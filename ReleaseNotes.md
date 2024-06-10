@@ -2,7 +2,7 @@
 
 ## HEAD
 
-This update brings a new design for the start page, better logging for TagLib and a new repository for ubuntu and debian getting rid of jfrog.
+This update brings a new design for the start page, better logging and a new repository for ubuntu and debian getting rid of jfrog.
 
 ### NEW Features
 
@@ -12,9 +12,10 @@ This update brings a new design for the start page, better logging for TagLib an
 - WebUI: New design for home page and login screen
 - Allow metadata handler to be disabled, add charset support
 - UPnP specification files (description.xml, cds.xml) now reflect client quirks
+- Additional command line options for logging (--syslog and --rotatelog)
 - TagLib messages are logged with gerbera now. They also show up with `debug-mode="taglib"`.
-- Exiv2 messages are logged with gerbera now. They also show up with `debug-mode="exiv2"`.
-- libexif messages are logged with gerbera now. They also show up with `debug-mode="exif"`.
+- LibExiv2 messages are logged with gerbera now. They also show up with `debug-mode="exiv2"`.
+- LibExif messages are logged with gerbera now. They also show up with `debug-mode="exif"`.
 - ffmpeg messages are logged with gerbera now. They also show up with `debug-mode="ffmpeg"`.
 
 ### FIXES
@@ -23,12 +24,14 @@ This update brings a new design for the start page, better logging for TagLib an
 - Build with ffmpegthumbnailer but without ffmpeg
 - Changed repository for ubuntu and debian to https://pkg.gerbera.io/
 - Autologout from UI
+- Finally SIGHUP can be used to reload gerbera without restarting
 
 ### Code Improvements
 
 - Rework of server mechanism for file and data requests
 - Update versions of pupnp (1.14.19), npupnp (6.1.2), spdlog (1.14.1), taglib (2.0.1), ffmpegthumbnailer(2.2.2-60-g1b5a779)
 - Allow building of libexif (up to v0.6.24-89-g87abeae)
+- Refactoring of Inotify code and command line handling
 
 ## 2.1.0
 

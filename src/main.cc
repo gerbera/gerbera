@@ -156,41 +156,43 @@ static void installSignalHandler()
 
 int main(int argc, char** argv, char** envp)
 {
-    cxxopts::Options options("gerbera", "Gerbera UPnP Media Server - https://gerbera.io");
+    cxxopts::Options options(GerberaRuntime::ProgramName, "Gerbera UPnP Media Server - https://gerbera.io");
     runtime.init(&options);
     std::optional<std::string> magic = runtime.getMagic();
     const auto additionalArgs = std::vector<ConfigOptionArgs> {
         { CFG_SERVER_PORT, "p", "port", "Port to bind with, must be >=49152", std::optional<std::string>(), "PORT" },
         { CFG_SERVER_IP, "i", "ip", "IP to bind with", std::optional<std::string>(), "IP" },
         { CFG_SERVER_NETWORK_INTERFACE, "e", "interface", "Interface to bind with", std::optional<std::string>(), "IF" },
-        { CFG_SERVER_HOME, "m", "home", "Search this directory for a .config/gerbera folder containing a config file", std::optional<std::string>(), "DIR" },
+        { CFG_SERVER_HOME, "m", GRB_OPTION_HOME, "Search this directory for a .config/gerbera folder containing a config file", std::optional<std::string>(), "DIR" },
 #ifdef HAVE_MAGIC
         { CFG_IMPORT_MAGIC_FILE, "", "magic", "Set magic FILE", magic, "FILE" },
 #endif
         { CFG_IMPORT_LAYOUT_MODE, "", "import-mode", "Activate import MODE ('mt' or 'grb')", std::optional<std::string>(), "MODE" },
 #ifdef GRBDEBUG
-        { CFG_SERVER_DEBUG_MODE, "", "debug-mode", "Set debugging mode to FACILITY", std::optional<std::string>(), "FACILITY" },
+        { CFG_SERVER_LOG_DEBUG_MODE, "", "debug-mode", "Set debugging mode to FACILITY", std::optional<std::string>(), "FACILITY" },
 #endif
     };
 
     options.add_options() //
-        ("h,help", "Print this help and exit") //
-        ("D,debug", "Enable debugging", cxxopts::value<bool>()->default_value("false")) //
-        ("v,version", "Print version info and exit") //
-        ("compile-info", "Print compile info and exit") //
-        ("create-config", "Print a default config.xml file and exit") //
-        ("create-example-config", "Print a example config.xml file and exit") //
-        ("check-config", "Check config.xml file and exit") //
-        ("print-options", "Print simple config options and exit") //
-        ("offline", "Do not answer UPnP content requests") // good for initial scans
-        ("d,daemon", "Daemonize after startup", cxxopts::value<bool>()->default_value("false")) //
-        ("u,user", "Drop privs to user UID", cxxopts::value<std::string>(), "UID") //
-        ("P,pidfile", "Write a pidfile to the specified location, e.g. /run/gerbera.pid", cxxopts::value<fs::path>(), "FILE") //
-        ("c,config", "Path to config file", cxxopts::value<fs::path>(), "DIR") //
-        ("f,cfgdir", "Override name of config folder (.config/gerbera) in home folder.", cxxopts::value<fs::path>(), "DIR") //
-        ("l,logfile", "Set log location", cxxopts::value<fs::path>(), "FILE") //
-        ("add-file", "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<fs::path>>(), "FILE") //
-        ("set-option", "Set simple config option OPT to value VAL, can be specified multiple times use --print-options for value OPTs", cxxopts::value<std::vector<std::string>>(), "OPT=VAL") //
+        ("h," GRB_OPTION_HELP, "Print this help and exit") //
+        ("D," GRB_OPTION_DEBUG, "Enable debugging", cxxopts::value<bool>()->default_value("false")) //
+        ("v," GRB_OPTION_VERSION, "Print version info and exit") //
+        (GRB_OPTION_COMPILEINFO, "Print compile info and exit") //
+        (GRB_OPTION_CREATECONFIG, "Print a default config.xml file and exit") //
+        (GRB_OPTION_CREATEEXAMPLECONFIG, "Print a example config.xml file and exit") //
+        (GRB_OPTION_CHECKCONFIG, "Check config.xml file and exit") //
+        (GRB_OPTION_PRINTOPTIONS, "Print simple config options and exit") //
+        (GRB_OPTION_OFFLINE, "Do not answer UPnP content requests") // good for initial scans
+        ("d," GRB_OPTION_DAEMON, "Daemonize after startup", cxxopts::value<bool>()->default_value("false")) //
+        ("u," GRB_OPTION_USER, "Drop privs to user UID", cxxopts::value<std::string>(), "UID") //
+        ("P," GRB_OPTION_PIDFILE, "Write a pidfile to the specified location, e.g. /run/gerbera.pid", cxxopts::value<fs::path>(), "FILE") //
+        ("c," GRB_OPTION_CONFIG, "Path to config file", cxxopts::value<fs::path>(), "DIR") //
+        ("f," GRB_OPTION_CFGDIR, "Override name of config folder (.config/gerbera) in home folder", cxxopts::value<fs::path>(), "DIR") //
+        ("l," GRB_OPTION_LOGFILE, "Set log location", cxxopts::value<fs::path>(), "FILE") //
+        (GRB_OPTION_ROTATELOG, "Set rotating log location", cxxopts::value<fs::path>(), "FILE") //
+        (GRB_OPTION_SYSLOG, "Log to syslog", cxxopts::value<std::string>()->implicit_value("USER"), "LOG") //
+        (GRB_OPTION_ADDFILE, "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<fs::path>>(), "FILE") //
+        (GRB_OPTION_SETOPTION, "Set simple config option OPT to value VAL, can be specified multiple times use --print-options for value OPTs", cxxopts::value<std::vector<std::string>>(), "OPT=VAL") //
         ;
 
     try {
@@ -215,9 +217,9 @@ int main(int argc, char** argv, char** envp)
             runtime.handleConfigOptions(configManager, additionalArgs);
             configManager->validate();
 #ifdef GRBDEBUG
-            GrbLogger::Logger.init(configManager->getIntOption(CFG_SERVER_DEBUG_MODE));
+            GrbLogger::Logger.init(configManager->getIntOption(CFG_SERVER_LOG_DEBUG_MODE));
 #endif
-            if (results.count("check-config") > 0) {
+            if (results.count(GRB_OPTION_CHECKCONFIG) > 0) {
                 runtime.exit(EXIT_SUCCESS);
             }
             portnum = configManager->getUIntOption(CFG_SERVER_PORT);
@@ -266,6 +268,7 @@ int main(int argc, char** argv, char** envp)
                     server->shutdown();
                 server.reset();
                 configManager.reset();
+                runtime.shutdown();
             } catch (const std::runtime_error& e) {
                 log_error("{}", e.what());
             }
@@ -291,6 +294,7 @@ int main(int argc, char** argv, char** envp)
                     server->shutdown();
                     server.reset();
                     configManager.reset();
+                    runtime.shutdown();
 
                     GerberaRuntime runtimeChild(&options);
                     try {
@@ -303,7 +307,7 @@ int main(int argc, char** argv, char** envp)
                         runtimeChild.handleConfigOptions(configManager, additionalArgs);
                         configManager->validate();
 #ifdef GRBDEBUG
-                        GrbLogger::Logger.init(configManager->getIntOption(CFG_SERVER_DEBUG_MODE));
+                        GrbLogger::Logger.init(configManager->getIntOption(CFG_SERVER_LOG_DEBUG_MODE));
 #endif
                         portnum = configManager->getUIntOption(CFG_SERVER_PORT);
                     } catch (const ConfigParseException& ce) {

@@ -55,6 +55,7 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="ui" minOccurs="0"/>
+                <xs:element ref="logging" minOccurs="0"/>
                 <xs:element ref="port" minOccurs="0"/>
                 <xs:element ref="name" minOccurs="0"/>
 
@@ -281,6 +282,13 @@
             <xs:attribute name="show-numbering" type="boolean" default="yes"/>
             <xs:attribute name="show-thumbnail" type="boolean" default="yes"/>
             <xs:attribute name="show-video" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="logging">
+        <xs:complexType>
+            <xs:attribute name="rotate-file-size" type="xs:positiveInteger" default="5242880"/>
+            <xs:attribute name="rotate-file-count" type="xs:positiveInteger" default="10"/>
         </xs:complexType>
     </xs:element>
 

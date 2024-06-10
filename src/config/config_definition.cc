@@ -547,10 +547,16 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         YES),
 
 #ifdef GRBDEBUG
-    std::make_shared<ConfigIntSetup>(CFG_SERVER_DEBUG_MODE,
+    std::make_shared<ConfigIntSetup>(CFG_SERVER_LOG_DEBUG_MODE,
         "/server/attribute::debug-mode", "config-server.html#debug-mode",
         0, GrbLogger::makeFacility, GrbLogger::printFacility),
 #endif
+    std::make_shared<ConfigUIntSetup>(CFG_SERVER_LOG_ROTATE_SIZE,
+        "/server/logging/attribute::rotate-file-size", "config-server.html#logging",
+        1024 * 1024 * 5),
+    std::make_shared<ConfigUIntSetup>(CFG_SERVER_LOG_ROTATE_COUNT,
+        "/server/logging/attribute::rotate-file-count", "config-server.html#logging",
+        10),
 
     std::make_shared<ConfigClientSetup>(CFG_CLIENTS_LIST,
         "/clients", "config-clients.html#clients"),

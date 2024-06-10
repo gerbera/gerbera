@@ -7,7 +7,7 @@ Wants=${SYSTEMD_WANTS_TARGET}
 Type=simple
 User=gerbera
 Group=gerbera
-ExecStart=${CMAKE_INSTALL_PREFIX}/bin/gerbera -c /etc/gerbera/config.xml
+ExecStart=${CMAKE_INSTALL_PREFIX}/bin/gerbera -c /etc/gerbera/config.xml --syslog
 Restart=on-failure
 RestartSec=5
 
