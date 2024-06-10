@@ -22,7 +22,7 @@
 */
 
 /// \file upnp_quirks.cc
-#define LOG_FAC log_facility_t::clients
+#define GRB_LOG_FAC GrbLogFacility::clients
 
 #include "quirks.h" // API
 

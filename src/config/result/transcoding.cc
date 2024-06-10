@@ -30,7 +30,7 @@
 */
 
 /// \file transcoding.cc
-#define LOG_FAC log_facility_t::transcoding
+#define GRB_LOG_FAC GrbLogFacility::transcoding
 
 #include "transcoding.h" // API
 

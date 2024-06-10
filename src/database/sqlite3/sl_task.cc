@@ -19,7 +19,7 @@
 */
 
 /// \file sl_task.cc
-#define LOG_FAC log_facility_t::sqlite3
+#define GRB_LOG_FAC GrbLogFacility::sqlite3
 
 #include "sl_task.h" // API
 

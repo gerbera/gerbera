@@ -23,7 +23,7 @@
 
 /// \file upnp_clients.cc
 /// client info initially taken from https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.cc
-#define LOG_FAC log_facility_t::clients
+#define GRB_LOG_FAC GrbLogFacility::clients
 
 #include "clients.h" // API
 

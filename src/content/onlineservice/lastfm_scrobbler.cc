@@ -32,7 +32,7 @@
 /// \file lastfm_scrobbler.cc
 
 #ifdef HAVE_LASTFMLIB
-#define LOG_FAC log_facility_t::online
+#define GRB_LOG_FAC GrbLogFacility::online
 #include "lastfm_scrobbler.h" // API
 
 #include "cds_item.h"

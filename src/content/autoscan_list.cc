@@ -22,7 +22,7 @@
 */
 
 /// \file autoscan_list.cc
-#define LOG_FAC log_facility_t::autoscan
+#define GRB_LOG_FAC GrbLogFacility::autoscan
 
 #include "autoscan_list.h"
 

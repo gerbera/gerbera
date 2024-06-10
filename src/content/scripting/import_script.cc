@@ -32,7 +32,7 @@
 /// \file import_script.cc
 
 #ifdef HAVE_JS
-#define LOG_FAC log_facility_t::script
+#define GRB_LOG_FAC GrbLogFacility::script
 #include "import_script.h" // API
 
 #include "cds/cds_objects.h"

@@ -30,7 +30,7 @@
 */
 
 /// \file builtin_layout.cc
-#define LOG_FAC log_facility_t::layout
+#define GRB_LOG_FAC GrbLogFacility::layout
 
 #include "builtin_layout.h" // API
 

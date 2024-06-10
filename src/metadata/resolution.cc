@@ -20,7 +20,7 @@ Gerbera - https://gerbera.io/
 */
 
 /// \file resolution.cc
-#define LOG_FAC log_facility_t::metadata
+#define GRB_LOG_FAC GrbLogFacility::metadata
 
 #include "resolution.h"
 #include "util/tools.h"

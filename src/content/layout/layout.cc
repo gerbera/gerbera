@@ -21,7 +21,7 @@
 */
 
 /// \file layout.cc
-#define LOG_FAC log_facility_t::layout
+#define GRB_LOG_FAC GrbLogFacility::layout
 
 #include <map>
 

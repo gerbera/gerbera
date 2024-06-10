@@ -30,7 +30,7 @@
 */
 
 /// \file sql_database.cc
-#define LOG_FAC log_facility_t::sqldatabase
+#define GRB_LOG_FAC GrbLogFacility::sqldatabase
 
 #include "sql_database.h" // API
 

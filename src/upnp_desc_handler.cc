@@ -20,7 +20,7 @@
 */
 
 /// \file upnp_desc_handler.cc
-#define LOG_FAC log_facility_t::device
+#define GRB_LOG_FAC GrbLogFacility::device
 
 #include "upnp_desc_handler.h" // API
 

@@ -32,7 +32,7 @@
 /// \file task_processor.cc
 
 #ifdef ONLINE_SERVICES
-#define LOG_FAC log_facility_t::online
+#define GRB_LOG_FAC GrbLogFacility::online
 #include "task_processor.h" // API
 
 #include "content/content_manager.h"

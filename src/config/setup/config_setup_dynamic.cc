@@ -21,6 +21,7 @@
 */
 
 /// \file config_setup_dynamic.cc
+#define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config/setup/config_setup_dynamic.h" // API
 

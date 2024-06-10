@@ -32,7 +32,7 @@
 /// \file playlist_parser_script.cc
 
 #ifdef HAVE_JS
-#define LOG_FAC log_facility_t::script
+#define GRB_LOG_FAC GrbLogFacility::script
 
 #include "playlist_parser_script.h" // API
 

@@ -30,7 +30,7 @@
 */
 
 /// \file jpeg_resolution.cc
-
+#define GRB_LOG_FAC GrbLogFacility::taglib
 #include <climits>
 #include <cstddef>
 #include <fmt/core.h>

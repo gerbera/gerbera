@@ -30,7 +30,7 @@
 */
 
 /// \file upnp_cds.cc
-#define LOG_FAC log_facility_t::cds
+#define GRB_LOG_FAC GrbLogFacility::cds
 
 #include "cont_dir_service.h" // API
 
@@ -69,7 +69,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     auto reqRoot = req->document_element();
 
 #ifdef GRBDEBUG
-    if (GrbLogger::Logger.isDebugging(LOG_FAC))
+    if (GrbLogger::Logger.isDebugging(GRB_LOG_FAC))
         for (auto&& child : reqRoot.children()) {
             log_debug("request {} = {}", child.name(), reqRoot.child(child.name()).text().as_string());
         }
@@ -170,7 +170,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     auto reqRoot = req->document_element();
 
 #ifdef GRBDEBUG
-    if (GrbLogger::Logger.isDebugging(LOG_FAC))
+    if (GrbLogger::Logger.isDebugging(GRB_LOG_FAC))
         for (auto&& child : reqRoot.children()) {
             log_debug("request {} = {}", child.name(), reqRoot.child(child.name()).text().as_string());
         }

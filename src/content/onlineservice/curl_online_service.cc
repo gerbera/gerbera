@@ -24,7 +24,7 @@
 /// \file curl_online_service.cc
 
 #ifdef HAVE_CURL
-#define LOG_FAC log_facility_t::online
+#define GRB_LOG_FAC GrbLogFacility::online
 #include "curl_online_service.h" // API
 
 #include "cds/cds_item.h"

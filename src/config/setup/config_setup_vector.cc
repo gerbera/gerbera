@@ -21,6 +21,7 @@
 */
 
 /// \file config_setup_vector.cc
+#define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_setup_vector.h" // API
 

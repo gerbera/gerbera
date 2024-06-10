@@ -31,6 +31,7 @@
 
 /// \file database.cc
 
+#define GRB_LOG_FAC GrbLogFacility::sqldatabase
 #include "database.h" // API
 
 #include "database/mysql/mysql_database.h"

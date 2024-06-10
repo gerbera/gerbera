@@ -30,7 +30,7 @@
 */
 
 /// \file io_handler_buffer_helper.cc
-#define LOG_FAC log_facility_t::iohandler
+#define GRB_LOG_FAC GrbLogFacility::iohandler
 
 #include "io_handler_buffer_helper.h" // API
 

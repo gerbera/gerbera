@@ -30,7 +30,7 @@
 */
 
 /// \file upnp_xml.cc
-#define LOG_FAC log_facility_t::xml
+#define GRB_LOG_FAC GrbLogFacility::xml
 
 #include "xml_builder.h" // API
 

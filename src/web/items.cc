@@ -30,7 +30,7 @@
 */
 
 /// \file items.cc
-#define LOG_FAC log_facility_t::web
+#define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
 

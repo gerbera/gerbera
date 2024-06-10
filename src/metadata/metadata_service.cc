@@ -30,7 +30,7 @@
 */
 
 /// \file metadata_service.cc
-#define LOG_FAC log_facility_t::metadata
+#define GRB_LOG_FAC GrbLogFacility::metadata
 
 #include "metadata_service.h" // API
 

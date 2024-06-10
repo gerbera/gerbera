@@ -30,7 +30,7 @@
 */
 
 /// \file upnp_cm.cc
-#define LOG_FAC log_facility_t::connmgr
+#define GRB_LOG_FAC GrbLogFacility::connmgr
 
 #include "conn_mgr_service.h" // API
 

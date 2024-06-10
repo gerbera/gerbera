@@ -30,7 +30,7 @@
 */
 
 /// \file update_manager.cc
-#define LOG_FAC log_facility_t::update
+#define GRB_LOG_FAC GrbLogFacility::update
 
 #include "update_manager.h" // API
 

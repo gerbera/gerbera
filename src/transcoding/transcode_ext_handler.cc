@@ -30,7 +30,7 @@
 */
 
 /// \file transcode_ext_handler.cc
-#define LOG_FAC log_facility_t::transcoding
+#define GRB_LOG_FAC GrbLogFacility::transcoding
 
 #include "transcode_ext_handler.h" // API
 

@@ -22,7 +22,7 @@ Gerbera - https://gerbera.io/
 /// \file ffmpeg_thumbnailer_handler.cc
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
-#define LOG_FAC log_facility_t::ffmpeg
+#define GRB_LOG_FAC GrbLogFacility::ffmpeg
 
 #include "ffmpeg_thumbnailer_handler.h" // API
 

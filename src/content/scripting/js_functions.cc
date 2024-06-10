@@ -32,7 +32,7 @@
 /// \file js_functions.cc
 
 #ifdef HAVE_JS
-#define LOG_FAC log_facility_t::script
+#define GRB_LOG_FAC GrbLogFacility::script
 #include "js_functions.h" // API
 
 #include "cds/cds_objects.h"

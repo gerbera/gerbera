@@ -32,7 +32,7 @@
 #include "util/enum_iterator.h"
 #include "util/tools.h"
 
-using LogFacilityIterator = EnumIterator<log_facility_t, log_facility_t::thread, log_facility_t::log_MAX>;
+using LogFacilityIterator = EnumIterator<GrbLogFacility, GrbLogFacility::thread, GrbLogFacility::log_MAX>;
 
 void GrbLogger::init(int debugMode)
 {
@@ -56,7 +56,7 @@ int GrbLogger::remapFacility(const std::string& flag)
         }
     }
 
-    if (toLower(GrbLogger::facilities[log_facility_t::log_MAX].data()) == toLower(flag)) {
+    if (toLower(GrbLogger::facilities[GrbLogFacility::log_MAX].data()) == toLower(flag)) {
         int result = 0;
         for (auto&& bit : LogFacilityIterator())
             result |= 1 << to_underlying(bit);
@@ -90,37 +90,38 @@ int GrbLogger::makeFacility(const std::string& optValue)
 }
 
 GrbLogger GrbLogger::Logger;
-std::map<log_facility_t, std::string_view> GrbLogger::facilities = {
-    { log_facility_t::thread, "Thread" },
-    { log_facility_t::sqlite3, "Sqlite3" },
-    { log_facility_t::cds, "CDS" },
-    { log_facility_t::server, "Server" },
-    { log_facility_t::content, "Content" },
-    { log_facility_t::update, "Update" },
-    { log_facility_t::mysql, "MySQL" },
-    { log_facility_t::sqldatabase, "SQL" },
-    { log_facility_t::proc, "Proc" },
-    { log_facility_t::autoscan, "Autoscan" },
-    { log_facility_t::script, "Script" },
-    { log_facility_t::web, "Web" },
-    { log_facility_t::layout, "Layout" },
-    { log_facility_t::exif, "Exif" },
-    { log_facility_t::exiv2, "Exiv2" },
-    { log_facility_t::transcoding, "Transcoding" },
-    { log_facility_t::taglib, "Taglib" },
-    { log_facility_t::ffmpeg, "FFMpeg" },
-    { log_facility_t::wavpack, "WavPack" },
-    { log_facility_t::requests, "Requests" },
-    { log_facility_t::device, "Device" },
-    { log_facility_t::connmgr, "ConnMgr" },
-    { log_facility_t::mrregistrar, "MRRegistrar" },
-    { log_facility_t::xml, "XML" },
-    { log_facility_t::clients, "Clients" },
-    { log_facility_t::iohandler, "IoHandler" },
-    { log_facility_t::online, "Online" },
-    { log_facility_t::metadata, "Metadata" },
-    { log_facility_t::matroska, "Matroska" },
+std::map<GrbLogFacility, std::string_view> GrbLogger::facilities = {
+    { GrbLogFacility::thread, "Thread" },
+    { GrbLogFacility::sqlite3, "Sqlite3" },
+    { GrbLogFacility::cds, "CDS" },
+    { GrbLogFacility::server, "Server" },
+    { GrbLogFacility::config, "Config" },
+    { GrbLogFacility::content, "Content" },
+    { GrbLogFacility::update, "Update" },
+    { GrbLogFacility::mysql, "MySQL" },
+    { GrbLogFacility::sqldatabase, "SQL" },
+    { GrbLogFacility::proc, "Proc" },
+    { GrbLogFacility::autoscan, "Autoscan" },
+    { GrbLogFacility::script, "Script" },
+    { GrbLogFacility::web, "Web" },
+    { GrbLogFacility::layout, "Layout" },
+    { GrbLogFacility::exif, "Exif" },
+    { GrbLogFacility::exiv2, "Exiv2" },
+    { GrbLogFacility::transcoding, "Transcoding" },
+    { GrbLogFacility::taglib, "Taglib" },
+    { GrbLogFacility::ffmpeg, "FFMpeg" },
+    { GrbLogFacility::wavpack, "WavPack" },
+    { GrbLogFacility::requests, "Requests" },
+    { GrbLogFacility::device, "Device" },
+    { GrbLogFacility::connmgr, "ConnMgr" },
+    { GrbLogFacility::mrregistrar, "MRRegistrar" },
+    { GrbLogFacility::xml, "XML" },
+    { GrbLogFacility::clients, "Clients" },
+    { GrbLogFacility::iohandler, "IoHandler" },
+    { GrbLogFacility::online, "Online" },
+    { GrbLogFacility::metadata, "Metadata" },
+    { GrbLogFacility::matroska, "Matroska" },
 
-    { log_facility_t::log_MAX, "All" },
+    { GrbLogFacility::log_MAX, "All" },
 };
 #endif

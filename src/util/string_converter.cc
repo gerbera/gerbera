@@ -30,7 +30,7 @@
 */
 
 /// \file string_converter.cc
-
+#define GRB_LOG_FAC GrbLogFacility::content
 #include "string_converter.h" // API
 
 #include "config/result/directory_tweak.h"

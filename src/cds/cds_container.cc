@@ -27,6 +27,7 @@ Gerbera - https://gerbera.io/
 
 /// \file cds_container.cc
 
+#define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_container.h" // API
 
 #include "util/grb_time.h"
