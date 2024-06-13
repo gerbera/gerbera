@@ -121,11 +121,6 @@
 // #define UPNP_DLNA_PROFILE_JPEG_LRG_ICO "JPEG_LRG_ICO"
 
 // device description defaults
-#define UPNP_DESC_DEVICE_NAMESPACE "urn:schemas-upnp-org:device-1-0"
-#define UPNP_DESC_DEVICE_TYPE "urn:schemas-upnp-org:device:MediaServer:1"
-#define UPNP_DESC_SPEC_VERSION_MAJOR "1"
-#define UPNP_DESC_SPEC_VERSION_MINOR "0"
-#define UPNP_DESC_PRODUCT_CAPS "smi,DCM10,getMediaInfo.sec,getCaptionInfo.sec"
 #define UPNP_DESC_SCPD_URL "/upnp"
 #define UPNP_DESC_DEVICE_DESCRIPTION "/description.xml"
 

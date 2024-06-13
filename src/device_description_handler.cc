@@ -103,6 +103,17 @@ std::string DeviceDescriptionHandler::getPresentationUrl(std::string ip, in_port
     return presentationURL;
 }
 
+struct ServiceCapabilityValues {
+    std::string value;
+    QuirkFlags quirkFlags;
+};
+
+struct ServiceCapabilities {
+    std::string_view serviceType;
+    QuirkFlags quirkFlags;
+    std::vector<ServiceCapabilityValues> serviceValues;
+};
+
 std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in_port_t port, const std::shared_ptr<Quirks>& quirks) const
 {
     auto doc = std::make_unique<pugi::xml_document>();
@@ -112,54 +123,68 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in
     decl.append_attribute("encoding") = "UTF-8";
 
     auto root = doc->append_child("root");
-    root.append_attribute("xmlns") = UPNP_DESC_DEVICE_NAMESPACE;
+    root.append_attribute("xmlns") = "urn:schemas-upnp-org:device-1-0";
     root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
+    root.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_NAMESPACE;
 
     auto specVersion = root.append_child("specVersion");
-    specVersion.append_child("major").append_child(pugi::node_pcdata).set_value(UPNP_DESC_SPEC_VERSION_MAJOR);
-    specVersion.append_child("minor").append_child(pugi::node_pcdata).set_value(UPNP_DESC_SPEC_VERSION_MINOR);
+    specVersion.append_child("major").append_child(pugi::node_pcdata).set_value("1");
+    specVersion.append_child("minor").append_child(pugi::node_pcdata).set_value("0");
 
     auto device = root.append_child("device");
 
-    auto dlnaDoc = device.append_child("dlna:X_DLNADOC");
-    dlnaDoc.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_NAMESPACE;
-    if (quirks && quirks->hasFlag(QUIRK_FLAG_SAMSUNG)) {
-        dlnaDoc.append_child(pugi::node_pcdata).set_value("M-DMS-1.50");
-    } else {
-        dlnaDoc.append_child(pugi::node_pcdata).set_value("DMS-1.50");
-    }
-
-    constexpr std::array deviceConfigProperties {
-        std::pair("friendlyName", CFG_SERVER_NAME),
-        std::pair("manufacturer", CFG_SERVER_MANUFACTURER),
-        std::pair("manufacturerURL", CFG_SERVER_MANUFACTURER_URL),
-        std::pair("modelDescription", CFG_SERVER_MODEL_DESCRIPTION),
-        std::pair("modelName", CFG_SERVER_MODEL_NAME),
-        std::pair("modelNumber", CFG_SERVER_MODEL_NUMBER),
-        std::pair("modelURL", CFG_SERVER_MODEL_URL),
-        std::pair("serialNumber", CFG_SERVER_SERIAL_NUMBER),
-        std::pair("UDN", CFG_SERVER_UDN),
-    };
-    for (auto&& [tag, field] : deviceConfigProperties) {
-        device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
-    }
+    // add configuration values
     {
-        const static struct ServiceCapabilities {
-            std::string_view serviceType;
-            std::string serviceId;
-            QuirkFlags quirkFlags;
-        } deviceStringProperties[] = {
-            { "deviceType", UPNP_DESC_DEVICE_TYPE, QUIRK_FLAG_NONE },
-            { "presentationURL", getPresentationUrl(ip, port), QUIRK_FLAG_NONE },
-            { "sec:ProductCap", UPNP_DESC_PRODUCT_CAPS, QUIRK_FLAG_NONE },
-            { "sec:X_ProductCap", UPNP_DESC_PRODUCT_CAPS, QUIRK_FLAG_SAMSUNG },
+        constexpr std::array deviceConfigProperties {
+            std::pair("friendlyName", CFG_SERVER_NAME),
+            std::pair("manufacturer", CFG_SERVER_MANUFACTURER),
+            std::pair("manufacturerURL", CFG_SERVER_MANUFACTURER_URL),
+            std::pair("modelDescription", CFG_SERVER_MODEL_DESCRIPTION),
+            std::pair("modelName", CFG_SERVER_MODEL_NAME),
+            std::pair("modelNumber", CFG_SERVER_MODEL_NUMBER),
+            std::pair("modelURL", CFG_SERVER_MODEL_URL),
+            std::pair("serialNumber", CFG_SERVER_SERIAL_NUMBER),
+            std::pair("UDN", CFG_SERVER_UDN),
         };
-        for (auto&& [tag, value, quirkFlags] : deviceStringProperties) {
-            if (!quirks || quirkFlags == QUIRK_FLAG_NONE || quirks->hasFlag(quirkFlags))
-                device.append_child(tag.data()).append_child(pugi::node_pcdata).set_value(value.c_str());
+        for (auto&& [tag, field] : deviceConfigProperties) {
+            device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());
         }
     }
-
+    // add service details
+    {
+        const ServiceCapabilities deviceStringProperties[] = {
+            { "dlna:X_DLNACAP", QUIRK_FLAG_NONE, {} },
+            { "dlna:X_DLNADOC", QUIRK_FLAG_NONE, { { "DMS-1.50", QUIRK_FLAG_NONE } } },
+            { "dlna:X_DLNADOC", QUIRK_FLAG_SAMSUNG, { { "M-DMS-1.50", QUIRK_FLAG_NONE } } },
+            { "deviceType", QUIRK_FLAG_NONE, { { "urn:schemas-upnp-org:device:MediaServer:1", QUIRK_FLAG_NONE } } },
+            { "presentationURL", QUIRK_FLAG_NONE, { { getPresentationUrl(ip, port), QUIRK_FLAG_NONE } } },
+            { "sec:ProductCap", QUIRK_FLAG_NONE, {
+                                                     { "smi", QUIRK_FLAG_NONE },
+                                                     { "DCM10", QUIRK_FLAG_SAMSUNG },
+                                                     { "getMediaInfo.sec", QUIRK_FLAG_NONE },
+                                                     { "getCaptionInfo.sec", QUIRK_FLAG_NONE },
+                                                 } },
+            { "sec:X_ProductCap", QUIRK_FLAG_SAMSUNG, {
+                                                          { "smi", QUIRK_FLAG_NONE },
+                                                          { "DCM10", QUIRK_FLAG_NONE },
+                                                          { "getMediaInfo.sec", QUIRK_FLAG_NONE },
+                                                          { "getCaptionInfo.sec", QUIRK_FLAG_NONE },
+                                                      } },
+        };
+        for (auto&& [tag, serviceFlags, values] : deviceStringProperties) {
+            if (!quirks || serviceFlags == QUIRK_FLAG_NONE || quirks->hasFlag(serviceFlags)) {
+                std::vector<std::string> serviceValue;
+                for (auto&& [value, valueFlags] : values) {
+                    if (!quirks || valueFlags == QUIRK_FLAG_NONE || quirks->hasFlag(valueFlags)) {
+                        serviceValue.push_back(value);
+                    }
+                }
+                auto serviceEntry = device.append_child(tag.data());
+                if (!serviceValue.empty())
+                    serviceEntry.append_child(pugi::node_pcdata).set_value(fmt::format("{}", fmt::join(serviceValue, ",")).c_str());
+            }
+        }
+    }
     // add icons
     {
         auto iconList = device.append_child("iconList");
@@ -188,7 +213,6 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in
             }
         }
     }
-
     // add services
     {
         auto serviceList = device.append_child("serviceList");

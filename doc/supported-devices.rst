@@ -18,7 +18,7 @@ The automatic detection supports the following devices and software:
 - StandardUPnP (all devices sending signature UPnP/1.0)
 - BubbleUPnP (running on smartphones)
 - SamsungAllShare (AllShare running on Windows)
-- SamsungSeriesQ (Samsung Series [Q] TVs), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC``
+- SamsungSeriesQ (Samsung Series [Q] TVs), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC|DCM10``
 - SamsungSeriesCDE (Samsung other TVs), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC``
 - SamsungBDP (Samsung Blu-ray Player BD-D5100), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
 - SamsungBDJ5500 (Samsung Blu-ray Player J5500), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
@@ -45,6 +45,7 @@ The device flags have the following meaning
 -  ``HIDE_SUBTITLE_RESOURCE``: 0x400, hide subtitle resource in UPnP data (only add captionInfo)
 -  ``HIDE_TRANSCODE_RESOURCE``: 0x800, hide transcoded resources in UPnP data (only adds content stream resources)
 -  ``SIMPLE_DATE``: 0x1000, return ``dc:date`` without timezone as Zulu time.
+-  ``DCM10``: 0x2000, add DCM10 as device capability.
 
 
 Manual Overrides
