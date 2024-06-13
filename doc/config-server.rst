@@ -400,7 +400,7 @@ This section defines various logging settings.
     * Optional
     * Default: **10**
 
-    When using command line option --rotatelog this value defines the number of files in the log rotation.
+    When using command line option ``--rotatelog`` this value defines the number of files in the log rotation.
 
 .. _ui:
 

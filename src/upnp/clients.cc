@@ -130,7 +130,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
             "Samsung Series [Q] TVs",
             DEFAULT_CLIENT_GROUP,
             ClientType::SamsungSeriesQ,
-            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES | QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES | QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC | QUIRK_FLAG_DCM10,
             ClientMatchType::UserAgent,
             "SEC_HHP_[TV] Samsung Q",
         },
