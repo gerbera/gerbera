@@ -108,7 +108,7 @@ void GerberaRuntime::init(const cxxopts::Options* options)
         { GRB_OPTION_OFFLINE, [=](const std::string& arg) { return this->setOfflineMode(arg); } },
         { GRB_OPTION_PIDFILE, [=](const std::string& arg) { return this->createPidFile(arg); } },
         { GRB_OPTION_CONFIG, [=](const std::string& arg) { return this->setConfigFile(arg); } },
-        { GRB_OPTION_CFGDIR, [=](const std::string& arg) { return this->setConfigDir(arg); }, false, [=]() { return this->checkDirs(); } },
+        { GRB_OPTION_CFGDIR, [=](const std::string& arg) { return this->setConfigDir(arg); } },
     };
 
     argumentOptionCallbacks = std::vector<ArgumentHandler> {
@@ -564,6 +564,7 @@ void GerberaRuntime::handleOptions(const cxxopts::ParseResult* results, bool sta
     offline = (*results)["offline"].as<bool>();
     if (!createConfigSet && !exampleConfigSet && startup)
         logCopyright();
+    checkDirs();
     finalizeOptions(finalHandlers);
 
     log_debug("Datadir is: '{}'", dataDir.value_or("unset"));
