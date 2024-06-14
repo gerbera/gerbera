@@ -26,14 +26,14 @@
 #ifndef __CONFIG_SETUP_H__
 #define __CONFIG_SETUP_H__
 
-#include <map>
-#include <memory>
-#include <pugixml.hpp>
-
-#include "common.h"
 #include "config.h"
 #include "config_options.h"
 #include "util/enum_iterator.h"
+
+#include <functional>
+#include <map>
+#include <memory>
+#include <pugixml.hpp>
 
 #define YES "yes"
 #define NO "no"

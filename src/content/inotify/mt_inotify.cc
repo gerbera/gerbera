@@ -42,6 +42,8 @@
 #ifdef HAVE_INOTIFY
 #include "mt_inotify.h"
 
+#include "exceptions.h"
+#include "util/logger.h"
 #include "util/tools.h"
 
 #include <array>

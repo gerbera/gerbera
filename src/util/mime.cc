@@ -26,6 +26,8 @@
 #include "mime.h" // API
 
 #include "config/config.h"
+#include "exceptions.h"
+#include "util/logger.h"
 #include "util/tools.h"
 
 Mime::Mime(const std::shared_ptr<Config>& config)

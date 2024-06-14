@@ -7,13 +7,12 @@
 #include <deque>
 #include <memory>
 
-#include "common.h"
 #include "util/generic_task.h"
 #include "util/thread_runner.h"
 
 // forward declaration
 class Config;
-class ContentManager;
+class Content;
 class OnlineService;
 class Layout;
 class Timer;
@@ -45,7 +44,7 @@ protected:
 
 class TPFetchOnlineContentTask : public GenericTask {
 public:
-    TPFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
+    TPFetchOnlineContentTask(std::shared_ptr<Content> content,
         std::shared_ptr<TaskProcessor> taskProcessor,
         std::shared_ptr<Timer> timer,
         std::shared_ptr<OnlineService> service,
@@ -54,7 +53,7 @@ public:
     void run() override;
 
 protected:
-    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Content> content;
     std::shared_ptr<TaskProcessor> task_processor;
     std::shared_ptr<Timer> timer;
 

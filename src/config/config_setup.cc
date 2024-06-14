@@ -25,10 +25,12 @@
 #define GRB_LOG_FAC GrbLogFacility::config
 #include "config_setup.h" // API
 
-#include <numeric>
-
 #include "config_definition.h"
 #include "config_options.h"
+#include "exceptions.h"
+#include "util/logger.h"
+
+#include <numeric>
 
 pugi::xml_node ConfigSetup::getXmlElement(const pugi::xml_node& root) const
 {

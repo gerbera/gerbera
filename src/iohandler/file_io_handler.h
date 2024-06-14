@@ -34,7 +34,6 @@
 #ifndef __FILE_IO_HANDLER_H__
 #define __FILE_IO_HANDLER_H__
 
-#include "common.h"
 #include "io_handler.h"
 #include "util/grb_fs.h"
 

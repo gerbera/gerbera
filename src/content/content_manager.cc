@@ -42,10 +42,12 @@
 #include "config/config_options.h"
 #include "config/result/autoscan.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "import_service.h"
 #include "metadata/metadata_service.h"
 #include "update_manager.h"
 #include "upnp/clients.h"
+#include "util/generic_task.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/timer.h"
@@ -221,10 +223,11 @@ void ContentManager::run()
 
     log_debug("autoscan_timed");
     autoscanList->notifyAll(this);
+    auto self_content = std::dynamic_pointer_cast<Content>(self);
 #ifdef HAVE_INOTIFY
-    autoscanList->initTimer(self, timer, config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY), inotify);
+    autoscanList->initTimer(self_content, timer, config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY), inotify);
 #else
-    autoscanList->initTimer(self, timer);
+    autoscanList->initTimer(self_content, timer);
 #endif
 }
 

@@ -34,7 +34,6 @@
 #ifndef __WEB_PAGES_H__
 #define __WEB_PAGES_H__
 
-#include "common.h"
 #include "config/config.h"
 #include "request_handler.h"
 #include "web_request_handler.h"
@@ -61,7 +60,7 @@ protected:
     bool accountsEnabled { false };
 
 public:
-    explicit Auth(const std::shared_ptr<ContentManager>& content);
+    explicit Auth(const std::shared_ptr<Content>& content);
     void process() override;
 };
 
@@ -71,7 +70,7 @@ protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 public:
-    explicit Containers(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
+    explicit Containers(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
@@ -97,7 +96,7 @@ protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 public:
-    explicit Items(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
+    explicit Items(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
@@ -123,7 +122,7 @@ protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 public:
-    explicit EditLoad(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
+    explicit EditLoad(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     void process() override;
 };
 
@@ -188,7 +187,7 @@ public:
 /// \return the appropriate request handler.
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     const std::shared_ptr<Context>& context,
-    const std::shared_ptr<ContentManager>& content,
+    const std::shared_ptr<Content>& content,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
     const std::string& page);
 
@@ -226,7 +225,7 @@ protected:
     static void addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs);
 
 public:
-    explicit ConfigLoad(const std::shared_ptr<ContentManager>& content);
+    explicit ConfigLoad(const std::shared_ptr<Content>& content);
     void process() override;
 };
 
@@ -236,7 +235,7 @@ protected:
     std::shared_ptr<Context> context;
 
 public:
-    explicit ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<ContentManager>& content);
+    explicit ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<Content>& content);
     void process() override;
 };
 

@@ -35,11 +35,12 @@
 #define GRB_LOG_FAC GrbLogFacility::online
 #include "atrailers_content_handler.h" // API
 
-#include <array>
-
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "exceptions.h"
 #include "util/tools.h"
+
+#include <array>
 
 void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document> service)
 {

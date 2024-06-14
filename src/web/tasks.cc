@@ -34,7 +34,8 @@
 
 #include "pages.h" // API
 
-#include "content/content_manager.h"
+#include "content/content.h"
+#include "exceptions.h"
 #include "util/xml_to_json.h"
 
 void Web::Tasks::process()
@@ -55,7 +56,7 @@ void Web::Tasks::process()
         }
     } else if (action == "cancel") {
         int taskID = intParam("task_id");
-        content->invalidateTask(taskID);
+        content->invalidateTask(taskID, TaskOwner::ContentManagerTask);
     } else
         throw_std_runtime_error("called with illegal action");
 }

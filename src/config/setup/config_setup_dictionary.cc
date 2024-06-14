@@ -25,10 +25,11 @@
 
 #include "config_setup_dictionary.h" // API
 
-#include <numeric>
-
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "util/logger.h"
+
+#include <numeric>
 
 /// \brief Creates a dictionary from an XML nodeset.
 /// \param element starting element of the nodeset.

@@ -31,10 +31,11 @@
 #include "upnp/quirks.h"
 #include "upnp/xml_builder.h"
 #include "util/grb_time.h"
+#include "util/logger.h"
 #include "util/mime.h"
 #include "util/tools.h"
 
-UIHandler::UIHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
+UIHandler::UIHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
     : RequestHandler(content, xmlBuilder)
 {
 }

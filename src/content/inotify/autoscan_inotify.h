@@ -39,7 +39,7 @@
 
 // forward declaration
 class AutoscanDirectory;
-class ContentManager;
+class Content;
 class Inotify;
 class InotifyHandler;
 enum class WatchType;
@@ -60,7 +60,7 @@ class WatchMove;
 
 class AutoscanInotify {
 public:
-    explicit AutoscanInotify(const std::shared_ptr<ContentManager>& content);
+    explicit AutoscanInotify(const std::shared_ptr<Content>& content);
     ~AutoscanInotify();
 
     AutoscanInotify(const AutoscanInotify&) = delete;
@@ -83,7 +83,7 @@ public:
 private:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
-    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Content> content;
 
     void threadProc();
 

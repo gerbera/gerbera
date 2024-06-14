@@ -34,7 +34,7 @@
 
 #include "io_handler_buffer_helper.h" // API
 
-#include "config/config.h"
+#include "exceptions.h"
 
 #include <algorithm>
 

@@ -42,14 +42,14 @@
 static constexpr auto CFG_DEFAULT_UPDATE_AT_START = std::chrono::seconds(10);
 
 // forward declaration
-class ContentManager;
+class Content;
 class CurlContentHandler;
 
 /// \brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
 class ATrailersService : public CurlOnlineService {
 public:
-    explicit ATrailersService(const std::shared_ptr<ContentManager>& content);
+    explicit ATrailersService(const std::shared_ptr<Content>& content);
 
     /// \brief Get the type of the service (i.e. Weborama, Shoutcast, etc.)
     OnlineServiceType getServiceType() const override;

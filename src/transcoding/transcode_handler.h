@@ -34,21 +34,20 @@
 #ifndef __TRANSCODE_HANDLER_H__
 #define __TRANSCODE_HANDLER_H__
 
-#include <memory>
-
-#include "common.h"
 #include "util/grb_fs.h"
+
+#include <memory>
 
 // forward declaration
 class CdsObject;
 class Config;
-class ContentManager;
+class Content;
 class IOHandler;
 class TranscodingProfile;
 
 class TranscodeHandler {
 public:
-    explicit TranscodeHandler(const std::shared_ptr<ContentManager>& content);
+    explicit TranscodeHandler(const std::shared_ptr<Content>& content);
     virtual ~TranscodeHandler() = default;
 
     virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<TranscodingProfile>& profile,
@@ -60,7 +59,7 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
-    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Content> content;
 };
 
 #endif // __TRANSCODE_HANDLER_H__

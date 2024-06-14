@@ -22,7 +22,7 @@ Gerbera - https://gerbera.io/
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "grb_time.h" // API
 
-#include "common.h"
+#include "logger.h"
 #include "tools.h"
 
 #include <fmt/chrono.h>

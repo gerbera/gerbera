@@ -26,12 +26,12 @@
 
 #include "headers.h" // API
 
+#include "util/logger.h"
+#include "util/tools.h"
+
 #if !defined(USING_NPUPNP)
 #include <UpnpExtraHeaders.h>
 #endif
-
-#include "common.h"
-#include "util/tools.h"
 
 std::string Headers::stripInvalid(const std::string& value)
 {

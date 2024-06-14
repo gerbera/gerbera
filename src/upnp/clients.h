@@ -28,16 +28,16 @@
 #ifndef __UPNP_CLIENTS_H__
 #define __UPNP_CLIENTS_H__
 
+#include "cds/cds_enums.h"
+#include "common.h"
+#include "upnp/quirks.h"
+#include "util/grb_time.h"
+
 #include <memory>
 #include <mutex>
 #include <pugixml.hpp>
 #include <sys/socket.h>
 #include <vector>
-
-#include "cds/cds_enums.h"
-#include "common.h"
-#include "upnp/quirks.h"
-#include "util/grb_time.h"
 
 // forward declaration
 class Config;

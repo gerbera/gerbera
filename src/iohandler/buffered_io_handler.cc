@@ -34,6 +34,7 @@
 
 #include "buffered_io_handler.h" // API
 
+#include "exceptions.h"
 #include "util/grb_time.h"
 
 class Config;

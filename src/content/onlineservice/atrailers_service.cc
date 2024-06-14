@@ -37,13 +37,13 @@
 
 #include "atrailers_content_handler.h"
 #include "config/config_option_enum.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "util/tools.h"
 
 #define ATRAILERS_SERVICE_URL_640 "https://trailers.apple.com/trailers/home/xml/current.xml"
 #define ATRAILERS_SERVICE_URL_720P "https://trailers.apple.com/trailers/home/xml/current_720p.xml"
 
-ATrailersService::ATrailersService(const std::shared_ptr<ContentManager>& content)
+ATrailersService::ATrailersService(const std::shared_ptr<Content>& content)
     : CurlOnlineService(content, ATRAILERS_SERVICE)
 {
     if (EnumOption<AtrailerResolution>::getEnumOption(config, CFG_ONLINE_CONTENT_ATRAILERS_RESOLUTION) == AtrailerResolution::Low)

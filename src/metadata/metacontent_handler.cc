@@ -33,7 +33,7 @@
 #include "cds/cds_objects.h"
 #include "config/config.h"
 #include "config/result/directory_tweak.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "iohandler/file_io_handler.h"
 #include "util/mime.h"
 #include "util/tools.h"
@@ -332,7 +332,7 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(const std::shared_ptr<C
 
 std::unique_ptr<ContentPathSetup> MetafileHandler::setup {};
 
-MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context, std::shared_ptr<ContentManager> content)
+MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context, std::shared_ptr<Content> content)
     : MetacontentHandler(context)
     , content(std::move(content))
 {

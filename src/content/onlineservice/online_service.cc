@@ -35,11 +35,12 @@
 #define GRB_LOG_FAC GrbLogFacility::online
 #include "online_service.h" // API
 
-#include <array>
-
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "context.h"
+#include "exceptions.h"
 #include "util/tools.h"
+
+#include <array>
 
 // DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING
 // NEW SERVICES!
@@ -65,7 +66,7 @@ std::shared_ptr<OnlineService> OnlineServiceList::getService(OnlineServiceType s
     return service_list.at(to_underlying(service));
 }
 
-OnlineService::OnlineService(const std::shared_ptr<ContentManager>& content)
+OnlineService::OnlineService(const std::shared_ptr<Content>& content)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , content(content)

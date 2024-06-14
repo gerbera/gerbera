@@ -37,7 +37,7 @@
 #include <array>
 
 #include "config/result/autoscan.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/database.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

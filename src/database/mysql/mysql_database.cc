@@ -35,10 +35,11 @@
 #ifdef HAVE_MYSQL
 #include "mysql_database.h"
 
-#include <netinet/in.h>
-
+#include "exceptions.h"
 #include "util/thread_runner.h"
 #include "util/tools.h"
+
+#include <netinet/in.h>
 
 //#define MYSQL_SET_NAMES "/*!40101 SET NAMES utf8 */"
 //#define MYSQL_SELECT_DEBUG

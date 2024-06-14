@@ -34,14 +34,12 @@
 
 #include "file_request_handler.h" // API
 
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include "cds/cds_item.h"
 #include "config/config.h"
 #include "config/result/transcoding.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "iohandler/file_io_handler.h"
 #include "metadata/metadata_handler.h"
 #include "metadata/metadata_service.h"
@@ -55,7 +53,10 @@
 #include "util/url_utils.h"
 #include "web/session_manager.h"
 
-FileRequestHandler::FileRequestHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::shared_ptr<MetadataService> metadataService)
+#include <sys/stat.h>
+#include <unistd.h>
+
+FileRequestHandler::FileRequestHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::shared_ptr<MetadataService> metadataService)
     : RequestHandler(content, xmlBuilder)
     , metadataService(std::move(metadataService))
 {

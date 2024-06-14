@@ -29,7 +29,7 @@ Gerbera - https://gerbera.io/
 #include "config/config_generator.h"
 #include "config/config_setup.h"
 #include "content/autoscan_setting.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "server.h"
 
 // those are needed for -u user and -d daemonize options

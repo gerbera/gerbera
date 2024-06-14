@@ -26,6 +26,7 @@ Gerbera - https://gerbera.io/
 #include "cds/cds_objects.h"
 #include "config/result/autoscan.h"
 #include "database/sqlite3/sqlite_database.h"
+#include "exceptions.h"
 #include "sqlite_config_fake.h"
 #include "upnp/xml_builder.h"
 #include "util/tools.h"

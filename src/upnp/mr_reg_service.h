@@ -35,12 +35,11 @@
 #ifndef __UPNP_MRREG_H__
 #define __UPNP_MRREG_H__
 
-#include <memory>
-
-#include <upnp.h>
-
-#include "common.h"
 #include "context.h"
+
+#include <memory>
+#include <string>
+#include <upnp.h>
 
 class ActionRequest;
 class CdsObject;

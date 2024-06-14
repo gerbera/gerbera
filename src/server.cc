@@ -34,24 +34,13 @@
 
 #include "server.h" // API
 
-#ifdef HAVE_CURL
-#include <curl/curl.h>
-#endif
-
-#include <upnpconfig.h>
-#ifdef UPNP_HAVE_TOOLS
-#include <upnptools.h>
-#endif
-
-#include <sstream>
-#include <thread>
-
 #include "action_request.h"
 #include "config/config.h"
 #include "config/config_option_enum.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "device_description_handler.h"
+#include "exceptions.h"
 #include "file_request_handler.h"
 #include "iohandler/io_handler.h"
 #include "metadata/metadata_service.h"
@@ -84,6 +73,18 @@
 #ifdef ONLINE_SERVICES
 #include "content/onlineservice/online_service.h"
 #endif
+
+#ifdef HAVE_CURL
+#include <curl/curl.h>
+#endif
+
+#include <upnpconfig.h>
+#ifdef UPNP_HAVE_TOOLS
+#include <upnptools.h>
+#endif
+
+#include <sstream>
+#include <thread>
 
 constexpr auto DEVICE_DESCRIPTION_PATH = std::string_view(UPNP_DESC_SCPD_URL UPNP_DESC_DEVICE_DESCRIPTION);
 

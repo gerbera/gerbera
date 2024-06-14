@@ -33,6 +33,9 @@
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "timer.h" // API
 
+#include "exceptions.h"
+#include "util/logger.h"
+
 void Timer::run()
 {
     log_debug("Starting Timer thread...");

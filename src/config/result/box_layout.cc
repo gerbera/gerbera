@@ -27,7 +27,7 @@
 #include "box_layout.h" // API
 
 #include "config/config.h"
-#include "content/content_manager.h"
+#include "util/logger.h"
 
 void BoxLayoutList::add(const std::shared_ptr<BoxLayout>& layout, std::size_t index)
 {

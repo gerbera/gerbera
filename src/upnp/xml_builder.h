@@ -34,14 +34,13 @@
 #ifndef __UPNP_XML_H__
 #define __UPNP_XML_H__
 
+#include "config/config.h"
+#include "context.h"
+
 #include <deque>
 #include <memory>
 #include <pugixml.hpp>
 #include <vector>
-
-#include "common.h"
-#include "config/config.h"
-#include "context.h"
 
 #define CONTENT_MEDIA_HANDLER "media"
 #define CONTENT_ONLINE_HANDLER "online"

@@ -26,6 +26,7 @@
 #include "config_setup_time.h" // API
 
 #include "config/config_options.h"
+#include "exceptions.h"
 #include "util/grb_time.h"
 
 int ConfigTimeSetup::getXmlContent(const pugi::xml_node& root)

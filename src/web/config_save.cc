@@ -30,12 +30,12 @@
 #include "config/config_definition.h"
 #include "config/config_setup.h"
 #include "config/result/autoscan.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/database.h"
 #include "upnp/clients.h"
 #include "util/xml_to_json.h"
 
-Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<ContentManager>& content)
+Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<Content>& content)
     : WebRequestHandler(content)
     , context(std::move(context))
 {

@@ -35,8 +35,9 @@
 #include "pages.h" // API
 
 #include "config/result/autoscan.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "util/xml_to_json.h"
 
 void Web::Autoscan::process()

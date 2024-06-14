@@ -24,15 +24,14 @@ Gerbera - https://gerbera.io/
 #ifndef __METADATA_SERVICE_H__
 #define __METADATA_SERVICE_H__
 
-#include <map>
-
-#include "common.h"
 #include "util/grb_fs.h"
+
+#include <map>
 
 // forward declaration
 class CdsItem;
 class Config;
-class ContentManager;
+class Content;
 class Context;
 enum class ContentHandler;
 class MetadataHandler;
@@ -72,12 +71,12 @@ class MetadataService {
 private:
     std::shared_ptr<Context> context;
     std::shared_ptr<Config> config;
-    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Content> content;
     std::map<std::string, std::string> mappings;
     std::map<MetadataType, std::shared_ptr<MetadataHandler>> handlers;
 
 public:
-    explicit MetadataService(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content);
+    explicit MetadataService(const std::shared_ptr<Context>& context, const std::shared_ptr<Content>& content);
 
     void extractMetaData(const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt);
     std::shared_ptr<MetadataHandler> getHandler(ContentHandler handlerType);

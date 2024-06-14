@@ -25,8 +25,6 @@
 
 #include "config_setup_transcoding.h" // API
 
-#include <numeric>
-
 #include "config/config_definition.h"
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
@@ -39,6 +37,9 @@
 #include "config_setup_path.h"
 #include "config_setup_string.h"
 #include "metadata/resolution.h"
+#include "util/logger.h"
+
+#include <numeric>
 
 /// \brief Creates an array of TranscodingProfile objects from an XML
 /// nodeset.

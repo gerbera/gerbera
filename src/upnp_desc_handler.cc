@@ -30,11 +30,12 @@
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
 #include "util/grb_time.h"
+#include "util/logger.h"
 #include "util/tools.h"
 
 #include <sstream>
 
-UpnpDescHandler::UpnpDescHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
+UpnpDescHandler::UpnpDescHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
     : RequestHandler(content, xmlBuilder)
     , useDynamicDescription(config->getBoolOption(CFG_UPNP_DYNAMIC_DESCRIPTION))
 {

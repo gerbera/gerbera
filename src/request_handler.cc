@@ -34,15 +34,17 @@
 
 #include "request_handler.h" // API
 
-#include "content/content_manager.h"
+#include "common.h"
+#include "content/content.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "upnp/quirks.h"
 #include "util/grb_net.h"
 #include "util/tools.h"
 
 #include <fmt/core.h>
 
-RequestHandler::RequestHandler(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
+RequestHandler::RequestHandler(std::shared_ptr<Content> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : content(std::move(content))
     , context(this->content->getContext())
     , config(this->context->getConfig())

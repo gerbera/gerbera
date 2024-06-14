@@ -35,14 +35,15 @@
 #define GRB_LOG_FAC GrbLogFacility::exif
 #include "libexif_handler.h" // API
 
-#include <array>
-
 #include "cds/cds_item.h"
+#include "exceptions.h"
 #include "iohandler/file_io_handler.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/jpeg_resolution.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
+
+#include <array>
 
 /// \brief Sets resolution for a given resource index, item must be a JPEG image
 static void setJpegResolutionResource(const std::shared_ptr<CdsItem>& item, std::size_t resNum = 0)

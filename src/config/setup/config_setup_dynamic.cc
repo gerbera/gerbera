@@ -25,14 +25,15 @@
 
 #include "config/setup/config_setup_dynamic.h" // API
 
-#include <numeric>
-
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "config/result/dynamic_content.h"
 #include "config_setup_int.h"
 #include "config_setup_path.h"
 #include "config_setup_string.h"
+#include "util/logger.h"
+
+#include <numeric>
 
 /// \brief Creates an array of DynamicContent objects from a XML nodeset.
 /// \param element starting element of the nodeset.

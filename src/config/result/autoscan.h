@@ -35,10 +35,12 @@
 #ifndef __AUTOSCAN_H__
 #define __AUTOSCAN_H__
 
-#include <mutex>
-
+#include "common.h"
 #include "upnp/upnp_common.h"
 #include "util/timer.h"
+
+#include <mutex>
+#include <string_view>
 
 // forward declarations
 class CdsContainer;

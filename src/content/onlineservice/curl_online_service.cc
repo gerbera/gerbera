@@ -30,9 +30,10 @@
 #include "cds/cds_item.h"
 #include "config/config.h"
 #include "config/result/autoscan.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "content/layout/layout.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 #include "util/url.h"
@@ -43,7 +44,7 @@ CurlContentHandler::CurlContentHandler(const std::shared_ptr<Context>& context)
 {
 }
 
-CurlOnlineService::CurlOnlineService(const std::shared_ptr<ContentManager>& content, std::string serviceName)
+CurlOnlineService::CurlOnlineService(const std::shared_ptr<Content>& content, std::string serviceName)
     : OnlineService(content)
     , curl_handle(curl_easy_init())
     , serviceName(std::move(serviceName))

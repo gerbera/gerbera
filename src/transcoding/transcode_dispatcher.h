@@ -34,7 +34,6 @@
 #ifndef __TRANSCODE_DISPATCHER_H__
 #define __TRANSCODE_DISPATCHER_H__
 
-#include "common.h"
 #include "transcode_handler.h"
 
 class TranscodeDispatcher : public TranscodeHandler {

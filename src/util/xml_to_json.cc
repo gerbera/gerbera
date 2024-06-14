@@ -35,9 +35,11 @@
 #define GRB_LOG_FAC GrbLogFacility::cds
 #include "xml_to_json.h"
 
-#include <regex>
-
+#include "exceptions.h"
 #include "util/tools.h"
+
+#include <fmt/format.h>
+#include <regex>
 
 std::string Xml2Json::getJson(const pugi::xml_node& node)
 {

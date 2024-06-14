@@ -27,6 +27,7 @@
 
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "util/logger.h"
 
 #ifdef HAVE_INOTIFY
 #include "content/inotify/mt_inotify.h"

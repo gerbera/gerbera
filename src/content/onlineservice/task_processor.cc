@@ -35,8 +35,9 @@
 #define GRB_LOG_FAC GrbLogFacility::online
 #include "task_processor.h" // API
 
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "content/layout/layout.h"
+#include "exceptions.h"
 #include "online_service.h"
 
 TaskProcessor::TaskProcessor(std::shared_ptr<Config> config)
@@ -162,7 +163,7 @@ std::deque<std::shared_ptr<GenericTask>> TaskProcessor::getTasklist() const
     return taskList;
 }
 
-TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
+TPFetchOnlineContentTask::TPFetchOnlineContentTask(std::shared_ptr<Content> content,
     std::shared_ptr<TaskProcessor> taskProcessor,
     std::shared_ptr<Timer> timer,
     std::shared_ptr<OnlineService> service,

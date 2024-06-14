@@ -30,7 +30,7 @@
 
 // forward declaration
 class AutoscanDirectory;
-class ContentManager;
+class Content;
 class Context;
 class Database;
 class Timer;
@@ -81,7 +81,7 @@ public:
     std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy() const;
 
     void initTimer(
-        std::shared_ptr<ContentManager>& content,
+        std::shared_ptr<Content>& content,
         std::shared_ptr<Timer>& timer
 #ifdef HAVE_INOTIFY
         ,

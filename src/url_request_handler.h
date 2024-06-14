@@ -34,7 +34,6 @@
 #ifndef __URL_REQUEST_HANDLER_H__
 #define __URL_REQUEST_HANDLER_H__
 
-#include "common.h"
 #include "request_handler.h"
 
 class URLRequestHandler : public RequestHandler {

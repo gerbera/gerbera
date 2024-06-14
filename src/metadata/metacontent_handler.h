@@ -32,7 +32,7 @@
 #include "config/config.h"
 #include "metadata_handler.h"
 
-class ContentManager;
+class Content;
 
 class ContentPathSetup {
 public:
@@ -89,13 +89,13 @@ private:
 /// \brief This class is responsible for populating metadata from additional files
 class MetafileHandler : public MetacontentHandler {
 public:
-    explicit MetafileHandler(const std::shared_ptr<Context>& context, std::shared_ptr<ContentManager> content);
+    explicit MetafileHandler(const std::shared_ptr<Context>& context, std::shared_ptr<Content> content);
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
 
 private:
     static std::unique_ptr<ContentPathSetup> setup;
-    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Content> content;
 };
 
 /// \brief This class is responsible for reverse mapping filesystem based resources

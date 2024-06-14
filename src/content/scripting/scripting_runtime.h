@@ -36,8 +36,7 @@
 
 #include <duktape.h>
 #include <mutex>
-
-#include "common.h"
+#include <string>
 
 /// \brief ScriptingRuntime class definition.
 class ScriptingRuntime {

@@ -31,10 +31,10 @@
 #include "config/result/client_config.h"
 #include "database/database.h"
 #include "util/grb_net.h"
-
-#include <upnp.h>
+#include "util/logger.h"
 
 #include <algorithm>
+#include <upnp.h>
 
 std::shared_ptr<ClientStatusDetail> ClientStatusDetail::clone() const
 {

@@ -36,6 +36,16 @@
 
 #include "taglib_handler.h" // API
 
+#include "cds/cds_item.h"
+#include "config/config.h"
+#include "exceptions.h"
+#include "iohandler/mem_io_handler.h"
+#include "metadata_enums.h"
+#include "util/grb_time.h"
+#include "util/mime.h"
+#include "util/string_converter.h"
+#include "util/tools.h"
+
 #include <aifffile.h>
 #include <apefile.h>
 #include <asffile.h>
@@ -58,15 +68,6 @@
 #if TAGLIB_MAJOR_VERSION >= 2
 #include <mp4itemfactory.h>
 #endif
-
-#include "cds/cds_item.h"
-#include "config/config.h"
-#include "iohandler/mem_io_handler.h"
-#include "metadata_enums.h"
-#include "util/grb_time.h"
-#include "util/mime.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
 
 class GerberaTagLibDebugListener : public TagLib::DebugListener {
 private:

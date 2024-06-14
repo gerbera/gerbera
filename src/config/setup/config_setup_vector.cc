@@ -25,10 +25,11 @@
 
 #include "config_setup_vector.h" // API
 
-#include <numeric>
-
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "util/logger.h"
+
+#include <numeric>
 
 /// \brief Creates a vector from an XML nodeset.
 /// \param optValue starting element of the nodeset.

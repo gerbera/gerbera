@@ -35,7 +35,6 @@
 #ifndef __CONFIG_MANAGER_H__
 #define __CONFIG_MANAGER_H__
 
-#include "common.h"
 #include "config.h"
 
 #include <map>

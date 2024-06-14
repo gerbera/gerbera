@@ -26,7 +26,6 @@ Gerbera - https://gerbera.io/
 #include <fmt/format.h>
 #include <sstream>
 
-#include "common.h"
 #include "exceptions.h"
 
 namespace URLUtils {

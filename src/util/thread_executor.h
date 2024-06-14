@@ -34,12 +34,11 @@
 #ifndef __THREAD_EXECUTOR_H__
 #define __THREAD_EXECUTOR_H__
 
+#include "executor.h"
+
 #include <condition_variable>
 #include <mutex>
 #include <pthread.h>
-
-#include "common.h"
-#include "executor.h"
 
 /// \brief an executor which runs a thread
 class ThreadExecutor : public Executor {

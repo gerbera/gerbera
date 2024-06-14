@@ -27,8 +27,9 @@
 #include "autoscan_list.h"
 
 #include "config/result/autoscan.h"
-#include "content_manager.h"
+#include "content.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "util/timer.h"
 
 #ifdef HAVE_INOTIFY
@@ -192,7 +193,7 @@ void AutoscanList::notifyAll(Timer::Subscriber* sub)
 }
 
 void AutoscanList::initTimer(
-    std::shared_ptr<ContentManager>& content,
+    std::shared_ptr<Content>& content,
     std::shared_ptr<Timer>& timer
 #ifdef HAVE_INOTIFY
     ,

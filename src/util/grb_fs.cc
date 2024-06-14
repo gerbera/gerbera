@@ -22,6 +22,10 @@ Gerbera - https://gerbera.io/
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "grb_fs.h" // API
 
+#include "exceptions.h"
+#include "util/logger.h"
+#include "util/tools.h"
+
 #include <fcntl.h>
 #include <fstream>
 #include <sstream>
@@ -31,8 +35,6 @@ Gerbera - https://gerbera.io/
 #ifdef __HAIKU__
 #define _DEFAULT_SOURCE
 #endif
-
-#include "util/tools.h"
 
 std::string rtrimPath(std::string& s, unsigned char sep)
 {

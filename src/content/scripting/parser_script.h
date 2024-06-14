@@ -34,15 +34,15 @@
 #ifndef __PARSER_SCRIPT_H__
 #define __PARSER_SCRIPT_H__
 
-#include <memory>
-#include <pugixml.hpp>
-
 #include "common.h"
 #include "script.h"
 
+#include <memory>
+#include <pugixml.hpp>
+
 // forward declaration
 class CdsObject;
-class ContentManager;
+class Content;
 class GenericTask;
 
 extern "C" {
@@ -58,7 +58,7 @@ public:
     pugi::xml_node& readXml(int direction);
 
 protected:
-    ParserScript(const std::shared_ptr<ContentManager>& content, const std::string& parent, const std::string& name, const std::string& objName);
+    ParserScript(const std::shared_ptr<Content>& content, const std::string& parent, const std::string& name, const std::string& objName);
 
     static pugi::xml_node nullNode;
     static constexpr int ONE_TEXTLINE_BYTES = 1024;

@@ -34,12 +34,11 @@
 #ifndef __CDS_RESOURCE_H__
 #define __CDS_RESOURCE_H__
 
+#include "cds_enums.h"
+#include "util/enum_iterator.h"
+
 #include <map>
 #include <memory>
-
-#include "cds_enums.h"
-#include "common.h"
-#include "util/enum_iterator.h"
 
 /// \brief name for external urls that can appear in object resources (i.e.
 /// a YouTube thumbnail)

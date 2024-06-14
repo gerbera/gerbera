@@ -34,14 +34,15 @@
 
 #include "process_io_handler.h" // API
 
+#include "content/content.h"
+#include "exceptions.h"
+
 #include <csignal>
 #include <utility>
 
 #include <fcntl.h>
 #include <sys/select.h>
 #include <unistd.h>
-
-#include "content/content_manager.h"
 
 // after MAX_TIMEOUTS we will tell libupnp to check the socket,
 // this will make sure that we do not block the read and allow libupnp to
@@ -105,7 +106,7 @@ void ProcessIOHandler::unregisterAll()
     }
 }
 
-ProcessIOHandler::ProcessIOHandler(const std::shared_ptr<ContentManager>& content,
+ProcessIOHandler::ProcessIOHandler(const std::shared_ptr<Content>& content,
     fs::path filename,
     std::shared_ptr<Executor> mainProc,
     std::vector<std::unique_ptr<ProcListItem>> procList,

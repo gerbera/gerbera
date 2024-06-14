@@ -33,7 +33,10 @@
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "string_converter.h" // API
 
+#include "common.h"
 #include "config/result/directory_tweak.h"
+#include "exceptions.h"
+#include "util/logger.h"
 
 StringConverter::StringConverter(const std::string& from, const std::string& to)
     : cd(iconv_open(to.c_str(), from.c_str()))

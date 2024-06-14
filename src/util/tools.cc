@@ -33,6 +33,10 @@
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "tools.h" // API
 
+#include "config/config.h"
+#include "contrib/md5.h"
+#include "util/logger.h"
+
 #include <numeric>
 #include <queue>
 #include <sstream>
@@ -46,9 +50,6 @@
 #else
 #include <uuid/uuid.h>
 #endif
-
-#include "config/config.h"
-#include "contrib/md5.h"
 
 static constexpr auto hexChars = "0123456789abcdef";
 

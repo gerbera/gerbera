@@ -40,7 +40,7 @@
 #include <fmt/chrono.h>
 #include <sstream>
 
-DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::string ip, in_port_t port)
+DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::string ip, in_port_t port)
     : RequestHandler(content, xmlBuilder)
     , ip(ip)
     , port(port)

@@ -33,6 +33,8 @@
 
 #include "thread_executor.h" // API
 
+#include "util/logger.h"
+
 ThreadExecutor::~ThreadExecutor()
 {
     kill();

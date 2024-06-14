@@ -34,7 +34,9 @@
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_resource.h" // API
 
+#include "exceptions.h"
 #include "metadata/resolution.h"
+#include "util/logger.h"
 #include "util/tools.h"
 #include "util/url_utils.h"
 

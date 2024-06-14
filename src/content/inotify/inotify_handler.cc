@@ -29,7 +29,7 @@
 
 #include "config/result/autoscan.h"
 #include "content/autoscan_setting.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "content/inotify/autoscan_inotify.h"
 #include "content/inotify/directory_watch.h"
 #include "content/inotify/watch.h"
@@ -179,7 +179,7 @@ void InotifyHandler::doMove(const std::shared_ptr<DirectoryWatch>& wdObj)
     }
 }
 
-void InotifyHandler::doDirectory(AutoScanSetting& asSetting, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<DirectoryWatch>& wdObj)
+void InotifyHandler::doDirectory(AutoScanSetting& asSetting, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj)
 {
     if (AUTOSCAN_IS_NEW(mask)) {
         ai->recheckNonexistingMonitors(wd, wdObj);
@@ -195,7 +195,7 @@ void InotifyHandler::doDirectory(AutoScanSetting& asSetting, const std::shared_p
     }
 }
 
-int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<DirectoryWatch>& wdObj, ImportMode importMode, bool isDir)
+int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj, ImportMode importMode, bool isDir)
 {
     int result = INOTIFY_ROOT;
     if (!AUTOSCAN_IS_NEW(mask)) {
@@ -225,7 +225,7 @@ int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, co
     return result;
 }
 
-void InotifyHandler::doNewFile(AutoScanSetting& asSetting, const std::shared_ptr<ContentManager>& content, bool isDir)
+void InotifyHandler::doNewFile(AutoScanSetting& asSetting, const std::shared_ptr<Content>& content, bool isDir)
 {
     if (AUTOSCAN_IS_NEW_FILE(mask)) {
         log_debug("Adding {}", path.c_str());

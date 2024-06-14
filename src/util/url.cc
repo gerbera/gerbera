@@ -35,9 +35,11 @@
 #define GRB_LOG_FAC GrbLogFacility::curl
 #include "url.h" // API
 
-#include <sstream>
+#include "common.h"
+#include "exceptions.h"
+#include "util/logger.h"
 
-#include "config/config.h"
+#include <sstream>
 
 std::string URL::download(const std::string& url, long* httpRetcode,
     CURL* curlHandle, bool onlyHeader,

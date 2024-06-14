@@ -39,8 +39,7 @@
 
 #include <curl/curl.h>
 #include <memory>
-
-#include "common.h"
+#include <string>
 
 class URL {
 public:

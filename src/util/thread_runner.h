@@ -26,15 +26,16 @@
 #ifndef __THREAD_RUNNER_H__
 #define __THREAD_RUNNER_H__
 
-#include <chrono>
-#include <condition_variable>
-#include <mutex>
-#include <thread>
-
-#include <pthread.h>
-
 #include "config/config.h"
 #include "thread_executor.h"
+#include "util/logger.h"
+
+#include <chrono>
+#include <condition_variable>
+#include <functional>
+#include <mutex>
+#include <pthread.h>
+#include <thread>
 
 using ThreadProc = std::function<void(void* target)>;
 

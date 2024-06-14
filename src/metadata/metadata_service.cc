@@ -37,6 +37,7 @@
 #include "cds/cds_item.h"
 #include "config/config.h"
 #include "content/scripting/script_names.h"
+#include "exceptions.h"
 #include "metadata_enums.h"
 #include "util/tools.h"
 
@@ -67,7 +68,7 @@
 #include "ffmpeg_thumbnailer_handler.h"
 #include "metadata/metacontent_handler.h"
 
-MetadataService::MetadataService(const std::shared_ptr<Context>& context, const std::shared_ptr<ContentManager>& content)
+MetadataService::MetadataService(const std::shared_ptr<Context>& context, const std::shared_ptr<Content>& content)
     : context(context)
     , config(context->getConfig())
     , content(content)

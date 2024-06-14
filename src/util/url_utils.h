@@ -24,12 +24,12 @@ Gerbera - https://gerbera.io/
 #ifndef GERBERA_URL_UTILS_H
 #define GERBERA_URL_UTILS_H
 
+#include "common.h"
+
 #include <map>
 #include <string_view>
 #include <utility>
 #include <vector>
-
-#include "common.h"
 
 namespace URLUtils {
 

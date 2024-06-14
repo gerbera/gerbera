@@ -38,10 +38,11 @@
 
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "exceptions.h"
 #include "scripting_runtime.h"
 #include "util/string_converter.h"
 
-MetafileParserScript::MetafileParserScript(const std::shared_ptr<ContentManager>& content, const std::string& parent)
+MetafileParserScript::MetafileParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
     : ParserScript(content, parent, "metafile", "obj")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT);

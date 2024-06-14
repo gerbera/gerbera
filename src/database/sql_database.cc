@@ -45,6 +45,7 @@
 #include "config/result/autoscan.h"
 #include "config/result/dynamic_content.h"
 #include "content/autoscan_list.h"
+#include "exceptions.h"
 #include "metadata/metadata_enums.h"
 #include "search_handler.h"
 #include "upnp/clients.h"

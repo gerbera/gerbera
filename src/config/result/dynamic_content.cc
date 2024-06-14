@@ -26,7 +26,7 @@
 
 #include "dynamic_content.h" // API
 
-#include "content/content_manager.h"
+#include "util/logger.h"
 
 void DynamicContentList::add(const std::shared_ptr<DynamicContent>& cont, std::size_t index)
 {

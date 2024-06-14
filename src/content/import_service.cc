@@ -32,6 +32,7 @@
 #include "config/result/autoscan.h"
 #include "content_manager.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "layout/builtin_layout.h"
 #include "metadata/metadata_enums.h"
 #include "metadata/metadata_handler.h"

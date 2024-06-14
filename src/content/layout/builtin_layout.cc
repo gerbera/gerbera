@@ -41,7 +41,7 @@
 #include "config/config.h"
 #include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "context.h"
 #include "metadata/metadata_enums.h"
 #include "util/string_converter.h"
@@ -57,7 +57,7 @@
 
 #endif // ONLINE_SERVICES
 
-BuiltinLayout::BuiltinLayout(std::shared_ptr<ContentManager> content)
+BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
     : Layout(std::move(content))
     , config(this->content->getContext()->getConfig())
     , genreMap(this->config->getDictionaryOption(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP))

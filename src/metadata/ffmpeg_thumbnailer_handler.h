@@ -24,11 +24,11 @@ Gerbera - https://gerbera.io/
 #ifndef GERBERA_FFMPEG_THUMBNAILER_HANDLER_H
 #define GERBERA_FFMPEG_THUMBNAILER_HANDLER_H
 #ifdef HAVE_FFMPEGTHUMBNAILER
-
-#include <memory>
-
 #include "config/config.h"
 #include "metadata_handler.h"
+
+#include <memory>
+#include <mutex>
 
 class CdsObject;
 class IOHandler;
