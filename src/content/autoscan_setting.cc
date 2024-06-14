@@ -27,7 +27,7 @@
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "autoscan_setting.h" // API
 
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "config/result/directory_tweak.h"
 
 void AutoScanSetting::mergeOptions(const std::shared_ptr<Config>& config, const fs::path& location)

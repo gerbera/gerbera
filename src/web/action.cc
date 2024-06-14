@@ -34,7 +34,7 @@
 
 #include "pages.h" // API
 
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "content/content_manager.h"
 #include "util/xml_to_json.h"
 

@@ -32,12 +32,12 @@
 /// \file url.cc
 
 #ifdef HAVE_CURL
-#define GRB_LOG_FAC GrbLogFacility::content
+#define GRB_LOG_FAC GrbLogFacility::curl
 #include "url.h" // API
 
 #include <sstream>
 
-#include "config/config_manager.h"
+#include "config/config.h"
 
 std::string URL::download(const std::string& url, long* httpRetcode,
     CURL* curlHandle, bool onlyHeader,
@@ -58,11 +58,14 @@ std::string URL::download(const std::string& url, long* httpRetcode,
     curl_easy_reset(curlHandle);
 
     if (verbose) {
-        bool logEnabled;
-#ifdef TOMBDEBUG
-        logEnabled = !ConfigManager::isDebugLogging();
+#ifdef GRBDEBUG
+        bool logEnabled = GrbLogger::Logger.isDebugging(GRB_LOG_FAC) || GrbLogger::Logger.isDebugLogging();
 #else
-        logEnabled = ConfigManager::isDebugLogging();
+#ifdef TOMBDEBUG
+        bool logEnabled = !GrbLogger::Logger.isDebugLogging();
+#else
+        bool logEnabled = GrbLogger::Logger.isDebugLogging();
+#endif
 #endif
         if (logEnabled)
             curl_easy_setopt(curlHandle, CURLOPT_VERBOSE, 1);

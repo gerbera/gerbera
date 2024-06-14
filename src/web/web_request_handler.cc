@@ -34,7 +34,7 @@
 
 #include "web_request_handler.h" // API
 
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "content/content_manager.h"
 #include "iohandler/mem_io_handler.h"
 #include "session_manager.h"

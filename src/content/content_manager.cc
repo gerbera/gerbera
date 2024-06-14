@@ -34,9 +34,6 @@
 
 #include "content_manager.h" // API
 
-#include <fmt/chrono.h>
-#include <regex>
-
 #include "autoscan_list.h"
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
@@ -79,6 +76,9 @@
 #ifdef HAVE_INOTIFY
 #include "content/inotify/autoscan_inotify.h"
 #endif
+
+#include <fmt/chrono.h>
+#include <regex>
 
 ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     const std::shared_ptr<Server>& server, std::shared_ptr<Timer> timer)

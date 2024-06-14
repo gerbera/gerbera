@@ -24,16 +24,15 @@
 
 #include "upnp_desc_handler.h" // API
 
-#include <sstream>
-
 #include "iohandler/file_io_handler.h"
 #include "iohandler/mem_io_handler.h"
 #include "upnp/quirks.h"
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
 #include "util/grb_time.h"
-#include "util/mime.h"
 #include "util/tools.h"
+
+#include <sstream>
 
 UpnpDescHandler::UpnpDescHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
     : RequestHandler(content, xmlBuilder)

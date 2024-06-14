@@ -34,14 +34,6 @@
 
 #include "config_manager.h" // API
 
-#include <filesystem>
-#include <numeric>
-#include <sstream>
-
-#if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
-#include <langinfo.h>
-#endif
-
 #include "config/result/autoscan.h"
 #include "config/result/client_config.h"
 #include "config/result/transcoding.h"
@@ -54,7 +46,12 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-bool ConfigManager::debug = false;
+#include <numeric>
+#include <sstream>
+
+#if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
+#include <langinfo.h>
+#endif
 
 ConfigManager::ConfigManager(fs::path filename,
     const fs::path& userHome, const fs::path& configDir,
@@ -62,7 +59,7 @@ ConfigManager::ConfigManager(fs::path filename,
     : filename(std::move(filename))
     , dataDir(std::move(dataDir))
 {
-    ConfigManager::debug = debug;
+    GrbLogger::Logger.setDebugLogging(debug);
 
     if (this->filename.empty()) {
         // No config file path provided, so lets find one.

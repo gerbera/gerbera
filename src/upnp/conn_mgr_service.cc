@@ -35,7 +35,7 @@
 #include "conn_mgr_service.h" // API
 
 #include "action_request.h"
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "database/database.h"
 #include "subscription_request.h"
 #include "upnp/upnp_common.h"

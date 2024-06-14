@@ -40,8 +40,8 @@
 
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
+#include "config/config.h"
 #include "config/config_definition.h"
-#include "config/config_manager.h"
 #include "config/result/transcoding.h"
 #include "database/database.h"
 #include "device_description_handler.h"

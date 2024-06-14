@@ -36,7 +36,7 @@
 #include "lastfm_scrobbler.h" // API
 
 #include "cds_item.h"
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "metadata/metadata_enums.h"
 #include "util/tools.h"
 

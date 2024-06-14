@@ -28,6 +28,8 @@
 
 #include "config/config_setup.h"
 
+class ClientConfig;
+
 class ConfigClientSetup : public ConfigSetup {
     using ConfigSetup::ConfigSetup;
 

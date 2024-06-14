@@ -47,7 +47,7 @@
 #include <thread>
 
 #include "action_request.h"
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "config/config_option_enum.h"
 #include "content/content_manager.h"
 #include "database/database.h"

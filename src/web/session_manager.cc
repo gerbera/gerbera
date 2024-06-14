@@ -37,7 +37,7 @@
 #include <memory>
 #include <unordered_set>
 
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "util/timer.h"
 #include "util/tools.h"
 

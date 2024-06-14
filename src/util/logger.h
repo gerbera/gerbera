@@ -78,6 +78,7 @@ enum class GrbLogFacility {
     online,
     metadata,
     matroska,
+    curl,
 
     log_MAX,
 };
@@ -110,8 +111,12 @@ public:
     static int remapFacility(const std::string& flag);
     static int makeFacility(const std::string& optValue);
 
+    bool isDebugLogging() { return debug; }
+    void setDebugLogging(bool deb) { debug = deb; }
+
 private:
     static std::map<GrbLogFacility, std::string_view> facilities;
+    bool debug;
 
     std::array<bool, to_underlying(GrbLogFacility::log_MAX)> hasDebugging {};
 };
@@ -126,7 +131,16 @@ private:
 #endif
 
 #else
+class GrbLogger {
+public:
+    static GrbLogger Logger;
 
+    bool isDebugLogging() { return debug; }
+    void setDebugLogging(bool deb) { debug = deb; }
+
+private:
+    bool debug;
+};
 #define log_facility(fac, ...) log_debug(__VA_ARGS__)
 
 #endif

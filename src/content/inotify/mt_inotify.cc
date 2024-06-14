@@ -42,6 +42,8 @@
 #ifdef HAVE_INOTIFY
 #include "mt_inotify.h"
 
+#include "util/tools.h"
+
 #include <array>
 #include <sys/inotify.h>
 #include <sys/ioctl.h>
@@ -51,8 +53,6 @@
 #ifdef SOLARIS
 #include <sys/filio.h> // FIONREAD
 #endif
-
-#include "util/tools.h"
 
 #define MAX_EVENTS 4096
 

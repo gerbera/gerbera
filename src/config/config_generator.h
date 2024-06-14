@@ -28,7 +28,7 @@
 
 #include <pugixml.hpp>
 
-#include "config/config_manager.h"
+#include "config/config.h"
 
 class ConfigGenerator {
 public:

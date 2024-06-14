@@ -35,13 +35,13 @@
 #ifndef __CONFIG_MANAGER_H__
 #define __CONFIG_MANAGER_H__
 
+#include "common.h"
+#include "config.h"
+
 #include <map>
 #include <memory>
 #include <netinet/in.h>
 #include <pugixml.hpp>
-
-#include "common.h"
-#include "config.h"
 
 // forward declaration
 class AutoscanDirectory;
@@ -144,13 +144,10 @@ public:
     void setOrigValue(const std::string& item, UIntOptionType value) override;
     void setOrigValue(const std::string& item, LongOptionType value) override;
 
-    static bool isDebugLogging() { return debug; }
-
 protected:
     fs::path filename;
     fs::path dataDir;
     fs::path magicFile;
-    static bool debug;
     std::map<std::string, std::string> origValues;
 
     std::unique_ptr<pugi::xml_document> xmlDoc { std::make_unique<pugi::xml_document>() };

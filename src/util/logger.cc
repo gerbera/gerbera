@@ -89,7 +89,6 @@ int GrbLogger::makeFacility(const std::string& optValue)
     return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | GrbLogger::remapFacility(trimString(i)); });
 }
 
-GrbLogger GrbLogger::Logger;
 std::map<GrbLogFacility, std::string_view> GrbLogger::facilities = {
     { GrbLogFacility::thread, "Thread" },
     { GrbLogFacility::sqlite3, "Sqlite3" },
@@ -121,7 +120,10 @@ std::map<GrbLogFacility, std::string_view> GrbLogger::facilities = {
     { GrbLogFacility::online, "Online" },
     { GrbLogFacility::metadata, "Metadata" },
     { GrbLogFacility::matroska, "Matroska" },
+    { GrbLogFacility::curl, "Curl" },
 
     { GrbLogFacility::log_MAX, "All" },
 };
 #endif
+
+GrbLogger GrbLogger::Logger;

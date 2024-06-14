@@ -33,13 +33,6 @@
 #ifndef __AUTOSCAN_INOTIFY_H__
 #define __AUTOSCAN_INOTIFY_H__
 
-#include <memory>
-#include <mutex>
-#include <queue>
-#include <thread>
-#include <unordered_map>
-#include <vector>
-
 #include "config/config.h"
 #include "context.h"
 #include "inotify_types.h"
@@ -54,6 +47,13 @@ class Watch;
 class DirectoryWatch;
 class WatchAutoscan;
 class WatchMove;
+
+#include <memory>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <unordered_map>
+#include <vector>
 
 #define INOTIFY_ROOT (-1)
 #define INOTIFY_UNKNOWN_PARENT_WD (-2)

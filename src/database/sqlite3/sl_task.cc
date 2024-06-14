@@ -23,7 +23,7 @@
 
 #include "sl_task.h" // API
 
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "sqlite_database.h"
 #include "util/tools.h"
 

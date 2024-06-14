@@ -34,7 +34,7 @@
 
 #include "io_handler_buffer_helper.h" // API
 
-#include "config/config_manager.h"
+#include "config/config.h"
 
 #include <algorithm>
 

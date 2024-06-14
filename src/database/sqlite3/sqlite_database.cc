@@ -34,7 +34,7 @@
 
 #include "sqlite_database.h" // API
 
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "sl_task.h"
 
 static constexpr auto sqlite3UpdateVersion = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");

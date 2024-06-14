@@ -33,7 +33,7 @@ Gerbera - https://gerbera.io/
 #include <string>
 #include <vector>
 
-class ConfigManager;
+class Config;
 class Server;
 namespace spdlog {
 class logger;
@@ -95,7 +95,7 @@ public:
     // \brief: Handle regular command line options
     void handleOptions(const cxxopts::ParseResult* results, bool startup = true);
     // \brief: Handle command line options that are linked with configuration values
-    void handleConfigOptions(const std::shared_ptr<ConfigManager>& configManager, const std::vector<ConfigOptionArgs>& additionalArgs);
+    void handleConfigOptions(const std::shared_ptr<Config>& configManager, const std::vector<ConfigOptionArgs>& additionalArgs);
     // \brief: Handle command line options that require a running server
     void handleServerOptions(const std::shared_ptr<Server>& server);
     // \brief: Release all loggers
@@ -133,7 +133,7 @@ private:
     bool configDirSet = false;
     pid_t pid;
     const cxxopts::ParseResult* results;
-    std::shared_ptr<ConfigManager> configManager;
+    std::shared_ptr<Config> configManager;
     std::shared_ptr<Server> server;
     std::vector<std::string> grbLoggers;
     std::shared_ptr<spdlog::logger> defaultLogger;

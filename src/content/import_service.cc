@@ -26,9 +26,6 @@
 
 #include "import_service.h" // API
 
-#include <fmt/chrono.h>
-#include <regex>
-
 #include "autoscan_setting.h"
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
@@ -39,7 +36,6 @@
 #include "metadata/metadata_enums.h"
 #include "metadata/metadata_handler.h"
 #include "metadata/metadata_service.h"
-#include "upnp/upnp_common.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -50,6 +46,9 @@
 #include "scripting/metafile_parser_script.h"
 #include "scripting/playlist_parser_script.h"
 #endif
+
+#include <fmt/chrono.h>
+#include <regex>
 
 bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const std::string& actual) const
 {
