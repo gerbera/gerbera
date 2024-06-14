@@ -30,12 +30,13 @@ Gerbera - https://gerbera.io/
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_item.h" // API
 
-#include <array>
-#include <numeric>
-
+#include "exceptions.h"
 #include "upnp/clients.h"
 #include "upnp/upnp_common.h"
 #include "util/grb_time.h"
+
+#include <array>
+#include <numeric>
 
 CdsItem::CdsItem()
 {

@@ -26,10 +26,10 @@
 
 #include "transcode_handler.h" // API
 
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "context.h"
 
-TranscodeHandler::TranscodeHandler(const std::shared_ptr<ContentManager>& content)
+TranscodeHandler::TranscodeHandler(const std::shared_ptr<Content>& content)
     : config(content->getContext()->getConfig())
     , content(content)
 {

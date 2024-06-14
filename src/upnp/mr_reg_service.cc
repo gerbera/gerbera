@@ -37,9 +37,11 @@
 #include "action_request.h"
 #include "config/config.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "subscription_request.h"
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
+#include "util/logger.h"
 #include "util/tools.h"
 
 MRRegistrarService::MRRegistrarService(const std::shared_ptr<Context>& context,

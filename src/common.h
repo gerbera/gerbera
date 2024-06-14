@@ -33,8 +33,7 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include "exceptions.h"
-#include "util/logger.h"
+#include <string_view>
 
 #define SOURCE (-1)
 #define OFF 0
@@ -60,9 +59,6 @@ constexpr auto DIR_SEPARATOR = char('/');
 
 // default mime types for items in the cds
 #define MIMETYPE_DEFAULT "application/octet-stream"
-
-// default protocol
-constexpr auto PROTOCOL = std::string_view("http-get");
 
 // device description defaults
 #define DESC_MANUFACTURER_URL "https://gerbera.io/"

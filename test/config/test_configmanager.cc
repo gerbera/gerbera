@@ -28,6 +28,7 @@
 
 #include "config/config_generator.h"
 #include "config/config_manager.h"
+#include "exceptions.h"
 #include "util/tools.h"
 
 class ConfigManagerTest : public ::testing::Test {

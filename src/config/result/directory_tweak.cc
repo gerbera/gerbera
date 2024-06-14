@@ -27,8 +27,8 @@
 #include "directory_tweak.h" // API
 
 #include "config/config.h"
-#include "content/content_manager.h"
 #include "upnp/clients.h"
+#include "util/logger.h"
 
 void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index)
 {

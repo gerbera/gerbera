@@ -36,13 +36,14 @@
 #include "import_script.h" // API
 
 #include "cds/cds_objects.h"
+#include "common.h"
 #include "config/result/autoscan.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "js_functions.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-ImportScript::ImportScript(const std::shared_ptr<ContentManager>& content, const std::string& parent)
+ImportScript::ImportScript(const std::shared_ptr<Content>& content, const std::string& parent)
     : Script(content, parent, "import", "orig", StringConverter::i2i(content->getContext()->getConfig()))
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);

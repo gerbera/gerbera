@@ -34,7 +34,7 @@
 class AutoscanInotify;
 class AutoScanSetting;
 class AutoscanDirectory;
-class ContentManager;
+class Content;
 class Database;
 class DirectoryWatch;
 class WatchAutoscan;
@@ -51,9 +51,9 @@ public:
     fs::path getPath(const std::shared_ptr<DirectoryWatch>& wdObj);
     std::pair<bool, std::shared_ptr<AutoscanDirectory>> getAutoscanDirectory(const std::shared_ptr<DirectoryWatch>& wdObj);
     void doMove(const std::shared_ptr<DirectoryWatch>& wdObj);
-    void doDirectory(AutoScanSetting& asSetting, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<DirectoryWatch>& wdObj);
-    int doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<ContentManager>& content, const std::shared_ptr<DirectoryWatch>& wdObj, ImportMode importMode, bool isDir);
-    void doNewFile(AutoScanSetting& asSetting, const std::shared_ptr<ContentManager>& content, bool isDir);
+    void doDirectory(AutoScanSetting& asSetting, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj);
+    int doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj, ImportMode importMode, bool isDir);
+    void doNewFile(AutoScanSetting& asSetting, const std::shared_ptr<Content>& content, bool isDir);
     void doIgnored();
 
     bool hasEvent() const { return mask; }

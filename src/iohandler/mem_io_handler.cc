@@ -34,6 +34,8 @@
 
 #include "mem_io_handler.h" // API
 
+#include "exceptions.h"
+
 #include <algorithm>
 
 MemIOHandler::MemIOHandler(const void* buffer, int length)

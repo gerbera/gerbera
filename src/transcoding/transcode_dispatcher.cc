@@ -35,6 +35,7 @@
 #include "transcode_dispatcher.h" // API
 
 #include "config/result/transcoding.h"
+#include "exceptions.h"
 #include "iohandler/io_handler.h"
 #include "transcode_ext_handler.h"
 

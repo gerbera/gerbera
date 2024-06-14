@@ -34,15 +34,12 @@
 
 #include "transcode_ext_handler.h" // API
 
-#include <fcntl.h>
-#include <sys/stat.h>
-#include <unistd.h>
-
 #include "cds/cds_objects.h"
 #include "config/config.h"
 #include "config/result/transcoding.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "iohandler/buffered_io_handler.h"
 #include "iohandler/io_handler_chainer.h"
 #include "iohandler/process_io_handler.h"
@@ -53,6 +50,10 @@
 #ifdef HAVE_CURL
 #include "iohandler/curl_io_handler.h"
 #endif
+
+#include <fcntl.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::shared_ptr<TranscodingProfile>& profile,
     const fs::path& location, const std::shared_ptr<CdsObject>& obj,

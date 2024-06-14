@@ -44,11 +44,11 @@
 #include "config/setup/config_setup_dictionary.h"
 #include "config/setup/config_setup_enum.h"
 #include "config/setup/config_setup_vector.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/database.h"
 #include "util/xml_to_json.h"
 
-Web::ConfigLoad::ConfigLoad(const std::shared_ptr<ContentManager>& content)
+Web::ConfigLoad::ConfigLoad(const std::shared_ptr<Content>& content)
     : WebRequestHandler(content)
 {
     try {

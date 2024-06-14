@@ -36,8 +36,10 @@
 
 #include "parser_script.h" // API
 
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/database.h"
+#include "exceptions.h"
+#include "util/generic_task.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -166,7 +168,7 @@ duk_ret_t jsUpdateCdsObject(duk_context* ctx)
     return 1;
 }
 
-ParserScript::ParserScript(const std::shared_ptr<ContentManager>& content, const std::string& parent,
+ParserScript::ParserScript(const std::shared_ptr<Content>& content, const std::string& parent,
     const std::string& name, const std::string& objName)
     : Script(content, parent, name, objName, StringConverter::p2i(content->getContext()->getConfig()))
 {

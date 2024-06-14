@@ -34,19 +34,19 @@
 #ifndef __SCRIPTING_SCRIPT_H__
 #define __SCRIPTING_SCRIPT_H__
 
-#include <duktape.h>
-#include <mutex>
-
-#include "common.h"
 #include "context.h"
 #include "util/grb_fs.h"
+
+#include <duktape.h>
+#include <map>
+#include <mutex>
 
 // forward declaration
 enum class AutoscanMediaMode;
 class CdsContainer;
 class CdsItem;
 class CdsObject;
-class ContentManager;
+class Content;
 class ScriptingRuntime;
 class StringConverter;
 
@@ -91,12 +91,12 @@ public:
     static Script* getContextScript(duk_context* ctx);
 
     std::shared_ptr<Database> getDatabase() const { return database; }
-    std::shared_ptr<ContentManager> getContent() const { return content; }
+    std::shared_ptr<Content> getContent() const { return content; }
     std::string getOrigName() const { return objectName; }
     std::shared_ptr<CdsObject> getProcessedObject() const { return processed; }
 
 protected:
-    Script(const std::shared_ptr<ContentManager>& content, const std::string& parent,
+    Script(const std::shared_ptr<Content>& content, const std::string& parent,
         const std::string& name, std::string objName, std::unique_ptr<StringConverter> sc);
 
     void execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
@@ -116,7 +116,7 @@ protected:
 
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
-    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Content> content;
     std::shared_ptr<ScriptingRuntime> runtime;
     std::unique_ptr<StringConverter> sc;
 

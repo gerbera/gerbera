@@ -22,6 +22,10 @@ Gerbera - https://gerbera.io/
 #define GRB_LOG_FAC GrbLogFacility::clients
 #include "grb_net.h" // API
 
+#include "exceptions.h"
+#include "logger.h"
+#include "tools.h"
+
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <netdb.h>
@@ -29,9 +33,6 @@ Gerbera - https://gerbera.io/
 #ifdef SOLARIS
 #include <sys/sockio.h>
 #endif
-
-#include "common.h"
-#include "tools.h"
 
 #define M_SOCK_ADDR_IN_PTR(sa) reinterpret_cast<struct sockaddr_in*>(sa)
 #define M_SOCK_ADDR_IN_ADDR(sa) M_SOCK_ADDR_IN_PTR(sa)->sin_addr

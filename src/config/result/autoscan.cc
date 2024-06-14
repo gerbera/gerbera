@@ -35,8 +35,7 @@
 #include "autoscan.h" // API
 
 #include "cds/cds_container.h"
-#include "content/content_manager.h"
-#include "database/database.h"
+#include "exceptions.h"
 #include "util/enum_iterator.h"
 #include "util/tools.h"
 

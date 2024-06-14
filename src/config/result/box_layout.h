@@ -27,12 +27,13 @@
 #ifndef __BOXLAYOUT_H_
 #define __BOXLAYOUT_H_
 
+#include "common.h"
+
 #include <map>
 #include <memory>
 #include <mutex>
+#include <string>
 #include <vector>
-
-#include "common.h"
 
 // forward declaration
 class BoxLayout;

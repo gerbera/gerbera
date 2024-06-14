@@ -40,12 +40,13 @@
 #include "cds/cds_item.h"
 #include "config/config.h"
 #include "content/autoscan_setting.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "scripting_runtime.h"
 #include "util/string_converter.h"
 
-PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<ContentManager>& content, const std::string& parent)
+PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
     : ParserScript(content, parent, "playlist", "playlist")
 {
     std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);

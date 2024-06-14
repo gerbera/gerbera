@@ -45,6 +45,13 @@
 #define GRB_LOG_FAC GrbLogFacility::ffmpeg
 #include "ffmpeg_handler.h"
 
+#include "cds/cds_item.h"
+#include "iohandler/io_handler.h"
+#include "upnp/upnp_common.h"
+#include "util/grb_time.h"
+#include "util/string_converter.h"
+#include "util/tools.h"
+
 #include <fmt/chrono.h>
 
 extern "C" {
@@ -53,13 +60,6 @@ extern "C" {
 #include <libavutil/avutil.h>
 
 } // extern "C"
-
-#include "cds/cds_item.h"
-#include "iohandler/io_handler.h"
-#include "upnp/upnp_common.h"
-#include "util/grb_time.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
 
 #ifdef HAVE_AVSTREAM_CODECPAR
 #define as_codecpar(s) s->codecpar

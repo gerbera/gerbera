@@ -34,12 +34,12 @@
 #ifndef __UPDATE_MANAGER_H__
 #define __UPDATE_MANAGER_H__
 
+#include "common.h"
+#include "util/thread_runner.h"
+
 #include <memory>
 #include <unordered_set>
 #include <vector>
-
-#include "common.h"
-#include "util/thread_runner.h"
 
 // forward declaration
 class Config;

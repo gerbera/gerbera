@@ -36,8 +36,9 @@
 #include "js_functions.h" // API
 
 #include "cds/cds_objects.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "script.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

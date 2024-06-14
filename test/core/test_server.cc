@@ -19,16 +19,18 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "common.h"
+#include "exceptions.h"
+#include "util/tools.h"
+
 #include <array>
 #include <filesystem>
+#include <fmt/format.h>
 #include <fstream>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <memory>
 #include <regex>
-
-#include "common.h"
-#include "util/tools.h"
 
 namespace fs = std::filesystem;
 

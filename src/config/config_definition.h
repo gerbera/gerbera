@@ -27,9 +27,11 @@
 #ifndef __CONFIG_DEFINITION_H__
 #define __CONFIG_DEFINITION_H__
 
-#include "common.h"
 #include "config.h"
+#include "exceptions.h"
 #include "util/tools.h"
+
+#include <fmt/format.h>
 
 #define CONFIG_XML_VERSION 2
 

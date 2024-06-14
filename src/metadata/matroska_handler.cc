@@ -27,6 +27,14 @@
 #define GRB_LOG_FAC GrbLogFacility::matroska
 #include "matroska_handler.h" // API
 
+#include "cds/cds_item.h"
+#include "exceptions.h"
+#include "iohandler/mem_io_handler.h"
+#include "util/grb_time.h"
+#include "util/mime.h"
+#include "util/string_converter.h"
+#include "util/tools.h"
+
 #include <fmt/chrono.h>
 #include <vector>
 
@@ -40,13 +48,6 @@
 #include <matroska/KaxContexts.h>
 #include <matroska/KaxSeekHead.h>
 #include <matroska/KaxSegment.h>
-
-#include "cds/cds_item.h"
-#include "iohandler/mem_io_handler.h"
-#include "util/grb_time.h"
-#include "util/mime.h"
-#include "util/string_converter.h"
-#include "util/tools.h"
 
 using namespace libebml;
 using namespace libmatroska;

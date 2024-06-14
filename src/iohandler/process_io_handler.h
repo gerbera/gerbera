@@ -34,13 +34,12 @@
 #ifndef __PROCESS_IO_HANDLER_H__
 #define __PROCESS_IO_HANDLER_H__
 
-#include "common.h"
 #include "io_handler.h"
 #include "util/executor.h"
 #include "util/grb_fs.h"
 
 // forward declaration
-class ContentManager;
+class Content;
 
 #define FIFO_READ_TIMEOUT 2
 #define FIFO_WRITE_TIMEOUT 2
@@ -63,7 +62,7 @@ public:
     /// \param filename to read the data from
     /// \param procList associated processes that will be terminated once
     /// they are no longer needed
-    ProcessIOHandler(const std::shared_ptr<ContentManager>& content,
+    ProcessIOHandler(const std::shared_ptr<Content>& content,
         fs::path filename, std::shared_ptr<Executor> mainProc,
         std::vector<std::unique_ptr<ProcListItem>> procList = {},
         bool ignoreSeek = false);
@@ -99,7 +98,7 @@ public:
     void close() override;
 
 protected:
-    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Content> content;
 
     /// \brief List of associated processes.
     std::vector<std::unique_ptr<ProcListItem>> procList;

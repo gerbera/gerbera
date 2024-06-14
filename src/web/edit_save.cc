@@ -34,8 +34,9 @@
 
 #include "pages.h" // API
 
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 

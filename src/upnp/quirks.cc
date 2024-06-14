@@ -26,12 +26,8 @@
 
 #include "quirks.h" // API
 
-#include <array>
-#include <utility>
-
 #include "action_request.h"
 #include "cds/cds_item.h"
-#include "content/content_manager.h"
 #include "database/database.h"
 #include "server.h"
 #include "upnp/clients.h"
@@ -40,6 +36,9 @@
 #include "upnp/xml_builder.h"
 #include "util/grb_net.h"
 #include "util/tools.h"
+
+#include <array>
+#include <utility>
 
 Quirks::Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<ClientManager>& clientManager, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent)
     : xmlBuilder(std::move(xmlBuilder))

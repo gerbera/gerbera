@@ -46,7 +46,7 @@ class ClientManager;
 class Config;
 class ConnectionManagerService;
 class ContentDirectoryService;
-class ContentManager;
+class Content;
 class Context;
 class Database;
 class MetadataService;
@@ -94,7 +94,7 @@ public:
 
     void sendCDSSubscriptionUpdate(const std::string& updateString);
 
-    std::shared_ptr<ContentManager> getContent() const { return content; }
+    std::shared_ptr<Content> getContent() const { return content; }
 
 protected:
     std::shared_ptr<Config> config;
@@ -105,7 +105,7 @@ protected:
     std::shared_ptr<Context> context;
 
     std::shared_ptr<Timer> timer;
-    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Content> content;
     std::shared_ptr<MetadataService> metadataService;
 
     std::string ip;

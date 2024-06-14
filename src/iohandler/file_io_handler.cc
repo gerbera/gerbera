@@ -34,6 +34,8 @@
 
 #include "file_io_handler.h" // API
 
+#include "exceptions.h"
+
 FileIOHandler::FileIOHandler(const fs::path& filename)
     : file(filename)
 {

@@ -34,15 +34,15 @@
 #ifndef __CDS_OBJECTS_H__
 #define __CDS_OBJECTS_H__
 
-#include <algorithm>
-#include <map>
-#include <memory>
-#include <vector>
-
 #include "cds_resource.h"
 #include "common.h"
 #include "metadata/metadata_enums.h"
 #include "util/grb_fs.h"
+
+#include <algorithm>
+#include <map>
+#include <memory>
+#include <vector>
 
 /// \brief Generic object in the Content Directory.
 class CdsObject {

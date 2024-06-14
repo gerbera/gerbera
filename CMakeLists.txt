@@ -135,6 +135,7 @@ add_library(libgerbera STATIC
         src/content/cm_task.h
         src/content/content_manager.cc
         src/content/content_manager.h
+        src/content/content.h
         src/content/import_service.cc
         src/content/import_service.h
         src/content/inotify/autoscan_inotify.cc

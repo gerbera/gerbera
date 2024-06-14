@@ -40,6 +40,7 @@
 #include "cds_container.h"
 #include "cds_item.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "upnp/clients.h"
 #include "util/tools.h"
 

@@ -36,7 +36,6 @@
 
 #include <upnp.h>
 
-#include "common.h"
 #include "io_handler.h"
 #include "util/thread_runner.h"
 

@@ -56,7 +56,6 @@ using QuirkFlags = std::uint32_t;
 // forward declaration
 class ActionRequest;
 class ClientManager;
-class ContentManager;
 class Context;
 class CdsItem;
 class CdsObject;

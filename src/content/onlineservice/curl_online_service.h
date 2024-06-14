@@ -37,7 +37,7 @@
 #include "online_service.h"
 
 // forward declaration
-class ContentManager;
+class Content;
 class CdsObject;
 
 /// \brief this class is responsible for creating objects from the CurlContentHandler
@@ -71,7 +71,7 @@ protected:
 /// handles adding/refreshing content in the database.
 class CurlOnlineService : public OnlineService {
 public:
-    explicit CurlOnlineService(const std::shared_ptr<ContentManager>& content, std::string serviceName);
+    explicit CurlOnlineService(const std::shared_ptr<Content>& content, std::string serviceName);
     ~CurlOnlineService() override;
 
     CurlOnlineService(const CurlOnlineService&) = delete;

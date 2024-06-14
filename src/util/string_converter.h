@@ -37,7 +37,6 @@
 #include <iconv.h>
 #include <memory>
 
-#include "common.h"
 #include "config/config.h"
 
 class StringConverter {

@@ -34,8 +34,10 @@
 
 #include "pages.h" // API
 
+#include "common.h"
 #include "config/config.h"
-#include "content/content_manager.h"
+#include "content/content.h"
+#include "exceptions.h"
 #include "util/xml_to_json.h"
 
 void Web::Action::process()

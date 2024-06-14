@@ -37,6 +37,7 @@
 #include <thread>
 
 #include "exceptions.h"
+#include "util/logger.h"
 
 IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler> readFrom, std::unique_ptr<IOHandler> writeTo, int chunkSize)
 {

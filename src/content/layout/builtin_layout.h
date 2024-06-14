@@ -45,7 +45,7 @@ class Config;
 
 class BuiltinLayout : public Layout {
 public:
-    explicit BuiltinLayout(std::shared_ptr<ContentManager> content);
+    explicit BuiltinLayout(std::shared_ptr<Content> content);
 
 protected:
     std::shared_ptr<Config> config;

@@ -25,8 +25,10 @@
 
 #include "config_setup_string.h" // API
 
+#include "common.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "util/logger.h"
 #include "util/string_converter.h"
 
 #include <array>

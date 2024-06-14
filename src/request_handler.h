@@ -35,22 +35,20 @@
 #ifndef __REQUEST_HANDLER_H__
 #define __REQUEST_HANDLER_H__
 
+#include "context.h"
+
 #include <map>
 #include <memory>
+#include <upnp.h>
 #include <utility>
 #include <vector>
-
-#include <upnp.h>
-
-#include "common.h"
-#include "context.h"
 
 // forward declaration
 class CdsObject;
 struct ClientInfo;
 class Config;
 class Context;
-class ContentManager;
+class Content;
 class Database;
 class IOHandler;
 class Mime;
@@ -60,7 +58,7 @@ class UpnpXMLBuilder;
 
 class RequestHandler {
 public:
-    explicit RequestHandler(std::shared_ptr<ContentManager> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
+    explicit RequestHandler(std::shared_ptr<Content> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
     virtual ~RequestHandler() = default;
 
     /// \brief Returns information about the requested content.
@@ -78,7 +76,7 @@ public:
     std::shared_ptr<CdsObject> loadObject(const std::map<std::string, std::string>& params) const;
 
 protected:
-    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Content> content;
     std::shared_ptr<Context> context;
     std::shared_ptr<Config> config;
     std::shared_ptr<Mime> mime;

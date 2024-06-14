@@ -39,8 +39,6 @@
 #include <pugixml.hpp>
 #include <upnp.h>
 
-#include "common.h"
-
 // forward declaration
 class UpnpXMLBuilder;
 class Quirks;

@@ -47,7 +47,7 @@
 #include "config/setup/config_setup_autoscan.h"
 #include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_dictionary.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/database.h"
 #include "js_functions.h"
 #include "script_names.h"
@@ -174,7 +174,7 @@ void Script::setIntProperty(const std::string& name, int value)
 
 /* **************** */
 
-Script::Script(const std::shared_ptr<ContentManager>& content, const std::string& parent,
+Script::Script(const std::shared_ptr<Content>& content, const std::string& parent,
     const std::string& name, std::string objName, std::unique_ptr<StringConverter> sc)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())

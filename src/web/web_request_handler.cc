@@ -35,7 +35,8 @@
 #include "web_request_handler.h" // API
 
 #include "config/config.h"
-#include "content/content_manager.h"
+#include "content/content.h"
+#include "exceptions.h"
 #include "iohandler/mem_io_handler.h"
 #include "session_manager.h"
 #include "upnp/headers.h"
@@ -46,7 +47,7 @@
 
 namespace Web {
 
-WebRequestHandler::WebRequestHandler(const std::shared_ptr<ContentManager>& content)
+WebRequestHandler::WebRequestHandler(const std::shared_ptr<Content>& content)
     : RequestHandler(content, nullptr)
     , sessionManager(this->content->getContext()->getSessionManager())
 {

@@ -28,6 +28,7 @@ Gerbera - https://gerbera.io/
 #include <pugixml.hpp>
 
 #include "cds/cds_objects.h"
+#include "exceptions.h"
 #include "upnp/upnp_common.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

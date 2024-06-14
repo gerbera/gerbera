@@ -33,11 +33,11 @@
 
 #ifdef HAVE_MYSQL
 
-#ifndef __mysql_database_H__
-#define __mysql_database_H__
+#ifndef __MYSQL_DATABASE_H__
+#define __MYSQL_DATABASE_H__
 
-#include "common.h"
 #include "database/sql_database.h"
+
 #include <mysql.h>
 #include <vector>
 

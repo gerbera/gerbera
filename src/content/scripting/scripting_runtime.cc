@@ -36,6 +36,8 @@
 
 #include "scripting_runtime.h" // API
 
+#include "util/logger.h"
+
 ScriptingRuntime::ScriptingRuntime()
     : ctx(duk_create_heap(nullptr, nullptr, nullptr, nullptr, [](auto, auto msg) { log_error("Fatal Duktape error: {}", msg ? msg : "no message"); std::abort(); }))
 {

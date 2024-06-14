@@ -38,14 +38,15 @@
 
 #define GRB_LOG_FAC GrbLogFacility::server
 
-#include "common.h"
 #include "config/config_manager.h"
 #include "config/grb_runtime.h"
 #include "contrib/cxxopts.hpp"
+#include "exceptions.h"
 #include "server.h"
 #include "upnp/conn_mgr_service.h"
 #include "upnp/cont_dir_service.h"
 #include "upnp/mr_reg_service.h"
+#include "util/logger.h"
 
 #include <condition_variable>
 #include <csignal>

@@ -36,7 +36,6 @@
 
 #include <pugixml.hpp>
 
-#include "common.h"
 #include "context.h"
 #include "request_handler.h"
 #include "util/generic_task.h"
@@ -120,7 +119,7 @@ protected:
 
 public:
     /// \brief Constructor, currently empty.
-    explicit WebRequestHandler(const std::shared_ptr<ContentManager>& content);
+    explicit WebRequestHandler(const std::shared_ptr<Content>& content);
 
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL

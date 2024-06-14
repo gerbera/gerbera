@@ -36,7 +36,8 @@
 
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
-#include "content/content_manager.h"
+#include "content/content.h"
+#include "exceptions.h"
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 

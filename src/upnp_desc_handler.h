@@ -34,7 +34,7 @@ class UpnpXMLBuilder;
 
 class UpnpDescHandler : public RequestHandler {
 public:
-    explicit UpnpDescHandler(const std::shared_ptr<ContentManager>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder);
+    explicit UpnpDescHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder);
 
     const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;

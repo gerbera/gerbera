@@ -39,7 +39,6 @@
 #include <curl/curl.h>
 #include <upnp.h>
 
-#include "common.h"
 #include "io_handler_buffer_helper.h"
 
 class Config;

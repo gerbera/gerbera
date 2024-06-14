@@ -25,8 +25,6 @@
 #ifndef __CM_TASK_H__
 #define __CM_TASK_H__
 
-#include "common.h"
-
 #include "autoscan_setting.h"
 #include "util/generic_task.h"
 #include "util/grb_fs.h"

@@ -34,19 +34,19 @@
 #ifndef __SCRIPTING_IMPORT_SCRIPT_H__
 #define __SCRIPTING_IMPORT_SCRIPT_H__
 
-#include <memory>
-
 #include "common.h"
 #include "script.h"
 
+#include <memory>
+
 // forward declaration
 enum class AutoscanMediaMode;
-class ContentManager;
+class Content;
 class ScriptingRuntime;
 
 class ImportScript : public Script {
 public:
-    ImportScript(const std::shared_ptr<ContentManager>& content, const std::string& parent);
+    ImportScript(const std::shared_ptr<Content>& content, const std::string& parent);
 
     void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
     void addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);

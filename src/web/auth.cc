@@ -35,6 +35,7 @@
 #include "pages.h" // API
 
 #include "config/config.h"
+#include "exceptions.h"
 #include "session_manager.h"
 #include "util/tools.h"
 #include "util/xml_to_json.h"
@@ -60,7 +61,7 @@ static bool checkToken(const std::string& token, const std::string& password, co
     return (checksum == encPassword);
 }
 
-Web::Auth::Auth(const std::shared_ptr<ContentManager>& content)
+Web::Auth::Auth(const std::shared_ptr<Content>& content)
     : WebRequestHandler(content)
     , timeout(std::chrono::minutes(config->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT)))
     , accountsEnabled(config->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED))

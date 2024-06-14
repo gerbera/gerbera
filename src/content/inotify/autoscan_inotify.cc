@@ -38,7 +38,7 @@
 #include "config/config_option_enum.h"
 #include "config/result/autoscan.h"
 #include "content/autoscan_setting.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "content/inotify/directory_watch.h"
 #include "content/inotify/inotify_handler.h"
 #include "content/inotify/mt_inotify.h"
@@ -50,7 +50,7 @@
 
 #define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
 
-AutoscanInotify::AutoscanInotify(const std::shared_ptr<ContentManager>& content)
+AutoscanInotify::AutoscanInotify(const std::shared_ptr<Content>& content)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , content(content)

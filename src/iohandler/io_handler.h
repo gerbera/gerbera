@@ -38,8 +38,6 @@
 
 #include <upnp.h>
 
-#include "common.h"
-
 #define CHECK_SOCKET (-666)
 
 class IOHandler {

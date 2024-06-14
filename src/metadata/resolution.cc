@@ -22,7 +22,9 @@ Gerbera - https://gerbera.io/
 /// \file resolution.cc
 #define GRB_LOG_FAC GrbLogFacility::metadata
 
-#include "resolution.h"
+#include "resolution.h" // API
+
+#include "exceptions.h"
 #include "util/tools.h"
 
 Resolution::Resolution(const std::string& string)

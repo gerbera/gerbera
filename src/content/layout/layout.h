@@ -36,16 +36,18 @@
 
 #include "util/grb_fs.h"
 
+#include <map>
+
 // forward declaration
 enum class AutoscanMediaMode;
 class CdsContainer;
 class CdsObject;
-class ContentManager;
+class Content;
 enum class OnlineServiceType;
 
 class Layout {
 public:
-    explicit Layout(std::shared_ptr<ContentManager> content)
+    explicit Layout(std::shared_ptr<Content> content)
         : content(std::move(content))
     {
     }
@@ -63,7 +65,7 @@ protected:
     virtual void addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) = 0;
 #endif
 
-    std::shared_ptr<ContentManager> content;
+    std::shared_ptr<Content> content;
 };
 
 #endif // __LAYOUT_H__

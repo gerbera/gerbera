@@ -27,6 +27,7 @@
 
 #include "config/config_option_enum.h"
 #include "config/config_setup.h"
+#include "util/logger.h"
 
 template <class En>
 class ConfigEnumSetup : public ConfigSetup {

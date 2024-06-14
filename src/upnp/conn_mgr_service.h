@@ -34,12 +34,10 @@
 #ifndef __UPNP_CM_H__
 #define __UPNP_CM_H__
 
-#include <memory>
-
-#include <upnp.h>
-
-#include "common.h"
 #include "context.h"
+
+#include <memory>
+#include <upnp.h>
 
 class ActionRequest;
 class CdsObject;

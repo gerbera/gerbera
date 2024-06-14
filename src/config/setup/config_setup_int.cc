@@ -25,8 +25,10 @@
 
 #include "config_setup_int.h" // API
 
+#include "common.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "util/logger.h"
 
 template <typename T, class OptionClass>
 void ConfigIntegerSetup<T, OptionClass>::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)

@@ -42,6 +42,7 @@
 #include "config/config.h"
 #include "database/database.h"
 #include "database/sql_database.h"
+#include "exceptions.h"
 #include "subscription_request.h"
 #include "upnp/clients.h"
 #include "upnp/quirks.h"

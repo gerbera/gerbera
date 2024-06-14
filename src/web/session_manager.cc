@@ -34,12 +34,14 @@
 
 #include "session_manager.h" // API
 
-#include <memory>
-#include <unordered_set>
-
+#include "common.h"
 #include "config/config.h"
+#include "exceptions.h"
 #include "util/timer.h"
 #include "util/tools.h"
+
+#include <memory>
+#include <unordered_set>
 
 #define MAX_UI_UPDATE_IDS 10
 

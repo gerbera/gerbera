@@ -38,7 +38,7 @@
 
 class MetafileParserScript : public ParserScript {
 public:
-    MetafileParserScript(const std::shared_ptr<ContentManager>& content, const std::string& parent);
+    MetafileParserScript(const std::shared_ptr<Content>& content, const std::string& parent);
     void processObject(const std::shared_ptr<CdsObject>& obj, const fs::path& path);
 
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override;

@@ -25,11 +25,13 @@
 
 #include "config_setup_array.h" // API
 
-#include <numeric>
-
+#include "common.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "config_setup_int.h"
+#include "util/logger.h"
+
+#include <numeric>
 
 /// \brief Creates an array of strings from an XML nodeset.
 /// \param element starting element of the nodeset.

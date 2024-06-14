@@ -27,10 +27,6 @@
 
 #include "config_definition.h" // API
 
-#ifdef HAVE_CURL
-#include <curl/curl.h>
-#endif
-
 #include "cds/cds_enums.h"
 #include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
@@ -54,10 +50,14 @@
 #include "config_option_enum.h"
 #include "config_options.h"
 #include "config_setup.h"
-#include "content/content_manager.h"
+#include "content/content.h"
 #include "database/sqlite3/sqlite_config.h"
 #include "metadata/metadata_enums.h"
 #include "upnp/upnp_common.h"
+
+#ifdef HAVE_CURL
+#include <curl/curl.h>
+#endif
 
 // default values
 

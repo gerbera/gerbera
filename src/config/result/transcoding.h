@@ -35,12 +35,13 @@
 #ifndef __TRANSCODING_H__
 #define __TRANSCODING_H__
 
-#include <map>
-#include <vector>
-
 #include "cds/cds_resource.h"
+#include "common.h"
 #include "upnp/quirks.h"
 #include "util/grb_fs.h"
+
+#include <map>
+#include <vector>
 
 enum class TranscodingType {
     None,

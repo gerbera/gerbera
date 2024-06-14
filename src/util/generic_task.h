@@ -28,10 +28,10 @@
 
     $Id$
 */
-#include "common.h"
-
 #ifndef __GENERIC_TASK_H__
 #define __GENERIC_TASK_H__
+
+#include <string>
 
 enum class TaskType {
     Invalid,

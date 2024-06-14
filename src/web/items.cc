@@ -37,11 +37,12 @@
 #include "cds/cds_item.h"
 #include "config/result/autoscan.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "server.h"
 #include "upnp/xml_builder.h"
 #include "util/xml_to_json.h"
 
-Web::Items::Items(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
+Web::Items::Items(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(content)
     , xmlBuilder(std::move(xmlBuilder))
 {

@@ -34,14 +34,17 @@
 #define __TOOLS_H__
 
 #include <algorithm>
+#include <cinttypes>
 #include <map>
 #include <optional>
+#include <string>
 #include <vector>
-
-#include "common.h"
 
 // forward declaration
 class IOHandler;
+
+// default protocol
+constexpr auto PROTOCOL = std::string_view("http-get");
 
 /// \brief splits the given string into array of strings using a separator character.
 /// \param str String to split

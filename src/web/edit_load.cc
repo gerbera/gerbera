@@ -34,18 +34,19 @@
 
 #include "pages.h" // API
 
-#include <fmt/chrono.h>
-
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "server.h"
 #include "upnp/clients.h"
 #include "upnp/xml_builder.h"
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
-Web::EditLoad::EditLoad(const std::shared_ptr<ContentManager>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
+#include <fmt/chrono.h>
+
+Web::EditLoad::EditLoad(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
     : WebRequestHandler(content)
     , xmlBuilder(std::move(xmlBuilder))
 {

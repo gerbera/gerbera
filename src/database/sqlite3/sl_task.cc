@@ -24,6 +24,7 @@
 #include "sl_task.h" // API
 
 #include "config/config.h"
+#include "exceptions.h"
 #include "sqlite_database.h"
 #include "util/tools.h"
 

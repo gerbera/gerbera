@@ -35,13 +35,14 @@
 #include "pages.h" // API
 
 #include "config/config_setup.h"
+#include "exceptions.h"
 #include "util/xml_to_json.h"
 
 namespace Web {
 
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     const std::shared_ptr<Context>& context,
-    const std::shared_ptr<ContentManager>& content,
+    const std::shared_ptr<Content>& content,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
     const std::string& page)
 {
