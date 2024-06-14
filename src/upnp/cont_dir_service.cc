@@ -39,7 +39,7 @@
 #include "action_request.h"
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "database/database.h"
 #include "database/sql_database.h"
 #include "subscription_request.h"

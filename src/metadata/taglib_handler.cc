@@ -60,7 +60,7 @@
 #endif
 
 #include "cds/cds_item.h"
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "iohandler/mem_io_handler.h"
 #include "metadata_enums.h"
 #include "util/grb_time.h"

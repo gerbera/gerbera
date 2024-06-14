@@ -35,7 +35,7 @@
 #include "metadata_service.h" // API
 
 #include "cds/cds_item.h"
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "content/scripting/script_names.h"
 #include "metadata_enums.h"
 #include "util/tools.h"

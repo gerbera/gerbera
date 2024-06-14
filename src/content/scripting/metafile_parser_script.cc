@@ -37,7 +37,7 @@
 #include "metafile_parser_script.h" // API
 
 #include "cds/cds_item.h"
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "scripting_runtime.h"
 #include "util/string_converter.h"
 

@@ -30,12 +30,12 @@
 */
 
 /// \file curl_io_handler.cc
-#define GRB_LOG_FAC GrbLogFacility::iohandler
+#define GRB_LOG_FAC GrbLogFacility::curl
 
 #ifdef HAVE_CURL
 #include "curl_io_handler.h" // API
 
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "util/tools.h"
 
 CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, const std::string& url, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize)
@@ -93,11 +93,14 @@ void CurlIOHandler::threadProc()
     curl_easy_setopt(curl_handle, CURLOPT_FOLLOWLOCATION, 1);
     curl_easy_setopt(curl_handle, CURLOPT_MAXREDIRS, -1);
 
-    bool logEnabled;
-#ifdef TOMBDEBUG
-    logEnabled = !ConfigManager::isDebugLogging();
+#ifdef GRBDEBUG
+    bool logEnabled = GrbLogger::Logger.isDebugging(GRB_LOG_FAC) || GrbLogger::Logger.isDebugLogging();
 #else
-    logEnabled = ConfigManager::isDebugLogging();
+#ifdef TOMBDEBUG
+    bool logEnabled = !GrbLogger::Logger.isDebugLogging();
+#else
+    bool logEnabled = GrbLogger::Logger.isDebugLogging();
+#endif
 #endif
     if (logEnabled)
         curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);

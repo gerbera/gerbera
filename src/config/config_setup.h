@@ -32,7 +32,6 @@
 
 #include "common.h"
 #include "config.h"
-#include "config_manager.h"
 #include "config_options.h"
 #include "util/enum_iterator.h"
 

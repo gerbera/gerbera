@@ -47,7 +47,7 @@
 #include <uuid/uuid.h>
 #endif
 
-#include "config/config_manager.h"
+#include "config/config.h"
 #include "contrib/md5.h"
 
 static constexpr auto hexChars = "0123456789abcdef";

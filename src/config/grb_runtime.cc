@@ -27,7 +27,6 @@ Gerbera - https://gerbera.io/
 #include "config/config.h"
 #include "config/config_definition.h"
 #include "config/config_generator.h"
-#include "config/config_manager.h"
 #include "config/config_setup.h"
 #include "content/autoscan_setting.h"
 #include "content/content_manager.h"
@@ -599,7 +598,7 @@ void GerberaRuntime::finalizeOptions(std::vector<std::pair<bool, HandleCallback>
     }
 }
 
-void GerberaRuntime::handleConfigOptions(const std::shared_ptr<ConfigManager>& configManager, const std::vector<ConfigOptionArgs>& additionalArgs)
+void GerberaRuntime::handleConfigOptions(const std::shared_ptr<Config>& configManager, const std::vector<ConfigOptionArgs>& additionalArgs)
 {
     if (!options || !results)
         return;
