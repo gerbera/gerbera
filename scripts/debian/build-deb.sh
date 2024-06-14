@@ -269,6 +269,7 @@ if [[ "${lsb_distro}" != "Raspbian" ]]; then
       [[ $is_tag == 1 ]] && upload_to_repo debian
       # Git builds go to git
       [[ $is_tag == 0 ]] && upload_to_repo debian-git
+      exit 0
     else
       printf "Skipping upload due to missing DEB_UPLOAD_ENDPOINT"
     fi
