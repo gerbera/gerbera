@@ -249,7 +249,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
     -DWITH_SYSTEMD=${WITH_SYSTEMD} \
     -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"
-
+set -x
   if [[ "${lsb_distro}" != "Raspbian" ]]; then
     if [[ "${my_sys}" != "HEAD" ]]; then
       cpack -G DEB \
