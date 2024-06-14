@@ -89,8 +89,6 @@ GerberaRuntime::GerberaRuntime(const cxxopts::Options* options)
 void GerberaRuntime::init(const cxxopts::Options* options)
 {
     this->options = options;
-    if (!dataDir.has_value())
-        dataDir = PACKAGE_DATADIR;
 
     argumentCallbacks = std::vector<ArgumentHandler> {
         { GRB_OPTION_HELP, [=](const std::string& arg) { return this->printHelpMessage(arg); }, true },
@@ -472,25 +470,30 @@ bool GerberaRuntime::checkDirs()
     if (!confDir.has_value()) {
         confDir = DEFAULT_CONFIG_HOME;
     }
+
     // If home is not given by the user, get it from the environment
     // Check XDG first
-    const char* h = std::getenv("XDG_CONFIG_HOME");
-    if (h) {
-        home = h;
-        confDir = "gerbera";
-    } else {
-        // Then look for home
-        auto hEnv = getEnv("HOME");
-        if (hEnv.has_value())
-            home = hEnv;
+    if (!configFile.has_value() && !home.has_value()) {
+        const char* h = std::getenv("XDG_CONFIG_HOME");
+        if (h) {
+            home = h;
+            confDir = "gerbera";
+        } else {
+            // Then look for home
+            auto hEnv = getEnv("HOME");
+            if (hEnv.has_value())
+                home = hEnv;
+        }
+
+        if (!home.has_value()) {
+            log_error("Could not determine users home directory");
+            this->exit(EXIT_FAILURE);
+        }
+        log_info("Home detected as: {}", home->c_str());
     }
 
-    if (!home.has_value()) {
-        log_error("Could not determine users home directory");
-        this->exit(EXIT_FAILURE);
-    }
-    log_info("Home detected as: {}", home->c_str());
-
+    if (!dataDir.has_value())
+        dataDir = PACKAGE_DATADIR;
     return true;
 }
 
