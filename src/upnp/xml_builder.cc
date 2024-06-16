@@ -34,20 +34,21 @@
 
 #include "xml_builder.h" // API
 
-#include <array>
-#include <fmt/chrono.h>
-#include <sstream>
-
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "config/config.h"
 #include "config/config_definition.h"
+#include "config/config_val.h"
 #include "config/result/transcoding.h"
 #include "database/database.h"
 #include "device_description_handler.h"
 #include "request_handler.h"
 #include "upnp/clients.h"
 #include "util/url_utils.h"
+
+#include <array>
+#include <fmt/chrono.h>
+#include <sstream>
 
 #define URL_FILE_EXTENSION "ext"
 
@@ -57,14 +58,14 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     , database(context->getDatabase())
     , virtualURL(std::move(virtualUrl))
 {
-    for (auto&& entry : this->config->getArrayOption(CFG_IMPORT_RESOURCES_ORDER)) {
+    for (auto&& entry : this->config->getArrayOption(ConfigVal::IMPORT_RESOURCES_ORDER)) {
         orderedHandler.push_back(EnumMapper::remapContentHandler(entry));
     }
-    entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
-    multiValue = config->getBoolOption(CFG_UPNP_MULTI_VALUES_ENABLED);
-    ctMappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    profMappings = config->getVectorOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
-    transferMappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST);
+    entrySeparator = config->getOption(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP);
+    multiValue = config->getBoolOption(ConfigVal::UPNP_MULTI_VALUES_ENABLED);
+    ctMappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    profMappings = config->getVectorOption(ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
+    transferMappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST);
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType) const
@@ -111,7 +112,7 @@ static std::string formatXmlString(bool strictXml, std::size_t stringLimit, cons
 }
 
 void UpnpXMLBuilder::addPropertyList(bool strictXml, std::size_t stringLimit, pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData,
-    config_option_t itemProps, config_option_t nsProp) const
+    ConfigVal itemProps, ConfigVal nsProp) const
 {
     auto namespaceMap = config->getDictionaryOption(nsProp);
     for (auto&& [xmlns, uri] : namespaceMap) {
@@ -195,7 +196,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
 
         // client specific properties
         if (quirks) {
-            quirks->restoreSamsungBookMarkedPosition(item, result, config->getIntOption(CFG_CLIENTS_BOOKMARK_OFFSET));
+            quirks->restoreSamsungBookMarkedPosition(item, result, config->getIntOption(ConfigVal::CLIENTS_BOOKMARK_OFFSET));
             mvMeta = quirks->getMultiValue();
             simpleDate = quirks->needsSimpleDate();
         }
@@ -249,7 +250,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             addField(result, "upnp:lastPlaybackPosition", auxData["upnp:lastPlaybackPosition"]);
         }
 
-        addPropertyList(strictXml, stringLimit, result, meta, auxData, CFG_UPNP_TITLE_PROPERTIES, CFG_UPNP_TITLE_NAMESPACES);
+        addPropertyList(strictXml, stringLimit, result, meta, auxData, ConfigVal::UPNP_TITLE_PROPERTIES, ConfigVal::UPNP_TITLE_NAMESPACES);
         addResources(item, result, quirks);
 
         result.set_name("item");
@@ -265,13 +266,13 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         log_debug("container is class: {}", upnpClass.c_str());
         auto&& meta = obj->getMetaData();
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM)) {
-            addPropertyList(strictXml, stringLimit, result, meta, auxData, CFG_UPNP_ALBUM_PROPERTIES, CFG_UPNP_ALBUM_NAMESPACES);
+            addPropertyList(strictXml, stringLimit, result, meta, auxData, ConfigVal::UPNP_ALBUM_PROPERTIES, ConfigVal::UPNP_ALBUM_NAMESPACES);
         } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST)) {
-            addPropertyList(strictXml, stringLimit, result, meta, auxData, CFG_UPNP_ARTIST_PROPERTIES, CFG_UPNP_ARTIST_NAMESPACES);
+            addPropertyList(strictXml, stringLimit, result, meta, auxData, ConfigVal::UPNP_ARTIST_PROPERTIES, ConfigVal::UPNP_ARTIST_NAMESPACES);
         } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_GENRE)) {
-            addPropertyList(strictXml, stringLimit, result, meta, auxData, CFG_UPNP_GENRE_PROPERTIES, CFG_UPNP_GENRE_NAMESPACES);
+            addPropertyList(strictXml, stringLimit, result, meta, auxData, ConfigVal::UPNP_GENRE_PROPERTIES, ConfigVal::UPNP_GENRE_NAMESPACES);
         } else if (startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
-            addPropertyList(strictXml, stringLimit, result, meta, auxData, CFG_UPNP_PLAYLIST_PROPERTIES, CFG_UPNP_PLAYLIST_NAMESPACES);
+            addPropertyList(strictXml, stringLimit, result, meta, auxData, ConfigVal::UPNP_PLAYLIST_PROPERTIES, ConfigVal::UPNP_PLAYLIST_NAMESPACES);
         }
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST) || startswith(upnpClass, UPNP_CLASS_CONTAINER) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
             auto url = renderContainerImageURL(cont);
@@ -522,8 +523,8 @@ std::string UpnpXMLBuilder::dlnaProfileString(const CdsResource& res, const std:
 std::string UpnpXMLBuilder::findDlnaProfile(const CdsResource& res, const std::string& contentType) const
 {
     std::string dlnaProfile;
-    static auto fromKey = ConfigDefinition::removeAttribute(ATTR_IMPORT_MAPPINGS_MIMETYPE_FROM);
-    static auto toKey = ConfigDefinition::removeAttribute(ATTR_IMPORT_MAPPINGS_MIMETYPE_TO);
+    static auto fromKey = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM);
+    static auto toKey = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO);
     auto legacyKey = fmt::format("{}-{}-{}", contentType, res.getAttribute(ResourceAttribute::VIDEOCODEC), res.getAttribute(ResourceAttribute::AUDIOCODEC));
     std::size_t matchLength = 0;
     for (auto&& map : profMappings) {
@@ -580,7 +581,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
     //
     // TODO: allow transcoding for URLs
     // now get the profile
-    auto tlist = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST);
+    auto tlist = config->getTranscodingProfileListOption(ConfigVal::TRANSCODING_PROFILE_LIST);
     auto filterList = tlist->getFilterList();
     if (!filterList.empty()) {
         auto mainResource = item->getResource(ResourcePurpose::Content);
@@ -779,7 +780,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
     }
 
     if (!captionInfoEx.empty()) {
-        auto count = (quirks && quirks->getCaptionInfoCount() > -1) ? quirks->getCaptionInfoCount() : config->getIntOption(CFG_UPNP_CAPTION_COUNT);
+        auto count = (quirks && quirks->getCaptionInfoCount() > -1) ? quirks->getCaptionInfoCount() : config->getIntOption(ConfigVal::UPNP_CAPTION_COUNT);
         for (auto&& captionInfo : captionInfoEx) {
             count--;
             if (count < 0)

@@ -41,7 +41,7 @@ using ::testing::Return;
 class MyConfigMock final : public ConfigMock {
 public:
     MyConfigMock() { list = std::make_shared<ClientConfigList>(); }
-    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return list; }
+    std::shared_ptr<ClientConfigList> getClientConfigListOption(ConfigVal option) const override { return list; }
     std::shared_ptr<ClientConfigList> list;
 };
 
@@ -148,9 +148,9 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
 
-    EXPECT_CALL(*config, getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP))
+    EXPECT_CALL(*config, getOption(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP))
         .WillRepeatedly(Return(" / "));
-    log_warning(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
+    log_warning(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP);
     EXPECT_CALL(*config, getTranscodingProfileListOption(_))
         .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
 
@@ -195,9 +195,9 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithEscapes)
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
 
-    EXPECT_CALL(*config, getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP))
+    EXPECT_CALL(*config, getOption(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP))
         .WillRepeatedly(Return(" / "));
-    log_warning(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
+    log_warning(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP);
     EXPECT_CALL(*config, getTranscodingProfileListOption(_))
         .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
 
@@ -242,9 +242,9 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithStrictXmlQuirks)
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
 
-    EXPECT_CALL(*config, getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP))
+    EXPECT_CALL(*config, getOption(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP))
         .WillRepeatedly(Return(" / "));
-    log_warning(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
+    log_warning(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP);
     EXPECT_CALL(*config, getTranscodingProfileListOption(_))
         .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
 
@@ -320,7 +320,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
 
-    EXPECT_CALL(*config, getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP))
+    EXPECT_CALL(*config, getOption(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP))
         .WillRepeatedly(Return(" / "));
     EXPECT_CALL(*config, getTranscodingProfileListOption(_))
         .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));

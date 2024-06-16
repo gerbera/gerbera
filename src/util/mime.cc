@@ -26,15 +26,16 @@
 #include "mime.h" // API
 
 #include "config/config.h"
+#include "config/config_val.h"
 #include "exceptions.h"
 #include "util/logger.h"
 #include "util/tools.h"
 
 Mime::Mime(const std::shared_ptr<Config>& config)
-    : extension_map_case_sensitive(config->getBoolOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE))
-    , ignore_unknown_extensions(config->getBoolOption(CFG_IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS))
-    , extension_mimetype_map(config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST))
-    , ignoredExtensions(config->getArrayOption(CFG_IMPORT_MAPPINGS_IGNORED_EXTENSIONS))
+    : extension_map_case_sensitive(config->getBoolOption(ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE))
+    , ignore_unknown_extensions(config->getBoolOption(ConfigVal::IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS))
+    , extension_mimetype_map(config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST))
+    , ignoredExtensions(config->getArrayOption(ConfigVal::IMPORT_MAPPINGS_IGNORED_EXTENSIONS))
 {
     if (ignore_unknown_extensions && (extension_mimetype_map.empty())) {
         log_warning("Ignore unknown extensions set, but no mappings specified");
@@ -44,13 +45,13 @@ Mime::Mime(const std::shared_ptr<Config>& config)
 
 #ifdef HAVE_MAGIC
     // init filemagic
-    int magicFlags = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS) ? MAGIC_MIME_TYPE | MAGIC_SYMLINK : MAGIC_MIME_TYPE;
+    int magicFlags = config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS) ? MAGIC_MIME_TYPE | MAGIC_SYMLINK : MAGIC_MIME_TYPE;
     magicCookie = magic_open(magicFlags);
     if (!magicCookie) {
         throw_std_runtime_error("magic_open failed");
     }
 
-    std::string optMagicFile = config->getOption(CFG_IMPORT_MAGIC_FILE);
+    std::string optMagicFile = config->getOption(ConfigVal::IMPORT_MAGIC_FILE);
     const char* magicFile = !optMagicFile.empty() ? optMagicFile.c_str() : nullptr;
     if (magic_load(magicCookie, magicFile) == -1) {
         auto errMsg = magic_error(magicCookie);

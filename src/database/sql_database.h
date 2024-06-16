@@ -34,14 +34,15 @@
 #ifndef __SQL_STORAGE_H__
 #define __SQL_STORAGE_H__
 
+#include "config/config.h"
+#include "config/config_val.h"
+#include "database.h"
+#include "sql_format.h"
+
 #include <array>
 #include <mutex>
 #include <unordered_set>
 #include <utility>
-
-#include "config/config.h"
-#include "database.h"
-#include "sql_format.h"
 
 // forward declarations
 class CdsContainer;
@@ -238,7 +239,7 @@ protected:
     using SqlAutoLock = std::scoped_lock<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
-    void upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd);
+    void upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, ConfigVal upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd);
     virtual void _exec(const std::string& query) = 0;
 
 private:
@@ -342,7 +343,7 @@ void SQLDatabase::deleteRow(std::string_view tableName, std::string_view key, co
 class SqlWithTransactions {
 protected:
     explicit SqlWithTransactions(const std::shared_ptr<Config>& config)
-        : use_transaction(config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS))
+        : use_transaction(config->getBoolOption(ConfigVal::SERVER_STORAGE_USE_TRANSACTIONS))
     {
     }
 

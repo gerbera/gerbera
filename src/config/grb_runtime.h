@@ -72,7 +72,7 @@ struct ArgumentHandler {
 
 class ConfigOptionArgs {
 public:
-    config_option_t option;
+    ConfigVal option;
     std::string optShort;
     std::string optLong;
     std::string desc;

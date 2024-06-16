@@ -85,6 +85,7 @@ add_library(libgerbera STATIC
         src/config/config_options.h
         src/config/config_setup.cc
         src/config/config_setup.h
+        src/config/config_val.h
         src/config/result/autoscan.cc
         src/config/result/autoscan.h
         src/config/result/box_layout.cc

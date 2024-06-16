@@ -27,41 +27,41 @@ Gerbera - https://gerbera.io/
 class MySQLConfigFake : public Config {
 public:
     fs::path getConfigFilename() const override { return {}; }
-    std::string getOption(config_option_t option) const override
+    std::string getOption(ConfigVal option) const override
     {
-        if (option == CFG_SERVER_STORAGE_MYSQL_HOST) {
+        if (option == ConfigVal::SERVER_STORAGE_MYSQL_HOST) {
             return "hydra.home";
         }
-        if (option == CFG_SERVER_STORAGE_MYSQL_USERNAME) {
+        if (option == ConfigVal::SERVER_STORAGE_MYSQL_USERNAME) {
             return "root";
         }
-        if (option == CFG_SERVER_STORAGE_DRIVER) {
+        if (option == ConfigVal::SERVER_STORAGE_DRIVER) {
             return "mysql";
         }
-        if (option == CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE) {
+        if (option == ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE) {
             return "mysql.sql";
         }
-        if (option == CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE) {
+        if (option == ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE) {
             return "mysql-upgrade.xml";
         }
-        //        if (option == CFG_SERVER_STORAGE_MYSQL_DATABASE) {
+        //        if (option == ConfigVal::SERVER_STORAGE_MYSQL_DATABASE) {
         //            return "gerbera";
         //        }
         return {};
     }
-    void addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue) override { }
-    std::int32_t getIntOption(config_option_t option) const override { return 0; }
-    std::uint32_t getUIntOption(config_option_t option) const override { return 0; }
-    std::int64_t getLongOption(config_option_t option) const override { return 0; }
-    std::shared_ptr<ConfigOption> getConfigOption(config_option_t option) const override { return {}; }
-    bool getBoolOption(config_option_t option) const override { return false; }
-    std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override { return {}; }
-    std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(config_option_t option) const override { return {}; }
-    std::vector<std::string> getArrayOption(config_option_t option) const override { return {}; }
-    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption(config_option_t option) const override { return {}; }
-    std::shared_ptr<BoxLayoutList> getBoxLayoutListOption(config_option_t option) const override { return nullptr; }
-    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return nullptr; }
-    std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override { return nullptr; }
+    void addOption(ConfigVal option, const std::shared_ptr<ConfigOption>& optionValue) override { }
+    std::int32_t getIntOption(ConfigVal option) const override { return 0; }
+    std::uint32_t getUIntOption(ConfigVal option) const override { return 0; }
+    std::int64_t getLongOption(ConfigVal option) const override { return 0; }
+    std::shared_ptr<ConfigOption> getConfigOption(ConfigVal option) const override { return {}; }
+    bool getBoolOption(ConfigVal option) const override { return false; }
+    std::map<std::string, std::string> getDictionaryOption(ConfigVal option) const override { return {}; }
+    std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(ConfigVal option) const override { return {}; }
+    std::vector<std::string> getArrayOption(ConfigVal option) const override { return {}; }
+    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption(ConfigVal option) const override { return {}; }
+    std::shared_ptr<BoxLayoutList> getBoxLayoutListOption(ConfigVal option) const override { return nullptr; }
+    std::shared_ptr<ClientConfigList> getClientConfigListOption(ConfigVal option) const override { return nullptr; }
+    std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(ConfigVal option) const override { return nullptr; }
     void updateConfigFromDatabase(const std::shared_ptr<Database>& database) override { }
     std::string getOrigValue(const std::string& item) const override { return {}; }
     void setOrigValue(const std::string& item, const std::string& value) override { }
@@ -70,8 +70,8 @@ public:
     void setOrigValue(const std::string& item, std::uint32_t value) override { }
     void setOrigValue(const std::string& item, std::int64_t value) override { }
     bool hasOrigValue(const std::string& item) const override { return false; }
-    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) const override { return nullptr; }
-    std::shared_ptr<DynamicContentList> getDynamicContentListOption(config_option_t option) const override { return nullptr; }
+    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(ConfigVal option) const override { return nullptr; }
+    std::shared_ptr<DynamicContentList> getDynamicContentListOption(ConfigVal option) const override { return nullptr; }
 };
 
 #endif //GERBERA_MYSQL_CONFIG_FAKE_H

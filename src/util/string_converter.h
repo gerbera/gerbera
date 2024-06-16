@@ -63,7 +63,7 @@ public:
     static std::unique_ptr<StringConverter> f2i(const std::shared_ptr<Config>& cm);
 
     /// \brief metadata to internal
-    static std::unique_ptr<StringConverter> m2i(config_option_t option, const fs::path& location, const std::shared_ptr<Config>& cm);
+    static std::unique_ptr<StringConverter> m2i(ConfigVal option, const fs::path& location, const std::shared_ptr<Config>& cm);
 #ifdef HAVE_JS
     /// \brief scripting to internal
     static std::unique_ptr<StringConverter> j2i(const std::shared_ptr<Config>& cm);

@@ -28,11 +28,12 @@
 #include "autoscan_setting.h" // API
 
 #include "config/config.h"
+#include "config/config_val.h"
 #include "config/result/directory_tweak.h"
 
 void AutoScanSetting::mergeOptions(const std::shared_ptr<Config>& config, const fs::path& location)
 {
-    auto tweak = config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(location);
+    auto tweak = config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST)->get(location);
     if (!tweak)
         return;
 

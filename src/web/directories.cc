@@ -34,14 +34,15 @@
 
 #include "pages.h" // API
 
-#include <array>
-
+#include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "content/content.h"
 #include "database/database.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 #include "util/xml_to_json.h"
+
+#include <array>
 
 using dirInfo = std::pair<fs::path, bool>;
 
@@ -65,8 +66,8 @@ void Web::Directories::process()
     containers.append_attribute("type") = "filesystem";
 
     // don't bother users with system directorties
-    auto&& excludesFullpath = config->getArrayOption(CFG_IMPORT_SYSTEM_DIRECTORIES);
-    auto&& includesFullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
+    auto&& excludesFullpath = config->getArrayOption(ConfigVal::IMPORT_SYSTEM_DIRECTORIES);
+    auto&& includesFullpath = config->getArrayOption(ConfigVal::IMPORT_VISIBLE_DIRECTORIES);
     // don't bother users with special or config directorties
     constexpr std::array excludesDirname {
         "lost+found",

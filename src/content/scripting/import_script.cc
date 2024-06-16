@@ -37,6 +37,7 @@
 
 #include "cds/cds_objects.h"
 #include "common.h"
+#include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "content/content.h"
 #include "js_functions.h"
@@ -46,7 +47,7 @@
 ImportScript::ImportScript(const std::shared_ptr<Content>& content, const std::string& parent)
     : Script(content, parent, "import", "orig", StringConverter::i2i(content->getContext()->getConfig()))
 {
-    std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT);
+    std::string scriptPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT);
     if (!scriptPath.empty()) {
         load(scriptPath);
     }
@@ -102,29 +103,29 @@ void ImportScript::callFunction(const std::shared_ptr<CdsObject>& obj, const std
 
 void ImportScript::addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
-    callFunction(obj, cont, config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_AUDIOFILE), scriptPath, AutoscanMediaMode::Audio, containerMap);
+    callFunction(obj, cont, config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_AUDIOFILE), scriptPath, AutoscanMediaMode::Audio, containerMap);
 }
 
 void ImportScript::addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
-    callFunction(obj, cont, config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_VIDEOFILE), scriptPath, AutoscanMediaMode::Video, containerMap);
+    callFunction(obj, cont, config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_VIDEOFILE), scriptPath, AutoscanMediaMode::Video, containerMap);
 }
 
 void ImportScript::addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
-    callFunction(obj, cont, config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_IMAGEFILE), scriptPath, AutoscanMediaMode::Video, containerMap);
+    callFunction(obj, cont, config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_IMAGEFILE), scriptPath, AutoscanMediaMode::Video, containerMap);
 }
 
 #ifdef ONLINE_SERVICES
 void ImportScript::addTrailer(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
-    callFunction(obj, nullptr, config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER), scriptPath, AutoscanMediaMode::Video, containerMap);
+    callFunction(obj, nullptr, config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER), scriptPath, AutoscanMediaMode::Video, containerMap);
 }
 #endif
 
 bool ImportScript::hasImportFunctions() const
 {
-    return config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_SCRIPT).empty();
+    return config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT).empty();
 }
 
 bool ImportScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId)

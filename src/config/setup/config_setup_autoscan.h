@@ -46,7 +46,7 @@ protected:
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
-    ConfigAutoscanSetup(config_option_t option, const char* xpath, const char* help, AutoscanScanMode scanmode)
+    ConfigAutoscanSetup(ConfigVal option, const char* xpath, const char* help, AutoscanScanMode scanmode)
         : ConfigSetup(option, xpath, help)
         , scanMode(scanmode)
     {
@@ -60,7 +60,7 @@ public:
 
     std::string getUniquePath() const override;
 
-    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
+    std::string getItemPath(int index = 0, ConfigVal propOption = ConfigVal::MAX, ConfigVal propOption2 = ConfigVal::MAX, ConfigVal propOption3 = ConfigVal::MAX, ConfigVal propOption4 = ConfigVal::MAX) const override;
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 

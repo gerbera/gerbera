@@ -28,6 +28,7 @@
 #include "wavpack_handler.h" // API
 
 #include "cds/cds_item.h"
+#include "config/config_val.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
@@ -58,7 +59,7 @@ static const auto metaTags = std::map<std::string_view, MetadataFields> {
 #define ALBUMART_OPTION "albumArtTag"
 
 WavPackHandler::WavPackHandler(const std::shared_ptr<Context>& context)
-    : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_WVC_ENABLED)
+    : MediaMetadataHandler(context, ConfigVal::IMPORT_LIBOPTS_WVC_ENABLED)
 {
 }
 
@@ -221,7 +222,7 @@ void WavPackHandler::getAttachments(WavpackContext* context, const std::shared_p
 
 void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item)
 {
-    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_WVC_CHARSET, item->getLocation(), config);
+    auto sc = StringConverter::m2i(ConfigVal::IMPORT_LIBOPTS_WVC_CHARSET, item->getLocation(), config);
     auto tagCount = WavpackGetNumTagItems(context);
     char tag[MAX_WV_TEXT_SIZE];
     char value[MAX_WV_TEXT_SIZE];

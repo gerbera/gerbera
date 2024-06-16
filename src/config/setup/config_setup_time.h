@@ -40,7 +40,7 @@ protected:
     int maxValue = -1;
 
 public:
-    ConfigTimeSetup(config_option_t option, const char* xpath, const char* help, ConfigTimeType type, int defaultValue = 0, int minValue = -1, int maxValue = -1)
+    ConfigTimeSetup(ConfigVal option, const char* xpath, const char* help, ConfigTimeType type, int defaultValue = 0, int minValue = -1, int maxValue = -1)
         : ConfigSetup(option, xpath, help, false)
         , type(type)
         , minValue(minValue)

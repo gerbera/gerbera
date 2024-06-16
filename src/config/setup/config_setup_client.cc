@@ -43,19 +43,19 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, cons
     if (!element)
         return true;
 
-    auto&& ccs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_CLIENTS_CLIENT);
+    auto&& ccs = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_CLIENTS_CLIENT);
     for (auto&& it : ccs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
-        auto flags = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
-        auto group = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_GROUP)->getXmlContent(child);
-        auto ip = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->getXmlContent(child);
-        auto userAgent = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
-        auto captionInfoCount = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
-        auto stringLimit = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_STRING_LIMIT)->getXmlContent(child);
-        auto multiValue = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_CLIENTS_UPNP_MULTI_VALUE)->getXmlContent(child);
-        auto mappings = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ATTR_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child);
-        auto headers = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ATTR_CLIENTS_UPNP_HEADERS)->getXmlContent(child);
+        auto flags = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
+        auto group = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->getXmlContent(child);
+        auto ip = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->getXmlContent(child);
+        auto userAgent = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
+        auto captionInfoCount = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
+        auto stringLimit = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->getXmlContent(child);
+        auto multiValue = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->getXmlContent(child);
+        auto mappings = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child);
+        auto headers = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS)->getXmlContent(child);
 
         auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, mappings, headers, captionInfoCount, stringLimit, multiValue);
         try {
@@ -82,65 +82,65 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
     if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
-    auto index = getItemPath(i, ATTR_CLIENTS_CLIENT_FLAGS);
+    auto index = getItemPath(i, ConfigVal::A_CLIENTS_CLIENT_FLAGS);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
-        entry->setFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_CLIENT_FLAGS)->checkIntValue(optValue));
+        entry->setFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->checkIntValue(optValue));
         log_debug("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
         return true;
     }
-    index = getItemPath(i, ATTR_CLIENTS_CLIENT_IP);
+    index = getItemPath(i, ConfigVal::A_CLIENTS_CLIENT_IP);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getIp());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
             entry->setIp(optValue);
             log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getIp());
             return true;
         }
     }
-    index = getItemPath(i, ATTR_CLIENTS_CLIENT_GROUP);
+    index = getItemPath(i, ConfigVal::A_CLIENTS_CLIENT_GROUP);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getGroup());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_GROUP)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->checkValue(optValue)) {
             entry->setGroup(optValue);
             log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getGroup());
             return true;
         }
     }
-    index = getItemPath(i, ATTR_CLIENTS_CLIENT_USERAGENT);
+    index = getItemPath(i, ConfigVal::A_CLIENTS_CLIENT_USERAGENT);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getUserAgent());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
             entry->setUserAgent(optValue);
             log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getUserAgent());
             return true;
         }
     }
-    index = getItemPath(i, ATTR_CLIENTS_UPNP_CAPTION_COUNT);
+    index = getItemPath(i, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getCaptionInfoCount());
-        entry->setCaptionInfoCount(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_CAPTION_COUNT)->checkIntValue(optValue));
+        entry->setCaptionInfoCount(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->checkIntValue(optValue));
         log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getCaptionInfoCount());
         return true;
     }
-    index = getItemPath(i, ATTR_CLIENTS_UPNP_STRING_LIMIT);
+    index = getItemPath(i, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getStringLimit());
-        entry->setStringLimit(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_CLIENTS_UPNP_STRING_LIMIT)->checkIntValue(optValue));
+        entry->setStringLimit(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->checkIntValue(optValue));
         log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getStringLimit());
         return true;
     }
-    index = getItemPath(i, ATTR_CLIENTS_UPNP_MULTI_VALUE);
+    index = getItemPath(i, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getMultiValue());
-        entry->setMultiValue(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_CLIENTS_UPNP_MULTI_VALUE)->checkValue(optValue));
+        entry->setMultiValue(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->checkValue(optValue));
         log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getMultiValue());
         return true;
     }
@@ -195,19 +195,19 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
     return optionValue;
 }
 
-std::string ConfigClientSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+std::string ConfigClientSetup::getItemPath(int index, ConfigVal propOption, ConfigVal propOption2, ConfigVal propOption3, ConfigVal propOption4) const
 {
     if (index == ITEM_PATH_ROOT) {
-        return ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT);
+        return ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT);
     }
     if (index == ITEM_PATH_NEW) {
-        if (propOption != CFG_MAX) {
-            return fmt::format("{}[_]/{}", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT), ConfigDefinition::ensureAttribute(propOption));
+        if (propOption != ConfigVal::MAX) {
+            return fmt::format("{}[_]/{}", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), ConfigDefinition::ensureAttribute(propOption));
         }
-        return fmt::format("{}[_]", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT));
+        return fmt::format("{}[_]", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT));
     }
-    if (propOption != CFG_MAX) {
-        return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT), index, ConfigDefinition::ensureAttribute(propOption));
+    if (propOption != ConfigVal::MAX) {
+        return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), index, ConfigDefinition::ensureAttribute(propOption));
     }
-    return fmt::format("{}[{}]", ConfigDefinition::mapConfigOption(ATTR_CLIENTS_CLIENT), index);
+    return fmt::format("{}[{}]", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), index);
 }

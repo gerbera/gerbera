@@ -27,6 +27,7 @@
 
 #include "config_definition.h"
 #include "config_options.h"
+#include "config_val.h"
 #include "exceptions.h"
 #include "util/logger.h"
 

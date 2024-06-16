@@ -154,7 +154,7 @@ bool ConfigVectorSetup::updateDetail(const std::string& optItem, std::string& op
     return false;
 }
 
-std::string ConfigVectorSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+std::string ConfigVectorSetup::getItemPath(int index, ConfigVal propOption, ConfigVal propOption2, ConfigVal propOption3, ConfigVal propOption4) const
 {
     auto opt = ConfigDefinition::ensureAttribute(propOption);
 

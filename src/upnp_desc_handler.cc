@@ -24,6 +24,7 @@
 
 #include "upnp_desc_handler.h" // API
 
+#include "config/config_val.h"
 #include "iohandler/file_io_handler.h"
 #include "iohandler/mem_io_handler.h"
 #include "upnp/quirks.h"
@@ -37,7 +38,7 @@
 
 UpnpDescHandler::UpnpDescHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
     : RequestHandler(content, xmlBuilder)
-    , useDynamicDescription(config->getBoolOption(CFG_UPNP_DYNAMIC_DESCRIPTION))
+    , useDynamicDescription(config->getBoolOption(ConfigVal::UPNP_DYNAMIC_DESCRIPTION))
 {
 }
 
@@ -51,7 +52,7 @@ fs::path UpnpDescHandler::getPath(const std::shared_ptr<Quirks>& quirks, std::st
         log_warning("Bad client is not following the SCPDURL spec! (requesting {} not /upnp{}) Remapping it.", path, path);
         path = fmt::format("{}{}", UPNP_DESC_SCPD_URL, path);
     }
-    auto webroot = config->getOption(CFG_SERVER_WEBROOT);
+    auto webroot = config->getOption(ConfigVal::SERVER_WEBROOT);
     auto webFile = fmt::format("{}{}", webroot, path);
     log_debug("Upnp: file: {}", webFile);
     return webFile;

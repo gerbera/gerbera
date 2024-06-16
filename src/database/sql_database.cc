@@ -386,7 +386,7 @@ void SQLDatabase::init()
 
     browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
     auto searchTagMap = searchSortMap;
-    if (config->getBoolOption(CFG_UPNP_SEARCH_FILENAME)) {
+    if (config->getBoolOption(ConfigVal::UPNP_SEARCH_FILENAME)) {
         searchTagMap.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), SearchCol::DcTitle);
     }
     searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchTagMap, searchColMap);
@@ -457,7 +457,7 @@ void SQLDatabase::init()
     sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper);
 }
 
-void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, config_option_t upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd)
+void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, ConfigVal upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd)
 {
     /* --- load database upgrades from config file --- */
     const fs::path& upgradeFile = config->getOption(upgradeOption);
@@ -915,7 +915,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     const auto parent = param.getObject();
 
     if (param.getDynamicContainers() && dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
-        auto dynConfig = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
+        auto dynConfig = config->getDynamicContentListOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
         if (dynConfig) {
             auto reqCount = (param.getRequestedCount() <= 0 || param.getRequestedCount() > dynConfig->getMaxCount()) ? dynConfig->getMaxCount() : param.getRequestedCount();
             auto srcParam = SearchParam(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
@@ -1034,8 +1034,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         }
     }
 
-    if (param.getDynamicContainers() && config->getBoolOption(CFG_SERVER_DYNAMIC_CONTENT_LIST_ENABLED) && getContainers && param.getStartingIndex() == 0 && param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
-        auto dynContent = config->getDynamicContentListOption(CFG_SERVER_DYNAMIC_CONTENT_LIST);
+    if (param.getDynamicContainers() && config->getBoolOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST_ENABLED) && getContainers && param.getStartingIndex() == 0 && param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+        auto dynContent = config->getDynamicContentListOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST);
         if (dynamicContainers.size() < dynContent->size()) {
             for (std::size_t count = 0; count < dynContent->size(); count++) {
                 auto dynConfig = dynContent->get(count);

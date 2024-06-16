@@ -49,26 +49,26 @@ protected:
     T minValue {};
 
 public:
-    ConfigIntegerSetup(config_option_t option, const char* xpath, const char* help)
+    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help)
         : ConfigSetup(option, xpath, help)
     {
         this->defaultValue = fmt::to_string(0);
     }
 
-    ConfigIntegerSetup(config_option_t option, const char* xpath, const char* help, T defaultValue)
+    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, T defaultValue)
         : ConfigSetup(option, xpath, help)
     {
         this->defaultValue = fmt::to_string(defaultValue);
     }
 
-    ConfigIntegerSetup(config_option_t option, const char* xpath, const char* help, IntCheckFunction check)
+    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, IntCheckFunction check)
         : ConfigSetup(option, xpath, help)
         , valueCheck(std::move(check))
     {
         this->defaultValue = fmt::to_string(0);
     }
 
-    ConfigIntegerSetup(config_option_t option, const char* xpath, const char* help, T defaultValue, IntParseFunction parseValue, IntPrintFunction printValue = nullptr)
+    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, T defaultValue, IntParseFunction parseValue, IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help)
         , parseValue(std::move(parseValue))
         , printValue(std::move(printValue))
@@ -76,7 +76,7 @@ public:
         this->defaultValue = fmt::to_string(defaultValue);
     }
 
-    ConfigIntegerSetup(config_option_t option, const char* xpath, const char* help, T defaultValue, IntCheckFunction check, IntPrintFunction printValue = nullptr)
+    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, T defaultValue, IntCheckFunction check, IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help)
         , valueCheck(std::move(check))
         , printValue(std::move(printValue))
@@ -84,7 +84,7 @@ public:
         this->defaultValue = fmt::to_string(defaultValue);
     }
 
-    ConfigIntegerSetup(config_option_t option, const char* xpath, const char* help, T defaultValue, T minValue, IntMinFunction check)
+    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, T defaultValue, T minValue, IntMinFunction check)
         : ConfigSetup(option, xpath, help)
         , minCheck(std::move(check))
         , minValue(minValue)
@@ -92,7 +92,7 @@ public:
         this->defaultValue = fmt::to_string(defaultValue);
     }
 
-    ConfigIntegerSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, IntCheckFunction check = nullptr, IntPrintFunction printValue = nullptr)
+    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, const char* defaultValue, IntCheckFunction check = nullptr, IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help)
         , valueCheck(std::move(check))
         , printValue(std::move(printValue))
@@ -100,7 +100,7 @@ public:
         this->defaultValue = defaultValue;
     }
 
-    ConfigIntegerSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check, IntPrintFunction printValue = nullptr)
+    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check, IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help, std::move(check), defaultValue)
         , printValue(std::move(printValue))
     {

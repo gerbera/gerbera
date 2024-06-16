@@ -39,7 +39,7 @@
 
 #include "curl_online_service.h"
 
-static constexpr auto CFG_DEFAULT_UPDATE_AT_START = std::chrono::seconds(10);
+static constexpr auto DEFAULT_UPDATE_AT_START = std::chrono::seconds(10);
 
 // forward declaration
 class Content;

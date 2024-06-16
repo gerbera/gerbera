@@ -36,6 +36,7 @@
 
 #include "cds/cds_objects.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "config/result/transcoding.h"
 #include "content/content.h"
 #include "database/database.h"
@@ -68,7 +69,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
         auto mappings = config->getDictionaryOption(
-            CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+            ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
             auto res = obj->getResource(ContentHandler::DEFAULT);
@@ -117,7 +118,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
 
 fs::path TranscodeExternalHandler::makeFifo()
 {
-    fs::path tmpDir = config->getOption(CFG_SERVER_TMPDIR);
+    fs::path tmpDir = config->getOption(ConfigVal::SERVER_TMPDIR);
     auto fifoPath = tmpDir / fmt::format("grb-tr-{}", generateRandomId());
 
     log_debug("Creating FIFO: {}", fifoPath.string());
@@ -163,8 +164,8 @@ fs::path TranscodeExternalHandler::openCurlFifo(const fs::path& location, std::v
 
     try {
         auto cIoh = std::make_unique<CurlIOHandler>(config, url, nullptr,
-            config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
-            config->getIntOption(CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
+            config->getIntOption(ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
+            config->getIntOption(ConfigVal::EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
         auto pIoh = std::make_unique<ProcessIOHandler>(content, ret, nullptr);
         auto ch = std::make_unique<IOHandlerChainer>(std::move(cIoh), std::move(pIoh), 16384);
         procList.push_back(std::make_unique<ProcListItem>(std::move(ch)));

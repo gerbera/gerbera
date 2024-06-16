@@ -28,6 +28,7 @@
 #include "clients.h" // API
 
 #include "config/config.h"
+#include "config/config_val.h"
 #include "config/result/client_config.h"
 #include "database/database.h"
 #include "util/grb_net.h"
@@ -43,7 +44,7 @@ std::shared_ptr<ClientStatusDetail> ClientStatusDetail::clone() const
 
 ClientManager::ClientManager(const std::shared_ptr<Config>& config, std::shared_ptr<Database> database)
     : database(std::move(database))
-    , cacheThreshold(config->getIntOption(CFG_CLIENTS_CACHE_THRESHOLD))
+    , cacheThreshold(config->getIntOption(ConfigVal::CLIENTS_CACHE_THRESHOLD))
 {
     refresh(config);
     if (this->database) {
@@ -196,7 +197,7 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
         },
     };
 
-    auto clientConfigList = config->getClientConfigListOption(CFG_CLIENTS_LIST);
+    auto clientConfigList = config->getClientConfigListOption(ConfigVal::CLIENTS_LIST);
     for (std::size_t i = 0; i < clientConfigList->size(); i++) {
         auto clientConfig = clientConfigList->get(i);
         clientInfo.push_back(clientConfig->getClientInfo());

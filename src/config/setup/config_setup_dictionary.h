@@ -58,11 +58,11 @@ protected:
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status = "") const;
 
 public:
-    config_option_t nodeOption {};
-    config_option_t keyOption {};
-    config_option_t valOption {};
+    ConfigVal nodeOption {};
+    ConfigVal keyOption {};
+    ConfigVal valOption {};
 
-    explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr,
+    explicit ConfigDictionarySetup(ConfigVal option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr,
         bool notEmpty = false, bool itemNotEmpty = false, bool required = false, std::map<std::string, std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
@@ -72,8 +72,8 @@ public:
     {
     }
 
-    explicit ConfigDictionarySetup(config_option_t option, const char* xpath, const char* help,
-        config_option_t nodeOption, config_option_t keyOption, config_option_t valOption,
+    explicit ConfigDictionarySetup(ConfigVal option, const char* xpath, const char* help,
+        ConfigVal nodeOption, ConfigVal keyOption, ConfigVal valOption,
         bool notEmpty = false, bool itemNotEmpty = false, bool required = false, std::map<std::string, std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
@@ -91,7 +91,7 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
+    std::string getItemPath(int index = 0, ConfigVal propOption = ConfigVal::MAX, ConfigVal propOption2 = ConfigVal::MAX, ConfigVal propOption3 = ConfigVal::MAX, ConfigVal propOption4 = ConfigVal::MAX) const override;
 
     std::map<std::string, std::string> getXmlContent(const pugi::xml_node& optValue);
 

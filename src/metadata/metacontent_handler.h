@@ -36,7 +36,7 @@ class Content;
 
 class ContentPathSetup {
 public:
-    explicit ContentPathSetup(std::shared_ptr<Config> config, config_option_t fileListOption, config_option_t dirListOption);
+    explicit ContentPathSetup(std::shared_ptr<Config> config, ConfigVal fileListOption, ConfigVal dirListOption);
     std::vector<fs::path> getContentPath(const std::shared_ptr<CdsObject>& obj, const std::string& setting, fs::path folder = "") const;
 
 private:

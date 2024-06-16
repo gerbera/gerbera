@@ -25,6 +25,7 @@
 #define GRB_LOG_FAC GrbLogFacility::sqldatabase
 #include "search_handler.h" // API
 
+#include "config/config_val.h"
 #include "database/sql_database.h"
 #include "exceptions.h"
 #include "metadata/metadata_enums.h"

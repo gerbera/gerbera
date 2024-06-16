@@ -33,13 +33,13 @@ protected:
     bool notEmpty = false;
 
 public:
-    ConfigStringSetup(config_option_t option, const char* xpath, const char* help, bool required = false, const char* defaultValue = "", bool notEmpty = false)
+    ConfigStringSetup(ConfigVal option, const char* xpath, const char* help, bool required = false, const char* defaultValue = "", bool notEmpty = false)
         : ConfigSetup(option, xpath, help, required, defaultValue)
         , notEmpty(notEmpty)
     {
     }
 
-    ConfigStringSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check = nullptr, bool notEmpty = false, bool required = false)
+    ConfigStringSetup(ConfigVal option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check = nullptr, bool notEmpty = false, bool required = false)
         : ConfigSetup(option, xpath, help, std::move(check), defaultValue, required)
         , notEmpty(notEmpty)
     {

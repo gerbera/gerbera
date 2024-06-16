@@ -40,6 +40,7 @@
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "database/database.h"
 #include "database/sql_database.h"
 #include "exceptions.h"
@@ -57,9 +58,9 @@ ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>&
     , deviceHandle(deviceHandle)
     , xmlBuilder(std::move(xmlBuilder))
 {
-    titleSegments = this->config->getArrayOption(CFG_UPNP_SEARCH_ITEM_SEGMENTS);
-    resultSeparator = this->config->getOption(CFG_UPNP_SEARCH_SEPARATOR);
-    searchableContainers = this->config->getBoolOption(CFG_UPNP_SEARCH_CONTAINER_FLAG);
+    titleSegments = this->config->getArrayOption(ConfigVal::UPNP_SEARCH_ITEM_SEGMENTS);
+    resultSeparator = this->config->getOption(ConfigVal::UPNP_SEARCH_SEPARATOR);
+    searchableContainers = this->config->getBoolOption(ConfigVal::UPNP_SEARCH_CONTAINER_FLAG);
 }
 
 void ContentDirectoryService::doBrowse(ActionRequest& request)
@@ -106,7 +107,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     if (sortCriteria.empty() && (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)))
         flag |= BROWSE_TRACK_SORT;
 
-    if (config->getBoolOption(CFG_SERVER_HIDE_PC_DIRECTORY))
+    if (config->getBoolOption(ConfigVal::SERVER_HIDE_PC_DIRECTORY))
         flag |= BROWSE_HIDE_FS_ROOT;
 
     auto param = BrowseParam(parent, flag);
@@ -272,14 +273,14 @@ void ContentDirectoryService::markPlayedItem(const std::shared_ptr<CdsObject>& c
 
     auto item = std::static_pointer_cast<CdsItem>(cdsObject);
     auto playStatus = item->getPlayStatus();
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && playStatus && playStatus->getPlayCount() > 0) {
-        std::vector<std::string> markList = config->getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
+    if (config->getBoolOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && playStatus && playStatus->getPlayCount() > 0) {
+        std::vector<std::string> markList = config->getArrayOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST);
         bool mark = std::any_of(markList.begin(), markList.end(), [&](auto&& i) { return startswith(item->getClass(), markContentMap.at(i)); });
         if (mark) {
-            if (config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
-                title = config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
+            if (config->getBoolOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND))
+                title = config->getOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING).append(title);
             else
-                title.append(config->getOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
+                title.append(config->getOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING));
         }
     }
 
@@ -438,7 +439,7 @@ void ContentDirectoryService::processSubscriptionRequest(const SubscriptionReque
 
 #if defined(USING_NPUPNP)
     UpnpAcceptSubscriptionXML(
-        deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
+        deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(),
         UPNP_DESC_CDS_SERVICE_ID, xml, request.getSubscriptionID().c_str());
 #else
     IXML_Document* event = nullptr;
@@ -448,7 +449,7 @@ void ContentDirectoryService::processSubscriptionRequest(const SubscriptionReque
     }
 
     UpnpAcceptSubscriptionExt(deviceHandle,
-        config->getOption(CFG_SERVER_UDN).c_str(),
+        config->getOption(ConfigVal::SERVER_UDN).c_str(),
         UPNP_DESC_CDS_SERVICE_ID, event, request.getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
@@ -470,7 +471,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
 #if defined(USING_NPUPNP)
-    UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CDS_SERVICE_ID, xml);
+    UpnpNotifyXML(deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(), UPNP_DESC_CDS_SERVICE_ID, xml);
 #else
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
@@ -479,7 +480,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
-    UpnpNotifyExt(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CDS_SERVICE_ID, event);
+    UpnpNotifyExt(deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(), UPNP_DESC_CDS_SERVICE_ID, event);
 
     ixmlDocument_free(event);
 #endif

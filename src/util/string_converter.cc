@@ -34,6 +34,7 @@
 #include "string_converter.h" // API
 
 #include "common.h"
+#include "config/config_val.h"
 #include "config/result/directory_tweak.h"
 #include "exceptions.h"
 #include "util/logger.h"
@@ -188,20 +189,20 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
 std::unique_ptr<StringConverter> StringConverter::i2f(const std::shared_ptr<Config>& cm)
 {
     return std::make_unique<StringConverter>(
-        DEFAULT_INTERNAL_CHARSET, cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET));
+        DEFAULT_INTERNAL_CHARSET, cm->getOption(ConfigVal::IMPORT_FILESYSTEM_CHARSET));
 }
 std::unique_ptr<StringConverter> StringConverter::f2i(const std::shared_ptr<Config>& cm)
 {
     return std::make_unique<StringConverter>(
-        cm->getOption(CFG_IMPORT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET);
+        cm->getOption(ConfigVal::IMPORT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET);
 }
-std::unique_ptr<StringConverter> StringConverter::m2i(config_option_t option, const fs::path& location, const std::shared_ptr<Config>& cm)
+std::unique_ptr<StringConverter> StringConverter::m2i(ConfigVal option, const fs::path& location, const std::shared_ptr<Config>& cm)
 {
     auto charset = cm->getOption(option);
     if (charset.empty()) {
-        charset = cm->getOption(CFG_IMPORT_METADATA_CHARSET);
+        charset = cm->getOption(ConfigVal::IMPORT_METADATA_CHARSET);
     }
-    auto tweak = cm->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST)->get(!location.empty() ? location : "/");
+    auto tweak = cm->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST)->get(!location.empty() ? location : "/");
     if (tweak && tweak->hasMetaCharset()) {
         charset = tweak->getMetaCharset();
         log_debug("Using charset {} for {}", charset, location.string());
@@ -214,14 +215,14 @@ std::unique_ptr<StringConverter> StringConverter::m2i(config_option_t option, co
 std::unique_ptr<StringConverter> StringConverter::j2i(const std::shared_ptr<Config>& cm)
 {
     return std::make_unique<StringConverter>(
-        cm->getOption(CFG_IMPORT_SCRIPTING_CHARSET),
+        cm->getOption(ConfigVal::IMPORT_SCRIPTING_CHARSET),
         DEFAULT_INTERNAL_CHARSET);
 }
 
 std::unique_ptr<StringConverter> StringConverter::p2i(const std::shared_ptr<Config>& cm)
 {
     return std::make_unique<StringConverter>(
-        cm->getOption(CFG_IMPORT_PLAYLIST_CHARSET),
+        cm->getOption(ConfigVal::IMPORT_PLAYLIST_CHARSET),
         DEFAULT_INTERNAL_CHARSET);
 }
 #endif

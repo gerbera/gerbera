@@ -34,11 +34,10 @@
 
 #include "builtin_layout.h" // API
 
-#include <regex>
-
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
 #include "content/content.h"
@@ -57,12 +56,14 @@
 
 #endif // ONLINE_SERVICES
 
+#include <regex>
+
 BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
     : Layout(std::move(content))
     , config(this->content->getContext()->getConfig())
-    , genreMap(this->config->getDictionaryOption(CFG_IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
+    , genreMap(this->config->getDictionaryOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
 {
-    auto blOption = config->getBoxLayoutListOption(CFG_BOXLAYOUT_BOX);
+    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
     for (auto&& bl : blOption->getArrayCopy()) {
         // We could copy only the enabled containers, but to avoid checking dependencies here, we copy all of them!
         container[bl->getKey()] = std::make_shared<CdsContainer>(bl->getTitle());
@@ -85,7 +86,7 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
     }
 
 #ifdef ONLINE_SERVICES
-    if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
+    if (config->getBoolOption(ConfigVal::ONLINE_CONTENT_ATRAILERS_ENABLED)) {
 #ifdef ATRAILERS
         chain["/Online Services/Apple/All Trailers"] = this->content->addContainerTree({ containerAt(BoxKeys::trailerRoot), containerAt(BoxKeys::trailerApple), containerAt(BoxKeys::trailerAll) }, nullptr);
 #endif
@@ -109,7 +110,7 @@ void BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path
     auto&& objPath = obj->getLocation();
     if (!rootPath.empty()) {
         // make location relative to rootpath: "/home/.../Videos/Action/a.mkv" with rootpath "/home/.../Videos" -> "Action"
-        dir = fs::relative(objPath.parent_path(), config->getBoolOption(CFG_IMPORT_LAYOUT_PARENT_PATH) ? rootPath.parent_path() : rootPath);
+        dir = fs::relative(objPath.parent_path(), config->getBoolOption(ConfigVal::IMPORT_LAYOUT_PARENT_PATH) ? rootPath.parent_path() : rootPath);
         if (dir == ".")
             dir = getLastPath(objPath);
     } else
@@ -135,7 +136,7 @@ void BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path
 void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     auto f2i = StringConverter::f2i(config);
-    auto blOption = config->getBoxLayoutListOption(CFG_BOXLAYOUT_BOX);
+    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
 
     auto id = chain["/Video/All Video"];
     log_debug("add video file {}", obj->getLocation().string());
@@ -198,7 +199,7 @@ void BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::s
 void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     auto f2i = StringConverter::f2i(config);
-    auto blOption = config->getBoxLayoutListOption(CFG_BOXLAYOUT_BOX);
+    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
 
     log_debug("add image file {}", obj->getLocation().string());
 
@@ -260,7 +261,7 @@ void BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::s
 void BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     auto f2i = StringConverter::f2i(config);
-    auto blOption = config->getBoxLayoutListOption(CFG_BOXLAYOUT_BOX);
+    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
 
     std::string desc;
     log_debug("add audio file {}", obj->getLocation().string());
@@ -472,7 +473,7 @@ void BuiltinLayout::addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServ
 #ifdef ATRAILERS
 void BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
 {
-    auto blOption = config->getBoxLayoutListOption(CFG_BOXLAYOUT_BOX);
+    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
 
     log_debug("add trailer {}", obj->getLocation().string());
     {

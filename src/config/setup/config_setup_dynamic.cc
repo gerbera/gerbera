@@ -42,30 +42,30 @@ bool ConfigDynamicContentSetup::createOptionFromNode(const pugi::xml_node& eleme
     if (!element)
         return true;
 
-    auto&& ccs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_DYNAMIC_CONTAINER);
+    auto&& ccs = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_DYNAMIC_CONTAINER);
     for (auto&& it : ccs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
-        fs::path location = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_LOCATION)->getXmlContent(child);
+        fs::path location = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ConfigVal::A_DYNAMIC_CONTAINER_LOCATION)->getXmlContent(child);
 
         auto cont = std::make_shared<DynamicContent>(location);
 
         {
-            auto cs = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_IMAGE);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ConfigVal::A_DYNAMIC_CONTAINER_IMAGE);
             cont->setImage(cs->getXmlContent(child));
         }
         {
-            auto cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_TITLE);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_TITLE);
             cont->setTitle(cs->getXmlContent(child));
             if (cont->getTitle().empty()) {
                 cont->setTitle(location.filename());
             }
-            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_SORT);
+            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_SORT);
             cont->setSort(cs->getXmlContent(child));
-            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_FILTER);
+            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_FILTER);
             cont->setFilter(cs->getXmlContent(child));
         }
         {
-            auto cs = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_DYNAMIC_CONTAINER_MAXCOUNT);
+            auto cs = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT);
             cont->setMaxCount(cs->getXmlContent(child));
         }
         try {
@@ -90,62 +90,62 @@ bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& opt
         return true;
     }
 
-    auto index = getItemPath(i, ATTR_DYNAMIC_CONTAINER_LOCATION);
+    auto index = getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getLocation());
         auto pathValue = optValue;
-        if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_LOCATION)->checkPathValue(optValue, pathValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ConfigVal::A_DYNAMIC_CONTAINER_LOCATION)->checkPathValue(optValue, pathValue)) {
             entry->setLocation(pathValue);
             log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getLocation().string());
             return true;
         }
     }
-    index = getItemPath(i, ATTR_DYNAMIC_CONTAINER_IMAGE);
+    index = getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_IMAGE);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getImage());
-        if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_DYNAMIC_CONTAINER_IMAGE)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ConfigVal::A_DYNAMIC_CONTAINER_IMAGE)->checkValue(optValue)) {
             entry->setImage(optValue);
             log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getImage().string());
             return true;
         }
     }
-    index = getItemPath(i, ATTR_DYNAMIC_CONTAINER_TITLE);
+    index = getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_TITLE);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getTitle());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_TITLE)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_TITLE)->checkValue(optValue)) {
             entry->setTitle(optValue);
             log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getTitle());
             return true;
         }
     }
-    index = getItemPath(i, ATTR_DYNAMIC_CONTAINER_FILTER);
+    index = getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_FILTER);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getFilter());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_FILTER)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_FILTER)->checkValue(optValue)) {
             entry->setFilter(optValue);
             log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getFilter());
             return true;
         }
     }
-    index = getItemPath(i, ATTR_DYNAMIC_CONTAINER_SORT);
+    index = getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_SORT);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getSort());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_DYNAMIC_CONTAINER_SORT)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_SORT)->checkValue(optValue)) {
             entry->setSort(optValue);
             log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getSort());
             return true;
         }
     }
-    index = getItemPath(i, ATTR_DYNAMIC_CONTAINER_MAXCOUNT);
+    index = getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getMaxCount());
-        entry->setMaxCount(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_DYNAMIC_CONTAINER_MAXCOUNT)->checkIntValue(optValue));
+        entry->setMaxCount(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT)->checkIntValue(optValue));
         log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getMaxCount());
         return true;
     }
@@ -201,19 +201,19 @@ std::shared_ptr<ConfigOption> ConfigDynamicContentSetup::newOption(const pugi::x
     return optionValue;
 }
 
-std::string ConfigDynamicContentSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+std::string ConfigDynamicContentSetup::getItemPath(int index, ConfigVal propOption, ConfigVal propOption2, ConfigVal propOption3, ConfigVal propOption4) const
 {
     if (index == ITEM_PATH_ROOT) {
-        return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(ATTR_DYNAMIC_CONTAINER));
+        return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER));
     }
     if (index == ITEM_PATH_NEW) {
-        if (propOption != CFG_MAX) {
-            return fmt::format("{}/{}[_]/{}", xpath, ConfigDefinition::mapConfigOption(ATTR_DYNAMIC_CONTAINER), ConfigDefinition::ensureAttribute(propOption));
+        if (propOption != ConfigVal::MAX) {
+            return fmt::format("{}/{}[_]/{}", xpath, ConfigDefinition::mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER), ConfigDefinition::ensureAttribute(propOption));
         }
-        return fmt::format("{}/{}[_]", xpath, ConfigDefinition::mapConfigOption(ATTR_DYNAMIC_CONTAINER));
+        return fmt::format("{}/{}[_]", xpath, ConfigDefinition::mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER));
     }
-    if (propOption != CFG_MAX) {
-        return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(ATTR_DYNAMIC_CONTAINER), index, ConfigDefinition::ensureAttribute(propOption));
+    if (propOption != ConfigVal::MAX) {
+        return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER), index, ConfigDefinition::ensureAttribute(propOption));
     }
-    return fmt::format("{}/{}[{}]", xpath, ConfigDefinition::mapConfigOption(ATTR_DYNAMIC_CONTAINER), index);
+    return fmt::format("{}/{}[{}]", xpath, ConfigDefinition::mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER), index);
 }

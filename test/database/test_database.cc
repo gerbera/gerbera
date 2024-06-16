@@ -43,12 +43,12 @@ class TestSqliteDatabase : public Sqlite3Database {
 class DatabaseTestBase : public ::testing::Test {
 
 protected:
-    void testUpgrade(config_option_t option);
+    void testUpgrade(ConfigVal option);
     std::shared_ptr<Database> subject;
     std::shared_ptr<Config> config;
 };
 
-void DatabaseTestBase::testUpgrade(config_option_t option)
+void DatabaseTestBase::testUpgrade(ConfigVal option)
 {
     const fs::path& upgradeFile = config->getOption(option);
     pugi::xml_document xmlDoc;
@@ -88,7 +88,7 @@ public:
 
 TEST_F(Sqlite3DatabaseTest, CheckInitScript)
 {
-    auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
+    auto sqlFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
     auto sql = GrbFile(sqlFilePath).readTextFile();
     auto&& myHash = stringHash(sql);
 
@@ -97,7 +97,7 @@ TEST_F(Sqlite3DatabaseTest, CheckInitScript)
 
 TEST_F(Sqlite3DatabaseTest, CheckUpgradeCommands)
 {
-    testUpgrade(CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE);
+    testUpgrade(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE);
 }
 
 // test is blocking on CONAN
@@ -155,12 +155,12 @@ public:
 
 TEST_F(MysqlDatabaseTest, CheckUpgradeCommands)
 {
-    testUpgrade(CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE);
+    testUpgrade(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE);
 }
 
 TEST_F(MysqlDatabaseTest, CheckInitScript)
 {
-    auto sqlFilePath = config->getOption(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
+    auto sqlFilePath = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
     auto sql = GrbFile(sqlFilePath).readTextFile();
     auto&& myHash = stringHash(sql);
 

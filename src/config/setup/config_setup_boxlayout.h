@@ -42,7 +42,7 @@ protected:
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<BoxLayout>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
-    ConfigBoxLayoutSetup(config_option_t option, const char* xpath, const char* help, std::vector<BoxLayout> defaultEntries)
+    ConfigBoxLayoutSetup(ConfigVal option, const char* xpath, const char* help, std::vector<BoxLayout> defaultEntries)
         : ConfigSetup(option, xpath, help)
         , defaultEntries(std::move(defaultEntries))
     {
@@ -54,7 +54,7 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
+    std::string getItemPath(int index = 0, ConfigVal propOption = ConfigVal::MAX, ConfigVal propOption2 = ConfigVal::MAX, ConfigVal propOption3 = ConfigVal::MAX, ConfigVal propOption4 = ConfigVal::MAX) const override;
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 

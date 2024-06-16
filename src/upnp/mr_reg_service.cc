@@ -36,6 +36,7 @@
 
 #include "action_request.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "database/database.h"
 #include "exceptions.h"
 #include "subscription_request.h"
@@ -122,7 +123,7 @@ void MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& r
 
 #if defined(USING_NPUPNP)
     UpnpAcceptSubscriptionXML(
-        deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
+        deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(),
         UPNP_DESC_MRREG_SERVICE_ID, xml, request.getSubscriptionID().c_str());
 #else
     IXML_Document* event = nullptr;
@@ -132,7 +133,7 @@ void MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& r
     }
 
     UpnpAcceptSubscriptionExt(deviceHandle,
-        config->getOption(CFG_SERVER_UDN).c_str(),
+        config->getOption(ConfigVal::SERVER_UDN).c_str(),
         UPNP_DESC_MRREG_SERVICE_ID, event, request.getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
@@ -158,7 +159,7 @@ void MRRegistrarService::prcoessSubscriptionUpdate(std::string sourceProtocol_CS
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
-    UpnpNotifyExt(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), serviceID.c_str(), event);
+    UpnpNotifyExt(deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(), serviceID.c_str(), event);
 
     ixmlDocument_free(event);
 }

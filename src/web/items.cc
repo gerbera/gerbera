@@ -35,6 +35,7 @@
 #include "pages.h" // API
 
 #include "cds/cds_item.h"
+#include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "database/database.h"
 #include "exceptions.h"
@@ -97,7 +98,7 @@ void Web::Items::process()
     }
 
 #ifdef HAVE_INOTIFY
-    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+    if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
         // check for inotify mode
         int startpointId = INVALID_OBJECT_ID;
         if (autoscanType == 0) {

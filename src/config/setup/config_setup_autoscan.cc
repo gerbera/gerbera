@@ -44,16 +44,16 @@ std::string ConfigAutoscanSetup::getUniquePath() const
     return fmt::format("{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode));
 }
 
-std::string ConfigAutoscanSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+std::string ConfigAutoscanSetup::getItemPath(int index, ConfigVal propOption, ConfigVal propOption2, ConfigVal propOption3, ConfigVal propOption4) const
 {
     if (index > ITEM_PATH_ROOT)
-        return fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), index, ConfigDefinition::ensureAttribute(propOption));
+        return fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY), index, ConfigDefinition::ensureAttribute(propOption));
     if (index == ITEM_PATH_ROOT)
-        return fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
+        return fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY));
     if (index == ITEM_PATH_NEW)
-        return fmt::format("{}/{}/{}[_]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY), ConfigDefinition::ensureAttribute(propOption));
+        return fmt::format("{}/{}/{}[_]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), ConfigDefinition::mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY), ConfigDefinition::ensureAttribute(propOption));
 
-    return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(ATTR_AUTOSCAN_DIRECTORY));
+    return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY));
 }
 
 /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
@@ -64,19 +64,19 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
     if (!element)
         return true;
 
-    auto&& cs = ConfigDefinition::findConfigSetup<ConfigSetup>(ATTR_AUTOSCAN_DIRECTORY);
+    auto&& cs = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY);
     for (auto&& it : cs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
         fs::path location;
         try {
-            location = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->getXmlContent(child);
+            location = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION)->getXmlContent(child);
         } catch (const std::runtime_error&) {
             log_warning("Found an Autoscan directory with invalid location!");
             continue;
         }
 
-        AutoscanScanMode mode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AutoscanScanMode>>(ATTR_AUTOSCAN_DIRECTORY_MODE)->getXmlContent(child);
+        AutoscanScanMode mode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AutoscanScanMode>>(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE)->getXmlContent(child);
 
         if (mode != scanMode) {
             continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
@@ -84,23 +84,23 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
 
         unsigned int interval = 0;
         if (mode == AutoscanScanMode::Timed) {
-            interval = ConfigDefinition::findConfigSetup<ConfigTimeSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->getXmlContent(child);
+            interval = ConfigDefinition::findConfigSetup<ConfigTimeSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL)->getXmlContent(child);
         }
 
-        bool recursive = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->getXmlContent(child);
-        int mt = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE)->getXmlContent(child);
+        bool recursive = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE)->getXmlContent(child);
+        int mt = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE)->getXmlContent(child);
         log_debug("mt = {} -> {}", mt, AutoscanDirectory::mapMediaType(mt));
 
-        unsigned int retryCount = ConfigDefinition::findConfigSetup<ConfigUIntSetup>(ATTR_AUTOSCAN_DIRECTORY_RETRYCOUNT)->getXmlContent(child);
-        auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
+        unsigned int retryCount = ConfigDefinition::findConfigSetup<ConfigUIntSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_RETRYCOUNT)->getXmlContent(child);
+        auto cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES);
         bool hidden = cs->hasXmlElement(child) ? cs->getXmlContent(child) : hiddenFiles;
 
-        cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
+        cs = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
         bool follow = cs->hasXmlElement(child) ? cs->getXmlContent(child) : followSymlinks;
 
-        auto ctAudio = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO)->getXmlContent(child);
-        auto ctImage = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE)->getXmlContent(child);
-        auto ctVideo = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO)->getXmlContent(child);
+        auto ctAudio = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO)->getXmlContent(child);
+        auto ctImage = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE)->getXmlContent(child);
+        auto ctVideo = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO)->getXmlContent(child);
         try {
             auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
             containerMap[AutoscanMediaMode::Audio] = ctAudio;
@@ -120,7 +120,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
 
 bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status) const
 {
-    auto index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_LOCATION);
+    auto index = getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION);
     if (optItem == getUniquePath() && status != STATUS_CHANGED) {
         return true;
     }
@@ -129,56 +129,56 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
         if (entry->getOrig())
             config->setOrigValue(index, entry->getLocation());
         auto pathValue = optValue;
-        if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ATTR_AUTOSCAN_DIRECTORY_LOCATION)->checkPathValue(optValue, pathValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigPathSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION)->checkPathValue(optValue, pathValue)) {
             entry->setLocation(pathValue);
         }
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getLocation().string());
         return true;
     }
 
-    index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_MODE);
+    index = getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE);
     if (optItem == index) {
         log_error("Autoscan Mode cannot be changed {} {}", index, AutoscanDirectory::mapScanmode(entry->getScanMode()));
         return true;
     }
 
-    index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_INTERVAL);
+    index = getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, fmt::to_string(entry->getInterval().count()));
-        entry->setInterval(std::chrono::seconds(ConfigDefinition::findConfigSetup<ConfigTimeSetup>(ATTR_AUTOSCAN_DIRECTORY_INTERVAL)->checkTimeValue(optValue)));
+        entry->setInterval(std::chrono::seconds(ConfigDefinition::findConfigSetup<ConfigTimeSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL)->checkTimeValue(optValue)));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getInterval().count());
         return true;
     }
 
-    index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_RECURSIVE);
+    index = getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getRecursive());
-        entry->setRecursive(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE)->checkValue(optValue));
+        entry->setRecursive(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE)->checkValue(optValue));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getRecursive());
         return true;
     }
 
-    index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES);
+    index = getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getHidden());
-        entry->setHidden(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
+        entry->setHidden(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getHidden());
         return true;
     }
 
-    index = getItemPath(i, ATTR_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
+    index = getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getFollowSymlinks());
-        entry->setFollowSymlinks(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS)->checkValue(optValue));
+        entry->setFollowSymlinks(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS)->checkValue(optValue));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getFollowSymlinks());
         return true;
     }
 
-    index = getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_AUDIO);
+    index = getItemPath(i, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getContainerTypes().at(AutoscanMediaMode::Audio));
@@ -187,7 +187,7 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
         return true;
     }
 
-    index = getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_IMAGE);
+    index = getItemPath(i, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getContainerTypes().at(AutoscanMediaMode::Image));
@@ -196,7 +196,7 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
         return true;
     }
 
-    index = getItemPath(i, ATTR_AUTOSCAN_CONTAINER_TYPE_VIDEO);
+    index = getItemPath(i, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getContainerTypes().at(AutoscanMediaMode::Video));

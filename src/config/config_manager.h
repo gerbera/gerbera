@@ -71,61 +71,61 @@ public:
     /// \brief add a config option
     /// \param option option type to add.
     /// \param option option to add.
-    void addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue) override;
+    void addOption(ConfigVal option, const std::shared_ptr<ConfigOption>& optionValue) override;
 
     /// \brief returns a config option of type std::string
     /// \param option option to retrieve.
-    std::string getOption(config_option_t option) const override;
+    std::string getOption(ConfigVal option) const override;
 
     /// \brief returns a config option of type int
     /// \param option option to retrieve.
-    IntOptionType getIntOption(config_option_t option) const override;
-    UIntOptionType getUIntOption(config_option_t option) const override;
-    LongOptionType getLongOption(config_option_t option) const override;
+    IntOptionType getIntOption(ConfigVal option) const override;
+    UIntOptionType getUIntOption(ConfigVal option) const override;
+    LongOptionType getLongOption(ConfigVal option) const override;
 
     /// \brief returns a config option of any type
     /// \param option option to retrieve.
-    std::shared_ptr<ConfigOption> getConfigOption(config_option_t option) const override;
+    std::shared_ptr<ConfigOption> getConfigOption(ConfigVal option) const override;
 
     /// \brief returns a config option of type bool
     /// \param option option to retrieve.
-    bool getBoolOption(config_option_t option) const override;
+    bool getBoolOption(ConfigVal option) const override;
 
     /// \brief returns a config option of type dictionary
     /// \param option option to retrieve.
-    std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override;
+    std::map<std::string, std::string> getDictionaryOption(ConfigVal option) const override;
 
     /// \brief returns a config option of type vector
     /// \param option option to retrieve.
-    std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(config_option_t option) const override;
+    std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(ConfigVal option) const override;
 
     /// \brief returns a config option of type array of string
     /// \param option option to retrieve.
-    std::vector<std::string> getArrayOption(config_option_t option) const override;
+    std::vector<std::string> getArrayOption(ConfigVal option) const override;
 
     /// \brief returns a config option of type AutoscanList
     /// \param option to retrieve
-    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption(config_option_t option) const override;
+    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption(ConfigVal option) const override;
 
     /// \brief returns a config option of type ClientConfigList
     /// \param option to retrieve
-    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override;
+    std::shared_ptr<ClientConfigList> getClientConfigListOption(ConfigVal option) const override;
 
     /// \brief returns a config option of type BoxLayoutList
     /// \param option to retrieve
-    std::shared_ptr<BoxLayoutList> getBoxLayoutListOption(config_option_t option) const override;
+    std::shared_ptr<BoxLayoutList> getBoxLayoutListOption(ConfigVal option) const override;
 
     /// \brief returns a config option of type DirectoryConfigList
     /// \param option to retrieve
-    std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override;
+    std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(ConfigVal option) const override;
 
     /// \brief returns a config option of type DynamicContentList
     /// \param option to retrieve
-    std::shared_ptr<DynamicContentList> getDynamicContentListOption(config_option_t option) const override;
+    std::shared_ptr<DynamicContentList> getDynamicContentListOption(ConfigVal option) const override;
 
     /// \brief returns a config option of type TranscodingProfileList
     /// \param option to retrieve
-    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(config_option_t option) const override;
+    std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(ConfigVal option) const override;
 
     bool hasOrigValue(const std::string& item) const override
     {
@@ -151,9 +151,9 @@ protected:
 
     std::unique_ptr<pugi::xml_document> xmlDoc { std::make_unique<pugi::xml_document>() };
 
-    std::vector<std::shared_ptr<ConfigOption>> options { CFG_MAX };
+    std::vector<std::shared_ptr<ConfigOption>> options;
 
-    std::shared_ptr<ConfigOption> setOption(const pugi::xml_node& root, config_option_t option, const std::map<std::string, std::string>* arguments = nullptr);
+    std::shared_ptr<ConfigOption> setOption(const pugi::xml_node& root, ConfigVal option, const std::map<std::string, std::string>* arguments = nullptr);
 
     std::shared_ptr<Config> getSelf();
 };

@@ -204,7 +204,7 @@ class ConfigLoad : public WebRequestHandler {
 protected:
     std::vector<ConfigValue> dbEntries;
     std::map<std::string, std::string> allItems;
-    void createItem(pugi::xml_node& item, const std::string& name, config_option_t id, config_option_t aid, const std::shared_ptr<ConfigSetup>& cs = nullptr);
+    void createItem(pugi::xml_node& item, const std::string& name, ConfigVal id, ConfigVal aid, const std::shared_ptr<ConfigSetup>& cs = nullptr);
 
     void writeDatabaseStatus(pugi::xml_node& values);
     void writeSimpleProperties(pugi::xml_node& values);

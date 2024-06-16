@@ -83,13 +83,13 @@ protected:
     std::vector<std::string> auxTags;
 
 public:
-    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, config_option_t enableOption)
+    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, ConfigVal enableOption)
         : MetadataHandler(context)
         , isEnabled(this->config->getBoolOption(enableOption))
     {
     }
 
-    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, config_option_t enableOption, config_option_t metaOption, config_option_t auxOption)
+    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, ConfigVal enableOption, ConfigVal metaOption, ConfigVal auxOption)
         : MetadataHandler(context)
         , isEnabled(this->config->getBoolOption(enableOption))
         , metaTags(this->config->getDictionaryOption(metaOption))

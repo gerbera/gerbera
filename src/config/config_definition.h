@@ -67,11 +67,11 @@ public:
         return complexOptions;
     }
 
-    static const char* mapConfigOption(config_option_t option);
+    static const char* mapConfigOption(ConfigVal option);
     /// \brief check whether option is only available when other option is set
-    static bool isDependent(config_option_t option);
+    static bool isDependent(ConfigVal option);
 
-    static std::shared_ptr<ConfigSetup> findConfigSetup(config_option_t option, bool save = false);
+    static std::shared_ptr<ConfigSetup> findConfigSetup(ConfigVal option, bool save = false);
     static std::shared_ptr<ConfigSetup> findConfigSetupByPath(const std::string& key, bool save = false, const std::shared_ptr<ConfigSetup>& parent = nullptr);
     template <class CS>
     static std::vector<std::shared_ptr<CS>> getConfigSetupList()
@@ -87,7 +87,7 @@ public:
     }
 
     template <class CS>
-    static std::shared_ptr<CS> findConfigSetup(config_option_t option, bool save = false)
+    static std::shared_ptr<CS> findConfigSetup(ConfigVal option, bool save = false)
     {
         auto base = findConfigSetup(option, save);
         if (!base && save)
@@ -100,14 +100,14 @@ public:
         return result;
     }
 
-    static std::string ensureAttribute(config_option_t option, bool check = true)
+    static std::string ensureAttribute(ConfigVal option, bool check = true)
     {
         auto attr = std::string(mapConfigOption(option));
         if (!startswith(attr, ATTRIBUTE) && check)
             return fmt::format("{}{}", ATTRIBUTE, attr);
         return attr;
     }
-    static std::string removeAttribute(config_option_t option)
+    static std::string removeAttribute(ConfigVal option)
     {
         auto attr = std::string(mapConfigOption(option));
         if (attr.size() > ATTRIBUTE.size() && startswith(attr, ATTRIBUTE))
@@ -119,9 +119,9 @@ private:
     /// \brief all known options
     static const std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
     /// \brief parent options for path search
-    static const std::map<config_option_t, std::vector<config_option_t>> parentOptions;
+    static const std::map<ConfigVal, std::vector<ConfigVal>> parentOptions;
     /// \brief option dependencies for automatic loading
-    static const std::map<config_option_t, config_option_t> dependencyMap;
+    static const std::map<ConfigVal, ConfigVal> dependencyMap;
 };
 
 #endif // __CONFIG_DEFINITION_H__

@@ -28,7 +28,7 @@
 
 #include "config.h"
 #include "config_options.h"
-#include "util/enum_iterator.h"
+#include "config_val.h"
 
 #include <functional>
 #include <map>
@@ -43,7 +43,6 @@
 #define ITEM_PATH_PREFIX (-3)
 
 using StringCheckFunction = std::function<bool(std::string& value)>;
-using ConfigOptionIterator = EnumIterator<config_option_t, config_option_t::CFG_MIN, config_option_t::CFG_MAX>;
 
 class ConfigValue {
 public:
@@ -92,10 +91,10 @@ public:
 
     pugi::xpath_node_set getXmlTree(const pugi::xml_node& element) const;
 
-    config_option_t option;
+    ConfigVal option;
     const char* xpath;
 
-    ConfigSetup(config_option_t option, const char* xpath, const char* help, bool required = false, const char* defaultValue = "")
+    ConfigSetup(ConfigVal option, const char* xpath, const char* help, bool required = false, const char* defaultValue = "")
         : cpath(buildCpath(xpath))
         , required(required)
         , rawCheck(nullptr)
@@ -106,7 +105,7 @@ public:
     {
     }
 
-    ConfigSetup(config_option_t option, const char* xpath, const char* help, StringCheckFunction check, const char* defaultValue = "", bool required = false)
+    ConfigSetup(ConfigVal option, const char* xpath, const char* help, StringCheckFunction check, const char* defaultValue = "", bool required = false)
         : cpath(buildCpath(xpath))
         , required(required)
         , rawCheck(std::move(check))
@@ -157,7 +156,8 @@ public:
 
     virtual bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) { return false; }
 
-    virtual std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const { return xpath; }
+    virtual std::string getItemPath(int index = 0, ConfigVal propOption = ConfigVal::MAX, ConfigVal propOption2 = ConfigVal::MAX, ConfigVal propOption3 = ConfigVal::MAX, ConfigVal propOption4 = ConfigVal::MAX) const { return xpath; }
+    virtual std::string getItemPath(int index, std::vector<ConfigVal> propOptions) const { return xpath; }
 
     virtual std::string getUniquePath() const { return xpath; }
     virtual std::string getCurrentValue() const { return optionValue ? optionValue->getOption() : ""; }

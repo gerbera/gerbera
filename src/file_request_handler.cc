@@ -36,6 +36,7 @@
 
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "config/result/transcoding.h"
 #include "content/content.h"
 #include "database/database.h"
@@ -140,14 +141,14 @@ const struct ClientInfo* FileRequestHandler::getInfo(const char* filename, UpnpF
 
     } else if (!isResourceFile && !trProfile.empty()) {
 
-        auto transcodingProfile = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(trProfile);
+        auto transcodingProfile = config->getTranscodingProfileListOption(ConfigVal::TRANSCODING_PROFILE_LIST)->getByName(trProfile);
         if (!transcodingProfile)
             throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", path.c_str(), trProfile);
 
         mimeType = transcodingProfile->getTargetMimeType();
 
         // TODO: this WAV specific logic should be more generic
-        auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
             auto res = obj->getResource(ContentHandler::DEFAULT);
             std::string freq = res->getAttribute(ResourceAttribute::SAMPLEFREQUENCY);
@@ -169,7 +170,7 @@ const struct ClientInfo* FileRequestHandler::getInfo(const char* filename, UpnpF
         resource = item->getResource(resourceId);
 
         // Generate DNLA Headers
-        auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+        auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         std::string dlnaContentHeader = xmlBuilder->getDLNAContentHeader(getValueOrDefault(mappings, mimeType), resource);
         if (!dlnaContentHeader.empty()) {
             headers.addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
@@ -255,7 +256,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, const 
     }
 
     if (!trProfile.empty()) {
-        auto transcodingProfile = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)->getByName(trProfile);
+        auto transcodingProfile = config->getTranscodingProfileListOption(ConfigVal::TRANSCODING_PROFILE_LIST)->getByName(trProfile);
         if (!transcodingProfile)
             throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", path.c_str(), trProfile);
 

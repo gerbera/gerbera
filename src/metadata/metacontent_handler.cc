@@ -26,24 +26,25 @@
 
 #include "metacontent_handler.h" // API
 
-#include <array>
-#include <regex>
-#include <sys/stat.h>
-
 #include "cds/cds_objects.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "config/result/directory_tweak.h"
 #include "content/content.h"
 #include "iohandler/file_io_handler.h"
 #include "util/mime.h"
 #include "util/tools.h"
 
-ContentPathSetup::ContentPathSetup(std::shared_ptr<Config> config, config_option_t fileListOption, config_option_t dirListOption)
+#include <array>
+#include <regex>
+#include <sys/stat.h>
+
+ContentPathSetup::ContentPathSetup(std::shared_ptr<Config> config, ConfigVal fileListOption, ConfigVal dirListOption)
     : config(std::move(config))
     , names(this->config->getArrayOption(fileListOption))
     , patterns(this->config->getDictionaryOption(dirListOption))
-    , allTweaks(this->config->getDirectoryTweakOption(CFG_IMPORT_DIRECTORIES_LIST))
-    , caseSensitive(this->config->getBoolOption(CFG_IMPORT_RESOURCES_CASE_SENSITIVE))
+    , allTweaks(this->config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST))
+    , caseSensitive(this->config->getBoolOption(ConfigVal::IMPORT_RESOURCES_CASE_SENSITIVE))
 {
 }
 
@@ -169,7 +170,7 @@ FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_FANART_FILE_LIST, CFG_IMPORT_RESOURCES_FANART_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST);
     }
 }
 
@@ -218,13 +219,13 @@ ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_CONTAINERART_FILE_LIST, CFG_IMPORT_RESOURCES_CONTAINERART_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST);
     }
 }
 
 void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
-    auto pathList = setup->getContentPath(obj, SETTING_CONTAINERART, config->getOption(CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION));
+    auto pathList = setup->getContentPath(obj, SETTING_CONTAINERART, config->getOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION));
     if (pathList.empty() || pathList[0].empty()) {
         pathList = setup->getContentPath(obj, SETTING_CONTAINERART);
     }
@@ -251,7 +252,7 @@ std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(const std::shared_p
 {
     fs::path path = resource->getAttribute(ResourceAttribute::RESOURCE_FILE);
     if (path.empty()) {
-        path = setup->getContentPath(obj, SETTING_CONTAINERART, config->getOption(CFG_IMPORT_RESOURCES_CONTAINERART_LOCATION))[0];
+        path = setup->getContentPath(obj, SETTING_CONTAINERART, config->getOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION))[0];
         if (path.empty()) {
             path = setup->getContentPath(obj, SETTING_CONTAINERART)[0];
         }
@@ -272,7 +273,7 @@ SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_SUBTITLE_FILE_LIST, CFG_IMPORT_RESOURCES_SUBTITLE_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST);
     }
 }
 
@@ -337,7 +338,7 @@ MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context, std::s
     , content(std::move(content))
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_METAFILE_FILE_LIST, CFG_IMPORT_RESOURCES_METAFILE_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST);
     }
 }
 
@@ -369,7 +370,7 @@ ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, CFG_IMPORT_RESOURCES_RESOURCE_FILE_LIST, CFG_IMPORT_RESOURCES_RESOURCE_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST);
     }
 }
 

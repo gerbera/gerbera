@@ -42,6 +42,7 @@
 #include "config_option_enum.h"
 #include "config_options.h"
 #include "config_setup.h"
+#include "config_val.h"
 #include "database/database.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -59,6 +60,7 @@ ConfigManager::ConfigManager(fs::path filename,
     : filename(std::move(filename))
     , dataDir(std::move(dataDir))
 {
+    options = std::vector<std::shared_ptr<ConfigOption>>(to_underlying(ConfigVal::MAX));
     GrbLogger::Logger.setDebugLogging(debug);
 
     if (this->filename.empty()) {
@@ -85,7 +87,7 @@ std::shared_ptr<Config> ConfigManager::getSelf()
     return shared_from_this();
 }
 
-std::shared_ptr<ConfigOption> ConfigManager::setOption(const pugi::xml_node& root, config_option_t option, const std::map<std::string, std::string>* arguments)
+std::shared_ptr<ConfigOption> ConfigManager::setOption(const pugi::xml_node& root, ConfigVal option, const std::map<std::string, std::string>* arguments)
 {
     auto co = ConfigDefinition::findConfigSetup(option);
     auto self = getSelf();
@@ -94,9 +96,9 @@ std::shared_ptr<ConfigOption> ConfigManager::setOption(const pugi::xml_node& roo
     return co->getValue();
 }
 
-void ConfigManager::addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue)
+void ConfigManager::addOption(ConfigVal option, const std::shared_ptr<ConfigOption>& optionValue)
 {
-    options.at(option) = optionValue;
+    options.at(to_underlying(option)) = optionValue;
 }
 
 void ConfigManager::load(const fs::path& userHome)
@@ -128,11 +130,11 @@ void ConfigManager::load(const fs::path& userHome)
 
     // now go through the mandatory parameters,
     // if something is missing we will not start the server
-    auto co = ConfigDefinition::findConfigSetup(CFG_SERVER_HOME);
+    auto co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_HOME);
     // respect command line if available; ignore xml value
     {
         std::string activeHome = userHome.string();
-        bool homeOverride = setOption(root, CFG_SERVER_HOME_OVERRIDE)->getBoolOption();
+        bool homeOverride = setOption(root, ConfigVal::SERVER_HOME_OVERRIDE)->getBoolOption();
         if (userHome.empty() || homeOverride) {
             activeHome = co->getXmlContent(root);
         } else {
@@ -148,18 +150,18 @@ void ConfigManager::load(const fs::path& userHome)
     [[maybe_unused]] bool mysqlEn = false;
     bool sqlite3En = false;
 
-    co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE);
+    co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE);
     co->getXmlElement(root); // fails if missing
-    setOption(root, CFG_SERVER_STORAGE_USE_TRANSACTIONS);
+    setOption(root, ConfigVal::SERVER_STORAGE_USE_TRANSACTIONS);
 
-    co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_MYSQL);
+    co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL);
     if (co->hasXmlElement(root)) {
-        mysqlEn = setOption(root, CFG_SERVER_STORAGE_MYSQL_ENABLED)->getBoolOption();
+        mysqlEn = setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED)->getBoolOption();
     }
 
-    co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_SQLITE);
+    co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE);
     if (co->hasXmlElement(root)) {
-        sqlite3En = setOption(root, CFG_SERVER_STORAGE_SQLITE_ENABLED)->getBoolOption();
+        sqlite3En = setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_ENABLED)->getBoolOption();
     }
 
     std::string dbDriver;
@@ -167,17 +169,17 @@ void ConfigManager::load(const fs::path& userHome)
 #ifdef HAVE_MYSQL
     if (mysqlEn) {
         // read mysql options
-        setOption(root, CFG_SERVER_STORAGE_MYSQL_HOST);
-        setOption(root, CFG_SERVER_STORAGE_MYSQL_DATABASE);
-        setOption(root, CFG_SERVER_STORAGE_MYSQL_USERNAME);
-        setOption(root, CFG_SERVER_STORAGE_MYSQL_PORT);
-        setOption(root, CFG_SERVER_STORAGE_MYSQL_SOCKET);
-        setOption(root, CFG_SERVER_STORAGE_MYSQL_PASSWORD);
+        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_HOST);
+        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_DATABASE);
+        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_USERNAME);
+        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_PORT);
+        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_SOCKET);
+        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_PASSWORD);
 
-        co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
+        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
         co->setDefaultValue(dataDir / "mysql.sql");
         co->makeOption(root, self);
-        co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE);
+        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE);
         co->setDefaultValue(dataDir / "mysql-upgrade.xml");
         co->makeOption(root, self);
         dbDriver = "mysql";
@@ -186,39 +188,39 @@ void ConfigManager::load(const fs::path& userHome)
 
     if (sqlite3En) {
         // read sqlite options
-        setOption(root, CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
-        setOption(root, CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS);
-        setOption(root, CFG_SERVER_STORAGE_SQLITE_JOURNALMODE);
-        setOption(root, CFG_SERVER_STORAGE_SQLITE_RESTORE);
-        setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
-        setOption(root, CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
+        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
+        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_SYNCHRONOUS);
+        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_JOURNALMODE);
+        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_RESTORE);
+        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
+        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
 
-        co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
+        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
         co->setDefaultValue(dataDir / "sqlite3.sql");
         co->makeOption(root, self);
-        co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE);
+        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE);
         co->setDefaultValue(dataDir / "sqlite3-upgrade.xml");
         co->makeOption(root, self);
         dbDriver = "sqlite3";
     }
 
-    co = ConfigDefinition::findConfigSetup(CFG_SERVER_STORAGE_DRIVER);
+    co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_DRIVER);
     co->makeOption(dbDriver, self);
 
-    bool multiValue = setOption(root, CFG_UPNP_MULTI_VALUES_ENABLED)->getBoolOption();
-    co = ConfigDefinition::findConfigSetup(ATTR_CLIENTS_UPNP_MULTI_VALUE);
+    bool multiValue = setOption(root, ConfigVal::UPNP_MULTI_VALUES_ENABLED)->getBoolOption();
+    co = ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE);
     co->setDefaultValue(multiValue ? YES : NO);
 
-    bool clEn = setOption(root, CFG_CLIENTS_LIST_ENABLED)->getBoolOption();
+    bool clEn = setOption(root, ConfigVal::CLIENTS_LIST_ENABLED)->getBoolOption();
     args["isEnabled"] = clEn ? "true" : "false";
-    setOption(root, CFG_CLIENTS_LIST, &args);
+    setOption(root, ConfigVal::CLIENTS_LIST, &args);
     args.clear();
 
-    setOption(root, CFG_IMPORT_HIDDEN_FILES);
-    setOption(root, CFG_IMPORT_FOLLOW_SYMLINKS);
-    bool csens = setOption(root, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE)->getBoolOption();
+    setOption(root, ConfigVal::IMPORT_HIDDEN_FILES);
+    setOption(root, ConfigVal::IMPORT_FOLLOW_SYMLINKS);
+    bool csens = setOption(root, ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE)->getBoolOption();
     args["tolower"] = fmt::to_string(!csens);
-    setOption(root, CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, &args);
+    setOption(root, ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, &args);
     args.clear();
 
     std::string defaultCharSet = DEFAULT_FILESYSTEM_CHARSET;
@@ -229,7 +231,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
 #endif
     // check if the one we take as default is actually available
-    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_FILESYSTEM_CHARSET);
+    co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_FILESYSTEM_CHARSET);
     try {
         auto conv = std::make_unique<StringConverter>(defaultCharSet, DEFAULT_INTERNAL_CHARSET);
     } catch (const std::runtime_error&) {
@@ -237,92 +239,92 @@ void ConfigManager::load(const fs::path& userHome)
     }
     co->setDefaultValue(defaultCharSet);
 
-    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_METADATA_CHARSET);
+    co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_METADATA_CHARSET);
     co->setDefaultValue(defaultCharSet);
 
-    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_PLAYLIST_CHARSET);
+    co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_PLAYLIST_CHARSET);
     co->setDefaultValue(defaultCharSet);
 
-    co = ConfigDefinition::findConfigSetup(ATTR_DIRECTORIES_TWEAK_META_CHARSET);
+    co = ConfigDefinition::findConfigSetup(ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET);
     co->setDefaultValue(defaultCharSet);
 
 #ifdef HAVE_JS
     // read javascript options
-    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_COMMON_FOLDER);
+    co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER);
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR);
     co->makeOption(root, self);
 
     // read more javascript options
-    co = ConfigDefinition::findConfigSetup(CFG_IMPORT_SCRIPTING_CHARSET);
+    co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_SCRIPTING_CHARSET);
     co->setDefaultValue(defaultCharSet);
 #endif
 
-    args["hiddenFiles"] = getBoolOption(CFG_IMPORT_HIDDEN_FILES) ? "true" : "false";
-    args["followSymlinks"] = getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS) ? "true" : "false";
-    setOption(root, CFG_IMPORT_AUTOSCAN_TIMED_LIST, &args);
+    args["hiddenFiles"] = getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES) ? "true" : "false";
+    args["followSymlinks"] = getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS) ? "true" : "false";
+    setOption(root, ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, &args);
 
 #ifdef HAVE_INOTIFY
-    auto useInotify = setOption(root, CFG_IMPORT_AUTOSCAN_USE_INOTIFY)->getBoolOption();
+    auto useInotify = setOption(root, ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)->getBoolOption();
 
     if (useInotify) {
-        setOption(root, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST, &args);
+        setOption(root, ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST, &args);
     } else {
-        setOption({}, CFG_IMPORT_AUTOSCAN_INOTIFY_LIST); // set empty list
+        setOption({}, ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST); // set empty list
     }
 #endif
     args.clear();
 
     // read transcoding options
-    auto trEn = setOption(root, CFG_TRANSCODING_TRANSCODING_ENABLED)->getBoolOption();
+    auto trEn = setOption(root, ConfigVal::TRANSCODING_TRANSCODING_ENABLED)->getBoolOption();
     args["isEnabled"] = trEn ? "true" : "false";
-    setOption(root, CFG_TRANSCODING_PROFILE_LIST, &args);
+    setOption(root, ConfigVal::TRANSCODING_PROFILE_LIST, &args);
     args.clear();
 
 #ifdef HAVE_CURL
     if (trEn) {
-        setOption(root, CFG_EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE);
-        setOption(root, CFG_EXTERNAL_TRANSCODING_CURL_FILL_SIZE);
+        setOption(root, ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE);
+        setOption(root, ConfigVal::EXTERNAL_TRANSCODING_CURL_FILL_SIZE);
     }
 #endif // HAVE_CURL
 
     // read import options
     args["trim"] = "false";
-    setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_SEP, &args);
-    setOption(root, CFG_UPNP_SEARCH_SEPARATOR, &args);
-    setOption(root, CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP, &args);
+    setOption(root, ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP, &args);
+    setOption(root, ConfigVal::UPNP_SEARCH_SEPARATOR, &args);
+    setOption(root, ConfigVal::IMPORT_LIBOPTS_ENTRY_LEGACY_SEP, &args);
     args.clear();
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
-    auto ffmpEn = setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)->getBoolOption();
+    auto ffmpEn = setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)->getBoolOption();
     if (ffmpEn) {
-        setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
-        setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
-        setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
-        setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
-        setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
-        setOption(root, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
+        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
+        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
+        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
+        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
     }
 #endif
 
 #if defined(HAVE_LASTFMLIB)
-    auto lfmEn = setOption(root, CFG_SERVER_EXTOPTS_LASTFM_ENABLED)->getBoolOption();
+    auto lfmEn = setOption(root, ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED)->getBoolOption();
     if (lfmEn) {
-        setOption(root, CFG_SERVER_EXTOPTS_LASTFM_USERNAME);
-        setOption(root, CFG_SERVER_EXTOPTS_LASTFM_PASSWORD);
+        setOption(root, ConfigVal::SERVER_EXTOPTS_LASTFM_USERNAME);
+        setOption(root, ConfigVal::SERVER_EXTOPTS_LASTFM_PASSWORD);
     }
 #endif
 
     // read online content options
 #ifdef ATRAILERS
-    auto atrailersRefresh = setOption(root, CFG_ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();
+    auto atrailersRefresh = setOption(root, ConfigVal::ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();
 
-    co = ConfigDefinition::findConfigSetup(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
+    co = ConfigDefinition::findConfigSetup(ConfigVal::ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
     co->makeOption(fmt::to_string(atrailersRefresh), self);
 #endif
 
     // read options that do not have special requirement and that are not yet loaded
     for (auto&& optionKey : ConfigOptionIterator()) {
-        if (!options.at(optionKey) && !ConfigDefinition::isDependent(optionKey)) {
+        if (!options.at(to_underlying(optionKey)) && !ConfigDefinition::isDependent(optionKey)) {
             setOption(root, optionKey);
         }
     }
@@ -343,12 +345,12 @@ bool ConfigManager::validate()
     log_info("Validating configuration...");
     auto self = getSelf();
 
-    if (!getOption(CFG_SERVER_NETWORK_INTERFACE).empty() && !getOption(CFG_SERVER_IP).empty())
+    if (!getOption(ConfigVal::SERVER_NETWORK_INTERFACE).empty() && !getOption(ConfigVal::SERVER_IP).empty())
         throw_std_runtime_error("Error in config file: you can not specify interface and ip at the same time");
 
     // checking database driver options
-    bool mysqlEn = getBoolOption(CFG_SERVER_STORAGE_MYSQL_ENABLED);
-    bool sqlite3En = getBoolOption(CFG_SERVER_STORAGE_SQLITE_ENABLED);
+    bool mysqlEn = getBoolOption(ConfigVal::SERVER_STORAGE_MYSQL_ENABLED);
+    bool sqlite3En = getBoolOption(ConfigVal::SERVER_STORAGE_SQLITE_ENABLED);
 
     if (sqlite3En && mysqlEn)
         throw_std_runtime_error("You enabled both, sqlite3 and mysql but "
@@ -366,8 +368,8 @@ bool ConfigManager::validate()
     }
 #endif // HAVE_MYSQL
 
-    auto appendto = EnumOption<UrlAppendMode>::getEnumOption(self, CFG_SERVER_APPEND_PRESENTATION_URL_TO);
-    if ((appendto == UrlAppendMode::ip || appendto == UrlAppendMode::port) && getOption(CFG_SERVER_PRESENTATION_URL).empty()) {
+    auto appendto = EnumOption<UrlAppendMode>::getEnumOption(self, ConfigVal::SERVER_APPEND_PRESENTATION_URL_TO);
+    if ((appendto == UrlAppendMode::ip || appendto == UrlAppendMode::port) && getOption(ConfigVal::SERVER_PRESENTATION_URL).empty()) {
         throw_std_runtime_error("Error in config file: \"append-to\" attribute "
                                 "value in <presentationURL> tag is set to \"{}\""
                                 "but no URL is specified",
@@ -375,8 +377,8 @@ bool ConfigManager::validate()
     }
 
 #ifdef HAVE_INOTIFY
-    auto configTimedList = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST);
-    auto configInotifyList = getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST);
+    auto configTimedList = getAutoscanListOption(ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST);
+    auto configInotifyList = getAutoscanListOption(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST);
 
     for (const auto& iDir : configInotifyList) {
         for (const auto& tDir : configTimedList) {
@@ -387,23 +389,23 @@ bool ConfigManager::validate()
 #endif
 
     // now go through the optional settings and fix them if anything is missing
-    auto defIpp = getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
+    auto defIpp = getIntOption(ConfigVal::SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
 
     // now get the option list for the drop-down menu
-    auto menuOpts = getArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+    auto menuOpts = getArrayOption(ConfigVal::SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
     if (std::find(menuOpts.begin(), menuOpts.end(), fmt::to_string(defIpp)) == menuOpts.end())
         throw_std_runtime_error("Error in config file: at least one <option> "
                                 "under <items-per-page> must match the "
                                 "<items-per-page default=\"\" /> attribute");
 
-    bool markingEnabled = getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED);
-    bool contentArrayEmpty = getArrayOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST).empty();
+    bool markingEnabled = getBoolOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED);
+    bool contentArrayEmpty = getArrayOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST).empty();
     if (markingEnabled && contentArrayEmpty) {
         throw_std_runtime_error("Error in config file: <mark-played-items>/<mark> tag must contain at least one <content> tag");
     }
 
 #ifndef HAVE_JS
-    auto layoutType = EnumOption<LayoutType>::getEnumOption(self, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+    auto layoutType = EnumOption<LayoutType>::getEnumOption(self, ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
 
     if (layoutType == LayoutType::Js)
         throw_std_runtime_error("Gerbera was compiled without JS support, "
@@ -479,135 +481,135 @@ void ConfigManager::setOrigValue(const std::string& item, LongOptionType value)
 }
 
 // The validate function ensures that the array is completely filled!
-std::string ConfigManager::getOption(config_option_t option) const
+std::string ConfigManager::getOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getOption();
 }
 
-IntOptionType ConfigManager::getIntOption(config_option_t option) const
+IntOptionType ConfigManager::getIntOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getIntOption();
 }
 
-UIntOptionType ConfigManager::getUIntOption(config_option_t option) const
+UIntOptionType ConfigManager::getUIntOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getUIntOption();
 }
 
-LongOptionType ConfigManager::getLongOption(config_option_t option) const
+LongOptionType ConfigManager::getLongOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getLongOption();
 }
 
-std::shared_ptr<ConfigOption> ConfigManager::getConfigOption(config_option_t option) const
+std::shared_ptr<ConfigOption> ConfigManager::getConfigOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue;
 }
 
-bool ConfigManager::getBoolOption(config_option_t option) const
+bool ConfigManager::getBoolOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getBoolOption();
 }
 
-std::map<std::string, std::string> ConfigManager::getDictionaryOption(config_option_t option) const
+std::map<std::string, std::string> ConfigManager::getDictionaryOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getDictionaryOption();
 }
 
-std::vector<std::vector<std::pair<std::string, std::string>>> ConfigManager::getVectorOption(config_option_t option) const
+std::vector<std::vector<std::pair<std::string, std::string>>> ConfigManager::getVectorOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getVectorOption();
 }
 
-std::vector<std::string> ConfigManager::getArrayOption(config_option_t option) const
+std::vector<std::string> ConfigManager::getArrayOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getArrayOption();
 }
 
-std::vector<std::shared_ptr<AutoscanDirectory>> ConfigManager::getAutoscanListOption(config_option_t option) const
+std::vector<std::shared_ptr<AutoscanDirectory>> ConfigManager::getAutoscanListOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getAutoscanListOption();
 }
 
-std::shared_ptr<BoxLayoutList> ConfigManager::getBoxLayoutListOption(config_option_t option) const
+std::shared_ptr<BoxLayoutList> ConfigManager::getBoxLayoutListOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getBoxLayoutListOption();
 }
 
-std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(config_option_t option) const
+std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getClientConfigListOption();
 }
 
-std::shared_ptr<DirectoryConfigList> ConfigManager::getDirectoryTweakOption(config_option_t option) const
+std::shared_ptr<DirectoryConfigList> ConfigManager::getDirectoryTweakOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getDirectoryTweakOption();
 }
 
-std::shared_ptr<DynamicContentList> ConfigManager::getDynamicContentListOption(config_option_t option) const
+std::shared_ptr<DynamicContentList> ConfigManager::getDynamicContentListOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }
     return optionValue->getDynamicContentListOption();
 }
 
-std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(config_option_t option) const
+std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(ConfigVal option) const
 {
-    auto optionValue = options.at(option);
+    auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
         throw_std_runtime_error("option {} not set", option);
     }

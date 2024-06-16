@@ -47,11 +47,11 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
     for (auto&& it : ccs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
-        auto key = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_KEY)->getXmlContent(child);
-        auto title = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_TITLE)->getXmlContent(child);
-        auto objClass = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_CLASS)->getXmlContent(child);
-        auto size = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
-        auto enabled = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
+        auto key = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->getXmlContent(child);
+        auto title = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->getXmlContent(child);
+        auto objClass = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->getXmlContent(child);
+        auto size = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
+        auto enabled = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
 
         if (std::find_if(defaultEntries.cbegin(), defaultEntries.cend(), [&key](auto& box) { return key == box.getKey(); }) == defaultEntries.cend()) {
             // Warn the user that his option will be ignored in built-in layout. But allow to use "unknown" options for js
@@ -93,49 +93,49 @@ bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem,
     if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
-    auto index = getItemPath(i, ATTR_BOXLAYOUT_BOX_KEY);
+    auto index = getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_KEY);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getKey());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_KEY)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->checkValue(optValue)) {
             entry->setKey(optValue);
             log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getKey());
             return true;
         }
     }
-    index = getItemPath(i, ATTR_BOXLAYOUT_BOX_TITLE);
+    index = getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_TITLE);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getTitle());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_TITLE)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->checkValue(optValue)) {
             entry->setTitle(optValue);
             log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getTitle());
             return true;
         }
     }
-    index = getItemPath(i, ATTR_BOXLAYOUT_BOX_CLASS);
+    index = getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_CLASS);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getClass());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ATTR_BOXLAYOUT_BOX_CLASS)->checkValue(optValue)) {
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->checkValue(optValue)) {
             entry->setClass(optValue);
             log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getClass());
             return true;
         }
     }
-    index = getItemPath(i, ATTR_BOXLAYOUT_BOX_SIZE);
+    index = getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_SIZE);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getSize());
-        entry->setSize(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ATTR_BOXLAYOUT_BOX_SIZE)->checkIntValue(optValue));
+        entry->setSize(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->checkIntValue(optValue));
         log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getSize());
         return true;
     }
-    index = getItemPath(i, ATTR_BOXLAYOUT_BOX_ENABLED);
+    index = getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_ENABLED);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getEnabled());
-        entry->setEnabled(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ATTR_BOXLAYOUT_BOX_ENABLED)->checkValue(optValue));
+        entry->setEnabled(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->checkValue(optValue));
         log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getEnabled());
         return true;
     }
@@ -197,7 +197,7 @@ std::shared_ptr<ConfigOption> ConfigBoxLayoutSetup::newOption(const pugi::xml_no
     return optionValue;
 }
 
-std::string ConfigBoxLayoutSetup::getItemPath(int index, config_option_t propOption, config_option_t propOption2, config_option_t propOption3, config_option_t propOption4) const
+std::string ConfigBoxLayoutSetup::getItemPath(int index, ConfigVal propOption, ConfigVal propOption2, ConfigVal propOption3, ConfigVal propOption4) const
 {
     if (index == ITEM_PATH_PREFIX) {
         return ConfigDefinition::mapConfigOption(option);
@@ -206,12 +206,12 @@ std::string ConfigBoxLayoutSetup::getItemPath(int index, config_option_t propOpt
         return ConfigDefinition::mapConfigOption(option);
     }
     if (index == ITEM_PATH_NEW) {
-        if (propOption != CFG_MAX) {
+        if (propOption != ConfigVal::MAX) {
             return fmt::format("{}[_]/{}", ConfigDefinition::mapConfigOption(option), ConfigDefinition::ensureAttribute(propOption));
         }
         return fmt::format("{}[_]", ConfigDefinition::mapConfigOption(option));
     }
-    if (propOption != CFG_MAX) {
+    if (propOption != ConfigVal::MAX) {
         return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(option), index, ConfigDefinition::ensureAttribute(propOption));
     }
     return fmt::format("{}[{}]", ConfigDefinition::mapConfigOption(option), index);

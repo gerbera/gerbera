@@ -38,6 +38,8 @@
 
 #include "database/sql_database.h"
 
+#include "config/config_val.h"
+
 #include <mysql.h>
 #include <vector>
 

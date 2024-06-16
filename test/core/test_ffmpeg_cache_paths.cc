@@ -20,8 +20,10 @@
     $Id$
 */
 #include "../mock/config_mock.h"
+
+#include "config/config_val.h"
 #include "metadata/ffmpeg_thumbnailer_handler.h"
-#include <metadata/ffmpeg_handler.h>
+#include "metadata/ffmpeg_handler.h"
 
 #include <gtest/gtest.h>
 
@@ -33,20 +35,20 @@ TEST(Thumbnailer_Cache, BaseDirFromConfig)
 {
     auto ctx = std::make_shared<Context>(std::make_shared<ConfigMock>(), nullptr, nullptr, nullptr, nullptr);
     auto cfg = std::static_pointer_cast<ConfigMock>(ctx->getConfig());
-    EXPECT_CALL(*cfg, getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR))
+    EXPECT_CALL(*cfg, getOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR))
         .WillOnce(Return("/var/lib/cache"));
-    EXPECT_EQ(FfmpegThumbnailerHandler(ctx, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED).getThumbnailCacheBasePath(), fs::path { "/var/lib/cache" });
+    EXPECT_EQ(FfmpegThumbnailerHandler(ctx, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED).getThumbnailCacheBasePath(), fs::path { "/var/lib/cache" });
 }
 
 TEST(Thumbnailer_Cache, BaseDirDefaultFromUserHome)
 {
     auto ctx = std::make_shared<Context>(std::make_shared<ConfigMock>(), nullptr, nullptr, nullptr, nullptr);
     auto cfg = std::static_pointer_cast<ConfigMock>(ctx->getConfig());
-    EXPECT_CALL(*cfg, getOption(CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR))
+    EXPECT_CALL(*cfg, getOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR))
         .WillOnce(Return(""));
-    EXPECT_CALL(*cfg, getOption(CFG_SERVER_HOME))
+    EXPECT_CALL(*cfg, getOption(ConfigVal::SERVER_HOME))
         .WillOnce(Return("/var/lib/gerbera"));
-    EXPECT_EQ(FfmpegThumbnailerHandler(ctx, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED).getThumbnailCacheBasePath(), fs::path { "/var/lib/gerbera/cache-dir" });
+    EXPECT_EQ(FfmpegThumbnailerHandler(ctx, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED).getThumbnailCacheBasePath(), fs::path { "/var/lib/gerbera/cache-dir" });
 }
 
 TEST(Thumbnailer_Cache, CachePathAppendsAbsolute)

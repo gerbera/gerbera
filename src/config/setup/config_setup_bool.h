@@ -32,18 +32,18 @@ class ConfigBoolSetup : public ConfigSetup {
     using ConfigSetup::ConfigSetup;
 
 public:
-    ConfigBoolSetup(config_option_t option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check = nullptr)
+    ConfigBoolSetup(ConfigVal option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check = nullptr)
         : ConfigSetup(option, xpath, help, std::move(check), defaultValue)
     {
     }
 
-    ConfigBoolSetup(config_option_t option, const char* xpath, const char* help, bool defaultValue, StringCheckFunction check = nullptr)
+    ConfigBoolSetup(ConfigVal option, const char* xpath, const char* help, bool defaultValue, StringCheckFunction check = nullptr)
         : ConfigSetup(option, xpath, help, std::move(check))
     {
         this->defaultValue = defaultValue ? YES : NO;
     }
 
-    ConfigBoolSetup(config_option_t option, const char* xpath, const char* help, bool defaultValue, bool required)
+    ConfigBoolSetup(ConfigVal option, const char* xpath, const char* help, bool defaultValue, bool required)
         : ConfigSetup(option, xpath, help, required)
     {
         this->defaultValue = defaultValue ? YES : NO;

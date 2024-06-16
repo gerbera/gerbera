@@ -36,6 +36,7 @@
 #include "autoscan_inotify.h" // API
 
 #include "config/config_option_enum.h"
+#include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "content/autoscan_setting.h"
 #include "content/content.h"
@@ -55,8 +56,8 @@ AutoscanInotify::AutoscanInotify(const std::shared_ptr<Content>& content)
     , database(content->getContext()->getDatabase())
     , content(content)
 {
-    defFollowSymlinks = this->config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
-    defHidden = this->config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+    defFollowSymlinks = this->config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
+    defHidden = this->config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
     std::error_code ec;
     if (isRegularFile(INOTIFY_MAX_USER_WATCHES_FILE, ec)) {
         try {
@@ -69,7 +70,7 @@ AutoscanInotify::AutoscanInotify(const std::shared_ptr<Content>& content)
 
     shutdownFlag = true;
     events = IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT;
-    if (this->config->getBoolOption(CFG_IMPORT_AUTOSCAN_INOTIFY_ATTRIB))
+    if (this->config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_ATTRIB))
         events |= IN_ATTRIB;
 }
 
@@ -103,7 +104,7 @@ void AutoscanInotify::run()
 void AutoscanInotify::threadProc()
 {
     std::error_code ec;
-    auto importMode = EnumOption<ImportMode>::getEnumOption(config, CFG_IMPORT_LAYOUT_MODE);
+    auto importMode = EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
     while (!shutdownFlag) {
         try {
             std::unique_lock<std::mutex> lock(mutex);

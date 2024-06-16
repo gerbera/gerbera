@@ -28,6 +28,7 @@
 #include "matroska_handler.h" // API
 
 #include "cds/cds_item.h"
+#include "config/config_val.h"
 #include "exceptions.h"
 #include "iohandler/mem_io_handler.h"
 #include "util/grb_time.h"
@@ -106,7 +107,7 @@ public:
 };
 
 MatroskaHandler::MatroskaHandler(const std::shared_ptr<Context>& context)
-    : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_MKV_ENABLED)
+    : MediaMetadataHandler(context, ConfigVal::IMPORT_LIBOPTS_MKV_ENABLED)
 {
 }
 
@@ -266,7 +267,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
     // master elements
     info->Read(ebmlStream, EBML_CONTEXT(info), iUpperLevel, dummyEl, true);
 
-    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_MKV_CHARSET, item->getLocation(), config);
+    auto sc = StringConverter::m2i(ConfigVal::IMPORT_LIBOPTS_MKV_CHARSET, item->getLocation(), config);
     for (auto&& el : *info) {
         if (EbmlId(*el) == EBML_ID(KaxTitle)) {
             auto titleEl = dynamic_cast<KaxTitle*>(el);

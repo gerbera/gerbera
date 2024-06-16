@@ -40,6 +40,7 @@
 #include "cm_task.h"
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
+#include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "database/database.h"
 #include "exceptions.h"
@@ -102,7 +103,7 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     task_processor = std::make_shared<TaskProcessor>(config);
 #endif
     importService = std::make_shared<ImportService>(this->context);
-    importMode = EnumOption<ImportMode>::getEnumOption(config, CFG_IMPORT_LAYOUT_MODE);
+    importMode = EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
 }
 
 void ContentManager::run()
@@ -133,7 +134,7 @@ void ContentManager::run()
     }
 
     autoscanList = database->getAutoscanList(AutoscanScanMode::Timed);
-    for (auto& dir : config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_TIMED_LIST)) {
+    for (auto& dir : config->getAutoscanListOption(ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST)) {
         fs::path path = dir->getLocation();
         if (fs::is_directory(path)) {
             dir->setObjectID(ensurePathExistence(path));
@@ -150,7 +151,7 @@ void ContentManager::run()
 #ifdef HAVE_INOTIFY
     inotify = std::make_unique<AutoscanInotify>(self);
 
-    if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+    if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
         auto db = database->getAutoscanList(AutoscanScanMode::INotify);
         for (std::size_t i = 0; i < db->size(); i++) {
             auto dir = db->get(i);
@@ -166,7 +167,7 @@ void ContentManager::run()
                 continue;
             }
         }
-        for (const auto& dir : config->getAutoscanListOption(CFG_IMPORT_AUTOSCAN_INOTIFY_LIST)) {
+        for (const auto& dir : config->getAutoscanListOption(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST)) {
             fs::path path = dir->getLocation();
             if (fs::is_directory(path)) {
                 dir->setObjectID(ensurePathExistence(path));
@@ -185,7 +186,7 @@ void ContentManager::run()
     inotify->run();
 #endif
 
-    auto layoutType = EnumOption<LayoutType>::getEnumOption(config, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+    auto layoutType = EnumOption<LayoutType>::getEnumOption(config, ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
     log_debug("virtual layout Type {}", layoutType);
     layoutEnabled = (layoutType == LayoutType::Builtin || layoutType == LayoutType::Js);
 
@@ -193,17 +194,17 @@ void ContentManager::run()
     online_services = std::make_unique<OnlineServiceList>();
 
 #ifdef ATRAILERS
-    if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_ENABLED)) {
+    if (config->getBoolOption(ConfigVal::ONLINE_CONTENT_ATRAILERS_ENABLED)) {
         try {
             auto at = std::make_shared<ATrailersService>(self);
 
-            auto i = std::chrono::seconds(config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_REFRESH));
+            auto i = std::chrono::seconds(config->getIntOption(ConfigVal::ONLINE_CONTENT_ATRAILERS_REFRESH));
             at->setRefreshInterval(i);
 
-            i = std::chrono::seconds(config->getIntOption(CFG_ONLINE_CONTENT_ATRAILERS_PURGE_AFTER));
+            i = std::chrono::seconds(config->getIntOption(ConfigVal::ONLINE_CONTENT_ATRAILERS_PURGE_AFTER));
             at->setItemPurgeInterval(i);
-            if (config->getBoolOption(CFG_ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START))
-                i = CFG_DEFAULT_UPDATE_AT_START;
+            if (config->getBoolOption(ConfigVal::ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START))
+                i = DEFAULT_UPDATE_AT_START;
 
             auto atParam = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, to_underlying(OnlineServiceType::OS_ATrailers));
             at->setTimerParameter(std::move(atParam));
@@ -225,7 +226,7 @@ void ContentManager::run()
     autoscanList->notifyAll(this);
     auto self_content = std::dynamic_pointer_cast<Content>(self);
 #ifdef HAVE_INOTIFY
-    autoscanList->initTimer(self_content, timer, config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY), inotify);
+    autoscanList->initTimer(self_content, timer, config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY), inotify);
 #else
     autoscanList->initTimer(self_content, timer);
 #endif
@@ -1228,7 +1229,7 @@ void ContentManager::initLayout()
     if (layoutEnabled) {
         auto self = shared_from_this();
         auto lock = threadRunner->lockGuard("initLayout");
-        auto layoutType = EnumOption<LayoutType>::getEnumOption(config, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+        auto layoutType = EnumOption<LayoutType>::getEnumOption(config, ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
         importService->initLayout(layoutType);
         for (std::size_t i = 0; i < autoscanList->size(); i++) {
             auto autoscanDir = autoscanList->get(i);
@@ -1459,7 +1460,7 @@ void ContentManager::cleanupTasks(const fs::path& path)
         if (dir->getScanMode() == AutoscanScanMode::Timed) {
             timer->removeTimerSubscriber(this, rmList->get(i)->getTimerParameter(), true);
 #ifdef HAVE_INOTIFY
-        } else if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+        } else if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
             inotify->unmonitor(dir);
 #endif
         }
@@ -1533,7 +1534,7 @@ void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirec
         timer->removeTimerSubscriber(this, adir->getTimerParameter(), true);
     }
 #ifdef HAVE_INOTIFY
-    else if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && (adir->getScanMode() == AutoscanScanMode::INotify)) {
+    else if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY) && (adir->getScanMode() == AutoscanScanMode::INotify)) {
         inotify->unmonitor(adir);
     }
 #endif
@@ -1589,7 +1590,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         auto asImportService = std::make_shared<ImportService>(context);
         asImportService->run(self, dir, dir->getLocation());
         dir->setImportService(asImportService);
-        auto layoutType = EnumOption<LayoutType>::getEnumOption(config, CFG_IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+        auto layoutType = EnumOption<LayoutType>::getEnumOption(config, ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
         asImportService->initLayout(layoutType);
         scanDir(dir, true);
         return;
@@ -1598,7 +1599,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     if (original->getScanMode() == AutoscanScanMode::Timed)
         timer->removeTimerSubscriber(this, original->getTimerParameter(), true);
 #ifdef HAVE_INOTIFY
-    else if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && (original->getScanMode() == AutoscanScanMode::INotify))
+    else if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY) && (original->getScanMode() == AutoscanScanMode::INotify))
         inotify->unmonitor(original);
 #endif
 
@@ -1624,7 +1625,7 @@ void ContentManager::scanDir(const std::shared_ptr<AutoscanDirectory>& dir, bool
     if (dir->getScanMode() == AutoscanScanMode::Timed)
         timerNotify(dir->getTimerParameter());
 #ifdef HAVE_INOTIFY
-    else if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY) && (dir->getScanMode() == AutoscanScanMode::INotify))
+    else if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY) && (dir->getScanMode() == AutoscanScanMode::INotify))
         inotify->monitor(dir);
 #endif
 
@@ -1646,13 +1647,13 @@ void ContentManager::triggerPlayHook(const std::string& group, const std::shared
     playStatus->setLastPlayed();
     database->savePlayStatus(playStatus);
 
-    bool suppress = config->getBoolOption(CFG_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
+    bool suppress = config->getBoolOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
     log_debug("Marking object {} as played", obj->getTitle());
     if (!suppress)
         updateObject(obj, true);
 
 #ifdef HAVE_LASTFMLIB
-    if (config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED) && item->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
+    if (config->getBoolOption(ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED) && item->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
         last_fm->startedPlaying(item);
     }
 #endif

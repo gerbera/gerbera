@@ -36,6 +36,7 @@
 
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "content/scripting/script_names.h"
 #include "exceptions.h"
 #include "metadata_enums.h"
@@ -73,7 +74,7 @@ MetadataService::MetadataService(const std::shared_ptr<Context>& context, const 
     , config(context->getConfig())
     , content(content)
 {
-    mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 
     handlers = std::map<MetadataType, std::shared_ptr<MetadataHandler>> {
 #ifdef HAVE_TAGLIB
@@ -95,9 +96,9 @@ MetadataService::MetadataService(const std::shared_ptr<Context>& context, const 
         { MetadataType::Ffmpeg, std::make_shared<FfmpegHandler>(context) },
 #endif
 #ifdef HAVE_FFMPEGTHUMBNAILER
-        { MetadataType::VideoThumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED) },
-        { MetadataType::ImageThumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_ENABLED) },
-        { MetadataType::Thumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, CFG_SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) },
+        { MetadataType::VideoThumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED) },
+        { MetadataType::ImageThumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_ENABLED) },
+        { MetadataType::Thumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) },
 #endif
         { MetadataType::FanArt, std::make_shared<FanArtHandler>(context) },
         { MetadataType::ContainerArt, std::make_shared<ContainerArtHandler>(context) },

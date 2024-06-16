@@ -39,6 +39,7 @@
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "content/autoscan_setting.h"
 #include "content/content.h"
 #include "database/database.h"
@@ -49,12 +50,12 @@
 PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
     : ParserScript(content, parent, "playlist", "playlist")
 {
-    std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
+    std::string scriptPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
     if (!scriptPath.empty()) {
         load(scriptPath);
         scriptMode = true;
     } else {
-        playlistFunction = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST);
+        playlistFunction = config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST);
     }
 }
 
@@ -77,9 +78,9 @@ std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cd
 
         if (!mainObj) {
             AutoScanSetting asSetting;
-            asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+            asSetting.followSymlinks = config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
             asSetting.recursive = false;
-            asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+            asSetting.hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
             asSetting.rescanResource = false;
             asSetting.async = false;
             asSetting.adir = content->findAutoscanDirectory(rootPath);
@@ -110,7 +111,7 @@ bool PlaylistParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
         }
         cdsObj->setRefID(pcdId);
         cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-    } else if (config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) || config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS)) {
+    } else if (config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) || config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS)) {
         cdsObj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
         cdsObj->setRefID(origObject->getID());
     }
@@ -119,7 +120,7 @@ bool PlaylistParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
 
 void PlaylistParserScript::handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont)
 {
-    if ((config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) || config->getBoolOption(CFG_IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS)) && cont->getRefID() > 0) {
+    if ((config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) || config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS)) && cont->getRefID() > 0) {
         cont->setFlag(OBJECT_FLAG_PLAYLIST_REF);
     }
 }
