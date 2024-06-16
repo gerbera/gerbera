@@ -27,7 +27,7 @@
     "@popperjs/core": "^2.11.8",
     "babel-loader": "^8.3.0",
     "bootstrap": "^4.6.2",
-    "braces": "^3.0.2",
+    "braces": "^3.0.3",
     "chai": "^4.3.7",
     "chromedriver": "124.0",
     "concurrently": "^7.6.0",
