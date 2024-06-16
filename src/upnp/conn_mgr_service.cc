@@ -36,6 +36,7 @@
 
 #include "action_request.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "database/database.h"
 #include "exceptions.h"
 #include "subscription_request.h"
@@ -127,7 +128,7 @@ void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequ
 
 #if defined(USING_NPUPNP)
     UpnpAcceptSubscriptionXML(
-        deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(),
+        deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(),
         UPNP_DESC_CM_SERVICE_ID, xml, request.getSubscriptionID().c_str());
 #else
     IXML_Document* event = nullptr;
@@ -137,7 +138,7 @@ void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequ
     }
 
     UpnpAcceptSubscriptionExt(deviceHandle,
-        config->getOption(CFG_SERVER_UDN).c_str(),
+        config->getOption(ConfigVal::SERVER_UDN).c_str(),
         UPNP_DESC_CM_SERVICE_ID, event, request.getSubscriptionID().c_str());
 
     ixmlDocument_free(event);
@@ -153,7 +154,7 @@ void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceP
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
 #if defined(USING_NPUPNP)
-    UpnpNotifyXML(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CM_SERVICE_ID, xml);
+    UpnpNotifyXML(deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(), UPNP_DESC_CM_SERVICE_ID, xml);
 #else
     IXML_Document* event = nullptr;
     int err = ixmlParseBufferEx(xml.c_str(), &event);
@@ -162,7 +163,7 @@ void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceP
         throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
     }
 
-    UpnpNotifyExt(deviceHandle, config->getOption(CFG_SERVER_UDN).c_str(), UPNP_DESC_CM_SERVICE_ID, event);
+    UpnpNotifyExt(deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(), UPNP_DESC_CM_SERVICE_ID, event);
 
     ixmlDocument_free(event);
 #endif

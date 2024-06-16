@@ -38,6 +38,7 @@
 
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "exceptions.h"
 #include "iohandler/mem_io_handler.h"
 #include "metadata_enums.h"
@@ -88,10 +89,10 @@ private:
 GerberaTagLibDebugListener GerberaTagLibDebugListener::grbListener;
 
 TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
-    : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_ID3_ENABLED, CFG_IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST, CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST)
+    : MediaMetadataHandler(context, ConfigVal::IMPORT_LIBOPTS_ID3_ENABLED, ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST, ConfigVal::IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST)
 {
-    entrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
-    legacyEntrySeparator = this->config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_LEGACY_SEP);
+    entrySeparator = this->config->getOption(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP);
+    legacyEntrySeparator = this->config->getOption(ConfigVal::IMPORT_LIBOPTS_ENTRY_LEGACY_SEP);
     trimStringInPlace(legacyEntrySeparator);
     if (legacyEntrySeparator.empty())
         legacyEntrySeparator = "\n";
@@ -273,7 +274,7 @@ void TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     if (!item || !isEnabled)
         return;
 
-    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string contentType = getValueOrDefault(mappings, item->getMimeType());
 
     auto fs = TagLib::FileStream(item->getLocation().c_str(), true); // true = Read only
@@ -340,7 +341,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
     if (!item) // not streamable
         return nullptr;
 
-    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string contentType = getValueOrDefault(mappings, item->getMimeType());
     auto itemLocation = item->getLocation().c_str();
 
@@ -486,7 +487,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr
     // http://id3.org/id3v2.4.0-frames "4.2.6. User defined text information frame"
     bool hasTXXXFrames = frameListMap.contains("TXXX");
 
-    std::vector<std::string> auxTagsList = config->getArrayOption(CFG_IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
+    std::vector<std::string> auxTagsList = config->getArrayOption(ConfigVal::IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST);
     for (auto&& desiredFrame : auxTagsList) {
         if (desiredFrame.empty()) {
             continue;

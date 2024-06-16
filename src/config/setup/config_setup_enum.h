@@ -36,14 +36,14 @@ protected:
     std::map<std::string, En> valueMap;
 
 public:
-    ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, std::map<std::string, En> valueMap, bool notEmpty = false)
+    ConfigEnumSetup(ConfigVal option, const char* xpath, const char* help, std::map<std::string, En> valueMap, bool notEmpty = false)
         : ConfigSetup(option, xpath, help, false, "")
         , notEmpty(notEmpty)
         , valueMap(std::move(valueMap))
     {
     }
 
-    ConfigEnumSetup(config_option_t option, const char* xpath, const char* help, En defaultValue, std::map<std::string, En> valueMap, bool notEmpty = false)
+    ConfigEnumSetup(ConfigVal option, const char* xpath, const char* help, En defaultValue, std::map<std::string, En> valueMap, bool notEmpty = false)
         : ConfigSetup(option, xpath, help, false, "")
         , notEmpty(notEmpty)
         , valueMap(std::move(valueMap))

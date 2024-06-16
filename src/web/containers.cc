@@ -35,6 +35,7 @@
 #include "pages.h" // API
 
 #include "cds/cds_container.h"
+#include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "database/database.h"
 #include "exceptions.h"
@@ -87,7 +88,7 @@ void Web::Containers::process()
         if (autoscanType > 0) {
             autoscanMode = AUTOSCAN_TIMED;
 #ifdef HAVE_INOTIFY
-            if (config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY)) {
+            if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
                 auto adir = database->getAutoscanDirectory(cont->getID());
                 if (adir && (adir->getScanMode() == AutoscanScanMode::INotify))
                     autoscanMode = AUTOSCAN_INOTIFY;

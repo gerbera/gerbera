@@ -39,6 +39,7 @@
 #define GRB_LOG_FAC GrbLogFacility::server
 
 #include "config/config_manager.h"
+#include "config/config_val.h"
 #include "config/grb_runtime.h"
 #include "contrib/cxxopts.hpp"
 #include "exceptions.h"
@@ -161,16 +162,16 @@ int main(int argc, char** argv, char** envp)
     runtime.init(&options);
     std::optional<std::string> magic = runtime.getMagic();
     const auto additionalArgs = std::vector<ConfigOptionArgs> {
-        { CFG_SERVER_PORT, "p", "port", "Port to bind with, must be >=49152", std::optional<std::string>(), "PORT" },
-        { CFG_SERVER_IP, "i", "ip", "IP to bind with", std::optional<std::string>(), "IP" },
-        { CFG_SERVER_NETWORK_INTERFACE, "e", "interface", "Interface to bind with", std::optional<std::string>(), "IF" },
-        { CFG_SERVER_HOME, "m", GRB_OPTION_HOME, "Search this directory for a .config/gerbera folder containing a config file", std::optional<std::string>(), "DIR" },
+        { ConfigVal::SERVER_PORT, "p", "port", "Port to bind with, must be >=49152", std::optional<std::string>(), "PORT" },
+        { ConfigVal::SERVER_IP, "i", "ip", "IP to bind with", std::optional<std::string>(), "IP" },
+        { ConfigVal::SERVER_NETWORK_INTERFACE, "e", "interface", "Interface to bind with", std::optional<std::string>(), "IF" },
+        { ConfigVal::SERVER_HOME, "m", GRB_OPTION_HOME, "Search this directory for a .config/gerbera folder containing a config file", std::optional<std::string>(), "DIR" },
 #ifdef HAVE_MAGIC
-        { CFG_IMPORT_MAGIC_FILE, "", "magic", "Set magic FILE", magic, "FILE" },
+        { ConfigVal::IMPORT_MAGIC_FILE, "", "magic", "Set magic FILE", magic, "FILE" },
 #endif
-        { CFG_IMPORT_LAYOUT_MODE, "", "import-mode", "Activate import MODE ('mt' or 'grb')", std::optional<std::string>(), "MODE" },
+        { ConfigVal::IMPORT_LAYOUT_MODE, "", "import-mode", "Activate import MODE ('mt' or 'grb')", std::optional<std::string>(), "MODE" },
 #ifdef GRBDEBUG
-        { CFG_SERVER_LOG_DEBUG_MODE, "", "debug-mode", "Set debugging mode to FACILITY", std::optional<std::string>(), "FACILITY" },
+        { ConfigVal::SERVER_LOG_DEBUG_MODE, "", "debug-mode", "Set debugging mode to FACILITY", std::optional<std::string>(), "FACILITY" },
 #endif
     };
 
@@ -218,12 +219,12 @@ int main(int argc, char** argv, char** envp)
             runtime.handleConfigOptions(configManager, additionalArgs);
             configManager->validate();
 #ifdef GRBDEBUG
-            GrbLogger::Logger.init(configManager->getIntOption(CFG_SERVER_LOG_DEBUG_MODE));
+            GrbLogger::Logger.init(configManager->getIntOption(ConfigVal::SERVER_LOG_DEBUG_MODE));
 #endif
             if (results.count(GRB_OPTION_CHECKCONFIG) > 0) {
                 runtime.exit(EXIT_SUCCESS);
             }
-            portnum = configManager->getUIntOption(CFG_SERVER_PORT);
+            portnum = configManager->getUIntOption(ConfigVal::SERVER_PORT);
         } catch (const ConfigParseException& ce) {
             log_error("Error parsing config file '{}': {}", runtime.getConfigFile().c_str(), ce.what());
             runtime.exit(EXIT_FAILURE);
@@ -308,9 +309,9 @@ int main(int argc, char** argv, char** envp)
                         runtimeChild.handleConfigOptions(configManager, additionalArgs);
                         configManager->validate();
 #ifdef GRBDEBUG
-                        GrbLogger::Logger.init(configManager->getIntOption(CFG_SERVER_LOG_DEBUG_MODE));
+                        GrbLogger::Logger.init(configManager->getIntOption(ConfigVal::SERVER_LOG_DEBUG_MODE));
 #endif
-                        portnum = configManager->getUIntOption(CFG_SERVER_PORT);
+                        portnum = configManager->getUIntOption(ConfigVal::SERVER_PORT);
                     } catch (const ConfigParseException& ce) {
                         log_error("Error parsing config file '{}': {}", runtimeChild.getConfigFile().c_str(), ce.what());
                         log_error("Could not restart Gerbera");

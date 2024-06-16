@@ -35,6 +35,7 @@
 #include "sqlite_database.h" // API
 
 #include "config/config.h"
+#include "config/config_val.h"
 #include "exceptions.h"
 #include "sl_task.h"
 
@@ -62,8 +63,8 @@ void Sqlite3Database::prepare()
 {
     _exec("PRAGMA locking_mode = EXCLUSIVE");
     _exec("PRAGMA foreign_keys = ON");
-    _exec(fmt::format("PRAGMA journal_mode = {}", config->getOption(CFG_SERVER_STORAGE_SQLITE_JOURNALMODE)));
-    exec(fmt::format("PRAGMA synchronous = {}", config->getIntOption(CFG_SERVER_STORAGE_SQLITE_SYNCHRONOUS)));
+    _exec(fmt::format("PRAGMA journal_mode = {}", config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_JOURNALMODE)));
+    exec(fmt::format("PRAGMA synchronous = {}", config->getIntOption(ConfigVal::SERVER_STORAGE_SQLITE_SYNCHRONOUS)));
 }
 
 void Sqlite3Database::init()
@@ -71,7 +72,7 @@ void Sqlite3Database::init()
     dbInitDone = false;
     SQLDatabase::init();
 
-    fs::path dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    fs::path dbFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
     auto dbFile = GrbFile(dbFilePath);
     log_debug("SQLite path: {}", dbFilePath.c_str());
 
@@ -110,7 +111,7 @@ void Sqlite3Database::init()
     } catch (const std::runtime_error&) {
         log_warning("Sqlite3 database seems to be corrupt or doesn't exist yet.");
         // database seems to be corrupt or nonexistent
-        if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_RESTORE) && sqliteStatus == SQLITE_OK) {
+        if (config->getBoolOption(ConfigVal::SERVER_STORAGE_SQLITE_RESTORE) && sqliteStatus == SQLITE_OK) {
             // try to restore database
 
             // checking for backup file
@@ -154,15 +155,15 @@ void Sqlite3Database::init()
     }
 
     try {
-        upgradeDatabase(std::stoul(dbVersion), hashies, CFG_SERVER_STORAGE_SQLITE_UPGRADE_FILE, sqlite3UpdateVersion, sqlite3AddResourceAttr);
-        if (config->getBoolOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_ENABLED) && timer) {
+        upgradeDatabase(std::stoul(dbVersion), hashies, ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE, sqlite3UpdateVersion, sqlite3AddResourceAttr);
+        if (config->getBoolOption(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED) && timer) {
             // do a backup now
             auto btask = std::make_shared<SLBackupTask>(config, false);
             this->addTask(btask);
             btask->waitForTask();
 
             // add timer for backups
-            auto backupInterval = std::chrono::seconds(config->getIntOption(CFG_SERVER_STORAGE_SQLITE_BACKUP_INTERVAL));
+            auto backupInterval = std::chrono::seconds(config->getIntOption(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL));
             timer->addTimerSubscriber(this, backupInterval, nullptr);
             hasBackupTimer = true;
         }
@@ -347,7 +348,7 @@ void Sqlite3Database::threadProc()
     try {
         sqlite3* db;
 
-        std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+        std::string dbFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
         int res = sqlite3_open(dbFilePath.c_str(), &db);
         if (res != SQLITE_OK) {

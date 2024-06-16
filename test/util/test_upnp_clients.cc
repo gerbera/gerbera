@@ -31,7 +31,7 @@
 class MyConfigMock final : public ConfigMock {
 public:
     MyConfigMock() { list = std::make_shared<ClientConfigList>(); }
-    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return list; }
+    std::shared_ptr<ClientConfigList> getClientConfigListOption(ConfigVal option) const override { return list; }
     std::shared_ptr<ClientConfigList> list;
 };
 

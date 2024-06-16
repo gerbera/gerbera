@@ -36,6 +36,7 @@
 #include "libexif_handler.h" // API
 
 #include "cds/cds_item.h"
+#include "config/config_val.h"
 #include "exceptions.h"
 #include "iohandler/file_io_handler.h"
 #include "iohandler/mem_io_handler.h"
@@ -191,7 +192,7 @@ static void logfunc(ExifLog* log, ExifLogCode code, const char* domain, const ch
 }
 
 LibExifHandler::LibExifHandler(const std::shared_ptr<Context>& context)
-    : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_EXIF_ENABLED, CFG_IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST, CFG_IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST)
+    : MediaMetadataHandler(context, ConfigVal::IMPORT_LIBOPTS_EXIF_ENABLED, ConfigVal::IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST, ConfigVal::IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST)
 {
     log = exif_log_new();
     exif_log_set_func(log, logfunc, nullptr);
@@ -289,7 +290,7 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     if (!item || !isEnabled)
         return;
 
-    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_EXIF_CHARSET, item->getLocation(), config);
+    auto sc = StringConverter::m2i(ConfigVal::IMPORT_LIBOPTS_EXIF_CHARSET, item->getLocation(), config);
     ExifData* exifData = exif_data_new_from_file(item->getLocation().c_str());
 
     if (!exifData) {

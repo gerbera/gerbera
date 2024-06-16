@@ -35,6 +35,7 @@
 #include "pages.h" // API
 
 #include "common.h"
+#include "config/config_val.h"
 #include "database/database.h"
 #include "exceptions.h"
 #include "util/string_converter.h"
@@ -60,7 +61,7 @@ void Web::Files::process()
 
     std::error_code ec;
     std::map<std::string, fs::path> filesMap;
-    auto&& includesFullpath = config->getArrayOption(CFG_IMPORT_VISIBLE_DIRECTORIES);
+    auto&& includesFullpath = config->getArrayOption(ConfigVal::IMPORT_VISIBLE_DIRECTORIES);
 
     for (auto&& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();

@@ -35,6 +35,7 @@
 #include "pages.h" // API
 
 #include "common.h"
+#include "config/config_val.h"
 #include "content/autoscan_setting.h"
 #include "content/content.h"
 #include "exceptions.h"
@@ -54,8 +55,8 @@ void Web::Add::process()
 
     AutoScanSetting asSetting;
     asSetting.recursive = true;
-    asSetting.followSymlinks = config->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
-    asSetting.hidden = config->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+    asSetting.followSymlinks = config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
+    asSetting.hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
     asSetting.mergeOptions(config, path);
 
     std::error_code ec;

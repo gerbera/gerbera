@@ -42,7 +42,7 @@ public:
 
     Enum getEnumOption() const { return option; }
 
-    static Enum getEnumOption(const std::shared_ptr<Config>& config, config_option_t option)
+    static Enum getEnumOption(const std::shared_ptr<Config>& config, ConfigVal option)
     {
         auto optionValue = config->getConfigOption(option);
         auto optionEnumValue = std::dynamic_pointer_cast<EnumOption<Enum>>(optionValue);

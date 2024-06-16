@@ -35,6 +35,7 @@
 #include "web_request_handler.h" // API
 
 #include "config/config.h"
+#include "config/config_val.h"
 #include "content/content.h"
 #include "exceptions.h"
 #include "iohandler/mem_io_handler.h"
@@ -149,7 +150,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, const s
     std::string output;
     // processing page, creating output
     try {
-        if (!config->getBoolOption(CFG_SERVER_UI_ENABLED)) {
+        if (!config->getBoolOption(ConfigVal::SERVER_UI_ENABLED)) {
             log_warning("The UI is disabled in the configuration file. See README.");
             error = "The UI is disabled in the configuration file. See README.";
             errorCode = 900;

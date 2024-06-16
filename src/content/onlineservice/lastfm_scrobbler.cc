@@ -47,11 +47,11 @@ LastFm::LastFm(const std::shared_ptr<Context>& context)
 
 void LastFm::run()
 {
-    if (!config->getBoolOption(CFG_SERVER_EXTOPTS_LASTFM_ENABLED))
+    if (!config->getBoolOption(ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED))
         return;
 
-    std::string username = config->getOption(CFG_SERVER_EXTOPTS_LASTFM_USERNAME);
-    std::string password = config->getOption(CFG_SERVER_EXTOPTS_LASTFM_PASSWORD);
+    std::string username = config->getOption(ConfigVal::SERVER_EXTOPTS_LASTFM_USERNAME);
+    std::string password = config->getOption(ConfigVal::SERVER_EXTOPTS_LASTFM_PASSWORD);
 
     scrobbler = std::make_unique<LastFmScrobbler>(username, password, false, false);
     scrobbler->authenticate();

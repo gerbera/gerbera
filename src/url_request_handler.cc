@@ -37,6 +37,7 @@
 
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "config/result/transcoding.h"
 #include "content/content.h"
 #include "database/database.h"
@@ -69,7 +70,7 @@ const struct ClientInfo* URLRequestHandler::getInfo(const char* filename, UpnpFi
     std::string mimeType;
 
     if (!trProfile.empty()) {
-        auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
+        auto tp = config->getTranscodingProfileListOption(ConfigVal::TRANSCODING_PROFILE_LIST)
                       ->getByName(trProfile);
         if (!tp)
             throw_std_runtime_error("Transcoding requested but no profile matching the name {} found", trProfile);
@@ -141,7 +142,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, const s
 
     std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     if (!trProfile.empty()) {
-        auto tp = config->getTranscodingProfileListOption(CFG_TRANSCODING_PROFILE_LIST)
+        auto tp = config->getTranscodingProfileListOption(ConfigVal::TRANSCODING_PROFILE_LIST)
                       ->getByName(trProfile);
         if (!tp)
             throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", url, trProfile);

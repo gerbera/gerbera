@@ -29,6 +29,7 @@
 #include "autoscan_setting.h"
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
+#include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "content_manager.h"
 #include "database/database.h"
@@ -123,16 +124,16 @@ ImportService::ImportService(std::shared_ptr<Context> context)
     , mime(this->context->getMime())
     , database(this->context->getDatabase())
 {
-    hasReadableNames = config->getBoolOption(CFG_IMPORT_READABLE_NAMES);
-    hasCaseSensitiveNames = config->getBoolOption(CFG_IMPORT_CASE_SENSITIVE_TAGS);
-    hasDefaultDate = config->getBoolOption(CFG_IMPORT_DEFAULT_DATE);
-    mimetypeContenttypeMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    mimetypeUpnpclassMap = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
-    configLayoutMapping = config->getDictionaryOption(CFG_IMPORT_LAYOUT_MAPPING);
-    containerImageParentCount = config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT);
-    containerImageMinDepth = config->getIntOption(CFG_IMPORT_RESOURCES_CONTAINERART_MINDEPTH);
-    virtualDirKeys = config->getArrayOption(CFG_IMPORT_VIRTUAL_DIRECTORY_KEYS);
-    noMediaName = config->getOption(CFG_IMPORT_NOMEDIA_FILE);
+    hasReadableNames = config->getBoolOption(ConfigVal::IMPORT_READABLE_NAMES);
+    hasCaseSensitiveNames = config->getBoolOption(ConfigVal::IMPORT_CASE_SENSITIVE_TAGS);
+    hasDefaultDate = config->getBoolOption(ConfigVal::IMPORT_DEFAULT_DATE);
+    mimetypeContenttypeMap = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    mimetypeUpnpclassMap = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST);
+    configLayoutMapping = config->getDictionaryOption(ConfigVal::IMPORT_LAYOUT_MAPPING);
+    containerImageParentCount = config->getIntOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT);
+    containerImageMinDepth = config->getIntOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_MINDEPTH);
+    virtualDirKeys = config->getArrayOption(ConfigVal::IMPORT_VIRTUAL_DIRECTORY_KEYS);
+    noMediaName = config->getOption(ConfigVal::IMPORT_NOMEDIA_FILE);
     UpnpMap::initMap(upnpMap, mimetypeUpnpclassMap);
 }
 

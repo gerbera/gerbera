@@ -24,6 +24,7 @@
 #include "sl_task.h" // API
 
 #include "config/config.h"
+#include "config/config_val.h"
 #include "exceptions.h"
 #include "sqlite_database.h"
 #include "util/tools.h"
@@ -73,7 +74,7 @@ SLInitTask::SLInitTask(std::shared_ptr<Config> config, unsigned int hashie)
 void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
 {
     log_debug("Running: init");
-    std::string dbFilePath = config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    std::string dbFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
 
     sqlite3_close(db);
 
@@ -81,7 +82,7 @@ void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
     if (res != SQLITE_OK)
         throw DatabaseException("", "SQLite: Failed to create new database");
 
-    auto sqlFilePath = fs::path(config->getOption(CFG_SERVER_STORAGE_SQLITE_INIT_SQL_FILE));
+    auto sqlFilePath = fs::path(config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE));
     log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
     auto sql = GrbFile(std::move(sqlFilePath)).readTextFile();
     auto&& myHash = stringHash(sql);
@@ -188,8 +189,8 @@ void SLExecTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
 SLBackupTask::SLBackupTask(std::shared_ptr<Config> config, bool restore)
     : config(std::move(config))
     , restore(restore)
-    , dbFile(this->config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE))
-    , dbBackupFile(fmt::format(SQLITE3_BACKUP_FORMAT, this->config->getOption(CFG_SERVER_STORAGE_SQLITE_DATABASE_FILE)))
+    , dbFile(this->config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE))
+    , dbBackupFile(fmt::format(SQLITE3_BACKUP_FORMAT, this->config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE)))
 {
 }
 

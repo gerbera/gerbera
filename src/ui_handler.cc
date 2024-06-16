@@ -24,8 +24,7 @@
 
 #include "ui_handler.h" // API
 
-#include <sstream>
-
+#include "config/config_val.h"
 #include "iohandler/file_io_handler.h"
 #include "iohandler/mem_io_handler.h"
 #include "upnp/quirks.h"
@@ -34,6 +33,8 @@
 #include "util/logger.h"
 #include "util/mime.h"
 #include "util/tools.h"
+
+#include <sstream>
 
 UIHandler::UIHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
     : RequestHandler(content, xmlBuilder)
@@ -70,7 +71,7 @@ const struct ClientInfo* UIHandler::getInfo(const char* filename, UpnpFileInfo* 
     }
 
     auto quirks = getQuirks(info);
-    auto uiEnabled = config->getBoolOption(CFG_SERVER_UI_ENABLED);
+    auto uiEnabled = config->getBoolOption(ConfigVal::SERVER_UI_ENABLED);
     if (!uiEnabled && !startswith(path, "/icons")) {
         log_warning("UI is disabled!");
         UpnpFileInfo_set_FileLength(info, -1);
@@ -81,7 +82,7 @@ const struct ClientInfo* UIHandler::getInfo(const char* filename, UpnpFileInfo* 
         return quirks ? quirks->getInfo() : nullptr;
     }
 
-    auto webroot = config->getOption(CFG_SERVER_WEBROOT);
+    auto webroot = config->getOption(ConfigVal::SERVER_WEBROOT);
     auto webFile = fmt::format("{}{}", webroot, path);
     log_debug("UI: file: {}", webFile);
 
@@ -107,7 +108,7 @@ std::unique_ptr<IOHandler> UIHandler::open(const char* filename, const std::shar
         path = "/index.html";
     }
 
-    auto webroot = config->getOption(CFG_SERVER_WEBROOT);
+    auto webroot = config->getOption(ConfigVal::SERVER_WEBROOT);
     auto webFile = fmt::format("{}{}", webroot, path);
     log_debug("UI: file: {}", webFile);
 

@@ -35,6 +35,7 @@
 #ifdef HAVE_MYSQL
 #include "mysql_database.h"
 
+#include "config/config_val.h"
 #include "exceptions.h"
 #include "util/thread_runner.h"
 #include "util/tools.h"
@@ -124,12 +125,12 @@ void MySQLDatabase::init()
     bool myBoolVar = true;
     mysql_options(&db, MYSQL_OPT_RECONNECT, &myBoolVar);
 
-    std::string dbHost = config->getOption(CFG_SERVER_STORAGE_MYSQL_HOST);
-    std::string dbName = config->getOption(CFG_SERVER_STORAGE_MYSQL_DATABASE);
-    std::string dbUser = config->getOption(CFG_SERVER_STORAGE_MYSQL_USERNAME);
-    auto dbPort = in_port_t(config->getIntOption(CFG_SERVER_STORAGE_MYSQL_PORT));
-    std::string dbPass = config->getOption(CFG_SERVER_STORAGE_MYSQL_PASSWORD);
-    std::string dbSock = config->getOption(CFG_SERVER_STORAGE_MYSQL_SOCKET);
+    std::string dbHost = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_HOST);
+    std::string dbName = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_DATABASE);
+    std::string dbUser = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_USERNAME);
+    auto dbPort = in_port_t(config->getIntOption(ConfigVal::SERVER_STORAGE_MYSQL_PORT));
+    std::string dbPass = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_PASSWORD);
+    std::string dbSock = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_SOCKET);
 
     resMysql = mysql_real_connect(&db,
         dbHost.c_str(),
@@ -155,7 +156,7 @@ void MySQLDatabase::init()
 
     if (dbVersion.empty()) {
         log_info("Database doesn't seem to exist. Creating database...");
-        auto sqlFilePath = fs::path(config->getOption(CFG_SERVER_STORAGE_MYSQL_INIT_SQL_FILE));
+        auto sqlFilePath = fs::path(config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE));
         log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
         auto sql = GrbFile(std::move(sqlFilePath)).readTextFile();
         auto&& myHash = stringHash(sql);
@@ -186,7 +187,7 @@ void MySQLDatabase::init()
         log_info("Database created successfully!");
     }
 
-    upgradeDatabase(std::stoul(dbVersion), hashies, CFG_SERVER_STORAGE_MYSQL_UPGRADE_FILE, mysqlUpdateVersion, mysqlAddResourceAttr);
+    upgradeDatabase(std::stoul(dbVersion), hashies, ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, mysqlUpdateVersion, mysqlAddResourceAttr);
 
     lock.unlock();
 

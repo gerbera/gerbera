@@ -29,6 +29,7 @@
 #include "config/config.h"
 #include "config/config_definition.h"
 #include "config/config_option_enum.h"
+#include "config/config_val.h"
 #include "iohandler/mem_io_handler.h"
 #include "upnp/clients.h"
 #include "upnp/quirks.h"
@@ -44,7 +45,7 @@ DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<Content
     : RequestHandler(content, xmlBuilder)
     , ip(ip)
     , port(port)
-    , useDynamicDescription(config->getBoolOption(CFG_UPNP_DYNAMIC_DESCRIPTION))
+    , useDynamicDescription(config->getBoolOption(ConfigVal::UPNP_DYNAMIC_DESCRIPTION))
 {
     deviceDescription = renderDeviceDescription(ip, port, nullptr);
 }
@@ -83,11 +84,11 @@ std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, 
 
 std::string DeviceDescriptionHandler::getPresentationUrl(std::string ip, in_port_t port) const
 {
-    std::string presentationURL = config->getOption(CFG_SERVER_PRESENTATION_URL);
+    std::string presentationURL = config->getOption(ConfigVal::SERVER_PRESENTATION_URL);
     if (presentationURL.empty()) {
         presentationURL = fmt::format("http://{}/", GrbNet::renderWebUri(ip, port));
     } else {
-        auto appendto = EnumOption<UrlAppendMode>::getEnumOption(config, CFG_SERVER_APPEND_PRESENTATION_URL_TO);
+        auto appendto = EnumOption<UrlAppendMode>::getEnumOption(config, ConfigVal::SERVER_APPEND_PRESENTATION_URL_TO);
         if (appendto == UrlAppendMode::ip) {
             presentationURL = fmt::format("{}/{}", GrbNet::renderWebUri(ip, 0), presentationURL);
         } else if (appendto == UrlAppendMode::port) {
@@ -133,15 +134,15 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in
     // add configuration values
     {
         constexpr std::array deviceConfigProperties {
-            std::pair("friendlyName", CFG_SERVER_NAME),
-            std::pair("manufacturer", CFG_SERVER_MANUFACTURER),
-            std::pair("manufacturerURL", CFG_SERVER_MANUFACTURER_URL),
-            std::pair("modelDescription", CFG_SERVER_MODEL_DESCRIPTION),
-            std::pair("modelName", CFG_SERVER_MODEL_NAME),
-            std::pair("modelNumber", CFG_SERVER_MODEL_NUMBER),
-            std::pair("modelURL", CFG_SERVER_MODEL_URL),
-            std::pair("serialNumber", CFG_SERVER_SERIAL_NUMBER),
-            std::pair("UDN", CFG_SERVER_UDN),
+            std::pair("friendlyName", ConfigVal::SERVER_NAME),
+            std::pair("manufacturer", ConfigVal::SERVER_MANUFACTURER),
+            std::pair("manufacturerURL", ConfigVal::SERVER_MANUFACTURER_URL),
+            std::pair("modelDescription", ConfigVal::SERVER_MODEL_DESCRIPTION),
+            std::pair("modelName", ConfigVal::SERVER_MODEL_NAME),
+            std::pair("modelNumber", ConfigVal::SERVER_MODEL_NUMBER),
+            std::pair("modelURL", ConfigVal::SERVER_MODEL_URL),
+            std::pair("serialNumber", ConfigVal::SERVER_SERIAL_NUMBER),
+            std::pair("UDN", ConfigVal::SERVER_UDN),
         };
         for (auto&& [tag, field] : deviceConfigProperties) {
             device.append_child(tag).append_child(pugi::node_pcdata).set_value(config->getOption(field).c_str());

@@ -22,33 +22,34 @@
 #ifndef __CONFIG_MOCK_H__
 #define __CONFIG_MOCK_H__
 
+#include "config/config.h"
+#include "config/config_val.h"
+#include "metadata/metadata_enums.h"
+
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
-
-#include "config/config.h"
-#include "metadata/metadata_enums.h"
 
 class ConfigMock : public Config {
 public:
     fs::path getConfigFilename() const override { return {}; }
-    MOCK_METHOD(std::string, getOption, (config_option_t option), (const override));
-    void addOption(config_option_t option, const std::shared_ptr<ConfigOption>& optionValue) override { }
-    std::int32_t getIntOption(config_option_t option) const override {
+    MOCK_METHOD(std::string, getOption, (ConfigVal option), (const override));
+    void addOption(ConfigVal option, const std::shared_ptr<ConfigOption>& optionValue) override { }
+    std::int32_t getIntOption(ConfigVal option) const override {
         switch (option) {
-        case CFG_UPNP_CAPTION_COUNT:
+        case ConfigVal::UPNP_CAPTION_COUNT:
             return 1;
         default:
             return 0;
         }
     }
-    std::uint32_t getUIntOption(config_option_t option) const override { return 0; }
-    std::int64_t getLongOption(config_option_t option) const override { return 0; }
-    std::shared_ptr<ConfigOption> getConfigOption(config_option_t option) const override { return {}; }
-    bool getBoolOption(config_option_t option) const override { return false; }
-    std::map<std::string, std::string> getDictionaryOption(config_option_t option) const override
+    std::uint32_t getUIntOption(ConfigVal option) const override { return 0; }
+    std::int64_t getLongOption(ConfigVal option) const override { return 0; }
+    std::shared_ptr<ConfigOption> getConfigOption(ConfigVal option) const override { return {}; }
+    bool getBoolOption(ConfigVal option) const override { return false; }
+    std::map<std::string, std::string> getDictionaryOption(ConfigVal option) const override
     {
         switch (option) {
-        case CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST:
+        case ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST:
             return {
                 { "application/ogg", CONTENT_TYPE_OGG },
                 { "audio/L16", CONTENT_TYPE_PCM },
@@ -75,7 +76,7 @@ public:
                 { MIME_TYPE_ASX_PLAYLIST, CONTENT_TYPE_PLAYLIST },
                 { "video/x-msvideo", CONTENT_TYPE_AVI },
             };
-        case CFG_UPNP_ALBUM_PROPERTIES:
+        case ConfigVal::UPNP_ALBUM_PROPERTIES:
             return {
                 { "dc:creator", "M_ALBUMARTIST" },
                 { "upnp:artist", "M_ALBUMARTIST" },
@@ -93,11 +94,11 @@ public:
             return {};
         }
     }
-    std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(config_option_t option) const override
+    std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(ConfigVal option) const override
     {
         switch (option) {
 
-        case CFG_IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST:
+        case ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST:
             return {
                 { { "from", CONTENT_TYPE_ASF }, { "to", "VC_ASF_AP_L2_WMA" } },
                 { { "from", CONTENT_TYPE_AVI }, { "to", "AVI" } },
@@ -118,11 +119,11 @@ public:
             return {};
         }
     }
-    std::vector<std::string> getArrayOption(config_option_t option) const override { return {}; }
-    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption(config_option_t option) const override { return {}; }
-    std::shared_ptr<BoxLayoutList> getBoxLayoutListOption(config_option_t option) const override { return {}; }
-    std::shared_ptr<ClientConfigList> getClientConfigListOption(config_option_t option) const override { return nullptr; }
-    std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(config_option_t option) const override { return nullptr; }
+    std::vector<std::string> getArrayOption(ConfigVal option) const override { return {}; }
+    std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption(ConfigVal option) const override { return {}; }
+    std::shared_ptr<BoxLayoutList> getBoxLayoutListOption(ConfigVal option) const override { return {}; }
+    std::shared_ptr<ClientConfigList> getClientConfigListOption(ConfigVal option) const override { return nullptr; }
+    std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(ConfigVal option) const override { return nullptr; }
     void updateConfigFromDatabase(const std::shared_ptr<Database>& database) override { }
     std::string getOrigValue(const std::string& item) const override { return {}; }
     void setOrigValue(const std::string& item, const std::string& value) override { }
@@ -131,8 +132,8 @@ public:
     void setOrigValue(const std::string& item, std::uint32_t value) override { }
     void setOrigValue(const std::string& item, std::int64_t value) override { }
     bool hasOrigValue(const std::string& item) const override { return false; }
-    MOCK_METHOD(std::shared_ptr<TranscodingProfileList>, getTranscodingProfileListOption, (config_option_t option), (const override));
-    MOCK_METHOD(std::shared_ptr<DynamicContentList>, getDynamicContentListOption, (config_option_t option), (const override));
+    MOCK_METHOD(std::shared_ptr<TranscodingProfileList>, getTranscodingProfileListOption, (ConfigVal option), (const override));
+    MOCK_METHOD(std::shared_ptr<DynamicContentList>, getDynamicContentListOption, (ConfigVal option), (const override));
 };
 
 #endif // __CONFIG_MOCK_H__

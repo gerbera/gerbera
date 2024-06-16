@@ -71,7 +71,7 @@ void Web::ConfigSave::process()
             std::shared_ptr<ConfigSetup> cs;
             log_debug("save item {}='{}' {}", param(item), param(key), param(status));
             if (!param(key).empty() && param(key) != "-1") {
-                auto option = static_cast<config_option_t>(std::stoi(param(key)));
+                auto option = static_cast<ConfigVal>(std::stoi(param(key)));
                 cs = ConfigDefinition::findConfigSetup(option, true);
             } else if (!param(item).empty()) {
                 cs = ConfigDefinition::findConfigSetupByPath(param(item), true);

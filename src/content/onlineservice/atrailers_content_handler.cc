@@ -37,6 +37,7 @@
 
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "exceptions.h"
 #include "util/tools.h"
 
@@ -52,7 +53,7 @@ void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_docume
 
     trailer_it = root.begin();
 
-    auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
+    auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
     trailer_mimetype = getValueOrDefault(mappings, "mov", "video/quicktime");
 }
 

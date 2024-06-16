@@ -57,10 +57,10 @@ protected:
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status = "") const;
 
 public:
-    config_option_t nodeOption;
-    config_option_t attrOption = CFG_MAX;
+    ConfigVal nodeOption;
+    ConfigVal attrOption = ConfigVal::MAX;
 
-    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption,
+    ConfigArraySetup(ConfigVal option, const char* xpath, const char* help, ConfigVal nodeOption,
         ArrayInitFunction init = nullptr, bool notEmpty = false, std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
@@ -70,7 +70,7 @@ public:
     {
     }
 
-    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption,
+    ConfigArraySetup(ConfigVal option, const char* xpath, const char* help, ConfigVal nodeOption, ConfigVal attrOption,
         bool notEmpty, bool itemNotEmpty, std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
@@ -81,7 +81,7 @@ public:
     {
     }
 
-    ConfigArraySetup(config_option_t option, const char* xpath, const char* help, config_option_t nodeOption, config_option_t attrOption,
+    ConfigArraySetup(ConfigVal option, const char* xpath, const char* help, ConfigVal nodeOption, ConfigVal attrOption,
         ArrayItemCheckFunction itemCheck, std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , itemCheck(std::move(itemCheck))
@@ -97,7 +97,7 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(int index = 0, config_option_t propOption = CFG_MAX, config_option_t propOption2 = CFG_MAX, config_option_t propOption3 = CFG_MAX, config_option_t propOption4 = CFG_MAX) const override;
+    std::string getItemPath(int index = 0, ConfigVal propOption = ConfigVal::MAX, ConfigVal propOption2 = ConfigVal::MAX, ConfigVal propOption3 = ConfigVal::MAX, ConfigVal propOption4 = ConfigVal::MAX) const override;
 
     std::vector<std::string> getXmlContent(const pugi::xml_node& optValue);
 

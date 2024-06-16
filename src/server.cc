@@ -37,6 +37,7 @@
 #include "action_request.h"
 #include "config/config.h"
 #include "config/config_option_enum.h"
+#include "config/config_val.h"
 #include "content/content_manager.h"
 #include "database/database.h"
 #include "device_description_handler.h"
@@ -97,8 +98,8 @@ void Server::init(bool offln)
 {
     offline = offln;
 
-    serverUDN = config->getOption(CFG_SERVER_UDN);
-    aliveAdvertisementInterval = config->getIntOption(CFG_SERVER_ALIVE_INTERVAL);
+    serverUDN = config->getOption(ConfigVal::SERVER_UDN);
+    aliveAdvertisementInterval = config->getIntOption(ConfigVal::SERVER_ALIVE_INTERVAL);
 
 #ifdef HAVE_CURL
     curl_global_init(CURL_GLOBAL_ALL);
@@ -139,8 +140,8 @@ void Server::run()
         throw UpnpException(500, fmt::format("run: Activating ContentService failed {}", ex.what()));
     }
 
-    std::string iface = config->getOption(CFG_SERVER_NETWORK_INTERFACE);
-    ip = config->getOption(CFG_SERVER_IP);
+    std::string iface = config->getOption(ConfigVal::SERVER_NETWORK_INTERFACE);
+    ip = config->getOption(ConfigVal::SERVER_IP);
 
     if (!ip.empty() && !iface.empty())
         throw_std_runtime_error("You cannot specify interface {} and IP {} at the same time", iface, ip);
@@ -152,12 +153,12 @@ void Server::run()
         throw_std_runtime_error("Could not find IP: {}", ip);
 
     // check webroot directory
-    std::string webRoot = config->getOption(CFG_SERVER_WEBROOT);
+    std::string webRoot = config->getOption(ConfigVal::SERVER_WEBROOT);
     if (webRoot.empty()) {
         throw_std_runtime_error("Invalid web server root directory {}", webRoot);
     }
 
-    auto configPort = static_cast<in_port_t>(config->getUIntOption(CFG_SERVER_PORT));
+    auto configPort = static_cast<in_port_t>(config->getUIntOption(ConfigVal::SERVER_PORT));
     auto ret = startupInterface(iface, configPort);
     if (ret != UPNP_E_SUCCESS) {
         throw UpnpException(ret, fmt::format("UpnpInit failed {} {}", iface, port));
@@ -184,7 +185,7 @@ void Server::run()
     webXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getExternalUrl());
     auto devDescHdl = std::make_shared<DeviceDescriptionHandler>(content, webXmlBuilder, ip, port);
 
-    int activeUpnpDescription = config->getBoolOption(CFG_UPNP_DYNAMIC_DESCRIPTION) ? 0 : 1;
+    int activeUpnpDescription = config->getBoolOption(ConfigVal::UPNP_DYNAMIC_DESCRIPTION) ? 0 : 1;
     // register root device with the library
     auto upnpDesc = std::vector<UpnpDesc> {
         { UPNPREG_URL_DESC, fmt::format("http://{}{}", GrbNet::renderWebUri(ip, port), DEVICE_DESCRIPTION_PATH), -1 },
@@ -214,7 +215,7 @@ void Server::run()
 
     log_debug("Creating ContentDirectoryService");
     cds = std::make_unique<ContentDirectoryService>(context, upnpXmlBuilder, rootDeviceHandle,
-        config->getIntOption(CFG_SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
+        config->getIntOption(ConfigVal::SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
 
     log_debug("Creating ConnectionManagerService");
     cmgr = std::make_unique<ConnectionManagerService>(context, upnpXmlBuilder, rootDeviceHandle);
@@ -231,7 +232,7 @@ void Server::run()
     }
 
 #if !defined(USING_NPUPNP)
-    if (config->getBoolOption(CFG_UPNP_LITERAL_HOST_REDIRECTION))
+    if (config->getBoolOption(ConfigVal::UPNP_LITERAL_HOST_REDIRECTION))
         UpnpSetAllowLiteralHostRedirection(1);
 #endif
 
@@ -266,8 +267,8 @@ void Server::run()
 
             log_warning("Rejected attempt to load host '{}' as it does not match configured virtualURL/externalURL: '{}'/'{}'. "
                         "See https://docs.gerbera.io/en/stable/config-server.html#virtualurl",
-                host, static_cast<Server*>(cookie)->config->getOption(CFG_VIRTUAL_URL),
-                static_cast<Server*>(cookie)->config->getOption(CFG_EXTERNAL_URL));
+                host, static_cast<Server*>(cookie)->config->getOption(ConfigVal::VIRTUAL_URL),
+                static_cast<Server*>(cookie)->config->getOption(ConfigVal::EXTERNAL_URL));
             return UPNP_E_BAD_HTTPMSG;
         },
         this);
@@ -310,11 +311,11 @@ int Server::startupInterface(const std::string& iface, in_port_t inPort)
 
 void Server::writeBookmark(const std::string& addr)
 {
-    const std::string data = config->getBoolOption(CFG_SERVER_UI_ENABLED)
+    const std::string data = config->getBoolOption(ConfigVal::SERVER_UI_ENABLED)
         ? httpRedirectTo(addr)
         : httpRedirectTo(addr, "disabled.html");
 
-    fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
+    fs::path path = config->getOption(ConfigVal::SERVER_BOOKMARK_FILE);
     log_debug("Writing bookmark file to: {}", path.c_str());
     GrbFile(path).writeTextFile(data);
 }
@@ -323,14 +324,14 @@ void Server::emptyBookmark()
 {
     const std::string_view data = "<html><body><h1>Gerbera Media Server is not running.</h1><p>Please start it and try again.</p></body></html>";
 
-    fs::path path = config->getOption(CFG_SERVER_BOOKMARK_FILE);
+    fs::path path = config->getOption(ConfigVal::SERVER_BOOKMARK_FILE);
     log_debug("Clearing bookmark file at: {}", path.c_str());
     GrbFile(path).writeTextFile(data);
 }
 
 std::string Server::getVirtualUrl() const
 {
-    auto virtUrl = config->getOption(CFG_VIRTUAL_URL);
+    auto virtUrl = config->getOption(ConfigVal::VIRTUAL_URL);
     if (virtUrl.empty()) {
         virtUrl = GrbNet::renderWebUri(ip, port);
     }
@@ -344,9 +345,9 @@ std::string Server::getVirtualUrl() const
 
 std::string Server::getExternalUrl() const
 {
-    auto virtUrl = config->getOption(CFG_EXTERNAL_URL);
+    auto virtUrl = config->getOption(ConfigVal::EXTERNAL_URL);
     if (virtUrl.empty()) {
-        virtUrl = config->getOption(CFG_VIRTUAL_URL);
+        virtUrl = config->getOption(ConfigVal::VIRTUAL_URL);
         if (virtUrl.empty()) {
             virtUrl = GrbNet::renderWebUri(ip, port);
         }

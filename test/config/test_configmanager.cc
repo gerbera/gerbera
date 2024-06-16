@@ -28,6 +28,7 @@
 
 #include "config/config_generator.h"
 #include "config/config_manager.h"
+#include "config/config_val.h"
 #include "exceptions.h"
 #include "util/tools.h"
 
@@ -123,10 +124,10 @@ TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues)
     auto shared = std::make_shared<ConfigManager>(configFile, home, confdir, prefix, false);
     shared->load(home);
 
-    ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_ENABLED));
-    ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS));
-    ASSERT_FALSE(shared->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED));
-    ASSERT_EQ(30, shared->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT));
+    ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_ENABLED));
+    ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_SHOW_TOOLTIPS));
+    ASSERT_FALSE(shared->getBoolOption(ConfigVal::SERVER_UI_ACCOUNTS_ENABLED));
+    ASSERT_EQ(30, shared->getIntOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT));
 }
 
 TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
@@ -157,8 +158,8 @@ TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified)
     auto shared = std::make_shared<ConfigManager>(configFile, home, confdir, prefix, false);
     shared->load(home);
 
-    ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_ENABLED));
-    ASSERT_TRUE(shared->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS));
-    ASSERT_FALSE(shared->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED));
-    ASSERT_EQ(30, shared->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT));
+    ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_ENABLED));
+    ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_SHOW_TOOLTIPS));
+    ASSERT_FALSE(shared->getBoolOption(ConfigVal::SERVER_UI_ACCOUNTS_ENABLED));
+    ASSERT_EQ(30, shared->getIntOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT));
 }

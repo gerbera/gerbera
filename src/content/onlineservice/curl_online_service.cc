@@ -29,6 +29,7 @@
 
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "content/content.h"
 #include "content/layout/layout.h"
@@ -139,7 +140,7 @@ bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout
 
             if (layout) {
                 std::string mimetype = item->getMimeType();
-                auto mappings = config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+                auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
                 std::string contentType = getValueOrDefault(mappings, mimetype);
 
                 layout->processCdsObject(obj, nullptr, "", contentType, AutoscanDirectory::ContainerTypesDefaults);

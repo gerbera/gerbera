@@ -34,6 +34,7 @@
 #define GRB_LOG_FAC GrbLogFacility::sqldatabase
 #include "database.h" // API
 
+#include "config/config_val.h"
 #include "database/mysql/mysql_database.h"
 #include "database/sqlite3/sqlite_database.h"
 #include "exceptions.h"
@@ -46,8 +47,8 @@ Database::Database(std::shared_ptr<Config> config)
 std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer)
 {
     auto database = [&]() -> std::shared_ptr<Database> {
-        std::string type = config->getOption(CFG_SERVER_STORAGE_DRIVER);
-        bool useTransaction = config->getBoolOption(CFG_SERVER_STORAGE_USE_TRANSACTIONS);
+        std::string type = config->getOption(ConfigVal::SERVER_STORAGE_DRIVER);
+        bool useTransaction = config->getBoolOption(ConfigVal::SERVER_STORAGE_USE_TRANSACTIONS);
 
         if (type == "sqlite3" && useTransaction) {
             return std::make_shared<Sqlite3DatabaseWithTransactions>(config, mime, timer);

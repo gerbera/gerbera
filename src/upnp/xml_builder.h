@@ -128,8 +128,8 @@ protected:
         pugi::xml_node& result,
         const std::vector<std::pair<std::string, std::string>>& meta,
         const std::map<std::string, std::string>& auxData,
-        config_option_t itemProps,
-        config_option_t nsProp) const;
+        ConfigVal itemProps,
+        ConfigVal nsProp) const;
     std::string findDlnaProfile(const CdsResource& res, const std::string& contentType) const;
     std::string dlnaProfileString(const CdsResource& res, const std::string& contentType, bool formatted = true) const;
 

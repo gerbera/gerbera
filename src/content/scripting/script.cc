@@ -184,8 +184,8 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
     , contextName(fmt::format("{}_{}", name, parent))
     , objectName(std::move(objName))
 {
-    hasCaseSensitiveNames = config->getBoolOption(CFG_IMPORT_CASE_SENSITIVE_TAGS);
-    entrySeparator = config->getOption(CFG_IMPORT_LIBOPTS_ENTRY_SEP);
+    hasCaseSensitiveNames = config->getBoolOption(ConfigVal::IMPORT_CASE_SENSITIVE_TAGS);
+    entrySeparator = config->getOption(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP);
     /* create a context and associate it with the JS run time */
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     replaceAllString(contextName, "/", "_");
@@ -195,7 +195,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
 
     _p2i = StringConverter::p2i(config);
     _j2i = StringConverter::j2i(config);
-    _m2i = StringConverter::m2i(CFG_IMPORT_METADATA_CHARSET, "", config);
+    _m2i = StringConverter::m2i(ConfigVal::IMPORT_METADATA_CHARSET, "", config);
     _f2i = StringConverter::f2i(config);
     _i2i = StringConverter::i2i(config);
 
@@ -302,15 +302,15 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
         auto autoscan = ascs->getValue()->getAutoscanListOption();
         for (const auto& adir : content->getAutoscanDirectories()) {
             duk_push_object(ctx);
-            setProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
-            setProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
-            setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
-            setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
-            setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_MEDIATYPE), adir->getMediaType());
-            setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
-            setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
-            setIntProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
-            setProperty(ConfigDefinition::removeAttribute(ATTR_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
+            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
+            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
+            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
+            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
+            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE), adir->getMediaType());
+            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
+            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
+            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
+            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
 
             duk_put_prop_string(ctx, -2, fmt::to_string(adir->getScanID()).c_str());
         }
@@ -326,10 +326,10 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             duk_push_object(ctx);
             auto boxLayout = boxLayoutList->get(i);
             setIntProperty("id", boxLayout->getId());
-            setIntProperty(ConfigDefinition::removeAttribute(ATTR_BOXLAYOUT_BOX_SIZE), boxLayout->getSize());
-            setIntProperty(ConfigDefinition::removeAttribute(ATTR_BOXLAYOUT_BOX_ENABLED), boxLayout->getEnabled());
-            setProperty(ConfigDefinition::removeAttribute(ATTR_BOXLAYOUT_BOX_TITLE), boxLayout->getTitle());
-            setProperty(ConfigDefinition::removeAttribute(ATTR_BOXLAYOUT_BOX_CLASS), boxLayout->getClass());
+            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_SIZE), boxLayout->getSize());
+            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_ENABLED), boxLayout->getEnabled());
+            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_TITLE), boxLayout->getTitle());
+            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_CLASS), boxLayout->getClass());
             duk_put_prop_string(ctx, -2, boxLayout->getKey().c_str());
         }
         boxLayoutItemPath = bcs->getItemPath(ITEM_PATH_PREFIX); // prefix
@@ -340,8 +340,8 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
 
     defineFunctions(jsGlobalFunctions.data());
 
-    std::string commonScrPath = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_SCRIPT);
-    std::string commonFdrPath = config->getOption(CFG_IMPORT_SCRIPTING_COMMON_FOLDER);
+    std::string commonScrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_COMMON_SCRIPT);
+    std::string commonFdrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER);
 
     if (commonScrPath.empty() && commonFdrPath.empty()) {
         log_warning("Common script disabled in configuration");
@@ -355,8 +355,8 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             log_error("Unable to load {}: {}", commonScrPath, e.what());
         }
     }
-    std::string customScrPath = config->getOption(CFG_IMPORT_SCRIPTING_CUSTOM_SCRIPT);
-    std::string customFdrPath = config->getOption(CFG_IMPORT_SCRIPTING_CUSTOM_FOLDER);
+    std::string customScrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_CUSTOM_SCRIPT);
+    std::string customFdrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER);
     if (!customScrPath.empty()) {
         try {
             _load(customScrPath);

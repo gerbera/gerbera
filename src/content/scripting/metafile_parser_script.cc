@@ -38,6 +38,7 @@
 
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "config/config_val.h"
 #include "exceptions.h"
 #include "scripting_runtime.h"
 #include "util/string_converter.h"
@@ -45,13 +46,13 @@
 MetafileParserScript::MetafileParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
     : ParserScript(content, parent, "metafile", "obj")
 {
-    std::string scriptPath = config->getOption(CFG_IMPORT_SCRIPTING_METAFILE_SCRIPT);
+    std::string scriptPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_METAFILE_SCRIPT);
     defineFunction("updateCdsObject", jsUpdateCdsObject, 1);
     if (!scriptPath.empty()) {
         load(scriptPath);
         scriptMode = true;
     } else {
-        metafileFunction = config->getOption(CFG_IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE);
+        metafileFunction = config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE);
     }
 }
 

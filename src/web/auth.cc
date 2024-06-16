@@ -35,6 +35,7 @@
 #include "pages.h" // API
 
 #include "config/config.h"
+#include "config/config_val.h"
 #include "exceptions.h"
 #include "session_manager.h"
 #include "util/tools.h"
@@ -63,8 +64,8 @@ static bool checkToken(const std::string& token, const std::string& password, co
 
 Web::Auth::Auth(const std::shared_ptr<Content>& content)
     : WebRequestHandler(content)
-    , timeout(std::chrono::minutes(config->getIntOption(CFG_SERVER_UI_SESSION_TIMEOUT)))
-    , accountsEnabled(config->getBoolOption(CFG_SERVER_UI_ACCOUNTS_ENABLED))
+    , timeout(std::chrono::minutes(config->getIntOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT)))
+    , accountsEnabled(config->getBoolOption(ConfigVal::SERVER_UI_ACCOUNTS_ENABLED))
 {
 }
 
@@ -81,25 +82,25 @@ void Web::Auth::process()
     if (action == "get_config") {
         auto cfg = root.append_child("config");
         cfg.append_attribute("accounts") = accountsEnabled;
-        cfg.append_attribute("enableNumbering") = config->getBoolOption(CFG_SERVER_UI_ENABLE_NUMBERING);
-        cfg.append_attribute("enableThumbnail") = config->getBoolOption(CFG_SERVER_UI_ENABLE_THUMBNAIL);
-        cfg.append_attribute("enableVideo") = config->getBoolOption(CFG_SERVER_UI_ENABLE_VIDEO);
-        cfg.append_attribute("show-tooltips") = config->getBoolOption(CFG_SERVER_UI_SHOW_TOOLTIPS);
-        cfg.append_attribute("poll-when-idle") = config->getBoolOption(CFG_SERVER_UI_POLL_WHEN_IDLE);
-        cfg.append_attribute("poll-interval") = config->getIntOption(CFG_SERVER_UI_POLL_INTERVAL);
+        cfg.append_attribute("enableNumbering") = config->getBoolOption(ConfigVal::SERVER_UI_ENABLE_NUMBERING);
+        cfg.append_attribute("enableThumbnail") = config->getBoolOption(ConfigVal::SERVER_UI_ENABLE_THUMBNAIL);
+        cfg.append_attribute("enableVideo") = config->getBoolOption(ConfigVal::SERVER_UI_ENABLE_VIDEO);
+        cfg.append_attribute("show-tooltips") = config->getBoolOption(ConfigVal::SERVER_UI_SHOW_TOOLTIPS);
+        cfg.append_attribute("poll-when-idle") = config->getBoolOption(ConfigVal::SERVER_UI_POLL_WHEN_IDLE);
+        cfg.append_attribute("poll-interval") = config->getIntOption(ConfigVal::SERVER_UI_POLL_INTERVAL);
 
         /// CREATE XML FRAGMENT FOR ITEMS PER PAGE
         auto ipp = cfg.append_child("items-per-page");
         xml2Json->setArrayName(ipp, "option");
-        ipp.append_attribute("default") = config->getIntOption(CFG_SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
+        ipp.append_attribute("default") = config->getIntOption(ConfigVal::SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
 
-        auto menuOpts = config->getArrayOption(CFG_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
+        auto menuOpts = config->getArrayOption(ConfigVal::SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
         for (auto&& menuOpt : menuOpts) {
             ipp.append_child("option").append_child(pugi::node_pcdata).set_value(menuOpt.c_str());
         }
 
 #ifdef HAVE_INOTIFY
-        cfg.append_attribute("have-inotify") = config->getBoolOption(CFG_IMPORT_AUTOSCAN_USE_INOTIFY);
+        cfg.append_attribute("have-inotify") = config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY);
 #else
         cfg.append_attribute("have-inotify") = false;
 #endif
@@ -110,7 +111,7 @@ void Web::Auth::process()
         // actions->appendTextChild("action", "fokel2");
 
         auto friendlyName = cfg.append_child("friendlyName").append_child(pugi::node_pcdata);
-        friendlyName.set_value(config->getOption(CFG_SERVER_NAME).c_str());
+        friendlyName.set_value(config->getOption(ConfigVal::SERVER_NAME).c_str());
 
         auto gerberaVersion = cfg.append_child("version").append_child(pugi::node_pcdata);
         gerberaVersion.set_value(GERBERA_VERSION);

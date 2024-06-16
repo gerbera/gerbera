@@ -135,7 +135,7 @@ bool GerberaRuntime::handleOptionArgs(const std::string& arg)
     auto setValueList = (*results)[arg].as<std::vector<std::string>>();
     for (auto&& valueString : setValueList) {
         auto valueList = splitString(valueString, '=');
-        auto option = static_cast<config_option_t>(stoiString(valueList[0]));
+        auto option = static_cast<ConfigVal>(stoiString(valueList[0]));
         auto setup = ConfigDefinition::findConfigSetup(option);
         if (!setup)
             continue;
@@ -153,10 +153,10 @@ bool GerberaRuntime::handleOptionArgs(const std::string& arg)
 bool GerberaRuntime::printOptions(const std::string& arg)
 {
     auto setupList = ConfigDefinition::getOptionList();
-    auto resultMap = std::map<config_option_t, std::string>();
+    auto resultMap = std::map<ConfigVal, std::string>();
     fmt::print("Active Options\n");
     for (auto&& setup : setupList) {
-        if (setup && setup->getTypeString() != "List" && setup->option < CFG_MAX) {
+        if (setup && setup->getTypeString() != "List" && setup->option < ConfigVal::MAX) {
             auto value = !setup->getCurrentValue().empty() ? setup->getCurrentValue() : setup->getDefaultValue();
             resultMap[setup->option] = fmt::format("[{}] : {} = {}", setup->getUniquePath(), setup->getTypeString(), value);
         }
@@ -184,8 +184,8 @@ bool GerberaRuntime::setLogFile(const std::string& arg)
 
 bool GerberaRuntime::setRotatelog(const std::string& arg)
 {
-    auto max_size = configManager->getUIntOption(CFG_SERVER_LOG_ROTATE_SIZE);
-    auto max_files = configManager->getUIntOption(CFG_SERVER_LOG_ROTATE_COUNT);
+    auto max_size = configManager->getUIntOption(ConfigVal::SERVER_LOG_ROTATE_SIZE);
+    auto max_files = configManager->getUIntOption(ConfigVal::SERVER_LOG_ROTATE_COUNT);
     logfile = (*results)[arg].as<fs::path>();
     if (!fs::directory_entry(logfile->parent_path()).exists()) {
         log_warning("Log dir {} missing", logfile->parent_path().c_str());
@@ -392,9 +392,9 @@ bool GerberaRuntime::addFile(const std::string& arg)
             if (!ec) {
                 // add file/directory recursively and asynchronously
                 AutoScanSetting asSetting;
-                asSetting.followSymlinks = configManager->getBoolOption(CFG_IMPORT_FOLLOW_SYMLINKS);
+                asSetting.followSymlinks = configManager->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
                 asSetting.recursive = true;
-                asSetting.hidden = configManager->getBoolOption(CFG_IMPORT_HIDDEN_FILES);
+                asSetting.hidden = configManager->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
                 asSetting.rescanResource = false;
                 asSetting.mergeOptions(configManager, file);
                 server->getContent()->addFile(dirEnt, asSetting, true);

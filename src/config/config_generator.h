@@ -45,7 +45,7 @@ public:
     void generateDatabase(const fs::path& prefixDir);
     void generateImport(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile);
     void generateMappings();
-    void generateBoxlayout(config_option_t option);
+    void generateBoxlayout(ConfigVal option);
     void generateOnlineContent();
     void generateTranscoding();
     void generateUdn(bool doExport = true);
@@ -58,17 +58,17 @@ protected:
     bool example { false };
     std::map<std::string, std::shared_ptr<pugi::xml_node>> generated;
     pugi::xml_document doc;
-    void generateOptions(const std::vector<std::pair<config_option_t, bool>>& options);
+    void generateOptions(const std::vector<std::pair<ConfigVal, bool>>& options);
     std::shared_ptr<pugi::xml_node> setValue(const std::string& tag, const std::string& value = "", bool makeLastChild = false);
 
-    std::shared_ptr<pugi::xml_node> setDictionary(config_option_t option);
-    std::shared_ptr<pugi::xml_node> setVector(config_option_t option);
-    std::shared_ptr<pugi::xml_node> setValue(config_option_t option, const std::string& value = "");
-    std::shared_ptr<pugi::xml_node> setValue(config_option_t option, config_option_t attr, const std::string& value);
-    std::shared_ptr<pugi::xml_node> setValue(config_option_t option, const std::string& key, const std::string& value);
-    std::shared_ptr<pugi::xml_node> setValue(config_option_t option, config_option_t dict, config_option_t attr, const std::string& value);
+    std::shared_ptr<pugi::xml_node> setDictionary(ConfigVal option);
+    std::shared_ptr<pugi::xml_node> setVector(ConfigVal option);
+    std::shared_ptr<pugi::xml_node> setValue(ConfigVal option, const std::string& value = "");
+    std::shared_ptr<pugi::xml_node> setValue(ConfigVal option, ConfigVal attr, const std::string& value);
+    std::shared_ptr<pugi::xml_node> setValue(ConfigVal option, const std::string& key, const std::string& value);
+    std::shared_ptr<pugi::xml_node> setValue(ConfigVal option, ConfigVal dict, ConfigVal attr, const std::string& value);
 
-    static std::shared_ptr<pugi::xml_node> setValue(const std::shared_ptr<pugi::xml_node>& parent, config_option_t option, const std::string& value);
+    static std::shared_ptr<pugi::xml_node> setValue(const std::shared_ptr<pugi::xml_node>& parent, ConfigVal option, const std::string& value);
 };
 
 #endif // GERBERA_CONFIG_GENERATOR_H

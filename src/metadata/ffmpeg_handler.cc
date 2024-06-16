@@ -46,6 +46,7 @@
 #include "ffmpeg_handler.h"
 
 #include "cds/cds_item.h"
+#include "config/config_val.h"
 #include "iohandler/io_handler.h"
 #include "upnp/upnp_common.h"
 #include "util/grb_time.h"
@@ -124,9 +125,9 @@ static FfmpegLogger globalFfmpegLogger = FfmpegLogger();
 int FfmpegLogger::printPrefix = 1;
 
 FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
-    : MediaMetadataHandler(context, CFG_IMPORT_LIBOPTS_FFMPEG_ENABLED, CFG_IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST, CFG_IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST)
+    : MediaMetadataHandler(context, ConfigVal::IMPORT_LIBOPTS_FFMPEG_ENABLED, ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST, ConfigVal::IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST)
 {
-    mappings = this->config->getDictionaryOption(CFG_IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    mappings = this->config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 }
 
 void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const
@@ -330,7 +331,7 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         avformat_close_input(&pFormatCtx);
         return; // Couldn't find stream information
     }
-    auto sc = StringConverter::m2i(CFG_IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
+    auto sc = StringConverter::m2i(ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
     // Add metadata using ffmpeg library calls
     addFfmpegMetadataFields(item, sc, pFormatCtx);
     // Add auxdata
