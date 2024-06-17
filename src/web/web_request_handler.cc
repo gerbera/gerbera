@@ -34,6 +34,7 @@
 
 #include "web_request_handler.h" // API
 
+#include "common.h"
 #include "config/config.h"
 #include "config/config_val.h"
 #include "content/content.h"

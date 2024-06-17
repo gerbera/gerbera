@@ -36,6 +36,7 @@
 
 #include "common.h"
 #include "content/content.h"
+#include "context.h"
 #include "database/database.h"
 #include "exceptions.h"
 #include "upnp/quirks.h"
