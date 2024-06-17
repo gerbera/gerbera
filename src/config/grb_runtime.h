@@ -63,6 +63,8 @@ using HandleCallback = std::function<bool()>;
 #define GRB_OPTION_SETOPTION "set-option"
 #define GRB_OPTION_ADDFILE "add-file"
 
+#define DEFAULT_CONFIG_HOME ".config/gerbera"
+
 struct ArgumentHandler {
     std::string argument;
     ParseCallback parseCallback;

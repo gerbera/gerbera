@@ -35,8 +35,6 @@
 #ifndef __REQUEST_HANDLER_H__
 #define __REQUEST_HANDLER_H__
 
-#include "context.h"
-
 #include <map>
 #include <memory>
 #include <upnp.h>
@@ -55,6 +53,17 @@ class Mime;
 class Quirks;
 class Server;
 class UpnpXMLBuilder;
+
+#define LINK_FILE_REQUEST_HANDLER "/" CONTENT_MEDIA_HANDLER "/"
+#define LINK_URL_REQUEST_HANDLER "/" CONTENT_ONLINE_HANDLER "/"
+
+#define URL_PARAM_TRANSCODE_PROFILE_NAME "pr_name"
+#define URL_PARAM_TRANSCODE "tr"
+#define URL_VALUE_TRANSCODE_NO_RES_ID "none"
+#define URL_VALUE_TRANSCODE "1"
+#define URL_OBJECT_ID "object_id"
+#define URL_REQUEST_TYPE "req_type"
+#define URL_RESOURCE_ID "res_id"
 
 class RequestHandler {
 public:

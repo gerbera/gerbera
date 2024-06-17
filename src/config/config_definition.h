@@ -56,6 +56,9 @@
 #define DEFAULT_VIDEO_CHUNK_SIZE 512000
 #define DEFAULT_VIDEO_FILL_SIZE 120000
 
+// device description defaults
+#define DESC_MANUFACTURER_URL "https://gerbera.io/"
+
 class ConfigSetup;
 
 class ConfigDefinition {

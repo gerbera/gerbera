@@ -33,23 +33,14 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#include <string_view>
-
 #define SOURCE (-1)
-#define OFF 0
+#define OFF (0)
 
 // fixed CdsObjectIDs
 #define CDS_ID_ROOT (0)
 #define CDS_ID_FS_ROOT (1)
 #define INVALID_OBJECT_ID (-333)
 static constexpr bool IS_FORBIDDEN_CDS_ID(int id) { return id <= CDS_ID_FS_ROOT; }
-
-// URL FORMATTING CONSTANTS
-#define URL_OBJECT_ID "object_id"
-#define URL_REQUEST_TYPE "req_type"
-#define URL_RESOURCE_ID "res_id"
-constexpr auto URL_PARAM_SEPARATOR = std::string_view("/");
-#define URL_UI_PARAM_SEPARATOR '?'
 
 // SEPARATOR
 #define FS_ROOT_DIRECTORY "/"
@@ -60,27 +51,9 @@ constexpr auto DIR_SEPARATOR = char('/');
 // default mime types for items in the cds
 #define MIMETYPE_DEFAULT "application/octet-stream"
 
-// device description defaults
-#define DESC_MANUFACTURER_URL "https://gerbera.io/"
-
 #define DEFAULT_INTERNAL_CHARSET "UTF-8"
-#define DEFAULT_CONFIG_HOME ".config/gerbera"
 
 static constexpr auto CLIENT_GROUP_TAG = "group";
 #define DEFAULT_CLIENT_GROUP "default"
-
-#define URL_PARAM_TRANSCODE_PROFILE_NAME "pr_name"
-#define URL_PARAM_TRANSCODE "tr"
-#define URL_VALUE_TRANSCODE_NO_RES_ID "none"
-#define URL_VALUE_TRANSCODE "1"
-
-// misc
-
-#define DEFAULT_MARK_PLAYED_CONTENT_AUDIO "audio"
-#define DEFAULT_MARK_PLAYED_CONTENT_VIDEO "video"
-#define DEFAULT_MARK_PLAYED_CONTENT_IMAGE "image"
-
-#define LINK_FILE_REQUEST_HANDLER "/" CONTENT_MEDIA_HANDLER "/"
-#define LINK_URL_REQUEST_HANDLER "/" CONTENT_ONLINE_HANDLER "/"
 
 #endif // __COMMON_H__

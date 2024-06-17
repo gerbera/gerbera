@@ -34,12 +34,15 @@
 #ifndef __WEB_REQUEST_HANDLER_H__
 #define __WEB_REQUEST_HANDLER_H__
 
-#include <pugixml.hpp>
-
 #include "context.h"
 #include "request_handler.h"
 #include "util/generic_task.h"
 #include "util/tools.h"
+
+#include <pugixml.hpp>
+
+// URL FORMATTING CONSTANTS
+#define URL_UI_PARAM_SEPARATOR '?'
 
 class Xml2Json;
 

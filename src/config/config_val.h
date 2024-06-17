@@ -415,4 +415,8 @@ enum class AtrailerResolution {
 
 using ConfigOptionIterator = EnumIterator<ConfigVal, CFG_MIN, ConfigVal::MAX>;
 
+#define DEFAULT_MARK_PLAYED_CONTENT_AUDIO "audio"
+#define DEFAULT_MARK_PLAYED_CONTENT_VIDEO "video"
+#define DEFAULT_MARK_PLAYED_CONTENT_IMAGE "image"
+
 #endif // __CONFIG_VAL_H__
