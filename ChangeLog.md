@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Add log sinks for rotating log files and syslog
 - Add missing define on ubuntu 18
 - Add sample-frequency to config2.xsd
 - Adding consistent album artist support
@@ -17,16 +18,19 @@
 - Build: Upload for focal
 - Build: Use Ruby2.6 for bionic
 - Build: Use Ruby2.7 for bionic
+- Bump braces from 3.0.2 to 3.0.3 in /gerbera-web
 - CI: Drop excluded ubuntu versions as CMake PPA now supports those combinations
 - CI: Pass publish-deb secrets via env instead
 - CI: Upload debs to pkg.gerbera.io
 - clang-tidy: don't cast through void
 - config2.xsd fixes
 - Config: Add flag to disable dynamic descriptions
+- Config: Separate config values
 - docs: Update Arch Linux installs
 - Docs: Update Ubuntu/Debian repo instructions
 - Documentation: Update with new WebUI
 - Extract command line argument handling to Runtime class
+- Extract Content interface
 - FFMpeg: add custom logger
 - Fix creation of mr_reg.xml
 - Fix discovery
@@ -40,9 +44,11 @@
 - Metadata: Unify handling and allow to disable
 - Playlist: Allow configuration of directory depth
 - Server: Handle all HTTP via virtualdir
+- Startup: Always check dirs
 - TagLib: Use DebugListener to suppress messages
 - UI: Fix auto logout
 - UI: Tidy up login and homepage
+- UPnP description: Allow dynamic capability values
 - UPnP specification files reflect client quirks
 
 ### 2.1.0
