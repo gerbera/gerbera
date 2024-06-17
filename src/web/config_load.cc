@@ -150,7 +150,7 @@ void Web::ConfigLoad::process()
     writeImportTweaks(values);
     writeDynamicContent(values);
     writeBoxLayout(values);
-    writeTransconding(values);
+    writeTranscoding(values);
     writeAutoscan(values);
     writeDictionaries(values);
     writeVectors(values);
@@ -265,9 +265,9 @@ void Web::ConfigLoad::writeSimpleProperties(pugi::xml_node& values)
         try {
             auto scs = ConfigDefinition::findConfigSetup(option);
             auto item = values.append_child("item");
-            createItem(item, scs->getItemPath(ITEM_PATH_ROOT), option, option, scs);
+            createItem(item, scs->getItemPath(ITEM_PATH_ROOT, {}), option, option, scs);
 
-            log_debug("    Option {:03d} {} = {}", option, scs->getItemPath(), scs->getCurrentValue().c_str());
+            log_debug("    Option {:03d} {} = {}", option, scs->getItemPath(0, {}), scs->getCurrentValue().c_str());
             setValue(item, scs->getCurrentValue());
         } catch (const std::runtime_error& e) {
             log_warning("Option {:03d} {}", option, e.what());
@@ -284,31 +284,31 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
         auto client = clientConfig->get(i);
 
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_CLIENTS_CLIENT_FLAGS), cs->option, ConfigVal::A_CLIENTS_CLIENT_FLAGS, cs);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_FLAGS }), cs->option, ConfigVal::A_CLIENTS_CLIENT_FLAGS, cs);
         setValue(item, ClientConfig::mapFlags(client->getFlags()));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_CLIENTS_CLIENT_IP), cs->option, ConfigVal::A_CLIENTS_CLIENT_IP, cs);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_IP }), cs->option, ConfigVal::A_CLIENTS_CLIENT_IP, cs);
         setValue(item, client->getIp());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_CLIENTS_CLIENT_USERAGENT), cs->option, ConfigVal::A_CLIENTS_CLIENT_USERAGENT, cs);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_USERAGENT }), cs->option, ConfigVal::A_CLIENTS_CLIENT_USERAGENT, cs);
         setValue(item, client->getUserAgent());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_CLIENTS_CLIENT_GROUP), cs->option, ConfigVal::A_CLIENTS_CLIENT_GROUP, cs);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_GROUP }), cs->option, ConfigVal::A_CLIENTS_CLIENT_GROUP, cs);
         setValue(item, client->getGroup());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT), cs->option, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT, cs);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT }), cs->option, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT, cs);
         setValue(item, client->getCaptionInfoCount());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT), cs->option, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT, cs);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT }), cs->option, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT, cs);
         setValue(item, client->getStringLimit());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE), cs->option, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE, cs);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE }), cs->option, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE, cs);
         setValue(item, client->getMultiValue());
 
         // ToDo: Sub Dictionary ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE
@@ -316,25 +316,25 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
     }
     if (clientConfig->size() == 0) {
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_CLIENTS_CLIENT_FLAGS), cs->option, ConfigVal::A_CLIENTS_CLIENT_FLAGS, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_FLAGS));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT_FLAGS }), cs->option, ConfigVal::A_CLIENTS_CLIENT_FLAGS, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_FLAGS));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_CLIENTS_CLIENT_IP), cs->option, ConfigVal::A_CLIENTS_CLIENT_IP, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_IP));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT_IP }), cs->option, ConfigVal::A_CLIENTS_CLIENT_IP, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_IP));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_CLIENTS_CLIENT_USERAGENT), cs->option, ConfigVal::A_CLIENTS_CLIENT_USERAGENT, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_USERAGENT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT_USERAGENT }), cs->option, ConfigVal::A_CLIENTS_CLIENT_USERAGENT, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_USERAGENT));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_CLIENTS_CLIENT_GROUP), cs->option, ConfigVal::A_CLIENTS_CLIENT_GROUP, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_GROUP));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT_GROUP }), cs->option, ConfigVal::A_CLIENTS_CLIENT_GROUP, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_GROUP));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT), cs->option, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT }), cs->option, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT), cs->option, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT }), cs->option, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE), cs->option, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE }), cs->option, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE));
     }
 }
 
@@ -347,47 +347,47 @@ void Web::ConfigLoad::writeImportTweaks(pugi::xml_node& values)
         auto dir = directoryConfig->get(i);
 
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DIRECTORIES_TWEAK_LOCATION), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_LOCATION);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_LOCATION }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_LOCATION);
         setValue(item, dir->getLocation());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DIRECTORIES_TWEAK_INHERIT), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_INHERIT);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_INHERIT }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_INHERIT);
         setValue(item, dir->getInherit());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE);
         setValue(item, dir->getRecursive());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN);
         setValue(item, dir->getHidden());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE);
         setValue(item, dir->getCaseSensitive());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS);
         setValue(item, dir->getFollowSymlinks());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET);
         setValue(item, dir->hasMetaCharset() ? dir->getMetaCharset() : "");
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE);
         setValue(item, dir->hasFanArtFile() ? dir->getFanArtFile() : "");
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE);
         setValue(item, dir->hasResourceFile() ? dir->getResourceFile() : "");
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE);
         setValue(item, dir->hasSubTitleFile() ? dir->getSubTitleFile() : "");
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE);
         setValue(item, dir->hasMetafile() ? dir->getMetafile() : "");
     }
 }
@@ -401,47 +401,47 @@ void Web::ConfigLoad::writeDynamicContent(pugi::xml_node& values)
         auto cont = dynContent->get(i);
 
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DYNAMIC_CONTAINER_LOCATION }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION);
         setValue(item, cont->getLocation());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_IMAGE), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_IMAGE);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DYNAMIC_CONTAINER_IMAGE }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_IMAGE);
         setValue(item, cont->getImage());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_TITLE), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_TITLE);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DYNAMIC_CONTAINER_TITLE }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_TITLE);
         setValue(item, cont->getTitle());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_FILTER), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_FILTER);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DYNAMIC_CONTAINER_FILTER }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_FILTER);
         setValue(item, cont->getFilter());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_SORT), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_SORT);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DYNAMIC_CONTAINER_SORT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_SORT);
         setValue(item, cont->getSort());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT);
         setValue(item, cont->getMaxCount());
     }
     if (dynContent->size() == 0) {
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_LOCATION));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_LOCATION }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_LOCATION));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_DYNAMIC_CONTAINER_IMAGE), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_IMAGE, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_IMAGE));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_IMAGE }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_IMAGE, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_IMAGE));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_DYNAMIC_CONTAINER_TITLE), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_TITLE));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_TITLE }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_TITLE));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_DYNAMIC_CONTAINER_FILTER), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_FILTER));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_FILTER }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_FILTER));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_DYNAMIC_CONTAINER_SORT), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_SORT, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_SORT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_SORT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_SORT, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_SORT));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT));
     }
 }
 
@@ -454,45 +454,45 @@ void Web::ConfigLoad::writeBoxLayout(pugi::xml_node& values)
         auto cont = boxlayoutContent->get(i);
 
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_KEY), cs->option, ConfigVal::A_BOXLAYOUT_BOX_KEY);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_BOXLAYOUT_BOX_KEY }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_KEY);
         setValue(item, cont->getKey());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_TITLE), cs->option, ConfigVal::A_BOXLAYOUT_BOX_TITLE);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_BOXLAYOUT_BOX_TITLE }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_TITLE);
         setValue(item, cont->getTitle());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_CLASS), cs->option, ConfigVal::A_BOXLAYOUT_BOX_CLASS);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_BOXLAYOUT_BOX_CLASS }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_CLASS);
         setValue(item, cont->getClass());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_SIZE), cs->option, ConfigVal::A_BOXLAYOUT_BOX_SIZE);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_BOXLAYOUT_BOX_SIZE }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_SIZE);
         setValue(item, cont->getSize());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_ENABLED), cs->option, ConfigVal::A_BOXLAYOUT_BOX_ENABLED);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_ENABLED);
         setValue(item, cont->getEnabled());
     }
     if (boxlayoutContent->size() == 0) {
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_BOXLAYOUT_BOX_KEY), cs->option, ConfigVal::A_BOXLAYOUT_BOX_KEY, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_KEY));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_KEY }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_KEY, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_KEY));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_BOXLAYOUT_BOX_TITLE), cs->option, ConfigVal::A_BOXLAYOUT_BOX_TITLE, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_TITLE));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_TITLE }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_TITLE, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_TITLE));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_BOXLAYOUT_BOX_CLASS), cs->option, ConfigVal::A_BOXLAYOUT_BOX_CLASS, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_CLASS));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_CLASS }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_CLASS, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_CLASS));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_BOXLAYOUT_BOX_SIZE), cs->option, ConfigVal::A_BOXLAYOUT_BOX_SIZE, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_SIZE));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_SIZE }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_SIZE, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_SIZE));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_BOXLAYOUT_BOX_ENABLED), cs->option, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_ENABLED));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_ENABLED));
     }
 }
 
 /// \brief: write transconding configuration
-void Web::ConfigLoad::writeTransconding(pugi::xml_node& values)
+void Web::ConfigLoad::writeTranscoding(pugi::xml_node& values)
 {
     auto cs = ConfigDefinition::findConfigSetup(ConfigVal::TRANSCODING_PROFILE_LIST);
     auto transcoding = cs->getValue()->getTranscodingProfileListOption();
@@ -501,23 +501,23 @@ void Web::ConfigLoad::writeTransconding(pugi::xml_node& values)
     // write filter list and collect required profiles
     for (auto&& filter : transcoding->getFilterList()) {
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE), cs->option, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, cs);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE }), cs->option, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, cs);
         setValue(item, filter->getMimeType());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_USING), cs->option, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_USING, cs);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_USING }), cs->option, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_USING, cs);
         setValue(item, filter->getTranscoderName());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SRCDLNA), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SRCDLNA, cs);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SRCDLNA }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SRCDLNA, cs);
         setValue(item, filter->getSourceProfile());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING, cs);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING, cs);
         setValue(item, fmt::join(filter->getNoTranscodingMimeTypes(), ","));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS, cs);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS, cs);
         setValue(item, ClientConfig::mapFlags(filter->getClientFlags()));
 
         if (filter->getTranscodingProfile())
@@ -531,93 +531,93 @@ void Web::ConfigLoad::writeTransconding(pugi::xml_node& values)
     // profiles can only be exported when linked to at least one filter
     for (auto&& [name, entry] : profiles) {
         auto item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME);
         setValue(item, name);
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
         setValue(item, ClientConfig::mapFlags(entry->getClientFlags()));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED);
         setValue(item, entry->isEnabled());
 
         item = values.append_child("item");
         auto ttEnumSetup = ConfigDefinition::findConfigSetup<ConfigEnumSetup<TranscodingType>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE);
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE);
         setValue(item, ttEnumSetup->mapEnumValue(entry->getType()));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_DLNAPROF), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_DLNAPROF);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_DLNAPROF }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_DLNAPROF);
         setValue(item, entry->getDlnaProfile());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE);
         setValue(item, entry->getTargetMimeType());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES);
         setValue(item, entry->getAttributeOverride(ResourceAttribute::RESOLUTION));
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL);
         setValue(item, entry->getAcceptURL());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SAMPFREQ), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SAMPFREQ }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
         setValue(item, entry->getSampleFreq());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NRCHAN), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NRCHAN);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NRCHAN }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NRCHAN);
         setValue(item, entry->getNumChannels());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_HIDEORIG), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_HIDEORIG }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
         setValue(item, entry->hideOriginalResource());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_THUMB), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_THUMB);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_THUMB }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_THUMB);
         setValue(item, entry->isThumbnail());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST);
         setValue(item, entry->getFirstResource());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG);
         setValue(item, entry->isTheora());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
         setValue(item, entry->getCommand());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS);
         setValue(item, entry->getArguments());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE);
         setValue(item, entry->getBufferSize());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK);
         setValue(item, entry->getBufferChunkSize());
 
         item = values.append_child("item");
-        createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL);
         setValue(item, entry->getBufferInitialFillSize());
 
         auto fourCCMode = entry->getAVIFourCCListMode();
         if (fourCCMode != AviFourccListmode::None) {
             item = values.append_child("item");
-            createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
+            createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
             auto fccEnumSetup = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AviFourccListmode>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
             setValue(item, fccEnumSetup->mapEnumValue(fourCCMode));
 
             const auto& fourCCList = entry->getAVIFourCCList();
             if (!fourCCList.empty()) {
                 item = values.append_child("item");
-                createItem(item, cs->getItemPath(pr, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
+                createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
                 setValue(item, std::accumulate(next(fourCCList.begin()), fourCCList.end(), fourCCList[0], [](auto&& a, auto&& b) { return fmt::format("{}, {}", a, b); }));
             }
         }
@@ -634,93 +634,93 @@ void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
             auto&& entry = autoscan.at(i);
             auto&& adir = content->getAutoscanDirectory(entry->getLocation());
             auto item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION);
             setValue(item, adir->getLocation());
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE);
             setValue(item, AutoscanDirectory::mapScanmode(adir->getScanMode()));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL);
             setValue(item, adir->getInterval().count());
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE);
             setValue(item, adir->getRecursive());
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE);
             setValue(item, AutoscanDirectory::mapMediaType(adir->getMediaType()));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES);
             setValue(item, adir->getHidden());
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
             setValue(item, adir->getFollowSymlinks());
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO);
             setValue(item, adir->getContainerTypes().at(AutoscanMediaMode::Audio));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE);
             setValue(item, adir->getContainerTypes().at(AutoscanMediaMode::Image));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO);
             setValue(item, adir->getContainerTypes().at(AutoscanMediaMode::Video));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT);
             setValue(item, adir->getActiveScanCount());
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT);
             setValue(item, adir->getTaskCount());
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(i, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_LMT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT);
             setValue(item, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
         }
         if (autoscan.empty()) {
             auto item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT));
 
             item = values.append_child("item");
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_LMT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT));
         }
     }
 }
@@ -733,11 +733,11 @@ void Web::ConfigLoad::writeDictionaries(pugi::xml_node& values)
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
         for (auto&& [key, val] : dictionary) {
             auto item = values.append_child("item");
-            createItem(item, dcs->getItemPath(i, dcs->keyOption), dcs->option, dcs->keyOption, dcs);
+            createItem(item, dcs->getItemPath(i, { dcs->keyOption }), dcs->option, dcs->keyOption, dcs);
             setValue(item, key.substr(5));
 
             item = values.append_child("item");
-            createItem(item, dcs->getItemPath(i, dcs->valOption), dcs->option, dcs->valOption, dcs);
+            createItem(item, dcs->getItemPath(i, { dcs->valOption }), dcs->option, dcs->valOption, dcs);
             setValue(item, val);
             i++;
         }
@@ -762,7 +762,7 @@ void Web::ConfigLoad::writeVectors(pugi::xml_node& values)
                 auto pos = std::find(attrList.begin(), attrList.end(), key);
                 if (pos != attrList.end())
                     j = std::distance(attrList.begin(), pos);
-                createItem(item, vcs->getItemPath(i, key), vcs->option, vcs->optionList[j], vcs);
+                createItem(item, vcs->getItemPath(i, { key }), vcs->option, vcs->optionList[j], vcs);
                 setValue(item, val);
             }
             i++;
@@ -778,7 +778,7 @@ void Web::ConfigLoad::writeArrays(pugi::xml_node& values)
         for (std::size_t i = 0; i < array.size(); i++) {
             auto&& entry = array[i];
             auto item = values.append_child("item");
-            createItem(item, acs->getItemPath(i), acs->option, acs->attrOption != ConfigVal::MAX ? acs->attrOption : acs->nodeOption, acs);
+            createItem(item, acs->getItemPath(i, {}), acs->option, acs->attrOption != ConfigVal::MAX ? acs->attrOption : acs->nodeOption, acs);
             setValue(item, entry);
         }
     }

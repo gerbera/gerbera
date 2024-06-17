@@ -27,6 +27,7 @@
 #define __CONFIG_SETUP_ARRAY_H__
 
 #include "config/config_setup.h"
+#include "config/config_val.h"
 
 using ArrayInitFunction = std::function<bool(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)>;
 using ArrayItemCheckFunction = std::function<bool(const std::string& value)>;
@@ -97,7 +98,7 @@ public:
 
     bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(int index = 0, ConfigVal propOption = ConfigVal::MAX, ConfigVal propOption2 = ConfigVal::MAX, ConfigVal propOption3 = ConfigVal::MAX, ConfigVal propOption4 = ConfigVal::MAX) const override;
+    std::string getItemPath(int index, const std::vector<ConfigVal>& propOptions) const override;
 
     std::vector<std::string> getXmlContent(const pugi::xml_node& optValue);
 

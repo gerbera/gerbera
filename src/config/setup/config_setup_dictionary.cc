@@ -27,6 +27,7 @@
 
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "config/config_val.h"
 #include "util/logger.h"
 
 #include <numeric>
@@ -87,8 +88,8 @@ void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, const std::sh
 
 bool ConfigDictionarySetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status) const
 {
-    auto keyIndex = getItemPath(i, keyOption);
-    auto valIndex = getItemPath(i, valOption);
+    auto keyIndex = getItemPath(i, { keyOption });
+    auto valIndex = getItemPath(i, { valOption });
     if (optItem == keyIndex || !status.empty()) {
         config->setOrigValue(keyIndex, optKey);
         if (status == STATUS_REMOVED) {
@@ -151,9 +152,9 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
     return false;
 }
 
-std::string ConfigDictionarySetup::getItemPath(int index, ConfigVal propOption, ConfigVal propOption2, ConfigVal propOption3, ConfigVal propOption4) const
+std::string ConfigDictionarySetup::getItemPath(int index, const std::vector<ConfigVal>& propOptions) const
 {
-    auto opt = ConfigDefinition::ensureAttribute(propOption);
+    auto opt = propOptions.size() > 0 ? ConfigDefinition::ensureAttribute(propOptions[0]) : "";
 
     if (index > ITEM_PATH_ROOT)
         return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), index, opt);

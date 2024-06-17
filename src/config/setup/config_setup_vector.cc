@@ -27,6 +27,7 @@
 
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "config/config_val.h"
 #include "util/logger.h"
 
 #include <numeric>
@@ -154,9 +155,9 @@ bool ConfigVectorSetup::updateDetail(const std::string& optItem, std::string& op
     return false;
 }
 
-std::string ConfigVectorSetup::getItemPath(int index, ConfigVal propOption, ConfigVal propOption2, ConfigVal propOption3, ConfigVal propOption4) const
+std::string ConfigVectorSetup::getItemPath(int index, const std::vector<ConfigVal>& propOptions) const
 {
-    auto opt = ConfigDefinition::ensureAttribute(propOption);
+    auto opt = ConfigDefinition::ensureAttribute(propOptions.size() > 0 ? propOptions[0] : ConfigVal::MAX);
 
     if (index > ITEM_PATH_ROOT)
         return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), index, opt);

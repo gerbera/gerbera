@@ -27,6 +27,7 @@
 
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "config/config_val.h"
 #include "config/result/box_layout.h"
 #include "config_setup_bool.h"
 #include "config_setup_int.h"
@@ -90,10 +91,10 @@ void ConfigBoxLayoutSetup::makeOption(const pugi::xml_node& root, const std::sha
 
 bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<BoxLayout>& entry, std::string& optValue, const std::string& status) const
 {
-    if (optItem == getItemPath(i) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+    if (optItem == getItemPath(i, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
-    auto index = getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_KEY);
+    auto index = getItemPath(i, { ConfigVal::A_BOXLAYOUT_BOX_KEY });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getKey());
@@ -103,7 +104,7 @@ bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
-    index = getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_TITLE);
+    index = getItemPath(i, { ConfigVal::A_BOXLAYOUT_BOX_TITLE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getTitle());
@@ -113,7 +114,7 @@ bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
-    index = getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_CLASS);
+    index = getItemPath(i, { ConfigVal::A_BOXLAYOUT_BOX_CLASS });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getClass());
@@ -123,7 +124,7 @@ bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
-    index = getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_SIZE);
+    index = getItemPath(i, { ConfigVal::A_BOXLAYOUT_BOX_SIZE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getSize());
@@ -131,7 +132,7 @@ bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem,
         log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getSize());
         return true;
     }
-    index = getItemPath(i, ConfigVal::A_BOXLAYOUT_BOX_ENABLED);
+    index = getItemPath(i, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getEnabled());
@@ -197,7 +198,7 @@ std::shared_ptr<ConfigOption> ConfigBoxLayoutSetup::newOption(const pugi::xml_no
     return optionValue;
 }
 
-std::string ConfigBoxLayoutSetup::getItemPath(int index, ConfigVal propOption, ConfigVal propOption2, ConfigVal propOption3, ConfigVal propOption4) const
+std::string ConfigBoxLayoutSetup::getItemPath(int index, const std::vector<ConfigVal>& propOptions) const
 {
     if (index == ITEM_PATH_PREFIX) {
         return ConfigDefinition::mapConfigOption(option);
@@ -206,13 +207,13 @@ std::string ConfigBoxLayoutSetup::getItemPath(int index, ConfigVal propOption, C
         return ConfigDefinition::mapConfigOption(option);
     }
     if (index == ITEM_PATH_NEW) {
-        if (propOption != ConfigVal::MAX) {
-            return fmt::format("{}[_]/{}", ConfigDefinition::mapConfigOption(option), ConfigDefinition::ensureAttribute(propOption));
+        if (propOptions.size() > 0) {
+            return fmt::format("{}[_]/{}", ConfigDefinition::mapConfigOption(option), ConfigDefinition::ensureAttribute(propOptions[0]));
         }
         return fmt::format("{}[_]", ConfigDefinition::mapConfigOption(option));
     }
-    if (propOption != ConfigVal::MAX) {
-        return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(option), index, ConfigDefinition::ensureAttribute(propOption));
+    if (propOptions.size() > 0) {
+        return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(option), index, ConfigDefinition::ensureAttribute(propOptions[0]));
     }
     return fmt::format("{}[{}]", ConfigDefinition::mapConfigOption(option), index);
 }

@@ -1333,6 +1333,16 @@
           "editable": true
         },
         {
+          "item": "/import/library-options/libexif/attribute::enabled",
+          "caption": "libexif enabled",
+          "editable": true
+        },
+        {
+          "item": "/import/library-options/libexif/attribute::charset",
+          "caption": "libexif charset",
+          "editable": true
+        },
+        {
           "item": "/import/library-options/libexif/auxdata/add-data",
           "caption": "libexif",
           "type": "List",
@@ -1362,6 +1372,16 @@
               "editable": true
             }
           ]
+        },
+        {
+          "item": "/import/library-options/id3/attribute::enabled",
+          "caption": "taglib enabled",
+          "editable": true
+        },
+        {
+          "item": "/import/library-options/id3/attribute::charset",
+          "caption": "taglib charset",
+          "editable": true
         },
         {
           "item": "/import/library-options/id3/auxdata/add-data",
@@ -1395,6 +1415,16 @@
           ]
         },
         {
+          "item": "/import/library-options/exiv2/attribute::enabled",
+          "caption": "exiv2 enabled",
+          "editable": true
+        },
+        {
+          "item": "/import/library-options/exiv2/attribute::charset",
+          "caption": "exiv2 charset",
+          "editable": true
+        },
+        {
           "item": "/import/library-options/exiv2/auxdata/add-data",
           "caption": "exiv2",
           "type": "List",
@@ -1426,6 +1456,16 @@
           ]
         },
         {
+          "item": "/import/library-options/ffmpeg/attribute::enabled",
+          "caption": "ffmpeg enabled",
+          "editable": true
+        },
+        {
+          "item": "/import/library-options/ffmpeg/attribute::charset",
+          "caption": "ffmpeg charset",
+          "editable": true
+        },
+        {
           "item": "/import/library-options/ffmpeg/auxdata/add-data",
           "caption": "ffmpeg",
           "type": "List",
@@ -1455,6 +1495,26 @@
               "editable": true
             }
           ]
+        },
+        {
+          "item": "/import/library-options/wavpack/attribute::enabled",
+          "caption": "wavpack enabled",
+          "editable": true
+        },
+        {
+          "item": "/import/library-options/wavpack/attribute::charset",
+          "caption": "wavpack charset",
+          "editable": true
+        },
+        {
+          "item": "/import/library-options/mkv/attribute::enabled",
+          "caption": "matroska enabled",
+          "editable": true
+        },
+        {
+          "item": "/import/library-options/mkv/attribute::charset",
+          "caption": "matroska charset",
+          "editable": true
         }
       ]
     },

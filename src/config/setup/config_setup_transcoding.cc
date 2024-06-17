@@ -28,6 +28,7 @@
 #include "config/config_definition.h"
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
+#include "config/config_val.h"
 #include "config/result/transcoding.h"
 #include "config_setup_array.h"
 #include "config_setup_bool.h"
@@ -234,32 +235,33 @@ void ConfigTranscodingSetup::makeOption(const pugi::xml_node& root, const std::s
     setOption(config);
 }
 
-std::string ConfigTranscodingSetup::getItemPath(int index, ConfigVal propOption, ConfigVal propOption2, ConfigVal propOption3, ConfigVal propOption4) const
+std::string ConfigTranscodingSetup::getItemPath(int index, const std::vector<ConfigVal>& propOptions) const
 {
     if (index < 0) {
         return fmt::to_string(xpath);
     }
 
-    auto opt2 = ConfigDefinition::ensureAttribute(propOption2, propOption3 == ConfigVal::MAX);
-    auto opt3 = ConfigDefinition::ensureAttribute(propOption3, propOption4 == ConfigVal::MAX);
-    auto opt4 = ConfigDefinition::ensureAttribute(propOption4, propOption4 != ConfigVal::MAX);
+    auto opt2 = ConfigDefinition::ensureAttribute(propOptions.size() > 1 ? propOptions[1] : ConfigVal::MAX, propOptions.size() == 2);
+    auto opt3 = ConfigDefinition::ensureAttribute(propOptions.size() > 2 ? propOptions[2] : ConfigVal::MAX, propOptions.size() == 3);
+    auto opt4 = ConfigDefinition::ensureAttribute(propOptions.size() > 3 ? propOptions[3] : ConfigVal::MAX, propOptions.size() > 4);
+    auto propOption = propOptions.size() > 0 ? propOptions[0] : ConfigVal::MAX;
 
     if (propOption == ConfigVal::A_TRANSCODING_PROFILES_PROFLE || propOption == ConfigVal::A_TRANSCODING_MIMETYPE_FILTER) {
-        if (propOption3 == ConfigVal::MAX) {
+        if (propOptions.size() < 3) {
             return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(propOption), index, opt2);
         }
         return fmt::format("{}[{}]/{}/{}", ConfigDefinition::mapConfigOption(propOption), index, opt2, opt3);
     }
     if (propOption == ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP) {
-        if (propOption4 == ConfigVal::MAX) {
-            return fmt::format("{}/{}[{}]/{}", ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOption2), index, opt3);
+        if (propOptions.size() < 4) {
+            return fmt::format("{}/{}[{}]/{}", ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOptions[1]), index, opt3);
         }
-        return fmt::format("{}/{}[{}]/{}/{}", ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOption2), index, opt3, opt4);
+        return fmt::format("{}/{}[{}]/{}/{}", ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOptions[1]), index, opt3, opt4);
     }
-    if (propOption4 == ConfigVal::MAX) {
-        return fmt::format("{}/{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOption2), index, opt3);
+    if (propOptions.size() > 1 && propOptions.size() < 4) {
+        return fmt::format("{}/{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOptions[1]), index, opt3);
     }
-    return fmt::format("{}/{}/{}[{}]/{}/{}", xpath, ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOption2), index, opt3, opt4);
+    return fmt::format("{}/{}/{}[{}]/{}/{}", xpath, ConfigDefinition::mapConfigOption(propOption), ConfigDefinition::mapConfigOption(propOptions.size() > 1 ? propOptions[1] : ConfigVal::MAX), index, opt3, opt4);
 }
 
 bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
@@ -272,35 +274,35 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
 
         // update properties in profile part
         for (auto&& filter : value->getTranscodingProfileListOption()->getFilterList()) {
-            auto index = getItemPath(i, ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE);
+            auto index = getItemPath(i, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE });
             if (optItem == index) {
                 config->setOrigValue(index, filter->getMimeType());
                 filter->setMimeType(optValue);
                 log_debug("New Transcoding Detail {} {}", index, filter->getMimeType());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_USING);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_USING });
             if (optItem == index) {
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, filter->getTranscoderName());
                 filter->setTranscoderName(optValue);
                 log_debug("New Transcoding Detail {} {}", index, filter->getTranscoderName());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS });
             if (optItem == index) {
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, filter->getClientFlags());
                 filter->setClientFlags(ConfigDefinition::findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->checkIntValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, filter->getClientFlags());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SRCDLNA);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SRCDLNA });
             if (optItem == index) {
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, filter->getSourceProfile());
                 filter->setSourceProfile(optValue);
                 log_debug("New Transcoding Detail {} {}", index, filter->getSourceProfile());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING });
             if (optItem == index) {
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, fmt::join(filter->getNoTranscodingMimeTypes(), ","));
                 std::vector<std::string> noTranscodingVector;
@@ -319,26 +321,26 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
         i = 0;
         // update properties in transcoding part
         for (auto&& [name, entry] : profiles) {
-            auto index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME);
+            auto index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME });
             if (optItem == index) {
                 log_error("Cannot change profile name in Transcoding Detail {} {}", index, name);
                 return false;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED });
             if (optItem == index) {
                 config->setOrigValue(index, entry->isEnabled());
                 entry->setEnabled(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isEnabled());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS });
             if (optItem == index) {
                 config->setOrigValue(index, entry->getClientFlags());
                 entry->setClientFlags(ConfigDefinition::findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->checkIntValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getClientFlags());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE });
             if (optItem == index) {
                 TranscodingType type;
                 auto setup = ConfigDefinition::findConfigSetup<ConfigEnumSetup<TranscodingType>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE);
@@ -349,7 +351,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                     return true;
                 }
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE });
             if (optItem == index) {
                 if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getTargetMimeType());
@@ -360,7 +362,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
 
             // update profile options
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES });
             if (optItem == index) {
                 if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getAttributeOverride(ResourceAttribute::RESOLUTION));
@@ -369,14 +371,14 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                     return true;
                 }
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL });
             if (optItem == index) {
                 config->setOrigValue(index, entry->getAcceptURL());
                 entry->setAcceptURL(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getAcceptURL());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_DLNAPROF);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_DLNAPROF });
             if (optItem == index) {
                 if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_DLNAPROF)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getDlnaProfile());
@@ -385,42 +387,42 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                     return true;
                 }
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SAMPFREQ);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SAMPFREQ });
             if (optItem == index) {
                 config->setOrigValue(index, entry->getSampleFreq());
                 entry->setSampleFreq(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SAMPFREQ)->checkIntValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getSampleFreq());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NRCHAN);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NRCHAN });
             if (optItem == index) {
                 config->setOrigValue(index, entry->getNumChannels());
                 entry->setNumChannels(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NRCHAN)->checkIntValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getNumChannels());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_HIDEORIG);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_HIDEORIG });
             if (optItem == index) {
                 config->setOrigValue(index, entry->hideOriginalResource());
                 entry->setHideOriginalResource(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_HIDEORIG)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->hideOriginalResource());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_THUMB);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_THUMB });
             if (optItem == index) {
                 config->setOrigValue(index, entry->isThumbnail());
                 entry->setThumbnail(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_THUMB)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->isThumbnail());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST });
             if (optItem == index) {
                 config->setOrigValue(index, entry->getFirstResource());
                 entry->setFirstResource(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST)->checkValue(optValue));
                 log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getFirstResource());
                 return true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG });
             if (optItem == index) {
                 config->setOrigValue(index, entry->isTheora());
                 entry->setTheora(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG)->checkValue(optValue));
@@ -433,19 +435,19 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             std::size_t chunk = entry->getBufferChunkSize();
             std::size_t fill = entry->getBufferInitialFillSize();
             bool setBuffer = false;
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE });
             if (optItem == index) {
                 config->setOrigValue(index, static_cast<int>(buffer));
                 buffer = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->checkIntValue(optValue);
                 setBuffer = true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK });
             if (optItem == index) {
                 config->setOrigValue(index, static_cast<int>(chunk));
                 chunk = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->checkIntValue(optValue);
                 setBuffer = true;
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL });
             if (optItem == index) {
                 config->setOrigValue(index, static_cast<int>(fill));
                 fill = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->checkIntValue(optValue);
@@ -467,7 +469,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
 
             // update agent options
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND });
             if (optItem == index) {
                 if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getCommand());
@@ -476,7 +478,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                     return true;
                 }
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS });
             if (optItem == index) {
                 if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getArguments());
@@ -490,7 +492,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             AviFourccListmode fccMode = entry->getAVIFourCCListMode();
             auto fccList = entry->getAVIFourCCList();
             bool set4cc = false;
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE });
             if (optItem == index) {
                 auto setup = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AviFourccListmode>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
                 config->setOrigValue(index, setup->mapEnumValue(fccMode));
@@ -498,7 +500,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
                     set4cc = true;
                 }
             }
-            index = getItemPath(i, ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC);
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC });
             if (optItem == index) {
                 config->setOrigValue(index, std::accumulate(next(fccList.begin()), fccList.end(), fccList[0], [](auto&& a, auto&& b) { return fmt::format("{}, {}", a, b); }));
                 fccList.clear();
