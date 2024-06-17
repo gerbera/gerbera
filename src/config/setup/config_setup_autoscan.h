@@ -60,7 +60,7 @@ public:
 
     std::string getUniquePath() const override;
 
-    std::string getItemPath(int index = 0, ConfigVal propOption = ConfigVal::MAX, ConfigVal propOption2 = ConfigVal::MAX, ConfigVal propOption3 = ConfigVal::MAX, ConfigVal propOption4 = ConfigVal::MAX) const override;
+    std::string getItemPath(int index, const std::vector<ConfigVal>& propOptions) const override;
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 

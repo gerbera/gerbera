@@ -28,6 +28,7 @@ Gerbera - https://gerbera.io/
 #include "config/config_definition.h"
 #include "config/config_generator.h"
 #include "config/config_setup.h"
+#include "config/config_val.h"
 #include "content/autoscan_setting.h"
 #include "content/content.h"
 #include "server.h"

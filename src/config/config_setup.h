@@ -28,7 +28,6 @@
 
 #include "config.h"
 #include "config_options.h"
-#include "config_val.h"
 
 #include <functional>
 #include <map>
@@ -43,6 +42,8 @@
 #define ITEM_PATH_PREFIX (-3)
 
 using StringCheckFunction = std::function<bool(std::string& value)>;
+
+enum class ConfigVal;
 
 class ConfigValue {
 public:
@@ -156,8 +157,7 @@ public:
 
     virtual bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) { return false; }
 
-    virtual std::string getItemPath(int index = 0, ConfigVal propOption = ConfigVal::MAX, ConfigVal propOption2 = ConfigVal::MAX, ConfigVal propOption3 = ConfigVal::MAX, ConfigVal propOption4 = ConfigVal::MAX) const { return xpath; }
-    virtual std::string getItemPath(int index, std::vector<ConfigVal> propOptions) const { return xpath; }
+    virtual std::string getItemPath(int index, const std::vector<ConfigVal>& propOptions) const { return xpath; }
 
     virtual std::string getUniquePath() const { return xpath; }
     virtual std::string getCurrentValue() const { return optionValue ? optionValue->getOption() : ""; }

@@ -212,7 +212,7 @@ protected:
     void writeImportTweaks(pugi::xml_node& values);
     void writeDynamicContent(pugi::xml_node& values);
     void writeBoxLayout(pugi::xml_node& values);
-    void writeTransconding(pugi::xml_node& values);
+    void writeTranscoding(pugi::xml_node& values);
     void writeAutoscan(pugi::xml_node& values);
     void writeDictionaries(pugi::xml_node& values);
     void writeVectors(pugi::xml_node& values);

@@ -28,6 +28,7 @@
 #include "common.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
+#include "config/config_val.h"
 #include "config_setup_int.h"
 #include "util/logger.h"
 
@@ -73,7 +74,7 @@ void ConfigArraySetup::makeOption(const pugi::xml_node& root, const std::shared_
 
 bool ConfigArraySetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status) const
 {
-    auto index = getItemPath(i);
+    auto index = getItemPath(i, {});
     if (optItem == index || !status.empty()) {
         auto realIndex = value->getIndex(i);
         if (realIndex < std::numeric_limits<std::size_t>::max()) {
@@ -126,7 +127,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
     return false;
 }
 
-std::string ConfigArraySetup::getItemPath(int index, ConfigVal propOption, ConfigVal propOption2, ConfigVal propOption3, ConfigVal propOption4) const
+std::string ConfigArraySetup::getItemPath(int index, const std::vector<ConfigVal>& propOptions) const
 {
     if (index < 0) {
         return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));

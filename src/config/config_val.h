@@ -415,5 +415,4 @@ enum class AtrailerResolution {
 
 using ConfigOptionIterator = EnumIterator<ConfigVal, CFG_MIN, ConfigVal::MAX>;
 
-#define CFG_MAX to_underlying(ConfigVal::MAX)
 #endif // __CONFIG_VAL_H__
