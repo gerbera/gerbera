@@ -1130,8 +1130,11 @@ This section sets the rules for additional containers which have calculated cont
 
         * Required
 
-        Filter to run to get the contents of the container. It uses the syntax of UPnP search with additional properties ``last_modified`` and ``last_updated``.
-        It also support comparing against a special value ``"@last*"`` where ``*`` can be any integer which evaluates to the current time minus the number of days as specified.
+        Define a filter to run in order to get the contents of the container.
+        The filter uses the syntax of UPnP search with additional properties ``last_modified`` (date), ``last_updated`` (date),
+        ``upnp:lastPlaybackTime`` (date), ``play_group`` (string, ``group`` from client config) and ``upnp:playbackCount`` (number).
+        Date properties support comparing against a special value ``"@last*"`` where ``*`` can be any integer which evaluates to
+        the current time minus the number of days as specified.
 
         ::
 
@@ -1139,7 +1142,8 @@ This section sets the rules for additional containers which have calculated cont
 
         * Required
 
-        Position in the virtual layout where the node is added. If it is in a sub-container, e.g. ``/Audio/New``, it only becomes visible if the import generates the parent container.
+        Position in the virtual layout where the node is added. If it is in a sub-container, e.g. ``/Audio/New``, it only
+        becomes visible if the import generates the parent container.
 
         ::
 
@@ -1164,6 +1168,7 @@ This section sets the rules for additional containers which have calculated cont
         * Optional
 
         Limit the number of item in dynamic container.
+
         * Default: 500
 
         ::

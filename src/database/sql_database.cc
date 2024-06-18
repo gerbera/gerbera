@@ -34,10 +34,6 @@
 
 #include "sql_database.h" // API
 
-#include <algorithm>
-#include <fmt/chrono.h>
-#include <vector>
-
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "config/config.h"
@@ -56,6 +52,10 @@
 #include "util/tools.h"
 #include "util/url_utils.h"
 
+#include <algorithm>
+#include <fmt/chrono.h>
+#include <vector>
+
 #define MAX_REMOVE_SIZE 1000
 #define MAX_REMOVE_RECURSION 500
 
@@ -69,6 +69,7 @@
 #define SRC_ALIAS "c"
 #define MTA_ALIAS "m"
 #define RES_ALIAS "re"
+#define PLY_ALIAS "pl"
 
 // database
 #define LOC_DIR_PREFIX 'D'
@@ -165,6 +166,14 @@ enum class AutoscanColumn {
     ObjLocation,
 };
 
+/// \brief playstatus column ids
+enum class PlaystatusCol {
+    Group = 0,
+    ItemId,
+    PlayCount,
+    LastPlayed,
+};
+
 /// \brief Map browse column ids to column names
 // map ensures entries are in correct order, each value of BrowseCol must be present
 static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColMap {
@@ -193,7 +202,7 @@ static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
     { BrowseCol::AsPersistent, { AUS_ALIAS, "persistent" } },
 };
 
-/// \brief Map search oolumn ids to column names
+/// \brief Map search column ids to column names
 // map ensures entries are in correct order, each value of SearchCol must be present
 static const std::map<SearchCol, std::pair<std::string, std::string>> searchColMap {
     { SearchCol::Id, { SRC_ALIAS, "id" } },
@@ -292,6 +301,25 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
     { "obj_location", AutoscanColumn::ObjLocation },
 };
 
+/// \brief Map playstatus column ids to column names
+// map ensures entries are in correct order, each value of PlaystatusCol must be present
+static std::map<PlaystatusCol, std::pair<std::string, std::string>> playstatusColMap {
+    { PlaystatusCol::Group, { PLY_ALIAS, "group" } },
+    { PlaystatusCol::ItemId, { PLY_ALIAS, "item_id" } },
+    { PlaystatusCol::PlayCount, { PLY_ALIAS, "playCount" } },
+    { PlaystatusCol::LastPlayed, { PLY_ALIAS, "lastPlayed" } },
+};
+
+/// \brief Playstatus search keys to column ids
+// entries are handled sequentially,
+// duplicate entries are added to statement in same order if key is present in SortCriteria
+static const std::vector<std::pair<std::string, PlaystatusCol>> playstatusTagMap {
+    { UPNP_SEARCH_PLAY_GROUP, PlaystatusCol::Group },
+    { UPNP_SEARCH_ID, PlaystatusCol::ItemId },
+    { UPNP_SEARCH_PLAY_COUNT, PlaystatusCol::PlayCount },
+    { UPNP_SEARCH_LAST_PLAYED, PlaystatusCol::LastPlayed },
+};
+
 // Format string for a recursive query of a parent container
 static constexpr auto sql_search_container_query_raw = R"(
 -- Find all children of parent_id
@@ -316,6 +344,7 @@ static std::shared_ptr<EnumColumnMapper<MetadataCol>> metaColumnMapper;
 static std::shared_ptr<EnumColumnMapper<AutoscanCol>> asColumnMapper;
 static std::shared_ptr<EnumColumnMapper<AutoscanColumn>> autoscanColumnMapper;
 static std::shared_ptr<EnumColumnMapper<int>> resourceColumnMapper;
+static std::shared_ptr<EnumColumnMapper<PlaystatusCol>> playstatusColumnMapper;
 
 SQLDatabase::SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime)
     : Database(config)
@@ -392,6 +421,7 @@ void SQLDatabase::init()
     searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchTagMap, searchColMap);
     metaColumnMapper = std::make_shared<EnumColumnMapper<MetadataCol>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
     resourceColumnMapper = std::make_shared<EnumColumnMapper<int>>(table_quote_begin, table_quote_end, RES_ALIAS, RESOURCE_TABLE, resourceTagMap, resourceColMap);
+    playstatusColumnMapper = std::make_shared<EnumColumnMapper<PlaystatusCol>>(table_quote_begin, table_quote_end, PLY_ALIAS, PLAYSTATUS_TABLE, playstatusTagMap, playstatusColMap);
     asColumnMapper = std::make_shared<EnumColumnMapper<AutoscanCol>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, asTagMap, asColMap);
     autoscanColumnMapper = std::make_shared<EnumColumnMapper<AutoscanColumn>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, autoscanTagMap, autoscanColMap);
 
@@ -419,7 +449,8 @@ void SQLDatabase::init()
 
         auto join1 = fmt::format("LEFT JOIN {} ON {} = {}", metaColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
         auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        this->sql_search_query = fmt::format("{} {} {}", searchColumnMapper->tableQuoted(), join1, join2);
+        auto join3 = fmt::format("LEFT JOIN {} ON {} = {}", playstatusColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), playstatusColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        this->sql_search_query = fmt::format("{} {} {} {}", searchColumnMapper->tableQuoted(), join1, join2, join3);
 
         // Build container query format string
         auto sql_container_query = fmt::format(sql_search_container_query_raw, identifier("containers"), identifier("cont"), searchColumnMapper->tableQuoted(), searchColumnMapper->getAlias(), searchColumnMapper->mapQuoted(UPNP_SEARCH_PARENTID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_REFID, true));
@@ -454,7 +485,7 @@ void SQLDatabase::init()
         this->sql_resource_query = fmt::format("SELECT {} ", fmt::join(buf, ", "));
     }
 
-    sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper);
+    sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper, playstatusColumnMapper);
 }
 
 void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, ConfigVal upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd)
@@ -551,6 +582,9 @@ std::string SQLDatabase::getSearchCapabilities()
 {
     auto searchKeys = std::vector {
         std::string(UPNP_SEARCH_CLASS),
+        std::string(UPNP_SEARCH_PLAY_COUNT),
+        std::string(UPNP_SEARCH_LAST_PLAYED),
+        std::string(UPNP_SEARCH_PLAY_GROUP),
     };
     searchKeys.reserve(to_underlying(MetadataFields::M_MAX) + to_underlying(ResourceAttribute::MAX));
     for (auto&& [field, meta] : MetaEnumMapper::mt_keys) {
@@ -966,7 +1000,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             if (param.getFlag(BROWSE_TRACK_SORT)) {
                 orderQb = fmt::format("{},{}", browseColumnMapper->mapQuoted(BrowseCol::PartNumber), browseColumnMapper->mapQuoted(BrowseCol::TrackNumber));
             } else {
-                SortParser sortParser(browseColumnMapper, metaColumnMapper, param.getSortCriteria());
+                SortParser sortParser(browseColumnMapper, playstatusColumnMapper, metaColumnMapper, param.getSortCriteria());
                 orderQb = sortParser.parse(addColumns, addJoin);
             }
             if (orderQb.empty()) {
@@ -1121,7 +1155,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     std::string addJoin;
     // order by code..
     auto orderByCode = [&]() {
-        SortParser sortParser(searchColumnMapper, metaColumnMapper, param.getSortCriteria());
+        SortParser sortParser(searchColumnMapper, playstatusColumnMapper, metaColumnMapper, param.getSortCriteria());
         auto orderQb = sortParser.parse(addColumns, addJoin);
         if (orderQb.empty()) {
             orderQb = searchColumnMapper->mapQuoted(SearchCol::DcTitle);

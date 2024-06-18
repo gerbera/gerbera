@@ -543,10 +543,11 @@ std::string ASTOrOperator::emit() const
     return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
 }
 
-DefaultSQLEmitter::DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper, std::shared_ptr<ColumnMapper> resMapper)
+DefaultSQLEmitter::DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper, std::shared_ptr<ColumnMapper> resMapper, std::shared_ptr<ColumnMapper> plyMapper)
     : colMapper(std::move(colMapper))
     , metaMapper(std::move(metaMapper))
     , resMapper(std::move(resMapper))
+    , plyMapper(std::move(plyMapper))
 {
 }
 
@@ -590,13 +591,16 @@ std::pair<std::string, std::string> DefaultSQLEmitter::getPropertyStatement(cons
     if (resMapper && resMapper->hasEntry(property)) {
         return { resMapper->mapQuoted(property), resMapper->mapQuotedLower(property) };
     }
+    if (plyMapper && plyMapper->hasEntry(property)) {
+        return { plyMapper->mapQuoted(property), plyMapper->mapQuotedLower(property) };
+    }
     if (metaMapper) {
         return {
             fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuoted(META_VALUE), property),
             fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuotedLower(META_VALUE), property)
         };
     }
-    log_info("Property {} not yet supported. Search may return no result!", property);
+    log_warning("Property {} not yet supported. Search may return no result!", property);
     return {};
 }
 
@@ -609,6 +613,10 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
     if ((operatr == ">" || operatr == ">=") && startswith(value, "@last")) {
         auto dateVal = currentTime() - std::chrono::hours(24 * stoiString(value.substr(5)));
         return fmt::format(logicOperator.at("newer"), "", fmt::format("{} {}", prpUpper, operatr), fmt::format("{} {}", prpLower, operatr), dateVal.count());
+    }
+
+    if ((operatr == ">" || operatr == ">=") && stoiString(value) > 0 && property == UPNP_SEARCH_PLAY_COUNT) {
+        return fmt::format("{} {} {}", prpLower, operatr, stoiString(value));
     }
 
     if (operatr != "=")
@@ -657,8 +665,9 @@ std::string DefaultSQLEmitter::emit(const ASTOrOperator* node, const std::string
     return fmt::format("{} OR {}", lhs, rhs);
 }
 
-SortParser::SortParser(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper, std::string sortCriteria)
+SortParser::SortParser(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> plyMapper, std::shared_ptr<ColumnMapper> metaMapper, std::string sortCriteria)
     : colMapper(std::move(colMapper))
+    , plyMapper(std::move(plyMapper))
     , metaMapper(std::move(metaMapper))
     , sortCrit(std::move(sortCriteria))
 {
@@ -681,7 +690,7 @@ std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
         } else {
             log_warning("Unknown sort direction '{}' in '{}'", seg, sortCrit);
         }
-        if (!colMapper->mapQuotedList(sort, seg, (desc ? "DESC" : "ASC"))) {
+        if (!colMapper->mapQuotedList(sort, seg, (desc ? "DESC" : "ASC")) && !plyMapper->mapQuotedList(sort, seg, (desc ? "DESC" : "ASC"))) {
             std::string sortSql;
             for (auto&& metaId : MetadataIterator()) {
                 auto&& metaName = MetaEnumMapper::getMetaFieldName(metaId);

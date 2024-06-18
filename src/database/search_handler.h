@@ -28,6 +28,8 @@
 #ifndef __SEARCH_HANDLER_H__
 #define __SEARCH_HANDLER_H__
 
+#include "util/tools.h"
+
 #include <algorithm>
 #include <fmt/core.h>
 #include <map>
@@ -35,14 +37,15 @@
 #include <unordered_map>
 #include <vector>
 
-#include "util/tools.h"
-
 #define UPNP_SEARCH_CLASS "upnp:class"
 #define UPNP_SEARCH_ID "@id"
 #define UPNP_SEARCH_REFID "@refID"
 #define UPNP_SEARCH_PARENTID "@parentID"
 #define UPNP_SEARCH_LAST_UPDATED "last_updated"
 #define UPNP_SEARCH_LAST_MODIFIED "last_modified"
+#define UPNP_SEARCH_LAST_PLAYED "upnp:lastPlaybackTime"
+#define UPNP_SEARCH_PLAY_COUNT "upnp:playbackCount"
+#define UPNP_SEARCH_PLAY_GROUP "play_group"
 #define UPNP_SEARCH_PATH "path"
 #define META_NAME "name"
 #define META_VALUE "value"
@@ -317,7 +320,10 @@ public:
 
 class DefaultSQLEmitter : public SQLEmitter {
 public:
-    DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper, std::shared_ptr<ColumnMapper> resMapper);
+    DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper,
+        std::shared_ptr<ColumnMapper> metaMapper,
+        std::shared_ptr<ColumnMapper> resMapper,
+        std::shared_ptr<ColumnMapper> plyMapper);
 
     std::string emitSQL(const ASTNode* node) const override;
     std::string emit(const ASTAsterisk* node) const override { return {}; }
@@ -336,6 +342,7 @@ private:
     std::shared_ptr<ColumnMapper> colMapper;
     std::shared_ptr<ColumnMapper> metaMapper;
     std::shared_ptr<ColumnMapper> resMapper;
+    std::shared_ptr<ColumnMapper> plyMapper;
 
     std::pair<std::string, std::string> getPropertyStatement(const std::string& property) const;
 };
@@ -459,11 +466,12 @@ private:
 
 class SortParser {
 public:
-    SortParser(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper, std::string sortCriteria);
+    SortParser(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> plyMapper, std::shared_ptr<ColumnMapper> metaMapper, std::string sortCriteria);
     std::string parse(std::string& addColumns, std::string& addJoin);
 
 private:
     std::shared_ptr<ColumnMapper> colMapper;
+    std::shared_ptr<ColumnMapper> plyMapper;
     std::shared_ptr<ColumnMapper> metaMapper;
     std::string sortCrit;
 };
