@@ -43,6 +43,7 @@
 - Logging: Separate description requests
 - Metadata: Unify handling and allow to disable
 - Playlist: Allow configuration of directory depth
+- Search: Add playstatus details to search properties
 - Server: Handle all HTTP via virtualdir
 - Startup: Always check dirs
 - TagLib: Use DebugListener to suppress messages

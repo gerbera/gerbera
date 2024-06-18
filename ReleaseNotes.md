@@ -12,6 +12,7 @@ This update brings a new design for the start page, better logging and a new rep
 - WebUI: New design for home page and login screen
 - Allow metadata handler to be disabled, add charset support
 - UPnP specification files (description.xml, cds.xml) now reflect client quirks
+- Search for `upnp:lastPlaybackTime`, `upnp:playbackCount` and `play_group`
 - Additional command line options for logging (`--syslog` and `--rotatelog`)
 - TagLib messages are logged with gerbera now. They also show up with `debug-mode="taglib"`.
 - LibExiv2 messages are logged with gerbera now. They also show up with `debug-mode="exiv2"`.

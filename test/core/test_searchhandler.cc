@@ -20,11 +20,11 @@
   $Id$
 */
 
-#include <gtest/gtest.h>
-#include <regex>
-
 #include "database/search_handler.h"
 #include "metadata/metadata_enums.h"
+
+#include <gtest/gtest.h>
+#include <regex>
 
 using upVecUpST = std::unique_ptr<std::vector<std::unique_ptr<SearchToken>>>;
 static decltype(auto) getAllTokens(const std::string& input)
@@ -301,7 +301,6 @@ public:
             { TestCol::LastUpdated, { "t", "last_updated" } },
         };
         columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
-
     }
 
     void TearDown() override { }
@@ -310,7 +309,7 @@ public:
         const std::string& expectedOutput, const std::string& expectedRe = "")
     {
         try {
-            DefaultSQLEmitter emitter(columnMapper, columnMapper, columnMapper);
+            DefaultSQLEmitter emitter(columnMapper, columnMapper, columnMapper, columnMapper);
             auto parser = SearchParser(emitter, input);
             auto rootNode = parser.parse();
             if (!rootNode)
@@ -330,7 +329,7 @@ public:
         const std::string& expectedOutput)
     {
         try {
-            auto parser = SortParser(columnMapper, columnMapper, input);
+            auto parser = SortParser(columnMapper, columnMapper, columnMapper, input);
             std::string addColumns;
             std::string addJoin;
             auto output = parser.parse(addColumns, addJoin);
