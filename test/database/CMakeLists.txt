@@ -1,5 +1,4 @@
 add_executable(testdb
-    main.cc
     test_database.cc
     test_sql_generators.cc
     mysql_config_fake.h
@@ -13,17 +12,10 @@ add_custom_command(TARGET testdb POST_BUILD
     COMMENT "Copying Database Scripts"
 )
 
-if (NOT TARGET GTest::gmock)
-    target_link_libraries(testdb PRIVATE
-        libgerbera
-        GTest::GTest
-    )
-else()
-    target_link_libraries(testdb PRIVATE
-        libgerbera
-        GTest::gmock
-    )
-endif()
+target_link_libraries(testdb PUBLIC
+    libgerbera
+    GTest::gmock_main
+)
 
 include(GoogleTest)
 gtest_discover_tests(testdb DISCOVERY_TIMEOUT 60)
