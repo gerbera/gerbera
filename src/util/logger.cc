@@ -90,6 +90,7 @@ int GrbLogger::makeFacility(const std::string& optValue)
 }
 
 std::map<GrbLogFacility, std::string_view> GrbLogger::facilities = {
+    // doc-debug-modes-begin
     { GrbLogFacility::thread, "Thread" },
     { GrbLogFacility::sqlite3, "Sqlite3" },
     { GrbLogFacility::cds, "CDS" },
@@ -121,6 +122,7 @@ std::map<GrbLogFacility, std::string_view> GrbLogger::facilities = {
     { GrbLogFacility::metadata, "Metadata" },
     { GrbLogFacility::matroska, "Matroska" },
     { GrbLogFacility::curl, "Curl" },
+    // doc-debug-modes-end
 
     { GrbLogFacility::log_MAX, "All" },
 };

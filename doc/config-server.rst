@@ -5,6 +5,8 @@ Configure Server
 
 These settings define the server configuration, this includes UPnP behavior, selection of database, accounts for the UI as well as installation locations of shared data.
 
+.. _server:
+
 ``server``
 ~~~~~~~~~~
 

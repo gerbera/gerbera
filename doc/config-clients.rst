@@ -5,6 +5,8 @@ Configure Client Quirks
 
 These settings define the additions to the automatic client type detection.
 
+.. _clients:
+
 ``clients``
 ~~~~~~~~~~~
 

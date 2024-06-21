@@ -15,37 +15,81 @@ Automatic Device Detection
 With each UPnP request a device sends its signature which is used by gerbera to assign special functionality to the response.
 The automatic detection supports the following devices and software:
 
-- StandardUPnP (all devices sending signature UPnP/1.0)
-- BubbleUPnP (running on smartphones)
-- SamsungAllShare (AllShare running on Windows)
-- SamsungSeriesQ (Samsung Series [Q] TVs), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC|DCM10``
-- SamsungSeriesCDE (Samsung other TVs), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC``
-- SamsungBDP (Samsung Blu-ray Player BD-D5100), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
-- SamsungBDJ5500 (Samsung Blu-ray Player J5500), setting device flags to ``SAMSUNG|SAMSUNG_FEATURES``
-- EC-IRadio (e.g. Dual CR 510), setting device flags to ``IRADIO``
-- FSL/Frontier Silicon/Frontier Smart (e.g. Technisat DigitRadio 580), setting device flags to ``SIMPLE_DATE``
-- PanasonicTV, setting device flags to ``PANASONIC``
-- BoseSoundtouch, setting device flags to ``STRICTXML``
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| Device Type                         | Description                                      | Device Flags                                            |
++=====================================+==================================================+=========================================================+
+| StandardUPnP                        | all devices sending signature UPnP/1.0           |                                                         |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| BubbleUPnP                          | running on smartphones                           |                                                         |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| SamsungAllShare                     | AllShare running on Windows                      |                                                         |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| SamsungSeriesQ                      | Samsung Series [Q] TVs                           | ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC|DCM10`` |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| SamsungSeriesCDE                    | Samsung other TVs                                | ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC``       |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| SamsungBDP                          | Samsung Blu-ray Player BD-D5100                  | ``SAMSUNG|SAMSUNG_FEATURES``                            |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| SamsungBDJ5500                      | Samsung Blu-ray Player J5500                     | ``SAMSUNG|SAMSUNG_FEATURES``                            |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| EC-IRadio                           | e.g. Dual CR 510                                 | ``IRADIO``                                              |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| FSL/Frontier Silicon/Frontier Smart | e.g. Technisat DigitRadio 580                    | ``SIMPLE_DATE``                                         |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| PanasonicTV                         | all Panasonic TV                                 | ``PANASONIC``                                           |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| BoseSoundtouch                      | Running on Smartphone to support Bose Multiroom  | ``STRICTXML``                                           |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+
+.. _device-flags:
 
 Device Flags
 ~~~~~~~~~~~~
 
 The device flags have the following meaning
 
--  ``SAMSUNG``: 0x01, add "CaptionInfo.sec" to video header
--  ``SAMSUNG_BOOKMARK_SEC``: 0x02, restore last played position when the media is played again (only for Samsung). Not applicable for transcoded media
--  ``SAMSUNG_BOOKMARK_MSEC``: 0x04, same as SAMSUNG_BOOKMARK_SEC, but the bookmark value is received from the Samsung TV as msec
--  ``SAMSUNG_FEATURES``: 0x10, activate Samsung features protocol (support for additional request like X_GetFeatureList, X_GetObjectIDfromIndex, X_GetIndexfromRID)
--  ``SAMSUNG_HIDE_DYNAMIC``: 0x20, some Samsung devices do not work with dynamic folders on top level, so this flag hides them for those devices
--  ``IRADIO``: 0x08, don't send ``<?xml ...?>`` declaration in response
--  ``PV_SUBTITLES``: 0x40, add attributes ``pv:subtitleFileType`` and ``pv:subtitleFileUri`` to video files if subtitles exist
--  ``PANASONIC``: 0x80, avoid adding part of the filename in item uri. Filename in item uri is used by other players, e.g. VLC to detect the language of a subtitle file.
--  ``STRICTXML``: 0x100, encode most of special chars also, like ``'`` as ``&amp;apos;``
--  ``HIDE_THUMBNAIL_RESOURCE``: 0x200, hide thumbnail resource in UPnP data (only adds albumArtUri)
--  ``HIDE_SUBTITLE_RESOURCE``: 0x400, hide subtitle resource in UPnP data (only add captionInfo)
--  ``HIDE_TRANSCODE_RESOURCE``: 0x800, hide transcoded resources in UPnP data (only adds content stream resources)
--  ``SIMPLE_DATE``: 0x1000, return ``dc:date`` without timezone as Zulu time.
--  ``DCM10``: 0x2000, add DCM10 as device capability.
++------------------------------+--------+------------------------------------------------------------------------+
+| Key                          | Value  | Description                                                            |
++==============================+========+========================================================================+
+| ``SAMSUNG``                  | 0x01   | Add "CaptionInfo.sec" to video header                                  |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``SAMSUNG_BOOKMARK_SEC``     | 0x02   | Restore last played position when the media is played again            |
+|                              |        | (only for Samsung). Not applicable for transcoded media                |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``SAMSUNG_BOOKMARK_MSEC``    | 0x04   | Same as ``SAMSUNG_BOOKMARK_SEC``, but the bookmark value is received   |
+|                              |        | from the Samsung TV as msec                                            |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``SAMSUNG_FEATURES``         | 0x10   | Activate Samsung features protocol                                     |
+|                              |        |                                                                        |
+|                              |        | (support for additional request like                                   |
+|                              |        | `X_GetFeatureList`, `X_GetObjectIDfromIndex`, `X_GetIndexfromRID`)     |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``SAMSUNG_HIDE_DYNAMIC``     | 0x20   | Some Samsung devices do not work with dynamic folders on top level,    |
+|                              |        | so this flag hides them for those devices                              |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``IRADIO``                   | 0x08   | Don't send ``<?xml ...?>`` declaration in response                     |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``PV_SUBTITLES``             | 0x40   | Add attributes ``pv:subtitleFileType`` and ``pv:subtitleFileUri``      |
+|                              |        | to video files if subtitles exist                                      |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``PANASONIC``                | 0x80   | Avoid adding part of the filename in item uri. Filename in item uri is |
+|                              |        | used by other players,                                                 |
+|                              |        |                                                                        |
+|                              |        | e.g. VLC to detect the language of a subtitle file.                    |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``STRICTXML``                | 0x100  | Encode most of special chars also, like ``'`` as ``&amp;apos;``        |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``HIDE_THUMBNAIL_RESOURCE``  | 0x200  | Hide thumbnail resource in UPnP data (only adds albumArtUri)           |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``HIDE_SUBTITLE_RESOURCE``   | 0x400  | Hide subtitle resource in UPnP data (only add captionInfo)             |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``HIDE_TRANSCODE_RESOURCE``  | 0x800  | Hide transcoded resources in UPnP data (only adds content stream       |
+|                              |        | resources)                                                             |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``SIMPLE_DATE``              | 0x1000 | Return ``dc:date`` without timezone as Zulu time.                      |
++------------------------------+--------+------------------------------------------------------------------------+
+| ``DCM10``                    | 0x2000 | Add DCM10 as device capability.                                        |
++------------------------------+--------+------------------------------------------------------------------------+
 
 
 Manual Overrides

@@ -37,6 +37,7 @@
 - Handle broken Systemd on some debian
 - Import: Add option case sensitive tags
 - Import: fix single file update
+- Improve documentation
 - Inotify: Handle Inotify access failed
 - Insecure download due to ubuntu-20.04/armhf failing
 - Libexif: add custom logger
