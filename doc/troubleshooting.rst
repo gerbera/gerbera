@@ -130,9 +130,13 @@ Debug Mode
     --debug-mode "subsystem[|subsystem2|...]"
 
 Activate debugging messages only for certain subsystems. The following subsystems are available:
-``thread``, ``sqlite3``, ``cds``, ``server``, ``content``, ``update``, ``mysql``, ``sqldatabase``, ``proc``, ``autoscan``, ``script``, ``web``, ``layout``,
-``exif``, ``transcoding``, ``taglib``, ``ffmpeg``, ``wavpack``, ``requests``, ``connmgr``, ``mrregistrar``, ``xml``, ``clients``, ``iohandler``, ``online``,
-``metadata``, ``matroska``.
+
+.. literalinclude:: ../src/util/logger.cc
+    :start-after: // doc-debug-modes-begin
+    :end-before: // doc-debug-modes-end
+    :dedent: 4
+    :caption: Subsystem names are the strings in quotes
+    :language: c++
 
 Multiple subsystems can be combined with a ``|``. Names are not case sensitive. This is for developers and testers mostly and has to be activted in cmake 
 options at compile time (``-DWITH_DEBUG_OPTIONS=YES``).
@@ -186,4 +190,22 @@ Configuration
 -------------
 
 If you have broken Gerbera by modifying values on the config page, have to clear the database or at least remove all entries from the table ``grb_config_value``.
+
+
+UPnP
+~~~~
+
+Discovery
+---------
+
+If your gerbera server disappears from some clients you may modify the alive
+interval in the :ref:`server <server>` section.
+
+Browsing
+--------
+
+If your device does not show any files or responds with not supported there
+is a set of client tweaks in :ref:`Device Flags <device-flags>`. If only some
+file types do not work you can add mimetype mapping to the
+:ref:`client config <clients>`.
 
