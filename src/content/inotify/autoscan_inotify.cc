@@ -264,8 +264,9 @@ int AutoscanInotify::watchPathForMoves(const fs::path& path, int wd, unsigned in
 {
     int parentWd = INOTIFY_ROOT;
 
+    fs::path parent = path.parent_path();
     fs::path watchPath;
-    for (auto it = path.begin(); it != std::prev(path.end()); ++it) {
+    for (auto it = parent.begin(); it != parent.end(); ++it) {
         watchPath /= *it;
         log_debug("adding move watch: {}", watchPath.c_str());
         parentWd = addMoveWatch(watchPath, wd, parentWd, retryCount);

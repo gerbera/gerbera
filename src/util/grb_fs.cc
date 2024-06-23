@@ -293,13 +293,7 @@ bool isTheora(const fs::path& oggFilename)
 
 fs::path getLastPath(const fs::path& path)
 {
-    auto it = std::prev(path.end()); // filename
-    if (it != path.end())
-        it = std::prev(it); // last path
-    if (it != path.end())
-        return *it;
-
-    return {};
+    return path.parent_path().filename();
 }
 
 #ifndef HAVE_FFMPEG
