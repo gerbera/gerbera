@@ -35,9 +35,6 @@
 #define GRB_LOG_FAC GrbLogFacility::script
 #include "script.h" // API
 
-#include <array>
-#include <fmt/chrono.h>
-
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "config/config_definition.h"
@@ -51,6 +48,7 @@
 #include "database/database.h"
 #include "js_functions.h"
 #include "script_names.h"
+#include "script_property.h"
 #include "scripting_runtime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -62,6 +60,9 @@
 #ifdef ATRAILERS
 #include "content/onlineservice/atrailers_content_handler.h"
 #endif
+
+#include <array>
+#include <fmt/chrono.h>
 
 static constexpr std::array jsGlobalFunctions {
     duk_function_list_entry { "print2", js_print2, DUK_VARARGS },
@@ -75,90 +76,6 @@ static constexpr std::array jsGlobalFunctions {
     duk_function_list_entry { "j2i", js_j2i, 1 },
     duk_function_list_entry { nullptr, nullptr, 0 },
 };
-
-std::string Script::getProperty(const std::string& name) const
-{
-    std::string ret;
-    if (!duk_is_object_coercible(ctx, -1))
-        return ret;
-    duk_get_prop_string(ctx, -1, name.c_str());
-    if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1)) {
-        duk_pop(ctx);
-        return ret;
-    }
-    ret = duk_get_string(ctx, -1);
-    duk_pop(ctx);
-    return ret;
-}
-
-int Script::getBoolProperty(const std::string& name) const
-{
-    if (!duk_is_object_coercible(ctx, -1))
-        return -1;
-    duk_get_prop_string(ctx, -1, name.c_str());
-    if (duk_is_null_or_undefined(ctx, -1)) {
-        duk_pop(ctx);
-        return -1;
-    }
-    auto ret = duk_to_boolean(ctx, -1);
-    duk_pop(ctx);
-    return ret;
-}
-
-int Script::getIntProperty(const std::string& name, int def) const
-{
-    if (!duk_is_object_coercible(ctx, -1))
-        return def;
-    duk_get_prop_string(ctx, -1, name.c_str());
-    if (duk_is_null_or_undefined(ctx, -1)) {
-        duk_pop(ctx);
-        return def;
-    }
-    auto ret = duk_to_int32(ctx, -1);
-    duk_pop(ctx);
-    return ret;
-}
-
-std::vector<std::string> Script::getArrayProperty(const std::string& name) const
-{
-    std::vector<std::string> result;
-    if (!duk_is_object_coercible(ctx, -1))
-        return result;
-    duk_get_prop_string(ctx, -1, name.c_str());
-    if (duk_is_null_or_undefined(ctx, -1) || !duk_is_array(ctx, -1)) {
-        duk_pop(ctx);
-        return result;
-    }
-    duk_enum(ctx, -1, 0);
-    while (duk_next(ctx, -1, 1 /* get_value */)) {
-        duk_get_string(ctx, -1);
-        if (duk_is_null_or_undefined(ctx, -1)) {
-            duk_pop_2(ctx);
-            continue;
-        }
-        // [key = duk_to_string(ctx, -2)]
-        auto val = std::string(duk_to_string(ctx, -1));
-        result.push_back(std::move(val));
-        duk_pop_2(ctx); /* pop_key */
-    }
-    duk_pop(ctx); // duk_enum
-    duk_pop(ctx); // property
-    return result;
-}
-
-std::vector<std::string> Script::getPropertyNames() const
-{
-    std::vector<std::string> keys;
-    duk_enum(ctx, -1, 0);
-    while (duk_next(ctx, -1, 0 /*get_key*/)) {
-        /* [ ... enum key ] */
-        auto sym = std::string(duk_get_string(ctx, -1));
-        keys.push_back(std::move(sym));
-        duk_pop(ctx); /* pop_key */
-    }
-    duk_pop(ctx); // duk_enum
-    return keys;
-}
 
 void Script::setProperty(const std::string& name, const std::string& value)
 {
@@ -481,6 +398,7 @@ void Script::loadFolder(const fs::path& scriptFolder)
 #define GRB_CONTAINERTYPE_VIDEO "grb_container_type_video"
 #define OBJECT_SCRIPT_PATH "object_script_path"
 #define OBJECT_AUTOSCAN_ID "object_autoscan_id"
+#define OBJECT_REF_LIST "object_ref_list"
 #define CONT_NAME "cont"
 
 void Script::cleanup()
@@ -490,12 +408,13 @@ void Script::cleanup()
     duk_del_prop_string(ctx, -1, CONT_NAME);
     duk_del_prop_string(ctx, -1, OBJECT_SCRIPT_PATH);
     duk_del_prop_string(ctx, -1, OBJECT_AUTOSCAN_ID);
+    duk_del_prop_string(ctx, -1, OBJECT_REF_LIST);
     duk_del_prop_string(ctx, -1, GRB_CONTAINERTYPE_AUDIO);
     duk_del_prop_string(ctx, -1, GRB_CONTAINERTYPE_VIDEO);
     duk_del_prop_string(ctx, -1, GRB_CONTAINERTYPE_IMAGE);
 }
 
-void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath)
+std::vector<int> Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath)
 {
     cdsObject2dukObject(obj);
     duk_put_global_string(ctx, objectName.c_str());
@@ -506,6 +425,9 @@ void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& r
 
     duk_push_string(ctx, rootPath.c_str());
     duk_put_global_string(ctx, OBJECT_SCRIPT_PATH);
+
+    duk_push_array(ctx);
+    duk_put_global_string(ctx, OBJECT_REF_LIST);
 
     auto autoScan = content->getAutoscanDirectory(rootPath);
     if (autoScan && !rootPath.empty()) {
@@ -535,11 +457,13 @@ void Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& r
     duk_remove(ctx, -2);
 
     _execute();
+    std::vector<int> result = ScriptGlobalProperty(ctx, OBJECT_REF_LIST).getIntArrayValue();
     cleanup();
     duk_pop(ctx);
+    return result;
 }
 
-void Script::call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& functionName, const fs::path& rootPath, const std::string& containerType)
+std::vector<int> Script::call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& functionName, const fs::path& rootPath, const std::string& containerType)
 {
     // write global object used in callback functionss
     cdsObject2dukObject(obj);
@@ -595,7 +519,10 @@ void Script::call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<C
         duk_pop(ctx);
         throw_std_runtime_error("javascript runtime error");
     }
+    std::vector<int> result = ScriptResultProperty(ctx).getIntArrayValue();
+
     duk_pop(ctx);
+    return result;
 }
 
 void Script::setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string& val) const
@@ -621,7 +548,7 @@ void Script::setMetaData(const std::shared_ptr<CdsObject>& obj, const std::share
 
 std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>& pcd)
 {
-    int objType = getIntProperty("objectType", -1);
+    int objType = ScriptNamedProperty(ctx, "objectType").getIntValue(-1);
     if (objType == -1) {
         log_error("missing objectType property");
         return nullptr;
@@ -632,27 +559,26 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
     // CdsObject
     obj->setVirtual(true); // JS creates only virtual objects
 
-    int id = getIntProperty("id", INVALID_OBJECT_ID);
-    if (id != INVALID_OBJECT_ID)
+    int id = ScriptNamedProperty(ctx, "id").getIntValue(INVALID_OBJECT_ID);
+    if (id != INVALID_OBJECT_ID) {
         obj->setID(id);
-    id = getIntProperty("refID", INVALID_OBJECT_ID);
-    if (id != INVALID_OBJECT_ID)
+    }
+    id = ScriptNamedProperty(ctx, "refID").getIntValue(INVALID_OBJECT_ID);
+    if (id != INVALID_OBJECT_ID) {
         obj->setRefID(id);
-    id = getIntProperty("parentID", INVALID_OBJECT_ID);
+    }
+    id = ScriptNamedProperty(ctx, "parentID").getIntValue(INVALID_OBJECT_ID);
     if (id != INVALID_OBJECT_ID) {
         obj->setParentID(id);
     }
 
-    duk_get_prop_string(ctx, -1, "parent");
-    if (duk_is_object(ctx, -1)) {
-        duk_to_object(ctx, -1);
+    ScriptNamedProperty(ctx, "parent").getObject([&]() {
         auto parent = dukObject2cdsObject(nullptr);
         if (parent) {
             obj->setParent(parent);
             log_debug("dukObject2cdsObject: Parent {}", parent->getClass());
         }
-    }
-    duk_pop(ctx);
+    });
 
     // stuff that has not been exported to js
     if (pcd) {
@@ -660,21 +586,19 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
         obj->setResources(pcd->getResources());
         obj->setAuxData(pcd->getAuxData());
     } else {
-        int flags = getIntProperty("flags", -1);
+        int flags = ScriptNamedProperty(ctx, "flags").getIntValue(-1);
         if (flags >= 0)
             obj->setFlags(flags);
 
-        duk_get_prop_string(ctx, -1, "res");
-        if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
-            duk_to_object(ctx, -1);
-            auto keys = getPropertyNames();
+        ScriptNamedProperty(ctx, "res").getObject([&]() {
+            auto keys = ScriptProperty(ctx).getPropertyNames();
 
             int resCount = 0;
             for (auto&& sym : keys) {
                 if (sym.find("handlerType") != std::string::npos) {
-                    int ht = getIntProperty(sym, -1);
+                    int ht = ScriptNamedProperty(ctx, sym).getIntValue(-1);
                     auto purpSym = fmt::format("{}:purpose", resCount);
-                    int purpose = getIntProperty(purpSym, -1);
+                    int purpose = ScriptNamedProperty(ctx, purpSym).getIntValue(-1);
                     if (ht >= 0 && purpose >= 0) {
                         auto newRes = std::make_shared<CdsResource>(EnumMapper::remapContentHandler(ht), EnumMapper::remapPurpose(purpose));
                         obj->addResource(newRes);
@@ -687,7 +611,7 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
                 resCount = res->getResId();
                 // only attributes enumerated in res_names are allowed
                 for (auto&& [key, upnp] : res_names) {
-                    auto val = getProperty(resCount == 0 ? EnumMapper::getAttributeName(key) : fmt::format("{}-{}", resCount, EnumMapper::getAttributeName(key)));
+                    auto val = ScriptNamedProperty(ctx, resCount == 0 ? EnumMapper::getAttributeName(key) : fmt::format("{}-{}", resCount, EnumMapper::getAttributeName(key))).getStringValue();
                     if (!val.empty()) {
                         val = sc->convert(val);
                         res->addAttribute(key, val);
@@ -697,7 +621,7 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
                 for (auto&& sym : keys) {
                     if (sym.find(head) != std::string::npos) {
                         auto key = sym.substr(head.size());
-                        auto val = getProperty(sym);
+                        auto val = ScriptNamedProperty(ctx, sym).getStringValue();
                         res->addParameter(key, val);
                     }
                 }
@@ -705,27 +629,23 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
                 for (auto&& sym : keys) {
                     if (sym.find(head) != std::string::npos) {
                         auto key = sym.substr(head.size());
-                        auto val = getProperty(sym);
+                        auto val = ScriptNamedProperty(ctx, sym).getStringValue();
                         res->addOption(key, val);
                     }
                 }
             }
-        }
-        duk_pop(ctx); // res
+        });
 
-        duk_get_prop_string(ctx, -1, "aux");
-        if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
-            duk_to_object(ctx, -1);
-            auto keys = getPropertyNames();
+        ScriptNamedProperty(ctx, "aux").getObject([&]() {
+            auto keys = ScriptProperty(ctx).getPropertyNames();
             for (auto&& sym : keys) {
-                auto val = getProperty(sym);
+                auto val = ScriptNamedProperty(ctx, sym).getStringValue();
                 if (!val.empty()) {
                     val = sc->convert(val);
                     obj->setAuxData(sym, val);
                 }
             }
-        }
-        duk_pop(ctx); // aux
+        });
     }
     return obj;
 }
@@ -734,13 +654,16 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
 {
     auto obj = createObject(pcd);
 
-    int mtime = getIntProperty("mtime", 0);
+    if (!obj)
+        return nullptr;
+
+    int mtime = ScriptNamedProperty(ctx, "mtime").getIntValue(0);
     if (mtime > 0) {
         obj->setMTime(std::chrono::seconds(mtime));
     }
 
     {
-        auto val = getProperty("title");
+        auto val = ScriptNamedProperty(ctx, "title").getStringValue();
         if (!val.empty()) {
             val = sc->convert(val);
             obj->setTitle(val);
@@ -750,7 +673,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     }
 
     {
-        auto val = getProperty("upnpclass");
+        auto val = ScriptNamedProperty(ctx, "upnpclass").getStringValue();
         if (!val.empty()) {
             val = sc->convert(val);
             obj->setClass(val);
@@ -759,33 +682,30 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         }
     }
 
-    int restricted = getBoolProperty("restricted");
+    int restricted = ScriptNamedProperty(ctx, "restricted").getBoolValue();
     if (restricted >= 0)
         obj->setRestricted(restricted);
 
-    duk_get_prop_string(ctx, -1, "metaData");
-    if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
-        duk_to_object(ctx, -1);
+    ScriptNamedProperty(ctx, "metaData").getObject([&]() {
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        auto keys = getPropertyNames();
+        auto keys = ScriptProperty(ctx).getPropertyNames();
         for (auto&& sym : keys) {
-            auto arrayVal = getArrayProperty(sym);
+            auto arrayVal = ScriptNamedProperty(ctx, sym).getStringArrayValue();
             for (auto&& val : arrayVal) {
                 if (!val.empty()) {
                     setMetaData(obj, item, sym, val);
                 }
             }
         }
-    }
-    duk_pop(ctx); // metaData
+    });
 
-    fs::path location = !hasCaseSensitiveNames && obj->isContainer() ? toLower(getProperty("location")) : getProperty("location");
+    fs::path location = !hasCaseSensitiveNames && obj->isContainer() ? toLower(ScriptNamedProperty(ctx, "location").getStringValue()) : ScriptNamedProperty(ctx, "location").getStringValue();
     if (!location.empty()) {
         // location must not be touched by character conversion!
         obj->setLocation(location);
     }
 
-    auto description = getProperty("description");
+    auto description = ScriptNamedProperty(ctx, "description").getStringValue();
     if (!description.empty()) {
         description = sc->convert(description);
         obj->removeMetaData(MetadataFields::M_DESCRIPTION);
@@ -800,7 +720,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         if (pcd)
             pcdItem = std::static_pointer_cast<CdsItem>(pcd);
 
-        auto mimetype = getProperty("mimetype");
+        auto mimetype = ScriptNamedProperty(ctx, "mimetype").getStringValue();
         if (!mimetype.empty()) {
             mimetype = sc->convert(mimetype);
             item->setMimeType(mimetype);
@@ -808,14 +728,14 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             item->setMimeType(pcdItem->getMimeType());
         }
 
-        auto serviceID = getProperty("serviceID");
+        auto serviceID = ScriptNamedProperty(ctx, "serviceID").getStringValue();
         if (!serviceID.empty()) {
             serviceID = sc->convert(serviceID);
             item->setServiceID(serviceID);
         }
 
         {
-            auto val = getProperty("description");
+            auto val = ScriptNamedProperty(ctx, "description").getStringValue();
             if (!val.empty()) {
                 val = sc->convert(val);
                 item->removeMetaData(MetadataFields::M_DESCRIPTION);
@@ -834,7 +754,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
 
             obj->setRestricted(true);
 
-            auto protocol = getProperty("protocol");
+            auto protocol = ScriptNamedProperty(ctx, "protocol").getStringValue();
             if (!protocol.empty()) {
                 protocol = sc->convert(protocol);
                 protocolInfo = renderProtocolInfo(item->getMimeType(), protocol);
@@ -850,7 +770,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 resource = item->getResource(ContentHandler::DEFAULT);
             }
             resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
-            int size = getIntProperty("size", -1);
+            int size = ScriptNamedProperty(ctx, "size").getIntValue(-1);
             if (size > -1) {
                 resource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(size));
             }
@@ -862,11 +782,12 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     // CdsDirectory
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        auto id = getIntProperty("updateID", -1);
+        auto id = ScriptNamedProperty(ctx, "updateID").getIntValue(-1);
         if (id >= CDS_ID_ROOT)
             cont->setUpdateID(id);
 
-        int searchable = getBoolProperty("searchable");
+        int searchable = ScriptNamedProperty(ctx, "searchable").getBoolValue();
+        log_debug("{} searchable {}", cont->getTitle(), searchable);
         if (searchable >= 0)
             cont->setSearchable(searchable);
 

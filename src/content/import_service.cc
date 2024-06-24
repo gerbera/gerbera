@@ -49,6 +49,7 @@
 #include "scripting/playlist_parser_script.h"
 #endif
 
+#include <algorithm>
 #include <fmt/chrono.h>
 #include <regex>
 
@@ -612,27 +613,24 @@ void ImportService::fillLayout(const std::shared_ptr<GenericTask>& task)
 void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state, std::shared_ptr<CdsObject> object, const std::shared_ptr<CdsContainer>& parent, const std::shared_ptr<GenericTask>& task)
 {
     std::shared_ptr<CdsObject> cdsObject = state ? state->getObject() : std::move(object);
+    log_debug("cds {}, layout {}, autoscanDir {}", !!cdsObject, !!layout, !!autoscanDir);
 
     if (cdsObject && cdsObject->isItem() && layout) {
         try {
             std::string mimetype = std::static_pointer_cast<CdsItem>(cdsObject)->getMimeType();
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
+    log_debug("mimetype {}, contentype {}, autoscanDir {}", mimetype, contentType, (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())));
 
             if (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())) {
                 // only lock mutex while processing item layout
                 std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
                 // get ref'd objects with last mod time
-                auto listOrig = state ? database->getRefObjects(cdsObject->getID()) : std::vector<std::pair<int, std::chrono::seconds>> {};
-                layout->processCdsObject(cdsObject, parent, rootPath, contentType, autoscanDir ? autoscanDir->getContainerTypes() : AutoscanDirectory::ContainerTypesDefaults);
-                // compare ref'd objects last mod time
-                auto listResult = state ? database->getRefObjects(cdsObject->getID()) : std::vector<std::pair<int, std::chrono::seconds>> {};
-                for (auto&& origEntry : listOrig) {
-                    auto newEntry = std::find_if(listResult.begin(), listResult.end(), [&](const auto& entry) { return origEntry.first == entry.first && origEntry.second > entry.second; });
-                    if (newEntry == listResult.end()) {
-                        log_debug("Deleting orphaned virtual item {}", origEntry.first);
-                        database->removeObject(origEntry.first, "", false);
-                    }
-                }
+                auto refObjects = state ? database->getRefObjects(cdsObject->getID()) : std::vector<int> {};
+log_debug("Updating layout {}", cdsObject->getLocation().c_str());
+                layout->processCdsObject(cdsObject, parent,
+                    rootPath, contentType,
+                    autoscanDir ? autoscanDir->getContainerTypes() : AutoscanDirectory::ContainerTypesDefaults,
+                    refObjects);
             } else {
                 log_debug("file ignored: {} autoscanDir={}, class={}, hasContent={}, mediaType={}", cdsObject->getLocation().string(), !!autoscanDir, cdsObject->getClass(), autoscanDir ? autoscanDir->hasContent(cdsObject->getClass()) : false, autoscanDir ? autoscanDir->getMediaType() : -2);
             }

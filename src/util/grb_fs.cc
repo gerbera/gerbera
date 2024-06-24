@@ -26,6 +26,7 @@ Gerbera - https://gerbera.io/
 #include "util/logger.h"
 #include "util/tools.h"
 
+#include <algorithm>
 #include <fcntl.h>
 #include <fstream>
 #include <sstream>

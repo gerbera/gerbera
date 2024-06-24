@@ -291,7 +291,7 @@ public:
     /// \param withoutContainer if false: all children are returned; if true: only items are returned
     /// \return DBHash containing the objectID's - nullptr if there are none!
     virtual std::size_t getObjects(int parentID, bool withoutContainer, std::unordered_set<int>& ret, bool full) = 0;
-    virtual std::vector<std::pair<int, std::chrono::seconds>> getRefObjects(int objectId) = 0;
+    virtual std::vector<int> getRefObjects(int objectId) = 0;
     virtual std::unordered_set<int> getUnreferencedObjects() = 0;
 
     /// \brief Remove all objects found in list

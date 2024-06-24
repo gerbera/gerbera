@@ -22,9 +22,9 @@
 #ifndef __DATABASE_MOCK_H__
 #define __DATABASE_MOCK_H__
 
-#include <gtest/gtest.h>
-
 #include "database/database.h"
+
+#include <gtest/gtest.h>
 
 class DatabaseMock : public Database {
 public:
@@ -58,7 +58,7 @@ public:
 
     std::unique_ptr<ChangedContainers> removeObject(int objectID, const fs::path& path, bool all) override { return {}; }
     std::size_t getObjects(int parentID, bool withoutContainer, std::unordered_set<int>& ret, bool full) override { return 0; }
-    std::vector<std::pair<int, std::chrono::seconds>> getRefObjects(int objectId) override { return {}; }
+    std::vector<int> getRefObjects(int objectId) override { return {}; }
     std::unordered_set<int> getUnreferencedObjects() override { return {}; }
 
     std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override { return {}; }

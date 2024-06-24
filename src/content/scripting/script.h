@@ -40,6 +40,7 @@
 #include <duktape.h>
 #include <map>
 #include <mutex>
+#include <vector>
 
 // forward declaration
 enum class AutoscanMediaMode;
@@ -68,14 +69,8 @@ public:
     Script(const Script&) = delete;
     Script& operator=(const Script&) = delete;
 
-    std::string getProperty(const std::string& name) const;
-    int getBoolProperty(const std::string& name) const;
-    int getIntProperty(const std::string& name, int def) const;
-    std::vector<std::string> getArrayProperty(const std::string& name) const;
-
     void setProperty(const std::string& name, const std::string& value);
     void setIntProperty(const std::string& name, int value);
-    std::vector<std::string> getPropertyNames() const;
 
     void defineFunction(const std::string& name, duk_c_function function, std::uint32_t numParams);
     void defineFunctions(const duk_function_list_entry* functions);
@@ -99,8 +94,8 @@ protected:
     Script(const std::shared_ptr<Content>& content, const std::string& parent,
         const std::string& name, std::string objName, std::unique_ptr<StringConverter> sc);
 
-    void execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
-    void call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& functionName, const fs::path& rootPath, const std::string& containerType);
+    std::vector<int> execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
+    std::vector<int> call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& functionName, const fs::path& rootPath, const std::string& containerType);
     void cleanup();
     int gc_counter {};
     void setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string& val) const;

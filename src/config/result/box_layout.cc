@@ -29,6 +29,8 @@
 #include "config/config.h"
 #include "util/logger.h"
 
+#include <algorithm>
+
 void BoxLayoutList::add(const std::shared_ptr<BoxLayout>& layout, std::size_t index)
 {
     AutoLock lock(mutex);

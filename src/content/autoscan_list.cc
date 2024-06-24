@@ -37,6 +37,8 @@
 #include "content/inotify/mt_inotify.h"
 #endif
 
+#include <algorithm>
+
 void AutoscanList::updateLMinDB(Database& database)
 {
     AutoLock lock(mutex);

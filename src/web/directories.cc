@@ -42,6 +42,7 @@
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
+#include <algorithm>
 #include <array>
 
 using dirInfo = std::pair<fs::path, bool>;

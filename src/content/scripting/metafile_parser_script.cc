@@ -40,6 +40,7 @@
 #include "config/config.h"
 #include "config/config_val.h"
 #include "exceptions.h"
+#include "script_property.h"
 #include "scripting_runtime.h"
 #include "util/string_converter.h"
 
@@ -137,25 +138,22 @@ bool MetafileParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
 
 void MetafileParserScript::handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item)
 {
-    item->setTrackNumber(getIntProperty("trackNumber", 0));
-    item->setPartNumber(getIntProperty("partNumber", 0));
+    item->setTrackNumber(ScriptNamedProperty(ctx, "trackNumber").getIntValue(0));
+    item->setPartNumber(ScriptNamedProperty(ctx, "partNumber").getIntValue(0));
 }
 
 std::shared_ptr<CdsObject> MetafileParserScript::createObject(const std::shared_ptr<CdsObject>& pcd)
 {
-    duk_get_prop_string(ctx, -1, "aux");
-    if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
-        duk_to_object(ctx, -1);
-        auto keys = getPropertyNames();
+    ScriptNamedProperty(ctx, "aux").getObject([&]() {
+        auto keys = ScriptProperty(ctx).getPropertyNames();
         for (auto&& sym : keys) {
-            auto val = getProperty(sym);
+            auto val = ScriptNamedProperty(ctx, sym).getStringValue();
             if (!val.empty()) {
                 val = sc->convert(val);
                 pcd->setAuxData(sym, val);
             }
         }
-    }
-    duk_pop(ctx); // aux
+    });
     return pcd;
 }
 

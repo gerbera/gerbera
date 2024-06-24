@@ -46,6 +46,7 @@
 #include "upnp/clients.h"
 #include "util/url_utils.h"
 
+#include <algorithm>
 #include <array>
 #include <fmt/chrono.h>
 #include <sstream>

@@ -34,12 +34,12 @@
 #ifndef __TIMER_H__
 #define __TIMER_H__
 
+#include "grb_time.h"
+#include "thread_runner.h"
+
 #include <algorithm>
 #include <atomic>
 #include <memory>
-
-#include "grb_time.h"
-#include "thread_runner.h"
 
 class Timer {
 public:

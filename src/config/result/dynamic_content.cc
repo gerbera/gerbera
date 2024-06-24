@@ -28,6 +28,8 @@
 
 #include "util/logger.h"
 
+#include <algorithm>
+
 void DynamicContentList::add(const std::shared_ptr<DynamicContent>& cont, std::size_t index)
 {
     AutoLock lock(mutex);

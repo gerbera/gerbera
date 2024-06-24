@@ -36,7 +36,6 @@
 
 #include "layout.h"
 
-#include <map>
 #include <memory>
 
 class ImportScript;
@@ -47,18 +46,23 @@ protected:
     std::shared_ptr<ScriptingRuntime> runtime;
     std::unique_ptr<ImportScript> import_script;
 
-    void addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
-    void addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
-    void addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    std::vector<int> addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    std::vector<int> addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    std::vector<int> addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 
 #ifdef ONLINE_SERVICES
-    void addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    std::vector<int> addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 #endif
 
 public:
     JSLayout(const std::shared_ptr<Content>& content, const std::string& parent);
 
-    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    void processCdsObject(const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& parent,
+        const fs::path& rootpath,
+        const std::string& contentType,
+        const std::map<AutoscanMediaMode, std::string>& containerMap,
+        std::vector<int>& refObjects) override;
 };
 
 #endif // __JS_LAYOUT_H__

@@ -762,11 +762,15 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
             fmt::format("{}={:d}", identifier("ref_id"), refObj->getID()),
             fmt::format("{}={}", identifier("dc_title"), quote(obj->getTitle())),
         };
-        auto res = select(fmt::format("SELECT 1 FROM {} WHERE {} LIMIT 1",
-            identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
+        auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
+            identifier("id"), identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
         // if duplicate items is found - ignore
-        if (res && res->getNumRows() > 0)
+        if (res && res->getNumRows() > 0) {
+            op = Operation::Update;
+            auto row = res->nextRow();
+            obj->setID(row->col_int(0, INVALID_OBJECT_ID));
             return returnVal;
+        }
     }
 
     returnVal.emplace_back(CDS_OBJECT_TABLE, std::move(cdsObjectSql), op);
@@ -956,6 +960,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
                 param.getStartingIndex(), reqCount, false, param.getGroup()); // get params from browse
             int numMatches = 0;
             auto result = this->search(srcParam, &numMatches);
+            numMatches = numMatches > dynConfig->getMaxCount() ? dynConfig->getMaxCount() : numMatches;
             param.setTotalMatches(numMatches);
             return result;
         }
@@ -1860,7 +1865,7 @@ std::size_t SQLDatabase::getObjects(int parentID, bool withoutContainer, std::un
     return ret.size();
 }
 
-std::vector<std::pair<int, std::chrono::seconds>> SQLDatabase::getRefObjects(int objectId)
+std::vector<int> SQLDatabase::getRefObjects(int objectId)
 {
     auto colId = identifier("id");
     auto colRefId = identifier("ref_id");
@@ -1873,13 +1878,13 @@ std::vector<std::pair<int, std::chrono::seconds>> SQLDatabase::getRefObjects(int
     if (!res)
         throw_std_runtime_error("db error");
 
-    std::vector<std::pair<int, std::chrono::seconds>> result;
+    std::vector<int> result;
     if (res->getNumRows() == 0)
         return result;
 
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        result.emplace_back(row->col_int(0, INVALID_OBJECT_ID), row->col_int(1, 0));
+        result.emplace_back(row->col_int(0, INVALID_OBJECT_ID));
     }
     return result;
 }

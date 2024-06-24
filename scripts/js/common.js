@@ -537,16 +537,17 @@ function addAudio(obj, cont, rootPath, containerType) {
     chain.year.metaData[M_DATE] = [ date ];
     chain.year.metaData[M_UPNP_DATE] = [ date ];
     chain.composer.metaData[M_COMPOSER] = [ composer ];
+    const result = [];
 
     var container;
     if (boxSetup[BK_audioAll].enabled) {
         container = addContainerTree([chain.audio, chain.allAudio]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
     }
 
     if (boxSetup[BK_audioAllSongs].enabled && boxSetup[BK_audioAllArtists].enabled) {
         container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
     }
 
     var i;
@@ -566,13 +567,13 @@ function addAudio(obj, cont, rootPath, containerType) {
 
         obj.title = prefix + title;
         container = addContainerTree([chain.audio, chain.allFull]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
 
         if (boxSetup[BK_audioAllArtists].enabled) {
             for (i = 0; i < artCnt; i++) {
                 chain.artist.title = artist[i];
                 container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFull]);
-                addCdsObject(obj, container);
+                result.push(addCdsObject(obj, container));
             }
         }
 
@@ -587,7 +588,7 @@ function addAudio(obj, cont, rootPath, containerType) {
             chain.artist.title = artist[i];
             chain.artist.searchable = true;
             container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.album]);
-            addCdsObject(obj, container);
+            result.push(addCdsObject(obj, container));
         }
 
         obj.title = temp; // Restore the title
@@ -601,7 +602,7 @@ function addAudio(obj, cont, rootPath, containerType) {
         chain.album.location = getRootPath(rootPath, obj.location).join('_');
         container = addContainerTree([chain.audio, chain.allAlbums, chain.album]);
         chain.album.location = '';
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
 
         obj.title = temp; // Restore the title
     }
@@ -613,19 +614,19 @@ function addAudio(obj, cont, rootPath, containerType) {
                 chain.genre.title = obj.metaData[M_GENRE][oneGenre];
                 chain.genre.metaData[M_GENRE] = [ oneGenre ];
                 container = addContainerTree([chain.audio, chain.allGenres, chain.genre]);
-                addCdsObject(obj, container);
+                result.push(addCdsObject(obj, container));
             }
         }
     }
 
     if (boxSetup[BK_audioAllYears].enabled) {
         container = addContainerTree([chain.audio, chain.allYears, chain.year]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
     }
 
     if (boxSetup[BK_audioAllComposers].enabled) {
         container = addContainerTree([chain.audio, chain.allComposers, chain.composer]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
     }
 
     if (boxSetup[BK_audioArtistChronology].enabled && boxSetup[BK_audioAllArtists].enabled) {
@@ -633,10 +634,11 @@ function addAudio(obj, cont, rootPath, containerType) {
         chain.artist.searchable = false;
         chain.album.title = date + " - " + album;
         container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.artistChronology, chain.album]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
 
         chain.album.title = album; // Restore the title;
     }
+    return result;
 }
 // doc-add-audio-end
 
@@ -883,16 +885,17 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
     chain.album_artist.metaData[M_ARTIST] = [ album_artist ];
     chain.album_artist.metaData[M_ALBUMARTIST] = [ album_artist ];
     var isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
+    const result = [];
 
     obj.title = tracktitle;
     var container = addContainerTree(isSingleCharBox ? [chain.allAlbums, chain.abc, chain.album_artist] : [chain.allAlbums, chain.abc, chain.init, chain.album_artist]);
-    addCdsObject(obj, container);
+    result.push(addCdsObject(obj, container));
 
     container = addContainerTree([chain.allAlbums, chain.abc, chain.entryAllLevel2, chain.album_artist]);
-    addCdsObject(obj, container);
+    result.push(addCdsObject(obj, container));
 
     container = addContainerTree([chain.allAlbums, chain.entryAllLevel1, chain.album_artist]);
-    addCdsObject(obj, container);
+    result.push(addCdsObject(obj, container));
 
     // Artist
     obj.title = title + ' (' + album + ', ' + date + ')';
@@ -902,7 +905,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
         chain.artist.title = artist[i];
         chain.artist.searchable = true;
         container = addContainerTree([chain.allArtists, chain.entryAllLevel1, chain.artist]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
     }
     chain.artist.searchable = false;
 
@@ -910,21 +913,21 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
         chain.abc.title = abcbox(artist[i], boxSetup[BK_audioStructuredAllArtists].size, boxConfig.divChar);
         isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
         container = addContainerTree([chain.allArtists, chain.abc, chain.entryAllLevel2, chain.artist]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
     }
 
     obj.title = title + ' (' + album + ', ' + date + ')';
     for (i = 0; i < artCnt; i++) {
         chain.init.title = mapInitial(artist[i].charAt(0));
         container = addContainerTree(isSingleCharBox ? [chain.allArtists, chain.abc, chain.artist, chain.entryAllLevel3] : [chain.allArtists, chain.abc, chain.init, chain.artist, chain.entryAllLevel3]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
     }
 
     obj.title = tracktitle;
     chain.album.title = album + ' (' + date + ')';
     chain.album.searchable = true;
     container = addContainerTree(isSingleCharBox ? [chain.allArtists, chain.abc, chain.artist, chain.album] : [chain.allArtists, chain.abc, chain.init, chain.artist, chain.album]);
-    addCdsObject(obj, container);
+    result.push(addCdsObject(obj, container));
     chain.album.searchable = false;
 
     // Genre
@@ -936,7 +939,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
                 chain.genre.title = obj.metaData[M_GENRE][oneGenre];
                 chain.genre.metaData[M_GENRE] = [ oneGenre ];
                 container = addContainerTree([chain.allGenres, chain.genre, chain.entryAllLevel1]);
-                addCdsObject(obj, container);
+                result.push(addCdsObject(obj, container));
             }
         }
 
@@ -949,7 +952,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
                     chain.genre.title = obj.metaData[M_GENRE][oneGenre];
                     chain.genre.metaData[M_GENRE] = [ oneGenre ];
                     container = addContainerTree(isSingleCharBox ? [chain.allGenres, chain.genre, chain.abc, chain.album_artist] : [chain.allGenres, chain.genre, chain.abc, chain.init, chain.album_artist]);
-                    addCdsObject(obj, container);
+                    result.push(addCdsObject(obj, container));
                 }
             }
         }
@@ -964,11 +967,11 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
         chain.init.title = mapInitial(title.charAt(0));
         chain.init.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_ARTIST;
         container = addContainerTree(isSingleCharBox ? [chain.allTracks, chain.abc] : [chain.allTracks, chain.abc, chain.init]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
 
         obj.title = title + ' - ' + artist_full;
         container = addContainerTree([chain.allTracks, chain.entryAllLevel1]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
     }
 
     // Sort years into decades
@@ -976,17 +979,18 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
         obj.title = title + ' - ' + artist_full;
 
         container = addContainerTree([chain.allYears, chain.decade, chain.entryAllLevel3]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
 
         container = addContainerTree([chain.allYears, chain.decade, chain.date, chain.entryAllLevel3]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
 
         obj.title = tracktitle;
         chain.album.title = album;
         chain.album.searchable = true;
         container = addContainerTree([chain.allYears, chain.decade, chain.date, chain.artist, chain.album]);
-        addCdsObject(obj, container);
+        result.push(addCdsObject(obj, container));
     }
+    return result;
 }
 
 // doc-add-video-begin
@@ -1049,7 +1053,8 @@ function addVideo(obj, cont, rootPath, containerType) {
     };
     chain.video.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_VIDEO_ITEM ];
     var container = addContainerTree([chain.video, chain.allVideo]);
-    addCdsObject(obj, container);
+    const result = [];
+    result.push(addCdsObject(obj, container));
 
     // Year
     if (boxSetup[BK_videoAll].enabled && obj.metaData[M_CREATION_DATE] && obj.metaData[M_CREATION_DATE][0]) {
@@ -1058,7 +1063,7 @@ function addVideo(obj, cont, rootPath, containerType) {
         if (dateParts.length > 1) {
             chain.year.title = dateParts[0];
             chain.month.title = dateParts[1];
-            addCdsObject(obj, addContainerTree([chain.video, chain.allYears, chain.year, chain.month]));
+            result.push(addCdsObject(obj, addContainerTree([chain.video, chain.allYears, chain.year, chain.month])));
         }
     }
 
@@ -1070,7 +1075,7 @@ function addVideo(obj, cont, rootPath, containerType) {
             date = dateParts[0];
         }
         chain.date.title = date;
-        addCdsObject(obj, addContainerTree([chain.video, chain.allDates, chain.date]));
+        result.push(addCdsObject(obj, addContainerTree([chain.video, chain.allDates, chain.date])));
     }
 
     // Directories
@@ -1084,8 +1089,10 @@ function addVideo(obj, cont, rootPath, containerType) {
         tree[tree.length-1].res = containerResource;
         tree[tree.length-1].aux = obj.aux;
         tree[tree.length-1].refID = containerRefID;
-        addCdsObject(obj, addContainerTree(tree));
+        result.push(addCdsObject(obj, addContainerTree(tree)));
     }
+
+    return result;
 }
 // doc-add-video-end
 
@@ -1149,7 +1156,8 @@ function addImage(obj, cont, rootPath, containerType) {
             refID: containerRefID },
     };
     chain.imageRoot.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_IMAGE_ITEM ];
-    addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]));
+    const result = [];
+    result.push(addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages])));
 
     // Years
     if (boxSetup[BK_imageAllYears].enabled && obj.metaData[M_DATE] && obj.metaData[M_DATE][0]) {
@@ -1158,7 +1166,7 @@ function addImage(obj, cont, rootPath, containerType) {
         if (dateParts.length > 1) {
             chain.year.title = dateParts[0];
             chain.month.title = dateParts[1];
-            addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allYears, chain.year, chain.month]));
+            result.push(addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allYears, chain.year, chain.month])));
         }
     }
 
@@ -1170,7 +1178,7 @@ function addImage(obj, cont, rootPath, containerType) {
             date = dateParts[0];
         }
         chain.date.title = date;
-        addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allDates, chain.date]));
+        result.push(addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allDates, chain.date])));
     }
 
     // Directories
@@ -1184,8 +1192,9 @@ function addImage(obj, cont, rootPath, containerType) {
         tree[tree.length-1].res = containerResource;
         tree[tree.length-1].aux = obj.aux;
         tree[tree.length-1].refID = containerRefID;
-        addCdsObject(obj, addContainerTree(tree));
+        result.push(addCdsObject(obj, addContainerTree(tree)));
     }
+    return result;
 }
 // doc-add-image-end
 
@@ -1240,7 +1249,8 @@ function addTrailer(obj) {
     // First we will add the item to the 'All Trailers' container, so
     // that we get a nice long playlist:
 
-    addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.allTrailers]));
+    const result = [];
+    result.push(addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.allTrailers])));
 
     // We also want to sort the trailers by genre, however we need to
     // take some extra care here: the genre property here is a comma
@@ -1258,7 +1268,7 @@ function addTrailer(obj) {
         for (var i = 0; i < genres.length; i++) {
             chain.genre.title = genres[i];
             chain.genre.metaData[M_GENRE] = [ genres[i] ];
-            addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.allGenres, chain.genre]));
+            result.push(addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.allGenres, chain.genre])));
         }
     }
 
@@ -1272,7 +1282,7 @@ function addTrailer(obj) {
             chain.date.title = reldate.slice(0, 7);
             chain.date.metaData[M_DATE] = [ reldate.slice(0, 7) ];
             chain.date.metaData[M_UPNP_DATE] = [ reldate.slice(0, 7) ];
-            addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.relDate, chain.date]));
+            result.push(addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.relDate, chain.date])));
         }
     }
 
@@ -1286,14 +1296,15 @@ function addTrailer(obj) {
             chain.date.title = postdate.slice(0, 7);
             chain.date.metaData[M_DATE] = [ postdate.slice(0, 7) ];
             chain.date.metaData[M_UPNP_DATE] = [ postdate.slice(0, 7) ];
-            addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.postDate, chain.date]));
+            result.push(addCdsObject(obj, addContainerTree([chain.trailerRoot , chain.appleTrailers, chain.postDate, chain.date])));
         }
     }
+    return result;
 }
 // doc-add-trailer-end
 
 // doc-add-playlist-item-begin
-function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder) {
+function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result) {
     // Determine if the item that we got is an URL or a local file.
 
     if (entry.location.match(/^.*:\/\//)) {
@@ -1327,7 +1338,7 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
 
         // Your item will be added to the container named by the playlist
         // that you are currently parsing.
-        addCdsObject(exturl, playlistChain);
+        result.push(addCdsObject(exturl, playlistChain));
     } else {
         if (entry.location.substr(0,1) !== '/') {
             entry.location = playlistLocation + entry.location;
@@ -1350,7 +1361,7 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
         item.writeThrough = entry.writeThrough;
         print2("Debug", "Playlist '" + item.title + "' Adding entry: " + item.playlistOrder + " " + item.location);
 
-        addCdsObject(item, playlistChain);
+        result.push(addCdsObject(item, playlistChain));
     }
     return true;
 }
@@ -1376,6 +1387,7 @@ function readM3uPlaylist(playlist_title, playlistLocation, playlistChain, playli
     if (line && line.charCodeAt(0) === 0xFEFF) {
         line = line.substr(1);
     }
+    const result = [];
 
     // Here is the do - while loop which will read the playlist line by line.
     do {
@@ -1392,11 +1404,11 @@ function readM3uPlaylist(playlist_title, playlistLocation, playlistChain, playli
         } else if (line && !line.match(/^(#|\s*$)/)) {
             entry.location = line;
             // Call the helper function to add the item once you gathered the data:
-            var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
+            var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result);
 
             // Also add to "Directories"
             if (playlistDirChain && state)
-                state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
+                state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result);
 
             entry.title = null;
             entry.mimetype = null;
@@ -1406,6 +1418,8 @@ function readM3uPlaylist(playlist_title, playlistLocation, playlistChain, playli
 
         line = readln();
     } while (line);
+
+    return result;
 }
 // doc-playlist-m3u-parse-end
 
@@ -1432,6 +1446,7 @@ function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playli
     var playlistOrder = 1;
     var node = readXml(-2);
     var level = 0;
+    const result = [];
     
     while (node || level > 0) {
         if (!node && level > 0) {
@@ -1441,10 +1456,10 @@ function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playli
             if (entry.location) {
                 if (base)
                     entry.location = base + '/' + entry.location;
-                var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
+                var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result);
                 if (playlistDirChain && state) {
                     entry.writeThrough = 0;
-                    state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
+                    state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result);
                 }
                 if (state)
                     playlistOrder++;
@@ -1495,12 +1510,13 @@ function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playli
     }
 
     if (entry.location) {
-        var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
+        var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result);
         if (playlistDirChain && state) {
             entry.writeThrough = 0;
-            addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
+            addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result);
         }
     }
+    return result;
 }
 
 function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playlistDirChain) {
@@ -1517,6 +1533,7 @@ function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playli
     };
     var line = readln();
     var playlistOrder = 1;
+    const result = [];
     
     do {
         if (line.match(/^\[playlist\]$/i)) {
@@ -1534,9 +1551,9 @@ function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playli
                 entry.order = id;
             if (entry.order !== id) {
                 if (entry.location) {
-                    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
+                    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result);
                     if (playlistDirChain && state)
-                        state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
+                        state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result);
                     if (state)
                         playlistOrder++;
                 }
@@ -1554,9 +1571,9 @@ function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playli
                 entry.order = id;
             if (entry.order !== id) {
                 if (entry.location) {
-                    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
+                    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result);
                     if (playlistDirChain && state)
-                        state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
+                        state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result);
                     if (state)
                         playlistOrder++;
                 }
@@ -1574,9 +1591,9 @@ function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playli
                 entry.order = id;
             if (entry.order !== id) {
                 if (entry.location) {
-                    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
+                    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result);
                     if (playlistDirChain && state)
-                        state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
+                        state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result);
                     if (state)
                         playlistOrder++;
                 }
@@ -1594,10 +1611,11 @@ function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playli
     } while (line !== undefined);
 
     if (entry.location) {
-        var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder);
+        var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result);
         if (playlistDirChain && state)
-            addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder);
+            addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result);
     }
+    return result;
 }
 
 function parseNfo(obj, nfo_file_name) {

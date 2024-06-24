@@ -19,6 +19,7 @@
 - Build: Use Ruby2.6 for bionic
 - Build: Use Ruby2.7 for bionic
 - Bump braces from 3.0.2 to 3.0.3 in /gerbera-web
+- Bump ws, engine.io and socket.io-adapter in /gerbera-web
 - CI: Drop excluded ubuntu versions as CMake PPA now supports those combinations
 - CI: Pass publish-deb secrets via env instead
 - CI: Upload debs to pkg.gerbera.io
@@ -32,6 +33,7 @@
 - Extract command line argument handling to Runtime class
 - Extract Content interface
 - FFMpeg: add custom logger
+- Fix crashes on freebsd 14.1
 - Fix creation of mr_reg.xml
 - Fix discovery
 - Handle broken Systemd on some debian

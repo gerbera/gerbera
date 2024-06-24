@@ -42,24 +42,24 @@ function importItem(item, cont) {
             case "object.item.audioItem.audioBroadcast":
                 switch (audioLayout) {
                 case 'Structured':
-                    addAudioStructured(obj, cont, object_script_path, grb_container_type_audio);
+                    return addAudioStructured(obj, cont, object_script_path, grb_container_type_audio);
                     break;
                 default:
-                    addAudio(obj, cont, object_script_path, grb_container_type_audio);
+                    return addAudio(obj, cont, object_script_path, grb_container_type_audio);
                     break;
                 }
                 break;
             case "object.item.videoItem":
             case "object.item.videoItem.movie":
-                addVideo(obj, cont, object_script_path, grb_container_type_video);
+                return addVideo(obj, cont, object_script_path, grb_container_type_video);
                 break;
             case "object.item.videoItem.musicVideoClip":
             case "object.item.videoItem.videoBroadcast":
-                addTrailer(obj);
+                return addTrailer(obj);
                 break;
             case "object.item.imageItem":
             case "object.item.imageItem.photo":
-                addImage(obj, cont, object_script_path, grb_container_type_image);
+                return addImage(obj, cont, object_script_path, grb_container_type_image);
                 break;
             case "object.item.textItem":
             case "object.item.bookmarkItem":
@@ -77,21 +77,21 @@ function importItem(item, cont) {
                     case "audio":
                         switch (audioLayout) {
                         case 'Structured':
-                            addAudioStructured(obj, cont, object_script_path, grb_container_type_audio);
+                            return addAudioStructured(obj, cont, object_script_path, grb_container_type_audio);
                             break;
                         default:
-                            addAudio(obj, cont, object_script_path, grb_container_type_audio);
+                            return addAudio(obj, cont, object_script_path, grb_container_type_audio);
                             break;
                         }
                         break;
                     case "video":
-                        addVideo(obj, cont, object_script_path, grb_container_type_video);
+                        return addVideo(obj, cont, object_script_path, grb_container_type_video);
                         break;
                     case "trailer":
-                        addTrailer(obj);
+                        return addTrailer(obj);
                         break;
                     case "image":
-                        addImage(obj, cont, object_script_path, grb_container_type_image);
+                        return addImage(obj, cont, object_script_path, grb_container_type_image);
                         break;
                     default:
                         print2("Error", "Unable to handle mime type '" + item.mimetype + "' for " + obj.location);
@@ -104,27 +104,28 @@ function importItem(item, cont) {
 
 // doc-import-begin
 function importAudio(obj, cont, rootPath, autoscanId, containerType) {
-    addAudio(obj, cont, rootPath, containerType);
+    return addAudio(obj, cont, rootPath, containerType);
 }
 function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
-    addAudioStructured(obj, cont, rootPath, containerType);
+    return addAudioStructured(obj, cont, rootPath, containerType);
 }
 function importVideo(obj, cont, rootPath, autoscanId, containerType) {
-    addVideo(obj, cont, rootPath, containerType);
+    return addVideo(obj, cont, rootPath, containerType);
 }
 function importImage(obj, cont, rootPath, autoscanId, containerType) {
-    addImage(obj, cont, rootPath, containerType);
+    return addImage(obj, cont, rootPath, containerType);
 }
 function importTrailer(obj, cont, rootPath, autoscanId, containerType) {
-    addTrailer(obj);
+    return addTrailer(obj);
 }
 // doc-import-end
 
 // Global Variables
 var orig;
 var cont;
+var object_ref_list;
 // compatibility with older configurations
 if (!cont || cont === undefined)
     cont = orig;
 if (orig && orig !== undefined)
-    importItem(orig, cont);
+    object_ref_list = importItem(orig, cont);

@@ -23,18 +23,21 @@
 function importMetadata(meta, cont, rootPath, autoscanId, containerType) {
     const arr = rootPath.split('.');
     print2("Info", "Processing metafile: " + rootPath + " for " + meta.location + " " + arr[arr.length-1].toLowerCase());
+    var result = [];
     switch (arr[arr.length-1].toLowerCase()) {
         case "nfo":
-            parseNfo(meta, rootPath);
+            result = parseNfo(meta, rootPath);
             updateCdsObject(meta);
             break;
     }
+    return result;
 }
 
 var obj;
 var cont;
+var object_ref_list;
 // compatibility with older configurations
 if (!cont || cont === undefined)
     cont = obj;
 if (obj && obj !== undefined)
-    importMetadata(obj, cont, object_script_path, -1, "");
+    object_ref_list = importMetadata(obj, cont, object_script_path, -1, "");

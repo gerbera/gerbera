@@ -48,12 +48,23 @@ class ImportScript : public Script {
 public:
     ImportScript(const std::shared_ptr<Content>& content, const std::string& parent);
 
-    void processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
-    void addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
-    void addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
-    void addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    std::vector<int> processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    std::vector<int> addVideo(const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& cont,
+        const fs::path& scriptPath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap);
+    std::vector<int> addImage(const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& cont,
+        const fs::path& scriptPath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap);
+    std::vector<int> addAudio(const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& cont,
+        const fs::path& scriptPath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap);
 #ifdef ONLINE_SERVICES
-    void addTrailer(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    std::vector<int> addTrailer(const std::shared_ptr<CdsObject>& obj,
+        const fs::path& scriptPath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap);
 #endif
 
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
@@ -64,7 +75,12 @@ public:
     bool hasImportFunctions() const;
 
 private:
-    void callFunction(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& function, const fs::path& scriptPath, AutoscanMediaMode mediaMode, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    std::vector<int> callFunction(const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& cont,
+        const std::string& function,
+        const fs::path& scriptPath,
+        AutoscanMediaMode mediaMode,
+        const std::map<AutoscanMediaMode, std::string>& containerMap);
 };
 
 #endif // __SCRIPTING_IMPORT_SCRIPT_H__

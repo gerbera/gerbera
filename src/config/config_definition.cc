@@ -56,6 +56,8 @@
 #include "metadata/metadata_enums.h"
 #include "upnp/upnp_common.h"
 
+#include <algorithm>
+
 #ifdef HAVE_CURL
 #include <curl/curl.h>
 #endif

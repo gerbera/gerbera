@@ -53,6 +53,7 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
+#include <algorithm>
 #include <fmt/chrono.h>
 
 extern "C" {
