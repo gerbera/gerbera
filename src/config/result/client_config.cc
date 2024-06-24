@@ -26,13 +26,14 @@
 
 #include "client_config.h" // API
 
-#include <array>
-#include <numeric>
-
 #include "cds/cds_enums.h"
 #include "exceptions.h"
 #include "util/logger.h"
 #include "util/tools.h"
+
+#include <algorithm>
+#include <array>
+#include <numeric>
 
 ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, const std::map<std::string, std::string>& mimeMappings, const std::map<std::string, std::string>& headers, int captionInfoCount, int stringLimit, bool multiValue)
 {

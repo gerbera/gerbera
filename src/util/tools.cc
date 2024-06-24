@@ -37,6 +37,7 @@
 #include "contrib/md5.h"
 #include "util/logger.h"
 
+#include <algorithm>
 #include <numeric>
 #include <queue>
 #include <sstream>

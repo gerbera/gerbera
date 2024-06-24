@@ -182,6 +182,8 @@ add_library(libgerbera STATIC
         src/content/scripting/script.cc
         src/content/scripting/script.h
         src/content/scripting/script_names.h
+        src/content/scripting/script_property.cc
+        src/content/scripting/script_property.h
         src/content/scripting/scripting_runtime.cc
         src/content/scripting/scripting_runtime.h
         src/content/update_manager.cc

@@ -142,8 +142,12 @@ bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout
                 std::string mimetype = item->getMimeType();
                 auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
                 std::string contentType = getValueOrDefault(mappings, mimetype);
+                std::vector<int> refObjects;
 
-                layout->processCdsObject(obj, nullptr, "", contentType, AutoscanDirectory::ContainerTypesDefaults);
+                layout->processCdsObject(obj, nullptr, "",
+                    contentType,
+                    AutoscanDirectory::ContainerTypesDefaults,
+                    refObjects);
             }
         } else {
             log_debug("Updating existing {} object", serviceName);

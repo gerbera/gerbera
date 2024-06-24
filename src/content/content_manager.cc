@@ -56,8 +56,6 @@
 #include "web/session_manager.h"
 
 #ifdef HAVE_JS
-#include "layout/js_layout.h"
-#include "scripting/import_script.h"
 #include "scripting/metafile_parser_script.h"
 #include "scripting/playlist_parser_script.h"
 #include "scripting/scripting_runtime.h"
@@ -80,6 +78,7 @@
 #include "content/inotify/autoscan_inotify.h"
 #endif
 
+#include <algorithm>
 #include <fmt/chrono.h>
 #include <regex>
 

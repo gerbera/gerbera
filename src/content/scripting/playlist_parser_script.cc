@@ -44,6 +44,7 @@
 #include "content/content.h"
 #include "database/database.h"
 #include "exceptions.h"
+#include "script_property.h"
 #include "scripting_runtime.h"
 #include "util/string_converter.h"
 
@@ -61,7 +62,7 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& conte
 
 std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath)
 {
-    int otype = getIntProperty("objectType", -1);
+    int otype = ScriptNamedProperty(ctx, "objectType").getIntValue(-1);
     if (otype == -1) {
         log_error("missing objectType property");
         return { {}, INVALID_OBJECT_ID };
@@ -70,7 +71,7 @@ std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cd
     if (IS_CDS_ITEM_EXTERNAL_URL(otype))
         return { dukObject2cdsObject(origObject), INVALID_OBJECT_ID };
 
-    fs::path loc = fs::weakly_canonical(getProperty("location")); // make sure relative paths can be retrieved
+    fs::path loc = fs::weakly_canonical(ScriptNamedProperty(ctx, "location").getStringValue()); // make sure relative paths can be retrieved
     std::error_code ec;
     auto dirEnt = fs::directory_entry(loc, ec);
     if (!ec && isRegularFile(dirEnt, ec)) {
@@ -127,14 +128,11 @@ void PlaylistParserScript::handleObject2cdsContainer(duk_context* ctx, const std
 
 void PlaylistParserScript::handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item)
 {
-    int writeThrough = getIntProperty("writeThrough", -1);
-    duk_get_prop_string(ctx, -1, "extra");
-
-    if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
-        duk_to_object(ctx, -1);
-        auto keys = getPropertyNames();
+    int writeThrough = ScriptNamedProperty(ctx, "writeThrough").getIntValue(-1);
+    ScriptNamedProperty(ctx, "extra").getObject([&]() {
+        auto keys = ScriptProperty(ctx).getPropertyNames();
         for (auto&& sym : keys) {
-            auto val = getProperty(sym);
+            auto val = ScriptNamedProperty(ctx, sym).getStringValue();
             if (!val.empty()) {
                 val = sc->convert(val);
                 item->addMetaData(sym, val);
@@ -145,8 +143,7 @@ void PlaylistParserScript::handleObject2cdsItem(duk_context* ctx, const std::sha
                 }
             }
         }
-    }
-    duk_pop(ctx); // extra
+    });
 
     if (writeThrough > 0 && pcd) {
         pcd->removeMetaData(MetadataFields::M_TITLE);
@@ -154,7 +151,7 @@ void PlaylistParserScript::handleObject2cdsItem(duk_context* ctx, const std::sha
         content->updateObject(pcd);
     }
 
-    item->setTrackNumber(getIntProperty("playlistOrder", 0));
+    item->setTrackNumber(ScriptNamedProperty(ctx, "playlistOrder").getIntValue(0));
     item->setPartNumber(0);
 }
 

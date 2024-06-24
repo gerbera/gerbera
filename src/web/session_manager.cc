@@ -41,6 +41,7 @@
 #include "util/timer.h"
 #include "util/tools.h"
 
+#include <algorithm>
 #include <memory>
 #include <unordered_set>
 

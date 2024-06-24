@@ -37,6 +37,7 @@
 #include "util/grb_fs.h"
 
 #include <map>
+#include <vector>
 
 // forward declaration
 enum class AutoscanMediaMode;
@@ -54,18 +55,41 @@ public:
 
     virtual ~Layout() = default;
 
-    virtual void processCdsObject(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::string& contentType, const std::map<AutoscanMediaMode, std::string>& containerMap);
+    virtual void processCdsObject(const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& parent,
+        const fs::path& rootpath,
+        const std::string& contentType,
+        const std::map<AutoscanMediaMode, std::string>& containerMap,
+        std::vector<int>& refObjects);
 
 protected:
-    virtual void addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) = 0;
-    virtual void addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) = 0;
-    virtual void addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) = 0;
+    virtual std::vector<int> addVideo(const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& parent,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap)
+        = 0;
+    virtual std::vector<int> addImage(const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& parent,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap)
+        = 0;
+    virtual std::vector<int> addAudio(const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& parent,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap)
+        = 0;
 
 #ifdef ONLINE_SERVICES
-    virtual void addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) = 0;
+    virtual std::vector<int> addTrailer(const std::shared_ptr<CdsObject>& obj,
+        OnlineServiceType serviceType,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap)
+        = 0;
 #endif
 
     std::shared_ptr<Content> content;
+
+    void cleanUp(const std::vector<int>& refObjects, const std::vector<int>& resObjects);
 };
 
 #endif // __LAYOUT_H__

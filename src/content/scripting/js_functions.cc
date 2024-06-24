@@ -40,6 +40,7 @@
 #include "database/database.h"
 #include "exceptions.h"
 #include "script.h"
+#include "script_property.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -129,21 +130,22 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
         auto [containerId, containerStatus] = cm->addContainerTree(chain, lastItem);
         if (containerId != INVALID_OBJECT_ID) {
             /* setting last container ID as return value */
-            auto tmp = fmt::to_string(containerId);
-            duk_push_string(ctx, tmp.c_str());
+            log_debug("container {}", containerId);
+            duk_push_string(ctx, fmt::to_string(containerId).c_str());
             return 1;
         }
     }
+    log_debug("Chain empty");
 
     return 0;
 }
 
 duk_ret_t js_addCdsObject(duk_context* ctx)
 {
-    auto* self = Script::getContextScript(ctx);
+    auto self = Script::getContextScript(ctx);
 
     if (!duk_is_object(ctx, 0)) {
-        log_debug("js_addCdsObject: No object argument");
+        log_debug("No object argument");
         return 0;
     }
     duk_to_object(ctx, 0);
@@ -154,10 +156,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
     // stack: js_cds_obj containerId
 
     try {
-        duk_get_global_string(ctx, "object_script_path");
-        auto rp = duk_get_string(ctx, -1);
-        duk_pop(ctx);
-        std::string rootPath = rp ? rp : "";
+        std::string rootPath = ScriptGlobalProperty(ctx, "object_script_path").getStringValue();
 
         if (self->getOrigName().empty())
             duk_push_undefined(ctx);
@@ -172,7 +171,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
 
         auto origObject = self->dukObject2cdsObject(self->getProcessedObject());
         if (!origObject) {
-            log_debug("js_addCdsObject: No global object");
+            log_debug("No orig object");
             return 0;
         }
 
@@ -180,7 +179,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         // stack: js_orig_obj containerId js_cds_obj
         auto [cdsObj, pcdId] = self->createObject2cdsObject(origObject, rootPath);
         if (!cdsObj) {
-            log_debug("js_addCdsObject: No content object");
+            log_debug("No content object");
             return 0;
         }
 
@@ -193,7 +192,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
 
         cdsObj->setParentID(parentId);
         if (!self->setRefId(cdsObj, origObject, pcdId)) {
-            log_debug("js_addCdsObject: No ref object");
+            log_debug("No ref object");
             return 0;
         }
 
@@ -201,7 +200,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         self->getContent()->addObject(cdsObj, parentStatus);
 
         /* setting object ID as return value */
-        duk_push_string(ctx, fmt::to_string(parentId).c_str());
+        duk_push_string(ctx, fmt::to_string(cdsObj->getID()).c_str());
         return 1;
     } catch (const ServerShutdownException&) {
         log_warning("Aborting script execution due to server shutdown.");

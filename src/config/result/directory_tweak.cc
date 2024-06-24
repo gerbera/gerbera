@@ -30,6 +30,8 @@
 #include "upnp/clients.h"
 #include "util/logger.h"
 
+#include <algorithm>
+
 void DirectoryConfigList::add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index)
 {
     AutoLock lock(mutex);

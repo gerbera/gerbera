@@ -34,6 +34,7 @@
 #include "config_setup_string.h"
 #include "util/logger.h"
 
+#include <algorithm>
 #include <numeric>
 
 /// \brief Creates an array of BoxLayout objects from a XML nodeset.

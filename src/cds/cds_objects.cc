@@ -34,15 +34,15 @@
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_objects.h" // API
 
-#include <array>
-#include <numeric>
-
 #include "cds_container.h"
 #include "cds_item.h"
 #include "database/database.h"
 #include "exceptions.h"
 #include "upnp/clients.h"
 #include "util/tools.h"
+
+#include <array>
+#include <numeric>
 
 static constexpr bool isCdsItem(unsigned int type) { return type & OBJECT_TYPE_ITEM; }
 static constexpr bool isCdsPureItem(unsigned int type) { return type == OBJECT_TYPE_ITEM; }

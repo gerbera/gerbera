@@ -29,12 +29,12 @@ Gerbera - https://gerbera.io/
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_enums.h" // API
 
+#include "exceptions.h"
+#include "util/logger.h"
+
 #include <algorithm>
 #include <array>
 #include <fmt/format.h>
-
-#include "exceptions.h"
-#include "util/logger.h"
 
 static constexpr std::array chKeys = {
     std::pair(ContentHandler::DEFAULT, "Default"),
