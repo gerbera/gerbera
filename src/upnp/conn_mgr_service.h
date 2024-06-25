@@ -34,13 +34,14 @@
 #ifndef __UPNP_CM_H__
 #define __UPNP_CM_H__
 
-#include "context.h"
-
 #include <memory>
 #include <upnp.h>
 
 class ActionRequest;
 class CdsObject;
+class Config;
+class Context;
+class Database;
 class SubscriptionRequest;
 class UpnpXMLBuilder;
 

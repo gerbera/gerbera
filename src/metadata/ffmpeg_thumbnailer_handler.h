@@ -21,10 +21,10 @@ Gerbera - https://gerbera.io/
 
 /// \file ffmpeg_thumbnailer_handler.h
 
-#ifndef GERBERA_FFMPEG_THUMBNAILER_HANDLER_H
-#define GERBERA_FFMPEG_THUMBNAILER_HANDLER_H
+#ifndef __FFMPEG_THUMBNAILER_HANDLER_H__
+#define __FFMPEG_THUMBNAILER_HANDLER_H__
 #ifdef HAVE_FFMPEGTHUMBNAILER
-#include "config/config.h"
+
 #include "metadata_handler.h"
 
 #include <memory>
@@ -53,4 +53,4 @@ private:
 };
 
 #endif // HAVE_FFMPEGTHUMBNAILER
-#endif // GERBERA_FFMPEG_THUMBNAILER_HANDLER_H
+#endif // __FFMPEG_THUMBNAILER_HANDLER_H__

@@ -36,6 +36,7 @@
 
 #include "content/content.h"
 #include "exceptions.h"
+#include "util/generic_task.h"
 #include "util/xml_to_json.h"
 
 void Web::Tasks::process()

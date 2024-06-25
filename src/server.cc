@@ -39,6 +39,7 @@
 #include "config/config_option_enum.h"
 #include "config/config_val.h"
 #include "content/content_manager.h"
+#include "context.h"
 #include "database/database.h"
 #include "device_description_handler.h"
 #include "exceptions.h"

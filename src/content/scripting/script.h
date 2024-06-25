@@ -34,7 +34,6 @@
 #ifndef __SCRIPTING_SCRIPT_H__
 #define __SCRIPTING_SCRIPT_H__
 
-#include "context.h"
 #include "util/grb_fs.h"
 
 #include <duktape.h>
@@ -47,7 +46,9 @@ enum class AutoscanMediaMode;
 class CdsContainer;
 class CdsItem;
 class CdsObject;
+class Config;
 class Content;
+class Database;
 class ScriptingRuntime;
 class StringConverter;
 

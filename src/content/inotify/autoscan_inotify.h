@@ -34,7 +34,6 @@
 #define __AUTOSCAN_INOTIFY_H__
 
 #include "config/config.h"
-#include "context.h"
 #include "inotify_types.h"
 
 // forward declaration

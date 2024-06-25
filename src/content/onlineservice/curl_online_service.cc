@@ -33,6 +33,7 @@
 #include "config/result/autoscan.h"
 #include "content/content.h"
 #include "content/layout/layout.h"
+#include "context.h"
 #include "database/database.h"
 #include "exceptions.h"
 #include "util/string_converter.h"

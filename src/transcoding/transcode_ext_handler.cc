@@ -39,7 +39,6 @@
 #include "config/config_val.h"
 #include "config/result/transcoding.h"
 #include "content/content.h"
-#include "database/database.h"
 #include "exceptions.h"
 #include "iohandler/buffered_io_handler.h"
 #include "iohandler/io_handler_chainer.h"

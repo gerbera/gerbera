@@ -41,6 +41,7 @@
 #include "cds/cds_item.h"
 #include "config/config.h"
 #include "config/config_val.h"
+#include "context.h"
 #include "database/database.h"
 #include "database/sql_database.h"
 #include "exceptions.h"

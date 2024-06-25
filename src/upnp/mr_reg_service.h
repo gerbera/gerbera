@@ -35,14 +35,14 @@
 #ifndef __UPNP_MRREG_H__
 #define __UPNP_MRREG_H__
 
-#include "context.h"
-
 #include <memory>
 #include <string>
 #include <upnp.h>
 
 class ActionRequest;
 class CdsObject;
+class Config;
+class Context;
 class SubscriptionRequest;
 class UpnpXMLBuilder;
 

@@ -24,6 +24,7 @@
 
 #include "upnp_desc_handler.h" // API
 
+#include "config/config.h"
 #include "config/config_val.h"
 #include "iohandler/file_io_handler.h"
 #include "iohandler/mem_io_handler.h"

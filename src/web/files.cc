@@ -36,7 +36,6 @@
 
 #include "common.h"
 #include "config/config_val.h"
-#include "database/database.h"
 #include "exceptions.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

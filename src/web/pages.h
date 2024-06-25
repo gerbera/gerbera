@@ -34,9 +34,9 @@
 #ifndef __WEB_PAGES_H__
 #define __WEB_PAGES_H__
 
-#include "config/config.h"
-#include "request_handler.h"
 #include "web_request_handler.h"
+
+#include <chrono>
 
 // forward declaration
 class AutoscanDirectory;
@@ -47,6 +47,7 @@ class ConfigSetup;
 class ConfigValue;
 class Database;
 class UpnpXMLBuilder;
+enum class ConfigVal;
 
 namespace Web {
 

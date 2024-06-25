@@ -30,14 +30,14 @@
 #ifndef __CURL_ONLINE_SERVICE_H__
 #define __CURL_ONLINE_SERVICE_H__
 
+#include "online_service.h"
+
 #include <curl/curl.h>
 #include <pugixml.hpp>
 
-#include "context.h"
-#include "online_service.h"
-
 // forward declaration
 class Content;
+class Context;
 class CdsObject;
 
 /// \brief this class is responsible for creating objects from the CurlContentHandler

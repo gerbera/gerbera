@@ -40,9 +40,8 @@
 #include <lastfmlib/lastfmscrobbler.h>
 #include <memory>
 
-#include "context.h"
-
 class Config;
+class Context;
 class CdsItem;
 
 class LastFm {

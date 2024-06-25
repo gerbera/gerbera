@@ -45,6 +45,7 @@
 #include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_dictionary.h"
 #include "content/content.h"
+#include "context.h"
 #include "database/database.h"
 #include "js_functions.h"
 #include "script_names.h"

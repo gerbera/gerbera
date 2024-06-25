@@ -35,7 +35,6 @@
 #include "pages.h" // API
 
 #include "content/content.h"
-#include "database/database.h"
 #include "util/xml_to_json.h"
 
 void Web::VoidType::process()
