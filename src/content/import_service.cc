@@ -619,14 +619,12 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
         try {
             std::string mimetype = std::static_pointer_cast<CdsItem>(cdsObject)->getMimeType();
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
-    log_debug("mimetype {}, contentype {}, autoscanDir {}", mimetype, contentType, (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())));
 
             if (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())) {
                 // only lock mutex while processing item layout
                 std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
                 // get ref'd objects with last mod time
                 auto refObjects = state ? database->getRefObjects(cdsObject->getID()) : std::vector<int> {};
-log_debug("Updating layout {}", cdsObject->getLocation().c_str());
                 layout->processCdsObject(cdsObject, parent,
                     rootPath, contentType,
                     autoscanDir ? autoscanDir->getContainerTypes() : AutoscanDirectory::ContainerTypesDefaults,

@@ -34,10 +34,10 @@
 #ifndef __UPNP_XML_H__
 #define __UPNP_XML_H__
 
-#include "config/config.h"
-#include "context.h"
+#include "util/grb_fs.h"
 
 #include <deque>
+#include <map>
 #include <memory>
 #include <pugixml.hpp>
 #include <vector>
@@ -50,7 +50,11 @@ class CdsContainer;
 class CdsItem;
 class CdsObject;
 class CdsResource;
+class Config;
+class Context;
+class Database;
 enum class ContentHandler;
+enum class ConfigVal;
 class Quirks;
 
 class UpnpXMLBuilder {

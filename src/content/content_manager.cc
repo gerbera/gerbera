@@ -42,6 +42,7 @@
 #include "config/config_options.h"
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
+#include "context.h"
 #include "database/database.h"
 #include "exceptions.h"
 #include "import_service.h"

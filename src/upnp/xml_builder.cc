@@ -40,6 +40,7 @@
 #include "config/config_definition.h"
 #include "config/config_val.h"
 #include "config/result/transcoding.h"
+#include "context.h"
 #include "database/database.h"
 #include "device_description_handler.h"
 #include "request_handler.h"

@@ -44,6 +44,7 @@
 #include "content/inotify/inotify_handler.h"
 #include "content/inotify/mt_inotify.h"
 #include "content/inotify/watch.h"
+#include "context.h"
 #include "database/database.h"
 #include "util/tools.h"
 

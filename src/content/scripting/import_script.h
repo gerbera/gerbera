@@ -41,6 +41,7 @@
 
 // forward declaration
 enum class AutoscanMediaMode;
+class Config;
 class Content;
 class ScriptingRuntime;
 

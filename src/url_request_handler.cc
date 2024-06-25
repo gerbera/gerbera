@@ -40,7 +40,6 @@
 #include "config/config_val.h"
 #include "config/result/transcoding.h"
 #include "content/content.h"
-#include "database/database.h"
 #include "exceptions.h"
 #include "iohandler/curl_io_handler.h"
 #include "transcoding/transcode_dispatcher.h"

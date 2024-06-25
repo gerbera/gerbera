@@ -37,6 +37,7 @@
 
 #include "cds_item.h"
 #include "config/config.h"
+#include "context.h"
 #include "metadata/metadata_enums.h"
 #include "util/tools.h"
 

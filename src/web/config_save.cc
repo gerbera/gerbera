@@ -31,6 +31,7 @@
 #include "config/config_setup.h"
 #include "config/result/autoscan.h"
 #include "content/content.h"
+#include "context.h"
 #include "database/database.h"
 #include "upnp/clients.h"
 #include "util/xml_to_json.h"

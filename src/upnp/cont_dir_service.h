@@ -34,8 +34,6 @@
 #ifndef __UPNP_CDS_H__
 #define __UPNP_CDS_H__
 
-#include "context.h"
-
 #include <memory>
 #include <string>
 #include <upnp.h>
@@ -43,6 +41,9 @@
 
 class ActionRequest;
 class CdsObject;
+class Config;
+class Context;
+class Database;
 class SubscriptionRequest;
 class UpnpXMLBuilder;
 
