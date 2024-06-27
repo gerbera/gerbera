@@ -60,7 +60,7 @@ else
     EBML="1.4.5"
     EXIV2="v0.28.2"
     EXIF="v0.6.24"
-    EXIF_commit="87abeae2a492629cd54e6bb38345b4d1d55b288d"
+    EXIF_commit="2ed252de3ece73e85247d5a5df5a4eb6420a494d"
     FFMPEGTHUMBNAILER="2.2.2"
     FFMPEGTHUMBNAILER_commit="1b5a77983240bcf00a4ef7702c07bcd8f4e5f97c"
     FMT="11.0.0"
