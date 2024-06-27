@@ -512,6 +512,7 @@ within the import and/or the playlist script:
         A virtual object that is either a copy of or a reference to 'orig'
     :param string containerId:
         A string, containing the container id as optained from ``addContainerTree``.
+    :returns: object id for use as result of the import function.
 
 
 .. js:function:: addContainerTree(arr)
@@ -519,7 +520,7 @@ within the import and/or the playlist script:
     Creates a hierarchy of containers
 
     :param array arr: An array of container defintions. It has the object structure as described above.
-    :returns: container id formatted for use in ``addCdsObject``
+    :returns: container id for use in ``addCdsObject``
 
     .. code-block:: js
 

@@ -35,7 +35,7 @@ downloadSource https://github.com/taglib/taglib/archive/v${VERSION}.tar.gz "-" "
 
 installDeps ${main_dir} taglib
 
-cmake ..
+cmake .. -DBUILD_EXAMPLES=OFF
 
 makeInstall
 

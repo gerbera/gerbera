@@ -189,7 +189,17 @@ A solution to this is that you define the properties that identify one particula
 Configuration
 -------------
 
-If you have broken Gerbera by modifying values on the config page, have to clear the database or at least remove all entries from the table ``grb_config_value``.
+If you have broken Gerbera by modifying values on the config page, have to
+clear the database or at least remove all entries from the table
+``grb_config_value``.
+
+
+Content
+-------
+
+If your content is not as you expect, you can easily restart the import by
+using the web ui to remove the contents of ``PC Directory`` or parts of it
+without dropping the whole database.
 
 
 UPnP
