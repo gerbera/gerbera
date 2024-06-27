@@ -31,7 +31,7 @@ tgz_file="${script_dir}/pugixml-${VERSION}.tgz"
 
 downloadSource https://github.com/zeux/pugixml/releases/download/v${VERSION}/pugixml-${VERSION}.tar.gz
 
-cmake ..
+cmake .. -DPUGIXML_BUILD_TESTS=OFF
 
 makeInstall
 

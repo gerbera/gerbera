@@ -1,8 +1,11 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v2.2.0
 
 This update brings a new design for the start page, better logging and a new repository for ubuntu and debian getting rid of jfrog.
+
+Also virtual items are detected during import and cleaned up as required instead of deleting and recreating them all.
+This requires a change in js scripts: All import functions have to return a list of created object ids.
 
 ### NEW Features
 
@@ -34,9 +37,10 @@ This update brings a new design for the start page, better logging and a new rep
 - Allow building of libexif (up to v0.6.24-90-g2ed252d)
 - Refactoring of property handling in scripts
 - Refactoring of Inotify code and command line handling
-- Refactoring of Config and Content code to reduce header nesting
+- Refactoring of Config and Content code
+- Reduce header nesting
 
-## 2.1.0
+## v2.1.0
 
 This release started out as a mere bugfix release but gathered some nice features along the way.
 This includes the full build support for NPUPNP, the update of the conan build system to V2 and the return of

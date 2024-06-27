@@ -1,11 +1,12 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v2.2.0
 
 - Add log sinks for rotating log files and syslog
 - Add missing define on ubuntu 18
 - Add sample-frequency to config2.xsd
 - Adding consistent album artist support
+- Build against fmt 11.0.0
 - Build support for libnpupnp 6.1.2
 - Build: Add install scripts for alpine/docker
 - Build: Add install scripts for OpenSuSE
@@ -33,10 +34,14 @@
 - Extract command line argument handling to Runtime class
 - Extract Content interface
 - FFMpeg: add custom logger
+- FFMpeg: Reduce logger noise
 - Fix crashes on freebsd 14.1
 - Fix creation of mr_reg.xml
+- Fix database calls for browsing dynamic containers
 - Fix discovery
+- Fix logger.cc without DEBUG
 - Handle broken Systemd on some debian
+- Implement updating virtual entries
 - Import: Add option case sensitive tags
 - Import: fix single file update
 - Improve documentation
@@ -54,8 +59,9 @@
 - UI: Tidy up login and homepage
 - UPnP description: Allow dynamic capability values
 - UPnP specification files reflect client quirks
+- Xml2Json: improve encoding for special chars
 
-### 2.1.0
+### v2.1.0
 
 - Add ctypes include
 - Add issue template
