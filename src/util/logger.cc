@@ -23,9 +23,9 @@
 
 /// \file logger.cc
 
-#ifdef GRBDEBUG
-
 #include "util/logger.h" // API
+
+#ifdef GRBDEBUG
 
 #include <numeric>
 
