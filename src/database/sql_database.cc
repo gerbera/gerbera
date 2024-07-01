@@ -435,6 +435,7 @@ void SQLDatabase::init()
         auto join1 = fmt::format("LEFT JOIN {0} {1} ON {2} = {1}.{3}",
             identifier(CDS_OBJECT_TABLE), identifier(REF_ALIAS), browseColumnMapper->mapQuoted(BrowseCol::RefId), identifier(browseColMap.at(BrowseCol::Id).second));
         auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", asColumnMapper->tableQuoted(), asColumnMapper->mapQuoted(AutoscanCol::ObjId), browseColumnMapper->mapQuoted(BrowseCol::Id));
+        auto join3 = fmt::format("LEFT JOIN {} ON {} = {}", playstatusColumnMapper->tableQuoted(), playstatusColumnMapper->mapQuoted(PlaystatusCol::ItemId), browseColumnMapper->mapQuoted(BrowseCol::Id));
         this->sql_browse_columns = fmt::format("{}", fmt::join(buf, ", "));
         this->sql_browse_query = fmt::format("{} {} {} ", browseColumnMapper->tableQuoted(), join1, join2);
     }
@@ -454,7 +455,7 @@ void SQLDatabase::init()
 
         // Build container query format string
         auto sql_container_query = fmt::format(sql_search_container_query_raw, identifier("containers"), identifier("cont"), searchColumnMapper->tableQuoted(), searchColumnMapper->getAlias(), searchColumnMapper->mapQuoted(UPNP_SEARCH_PARENTID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_REFID, true));
-        this->sql_search_container_query_format = fmt::format("{} {} {}", sql_container_query, join1, join2);
+        this->sql_search_container_query_format = fmt::format("{} {} {} {}", sql_container_query, join1, join2, join3);
     }
     // Statement for metadata
     {
