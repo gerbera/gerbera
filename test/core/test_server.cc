@@ -26,6 +26,9 @@ Gerbera - https://gerbera.io/
 #include <array>
 #include <filesystem>
 #include <fmt/format.h>
+#if FMT_VERSION >= 100202
+#include <fmt/ranges.h>
+#endif
 #include <fstream>
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>

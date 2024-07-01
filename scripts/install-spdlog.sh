@@ -38,7 +38,9 @@ tgz_file="${script_dir}/spdlog-${VERSION}.tgz"
 
 downloadSource https://github.com/gabime/spdlog/archive/v$VERSION.tar.gz
 
-cmake .. -DSPDLOG_FMT_EXTERNAL=ON -DBUILD_SHARED_LIBS=${BUILD_SHARED}
+cmake .. -DSPDLOG_FMT_EXTERNAL=ON \
+         -DBUILD_SHARED_LIBS=${BUILD_SHARED} \
+         -DSPDLOG_BUILD_EXAMPLE=OFF
 
 makeInstall
 

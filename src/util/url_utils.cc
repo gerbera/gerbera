@@ -23,10 +23,13 @@ Gerbera - https://gerbera.io/
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "url_utils.h" // API
 
-#include <fmt/format.h>
-#include <sstream>
-
 #include "exceptions.h"
+
+#include <fmt/format.h>
+#if FMT_VERSION >= 100202
+#include <fmt/ranges.h>
+#endif
+#include <sstream>
 
 namespace URLUtils {
 
