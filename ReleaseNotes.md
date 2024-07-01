@@ -30,8 +30,9 @@ This update brings a new design for the start page, better logging and a new rep
 ### Code Improvements
 
 - Rework of server mechanism for file and data requests
-- Update versions of pupnp (1.14.19), npupnp (6.1.2), spdlog (1.14.1), taglib (2.0.1), ffmpegthumbnailer(2.2.2-60-g1b5a779)
-- Allow building of libexif (up to v0.6.24-89-g87abeae)
+- Update versions of pupnp (1.14.19), npupnp (6.1.2), spdlog (1.14.1), taglib (2.0.1), ffmpegthumbnailer(2.2.2-60-g1b5a779), fmt (11.0.0)
+- Allow building of libexif (up to v0.6.24-90-g2ed252d)
+- Refactoring of property handling in scripts
 - Refactoring of Inotify code and command line handling
 - Refactoring of Config and Content code to reduce header nesting
 

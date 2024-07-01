@@ -24,8 +24,10 @@
 #include "duk_helper.h"
 #include <duk_config.h>
 #include <duktape.h>
-#include <fmt/core.h>
 #include <fmt/format.h>
+#if FMT_VERSION >= 100202
+#include <fmt/ranges.h>
+#endif
 #include <iostream>
 #include <regex>
 

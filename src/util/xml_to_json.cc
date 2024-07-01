@@ -39,6 +39,9 @@
 #include "util/tools.h"
 
 #include <fmt/format.h>
+#if FMT_VERSION >= 100202
+#include <fmt/ranges.h>
+#endif
 #include <regex>
 
 std::string Xml2Json::getJson(const pugi::xml_node& node)
