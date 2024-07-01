@@ -616,7 +616,7 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
     }
 
     if ((operatr == ">" || operatr == ">=") && stoiString(value) > 0 && property == UPNP_SEARCH_PLAY_COUNT) {
-        return fmt::format("{} {} {}", prpLower, operatr, stoiString(value));
+        return fmt::format("{} {} {}", prpUpper, operatr, stoiString(value));
     }
 
     if (operatr != "=")
