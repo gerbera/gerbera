@@ -59,7 +59,7 @@ void Web::Directories::process()
 
     auto containers = root.append_child("containers");
     xml2Json->setArrayName(containers, "container");
-    xml2Json->setFieldType("title", "string");
+    xml2Json->setFieldType("title", FieldType::STRING);
     containers.append_attribute("parent_id") = parentID.c_str();
     if (!param("select_it").empty())
         containers.append_attribute("select_it") = param("select_it").c_str();

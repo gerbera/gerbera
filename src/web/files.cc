@@ -52,7 +52,7 @@ void Web::Files::process()
 
     auto files = root.append_child("files");
     xml2Json->setArrayName(files, "file");
-    xml2Json->setFieldType("filename", "string");
+    xml2Json->setFieldType("filename", FieldType::STRING);
     files.append_attribute("parent_id") = parentID.c_str();
     files.append_attribute("location") = path.c_str();
 

@@ -66,8 +66,8 @@ void Web::EditLoad::process()
 
     // set handling of json properties
     auto root = xmlDoc->document_element();
-    xml2Json->setFieldType("value", "string");
-    xml2Json->setFieldType("title", "string");
+    xml2Json->setFieldType("value", FieldType::STRING);
+    xml2Json->setFieldType("title", FieldType::STRING);
 
     // write object core info
     auto item = root.append_child("item");
@@ -110,7 +110,7 @@ void Web::EditLoad::process()
     // write metadata
     auto metaData = item.append_child("metadata");
     xml2Json->setArrayName(metaData, "metadata");
-    xml2Json->setFieldType("metavalue", "string");
+    xml2Json->setFieldType("metavalue", FieldType::STRING);
 
     for (auto&& [key, val] : obj->getMetaData()) {
         auto metaEntry = metaData.append_child("metadata");
@@ -122,7 +122,7 @@ void Web::EditLoad::process()
     // write auxdata
     auto auxData = item.append_child("auxdata");
     xml2Json->setArrayName(auxData, "auxdata");
-    xml2Json->setFieldType("auxvalue", "string");
+    xml2Json->setFieldType("auxvalue", FieldType::STRING);
 
     for (auto&& [key, val] : obj->getAuxData()) {
         auto auxEntry = auxData.append_child("auxdata");
@@ -133,8 +133,8 @@ void Web::EditLoad::process()
 
     auto resources = item.append_child("resources");
     xml2Json->setArrayName(resources, "resources");
-    xml2Json->setFieldType("resvalue", "string");
-    xml2Json->setFieldType("rawvalue", "string");
+    xml2Json->setFieldType("resvalue", FieldType::ENCSTRING);
+    xml2Json->setFieldType("rawvalue", FieldType::STRING);
 
     auto objItem = std::dynamic_pointer_cast<CdsItem>(obj);
 
@@ -195,14 +195,7 @@ void Web::EditLoad::process()
         for (auto&& [key, val] : resItem->getOptions()) {
             auto resEntry = resources.append_child("resources");
             resEntry.append_attribute("resname") = fmt::format("-{}", key).c_str();
-            std::string encodedVal;
-            for (auto c : val) {
-                if (c < 32)
-                    encodedVal += fmt::format("\\u{:04x}", c);
-                else
-                    encodedVal += fmt::format("{}", c);
-            }
-            resEntry.append_attribute("resvalue") = encodedVal.c_str();
+            resEntry.append_attribute("resvalue") = val.c_str();
             resEntry.append_attribute("editable") = false;
         }
     }
