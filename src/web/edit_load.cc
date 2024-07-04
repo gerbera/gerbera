@@ -195,7 +195,14 @@ void Web::EditLoad::process()
         for (auto&& [key, val] : resItem->getOptions()) {
             auto resEntry = resources.append_child("resources");
             resEntry.append_attribute("resname") = fmt::format("-{}", key).c_str();
-            resEntry.append_attribute("resvalue") = val.c_str();
+            std::string encodedVal;
+            for (auto c : val) {
+                if (c < 32)
+                    encodedVal += fmt::format("\\u{:04x}", c);
+                else
+                    encodedVal += fmt::format("{}", c);
+            }
+            resEntry.append_attribute("resvalue") = encodedVal.c_str();
             resEntry.append_attribute("editable") = false;
         }
     }
