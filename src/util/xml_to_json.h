@@ -40,20 +40,28 @@
 
 #include <pugixml.hpp>
 
+enum class FieldType {
+    STRING,
+    ENCSTRING,
+    NUMBER,
+    BOOL,
+};
+
 class Xml2Json {
 public:
     std::string getJson(const pugi::xml_node& node);
 
     void setArrayName(const pugi::xml_node& node, std::string_view name) { asArray.insert_or_assign(node, name); }
-    void setFieldType(const std::string& node, std::string_view type) { asType.insert_or_assign(node, type); }
+    void setFieldType(const std::string& node, FieldType type) { asType.insert_or_assign(node, type); }
 
 private:
     static std::string getAsString(std::string_view str);
+    static std::string getEncString(std::string_view str);
     std::string getValue(const std::string& name, const char* text);
     std::pair<bool, std::string_view> isArray(const pugi::xml_node& node);
 
     std::map<pugi::xml_node, std::string> asArray;
-    std::map<std::string, std::string> asType;
+    std::map<std::string, FieldType> asType;
 };
 
 #endif // __UTIL_XML_TO_JSON_H__

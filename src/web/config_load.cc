@@ -139,12 +139,12 @@ void Web::ConfigLoad::process()
 
     // set handling of json properties
     xml2Json->setArrayName(values, CONFIG_LOAD_ITEM);
-    xml2Json->setFieldType(CONFIG_LOAD_ITEM, "string");
-    xml2Json->setFieldType(CONFIG_LOAD_ID, "string");
-    xml2Json->setFieldType(CONFIG_LOAD_AID, "string");
-    xml2Json->setFieldType(CONFIG_LOAD_VALUE, "string");
-    xml2Json->setFieldType(CONFIG_LOAD_DEFAULTVALUE, "string");
-    xml2Json->setFieldType(CONFIG_LOAD_ORIGVALUE, "string");
+    xml2Json->setFieldType(CONFIG_LOAD_ITEM, FieldType::STRING);
+    xml2Json->setFieldType(CONFIG_LOAD_ID, FieldType::STRING);
+    xml2Json->setFieldType(CONFIG_LOAD_AID, FieldType::STRING);
+    xml2Json->setFieldType(CONFIG_LOAD_VALUE, FieldType::STRING);
+    xml2Json->setFieldType(CONFIG_LOAD_DEFAULTVALUE, FieldType::STRING);
+    xml2Json->setFieldType(CONFIG_LOAD_ORIGVALUE, FieldType::STRING);
 
     log_debug("Sending Config to web!");
 

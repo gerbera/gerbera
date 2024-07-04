@@ -97,20 +97,39 @@ std::string Xml2Json::getAsString(std::string_view str)
     return fmt::format(R"("{}")", escaped);
 }
 
+std::string Xml2Json::getEncString(std::string_view str)
+{
+    auto escaped = escape(str, '\\', '"');
+
+    std::string encodedVal;
+    for (auto c : escaped) {
+        if (c == '\n') {
+            encodedVal += "\\n";
+        } else if (c == '\r') {
+            encodedVal += "\\r";
+        } else if (c == '\t') {
+            encodedVal += "\\t";
+        } else if (c < 32) {
+            encodedVal += fmt::format("\\u{:04x}", c);
+        } else {
+            encodedVal += fmt::format("{}", c);
+        }
+    }
+    return fmt::format(R"("{}")", encodedVal);
+}
+
 std::string Xml2Json::getValue(const std::string& name, const char* text)
 {
     auto hint = asType.find(name);
 
     if (hint != asType.end()) {
-        if (hint->second == "string") {
+        switch (hint->second) {
+        case FieldType::STRING:
             return getAsString(text);
-        }
-
-        if (hint->second == "bool") {
-            return text;
-        }
-
-        if (hint->second == "number") {
+        case FieldType::ENCSTRING:
+            return getEncString(text);
+        case FieldType::BOOL:
+        case FieldType::NUMBER:
             return text;
         }
     }

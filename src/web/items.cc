@@ -67,9 +67,9 @@ void Web::Items::process()
     auto root = xmlDoc->document_element();
     auto items = root.append_child("items");
     xml2Json->setArrayName(items, "item");
-    xml2Json->setFieldType("title", "string");
-    xml2Json->setFieldType("part", "string");
-    xml2Json->setFieldType("track", "string");
+    xml2Json->setFieldType("title", FieldType::STRING);
+    xml2Json->setFieldType("part", FieldType::STRING);
+    xml2Json->setFieldType("track", FieldType::STRING);
     items.append_attribute("parent_id") = parentID;
 
     auto container = database->loadObject(DEFAULT_CLIENT_GROUP, parentID);
