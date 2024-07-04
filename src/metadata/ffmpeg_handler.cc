@@ -103,19 +103,19 @@ private:
             switch (level) {
             case AV_LOG_PANIC: // ffmpeg will crash now
             case AV_LOG_FATAL: // fatal as in can't decode, not crash
-            case AV_LOG_ERROR:
-                log_error("FFMpeg (): {}", level, message);
+                log_error("FFMpeg {} {}", level, message);
                 break;
+            case AV_LOG_ERROR:
             case AV_LOG_WARNING:
-                log_debug("FFMpeg (): {}", level, message);
+                log_debug("FFMpeg {}: {}", level, message);
                 break;
             case AV_LOG_INFO:
-                log_debug("FFMpeg (): {}", level, message);
+                log_debug("FFMpeg {}: {}", level, message);
                 break;
             case AV_LOG_VERBOSE:
             case AV_LOG_DEBUG:
             case AV_LOG_TRACE:
-                log_debug("FFMpeg (): {}", level, message);
+                log_debug("FFMpeg {}: {}", level, message);
                 break;
             case AV_LOG_QUIET:
                 break;
