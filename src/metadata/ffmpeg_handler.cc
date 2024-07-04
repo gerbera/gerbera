@@ -73,7 +73,7 @@ class FfmpegLogger {
 public:
     FfmpegLogger()
     {
-        av_log_set_level(AV_LOG_INFO);
+        av_log_set_level(logLevel);
         av_log_set_callback(&FfmpegLogger::LogFfmpegMessage);
     }
     ~FfmpegLogger()
@@ -85,6 +85,7 @@ private:
     FfmpegLogger(const FfmpegLogger&) = delete;
     FfmpegLogger& operator=(const FfmpegLogger&) = delete;
     static int printPrefix;
+    static int logLevel;
 
     static void LogFfmpegMessage(void* ptr, int level, const char* fmt, va_list vargs)
     {
@@ -98,32 +99,37 @@ private:
             message = "Failed to format message";
         }
 
-        switch (level) {
-        case AV_LOG_PANIC: // ffmpeg will crash now
-            log_error("FFMpeg: {}", message);
-            break;
-        case AV_LOG_FATAL: // fatal as in can't decode, not crash
-        case AV_LOG_ERROR:
-        case AV_LOG_WARNING:
-            log_warning("FFMpeg: {}", message);
-            break;
-        case AV_LOG_INFO:
-            log_info("FFMpeg: {}", message);
-            break;
-        case AV_LOG_VERBOSE:
-        case AV_LOG_DEBUG:
-        case AV_LOG_TRACE:
-            log_debug("FFMpeg: {}", message);
-            break;
-        default:
-            log_warning("FFMpeg unhandled {}: {}", message);
-            break;
+        if (level <= logLevel) { // some ffmpeg functions use log_level_offset
+            switch (level) {
+            case AV_LOG_PANIC: // ffmpeg will crash now
+            case AV_LOG_FATAL: // fatal as in can't decode, not crash
+            case AV_LOG_ERROR:
+                log_error("FFMpeg (): {}", level, message);
+                break;
+            case AV_LOG_WARNING:
+                log_debug("FFMpeg (): {}", level, message);
+                break;
+            case AV_LOG_INFO:
+                log_debug("FFMpeg (): {}", level, message);
+                break;
+            case AV_LOG_VERBOSE:
+            case AV_LOG_DEBUG:
+            case AV_LOG_TRACE:
+                log_debug("FFMpeg (): {}", level, message);
+                break;
+            case AV_LOG_QUIET:
+                break;
+            default:
+                log_warning("FFMpeg unhandled {}: {}", level, message);
+                break;
+            }
         }
     }
 };
 
 static FfmpegLogger globalFfmpegLogger = FfmpegLogger();
 int FfmpegLogger::printPrefix = 1;
+int FfmpegLogger::logLevel = AV_LOG_INFO;
 
 FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context, ConfigVal::IMPORT_LIBOPTS_FFMPEG_ENABLED, ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST, ConfigVal::IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST)
