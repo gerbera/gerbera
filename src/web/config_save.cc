@@ -36,8 +36,8 @@
 #include "upnp/clients.h"
 #include "util/xml_to_json.h"
 
-Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<Content>& content)
-    : WebRequestHandler(content)
+Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<Content>& content, const std::shared_ptr<Server>& server)
+    : WebRequestHandler(content, server)
     , context(std::move(context))
 {
 }

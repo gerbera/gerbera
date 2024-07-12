@@ -120,6 +120,8 @@
 // #define UPNP_DLNA_PROFILE_JPEG_SM_ICO "JPEG_SM_ICO"
 // #define UPNP_DLNA_PROFILE_JPEG_LRG_ICO "JPEG_LRG_ICO"
 
+#define UPNP_DESC_STYLESHEET "/css/upnp.css"
+
 // device description defaults
 #define UPNP_DESC_SCPD_URL "/upnp"
 #define UPNP_DESC_DEVICE_DESCRIPTION "/description.xml"

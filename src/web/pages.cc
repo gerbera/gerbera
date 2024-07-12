@@ -43,43 +43,44 @@ namespace Web {
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     const std::shared_ptr<Context>& context,
     const std::shared_ptr<Content>& content,
+    const std::shared_ptr<Server>& server,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
     const std::string& page)
 {
     if (page == "add")
-        return std::make_unique<Web::Add>(content);
+        return std::make_unique<Web::Add>(content, server);
     if (page == "remove")
-        return std::make_unique<Web::Remove>(content);
+        return std::make_unique<Web::Remove>(content, server);
     if (page == "add_object")
-        return std::make_unique<Web::AddObject>(content);
+        return std::make_unique<Web::AddObject>(content, server);
     if (page == "auth")
-        return std::make_unique<Web::Auth>(content);
+        return std::make_unique<Web::Auth>(content, server);
     if (page == "containers")
-        return std::make_unique<Web::Containers>(content, xmlBuilder);
+        return std::make_unique<Web::Containers>(content, xmlBuilder, server);
     if (page == "directories")
-        return std::make_unique<Web::Directories>(content);
+        return std::make_unique<Web::Directories>(content, server);
     if (page == "files")
-        return std::make_unique<Web::Files>(content);
+        return std::make_unique<Web::Files>(content, server);
     if (page == "items")
-        return std::make_unique<Web::Items>(content, xmlBuilder);
+        return std::make_unique<Web::Items>(content, xmlBuilder, server);
     if (page == "edit_load")
-        return std::make_unique<Web::EditLoad>(content, xmlBuilder);
+        return std::make_unique<Web::EditLoad>(content, xmlBuilder, server);
     if (page == "edit_save")
-        return std::make_unique<Web::EditSave>(content);
+        return std::make_unique<Web::EditSave>(content, server);
     if (page == "autoscan")
-        return std::make_unique<Web::Autoscan>(content);
+        return std::make_unique<Web::Autoscan>(content, server);
     if (page == "void")
-        return std::make_unique<Web::VoidType>(content);
+        return std::make_unique<Web::VoidType>(content, server);
     if (page == "tasks")
-        return std::make_unique<Web::Tasks>(content);
+        return std::make_unique<Web::Tasks>(content, server);
     if (page == "action")
-        return std::make_unique<Web::Action>(content);
+        return std::make_unique<Web::Action>(content, server);
     if (page == "clients")
-        return std::make_unique<Web::Clients>(content);
+        return std::make_unique<Web::Clients>(content, server);
     if (page == "config_load")
-        return std::make_unique<Web::ConfigLoad>(content);
+        return std::make_unique<Web::ConfigLoad>(content, server);
     if (page == "config_save")
-        return std::make_unique<Web::ConfigSave>(context, content);
+        return std::make_unique<Web::ConfigSave>(context, content, server);
 
     throw_std_runtime_error("Unknown page: {}", page);
 }

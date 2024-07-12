@@ -28,14 +28,22 @@
 
 #include <memory>
 
+class Server;
 class UpnpXMLBuilder;
 
 class UIHandler : public RequestHandler {
 public:
-    explicit UIHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder);
+    explicit UIHandler(const std::shared_ptr<Content>& content,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        std::shared_ptr<Server> server);
 
     const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
+
+private:
+    std::string webRoot;
+    bool uiEnabled;
+    std::shared_ptr<Server> server;
 };
 
 #endif // GERBERA_UI_HANDLER_H

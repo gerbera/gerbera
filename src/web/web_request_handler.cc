@@ -41,6 +41,7 @@
 #include "context.h"
 #include "exceptions.h"
 #include "iohandler/mem_io_handler.h"
+#include "server.h"
 #include "session_manager.h"
 #include "upnp/headers.h"
 #include "upnp/quirks.h"
@@ -51,9 +52,10 @@
 
 namespace Web {
 
-WebRequestHandler::WebRequestHandler(const std::shared_ptr<Content>& content)
+WebRequestHandler::WebRequestHandler(const std::shared_ptr<Content>& content, std::shared_ptr<Server> server)
     : RequestHandler(content, nullptr)
     , sessionManager(this->content->getContext()->getSessionManager())
+    , server(std::move(server))
 {
 }
 
@@ -111,15 +113,18 @@ const struct ClientInfo* WebRequestHandler::getInfo(const char* filename, UpnpFi
 
     std::string contentType = "application/json; charset=UTF-8";
 
-#ifdef USING_NPUPNP
-    info->content_type = std::move(contentType);
-#else
-    UpnpFileInfo_set_ContentType(info, contentType.c_str());
-#endif
     Headers headers;
     headers.addHeader("Cache-Control", "no-cache, must-revalidate");
     headers.addHeader("SameSite", "Lax");
-    headers.addHeader("Access-Control-Allow-Origin", "*");
+#ifdef USING_NPUPNP
+    info->content_type = std::move(contentType);
+    headers.addHeader("Access-Control-Allow-Origin", fmt::format("{}", fmt::join(server->getCorsHosts(), " ")));
+#else
+    UpnpFileInfo_set_ContentType(info, contentType.c_str());
+#if (UPNP_VERSION < 11419)
+    headers.addHeader("Access-Control-Allow-Origin", fmt::format("{}", fmt::join(server->getCorsHosts(), " ")));
+#endif
+#endif
 
     auto quirks = getQuirks(info);
     if (quirks)

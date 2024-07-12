@@ -28,9 +28,9 @@
 #include "config/config_val.h"
 #include "context.h"
 #include "iohandler/file_io_handler.h"
-#include "iohandler/mem_io_handler.h"
+#include "server.h"
+#include "upnp/headers.h"
 #include "upnp/quirks.h"
-#include "upnp/xml_builder.h"
 #include "util/grb_time.h"
 #include "util/logger.h"
 #include "util/mime.h"
@@ -38,8 +38,13 @@
 
 #include <sstream>
 
-UIHandler::UIHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
+UIHandler::UIHandler(const std::shared_ptr<Content>& content,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+    std::shared_ptr<Server> server)
     : RequestHandler(content, xmlBuilder)
+    , webRoot(config->getOption(ConfigVal::SERVER_WEBROOT))
+    , uiEnabled(config->getBoolOption(ConfigVal::SERVER_UI_ENABLED))
+    , server(std::move(server))
 {
 }
 
@@ -73,7 +78,13 @@ const struct ClientInfo* UIHandler::getInfo(const char* filename, UpnpFileInfo* 
     }
 
     auto quirks = getQuirks(info);
-    auto uiEnabled = config->getBoolOption(ConfigVal::SERVER_UI_ENABLED);
+    auto headers = Headers();
+    headers.addHeader("Content-Security-Policy", fmt::format("default-src {} 'unsafe-inline'; img-src *; media-src *; child-src 'none';", fmt::join(server->getCorsHosts(), " ")));
+    headers.addHeader("SameSite", "Lax");
+    if (quirks)
+        quirks->updateHeaders(headers);
+    headers.writeHeaders(info);
+
     if (!uiEnabled && !startswith(path, "/icons")) {
         log_warning("UI is disabled!");
         UpnpFileInfo_set_FileLength(info, -1);
@@ -84,8 +95,7 @@ const struct ClientInfo* UIHandler::getInfo(const char* filename, UpnpFileInfo* 
         return quirks ? quirks->getInfo() : nullptr;
     }
 
-    auto webroot = config->getOption(ConfigVal::SERVER_WEBROOT);
-    auto webFile = fmt::format("{}{}", webroot, path);
+    auto webFile = fmt::format("{}{}", webRoot, path);
     log_debug("UI: file: {}", webFile);
 
     auto mime = getMime(context->getMime(), webFile);
@@ -110,8 +120,7 @@ std::unique_ptr<IOHandler> UIHandler::open(const char* filename, const std::shar
         path = "/index.html";
     }
 
-    auto webroot = config->getOption(ConfigVal::SERVER_WEBROOT);
-    auto webFile = fmt::format("{}{}", webroot, path);
+    auto webFile = fmt::format("{}{}", webRoot, path);
     log_debug("UI: file: {}", webFile);
 
     auto ioHandler = std::make_unique<FileIOHandler>(webFile);

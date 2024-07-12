@@ -116,6 +116,10 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in
 {
     auto doc = std::make_unique<pugi::xml_document>();
 
+    auto style = doc->prepend_child(pugi::node_pi);
+    style.set_name("xml-stylesheet");
+    style.set_value("href=\"" UPNP_DESC_STYLESHEET "\" type=\"text/css\"");
+
     auto decl = doc->prepend_child(pugi::node_declaration);
     decl.append_attribute("version") = "1.0";
     decl.append_attribute("encoding") = "UTF-8";

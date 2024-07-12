@@ -53,7 +53,7 @@ sudo make install
 | libiconv            |             |             |                     | Required      | Charset conversion         |          |
 | sqlite3             | 3.7.0       | 3.35.5      | 3.36.0              | Required      | Database storage           |          |
 | zlib                |             |             |                     | Required      | Data compression           |          |
-| [fmtlib]            | 7.1.3       | 9.1.0       | 11.0.0              | Required      | Fast string formatting     |          |
+| [fmtlib]            | 7.1.3       | 9.1.0       | 11.0.1              | Required      | Fast string formatting     |          |
 | [spdlog]            | 1.8.1       | 1.11.0      | 1.14.1              | Required      | Runtime logging            |          |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0               | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |                     | Optional      | Alternate database storage | Disabled |
@@ -65,7 +65,7 @@ sudo make install
 | [libebml]           |             | 1.4.2       | 1.4.5               | Optional      | requird by [libmatroska]   | Enabled  |
 | ffmpeg/libav        |             |             |                     | Optional      | File metadata              | Disabled |
 | [libexif]           |             | v0.6.24     | v0.6.24-90-g2ed252d | Optional      | JPEG Exif metadata         | Enabled  |
-| [libexiv2]          | v0.26       | v0.27.7     | v0.28.2             | Optional      | Exif, IPTC, XMP metadata   | Disabled |
+| [libexiv2]          | v0.26       | v0.27.7     | v0.28.3             | Optional      | Exif, IPTC, XMP metadata   | Disabled |
 | [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0               | Optional      | Enables scrobbling         | Disabled |
 | [ffmpegthumbnailer] |             | 2.2.2       | 2.2.2-60-g1b5a779   | Optional      | Generate video thumbnails  | Disabled |
 | inotify             |             |             |                     | Optional      | Efficient file monitoring  | Enabled  |
