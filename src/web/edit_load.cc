@@ -38,7 +38,6 @@
 #include "cds/cds_item.h"
 #include "database/database.h"
 #include "exceptions.h"
-#include "server.h"
 #include "upnp/clients.h"
 #include "upnp/xml_builder.h"
 #include "util/tools.h"
@@ -46,8 +45,8 @@
 
 #include <fmt/chrono.h>
 
-Web::EditLoad::EditLoad(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder)
-    : WebRequestHandler(content)
+Web::EditLoad::EditLoad(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<Server>& server)
+    : WebRequestHandler(content, server)
     , xmlBuilder(std::move(xmlBuilder))
 {
 }

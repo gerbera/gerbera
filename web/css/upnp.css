@@ -1,0 +1,310 @@
+@font-face {
+    font-family: 'Lato';
+    font-style: normal;
+    font-weight: 400;
+    src: local('Lato Regular'), local('Lato-Regular'),
+        url('/vendor/lato/lato-v14-latin-ext_latin-regular.woff2') format('woff2'),
+        /* Chrome 26+, Opera 23+, Firefox 39+ */
+        url('/vendor/lato/lato-v14-latin-ext_latin-regular.woff') format('woff');
+    /* Chrome 6+, Firefox 3.6+, IE 9+, Safari 5.1+ */
+}
+
+scpd:before,
+root:before {
+    content: url("/assets/theme/gerbera-logo-white.png");
+}
+
+scpd,
+root {
+    background-color: #222;
+    margin: 10px;
+    color: #bbb;
+    font-family: "Lato", "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+
+scpd,
+root,
+specVersion,
+action {
+    display: block;
+}
+
+icon {
+    display: table-row;
+}
+
+friendlyName,
+UDN,
+X_DLNADOC,
+X_DLNACAP,
+deviceType,
+modelDescription,
+presentationURL,
+ProductCap,
+modelURL,
+X_ProductCap {
+    display: block;
+}
+
+manufacturer,
+modelNumber,
+modelName,
+manufacturerURL,
+serialNumber {
+    display: inline;
+}
+
+scpd:after,
+root:after {
+    display: block;
+    content: " ";
+    height: 20px;
+}
+
+argumentList {
+    margin-left: 2em;
+    display: table;
+}
+
+iconList,
+serviceList {
+    display: table;
+}
+
+
+argument,
+service {
+    display: table-row;
+    margin-left: 2em;
+}
+
+name {
+    font-weight: bold;
+}
+
+name,
+direction,
+relatedStateVariable,
+dataType,
+defaultValue,
+mime,
+width,
+height,
+depth,
+url,
+serviceType,
+serviceId,
+SCPDURL,
+controlURL,
+eventSubURL {
+    padding-left: 5px;
+    padding-right: 5px;
+    display: table-cell;
+}
+
+action>name {
+    display: inline;
+}
+
+friendlyName,
+actionList,
+iconList,
+serviceList {
+    padding-top: 20px;
+    display: block;
+}
+
+allowedValueList {
+    margin-left: 5px;
+    display: table;
+}
+
+allowedValue {
+    display: table;
+    padding-left: 2em;
+}
+
+serviceStateTable {
+    padding-top: 20px;
+    display: block;
+}
+
+stateVariable {
+    display: table-row
+}
+
+/* labels */
+
+specVersion:before {
+    content: "specVersion: ";
+}
+
+major:after {
+    content: ".";
+}
+
+action:before {
+    content: "- Action: ";
+}
+
+icon:before {
+    content: "- Icon: ";
+}
+
+service:before {
+    content: "- Service: ";
+}
+
+mimetype:before {
+    content: ""
+}
+
+url:before {
+    content: ""
+}
+
+height:before,
+depth:before {
+    content: "x "
+}
+
+argumentList:before {
+    content: "    ( ";
+}
+
+argumentList:after {
+    content: " )";
+}
+
+serviceStateTable:before {
+    content: "ServiceStateTable:";
+    font-weight: bold;
+    font-size: large;
+}
+
+stateVariable:before {
+    content: "- StateVariable: ";
+    font-weight: normal;
+}
+
+relatedStateVariable:before,
+dataType:before {
+    content: ": ";
+}
+
+friendlyName:before,
+modelDescription:before,
+modelName:before,
+manufacturer:before,
+UDN:before,
+X_DLNACAP:before,
+X_DLNADOC:before,
+ProductCap:before,
+X_ProductCap:before,
+manufacturer:before,
+modelName:before,
+modelURL:before,
+serialNumber:before,
+presentationURL:before,
+deviceType:before {
+    font-weight: bold;
+    width: 150px;
+    display: inline-block;
+}
+
+friendlyName:before {
+    content: "Server: "
+}
+
+modelDescription:before {
+    content: "Description: "
+}
+
+modelName:before {
+    content: "Model: "
+}
+
+manufacturer:before {
+    content: "Manufacturer: ";
+}
+
+UDN:before {
+    content: "UDN: ";
+}
+
+X_DLNACAP:before {
+    content: "X_DLNACAP: "
+}
+
+X_DLNADOC:before {
+    content: "X_DLNADOC: "
+}
+
+ProductCap:before {
+    content: "ProductCap: "
+}
+
+X_ProductCap:before {
+    content: "X_ProductCap: "
+}
+
+manufacturer:before {
+    content: "Manufacturer: ";
+}
+
+modelName:before {
+    content: "Model: ";
+}
+
+modelNumber:before {
+    /* content: "ModelNumber: "; */
+}
+
+modelURL:before {
+    content: "ModelURL: ";
+}
+
+serialNumber:before {
+    content: "SerialNumber: ";
+}
+
+presentationURL:before {
+    content: "URL: ";
+}
+
+deviceType:before {
+    content: "DeviceType: ";
+}
+
+actionList:before {
+    content: "Actions:";
+    font-weight: bold;
+    font-size: large;
+}
+
+iconList:before {
+    content: "Icons:";
+    font-weight: bold;
+    font-size: large;
+}
+
+serviceList:before {
+    content: "Services:";
+    font-weight: bold;
+    font-size: large;
+}
+
+allowedValueList:before {
+    content: "AllowedValues: ";
+    font-style: italic;
+}
+
+defaultValue:before {
+    content: 'defaultValue: "';
+    font-style: italic;
+}
+
+defaultValue:after {
+    content: '"';
+    font-style: italic;
+}

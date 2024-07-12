@@ -63,8 +63,8 @@
 #define CONFIG_LOAD_TYPE "type"
 #define CONFIG_LOAD_VALUE "value"
 
-Web::ConfigLoad::ConfigLoad(const std::shared_ptr<Content>& content)
-    : WebRequestHandler(content)
+Web::ConfigLoad::ConfigLoad(const std::shared_ptr<Content>& content, const std::shared_ptr<Server>& server)
+    : WebRequestHandler(content, server)
 {
     try {
         if (this->database) {

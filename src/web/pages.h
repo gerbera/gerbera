@@ -61,7 +61,7 @@ protected:
     bool accountsEnabled { false };
 
 public:
-    explicit Auth(const std::shared_ptr<Content>& content);
+    explicit Auth(const std::shared_ptr<Content>& content, const std::shared_ptr<Server>& server);
     void process() override;
 };
 
@@ -71,7 +71,7 @@ protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 public:
-    explicit Containers(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
+    explicit Containers(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<Server>& server);
     void process() override;
 };
 
@@ -97,7 +97,7 @@ protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 public:
-    explicit Items(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
+    explicit Items(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<Server>& server);
     void process() override;
 };
 
@@ -123,7 +123,7 @@ protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
 public:
-    explicit EditLoad(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
+    explicit EditLoad(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<Server>& server);
     void process() override;
 };
 
@@ -189,6 +189,7 @@ public:
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     const std::shared_ptr<Context>& context,
     const std::shared_ptr<Content>& content,
+    const std::shared_ptr<Server>& server,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
     const std::string& page);
 
@@ -226,7 +227,7 @@ protected:
     static void addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs);
 
 public:
-    explicit ConfigLoad(const std::shared_ptr<Content>& content);
+    explicit ConfigLoad(const std::shared_ptr<Content>& content, const std::shared_ptr<Server>& server);
     void process() override;
 };
 
@@ -236,7 +237,7 @@ protected:
     std::shared_ptr<Context> context;
 
 public:
-    explicit ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<Content>& content);
+    explicit ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<Content>& content, const std::shared_ptr<Server>& server);
     void process() override;
 };
 

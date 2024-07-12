@@ -1,5 +1,15 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
+### NEW Features
+
+### FIXES
+
+### Code Improvements
+
+- Update versions of libexiv2 (0.28.3), fmt (11.0.1)
+
 ## v2.2.0
 
 This update brings a new design for the start page, better logging and a new repository for ubuntu and debian getting rid of jfrog.

@@ -95,6 +95,7 @@ public:
     void sendCDSSubscriptionUpdate(const std::string& updateString);
 
     std::shared_ptr<Content> getContent() const { return content; }
+    std::vector<std::string> getCorsHosts() const { return corsHosts; }
 
 protected:
     std::shared_ptr<Config> config;
@@ -107,10 +108,12 @@ protected:
     std::shared_ptr<Timer> timer;
     std::shared_ptr<Content> content;
     std::shared_ptr<MetadataService> metadataService;
+    std::shared_ptr<Server> self;
 
     std::string ip;
     in_port_t port {};
     std::vector<std::string> validHosts {};
+    std::vector<std::string> corsHosts {};
 
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag {};

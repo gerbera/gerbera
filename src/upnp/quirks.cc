@@ -29,7 +29,6 @@
 #include "action_request.h"
 #include "cds/cds_item.h"
 #include "database/database.h"
-#include "server.h"
 #include "upnp/clients.h"
 #include "upnp/headers.h"
 #include "upnp/upnp_common.h"

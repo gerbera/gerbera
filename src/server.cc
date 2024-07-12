@@ -107,7 +107,7 @@ void Server::init(bool offln)
 #endif
 
     // initialize what is needed
-    auto self = shared_from_this();
+    self = shared_from_this();
     timer = std::make_shared<Timer>();
     timer->run();
 
@@ -237,22 +237,46 @@ void Server::run()
         UpnpSetAllowLiteralHostRedirection(1);
 #endif
 
-    std::string url = getVirtualUrl();
-    writeBookmark(url);
-    log_info("The Web UI can be reached by following this link: {}", url);
+    {
+        std::string url = getVirtualUrl();
+        writeBookmark(url);
+        log_info("The Web UI can be reached by following this link: {}", url);
 
-    validHosts = std::vector<std::string> {
-        std::string(UpnpGetServerIpAddress()),
-        std::string(UpnpGetServerIp6Address()),
-        std::string(UpnpGetServerUlaGuaIp6Address()),
-    };
-    if (!url.empty()) {
-        validHosts.push_back(url);
+        validHosts = std::vector<std::string> {
+            std::string(UpnpGetServerIpAddress()),
+            std::string(UpnpGetServerIp6Address()),
+            std::string(UpnpGetServerUlaGuaIp6Address()),
+        };
+        if (!url.empty()) {
+            validHosts.push_back(url);
+        }
+        url = getExternalUrl();
+        if (!url.empty()) {
+            validHosts.push_back(url);
+        }
     }
-    url = getExternalUrl();
-    if (!url.empty()) {
-        validHosts.push_back(url);
+
+#if !defined(USING_NPUPNP)
+#if (UPNP_VERSION >= 11419)
+    {
+        corsHosts = {
+            "'self'",
+            fmt::format("http://{}", UpnpGetServerIpAddress()),
+            fmt::format("http://[{}]", UpnpGetServerIp6Address()),
+            fmt::format("http://[{}]", UpnpGetServerUlaGuaIp6Address()),
+        };
+        std::string url = getVirtualUrl();
+        if (!url.empty()) {
+            corsHosts.push_back(url);
+        }
+        url = getExternalUrl();
+        if (!url.empty()) {
+            corsHosts.push_back(url);
+        }
+        UpnpSetWebServerCorsString(fmt::format("{}", fmt::join(corsHosts, " ")).c_str());
     }
+#endif
+#endif
 
     UpnpSetHostValidateCallback(
         [](auto host, auto cookie) -> int {
@@ -591,7 +615,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         auto it = params.find(URL_REQUEST_TYPE);
         std::string rType = it != params.end() && !it->second.empty() ? it->second : "index";
 
-        return Web::createWebRequestHandler(context, content, webXmlBuilder, rType);
+        return Web::createWebRequestHandler(context, content, self, webXmlBuilder, rType);
     }
 
     if (startswith(link, DEVICE_DESCRIPTION_PATH) || endswith(link, UPNP_DESC_DEVICE_DESCRIPTION)) {
@@ -610,7 +634,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         || startswith(link, "/css")
         || startswith(link, "/icons")
         || startswith(link, "/gerbera-config-")) {
-        return std::make_unique<UIHandler>(content, upnpXmlBuilder);
+        return std::make_unique<UIHandler>(content, upnpXmlBuilder, self);
     }
 
 #if defined(HAVE_CURL)

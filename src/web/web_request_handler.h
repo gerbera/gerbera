@@ -43,6 +43,7 @@
 #define URL_UI_PARAM_SEPARATOR '?'
 
 class GenericTask;
+class Server;
 class Xml2Json;
 
 namespace Web {
@@ -64,6 +65,7 @@ static constexpr auto SID = "GerberaSID";
 class WebRequestHandler : public RequestHandler {
 protected:
     std::shared_ptr<Web::SessionManager> sessionManager;
+    std::shared_ptr<Server> server;
 
     bool checkRequestCalled {};
 
@@ -121,7 +123,7 @@ protected:
 
 public:
     /// \brief Constructor, currently empty.
-    explicit WebRequestHandler(const std::shared_ptr<Content>& content);
+    explicit WebRequestHandler(const std::shared_ptr<Content>& content, std::shared_ptr<Server> server);
 
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL
