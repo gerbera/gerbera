@@ -43,6 +43,7 @@
 #include "iohandler/mem_io_handler.h"
 #include "server.h"
 #include "session_manager.h"
+#include "upnp/compat.h"
 #include "upnp/headers.h"
 #include "upnp/quirks.h"
 #include "util/generic_task.h"
@@ -118,12 +119,11 @@ const struct ClientInfo* WebRequestHandler::getInfo(const char* filename, UpnpFi
     headers.addHeader("SameSite", "Lax");
 #ifdef USING_NPUPNP
     info->content_type = std::move(contentType);
-    headers.addHeader("Access-Control-Allow-Origin", fmt::format("{}", fmt::join(server->getCorsHosts(), " ")));
 #else
     UpnpFileInfo_set_ContentType(info, contentType.c_str());
-#if (UPNP_VERSION < 11419)
-    headers.addHeader("Access-Control-Allow-Origin", fmt::format("{}", fmt::join(server->getCorsHosts(), " ")));
 #endif
+#ifdef UPNP_NEEDS_CORS
+    headers.addHeader("Access-Control-Allow-Origin", fmt::format("{}", fmt::join(server->getCorsHosts(), " ")));
 #endif
 
     auto quirks = getQuirks(info);

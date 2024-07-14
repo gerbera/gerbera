@@ -274,6 +274,8 @@ if [[ "${lsb_distro}" != "Raspbian" ]]; then
       printf "Skipping upload due to missing DEB_UPLOAD_ENDPOINT"
     fi
   else
+    echo "::group::Testing gerbera"
     ctest --output-on-failure
+    echo "::endgroup::"
   fi
 fi
