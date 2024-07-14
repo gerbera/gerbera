@@ -27,6 +27,7 @@
 #include "request_handler.h"
 
 #include <memory>
+#include <string>
 
 class Server;
 class UpnpXMLBuilder;

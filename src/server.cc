@@ -50,6 +50,7 @@
 #include "subscription_request.h"
 #include "ui_handler.h"
 #include "upnp/clients.h"
+#include "upnp/compat.h"
 #include "upnp/conn_mgr_service.h"
 #include "upnp/cont_dir_service.h"
 #include "upnp/mr_reg_service.h"
@@ -232,10 +233,8 @@ void Server::run()
         throw UpnpException(ret, fmt::format("run: UpnpSendAdvertisement {} failed", aliveAdvertisementInterval));
     }
 
-#if !defined(USING_NPUPNP)
     if (config->getBoolOption(ConfigVal::UPNP_LITERAL_HOST_REDIRECTION))
         UpnpSetAllowLiteralHostRedirection(1);
-#endif
 
     {
         std::string url = getVirtualUrl();
@@ -256,8 +255,6 @@ void Server::run()
         }
     }
 
-#if !defined(USING_NPUPNP)
-#if (UPNP_VERSION >= 11419)
     {
         corsHosts = {
             "'self'",
@@ -275,8 +272,6 @@ void Server::run()
         }
         UpnpSetWebServerCorsString(fmt::format("{}", fmt::join(corsHosts, " ")).c_str());
     }
-#endif
-#endif
 
     UpnpSetHostValidateCallback(
         [](auto host, auto cookie) -> int {
