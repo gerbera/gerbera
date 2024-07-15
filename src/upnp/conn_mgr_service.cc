@@ -41,6 +41,7 @@
 #include "database/database.h"
 #include "exceptions.h"
 #include "subscription_request.h"
+#include "upnp/compat.h"
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
 #include "util/logger.h"
@@ -127,23 +128,9 @@ void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequ
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
-#if defined(USING_NPUPNP)
-    UpnpAcceptSubscriptionXML(
-        deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(),
-        UPNP_DESC_CM_SERVICE_ID, xml, request.getSubscriptionID().c_str());
-#else
-    IXML_Document* event = nullptr;
-    int err = ixmlParseBufferEx(xml.c_str(), &event);
-    if (err != IXML_SUCCESS) {
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
-    }
-
-    UpnpAcceptSubscriptionExt(deviceHandle,
-        config->getOption(ConfigVal::SERVER_UDN).c_str(),
-        UPNP_DESC_CM_SERVICE_ID, event, request.getSubscriptionID().c_str());
-
-    ixmlDocument_free(event);
-#endif
+    GrbUpnpAcceptSubscription(
+        deviceHandle, config->getOption(ConfigVal::SERVER_UDN),
+        UPNP_DESC_CM_SERVICE_ID, xml, request.getSubscriptionID());
 }
 
 void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
@@ -153,19 +140,5 @@ void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceP
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocolCsv.c_str());
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
-
-#if defined(USING_NPUPNP)
-    UpnpNotifyXML(deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(), UPNP_DESC_CM_SERVICE_ID, xml);
-#else
-    IXML_Document* event = nullptr;
-    int err = ixmlParseBufferEx(xml.c_str(), &event);
-    if (err != IXML_SUCCESS) {
-        /// \todo add another error code
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
-    }
-
-    UpnpNotifyExt(deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(), UPNP_DESC_CM_SERVICE_ID, event);
-
-    ixmlDocument_free(event);
-#endif
+    GrbUpnpNotify(deviceHandle, config->getOption(ConfigVal::SERVER_UDN), UPNP_DESC_CM_SERVICE_ID, xml);
 }

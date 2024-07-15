@@ -26,12 +26,8 @@
 
 #include "headers.h" // API
 
+#include "upnp/compat.h"
 #include "util/logger.h"
-#include "util/tools.h"
-
-#if !defined(USING_NPUPNP)
-#include <UpnpExtraHeaders.h>
-#endif
 
 std::string Headers::stripInvalid(const std::string& value)
 {
@@ -79,54 +75,12 @@ void Headers::updateHeader(const std::string& key, const std::string& value)
     headers[cleanKey] = cleanValue;
 }
 
-std::string Headers::formatHeader(const std::pair<std::string, std::string>& header)
-{
-    return fmt::format("{}: {}", header.first, header.second);
-}
-
-std::pair<std::string, std::string> Headers::parseHeader(const std::string& header)
-{
-    std::string first = header;
-    std::string second;
-    std::size_t found = header.find_first_of(':');
-    if (found != std::string::npos) {
-        first = header.substr(0, found);
-        second = header.substr(found + 1);
-    }
-
-    trimStringInPlace(first);
-    trimStringInPlace(second);
-    return { first, second };
-}
-
 void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
 {
-#if defined(USING_NPUPNP)
-    std::copy(headers.begin(), headers.end(), std::back_inserter(fileInfo->response_headers));
-#else
-    auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
-    for (auto&& iter : headers) {
-        UpnpExtraHeaders* h = UpnpExtraHeaders_new();
-        UpnpExtraHeaders_set_resp(h, formatHeader(iter).c_str());
-        UpnpListInsert(head, UpnpListEnd(head), const_cast<UpnpListHead*>(UpnpExtraHeaders_get_node(h)));
-    }
-#endif
+    GrbUpnpSetHeaders(fileInfo, headers);
 }
 
 std::map<std::string, std::string> Headers::readHeaders(const UpnpFileInfo* fileInfo)
 {
-#if defined(USING_NPUPNP)
-    return fileInfo->request_headers;
-#else
-    std::map<std::string, std::string> ret;
-
-    auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
-    for (auto pos = UpnpListBegin(head); pos != UpnpListEnd(head); pos = UpnpListNext(head, pos)) {
-        auto extra = reinterpret_cast<UpnpExtraHeaders*>(pos);
-        std::string header = UpnpExtraHeaders_get_resp(extra);
-        ret.insert(parseHeader(header));
-    }
-
-    return ret;
-#endif
+    return GrbUpnpGetHeaders(fileInfo);
 }

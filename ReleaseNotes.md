@@ -4,11 +4,15 @@
 
 ### NEW Features
 
+- Higher cross site scripting security in web ui
+- Styles for xml documents when shown in browser
+
 ### FIXES
 
 ### Code Improvements
 
 - Update versions of libexiv2 (0.28.3), fmt (11.0.1)
+- Extract code for npupnp and pupnp specific handling
 
 ## v2.2.0
 

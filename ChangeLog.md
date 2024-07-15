@@ -1,5 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### HEAD
+
+- Web security and upnp compatibility
+
 ### v2.2.0
 
 - Add log sinks for rotating log files and syslog

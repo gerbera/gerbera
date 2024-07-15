@@ -45,6 +45,7 @@
 #include "metadata/metadata_handler.h"
 #include "metadata/metadata_service.h"
 #include "transcoding/transcode_dispatcher.h"
+#include "upnp/compat.h"
 #include "upnp/headers.h"
 #include "upnp/quirks.h"
 #include "upnp/upnp_common.h"
@@ -185,11 +186,7 @@ const struct ClientInfo* FileRequestHandler::getInfo(const char* filename, UpnpF
         headers.addHeader(UPNP_DLNA_TRANSFER_MODE_HEADER, dlnaTransferHeader);
     }
 
-#ifdef USING_NPUPNP
-    info->content_type = std::move(mimeType);
-#else
-    UpnpFileInfo_set_ContentType(info, mimeType.c_str());
-#endif
+    GrbUpnpFileInfoSetContentType(info, mimeType);
 
     if (quirks)
         quirks->updateHeaders(headers);

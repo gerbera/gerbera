@@ -117,11 +117,7 @@ const struct ClientInfo* WebRequestHandler::getInfo(const char* filename, UpnpFi
     Headers headers;
     headers.addHeader("Cache-Control", "no-cache, must-revalidate");
     headers.addHeader("SameSite", "Lax");
-#ifdef USING_NPUPNP
-    info->content_type = std::move(contentType);
-#else
-    UpnpFileInfo_set_ContentType(info, contentType.c_str());
-#endif
+    GrbUpnpFileInfoSetContentType(info, contentType);
 #ifdef UPNP_NEEDS_CORS
     headers.addHeader("Access-Control-Allow-Origin", fmt::format("{}", fmt::join(server->getCorsHosts(), " ")));
 #endif

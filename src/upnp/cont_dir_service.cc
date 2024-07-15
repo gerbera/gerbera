@@ -47,6 +47,7 @@
 #include "exceptions.h"
 #include "subscription_request.h"
 #include "upnp/clients.h"
+#include "upnp/compat.h"
 #include "upnp/quirks.h"
 #include "upnp/xml_builder.h"
 #include "util/tools.h"
@@ -438,23 +439,10 @@ void ContentDirectoryService::processSubscriptionRequest(const SubscriptionReque
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
-#if defined(USING_NPUPNP)
-    UpnpAcceptSubscriptionXML(
-        deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(),
-        UPNP_DESC_CDS_SERVICE_ID, xml, request.getSubscriptionID().c_str());
-#else
-    IXML_Document* event = nullptr;
-    int err = ixmlParseBufferEx(xml.c_str(), &event);
-    if (err != IXML_SUCCESS) {
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
-    }
+    GrbUpnpAcceptSubscription(
+        deviceHandle, config->getOption(ConfigVal::SERVER_UDN),
+        UPNP_DESC_CDS_SERVICE_ID, xml, request.getSubscriptionID());
 
-    UpnpAcceptSubscriptionExt(deviceHandle,
-        config->getOption(ConfigVal::SERVER_UDN).c_str(),
-        UPNP_DESC_CDS_SERVICE_ID, event, request.getSubscriptionID().c_str());
-
-    ixmlDocument_free(event);
-#endif
     log_debug("end");
 }
 
@@ -470,21 +458,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
-
-#if defined(USING_NPUPNP)
-    UpnpNotifyXML(deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(), UPNP_DESC_CDS_SERVICE_ID, xml);
-#else
-    IXML_Document* event = nullptr;
-    int err = ixmlParseBufferEx(xml.c_str(), &event);
-    if (err != IXML_SUCCESS) {
-        /// \todo add another error code
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
-    }
-
-    UpnpNotifyExt(deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(), UPNP_DESC_CDS_SERVICE_ID, event);
-
-    ixmlDocument_free(event);
-#endif
+    GrbUpnpNotify(deviceHandle, config->getOption(ConfigVal::SERVER_UDN), UPNP_DESC_CDS_SERVICE_ID, xml);
 
     log_debug("end");
 }
