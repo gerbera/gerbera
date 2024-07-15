@@ -40,6 +40,7 @@
 #include "context.h"
 #include "exceptions.h"
 #include "subscription_request.h"
+#include "upnp/compat.h"
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
 #include "util/logger.h"
@@ -121,46 +122,21 @@ void MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& r
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
-#if defined(USING_NPUPNP)
-    UpnpAcceptSubscriptionXML(
-        deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(),
-        UPNP_DESC_MRREG_SERVICE_ID, xml, request.getSubscriptionID().c_str());
-#else
-    IXML_Document* event = nullptr;
-    int err = ixmlParseBufferEx(xml.c_str(), &event);
-    if (err != IXML_SUCCESS) {
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
-    }
-
-    UpnpAcceptSubscriptionExt(deviceHandle,
-        config->getOption(ConfigVal::SERVER_UDN).c_str(),
-        UPNP_DESC_MRREG_SERVICE_ID, event, request.getSubscriptionID().c_str());
-
-    ixmlDocument_free(event);
-#endif
+    GrbUpnpAcceptSubscription(
+        deviceHandle, config->getOption(ConfigVal::SERVER_UDN),
+        UPNP_DESC_MRREG_SERVICE_ID, xml, request.getSubscriptionID());
 }
 
-// TODO: FIXME
-#if 0
-void MRRegistrarService::prcoessSubscriptionUpdate(std::string sourceProtocol_CSV)
+void MRRegistrarService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
 {
     auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
-    property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocol_CSV.c_str());
-    property->appendTextChild("SourceProtocolInfo", sourceProtocol_CSV);
+    property.append_child("ValidationRevokedUpdateID").append_child(pugi::node_pcdata).set_value("0");
+    property.append_child("ValidationSucceededUpdateID").append_child(pugi::node_pcdata).set_value("0");
+    property.append_child("AuthorizationDeniedUpdateID").append_child(pugi::node_pcdata).set_value("0");
+    property.append_child("AuthorizationGrantedUpdateID").append_child(pugi::node_pcdata).set_value("0");
+    property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocolCsv.c_str());
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
-
-    IXML_Document *event = nullptr;
-    int err = ixmlParseBufferEx(xml.c_str(), &event);
-    if (err != IXML_SUCCESS)
-    {
-        /// \todo add another error code
-        throw UpnpException(UPNP_E_SUBSCRIPTION_FAILED, "Could not convert property set to ixml");
-    }
-
-    UpnpNotifyExt(deviceHandle, config->getOption(ConfigVal::SERVER_UDN).c_str(), serviceID.c_str(), event);
-
-    ixmlDocument_free(event);
+    GrbUpnpNotify(deviceHandle, config->getOption(ConfigVal::SERVER_UDN), UPNP_DESC_MRREG_SERVICE_ID, xml);
 }
-#endif

@@ -105,14 +105,11 @@ public:
     /// if everything is ok. Currently we do not support any updates.
     void processSubscriptionRequest(const SubscriptionRequest& request);
 
-    // subscriptions for this service are not supported
-    // subscriptions for this service are not supported
-
     /// \brief Sends out an event to all subscribed devices.
-    /// \param sourceProtocol_CSV Comma Separated Value list of protocol information
+    /// \param sourceProtocolCsv Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-    //    void sendSubscriptionUpdate(std::string sourceProtocol_CSV);
+    void sendSubscriptionUpdate(const std::string& sourceProtocolCsv);
 };
 
 #endif // __UPNP_MRREG_H__

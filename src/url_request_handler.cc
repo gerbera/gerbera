@@ -43,6 +43,7 @@
 #include "exceptions.h"
 #include "iohandler/curl_io_handler.h"
 #include "transcoding/transcode_dispatcher.h"
+#include "upnp/compat.h"
 #include "upnp/xml_builder.h"
 #include "util/tools.h"
 #include "util/url.h"
@@ -98,12 +99,7 @@ const struct ClientInfo* URLRequestHandler::getInfo(const char* filename, UpnpFi
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_LastModified(info, 0);
     UpnpFileInfo_set_IsDirectory(info, 0);
-
-#ifdef USING_NPUPNP
-    info->content_type = std::move(mimeType);
-#else
-    UpnpFileInfo_set_ContentType(info, mimeType.c_str());
-#endif
+    GrbUpnpFileInfoSetContentType(info, mimeType);
     log_debug("web_get_info(): end");
 
     auto quirks = getQuirks(info);
