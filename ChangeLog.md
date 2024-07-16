@@ -1,9 +1,12 @@
 ## Gerbera - UPnP AV Mediaserver.
+#3155
 
 ### HEAD
 
+- Clean up commented out code
 - Improve docker instructions
 - Web security and upnp compatibility
+- Upgrade cxxopts.hpp to 3.2.1
 
 ### v2.2.0
 
