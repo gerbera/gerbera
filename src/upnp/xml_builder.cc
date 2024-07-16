@@ -812,7 +812,6 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             clientSpecficAttrs["pv:subtitleFileUri"] = captionInfo[""];
         }
 
-        // bool transcoded = (getValueOrDefault(resParams, URL_PARAM_TRANSCODE) == URL_VALUE_TRANSCODE);
         bool transcoded = purpose == ResourcePurpose::Transcode;
         auto clientGroup = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
 
@@ -870,7 +869,6 @@ std::string UpnpXMLBuilder::buildProtocolInfo(CdsResource& resource, const std::
     }
 
     protocolInfo = protocolInfo.substr(0, protocolInfo.rfind(':') + 1).append(extend);
-    // FIXME: Should we be working protocol info out here?
     resource.addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
 
     log_debug("protocolInfo: {}", protocolInfo.c_str());

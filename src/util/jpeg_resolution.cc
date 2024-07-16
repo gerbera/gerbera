@@ -149,7 +149,9 @@ static Resolution getJpegResolutionRaw(IOHandler& ioh)
         case M_SOF13:
         case M_SOF14:
         case M_SOF15:
-            // auto bitsPerColorComponent = std::to_integer<std::uint8_t>(data[2]);
+#if 0
+            auto bitsPerColorComponent = std::to_integer<std::uint8_t>(data[2]);
+#endif
             auto resX = getuint16(data + 5);
             auto resY = getuint16(data + 3);
             return { static_cast<uint64_t>(resX), static_cast<uint64_t>(resY) };

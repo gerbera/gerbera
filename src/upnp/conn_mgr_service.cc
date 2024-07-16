@@ -110,7 +110,6 @@ void ConnectionManagerService::processActionRequest(ActionRequest& request) cons
         // invalid or unsupported action
         log_debug("unrecognized action {}", request.getActionName().c_str());
         request.setErrorCode(UPNP_E_INVALID_ACTION);
-        //        throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
     log_debug("end");

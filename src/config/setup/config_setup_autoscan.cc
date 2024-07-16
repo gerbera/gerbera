@@ -243,13 +243,6 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
         }
     }
     return false;
-
-    //    for (i = 0; i < list->getEditSize(); i++) {
-    //        auto entry = list->get(i, true);
-    //        if (updateItem(i, optItem, config, entry, optValue)) {
-    //            return true;
-    //        }
-    //    }
 }
 
 void ConfigAutoscanSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)

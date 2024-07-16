@@ -111,7 +111,9 @@ void Web::Autoscan::process()
             if (boolParam("videoMusicVideo"))
                 mediaType.emplace_back("MusicVideo");
             int mt = AutoscanDirectory::makeMediaType(fmt::format("{}", fmt::join(mediaType, "|")));
-            // bool persistent = boolParam("persistent");
+#if 0
+            bool persistent = boolParam("persistent");
+#endif
 
             AutoscanScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
             int interval;
@@ -122,9 +124,8 @@ void Web::Autoscan::process()
 
             int objectID = fromFs ? content->ensurePathExistence(path) : intParam("object_id");
 
-            // log_info("adding autoscan {}: location={}, scan_mode={}, recursive={}, audio={}, image={}, video={}, interval={}, hidden={}",
-            //     objectID, "", AutoscanDirectory::mapScanmode(scanMode),
-            //     recursive, audio, image, video, interval, hidden);
+            log_debug("adding autoscan {}: location={}, recursive={}, mediaType={}, interval={}, hidden={}",
+                objectID, "", recursive, fmt::join(mediaType, "|"), interval, hidden);
 
             auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
             containerMap[AutoscanMediaMode::Audio] = param("ctAudio");
@@ -160,8 +161,6 @@ void Web::Autoscan::process()
             autoscanEl.append_child("location").append_child(pugi::node_pcdata).set_value(autoscanDir->getLocation().c_str());
             autoscanEl.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()));
             autoscanEl.append_child("from_config").append_child(pugi::node_pcdata).set_value(autoscanDir->persistent() ? "1" : "0");
-            // autoscanEl.append_child("scan_level").append_child(pugi::node_pcdata)
-            //     .set_value(AutoscanDirectory::mapScanlevel(autoscanDir->getScanLevel()).c_str());
         }
     } else
         throw_std_runtime_error("called with illegal action");

@@ -619,7 +619,6 @@ bool AutoscanInotify::removeFromWdObj(const std::shared_ptr<DirectoryWatch>& wdO
 
 void AutoscanInotify::addDescendant(int startPointWd, int addWd, const std::shared_ptr<AutoscanDirectory>& adir)
 {
-    // log_debug("called for {}, (adir->path={}); adding {}", startPointWd, adir->getLocation().c_str(), addWd);
     std::shared_ptr<DirectoryWatch> wdObj;
     try {
         wdObj = watches.at(startPointWd);
@@ -629,13 +628,10 @@ void AutoscanInotify::addDescendant(int startPointWd, int addWd, const std::shar
     if (!wdObj)
         return;
 
-    // log_debug("found wdObj");
     auto watch = getAppropriateAutoscan(wdObj, adir);
     if (!watch)
         return;
-    // log_debug("adding descendant");
     watch->addDescendant(addWd);
-    // log_debug("added descendant to {} (adir->path={}): {}; now: {}", startPointWd, adir->getLocation().c_str(), addWd, fmt::join(watch->getDescendants(), ","));
 }
 
 void AutoscanInotify::removeDescendants(int wd)

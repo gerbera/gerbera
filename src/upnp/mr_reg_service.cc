@@ -105,7 +105,6 @@ void MRRegistrarService::processActionRequest(ActionRequest& request)
         // invalid or unsupported action
         log_debug("unrecognized action {}", request.getActionName());
         request.setErrorCode(UPNP_E_INVALID_ACTION);
-        // throw UpnpException(UPNP_E_INVALID_ACTION, "unrecognized action");
     }
 
     log_debug("end");
