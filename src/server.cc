@@ -646,6 +646,7 @@ int Server::registerVirtualDirCallbacks()
     log_debug("Setting UpnpVirtualDir GetInfoCallback");
     int ret = UpnpVirtualDir_set_GetInfoCallback([](const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie) -> int {
         try {
+            log_debug("getInfo({})", filename);
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = URLUtils::urlUnescape(filename);
             *requestCookie = reqHandler->getInfo(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
@@ -666,6 +667,7 @@ int Server::registerVirtualDirCallbacks()
     log_debug("Setting UpnpVirtualDir OpenCallback");
     ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie) -> UpnpWebFileHandle {
         try {
+            log_debug("open({})", filename);
             auto client = requestCookie ? static_cast<const ClientInfo*>(requestCookie) : nullptr;
             auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
@@ -692,7 +694,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir ReadCallback");
     ret = UpnpVirtualDir_set_ReadCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
-        // log_debug("{} read({})", f, length);
+        log_debug("{} read({})", f, length);
         if (static_cast<const Server*>(cookie)->getShutdownStatus())
             return -1;
 
@@ -704,7 +706,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir WriteCallback");
     ret = UpnpVirtualDir_set_WriteCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
-        // log_debug("{} write({})", f, length);
+        log_debug("{} write({})", f, length);
         return 0;
     });
     if (ret != UPNP_E_SUCCESS)
@@ -712,7 +714,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir SeekCallback");
     ret = UpnpVirtualDir_set_SeekCallback([](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie) -> int {
-        // log_debug("{} seek({}, {})", f, offset, whence);
+        log_debug("{} seek({}, {})", f, offset, whence);
         try {
             auto ioHandler = static_cast<IOHandler*>(f);
             if (ioHandler)
@@ -728,7 +730,7 @@ int Server::registerVirtualDirCallbacks()
 
     log_debug("Setting UpnpVirtualDir CloseCallback");
     ret = UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
-        // log_debug("{} close()", f);
+        log_debug("{} close()", f);
         int retClose = 0;
         auto ioHandler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(f));
         if (ioHandler) {

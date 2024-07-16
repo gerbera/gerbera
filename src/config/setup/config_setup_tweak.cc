@@ -125,6 +125,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
+    // inherit
     index = getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_INHERIT });
     if (optItem == index) {
         if (entry->getOrig())
@@ -133,6 +134,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getInherit());
         return true;
     }
+    // recursive
     index = getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE });
     if (optItem == index) {
         if (entry->getOrig())
@@ -141,6 +143,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getRecursive());
         return true;
     }
+    // hidden
     index = getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN });
     if (optItem == index) {
         if (entry->getOrig())
@@ -149,6 +152,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getHidden());
         return true;
     }
+    // case sensitive
     index = getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE });
     if (optItem == index) {
         if (entry->getOrig())
@@ -157,6 +161,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getCaseSensitive());
         return true;
     }
+    // follow symlinks
     index = getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS });
     if (optItem == index) {
         if (entry->getOrig())
@@ -165,6 +170,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFollowSymlinks());
         return true;
     }
+    // charset
     index = getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET });
     if (optItem == index) {
         if (entry->getOrig())
@@ -175,6 +181,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
+    // fanart file
     index = getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE });
     if (optItem == index) {
         if (entry->getOrig())
@@ -185,6 +192,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
+    // resource file
     index = getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE });
     if (optItem == index) {
         if (entry->getOrig())
@@ -195,6 +203,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
+    // subtitle file
     index = getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE });
     if (optItem == index) {
         if (entry->getOrig())
@@ -205,6 +214,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
+    // metadata file
     index = getItemPath(i, { ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE });
     if (optItem == index) {
         if (entry->getOrig())

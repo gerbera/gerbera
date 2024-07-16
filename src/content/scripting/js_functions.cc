@@ -44,8 +44,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-// extern "C" {
-
 duk_ret_t js_print2(duk_context* ctx)
 {
     std::string mode = toUpper(duk_get_string(ctx, 0));
@@ -253,7 +251,5 @@ duk_ret_t js_j2i(duk_context* ctx)
 {
     return convertCharsetGeneric(ctx, J2I);
 }
-
-//} // extern "C"
 
 #endif // HAVE_JS

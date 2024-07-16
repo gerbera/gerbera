@@ -96,7 +96,7 @@ private:
     std::queue<std::shared_ptr<AutoscanDirectory>> monitorQueue;
     std::queue<std::shared_ptr<AutoscanDirectory>> unmonitorQueue;
 
-    // event mask with events to watch for (set by constructor);
+    // event mask with events to watch for (set by constructor)
     InotifyFlags events;
     bool defFollowSymlinks;
     bool defHidden;

@@ -79,6 +79,6 @@ void Web::Clients::process()
         item.append_attribute("count") = obj.at("count").c_str();
         item.append_attribute("playCount") = obj.at("playCount").c_str();
         item.append_attribute("bookmarks") = obj.at("bookmarks").c_str();
-        item.append_attribute("last") = obj.at("last").c_str(); // obj.last).c_str();
+        item.append_attribute("last") = obj.at("last").c_str();
     }
 }
