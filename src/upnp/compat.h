@@ -56,15 +56,13 @@ int UpnpSetWebServerCorsString(const char*);
 int UpnpNotifyXML(UpnpDevice_Handle handle, const char* devID, const char* servName, const std::string& propertySet);
 #define UPNP_NEEDS_SUBSCRIPTION_XML
 int UpnpAcceptSubscriptionXML(UpnpDevice_Handle handle, const char* devID, const char* servName, const std::string& propertySet, const std::string& subsId);
-
-#define GrbUpnpFileInfoSetContentType(i, mt) UpnpFileInfo_set_ContentType((i), (mt).c_str())
-
 #define UPNP_NEEDS_GET_HEADERS
 std::map<std::string, std::string> UpnpGetHeadersCompat(const UpnpFileInfo* fileInfo);
-#define GrbUpnpGetHeaders(i) UpnpGetHeadersCompat(i)
-
 #define UPNP_NEEDS_SET_HEADERS
 void UpnpSetHeadersCompat(const UpnpFileInfo* fileInfo, const std::map<std::string, std::string>& headers);
+
+#define GrbUpnpFileInfoSetContentType(i, mt) UpnpFileInfo_set_ContentType((i), (mt).c_str())
+#define GrbUpnpGetHeaders(i) UpnpGetHeadersCompat(i)
 #define GrbUpnpSetHeaders(i, h) UpnpSetHeadersCompat(i, h)
 
 #if (UPNP_VERSION <= 11419) or (UPNP_VERSION > 170000 and UPNP_VERSION <= 170110)

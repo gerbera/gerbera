@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Improve docker instructions
 - Web security and upnp compatibility
 
 ### v2.2.0

@@ -23,6 +23,8 @@ On Raspbian the container must be run with ``privileged: true`` to get time sync
 
     docker pull gerbera/gerbera
 
+Don't forget to provide your configuration and volume to the image.
+
 Ubuntu/Mint
 ~~~~~~~~~~~~~~~~~
 .. index:: Ubuntu Linux
