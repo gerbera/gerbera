@@ -15,10 +15,11 @@ For general help on using Gerbera, head over to our documentation online at [doc
 - arm64
 
 # Network Setup
-### Ports
-Port `49494/tcp` (HTTP) and `1900/udp` (SSDP Multicast) are exposed by default.
 
-### Multicast
+## Ports
+Port `49494/tcp` (HTTP, also set as gerbera port via command line) and `1900/udp` (SSDP Multicast) are exposed by default.
+
+## Multicast
 UPnP relies on having clients and servers able to communicate via IP Multicast.
 The default docker bridge network setup does not support multicast. The easiest way to achieve this is to use
 "host networking".
@@ -27,9 +28,10 @@ able to access the container from the docker host with this method by default.
 
 # Transcoding Tools
 Transcoding tools are made available in a separate image with the `-transcoding` suffix.
-e.g. `gerbera/gerbera:1.9.2-transcoding`. Includes tools such as ffmpeg and vlc.
+e.g. `gerbera/gerbera:2.2.0-transcoding`. Includes tools such as ffmpeg and vlc.
 
 # Examples
+
 ## Serve some files via a volume
 ```console
 $ docker run \
@@ -73,4 +75,17 @@ $ docker run \
     -v /some/files:/mnt/content:ro \
     -v /some/path/config.xml:/var/run/gerbera/config.xml \
      gerbera/gerbera:vX.X.X
+```
+
+## Overwrite default ports
+
+In cases (e.g. running multiple gerbera containers with different versions) you can override the exported ports
+
+```console
+$ docker run \
+    --name another-gerbera \
+    --network=host \
+    --expose <your-port>:<your-port> \
+    -v /some/files:/mnt/content:ro \
+     gerbera/gerbera:vX.X.X gerbera --port <your-port> --config /var/run/gerbera/config.xml
 ```
