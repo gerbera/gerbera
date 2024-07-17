@@ -1,5 +1,4 @@
 ## Gerbera - UPnP AV Mediaserver.
-#3155
 
 ### HEAD
 
@@ -7,6 +6,7 @@
 - Improve docker instructions
 - Web security and upnp compatibility
 - Upgrade cxxopts.hpp to 3.2.1
+- Upgrade md5 to 2002 version
 
 ### v2.2.0
 

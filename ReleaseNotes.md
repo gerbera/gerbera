@@ -12,6 +12,7 @@
 ### Code Improvements
 
 - Update versions of libexiv2 (0.28.3), fmt (11.0.1)
+- Upgrade contrib code cxxopts (3.2.1), md5 (2002)
 - Extract code for npupnp and pupnp specific handling
 
 ## v2.2.0
