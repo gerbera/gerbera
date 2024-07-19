@@ -147,9 +147,21 @@ void Web::Items::process()
         else
             item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cnt).c_str());
         item.append_child("mtype").append_child(pugi::node_pcdata).set_value(objItem->getMimeType().c_str());
-        item.append_child("upnp_class").append_child(pugi::node_pcdata).set_value(objItem->getClass().c_str());
-        std::string res = xmlBuilder->getFirstResourcePath(objItem);
-        item.append_child("res").append_child(pugi::node_pcdata).set_value(res.c_str());
+        auto objClass = objItem->getClass();
+        item.append_child("upnp_class").append_child(pugi::node_pcdata).set_value(objClass.c_str());
+        auto contRes = arrayObj->getResource(ResourcePurpose::Content);
+        if (contRes) {
+            item.append_child("size").append_child(pugi::node_pcdata).set_value(contRes->getAttributeValue(ResourceAttribute::SIZE).c_str());
+            if (!startswith(objClass, UPNP_CLASS_AUDIO_ITEM)) {
+                item.append_child("resolution").append_child(pugi::node_pcdata).set_value(contRes->getAttribute(ResourceAttribute::RESOLUTION).c_str());
+            }
+            if (!startswith(objClass, UPNP_CLASS_IMAGE_ITEM)) {
+                item.append_child("duration").append_child(pugi::node_pcdata).set_value(contRes->getAttributeValue(ResourceAttribute::DURATION).c_str());
+            }
+        }
+        std::string resPath = xmlBuilder->getFirstResourcePath(objItem);
+        if (!resPath.empty())
+            item.append_child("res").append_child(pugi::node_pcdata).set_value(resPath.c_str());
 
         auto url = xmlBuilder->renderItemImageURL(objItem);
         if (url) {

@@ -100,7 +100,7 @@ describe('Items Suite', () => {
 
       const item = await homePage.getItem(0);
       const text = await item.getText();
-      expect(text).to.equal('Test25.mp4');
+      expect(text).to.equal('Test25.mp4\n(1 MB, 1:42:00.448, 720x756)');
     });
   });
 });

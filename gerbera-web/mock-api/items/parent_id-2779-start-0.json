@@ -17,7 +17,10 @@
         "res": "/images/Flower.JPG",
         "class": "object.item.imageItem",
         "upnp_class": "object.item.imageItem",
-        "image": "/icons/mt-icon120.jpg"
+        "image": "/icons/mt-icon120.jpg",
+        "size": "1 MB",
+        "duration": "1:42:00.448",
+        "resolution": "720x756"
       }
     ]
   },

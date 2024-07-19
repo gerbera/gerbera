@@ -2,51 +2,79 @@
   {
     "id": 11111,
     "title": "Item Number 1",
-    "res": "http://localhost/item-number-1"
+    "res": "http://localhost/item-number-1",
+    "size": "1 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 22222,
     "title": "Item Number 2",
-    "res": "http://localhost/item-number-2"
+    "res": "http://localhost/item-number-2",
+    "size": "2 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 33333,
     "title": "Item Number 3",
-    "res": "http://localhost/item-number-3"
+    "res": "http://localhost/item-number-3",
+    "size": "3 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 44444,
     "title": "Item Number 4",
-    "res": "http://localhost/item-number-4"
+    "res": "http://localhost/item-number-4",
+    "size": "4 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 55555,
     "title": "Item Number 5",
-    "res": "http://localhost/item-number-5"
+    "res": "http://localhost/item-number-5",
+    "size": "5 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 66666,
     "title": "Item Number 6",
-    "res": "http://localhost/item-number-6"
+    "res": "http://localhost/item-number-6",
+    "size": "6 MB",
+    "resolution": "756x568"
   },
   {
     "id": 77777,
     "title": "Item Number 7",
-    "res": "http://localhost/item-number-7"
+    "res": "http://localhost/item-number-7",
+    "size": "7 MB",
+    "duration": "1:42:00.448"
   },
   {
     "id": 88888,
     "title": "Item Number 8",
-    "res": "http://localhost/item-number-8"
+    "res": "http://localhost/item-number-8",
+    "size": "8 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 99999,
     "title": "Item Number 9",
-    "res": "http://localhost/item-number-9"
+    "res": "http://localhost/item-number-9",
+    "size": "9 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 101010,
     "title": "Item Number 10",
-    "res": "http://localhost/item-number-10"
+    "res": "http://localhost/item-number-10",
+    "size": "10 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   }
 ]

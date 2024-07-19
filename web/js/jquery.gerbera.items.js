@@ -89,20 +89,31 @@ $.widget('grb.dataitems', {
           text.attr('type', item.mtype);
           text.attr('href', item.url);
           if (!pager || pager.gridMode === 0) {
+            const details = $('<td></td>');
+            const detailsDiv = $('<div></div>');
+            detailsDiv.appendTo(details);
+            detailsDiv.addClass('pull-right');
+            const props = [];
+            if (item.size) props.push(item.size);
+            if (item.duration) props.push(item.duration);
+            if (item.resolution) props.push(item.resolution);
+            if (props.length > 0) detailsDiv.text('(' + props.join(', ') + ')');
+            else detailsDiv.text('');
             text.text(itemText);
+            details.appendTo(row);
             text.appendTo(content);
           } else {
-            const div = $('<div style="display: grid;"></div>');
-            text.appendTo(div);
+            const gridDiv = $('<div style="display: grid;"></div>');
+            text.appendTo(gridDiv);
             if (pager.gridMode === 2) {
               const text2 = $('<a></a>');
               text2.attr('title', 'Open ' + item.text);
               text2.attr('type', item.mtype);
               text2.attr('href', item.url);
               text2.text(itemText);
-              text2.appendTo(div);
+              text2.appendTo(gridDiv);
             }
-            div.appendTo(content);
+            gridDiv.appendTo(content);
           }
         } else {
           text = $('<span></span>');
@@ -129,8 +140,16 @@ $.widget('grb.dataitems', {
         text.addClass('grb-item-url');
 
         let buttons;
-        if (itemType === 'db') {
+        if (!pager || pager.gridMode === 0) {
+          const buttonsCell = $('<td></td>');
           buttons = $('<div></div>');
+          buttons.appendTo(buttonsCell);
+          buttonsCell.appendTo(row);
+        } else {
+          buttons = $('<div></div>');
+          buttons.appendTo(content);
+        }
+        if (itemType === 'db') {
           buttons.addClass('grb-item-buttons pull-right justify-content-center align-items-center');
 
           const downloadIcon = $('<span></span>');
@@ -159,9 +178,7 @@ $.widget('grb.dataitems', {
                 onDelete(event);
               });
           }}
-          buttons.appendTo(content);
         } else if (itemType === 'fs') {
-          buttons = $('<div></div>');
           buttons.addClass('grb-item-buttons pull-right');
 
           const addIcon = $('<span></span>');
@@ -171,11 +188,10 @@ $.widget('grb.dataitems', {
           if (onAdd) {
             addIcon.click(item, onAdd);
           }
-          buttons.appendTo(content);
         }
         if (!pager || pager.gridMode === 0) {
           row.addClass('grb-item');
-          row.append(content);
+          row.prepend(content);
           tcontainer.append(row);
         } else {
           content.addClass('grb-item');
