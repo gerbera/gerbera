@@ -3,6 +3,7 @@
 ### HEAD
 
 - Clean up commented out code
+- FIXME done: Remove fake resource
 - Improve docker instructions
 - Web security and upnp compatibility
 - Upgrade cxxopts.hpp to 3.2.1

@@ -7,7 +7,10 @@
     "mtype": null,
     "upnp_class": null,
     "part": null,
-    "track": null
+    "track": null,
+    "size": "1 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 22222,
@@ -17,7 +20,10 @@
     "mtype": null,
     "upnp_class": null,
     "part": null,
-    "track": null
+    "track": null,
+    "size": "2 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 33333,
@@ -27,7 +33,10 @@
     "mtype": null,
     "upnp_class": null,
     "part": null,
-    "track": null
+    "track": null,
+    "size": "3 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 44444,
@@ -37,7 +46,10 @@
     "mtype": null,
     "upnp_class": null,
     "part": null,
-    "track": null
+    "track": null,
+    "size": "4 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 55555,
@@ -47,7 +59,10 @@
     "mtype": null,
     "upnp_class": null,
     "part": null,
-    "track": null
+    "track": null,
+    "size": "5 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 66666,
@@ -57,7 +72,10 @@
     "mtype": null,
     "upnp_class": null,
     "part": null,
-    "track": null
+    "track": null,
+    "size": "6 MB",
+    "duration": null,
+    "resolution": "756x568"
   },
   {
     "id": 77777,
@@ -67,7 +85,10 @@
     "mtype": null,
     "upnp_class": null,
     "part": null,
-    "track": null
+    "track": null,
+    "size": "7 MB",
+    "duration": "1:42:00.448",
+    "resolution": null
   },
   {
     "id": 88888,
@@ -77,7 +98,10 @@
     "mtype": null,
     "upnp_class": null,
     "part": null,
-    "track": null
+    "track": null,
+    "size": "8 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 99999,
@@ -87,7 +111,10 @@
     "mtype": null,
     "upnp_class": null,
     "part": null,
-    "track": null
+    "track": null,
+    "size": "9 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   },
   {
     "id": 101010,
@@ -97,6 +124,9 @@
     "mtype": null,
     "upnp_class": null,
     "part": null,
-    "track": null
+    "track": null,
+    "size": "10 MB",
+    "duration": "1:42:00.448",
+    "resolution": "720x756"
   }
 ]

@@ -357,10 +357,28 @@ TEST_F(UpnpXmlTest, CreateResponse)
     EXPECT_STREQ(root.attribute("xmlns:u").value(), "urn:schemas-upnp-org:service:ContentDirectory:1");
 }
 
+TEST_F(UpnpXmlTest, FirstResourceRendersEmptyWhenNoResource)
+{
+    auto obj = std::make_shared<CdsItemExternalURL>();
+    obj->setLocation("http://localhost/external/url");
+
+    auto item = std::static_pointer_cast<CdsItem>(obj);
+
+    std::string result = subject->getFirstResourcePath(item);
+
+    EXPECT_EQ(result, "");
+}
+
 TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl)
 {
     auto obj = std::make_shared<CdsItemExternalURL>();
     obj->setLocation("http://localhost/external/url");
+
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, "http-get:*:audio/mpeg:*");
+    resource->addAttribute(ResourceAttribute::DURATION, "123456");
+    resource->addAttribute(ResourceAttribute::SIZE, "4711");
+    obj->addResource(resource);
 
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
@@ -378,6 +396,11 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithP
     obj->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
     obj->setFlag(OBJECT_FLAG_PROXY_URL);
 
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
+    resource->addAttribute(ResourceAttribute::DURATION, "123456");
+    resource->addAttribute(ResourceAttribute::SIZE, "4711");
+    obj->addResource(resource);
+
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     std::string result = subject->getFirstResourcePath(item);
@@ -391,6 +414,11 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem)
     auto obj = std::make_shared<CdsItem>();
     obj->setLocation("local/content");
     obj->setID(12345);
+
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
+    resource->addAttribute(ResourceAttribute::DURATION, "123456");
+    resource->addAttribute(ResourceAttribute::SIZE, "4711");
+    obj->addResource(resource);
 
     auto item = std::static_pointer_cast<CdsItem>(obj);
 

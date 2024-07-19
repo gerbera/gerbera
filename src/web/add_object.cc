@@ -90,16 +90,15 @@ std::shared_ptr<CdsItemExternalURL> Web::AddObject::addUrl(int parentID, bool ad
     item->setURL(param("location"));
     item->setClass(param("class"));
 
-    std::string tmp = param("description");
-    if (!tmp.empty()) {
-        item->addMetaData(MetadataFields::M_DESCRIPTION, tmp);
+    std::string desc = param("description");
+    if (!desc.empty()) {
+        item->addMetaData(MetadataFields::M_DESCRIPTION, desc);
     }
 
-    /// \todo is there a default setting? autoscan? import settings?
-    tmp = param("mime-type");
-    if (tmp.empty())
-        tmp = MIMETYPE_DEFAULT;
-    item->setMimeType(tmp);
+    std::string mime = param("mime-type");
+    if (mime.empty())
+        mime = MIMETYPE_DEFAULT;
+    item->setMimeType(mime);
 
     std::string flags = param("flags");
     if (!flags.empty())
@@ -108,11 +107,11 @@ std::shared_ptr<CdsItemExternalURL> Web::AddObject::addUrl(int parentID, bool ad
     if (addProtocol) {
         std::string protocol = param("protocol");
         if (!protocol.empty())
-            protocolInfo = renderProtocolInfo(tmp, protocol);
+            protocolInfo = renderProtocolInfo(mime, protocol);
         else
-            protocolInfo = renderProtocolInfo(tmp);
+            protocolInfo = renderProtocolInfo(mime);
     } else
-        protocolInfo = renderProtocolInfo(tmp);
+        protocolInfo = renderProtocolInfo(mime);
 
     auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
     resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);

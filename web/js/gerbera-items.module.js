@@ -348,7 +348,10 @@ const transformItems = (items) => {
       upnp_class: ('upnp_class' in gItem) ? gItem.upnp_class : null,
       image: ('image' in gItem) ? gItem.image : null,
       part: ('part' in gItem) ? gItem.part : null,
-      track: ('track' in gItem) ? gItem.track : null
+      track: ('track' in gItem) ? gItem.track : null,
+      size: ('size' in gItem) ? gItem.size : null,
+      duration: ('duration' in gItem) ? gItem.duration : null,
+      resolution: ('resolution' in gItem) ? gItem.resolution : null,
     };
 
     if (!GerberaApp.serverConfig.enableNumbering) {
