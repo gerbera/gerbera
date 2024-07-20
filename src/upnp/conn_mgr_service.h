@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    upnp_cm.h - this file is part of MediaTomb.
+    conn_mgr_service.h - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,26 +29,21 @@
     $Id$
 */
 
-/// \file upnp_cm.h
+/// \file conn_mgr_service.h
 /// \brief Definition of the ConnectionManagerService class.
 #ifndef __UPNP_CM_H__
 #define __UPNP_CM_H__
 
-#include <memory>
-#include <upnp.h>
+#include "upnp_service.h"
 
-class ActionRequest;
 class CdsObject;
-class Config;
 class Context;
 class Database;
-class SubscriptionRequest;
-class UpnpXMLBuilder;
 
 /// \brief This class is responsible for the UPnP Connection Manager Service operations.
 ///
 /// Handles subscription and action invocation requests for the Connection Manager.
-class ConnectionManagerService {
+class ConnectionManagerService : public UpnpService {
 protected:
     /// \brief UPnP standard defined action: GetCurrentConnectionIDs()
     /// \param request Incoming ActionRequest.
@@ -73,38 +68,27 @@ protected:
     /// GetProtocolInfo(string Source, string Sink)
     void doGetProtocolInfo(ActionRequest& request) const;
 
-    std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
-
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
-    UpnpDevice_Handle deviceHandle;
 
 public:
     /// \brief Constructor for the CMS, saves the service type and service id
     /// in internal variables.
     /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
     explicit ConnectionManagerService(const std::shared_ptr<Context>& context,
-        std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle);
-
-    /// \brief Dispatches the ActionRequest between the available actions.
-    /// \param request Incoming ActionRequest.
-    ///
-    /// This function looks at the incoming ActionRequest and passes it on
-    /// to the appropriate action for processing.
-    void processActionRequest(ActionRequest& request) const;
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, UpnpDevice_Handle deviceHandle);
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request Incoming SubscriptionRequest.
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    void processSubscriptionRequest(const SubscriptionRequest& request) const;
+    void processSubscriptionRequest(const SubscriptionRequest& request) override;
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param sourceProtocol_CSV Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-    void sendSubscriptionUpdate(const std::string& sourceProtocolCsv);
+    void sendSubscriptionUpdate(const std::string& sourceProtocolCsv) override;
 };
 
 #endif // __UPNP_CM_H__

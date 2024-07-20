@@ -41,6 +41,7 @@ std::string millisecondsToHMSF(long long milliseconds);
 
 /// \brief converts a "H*:MM:SS.F*" representation to milliseconds
 long long HMSFToMilliseconds(std::string_view time);
+std::string millisecondsToString(long long milliseconds, bool all = false);
 
 std::chrono::seconds currentTime();
 std::chrono::milliseconds currentTimeMS();

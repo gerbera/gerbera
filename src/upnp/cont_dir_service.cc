@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    upnp_cds.cc - this file is part of MediaTomb.
+    cont_dir_service.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file upnp_cds.cc
+/// \file cont_dir_service.cc
 #define GRB_LOG_FAC GrbLogFacility::cds
 
 #include "cont_dir_service.h" // API
@@ -53,13 +53,24 @@
 #include "util/tools.h"
 
 ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
-    : stringLimit(stringLimit)
-    , config(context->getConfig())
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
+    : UpnpService(context->getConfig(), xmlBuilder, deviceHandle, UPNP_DESC_CDS_SERVICE_ID)
+    , stringLimit(stringLimit)
     , database(context->getDatabase())
-    , deviceHandle(deviceHandle)
-    , xmlBuilder(std::move(xmlBuilder))
 {
+    actionMap = {
+        { "Browse", [this](ActionRequest& r) { doBrowse(r); } },
+        { "GetSearchCapabilities", [this](ActionRequest& r) { doGetSearchCapabilities(r); } },
+        { "GetSortCapabilities", [this](ActionRequest& r) { doGetSortCapabilities(r); } },
+        { "GetSystemUpdateID", [this](ActionRequest& r) { doGetSystemUpdateID(r); } },
+        { "GetFeatureList", [this](ActionRequest& r) { doGetFeatureList(r); } },
+        { "GetSortExtensionCapabilities", [this](ActionRequest& r) { doGetSortExtensionCapabilities(r); } },
+        { "Search", [this](ActionRequest& r) { doSearch(r); } },
+        { "X_SetBookmark", [this](ActionRequest& r) { doSamsungBookmark(r); } },
+        { "X_GetFeatureList", [this](ActionRequest& r) { doSamsungFeatureList(r); } },
+        { "X_GetObjectIDfromIndex", [this](ActionRequest& r) { doSamsungGetObjectIDfromIndex(r); } },
+        { "X_GetIndexfromRID", [this](ActionRequest& r) { doSamsungGetIndexfromRID(r); } },
+    };
     titleSegments = this->config->getArrayOption(ConfigVal::UPNP_SEARCH_ITEM_SEGMENTS);
     resultSeparator = this->config->getOption(ConfigVal::UPNP_SEARCH_SEPARATOR);
     searchableContainers = this->config->getBoolOption(ConfigVal::UPNP_SEARCH_CONTAINER_FLAG);
@@ -391,41 +402,6 @@ void ContentDirectoryService::doSamsungGetIndexfromRID(ActionRequest& request)
     log_debug("end");
 }
 
-void ContentDirectoryService::processActionRequest(ActionRequest& request)
-{
-    log_debug("start");
-
-    if (request.getActionName() == "Browse") {
-        doBrowse(request);
-    } else if (request.getActionName() == "GetSearchCapabilities") {
-        doGetSearchCapabilities(request);
-    } else if (request.getActionName() == "GetSortCapabilities") {
-        doGetSortCapabilities(request);
-    } else if (request.getActionName() == "GetSystemUpdateID") {
-        doGetSystemUpdateID(request);
-    } else if (request.getActionName() == "GetFeatureList") {
-        doGetFeatureList(request);
-    } else if (request.getActionName() == "GetSortExtensionCapabilities") {
-        doGetSortExtensionCapabilities(request);
-    } else if (request.getActionName() == "Search") {
-        doSearch(request);
-    } else if (request.getActionName() == "X_SetBookmark") {
-        doSamsungBookmark(request);
-    } else if (request.getActionName() == "X_GetFeatureList") {
-        doSamsungFeatureList(request);
-    } else if (request.getActionName() == "X_GetObjectIDfromIndex") {
-        doSamsungGetObjectIDfromIndex(request);
-    } else if (request.getActionName() == "X_GetIndexfromRID") {
-        doSamsungGetIndexfromRID(request);
-    } else {
-        // invalid or unsupported action
-        log_warning("Unrecognized action {}", request.getActionName().c_str());
-        request.setErrorCode(UPNP_E_INVALID_ACTION);
-    }
-
-    log_debug("ContentDirectoryService::processActionRequest: end");
-}
-
 void ContentDirectoryService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
     log_debug("start");
@@ -441,7 +417,7 @@ void ContentDirectoryService::processSubscriptionRequest(const SubscriptionReque
 
     GrbUpnpAcceptSubscription(
         deviceHandle, config->getOption(ConfigVal::SERVER_UDN),
-        UPNP_DESC_CDS_SERVICE_ID, xml, request.getSubscriptionID());
+        serviceID, xml, request.getSubscriptionID());
 
     log_debug("end");
 }
@@ -458,7 +434,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
-    GrbUpnpNotify(deviceHandle, config->getOption(ConfigVal::SERVER_UDN), UPNP_DESC_CDS_SERVICE_ID, xml);
+    GrbUpnpNotify(deviceHandle, config->getOption(ConfigVal::SERVER_UDN), serviceID, xml);
 
     log_debug("end");
 }

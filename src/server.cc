@@ -533,11 +533,11 @@ void Server::routeActionRequest(ActionRequest& request)
     }
 
     // we need to match the serviceID to one of our services
-    if (request.getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
+    if (request.getServiceID() == cmgr->getServiceId()) {
         // this call is for the lifetime stats service
         log_debug("request for connection manager service");
         cmgr->processActionRequest(request);
-    } else if (request.getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
+    } else if (request.getServiceID() == cds->getServiceId()) {
         // this call is for the toaster control service
         log_debug("request for content directory service");
         if (!offline)
@@ -545,7 +545,7 @@ void Server::routeActionRequest(ActionRequest& request)
         else
             request.setErrorCode(UPNP_E_INVALID_ACTION);
 
-    } else if (request.getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
+    } else if (request.getServiceID() == mrreg->getServiceId()) {
         log_debug("request for MR Registrar service");
         mrreg->processActionRequest(request);
     } else {
@@ -566,16 +566,16 @@ void Server::routeSubscriptionRequest(const SubscriptionRequest& request) const
     }
 
     // we need to match the serviceID to one of our services
-    if (request.getServiceID() == UPNP_DESC_CDS_SERVICE_ID) {
+    if (request.getServiceID() == cds->getServiceId()) {
         // this call is for the content directory service
         log_debug("request for content directory service");
         if (!offline)
             cds->processSubscriptionRequest(request);
-    } else if (request.getServiceID() == UPNP_DESC_CM_SERVICE_ID) {
+    } else if (request.getServiceID() == cmgr->getServiceId()) {
         // this call is for the connection manager service
         log_debug("request for connection manager service");
         cmgr->processSubscriptionRequest(request);
-    } else if (request.getServiceID() == UPNP_DESC_MRREG_SERVICE_ID) {
+    } else if (request.getServiceID() == mrreg->getServiceId()) {
         log_debug("request for MRRegistrar service");
         mrreg->processSubscriptionRequest(request);
     } else {

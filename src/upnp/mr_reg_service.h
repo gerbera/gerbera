@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    upnp_mrreg.h - this file is part of MediaTomb.
+    mr_reg_service.h - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,35 +29,29 @@
     $Id$
 */
 
-/// \file upnp_mrreg.h
-/// \brief Definition of the ConnectionManagerService class.
+/// \file mr_reg_service.h
+/// \brief Definition of the MRRegistrarService class.
 
 #ifndef __UPNP_MRREG_H__
 #define __UPNP_MRREG_H__
+
+#include "upnp_service.h"
 
 #include <memory>
 #include <string>
 #include <upnp.h>
 
-class ActionRequest;
 class CdsObject;
-class Config;
 class Context;
-class SubscriptionRequest;
-class UpnpXMLBuilder;
 
-/// \brief This class is responsible for the UPnP Connection Manager Service operations.
+/// \brief This class is responsible for the UPnP Media Receiver Registrar Service operations.
 ///
 /// Handles subscription and action invocation requests for the Media Reciver Registrar.
 /// This is not a full implementation of the service, the IsAuthorized and IsValidated
 /// functions will always return true.
 /// These functions were only implemented to enable Xbox360 support.
-/// \todo the whole service class should be rewritten with the use of inheritance
-class MRRegistrarService {
+class MRRegistrarService : public UpnpService {
 protected:
-    /// \brief ID of the service.
-    std::string serviceID;
-
     /// \brief Media Receiver Registrar service action: IsAuthorized()
     /// \param request Incoming ActionRequest.
     ///
@@ -80,36 +74,24 @@ protected:
     /// IsValidated(string DeviceID, i4 Result)
     void doIsValidated(ActionRequest& request) const;
 
-    std::shared_ptr<Config> config;
-
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
-    UpnpDevice_Handle deviceHandle;
-
 public:
     /// \brief Constructor for MRReg
     /// in internal variables.
     MRRegistrarService(const std::shared_ptr<Context>& context,
-        std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle);
-
-    /// \brief Dispatches the ActionRequest between the available actions.
-    /// \param request Incoming ActionRequest.
-    ///
-    /// This function looks at the incoming ActionRequest and passes it on
-    /// to the appropriate action for processing.
-    void processActionRequest(ActionRequest& request);
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, UpnpDevice_Handle deviceHandle);
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request Incoming SubscriptionRequest.
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
-    /// if everything is ok. Currently we do not support any updates.
-    void processSubscriptionRequest(const SubscriptionRequest& request);
+    /// if everything is ok.
+    void processSubscriptionRequest(const SubscriptionRequest& request) override;
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param sourceProtocolCsv Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-    void sendSubscriptionUpdate(const std::string& sourceProtocolCsv);
+    void sendSubscriptionUpdate(const std::string& sourceProtocolCsv) override;
 };
 
 #endif // __UPNP_MRREG_H__

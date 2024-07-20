@@ -283,6 +283,8 @@ add_library(libgerbera STATIC
         src/upnp/quirks.cc
         src/upnp/quirks.h
         src/upnp/upnp_common.h
+        src/upnp/upnp_service.cc
+        src/upnp/upnp_service.h
         src/upnp/xml_builder.cc
         src/upnp/xml_builder.h
         src/url_request_handler.cc
