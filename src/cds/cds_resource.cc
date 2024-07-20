@@ -36,6 +36,7 @@
 
 #include "exceptions.h"
 #include "metadata/resolution.h"
+#include "util/grb_time.h"
 #include "util/logger.h"
 #include "util/tools.h"
 #include "util/url_utils.h"
@@ -139,6 +140,11 @@ std::string CdsResource::getAttributeValue(ResourceAttribute attr) const
     if (result.empty())
         return result;
     switch (attr) {
+    case ResourceAttribute::DURATION: {
+        auto msecs = HMSFToMilliseconds(result);
+        result = millisecondsToString(msecs);
+        break;
+    }
     case ResourceAttribute::BITRATE:
         // UPNP is silly and Bitrate is actually Bytes/Sec
         result = fmt::format("{} Kbps", stoulString(result) * 8 / 1000);

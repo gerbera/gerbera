@@ -34,23 +34,19 @@
 #ifndef __UPNP_CDS_H__
 #define __UPNP_CDS_H__
 
-#include <memory>
+#include "upnp_service.h"
+
 #include <string>
-#include <upnp.h>
 #include <vector>
 
-class ActionRequest;
 class CdsObject;
-class Config;
 class Context;
 class Database;
-class SubscriptionRequest;
-class UpnpXMLBuilder;
 
 /// \brief This class is responsible for the UPnP Content Directory Service operations.
 ///
 /// Handles subscription and action invocation requests for the CDS.
-class ContentDirectoryService {
+class ContentDirectoryService : public UpnpService {
 private:
     /// \brief The system update ID indicates changes in the content directory.
     ///
@@ -127,11 +123,7 @@ private:
     /// \param title current title of the item
     void markPlayedItem(const std::shared_ptr<CdsObject>& cdsObject, std::string title) const;
 
-    std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
-
-    UpnpDevice_Handle deviceHandle {};
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
 
     std::vector<std::string> titleSegments;
     std::string resultSeparator;
@@ -141,21 +133,15 @@ public:
     /// \brief Constructor for the CDS, saves the service type and service id
     /// in internal variables.
     explicit ContentDirectoryService(const std::shared_ptr<Context>& context,
-        std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit);
-
-    /// \brief Dispatches the ActionRequest between the available actions.
-    /// \param request ActionRequest to be processed by the function.
-    ///
-    /// This function looks at the incoming ActionRequest and passes it on
-    /// to the appropriate action for processing.
-    void processActionRequest(ActionRequest& request);
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        UpnpDevice_Handle deviceHandle, int stringLimit);
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request SubscriptionRequest to be processed by the function.
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    void processSubscriptionRequest(const SubscriptionRequest& request);
+    void processSubscriptionRequest(const SubscriptionRequest& request) override;
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param containerUpdateIDs_CSV Comma Separated Value list of container update ID's (as defined in the UPnP CDS specs)
@@ -163,7 +149,7 @@ public:
     /// When something in the content directory chagnes, we will send out
     /// an event to all subscribed devices. Container updates are supported,
     /// and of course the minimum required - systemUpdateID.
-    void sendSubscriptionUpdate(const std::string& containerUpdateIDsCsv);
+    void sendSubscriptionUpdate(const std::string& containerUpdateIDsCsv) override;
 };
 
 #endif // __UPNP_CDS_H__

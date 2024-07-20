@@ -53,8 +53,7 @@ CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, const std::s
     // bytesCurl = 0;
     signalAfterEveryRead = true;
 
-    // still todo:
-    // * optimize seek if data already in buffer
+    // still todo: optimize seek if data already in buffer
     seekEnabled = true;
 }
 

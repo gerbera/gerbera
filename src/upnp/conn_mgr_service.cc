@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    upnp_cm.cc - this file is part of MediaTomb.
+    conn_mgr_service.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file upnp_cm.cc
+/// \file conn_mgr_service.cc
 #define GRB_LOG_FAC GrbLogFacility::connmgr
 
 #include "conn_mgr_service.h" // API
@@ -48,12 +48,16 @@
 #include "util/tools.h"
 
 ConnectionManagerService::ConnectionManagerService(const std::shared_ptr<Context>& context,
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder, UpnpDevice_Handle deviceHandle)
-    : config(context->getConfig())
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+    UpnpDevice_Handle deviceHandle)
+    : UpnpService(context->getConfig(), xmlBuilder, deviceHandle, UPNP_DESC_CM_SERVICE_ID)
     , database(context->getDatabase())
-    , xmlBuilder(std::move(xmlBuilder))
-    , deviceHandle(deviceHandle)
 {
+    actionMap = {
+        { "GetCurrentConnectionIDs", [this](ActionRequest& r) { doGetCurrentConnectionIDs(r); } },
+        { "GetCurrentConnectionInfo", [this](ActionRequest& r) { doGetCurrentConnectionInfo(r); } },
+        { "GetProtocolInfo", [this](ActionRequest& r) { doGetProtocolInfo(r); } },
+    };
 }
 
 void ConnectionManagerService::doGetCurrentConnectionIDs(ActionRequest& request) const
@@ -96,26 +100,7 @@ void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request) const
     log_debug("end");
 }
 
-void ConnectionManagerService::processActionRequest(ActionRequest& request) const
-{
-    log_debug("start");
-
-    if (request.getActionName() == "GetCurrentConnectionIDs") {
-        doGetCurrentConnectionIDs(request);
-    } else if (request.getActionName() == "GetCurrentConnectionInfo") {
-        doGetCurrentConnectionInfo(request);
-    } else if (request.getActionName() == "GetProtocolInfo") {
-        doGetProtocolInfo(request);
-    } else {
-        // invalid or unsupported action
-        log_debug("unrecognized action {}", request.getActionName().c_str());
-        request.setErrorCode(UPNP_E_INVALID_ACTION);
-    }
-
-    log_debug("end");
-}
-
-void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequest& request) const
+void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
     auto csv = mimeTypesToCsv(database->getMimeTypes());
     auto propset = xmlBuilder->createEventPropertySet();
@@ -129,7 +114,7 @@ void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequ
 
     GrbUpnpAcceptSubscription(
         deviceHandle, config->getOption(ConfigVal::SERVER_UDN),
-        UPNP_DESC_CM_SERVICE_ID, xml, request.getSubscriptionID());
+        serviceID, xml, request.getSubscriptionID());
 }
 
 void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
@@ -139,5 +124,5 @@ void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceP
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocolCsv.c_str());
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
-    GrbUpnpNotify(deviceHandle, config->getOption(ConfigVal::SERVER_UDN), UPNP_DESC_CM_SERVICE_ID, xml);
+    GrbUpnpNotify(deviceHandle, config->getOption(ConfigVal::SERVER_UDN), serviceID, xml);
 }

@@ -52,6 +52,21 @@ std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::c
     return second - first;
 }
 
+std::string millisecondsToString(long long milliseconds, bool all)
+{
+    auto ms = milliseconds % 1000;
+    milliseconds /= 1000;
+
+    auto seconds = milliseconds % 60;
+    milliseconds /= 60;
+
+    auto minutes = milliseconds % 60;
+    auto hours = milliseconds / 60;
+    auto fmtStr = hours > 0 ? "{0:01}:{1:02}:{2:02}" : "{1:02}:{2:02}";
+
+    return fmt::format(fmtStr, hours, minutes, seconds) + (all ? fmt::format(".{:03}", ms) : "");
+}
+
 std::string millisecondsToHMSF(long long milliseconds)
 {
     auto ms = milliseconds % 1000;

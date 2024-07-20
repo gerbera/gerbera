@@ -31,10 +31,6 @@
 #include <map>
 #include <string>
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #if defined(USING_NPUPNP)
 
 #define GrbUpnpFileInfoSetContentType(i, mt) (i)->content_type = std::move((mt))
@@ -42,12 +38,12 @@ extern "C" {
 #define GrbUpnpSetHeaders(i, h) std::copy((h).begin(), (h).end(), std::back_inserter((i)->response_headers))
 
 #define UPNP_NEEDS_LITERAL_HOST_REDIRECT
-void UpnpSetAllowLiteralHostRedirection(int);
+extern "C" void UpnpSetAllowLiteralHostRedirection(int);
 
 #if (UPNP_VERSION <= 60102)
 // new method added
 #define UPNP_NEEDS_CORS
-int UpnpSetWebServerCorsString(const char*);
+extern "C" int UpnpSetWebServerCorsString(const char*);
 #endif
 
 #else // USING_NPUPNP
@@ -68,15 +64,12 @@ void UpnpSetHeadersCompat(const UpnpFileInfo* fileInfo, const std::map<std::stri
 #if (UPNP_VERSION <= 11419) or (UPNP_VERSION > 170000 and UPNP_VERSION <= 170110)
 // new method added
 #define UPNP_NEEDS_CORS
-int UpnpSetWebServerCorsString(const char*);
+extern "C" int UpnpSetWebServerCorsString(const char*);
 #endif
 
 #endif
 
-#define GrbUpnpNotify(handle, udn, serviceId, xml) UpnpNotifyXML(handle, (udn).c_str(), serviceId, xml)
-#define GrbUpnpAcceptSubscription(handle, udn, serviceId, xml, subsId) UpnpAcceptSubscriptionXML(handle, (udn).c_str(), serviceId, xml, subsId)
+#define GrbUpnpNotify(handle, udn, serviceId, xml) UpnpNotifyXML(handle, (udn).c_str(), (serviceId).c_str(), xml)
+#define GrbUpnpAcceptSubscription(handle, udn, serviceId, xml, subsId) UpnpAcceptSubscriptionXML(handle, (udn).c_str(), (serviceId).c_str(), xml, subsId)
 
-#ifdef __cplusplus
-}
-#endif
 #endif // GRB_UPNP_COMPAT_H__
