@@ -134,14 +134,14 @@ public:
     /// in internal variables.
     explicit ContentDirectoryService(const std::shared_ptr<Context>& context,
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
-        UpnpDevice_Handle deviceHandle, int stringLimit);
+        UpnpDevice_Handle deviceHandle, int stringLimit, bool offline);
 
     /// \brief Processes an incoming SubscriptionRequest.
     /// \param request SubscriptionRequest to be processed by the function.
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    void processSubscriptionRequest(const SubscriptionRequest& request) override;
+    bool processSubscriptionRequest(const SubscriptionRequest& request) override;
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param containerUpdateIDs_CSV Comma Separated Value list of container update ID's (as defined in the UPnP CDS specs)
@@ -149,7 +149,7 @@ public:
     /// When something in the content directory chagnes, we will send out
     /// an event to all subscribed devices. Container updates are supported,
     /// and of course the minimum required - systemUpdateID.
-    void sendSubscriptionUpdate(const std::string& containerUpdateIDsCsv) override;
+    bool sendSubscriptionUpdate(const std::string& containerUpdateIDsCsv) override;
 };
 
 #endif // __UPNP_CDS_H__

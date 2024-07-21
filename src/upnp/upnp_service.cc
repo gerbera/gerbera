@@ -41,11 +41,13 @@
 UpnpService::UpnpService(const std::shared_ptr<Config>& config,
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder,
     UpnpDevice_Handle deviceHandle,
-    std::string serviceId)
+    std::string serviceId,
+    bool offline)
     : config(config)
     , xmlBuilder(std::move(xmlBuilder))
     , deviceHandle(deviceHandle)
     , serviceID(std::move(serviceId))
+    , offline(offline)
 {
 }
 

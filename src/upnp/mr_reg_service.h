@@ -85,13 +85,13 @@ public:
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    void processSubscriptionRequest(const SubscriptionRequest& request) override;
+    bool processSubscriptionRequest(const SubscriptionRequest& request) override;
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param sourceProtocolCsv Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-    void sendSubscriptionUpdate(const std::string& sourceProtocolCsv) override;
+    bool sendSubscriptionUpdate(const std::string& sourceProtocolCsv) override;
 };
 
 #endif // __UPNP_MRREG_H__

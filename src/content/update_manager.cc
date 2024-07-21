@@ -38,6 +38,7 @@
 
 #include "database/database.h"
 #include "server.h"
+#include "upnp/upnp_common.h"
 #include "util/grb_net.h"
 #include "util/grb_time.h"
 #include "util/tools.h"
@@ -211,7 +212,7 @@ void UpdateManager::threadProc()
                 if (!updateString.empty()) {
                     try {
                         log_debug("updates sent: \"{}\"", updateString);
-                        server->sendCDSSubscriptionUpdate(updateString);
+                        server->sendSubscriptionUpdate(updateString, UPNP_DESC_CDS_SERVICE_ID);
                         lastUpdate = currentTimeMS();
                     } catch (const std::runtime_error& e) {
                         log_error("Fatal error when sending updates: {}", e.what());

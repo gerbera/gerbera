@@ -77,7 +77,7 @@ void MRRegistrarService::doRegisterDevice(ActionRequest& request) const
 
     request.setErrorCode(UPNP_E_NOT_EXIST);
 
-    log_debug("upnpActionGetCurrentConnectionInfo: end");
+    log_debug("end");
 }
 
 void MRRegistrarService::doIsValidated(ActionRequest& request) const
@@ -94,7 +94,7 @@ void MRRegistrarService::doIsValidated(ActionRequest& request) const
     log_debug("end");
 }
 
-void MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& request)
+bool MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
     auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
@@ -105,12 +105,12 @@ void MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& r
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
-    GrbUpnpAcceptSubscription(
-        deviceHandle, config->getOption(ConfigVal::SERVER_UDN),
-        serviceID, xml, request.getSubscriptionID());
+    return UPNP_E_SUCCESS == GrbUpnpAcceptSubscription( //
+               deviceHandle, config->getOption(ConfigVal::SERVER_UDN), //
+               serviceID, xml, request.getSubscriptionID());
 }
 
-void MRRegistrarService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
+bool MRRegistrarService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
 {
     auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
@@ -121,5 +121,7 @@ void MRRegistrarService::sendSubscriptionUpdate(const std::string& sourceProtoco
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocolCsv.c_str());
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
-    GrbUpnpNotify(deviceHandle, config->getOption(ConfigVal::SERVER_UDN), serviceID, xml);
+    return UPNP_E_SUCCESS == GrbUpnpNotify( //
+               deviceHandle, config->getOption(ConfigVal::SERVER_UDN), //
+               serviceID, xml);
 }
