@@ -53,16 +53,19 @@ protected:
     std::string serviceID;
 
     std::map<std::string, ActionRequestHandler> actionMap;
+    bool offline { false };
 
 public:
     /// \brief Constructor for UPpnpService
     UpnpService(const std::shared_ptr<Config>& config,
         std::shared_ptr<UpnpXMLBuilder> xmlBuilder,
         UpnpDevice_Handle deviceHandle,
-        std::string serviceId);
-    virtual ~UpnpService() {};
+        std::string serviceId,
+        bool offline = false);
+    virtual ~UpnpService() { }
 
     std::string getServiceId() const { return serviceID; }
+    bool isActiveMatch(const std::string& id) const { return !offline && id == serviceID; }
     /// \brief Dispatches the ActionRequest between the available actions.
     /// \param request Incoming ActionRequest.
     ///
@@ -75,13 +78,19 @@ public:
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    virtual void processSubscriptionRequest(const SubscriptionRequest& request) = 0;
+    virtual bool processSubscriptionRequest(const SubscriptionRequest& request)
+    {
+        return false;
+    }
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param sourceProtocolCsv Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-    virtual void sendSubscriptionUpdate(const std::string& sourceProtocolCsv) = 0;
+    virtual bool sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
+    {
+        return false;
+    }
 };
 
 #endif // __UPNP_SERVICE_H__

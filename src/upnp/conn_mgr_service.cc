@@ -80,7 +80,7 @@ void ConnectionManagerService::doGetCurrentConnectionInfo(ActionRequest& request
 
     request.setErrorCode(UPNP_E_NOT_EXIST);
 
-    log_debug("doGetCurrentConnectionInfo: end");
+    log_debug("end");
 }
 
 void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request) const
@@ -100,7 +100,7 @@ void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request) const
     log_debug("end");
 }
 
-void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequest& request)
+bool ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
     auto csv = mimeTypesToCsv(database->getMimeTypes());
     auto propset = xmlBuilder->createEventPropertySet();
@@ -112,17 +112,19 @@ void ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequ
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
-    GrbUpnpAcceptSubscription(
-        deviceHandle, config->getOption(ConfigVal::SERVER_UDN),
-        serviceID, xml, request.getSubscriptionID());
+    return UPNP_E_SUCCESS == GrbUpnpAcceptSubscription( //
+               deviceHandle, config->getOption(ConfigVal::SERVER_UDN), //
+               serviceID, xml, request.getSubscriptionID());
 }
 
-void ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
+bool ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
 {
     auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocolCsv.c_str());
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
-    GrbUpnpNotify(deviceHandle, config->getOption(ConfigVal::SERVER_UDN), serviceID, xml);
+    return UPNP_E_SUCCESS == GrbUpnpNotify( //
+               deviceHandle, //
+               config->getOption(ConfigVal::SERVER_UDN), serviceID, xml);
 }

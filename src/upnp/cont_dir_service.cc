@@ -53,8 +53,9 @@
 #include "util/tools.h"
 
 ContentDirectoryService::ContentDirectoryService(const std::shared_ptr<Context>& context,
-    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, UpnpDevice_Handle deviceHandle, int stringLimit)
-    : UpnpService(context->getConfig(), xmlBuilder, deviceHandle, UPNP_DESC_CDS_SERVICE_ID)
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, UpnpDevice_Handle deviceHandle,
+    int stringLimit, bool offline)
+    : UpnpService(context->getConfig(), xmlBuilder, deviceHandle, UPNP_DESC_CDS_SERVICE_ID, offline)
     , stringLimit(stringLimit)
     , database(context->getDatabase())
 {
@@ -402,7 +403,7 @@ void ContentDirectoryService::doSamsungGetIndexfromRID(ActionRequest& request)
     log_debug("end");
 }
 
-void ContentDirectoryService::processSubscriptionRequest(const SubscriptionRequest& request)
+bool ContentDirectoryService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
     log_debug("start");
 
@@ -415,14 +416,12 @@ void ContentDirectoryService::processSubscriptionRequest(const SubscriptionReque
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
 
-    GrbUpnpAcceptSubscription(
-        deviceHandle, config->getOption(ConfigVal::SERVER_UDN),
-        serviceID, xml, request.getSubscriptionID());
-
-    log_debug("end");
+    return UPNP_E_SUCCESS == GrbUpnpAcceptSubscription( //
+               deviceHandle, config->getOption(ConfigVal::SERVER_UDN), //
+               serviceID, xml, request.getSubscriptionID());
 }
 
-void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containerUpdateIDsCsv)
+bool ContentDirectoryService::sendSubscriptionUpdate(const std::string& containerUpdateIDsCsv)
 {
     log_debug("start {}", containerUpdateIDsCsv);
 
@@ -434,7 +433,7 @@ void ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
 
     std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
-    GrbUpnpNotify(deviceHandle, config->getOption(ConfigVal::SERVER_UDN), serviceID, xml);
-
-    log_debug("end");
+    return UPNP_E_SUCCESS == GrbUpnpNotify( //
+               deviceHandle, config->getOption(ConfigVal::SERVER_UDN), //
+               serviceID, xml);
 }

@@ -216,14 +216,14 @@ void Server::run()
     }
 
     log_debug("Creating ContentDirectoryService");
-    cds = std::make_unique<ContentDirectoryService>(context, upnpXmlBuilder, rootDeviceHandle,
-        config->getIntOption(ConfigVal::SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT));
+    serviceList.push_back(std::make_unique<ContentDirectoryService>(context, upnpXmlBuilder, rootDeviceHandle,
+        config->getIntOption(ConfigVal::SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT), offline));
 
     log_debug("Creating ConnectionManagerService");
-    cmgr = std::make_unique<ConnectionManagerService>(context, upnpXmlBuilder, rootDeviceHandle);
+    serviceList.push_back(std::make_unique<ConnectionManagerService>(context, upnpXmlBuilder, rootDeviceHandle));
 
     log_debug("Creating MRRegistrarService");
-    mrreg = std::make_unique<MRRegistrarService>(context, upnpXmlBuilder, rootDeviceHandle);
+    serviceList.push_back(std::make_unique<MRRegistrarService>(context, upnpXmlBuilder, rootDeviceHandle));
 
     // The advertisement will be sent by LibUPnP every (A/2)-30 seconds, and will have a cache-control max-age of A where A is
     // the value configured here. Ex: A value of 62 will result in an SSDP advertisement being sent every second.
@@ -439,9 +439,9 @@ void Server::shutdown()
     metadataService.reset();
     upnpXmlBuilder.reset();
     webXmlBuilder.reset();
-    cds.reset();
-    cmgr.reset();
-    mrreg.reset();
+    for (auto&& svc : serviceList)
+        svc.reset();
+    serviceList.clear();
 
     log_debug("Server down");
 }
@@ -533,27 +533,17 @@ void Server::routeActionRequest(ActionRequest& request)
     }
 
     // we need to match the serviceID to one of our services
-    if (request.getServiceID() == cmgr->getServiceId()) {
-        // this call is for the lifetime stats service
-        log_debug("request for connection manager service");
-        cmgr->processActionRequest(request);
-    } else if (request.getServiceID() == cds->getServiceId()) {
-        // this call is for the toaster control service
-        log_debug("request for content directory service");
-        if (!offline)
-            cds->processActionRequest(request);
-        else
-            request.setErrorCode(UPNP_E_INVALID_ACTION);
-
-    } else if (request.getServiceID() == mrreg->getServiceId()) {
-        log_debug("request for MR Registrar service");
-        mrreg->processActionRequest(request);
-    } else {
-        // cp is asking for a nonexistent service, or for a service
-        // that does not support any actions
-        log_debug("Service {} does not exist or action not supported", request.getServiceID());
-        throw UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or action not supported");
+    for (auto&& svc : serviceList) {
+        if (svc->isActiveMatch(request.getServiceID())) {
+            log_debug("action request for {}", request.getServiceID());
+            svc->processActionRequest(request);
+            return;
+        }
     }
+    // cp is asking for a nonexistent service, or for a service
+    // that does not support any actions
+    log_debug("Service {} does not exist or action {} not supported", request.getServiceID(), request.getActionName());
+    throw UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or action not supported");
 }
 
 void Server::routeSubscriptionRequest(const SubscriptionRequest& request) const
@@ -566,31 +556,29 @@ void Server::routeSubscriptionRequest(const SubscriptionRequest& request) const
     }
 
     // we need to match the serviceID to one of our services
-    if (request.getServiceID() == cds->getServiceId()) {
-        // this call is for the content directory service
-        log_debug("request for content directory service");
-        if (!offline)
-            cds->processSubscriptionRequest(request);
-    } else if (request.getServiceID() == cmgr->getServiceId()) {
-        // this call is for the connection manager service
-        log_debug("request for connection manager service");
-        cmgr->processSubscriptionRequest(request);
-    } else if (request.getServiceID() == mrreg->getServiceId()) {
-        log_debug("request for MRRegistrar service");
-        mrreg->processSubscriptionRequest(request);
-    } else {
-        // cp asks for a nonexistent service or for a service that
-        // does not support subscriptions
-        log_debug("Service {} does not exist or action not supported", request.getServiceID());
-        throw UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or subscriptions not supported");
+    for (auto&& svc : serviceList) {
+        if (svc->isActiveMatch(request.getServiceID())) {
+            log_debug("subscription request for {}", request.getServiceID());
+            if (svc->processSubscriptionRequest(request))
+                return;
+        }
     }
+    // cp asks for a nonexistent service or for a service that
+    // does not support subscriptions
+    log_debug("Service {} does not exist or subscriptions not supported", request.getServiceID());
+    throw UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or subscriptions not supported");
 }
 
 // Temp
-void Server::sendCDSSubscriptionUpdate(const std::string& updateString)
+void Server::sendSubscriptionUpdate(const std::string& updateString, const std::string& serviceId)
 {
-    if (!offline)
-        cds->sendSubscriptionUpdate(updateString);
+    for (auto&& svc : serviceList) {
+        if (svc->isActiveMatch(serviceId)) {
+            log_debug("subscription update for {}", serviceId);
+            if (svc->sendSubscriptionUpdate(updateString))
+                return;
+        }
+    }
 }
 
 std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filename) const

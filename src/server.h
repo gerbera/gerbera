@@ -44,18 +44,16 @@
 class ActionRequest;
 class ClientManager;
 class Config;
-class ConnectionManagerService;
-class ContentDirectoryService;
 class Content;
 class Context;
 class Database;
 class MetadataService;
 class Mime;
-class MRRegistrarService;
 class RequestHandler;
 class SubscriptionRequest;
 class Timer;
 class UpnpXMLBuilder;
+class UpnpService;
 namespace Web {
 class SessionManager;
 }
@@ -92,7 +90,7 @@ public:
     /// terminated. This is the case when upnp_clean() was called.
     bool getShutdownStatus() const;
 
-    void sendCDSSubscriptionUpdate(const std::string& updateString);
+    void sendSubscriptionUpdate(const std::string& updateString, const std::string& serviceId);
 
     std::shared_ptr<Content> getContent() const { return content; }
     std::vector<std::string> getCorsHosts() const { return corsHosts; }
@@ -137,27 +135,7 @@ protected:
 
     std::shared_ptr<UpnpXMLBuilder> upnpXmlBuilder;
     std::shared_ptr<UpnpXMLBuilder> webXmlBuilder;
-
-    /// \brief ContentDirectoryService instance.
-    ///
-    /// The ContentDirectoryService class is instantiated in the
-    /// constructor. The class is responsible for processing
-    /// an ActionRequest or a SubscriptionRequest.
-    std::unique_ptr<ContentDirectoryService> cds;
-
-    /// \brief ConnectionManagerService instance.
-    ///
-    /// The ConnectionManagerService class is instantiated in the
-    /// constructor. The class is responsible for processing
-    /// an ActionRequest or a SubscriptionRequest.
-    std::unique_ptr<ConnectionManagerService> cmgr;
-
-    /// \brief MediaReceiverRegistrarService instance.
-    ///
-    /// This class is not fully functional, it always returns "true"
-    /// on IsAuthorized and IsValidated requests. It added to ensure
-    /// Xbox360 compatibility.
-    std::unique_ptr<MRRegistrarService> mrreg;
+    std::vector<std::unique_ptr<UpnpService>> serviceList;
 
     /// \brief Dispatched an ActionRequest between the services.
     /// \param request Incoming ActionRequest.

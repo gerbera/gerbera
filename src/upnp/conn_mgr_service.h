@@ -73,7 +73,6 @@ protected:
 public:
     /// \brief Constructor for the CMS, saves the service type and service id
     /// in internal variables.
-    /// \todo Check if it makes sense to use it as it is done now...why not define them as constants?
     explicit ConnectionManagerService(const std::shared_ptr<Context>& context,
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, UpnpDevice_Handle deviceHandle);
 
@@ -82,13 +81,13 @@ public:
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    void processSubscriptionRequest(const SubscriptionRequest& request) override;
+    bool processSubscriptionRequest(const SubscriptionRequest& request) override;
 
     /// \brief Sends out an event to all subscribed devices.
     /// \param sourceProtocol_CSV Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
-    void sendSubscriptionUpdate(const std::string& sourceProtocolCsv) override;
+    bool sendSubscriptionUpdate(const std::string& sourceProtocolCsv) override;
 };
 
 #endif // __UPNP_CM_H__
