@@ -33,6 +33,8 @@ Audio/Video/Image Files
 
 The following properties are automatically extracted to metadata:
 
+.. _supported-properties:
+
     +---------------+-----------------+
     | Property      | Key             |
     +===============+=================+

@@ -37,6 +37,7 @@
 
 #include "cds/cds_resource.h"
 #include "common.h"
+#include "metadata/metadata_enums.h"
 #include "upnp/quirks.h"
 #include "util/grb_fs.h"
 
@@ -53,6 +54,24 @@ enum class AviFourccListmode {
     None,
     Process,
     Ignore
+};
+
+class TranscodingMimeProperty {
+public:
+    TranscodingMimeProperty(const std::string& key, ResourceAttribute attribute, MetadataFields metadata)
+        : key(key)
+        , attribute(attribute)
+        , metadata(metadata)
+    {
+    }
+    ResourceAttribute getAttribute() const { return attribute; }
+    MetadataFields getMetadata() const { return metadata; }
+    std::string getKey() const { return key; }
+
+private:
+    std::string key;
+    ResourceAttribute attribute = ResourceAttribute::MAX;
+    MetadataFields metadata = MetadataFields::M_MAX;
 };
 
 /// \brief this class keeps all data associated with one transcoding profile.
@@ -83,6 +102,8 @@ public:
 
     /// \brief get target mimetype
     std::string getTargetMimeType() const { return tm; }
+    std::vector<TranscodingMimeProperty> getTargetMimeProperties() const { return mimeProperties; }
+    void addTargetMimeProperty(TranscodingMimeProperty property) { mimeProperties.push_back(std::move(property)); }
 
     /// \brief sets the program name, i.e. the command line name of the
     /// transcoder that will be executed.
@@ -214,6 +235,7 @@ protected:
     AviFourccListmode fourccMode { AviFourccListmode::None };
     QuirkFlags clientFlags { 0 };
     std::string dlnaProf;
+    std::vector<TranscodingMimeProperty> mimeProperties;
 };
 
 class TranscodingFilter {

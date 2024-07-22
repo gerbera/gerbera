@@ -130,7 +130,7 @@ if [ $# -gt 1 ]; then
   my_upnp=$2
 fi
 
-echo "Running $0 ${my_sys} ${my_upnp} for ${lsb_distro}-${lsb_codename}"
+echo "Running $0 ${my_sys} ${my_upnp} for ${lsb_distro}-${lsb_codename}-${deb_arch}"
 
 set-libraries
 set-libraries-dist
@@ -262,7 +262,7 @@ else
   printf "Deb ${deb_name} already built!\n"
 fi
 
-if [[ "${lsb_distro}" != "Raspbian" ]]; then
+if [[ "${lsb_distro}" != "Raspbian" && "${lsb_codename}_${deb_arch}" != "focal_armhf" ]]; then
   if [[ "${my_sys}" != "HEAD" ]]; then
     if [[ "${DEB_UPLOAD_ENDPOINT:-}" ]]; then
       # Tags only for main repo

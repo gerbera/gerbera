@@ -2,18 +2,33 @@
 
 ## HEAD
 
+Because of the extension of configuration of transcoding profiles, those producing PCM output have to be updated:
+`<mimetype>audio/L16</mimetype>` must become
+```
+<mimetype value="audio/L16">
+  <mime-property key="rate" resource="sampleFrequency"/>
+  <mime-property key="channels" resource="nrAudioChannels"/>
+</mimetype>
+```
+
 ### NEW Features
 
 - Higher cross site scripting security in web ui
 - Styles for xml documents when shown in browser
+- Configuration of additional target mimetype properties for transcoding (e.g. needed for PCM output)
+- Display media details in web ui
 
 ### FIXES
+
+- Warning in case import function does not return new ids.
 
 ### Code Improvements
 
 - Update versions of libexiv2 (0.28.3), fmt (11.0.2)
 - Upgrade contrib code cxxopts (3.2.1), md5 (2002)
 - Extract code for npupnp and pupnp specific handling
+- Refactoring of UPnP services
+- Cleanup of several todos, FIXMES etc.
 
 ## v2.2.0
 

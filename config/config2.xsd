@@ -1178,7 +1178,10 @@
     <xs:element name="profile">
         <xs:complexType>
             <xs:all>
-                <xs:element ref="mimetype"/>
+                <xs:choice minOccurs="1" maxOccurs="1">
+                        <xs:element name="mimetype" type="xs:string"/>
+                        <xs:element ref="mimetype"/>
+                </xs:choice>
                 <xs:element ref="dlna-profile" minOccurs="0"/>
                 <xs:element ref="accept-url" minOccurs="0"/>
                 <xs:element ref="first-resource" minOccurs="0"/>
@@ -1204,7 +1207,22 @@
     </xs:element>
 
     <xs:element name="dlna-profile" type="xs:string"/>
-    <xs:element name="mimetype" type="xs:string"/>
+    <xs:element name="mimetype">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="mime-property" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="value" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+    <xs:element name="mime-property">
+        <xs:complexType>
+            <xs:attribute name="key" type="xs:string" use="required"/>
+            <xs:attribute name="resource" type="xs:string"/>
+            <xs:attribute name="metadata" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="accept-url" type="boolean" default="yes"/>
     <xs:element name="first-resource" type="boolean" default="no"/>
     <xs:element name="hide-original-resource" type="boolean" default="no"/>

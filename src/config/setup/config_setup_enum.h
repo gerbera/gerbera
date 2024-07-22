@@ -34,6 +34,10 @@ class ConfigEnumSetup : public ConfigSetup {
 protected:
     bool notEmpty = true;
     std::map<std::string, En> valueMap;
+    using EnumParsingFunction = En (*)(const std::string&);
+    using EnumPrintingFunction = std::string (*)(En);
+    EnumParsingFunction parsingFunction = nullptr;
+    EnumPrintingFunction printingFunction = nullptr;
 
 public:
     ConfigEnumSetup(ConfigVal option, const char* xpath, const char* help, std::map<std::string, En> valueMap, bool notEmpty = false)
@@ -49,6 +53,15 @@ public:
         , valueMap(std::move(valueMap))
     {
         this->defaultValue = mapEnumValue(defaultValue);
+    }
+
+    ConfigEnumSetup(ConfigVal option, const char* xpath, const char* help, En defaultValue, EnumParsingFunction parsingFunction, EnumPrintingFunction printingFunction, bool notEmpty = false)
+        : ConfigSetup(option, xpath, help, false, "")
+        , notEmpty(notEmpty)
+        , parsingFunction(parsingFunction)
+        , printingFunction(printingFunction)
+    {
+        this->defaultValue = printingFunction(defaultValue);
     }
 
     std::string getTypeString() const override { return "Enum"; }
@@ -73,7 +86,10 @@ public:
 
     bool checkEnumValue(const std::string& value, En& result) const
     {
-        if (valueMap.find(value) != valueMap.end()) {
+        if (parsingFunction) {
+            result = parsingFunction(value);
+            return true;
+        } else if (valueMap.find(value) != valueMap.end()) {
             result = valueMap.at(value);
             return true;
         }
@@ -82,6 +98,9 @@ public:
 
     std::string mapEnumValue(En value) const
     {
+        if (printingFunction) {
+            return printingFunction(value);
+        }
         for (auto&& [key, val] : valueMap) {
             if (val == value)
                 return key;
