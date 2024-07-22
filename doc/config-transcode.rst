@@ -161,7 +161,7 @@ This section defines the various transcoding profiles.
 
         * Required
 
-        Enables or disables the profile, allowed values are ”yes” or ”no”.
+        Enables or disables the profile, allowed values are ``yes`` or ``no``.
 
         ::
 
@@ -179,15 +179,49 @@ This section defines the various transcoding profiles.
 
         * Required
 
-        Defines the profile type, currently only ”external” is supported, this will change in the future.
+        Defines the profile type, currently only ``external`` is supported, this will change in the future.
 
     .. code-block:: xml
 
         <mimetype>audio/x-wav</mimetype>
+        <mimetype value="audio/L16">
+          <mime-property key="rate" resource="sampleFrequency"/>
+          <mime-property key="channels" resource="nrAudioChannels"/>
+          <mime-property key="date" metadata="M_DATE"/>
+        </mimetype>
 
     * Required
 
     Defines the mime type of the transcoding result (i.e. of the transcoded stream). In the above example we transcode to PCM.
+    There are two variation of this tag. The simple version accepts the target mime type in the content.
+    The second version allows setting additional properties which will be appended to the mimetype if the
+    respective property value is not empty. The above example will produce, e.g. ``audio/L16;rate=16000;channels=2;date=2024-07-22``.
+
+        ::
+
+            key=...
+
+        * Required
+
+        Key printed in front of the property value.
+
+        ::
+
+            resource=...
+
+        * optional
+
+        Name of a resource attribute to read. The attribute name must match one of the resource attributes and
+        must be available on the content resource. See :ref:`Supported Properties <supported-properties>`.
+
+        ::
+
+            metadata=...
+
+        * optional
+
+        Name of a resource attribute to read. The attribute name must match on of the metadata fields of the object.
+        See :ref:`Supported Properties <supported-properties>`.
 
     .. code-block:: xml
 
@@ -205,7 +239,7 @@ This section defines the various transcoding profiles.
     * Default: **yes**
 
     Some transcoders are able to handle non local content, i.e. instead giving a local file name you can pass an
-    URL to the transcoder. However, some transcoders can only deal with local files, for this case set the value to ”no”.
+    URL to the transcoder. However, some transcoders can only deal with local files, for this case set the value to ``no``.
 
     .. code-block:: xml
 

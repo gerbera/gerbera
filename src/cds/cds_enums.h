@@ -137,6 +137,7 @@ private:
         { ResourceAttribute::VIDEOCODEC, "sec:vcodec" },
         { ResourceAttribute::FORMAT, "format" },
         { ResourceAttribute::TYPE, "type" },
+        { ResourceAttribute::MAX, "unknown" },
     };
     inline static const std::map<ResourceAttribute, std::string> attrToDisplay {
         { ResourceAttribute::SIZE, "size" },
@@ -156,6 +157,7 @@ private:
         { ResourceAttribute::VIDEOCODEC, "videoCodec" },
         { ResourceAttribute::FORMAT, "format" },
         { ResourceAttribute::TYPE, "type" },
+        { ResourceAttribute::MAX, "unknown" },
     };
 
 public:

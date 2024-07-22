@@ -29,6 +29,7 @@ Gerbera - https://gerbera.io/
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_enums.h" // API
 
+#include "content/scripting/script_names.h"
 #include "exceptions.h"
 #include "util/logger.h"
 
@@ -111,6 +112,11 @@ std::string EnumMapper::getAttributeDisplay(ResourceAttribute attr)
 ResourceAttribute EnumMapper::mapAttributeName(const std::string& name)
 {
     for (auto&& [attr, n] : attrToName) {
+        if (n == name) {
+            return attr;
+        }
+    }
+    for (auto&& [attr, n] : res_names) {
         if (n == name) {
             return attr;
         }

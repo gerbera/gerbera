@@ -97,28 +97,49 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
             ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED)->getXmlContent(child),
             ConfigDefinition::findConfigSetup<ConfigEnumSetup<TranscodingType>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE)->getXmlContent(child),
             ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME)->getXmlContent(child));
-        prof->setTargetMimeType(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->getXmlContent(child));
         prof->setClientFlags(ConfigDefinition::findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child));
 
-        pugi::xml_node sub;
-        sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES)->getXmlElement(child);
-        if (sub) {
-            std::string param = sub.text().as_string();
-            if (!param.empty()) {
-                try {
-                    auto res = Resolution(param);
-                    prof->setAttributeOverride(ResourceAttribute::RESOLUTION, res.string());
-                } catch (const std::runtime_error& e) {
-                    log_info("Config setup for resolution {} is invalid", param);
+        // read resolution
+        {
+            pugi::xml_node sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RESOLUTION)->getXmlElement(child);
+            if (sub) {
+                std::string param = sub.text().as_string();
+                if (!param.empty()) {
+                    try {
+                        auto res = Resolution(param);
+                        prof->setAttributeOverride(ResourceAttribute::RESOLUTION, res.string());
+                    } catch (const std::runtime_error& e) {
+                        log_warning("Config setup for resolution {} is invalid", param);
+                    }
                 }
             }
         }
-
+        // read mimetype
+        {
+            pugi::xml_node sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->getXmlElement(child);
+            std::string mimetype;
+            if (sub) {
+                mimetype = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE_VALUE)->getXmlContent(sub);
+                if (!mimetype.empty()) {
+                    // handle properties
+                    for (auto prop : sub) {
+                        auto key = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE_PROPERTIES_KEY)->getXmlContent(prop);
+                        auto resource = ConfigDefinition::findConfigSetup<ConfigEnumSetup<ResourceAttribute>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE_PROPERTIES_RESOURCE)->getXmlContent(prop);
+                        auto metadata = ConfigDefinition::findConfigSetup<ConfigEnumSetup<MetadataFields>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE_PROPERTIES_METADATA)->getXmlContent(prop);
+                        prof->addTargetMimeProperty(std::move(TranscodingMimeProperty(key, resource, metadata)));
+                        log_debug("MimeProperty {}, key={}, resource={}, metadata={}", mimetype, key, EnumMapper::getAttributeName(resource), MetaEnumMapper::getMetaFieldName(metadata));
+                    }
+                } else {
+                    mimetype = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE)->getXmlContent(child);
+                }
+                prof->setTargetMimeType(mimetype);
+            }
+        }
         // read 4cc options
         {
             auto cs = ConfigDefinition::findConfigSetup<ConfigArraySetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC);
             if (cs->hasXmlElement(child)) {
-                sub = cs->getXmlElement(child);
+                pugi::xml_node sub = cs->getXmlElement(child);
                 AviFourccListmode fccMode = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AviFourccListmode>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE)->getXmlContent(sub);
                 if (fccMode != AviFourccListmode::None) {
                     prof->setAVIFourCCList(cs->getXmlContent(sub), fccMode);
@@ -168,13 +189,13 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         }
 
         // read agent options
-        sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)->getXmlElement(child);
         {
+            pugi::xml_node sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)->getXmlElement(child);
             auto cs = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
             cs->setFlag(prof->isEnabled(), ConfigPathArguments::mustExist);
             prof->setCommand(cs->getXmlContent(sub));
+            prof->setArguments(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub));
         }
-        prof->setArguments(ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub));
         {
             auto cs = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON);
             if (cs->hasXmlElement(child))
@@ -182,21 +203,23 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         }
 
         // set buffer options
-        sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)->getXmlElement(child);
-        std::size_t buffer = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->getXmlContent(sub);
-        std::size_t chunk = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->getXmlContent(sub);
-        std::size_t fill = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->getXmlContent(sub);
+        {
+            pugi::xml_node sub = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)->getXmlElement(child);
+            std::size_t buffer = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->getXmlContent(sub);
+            std::size_t chunk = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->getXmlContent(sub);
+            std::size_t fill = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL)->getXmlContent(sub);
 
-        if (chunk > buffer) {
-            log_error("Error in configuration: transcoding profile \"{}\" chunk size can not be greater than buffer size", prof->getName());
-            return false;
-        }
-        if (fill > buffer) {
-            log_error("Error in configuration: transcoding profile \"{}\" fill size can not be greater than buffer size", prof->getName());
-            return false;
-        }
+            if (chunk > buffer) {
+                log_error("Error in configuration: transcoding profile \"{}\" chunk size can not be greater than buffer size", prof->getName());
+                return false;
+            }
+            if (fill > buffer) {
+                log_error("Error in configuration: transcoding profile \"{}\" fill size can not be greater than buffer size", prof->getName());
+                return false;
+            }
 
-        prof->setBufferOptions(buffer, chunk, fill);
+            prof->setBufferOptions(buffer, chunk, fill);
+        }
 
         bool set = false;
         for (auto&& filter : trFilters) {
@@ -362,9 +385,9 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::strin
             }
 
             // update profile options
-            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES });
+            index = getItemPath(i, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RESOLUTION });
             if (optItem == index) {
-                if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES)->checkValue(optValue)) {
+                if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RESOLUTION)->checkValue(optValue)) {
                     config->setOrigValue(index, entry->getAttributeOverride(ResourceAttribute::RESOLUTION));
                     entry->setAttributeOverride(ResourceAttribute::RESOLUTION, optValue);
                     log_debug("New Transcoding Detail {} {}", index, config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)->getAttributeOverride(ResourceAttribute::RESOLUTION));

@@ -571,7 +571,7 @@ void Web::ConfigLoad::writeTranscoding(pugi::xml_node& values)
         setValue(item, entry->getTargetMimeType());
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RES);
+        createItem(item, cs->getItemPath(pr, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RESOLUTION }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RESOLUTION);
         setValue(item, entry->getAttributeOverride(ResourceAttribute::RESOLUTION));
 
         item = values.append_child(CONFIG_LOAD_ITEM);

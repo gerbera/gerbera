@@ -3,6 +3,7 @@
 ### HEAD
 
 - Clean up commented out code
+- Configuration of additional target mimetype properties for transcoding
 - FIXME done: Remove fake resource
 - Improve docker instructions
 - Refactor Upnp Services

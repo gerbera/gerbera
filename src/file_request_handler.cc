@@ -147,17 +147,20 @@ const struct ClientInfo* FileRequestHandler::getInfo(const char* filename, UpnpF
             throw_std_runtime_error("Transcoding of file {} but no profile matching the name {} found", path.c_str(), trProfile);
 
         mimeType = transcodingProfile->getTargetMimeType();
-
-        // TODO: this WAV specific logic should be more generic
-        auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-        if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
+        auto mimeProperties = transcodingProfile->getTargetMimeProperties();
+        if (mimeProperties.size() > 0) {
             auto res = obj->getResource(ContentHandler::DEFAULT);
-            std::string freq = res->getAttribute(ResourceAttribute::SAMPLEFREQUENCY);
-            std::string nrch = res->getAttribute(ResourceAttribute::NRAUDIOCHANNELS);
-            if (!freq.empty())
-                mimeType += fmt::format(";rate={}", freq);
-            if (!nrch.empty())
-                mimeType += fmt::format(";channels={}", nrch);
+            std::vector<std::string> propList = { mimeType };
+            for (auto prop : mimeProperties) {
+                std::string value;
+                if (prop.getAttribute() != ResourceAttribute::MAX)
+                    value = res->getAttribute(prop.getAttribute());
+                if (prop.getMetadata() != MetadataFields::M_MAX)
+                    value = obj->getMetaData(prop.getMetadata());
+                if (!value.empty())
+                    propList.push_back(fmt::format("{}={}", prop.getKey(), value));
+            }
+            mimeType = fmt::format("{}", fmt::join(propList, ";"));
         }
 
 #ifdef UPNP_USING_CHUNKED
