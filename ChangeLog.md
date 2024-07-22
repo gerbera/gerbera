@@ -4,6 +4,7 @@
 
 - Clean up commented out code
 - FIXME done: Remove fake resource
+- Warn about empty script result
 - Improve docker instructions
 - Refactor Upnp Services
 - Upgrade cxxopts.hpp to 3.2.1

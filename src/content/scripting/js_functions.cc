@@ -181,7 +181,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
             return 0;
         }
 
-        auto [parentId, parentStatus] = std::pair(stoiString(containerId), false);
+        auto parentId = stoiString(containerId);
 
         if (parentId <= 0) {
             log_error("Invalid parent id passed to addCdsObject: {}", parentId);
@@ -195,7 +195,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         }
 
         cdsObj->setID(INVALID_OBJECT_ID);
-        self->getContent()->addObject(cdsObj, parentStatus);
+        self->getContent()->addObject(cdsObj, false);
 
         /* setting object ID as return value */
         duk_push_string(ctx, fmt::to_string(cdsObj->getID()).c_str());
