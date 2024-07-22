@@ -39,15 +39,16 @@ public:
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
 
-    // fixme: these should be private
-    fs::path getThumbnailCacheBasePath() const;
+protected:
+    // Needed in tests
+    const fs::path& getThumbnailCacheBasePath() const { return cachePath; }
     static fs::path getThumbnailCachePath(const fs::path& base, const fs::path& movie);
 
 private:
     // The ffmpegthumbnailer code (ffmpeg?) is not threading safe.
     // Add a lock around the usage to avoid crashing randomly.
     mutable std::mutex thumb_mutex;
-
+    fs::path cachePath;
     std::optional<std::vector<std::byte>> readThumbnailCacheFile(const fs::path& movieFilename) const;
     void writeThumbnailCacheFile(const fs::path& movieFilename, const std::byte* data, std::size_t size) const;
 };

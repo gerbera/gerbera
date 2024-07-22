@@ -35,16 +35,6 @@ Gerbera - https://gerbera.io/
 #include <libffmpegthumbnailer/filmstripfilter.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
 
-fs::path FfmpegThumbnailerHandler::getThumbnailCacheBasePath() const
-{
-    auto configuredDir = config->getOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
-    if (!configuredDir.empty())
-        return configuredDir;
-
-    auto home = config->getOption(ConfigVal::SERVER_HOME);
-    return fs::path(home) / "cache-dir";
-}
-
 fs::path FfmpegThumbnailerHandler::getThumbnailCachePath(const fs::path& base, const fs::path& movie)
 {
     assert(movie.is_absolute());
@@ -150,6 +140,13 @@ FfmpegThumbnailerHandler::FfmpegThumbnailerHandler(const std::shared_ptr<Context
     : MediaMetadataHandler(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)
 {
     isEnabled = this->isEnabled && config->getBoolOption(checkOption);
+    auto configuredDir = config->getOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+    if (!configuredDir.empty()) {
+        cachePath = configuredDir;
+    } else {
+        auto home = config->getOption(ConfigVal::SERVER_HOME);
+        cachePath = fs::path(home) / "cache-dir";
+    }
 }
 
 #endif
