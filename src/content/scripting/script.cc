@@ -520,6 +520,11 @@ std::vector<int> Script::call(const std::shared_ptr<CdsObject>& obj, const std::
         duk_pop(ctx);
         throw_std_runtime_error("javascript runtime error");
     }
+    if (duk_is_null_or_undefined(ctx, -1)) {
+        log_warning("Function '{}' did not return a value!", functionName);
+        duk_pop(ctx);
+        return {};
+    }
     std::vector<int> result = ScriptResultProperty(ctx).getIntArrayValue();
 
     duk_pop(ctx);
@@ -713,6 +718,8 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         obj->addMetaData(MetadataFields::M_DESCRIPTION, description);
     }
 
+    /// \todo get hidden file setting from config manager?
+    /// what about same stuff in content manager, why is it not used there?
     // CdsItem
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);

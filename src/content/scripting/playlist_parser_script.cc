@@ -104,9 +104,6 @@ std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cd
 bool PlaylistParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId)
 {
     if (!cdsObj->isExternalItem()) {
-        /// \todo get hidden file setting from config manager?
-        /// what about same stuff in content manager, why is it not used
-        /// there?
         if (pcdId == INVALID_OBJECT_ID) {
             return false;
         }

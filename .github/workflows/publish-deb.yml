@@ -43,6 +43,9 @@ jobs:
             arch: "linux/arm/v7"
           - isPR: true
             arch: "linux/arm64/v8"
+          # ubuntu:20.04 linux/arm/v7 has broken certificate handling
+          - os-ver: "ubuntu:20.04"
+            arch: "linux/arm/v7"
 
     runs-on: ubuntu-latest
     name: Compile ${{ matrix.os-ver }} ${{ matrix.arch }}
