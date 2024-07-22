@@ -4,11 +4,11 @@
 
 - Clean up commented out code
 - FIXME done: Remove fake resource
-- Warn about empty script result
 - Improve docker instructions
 - Refactor Upnp Services
 - Upgrade cxxopts.hpp to 3.2.1
 - Upgrade md5 to 2002 version
+- Warn about empty script result
 - Web security and upnp compatibility
 
 ### v2.2.0
