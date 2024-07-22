@@ -194,6 +194,10 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
             return 0;
         }
 
+        if (self->isHiddenFile(cdsObj, rootPath)) {
+            log_debug("Hidden file {} cannot be added", cdsObj->getLocation().c_str());
+            return 0;
+        }
         cdsObj->setID(INVALID_OBJECT_ID);
         self->getContent()->addObject(cdsObj, false);
 
