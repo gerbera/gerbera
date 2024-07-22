@@ -44,6 +44,7 @@
 #include "config/setup/config_setup_autoscan.h"
 #include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_dictionary.h"
+#include "content/autoscan_setting.h"
 #include "content/content.h"
 #include "context.h"
 #include "database/database.h"
@@ -718,8 +719,6 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         obj->addMetaData(MetadataFields::M_DESCRIPTION, description);
     }
 
-    /// \todo get hidden file setting from config manager?
-    /// what about same stuff in content manager, why is it not used there?
     // CdsItem
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
@@ -803,6 +802,16 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     }
 
     return obj;
+}
+
+bool Script::isHiddenFile(const std::shared_ptr<CdsObject>& cdsObj, const std::string& rootPath)
+{
+    AutoScanSetting asSetting;
+    asSetting.recursive = true;
+    asSetting.followSymlinks = config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
+    asSetting.hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
+    asSetting.mergeOptions(config, rootPath);
+    return content->isHiddenFile(fs::directory_entry(cdsObj->getLocation()), false, asSetting);
 }
 
 void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
