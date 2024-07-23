@@ -113,12 +113,12 @@ struct ProfMapping {
 };
 
 static const std::vector<struct ProfMapping> resSteps {
-    { "ICO", 48, 48 },
-    { "LICO", 120, 120 },
-    { "TN", 160, 160 },
-    { "SD", 640, 480 },
-    { "HD", 1920, 1920 },
-    { "UHD", 4096, 4096 },
+    { RESOURCE_IMAGE_STEP_ICO, 48, 48 },
+    { RESOURCE_IMAGE_STEP_LICO, 120, 120 },
+    { RESOURCE_IMAGE_STEP_TN, 160, 160 },
+    { RESOURCE_IMAGE_STEP_SD, 640, 480 },
+    { RESOURCE_IMAGE_STEP_HD, 1920, 1920 },
+    { RESOURCE_IMAGE_STEP_UHD, 4096, 4096 },
 };
 static const std::vector<std::string_view> sizeUnits { "kB", "MB", "GB", "TB" };
 static const std::vector<std::string_view> freqUnits { "kHz", "MHz", "GHz" };

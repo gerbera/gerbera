@@ -17,6 +17,7 @@ Because of the extension of configuration of transcoding profiles, those produci
 - Styles for xml documents when shown in browser
 - Configuration of additional target mimetype properties for transcoding (e.g. needed for PCM output)
 - Display media details in web ui
+- Image and thumbnail profiles support PNG images
 
 ### FIXES
 

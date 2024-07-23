@@ -45,6 +45,14 @@
 #define RESOURCE_OPTION_URL "url"
 #define RESOURCE_OPTION_FOURCC "4cc"
 
+#define RESOURCE_IMAGE_STEP_ICO "ICO"
+#define RESOURCE_IMAGE_STEP_LICO "LICO"
+#define RESOURCE_IMAGE_STEP_TN "TN"
+#define RESOURCE_IMAGE_STEP_SD "SD"
+#define RESOURCE_IMAGE_STEP_HD "HD"
+#define RESOURCE_IMAGE_STEP_UHD "UHD"
+#define RESOURCE_IMAGE_STEP_DEF "*"
+
 class CdsResource {
 public:
     /// \brief creates a new resource object.
@@ -106,21 +114,6 @@ public:
     std::shared_ptr<CdsResource> clone();
 
     static std::shared_ptr<CdsResource> decode(const std::string& serial);
-
-    // FIXME Move out interval values to somewhere else? Options?
-    static bool isPrivateAttribute(ResourceAttribute attribute)
-    {
-        switch (attribute) {
-        case ResourceAttribute::RESOURCE_FILE:
-        case ResourceAttribute::FANART_OBJ_ID:
-        case ResourceAttribute::FANART_RES_ID:
-        case ResourceAttribute::TYPE:
-        case ResourceAttribute::FORMAT:
-            return true;
-        default:
-            return false;
-        }
-    }
     static std::string formatSizeValue(double value);
 
 protected:
