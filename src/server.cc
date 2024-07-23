@@ -569,7 +569,7 @@ void Server::routeSubscriptionRequest(const SubscriptionRequest& request) const
     throw UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or subscriptions not supported");
 }
 
-// Temp
+// sendSubscriptionUpdate
 void Server::sendSubscriptionUpdate(const std::string& updateString, const std::string& serviceId)
 {
     for (auto&& svc : serviceList) {
@@ -631,6 +631,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
 
 int Server::registerVirtualDirCallbacks()
 {
+    // UpnpVirtualDir GetInfoCallback
     log_debug("Setting UpnpVirtualDir GetInfoCallback");
     int ret = UpnpVirtualDir_set_GetInfoCallback([](const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie) -> int {
         try {
@@ -652,6 +653,7 @@ int Server::registerVirtualDirCallbacks()
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
+    // UpnpVirtualDir OpenCallback
     log_debug("Setting UpnpVirtualDir OpenCallback");
     ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie) -> UpnpWebFileHandle {
         try {
@@ -680,6 +682,7 @@ int Server::registerVirtualDirCallbacks()
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
+    // UpnpVirtualDir ReadCallback
     log_debug("Setting UpnpVirtualDir ReadCallback");
     ret = UpnpVirtualDir_set_ReadCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
         log_debug("{} read({})", f, length);
@@ -692,6 +695,7 @@ int Server::registerVirtualDirCallbacks()
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
+    // UpnpVirtualDir WriteCallback
     log_debug("Setting UpnpVirtualDir WriteCallback");
     ret = UpnpVirtualDir_set_WriteCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
         log_debug("{} write({})", f, length);
@@ -700,6 +704,7 @@ int Server::registerVirtualDirCallbacks()
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
+    // UpnpVirtualDir SeekCallback
     log_debug("Setting UpnpVirtualDir SeekCallback");
     ret = UpnpVirtualDir_set_SeekCallback([](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie) -> int {
         log_debug("{} seek({}, {})", f, offset, whence);
@@ -716,6 +721,7 @@ int Server::registerVirtualDirCallbacks()
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
+    // UpnpVirtualDir CloseCallback"
     log_debug("Setting UpnpVirtualDir CloseCallback");
     ret = UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
         log_debug("{} close()", f);

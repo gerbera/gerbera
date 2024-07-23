@@ -6,6 +6,7 @@
 - Configuration of additional target mimetype properties for transcoding
 - FIXME done: Remove fake resource
 - Improve docker instructions
+- Improve handling of thumbnail profiles
 - Refactor Upnp Services
 - Upgrade cxxopts.hpp to 3.2.1
 - Upgrade md5 to 2002 version

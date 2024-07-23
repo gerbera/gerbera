@@ -54,6 +54,60 @@
 
 #define URL_FILE_EXTENSION "ext"
 
+#define UPNP_DLNA_PROFILE "DLNA.ORG_PN"
+#define UPNP_DLNA_CONVERSION_INDICATOR "DLNA.ORG_CI"
+#define UPNP_DLNA_OP "DLNA.ORG_OP"
+#define UPNP_DLNA_FLAGS "DLNA.ORG_FLAGS"
+
+// DLNA.ORG_CI flags
+//
+// 0 - media is not transcoded
+// 1 - media is transcoded
+#define UPNP_DLNA_NO_CONVERSION "0"
+#define UPNP_DLNA_CONVERSION "1"
+
+// DLNA.ORG_OP flags
+//
+// Two booleans (binary digits) which determine what transport operations the renderer is allowed to
+// perform (in the form of HTTP request headers): the first digit allows the renderer to send
+// TimeSeekRange.DLNA.ORG (seek by time) headers; the second allows it to send RANGE (seek by byte)
+// headers.
+//
+// 0x00 - no seeking (or even pausing) allowed
+// 0x01 - seek by byte (exclusive)
+// 0x10 - seek by time (exclusive)
+// 0x11 - seek by both
+#define UPNP_DLNA_OP_SEEK_DISABLED "00"
+#define UPNP_DLNA_OP_SEEK_RANGE "01"
+#define UPNP_DLNA_OP_SEEK_TIME "10"
+#define UPNP_DLNA_OP_SEEK_BOTH "11"
+
+// DLNA.ORG_FLAGS flags
+//
+// 0x00100000 - dlna V1.5
+// 0x00200000 - connection stalling
+// 0x00400000 - background transfer mode
+// 0x00800000 - interactive transfer mode
+// 0x01000000 - streaming transfer mode
+#define UPNP_DLNA_ORG_FLAGS_AV "01700000000000000000000000000000"
+#define UPNP_DLNA_ORG_FLAGS_IMAGE "00800000000000000000000000000000"
+#define UPNP_DLNA_ORG_FLAGS_SUB "00d00000000000000000000000000000"
+
+// DLNA.ORG_PN flags
+#define UPNP_DLNA_PROFILE_JPEG_SM "JPEG_SM"
+#define UPNP_DLNA_PROFILE_JPEG_MED "JPEG_MED"
+#define UPNP_DLNA_PROFILE_JPEG_LRG "JPEG_LRG"
+#define UPNP_DLNA_PROFILE_JPEG_TN "JPEG_TN"
+#define UPNP_DLNA_PROFILE_JPEG_SM_ICO "JPEG_TN" // "JPEG_SM_ICO"
+#define UPNP_DLNA_PROFILE_JPEG_LRG_ICO "JPEG_TN" //"JPEG_LRG_ICO"
+
+#define UPNP_DLNA_PROFILE_PNG_SM "PNG_SM"
+#define UPNP_DLNA_PROFILE_PNG_MED "PNG_MED"
+#define UPNP_DLNA_PROFILE_PNG_LRG "PNG_LRG"
+#define UPNP_DLNA_PROFILE_PNG_TN "PNG_TN"
+#define UPNP_DLNA_PROFILE_PNG_SM_ICO "PNG_TN" // "PNG_SM_ICO"
+#define UPNP_DLNA_PROFILE_PNG_LRG_ICO "JPEG_TN" // "PNG_LRG_ICO"
+
 UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     std::string virtualUrl)
     : config(context->getConfig())
@@ -305,6 +359,20 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet() con
     return doc;
 }
 
+static bool isPrivateAttribute(ResourceAttribute attribute)
+{
+    switch (attribute) {
+    case ResourceAttribute::RESOURCE_FILE:
+    case ResourceAttribute::FANART_OBJ_ID:
+    case ResourceAttribute::FANART_RES_ID:
+    case ResourceAttribute::TYPE:
+    case ResourceAttribute::FORMAT:
+        return true;
+    default:
+        return false;
+    }
+}
+
 void UpnpXMLBuilder::renderResource(const CdsObject& object, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs, const std::string& clientGroup, const std::map<std::string, std::string>& mimeMappings) const
 {
     auto res = parent.append_child("res");
@@ -314,7 +382,7 @@ void UpnpXMLBuilder::renderResource(const CdsObject& object, const CdsResource& 
     res.append_child(pugi::node_pcdata).set_value(url.c_str());
 
     for (auto&& [attr, val] : resource.getAttributes()) {
-        if (CdsResource::isPrivateAttribute(attr)) {
+        if (isPrivateAttribute(attr)) {
             continue;
         }
         res.append_attribute(EnumMapper::getAttributeName(attr).c_str()) = val.c_str();
@@ -491,21 +559,37 @@ std::string UpnpXMLBuilder::getDLNATransferHeader(const std::string& mimeType) c
     return getValueOrDefault(transferMappings, mimeType);
 }
 
+static const std::map<std::string_view, std::map<std::string_view, std::string_view>> profileList {
+    { CONTENT_TYPE_JPG, {
+                            { RESOURCE_IMAGE_STEP_ICO, UPNP_DLNA_PROFILE_JPEG_SM_ICO },
+                            { RESOURCE_IMAGE_STEP_LICO, UPNP_DLNA_PROFILE_JPEG_LRG_ICO },
+                            { RESOURCE_IMAGE_STEP_TN, UPNP_DLNA_PROFILE_JPEG_TN },
+                            { RESOURCE_IMAGE_STEP_SD, UPNP_DLNA_PROFILE_JPEG_SM },
+                            { RESOURCE_IMAGE_STEP_HD, UPNP_DLNA_PROFILE_JPEG_MED },
+                            { RESOURCE_IMAGE_STEP_UHD, UPNP_DLNA_PROFILE_JPEG_LRG },
+                            { RESOURCE_IMAGE_STEP_DEF, UPNP_DLNA_PROFILE_JPEG_TN },
+                        } },
+    { CONTENT_TYPE_PNG, {
+                            { RESOURCE_IMAGE_STEP_ICO, UPNP_DLNA_PROFILE_PNG_SM_ICO },
+                            { RESOURCE_IMAGE_STEP_LICO, UPNP_DLNA_PROFILE_PNG_LRG_ICO },
+                            { RESOURCE_IMAGE_STEP_TN, UPNP_DLNA_PROFILE_PNG_TN },
+                            { RESOURCE_IMAGE_STEP_SD, UPNP_DLNA_PROFILE_PNG_SM },
+                            { RESOURCE_IMAGE_STEP_HD, UPNP_DLNA_PROFILE_PNG_MED },
+                            { RESOURCE_IMAGE_STEP_UHD, UPNP_DLNA_PROFILE_PNG_LRG },
+                            { RESOURCE_IMAGE_STEP_DEF, UPNP_DLNA_PROFILE_PNG_TN },
+                        } },
+};
+
 std::string UpnpXMLBuilder::dlnaProfileString(const CdsResource& res, const std::string& contentType, bool formatted) const
 {
     std::string dlnaProfile = res.getOption("dlnaProfile");
-    if (contentType == CONTENT_TYPE_JPG) {
+    if (profileList.find(contentType) != profileList.end()) {
+        auto profiles = profileList.at(contentType);
         std::string resValue = res.getAttributeValue(ResourceAttribute::RESOLUTION);
-        if (res.getPurpose() == ResourcePurpose::Thumbnail) {
-            dlnaProfile = UPNP_DLNA_PROFILE_JPEG_TN;
-        }
+        dlnaProfile = profiles.at(RESOURCE_IMAGE_STEP_DEF);
         if (res.getPurpose() == ResourcePurpose::Content && !resValue.empty()) {
-            if (resValue == "SD")
-                dlnaProfile = UPNP_DLNA_PROFILE_JPEG_SM;
-            else if (resValue == "HD")
-                dlnaProfile = UPNP_DLNA_PROFILE_JPEG_MED;
-            else if (resValue == "UHD")
-                dlnaProfile = UPNP_DLNA_PROFILE_JPEG_LRG;
+            if (profiles.find(resValue) != profiles.end())
+                dlnaProfile = profiles.at(resValue);
         }
     }
     if (dlnaProfile.empty()) {
@@ -752,10 +836,10 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             auto aa = parent.append_child(MetaEnumMapper::getMetaFieldName(MetadataFields::M_ALBUMARTURI).data());
             aa.append_child(pugi::node_pcdata).set_value(url.c_str());
 
-            /// \todo clean this up, make sure to check the mimetype and
-            /// provide the profile correctly
             aa.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_METADATA_NAMESPACE;
-            aa.append_attribute("dlna:profileID") = "JPEG_TN";
+            auto mimeType = getMimeType(*res, mimeMappings);
+            auto contentType = getValueOrDefault(ctMappings, mimeType);
+            aa.append_attribute("dlna:profileID") = dlnaProfileString(*res, contentType, false).c_str();
             continue;
         }
 

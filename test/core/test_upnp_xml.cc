@@ -296,7 +296,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     obj->addResource(resource);
 
     resource = std::make_shared<CdsResource>(ContentHandler::FANART, ResourcePurpose::Thumbnail);
-    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("image/jpeg"));
     resource->addAttribute(ResourceAttribute::RESOURCE_FILE, "/home/resource/cover.jpg");
     resource->addAttribute(ResourceAttribute::RESOLUTION, "200x200");
     obj->addResource(resource);
@@ -316,7 +316,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     expectedXml << "<res size=\"4711\" duration=\"123456\" bitrate=\"16044\" nrAudioChannels=\"2\" protocolInfo=\"http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000\">http://server/media/object_id/42/res_id/0/group/default/ext/file.mp3</res>\n";
     expectedXml << "<res protocolInfo=\"http-get:*:text/srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\">http://server/media/object_id/42/res_id/1/type/srt/ext/file.srt</res>\n";
     expectedXml << "<res protocolInfo=\"http-get:*:text/srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\" dc:language=\"fr\">http://server/media/object_id/42/res_id/2/type/srt/ext/file.fr.srt</res>\n";
-    expectedXml << "<res resolution=\"200x200\" protocolInfo=\"http-get:*:jpg:DLNA.ORG_OP=01;DLNA.ORG_CI=0\">http://server/media/object_id/42/res_id/3/ext/file.jpg</res>\n";
+    expectedXml << "<res resolution=\"200x200\" protocolInfo=\"http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_TN;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00800000000000000000000000000000\">http://server/media/object_id/42/res_id/3/ext/file.jpg</res>\n";
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
 
