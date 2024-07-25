@@ -61,6 +61,8 @@ Optional Packages
 +=====================+============================+=========================+==========+==============================+
 | curl                | Enables web services       | WITH\_CURL              | Enabled  |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
+| doxygen_            | Source documentation       | BUILD\_DOC              | Disabled |                              |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
 | duktape_            | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh           |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | ffmpeg/libav        | File metadata              | WITH\_AVCODEC           | Disabled |                              |
@@ -90,6 +92,7 @@ Optional Packages
 | wavpack_            | WavPack metadata support   | WITH\_WAVPACK           | Disabled | install-wavpack.sh           |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 
+.. _doxygen: https://github.com/doxygen/doxygen
 .. _duktape: https://duktape.org
 .. _ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
 .. _fmtlib: https://github.com/fmtlib/fmt
@@ -126,7 +129,17 @@ Quick Start Build
   mkdir build
   cd build
   cmake ../gerbera -DWITH_MAGIC=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_JS=1 \
-    -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_LASTFM=1
+    -DWITH_TAGLIB=1 -DWITH_AVCODEC=1 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_EXIF=1 -DWITH_LASTFM=0
+  make -j4
+  sudo make install
+
+If you want to have the same build as the official release:
+::
+
+  git clone https://github.com/gerbera/gerbera.git
+  mkdir build
+  cd build
+  cmake ../gerbera --preset=release-pupnp
   make -j4
   sudo make install
 

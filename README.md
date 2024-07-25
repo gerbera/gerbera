@@ -72,9 +72,10 @@ sudo make install
 
 ## Development Dependencies
 
-| Library             | Min Version | Recommended | Latest tested | Required?     | Note                       | Default  |
-|---------------------|-------------|-------------|---------------|---------------|----------------------------|----------|
-| [googletest]        | 1.10.0      | 1.10.0      | 1.14.0        | Optional      | Running tests              | Disabled |
+| Library             | Min Version | Recommended | Latest tested | Required?     | Note                           | Default  |
+|---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
+| [googletest]        | 1.10.0      | 1.10.0      | 1.15.0        | Optional      | Running tests                  | Disabled |
+| [doxygen]           |             | 1.8.14      | 1.8.14        | Optional      | Building source documentation  | Disabled |
 
 ## License
 
@@ -94,6 +95,7 @@ sudo make install
 
 [Docker Hub]: https://hub.docker.com/r/gerbera/gerbera
 [duktape]: https://duktape.org
+[doxygen]: https://github.com/doxygen/doxygen
 [ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
 [fmtlib]: https://github.com/fmtlib/fmt
 [googletest]: https://github.com/google/googletest

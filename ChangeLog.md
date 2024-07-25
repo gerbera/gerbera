@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Add build target for source documentation
 - Clean up commented out code
 - Configuration of additional target mimetype properties for transcoding
 - FIXME done: Remove fake resource

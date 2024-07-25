@@ -6,14 +6,35 @@ Troubleshooting
 Installation
 ~~~~~~~~~~~~
 
-If you want to update from a version that was provided by another package source (like ubuntu main -> jfrog) perform the following steps
+If you want to update from a version that was provided by another package source (like ubuntu main -> pkg.gerbera.io) perform the following steps
+
 - back up your configuration and database
-- uninstall the old version completely (look for left-over files under /usr/local/share)
+
+- uninstall the old version completely
+
+- look for left-over files under ``/usr/local/share`` or ``/usr/share``
+
 - install the new version
+
 - generate config file with ``--create-config``
+
 - merge your old settings into the new file and copy it into the right place
+
 - copy the database file to the right place (depending on version differences it is even recommended to create a new database)
+
 - start gerbera and check the log for migration errors in the database (if you migrate)
+
+Web UI
+~~~~~~
+
+In case your web UI seems to be stuck, try the following steps
+
+- Reload the page with ``Shift+Ctrl+r``
+
+- Clear the browser cache for you gerbera web UI
+
+- Open the page in private/incognito mode
+
 
 Network
 ~~~~~~~

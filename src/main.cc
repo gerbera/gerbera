@@ -34,7 +34,8 @@
 /// \mainpage Sourcecode Documentation.
 ///
 /// This documentation was generated using doxygen, you can reproduce it by
-/// running "doxygen doxygen.conf" from the mediatomb/doc/ directory.
+/// setting BUILD_DOC="YES" for cmake and then
+/// running "make doc" in your build directory.
 
 #define GRB_LOG_FAC GrbLogFacility::server
 
