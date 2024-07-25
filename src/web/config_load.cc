@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    config_load.cc - this file is part of Gerbera.
+    web/config_load.cc - this file is part of Gerbera.
 
     Copyright (C) 2020-2024 Gerbera Contributors
 
@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_load.cc
+/// \file web/config_load.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API

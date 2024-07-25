@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    upnp_clients.h - this file is part of Gerbera.
+    upnp/clients.h - this file is part of Gerbera.
 
     Copyright (C) 2020-2024 Gerbera Contributors
 
@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file upnp_clients.h
+/// \file upnp/clients.h
 /// \brief Definition of the Clients class.
 /// inspired by https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.h
 

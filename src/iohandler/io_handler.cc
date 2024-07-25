@@ -34,24 +34,13 @@
 
 #include "io_handler.h" // API
 
-/// \fn static UpnpWebFileHandle web_open(const char *filename,
-///                                       enum UpnpOpenFileMode mode)
 /// \brief Opens a file for the web server.
-/// \param filename Name of the file to open.
-/// \param mode in which the file will be opened (we only support UPNP_READ)
-///
-/// This function is called by the web server when it needs to open a file.
-///
-/// \retval UpnpWebFileHandle A valid file handle.
-/// \retval NULL Error.
+/// \param mode in which the data will be opened (we only support UPNP_READ)
 void IOHandler::open(enum UpnpOpenFileMode mode)
 {
 }
 
-/// \fn static int web_read (UpnpWebFileHandle f, char *buf,
-///                          std::size_t length)
 /// \brief Reads a previously opened file sequentially.
-/// \param f Handle of the file.
 /// \param buf  This buffer will be filled by fread.
 /// \param length Number of bytes to read.
 ///
@@ -66,10 +55,7 @@ std::size_t IOHandler::read(std::byte* buf, std::size_t length)
     return -1;
 }
 
-/// \fn static int web_write (UpnpWebFileHandle f,char *buf,
-///                           std::size_t length)
 /// \brief Writes to a previously opened file sequentially.
-/// \param f Handle of the file.
 /// \param buf This buffer will be filled by fwrite.
 /// \param length Number of bytes to fwrite.
 ///
@@ -80,17 +66,12 @@ std::size_t IOHandler::read(std::byte* buf, std::size_t length)
 /// \b length.
 ///
 /// \retval Actual number of bytes written.
-///
-/// \warning Currently this function is not supported.
 std::size_t IOHandler::write(std::byte* buf, std::size_t length)
 {
     return 0;
 }
 
-/// \fn static int web_seek (UpnpWebFileHandle f, long offset,
-///                   int origin)
 /// \brief Performs a seek on an open file.
-/// \param f Handle of the file.
 /// \param offset Number of bytes to move in the file. For seeking forwards
 /// positive values are used, for seeking backwards - negative. \b Offset must
 /// be positive if \b origin is set to \b SEEK_SET
@@ -99,8 +80,6 @@ std::size_t IOHandler::write(std::byte* buf, std::size_t length)
 /// SEEK_SET to specify an absolute offset.
 ///
 /// This function is called by the web server to perform seek on an a file.
-///
-/// \retval 0 On success, non-zero value on error.
 void IOHandler::seek(off_t offset, int whence)
 {
 }
@@ -111,13 +90,9 @@ off_t IOHandler::tell()
     return -1;
 }
 
-/// \fn static int web_close (UpnpWebFileHandle f)
 /// \brief Closes a previously opened file.
-/// \param f Handle of the file.
 ///
 /// Same as fclose()
-///
-/// \retval 0 On success, non-zero on error.
 void IOHandler::close()
 {
 }

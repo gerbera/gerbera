@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    upnp_xml.cc - this file is part of MediaTomb.
+    upnp/xml_builder.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file upnp_xml.cc
+/// \file upnp/xml_builder.cc
 #define GRB_LOG_FAC GrbLogFacility::xml
 
 #include "xml_builder.h" // API

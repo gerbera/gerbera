@@ -70,7 +70,7 @@ public:
 
     /// \brief add a config option
     /// \param option option type to add.
-    /// \param option option to add.
+    /// \param optionValue option to add.
     void addOption(ConfigVal option, const std::shared_ptr<ConfigOption>& optionValue) override;
 
     /// \brief returns a config option of type std::string

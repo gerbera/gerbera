@@ -34,13 +34,14 @@ enum class AutoscanScanMode;
 
 class ConfigAutoscanSetup : public ConfigSetup {
 protected:
+    /// \brief scanMode add only directories with the specified scanmode to the array
     AutoscanScanMode scanMode;
     bool hiddenFiles = false;
     bool followSymlinks = false;
 
     /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
     /// \param element starting element of the nodeset.
-    /// \param scanmode add only directories with the specified scanmode to the array
+    /// \param result vector with contents of array
     bool createOptionFromNode(const pugi::xml_node& element, std::vector<std::shared_ptr<AutoscanDirectory>>& result);
 
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;

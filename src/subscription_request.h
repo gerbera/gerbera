@@ -38,14 +38,14 @@
 #include <string>
 #include <upnp.h>
 
-/// \brief This class represents the Upnp_Subscription_Request type from the SDK.
+/// \brief This class represents the SubscriptionRequest type from the SDK.
 ///
-/// When we get a Upnp_Subscription_Request from the SDK we convert it to our
+/// When we get a SubscriptionRequest from the SDK we convert it to our
 /// structure. We then have the possibility to easily access various
 /// information inside it.
 class SubscriptionRequest {
 protected:
-    /// \brief Upnp_Subscription_Request that comes from the SDK.
+    /// \brief UpnpSubscriptionRequest that comes from the SDK.
     UpnpSubscriptionRequest* upnp_request;
 
     /// \brief ID of the service.
@@ -64,8 +64,8 @@ protected:
     std::string sID;
 
 public:
-    /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
-    /// \param *upnp_request Pointer to the Upnp_Subscription_Request structure.
+    /// \brief The Constructor takes the values from the upnpRequest and fills in internal variables.
+    /// \param upnpRequest Pointer to the UpnpSubscriptionRequest structure.
     explicit SubscriptionRequest(UpnpSubscriptionRequest* upnpRequest);
 
     /// \brief Returns the service ID (should be one of the services that we support).

@@ -22,7 +22,7 @@
 */
 
 /// \file directory_tweak.h
-///\brief Definitions of the DirectoryTweak class.
+/// \brief Definitions of the DirectoryTweak class.
 
 #ifndef __DIRECTORYTWEAK_H__
 #define __DIRECTORYTWEAK_H__
@@ -43,6 +43,7 @@ public:
     /// \brief Adds a new DirectoryTweak to the list.
     ///
     /// \param dir DirectoryTweak to add to the list.
+    /// \param index position of new entry
     /// \return scanID of the newly added DirectoryTweak
     void add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index = std::numeric_limits<std::size_t>::max());
 

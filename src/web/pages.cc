@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    pages.cc - this file is part of MediaTomb.
+    web/pages.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file pages.cc
+/// \file web/pages.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API

@@ -21,7 +21,7 @@
 */
 
 /// \file config_setup_boxlayout.h
-///\brief Definitions of the ConfigBoxLayoutSetup classes.
+/// \brief Definitions of the ConfigBoxLayoutSetup classes.
 
 #ifndef __CONFIG_SETUP_BOXLAYOUT_H__
 #define __CONFIG_SETUP_BOXLAYOUT_H__
@@ -37,6 +37,7 @@ protected:
 
     /// \brief Creates an array of BoxLayout objects from a XML nodeset.
     /// \param element starting element of the nodeset.
+    /// \param result contents of config.
     bool createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<BoxLayoutList>& result);
 
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<BoxLayout>& entry, std::string& optValue, const std::string& status = "") const;

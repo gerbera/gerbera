@@ -1,7 +1,7 @@
 /*GRB*
 Gerbera - https://gerbera.io/
 
-    cds_types.cc - this file is part of Gerbera.
+    cds_enums.cc - this file is part of Gerbera.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -25,7 +25,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file cds_types.cc
+/// \file cds_enums.cc
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_enums.h" // API
 

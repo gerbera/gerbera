@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    upnp_quirks.h - this file is part of Gerbera.
+    quirks.h - this file is part of Gerbera.
 
     Copyright (C) 2020-2024 Gerbera Contributors
 
@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file upnp_quirks.h
+/// \file quirks.h
 
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
@@ -81,8 +81,9 @@ public:
 
     /** \brief Add Samsung specific bookmark information to the request's result.
      *
-     * \param item const std::shared_ptr<CdsItem>& Item which will be played and stores the bookmark information.
-     * \param result pugi::xml_node& Answer content.
+     * \param item CdsItem which will be played and stores the bookmark information.
+     * \param result Answer content.
+     * \param offset number of seconds to jump
      * \return void
      *
      */
@@ -90,7 +91,8 @@ public:
 
     /** \brief Stored bookmark information into the database
      *
-     * \param request const std::unique_ptr<ActionRequest>& request sent by Samsung client, which holds the position information which should be stored
+     * \param database storage to retrieve position from
+     * \param request request sent by Samsung client, which holds the position information which should be stored
      * \return void
      *
      */
@@ -144,7 +146,7 @@ public:
 
     /** \brief Check whether the supplied flags are set
      *
-     * \param bitset of the flags to check
+     * \param flags bitset of the flags to check
      * \return bitset of the flags
      *
      */

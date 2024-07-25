@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    upnp_quirks.cc - this file is part of Gerbera.
+    quirks.cc - this file is part of Gerbera.
 
     Copyright (C) 2020-2024 Gerbera Contributors
 
@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file upnp_quirks.cc
+/// \file quirks.cc
 #define GRB_LOG_FAC GrbLogFacility::clients
 
 #include "quirks.h" // API

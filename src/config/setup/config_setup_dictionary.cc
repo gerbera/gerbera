@@ -33,24 +33,10 @@
 #include <numeric>
 
 /// \brief Creates a dictionary from an XML nodeset.
-/// \param element starting element of the nodeset.
-/// \param nodeName name of each node in the set
-/// \param keyAttr attribute name to be used as a key
-/// \param valAttr attribute name to be used as value
-///
-/// The basic idea is the following:
-/// You have a piece of XML that looks like this
-/// <some-section>
-///    <map from="1" to="2"/>
-///    <map from="3" to="4"/>
-/// </some-section>
-///
-/// This function will create a dictionary with the following
-/// key:value pairs: "1":"2", "3":"4"
-bool ConfigDictionarySetup::createOptionFromNode(const pugi::xml_node& optValue, std::map<std::string, std::string>& result) const
+bool ConfigDictionarySetup::createOptionFromNode(const pugi::xml_node& element, std::map<std::string, std::string>& result) const
 {
-    if (optValue) {
-        const auto dictNodes = optValue.select_nodes(ConfigDefinition::mapConfigOption(nodeOption));
+    if (element) {
+        const auto dictNodes = element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption));
         auto keyAttr = ConfigDefinition::removeAttribute(keyOption);
         auto valAttr = ConfigDefinition::removeAttribute(valOption);
 

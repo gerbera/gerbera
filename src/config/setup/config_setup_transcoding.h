@@ -34,9 +34,9 @@ class ConfigTranscodingSetup : public ConfigSetup {
 protected:
     bool isEnabled = false;
 
-    /// \brief Creates an array of TranscodingProfile objects from an XML
-    /// nodeset.
+    /// \brief Creates an array of TranscodingProfile objects from an XML nodeset.
     /// \param element starting element of the nodeset.
+    /// \param result contents of config.
     static bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result);
 
 public:

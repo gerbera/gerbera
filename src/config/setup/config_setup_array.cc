@@ -35,18 +35,6 @@
 #include <numeric>
 
 /// \brief Creates an array of strings from an XML nodeset.
-/// \param element starting element of the nodeset.
-/// \param nodeOption name of each node in the set
-/// \param attrOption name of the attribute, the value of which shouldbe extracted
-///
-/// Similar to \fn createDictionaryFromNode() this one extracts
-/// data from the following XML:
-/// <some-section>
-///     <tag attr="data"/>
-///     <tag attr="otherdata"/>
-/// <some-section>
-///
-/// This function will create an array like that: ["data", "otherdata"]
 bool ConfigArraySetup::createOptionFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const
 {
     if (element) {

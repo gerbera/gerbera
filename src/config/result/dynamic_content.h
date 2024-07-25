@@ -22,7 +22,7 @@
 */
 
 /// \file dynamic_content.h
-///\brief Definitions of the DynamicContent class.
+/// \brief Definitions of the DynamicContent class.
 
 #ifndef __DYNAMICCONTENT_H__
 #define __DYNAMICCONTENT_H__
@@ -42,6 +42,7 @@ public:
     /// \brief Adds a new DynamicContent to the list.
     ///
     /// \param cont DynamicContent to add to the list.
+    /// \param index position of new entry
     /// \return index of the newly added DynamicContent
     void add(const std::shared_ptr<DynamicContent>& cont, std::size_t index = std::numeric_limits<std::size_t>::max());
 

@@ -83,7 +83,9 @@ protected:
 
 public:
     /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
-    /// \param *upnp_request Pointer to the Upnp_Action_Request structure.
+    /// \param xmlBuilder builder for xml
+    /// \param clients list of all clients
+    /// \param upnpRequest Pointer to the Upnp_Action_Request structure.
     ActionRequest(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, std::shared_ptr<ClientManager> clients, UpnpActionRequest* upnpRequest);
     ~ActionRequest() = default;
 

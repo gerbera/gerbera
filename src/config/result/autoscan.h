@@ -97,10 +97,15 @@ public:
     /// \param location autoscan path
     /// \param mode scan mode
     /// \param recursive process directories recursively
+    /// \param persistent entry is from config file
     /// \param interval rescan interval in seconds (only for timed scan mode)
     /// \param hidden include hidden files
+    /// \param followSymlinks follow symbolic links
+    /// \param mediaType type of media to load from directory
+    /// \param containerMap mapping of media types to container types
     /// zero means none.
-    AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent, unsigned int interval = 0, bool hidden = false, bool followSymlinks = false, int mediaType = -1,
+    AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent,
+        unsigned int interval = 0, bool hidden = false, bool followSymlinks = false, int mediaType = -1,
         const std::map<AutoscanMediaMode, std::string>& containerMap = ContainerTypesDefaults);
 
     void setDatabaseID(int databaseID) { this->databaseID = databaseID; }

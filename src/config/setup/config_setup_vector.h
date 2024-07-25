@@ -21,7 +21,7 @@
 */
 
 /// \file config_setup_vector.h
-///\brief Definitions of the ConfigSetupVector class.
+/// \brief Definitions of the ConfigSetupVector class.
 
 #ifndef __CONFIG_SETUP_VECTOR_H__
 #define __CONFIG_SETUP_VECTOR_H__
@@ -36,18 +36,19 @@ protected:
     std::vector<std::vector<std::pair<std::string, std::string>>> defaultEntries;
 
     /// \brief Creates a vector from an XML nodeset.
-    /// \param optValue starting element of the nodeset.
+    /// \param element starting element of the nodeset.
+    /// \param result contents of config.
     ///
     /// The basic idea is the following:
     /// You have a piece of XML that looks like this
-    /// <some-section>
-    ///    <map from="1" via="3" to="2"/>
-    ///    <map from="3" to="4"/>
-    /// </some-section>
+    /// \<some-section\>
+    ///    \<map from="1" via="3" to="2"/\>
+    ///    \<map from="3" to="4"/\>
+    /// \</some-section\>
     ///
     /// This function will create a vector with the following
     /// list: { { "1", "3", "2" }, {"3", "", "4"}
-    bool createOptionFromNode(const pugi::xml_node& optValue, std::vector<std::vector<std::pair<std::string, std::string>>>& result) const;
+    bool createOptionFromNode(const pugi::xml_node& element, std::vector<std::vector<std::pair<std::string, std::string>>>& result) const;
 
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<VectorOption>& value, const std::string& optValue, const std::string& status = "") const;
 

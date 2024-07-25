@@ -68,6 +68,7 @@ protected:
     bool required = false;
     bool useDefault = false;
     StringCheckFunction rawCheck {};
+    /// \brief defaultValue default value if option not found
     std::string defaultValue;
     const char* help;
 
@@ -93,6 +94,11 @@ public:
     pugi::xpath_node_set getXmlTree(const pugi::xml_node& element) const;
 
     ConfigVal option;
+
+    /// \param xpath option xpath
+    /// The xpath parameter has XPath syntax:
+    /// "/path/to/option" will return the text value of the given "option" element
+    /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
     const char* xpath;
 
     ConfigSetup(ConfigVal option, const char* xpath, const char* help, bool required = false, const char* defaultValue = "")
@@ -143,12 +149,6 @@ public:
     bool hasXmlElement(const pugi::xml_node& root) const;
 
     /// \brief Returns a config option with the given xpath, if option does not exist a default value is returned.
-    /// \param xpath option xpath
-    /// \param defaultValue default value if option not found
-    ///
-    /// The xpath parameter has XPath syntax:
-    /// "/path/to/option" will return the text value of the given "option" element
-    /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
     std::string getXmlContent(const pugi::xml_node& root, bool trim = true);
 
     virtual void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr);

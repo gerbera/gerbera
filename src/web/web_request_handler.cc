@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    web_request_handler.cc - this file is part of MediaTomb.
+    web/web_request_handler.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file web_request_handler.cc
+/// \file web/web_request_handler.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "web_request_handler.h" // API

@@ -21,7 +21,7 @@
 */
 
 /// \file config_setup_client.h
-///\brief Definitions of the ConfigClientSetup classes.
+/// \brief Definitions of the ConfigClientSetup classes.
 
 #ifndef __CONFIG_SETUP_CLIENT_H__
 #define __CONFIG_SETUP_CLIENT_H__
@@ -38,6 +38,7 @@ protected:
 
     /// \brief Creates an array of ClientConfig objects from a XML nodeset.
     /// \param element starting element of the nodeset.
+    /// \param result contents of config.
     static bool createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<ClientConfigList>& result);
 
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status = "") const;

@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    watch_dir.h - this file is part of Gerbera.
+    watch.h - this file is part of Gerbera.
 
     Copyright (C) 2024 Gerbera Contributors
 
@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file watch_dir.h
+/// \file watch.h
 
 #ifndef __WATCH_DIR_H__
 #define __WATCH_DIR_H__

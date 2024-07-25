@@ -51,6 +51,7 @@ protected:
 public:
     /// \brief Initializes the internal buffer.
     /// \param buffer all operations will be done on this buffer.
+    /// \param length size of the buffer
     MemIOHandler(const void* buffer, int length);
     explicit MemIOHandler(const std::string& str);
     ~MemIOHandler() override;

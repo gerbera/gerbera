@@ -207,15 +207,11 @@ public:
     virtual void addObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) = 0;
 
     /// \brief Adds a virtual container chain specified by path.
-    /// \param path container path separated by '/'. Slashes in container
-    /// titles must be escaped.
-    /// \param lastClass upnp:class of the last container in the chain, it
-    /// is only set when the container is created for the first time.
-    /// \param lastRefID reference id of the last container in the chain,
-    /// INVALID_OBJECT_ID indicates that the id will not be set.
+    /// \param parentContainerId the id of the parent container
+    /// \param virtualPath container path separated by '/'
+    /// \param cont reference of the object to copy data from. Slashes in container
+    /// title must be escaped.
     /// \param containerID will be filled in by the function
-    /// \param updateID will be filled in by the function only if it is set to INVALID_OBJECT_ID
-    /// and it is necessary to update a container. Otherwise it will be left unchanged.
     ///
     /// The function gets a path (i.e. "/Audio/All Music/") and will create
     /// the container path if needed. The container ID will be filled in with
@@ -244,20 +240,19 @@ public:
     /// \brief Loads a given (pc directory) object, identified by the given path
     /// from the database
     /// \param path the path of the object; object is interpreted as directory
-    /// \param wasRegularFile was a regular file before file was moved, now fs::is_regular_file returns false (used for inotify events)
+    /// \param fileType type of the database entry to search
     /// \return the CdsObject
     virtual std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, DbFileType fileType = DbFileType::Auto) = 0;
 
     /// \brief checks for a given (pc directory) object, identified by the given path
     /// from the database
-    /// \param path the path of the object; object is interpreted as directory
-    /// \param wasRegularFile was a regular file before file was moved, now fs::is_regular_file returns false (used for inotify events)
+    /// \param fullpath the path of the object; object is interpreted as directory
+    /// \param fileType type of the database entry to search
     /// \return the obejectID
     virtual int findObjectIDByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) = 0;
 
     /// \brief increments the updateIDs for the given objectIDs
     /// \param ids pointer to the array of ids
-    /// \param size number of entries in the given array
     /// \return a String for UPnP: a CSV list; for every existing object:
     ///  "id,update_id"
     virtual std::string incrementUpdateIDs(const std::unordered_set<int>& ids) = 0;
@@ -280,16 +275,17 @@ public:
     /// the object is a reference to another object, the "all" flag
     /// determines, if the main object will be removed too.
     /// \param objectID the object id of the object to remove
+    /// \param path delete resource references to this path
     /// \param all if true and the object to be removed is a reference
-    /// \param objectType pointer to an int; will be filled with the objectType of
-    /// the removed object, if not NULL
     /// \return changed container ids
     virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, const fs::path& path, bool all) = 0;
 
     /// \brief Get all objects under the given parentID.
     /// \param parentID parent container
     /// \param withoutContainer if false: all children are returned; if true: only items are returned
-    /// \return DBHash containing the objectID's - nullptr if there are none!
+    /// \param ret list of matching objects
+    /// \param full do full hierarchy search
+    /// \return number of objects found
     virtual std::size_t getObjects(int parentID, bool withoutContainer, std::unordered_set<int>& ret, bool full) = 0;
     virtual std::vector<int> getRefObjects(int objectId) = 0;
     virtual std::unordered_set<int> getUnreferencedObjects() = 0;
@@ -350,7 +346,8 @@ public:
     /// present in the database. If it does not exist it will be created, but
     /// it's content will not be added.
     ///
-    /// \param *changedContainer returns the ID for the UpdateManager
+    /// \param path location of the container to handle
+    /// \param changedContainer returns the ID for the UpdateManager
     /// \return objectID of the container given by path
     virtual int ensurePathExistence(const fs::path& path, int* changedContainer) = 0;
 

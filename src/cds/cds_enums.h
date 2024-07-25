@@ -1,7 +1,7 @@
 /*GRB*
 Gerbera - https://gerbera.io/
 
-    cds_types.h - this file is part of Gerbera.
+    cds_enums.h - this file is part of Gerbera.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -25,7 +25,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file cds_types.h
+/// \file cds_enums.h
 
 #ifndef __CDS_TYPES_H__
 #define __CDS_TYPES_H__

@@ -94,9 +94,6 @@ public:
 class BoxLayoutList {
 public:
     /// \brief Adds a new BoxLayout to the list.
-    ///
-    /// \param box BoxLayout to add to the list.
-    /// \return scanID of the newly added BoxLayout
     void add(const std::shared_ptr<BoxLayout>& layout, std::size_t index = std::numeric_limits<std::size_t>::max());
 
     std::shared_ptr<BoxLayout> get(std::size_t id, bool edit = false) const;

@@ -82,11 +82,14 @@ public:
 
     /// \brief Add a subscriber
     ///
-    /// @param timerSubscriber Caller must ensure that before this pointer is
+    /// \param timerSubscriber Caller must ensure that before this pointer is
     /// freed the subscriber is removed by calling removeTimerSubscriber() with
     /// the same parameter argument, unless the subscription is for a one-shot
     /// timer and the subscriber has already been notified (and removed from the
     /// subscribers list).
+    /// \param notifyInterval timespan between two notifications of the subscriber
+    /// \param parameter additional parameter to provide when raising
+    /// \param once only call once
     void addTimerSubscriber(Subscriber* timerSubscriber, std::chrono::seconds notifyInterval, std::shared_ptr<Parameter> parameter, bool once = false);
     void removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<Parameter> parameter, bool dontFail = false);
     void triggerWait();

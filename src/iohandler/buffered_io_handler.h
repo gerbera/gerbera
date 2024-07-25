@@ -45,6 +45,7 @@
 class BufferedIOHandler : public IOHandlerBufferHelper {
 public:
     /// \brief get an instance of a BufferedIOHandler
+    /// \param config Access configuration
     /// \param underlyingHandler the IOHandler from which the buffer should read
     /// \param bufSize the size of the buffer in bytes
     /// \param maxChunkSize the maximum size of the chunks which are read by the buffer

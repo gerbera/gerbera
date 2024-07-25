@@ -175,7 +175,7 @@ protected:
     static int registerVirtualDirCallbacks();
 
     /// \brief Dispatch incoming UPnP root device events.
-    /// \param eventtype Upnp_EventType, identifying what kind of event came in.
+    /// \param eventType identifying what kind of event came in.
     /// \param event Pointer to the event.
     ///
     /// This function is called when a UPnP root device event is received,
@@ -188,7 +188,7 @@ protected:
     int handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* event);
 
     /// \brief Dispatch incoming UPnP client events.
-    /// \param eventtype Upnp_EventType, identifying what kind of event came in.
+    /// \param eventType identifying what kind of event came in.
     /// \param event Pointer to the event.
     ///
     int handleUpnpClientEvent(Upnp_EventType eventType, const void* event);

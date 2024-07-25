@@ -119,14 +119,16 @@ public:
     /// \param URL full url to the item: http://somewhere.com/something.mpg
     void setURL(const std::string& URL) { this->location = URL; }
 
+#if 0
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)
-    // void copyTo(std::shared_ptr<CdsObject> obj) override;
+    void copyTo(std::shared_ptr<CdsObject> obj) override;
 
     /// \brief Checks if current object is equal to obj.
     ///
-    /// See description for CdsObject::equals() for details.
-    // int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
+    /// See description for \fn CdsObject#equals() for details.
+    int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
+#endif
 
     /// \brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() const override;

@@ -1,8 +1,8 @@
 /*GRB*
 
-Gerbera - https://gerbera.io/
+    Gerbera - https://gerbera.io/
 
-    URLUtil.h - this file is part of Gerbera.
+    url_utils.h - this file is part of Gerbera.
 
     Copyright (C) 2022-2024 Gerbera Contributors
 
@@ -19,7 +19,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file URLUtil.h
+/// \file url_utils.h
 
 #ifndef GERBERA_URL_UTILS_H
 #define GERBERA_URL_UTILS_H
@@ -37,6 +37,7 @@ namespace URLUtils {
 /// Only '?' and '/' separators are allowed, otherwise an exception will
 /// be thrown.
 /// \param url URL that has to be processed
+/// \param separator split url at this character
 /// \return pair of path and parameters which reference the input-view of url
 ///
 /// This function splits the url into its path and parameter components.

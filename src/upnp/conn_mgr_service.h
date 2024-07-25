@@ -84,7 +84,7 @@ public:
     bool processSubscriptionRequest(const SubscriptionRequest& request) override;
 
     /// \brief Sends out an event to all subscribed devices.
-    /// \param sourceProtocol_CSV Comma Separated Value list of protocol information
+    /// \param sourceProtocolCsv Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
     bool sendSubscriptionUpdate(const std::string& sourceProtocolCsv) override;
