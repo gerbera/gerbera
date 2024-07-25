@@ -44,6 +44,8 @@ option(WITH_DEBUG             "Enables debug logging" ON)
 option(WITH_DEBUG_OPTIONS     "Enables dedicated debug messages" ON)
 option(WITH_TESTS             "Build unit tests" OFF)
 
+option(BUILD_DOC              "Add 'doc' target to generate documentation" OFF)
+
 # For building packages without depending on the old system libupnp
 option(STATIC_LIBUPNP         "Link to libupnp statically" OFF)
 
@@ -703,6 +705,11 @@ if(WITH_SYSTEMD AND (${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
     else()
         message(FATAL_ERROR "Systemd not found")
     endif()
+endif()
+
+if(BUILD_DOC)
+  include(cmake/generateDoc.cmake REQUIRED)
+  generate_documentation("${PROJECT_SOURCE_DIR}/doc/Doxyfile.in")
 endif()
 
 if(WITH_TESTS)

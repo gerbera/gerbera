@@ -30,7 +30,8 @@
         "WITH_LASTFM": "OFF",
         "WITH_DEBUG": "ON",
         "WITH_DEBUG_OPTIONS": "ON",
-        "WITH_TESTS": "ON"
+        "WITH_TESTS": "ON",
+        "BUILD_DOC": "ON"
       }
     },
     {
@@ -57,7 +58,8 @@
         "WITH_LASTFM": "OFF",
         "WITH_DEBUG": "ON",
         "WITH_DEBUG_OPTIONS": "ON",
-        "WITH_TESTS": "ON"
+        "WITH_TESTS": "ON",
+        "BUILD_DOC": "ON"
       }
     },
     {
