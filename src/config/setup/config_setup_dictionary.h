@@ -40,26 +40,27 @@ protected:
 
     /// \brief Creates a dictionary from an XML nodeset.
     /// \param element starting element of the nodeset.
-    /// \param nodeName name of each node in the set
-    /// \param keyAttr attribute name to be used as a key
-    /// \param valAttr attribute name to be used as value
+    /// \param result contents of config.
     ///
     /// The basic idea is the following:
     /// You have a piece of XML that looks like this
-    /// <some-section>
-    ///    <map from="1" to="2"/>
-    ///    <map from="3" to="4"/>
-    /// </some-section>
+    /// \<some-section\>
+    ///    \<map from="1" to="2"/\>
+    ///    \<map from="3" to="4"/\>
+    /// \</some-section\>
     ///
     /// This function will create a dictionary with the following
     /// key:value pairs: "1":"2", "3":"4"
-    bool createOptionFromNode(const pugi::xml_node& optValue, std::map<std::string, std::string>& result) const;
+    bool createOptionFromNode(const pugi::xml_node& element, std::map<std::string, std::string>& result) const;
 
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status = "") const;
 
 public:
+    /// \brief name of each node in the set
     ConfigVal nodeOption {};
+    /// \brief attribute name to be used as a key
     ConfigVal keyOption {};
+    /// \brief attribute name to be used as value
     ConfigVal valOption {};
 
     explicit ConfigDictionarySetup(ConfigVal option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr,

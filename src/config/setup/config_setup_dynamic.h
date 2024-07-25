@@ -21,7 +21,7 @@
 */
 
 /// \file config_setup_dynamic.h
-///\brief Definitions of the ConfigDynamicContentSetup classes.
+/// \brief Definitions of the ConfigDynamicContentSetup classes.
 
 #ifndef __CONFIG_SETUP_DYNAMIC_H__
 #define __CONFIG_SETUP_DYNAMIC_H__
@@ -37,6 +37,7 @@ class ConfigDynamicContentSetup : public ConfigSetup {
 protected:
     /// \brief Creates an array of DynamicContent objects from a XML nodeset.
     /// \param element starting element of the nodeset.
+    /// \param result contents of config.
     static bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result);
 
     bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status = "") const;

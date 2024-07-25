@@ -36,35 +36,42 @@
 
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
+#include "config/config_val.h"
+#include "content/autoscan_setting.h"
 #include "content/content.h"
 #include "exceptions.h"
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
-void Web::AddObject::addContainer(int parentID)
+void Web::AddObject::addContainer(int parentID, const std::string& title, const std::string& upnp_class)
 {
-    auto cont = content->addContainer(parentID, param("title"), param("class"));
+    auto cont = content->addContainer(parentID, title, upnp_class);
 
     std::string flags = param("flags");
-    if (!flags.empty())
+    if (!flags.empty()) {
         cont->setFlags(CdsObject::makeFlag(flags));
+        content->updateObject(cont, false);
+    }
 }
 
-std::shared_ptr<CdsItem> Web::AddObject::addItem(int parentID)
+std::shared_ptr<CdsItem> Web::AddObject::addItem(int parentID, const std::string& title, const std::string& upnp_class, const fs::path& location)
 {
     auto item = std::make_shared<CdsItem>();
     item->setParentID(parentID);
 
-    item->setTitle(param("title"));
-    item->setLocation(param("location"));
-    item->setClass(param("class"));
+    item->setTitle(title);
+    item->setLocation(location);
+    item->setClass(upnp_class);
 
+    if (isHiddenFile(item)) {
+        log_debug("Hidden file '{}' cannot be added", item->getLocation().c_str());
+        return {};
+    }
     std::string tmp = param("description");
     if (!tmp.empty()) {
         item->addMetaData(MetadataFields::M_DESCRIPTION, tmp);
     }
 
-    /// \todo is there a default setting? autoscan? import settings?
     tmp = param("mime-type");
     if (tmp.empty())
         tmp = MIMETYPE_DEFAULT;
@@ -79,16 +86,16 @@ std::shared_ptr<CdsItem> Web::AddObject::addItem(int parentID)
     return item;
 }
 
-std::shared_ptr<CdsItemExternalURL> Web::AddObject::addUrl(int parentID, bool addProtocol)
+std::shared_ptr<CdsItemExternalURL> Web::AddObject::addUrl(int parentID, const std::string& title, const std::string& upnp_class, bool addProtocol, const fs::path& location)
 {
     auto item = std::make_shared<CdsItemExternalURL>();
     std::string protocolInfo;
 
     item->setParentID(parentID);
 
-    item->setTitle(param("title"));
-    item->setURL(param("location"));
-    item->setClass(param("class"));
+    item->setTitle(title);
+    item->setURL(location);
+    item->setClass(upnp_class);
 
     std::string desc = param("description");
     if (!desc.empty()) {
@@ -120,44 +127,58 @@ std::shared_ptr<CdsItemExternalURL> Web::AddObject::addUrl(int parentID, bool ad
     return item;
 }
 
+bool Web::AddObject::isHiddenFile(const std::shared_ptr<CdsObject>& cdsObj)
+{
+    AutoScanSetting asSetting;
+    asSetting.recursive = true;
+    asSetting.followSymlinks = config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
+    asSetting.hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
+    asSetting.mergeOptions(config, "/");
+    return content->isHiddenFile(fs::directory_entry(cdsObj->getLocation()), false, asSetting);
+}
+
 void Web::AddObject::process()
 {
     checkRequest();
 
-    auto objType = std::string(param("obj_type"));
-    auto location = fs::path(param("location"));
+    auto title = std::string(param("title"));
+    if (title.empty())
+        throw_std_runtime_error("Empty 'title'");
 
-    if (param("title").empty())
-        throw_std_runtime_error("empty title");
-
-    if (param("class").empty())
-        throw_std_runtime_error("empty class");
+    auto upnp_class = std::string(param("class"));
+    if (upnp_class.empty())
+        throw_std_runtime_error("Empty 'class'");
 
     int parentID = intParam("parent_id", 0);
-
     std::shared_ptr<CdsObject> obj;
-
     bool allowFifo = false;
-    std::error_code ec;
 
+    auto objType = std::string(param("obj_type"));
     if (objType == STRING_OBJECT_TYPE_CONTAINER) {
-        this->addContainer(parentID);
+        // add additional container in virtual structure
+        this->addContainer(parentID, title, upnp_class);
     } else if (objType == STRING_OBJECT_TYPE_ITEM) {
+        // reference to some local file on disk
+        auto location = fs::path(param("location"));
         if (location.empty())
-            throw_std_runtime_error("no location given");
+            throw_std_runtime_error("Empty 'location'");
+        std::error_code ec;
         if (!isRegularFile(location, ec))
-            throw_std_runtime_error("file not found {}", ec.message());
-        obj = this->addItem(parentID);
+            throw_std_runtime_error("File '{}' not found {}", location.string(), ec.message());
+        obj = this->addItem(parentID, title, upnp_class, location);
         allowFifo = true;
     } else if (objType == STRING_OBJECT_TYPE_EXTERNAL_URL) {
+        // URL to serve to upnp devices
+        auto location = fs::path(param("location"));
         if (location.empty())
-            throw_std_runtime_error("No URL given");
-        obj = this->addUrl(parentID, true);
+            throw_std_runtime_error("Empty 'location' to be used as URL");
+        obj = this->addUrl(parentID, title, upnp_class, true, location);
     } else {
         throw_std_runtime_error("Unknown object type: {}", objType.c_str());
     }
 
     if (obj) {
+        // only for ITEM or EXTERNAL_URL
         obj->setVirtual(true);
         if (objType == STRING_OBJECT_TYPE_ITEM) {
             content->addVirtualItem(obj, allowFifo);

@@ -21,7 +21,7 @@
 */
 
 /// \file config_setup_path.h
-///\brief Definitions of the ConfigPathSetup class.
+/// \brief Definitions of the ConfigPathSetup class.
 
 #ifndef __CONFIG_SETUP_PATH_H__
 #define __CONFIG_SETUP_PATH_H__
@@ -30,10 +30,15 @@
 
 enum class ConfigPathArguments {
     none = 0,
+    /// \brief isFile file or directory
     isFile = (1 << 0),
+    /// \brief file/directory must exist
     mustExist = (1 << 1),
+    /// \brief option must not be empty
     notEmpty = (1 << 2),
+    /// \brief file has to be executable
     isExe = (1 << 3),
+    /// \brief path can be empty
     resolveEmpty = (1 << 4),
 };
 
@@ -52,8 +57,6 @@ protected:
     ConfigPathArguments arguments;
     /// \brief resolve path against home, an exception is raised if path does not exist on filesystem.
     /// \param path path to be resolved
-    /// \param isFile file or directory
-    /// \param mustExist file/directory must exist
     fs::path resolvePath(fs::path path) const;
 
     void loadArguments(const std::map<std::string, std::string>* arguments = nullptr);

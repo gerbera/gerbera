@@ -49,7 +49,7 @@ constexpr auto PROTOCOL = std::string_view("http-get");
 /// \brief splits the given string into array of strings using a separator character.
 /// \param str String to split
 /// \param sep separator character
-/// \param treat subsequent separators as empty array elements
+/// \param empty treat subsequent separators as empty array elements
 /// \return array of strings
 std::vector<std::string> splitString(std::string_view str, char sep, bool empty = false);
 
@@ -102,8 +102,7 @@ void replaceString(std::string& str, std::string_view from, std::string_view to)
 void replaceAllString(std::string& str, std::string_view from, std::string_view to);
 
 /// \brief Render HTML that is doing a redirect to the given ip, port and html page.
-/// \param ip IP address as string.
-/// \param port Port as string.
+/// \param addr IP address as string.
 /// \param page HTML document to redirect to.
 /// \return string representing the desired HTML document.
 std::string httpRedirectTo(std::string_view addr, std::string_view page = "");
@@ -130,7 +129,7 @@ std::string hexMd5(const void* data, std::size_t length);
 std::string hexStringMd5(std::string_view str);
 
 /// \brief Convert an array of strings to a CSV list, with additional protocol information
-/// \param array that needs to be converted
+/// \param mimeTypes array that needs to be converted
 /// \return string containing the CSV list
 std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes);
 
@@ -139,16 +138,18 @@ std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes);
 ///
 /// \param mimetype the mimetype that should be inserted
 /// \param protocol the protocol which should be inserted (default: "http-get")
+/// \param extend extend the protocolInfo
 /// \return The rendered protocolInfo String
 std::string renderProtocolInfo(std::string_view mimetype, std::string_view protocol = PROTOCOL, std::string_view extend = "");
 
 /// \brief Extracts mimetype from the protocol info string.
 /// \param protocol info string as used in the protocolInfo attribute
+/// \return mime-type in protocol
 std::string getMTFromProtocolInfo(std::string_view protocol);
 
 /// \brief Parses a protocolInfo string (see renderProtocolInfo).
 ///
-/// \param protocolInfoStr the String from renderProtocolInfo.
+/// \param protocolInfo the String from renderProtocolInfo.
 /// \return Protocol (i.e. http-get).
 std::string_view getProtocol(std::string_view protocolInfo);
 

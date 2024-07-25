@@ -59,9 +59,12 @@ protected:
 class ProcessIOHandler : public IOHandler {
 public:
     /// \brief Sets the filename to work with.
+    /// \param content content handler instance
     /// \param filename to read the data from
+    /// \param mainProc main process to observe
     /// \param procList associated processes that will be terminated once
     /// they are no longer needed
+    /// \param ignoreSeek don't throw exception when seek is called
     ProcessIOHandler(const std::shared_ptr<Content>& content,
         fs::path filename, std::shared_ptr<Executor> mainProc,
         std::vector<std::unique_ptr<ProcListItem>> procList = {},

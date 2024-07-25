@@ -49,7 +49,17 @@ class FileRequestHandler : public RequestHandler {
 public:
     explicit FileRequestHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::shared_ptr<MetadataService> metadataService);
 
+    /// \brief Returns information about the requested content.
+    /// \param filename Requested URL
+    /// \param info UpnpFileInfo structure, quite similar to statbuf.
+    /// \return the ClientInfo details to be provided to quirks
     const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) override;
+
+    /// \brief Prepares the output buffer and calls the process function.
+    /// \param filename Requested URL
+    /// \param quirks allows modifying the content of the response based on the client
+    /// \param mode either UPNP_READ or UPNP_WRITE
+    /// \return the appropriate IOHandler for the request.
     std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
 
 private:

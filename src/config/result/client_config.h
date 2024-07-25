@@ -22,7 +22,7 @@
 */
 
 /// \file client_config.h
-///\brief Definitions of the ClientConfig classes.
+/// \brief Definitions of the ClientConfig classes.
 
 #ifndef __CLIENTCONFIG_H__
 #define __CLIENTCONFIG_H__
@@ -39,9 +39,6 @@ class ClientConfig;
 class ClientConfigList {
 public:
     /// \brief Adds a new ClientConfig to the list.
-    ///
-    /// \param dir ClientConfig to add to the list.
-    /// \return scanID of the newly added ClientConfig
     void add(const std::shared_ptr<ClientConfig>& client, std::size_t index = std::numeric_limits<std::size_t>::max());
 
     std::shared_ptr<ClientConfig> get(std::size_t id, bool edit = false) const;
@@ -74,9 +71,17 @@ public:
 
     /// \brief Creates a new ClientConfig object.
     /// \param flags quirks flags
+    /// \param group client group
     /// \param ip ip address
     /// \param userAgent user agent
-    ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, const std::map<std::string, std::string>& mimeMappings, const std::map<std::string, std::string>& headers, int captionInfoCount, int stringLimit, bool multiValue);
+    /// \param mimeMappings special mappings for client
+    /// \param headers additional headers from client
+    /// \param captionInfoCount max count if \<captionInfo\> tags
+    /// \param stringLimit maximum length of name strings
+    /// \param multiValue client support multi value attributes
+    ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent,
+        const std::map<std::string, std::string>& mimeMappings, const std::map<std::string, std::string>& headers,
+        int captionInfoCount, int stringLimit, bool multiValue);
 
     const ClientInfo& getClientInfo() const { return clientInfo; }
 

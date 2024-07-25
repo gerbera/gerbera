@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    upnp_clients.cc - this file is part of Gerbera.
+    web/clients.cc - this file is part of Gerbera.
 
     Copyright (C) 2020-2024 Gerbera Contributors
 
@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file clients.cc
+/// \file web/clients.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API

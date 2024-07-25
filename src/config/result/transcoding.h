@@ -147,9 +147,9 @@ public:
 
     /// \brief Adds or overwrites a resource attribute.
     ///
-    /// This maps to an attribute of the <res> tag in the DIDL-Lite XML.
+    /// This maps to an attribute of the \<res\> tag in the DIDL-Lite XML.
     ///
-    /// \param name attribute name
+    /// \param attribute attribute name
     /// \param value attribute value
     void setAttributeOverride(ResourceAttribute attribute, const std::string& value);
     std::string getAttributeOverride(ResourceAttribute attribute) const;
@@ -162,6 +162,7 @@ public:
     /// be extended to a dictionary style options if more things like that
     /// become necessary; we need a possibility to have a more fine grained
     /// detection of content where mimetype alone is not enough.
+    /// \param theora new value of the flag
     void setTheora(bool theora) { this->theora = theora; }
     bool isTheora() const { return theora; }
 

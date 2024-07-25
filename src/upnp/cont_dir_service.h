@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    upnp_cds.h - this file is part of MediaTomb.
+    cont_dir_service.h - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file upnp_cds.h
+/// \file cont_dir_service.h
 /// \brief Definition of the ContentDirectoryService class.
 #ifndef __UPNP_CDS_H__
 #define __UPNP_CDS_H__
@@ -144,7 +144,7 @@ public:
     bool processSubscriptionRequest(const SubscriptionRequest& request) override;
 
     /// \brief Sends out an event to all subscribed devices.
-    /// \param containerUpdateIDs_CSV Comma Separated Value list of container update ID's (as defined in the UPnP CDS specs)
+    /// \param containerUpdateIDsCsv Comma Separated Value list of container update ID's (as defined in the UPnP CDS specs)
     ///
     /// When something in the content directory chagnes, we will send out
     /// an event to all subscribed devices. Container updates are supported,

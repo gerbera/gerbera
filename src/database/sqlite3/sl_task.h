@@ -49,7 +49,9 @@ public:
     virtual ~SLTask() = default;
 
     /// \brief run the sqlite3 task
+    /// \param db database api reference
     /// \param sl The instance of Sqlite3Database to do the queries with.
+    /// \param throwOnError throw exception when error occurs
     virtual void run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError = true) = 0;
 
     /// \brief returns true if the task is not completed
@@ -97,6 +99,7 @@ class SLInitTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 init task
     explicit SLInitTask(std::shared_ptr<Config> config, unsigned int hashie);
+
     void run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError = true) override;
 
     std::string_view taskType() const override { return "InitTask"; }
@@ -112,6 +115,7 @@ public:
     /// \brief Constructor for the sqlite3 select task
     /// \param query The SQL query string
     explicit SLSelectTask(const std::string& query);
+
     void run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError = true) override;
     [[nodiscard]] std::shared_ptr<Sqlite3Result> getResult() const { return pres; }
 
@@ -129,8 +133,11 @@ class SLExecTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 exec task
     /// \param query The SQL query string
+    /// \param getLastInsertId return the last created object
+    /// \param warnOnly no not throw exceptions
     SLExecTask(const std::string& query, bool getLastInsertId, bool warnOnly = false);
     SLExecTask(const std::string& query, std::string eKey);
+
     void run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError = true) override;
     int getLastInsertId() const { return lastInsertId; }
     bool checkKey(const std::string& key) const override { return key != eKey; }
@@ -146,11 +153,12 @@ protected:
     std::string eKey;
 };
 
-/// \brief A task for the sqlite3 thread to do a SQL exec.
+/// \brief A task for the sqlite3 thread to do a SQLite backup.
 class SLBackupTask : public SLTask {
 public:
     /// \brief Constructor for the sqlite3 backup task
     SLBackupTask(std::shared_ptr<Config> config, bool restore);
+
     void run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError = true) override;
 
     std::string_view taskType() const override { return "BackupTask"; }

@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    sqlite3_database.cc - this file is part of MediaTomb.
+    sqlite_database.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file sqlite3_database.cc
+/// \file sqlite_database.cc
 #define GRB_LOG_FAC GrbLogFacility::sqlite3
 
 #include "sqlite_database.h" // API

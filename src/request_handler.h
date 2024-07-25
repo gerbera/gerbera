@@ -77,6 +77,7 @@ public:
     virtual const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) = 0;
 
     /// \brief Prepares the output buffer and calls the process function.
+    /// \param filename Requested URL
     /// \param quirks allows modifying the content of the response based on the client
     /// \param mode either UPNP_READ or UPNP_WRITE
     /// \return the appropriate IOHandler for the request.

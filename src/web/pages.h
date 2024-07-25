@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    pages.h - this file is part of MediaTomb.
+    web/pages.h - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,16 +29,18 @@
     $Id$
 */
 
-/// \file pages.h
-/// \brief Defines the various WebRequestHandler subclasses which process requests coming to the ui.
+/// \file web/pages.h
+/// \brief Defines the various WebRequestHandler sub classes which process requests coming from WebUi.
 #ifndef __WEB_PAGES_H__
 #define __WEB_PAGES_H__
 
 #include "web_request_handler.h"
 
+#include "util/grb_fs.h"
+
 #include <chrono>
 
-// forward declaration
+// forward declarations
 class AutoscanDirectory;
 class CdsItemExternalURL;
 class CdsItem;
@@ -65,7 +67,7 @@ public:
     void process() override;
 };
 
-/// \brief Browser container tree
+/// \brief Call from WebUi to create container tree in database view
 class Containers : public WebRequestHandler {
 protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
@@ -75,7 +77,7 @@ public:
     void process() override;
 };
 
-/// \brief Browser directory tree
+/// \brief Call from WebUi to create directory tree in filesystem view
 class Directories : public WebRequestHandler {
     using WebRequestHandler::WebRequestHandler;
 
@@ -83,7 +85,7 @@ public:
     void process() override;
 };
 
-/// \brief Browser file list
+/// \brief Call from WebUi to list files in filesystem view
 class Files : public WebRequestHandler {
     using WebRequestHandler::WebRequestHandler;
 
@@ -91,7 +93,7 @@ public:
     void process() override;
 };
 
-/// \brief Browser item list
+/// \brief Call from WebUi to list items in database view
 class Items : public WebRequestHandler {
 protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
@@ -101,7 +103,7 @@ public:
     void process() override;
 };
 
-/// \brief Browser add item
+/// \brief Call from WebUi to add item from filesystem view
 class Add : public WebRequestHandler {
     using WebRequestHandler::WebRequestHandler;
 
@@ -109,7 +111,7 @@ public:
     void process() override;
 };
 
-/// \brief Browser remove item
+/// \brief Call from WebUi to Remove item in database view
 class Remove : public WebRequestHandler {
     using WebRequestHandler::WebRequestHandler;
 
@@ -117,7 +119,7 @@ public:
     void process() override;
 };
 
-/// \brief Browser remove item
+/// \brief Call from WebUi to Edit Item in database view
 class EditLoad : public WebRequestHandler {
 protected:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
@@ -127,7 +129,7 @@ public:
     void process() override;
 };
 
-/// \brief Browser remove item
+/// \brief Call from WebUi to Save Item properties in database view
 class EditSave : public WebRequestHandler {
     using WebRequestHandler::WebRequestHandler;
 
@@ -135,7 +137,7 @@ public:
     void process() override;
 };
 
-/// \brief Browser add object.
+/// \brief Call from WebUi to Add Object in database view
 class AddObject : public WebRequestHandler {
     using WebRequestHandler::WebRequestHandler;
 
@@ -143,12 +145,13 @@ public:
     void process() override;
 
 protected:
-    void addContainer(int parentID);
-    std::shared_ptr<CdsItem> addItem(int parentID);
-    std::shared_ptr<CdsItemExternalURL> addUrl(int parentID, bool addProtocol);
+    void addContainer(int parentID, const std::string& title, const std::string& upnp_class);
+    std::shared_ptr<CdsItem> addItem(int parentID, const std::string& title, const std::string& upnp_class, const fs::path& location);
+    std::shared_ptr<CdsItemExternalURL> addUrl(int parentID, const std::string& title, const std::string& upnp_class, bool addProtocol, const fs::path& location);
+    bool isHiddenFile(const std::shared_ptr<CdsObject>& cdsObj);
 };
 
-/// \brief autoscan add and remove
+/// \brief Call from WebUi to add or remove autoscan
 class Autoscan : public WebRequestHandler {
     using WebRequestHandler::WebRequestHandler;
 
@@ -159,7 +162,7 @@ protected:
     static void autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node& element);
 };
 
-/// \brief nothing :)
+/// \brief Call from WebUi to do nothing :)
 class VoidType : public WebRequestHandler {
     using WebRequestHandler::WebRequestHandler;
 
@@ -184,6 +187,10 @@ public:
 };
 
 /// \brief Chooses and creates the appropriate handler for processing the request.
+/// \param context runtime context
+/// \param content content handler
+/// \param server server instance
+/// \param xmlBuilder builder for xml string
 /// \param page identifies what type of the request we are dealing with.
 /// \return the appropriate request handler.
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
@@ -201,7 +208,7 @@ public:
     void process() override;
 };
 
-/// \brief load configuration
+/// \brief Call from WebUi to load configuration
 class ConfigLoad : public WebRequestHandler {
 protected:
     std::vector<ConfigValue> dbEntries;
@@ -231,7 +238,7 @@ public:
     void process() override;
 };
 
-/// \brief save configuration
+/// \brief Call from WebUi to save configuration
 class ConfigSave : public WebRequestHandler {
 protected:
     std::shared_ptr<Context> context;

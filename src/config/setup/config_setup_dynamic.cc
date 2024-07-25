@@ -37,7 +37,6 @@
 #include <numeric>
 
 /// \brief Creates an array of DynamicContent objects from a XML nodeset.
-/// \param element starting element of the nodeset.
 bool ConfigDynamicContentSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result)
 {
     if (!element)

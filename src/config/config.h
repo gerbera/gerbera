@@ -62,7 +62,7 @@ public:
 
     /// \brief add a config option
     /// \param option option type to add.
-    /// \param option option to add.
+    /// \param optionValue option to add.
     virtual void addOption(ConfigVal option, const std::shared_ptr<ConfigOption>& optionValue) = 0;
 
     virtual std::shared_ptr<ConfigOption> getConfigOption(ConfigVal option) const = 0;

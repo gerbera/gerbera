@@ -108,7 +108,7 @@ public:
     virtual std::shared_ptr<CdsContainer> addContainer(int parentID, const std::string& title, const std::string& upnpClass) = 0;
     /// \brief Adds a virtual item.
     /// \param obj item to add
-    /// \param allow_fifo flag to indicate that it is ok to add a fifo,
+    /// \param allowFifo flag to indicate that it is ok to add a fifo,
     /// otherwise only regular files or directories are allowed.
     ///
     /// This function makes sure that the file is first added to
@@ -123,6 +123,7 @@ public:
     virtual void addObject(const std::shared_ptr<CdsObject>& obj, bool firstChild) = 0;
     /// \brief Updates an object in the database.
     /// \param obj the object to update
+    /// \param sendUpdates send updates to subscribed clients
     virtual void updateObject(const std::shared_ptr<CdsObject>& obj, bool sendUpdates = true) = 0;
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
@@ -139,11 +140,9 @@ public:
 
     /// \brief Adds a file or directory to the database.
     /// \param dirEnt absolute path to the file
-    /// \param recursive recursive add (process subdirecotories)
-    /// \param async queue task or perform a blocking call
-    /// \param hidden true allows to import hidden files, false ignores them
-    /// \param rescanResource true allows to reload a directory containing a resource
-    /// \param queue for immediate processing or in normal order
+    /// \param asSetting Settings for import
+    /// \param lowPriority for immediate processing or in normal order
+    /// \param cancellable can be canceled
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
     virtual std::shared_ptr<CdsObject> addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting,
         bool lowPriority = false, bool cancellable = true)
@@ -151,16 +150,16 @@ public:
     /// \brief Adds a file or directory to the database.
     /// \param dirEnt absolute path to the file
     /// \param rootpath absolute path to the container root
-    /// \param recursive recursive add (process subdirecotories)
-    /// \param async queue task or perform a blocking call
-    /// \param hidden true allows to import hidden files, false ignores them
-    /// \param rescanResource true allows to reload a directory containing a resource
-    /// \param queue for immediate processing or in normal order
+    /// \param asSetting Settings for import
+    /// \param lowPriority for immediate processing or in normal order
+    /// \param cancellable can be canceled
     /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
     virtual std::shared_ptr<CdsObject> addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
         bool lowPriority = false, bool cancellable = true)
         = 0;
     /// \brief Adds a virtual container chain specified by path.
+    /// \param chain list of container objects to create
+    /// \param refItem object to take artwork from
     /// \return ID of the last container in the chain.
     virtual std::pair<int, bool> addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain, const std::shared_ptr<CdsObject>& refItem) = 0;
     // returns nullptr if file does not exist or is ignored due to configuration

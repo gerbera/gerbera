@@ -77,9 +77,6 @@ std::string ConfigPathSetup::getXmlContent(const pugi::xml_node& root)
 }
 
 /// \brief resolve path against home, an exception is raised if path does not exist on filesystem.
-/// \param path path to be resolved
-/// \param isFile file or directory
-/// \param mustExist file/directory must exist
 fs::path ConfigPathSetup::resolvePath(fs::path path) const
 {
     if (!isSet(ConfigPathArguments::resolveEmpty) && path.empty()) {

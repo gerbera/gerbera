@@ -151,7 +151,8 @@ public:
     std::shared_ptr<Session> createSession(std::chrono::seconds timeout);
 
     /// \brief Returns the instance to a Session with a given sessionID
-    /// \param ID of the Session.
+    /// \param sessionID id of the Session.
+    /// \param doLock lock the thread
     /// \return instance of the Session with a given ID or nullptr if no session with that ID was found.
     std::shared_ptr<Session> getSession(const std::string& sessionID, bool doLock = true) const;
 

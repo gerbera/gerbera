@@ -22,7 +22,7 @@
 
 /// \file search_handler.h
 /// \brief Definitions of classes supporting implementation of UPnP search
-/// Implements functionality defined in standardizeddcps\MediaServer_4 and MediaRenderer_3\UPnP-av-ContentDirectory-v4-Service-20150630.pdf
+/// Implements functionality defined in "standardizeddcps/MediaServer_4 and MediaRenderer_3/UPnP-av-ContentDirectory-v4-Service-20150630.pdf"
 /// Document available in upnpresources.zip, download from here:
 /// https://openconnectivity.org/developer/specifications/upnp-resources/upnp
 #ifndef __SEARCH_HANDLER_H__

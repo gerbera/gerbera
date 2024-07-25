@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    upnp_headers.h - this file is part of Gerbera.
+    headers.h - this file is part of Gerbera.
 
     Copyright (C) 2016-2024 Gerbera Contributors
 
@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file upnp_headers.h
+/// \file headers.h
 
 #ifndef GERBERA_HEADERS_H
 #define GERBERA_HEADERS_H

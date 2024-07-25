@@ -47,6 +47,7 @@ public:
     /// the index in the AutoscanList.
     ///
     /// \param dir AutoscanDirectory to add to the list.
+    /// \param index position of new entry
     /// \return scanID of the newly added AutoscanDirectory
     int add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index = std::numeric_limits<std::size_t>::max());
 

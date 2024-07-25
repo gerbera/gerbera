@@ -208,12 +208,26 @@ public:
 
     std::pair<bool, std::shared_ptr<CdsObject>> createSingleItem(const fs::directory_entry& dirEntry);
     std::shared_ptr<CdsContainer> createSingleContainer(int parentContainerId, const fs::directory_entry& dirEntry, const std::string& upnpClass);
+
+    /// \brief create layout of a single itme
+    /// \param state item state
+    /// \param object object to create layout
+    /// \param parent parent container
+    /// \param task import task associated
     void fillSingleLayout(const std::shared_ptr<ContentState>& state, std::shared_ptr<CdsObject> object, const std::shared_ptr<CdsContainer>& parent, const std::shared_ptr<GenericTask>& task);
 
     bool isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, const AutoScanSetting& settings);
 
     void updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
+
+    /// \brief Adds a virtual container chain specified by path.
+    /// \param parentContainerId id of the root container
+    /// \param chain list of container objects to create
+    /// \param refItem object to take artwork from
+    /// \param createdIds of the last container in the chain.
+    /// \return last id created
     std::pair<int, bool> addContainerTree(int parentContainerId, const std::vector<std::shared_ptr<CdsObject>>& chain, const std::shared_ptr<CdsObject>& refItem, std::vector<int>& createdIds);
+
     void finishScan(const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
 
     std::shared_ptr<CdsContainer> getContainer(const fs::path& location) const;

@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    runtime.h - this file is part of MediaTomb.
+    scripting_runtime.h - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file runtime.h
+/// \file scripting_runtime.h
 
 #ifndef __SCRIPTING_RUNTIME_H__
 #define __SCRIPTING_RUNTIME_H__

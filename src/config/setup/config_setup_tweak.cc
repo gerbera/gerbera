@@ -37,7 +37,6 @@
 #include <numeric>
 
 /// \brief Creates an array of DirectoryTweak objects from a XML nodeset.
-/// \param element starting element of the nodeset.
 bool ConfigDirectorySetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result)
 {
     if (!element)

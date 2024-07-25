@@ -57,10 +57,12 @@ class CdsResource {
 public:
     /// \brief creates a new resource object.
     ///
-    /// The CdsResource object represents a <res> tag in the DIDL-Lite XML.
+    /// The CdsResource object represents a \<res\> tag in the DIDL-Lite XML.
     ///
-    /// \param ContentHandler handlerType of the associated handler
-    /// \param Purpose purpose of the associated handler
+    /// \param handlerType of the associated handler
+    /// \param purpose of the associated handler
+    /// \param options options of resource
+    /// \param parameters parameters of resource
     explicit CdsResource(ContentHandler handlerType, ResourcePurpose purpose, std::string_view options = {}, std::string_view parameters = {});
     CdsResource(ContentHandler handlerType, ResourcePurpose purpose,
         std::map<ResourceAttribute, std::string> attributes,
@@ -71,9 +73,9 @@ public:
     void setResId(int rId) { resId = rId; }
     /// \brief Adds a resource attribute.
     ///
-    /// This maps to an attribute of the <res> tag in the DIDL-Lite XML.
+    /// This maps to an attribute of the \<res\> tag in the DIDL-Lite XML.
     ///
-    /// \param name attribute name
+    /// \param res attribute name
     /// \param value attribute value
     void addAttribute(ResourceAttribute res, std::string value);
 

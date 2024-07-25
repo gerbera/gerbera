@@ -54,12 +54,6 @@ bool ConfigSetup::hasXmlElement(const pugi::xml_node& root) const
 }
 
 /// \brief Returns a config option with the given xpath, if option does not exist a default value is returned.
-/// \param xpath option xpath
-/// \param defaultValue default value if option not found
-///
-/// The xpath parameter has XPath syntax:
-/// "/path/to/option" will return the text value of the given "option" element
-/// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
 std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
 {
     pugi::xpath_node xpathNode = root.select_node(cpath.c_str());

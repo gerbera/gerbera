@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    web_request_handler.h - this file is part of MediaTomb.
+    web/web_request_handler.h - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file web_request_handler.h
+/// \file web/web_request_handler.h
 /// \brief Definition of the WebRequestHandler class.
 #ifndef __WEB_REQUEST_HANDLER_H__
 #define __WEB_REQUEST_HANDLER_H__

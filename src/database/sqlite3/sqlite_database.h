@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    sqlite3_database.h - this file is part of MediaTomb.
+    sqlite_database.h - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file sqlite3_database.h
-///\brief Definitions of the Sqlite3Database, Sqlite3Result and Sqlite3Row classes.
+/// \file sqlite_database.h
+/// \brief Definitions of the Sqlite3Database, Sqlite3Result and Sqlite3Row classes.
 
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__

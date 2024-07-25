@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    session_manager.cc - this file is part of MediaTomb.
+    web/session_manager.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file session_manager.cc
+/// \file web/session_manager.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "session_manager.h" // API

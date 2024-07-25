@@ -47,8 +47,8 @@ class Config;
 class IOHandlerBufferHelper : public IOHandler {
 public:
     /// \brief get an instance of a IOHandlerBufferHelper
+    /// \param config Access to the configuration
     /// \param bufSize the size of the buffer in bytes
-    /// \param maxChunkSize the maximum size of the chunks which are read by the buffer
     /// \param initialFillSize the number of bytes which have to be in the buffer
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay

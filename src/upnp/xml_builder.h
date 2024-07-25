@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    upnp_xml.h - this file is part of MediaTomb.
+    upnp/xml_builder.h - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file upnp_xml.h
+/// \file upnp/xml_builder.h
 /// \brief Provides various XML related functions, basically a toolkit.
 #ifndef __UPNP_XML_H__
 #define __UPNP_XML_H__
@@ -67,13 +67,16 @@ public:
     /// \return pugi::xml_document representing the newly created XML.
     ///
     /// Basically it renders an XML that looks like the following:
-    /// <u:actionNameResponse xmlns:u="serviceType"/>
+    /// \<u:actionNameResponse xmlns:u="serviceType"/\>
     /// Further response information (various parameters, DIDL-Lite or
     /// whatever can then be adapted to it.
     std::unique_ptr<pugi::xml_document> createResponse(const std::string& actionName, const std::string& serviceType) const;
 
     /// \brief Renders the DIDL-Lite representation of an object in the content directory.
     /// \param obj Object to be rendered as XML.
+    /// \param stringLimit maximum length of string
+    /// \param parent parent xml node
+    /// \param quirks inject special handling for clients
     ///
     /// This function looks at the object, and renders the DIDL-Lite representation of it -
     /// either a container or an item
@@ -89,7 +92,12 @@ public:
     /// \param parent Parent node to render the result into
     /// \param clientSpecificAttrs A map containing extra client specific res attributes (like resolution, etc.)
     /// \param clientGroup The clients group for play tracking
-    void renderResource(const CdsObject& obj, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs, const std::string& clientGroup, const std::map<std::string, std::string>& mimeMappings) const;
+    /// \param mimeMappings mappings of mime-types
+    void renderResource(const CdsObject& obj,
+        const CdsResource& resource, pugi::xml_node& parent,
+        const std::map<std::string, std::string>& clientSpecificAttrs,
+        const std::string& clientGroup,
+        const std::map<std::string, std::string>& mimeMappings) const;
 
     std::optional<std::string> renderContainerImageURL(const std::shared_ptr<CdsContainer>& cont) const;
     std::optional<std::string> renderItemImageURL(const std::shared_ptr<CdsItem>& item) const;

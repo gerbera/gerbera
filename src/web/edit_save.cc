@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    edit_save.cc - this file is part of MediaTomb.
+    web/edit_save.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file edit_save.cc
+/// \file web/edit_save.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
