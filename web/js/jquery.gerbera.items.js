@@ -4,7 +4,7 @@
 
     jquery.gerbera.items.js - this file is part of Gerbera.
 
-    Copyright (C) 2016-2023 Gerbera Contributors
+    Copyright (C) 2016-2024 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -23,11 +23,6 @@
 $.widget('grb.dataitems', {
 
   _create: function () {
-    this.element.html('');
-    this.element.addClass('grb-dataitems');
-    const table = $('<table></table>').addClass('table');
-    const tbody = $('<tbody></tbody>');
-    let tcontainer = tbody;
     const data = this.options.data;
     const onDelete = this.options.onDelete;
     const onEdit = this.options.onEdit;
@@ -35,6 +30,12 @@ $.widget('grb.dataitems', {
     const onAdd = this.options.onAdd;
     const itemType = this.options.itemType;
     const pager = this.options.pager;
+
+    this.element.html('');
+    this.element.addClass('grb-dataitems');
+    const table = $('<table></table>').addClass('table').addClass('grb-table-'+ itemType);
+    const tbody = $('<tbody></tbody>');
+    let tcontainer = tbody;
     let row, content, text;
 
     if (data.length === 0) {
@@ -46,7 +47,8 @@ $.widget('grb.dataitems', {
 
     if (data.length > 0) {
       if (itemType === 'db' && pager && pager.gridMode > 0) {
-        row = $('<tr></tr>');
+        row = $('<tr></tr>').addClass('grb-item-row-' + pager.gridMode);
+        table.addClass('grb-item-table-' + pager.gridMode);
         content = $('<td></td>');
         const div = $('<div style="display: flex; flex-wrap: wrap;"></div>');
         content.append(div);
@@ -72,7 +74,7 @@ $.widget('grb.dataitems', {
             break;
           default:
             content = $('<td></td>');
-            row = $('<tr class="datagrid-row"></tr>');
+            row = $('<tr class="datagrid-row"></tr>').addClass('grb-item-row-' + gm);
         }
 
         var itemText = item.text;
@@ -120,10 +122,14 @@ $.widget('grb.dataitems', {
           text.text(itemText).appendTo(content);
         }
         if (item.image) {
-          if (pager && pager.gridMode === 3 && item.upnp_class.startsWith("object.item.imageItem"))
-            text.prepend($('<img class="pull-left grb-image" src="' + item.url + '"/>'));
-          else
+          if (pager && pager.gridMode === 3) {
+            if (item.upnp_class.startsWith("object.item.imageItem"))
+               text.prepend($('<img class="pull-left grb-image" src="' + item.url + '"/>'));
+             else
+               text.prepend($('<img class="pull-left grb-image" src="' + item.image + '"/>'));
+          } else {
             text.prepend($('<img class="pull-left rounded grb-thumbnail" src="' + item.image + '"/>'));
+          }
         } else {
           let icon = "fa-file-o";
           if (item.upnp_class) {
@@ -141,7 +147,7 @@ $.widget('grb.dataitems', {
 
         let buttons;
         if (!pager || pager.gridMode === 0) {
-          const buttonsCell = $('<td></td>');
+          const buttonsCell = $('<td></td>').addClass('grb-item-buttons');
           buttons = $('<div></div>');
           buttons.appendTo(buttonsCell);
           buttonsCell.appendTo(row);
@@ -150,7 +156,7 @@ $.widget('grb.dataitems', {
           buttons.appendTo(content);
         }
         if (itemType === 'db') {
-          buttons.addClass('grb-item-buttons pull-right justify-content-center align-items-center');
+          buttons.addClass('pull-right justify-content-center align-items-center');
 
           const downloadIcon = $('<span></span>');
           downloadIcon.prop('title', 'Download item');
@@ -190,7 +196,7 @@ $.widget('grb.dataitems', {
           }
         }
         if (!pager || pager.gridMode === 0) {
-          row.addClass('grb-item');
+          row.addClass('grb-item').addClass('grb-item-row-0');
           row.prepend(content);
           tcontainer.append(row);
         } else {
@@ -206,8 +212,10 @@ $.widget('grb.dataitems', {
       tcontainer.append(row);
     }
 
-    const tfoot = this.buildFooter(pager);
-    table.append(tfoot);
+    if (itemType === 'db') {
+      const tfoot = this.buildFooter(pager);
+      table.append(tfoot);
+    }
 
     this.element.append(table);
     const activePagerItem = this.element.find('#activePagerItem');

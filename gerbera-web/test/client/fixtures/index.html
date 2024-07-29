@@ -1,274 +1,530 @@
 <div id="container">
-    <div id="header">
-        <nav class="navbar navbar-expand-md navbar-dark" id="nav">
-            <button type="button" class="navbar-toggler navbar-toggler-right"
-                    data-toggle="collapse" data-target="#navbarContent" aria-controls="navbarContent"
-                    aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <a class="navbar-brand" href="https://github.com/gerbera/gerbera" title="Gerbera"><img class="d-inline-block align-top" alt="Gerbera Logo" /></a>
-            <div class="collapse navbar-collapse" id="navbarContent">
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item">
-                        <a id="nav-home" class="nav-link" data-gerbera-menu-cmd="HOME"><i class="fa fa-home"></i><span> Home</span> <span class="sr-only">(current)</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a id="nav-db" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db"><i class="fa fa-database"></i><span> Database</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a id="nav-fs" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs"><i class="fa fa-folder-open"></i><span> File System</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a id="nav-clients" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_CLIENTS" data-gerbera-type="clients"><i class="fa fa-desktop"></i><span> Clients</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a id="nav-config" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_CONFIG" data-gerbera-type="config"><i class="fa fa-sliders"></i><span> Config</span></a>
-                    </li>
-                </ul>
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a id="docs" class="nav-link disabled noactive" href="https://docs.gerbera.io/en/stable/" target="_blank"><i class="fa fa-question-circle"></i><span> Documentation</span></a>
-                    </li>
-                    <li class="nav-item">
-                        <a id="report-issue" class="nav-link noactive" href="http://github.com/gerbera/gerbera/issues" target="_blank"><i class="fa fa-bug"></i><span> Report an Issue <i class="fa fa-external-link" aria-hidden="true"></i></span></a>
-                    </li>
-                </ul>
-                <form id="login-form" class="form-inline my-2 my-lg-0">
-                    <input id="username" class="form-control mr-sm-2 login-field" placeholder="Username" style="display:none;" />
-                    <input id="password" type="password" class="form-control mr-sm-2 login-field" placeholder="Password"
-                           style="display:none;" />
-                    <button id="login-submit" class="btn btn-success my-2 my-sm-0">Login</button>
-                    <button id='logout' type="button" class="btn btn-danger my-2 my-sm-0" style="display:none;">Logout</button>
-                </form>
+  <div id="header">
+    <nav class="navbar navbar-expand-md navbar-dark" id="nav">
+      <button
+        type="button"
+        class="navbar-toggler navbar-toggler-right"
+        data-toggle="collapse"
+        data-target="#navbarContent"
+        aria-controls="navbarContent"
+        aria-expanded="false"
+        aria-label="Toggle navigation"
+      >
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <a
+        id="nav-home"
+        class="navbar-brand"
+        data-gerbera-menu-cmd="HOME"
+        href="https://github.com/gerbera/gerbera"
+        title="Gerbera"
+      >
+        <img class="d-inline-block align-top" alt="Gerbera Logo" />
+      </a>
+      <div class="collapse navbar-collapse" id="navbarContent">
+        <ul id="navbar" class="navbar-nav mr-auto">
+          <li class="nav-item">
+            <a id="nav-db" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db">
+              <i class="fa fa-database"></i>
+              <span>Database</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a id="nav-fs" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs">
+              <i class="fa fa-folder-open"></i>
+              <span>File System</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              id="nav-clients"
+              class="nav-link disabled"
+              data-gerbera-menu-cmd="SELECT_CLIENTS"
+              data-gerbera-type="clients"
+            >
+              <i class="fa fa-desktop"></i>
+              <span>Clients</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              id="nav-config"
+              class="nav-link disabled"
+              data-gerbera-menu-cmd="SELECT_CONFIG"
+              data-gerbera-type="config"
+            >
+              <i class="fa fa-sliders"></i>
+              <span>Config</span>
+            </a>
+          </li>
+        </ul>
+        <ul class="navbar-nav">
+          <li class="nav-item">
+            <a id="docs" class="nav-link disabled noactive" href="https://docs.gerbera.io/en/stable/" target="_blank">
+              <i class="fa fa-question-circle"></i>
+              <span>Documentation</span>
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              id="report-issue"
+              class="nav-link noactive"
+              href="https://github.com/gerbera/gerbera/issues"
+              target="_blank"
+            >
+              <i class="fa fa-bug"></i>
+              <span>
+                Report an Issue
+                <i class="fa fa-external-link" aria-hidden="true"></i>
+              </span>
+            </a>
+          </li>
+          <li class="nav-item" hidden>
+            <div class="nav-link disabled noactive" id="gerbera-version">
+              <i class="fa fa-code-fork"></i>
+              <span></span>
             </div>
-        </nav>
-        <div id="trail" class="row no-gutters"></div>
-    </div>
-    <div id="home" class="row">
-        <div class="col-sm offset-sm-2">
-            <div id="homeintro">
-                <h2 class="row">Welcome to Gerbera&nbsp;<span id="gerbera-title-version"></span></h2>
-                <p>Gerbera is an open source UPnP-AV media server.</p>
-            </div>
-            <a id="addlink" href="javascript:;" onclick="$('#nav-fs').click(); // Replace with hashchange handling">
-                <h4><i class="fa fa-plus"></i> Add some files</h4>
+          </li>
+          <a id="logout" type="button" class="btn btn-danger my-2 my-sm-0" style="display: none">Logout</a>
+        </ul>
+      </div>
+    </nav>
+    <div id="trail" class="row no-gutters"></div>
+  </div>
+  <div id="home" class="h-100 overflow-auto">
+    <div class="d-flex flex-column h-100">
+      <div id="homeintro" class="grb-trail flowers">
+        <div class="row mx-2">
+          <div class="col md-10 m-auto text-center">
+            <h2 class="row">
+              Welcome to Gerbera&nbsp;
+              <span id="gerbera-title-version"></span>
+            </h2>
+            <p>Gerbera is an open source UPnP-AV media server.</p>
+          </div>
+        </div>
+      </div>
+      <div id="login" style="display: none">
+        <form id="login-form" class="form p-5 my-lg-5 mx-lg-auto col-lg-4 bg-white">
+          <div class="form-group">
+            <label for="username">Username</label>
+            <input type="text" class="form-control" id="username" />
+          </div>
+          <div class="form-group">
+            <label for="password">Password</label>
+            <input type="password" class="form-control" id="password" />
+          </div>
+          <button id="login-submit" class="btn btn-primary btn-block">Login</button>
+        </form>
+      </div>
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-6 col-12" id="homelinks" style="display: none">
+            <div class="card-style mt-3">
+              <a id="addlink" href="javascript:;" onclick="$('#nav-fs').click(); // Replace with hashchange handling">
+                <h4>
+                  <i class="fa fa-plus"></i>
+                  Add some files
+                </h4>
                 <p>Browse and import your multimedia files into Gerbera.</p>
-            </a>
-            <a id="viewlink" href="javascript:;" onclick="$('#nav-db').click(); // Replace with hashchange handling">
-                <h4><i class="fa fa-files-o"></i> View indexed files</h4>
+              </a>
+              <a id="viewlink" href="javascript:;" onclick="$('#nav-db').click(); // Replace with hashchange handling">
+                <h4>
+                  <i class="fa fa-files-o"></i>
+                  View indexed files
+                </h4>
                 <span>View, update and remove files from Gerbera.</span>
-            </a>
-            <a id="clientlink" href="javascript:;" onclick="$('#nav-clients').click();">
-                <h4><i class="fa fa-desktop"></i> Show connected clients</h4>
+              </a>
+              <a id="clientlink" href="javascript:;" onclick="$('#nav-clients').click();">
+                <h4>
+                  <i class="fa fa-desktop"></i>
+                  Show connected clients
+                </h4>
                 <span>Show clients detected by Gerbera and their profile details</span>
-            </a>
-            <a id="configlink" href="javascript:;" onclick="$('#nav-config').click();">
-                <h4><i class="fa fa-sliders"></i> Edit Configuration</h4>
+              </a>
+              <a id="configlink" href="javascript:;" onclick="$('#nav-config').click();">
+                <h4>
+                  <i class="fa fa-sliders"></i>
+                  Edit Configuration
+                </h4>
                 <span>Change settings for Gerbera</span>
-            </a>
-        </div>
-        <div id="server-status" class="col md-3">
-          <h4>Server Statistics</h4>
-          <table class="table">
-            <tr id="status-head" class="status-head">
-              <th>File Type</th>
-              <th><div class="stat-value">Count</div></th>
-              <th><div class="stat-value">Size</div></th>
-            </tr>
-            <tr id="status-total" class="status-line">
-              <td><i class="fa fa-list"></i>&nbsp;&nbsp;Total Media Files</td>
-              <td><div class="stat-value" id="status-total-count"></div></td>
-              <td><div class="stat-value" id="status-total-size"></div></td>
-            </tr>
-            <tr id="status-item">
-              <td><div class="stat-value text-muted">General</div></td>
-              <td><div class="stat-value text-muted" id="status-item-count"></div></td>
-              <td><div class="stat-value text-muted" id="status-item-size"></div></td>
-            </tr>
-            <tr id="status-audio" class="status-line">
-              <td><i class="fa fa-music"></i>&nbsp;&nbsp;Audio</td>
-              <td><div class="stat-value" id="status-audio-count"></div></td>
-              <td><div class="stat-value" id="status-audio-size"></div></td>
-            </tr>
-            <tr id="status-audioMusic">
-              <td><div class="stat-value text-muted">Music Tracks</div></td>
-              <td><div class="stat-value text-muted" id="status-audioMusic-count"></div></td>
-              <td><div class="stat-value text-muted" id="status-audioMusic-size"></div></td>
-            </tr>
-            <tr id="status-audioBook">
-              <td><div class="stat-value text-muted">Audiobooks</div></td>
-              <td><div class="stat-value text-muted" id="status-audioBook-count"></div></td>
-              <td><div class="stat-value text-muted" id="status-audioBook-size"></div></td>
-            </tr>
-            <tr id="status-audioBroadcast">
-              <td><div class="stat-value text-muted">Audio Broadcasts</div></td>
-              <td><div class="stat-value text-muted" id="status-audioBroadcast-count"></div></td>
-              <td><div class="stat-value text-muted" id="status-audioBroadcast-size"></div></td>
-            </tr>
-            <tr id="status-video" class="status-line">
-              <td><i class="fa fa-film"></i>&nbsp;&nbsp;Videos</td>
-              <td><div class="stat-value" id="status-video-count"></div></td>
-              <td><div class="stat-value" id="status-video-size"></div></td>
-            </tr>
-            <tr id="status-videoMovie">
-              <td><div class="stat-value text-muted">Movies</div></td>
-              <td><div class="stat-value text-muted" id="status-videoMovie-count"></div></td>
-              <td><div class="stat-value text-muted" id="status-videoMovie-size"></div></td>
-            </tr>
-            <tr id="status-videoBroadcast">
-              <td><div class="stat-value text-muted">Video Broadcasts</div></td>
-              <td><div class="stat-value text-muted" id="status-videoBroadcast-count"></div></td>
-              <td><div class="stat-value text-muted" id="status-videoBroadcast-size"></div></td>
-            </tr>
-            <tr id="status-videoMusicVideoClip">
-              <td><div class="stat-value text-muted">Music Video Clips</div></td>
-              <td><div class="stat-value text-muted" id="status-videoMusicVideoClip-count"></div></td>
-              <td><div class="stat-value text-muted" id="status-videoMusicVideoClip-size"></div></td>
-            </tr>
-            <tr id="status-image" class="status-line">
-              <td><i class="fa fa-camera"></i>&nbsp;&nbsp;Images</td>
-              <td><div class="stat-value" id="status-image-count"></div></td>
-              <td><div class="stat-value" id="status-image-size"></div></td>
-            </tr>
-            <tr id="status-imagePhoto">
-              <td><div class="stat-value text-muted">Photos</div></td>
-              <td><div class="stat-value text-muted" id="status-imagePhoto-count"></div></td>
-              <td><div class="stat-value text-muted" id="status-imagePhoto-size"></div></td>
-            </tr>
-            <tr id="status-text" class="status-line">
-              <td><i class="fa fa-file-text"></i>&nbsp;&nbsp;Text</td>
-              <td><div class="stat-value" id="status-text-count"></div></td>
-              <td><div class="stat-value" id="status-text-size"></div></td>
-            </tr>
-          </table>
-        </div>
-        <div id="server-empty" class="col md-3">
-          <h4>Set up Gerbera with persistent content</h4>
-          <span class="text-muted">A bit more complicated but safer in the long run</span>
-          <ul>
-            <li>Add autoscan entry in config.xml (<a target="_blank" href="https://docs.gerbera.io/en/latest/config-import.html#autoscan">See documentation</a>)</li>
-            <li>Adjust further settings as required</li>
-            <li>Restart Gerbera service</li>
-            <li>Wait for import to complete</li>
-            <li>Check logs for error messages</li>
-          </ul>
-          <h4>Set up Gerbera with dynamic content</h4>
-          <span class="text-muted">Easier to create but all setup is lost when your database is deleted or corrupted</span>
-          <ul>
-            <li>Go to <i class="fa fa-folder-open"></i> <strong>File System</strong> view</li>
-            <li>Look for folders containing your media files</li>
-            <li>Click <i class="fa fa-history"></i> <strong>Add Autoscan Item</strong></li>
-            <li>Wait for import to complete</li>
-            <li>Check logs for error messages</li>
-          </ul>
-        </div>
-    </div>
-    <div id="content" style="display: none">
-        <div id="left">
-            <div id="tree">
+              </a>
             </div>
-        </div>
-        <div id="right">
-            <div id="datagrid">
+          </div>
+          <div id="server-status" class="col md-3">
+            <div class="card-style p-3 mt-3">
+              <h4>Server Statistics</h4>
+              <table class="table">
+                <tr id="status-head" class="status-head">
+                  <th>File Type</th>
+                  <th>
+                    <div class="stat-value">Count</div>
+                  </th>
+                  <th>
+                    <div class="stat-value">Size</div>
+                  </th>
+                </tr>
+                <tr id="status-item">
+                  <td>
+                    <div class="stat-value text-muted">General</div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-item-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-item-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-audio" class="status-line">
+                  <td>
+                    <i class="fa fa-music"></i>
+                    &nbsp;&nbsp;Audio
+                  </td>
+                  <td>
+                    <div class="stat-value" id="status-audio-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value" id="status-audio-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-audioMusic">
+                  <td>
+                    <div class="stat-value text-muted">Music Tracks</div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-audioMusic-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-audioMusic-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-audioBook">
+                  <td>
+                    <div class="stat-value text-muted">Audiobooks</div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-audioBook-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-audioBook-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-audioBroadcast">
+                  <td>
+                    <div class="stat-value text-muted">Audio Broadcasts</div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-audioBroadcast-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-audioBroadcast-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-video" class="status-line">
+                  <td>
+                    <i class="fa fa-film"></i>
+                    &nbsp;&nbsp;Videos
+                  </td>
+                  <td>
+                    <div class="stat-value" id="status-video-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value" id="status-video-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-videoMovie">
+                  <td>
+                    <div class="stat-value text-muted">Movies</div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-videoMovie-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-videoMovie-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-videoBroadcast">
+                  <td>
+                    <div class="stat-value text-muted">Video Broadcasts</div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-videoBroadcast-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-videoBroadcast-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-videoMusicVideoClip">
+                  <td>
+                    <div class="stat-value text-muted">Music Video Clips</div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-videoMusicVideoClip-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-videoMusicVideoClip-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-image" class="status-line">
+                  <td>
+                    <i class="fa fa-camera"></i>
+                    &nbsp;&nbsp;Images
+                  </td>
+                  <td>
+                    <div class="stat-value" id="status-image-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value" id="status-image-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-imagePhoto">
+                  <td>
+                    <div class="stat-value text-muted">Photos</div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-imagePhoto-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value text-muted" id="status-imagePhoto-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-text" class="status-line">
+                  <td>
+                    <i class="fa fa-file-text"></i>
+                    &nbsp;&nbsp;Text
+                  </td>
+                  <td>
+                    <div class="stat-value" id="status-text-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value" id="status-text-size"></div>
+                  </td>
+                </tr>
+                <tr id="status-total" class="status-line">
+                  <td>
+                    <i class="fa fa-list"></i>
+                    &nbsp;&nbsp;Total Media Files
+                  </td>
+                  <td>
+                    <div class="stat-value" id="status-total-count"></div>
+                  </td>
+                  <td>
+                    <div class="stat-value" id="status-total-size"></div>
+                  </td>
+                </tr>
+              </table>
             </div>
+          </div>
+          <div id="server-empty" class="col md-3">
+            <h4>Set up Gerbera with persistent content</h4>
+            <span class="text-muted">A bit more complicated but safer in the long run</span>
+            <ul>
+              <li>
+                Add autoscan entry in config.xml (
+                <a target="_blank" href="https://docs.gerbera.io/en/latest/config-import.html#autoscan"
+                  >See documentation</a
+                >
+                )
+              </li>
+              <li>Adjust further settings as required</li>
+              <li>Restart Gerbera service</li>
+              <li>Wait for import to complete</li>
+              <li>Check logs for error messages</li>
+            </ul>
+            <h4>Set up Gerbera with dynamic content</h4>
+            <span class="text-muted"
+              >Easier to create but all setup is lost when your database is deleted or corrupted</span
+            >
+            <ul>
+              <li>
+                Go to
+                <i class="fa fa-folder-open"></i>
+                <strong>File System</strong>
+                view
+              </li>
+              <li>Look for folders containing your media files</li>
+              <li>
+                Click
+                <i class="fa fa-history"></i>
+                <strong>Add Autoscan Item</strong>
+              </li>
+              <li>Wait for import to complete</li>
+              <li>Check logs for error messages</li>
+            </ul>
+          </div>
         </div>
+      </div>
     </div>
-    <div id="clients" style="display: none">
-        <div id="clientframe">
-            <div id="clientgrid">
-            </div>
-        </div>
+  </div>
+  <div id="content" style="display: none">
+    <div id="left">
+      <div id="tree"></div>
     </div>
-    <div id="config" style="display: none">
-        <div id="configframe">
-            <div id="configgrid">
-            </div>
-        </div>
+    <div id="splitterBar">&nbsp;</div>
+    <div style="display: flex; justify-content: start">
+      <button id="hideTree" class="btn btn-default">
+        <i class="fa fa-angle-double-left"></i>
+        <i class="fa fa-angle-double-right hidden"></i>
+      </button>
     </div>
+    <div id="right">
+      <div id="datagrid"></div>
+    </div>
+  </div>
+  <div id="clients" style="display: none">
+    <div id="clientframe">
+      <div id="clientgrid"></div>
+    </div>
+  </div>
+  <div id="config" style="display: none">
+    <div id="configframe">
+      <div id="configgrid"></div>
+    </div>
+  </div>
 </div>
 
-<div id="video" style="display: none;"></div>
+<div id="video" style="display: none"></div>
 
-<div id="editModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Edit Item</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+<div id="editModal" class="modal fade edit-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable edit-dialog" role="document">
+    <div class="modal-content edit-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Item</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body edit-body">
+        <div class="container-fluid edit-table p-0">
+          <div class="row no-gutters">
+            <div class="col">
+              <form class="editor-form">
+                <div class="form-group" id="objectIdGroup" hidden>
+                  <label for="editdObjectIdTxt">ID</label>
+                  <span id="editdObjectIdTxt" class="h3"></span>
+                  <input type="hidden" class="form-control" id="objectId" readonly disabled />
+                </div>
+                <div class="form-group" id="parentIdGroup" hidden>
+                  <label for="addParentId">Parent ID</label>
+                  <span id="addParentIdTxt" class="h3"></span>
+                  <input type="hidden" class="form-control" id="addParentId" readonly disabled />
+                </div>
+                <div class="form-group">
+                  <img width="150px" id="mediaimage" />
+                  <div class="form-group" style="display: inline-block">
+                    <div class="form-group" style="margin-left: 1em">
+                      <label for="editLmt">Last Modified</label>
+                      <input type="text" class="form-control" id="editLmt" />
+                    </div>
+                    <div class="form-group" style="margin-left: 1em">
+                      <label for="editLut">Last Updated</label>
+                      <input type="text" class="form-control" id="editLut" />
+                    </div>
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="editObjectType">Type</label>
+                  <select id="editObjectType" class="form-control">
+                    <option value="audio">Audio</option>
+                    <option value="audioBroadcast">Audio Broadcast</option>
+                    <option value="video">Video</option>
+                    <option value="videoBroadcast">Video Broadcast</option>
+                    <option value="container">Container</option>
+                    <option value="item">Item</option>
+                    <option value="external_url">External Link (URL)</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="editTitle">Title</label>
+                  <input type="text" class="form-control" id="editTitle" />
+                </div>
+                <div class="form-group">
+                  <label for="editTitle">Location</label>
+                  <input type="text" class="form-control" id="editLocation" />
+                </div>
+                <div class="form-group">
+                  <label for="editClass">Class</label>
+                  <input type="text" class="form-control" id="editClass" value="default" />
+                </div>
+                <div class="form-group">
+                  <label for="editDesc">Description</label>
+                  <input type="text" class="form-control" id="editDesc" />
+                </div>
+                <div class="form-group">
+                  <label for="editMime">Mimetype</label>
+                  <input type="text" class="form-control" id="editMime" />
+                </div>
+                <div class="form-group">
+                  <label for="editProtocol">Protocol</label>
+                  <input type="text" class="form-control" id="editProtocol" />
+                </div>
+                <div class="form-group">
+                  <label>Flags</label>
+                  <input type="text" class="form-control" id="editFlags" hidden />
+                  <div class="row form-group grb-edit-check" hidden>
+                    <label for="editFlag-Restricted">Restricted</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-Restricted" />
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-Searchable">Searchable</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-Searchable" />
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-UseResourceRef">UseResourceRef</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-UseResourceRef" />
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-PersistentContainer">PersistentContainer</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-PersistentContainer" />
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-PlaylistRef">PlaylistRef</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-PlaylistRef" />
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-ProxyUrl">ProxyUrl</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-ProxyUrl" />
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-OnlineService">OnlineService</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-OnlineService" />
+                  </div>
+                  <div class="row form-group grb-edit-check">
+                    <label for="editFlag-OggTheora">OggTheora</label>
+                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-OggTheora" />
+                  </div>
+                </div>
+                <div class="form-group">
+                  <label for="editLmt">Last Modified</label>
+                  <input type="text" class="form-control" id="editLmt" />
+                </div>
+                <div class="form-group">
+                  <label for="editLut">Last Updated</label>
+                  <input type="text" class="form-control" id="editLut" />
+                </div>
+              </form>
             </div>
-            <div class="modal-body">
-                <form>
-                    <div class="form-group" id="objectIdGroup" hidden>
-                        <label for="editdObjectIdTxt">ID</label>
-                        <span id="editdObjectIdTxt" class="h3"></span><input type="hidden" class="form-control" id="objectId" readonly disabled>
-                    </div>
-                    <div class="form-group" id="parentIdGroup" hidden>
-                        <label for="addParentId">Parent ID</label>
-                        <span id="addParentIdTxt" class="h3"></span><input type="hidden" class="form-control" id="addParentId" readonly disabled>
-                    </div>
-                    <div class="form-group">
-                        <img width="150px" id="mediaimage"/>
-                        <div class="form-group" style="display: inline-block">
-                            <div class="form-group" style="margin-left: 1em;">
-                                <label for="editLmt">Last Modified</label>
-                                <input type="text" class="form-control" id="editLmt">
-                            </div>
-                            <div class="form-group" style="margin-left: 1em;">
-                                <label for="editLut">Last Updated</label>
-                                <input type="text" class="form-control" id="editLut">
-                            </div>
-                        </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="editObjectType">Type</label>
-                        <select id="editObjectType" class="form-control">
-                            <option value="audio">Audio</option>
-                            <option value="audioBroadcast">Audio Broadcast</option>
-                            <option value="video">Video</option>
-                            <option value="videoBroadcast">Video Broadcast</option>
-                            <option value="container">Container</option>
-                            <option value="item">Item</option>
-                            <option value="external_url">External Link (URL)</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editTitle">Title</label>
-                        <input type="text" class="form-control" id="editTitle">
-                    </div>
-                    <div class="form-group">
-                        <label for="editTitle">Location</label>
-                        <input type="text" class="form-control" id="editLocation">
-                    </div>
-                    <div class="form-group">
-                        <label for="editClass">Class</label>
-                        <input type="text" class="form-control" id="editClass" value="default">
-                    </div>
-                    <div class="form-group">
-                        <label for="editDesc">Description</label>
-                        <input type="text" class="form-control" id="editDesc">
-                    </div>
-                    <div class="form-group">
-                        <label for="editMime">Mimetype</label>
-                        <input type="text" class="form-control" id="editMime">
-                    </div>
-                    <div class="form-group">
-                        <label for="editProtocol">Protocol</label>
-                        <input type="text" class="form-control" id="editProtocol">
-                    </div>
-                </form>
+            <div class="col ml-2" id="editCol">
+              <div class="detail-area">
+                <table id="metadata" class="table"></table>
+                <table id="auxdata" class="table"></table>
+                <table id="resdata" class="table"></table>
+              </div>
             </div>
-            <div class="modal-footer">
-                <button id="hidebutton" type="button" class="btn btn-default">Hide Details</button>
-                <button id="detailbutton" type="button" class="btn btn-default">Show Details</button>
-                <button id="editCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button id="editSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Item</button>
-            </div>
+          </div>
         </div>
+      </div>
+      <!-- /.modal-content -->
+      <div class="modal-footer bg-light">
+        <button id="hidebutton" type="button" class="btn btn-default">Hide Details</button>
+        <button id="detailbutton" type="button" class="btn btn-default">Show Details</button>
+        <button id="editCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="editSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Item</button>
+      </div>
     </div>
+    <!-- /.modal-dialog -->
+  </div>
 </div>
-
 <div id="autoscanModal" class="modal fade edit-modal" tabindex="-1" role="dialog">
   <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable edit-dialog" role="document">
     <div class="modal-content edit-content">
@@ -283,18 +539,21 @@
           <form class="row no-gutters editor-form">
             <div class="col" style="min-width: 250px !important">
               <div class="form-group" id="autoscan-persistent-msg">
-                <span>This is a persistent autoscan directory (defined in config), it cannot be modified via the web UI.</span>
+                <span
+                  >This is a persistent autoscan directory (defined in config), it cannot be modified via the web
+                  UI.</span
+                >
               </div>
               <div class="form-group row" hidden>
-                  <div class="col-md-6">
-                      <label for="autoscanId">ID:</label>
-                  </div>
-                  <div class="col-md-6">
-                      <span id="autoscanIdTxt" class="overflow"></span>
-                      <input type="hidden" id="autoscanId" />
-                      <input type="checkbox" class="hidden" id="autoscanFromFs" />
-                      <input type="checkbox" class="hidden" id="autoscanPersistent" />
-                  </div>
+                <div class="col-md-6">
+                  <label for="autoscanId">ID:</label>
+                </div>
+                <div class="col-md-6">
+                  <span id="autoscanIdTxt" class="overflow"></span>
+                  <input type="hidden" id="autoscanId" />
+                  <input type="checkbox" class="hidden" id="autoscanFromFs" />
+                  <input type="checkbox" class="hidden" id="autoscanPersistent" />
+                </div>
               </div>
               <div class="form-group row no-gutters">
                 <div class="col-3">
@@ -302,19 +561,47 @@
                 </div>
                 <div class="col-9">
                   <div class="form-check">
-                    <input type="radio" name="autoscanMode" id="autoscanModeNone" class="form-check-input" value="none" aria-describedby="autoscanModeNoneHelp"/>
+                    <input
+                      type="radio"
+                      name="autoscanMode"
+                      id="autoscanModeNone"
+                      class="form-check-input"
+                      value="none"
+                      aria-describedby="autoscanModeNoneHelp"
+                    />
                     <label for="autoscanModeNone" class="form-check-label">None</label>
-                    <small id="autoscanModeNoneHelp" class="form-text text-muted">Disable autoscanning for this directory</small>
+                    <small id="autoscanModeNoneHelp" class="form-text text-muted"
+                      >Disable autoscanning for this directory</small
+                    >
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="autoscanMode" id="autoscanModeInotify" class="form-check-input" value="inotify" aria-describedby="autoscanModeInotifyHelp"/>
+                    <input
+                      type="radio"
+                      name="autoscanMode"
+                      id="autoscanModeInotify"
+                      class="form-check-input"
+                      value="inotify"
+                      aria-describedby="autoscanModeInotifyHelp"
+                    />
                     <label for="autoscanModeInotify" class="form-check-label">INotify</label>
-                    <small id="autoscanModeInotifyHelp" class="form-text text-muted">Efficiently and quickly update based on system filesystem events. This is the suggested method unless the underlying system does not support it.</small>
+                    <small id="autoscanModeInotifyHelp" class="form-text text-muted"
+                      >Efficiently and quickly update based on system filesystem events. This is the suggested method
+                      unless the underlying system does not support it.</small
+                    >
                   </div>
                   <div class="form-check">
-                    <input type="radio" name="autoscanMode" id="autoscanModeTimed" class="form-check-input" value="timed" aria-describedby="autoscanModeTimedHelp"/>
+                    <input
+                      type="radio"
+                      name="autoscanMode"
+                      id="autoscanModeTimed"
+                      class="form-check-input"
+                      value="timed"
+                      aria-describedby="autoscanModeTimedHelp"
+                    />
                     <label for="autoscanModeTimed" class="form-check-label">Timed</label>
-                    <small id="autoscanModeTimedHelp" class="form-text text-muted">Re-scans the directory at set intervals. Resource intensive if run too often.</small>
+                    <small id="autoscanModeTimedHelp" class="form-text text-muted"
+                      >Re-scans the directory at set intervals. Resource intensive if run too often.</small
+                    >
                   </div>
                 </div>
               </div>
@@ -324,9 +611,17 @@
                 </div>
                 <div class="col-9">
                   <div class="form-check">
-                    <input type="checkbox" name="autoscanRecursive" id="autoscanRecursive" class="form-check-input" aria-describedby="autoscanRecursiveHelp"/>
+                    <input
+                      type="checkbox"
+                      name="autoscanRecursive"
+                      id="autoscanRecursive"
+                      class="form-check-input"
+                      aria-describedby="autoscanRecursiveHelp"
+                    />
                     <label for="autoscanRecursive" class="form-check-label">Recursive</label>
-                    <small id="autoscanRecursiveHelp" class="form-text text-muted">Descend into child directories and index them.</small>
+                    <small id="autoscanRecursiveHelp" class="form-text text-muted"
+                      >Descend into child directories and index them.</small
+                    >
                   </div>
                 </div>
               </div>
@@ -336,7 +631,13 @@
                 </div>
                 <div class="col-9">
                   <div class="form-check">
-                    <input type="checkbox" name="autoscanHidden" id="autoscanHidden" class="form-check-input" aria-describedby="autoscanHiddenHelp"/>
+                    <input
+                      type="checkbox"
+                      name="autoscanHidden"
+                      id="autoscanHidden"
+                      class="form-check-input"
+                      aria-describedby="autoscanHiddenHelp"
+                    />
                     <label for="autoscanHidden" class="form-check-label">Include Hidden</label>
                     <small id="autoscanHiddenHelp" class="form-text text-muted">Include hidden files/directories</small>
                   </div>
@@ -348,16 +649,24 @@
                 </div>
                 <div class="col-9">
                   <div class="form-check">
-                    <input type="checkbox" name="autoscanSymlinks" id="autoscanSymlinks" class="form-check-input" aria-describedby="autoscanSymlinksHelp"/>
+                    <input
+                      type="checkbox"
+                      name="autoscanSymlinks"
+                      id="autoscanSymlinks"
+                      class="form-check-input"
+                      aria-describedby="autoscanSymlinksHelp"
+                    />
                     <label for="autoscanSymlinks" class="form-check-label">Follow Symbolic Links</label>
-                    <small id="autoscanSymlinksHelp" class="form-text text-muted">Follow symbolic links and import them.</small>
+                    <small id="autoscanSymlinksHelp" class="form-text text-muted"
+                      >Follow symbolic links and import them.</small
+                    >
                   </div>
                 </div>
               </div>
               <div class="form-group row no-gutters">
                 <label for="autoscanInterval" class="col-3 col-form-label">Scan Interval (in seconds)</label>
                 <div class="col-4">
-                  <input type="number" id="autoscanInterval" class="form-control"/>
+                  <input type="number" id="autoscanInterval" class="form-control" />
                 </div>
               </div>
             </div>
@@ -370,23 +679,51 @@
                   <div class="form-check">
                     <div class="row no-gutters">
                       <div>
-                        <input type="checkbox" name="autoscanAudio" id="autoscanAudio" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
+                        <input
+                          type="checkbox"
+                          name="autoscanAudio"
+                          id="autoscanAudio"
+                          class="form-check-input"
+                          aria-describedby="autoscanAudioHelp"
+                        />
                         <label for="autoscanAudio" class="form-check-label grb-media-type">All Audio</label>
                       </div>
                       <div>
-                        <input type="checkbox" name="autoscanAudioMusic" id="autoscanAudioMusic" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
+                        <input
+                          type="checkbox"
+                          name="autoscanAudioMusic"
+                          id="autoscanAudioMusic"
+                          class="form-check-input"
+                          aria-describedby="autoscanAudioHelp"
+                        />
                         <label for="autoscanAudioMusic" class="form-check-label grb-media-type">Music</label>
                       </div>
                       <div>
-                        <input type="checkbox" name="autoscanAudioBook" id="autoscanAudioBook" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
+                        <input
+                          type="checkbox"
+                          name="autoscanAudioBook"
+                          id="autoscanAudioBook"
+                          class="form-check-input"
+                          aria-describedby="autoscanAudioHelp"
+                        />
                         <label for="autoscanAudioBook" class="form-check-label grb-media-type">Audio Book</label>
                       </div>
                       <div>
-                        <input type="checkbox" name="autoscanAudioBroadcast" id="autoscanAudioBroadcast" class="form-check-input" aria-describedby="autoscanAudioHelp"/>
-                        <label for="autoscanAudioBroadcast" class="form-check-label grb-media-type">Audio Broadcast</label>
+                        <input
+                          type="checkbox"
+                          name="autoscanAudioBroadcast"
+                          id="autoscanAudioBroadcast"
+                          class="form-check-input"
+                          aria-describedby="autoscanAudioHelp"
+                        />
+                        <label for="autoscanAudioBroadcast" class="form-check-label grb-media-type"
+                          >Audio Broadcast</label
+                        >
                       </div>
                     </div>
-                    <small id="autoscanAudioHelp" class="form-text text-muted">Import audio files from directory.</small>
+                    <small id="autoscanAudioHelp" class="form-text text-muted"
+                      >Import audio files from directory.</small
+                    >
                   </div>
                 </div>
               </div>
@@ -398,15 +735,29 @@
                   <div class="form-check">
                     <div class="row no-gutters">
                       <div>
-                        <input type="checkbox" name="autoscanImage" id="autoscanImage" class="form-check-input" aria-describedby="autoscanImageHelp"/>
+                        <input
+                          type="checkbox"
+                          name="autoscanImage"
+                          id="autoscanImage"
+                          class="form-check-input"
+                          aria-describedby="autoscanImageHelp"
+                        />
                         <label for="autoscanImage" class="form-check-label grb-media-type">All Images</label>
                       </div>
                       <div>
-                        <input type="checkbox" name="autoscanImagePhoto" id="autoscanImagePhoto" class="form-check-input" aria-describedby="autoscanImageHelp"/>
+                        <input
+                          type="checkbox"
+                          name="autoscanImagePhoto"
+                          id="autoscanImagePhoto"
+                          class="form-check-input"
+                          aria-describedby="autoscanImageHelp"
+                        />
                         <label for="autoscanImagePhoto" class="form-check-label grb-media-type">Photo</label>
                       </div>
                     </div>
-                    <small id="autoscanImageHelp" class="form-text text-muted">Import image files from directory.</small>
+                    <small id="autoscanImageHelp" class="form-text text-muted"
+                      >Import image files from directory.</small
+                    >
                   </div>
                 </div>
               </div>
@@ -418,45 +769,95 @@
                   <div class="form-check">
                     <div class="row no-gutters">
                       <div>
-                        <input type="checkbox" name="autoscanVideo" id="autoscanVideo" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
+                        <input
+                          type="checkbox"
+                          name="autoscanVideo"
+                          id="autoscanVideo"
+                          class="form-check-input"
+                          aria-describedby="autoscanVideoHelp"
+                        />
                         <label for="autoscanVideo" class="form-check-label grb-media-type">All Video</label>
                       </div>
                       <div>
-                        <input type="checkbox" name="autoscanVideoMovie" id="autoscanVideoMovie" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
+                        <input
+                          type="checkbox"
+                          name="autoscanVideoMovie"
+                          id="autoscanVideoMovie"
+                          class="form-check-input"
+                          aria-describedby="autoscanVideoHelp"
+                        />
                         <label for="autoscanVideoMovie" class="form-check-label grb-media-type">Movie</label>
                       </div>
                       <div>
-                        <input type="checkbox" name="autoscanVideoTV" id="autoscanVideoTV" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
+                        <input
+                          type="checkbox"
+                          name="autoscanVideoTV"
+                          id="autoscanVideoTV"
+                          class="form-check-input"
+                          aria-describedby="autoscanVideoHelp"
+                        />
                         <label for="autoscanVideoTV" class="form-check-label grb-media-type">TV</label>
                       </div>
                       <div>
-                        <input type="checkbox" name="autoscanVideoMusicVideo" id="autoscanVideoMusicVideo" class="form-check-input" aria-describedby="autoscanVideoHelp"/>
+                        <input
+                          type="checkbox"
+                          name="autoscanVideoMusicVideo"
+                          id="autoscanVideoMusicVideo"
+                          class="form-check-input"
+                          aria-describedby="autoscanVideoHelp"
+                        />
                         <label for="autoscanVideoMusicVideo" class="form-check-label grb-media-type">Music Video</label>
                       </div>
                     </div>
-                    <small id="autoscanVideoHelp" class="form-text text-muted">Import video files from directory.</small>
+                    <small id="autoscanVideoHelp" class="form-text text-muted"
+                      >Import video files from directory.</small
+                    >
                   </div>
                 </div>
               </div>
               <div class="form-group row no-gutters">
                 <label for="autoscanContainerTypeAudio" class="col-3 col-form-label">Audio Container</label>
                 <div class="col-9">
-                  <input type="text" name="autoscanContainerTypeAudio" id="autoscanContainerTypeAudio" class="form-control" aria-describedby="autoscanContainertypeAudioHelp"/>
-                  <small id="autoscanContainertypeAudioHelp" class="form-text text-muted">Container type for audio files</small>
+                  <input
+                    type="text"
+                    name="autoscanContainerTypeAudio"
+                    id="autoscanContainerTypeAudio"
+                    class="form-control"
+                    aria-describedby="autoscanContainertypeAudioHelp"
+                  />
+                  <small id="autoscanContainertypeAudioHelp" class="form-text text-muted"
+                    >Container type for audio files</small
+                  >
                 </div>
               </div>
               <div class="form-group row no-gutters">
                 <label for="autoscanContainerTypeImage" class="col-3 col-form-label">Image Container</label>
                 <div class="col-9">
-                  <input type="text" name="autoscanContainerTypeImage" id="autoscanContainerTypeImage" class="form-control" aria-describedby="autoscanContainertypeImageHelp"/>
-                  <small id="autoscanContainertypeImageHelp" class="form-text text-muted">Container type for image files</small>
+                  <input
+                    type="text"
+                    name="autoscanContainerTypeImage"
+                    id="autoscanContainerTypeImage"
+                    class="form-control"
+                    aria-describedby="autoscanContainertypeImageHelp"
+                  />
+                  <small id="autoscanContainertypeImageHelp" class="form-text text-muted"
+                    >Container type for image files</small
+                  >
                 </div>
               </div>
               <div class="form-group row no-gutters">
                 <label for="autoscanContainerTypeVideo" class="col-3 col-form-label">Video Container</label>
                 <div class="col-9">
-                  <input type="text" name="autoscanContainerTypeVideo" id="autoscanContainerTypeVideo" class="form-control" aria-describedby="autoscanContainertypeVideoHelp"/>
-                  <small id="autoscanContainertypeVideoHelp" class="form-controlform-text text-muted">Container type for video files</small>
+                  <input
+                    type="text"
+                    name="autoscanContainerTypeVideo"
+                    id="autoscanContainerTypeVideo"
+                    class="form-control"
+                    aria-describedby="autoscanContainertypeVideoHelp"
+                  />
+                  <small id="autoscanContainertypeVideoHelp" class="form-controlform-text text-muted"
+                    >Container type for video files</small
+                  >
                 </div>
               </div>
             </div>
@@ -469,133 +870,139 @@
         <button id="autoscanCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
         <button id="autoscanSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Autoscan</button>
       </div>
-    </div> <!-- /.modal-content -->
-  </div> <!-- /.modal-dialog -->
+    </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
 </div>
-
 <div id="dirTweakModal" class="modal fade" tabindex="-1" role="dialog">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h4 class="modal-title">Add Directory Tweak</h4>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+  <div class="modal-dialog modal-lg" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Directory Tweak</h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      <div class="modal-body">
+        <div class="container-fluid">
+          <form>
+            <div class="form-group row">
+              <div class="col-md-4">
+                <label for="dirTweakLocation">Location:</label>
+              </div>
+              <div class="col-md-6">
+                <input type="text" id="dirTweakLocation" name="location" class="form-control" disabled />
+                <input type="number" id="dirTweakId" name="id" class="form-control" hidden />
+                <input type="number" id="dirTweakIndex" name="index" class="form-control" hidden />
+                <input type="text" id="dirTweakStatus" name="status" class="form-control" hidden />
+              </div>
             </div>
-            <div class="modal-body">
-                <div class="container-fluid">
-                    <form>
-                        <div class="form-group row">
-                            <div class="col-md-4">
-                                <label for="dirTweakLocation">Location:</label>
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" id="dirTweakLocation" name="location" class="form-control" disabled />
-                                <input type="number" id="dirTweakId" name="id" class="form-control" hidden />
-                                <input type="number" id="dirTweakIndex" name="status" class="form-control" hidden />
-                                <input type="text" id="dirTweakStatus" name="status" class="form-control" hidden />
-                            </div>
-                        </div>
-                        <div class="form-check form-check-inline row">
-                            <div class="col-md-4">
-                                <label for="dirTweakInherit" class="form-check-label">Inherit settings to subdirs:</label>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-check form-check-inline">
-                                    <input type="checkbox" name="dirTweakInherit" id="dirTweakInherit" class="form-check-input" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-check form-check-inline row">
-                            <div class="col-md-4">
-                                <label for="dirTweakSymLinks" class="form-check-label">Follow Symbolic Links:</label>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-check form-check-inline">
-                                    <input type="checkbox" name="dirTweakSymLinks" id="dirTweakSymLinks" class="form-check-input" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-check form-check-inline row">
-                            <div class="col-md-4">
-                                <label for="dirTweakRecursive" class="form-check-label">Recursive import:</label>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-check form-check-inline">
-                                    <input type="checkbox" name="dirTweakRecursive" id="dirTweakRecursive" class="form-check-input" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-check form-check-inline row">
-                            <div class="col-md-4">
-                                <label for="dirTweakHidden" class="form-check-label">Include hidden files/directories:</label>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-check form-check-inline">
-                                    <input type="checkbox" name="dirTweakHidden" id="dirTweakHidden" class="form-check-input" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-check form-check-inline row">
-                            <div class="col-md-4">
-                                <label for="dirTweakCaseSens" class="form-check-label">Case sensitive resources:</label>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-check form-check-inline">
-                                    <input type="checkbox" name="dirTweakCaseSens" id="dirTweakCaseSens" class="form-check-input" />
-                                </div>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-md-4">
-                                <label for="dirTweakMetaCharset">Metadata Charset</label>
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" id="dirTweakMetaCharset" class="form-control"/>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-md-4">
-                                <label for="dirTweakFanArt">Fan Art File</label>
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" id="dirTweakFanArt" class="form-control" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-md-4">
-                                <label for="dirTweakSubtitle">Subtitle File</label>
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" id="dirTweakSubtitle" class="form-control" />
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <div class="col-md-4">
-                                <label for="dirTweakResource">Resource File</label>
-                            </div>
-                            <div class="col-md-6">
-                                <input type="text" id="dirTweakResource" class="form-control" />
-                            </div>
-                        </div>
-                    </form>
+            <div class="form-check form-check-inline row">
+              <div class="col-md-4">
+                <label for="dirTweakInherit" class="form-check-label">Inherit settings to subdirs:</label>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-check-inline">
+                  <input type="checkbox" name="dirTweakInherit" id="dirTweakInherit" class="form-check-input" />
                 </div>
+              </div>
             </div>
-            <div class="modal-footer">
-                <button id="dirTweakCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                <button id="dirTweakDelete" type="submit" class="btn btn-primary" data-dismiss="modal" hidden>Delete Directory Tweak</button>
-                <button id="dirTweakSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Directory Tweak</button>
+            <div class="form-check form-check-inline row">
+              <div class="col-md-4">
+                <label for="dirTweakSymLinks" class="form-check-label">Follow Symbolic Links:</label>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-check-inline">
+                  <input type="checkbox" name="dirTweakSymLinks" id="dirTweakSymLinks" class="form-check-input" />
+                </div>
+              </div>
             </div>
+            <div class="form-check form-check-inline row">
+              <div class="col-md-4">
+                <label for="dirTweakRecursive" class="form-check-label">Recursive import:</label>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-check-inline">
+                  <input type="checkbox" name="dirTweakRecursive" id="dirTweakRecursive" class="form-check-input" />
+                </div>
+              </div>
+            </div>
+            <div class="form-check form-check-inline row">
+              <div class="col-md-4">
+                <label for="dirTweakHidden" class="form-check-label">Include hidden files/directories:</label>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-check-inline">
+                  <input type="checkbox" name="dirTweakHidden" id="dirTweakHidden" class="form-check-input" />
+                </div>
+              </div>
+            </div>
+            <div class="form-check form-check-inline row">
+              <div class="col-md-4">
+                <label for="dirTweakCaseSens" class="form-check-label">Case sensitive resources:</label>
+              </div>
+              <div class="col-md-6">
+                <div class="form-check form-check-inline">
+                  <input type="checkbox" name="dirTweakCaseSens" id="dirTweakCaseSens" class="form-check-input" />
+                </div>
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-4">
+                <label for="dirTweakMetaCharset">Metadata Charset</label>
+              </div>
+              <div class="col-md-6">
+                <input type="text" id="dirTweakMetaCharset" class="form-control" />
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-4">
+                <label for="dirTweakFanArt">Fan Art File</label>
+              </div>
+              <div class="col-md-6">
+                <input type="text" id="dirTweakFanArt" class="form-control" />
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-4">
+                <label for="dirTweakSubtitle">Subtitle File</label>
+              </div>
+              <div class="col-md-6">
+                <input type="text" id="dirTweakSubtitle" class="form-control" />
+              </div>
+            </div>
+            <div class="form-group row">
+              <div class="col-md-4">
+                <label for="dirTweakResource">Resource File</label>
+              </div>
+              <div class="col-md-6">
+                <input type="text" id="dirTweakResource" class="form-control" />
+              </div>
+            </div>
+          </form>
         </div>
+      </div>
+      <div class="modal-footer">
+        <button id="dirTweakCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="dirTweakDelete" type="submit" class="btn btn-primary" data-dismiss="modal" hidden>
+          Delete Directory Tweak
+        </button>
+        <button id="dirTweakSave" type="submit" class="btn btn-primary" data-dismiss="modal">
+          Save Directory Tweak
+        </button>
+      </div>
     </div>
+    <!-- /.modal-content -->
+  </div>
+  <!-- /.modal-dialog -->
 </div>
-
 <div id="toast" class="alert">
-    <div id="grb-toast-wrapper">
-        <i id="grb-toast-icon" class="fa fa-star"></i>
-        <span id="grb-toast-msg"></span>
-    </div>
-    <button type="button" class="close" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
-    </button>
+  <div id="grb-toast-wrapper">
+    <i id="grb-toast-icon" class="fa fa-star"></i>
+    <span id="grb-toast-msg"></span>
+  </div>
+  <button type="button" class="close" aria-label="Close">
+    <span aria-hidden="true">&times;</span>
+  </button>
 </div>
