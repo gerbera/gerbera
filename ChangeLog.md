@@ -3,6 +3,7 @@
 ### HEAD
 
 - Add build target for source documentation
+- Add Splitter and Resize to items grid
 - Clean up commented out code
 - Configuration of additional target mimetype properties for transcoding
 - FIXME done: Remove fake resource

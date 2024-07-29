@@ -165,7 +165,7 @@ describe('Gerbera Items', () => {
 
     it('loads file items by transforming them', () => {
       Items.loadItems(fileItems);
-      expect($('#datagrid').find('tr').length).toEqual(33);
+      expect($('#datagrid').find('tr').length).toEqual(32);
     });
   });
   describe('deleteItemFromList()', () => {
@@ -360,7 +360,7 @@ describe('Gerbera Items', () => {
       ajaxSpy.and.callThrough();
     });
 
-    it('calls the server with the item details', () => {
+    it('calls the server with the `item` details', () => {
       const itemData = {
         item: itemMock
       };
@@ -373,7 +373,7 @@ describe('Gerbera Items', () => {
         title: 'Test.mp4',
         description: 'A%20description',
         updates: 'check',
-        flags: '',
+        flags: 'Restricted',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -395,7 +395,7 @@ describe('Gerbera Items', () => {
         object_id: '1471',
         title: 'container%20title',
         updates: 'check',
-        flags: '',
+        flags: 'Restricted',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -421,7 +421,7 @@ describe('Gerbera Items', () => {
         'mime-type': 'video%2Fts',
         protocol: 'http-get',
         updates: 'check',
-        flags: '',
+        flags: 'Restricted',
       };
       data[Auth.SID] = 'SESSION_ID';
 

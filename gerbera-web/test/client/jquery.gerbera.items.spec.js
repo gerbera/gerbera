@@ -19,7 +19,7 @@ describe('The jQuery Items Datagrid', () => {
       data: datagridData
     });
 
-    expect(dataGrid.find('tr').length).toBe(11);
+    expect(dataGrid.find('tr').length).toBe(10);
     expect(dataGrid.find('tr.grb-item').get(0).innerText).toContain(datagridData[0].text); // skip the header row
     expect(dataGrid.find('a').get(0).href).toBe(datagridData[0].url);
   });
@@ -133,6 +133,7 @@ describe('The jQuery Items Datagrid', () => {
 
   it('creates a table with a footer container a pager', () => {
     dataGrid.dataitems({
+      itemType: 'db',
       data: datagridData,
       pager: {pageCount: 10,
         currentPage: 1,
@@ -146,6 +147,7 @@ describe('The jQuery Items Datagrid', () => {
 
   it('creates a pager with only page count pages', () => {
     dataGrid.dataitems({
+      itemType: 'db',
       data: datagridData,
       pager: {pageCount: 10,
         currentPage: 1,
@@ -159,6 +161,7 @@ describe('The jQuery Items Datagrid', () => {
 
   it('creates a pager with only necessary amount of pages', () => {
     dataGrid.dataitems({
+      itemType: 'db',
       data: datagridData,
       pager: {pageCount: 10,
         currentPage: 1,
@@ -172,6 +175,7 @@ describe('The jQuery Items Datagrid', () => {
 
   it('creates a pager with existing number of pages', () => {
     dataGrid.dataitems({
+      itemType: 'db',
       data: datagridData,
       pager: {pageCount: 10,
         currentPage: 2,
@@ -185,6 +189,7 @@ describe('The jQuery Items Datagrid', () => {
 
   it('does not create a pager when no pageCount 0', () => {
     dataGrid.dataitems({
+      itemType: 'db',
       data: datagridData,
       pager: {pageCount: 0}
     });
@@ -194,6 +199,7 @@ describe('The jQuery Items Datagrid', () => {
 
   it('does not create a pager when no page info exists', () => {
     dataGrid.dataitems({
+      itemType: 'db',
       data: datagridData
     });
 
@@ -202,6 +208,7 @@ describe('The jQuery Items Datagrid', () => {
 
   it('creates a items per page select', () => {
     dataGrid.dataitems({
+      itemType: 'db',
       data: datagridData,
       pager: {pageCount: 10,
         currentPage: 2,
@@ -219,6 +226,7 @@ describe('The jQuery Items Datagrid', () => {
   it('creates a pager that goes to specific page when clicked', () => {
     const clickSpy = jasmine.createSpy('click');
     dataGrid.dataitems({
+      itemType: 'db',
       data: datagridData,
       pager: {
         currentPage: 1,
@@ -239,6 +247,7 @@ describe('The jQuery Items Datagrid', () => {
     const nextSpy = jasmine.createSpy('next');
     const previousSpy = jasmine.createSpy('previous');
     dataGrid.dataitems({
+      itemType: 'db',
       data: datagridData,
       pager: {
         currentPage: 2,
@@ -262,6 +271,7 @@ describe('The jQuery Items Datagrid', () => {
     const nextSpy = jasmine.createSpy('next');
     const previousSpy = jasmine.createSpy('previous');
     dataGrid.dataitems({
+      itemType: 'db',
       data: datagridData,
       pager: {
         currentPage: 20,
@@ -285,6 +295,7 @@ describe('The jQuery Items Datagrid', () => {
     const nextSpy = jasmine.createSpy('next');
     const previousSpy = jasmine.createSpy('previous');
     dataGrid.dataitems({
+      itemType: 'db',
       data: datagridData,
       pager: {
         currentPage: 1,

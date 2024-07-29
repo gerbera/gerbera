@@ -239,7 +239,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         object_id: '39479',
         title: 'Test.mp4',
         description: 'A%20description',
-        flags: '',
+        flags: 'Restricted',
       });
     });
 
@@ -252,7 +252,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(result).toEqual({
         object_id: '1471',
         title: 'container%20title',
-        flags: '',
+        flags: 'Restricted',
       });
     });
 
@@ -268,7 +268,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         location: 'http%3A%2F%2Flocalhost',
         description: 'description',
         'mime-type': 'video%2Fts',
-        flags: '',
+        flags: 'Restricted',
         protocol: 'http-get'
       });
     });

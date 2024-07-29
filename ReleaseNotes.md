@@ -18,6 +18,7 @@ Because of the extension of configuration of transcoding profiles, those produci
 - Configuration of additional target mimetype properties for transcoding (e.g. needed for PCM output)
 - Display media details in web ui
 - Image and thumbnail profiles support PNG images
+- Page layout of items page with splitter and resize button
 
 ### FIXES
 

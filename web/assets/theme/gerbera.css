@@ -11,7 +11,7 @@
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
 
-    Copyright (C) 2016-2023 Gerbera Contributors
+    Copyright (C) 2016-2024 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -240,6 +240,8 @@ body,
 #content {
     display: flex;
     flex: 1;
+    flex-grow: 2;
+    flex-shrink: 0;
     overflow: auto;
 }
 
@@ -256,13 +258,26 @@ body,
 
 #left {
     height: 100%;
+    width: 100%;
     flex: 1;
     overflow-y: auto;
     flex-grow: 2;
+    flex-shrink: 0;
     background-color: rgb(248, 248, 248);
     border-right: 1px solid #e9ecef;
 }
 
+#splitterBar {
+    flex-grow: 0;
+    flex-shrink: 0;
+    background: #3c3c3c;
+    width: 0.2rem;
+    cursor: col-resize;
+    margin: 0 0 0 auto;
+}
+.hidden {
+    display: none;
+}
 .card-style {
     background-color: white;
     border: 1px solid #e9ecef;
@@ -295,14 +310,18 @@ body,
 
 #right {
     flex: 1;
+    width: 100%;
     overflow-y: hidden;
     flex-grow: 5;
+    flex-shrink: 1;
 }
 
 #datagrid,
 #clientgrid {
     height: 100%;
     overflow: auto;
+    flex-grow: 2;
+    flex-shrink: 0;
     background-color: #fefefe;
 }
 
@@ -318,11 +337,11 @@ body,
 }
 
 #datagrid table, #clientgrid table {
-    width: 100%;
     display: flex;
     flex-direction: column;
     vertical-align: middle;
-    max-height: calc( 100% - 115px );
+    max-width: calc( 100% - 10px );
+    margin-bottom: 0px;
 }
 
 #clientgrid table {
@@ -331,9 +350,16 @@ body,
 
 #datagrid table tbody {
     flex: 1 0 auto;
-    overflow-y: scroll;
-    display: table;
+    overflow-y: auto;
     width: 100%;
+    display: inline-block;
+}
+
+.grb-table-fs tbody {
+    height: calc( 100vh - 115px );
+}
+.grb-table-db tbody {
+    height: calc( 100vh - 180px );
 }
 
 #clientgrid table tbody,
@@ -348,6 +374,10 @@ body,
     flex-shrink: 0;
     display: block;
     border-top: 1px solid #dee2e6;
+}
+
+#datagrid table tfoot tr {
+    display: inline-block;
 }
 
 #datagrid table tfoot tr,
@@ -513,9 +543,28 @@ body,
     width: 40%;
 }
 
+.grb-item-table-1,
+.grb-item-table-2,
+.grb-item-table-3 {
+    max-height: calc( 100vh - 250px );
+}
+.grb-item-row-0 {
+    width: 100%;
+    display: inline-table;
+}
+.grb-item-row-3 td {
+    padding: 0;
+}
+.grb-item-row-1,
+.grb-item-row-2,
+.grb-item-row-3 {
+    max-height: calc( 100vh - 250px );
+}
+
 .grb-item > td {
     vertical-align: middle;
     line-height: 36px;
+    padding: 8px;
     white-space: nowrap;
     text-overflow: ellipsis;
 }
@@ -536,12 +585,14 @@ body,
 }
 
 .grb-item-buttons {
+    width: 80px;
 }
 .grb-item-icon {
     width: 1em;
     height: 1em;
 }
 .grb-thumbnail {
+    image-orientation: from-image;
     margin-right: 10px;
     object-fit: contain;
     background: #eee;
@@ -551,12 +602,13 @@ body,
 }
 
 .grb-image {
-    margin-right: 10px;
+    image-orientation: from-image;
+    /* margin-right: 10px; */
     object-fit: contain;
     background: #eee;
     border: 1px solid #ddd;
-    height: calc( 100vh - 250px);
-    width: calc( 100vw - 650px);
+    height: calc( 100vh - 215px );
+    width: 100%;
 }
 
 .grb-item-grid {
