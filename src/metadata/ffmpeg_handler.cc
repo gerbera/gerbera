@@ -60,6 +60,7 @@ extern "C" {
 
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
+#include <libavutil/display.h>
 
 } // extern "C"
 
@@ -220,6 +221,20 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
     }
 }
 
+static double get_rotation(const std::int32_t* displaymatrix)
+{
+    double rot = 0;
+    if (displaymatrix)
+        rot = -round(av_display_rotation_get(displaymatrix));
+    rot -= 360 * floor(rot / 360 + 0.9 / 360);
+    if (rot < -180) {
+        rot += 360;
+    } else if (rot >= 180.0) {
+        rot -= 360;
+    }
+    return rot;
+}
+
 // ffmpeg library calls
 void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx)
 {
@@ -250,9 +265,39 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
         auto st = pFormatCtx->streams[i];
 
         if (st && !videoSet && as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO) {
+            // orientation
+            {
+                AVDictionaryEntry* entry = nullptr;
+                entry = av_dict_get(st->metadata, "rotate", entry, AV_DICT_MATCH_CASE);
+                double rot = 0;
+                if (entry) {
+                    rot = stoiString(entry->value);
+                    log_debug("{} = {}", "rotate", rot);
+                } else {
+                    auto displaymatrix = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, nullptr);
+                    if (displaymatrix) {
+                        rot = get_rotation(reinterpret_cast<std::int32_t*>(displaymatrix));
+                        log_debug("{} = {}", "displaymatrix", rot);
+                    }
+                }
+                int orientation = 0;
+                if (rot == 0) {
+                    orientation = 1;
+                } else if (rot == 90) {
+                    orientation = 6;
+                } else if (rot == -90) {
+                    orientation = 8;
+                } else if (rot == -180 || rot == 180) {
+                    orientation = 3;
+                }
+                log_debug("Added orientation: {}", orientation);
+                resource2->addAttribute(ResourceAttribute::ORIENTATION, fmt::format("{}", orientation));
+            }
+
             auto codecId = as_codecpar(st)->codec_id;
             resource2->addAttribute(ResourceAttribute::VIDEOCODEC, avcodec_get_name(codecId));
 
+            // fourcc
             if (as_codecpar(st)->codec_tag > 0) {
                 char fourcc[5];
                 fourcc[0] = as_codecpar(st)->codec_tag;
@@ -267,6 +312,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
                     resource->addOption(RESOURCE_OPTION_FOURCC, fcc);
             }
 
+            // resolution
             if (as_codecpar(st)->width > 0 && as_codecpar(st)->height > 0) {
                 auto resolution = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
 

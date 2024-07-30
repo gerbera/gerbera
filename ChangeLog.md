@@ -6,6 +6,7 @@
 - Add Splitter and Resize to items grid
 - Clean up commented out code
 - Configuration of additional target mimetype properties for transcoding
+- Extract image and video orientation to resource attributes
 - FIXME done: Remove fake resource
 - Improve docker instructions
 - Improve handling of thumbnail profiles

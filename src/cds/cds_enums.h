@@ -89,6 +89,7 @@ enum class ResourceAttribute : int {
     AUDIOCODEC,
     VIDEOCODEC,
     FORMAT,
+    ORIENTATION,
     MAX
 };
 
@@ -137,6 +138,7 @@ private:
         { ResourceAttribute::VIDEOCODEC, "sec:vcodec" },
         { ResourceAttribute::FORMAT, "format" },
         { ResourceAttribute::TYPE, "type" },
+        { ResourceAttribute::ORIENTATION, "orientation" },
         { ResourceAttribute::MAX, "unknown" },
     };
     inline static const std::map<ResourceAttribute, std::string> attrToDisplay {
@@ -157,6 +159,7 @@ private:
         { ResourceAttribute::VIDEOCODEC, "videoCodec" },
         { ResourceAttribute::FORMAT, "format" },
         { ResourceAttribute::TYPE, "type" },
+        { ResourceAttribute::ORIENTATION, "orientation" },
         { ResourceAttribute::MAX, "unknown" },
     };
 

@@ -35,6 +35,19 @@ Gerbera - https://gerbera.io/
 #include <libffmpegthumbnailer/filmstripfilter.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
 
+static void ffmpegThLogger(ThumbnailerLogLevel logLevel, const std::string message)
+{
+    switch (logLevel) {
+    case ThumbnailerLogLevelError:
+        log_error("FfmpegThumbnailerHandler: {}", message);
+        break;
+    case ThumbnailerLogLevelInfo:
+    default:
+        log_debug("FfmpegThumbnailerHandler: {}", message);
+        break;
+    }
+}
+
 fs::path FfmpegThumbnailerHandler::getThumbnailCachePath(const fs::path& base, const fs::path& movie)
 {
     assert(movie.is_absolute());
@@ -83,14 +96,15 @@ std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::sha
         auto thumbLock = std::scoped_lock<std::mutex>(thumb_mutex);
 
         auto th = ffmpegthumbnailer::VideoThumbnailer(config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE), false, true, config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY), false);
-        std::vector<uint8_t> img;
 
+        th.setLogCallback(ffmpegThLogger);
         th.setSeekPercentage(config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
         if (config->getBoolOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY))
             th.addFilter(new ffmpegthumbnailer::FilmStripFilter());
 
         log_debug("Generating thumbnail for file: {}", item->getLocation().c_str());
 
+        std::vector<uint8_t> img;
         th.generateThumbnail(item->getLocation().c_str(), Jpeg, img);
         if (cacheEnabled) {
             writeThumbnailCacheFile(item->getLocation(), reinterpret_cast<std::byte*>(img.data()), img.size());
