@@ -122,6 +122,7 @@ static const std::vector<struct ProfMapping> resSteps {
 };
 static const std::vector<std::string_view> sizeUnits { "kB", "MB", "GB", "TB" };
 static const std::vector<std::string_view> freqUnits { "kHz", "MHz", "GHz" };
+static const std::vector<std::string_view> orientation { "Top-left", "Top-right", "Bottom-right", "Bottom-left", "Left-top", "Right-top", "Right-bottom", "Left-bottom" };
 std::string CdsResource::formatSizeValue(double value)
 {
     auto result = fmt::format("{} B", value);
@@ -173,8 +174,18 @@ std::string CdsResource::getAttributeValue(ResourceAttribute attr) const
                 }
             }
         } catch (const std::runtime_error& e) {
-            log_info("Resource attribute for resolution {} is invalid", result);
+            log_warning("Resource attribute for resolution {} is invalid", result);
             return fmt::format("???", result);
+        }
+        break;
+    }
+    case ResourceAttribute::ORIENTATION: {
+        try {
+            std::size_t value = stoiString(result);
+            return (value > 0 && value <= orientation.size()) ? orientation.at(value - 1).data() : result;
+        } catch (const std::runtime_error& e) {
+            log_warning("Resource attribute for orientation {} is invalid", result);
+            return result;
         }
         break;
     }

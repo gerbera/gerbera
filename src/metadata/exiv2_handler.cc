@@ -94,6 +94,11 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
                 item->addMetaData(MetadataFields::M_DATE, value);
             }
         }
+        auto orientation = exifData.findKey(Exiv2::ExifKey("Exif.Image.Orientation"));
+        if (orientation != exifData.end()) {
+            log_info("orientation {}", orientation->toString());
+            item->getResource(ContentHandler::DEFAULT)->addAttribute(ResourceAttribute::ORIENTATION, sc->convert(orientation->toString()));
+        }
 
         // if there was no jpeg comment, look if there is an exiv2 comment
         // should we override the normal jpeg comment, if there is an exiv2 one?

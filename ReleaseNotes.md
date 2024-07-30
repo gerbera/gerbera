@@ -19,6 +19,7 @@ Because of the extension of configuration of transcoding profiles, those produci
 - Display media details in web ui
 - Image and thumbnail profiles support PNG images
 - Page layout of items page with splitter and resize button
+- Orientation for images and videos in resource attributes
 
 ### FIXES
 

@@ -359,7 +359,7 @@ body,
     height: calc( 100vh - 115px );
 }
 .grb-table-db tbody {
-    height: calc( 100vh - 180px );
+    height: calc( 100vh - 215px );
 }
 
 #clientgrid table tbody,
@@ -603,11 +603,10 @@ body,
 
 .grb-image {
     image-orientation: from-image;
-    /* margin-right: 10px; */
     object-fit: contain;
     background: #eee;
     border: 1px solid #ddd;
-    height: calc( 100vh - 215px );
+    height: calc( 100vh - 250px );
     width: 100%;
 }
 

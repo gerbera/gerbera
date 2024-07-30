@@ -255,6 +255,13 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
             }
             break;
         }
+        case EXIF_TAG_ORIENTATION: {
+            auto o = exif_data_get_byte_order(entry->parent->parent);
+            auto value = exif_get_short(entry->data, o);
+            log_debug("Found exif orientation {}", value);
+            item->getResource(ContentHandler::DEFAULT)->addAttribute(ResourceAttribute::ORIENTATION, fmt::format("{}", value));
+            break;
+        }
         default:
             break;
         }
