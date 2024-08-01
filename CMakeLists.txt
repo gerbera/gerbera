@@ -88,6 +88,8 @@ add_library(libgerbera STATIC
         src/config/config_setup.cc
         src/config/config_setup.h
         src/config/config_val.h
+        src/config/grb_runtime.cc
+        src/config/grb_runtime.h
         src/config/result/autoscan.cc
         src/config/result/autoscan.h
         src/config/result/box_layout.cc
@@ -128,17 +130,15 @@ add_library(libgerbera STATIC
         src/config/setup/config_setup_tweak.h
         src/config/setup/config_setup_vector.cc
         src/config/setup/config_setup_vector.h
-        src/config/grb_runtime.cc
-        src/config/grb_runtime.h
         src/content/autoscan_list.cc
         src/content/autoscan_list.h
         src/content/autoscan_setting.cc
         src/content/autoscan_setting.h
         src/content/cm_task.cc
         src/content/cm_task.h
+        src/content/content.h
         src/content/content_manager.cc
         src/content/content_manager.h
-        src/content/content.h
         src/content/import_service.cc
         src/content/import_service.h
         src/content/inotify/autoscan_inotify.cc
@@ -209,12 +209,8 @@ add_library(libgerbera STATIC
         src/database/sqlite3/sqlite_config.h
         src/database/sqlite3/sqlite_database.cc
         src/database/sqlite3/sqlite_database.h
-        src/device_description_handler.cc
-        src/device_description_handler.h
         src/exceptions.cc
         src/exceptions.h
-        src/file_request_handler.cc
-        src/file_request_handler.h
         src/iohandler/buffered_io_handler.cc
         src/iohandler/buffered_io_handler.h
         src/iohandler/curl_io_handler.cc
@@ -254,8 +250,18 @@ add_library(libgerbera STATIC
         src/metadata/taglib_handler.h
         src/metadata/wavpack_handler.cc
         src/metadata/wavpack_handler.h
-        src/request_handler.cc
-        src/request_handler.h
+        src/request_handler/file_request_handler.cc
+        src/request_handler/file_request_handler.h
+        src/request_handler/device_description_handler.cc
+        src/request_handler/device_description_handler.h
+        src/request_handler/request_handler.cc
+        src/request_handler/request_handler.h
+        src/request_handler/ui_handler.cc
+        src/request_handler/ui_handler.h
+        src/request_handler/upnp_desc_handler.cc
+        src/request_handler/upnp_desc_handler.h
+        src/request_handler/url_request_handler.cc
+        src/request_handler/url_request_handler.h
         src/server.cc
         src/server.h
         src/subscription_request.cc
@@ -266,13 +272,9 @@ add_library(libgerbera STATIC
         src/transcoding/transcode_ext_handler.h
         src/transcoding/transcode_handler.cc
         src/transcoding/transcode_handler.h
-        src/ui_handler.cc
-        src/ui_handler.h
-        src/upnp_desc_handler.cc
-        src/upnp_desc_handler.h
-        src/upnp/clients.h
         src/upnp/client_manager.cc
         src/upnp/client_manager.h
+        src/upnp/clients.h
         src/upnp/compat.cc
         src/upnp/compat.h
         src/upnp/conn_mgr_service.cc
@@ -290,8 +292,6 @@ add_library(libgerbera STATIC
         src/upnp/upnp_service.h
         src/upnp/xml_builder.cc
         src/upnp/xml_builder.h
-        src/url_request_handler.cc
-        src/url_request_handler.h
         src/util/enum_iterator.h
         src/util/executor.h
         src/util/generic_task.cc

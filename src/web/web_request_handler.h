@@ -34,7 +34,7 @@
 #ifndef __WEB_REQUEST_HANDLER_H__
 #define __WEB_REQUEST_HANDLER_H__
 
-#include "request_handler.h"
+#include "request_handler/request_handler.h"
 #include "util/tools.h"
 
 #include <pugixml.hpp>

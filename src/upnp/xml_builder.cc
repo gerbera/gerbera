@@ -42,8 +42,8 @@
 #include "config/result/transcoding.h"
 #include "context.h"
 #include "database/database.h"
-#include "device_description_handler.h"
-#include "request_handler.h"
+#include "request_handler/device_description_handler.h"
+#include "request_handler/request_handler.h"
 #include "upnp/clients.h"
 #include "util/url_utils.h"
 
