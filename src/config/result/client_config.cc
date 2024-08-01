@@ -37,38 +37,38 @@
 
 ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, const std::map<std::string, std::string>& mimeMappings, const std::map<std::string, std::string>& headers, int captionInfoCount, int stringLimit, bool multiValue)
 {
-    clientInfo.type = ClientType::Unknown;
+    clientProfile.type = ClientType::Unknown;
     if (!ip.empty()) {
-        clientInfo.matchType = ClientMatchType::IP;
-        clientInfo.match = ip;
+        clientProfile.matchType = ClientMatchType::IP;
+        clientProfile.match = ip;
     } else if (!userAgent.empty()) {
-        clientInfo.matchType = ClientMatchType::UserAgent;
-        clientInfo.match = userAgent;
+        clientProfile.matchType = ClientMatchType::UserAgent;
+        clientProfile.match = userAgent;
     } else {
-        clientInfo.matchType = ClientMatchType::None;
+        clientProfile.matchType = ClientMatchType::None;
     }
-    clientInfo.mimeMappings = mimeMappings;
-    clientInfo.headers = headers;
-    clientInfo.group = group;
-    clientInfo.flags = flags;
-    clientInfo.captionInfoCount = captionInfoCount;
-    clientInfo.stringLimit = stringLimit;
-    clientInfo.multiValue = multiValue;
+    clientProfile.mimeMappings = mimeMappings;
+    clientProfile.headers = headers;
+    clientProfile.group = group;
+    clientProfile.flags = flags;
+    clientProfile.captionInfoCount = captionInfoCount;
+    clientProfile.stringLimit = stringLimit;
+    clientProfile.multiValue = multiValue;
     if (flags & QUIRK_FLAG_HIDE_RES_THUMBNAIL) {
-        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), ResourcePurpose::Thumbnail);
-        clientInfo.supportedResources.erase(res);
+        auto res = std::find(clientProfile.supportedResources.begin(), clientProfile.supportedResources.end(), ResourcePurpose::Thumbnail);
+        clientProfile.supportedResources.erase(res);
     }
     if (flags & QUIRK_FLAG_HIDE_RES_SUBTITLE) {
-        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), ResourcePurpose::Subtitle);
-        clientInfo.supportedResources.erase(res);
+        auto res = std::find(clientProfile.supportedResources.begin(), clientProfile.supportedResources.end(), ResourcePurpose::Subtitle);
+        clientProfile.supportedResources.erase(res);
     }
     if (flags & QUIRK_FLAG_HIDE_RES_TRANSCODE) {
-        auto res = std::find(clientInfo.supportedResources.begin(), clientInfo.supportedResources.end(), ResourcePurpose::Transcode);
-        clientInfo.supportedResources.erase(res);
+        auto res = std::find(clientProfile.supportedResources.begin(), clientProfile.supportedResources.end(), ResourcePurpose::Transcode);
+        clientProfile.supportedResources.erase(res);
     }
     auto sIP = ip.empty() ? "" : fmt::format(" IP {}", ip);
     auto sUA = userAgent.empty() ? "" : fmt::format(" UserAgent {}", userAgent);
-    clientInfo.name = fmt::format("Manual Setup for{}{}", sIP, sUA);
+    clientProfile.name = fmt::format("Manual Setup for{}{}", sIP, sUA);
 }
 
 void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, std::size_t index)

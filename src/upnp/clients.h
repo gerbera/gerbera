@@ -33,15 +33,9 @@
 #include "upnp/quirks.h"
 #include "util/grb_time.h"
 
-#include <memory>
-#include <mutex>
-#include <pugixml.hpp>
-#include <sys/socket.h>
 #include <vector>
 
 // forward declaration
-class Config;
-class Database;
 class GrbNet;
 
 // specific customer products
@@ -69,7 +63,7 @@ enum class ClientMatchType {
     IP, // use client's network address
 };
 
-struct ClientInfo {
+struct ClientProfile {
     std::string name { "Unknown" }; // used for logging/debugging proposes only
     std::string group { DEFAULT_CLIENT_GROUP };
     ClientType type { ClientType::Unknown };
@@ -86,8 +80,8 @@ struct ClientInfo {
     std::vector<ResourcePurpose> supportedResources { ResourcePurpose::Content, ResourcePurpose::Thumbnail, ResourcePurpose::Subtitle, ResourcePurpose::Transcode };
 };
 
-struct ClientCacheEntry {
-    ClientCacheEntry(std::shared_ptr<GrbNet> addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientInfo* pInfo)
+struct ClientObservation {
+    ClientObservation(std::shared_ptr<GrbNet> addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientProfile* pInfo)
         : addr(std::move(addr))
         , userAgent(std::move(userAgent))
         , last(last)
@@ -100,7 +94,7 @@ struct ClientCacheEntry {
     std::string userAgent;
     std::chrono::seconds last;
     std::chrono::seconds age;
-    const struct ClientInfo* pInfo;
+    const struct ClientProfile* pInfo;
 };
 
 class ClientStatusDetail {
@@ -132,7 +126,10 @@ public:
     std::chrono::milliseconds getBookMarkPosition() const { return bookMarkPos; }
     void setBookMarkPosition(int bookMarkPos) { this->bookMarkPos = std::chrono::milliseconds(bookMarkPos); }
 
-    std::shared_ptr<ClientStatusDetail> clone() const;
+    std::shared_ptr<ClientStatusDetail> clone() const
+    {
+        return std::make_shared<ClientStatusDetail>(group, itemId, playCount, lastPlayed.count(), lastPlayedPosition.count(), bookMarkPos.count());
+    }
 
 private:
     std::string group; // default for any, otherwise group name from config
@@ -141,35 +138,6 @@ private:
     std::chrono::seconds lastPlayed;
     std::chrono::milliseconds lastPlayedPosition {};
     std::chrono::milliseconds bookMarkPos {};
-};
-
-class ClientManager {
-public:
-    explicit ClientManager(const std::shared_ptr<Config>& config, std::shared_ptr<Database> database);
-    void refresh(const std::shared_ptr<Config>& config);
-
-    // always return something, 'Unknown' if we do not know better
-    const ClientInfo* getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent) const;
-
-    void addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const std::string& descLocation);
-    const std::vector<ClientCacheEntry>& getClientList() const { return cache; }
-
-private:
-    const ClientInfo* getInfoByAddr(const std::shared_ptr<GrbNet>& addr) const;
-    const ClientInfo* getInfoByType(const std::string& match, ClientMatchType type) const;
-
-    const ClientInfo* getInfoByCache(const std::shared_ptr<GrbNet>& addr) const;
-    void updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientInfo* pInfo) const;
-
-    static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
-
-    mutable std::mutex mutex;
-    using AutoLock = std::scoped_lock<std::mutex>;
-    mutable std::vector<ClientCacheEntry> cache;
-
-    std::vector<ClientInfo> clientInfo;
-    std::shared_ptr<Database> database;
-    std::chrono::hours cacheThreshold;
 };
 
 #endif // __UPNP_CLIENTS_H__

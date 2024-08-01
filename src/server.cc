@@ -49,6 +49,7 @@
 #include "request_handler.h"
 #include "subscription_request.h"
 #include "ui_handler.h"
+#include "upnp/client_manager.h"
 #include "upnp/clients.h"
 #include "upnp/compat.h"
 #include "upnp/conn_mgr_service.h"
@@ -658,7 +659,7 @@ int Server::registerVirtualDirCallbacks()
     ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie) -> UpnpWebFileHandle {
         try {
             log_debug("open({})", filename);
-            auto client = requestCookie ? static_cast<const ClientInfo*>(requestCookie) : nullptr;
+            auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
             auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
             auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
             std::string link = URLUtils::urlUnescape(filename);

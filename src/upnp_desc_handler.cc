@@ -28,6 +28,7 @@
 #include "config/config_val.h"
 #include "iohandler/file_io_handler.h"
 #include "iohandler/mem_io_handler.h"
+#include "upnp/clients.h"
 #include "upnp/quirks.h"
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
@@ -48,9 +49,11 @@ fs::path UpnpDescHandler::getPath(const std::shared_ptr<Quirks>& quirks, std::st
     // This is a hack, we shouldnt need to do this, because SCPDURL is defined as being relative to the description doc
     // Which is served at /upnp/description.xml
     // HOWEVER it seems like its pretty common to just ignore that and request the base URL instead :(
-    // Ideally we would print client info here too TODO!
     if (!startswith(path, UPNP_DESC_SCPD_URL)) {
-        log_warning("Bad client is not following the SCPDURL spec! (requesting {} not /upnp{}) Remapping it.", path, path);
+        auto client = quirks ? quirks->getClient() : nullptr;
+        auto ip = client && client->addr ? client->addr->getHostName() : "";
+        auto userAgent = client ? client->userAgent : "";
+        log_warning("Bad client {} (userAgent {}) is not following the SCPDURL spec! (requesting {} not /upnp{}) Remapping it.", ip, userAgent, path, path);
         path = fmt::format("{}{}", UPNP_DESC_SCPD_URL, path);
     }
     auto webroot = config->getOption(ConfigVal::SERVER_WEBROOT);
@@ -59,7 +62,7 @@ fs::path UpnpDescHandler::getPath(const std::shared_ptr<Quirks>& quirks, std::st
     return webFile;
 }
 
-const struct ClientInfo* UpnpDescHandler::getInfo(const char* filename, UpnpFileInfo* info)
+const struct ClientObservation* UpnpDescHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     auto quirks = getQuirks(info);
     auto webFile = getPath(quirks, filename);
@@ -70,7 +73,7 @@ const struct ClientInfo* UpnpDescHandler::getInfo(const char* filename, UpnpFile
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_LastModified(info, currentTime().count());
-    return quirks ? quirks->getInfo() : nullptr;
+    return quirks ? quirks->getClient() : nullptr;
 }
 
 std::unique_ptr<IOHandler> UpnpDescHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)

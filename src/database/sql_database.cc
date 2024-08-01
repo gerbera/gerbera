@@ -2312,7 +2312,7 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
 }
 
 /* clients methods */
-std::vector<ClientCacheEntry> SQLDatabase::getClients()
+std::vector<ClientObservation> SQLDatabase::getClients()
 {
     auto fields = std::vector {
         identifier("addr"),
@@ -2322,7 +2322,7 @@ std::vector<ClientCacheEntry> SQLDatabase::getClients()
         identifier("last"),
         identifier("age"),
     };
-    std::vector<ClientCacheEntry> result;
+    std::vector<ClientObservation> result;
     auto res = select(fmt::format("SELECT {} FROM {}", fmt::join(fields, ", "), identifier(CLIENTS_TABLE)));
     if (!res)
         return result;
@@ -2343,7 +2343,7 @@ std::vector<ClientCacheEntry> SQLDatabase::getClients()
     return result;
 }
 
-void SQLDatabase::saveClients(const std::vector<ClientCacheEntry>& cache)
+void SQLDatabase::saveClients(const std::vector<ClientObservation>& cache)
 {
     deleteAll(CLIENTS_TABLE);
     auto fields = std::vector {

@@ -29,6 +29,7 @@
 #include "action_request.h"
 #include "cds/cds_item.h"
 #include "database/database.h"
+#include "upnp/client_manager.h"
 #include "upnp/clients.h"
 #include "upnp/headers.h"
 #include "upnp/upnp_common.h"
@@ -42,23 +43,31 @@
 Quirks::Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<ClientManager>& clientManager, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent)
     : xmlBuilder(std::move(xmlBuilder))
 {
-    if (addr || !userAgent.empty())
-        pClientInfo = clientManager->getInfo(addr, userAgent);
+    if (addr || !userAgent.empty()) {
+        pClient = clientManager->getInfo(addr, userAgent);
+        pClientProfile = pClient->pInfo;
+    }
+}
+
+Quirks::Quirks(const struct ClientObservation* client)
+    : pClientProfile(client->pInfo)
+    , pClient(client)
+{
 }
 
 QuirkFlags Quirks::checkFlags(QuirkFlags flags) const
 {
-    return pClientInfo ? pClientInfo->flags & flags : 0;
+    return pClientProfile ? pClientProfile->flags & flags : 0;
 }
 
 bool Quirks::hasFlag(QuirkFlags flag) const
 {
-    return pClientInfo && (pClientInfo->flags & flag) == flag;
+    return pClientProfile && (pClientProfile->flags & flag) == flag;
 }
 
 std::string Quirks::getGroup() const
 {
-    return pClientInfo ? pClientInfo->group : DEFAULT_CLIENT_GROUP;
+    return pClientProfile ? pClientProfile->group : DEFAULT_CLIENT_GROUP;
 }
 
 void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& headers)
@@ -73,7 +82,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& heade
         return;
     }
 
-    auto subAdded = xmlBuilder->renderSubtitleURL(item, pClientInfo->mimeMappings);
+    auto subAdded = xmlBuilder->renderSubtitleURL(item, pClientProfile->mimeMappings);
     if (subAdded) {
         log_debug("Call for Samsung CaptionInfo.sec: {}", subAdded.value());
         headers.addHeader("CaptionInfo.sec", subAdded.value());
@@ -226,9 +235,9 @@ void Quirks::saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& data
             [[maybe_unused]] auto rID = reqRoot.child_value("RID");
 
             log_debug("X_SetBookmark: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
-            auto playStatus = database->getPlayStatus(pClientInfo->group, objectID);
+            auto playStatus = database->getPlayStatus(pClientProfile->group, objectID);
             if (!playStatus)
-                playStatus = std::make_shared<ClientStatusDetail>(pClientInfo->group, objectID, 1, 0, 0, bookMarkPos);
+                playStatus = std::make_shared<ClientStatusDetail>(pClientProfile->group, objectID, 1, 0, 0, bookMarkPos);
             else {
                 playStatus->setLastPlayed();
                 playStatus->setBookMarkPosition(bookMarkPos);
@@ -244,7 +253,7 @@ void Quirks::saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& data
 
 bool Quirks::supportsResource(ResourcePurpose purpose) const
 {
-    return pClientInfo ? std::find(pClientInfo->supportedResources.begin(), pClientInfo->supportedResources.end(), purpose) != pClientInfo->supportedResources.end() : true;
+    return pClientProfile ? std::find(pClientProfile->supportedResources.begin(), pClientProfile->supportedResources.end(), purpose) != pClientProfile->supportedResources.end() : true;
 }
 
 bool Quirks::blockXmlDeclaration() const
@@ -259,12 +268,12 @@ bool Quirks::needsFileNameUri() const
 
 int Quirks::getCaptionInfoCount() const
 {
-    return pClientInfo ? pClientInfo->captionInfoCount : -1;
+    return pClientProfile ? pClientProfile->captionInfoCount : -1;
 }
 
 int Quirks::getStringLimit() const
 {
-    return pClientInfo ? pClientInfo->stringLimit : -1;
+    return pClientProfile ? pClientProfile->stringLimit : -1;
 }
 
 bool Quirks::needsStrictXml() const
@@ -279,17 +288,17 @@ bool Quirks::needsSimpleDate() const
 
 bool Quirks::getMultiValue() const
 {
-    return pClientInfo ? pClientInfo->multiValue : true;
+    return pClientProfile ? pClientProfile->multiValue : true;
 }
 
 std::map<std::string, std::string> Quirks::getMimeMappings() const
 {
-    return pClientInfo ? pClientInfo->mimeMappings : std::map<std::string, std::string>();
+    return pClientProfile ? pClientProfile->mimeMappings : std::map<std::string, std::string>();
 }
 
 void Quirks::updateHeaders(Headers& headers) const
 {
-    if (pClientInfo && !pClientInfo->headers.empty())
-        for (auto&& [key, value] : pClientInfo->headers)
+    if (pClientProfile && !pClientProfile->headers.empty())
+        for (auto&& [key, value] : pClientProfile->headers)
             headers.updateHeader(key, value);
 }

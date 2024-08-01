@@ -38,7 +38,7 @@ public:
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         std::shared_ptr<Server> server);
 
-    const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) override;
+    const struct ClientObservation* getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
 
 private:

@@ -30,6 +30,7 @@
 #include "content/content.h"
 #include "context.h"
 #include "database/database.h"
+#include "upnp/client_manager.h"
 #include "upnp/clients.h"
 #include "upnp/xml_builder.h"
 #include "util/grb_net.h"

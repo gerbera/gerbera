@@ -270,8 +270,9 @@ add_library(libgerbera STATIC
         src/ui_handler.h
         src/upnp_desc_handler.cc
         src/upnp_desc_handler.h
-        src/upnp/clients.cc
         src/upnp/clients.h
+        src/upnp/client_manager.cc
+        src/upnp/client_manager.h
         src/upnp/compat.cc
         src/upnp/compat.h
         src/upnp/conn_mgr_service.cc

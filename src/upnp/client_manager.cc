@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    upnp/clients.cc - this file is part of Gerbera.
+    upnp/client_manager.cc - this file is part of Gerbera.
 
     Copyright (C) 2020-2024 Gerbera Contributors
 
@@ -21,12 +21,13 @@
     $Id$
 */
 
-/// \file upnp/clients.cc
+/// \file upnp/client_manager.cc
 /// client info initially taken from https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.cc
 #define GRB_LOG_FAC GrbLogFacility::clients
 
-#include "clients.h" // API
+#include "client_manager.h" // API
 
+#include "clients.h"
 #include "config/config.h"
 #include "config/config_val.h"
 #include "config/result/client_config.h"
@@ -35,12 +36,8 @@
 #include "util/logger.h"
 
 #include <algorithm>
+#include <sys/socket.h>
 #include <upnp.h>
-
-std::shared_ptr<ClientStatusDetail> ClientStatusDetail::clone() const
-{
-    return std::make_shared<ClientStatusDetail>(group, itemId, playCount, lastPlayed.count(), lastPlayedPosition.count(), bookMarkPos.count());
-}
 
 ClientManager::ClientManager(const std::shared_ptr<Config>& config, std::shared_ptr<Database> database)
     : database(std::move(database))
@@ -55,8 +52,8 @@ ClientManager::ClientManager(const std::shared_ptr<Config>& config, std::shared_
                 info = getInfoByType(entry.userAgent, ClientMatchType::UserAgent);
             }
             if (!info) {
-                assert(clientInfo[0].type == ClientType::Unknown);
-                info = clientInfo.data();
+                assert(clientProfile[0].type == ClientType::Unknown);
+                info = clientProfile.data();
             }
             entry.pInfo = info;
             cache.push_back(std::move(entry));
@@ -67,7 +64,7 @@ ClientManager::ClientManager(const std::shared_ptr<Config>& config, std::shared_
 void ClientManager::refresh(const std::shared_ptr<Config>& config)
 {
     // table of supported clients (reverse search, sequence of entries matters!)
-    clientInfo = {
+    clientProfile = {
         // Used for not explicitly listed clients, must be first entry
         {
             "Unknown",
@@ -200,14 +197,14 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
     auto clientConfigList = config->getClientConfigListOption(ConfigVal::CLIENTS_LIST);
     for (std::size_t i = 0; i < clientConfigList->size(); i++) {
         auto clientConfig = clientConfigList->get(i);
-        clientInfo.push_back(clientConfig->getClientInfo());
+        clientProfile.push_back(clientConfig->getClientProfile());
     }
 }
 
 void ClientManager::addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const std::string& descLocation)
 {
 #if 0 // only needed if UserAgent is not good enough
-    const ClientInfo* info = nullptr;
+    const ClientProfile* info = nullptr;
 
     auto descXml = downloadDescription(descLocation);
     if (descXml) {
@@ -217,7 +214,7 @@ void ClientManager::addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, co
 #endif
 }
 
-const ClientInfo* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent) const
+const ClientObservation* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent) const
 {
     // 1. by IP address
     auto info = getInfoByAddr(addr);
@@ -228,35 +225,33 @@ const ClientInfo* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, co
 
     // update IP or User-Agent match in cache
     if (info) {
-        updateCache(addr, userAgent, info);
-    } else {
-        // 3. by cache
-        // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
-        info = getInfoByCache(addr);
+        return updateCache(addr, userAgent, info);
+    }
+    // 3. by cache
+    // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
+    auto client = getInfoByCache(addr);
+
+    if (client) {
+        return client;
     }
 
-    if (!info) {
-        // always return something, 'Unknown' if we do not know better
-        assert(clientInfo[0].type == ClientType::Unknown);
-        info = clientInfo.data();
+    // always return something, 'Unknown' if we do not know better
+    assert(clientProfile[0].type == ClientType::Unknown);
+    info = clientProfile.data();
 
-        // also add to cache, for web-ui proposes only
-        updateCache(addr, userAgent, info);
-    }
-
-    log_debug("client info: {} '{}' -> '{}' as {} with {}", addr->getNameInfo(), userAgent, info->name, ClientConfig::mapClientType(info->type), ClientConfig::mapFlags(info->flags));
-    return info;
+    // also add to cache, for web-ui proposes only
+    return updateCache(addr, userAgent, info);
 }
 
-const ClientInfo* ClientManager::getInfoByAddr(const std::shared_ptr<GrbNet>& addr) const
+const ClientProfile* ClientManager::getInfoByAddr(const std::shared_ptr<GrbNet>& addr) const
 {
-    auto it = std::find_if(clientInfo.begin(), clientInfo.end(), [=](auto&& c) {
+    auto it = std::find_if(clientProfile.begin(), clientProfile.end(), [=](auto&& c) {
         if (c.matchType != ClientMatchType::IP)
             return false;
         return addr->equals(c.match);
     });
 
-    if (it != clientInfo.end()) {
+    if (it != clientProfile.end()) {
         log_debug("found client by IP (ip='{}')", addr->getHostName());
         return &(*it);
     }
@@ -264,11 +259,11 @@ const ClientInfo* ClientManager::getInfoByAddr(const std::shared_ptr<GrbNet>& ad
     return nullptr;
 }
 
-const ClientInfo* ClientManager::getInfoByType(const std::string& match, ClientMatchType type) const
+const ClientProfile* ClientManager::getInfoByType(const std::string& match, ClientMatchType type) const
 {
     if (!match.empty()) {
-        auto it = std::find_if(clientInfo.rbegin(), clientInfo.rend(), [=](auto&& c) { return c.matchType == type && match.find(c.match) != std::string::npos; });
-        if (it != clientInfo.rend()) {
+        auto it = std::find_if(clientProfile.rbegin(), clientProfile.rend(), [=](auto&& c) { return c.matchType == type && match.find(c.match) != std::string::npos; });
+        if (it != clientProfile.rend()) {
             log_debug("found client by type (match='{}')", match);
             return &(*it);
         }
@@ -277,7 +272,7 @@ const ClientInfo* ClientManager::getInfoByType(const std::string& match, ClientM
     return nullptr;
 }
 
-const ClientInfo* ClientManager::getInfoByCache(const std::shared_ptr<GrbNet>& addr) const
+const ClientObservation* ClientManager::getInfoByCache(const std::shared_ptr<GrbNet>& addr) const
 {
     AutoLock lock(mutex);
 
@@ -286,13 +281,13 @@ const ClientInfo* ClientManager::getInfoByCache(const std::shared_ptr<GrbNet>& a
 
     if (it != cache.end()) {
         log_debug("found client by cache (hostname='{}')", it->addr->getHostName());
-        return it->pInfo;
+        return &(*it);
     }
 
     return nullptr;
 }
 
-void ClientManager::updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientInfo* pInfo) const
+const ClientObservation* ClientManager::updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientProfile* pInfo) const
 {
     AutoLock lock(mutex);
 
@@ -316,9 +311,13 @@ void ClientManager::updateCache(const std::shared_ptr<GrbNet>& addr, const std::
     } else {
         // add new client
         cache.emplace_back(addr, userAgent, now, now, pInfo);
+        it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
+            { return entry.addr->equals(addr); });
     }
     if (this->database)
         this->database->saveClients(cache);
+    log_debug("client info: {} '{}' -> '{}' as {} with {}", addr->getNameInfo(), userAgent, pInfo->name, ClientConfig::mapClientType(pInfo->type), ClientConfig::mapFlags(pInfo->flags));
+    return &(*it);
 }
 
 std::unique_ptr<pugi::xml_document> ClientManager::downloadDescription(const std::string& location)

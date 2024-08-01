@@ -38,12 +38,11 @@
 #include <map>
 #include <memory>
 #include <upnp.h>
-#include <utility>
 #include <vector>
 
 // forward declaration
 class CdsObject;
-struct ClientInfo;
+struct ClientObservation;
 class Config;
 class Context;
 class Content;
@@ -73,8 +72,8 @@ public:
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL
     /// \param info UpnpFileInfo structure, quite similar to statbuf.
-    /// \return the ClientInfo details to be provided to quirks
-    virtual const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) = 0;
+    /// \return the ClientObservation details to be provided to quirks
+    virtual const struct ClientObservation* getInfo(const char* filename, UpnpFileInfo* info) = 0;
 
     /// \brief Prepares the output buffer and calls the process function.
     /// \param filename Requested URL

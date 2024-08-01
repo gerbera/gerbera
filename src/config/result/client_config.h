@@ -83,50 +83,50 @@ public:
         const std::map<std::string, std::string>& mimeMappings, const std::map<std::string, std::string>& headers,
         int captionInfoCount, int stringLimit, bool multiValue);
 
-    const ClientInfo& getClientInfo() const { return clientInfo; }
+    const ClientProfile& getClientProfile() const { return clientProfile; }
 
-    int getFlags() const { return this->clientInfo.flags; }
-    void setFlags(int flags) { this->clientInfo.flags = flags; }
+    int getFlags() const { return this->clientProfile.flags; }
+    void setFlags(int flags) { this->clientProfile.flags = flags; }
 
-    std::map<std::string, std::string> getMimeMapings() const { return this->clientInfo.mimeMappings; }
-    std::map<std::string, std::string> getHeaders() const { return this->clientInfo.headers; }
+    std::map<std::string, std::string> getMimeMapings() const { return this->clientProfile.mimeMappings; }
+    std::map<std::string, std::string> getHeaders() const { return this->clientProfile.headers; }
 
-    int getCaptionInfoCount() const { return this->clientInfo.captionInfoCount; }
+    int getCaptionInfoCount() const { return this->clientProfile.captionInfoCount; }
     void setCaptionInfoCount(int captionInfoCount)
     {
-        this->clientInfo.captionInfoCount = captionInfoCount;
+        this->clientProfile.captionInfoCount = captionInfoCount;
     }
 
-    int getStringLimit() const { return this->clientInfo.stringLimit; }
+    int getStringLimit() const { return this->clientProfile.stringLimit; }
     void setStringLimit(int stringLimit)
     {
-        this->clientInfo.stringLimit = stringLimit;
+        this->clientProfile.stringLimit = stringLimit;
     }
 
-    bool getMultiValue() const { return this->clientInfo.multiValue; }
+    bool getMultiValue() const { return this->clientProfile.multiValue; }
     void setMultiValue(bool multiValue)
     {
-        this->clientInfo.multiValue = multiValue;
+        this->clientProfile.multiValue = multiValue;
     }
 
-    std::string getIp() const { return (this->clientInfo.matchType == ClientMatchType::IP) ? this->clientInfo.match : ""; }
+    std::string getIp() const { return (this->clientProfile.matchType == ClientMatchType::IP) ? this->clientProfile.match : ""; }
     void setIp(std::string_view ip)
     {
-        this->clientInfo.matchType = ClientMatchType::IP;
-        this->clientInfo.match = ip;
+        this->clientProfile.matchType = ClientMatchType::IP;
+        this->clientProfile.match = ip;
     }
 
-    std::string getGroup() const { return this->clientInfo.group; }
+    std::string getGroup() const { return this->clientProfile.group; }
     void setGroup(std::string_view group)
     {
-        this->clientInfo.group = group;
+        this->clientProfile.group = group;
     }
 
-    std::string getUserAgent() const { return (this->clientInfo.matchType == ClientMatchType::UserAgent) ? this->clientInfo.match : ""; }
+    std::string getUserAgent() const { return (this->clientProfile.matchType == ClientMatchType::UserAgent) ? this->clientProfile.match : ""; }
     void setUserAgent(std::string_view userAgent)
     {
-        this->clientInfo.matchType = ClientMatchType::UserAgent;
-        this->clientInfo.match = userAgent;
+        this->clientProfile.matchType = ClientMatchType::UserAgent;
+        this->clientProfile.match = userAgent;
     }
 
     /* helpers for clientType stuff */
@@ -143,7 +143,7 @@ public:
 
 protected:
     bool isOrig {};
-    ClientInfo clientInfo {};
+    ClientProfile clientProfile {};
 };
 
 #endif

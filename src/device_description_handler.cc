@@ -50,7 +50,7 @@ DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<Content
     deviceDescription = renderDeviceDescription(ip, port, nullptr);
 }
 
-const struct ClientInfo* DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
+const struct ClientObservation* DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("Device description requested {}", filename);
     auto quirks = info ? getQuirks(info) : nullptr;
@@ -59,13 +59,13 @@ const struct ClientInfo* DeviceDescriptionHandler::getInfo(const char* filename,
         deviceDescription = renderDeviceDescription(ip, port, quirks);
     }
     log_debug("hasQuirks: {}, size {}", (bool)quirks, deviceDescription.size());
-    // We should be able to do the generation here, but libupnp doesn't support the request cookies yet
+
     UpnpFileInfo_set_FileLength(info, deviceDescription.length());
     UpnpFileInfo_set_ContentType(info, "text/xml");
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_LastModified(info, currentTime().count());
-    return quirks ? quirks->getInfo() : nullptr;
+    return quirks ? quirks->getClient() : nullptr;
 }
 
 std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
