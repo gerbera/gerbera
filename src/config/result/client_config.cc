@@ -35,9 +35,13 @@
 #include <array>
 #include <numeric>
 
-ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent, const std::map<std::string, std::string>& mimeMappings, const std::map<std::string, std::string>& headers, int captionInfoCount, int stringLimit, bool multiValue)
+ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent,
+    const std::map<std::string, std::string>& mimeMappings,
+    const std::map<std::string, std::string>& headers,
+    const std::map<ClientMatchType, std::string>& matchValues,
+    int captionInfoCount, int stringLimit, bool multiValue)
 {
-    clientProfile.type = ClientType::Unknown;
+    clientProfile.type = ClientType::Custom;
     if (!ip.empty()) {
         clientProfile.matchType = ClientMatchType::IP;
         clientProfile.match = ip;
@@ -46,6 +50,10 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
         clientProfile.match = userAgent;
     } else {
         clientProfile.matchType = ClientMatchType::None;
+        for (auto&& [mType, mLabel] : matchValues) {
+            clientProfile.matchType = mType;
+            clientProfile.match = mLabel;
+        }
     }
     clientProfile.mimeMappings = mimeMappings;
     clientProfile.headers = headers;
@@ -66,9 +74,7 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
         auto res = std::find(clientProfile.supportedResources.begin(), clientProfile.supportedResources.end(), ResourcePurpose::Transcode);
         clientProfile.supportedResources.erase(res);
     }
-    auto sIP = ip.empty() ? "" : fmt::format(" IP {}", ip);
-    auto sUA = userAgent.empty() ? "" : fmt::format(" UserAgent {}", userAgent);
-    clientProfile.name = fmt::format("Manual Setup for{}{}", sIP, sUA);
+    clientProfile.name = fmt::format("{} Setup for {} {}", mapClientType(clientProfile.type), mapMatchType(clientProfile.matchType), clientProfile.match);
 }
 
 void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, std::size_t index)
@@ -146,6 +152,7 @@ void ClientConfigList::remove(std::size_t id, bool edit)
 
 static constexpr std::array clientTypes {
     std::pair("None", ClientType::Unknown),
+    std::pair("Custom", ClientType::Custom),
     std::pair("BubbleUPnP", ClientType::BubbleUPnP),
     std::pair("SamsungAllShare", ClientType::SamsungAllShare),
     std::pair("SamsungSeriesQ", ClientType::SamsungSeriesQ),
@@ -166,20 +173,36 @@ std::string_view ClientConfig::mapClientType(ClientType clientType)
             return cLabel;
         }
     }
-    throw_std_runtime_error("illegal clientType given to mapClientType()");
+    throw_std_runtime_error("illegal clientType {} given to mapClientType()", to_underlying(clientType));
 }
+
+static constexpr std::array matchTypes {
+    std::pair(ClientMatchType::None, "None"),
+    std::pair(ClientMatchType::UserAgent, "UserAgent"),
+    std::pair(ClientMatchType::IP, "IP"),
+    std::pair(ClientMatchType::FriendlyName, "FriendlyName"),
+    std::pair(ClientMatchType::ModelName, "ModelName"),
+    std::pair(ClientMatchType::Manufacturer, "Manufacturer"),
+};
 
 std::string_view ClientConfig::mapMatchType(ClientMatchType matchType)
 {
-    switch (matchType) {
-    case ClientMatchType::None:
-        return "None";
-    case ClientMatchType::UserAgent:
-        return "UserAgent";
-    case ClientMatchType::IP:
-        return "IP";
+    for (auto [mType, mLabel] : matchTypes) {
+        if (matchType == mType) {
+            return mLabel;
+        }
     }
-    throw_std_runtime_error("illegal matchType given to mapMatchType()");
+    throw_std_runtime_error("illegal matchType {} given to mapMatchType()", to_underlying(matchType));
+}
+
+ClientMatchType ClientConfig::remapMatchType(const std::string& matchType)
+{
+    for (auto [mType, mLabel] : matchTypes) {
+        if (toLower(matchType) == toLower(mLabel)) {
+            return mType;
+        }
+    }
+    return ClientMatchType::None;
 }
 
 static constexpr std::array quirkFlags {

@@ -544,6 +544,9 @@
             </xs:sequence>
             <xs:attribute name="ip" type="xs:string"/>
             <xs:attribute name="userAgent" type="xs:string"/>
+            <xs:attribute name="friendlyName" type="xs:string"/>
+            <xs:attribute name="modelName" type="xs:string"/>
+            <xs:attribute name="manufacturer" type="xs:string"/>
             <xs:attribute name="flags" type="xs:string" use="required"/>
             <xs:attribute name="caption-info-count" type="xs:positiveInteger" default="1"/>
             <xs:attribute name="upnp-string-limit" default="-1"/>

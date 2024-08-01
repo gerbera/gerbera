@@ -76,11 +76,14 @@ public:
     /// \param userAgent user agent
     /// \param mimeMappings special mappings for client
     /// \param headers additional headers from client
+    /// \param matchValues additional matches, last one wins
     /// \param captionInfoCount max count if \<captionInfo\> tags
     /// \param stringLimit maximum length of name strings
     /// \param multiValue client support multi value attributes
     ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent,
-        const std::map<std::string, std::string>& mimeMappings, const std::map<std::string, std::string>& headers,
+        const std::map<std::string, std::string>& mimeMappings,
+        const std::map<std::string, std::string>& headers,
+        const std::map<ClientMatchType, std::string>& matchValues,
         int captionInfoCount, int stringLimit, bool multiValue);
 
     const ClientProfile& getClientProfile() const { return clientProfile; }
@@ -132,6 +135,7 @@ public:
     /* helpers for clientType stuff */
     static std::string_view mapClientType(ClientType clientType);
     static std::string_view mapMatchType(ClientMatchType matchType);
+    static ClientMatchType remapMatchType(const std::string& matchType);
     static int remapFlag(const std::string& flag);
     static int makeFlags(const std::string& optValue);
 
