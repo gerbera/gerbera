@@ -64,7 +64,7 @@ FileRequestHandler::FileRequestHandler(const std::shared_ptr<Content>& content, 
 {
 }
 
-const struct ClientInfo* FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
+const struct ClientObservation* FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("Start: {}", filename);
 
@@ -199,7 +199,7 @@ const struct ClientInfo* FileRequestHandler::getInfo(const char* filename, UpnpF
     //      filename, object_id.c_str(), path.c_str(), info->content_type);
 
     log_debug("end: {}", filename);
-    return quirks ? quirks->getInfo() : nullptr;
+    return quirks ? quirks->getClient() : nullptr;
 }
 
 std::shared_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(std::shared_ptr<CdsObject>& obj, std::shared_ptr<CdsResource>& resource) const

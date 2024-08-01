@@ -39,8 +39,8 @@ public:
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL
     /// \param info UpnpFileInfo structure, quite similar to statbuf.
-    /// \return the ClientInfo details to be provided to quirks
-    const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) override;
+    /// \return the ClientObservation details to be provided to quirks
+    const struct ClientObservation* getInfo(const char* filename, UpnpFileInfo* info) override;
 
     /// \brief Prepares the output buffer and calls the process function.
     /// \param filename Requested URL

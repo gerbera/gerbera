@@ -183,8 +183,8 @@ public:
     void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") override;
 
     /* clients methods */
-    std::vector<ClientCacheEntry> getClients() override;
-    void saveClients(const std::vector<ClientCacheEntry>& cache) override;
+    std::vector<ClientObservation> getClients() override;
+    void saveClients(const std::vector<ClientObservation>& cache) override;
     std::shared_ptr<ClientStatusDetail> getPlayStatus(const std::string& group, int objectId) override;
     std::vector<std::shared_ptr<ClientStatusDetail>> getPlayStatusList(int objectId) override;
     void savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail) override;

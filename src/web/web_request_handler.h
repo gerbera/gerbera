@@ -127,14 +127,14 @@ public:
 
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL
-    /// \param info File_Info structure, quite similar to statbuf.
-    /// \return the ClientInfo details to be provided to quirks
+    /// \param info UpnpFileInfo structure, quite similar to statbuf.
+    /// \return the ClientObservation details to be provided to quirks
     ///
     /// We need to override this, because for serving UI pages (mostly generated from
     /// dynamic XML) we do not know the size of the data. This is of course different
     /// for the FileRequestHandler, where we can check the file and return all
     /// information about it.
-    const struct ClientInfo* getInfo(const char* filename, UpnpFileInfo* info) override;
+    const struct ClientObservation* getInfo(const char* filename, UpnpFileInfo* info) override;
 
     /// \brief Decodes the parameters from the filename (URL) and calls the internal open() function.
     /// \param filename The requested URL

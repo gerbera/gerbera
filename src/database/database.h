@@ -46,7 +46,7 @@ class AutoscanDirectory;
 enum class AutoscanScanMode;
 class CdsContainer;
 class CdsObject;
-struct ClientCacheEntry;
+struct ClientObservation;
 class ClientStatusDetail;
 class Config;
 class ConfigValue;
@@ -322,8 +322,8 @@ public:
     virtual void updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status = "unchanged") = 0;
 
     /* clients methods */
-    virtual std::vector<ClientCacheEntry> getClients() = 0;
-    virtual void saveClients(const std::vector<ClientCacheEntry>& cache) = 0;
+    virtual std::vector<ClientObservation> getClients() = 0;
+    virtual void saveClients(const std::vector<ClientObservation>& cache) = 0;
     virtual std::shared_ptr<ClientStatusDetail> getPlayStatus(const std::string& group, int objectId) = 0;
     virtual void savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail) = 0;
     virtual std::vector<std::shared_ptr<ClientStatusDetail>> getPlayStatusList(int objectId) = 0;

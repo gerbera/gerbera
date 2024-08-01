@@ -53,7 +53,7 @@
 #include "content/onlineservice/online_service_helper.h"
 #endif
 
-const struct ClientInfo* URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
+const struct ClientObservation* URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("start");
 
@@ -103,7 +103,7 @@ const struct ClientInfo* URLRequestHandler::getInfo(const char* filename, UpnpFi
     log_debug("web_get_info(): end");
 
     auto quirks = getQuirks(info);
-    return quirks ? quirks->getInfo() : nullptr;
+    return quirks ? quirks->getClient() : nullptr;
 }
 
 std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)

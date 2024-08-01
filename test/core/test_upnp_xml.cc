@@ -28,6 +28,7 @@ Gerbera - https://gerbera.io/
 #include "config/result/transcoding.h"
 #include "config/config_setup.h"
 #include "metadata/metadata_handler.h"
+#include "upnp/client_manager.h"
 #include "upnp/xml_builder.h"
 #include "util/grb_net.h"
 #include "util/tools.h"

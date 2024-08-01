@@ -64,16 +64,14 @@ class GrbNet;
 class Headers;
 class UpnpXMLBuilder;
 enum class ResourcePurpose;
-struct ClientInfo;
+struct ClientProfile;
+struct ClientObservation;
 
 class Quirks {
 public:
     Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<ClientManager>& clientManager, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent);
 
-    Quirks(const struct ClientInfo* client)
-        : pClientInfo(client)
-    {
-    }
+    Quirks(const struct ClientObservation* client);
 
     // Look for subtitle file and returns its URL in CaptionInfo.sec response header.
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
@@ -206,11 +204,13 @@ public:
     void updateHeaders(Headers& headers) const;
 
     bool hasFlag(QuirkFlags flag) const;
-    const struct ClientInfo* getInfo() { return pClientInfo; }
+    const struct ClientProfile* getProfile() { return pClientProfile; }
+    const struct ClientObservation* getClient() { return pClient; }
 
 private:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
-    const ClientInfo* pClientInfo;
+    const ClientProfile* pClientProfile;
+    const ClientObservation* pClient;
 };
 
 #endif // __UPNP_QUIRKS_H__

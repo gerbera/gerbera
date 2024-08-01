@@ -70,7 +70,7 @@ std::string getMime(const std::shared_ptr<Mime>& mime, std::string_view path)
     return "application/octet-stream";
 }
 
-const struct ClientInfo* UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
+const struct ClientObservation* UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     std::string path = filename;
     if (path == "/") {
@@ -92,7 +92,7 @@ const struct ClientInfo* UIHandler::getInfo(const char* filename, UpnpFileInfo* 
         UpnpFileInfo_set_IsReadable(info, -1);
         UpnpFileInfo_set_IsDirectory(info, -1);
         UpnpFileInfo_set_LastModified(info, currentTime().count());
-        return quirks ? quirks->getInfo() : nullptr;
+        return quirks ? quirks->getClient() : nullptr;
     }
 
     auto webFile = fmt::format("{}{}", webRoot, path);
@@ -108,7 +108,7 @@ const struct ClientInfo* UIHandler::getInfo(const char* filename, UpnpFileInfo* 
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_LastModified(info, currentTime().count());
 
-    return quirks ? quirks->getInfo() : nullptr;
+    return quirks ? quirks->getClient() : nullptr;
 }
 
 std::unique_ptr<IOHandler> UIHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)

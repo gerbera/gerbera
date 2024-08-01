@@ -33,7 +33,7 @@
 #include "content/content.h"
 #include "context.h"
 #include "database/database.h"
-#include "upnp/clients.h"
+#include "upnp/client_manager.h"
 #include "util/xml_to_json.h"
 
 Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<Content>& content, const std::shared_ptr<Server>& server)
