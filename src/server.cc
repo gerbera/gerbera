@@ -41,14 +41,15 @@
 #include "content/content_manager.h"
 #include "context.h"
 #include "database/database.h"
-#include "device_description_handler.h"
 #include "exceptions.h"
-#include "file_request_handler.h"
 #include "iohandler/io_handler.h"
 #include "metadata/metadata_service.h"
-#include "request_handler.h"
+#include "request_handler/device_description_handler.h"
+#include "request_handler/file_request_handler.h"
+#include "request_handler/request_handler.h"
+#include "request_handler/ui_handler.h"
+#include "request_handler/upnp_desc_handler.h"
 #include "subscription_request.h"
-#include "ui_handler.h"
 #include "upnp/client_manager.h"
 #include "upnp/clients.h"
 #include "upnp/compat.h"
@@ -57,7 +58,6 @@
 #include "upnp/mr_reg_service.h"
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
-#include "upnp_desc_handler.h"
 #include "util/grb_net.h"
 #include "util/mime.h"
 #include "util/tools.h"
@@ -67,7 +67,7 @@
 #include "web/session_manager.h"
 
 #ifdef HAVE_CURL
-#include "url_request_handler.h"
+#include "request_handler/url_request_handler.h"
 #endif
 
 #ifdef HAVE_INOTIFY
