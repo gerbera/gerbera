@@ -201,17 +201,35 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
     }
 }
 
+static constexpr std::array matchTypes {
+    std::pair(ClientMatchType::FriendlyName, "friendlyName"),
+    std::pair(ClientMatchType::ModelName, "modelName"),
+    std::pair(ClientMatchType::Manufacturer, "manufacturer"),
+};
+
 void ClientManager::addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const std::string& descLocation)
 {
-#if 0 // only needed if UserAgent is not good enough
-    const ClientProfile* info = nullptr;
-
-    auto descXml = downloadDescription(descLocation);
-    if (descXml) {
-        // TODO: search for FriendlyName + ModelName
-        //(void)getInfoByType(userAgent, ClientMatchType::FriendlyName, &info);
+    const ClientObservation* client = getInfo(addr, userAgent);
+    if (!client || (client->pInfo && client->pInfo->matchType == ClientMatchType::None)) {
+        auto descXml = downloadDescription(descLocation);
+        if (descXml) {
+            pugi::xpath_node rootNode = descXml->document_element();
+            if (rootNode.node() && std::string(rootNode.node().name()) == "root") {
+                pugi::xpath_node deviceNode = rootNode.node().select_node("device");
+                if (deviceNode && deviceNode.node()) {
+                    for (auto&& [mType, mNode] : matchTypes) {
+                        pugi::xpath_node deviceProp = deviceNode.node().select_node(mNode);
+                        if (deviceProp && deviceProp.node()) {
+                            auto info = getInfoByType(deviceProp.node().text().as_string(), mType);
+                            if (info) {
+                                updateCache(addr, userAgent, info);
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
-#endif
 }
 
 const ClientObservation* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent) const

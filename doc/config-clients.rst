@@ -75,15 +75,23 @@ This section defines the client behaviour for one client.
     This allows to select clients by IP address. Allowed values are ip addresses (v4 or v6) which can be followed by ``/pref`` where pref is any allowed prefix length for the protocol.
 
     ::
-    
+
         userAgent=...
 
     * Optional
     * Default: empty
-    
+
     This allows to filter clients by userAgent signature. It contains a part of the UserAgent http-signature of your client.
-    Run a network sniffer like wireshark or some UPnP utility to discover the signature. 
+    Run a network sniffer like wireshark or some UPnP utility to discover the signature.
     If ``ip`` is set ``userAgent`` is ignored.
+
+    ::
+
+        friendlyName=... modelName=... manufacturer=...
+
+    This allows to filter clients by their UPnP description. It contains a properties in the device section of the xml.
+    UPnP network tools will provide you with the link to the xml document.
+    It is only used if ip and userAgent are not set. friendlyName overwrite modelName which overwrites manufacturer.
 
     ::
 

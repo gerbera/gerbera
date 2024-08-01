@@ -51,15 +51,17 @@ enum class ClientType {
     FSL,
     PanasonicTV,
     BoseSoundtouch,
-    StandardUPnP
+    StandardUPnP,
+    Custom
 };
 
 // specify what must match
 enum class ClientMatchType {
     None,
     UserAgent, // received via UpnpActionRequest, UpnpFileInfo and UpnpDiscovery (all might be slitely different)
-    // FriendlyName,
-    // ModelName,
+    Manufacturer,
+    ModelName,
+    FriendlyName,
     IP, // use client's network address
 };
 
