@@ -46,6 +46,12 @@
 
 using dirInfo = std::pair<fs::path, bool>;
 
+Web::Directories::Directories(const std::shared_ptr<Content>& content, std::shared_ptr<ConverterManager> converterManager, const std::shared_ptr<Server>& server)
+    : WebRequestHandler(content, server)
+    , converterManager(std::move(converterManager))
+{
+}
+
 void Web::Directories::process()
 {
     static auto RootId = fmt::format("{}", CDS_ID_ROOT);
@@ -102,7 +108,7 @@ void Web::Directories::process()
         filesMap.emplace(id, std::pair(filepath, hasContent));
     }
 
-    auto f2i = StringConverter::f2i(config);
+    auto f2i = converterManager->f2i();
     for (auto&& [key, val] : filesMap) {
         auto file = val.first;
         auto&& has = val.second;

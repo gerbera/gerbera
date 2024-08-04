@@ -50,6 +50,7 @@ struct ClientObservation;
 class ClientStatusDetail;
 class Config;
 class ConfigValue;
+class ConverterManager;
 class Mime;
 class Timer;
 
@@ -355,7 +356,10 @@ public:
     virtual bool threadCleanupRequired() const = 0;
 
 protected:
-    static std::shared_ptr<Database> createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer);
+    static std::shared_ptr<Database> createInstance(const std::shared_ptr<Config>& config,
+        const std::shared_ptr<Mime>& mime,
+        const std::shared_ptr<ConverterManager>& converterManager,
+        const std::shared_ptr<Timer>& timer);
     friend class Server;
 
     virtual std::shared_ptr<Database> getSelf() = 0;

@@ -77,7 +77,7 @@ public:
     void SetUp() override
     {
         config = std::make_shared<SqliteConfigFake>();
-        subject = std::make_shared<Sqlite3Database>(config, nullptr, nullptr);
+        subject = std::make_shared<Sqlite3Database>(config, nullptr, nullptr, nullptr);
     }
 
     void TearDown() override
@@ -145,7 +145,7 @@ public:
     void SetUp() override
     {
         config = std::make_shared<MySQLConfigFake>();
-        subject = std::make_shared<MySQLDatabase>(config, nullptr);
+        subject = std::make_shared<MySQLDatabase>(config, nullptr, nullptr);
     }
 
     void TearDown() override

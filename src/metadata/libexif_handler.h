@@ -51,7 +51,7 @@ class LibExifHandler : public MediaMetadataHandler {
 private:
     ExifLog* log = nullptr;
 
-    void process_ifd(const ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc,
+    void process_ifd(const ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc,
         std::string& imageX, std::string& imageY,
         const std::vector<std::string>& auxtags, const std::map<std::string, std::string>& metatags);
 

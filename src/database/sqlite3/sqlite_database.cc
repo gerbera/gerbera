@@ -45,8 +45,8 @@ static constexpr auto sqlite3AddResourceAttr = std::string_view(R"(ALTER TABLE "
 #define DELETE_CACHE_MAX_TIME 60 // drop cache if last delete was more than 60 secs ago
 #define DELETE_CACHE_RED_SIZE 0.2 // reduce cache to 80% of max entries
 
-Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, std::shared_ptr<Timer> timer)
-    : SQLDatabase(config, mime)
+Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager, std::shared_ptr<Timer> timer)
+    : SQLDatabase(config, mime, converterManager)
     , timer(std::move(timer))
 {
     table_quote_begin = '"';
@@ -202,9 +202,9 @@ std::string Sqlite3Database::handleError(const std::string& query, const std::st
     return fmt::format("SQLITE3 ({}: {}): {}\n       Query: {}\n       Error: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
 }
 
-Sqlite3DatabaseWithTransactions::Sqlite3DatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer)
+Sqlite3DatabaseWithTransactions::Sqlite3DatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager, const std::shared_ptr<Timer>& timer)
     : SqlWithTransactions(config)
-    , Sqlite3Database(config, mime, timer)
+    , Sqlite3Database(config, mime, converterManager, timer)
 {
 }
 

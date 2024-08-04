@@ -45,6 +45,7 @@ class ActionRequest;
 class ClientManager;
 class Config;
 class Content;
+class ConverterManager;
 class Context;
 class Database;
 class MetadataService;
@@ -101,6 +102,7 @@ protected:
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
     std::shared_ptr<Web::SessionManager> sessionManager;
+    std::shared_ptr<ConverterManager> converterManager;
     std::shared_ptr<Context> context;
 
     std::shared_ptr<Timer> timer;

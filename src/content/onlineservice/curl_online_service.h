@@ -38,6 +38,7 @@
 // forward declaration
 class Content;
 class Context;
+class ConverterManager;
 class CdsObject;
 
 /// \brief this class is responsible for creating objects from the CurlContentHandler
@@ -96,6 +97,7 @@ protected:
 
     std::string service_url;
     std::string serviceName;
+    std::shared_ptr<ConverterManager> converterManager;
 };
 
 #endif //__CURL_ONLINE_SERVICE_H__

@@ -52,7 +52,7 @@ class SLTask;
 /// \brief The Database class for using SQLite3
 class Sqlite3Database : public Timer::Subscriber, public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
-    Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, std::shared_ptr<Timer> timer);
+    Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager, std::shared_ptr<Timer> timer);
 
     std::string handleError(const std::string& query, const std::string& error, sqlite3* db, int errorCode);
     void timerNotify(const std::shared_ptr<Timer::Parameter>& param) override;
@@ -110,7 +110,7 @@ private:
 /// \brief The Database class for using SQLite3 with transactions
 class Sqlite3DatabaseWithTransactions : public SqlWithTransactions, public Sqlite3Database {
 public:
-    Sqlite3DatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer);
+    Sqlite3DatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager, const std::shared_ptr<Timer>& timer);
 
     void beginTransaction(std::string_view tName) override;
     void rollback(std::string_view tName) override;

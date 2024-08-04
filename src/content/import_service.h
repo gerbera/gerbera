@@ -40,6 +40,7 @@ class CdsObject;
 class Config;
 class ContentManager;
 class Context;
+class ConverterManager;
 class Database;
 class GenericTask;
 class ImportService;
@@ -149,6 +150,7 @@ private:
     std::shared_ptr<Database> database;
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<MetadataService> metadataService;
+    std::shared_ptr<ConverterManager> converterManager;
 
     std::map<std::string, std::string> mimetypeContenttypeMap;
     std::map<std::string, std::string> mimetypeUpnpclassMap;
@@ -197,7 +199,7 @@ private:
     void cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime = std::chrono::seconds::zero(), const std::shared_ptr<CdsObject>& cdsObject = nullptr);
 
 public:
-    ImportService(std::shared_ptr<Context> context);
+    ImportService(std::shared_ptr<Context> context, std::shared_ptr<ConverterManager> converterManager);
 
     void run(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> autoScan = {}, fs::path path = "");
     void initLayout(LayoutType layoutType);

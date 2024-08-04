@@ -62,7 +62,7 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     try {
         std::string value;
-        const auto sc = StringConverter::m2i(ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET, item->getLocation(), config);
+        const auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET, item->getLocation());
 
         const auto image = Exiv2::ImageFactory::open(item->getLocation());
         image->readMetadata();
@@ -96,7 +96,6 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         }
         auto orientation = exifData.findKey(Exiv2::ExifKey("Exif.Image.Orientation"));
         if (orientation != exifData.end()) {
-            log_info("orientation {}", orientation->toString());
             item->getResource(ContentHandler::DEFAULT)->addAttribute(ResourceAttribute::ORIENTATION, sc->convert(orientation->toString()));
         }
 

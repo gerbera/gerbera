@@ -222,7 +222,7 @@ void WavPackHandler::getAttachments(WavpackContext* context, const std::shared_p
 
 void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item)
 {
-    auto sc = StringConverter::m2i(ConfigVal::IMPORT_LIBOPTS_WVC_CHARSET, item->getLocation(), config);
+    auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_WVC_CHARSET, item->getLocation());
     auto tagCount = WavpackGetNumTagItems(context);
     char tag[MAX_WV_TEXT_SIZE];
     char value[MAX_WV_TEXT_SIZE];

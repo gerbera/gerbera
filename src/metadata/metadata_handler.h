@@ -81,11 +81,13 @@ protected:
     bool isEnabled {};
     std::map<std::string, std::string> metaTags;
     std::vector<std::string> auxTags;
+    std::shared_ptr<ConverterManager> converterManager;
 
 public:
     explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, ConfigVal enableOption)
         : MetadataHandler(context)
         , isEnabled(this->config->getBoolOption(enableOption))
+        , converterManager(context->getConverterManager())
     {
     }
 
@@ -94,6 +96,7 @@ public:
         , isEnabled(this->config->getBoolOption(enableOption))
         , metaTags(this->config->getDictionaryOption(metaOption))
         , auxTags(this->config->getArrayOption(auxOption))
+        , converterManager(context->getConverterManager())
     {
     }
 

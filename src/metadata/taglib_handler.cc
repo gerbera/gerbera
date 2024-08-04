@@ -103,7 +103,7 @@ void TagLibHandler::addField(MetadataFields field, const TagLib::File& file, con
     if (!tag || tag->isEmpty())
         return;
 
-    auto sc = StringConverter::i2i(config); // sure is sure
+    auto sc = converterManager->i2i(); // sure is sure
 
     std::vector<std::string> value;
 
@@ -187,7 +187,7 @@ void TagLibHandler::addSpecialFields(const TagLib::File& file, const TagLib::Tag
     if (!tag || tag->isEmpty())
         return;
 
-    auto sc = StringConverter::i2i(config); // sure is sure
+    auto sc = converterManager->i2i(); // sure is sure
 
     for (auto&& [key, meta] : metaTags) {
         auto list = file.properties()[key];
@@ -243,7 +243,7 @@ void TagLibHandler::populateGenericTags(const std::shared_ptr<CdsItem>& item, co
     }
 }
 
-void TagLibHandler::populateAuxTags(const std::shared_ptr<CdsItem>& item, const TagLib::PropertyMap& propertyMap, const std::unique_ptr<StringConverter>& sc) const
+void TagLibHandler::populateAuxTags(const std::shared_ptr<CdsItem>& item, const TagLib::PropertyMap& propertyMap, const std::shared_ptr<StringConverter>& sc) const
 {
     for (auto&& desiredTag : auxTags) {
         if (desiredTag.empty()) {
@@ -481,7 +481,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr
         return;
     }
 
-    auto sc = StringConverter::i2i(config);
+    auto sc = converterManager->i2i();
 
     auto&& frameListMap = mp3.ID3v2Tag()->frameListMap();
     // http://id3.org/id3v2.4.0-frames "4.2.6. User defined text information frame"
@@ -606,7 +606,7 @@ void TagLibHandler::extractOgg(TagLib::IOStream& roStream, const std::shared_ptr
     if (!oggFile->tag())
         return;
 
-    auto sc = StringConverter::i2i(config);
+    auto sc = converterManager->i2i();
     auto propertyMap = oggFile->properties();
     populateAuxTags(item, propertyMap, sc);
 
@@ -637,7 +637,7 @@ void TagLibHandler::extractASF(TagLib::IOStream& roStream, const std::shared_ptr
     }
     populateGenericTags(item, asf);
 
-    auto sc = StringConverter::i2i(config);
+    auto sc = converterManager->i2i();
     auto propertyMap = asf.properties();
     populateAuxTags(item, propertyMap, sc);
 
@@ -680,7 +680,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream& roStream, const std::shared_pt
     }
     populateGenericTags(item, flac);
 
-    auto sc = StringConverter::i2i(config);
+    auto sc = converterManager->i2i();
     auto propertyMap = flac.properties();
     populateAuxTags(item, propertyMap, sc);
 
@@ -715,7 +715,7 @@ void TagLibHandler::extractAPE(TagLib::IOStream& roStream, const std::shared_ptr
     }
     populateGenericTags(item, ape);
 
-    auto sc = StringConverter::i2i(config);
+    auto sc = converterManager->i2i();
     auto propertyMap = ape.properties();
     populateAuxTags(item, propertyMap, sc);
 
@@ -737,7 +737,7 @@ void TagLibHandler::extractWavPack(TagLib::IOStream& roStream, const std::shared
     }
     populateGenericTags(item, wavpack);
 
-    auto sc = StringConverter::i2i(config);
+    auto sc = converterManager->i2i();
     auto propertyMap = wavpack.properties();
     populateAuxTags(item, propertyMap, sc);
 
@@ -769,7 +769,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream& roStream, const std::shared_ptr
         return;
     }
 
-    auto sc = StringConverter::i2i(config);
+    auto sc = converterManager->i2i();
     auto propertyMap = mp4.tag()->properties();
     populateAuxTags(item, propertyMap, sc);
 
@@ -810,7 +810,7 @@ void TagLibHandler::extractAiff(TagLib::IOStream& roStream, const std::shared_pt
     }
     populateGenericTags(item, aiff);
 
-    auto sc = StringConverter::i2i(config);
+    auto sc = converterManager->i2i();
     auto propertyMap = aiff.properties();
     populateAuxTags(item, propertyMap, sc);
 

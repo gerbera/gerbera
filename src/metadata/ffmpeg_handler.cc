@@ -138,7 +138,7 @@ FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
     mappings = this->config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 }
 
-void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const
+void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const
 {
     if (!pFormatCtx->metadata) {
         log_debug("no metadata");
@@ -156,7 +156,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item,
     }
 } // addFfmpegAuxdataFields
 
-void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const
+void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const
 {
     AVDictionaryEntry* e = nullptr;
 
@@ -384,7 +384,7 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         avformat_close_input(&pFormatCtx);
         return; // Couldn't find stream information
     }
-    auto sc = StringConverter::m2i(ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation(), config);
+    auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET, item->getLocation());
     // Add metadata using ffmpeg library calls
     addFfmpegMetadataFields(item, sc, pFormatCtx);
     // Add auxdata

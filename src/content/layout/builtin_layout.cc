@@ -61,6 +61,7 @@
 BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
     : Layout(std::move(content))
     , config(this->content->getContext()->getConfig())
+    , converterManager(this->content->getContext()->getConverterManager())
     , genreMap(this->config->getDictionaryOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
 {
     auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
@@ -117,7 +118,7 @@ int BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path&
     } else
         dir = getLastPath(objPath);
 
-    auto f2i = StringConverter::f2i(config);
+    auto f2i = converterManager->f2i();
     dir = f2i->convert(dir);
 
     if (!dir.empty()) {
@@ -137,7 +138,7 @@ int BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path&
 
 std::vector<int> BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
-    auto f2i = StringConverter::f2i(config);
+    auto f2i = converterManager->f2i();
     auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
     std::vector<int> result;
 
@@ -202,7 +203,7 @@ std::vector<int> BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, 
 
 std::vector<int> BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
-    auto f2i = StringConverter::f2i(config);
+    auto f2i = converterManager->f2i();
     auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
     std::vector<int> result;
 
@@ -266,7 +267,7 @@ std::vector<int> BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, 
 
 std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
-    auto f2i = StringConverter::f2i(config);
+    auto f2i = converterManager->f2i();
     auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
     std::vector<int> result;
 

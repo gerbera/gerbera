@@ -50,6 +50,7 @@ CurlOnlineService::CurlOnlineService(const std::shared_ptr<Content>& content, st
     : OnlineService(content)
     , curl_handle(curl_easy_init())
     , serviceName(std::move(serviceName))
+    , converterManager(content->getContext()->getConverterManager())
 {
     if (!curl_handle)
         throw_std_runtime_error("failed to initialize curl");
@@ -69,7 +70,7 @@ std::string CurlOnlineService::getServiceName() const
 std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
 {
     long retcode;
-    auto sc = StringConverter::i2i(config);
+    auto sc = converterManager->i2i();
 
     std::string buffer;
 

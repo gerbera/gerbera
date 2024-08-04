@@ -89,6 +89,7 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     , mime(context->getMime())
     , database(context->getDatabase())
     , session_manager(context->getSessionManager())
+    , converterManager(context->getConverterManager())
     , context(context)
     , timer(std::move(timer))
 #ifdef HAVE_JS
@@ -102,7 +103,7 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 #ifdef ONLINE_SERVICES
     task_processor = std::make_shared<TaskProcessor>(config);
 #endif
-    importService = std::make_shared<ImportService>(this->context);
+    importService = std::make_shared<ImportService>(this->context, converterManager);
     importMode = EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
 }
 
@@ -881,7 +882,7 @@ void ContentManager::addRecursive(
     bool hidden,
     const std::shared_ptr<CMAddFileTask>& task)
 {
-    auto f2i = StringConverter::f2i(config);
+    auto f2i = converterManager->f2i();
 
     std::error_code ec;
     if (!subDir.exists(ec) || !subDir.is_directory(ec)) {
@@ -1234,7 +1235,7 @@ void ContentManager::initLayout()
         for (std::size_t i = 0; i < autoscanList->size(); i++) {
             auto autoscanDir = autoscanList->get(i);
 
-            auto asImportService = std::make_shared<ImportService>(context);
+            auto asImportService = std::make_shared<ImportService>(context, converterManager);
             asImportService->run(self, autoscanDir, autoscanDir->getLocation());
             autoscanDir->setImportService(asImportService);
             asImportService->initLayout(layoutType);
@@ -1587,7 +1588,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         dir->resetLMT();
         database->addAutoscanDirectory(dir);
         auto self = shared_from_this();
-        auto asImportService = std::make_shared<ImportService>(context);
+        auto asImportService = std::make_shared<ImportService>(context, converterManager);
         asImportService->run(self, dir, dir->getLocation());
         dir->setImportService(asImportService);
         auto layoutType = EnumOption<LayoutType>::getEnumOption(config, ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);

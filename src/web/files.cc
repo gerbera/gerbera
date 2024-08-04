@@ -41,6 +41,12 @@
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
+Web::Files::Files(const std::shared_ptr<Content>& content, std::shared_ptr<ConverterManager> converterManager, const std::shared_ptr<Server>& server)
+    : WebRequestHandler(content, server)
+    , converterManager(std::move(converterManager))
+{
+}
+
 void Web::Files::process()
 {
     checkRequest();
@@ -78,7 +84,7 @@ void Web::Files::process()
         filesMap.try_emplace(id, filepath.filename());
     }
 
-    auto f2i = StringConverter::f2i(config);
+    auto f2i = converterManager->f2i();
     for (auto&& [key, val] : filesMap) {
         auto fe = files.append_child("file");
         fe.append_attribute("id") = key.c_str();

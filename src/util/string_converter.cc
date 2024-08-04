@@ -92,9 +92,12 @@ bool StringConverter::validate(const std::string& str)
 std::string StringConverter::_convert(const std::string& str, bool validate,
     std::size_t* stoppedAt)
 {
-    std::string retStr;
+    // reset to initial state
+    if (dirty) {
+        iconv(cd, nullptr, nullptr, nullptr, nullptr);
+        dirty = false;
+    }
 
-    auto input = str.c_str();
     auto length = str.length();
     if (length < (std::string::npos / 4)) {
         length *= 4;
@@ -110,6 +113,8 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         log_debug("Could not allocate memory for string conversion!\n{}", ex.what());
         throw_std_runtime_error("Could not allocate memory for string conversion");
     }
+
+    auto input = str.c_str();
     const char* inputCopy = input;
     char* outputCopy = output;
 
@@ -118,12 +123,6 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
 
     auto inputBytes = str.length();
     auto outputBytes = length;
-
-    // reset to initial state
-    if (dirty) {
-        iconv(cd, nullptr, nullptr, nullptr, nullptr);
-        dirty = false;
-    }
 
     // log_debug(("iconv: BEFORE: input bytes left: {}  output bytes left: {}",
     //        input_bytes, output_bytes));
@@ -140,7 +139,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         std::string err;
         switch (errno) {
         case EILSEQ:
-        case EINVAL:
+        case EINVAL: {
             if (errno == EILSEQ) {
                 log_error("iconv: {} could not be converted to new encoding: invalid character sequence!", str.c_str());
             } else {
@@ -152,11 +151,12 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
 
             if (stoppedAt)
                 *stoppedAt = str.length() - inputBytes;
-            retStr = std::string(output, outputCopy - output);
+            auto retStr = std::string(output, outputCopy - output);
             dirty = true;
             *outputCopy = 0;
             delete[] output;
             return retStr;
+        }
         case E2BIG:
             /// \todo should encode the whole string anyway
             err = "iconv: Insufficient space in output buffer";
@@ -166,7 +166,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
             break;
         }
         *outputCopy = 0;
-        log_error("{}", err);
+        log_error(err);
         //        log_debug("iconv: input: {}", input);
         //        log_debug("iconv: converted part:  {}", output);
         dirty = true;
@@ -178,60 +178,95 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     //        input_bytes, output_bytes);
     // log_debug("iconv: returned {}", ret);
 
-    retStr = std::string(output, outputCopy - output);
+    auto retStr = std::string(output, outputCopy - output);
     delete[] output;
     if (stoppedAt)
         *stoppedAt = 0; // no error
     return retStr;
 }
 
-/// \todo iconv caching
-std::unique_ptr<StringConverter> StringConverter::i2f(const std::shared_ptr<Config>& cm)
+ConverterManager::ConverterManager(const std::shared_ptr<Config>& cm)
+    : config(cm)
 {
-    return std::make_unique<StringConverter>(
-        DEFAULT_INTERNAL_CHARSET, cm->getOption(ConfigVal::IMPORT_FILESYSTEM_CHARSET));
-}
-std::unique_ptr<StringConverter> StringConverter::f2i(const std::shared_ptr<Config>& cm)
-{
-    return std::make_unique<StringConverter>(
-        cm->getOption(ConfigVal::IMPORT_FILESYSTEM_CHARSET), DEFAULT_INTERNAL_CHARSET);
-}
-std::unique_ptr<StringConverter> StringConverter::m2i(ConfigVal option, const fs::path& location, const std::shared_ptr<Config>& cm)
-{
-    auto charset = cm->getOption(option);
-    if (charset.empty()) {
-        charset = cm->getOption(ConfigVal::IMPORT_METADATA_CHARSET);
+#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
+    charsets[ConfigVal::MAX] = DEFAULT_INTERNAL_CHARSET;
+#endif
+    for (auto cv : std::array {
+#ifdef HAVE_LIBEXIF
+             ConfigVal::IMPORT_LIBOPTS_EXIF_CHARSET,
+#endif
+#ifdef HAVE_EXIV2
+             ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET,
+#endif
+#ifdef HAVE_TAGLIB
+             ConfigVal::IMPORT_LIBOPTS_ID3_CHARSET,
+#endif
+#ifdef HAVE_FFMPEG
+             ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET,
+#endif
+#ifdef HAVE_MATROSKA
+             ConfigVal::IMPORT_LIBOPTS_MKV_CHARSET,
+#endif
+#ifdef HAVE_WAVPACK
+             ConfigVal::IMPORT_LIBOPTS_WVC_CHARSET,
+#endif
+#ifdef HAVE_JS
+             ConfigVal::IMPORT_SCRIPTING_CHARSET,
+             ConfigVal::IMPORT_PLAYLIST_CHARSET,
+#endif
+             ConfigVal::IMPORT_METADATA_CHARSET,
+             ConfigVal::IMPORT_FILESYSTEM_CHARSET }) {
+        charsets[cv] = cm->getOption(cv);
     }
-    auto tweak = cm->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST)->get(!location.empty() ? location : "/");
+
+    for (auto&& [config, cs] : charsets) {
+        converters[cs] = std::make_shared<StringConverter>(
+            cs,
+            DEFAULT_INTERNAL_CHARSET);
+    }
+}
+
+const std::shared_ptr<StringConverter> ConverterManager::m2i(ConfigVal option, const fs::path& location)
+{
+    auto charset = charsets.at(option);
+    if (charset.empty()) {
+        charset = config->getOption(ConfigVal::IMPORT_METADATA_CHARSET);
+        charsets[option] = charset;
+    }
+    auto tweak = config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST)->get(!location.empty() ? location : "/");
     if (tweak && tweak->hasMetaCharset()) {
         charset = tweak->getMetaCharset();
+        if (converters.find(charset) == converters.end()) {
+            converters[charset] = std::make_shared<StringConverter>(
+                charset,
+                DEFAULT_INTERNAL_CHARSET);
+        }
         log_debug("Using charset {} for {}", charset, location.string());
     }
 
-    return std::make_unique<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET);
+    return converters.at(charset);
 }
 
-#ifdef HAVE_JS
-std::unique_ptr<StringConverter> StringConverter::j2i(const std::shared_ptr<Config>& cm)
+const std::shared_ptr<StringConverter> ConverterManager::f2i() const
 {
-    return std::make_unique<StringConverter>(
-        cm->getOption(ConfigVal::IMPORT_SCRIPTING_CHARSET),
-        DEFAULT_INTERNAL_CHARSET);
+    return converters.at(charsets.at(ConfigVal::IMPORT_FILESYSTEM_CHARSET));
 }
 
-std::unique_ptr<StringConverter> StringConverter::p2i(const std::shared_ptr<Config>& cm)
+#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
+const std::shared_ptr<StringConverter> ConverterManager::i2i() const
 {
-    return std::make_unique<StringConverter>(
-        cm->getOption(ConfigVal::IMPORT_PLAYLIST_CHARSET),
-        DEFAULT_INTERNAL_CHARSET);
+    return converters.at(charsets.at(ConfigVal::MAX));
 }
 #endif
 
-#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
-std::unique_ptr<StringConverter> StringConverter::i2i(const std::shared_ptr<Config>& cm)
+#ifdef HAVE_JS
+const std::shared_ptr<StringConverter> ConverterManager::j2i() const
 {
-    return std::make_unique<StringConverter>(
-        DEFAULT_INTERNAL_CHARSET,
-        DEFAULT_INTERNAL_CHARSET);
+    return converters.at(charsets.at(ConfigVal::IMPORT_SCRIPTING_CHARSET));
+}
+
+const std::shared_ptr<StringConverter> ConverterManager::p2i() const
+{
+    return converters.at(charsets.at(ConfigVal::IMPORT_PLAYLIST_CHARSET));
 }
 #endif
