@@ -267,7 +267,7 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
     // master elements
     info->Read(ebmlStream, EBML_CONTEXT(info), iUpperLevel, dummyEl, true);
 
-    auto sc = StringConverter::m2i(ConfigVal::IMPORT_LIBOPTS_MKV_CHARSET, item->getLocation(), config);
+    auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_MKV_CHARSET, item->getLocation());
     for (auto&& el : *info) {
         if (EbmlId(*el) == EBML_ID(KaxTitle)) {
             auto titleEl = dynamic_cast<KaxTitle*>(el);

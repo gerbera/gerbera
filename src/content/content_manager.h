@@ -54,6 +54,7 @@ enum class OnlineServiceType;
 
 class AutoscanList;
 class CdsItem;
+class ConverterManager;
 class CMAddFileTask;
 class GenericTask;
 class ImportService;
@@ -231,6 +232,7 @@ protected:
     std::shared_ptr<Database> database;
     std::shared_ptr<UpdateManager> update_manager;
     std::shared_ptr<Web::SessionManager> session_manager;
+    std::shared_ptr<ConverterManager> converterManager;
     std::shared_ptr<Context> context;
     std::shared_ptr<ImportService> importService;
 

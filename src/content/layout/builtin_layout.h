@@ -42,6 +42,7 @@
 // forward declaration
 class CdsContainer;
 class Config;
+class ConverterManager;
 
 class BuiltinLayout : public Layout {
 public:
@@ -49,6 +50,7 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
+    std::shared_ptr<ConverterManager> converterManager;
     std::map<std::string, std::string> genreMap;
     std::map<std::string, std::pair<int, bool>> chain;
     std::map<std::string, std::shared_ptr<CdsContainer>> container;

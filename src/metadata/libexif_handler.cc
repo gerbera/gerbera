@@ -204,7 +204,7 @@ LibExifHandler::~LibExifHandler()
 }
 
 void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_ptr<CdsItem>& item,
-    const std::unique_ptr<StringConverter>& sc,
+    const std::shared_ptr<StringConverter>& sc,
     std::string& imageX, std::string& imageY,
     const std::vector<std::string>& auxtags, const std::map<std::string, std::string>& metatags)
 {
@@ -297,7 +297,7 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     if (!item || !isEnabled)
         return;
 
-    auto sc = StringConverter::m2i(ConfigVal::IMPORT_LIBOPTS_EXIF_CHARSET, item->getLocation(), config);
+    auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_EXIF_CHARSET, item->getLocation());
     ExifData* exifData = exif_data_new_from_file(item->getLocation().c_str());
 
     if (!exifData) {

@@ -47,6 +47,7 @@ class CdsItem;
 class Config;
 class ConfigSetup;
 class ConfigValue;
+class ConverterManager;
 class Database;
 class UpnpXMLBuilder;
 enum class ConfigVal;
@@ -79,18 +80,22 @@ public:
 
 /// \brief Call from WebUi to create directory tree in filesystem view
 class Directories : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
-
 public:
+    explicit Directories(const std::shared_ptr<Content>& content, std::shared_ptr<ConverterManager> converterManager, const std::shared_ptr<Server>& server);
     void process() override;
+
+protected:
+    std::shared_ptr<ConverterManager> converterManager;
 };
 
 /// \brief Call from WebUi to list files in filesystem view
 class Files : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
-
 public:
+    explicit Files(const std::shared_ptr<Content>& content, std::shared_ptr<ConverterManager> converterManager, const std::shared_ptr<Server>& server);
     void process() override;
+
+protected:
+    std::shared_ptr<ConverterManager> converterManager;
 };
 
 /// \brief Call from WebUi to list items in database view

@@ -60,6 +60,7 @@
 #include "upnp/xml_builder.h"
 #include "util/grb_net.h"
 #include "util/mime.h"
+#include "util/string_converter.h"
 #include "util/tools.h"
 #include "util/url_utils.h"
 #include "util/xml_to_json.h"
@@ -114,12 +115,13 @@ void Server::init(bool offln)
     timer->run();
 
     mime = std::make_shared<Mime>(config);
-    database = Database::createInstance(config, mime, timer);
+    converterManager = std::make_shared<ConverterManager>(config);
+    database = Database::createInstance(config, mime, converterManager, timer);
     config->updateConfigFromDatabase(database);
 
     clientManager = std::make_shared<ClientManager>(config, database);
     sessionManager = std::make_shared<Web::SessionManager>(config, timer);
-    context = std::make_shared<Context>(config, clientManager, mime, database, sessionManager);
+    context = std::make_shared<Context>(config, clientManager, mime, database, sessionManager, converterManager);
 
     content = std::make_shared<ContentManager>(context, self, timer);
     metadataService = std::make_shared<MetadataService>(context, content);

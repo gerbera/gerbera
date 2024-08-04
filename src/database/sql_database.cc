@@ -346,9 +346,10 @@ static std::shared_ptr<EnumColumnMapper<AutoscanColumn>> autoscanColumnMapper;
 static std::shared_ptr<EnumColumnMapper<int>> resourceColumnMapper;
 static std::shared_ptr<EnumColumnMapper<PlaystatusCol>> playstatusColumnMapper;
 
-SQLDatabase::SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime)
+SQLDatabase::SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, std::shared_ptr<ConverterManager> converterManager)
     : Database(config)
     , mime(std::move(mime))
+    , converterManager(std::move(converterManager))
 {
 }
 
@@ -1348,12 +1349,13 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
 
     int parentID = ensurePathExistence(path.parent_path(), changedContainer);
 
-    auto f2i = StringConverter::f2i(config);
     if (changedContainer && *changedContainer == INVALID_OBJECT_ID)
         *changedContainer = parentID;
 
     std::vector<std::pair<std::string, std::string>> itemMetadata;
     itemMetadata.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE), fmt::format("{:%FT%T%z}", fmt::localtime(toSeconds(fs::last_write_time(path)).count())));
+
+    auto f2i = converterManager->f2i();
     return createContainer(parentID, f2i->convert(path.filename()), path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, itemMetadata);
 }
 

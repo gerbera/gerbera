@@ -212,7 +212,7 @@ public:
     void deleteRows(std::string_view tableName, const std::string& key, const std::vector<int>& values);
 
 protected:
-    explicit SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime);
+    explicit SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, std::shared_ptr<ConverterManager> converterManager);
     void init() override;
 
     /// \brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
@@ -230,6 +230,7 @@ protected:
     SQLIdentifier identifier(const std::string& name) const { return { name, table_quote_begin, table_quote_end }; }
 
     std::shared_ptr<Mime> mime;
+    std::shared_ptr<ConverterManager> converterManager;
 
     char table_quote_begin { '\0' };
     char table_quote_end { '\0' };

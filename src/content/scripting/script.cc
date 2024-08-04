@@ -94,9 +94,10 @@ void Script::setIntProperty(const std::string& name, int value)
 /* **************** */
 
 Script::Script(const std::shared_ptr<Content>& content, const std::string& parent,
-    const std::string& name, std::string objName, std::unique_ptr<StringConverter> sc)
+    const std::string& name, std::string objName, std::shared_ptr<StringConverter> sc)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
+    , converterManager(content->getContext()->getConverterManager())
     , content(content)
     , runtime(content->getScriptingRuntime())
     , sc(std::move(sc))
@@ -112,11 +113,11 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
     if (!ctx)
         throw_std_runtime_error("Scripting: could not initialize js context");
 
-    _p2i = StringConverter::p2i(config);
-    _j2i = StringConverter::j2i(config);
-    _m2i = StringConverter::m2i(ConfigVal::IMPORT_METADATA_CHARSET, "", config);
-    _f2i = StringConverter::f2i(config);
-    _i2i = StringConverter::i2i(config);
+    _p2i = converterManager->p2i();
+    _j2i = converterManager->j2i();
+    _m2i = converterManager->m2i(ConfigVal::IMPORT_METADATA_CHARSET, "");
+    _f2i = converterManager->f2i();
+    _i2i = converterManager->i2i();
 
     duk_push_thread_stash(ctx, ctx);
     duk_push_pointer(ctx, this);
@@ -326,7 +327,7 @@ void Script::_load(const fs::path& scriptPath)
     if (scriptText.empty())
         throw_std_runtime_error("empty script");
 
-    auto j2i = StringConverter::j2i(config);
+    auto j2i = converterManager->j2i();
     try {
         scriptText = j2i->convert(scriptText, true);
     } catch (const std::runtime_error& e) {

@@ -44,24 +44,27 @@ Database::Database(std::shared_ptr<Config> config)
 {
 }
 
-std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<Timer>& timer)
+std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config,
+    const std::shared_ptr<Mime>& mime,
+    const std::shared_ptr<ConverterManager>& converterManager,
+    const std::shared_ptr<Timer>& timer)
 {
     auto database = [&]() -> std::shared_ptr<Database> {
         std::string type = config->getOption(ConfigVal::SERVER_STORAGE_DRIVER);
         bool useTransaction = config->getBoolOption(ConfigVal::SERVER_STORAGE_USE_TRANSACTIONS);
 
         if (type == "sqlite3" && useTransaction) {
-            return std::make_shared<Sqlite3DatabaseWithTransactions>(config, mime, timer);
+            return std::make_shared<Sqlite3DatabaseWithTransactions>(config, mime, converterManager, timer);
         }
         if (type == "sqlite3") {
-            return std::make_shared<Sqlite3Database>(config, mime, timer);
+            return std::make_shared<Sqlite3Database>(config, mime, converterManager, timer);
         }
 #ifdef HAVE_MYSQL
         if (type == "mysql" && useTransaction) {
-            return std::make_shared<MySQLDatabaseWithTransactions>(config, mime);
+            return std::make_shared<MySQLDatabaseWithTransactions>(config, mime, converterManager);
         }
         if (type == "mysql") {
-            return std::make_shared<MySQLDatabase>(config, mime);
+            return std::make_shared<MySQLDatabase>(config, mime, converterManager);
         }
 #endif
         // other database types...

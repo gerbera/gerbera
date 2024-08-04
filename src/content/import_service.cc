@@ -119,11 +119,12 @@ void UpnpMap::initMap(std::vector<UpnpMap>& target, const std::map<std::string, 
     }
 }
 
-ImportService::ImportService(std::shared_ptr<Context> context)
+ImportService::ImportService(std::shared_ptr<Context> context, std::shared_ptr<ConverterManager> converterManager)
     : context(std::move(context))
     , config(this->context->getConfig())
     , mime(this->context->getMime())
     , database(this->context->getDatabase())
+    , converterManager(std::move(converterManager))
 {
     hasReadableNames = config->getBoolOption(ConfigVal::IMPORT_READABLE_NAMES);
     hasCaseSensitiveNames = config->getBoolOption(ConfigVal::IMPORT_CASE_SENSITIVE_TAGS);
@@ -575,7 +576,7 @@ std::pair<bool, std::shared_ptr<CdsObject>> ImportService::createSingleItem(cons
         item->setClass(upnpClass);
     }
 
-    auto f2i = StringConverter::f2i(config);
+    auto f2i = converterManager->f2i();
     auto title = objectPath.filename().string();
     if (hasReadableNames && upnpClass != UPNP_CLASS_ITEM) {
         title = objectPath.stem().string();

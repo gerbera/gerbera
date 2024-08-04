@@ -50,8 +50,8 @@
 static constexpr auto mysqlUpdateVersion = std::string_view("UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'");
 static constexpr auto mysqlAddResourceAttr = std::string_view("ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` varchar(255) default NULL");
 
-MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime)
-    : SQLDatabase(config, mime)
+MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager)
+    : SQLDatabase(config, mime, converterManager)
 {
     table_quote_begin = '`';
     table_quote_end = '`';
@@ -227,9 +227,9 @@ std::string MySQLDatabase::getError(MYSQL* db)
     return res;
 }
 
-MySQLDatabaseWithTransactions::MySQLDatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime)
+MySQLDatabaseWithTransactions::MySQLDatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager)
     : SqlWithTransactions(config)
-    , MySQLDatabase(config, mime)
+    , MySQLDatabase(config, mime, converterManager)
 {
 }
 

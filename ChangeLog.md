@@ -10,6 +10,7 @@
 - FIXME done: Remove fake resource
 - Improve docker instructions
 - Improve handling of thumbnail profiles
+- Refactor StringConverter
 - Refactor Upnp Services
 - Upgrade cxxopts.hpp to 3.2.1
 - Upgrade md5 to 2002 version

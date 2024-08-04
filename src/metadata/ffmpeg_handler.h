@@ -63,8 +63,8 @@ public:
 private:
     std::map<std::string, std::string> mappings;
 
-    void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const;
-    void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const;
+    void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const;
+    void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const;
     static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx);
 
     static constexpr std::array propertyMap {

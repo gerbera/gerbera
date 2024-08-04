@@ -29,8 +29,8 @@ class TestDatabase : public SQLDatabase, public std::enable_shared_from_this<SQL
 public:
     using SQLDatabase::identifier;
 
-    TestDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime)
-        : SQLDatabase(config, mime)
+    TestDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager)
+        : SQLDatabase(config, mime, converterManager)
     {
         table_quote_begin = '[';
         table_quote_end = ']';
@@ -93,7 +93,7 @@ class DatabaseTest : public ::testing::Test {
 public:
     void SetUp() override
     {
-        database = std::make_shared<TestDatabase>(config, mime);
+        database = std::make_shared<TestDatabase>(config, mime, converterManager);
     }
 
     void TearDown() override
@@ -104,6 +104,7 @@ public:
 protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Mime> mime;
+    std::shared_ptr<ConverterManager> converterManager;
     std::shared_ptr<TestDatabase> database;
 };
 

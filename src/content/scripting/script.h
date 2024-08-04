@@ -51,6 +51,7 @@ class Content;
 class Database;
 class ScriptingRuntime;
 class StringConverter;
+class ConverterManager;
 
 // perform garbage collection after script has been run for x times
 #define JS_CALL_GC_AFTER_NUM (1000)
@@ -96,7 +97,7 @@ public:
 
 protected:
     Script(const std::shared_ptr<Content>& content, const std::string& parent,
-        const std::string& name, std::string objName, std::unique_ptr<StringConverter> sc);
+        const std::string& name, std::string objName, std::shared_ptr<StringConverter> sc);
 
     std::vector<int> execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
     std::vector<int> call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& functionName, const fs::path& rootPath, const std::string& containerType);
@@ -115,9 +116,10 @@ protected:
 
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
+    std::shared_ptr<ConverterManager> converterManager;
     std::shared_ptr<Content> content;
     std::shared_ptr<ScriptingRuntime> runtime;
-    std::unique_ptr<StringConverter> sc;
+    std::shared_ptr<StringConverter> sc;
 
 private:
     bool hasCaseSensitiveNames;
@@ -127,11 +129,11 @@ private:
     std::string scriptPath;
     void _load(const fs::path& scriptPath);
     void _execute();
-    std::unique_ptr<StringConverter> _p2i;
-    std::unique_ptr<StringConverter> _j2i;
-    std::unique_ptr<StringConverter> _f2i;
-    std::unique_ptr<StringConverter> _m2i;
-    std::unique_ptr<StringConverter> _i2i;
+    std::shared_ptr<StringConverter> _p2i;
+    std::shared_ptr<StringConverter> _j2i;
+    std::shared_ptr<StringConverter> _f2i;
+    std::shared_ptr<StringConverter> _m2i;
+    std::shared_ptr<StringConverter> _i2i;
 };
 
 #endif // __SCRIPTING_SCRIPT_H__

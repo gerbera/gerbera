@@ -31,6 +31,7 @@ Gerbera - https://gerbera.io/
 #include "upnp/client_manager.h"
 #include "upnp/xml_builder.h"
 #include "util/grb_net.h"
+#include "util/string_converter.h"
 #include "util/tools.h"
 
 #include "../mock/config_mock.h"
@@ -54,7 +55,8 @@ public:
         config = std::make_shared<ConfigMock>();
 
         database = std::make_shared<DatabaseMock>(config);
-        context = std::make_shared<Context>(config, nullptr, nullptr, database, nullptr);
+        converterManager = std::make_shared<ConverterManager>(config);
+        context = std::make_shared<Context>(config, nullptr, nullptr, database, nullptr, converterManager);
 
         std::string virtualDir = "http://server";
         std::string presentationURl = "http://someurl/";
@@ -70,6 +72,7 @@ public:
     std::shared_ptr<ConfigMock> config;
     std::shared_ptr<DatabaseMock> database;
     std::shared_ptr<Context> context;
+    std::shared_ptr<ConverterManager> converterManager;
 };
 
 TEST_F(UpnpXmlTest, RenderObjectContainer)

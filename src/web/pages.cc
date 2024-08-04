@@ -35,6 +35,7 @@
 #include "pages.h" // API
 
 #include "config/config_setup.h"
+#include "context.h"
 #include "exceptions.h"
 #include "util/xml_to_json.h"
 
@@ -58,9 +59,9 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     if (page == "containers")
         return std::make_unique<Web::Containers>(content, xmlBuilder, server);
     if (page == "directories")
-        return std::make_unique<Web::Directories>(content, server);
+        return std::make_unique<Web::Directories>(content, context->getConverterManager(), server);
     if (page == "files")
-        return std::make_unique<Web::Files>(content, server);
+        return std::make_unique<Web::Files>(content, context->getConverterManager(), server);
     if (page == "items")
         return std::make_unique<Web::Items>(content, xmlBuilder, server);
     if (page == "edit_load")
