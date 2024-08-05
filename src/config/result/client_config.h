@@ -80,11 +80,12 @@ public:
     /// \param captionInfoCount max count if \<captionInfo\> tags
     /// \param stringLimit maximum length of name strings
     /// \param multiValue client support multi value attributes
+    /// \param isAllowed client is allowed to connect to server
     ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent,
         const std::map<std::string, std::string>& mimeMappings,
         const std::map<std::string, std::string>& headers,
         const std::map<ClientMatchType, std::string>& matchValues,
-        int captionInfoCount, int stringLimit, bool multiValue);
+        int captionInfoCount, int stringLimit, bool multiValue, bool isAllowed);
 
     const ClientProfile& getClientProfile() const { return clientProfile; }
 
@@ -110,6 +111,12 @@ public:
     void setMultiValue(bool multiValue)
     {
         this->clientProfile.multiValue = multiValue;
+    }
+
+    bool getAllowed() const { return this->clientProfile.isAllowed; }
+    void setAllowed(bool isAllowed)
+    {
+        this->clientProfile.isAllowed = isAllowed;
     }
 
     std::string getIp() const { return (this->clientProfile.matchType == ClientMatchType::IP) ? this->clientProfile.match : ""; }

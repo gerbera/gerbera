@@ -170,8 +170,8 @@ duk_ret_t jsUpdateCdsObject(duk_context* ctx)
 }
 
 ParserScript::ParserScript(const std::shared_ptr<Content>& content, const std::string& parent,
-    const std::string& name, const std::string& objName)
-    : Script(content, parent, name, objName, content->getContext()->getConverterManager()->p2i())
+    const std::string& name, const std::string& objName, bool needResult)
+    : Script(content, parent, name, objName, needResult, content->getContext()->getConverterManager()->p2i())
 {
     defineFunction("readln", jsReadln, 0);
     defineFunction("readXml", jsReadXml, 1);

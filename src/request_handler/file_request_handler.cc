@@ -58,17 +58,17 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
-FileRequestHandler::FileRequestHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::shared_ptr<MetadataService> metadataService)
-    : RequestHandler(content, xmlBuilder)
+FileRequestHandler::FileRequestHandler(const std::shared_ptr<Content>& content,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, const std::shared_ptr<Quirks>& quirks,
+    std::shared_ptr<MetadataService> metadataService)
+    : RequestHandler(content, xmlBuilder, quirks)
     , metadataService(std::move(metadataService))
 {
 }
 
-const struct ClientObservation* FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
+bool FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("Start: {}", filename);
-
-    auto quirks = getQuirks(info);
 
     auto params = URLUtils::parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
     auto obj = loadObject(params);
@@ -199,7 +199,7 @@ const struct ClientObservation* FileRequestHandler::getInfo(const char* filename
     //      filename, object_id.c_str(), path.c_str(), info->content_type);
 
     log_debug("end: {}", filename);
-    return quirks ? quirks->getClient() : nullptr;
+    return quirks && quirks->getClient();
 }
 
 std::shared_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(std::shared_ptr<CdsObject>& obj, std::shared_ptr<CdsResource>& resource) const

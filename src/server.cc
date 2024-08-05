@@ -188,7 +188,7 @@ void Server::run()
     log_debug("Creating UpnpXMLBuilders");
     upnpXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getVirtualUrl());
     webXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getExternalUrl());
-    auto devDescHdl = std::make_shared<DeviceDescriptionHandler>(content, webXmlBuilder, ip, port);
+    auto devDescHdl = std::make_shared<DeviceDescriptionHandler>(content, webXmlBuilder, nullptr, ip, port);
 
     int activeUpnpDescription = config->getBoolOption(ConfigVal::UPNP_DYNAMIC_DESCRIPTION) ? 0 : 1;
     // register root device with the library
@@ -276,25 +276,7 @@ void Server::run()
         UpnpSetWebServerCorsString(fmt::format("{}", fmt::join(corsHosts, " ")).c_str());
     }
 
-    UpnpSetHostValidateCallback(
-        [](auto host, auto cookie) -> int {
-            auto hostStr = std::string(host);
-            for (auto&& name : static_cast<Server*>(cookie)->validHosts) {
-                if (hostStr.find(name) != std::string::npos) {
-                    return UPNP_E_SUCCESS;
-                }
-                if (name.find(hostStr) != std::string::npos) {
-                    return UPNP_E_SUCCESS;
-                }
-            }
-
-            log_warning("Rejected attempt to load host '{}' as it does not match configured virtualURL/externalURL: '{}'/'{}'. "
-                        "See https://docs.gerbera.io/en/stable/config-server.html#virtualurl",
-                host, static_cast<Server*>(cookie)->config->getOption(ConfigVal::VIRTUAL_URL),
-                static_cast<Server*>(cookie)->config->getOption(ConfigVal::EXTERNAL_URL));
-            return UPNP_E_BAD_HTTPMSG;
-        },
-        this);
+    UpnpSetHostValidateCallback(HostValidateCallback, this);
 }
 
 int Server::startupInterface(const std::string& iface, in_port_t inPort)
@@ -572,7 +554,7 @@ void Server::routeSubscriptionRequest(const SubscriptionRequest& request) const
     throw UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or subscriptions not supported");
 }
 
-// sendSubscriptionUpdate
+/// \brief sendSubscriptionUpdate
 void Server::sendSubscriptionUpdate(const std::string& updateString, const std::string& serviceId)
 {
     for (auto&& svc : serviceList) {
@@ -584,32 +566,31 @@ void Server::sendSubscriptionUpdate(const std::string& updateString, const std::
     }
 }
 
-std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filename) const
+std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filename, const std::shared_ptr<Quirks>& quirks) const
 {
     std::string link = URLUtils::urlUnescape(filename);
     log_debug("Filename: {}", filename);
 
     if (startswith(link, fmt::format("/{}", CONTENT_MEDIA_HANDLER))) {
-        return std::make_unique<FileRequestHandler>(content, upnpXmlBuilder, metadataService);
+        return std::make_unique<FileRequestHandler>(content, upnpXmlBuilder, quirks, metadataService);
     }
 
     if (startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER))) {
-        auto&& [path, parameters] = URLUtils::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
-
+        auto&& parameters = URLUtils::getQuery(filename);
         auto params = URLUtils::dictDecode(parameters);
 
         auto it = params.find(URL_REQUEST_TYPE);
         std::string rType = it != params.end() && !it->second.empty() ? it->second : "index";
 
-        return Web::createWebRequestHandler(context, content, self, webXmlBuilder, rType);
+        return Web::createWebRequestHandler(context, content, self, webXmlBuilder, quirks, rType);
     }
 
     if (startswith(link, DEVICE_DESCRIPTION_PATH) || endswith(link, UPNP_DESC_DEVICE_DESCRIPTION)) {
-        return std::make_unique<DeviceDescriptionHandler>(content, upnpXmlBuilder, ip, port);
+        return std::make_unique<DeviceDescriptionHandler>(content, upnpXmlBuilder, quirks, ip, port);
     }
 
     if (startswith(link, UPNP_DESC_SCPD_URL) || endswith(link, UPNP_DESC_CDS_SCPD_URL) || endswith(link, UPNP_DESC_CM_SCPD_URL) || endswith(link, UPNP_DESC_MRREG_SCPD_URL)) {
-        return std::make_unique<UpnpDescHandler>(content, upnpXmlBuilder);
+        return std::make_unique<UpnpDescHandler>(content, upnpXmlBuilder, quirks);
     }
 
     if (link == "/" || startswith(link, "/index.html")
@@ -620,127 +601,200 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         || startswith(link, "/css")
         || startswith(link, "/icons")
         || startswith(link, "/gerbera-config-")) {
-        return std::make_unique<UIHandler>(content, upnpXmlBuilder, self);
+        return std::make_unique<UIHandler>(content, upnpXmlBuilder, quirks, self);
     }
 
 #if defined(HAVE_CURL)
     if (startswith(link, fmt::format("/{}", CONTENT_ONLINE_HANDLER))) {
-        return std::make_unique<URLRequestHandler>(content, upnpXmlBuilder);
+        return std::make_unique<URLRequestHandler>(content, upnpXmlBuilder, quirks);
     }
 #endif
 
     throw_std_runtime_error("No valid handler type in {}", filename);
 }
 
+std::shared_ptr<Quirks> Server::getQuirks(const UpnpFileInfo* info, bool isWeb) const
+{
+    auto ctrlPtIPAddr = std::make_shared<GrbNet>(UpnpFileInfo_get_CtrlPtIPAddr(info));
+    // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
+    std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
+    return std::make_shared<Quirks>(isWeb ? webXmlBuilder : upnpXmlBuilder, context->getClients(), ctrlPtIPAddr, std::move(userAgent));
+}
+
+int Server::HostValidateCallback(const char* host, void* cookie)
+{
+    auto hostStr = std::string(host);
+    for (auto&& name : static_cast<Server*>(cookie)->validHosts) {
+        if (hostStr.find(name) != std::string::npos) {
+            return UPNP_E_SUCCESS;
+        }
+        if (name.find(hostStr) != std::string::npos) {
+            return UPNP_E_SUCCESS;
+        }
+    }
+
+    log_warning("Rejected attempt to load host '{}' as it does not match configured virtualURL/externalURL: '{}'/'{}'. "
+                "See https://docs.gerbera.io/en/stable/config-server.html#virtualurl",
+        host, static_cast<Server*>(cookie)->config->getOption(ConfigVal::VIRTUAL_URL),
+        static_cast<Server*>(cookie)->config->getOption(ConfigVal::EXTERNAL_URL));
+    return UPNP_E_BAD_HTTPMSG;
+}
+
+int Server::GetInfoCallback(const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie)
+{
+    try {
+        log_debug("getInfo({})", filename);
+        auto server = static_cast<const Server*>(cookie);
+        auto quirks = server->getQuirks(info, startswith(filename, fmt::format("/{}", CONTENT_UI_HANDLER)));
+        auto client = quirks->getClient();
+        if (quirks && !quirks->isAllowed()) {
+            auto ip = client && client->addr ? client->addr->getHostName() : "unknown";
+            log_debug("Client blocked {}", ip);
+            return -1;
+        }
+        auto reqHandler = server->createRequestHandler(filename, quirks);
+        std::string link = URLUtils::urlUnescape(filename);
+        reqHandler->getInfo(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
+        *requestCookie = client;
+        return 0;
+    } catch (const ServerShutdownException&) {
+        return -1;
+    } catch (const SubtitlesNotFoundException& stex) {
+        log_warning("SubtitlesNotFoundException: {}", stex.what());
+        return -1;
+    } catch (const std::runtime_error& e) {
+        log_error("Exception: {}", e.what());
+        return -1;
+    }
+}
+
+UpnpWebFileHandle Server::OpenCallback(const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie)
+{
+    try {
+        log_debug("open({})", filename);
+        auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
+        auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
+        if (quirks && !quirks->isAllowed()) {
+            auto ip = client && client->addr ? client->addr->getHostName() : "unknown";
+            log_debug("Client blocked {}", ip);
+            return nullptr;
+        }
+        auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename, quirks);
+        std::string link = URLUtils::urlUnescape(filename);
+        auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), quirks, mode);
+        if (ioHandler) {
+            ioHandler->open(mode);
+            return ioHandler.release();
+        }
+        log_warning("No Handler for {}", link);
+        return nullptr;
+    } catch (const ServerShutdownException&) {
+        return nullptr;
+    } catch (const SubtitlesNotFoundException& stex) {
+        log_warning("SubtitlesNotFoundException: {}", stex.what());
+        return nullptr;
+    } catch (const std::runtime_error& ex) {
+        log_error("Exception: {}", ex.what());
+        return nullptr;
+    }
+}
+
+int Server::ReadCallback(UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie)
+{
+    log_debug("{} read({})", f, length);
+    if (static_cast<const Server*>(cookie)->getShutdownStatus())
+        return -1;
+    auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
+    auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
+    if (quirks && !quirks->isAllowed()) {
+        auto ip = client && client->addr ? client->addr->getHostName() : "unknown";
+        log_debug("Client blocked {}", ip);
+        return -1;
+    }
+
+    auto ioHandler = static_cast<IOHandler*>(f);
+    return ioHandler ? ioHandler->read(reinterpret_cast<std::byte*>(buf), length) : 0;
+}
+
+int Server::WriteCallback(UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie)
+{
+    log_debug("{} write not implemented({})", f, length);
+    return 0;
+}
+
+int Server::SeekCallback(UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie)
+{
+    log_debug("{} seek({}, {})", f, offset, whence);
+    try {
+        auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
+        auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
+        if (quirks && !quirks->isAllowed()) {
+            auto ip = client && client->addr ? client->addr->getHostName() : "unknown";
+            log_debug("Client blocked {}", ip);
+            return -1;
+        }
+        auto ioHandler = static_cast<IOHandler*>(f);
+        if (ioHandler)
+            ioHandler->seek(offset, whence);
+        return 0;
+    } catch (const std::runtime_error& e) {
+        log_error("Exception during seek: {}", e.what());
+        return -1;
+    }
+}
+
+int Server::CloseCallback(UpnpWebFileHandle f, const void* cookie, const void* requestCookie)
+{
+    log_debug("{} close()", f);
+    int retClose = 0;
+    auto ioHandler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(f));
+    if (ioHandler) {
+        try {
+            ioHandler->close();
+        } catch (const std::runtime_error& e) {
+            log_error("Exception during close: {}", e.what());
+            retClose = -1;
+        }
+    }
+
+    return retClose;
+}
+
 int Server::registerVirtualDirCallbacks()
 {
     // UpnpVirtualDir GetInfoCallback
     log_debug("Setting UpnpVirtualDir GetInfoCallback");
-    int ret = UpnpVirtualDir_set_GetInfoCallback([](const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie) -> int {
-        try {
-            log_debug("getInfo({})", filename);
-            auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
-            std::string link = URLUtils::urlUnescape(filename);
-            *requestCookie = reqHandler->getInfo(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), info);
-            return 0;
-        } catch (const ServerShutdownException&) {
-            return -1;
-        } catch (const SubtitlesNotFoundException& stex) {
-            log_warning("SubtitlesNotFoundException: {}", stex.what());
-            return -1;
-        } catch (const std::runtime_error& e) {
-            log_error("Exception: {}", e.what());
-            return -1;
-        }
-    });
+    int ret = UpnpVirtualDir_set_GetInfoCallback(GetInfoCallback);
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
     // UpnpVirtualDir OpenCallback
     log_debug("Setting UpnpVirtualDir OpenCallback");
-    ret = UpnpVirtualDir_set_OpenCallback([](const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie) -> UpnpWebFileHandle {
-        try {
-            log_debug("open({})", filename);
-            auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
-            auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
-            auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename);
-            std::string link = URLUtils::urlUnescape(filename);
-            auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), quirks, mode);
-            if (ioHandler) {
-                ioHandler->open(mode);
-                return ioHandler.release();
-            }
-            log_warning("No Handler for {}", link);
-            return nullptr;
-        } catch (const ServerShutdownException&) {
-            return nullptr;
-        } catch (const SubtitlesNotFoundException& stex) {
-            log_warning("SubtitlesNotFoundException: {}", stex.what());
-            return nullptr;
-        } catch (const std::runtime_error& ex) {
-            log_error("Exception: {}", ex.what());
-            return nullptr;
-        }
-    });
+    ret = UpnpVirtualDir_set_OpenCallback(OpenCallback);
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
     // UpnpVirtualDir ReadCallback
     log_debug("Setting UpnpVirtualDir ReadCallback");
-    ret = UpnpVirtualDir_set_ReadCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
-        log_debug("{} read({})", f, length);
-        if (static_cast<const Server*>(cookie)->getShutdownStatus())
-            return -1;
-
-        auto ioHandler = static_cast<IOHandler*>(f);
-        return ioHandler ? ioHandler->read(reinterpret_cast<std::byte*>(buf), length) : 0;
-    });
+    ret = UpnpVirtualDir_set_ReadCallback(ReadCallback);
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
     // UpnpVirtualDir WriteCallback
     log_debug("Setting UpnpVirtualDir WriteCallback");
-    ret = UpnpVirtualDir_set_WriteCallback([](UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie) -> int {
-        log_debug("{} write({})", f, length);
-        return 0;
-    });
+    ret = UpnpVirtualDir_set_WriteCallback(WriteCallback);
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
     // UpnpVirtualDir SeekCallback
     log_debug("Setting UpnpVirtualDir SeekCallback");
-    ret = UpnpVirtualDir_set_SeekCallback([](UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie) -> int {
-        log_debug("{} seek({}, {})", f, offset, whence);
-        try {
-            auto ioHandler = static_cast<IOHandler*>(f);
-            if (ioHandler)
-                ioHandler->seek(offset, whence);
-            return 0;
-        } catch (const std::runtime_error& e) {
-            log_error("Exception during seek: {}", e.what());
-            return -1;
-        }
-    });
+    ret = UpnpVirtualDir_set_SeekCallback(SeekCallback);
     if (ret != UPNP_E_SUCCESS)
         return ret;
 
     // UpnpVirtualDir CloseCallback"
     log_debug("Setting UpnpVirtualDir CloseCallback");
-    ret = UpnpVirtualDir_set_CloseCallback([](UpnpWebFileHandle f, const void* cookie, const void* requestCookie) -> int {
-        log_debug("{} close()", f);
-        int retClose = 0;
-        auto ioHandler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(f));
-        if (ioHandler) {
-            try {
-                ioHandler->close();
-            } catch (const std::runtime_error& e) {
-                log_error("Exception during close: {}", e.what());
-                retClose = -1;
-            }
-        }
-
-        return retClose;
-    });
+    ret = UpnpVirtualDir_set_CloseCallback(CloseCallback);
 
     return ret;
 }

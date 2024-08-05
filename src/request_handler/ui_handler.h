@@ -35,10 +35,10 @@ class UpnpXMLBuilder;
 class UIHandler : public RequestHandler {
 public:
     explicit UIHandler(const std::shared_ptr<Content>& content,
-        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, const std::shared_ptr<Quirks>& quirks,
         std::shared_ptr<Server> server);
 
-    const struct ClientObservation* getInfo(const char* filename, UpnpFileInfo* info) override;
+    bool getInfo(const char* filename, UpnpFileInfo* info) override;
     std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
 
 private:

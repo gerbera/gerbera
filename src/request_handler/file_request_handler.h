@@ -47,13 +47,12 @@ class MetadataService;
 class FileRequestHandler : public RequestHandler {
 
 public:
-    explicit FileRequestHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::shared_ptr<MetadataService> metadataService);
+    explicit FileRequestHandler(const std::shared_ptr<Content>& content,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, const std::shared_ptr<Quirks>& quirks,
+        std::shared_ptr<MetadataService> metadataService);
 
-    /// \brief Returns information about the requested content.
-    /// \param filename Requested URL
-    /// \param info UpnpFileInfo structure, quite similar to statbuf.
-    /// \return the ClientObservation details to be provided to quirks
-    const struct ClientObservation* getInfo(const char* filename, UpnpFileInfo* info) override;
+    /// \inherit
+    bool getInfo(const char* filename, UpnpFileInfo* info) override;
 
     /// \brief Prepares the output buffer and calls the process function.
     /// \param filename Requested URL

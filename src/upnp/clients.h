@@ -79,6 +79,7 @@ struct ClientProfile {
     int captionInfoCount { 1 };
     int stringLimit { -1 };
     bool multiValue { true };
+    bool isAllowed { true };
     std::vector<ResourcePurpose> supportedResources { ResourcePurpose::Content, ResourcePurpose::Thumbnail, ResourcePurpose::Subtitle, ResourcePurpose::Transcode };
 };
 

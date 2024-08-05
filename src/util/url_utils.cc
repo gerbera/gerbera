@@ -31,6 +31,10 @@ Gerbera - https://gerbera.io/
 #endif
 #include <sstream>
 
+// URL FORMATTING CONSTANTS
+#define URL_UI_PARAM_SEPARATOR '?'
+#define _URL_PARAM_SEPARATOR '/'
+
 namespace URLUtils {
 
 /// \brief Splits the url into a path and parameters string.
@@ -47,11 +51,11 @@ std::pair<std::string_view, std::string_view> splitUrl(std::string_view url, cha
 {
     std::size_t splitPos;
     switch (separator) {
-    case '/':
-        splitPos = url.rfind('/');
+    case _URL_PARAM_SEPARATOR:
+        splitPos = url.rfind(_URL_PARAM_SEPARATOR);
         break;
-    case '?':
-        splitPos = url.find('?');
+    case URL_UI_PARAM_SEPARATOR:
+        splitPos = url.find(URL_UI_PARAM_SEPARATOR);
         break;
     default:
         throw_std_runtime_error("Forbidden separator: {}", separator);
@@ -61,6 +65,11 @@ std::pair<std::string_view, std::string_view> splitUrl(std::string_view url, cha
         return { url, std::string_view() };
 
     return { url.substr(0, splitPos), url.substr(splitPos + 1) };
+}
+
+std::string_view getQuery(std::string_view url)
+{
+    return splitUrl(url, URL_UI_PARAM_SEPARATOR).second;
 }
 
 std::string joinUrl(const std::vector<std::string>& components, bool addToEnd, std::string_view separator)

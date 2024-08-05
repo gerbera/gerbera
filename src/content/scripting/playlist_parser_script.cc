@@ -49,7 +49,7 @@
 #include "util/string_converter.h"
 
 PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
-    : ParserScript(content, parent, "playlist", "playlist")
+    : ParserScript(content, parent, "playlist", "playlist", true)
 {
     std::string scriptPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_SCRIPT);
     if (!scriptPath.empty()) {

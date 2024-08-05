@@ -62,8 +62,11 @@ static bool checkToken(const std::string& token, const std::string& password, co
     return (checksum == encPassword);
 }
 
-Web::Auth::Auth(const std::shared_ptr<Content>& content, const std::shared_ptr<Server>& server)
-    : WebRequestHandler(content, server)
+Web::Auth::Auth(const std::shared_ptr<Content>& content,
+    const std::shared_ptr<Server>& server,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+    const std::shared_ptr<Quirks>& quirks)
+    : WebRequestHandler(content, server, xmlBuilder, quirks)
     , timeout(std::chrono::minutes(config->getIntOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT)))
     , accountsEnabled(config->getBoolOption(ConfigVal::SERVER_UI_ACCOUNTS_ENABLED))
 {

@@ -45,6 +45,7 @@ namespace URLUtils {
 /// path = "content/media"
 /// parameters = "object_id=12345&transcode=wav"
 std::pair<std::string_view, std::string_view> splitUrl(std::string_view url, char separator);
+std::string_view getQuery(std::string_view url);
 std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, std::string_view separator = URL_PARAM_SEPARATOR);
 std::map<std::string, std::string> parseParameters(std::string_view filename, std::string_view baseLink);
 

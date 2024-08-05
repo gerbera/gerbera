@@ -203,9 +203,13 @@ public:
      */
     void updateHeaders(Headers& headers) const;
 
+    /** \brief Client may connect to server
+     */
+    bool isAllowed() const;
+
     bool hasFlag(QuirkFlags flag) const;
-    const struct ClientProfile* getProfile() { return pClientProfile; }
-    const struct ClientObservation* getClient() { return pClient; }
+    const struct ClientProfile* getProfile() const { return pClientProfile; }
+    const struct ClientObservation* getClient() const { return pClient; }
 
 private:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;

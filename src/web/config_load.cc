@@ -63,8 +63,11 @@
 #define CONFIG_LOAD_TYPE "type"
 #define CONFIG_LOAD_VALUE "value"
 
-Web::ConfigLoad::ConfigLoad(const std::shared_ptr<Content>& content, const std::shared_ptr<Server>& server)
-    : WebRequestHandler(content, server)
+Web::ConfigLoad::ConfigLoad(const std::shared_ptr<Content>& content,
+    const std::shared_ptr<Server>& server,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+    const std::shared_ptr<Quirks>& quirks)
+    : WebRequestHandler(content, server, xmlBuilder, quirks)
 {
     try {
         if (this->database) {
@@ -313,6 +316,10 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_GROUP }), cs->option, ConfigVal::A_CLIENTS_CLIENT_GROUP, cs);
         setValue(item, client->getGroup());
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_ALLOWED }), cs->option, ConfigVal::A_CLIENTS_CLIENT_ALLOWED, cs);
+        setValue(item, client->getAllowed());
 
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(i, { ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT }), cs->option, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT, cs);

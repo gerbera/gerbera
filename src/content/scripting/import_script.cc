@@ -46,7 +46,7 @@
 #include "util/tools.h"
 
 ImportScript::ImportScript(const std::shared_ptr<Content>& content, const std::string& parent)
-    : Script(content, parent, "import", "orig", content->getContext()->getConverterManager()->i2i())
+    : Script(content, parent, "import", "orig", true, content->getContext()->getConverterManager()->i2i())
 {
     std::string scriptPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT);
     if (!scriptPath.empty()) {

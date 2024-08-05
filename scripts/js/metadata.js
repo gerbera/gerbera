@@ -26,8 +26,9 @@ function importMetadata(meta, cont, rootPath, autoscanId, containerType) {
     var result = [];
     switch (arr[arr.length-1].toLowerCase()) {
         case "nfo":
-            result = parseNfo(meta, rootPath);
+            parseNfo(meta, rootPath);
             updateCdsObject(meta);
+            result.push_back(meta.id);
             break;
     }
     return result;
