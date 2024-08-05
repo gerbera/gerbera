@@ -55,6 +55,7 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, cons
         auto captionInfoCount = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
         auto stringLimit = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->getXmlContent(child);
         auto multiValue = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->getXmlContent(child);
+        auto isAllowed = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->getXmlContent(child);
         auto mappings = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child);
         auto headers = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS)->getXmlContent(child);
         auto matchValues = std::map<ClientMatchType, std::string>();
@@ -65,7 +66,7 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, cons
             }
         }
 
-        auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, mappings, headers, matchValues, captionInfoCount, stringLimit, multiValue);
+        auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, mappings, headers, matchValues, captionInfoCount, stringLimit, multiValue, isAllowed);
         try {
             result->add(client);
         } catch (const std::runtime_error& e) {
@@ -117,6 +118,14 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
             log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getGroup());
             return true;
         }
+    }
+    index = getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_ALLOWED });
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getAllowed());
+        entry->setAllowed(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->checkValue(optValue));
+        log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getAllowed());
+        return true;
     }
     index = getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_USERAGENT });
     if (optItem == index) {

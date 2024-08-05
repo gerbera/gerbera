@@ -296,6 +296,11 @@ std::map<std::string, std::string> Quirks::getMimeMappings() const
     return pClientProfile ? pClientProfile->mimeMappings : std::map<std::string, std::string>();
 }
 
+bool Quirks::isAllowed() const
+{
+    return !pClientProfile || pClientProfile->isAllowed;
+};
+
 void Quirks::updateHeaders(Headers& headers) const
 {
     if (pClientProfile && !pClientProfile->headers.empty())

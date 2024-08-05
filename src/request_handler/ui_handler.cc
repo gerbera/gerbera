@@ -39,9 +39,9 @@
 #include <sstream>
 
 UIHandler::UIHandler(const std::shared_ptr<Content>& content,
-    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, const std::shared_ptr<Quirks>& quirks,
     std::shared_ptr<Server> server)
-    : RequestHandler(content, xmlBuilder)
+    : RequestHandler(content, xmlBuilder, quirks)
     , webRoot(config->getOption(ConfigVal::SERVER_WEBROOT))
     , uiEnabled(config->getBoolOption(ConfigVal::SERVER_UI_ENABLED))
     , server(std::move(server))
@@ -70,14 +70,13 @@ std::string getMime(const std::shared_ptr<Mime>& mime, std::string_view path)
     return "application/octet-stream";
 }
 
-const struct ClientObservation* UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
+bool UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     std::string path = filename;
     if (path == "/") {
         path = "/index.html";
     }
 
-    auto quirks = getQuirks(info);
     auto headers = Headers();
     headers.addHeader("Content-Security-Policy", fmt::format("default-src {} 'unsafe-inline'; img-src *; media-src *; child-src 'none';", fmt::join(server->getCorsHosts(), " ")));
     headers.addHeader("SameSite", "Lax");
@@ -92,7 +91,7 @@ const struct ClientObservation* UIHandler::getInfo(const char* filename, UpnpFil
         UpnpFileInfo_set_IsReadable(info, -1);
         UpnpFileInfo_set_IsDirectory(info, -1);
         UpnpFileInfo_set_LastModified(info, currentTime().count());
-        return quirks ? quirks->getClient() : nullptr;
+        return quirks && quirks->getClient();
     }
 
     auto webFile = fmt::format("{}{}", webRoot, path);
@@ -108,7 +107,7 @@ const struct ClientObservation* UIHandler::getInfo(const char* filename, UpnpFil
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_LastModified(info, currentTime().count());
 
-    return quirks ? quirks->getClient() : nullptr;
+    return quirks && quirks->getClient();
 }
 
 std::unique_ptr<IOHandler> UIHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)

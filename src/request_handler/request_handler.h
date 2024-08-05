@@ -31,7 +31,6 @@
 
 /// \file request_handler.h
 /// \brief Definition of the RequestHandler class.
-/// \todo genych, describe you this request handler...
 #ifndef __REQUEST_HANDLER_H__
 #define __REQUEST_HANDLER_H__
 
@@ -42,7 +41,6 @@
 
 // forward declaration
 class CdsObject;
-struct ClientObservation;
 class Config;
 class Context;
 class Content;
@@ -50,7 +48,6 @@ class Database;
 class IOHandler;
 class Mime;
 class Quirks;
-class Server;
 class UpnpXMLBuilder;
 
 #define LINK_FILE_REQUEST_HANDLER "/" CONTENT_MEDIA_HANDLER "/"
@@ -64,16 +61,17 @@ class UpnpXMLBuilder;
 #define URL_REQUEST_TYPE "req_type"
 #define URL_RESOURCE_ID "res_id"
 
+/// \brief base class for all handlers to answer request received via UPnP or web
 class RequestHandler {
 public:
-    explicit RequestHandler(std::shared_ptr<Content> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder);
+    explicit RequestHandler(std::shared_ptr<Content> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, std::shared_ptr<Quirks> quirks);
     virtual ~RequestHandler() = default;
 
-    /// \brief Returns information about the requested content.
+    /// \brief Returns header information about the requested content.
     /// \param filename Requested URL
-    /// \param info UpnpFileInfo structure, quite similar to statbuf.
-    /// \return the ClientObservation details to be provided to quirks
-    virtual const struct ClientObservation* getInfo(const char* filename, UpnpFileInfo* info) = 0;
+    /// \param info \c UpnpFileInfo structure, quite similar to \c statbuf.
+    /// \return \c true if there was client info available
+    virtual bool getInfo(const char* filename, UpnpFileInfo* info) = 0;
 
     /// \brief Prepares the output buffer and calls the process function.
     /// \param filename Requested URL
@@ -91,8 +89,7 @@ protected:
     std::shared_ptr<Mime> mime;
     std::shared_ptr<Database> database;
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
-
-    std::shared_ptr<Quirks> getQuirks(const UpnpFileInfo* info) const;
+    std::shared_ptr<Quirks> quirks;
 };
 
 #endif // __REQUEST_HANDLER_H__

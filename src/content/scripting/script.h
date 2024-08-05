@@ -97,7 +97,7 @@ public:
 
 protected:
     Script(const std::shared_ptr<Content>& content, const std::string& parent,
-        const std::string& name, std::string objName, std::shared_ptr<StringConverter> sc);
+        const std::string& name, std::string objName, bool needResult, std::shared_ptr<StringConverter> sc);
 
     std::vector<int> execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
     std::vector<int> call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& functionName, const fs::path& rootPath, const std::string& containerType);
@@ -123,6 +123,7 @@ protected:
 
 private:
     bool hasCaseSensitiveNames;
+    bool needResult;
     std::string entrySeparator;
     std::string contextName;
     std::string objectName;

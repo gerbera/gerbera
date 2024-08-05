@@ -588,6 +588,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT,
         "userAgent", "config-clients.html#client",
         ""),
+    std::make_shared<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED,
+        "allowed", "config-clients.html#client",
+        YES),
 
     std::make_shared<ConfigBoxLayoutSetup>(ConfigVal::BOXLAYOUT_BOX,
         "/import/scripting/virtual-layout/boxlayout/box", "config-import.html#boxlayout",

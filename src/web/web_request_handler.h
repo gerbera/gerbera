@@ -78,20 +78,20 @@ protected:
     /// \brief We can also always see what mode was requested.
     enum UpnpOpenFileMode mode {};
 
-    /// \brief This is the xml document, the root node to be populated by process() method.
+    /// \brief This is the xml document, the root node to be populated by \c process() method.
     std::unique_ptr<pugi::xml_document> xmlDoc;
 
-    /// \brief Hints for Xml2Json, such that we know when to create an array
+    /// \brief Hints for \c Xml2Json, such that we know when to create an array
     std::unique_ptr<Xml2Json> xml2Json;
 
     /// \brief The current session, used for this request; will be filled by
-    /// checkRequest()
+    /// \c checkRequest()
     std::shared_ptr<Session> session;
 
     /// \brief Little support function to access stuff from the dictionary in
     /// in an easier fashion.
     /// \param name of the parameter we are looking for.
-    /// \return Value of the parameter with the given name or nullptr if not found.
+    /// \return Value of the parameter with the given name or \c nullptr if not found.
     std::string param(const std::string& name) const { return getValueOrDefault(params, name); }
 
     int intParam(const std::string& name, int invalid = 0) const;
@@ -122,24 +122,27 @@ protected:
     static std::string_view mapAutoscanType(int type);
 
 public:
-    /// \brief Constructor, currently empty.
-    explicit WebRequestHandler(const std::shared_ptr<Content>& content, std::shared_ptr<Server> server);
+    /// \brief Constructor
+    explicit WebRequestHandler(const std::shared_ptr<Content>& content,
+        std::shared_ptr<Server> server,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        const std::shared_ptr<Quirks>& quirks);
 
     /// \brief Returns information about the requested content.
     /// \param filename Requested URL
-    /// \param info UpnpFileInfo structure, quite similar to statbuf.
-    /// \return the ClientObservation details to be provided to quirks
+    /// \param info \c UpnpFileInfo structure, quite similar to statbuf.
+    /// \return \c true if there was client info available
     ///
     /// We need to override this, because for serving UI pages (mostly generated from
     /// dynamic XML) we do not know the size of the data. This is of course different
     /// for the FileRequestHandler, where we can check the file and return all
     /// information about it.
-    const struct ClientObservation* getInfo(const char* filename, UpnpFileInfo* info) override;
+    bool getInfo(const char* filename, UpnpFileInfo* info) override;
 
     /// \brief Decodes the parameters from the filename (URL) and calls the internal open() function.
     /// \param filename The requested URL
     /// \param quirks allows modifying the content of the response based on the client
-    /// \param mode either UPNP_READ or UPNP_WRITE
+    /// \param mode either \c UPNP_READ or \c UPNP_WRITE
     /// \return the appropriate IOHandler for the request.
     std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
 

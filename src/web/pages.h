@@ -64,24 +64,29 @@ protected:
     bool accountsEnabled { false };
 
 public:
-    explicit Auth(const std::shared_ptr<Content>& content, const std::shared_ptr<Server>& server);
+    explicit Auth(const std::shared_ptr<Content>& content,
+        const std::shared_ptr<Server>& server,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        const std::shared_ptr<Quirks>& quirks);
     void process() override;
 };
 
 /// \brief Call from WebUi to create container tree in database view
 class Containers : public WebRequestHandler {
-protected:
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+    using WebRequestHandler::WebRequestHandler;
 
 public:
-    explicit Containers(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<Server>& server);
     void process() override;
 };
 
 /// \brief Call from WebUi to create directory tree in filesystem view
 class Directories : public WebRequestHandler {
 public:
-    explicit Directories(const std::shared_ptr<Content>& content, std::shared_ptr<ConverterManager> converterManager, const std::shared_ptr<Server>& server);
+    explicit Directories(const std::shared_ptr<Content>& content,
+        std::shared_ptr<ConverterManager> converterManager,
+        const std::shared_ptr<Server>& server,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        const std::shared_ptr<Quirks>& quirks);
     void process() override;
 
 protected:
@@ -91,7 +96,11 @@ protected:
 /// \brief Call from WebUi to list files in filesystem view
 class Files : public WebRequestHandler {
 public:
-    explicit Files(const std::shared_ptr<Content>& content, std::shared_ptr<ConverterManager> converterManager, const std::shared_ptr<Server>& server);
+    explicit Files(const std::shared_ptr<Content>& content,
+        std::shared_ptr<ConverterManager> converterManager,
+        const std::shared_ptr<Server>& server,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        const std::shared_ptr<Quirks>& quirks);
     void process() override;
 
 protected:
@@ -100,11 +109,9 @@ protected:
 
 /// \brief Call from WebUi to list items in database view
 class Items : public WebRequestHandler {
-protected:
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+    using WebRequestHandler::WebRequestHandler;
 
 public:
-    explicit Items(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<Server>& server);
     void process() override;
 };
 
@@ -126,11 +133,9 @@ public:
 
 /// \brief Call from WebUi to Edit Item in database view
 class EditLoad : public WebRequestHandler {
-protected:
-    std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
+    using WebRequestHandler::WebRequestHandler;
 
 public:
-    explicit EditLoad(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<Server>& server);
     void process() override;
 };
 
@@ -196,6 +201,7 @@ public:
 /// \param content content handler
 /// \param server server instance
 /// \param xmlBuilder builder for xml string
+/// \param quirks hook to client specific behaviour
 /// \param page identifies what type of the request we are dealing with.
 /// \return the appropriate request handler.
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(
@@ -203,6 +209,7 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
     const std::shared_ptr<Content>& content,
     const std::shared_ptr<Server>& server,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+    const std::shared_ptr<Quirks>& quirks,
     const std::string& page);
 
 /// \brief Browse clients list
@@ -239,7 +246,10 @@ protected:
     static void addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs);
 
 public:
-    explicit ConfigLoad(const std::shared_ptr<Content>& content, const std::shared_ptr<Server>& server);
+    explicit ConfigLoad(const std::shared_ptr<Content>& content,
+        const std::shared_ptr<Server>& server,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        const std::shared_ptr<Quirks>& quirks);
     void process() override;
 };
 
@@ -249,7 +259,11 @@ protected:
     std::shared_ptr<Context> context;
 
 public:
-    explicit ConfigSave(std::shared_ptr<Context> context, const std::shared_ptr<Content>& content, const std::shared_ptr<Server>& server);
+    explicit ConfigSave(std::shared_ptr<Context> context,
+        const std::shared_ptr<Content>& content,
+        const std::shared_ptr<Server>& server,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        const std::shared_ptr<Quirks>& quirks);
     void process() override;
 };
 

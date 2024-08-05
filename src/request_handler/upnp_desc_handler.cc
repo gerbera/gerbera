@@ -38,8 +38,8 @@
 
 #include <sstream>
 
-UpnpDescHandler::UpnpDescHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder)
-    : RequestHandler(content, xmlBuilder)
+UpnpDescHandler::UpnpDescHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, const std::shared_ptr<Quirks>& quirks)
+    : RequestHandler(content, xmlBuilder, quirks)
     , useDynamicDescription(config->getBoolOption(ConfigVal::UPNP_DYNAMIC_DESCRIPTION))
 {
 }
@@ -62,9 +62,8 @@ fs::path UpnpDescHandler::getPath(const std::shared_ptr<Quirks>& quirks, std::st
     return webFile;
 }
 
-const struct ClientObservation* UpnpDescHandler::getInfo(const char* filename, UpnpFileInfo* info)
+bool UpnpDescHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
-    auto quirks = getQuirks(info);
     auto webFile = getPath(quirks, filename);
     auto svcDescription = (useDynamicDescription && quirks) ? getServiceDescription(webFile, quirks) : "";
 
@@ -73,7 +72,7 @@ const struct ClientObservation* UpnpDescHandler::getInfo(const char* filename, U
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_LastModified(info, currentTime().count());
-    return quirks ? quirks->getClient() : nullptr;
+    return quirks && quirks->getClient();
 }
 
 std::unique_ptr<IOHandler> UpnpDescHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)

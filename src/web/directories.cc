@@ -46,8 +46,12 @@
 
 using dirInfo = std::pair<fs::path, bool>;
 
-Web::Directories::Directories(const std::shared_ptr<Content>& content, std::shared_ptr<ConverterManager> converterManager, const std::shared_ptr<Server>& server)
-    : WebRequestHandler(content, server)
+Web::Directories::Directories(const std::shared_ptr<Content>& content,
+    std::shared_ptr<ConverterManager> converterManager,
+    const std::shared_ptr<Server>& server,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+    const std::shared_ptr<Quirks>& quirks)
+    : WebRequestHandler(content, server, xmlBuilder, quirks)
     , converterManager(std::move(converterManager))
 {
 }

@@ -45,7 +45,7 @@
 #include "util/string_converter.h"
 
 MetafileParserScript::MetafileParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
-    : ParserScript(content, parent, "metafile", "obj")
+    : ParserScript(content, parent, "metafile", "obj", false)
 {
     std::string scriptPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_METAFILE_SCRIPT);
     defineFunction("updateCdsObject", jsUpdateCdsObject, 1);

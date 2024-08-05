@@ -1864,6 +1864,11 @@
               "editable": true
             },
             {
+              "item": "/clients/client/attribute::allowed",
+              "caption": "Client Allowed",
+              "editable": false
+            },
+            {
               "item": "/clients/client/attribute::flags",
               "caption": "Flags",
               "editable": true

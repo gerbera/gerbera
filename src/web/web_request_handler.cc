@@ -53,8 +53,11 @@
 
 namespace Web {
 
-WebRequestHandler::WebRequestHandler(const std::shared_ptr<Content>& content, std::shared_ptr<Server> server)
-    : RequestHandler(content, nullptr)
+WebRequestHandler::WebRequestHandler(const std::shared_ptr<Content>& content,
+    std::shared_ptr<Server> server,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+    const std::shared_ptr<Quirks>& quirks)
+    : RequestHandler(content, xmlBuilder, quirks)
     , sessionManager(this->content->getContext()->getSessionManager())
     , server(std::move(server))
 {
@@ -93,12 +96,10 @@ void WebRequestHandler::checkRequest(bool checkLogin)
     session->access();
 }
 
-const struct ClientObservation* WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
+bool WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     this->filename = filename;
-
-    auto&& [path, parameters] = URLUtils::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
-
+    auto&& parameters = URLUtils::getQuery(this->filename);
     auto decodedParams = URLUtils::dictDecode(parameters);
     if (params.empty()) {
         params = std::move(decodedParams);
@@ -122,17 +123,16 @@ const struct ClientObservation* WebRequestHandler::getInfo(const char* filename,
     headers.addHeader("Access-Control-Allow-Origin", fmt::format("{}", fmt::join(server->getCorsHosts(), " ")));
 #endif
 
-    auto quirks = getQuirks(info);
     if (quirks)
         quirks->updateHeaders(headers);
     headers.writeHeaders(info);
-    return quirks ? quirks->getClient() : nullptr;
+    return quirks && quirks->getClient();
 }
 
 std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
 {
     this->filename = filename;
-    auto&& [path, parameters] = URLUtils::splitUrl(filename, URL_UI_PARAM_SEPARATOR);
+    auto&& parameters = URLUtils::getQuery(this->filename);
     auto decodedParams = URLUtils::dictDecode(parameters);
     if (params.empty()) {
         params = std::move(decodedParams);

@@ -20,6 +20,8 @@ Because of the extension of configuration of transcoding profiles, those produci
 - Image and thumbnail profiles support PNG images
 - Page layout of items page with splitter and resize button
 - Orientation for images and videos in resource attributes
+- Additional client filtering options with friendlyName, modelName, manufacturer
+- Configuration option to block clients
 
 ### FIXES
 

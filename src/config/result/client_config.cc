@@ -39,7 +39,7 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
     const std::map<std::string, std::string>& mimeMappings,
     const std::map<std::string, std::string>& headers,
     const std::map<ClientMatchType, std::string>& matchValues,
-    int captionInfoCount, int stringLimit, bool multiValue)
+    int captionInfoCount, int stringLimit, bool multiValue, bool isAllowed)
 {
     clientProfile.type = ClientType::Custom;
     if (!ip.empty()) {
@@ -62,6 +62,7 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
     clientProfile.captionInfoCount = captionInfoCount;
     clientProfile.stringLimit = stringLimit;
     clientProfile.multiValue = multiValue;
+    clientProfile.isAllowed = isAllowed;
     if (flags & QUIRK_FLAG_HIDE_RES_THUMBNAIL) {
         auto res = std::find(clientProfile.supportedResources.begin(), clientProfile.supportedResources.end(), ResourcePurpose::Thumbnail);
         clientProfile.supportedResources.erase(res);

@@ -41,8 +41,10 @@
 #include <fmt/chrono.h>
 #include <sstream>
 
-DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::string ip, in_port_t port)
-    : RequestHandler(content, xmlBuilder)
+DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<Content>& content,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, const std::shared_ptr<Quirks>& quirks,
+    std::string ip, in_port_t port)
+    : RequestHandler(content, xmlBuilder, quirks)
     , ip(ip)
     , port(port)
     , useDynamicDescription(config->getBoolOption(ConfigVal::UPNP_DYNAMIC_DESCRIPTION))
@@ -50,10 +52,9 @@ DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<Content
     deviceDescription = renderDeviceDescription(ip, port, nullptr);
 }
 
-const struct ClientObservation* DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
+bool DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
     log_debug("Device description requested {}", filename);
-    auto quirks = info ? getQuirks(info) : nullptr;
 
     if (quirks && useDynamicDescription) {
         deviceDescription = renderDeviceDescription(ip, port, quirks);
@@ -65,7 +66,7 @@ const struct ClientObservation* DeviceDescriptionHandler::getInfo(const char* fi
     UpnpFileInfo_set_IsReadable(info, 1);
     UpnpFileInfo_set_IsDirectory(info, 0);
     UpnpFileInfo_set_LastModified(info, currentTime().count());
-    return quirks ? quirks->getClient() : nullptr;
+    return quirks && quirks->getClient();
 }
 
 std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)

@@ -144,6 +144,16 @@ This section defines the client behaviour for one client.
 
     Override the default ``server/upnp/multi-value`` of server.
 
+    ::
+
+        allowed="no"
+
+    * Optional
+
+    * Default: **yes**
+
+    If set to no all requests from a client are blocked.
+
 
 **Child Entries:**
 

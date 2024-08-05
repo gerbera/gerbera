@@ -52,6 +52,7 @@ Mime::Mime(const std::shared_ptr<Config>& config)
     }
 
     std::string optMagicFile = config->getOption(ConfigVal::IMPORT_MAGIC_FILE);
+    log_debug("magic '{}'", optMagicFile);
     const char* magicFile = !optMagicFile.empty() ? optMagicFile.c_str() : nullptr;
     if (magic_load(magicCookie, magicFile) == -1) {
         auto errMsg = magic_error(magicCookie);
@@ -100,6 +101,7 @@ std::pair<bool, std::string> Mime::getMimeType(const fs::path& path, const std::
         extension = toLower(extension);
 
     if (std::find(ignoredExtensions.begin(), ignoredExtensions.end(), extension) != ignoredExtensions.end()) {
+        log_debug("Ignoring file {} because of extension", path.string());
         return { true, "" };
     }
     std::string mimeType = getValueOrDefault(extension_mimetype_map, extension, "");

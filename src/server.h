@@ -50,6 +50,7 @@ class Context;
 class Database;
 class MetadataService;
 class Mime;
+class Quirks;
 class RequestHandler;
 class SubscriptionRequest;
 class Timer;
@@ -158,22 +159,23 @@ protected:
     void routeSubscriptionRequest(const SubscriptionRequest& request) const;
 
     /// \brief Registers callback functions for the internal web server.
-    /// \param filename Incoming filename.
+    /// \param filename Incoming filename/url.
+    /// \param quirks Client specific handling.
     ///
-    std::unique_ptr<RequestHandler> createRequestHandler(const char* filename) const;
+    std::unique_ptr<RequestHandler> createRequestHandler(const char* filename, const std::shared_ptr<Quirks>& quirks) const;
 
     /// \brief Registers callback functions for the internal web server.
     ///
     /// This function registers callbacks for the internal web server.
     /// The callback functions are:
-    /// \b web_get_info Query information on a file.
-    /// \b web_open Open a file.
-    /// \b web_read Sequentially read from a file.
-    /// \b web_write Sequentially write to a file (not supported).
-    /// \b web_seek Perform a seek on a file.
-    /// \b web_close Close file.
+    /// \arg \c GetInfoCallback Query information on a file.
+    /// \arg \c OpenCallback Open a file.
+    /// \arg \c ReadCallback Sequentially read from a file.
+    /// \arg \c WriteCallback Sequentially write to a file (not supported).
+    /// \arg \c SeekCallback Perform a seek on a file.
+    /// \arg \c CloseCallback Close file.
     ///
-    /// \return UPNP_E_SUCCESS Callbacks registered successfully, else error code.
+    /// \return \c UPNP_E_SUCCESS Callbacks registered successfully, else error code.
     static int registerVirtualDirCallbacks();
 
     /// \brief Dispatch incoming UPnP root device events.
@@ -210,6 +212,16 @@ protected:
     /// contains the port on which the server is actually running.
     std::string getVirtualUrl() const;
     std::string getExternalUrl() const;
+
+    std::shared_ptr<Quirks> getQuirks(const UpnpFileInfo* info, bool isWeb) const;
+    /// \brief Upnp callbacks
+    static int HostValidateCallback(const char* host, void* cookie);
+    static int GetInfoCallback(const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie);
+    static UpnpWebFileHandle OpenCallback(const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie);
+    static int ReadCallback(UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie);
+    static int WriteCallback(UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie);
+    static int SeekCallback(UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie);
+    static int CloseCallback(UpnpWebFileHandle f, const void* cookie, const void* requestCookie);
 };
 
 #endif // __SERVER_H__

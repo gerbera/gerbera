@@ -45,12 +45,6 @@
 
 #include <fmt/chrono.h>
 
-Web::EditLoad::EditLoad(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<Server>& server)
-    : WebRequestHandler(content, server)
-    , xmlBuilder(std::move(xmlBuilder))
-{
-}
-
 /// \brief: process request 'edit_load' to list contents of a folder
 void Web::EditLoad::process()
 {

@@ -42,12 +42,6 @@
 #include "upnp/xml_builder.h"
 #include "util/xml_to_json.h"
 
-Web::Containers::Containers(const std::shared_ptr<Content>& content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<Server>& server)
-    : WebRequestHandler(content, server)
-    , xmlBuilder(std::move(xmlBuilder))
-{
-}
-
 void Web::Containers::process()
 {
     log_debug("start process()");

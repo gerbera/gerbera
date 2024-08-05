@@ -34,13 +34,13 @@ class UpnpXMLBuilder;
 
 class DeviceDescriptionHandler : public RequestHandler {
 public:
-    explicit DeviceDescriptionHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, std::string ip, in_port_t port);
+    explicit DeviceDescriptionHandler(const std::shared_ptr<Content>& content,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        const std::shared_ptr<Quirks>& quirks,
+        std::string ip, in_port_t port);
 
-    /// \brief Returns information about the requested content.
-    /// \param filename Requested URL
-    /// \param info UpnpFileInfo structure, quite similar to statbuf.
-    /// \return the ClientObservation details to be provided to quirks
-    const struct ClientObservation* getInfo(const char* filename, UpnpFileInfo* info) override;
+    /// \inherit
+    bool getInfo(const char* filename, UpnpFileInfo* info) override;
 
     /// \brief Prepares the output buffer and calls the process function.
     /// \param filename Requested URL
