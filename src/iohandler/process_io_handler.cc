@@ -159,7 +159,7 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
     }
 }
 
-std::size_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
+grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
 {
     fd_set readSet;
     struct timespec timeout = { FIFO_READ_TIMEOUT, 0 };
