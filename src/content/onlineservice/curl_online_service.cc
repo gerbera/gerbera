@@ -81,7 +81,7 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
 #else
         bool verbose = false;
 #endif
-        buffer = URL::download(service_url, &retcode, curl_handle, false, verbose, true).second;
+        buffer = URL(service_url, curl_handle).download(&retcode, false, verbose, true).second;
     } catch (const std::runtime_error& ex) {
         log_error("Failed to download {} XML data: {}", serviceName, ex.what());
         return nullptr;
@@ -132,11 +132,9 @@ bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout
     auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::shared_ptr<CdsObject> obj;
     do {
-        /// \todo add try/catch here and a possibility do find out if we
-        /// may request more stuff or if we are at the end of the list
         obj = sc->getNextObject();
         if (!obj)
-            break;
+            continue;
 
         obj->setVirtual(true);
 
@@ -161,10 +159,7 @@ bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout
             obj->setParentID(old->getParentID());
             content->updateObject(obj);
         }
-
-        //        if (server->getShutdownStatus())
-        //            return false;
-    } while (obj);
+    } while (obj || !sc->isEnd());
 
     return false;
 }

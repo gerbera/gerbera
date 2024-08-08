@@ -46,7 +46,7 @@
 void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_document> service)
 {
     service_xml = std::move(service);
-    auto root = service_xml->document_element();
+    root = service_xml->document_element();
 
     if (std::string_view(root.name()) != "records")
         throw_std_runtime_error("Received invalid XML for Apple Trailers service");
@@ -59,8 +59,6 @@ void ATrailersContentHandler::setServiceContent(std::unique_ptr<pugi::xml_docume
 
 std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
 {
-    auto root = service_xml->document_element();
-
     while (trailer_it != root.end()) {
         auto trailer = *trailer_it;
         ++trailer_it;
@@ -81,6 +79,11 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getNextObject()
     } // while trailer_it
 
     return nullptr;
+}
+
+bool ATrailersContentHandler::isEnd()
+{
+    return trailer_it == root.end();
 }
 
 std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_node& trailer) const
@@ -140,12 +143,14 @@ std::shared_ptr<CdsObject> ATrailersContentHandler::getObject(const pugi::xml_no
         std::pair("studio", MetadataFields::M_PRODUCER),
         std::pair("director", MetadataFields::M_DIRECTOR),
         std::pair("releasedate", MetadataFields::M_DATE),
-        /// \todo cut out a small part for the usual description
+        std::pair("description", MetadataFields::M_DESCRIPTION),
         std::pair("description", MetadataFields::M_LONGDESCRIPTION),
     };
     for (auto&& [key, tag] : propertyMap) {
         temp = info.child(key).text().as_string();
         if (!temp.empty()) {
+            if (tag == MetadataFields::M_DESCRIPTION)
+                temp = temp.substr(0, 80);
             item->addMetaData(tag, temp);
         }
     }

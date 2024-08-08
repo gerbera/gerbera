@@ -39,18 +39,17 @@
 #include "exceptions.h"
 #include "util/tools.h"
 
-CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, const std::string& url, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize)
+CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, const std::string& url, std::size_t bufSize, std::size_t initialFillSize)
     : IOHandlerBufferHelper(config, bufSize, initialFillSize)
+    , URL(url)
+    , external_curl_handle(false)
+    , curl_handle(nullptr)
 {
-    if (url.empty())
+    if (this->URL.empty())
         throw_std_runtime_error("URL has not been set correctly");
     if (bufSize < CURL_MAX_WRITE_SIZE)
         throw_std_runtime_error("bufSize must be at least CURL_MAX_WRITE_SIZE({})", CURL_MAX_WRITE_SIZE);
 
-    this->URL = url;
-    this->external_curl_handle = curlHandle;
-    this->curl_handle = curlHandle;
-    // bytesCurl = 0;
     signalAfterEveryRead = true;
 
     // still todo: optimize seek if data already in buffer
@@ -79,7 +78,7 @@ void CurlIOHandler::close()
     if (isOpen)
         IOHandlerBufferHelper::close();
 
-    if (external_curl_handle && curl_handle)
+    if (!external_curl_handle && curl_handle)
         curl_easy_cleanup(curl_handle);
 }
 
@@ -90,9 +89,6 @@ void CurlIOHandler::threadProc()
     CURLcode res;
     assert(curl_handle);
     assert(!URL.empty());
-
-    // char error_buffer[CURL_ERROR_SIZE] = {'\0'};
-    // curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, error_buffer);
 
     curl_easy_setopt(curl_handle, CURLOPT_URL, URL.c_str());
     curl_easy_setopt(curl_handle, CURLOPT_NOSIGNAL, 1);
@@ -108,10 +104,13 @@ void CurlIOHandler::threadProc()
     bool logEnabled = GrbLogger::Logger.isDebugLogging();
 #endif
 #endif
-    if (logEnabled)
+    char errorBuffer[CURL_ERROR_SIZE] = { '\0' };
+    if (logEnabled) {
+        curl_easy_setopt(curl_handle, CURLOPT_ERRORBUFFER, errorBuffer);
         curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
+    }
 
-    // curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT,
+    curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, 20); // seconds
 
     // proxy..
 
@@ -145,9 +144,16 @@ void CurlIOHandler::threadProc()
         res = curl_easy_perform(curl_handle);
     } while (doSeek);
 
-    if (res != CURLE_OK)
+    if (res != CURLE_OK) {
         readError = true;
-    else
+        if (logEnabled) {
+            std::size_t len = strlen(errorBuffer);
+            if (len) {
+                log_error("libcurl (error {}): {}", res, errorBuffer);
+            } else
+                log_error("libcurl (error {}): {}", res, curl_easy_strerror(res));
+        }
+    } else
         eof = true;
 
     threadRunner->notify();
@@ -160,7 +166,7 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
     assert(wantWrite <= ego->bufSize);
     auto&& threadRunner = ego->threadRunner;
 
-    // log_debug("URL: {}; size: {}; nmemb: {}; wantWrite: {}", ego->URL.c_str(), size, nmemb, wantWrite);
+    // log_debug "URL: {}; size: {}; nmemb: {}; wantWrite: {}", ego->URL.c_str(), size, nmemb, wantWrite
 
     auto lock = threadRunner->uniqueLock();
 
@@ -237,7 +243,9 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
 
     lock.lock();
 
-    // ego->bytesCurl += wantWrite;
+#if 0
+    ego->bytesCurl += wantWrite;
+#endif
     ego->b += wantWrite;
     if (ego->b >= ego->bufSize)
         ego->b -= ego->bufSize;

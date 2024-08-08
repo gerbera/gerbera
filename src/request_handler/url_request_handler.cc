@@ -85,7 +85,7 @@ bool URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 #endif
         log_debug("Online content url: {}", url);
         try {
-            auto st = URL::getInfo(url);
+            auto st = URL(url).getInfo();
             UpnpFileInfo_set_FileLength(info, st.getSize());
             log_debug("URL used for request: {}", st.getURL());
         } catch (const std::runtime_error& ex) {
@@ -148,8 +148,9 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, const s
         return ioHandler;
     }
 
-    ///\todo make curl io handler configurable for url request handler
-    auto ioHandler = std::make_unique<CurlIOHandler>(config, url, nullptr, 1024 * 1024, 0);
+    auto ioHandler = std::make_unique<CurlIOHandler>(config, url,
+        config->getIntOption(ConfigVal::URL_REQUEST_CURL_BUFFER_SIZE),
+        config->getIntOption(ConfigVal::URL_REQUEST_CURL_FILL_SIZE));
     content->triggerPlayHook(group, obj);
     return ioHandler;
 }

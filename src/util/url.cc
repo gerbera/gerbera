@@ -41,22 +41,28 @@
 
 #include <sstream>
 
-std::pair<std::string, std::string> URL::download(const std::string& url, long* httpRetcode,
-    CURL* curlHandle, bool onlyHeader,
-    bool verbose, bool redirect)
+URL::URL(const std::string& url, CURL* curlHandle)
+    : url(url)
+    , curlHandle(curlHandle)
 {
-    bool cleanup = false;
-    char errorBuffer[CURL_ERROR_SIZE] = { '\0' };
-
     if (!curlHandle) {
-        curlHandle = curl_easy_init();
+        this->curlHandle = curl_easy_init();
         cleanup = true;
-        if (!curlHandle)
+        if (!this->curlHandle)
             throw_std_runtime_error("Invalid curl handle");
     }
+}
 
-    std::ostringstream headerBuffer;
-    std::ostringstream contentBuffer;
+URL::~URL()
+{
+    if (cleanup)
+        curl_easy_cleanup(curlHandle);
+}
+
+std::pair<std::string, std::string> URL::download(long* httpRetcode,
+    bool onlyHeader, bool verbose, bool redirect)
+{
+    char errorBuffer[CURL_ERROR_SIZE] = { '\0' };
 
     curl_easy_reset(curlHandle);
 
@@ -81,6 +87,8 @@ std::pair<std::string, std::string> URL::download(const std::string& url, long* 
     curl_easy_setopt(curlHandle, CURLOPT_ERRORBUFFER, errorBuffer);
     curl_easy_setopt(curlHandle, CURLOPT_CONNECTTIMEOUT, 20); // seconds
 
+    std::ostringstream headerBuffer;
+    std::ostringstream contentBuffer;
     if (onlyHeader) {
         curl_easy_setopt(curlHandle, CURLOPT_NOBODY, 1);
     } else {
@@ -97,62 +105,41 @@ std::pair<std::string, std::string> URL::download(const std::string& url, long* 
 
     auto res = curl_easy_perform(curlHandle);
     if (res != CURLE_OK) {
-        log_error("{}", errorBuffer);
-        if (cleanup)
-            curl_easy_cleanup(curlHandle);
+        log_error("libcurl (error {}): {}", res, errorBuffer);
         throw_std_runtime_error(errorBuffer);
     }
 
     res = curl_easy_getinfo(curlHandle, CURLINFO_RESPONSE_CODE, httpRetcode);
     if (res != CURLE_OK) {
         log_error("{}", errorBuffer);
-        if (cleanup)
-            curl_easy_cleanup(curlHandle);
         throw_std_runtime_error(errorBuffer);
     }
-
-    if (cleanup)
-        curl_easy_cleanup(curlHandle);
 
     return { headerBuffer.str(), contentBuffer.str() };
 }
 
-URL::Stat URL::getInfo(const std::string& url, CURL* curlHandle)
+URL::Stat URL::getInfo()
 {
     long retcode;
-    bool cleanup = false;
     curl_off_t cl;
     char* ct;
     char* cUrl;
     char errorBuffer[CURL_ERROR_SIZE] = { '\0' };
 
-    if (!curlHandle) {
-        curlHandle = curl_easy_init();
-        cleanup = true;
-        if (!curlHandle)
-            throw_std_runtime_error("Invalid curl handle");
-    }
-
-    download(url, &retcode, curlHandle, true, true, true);
+    download(&retcode, true, true, true);
     if (retcode != 200) {
-        if (cleanup)
-            curl_easy_cleanup(curlHandle);
         throw_std_runtime_error("Error retrieving information from {} - HTTP return code: {}", url.c_str(), retcode);
     }
 
     auto res = curl_easy_getinfo(curlHandle, CURLINFO_CONTENT_LENGTH_DOWNLOAD_T, &cl);
     if (res != CURLE_OK) {
         log_error("{}", errorBuffer);
-        if (cleanup)
-            curl_easy_cleanup(curlHandle);
         throw_std_runtime_error(errorBuffer);
     }
 
     res = curl_easy_getinfo(curlHandle, CURLINFO_CONTENT_TYPE, &ct);
     if (res != CURLE_OK) {
         log_error("{}", errorBuffer);
-        if (cleanup)
-            curl_easy_cleanup(curlHandle);
         throw_std_runtime_error(errorBuffer);
     }
 
@@ -162,15 +149,10 @@ URL::Stat URL::getInfo(const std::string& url, CURL* curlHandle)
     res = curl_easy_getinfo(curlHandle, CURLINFO_EFFECTIVE_URL, &cUrl);
     if (res != CURLE_OK) {
         log_error("{}", errorBuffer);
-        if (cleanup)
-            curl_easy_cleanup(curlHandle);
         throw_std_runtime_error(errorBuffer);
     }
 
     std::string usedUrl = cUrl ? cUrl : url;
-
-    if (cleanup)
-        curl_easy_cleanup(curlHandle);
 
     return { usedUrl, cl, mt };
 }
