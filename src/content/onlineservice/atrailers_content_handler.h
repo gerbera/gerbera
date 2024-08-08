@@ -63,13 +63,17 @@ public:
     /// when the whole service XML is parsed and no more objects are left,
     /// this function will return nullptr.
     ///
-    /// \return CdsObject or nullptr if there are no more objects to parse.
+    /// \return \c CdsObject or \c nullptr if there are no more objects to parse.
     std::shared_ptr<CdsObject> getNextObject() override;
+
+    /// \brief Checks whether we reached the end of the file
+    bool isEnd() override;
 
 protected:
     std::shared_ptr<CdsObject> getObject(const pugi::xml_node& trailer) const;
 
     pugi::xml_node_iterator trailer_it;
+    pugi::xml_node root;
 
     std::string trailer_mimetype;
 };

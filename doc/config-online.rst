@@ -38,7 +38,7 @@ This tag defines the online content section.
         fetch-buffer-size=...
 
     * Optional
-    * Default: **262144**
+    * Default: **1048576**
 
     Often, online content can be directly accessed by the player - we will just give it the URL. However, sometimes it
     may be necessary to proxy the content through Gerbera. This setting defines the buffer size in bytes, that will be

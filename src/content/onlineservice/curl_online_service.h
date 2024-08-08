@@ -49,7 +49,7 @@ public:
     virtual ~CurlContentHandler() = default;
 
     /// \brief Sets the service XML from which we will extract the objects.
-    /// \return false if service XML contained an error status.
+    /// \return \c false if service XML contained an error status.
     virtual void setServiceContent(std::unique_ptr<pugi::xml_document> service) = 0;
 
     /// \brief retrieves an object from the service.
@@ -58,8 +58,11 @@ public:
     /// when the whole service XML is parsed and no more objects are left,
     /// this function will return nullptr.
     ///
-    /// \return CdsObject or nullptr if there are no more objects to parse.
+    /// \return \c CdsObject or \c nullptr if there are no more objects to parse.
     virtual std::shared_ptr<CdsObject> getNextObject() = 0;
+
+    /// \brief Checks whether we reached the end of the file
+    virtual bool isEnd() = 0;
 
 protected:
     std::shared_ptr<Config> config;

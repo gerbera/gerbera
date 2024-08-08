@@ -921,6 +921,14 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         AtrailerResolution::Low,
         std::map<std::string, AtrailerResolution>({ { "640", AtrailerResolution::Low }, { "720", AtrailerResolution::Hi }, { "720p", AtrailerResolution::Hi } })),
 #endif
+#ifdef HAVE_CURL
+    std::make_shared<ConfigIntSetup>(ConfigVal::URL_REQUEST_CURL_BUFFER_SIZE,
+        "/server/online-content/attribute::fetch-buffer-size", "config-online.html#online-content",
+        1024 * 1024, CURL_MAX_WRITE_SIZE, ConfigIntSetup::CheckMinValue),
+    std::make_shared<ConfigIntSetup>(ConfigVal::URL_REQUEST_CURL_FILL_SIZE,
+        "/server/online-content/attribute::fetch-buffer-fill-size", "config-online.html#online-content",
+        0, 0, ConfigIntSetup::CheckMinValue),
+#endif // HAVE_CURL
 
 #ifdef HAVE_INOTIFY
     std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY,

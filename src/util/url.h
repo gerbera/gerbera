@@ -70,33 +70,39 @@ public:
         std::string mimetype;
     };
 
+    /// \brief create url wrapper object
+    /// \param url address to open
+    /// \param curlHandle an initialized and ready to use curl handle
+    URL(const std::string& url, CURL* curlHandle = nullptr);
+    ~URL();
+
     /// \brief downloads either the content or the headers to the buffer.
     ///
     /// This function uses an already initialized curl_handle, the reason
     /// is, that curl might keep the connection open if we do subsequent
     /// requests to the same server.
     ///
-    /// \param url address to open
     /// \param httpRetcode return code of the http call
-    /// \param curlHandle an initialized and ready to use curl handle
-    /// \param onlyHeader set true if you only want the header and not the
-    /// body
+    /// \param onlyHeader set true if you only want the header and not the body
     /// \param verbose enable curl verbose option
     /// \param redirect allow redirection
     /// \return downloaded header and content
-    static std::pair<std::string, std::string> download(const std::string& url,
-        long* httpRetcode,
-        CURL* curlHandle = nullptr,
+    std::pair<std::string, std::string> download(long* httpRetcode,
         bool onlyHeader = false,
         bool verbose = false,
         bool redirect = false);
 
-    static Stat getInfo(const std::string& url, CURL* curlHandle = nullptr);
+    Stat getInfo();
 
 protected:
     /// \brief This function is installed as a callback for libcurl, when
     /// we download data from a remote site.
+    /// \return number of read bytes
     static std::size_t dl(char* buf, std::size_t size, std::size_t nmemb, std::ostringstream* data);
+
+    std::string url;
+    CURL* curlHandle;
+    bool cleanup { false };
 };
 
 #endif // HAVE_CURL

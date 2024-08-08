@@ -6,6 +6,7 @@
 - Add configuration option to block clients
 - Add Splitter and Resize to items grid
 - Clean up commented out code
+- Clean up URL handling
 - Configuration of additional target mimetype properties for transcoding
 - Extract image and video orientation to resource attributes
 - FIXME done: Remove fake resource

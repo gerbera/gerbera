@@ -162,7 +162,7 @@ fs::path TranscodeExternalHandler::openCurlFifo(const fs::path& location, std::v
     auto ret = makeFifo();
 
     try {
-        auto cIoh = std::make_unique<CurlIOHandler>(config, url, nullptr,
+        auto cIoh = std::make_unique<CurlIOHandler>(config, url,
             config->getIntOption(ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
             config->getIntOption(ConfigVal::EXTERNAL_TRANSCODING_CURL_FILL_SIZE));
         auto pIoh = std::make_unique<ProcessIOHandler>(content, ret, nullptr);
