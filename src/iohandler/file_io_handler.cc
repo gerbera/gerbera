@@ -49,7 +49,7 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
     f = file.open("rb");
 }
 
-std::size_t FileIOHandler::read(std::byte* buf, std::size_t length)
+grb_read_t FileIOHandler::read(std::byte* buf, std::size_t length)
 {
     std::size_t ret = std::fread(buf, sizeof(std::byte), length, f);
 

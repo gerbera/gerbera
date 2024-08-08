@@ -66,7 +66,7 @@ IOHandlerBufferHelper::~IOHandlerBufferHelper() noexcept
         IOHandlerBufferHelper::close();
 }
 
-std::size_t IOHandlerBufferHelper::read(std::byte* buf, std::size_t length)
+grb_read_t IOHandlerBufferHelper::read(std::byte* buf, std::size_t length)
 {
     // check read on closed BufferedIOHandler
     assert(isOpen);

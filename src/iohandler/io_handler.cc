@@ -50,7 +50,7 @@ void IOHandler::open(enum UpnpOpenFileMode mode)
 ///
 /// \retval 0   EOF encountered.
 /// \retval -1  Error.
-std::size_t IOHandler::read(std::byte* buf, std::size_t length)
+grb_read_t IOHandler::read(std::byte* buf, std::size_t length)
 {
     return -1;
 }

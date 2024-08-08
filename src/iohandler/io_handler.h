@@ -31,14 +31,16 @@
 
 /// \file io_handler.h
 /// \brief Definition for the IOHandler class.
+
 #ifndef __IO_HANDLER_H__
 #define __IO_HANDLER_H__
 
 #include <cstddef>
-
+#include <cstdint>
 #include <upnp.h>
 
-#define CHECK_SOCKET (-666)
+using grb_read_t = std::int32_t;
+static constexpr grb_read_t CHECK_SOCKET = -666;
 
 class IOHandler {
 public:
@@ -51,7 +53,7 @@ public:
     /// \brief Reads previously opened/initialized data sequentially.
     /// \param buf This buffer will be filled by our read functions.
     /// \param length Number of bytes to read.
-    virtual std::size_t read(std::byte* buf, std::size_t length);
+    virtual grb_read_t read(std::byte* buf, std::size_t length);
 
     /// \brief Writes to previously opened/initialized data sequentially.
     /// \param buf Data to be written.

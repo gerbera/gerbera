@@ -31,6 +31,7 @@
 
 /// \file file_io_handler.h
 /// \brief Definition of the FileIOHandler class.
+
 #ifndef __FILE_IO_HANDLER_H__
 #define __FILE_IO_HANDLER_H__
 
@@ -56,7 +57,7 @@ public:
     /// \brief Reads a previously opened file sequentially.
     /// \param buf Data from the file will be copied into this buffer.
     /// \param length Number of bytes to be copied into the buffer.
-    std::size_t read(std::byte* buf, std::size_t length) override;
+    grb_read_t read(std::byte* buf, std::size_t length) override;
 
     /// \brief Writes to a previously opened file.
     /// \param buf Data from the buffer will be written to the file.
