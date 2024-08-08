@@ -57,6 +57,11 @@ CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, const std::s
     seekEnabled = true;
 }
 
+CurlIOHandler::~CurlIOHandler()
+{
+    CurlIOHandler::close();
+}
+
 void CurlIOHandler::open(enum UpnpOpenFileMode mode)
 {
     if (!curl_handle) {
@@ -71,7 +76,8 @@ void CurlIOHandler::open(enum UpnpOpenFileMode mode)
 
 void CurlIOHandler::close()
 {
-    IOHandlerBufferHelper::close();
+    if (isOpen)
+        IOHandlerBufferHelper::close();
 
     if (external_curl_handle && curl_handle)
         curl_easy_cleanup(curl_handle);

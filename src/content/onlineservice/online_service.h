@@ -32,15 +32,15 @@
 /// \file online_service.h
 /// \brief Definition of the OnlineService class.
 
-#ifdef ONLINE_SERVICES
-
 #ifndef __ONLINE_SERVICE_H__
 #define __ONLINE_SERVICE_H__
 
-#include <memory>
-#include <vector>
+#ifdef ONLINE_SERVICES
 
 #include "util/timer.h"
+
+#include <memory>
+#include <vector>
 
 // forward declaration
 class Config;
@@ -149,6 +149,6 @@ protected:
     std::vector<std::shared_ptr<OnlineService>> service_list {};
 };
 
-#endif //__ONLINE_SERVICE_H__
-
 #endif // ONLINE_SERVICES
+
+#endif //__ONLINE_SERVICE_H__

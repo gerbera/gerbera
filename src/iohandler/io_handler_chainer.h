@@ -40,7 +40,8 @@
 #define IOHC_WRITE_ERROR 4
 #define IOHC_EXCEPTION 5
 
-#include "io_handler.h"
+#include "io_handler.h" // Base
+
 #include "util/thread_executor.h"
 
 /// \brief gets two IOHandler, starts a thread which reads from one IOHandler
@@ -70,8 +71,8 @@ protected:
     void threadProc() override;
 
 private:
-    int status;
-    std::byte* buf;
+    int status { 0 };
+    std::byte* buf { nullptr };
     int chunkSize;
     std::unique_ptr<IOHandler> readFrom;
     std::unique_ptr<IOHandler> writeTo;

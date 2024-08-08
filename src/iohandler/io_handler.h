@@ -30,7 +30,7 @@
 */
 
 /// \file io_handler.h
-/// \brief Definitoin for the IOHandler class.
+/// \brief Definition for the IOHandler class.
 #ifndef __IO_HANDLER_H__
 #define __IO_HANDLER_H__
 

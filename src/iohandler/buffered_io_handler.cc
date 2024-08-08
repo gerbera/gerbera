@@ -53,6 +53,11 @@ BufferedIOHandler::BufferedIOHandler(const std::shared_ptr<Config>& config, std:
     // seekEnabled = true;
 }
 
+BufferedIOHandler::~BufferedIOHandler()
+{
+    BufferedIOHandler::close();
+}
+
 void BufferedIOHandler::open(enum UpnpOpenFileMode mode)
 {
     // do the open here instead of threadProc() because it may throw an exception
@@ -62,7 +67,8 @@ void BufferedIOHandler::open(enum UpnpOpenFileMode mode)
 
 void BufferedIOHandler::close()
 {
-    IOHandlerBufferHelper::close();
+    if (isOpen)
+        IOHandlerBufferHelper::close();
     // do the close here instead of threadProc() because it may throw an exception
     underlyingHandler->close();
 }

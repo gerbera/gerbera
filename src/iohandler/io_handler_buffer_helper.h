@@ -34,10 +34,11 @@
 #ifndef __IO_HANDLER_BUFFER_HELPER_H__
 #define __IO_HANDLER_BUFFER_HELPER_H__
 
-#include <upnp.h>
+#include "io_handler.h" // Base
 
-#include "io_handler.h"
 #include "util/thread_runner.h"
+
+#include <upnp.h>
 
 class Config;
 

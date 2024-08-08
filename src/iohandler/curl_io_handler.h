@@ -30,11 +30,12 @@
 */
 
 /// \file curl_io_handler.h
-
-#ifdef HAVE_CURL
+/// \brief Definition of the CurlIOHandler class.
 
 #ifndef __CURL_IO_HANDLER_H__
 #define __CURL_IO_HANDLER_H__
+
+#ifdef HAVE_CURL
 
 #include <curl/curl.h>
 #include <upnp.h>
@@ -43,9 +44,11 @@
 
 class Config;
 
+/// \brief Allows the web server to read from a web site.
 class CurlIOHandler : public IOHandlerBufferHelper {
 public:
     CurlIOHandler(const std::shared_ptr<Config>& config, const std::string& url, CURL* curlHandle, std::size_t bufSize, std::size_t initialFillSize);
+    ~CurlIOHandler() noexcept override;
 
     void open(enum UpnpOpenFileMode mode) override;
     void close() override;
@@ -60,6 +63,6 @@ private:
     void threadProc() override;
 };
 
-#endif // __CURL_IO_HANDLER_H__
-
 #endif // HAVE_CURL
+
+#endif // __CURL_IO_HANDLER_H__

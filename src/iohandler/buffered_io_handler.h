@@ -53,6 +53,7 @@ public:
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay
     BufferedIOHandler(const std::shared_ptr<Config>& config, std::unique_ptr<IOHandler> underlyingHandler, std::size_t bufSize, std::size_t maxChunkSize, std::size_t initialFillSize);
+    ~BufferedIOHandler() noexcept override;
 
     void open(enum UpnpOpenFileMode mode) override;
     void close() override;

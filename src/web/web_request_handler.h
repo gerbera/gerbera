@@ -39,9 +39,6 @@
 
 #include <pugixml.hpp>
 
-// URL FORMATTING CONSTANTS
-#define URL_UI_PARAM_SEPARATOR '?'
-
 class GenericTask;
 class Server;
 class Xml2Json;
