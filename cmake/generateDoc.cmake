@@ -13,9 +13,12 @@ macro(generate_documentation DOX_CONFIG_FILE)
     endif()
 
     #Define variables
+    get_target_property(GRB_COMPILE_DEFINITIONS libgerbera COMPILE_DEFINITIONS)
+    string (REPLACE ";" " " GRB_COMPILE_DEFINITIONS_STR "${GRB_COMPILE_DEFINITIONS}")
     set(SRCDIR  "${PROJECT_SOURCE_DIR}/src")
     set(ROOTDIR "${PROJECT_SOURCE_DIR}")
     set(BINDIR  "${PROJECT_BINARY_DIR}")
+    set(PREDEF  "${GRB_COMPILE_DEFINITIONS_STR}")
 
     configure_file(${DOX_CONFIG_FILE} ${CMAKE_CURRENT_BINARY_DIR}/doxy.config @ONLY)
 
