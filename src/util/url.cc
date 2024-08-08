@@ -41,7 +41,7 @@
 
 #include <sstream>
 
-std::string URL::download(const std::string& url, long* httpRetcode,
+std::pair<std::string, std::string> URL::download(const std::string& url, long* httpRetcode,
     CURL* curlHandle, bool onlyHeader,
     bool verbose, bool redirect)
 {
@@ -55,7 +55,8 @@ std::string URL::download(const std::string& url, long* httpRetcode,
             throw_std_runtime_error("Invalid curl handle");
     }
 
-    std::ostringstream buffer;
+    std::ostringstream headerBuffer;
+    std::ostringstream contentBuffer;
 
     curl_easy_reset(curlHandle);
 
@@ -80,16 +81,14 @@ std::string URL::download(const std::string& url, long* httpRetcode,
     curl_easy_setopt(curlHandle, CURLOPT_ERRORBUFFER, errorBuffer);
     curl_easy_setopt(curlHandle, CURLOPT_CONNECTTIMEOUT, 20); // seconds
 
-    /// \todo it would be a good idea to allow both variants, i.e. retrieve
-    /// the headers and data in one go when needed
     if (onlyHeader) {
         curl_easy_setopt(curlHandle, CURLOPT_NOBODY, 1);
-        curl_easy_setopt(curlHandle, CURLOPT_HEADERFUNCTION, URL::dl);
-        curl_easy_setopt(curlHandle, CURLOPT_HEADERDATA, &buffer);
     } else {
         curl_easy_setopt(curlHandle, CURLOPT_WRITEFUNCTION, URL::dl);
-        curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, &buffer);
+        curl_easy_setopt(curlHandle, CURLOPT_WRITEDATA, &contentBuffer);
     }
+    curl_easy_setopt(curlHandle, CURLOPT_HEADERFUNCTION, URL::dl);
+    curl_easy_setopt(curlHandle, CURLOPT_HEADERDATA, &headerBuffer);
 
     if (redirect) {
         curl_easy_setopt(curlHandle, CURLOPT_FOLLOWLOCATION, 1);
@@ -115,7 +114,7 @@ std::string URL::download(const std::string& url, long* httpRetcode,
     if (cleanup)
         curl_easy_cleanup(curlHandle);
 
-    return buffer.str();
+    return { headerBuffer.str(), contentBuffer.str() };
 }
 
 URL::Stat URL::getInfo(const std::string& url, CURL* curlHandle)

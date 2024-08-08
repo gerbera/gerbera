@@ -43,13 +43,14 @@
 
 class URL {
 public:
-    /// \brief This is a simplified version of the File_Info class as used
+    /// \brief This is a simplified version of the UpnpFileInfo class as used
     /// in libupnp.
     class Stat {
     public:
         /// \brief Initializes the class with given values, the values
         /// can not be changed afterwards.
         ///
+        /// \param url address of the web site
         /// \param size size of the media in bytes
         /// \param mimetype mime type of the media
         Stat(std::string url, curl_off_t size, std::string mimetype)
@@ -75,12 +76,15 @@ public:
     /// is, that curl might keep the connection open if we do subsequent
     /// requests to the same server.
     ///
-    /// \param curl_handle an initialized and ready to use curl handle
-    /// \param URL
-    /// \param only_header set true if you only want the header and not the
+    /// \param url address to open
+    /// \param httpRetcode return code of the http call
+    /// \param curlHandle an initialized and ready to use curl handle
+    /// \param onlyHeader set true if you only want the header and not the
     /// body
-    /// \param vebose enable curl verbose option
-    static std::string download(const std::string& url,
+    /// \param verbose enable curl verbose option
+    /// \param redirect allow redirection
+    /// \return downloaded header and content
+    static std::pair<std::string, std::string> download(const std::string& url,
         long* httpRetcode,
         CURL* curlHandle = nullptr,
         bool onlyHeader = false,

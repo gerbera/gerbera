@@ -76,8 +76,12 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
 
     try {
         log_debug("DOWNLOADING URL: {}", service_url);
-        buffer = URL::download(service_url, &retcode,
-            curl_handle, false, true, true);
+#ifdef GRBDEBUG
+        bool verbose = GrbLogger::Logger.isDebugging(GRB_LOG_FAC) || GrbLogger::Logger.isDebugLogging();
+#else
+        bool verbose = false;
+#endif
+        buffer = URL::download(service_url, &retcode, curl_handle, false, verbose, true).second;
     } catch (const std::runtime_error& ex) {
         log_error("Failed to download {} XML data: {}", serviceName, ex.what());
         return nullptr;
@@ -89,7 +93,7 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
     if (retcode != 200)
         return nullptr;
 
-    log_debug("GOT BUFFER{}", buffer);
+    log_debug("GOT BUFFER {}", buffer);
     auto doc = std::make_unique<pugi::xml_document>();
     pugi::xml_parse_result result = doc->load_string(sc->convert(buffer).c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
@@ -125,6 +129,7 @@ bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout
     auto sc = getContentHandler();
     sc->setServiceContent(std::move(reply));
 
+    auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::shared_ptr<CdsObject> obj;
     do {
         /// \todo add try/catch here and a possibility do find out if we
@@ -142,7 +147,6 @@ bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout
 
             if (layout) {
                 std::string mimetype = item->getMimeType();
-                auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
                 std::string contentType = getValueOrDefault(mappings, mimetype);
                 std::vector<int> refObjects;
 

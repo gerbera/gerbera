@@ -51,6 +51,7 @@ public:
     /// \brief Puts a file or directory on the inotify watch list.
     /// \param path file or directory to monitor.
     /// \param events inotify event mask
+    /// \param retryCount number of retries to acquire the watch before failing
     /// \return watch descriptor or a negative value on error
     int addWatch(const fs::path& path, InotifyFlags events, unsigned int retryCount) const;
 

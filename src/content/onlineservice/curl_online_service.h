@@ -25,10 +25,10 @@
 /// \brief Definition of the CurlContentHandler class.
 /// \brief Definition of the CurlOnlineService class.
 
-#ifdef HAVE_CURL
-
 #ifndef __CURL_ONLINE_SERVICE_H__
 #define __CURL_ONLINE_SERVICE_H__
+
+#ifdef HAVE_CURL
 
 #include "online_service.h"
 
@@ -100,6 +100,6 @@ protected:
     std::shared_ptr<ConverterManager> converterManager;
 };
 
-#endif //__CURL_ONLINE_SERVICE_H__
-
 #endif // HAVE_CURL
+
+#endif //__CURL_ONLINE_SERVICE_H__
