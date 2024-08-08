@@ -32,10 +32,10 @@
 /// \file atrailers_service.h
 /// \brief Definition of the ATrailersService class.
 
-#ifdef ATRAILERS
-
 #ifndef __ATRAILERS_SERVICE_H__
 #define __ATRAILERS_SERVICE_H__
+
+#ifdef ATRAILERS
 
 #include "curl_online_service.h"
 
@@ -58,6 +58,6 @@ protected:
     std::unique_ptr<CurlContentHandler> getContentHandler() const override;
 };
 
-#endif //__ATRAILERS_SERVICE_H__
-
 #endif // ATRAILERS
+
+#endif //__ATRAILERS_SERVICE_H__

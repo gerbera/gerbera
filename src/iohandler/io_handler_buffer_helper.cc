@@ -47,7 +47,7 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(std::shared_ptr<Config> config, std
     if (bufSize == 0)
         throw_std_runtime_error("bufSize must be greater than 0");
     if (initialFillSize > bufSize)
-        throw_std_runtime_error("initialFillSize must be lesser than or equal to the size of the buffer");
+        throw_std_runtime_error("initialFillSize {} must be lesser than or equal to the size of the buffer {}", initialFillSize, bufSize);
 }
 
 void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
@@ -63,7 +63,7 @@ void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
 IOHandlerBufferHelper::~IOHandlerBufferHelper() noexcept
 {
     if (isOpen)
-        close();
+        IOHandlerBufferHelper::close();
 }
 
 std::size_t IOHandlerBufferHelper::read(std::byte* buf, std::size_t length)

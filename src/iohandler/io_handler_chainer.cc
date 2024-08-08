@@ -34,18 +34,18 @@
 
 #include "io_handler_chainer.h" // API
 
-#include <thread>
-
 #include "exceptions.h"
 #include "util/logger.h"
+
+#include <thread>
 
 IOHandlerChainer::IOHandlerChainer(std::unique_ptr<IOHandler> readFrom, std::unique_ptr<IOHandler> writeTo, int chunkSize)
 {
     if (chunkSize <= 0)
-        throw_std_runtime_error("chunkSize must be positive");
+        throw_std_runtime_error("chunkSize {} must be positive", chunkSize);
     if (!readFrom || !writeTo)
         throw_std_runtime_error("readFrom and writeTo need to be set");
-    status = 0;
+
     readFrom->open(UPNP_READ);
     this->chunkSize = chunkSize;
     this->readFrom = std::move(readFrom);

@@ -34,7 +34,7 @@
 #include <UpnpExtraHeaders.h>
 #endif
 
-#if (UPNP_VERSION > 170000 and UPNP_VERSION <= 170110)
+#if (UPNP_VERSION > 170000 && UPNP_VERSION <= 170110)
 #define Stringize(L) #L
 #define MakeString(M, L) M(L)
 #define $Version MakeString(Stringize, (UPNP_VERSION))
