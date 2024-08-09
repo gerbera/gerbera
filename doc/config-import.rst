@@ -273,7 +273,6 @@ Below are the available scripting options:
             <image-file>importImage</image-file>
             <playlist create-link="yes">importPlaylist</playlist>
             <meta-file>importMetadata</meta-file>
-            <trailer>importTrailer</trailer>
         </import-function>
 
     Set the entry points for the virtual layout functions and file parsing functions. Selecting the entry point is the replacement for setting
@@ -312,7 +311,6 @@ Below are the available scripting options:
             audio-layout="Default|Structured"
             video-layout="Default"
             image-layout="Default"
-            trailer-layout="Default"
 
         * Optional
         * Default: **Default**
@@ -321,8 +319,6 @@ Below are the available scripting options:
 
         -  **Default**: `addAudio` is used to create the virtual layout
         -  **Structured**: `addAudioStructured` is used to create the virtual layout (only in combination with javascript)
-
-        `video-layout`, `image-layout` and `trailer-layout` are reserved for future use.
 
         The virtual layout can be adjusted using an import script which is defined as follows:
 

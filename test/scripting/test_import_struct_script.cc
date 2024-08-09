@@ -21,18 +21,20 @@
 */
 #ifdef HAVE_JS
 
-#include <duktape.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <memory>
-
 #include "content/onlineservice/online_service.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
+
+#include <duktape.h>
+#include <fmt/format.h>
+#include <memory>
 
 class ImportStructuredScriptTest : public CommonScriptTestFixture {
 public:

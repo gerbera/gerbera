@@ -238,7 +238,7 @@ protected:
     int databaseID { INVALID_OBJECT_ID };
     std::chrono::seconds last_mod_previous_scan = std::chrono::seconds::zero();
     std::chrono::seconds last_mod_current_scan = std::chrono::seconds::zero();
-    std::shared_ptr<Timer::Parameter> timer_parameter { std::make_shared<Timer::Parameter>(Timer::Parameter::IDAutoscan, INVALID_SCAN_ID) };
+    std::shared_ptr<Timer::Parameter> timer_parameter { std::make_shared<Timer::Parameter>(Timer::TimerParamType::IDAutoscan, INVALID_SCAN_ID) };
     std::map<fs::path, std::chrono::seconds> lastModified;
     unsigned int activeScanCount {};
     std::map<std::string, bool> scanContent { { UPNP_CLASS_AUDIO_ITEM, true }, { UPNP_CLASS_IMAGE_ITEM, true }, { UPNP_CLASS_VIDEO_ITEM, true } };

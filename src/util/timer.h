@@ -43,28 +43,28 @@
 
 class Timer {
 public:
+    enum class TimerParamType {
+        IDAutoscan,
+#ifdef ONLINE_SERVICES
+        IDOnlineContent,
+#endif
+    };
+
     /// \brief This is the parameter class for timerNotify
     class Parameter {
     public:
-        enum timer_param_t {
-            IDAutoscan,
-#ifdef ONLINE_SERVICES
-            IDOnlineContent,
-#endif
-        };
-
-        Parameter(timer_param_t param, int id)
+        Parameter(TimerParamType param, int id)
             : param(param)
             , id(id)
         {
         }
 
-        timer_param_t whoami() const { return param; }
+        TimerParamType whoami() const { return param; }
         void setID(int id) { this->id = id; }
         int getID() const { return id; }
 
     protected:
-        timer_param_t param;
+        TimerParamType param;
         int id;
     };
 

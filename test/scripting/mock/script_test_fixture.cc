@@ -28,7 +28,6 @@ Gerbera - https://gerbera.io/
 
 #include "cds/cds_objects.h"
 #include "config/result/autoscan.h"
-#include "content/onlineservice/atrailers_content_handler.h"
 #include "content/scripting/script_names.h"
 #include "metadata/metadata_enums.h"
 #include "util/grb_fs.h"
@@ -381,14 +380,6 @@ void ScriptTestFixture::addGlobalFunctions(duk_context* ctx, const duk_function_
 
     duk_push_int(ctx, 0);
     duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
-    duk_push_int(ctx, 1);
-    duk_put_global_string(ctx, "ONLINE_SERVICE_YOUTUBE");
-    duk_push_int(ctx, 4);
-    duk_put_global_string(ctx, "ONLINE_SERVICE_APPLE_TRAILERS");
-    duk_push_string(ctx, ATRAILERS_AUXDATA_POST_DATE);
-    duk_put_global_string(ctx, "APPLE_TRAILERS_AUXDATA_POST_DATE");
-    duk_push_int(ctx, 2);
-    duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
 
     duk_push_global_object(ctx);
     duk_put_function_list(ctx, -1, funcs);

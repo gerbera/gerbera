@@ -438,7 +438,9 @@ void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& 
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_AUDIOFILE, true },
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_VIDEOFILE, true },
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_IMAGEFILE, true },
+#ifdef ONLINESERVICES
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER, true },
+#endif
         { ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER, false },
         { ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS, false },
         { ConfigVal::IMPORT_SCRIPTING_STRUCTURED_LAYOUT_SKIPCHARS, false },
@@ -614,18 +616,10 @@ void ConfigGenerator::generateBoxlayout(ConfigVal option)
 
 void ConfigGenerator::generateOnlineContent()
 {
-    auto options = std::vector<std::pair<ConfigVal, bool>> {
-#ifdef ATRAILERS
-        { ConfigVal::ONLINE_CONTENT_ATRAILERS_ENABLED, true },
-        { ConfigVal::ONLINE_CONTENT_ATRAILERS_REFRESH, true },
-        { ConfigVal::ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START, true },
-        { ConfigVal::ONLINE_CONTENT_ATRAILERS_RESOLUTION, true },
-        { ConfigVal::ONLINE_CONTENT_ATRAILERS_PURGE_AFTER, false },
-#endif
-    };
+    auto options = std::vector<std::pair<ConfigVal, bool>> {};
     generateOptions(options);
 
-#ifndef ATRAILERS
+#ifdef ONLINE_SERVICES
     setValue("/import/online-content/");
 #endif
 }

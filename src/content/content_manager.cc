@@ -66,10 +66,6 @@
 #include "onlineservice/lastfm_scrobbler.h"
 #endif
 
-#ifdef ATRAILERS
-#include "onlineservice/atrailers_service.h"
-#endif
-
 #ifdef ONLINE_SERVICES
 #include "onlineservice/online_service.h"
 #include "onlineservice/task_processor.h"
@@ -193,32 +189,6 @@ void ContentManager::run()
 
 #ifdef ONLINE_SERVICES
     online_services = std::make_unique<OnlineServiceList>();
-
-#ifdef ATRAILERS
-    if (config->getBoolOption(ConfigVal::ONLINE_CONTENT_ATRAILERS_ENABLED)) {
-        try {
-            auto at = std::make_shared<ATrailersService>(self);
-
-            auto i = std::chrono::seconds(config->getIntOption(ConfigVal::ONLINE_CONTENT_ATRAILERS_REFRESH));
-            at->setRefreshInterval(i);
-
-            i = std::chrono::seconds(config->getIntOption(ConfigVal::ONLINE_CONTENT_ATRAILERS_PURGE_AFTER));
-            at->setItemPurgeInterval(i);
-            if (config->getBoolOption(ConfigVal::ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START))
-                i = DEFAULT_UPDATE_AT_START;
-
-            auto atParam = std::make_shared<Timer::Parameter>(Timer::Parameter::IDOnlineContent, to_underlying(OnlineServiceType::OS_ATrailers));
-            at->setTimerParameter(std::move(atParam));
-            online_services->registerService(at);
-            if (i > std::chrono::seconds::zero()) {
-                timer->addTimerSubscriber(this, i, at->getTimerParameter(), true);
-            }
-        } catch (const std::runtime_error& ex) {
-            log_error("Could not setup Apple Trailers: {}", ex.what());
-        }
-    }
-#endif // ATRAILERS
-
 #endif // ONLINE_SERVICES
 
     initLayout();
@@ -260,7 +230,7 @@ void ContentManager::timerNotify(const std::shared_ptr<Timer::Parameter>& parame
     if (!parameter)
         return;
 
-    if (parameter->whoami() == Timer::Parameter::IDAutoscan) {
+    if (parameter->whoami() == Timer::TimerParamType::IDAutoscan) {
         auto adir = autoscanList ? autoscanList->get(parameter->getID()) : nullptr;
 
         // do not rescan while other scans are still active
@@ -270,7 +240,7 @@ void ContentManager::timerNotify(const std::shared_ptr<Timer::Parameter>& parame
         rescanDirectory(adir, adir->getObjectID());
     }
 #ifdef ONLINE_SERVICES
-    else if (parameter->whoami() == Timer::Parameter::IDOnlineContent) {
+    else if (parameter->whoami() == Timer::TimerParamType::IDOnlineContent) {
         fetchOnlineContent(static_cast<OnlineServiceType>(parameter->getID()));
     }
 #endif // ONLINE_SERVICES

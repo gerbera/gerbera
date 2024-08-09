@@ -86,12 +86,12 @@ std::vector<int> JSLayout::addImage(const std::shared_ptr<CdsObject>& obj, const
 }
 
 #ifdef ONLINE_SERVICES
-std::vector<int> JSLayout::addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+std::vector<int> JSLayout::addOnlineItem(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     if (!import_script)
         return {};
 
-    return import_script->addTrailer(obj, rootpath, containerMap);
+    return import_script->addOnlineItem(obj, rootpath, containerMap);
 }
 #endif
 #endif // HAVE_JS

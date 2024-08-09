@@ -87,8 +87,6 @@ The layout function can be set in configuration of :ref:`Import Function <import
 +-----------------------+-----------------------------------------------------------------------+------+
 | importImage           | Create image layout similar to builtin layout                         | di   |
 +-----------------------+-----------------------------------------------------------------------+------+
-| importTrailer         | Create trailer layout for Apple trailers                              | dt   |
-+-----------------------+-----------------------------------------------------------------------+------+
 
 
 Playlists
@@ -179,8 +177,6 @@ The codes in *js layout* column refer to the *Code* column above.
 | Image/unknown                   | Unknown          | di        | yes            |
 +---------------------------------+------------------+-----------+----------------+
 | Trailer/trailerRoot             | Online Services  | dt        | yes            |
-+---------------------------------+------------------+-----------+----------------+
-| Trailer/appleTrailers           | Apple Trailers   | dt        | yes            |
 +---------------------------------+------------------+-----------+----------------+
 | Trailer/allTrailers             | All Trailers     | dt        | yes            |
 +---------------------------------+------------------+-----------+----------------+

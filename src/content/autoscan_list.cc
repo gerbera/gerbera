@@ -209,13 +209,13 @@ void AutoscanList::initTimer(
         if (autoScanDir->getScanMode() == AutoscanScanMode::INotify) {
             if (doInotify && inotify)
                 inotify->monitor(autoScanDir);
-            auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, autoScanDir->getScanID());
+            auto param = std::make_shared<Timer::Parameter>(Timer::TimerParamType::IDAutoscan, autoScanDir->getScanID());
             log_debug("Adding one-shot inotify scan");
             timer->addTimerSubscriber(content.get(), std::chrono::minutes(1), std::move(param), true);
         }
 #endif
         if (autoScanDir->getScanMode() == AutoscanScanMode::Timed) {
-            auto param = std::make_shared<Timer::Parameter>(Timer::Parameter::timer_param_t::IDAutoscan, autoScanDir->getScanID());
+            auto param = std::make_shared<Timer::Parameter>(Timer::TimerParamType::IDAutoscan, autoScanDir->getScanID());
             log_debug("Adding timed scan with interval {}", autoScanDir->getInterval().count());
             timer->addTimerSubscriber(content.get(), autoScanDir->getInterval(), std::move(param), false);
         }

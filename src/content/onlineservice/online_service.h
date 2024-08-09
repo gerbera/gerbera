@@ -39,8 +39,8 @@
 
 #include "util/timer.h"
 
+#include <map>
 #include <memory>
-#include <vector>
 
 // forward declaration
 class Config;
@@ -52,12 +52,22 @@ class Layout;
 #define ONLINE_SERVICE_LAST_UPDATE "lu"
 
 // make sure to add the database prefixes when adding new services
+// keep old entries to avoid future collisions
 enum class OnlineServiceType {
-    OS_None = 0,
-    OS_YouTube = 1,
-
-    OS_ATrailers = 4,
-    OS_Max
+    None = 0,
+#ifdef YOUTUBE // Until Jan 6, 2018
+    YouTube = 1,
+#endif
+#ifdef SOPCAST // Until Oct 31, 2021
+    SopCast = 2,
+#endif
+#ifdef WEBORAMA // Until Jan 1, 2017
+    Weborama = 3,
+#endif
+#ifdef ATRAILERS // Until Aug 11, 2024
+    ATrailers = 4,
+#endif
+    Max
 };
 
 /// \brief This is an interface for all online services, the function
@@ -146,7 +156,7 @@ public:
     std::shared_ptr<OnlineService> getService(OnlineServiceType service) const;
 
 protected:
-    std::vector<std::shared_ptr<OnlineService>> service_list {};
+    std::map<OnlineServiceType, std::shared_ptr<OnlineService>> service_list {};
 };
 
 #endif // ONLINE_SERVICES

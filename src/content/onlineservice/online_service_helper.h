@@ -32,10 +32,10 @@
 /// \file online_service_helper.h
 /// \brief Definition of the OnlineServiceHelper class.
 
-#ifdef ONLINE_SERVICES
-
 #ifndef __ONLINE_SERVICE_HELPER_H__
 #define __ONLINE_SERVICE_HELPER_H__
+
+#ifdef ONLINE_SERVICES
 
 #include <memory>
 
@@ -50,6 +50,6 @@ public:
     static std::string resolveURL(const std::shared_ptr<CdsItemExternalURL>& item);
 };
 
-#endif //__ONLINE_SERVICE_HELPER_H__
-
 #endif // ONLINE_SERVICES
+
+#endif //__ONLINE_SERVICE_HELPER_H__

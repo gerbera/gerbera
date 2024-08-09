@@ -62,10 +62,7 @@ protected:
     std::vector<int> addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 
 #ifdef ONLINE_SERVICES
-    std::vector<int> addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
-#ifdef ATRAILERS
-    std::vector<int> addATrailers(const std::shared_ptr<CdsObject>& obj);
-#endif
+    std::vector<int> addOnlineItem(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 #endif
 
     std::string mapGenre(const std::string& genre);

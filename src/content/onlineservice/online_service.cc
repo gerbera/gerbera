@@ -41,30 +41,44 @@
 #include "exceptions.h"
 #include "util/tools.h"
 
-#include <array>
-
 // DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING
 // NEW SERVICES!
-static constexpr std::array servicePrefixes { '\0', 'Y', 'S', 'W', 'T', '\0' };
+// keep old entries to avoid future collisions
+static const std::map<OnlineServiceType, char> servicePrefixes {
+    { OnlineServiceType::None, '\0' },
+#ifdef YOUTUBE
+    { OnlineServiceType::YouTube, 'Y' },
+#endif
+#ifdef SOPCAST
+    { OnlineServiceType::SopCast, 'S' },
+#endif
+#ifdef WEBORAMA
+    { OnlineServiceType::Weborama, 'W' },
+#endif
+#ifdef ATRAILERS
+    { OnlineServiceType::ATrailers, 'T' },
+#endif
+    { OnlineServiceType::Max, '\0' }
+};
 
 void OnlineServiceList::registerService(const std::shared_ptr<OnlineService>& service)
 {
     if (!service)
         return;
 
-    if (service->getServiceType() >= OnlineServiceType::OS_Max) {
+    if (service->getServiceType() >= OnlineServiceType::Max) {
         throw_std_runtime_error("Requested service with illegal type");
     }
 
-    service_list.at(to_underlying(service->getServiceType())) = service;
+    service_list[service->getServiceType()] = service;
 }
 
 std::shared_ptr<OnlineService> OnlineServiceList::getService(OnlineServiceType service) const
 {
-    if (service > OnlineServiceType::OS_Max)
+    if (service > OnlineServiceType::Max)
         return nullptr;
 
-    return service_list.at(to_underlying(service));
+    return service_list.at(service);
 }
 
 OnlineService::OnlineService(const std::shared_ptr<Content>& content)
@@ -76,10 +90,10 @@ OnlineService::OnlineService(const std::shared_ptr<Content>& content)
 
 char OnlineService::getDatabasePrefix(OnlineServiceType service)
 {
-    if (service >= OnlineServiceType::OS_Max)
+    if (service >= OnlineServiceType::Max)
         throw_std_runtime_error("Illegal service requested");
 
-    return servicePrefixes.at(to_underlying(service));
+    return servicePrefixes.at(service);
 }
 
 char OnlineService::getDatabasePrefix() const

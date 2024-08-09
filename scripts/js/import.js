@@ -68,9 +68,7 @@ function importItem(item, cont) {
                 break;
             default:
                 print2("Warning", "Unable to handle unknown upnp class '" + item.upnpclass + "' for " + obj.location);
-                if (mime === 'video' && obj.onlineservice === ONLINE_SERVICE_APPLE_TRAILERS) {
-                    mime = 'trailer';
-                } else if (item.mimetype === 'application/ogg') {
+                if (item.mimetype === 'application/ogg') {
                     mime = (item.theora === 1) ? 'video' : 'audio';
                 }
                 switch (mime) {
@@ -115,7 +113,7 @@ function importVideo(obj, cont, rootPath, autoscanId, containerType) {
 function importImage(obj, cont, rootPath, autoscanId, containerType) {
     return addImage(obj, cont, rootPath, containerType);
 }
-function importTrailer(obj, cont, rootPath, autoscanId, containerType) {
+function importOnlineItem(obj, cont, rootPath, autoscanId, containerType) {
     return addTrailer(obj);
 }
 // doc-import-end

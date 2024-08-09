@@ -43,7 +43,6 @@ class TranscodingProfileList;
 enum class ConfigVal;
 enum class UrlAppendMode;
 enum class LayoutType;
-enum class AtrailerResolution;
 
 class Config {
 public:

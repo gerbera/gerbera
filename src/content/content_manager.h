@@ -119,7 +119,7 @@ public:
 
 #ifdef ONLINE_SERVICES
     /// \brief Creates a layout based from data that is obtained from an
-    /// online service (like AppleTrailers etc.)
+    /// online service
     void fetchOnlineContent(OnlineServiceType serviceType, bool lowPriority = true,
         bool cancellable = true,
         bool unscheduledRefresh = false);
