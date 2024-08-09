@@ -10,7 +10,6 @@
       <audio-file>importAudio</audio-file>
       <video-file>importVideo</video-file>
       <image-file>importImage</image-file>
-      <trailer>importTrailer</trailer>
     </import-function>
     <virtual-layout type="builtin">
       <boxlayout>
@@ -48,7 +47,6 @@
         <box key="Image/imageRoot" title="Photos" class="object.container" />
         <box key="Image/unknown" title="Unknown" class="object.container" />
         <box key="Trailer/trailerRoot" title="Online Services" class="object.container" />
-        <box key="Trailer/appleTrailers" title="Apple Trailers" class="object.container" />
         <box key="Trailer/allTrailers" title="All Trailers" class="object.container" />
         <box key="Trailer/allGenres" title="Genres" class="object.container" />
         <box key="Trailer/relDate" title="Release Date" class="object.container" />
@@ -155,7 +153,5 @@
       <map from="wma" to="WMAFULL" />
     </contenttype-dlnaprofile>
   </mappings>
-  <online-content>
-    <AppleTrailers enabled="no" refresh="43200" update-at-start="no" resolution="640" />
-  </online-content>
+  <online-content />
 </import>

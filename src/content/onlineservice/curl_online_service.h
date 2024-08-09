@@ -29,6 +29,7 @@
 #define __CURL_ONLINE_SERVICE_H__
 
 #ifdef HAVE_CURL
+#ifdef ONLINE_SERVICES
 
 #include "online_service.h"
 
@@ -103,6 +104,7 @@ protected:
     std::shared_ptr<ConverterManager> converterManager;
 };
 
+#endif // ONLINE_SERVICES
 #endif // HAVE_CURL
 
 #endif //__CURL_ONLINE_SERVICE_H__

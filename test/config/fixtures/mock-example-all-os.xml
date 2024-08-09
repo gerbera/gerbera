@@ -4,16 +4,42 @@
      See https://gerbera.io or read the docs for more
      information on creating and using config.xml configuration files.
     -->
-  <server>
-    <ui enabled="yes" show-tooltips="yes">
+  <server debug-mode="0">
+    <ui enabled="yes" show-tooltips="yes" poll-interval="2" poll-when-idle="no" show-numbering="yes" show-thumbnail="yes" show-video="no">
       <accounts enabled="no" session-timeout="30">
         <account user="gerbera" password="gerbera" />
       </accounts>
+      <items-per-page default="25"></items-per-page>
     </ui>
     <name>Gerbera</name>
     <udn/>
-    <home>/tmp/.config/gerbera</home>
+    <home override="no">/tmp/.config/gerbera</home>
     <webroot>/usr/local/share/gerbera/web</webroot>
+    <port>0</port>
+    <ip></ip>
+    <interface></interface>
+    <manufacturer>Gerbera Contributors</manufacturer>
+    <manufacturerURL>https://gerbera.io/</manufacturerURL>
+    <modelName>Gerbera</modelName>
+    <modelDescription>Free UPnP AV MediaServer, GNU GPL</modelDescription>
+    <modelNumber>42</modelNumber>
+    <modelURL></modelURL>
+    <serialNumber>1</serialNumber>
+    <presentationURL append-to="none"></presentationURL>
+    <tmpdir>/tmp/</tmpdir>
+    <pc-directory upnp-hide="no" />
+    <bookmark>gerbera.html</bookmark>
+    <upnp-string-limit>-1</upnp-string-limit>
+    <virtualURL></virtualURL>
+    <externalURL></externalURL>
+    <upnp literal-host-redirection="no" multi-value="yes" search-result-separator=" - " search-filename="no" searchable-container-flag="no" caption-info-count="1">
+      <search-item-result></search-item-result>
+      <album-properties></album-properties>
+      <artist-properties></artist-properties>
+      <genre-properties></genre-properties>
+      <playlist-properties></playlist-properties>
+      <title-properties></title-properties>
+    </upnp>
     <!--
         How frequently (in seconds) to send ssdp:alive advertisements.
         Minimum alive value accepted is: 62
@@ -24,14 +50,24 @@
         in an SSDP advertisement being sent every second.
     -->
     <alive>180</alive>
-    <storage>
+    <storage use-transactions="no">
       <sqlite3 enabled="yes">
         <database-file>gerbera.db</database-file>
+        <synchronous>off</synchronous>
+        <journal-mode>WAL</journal-mode>
+        <on-error>restore</on-error>
+        <init-sql-file>/usr/local/share/gerbera/sqlite3.sql</init-sql-file>
+        <upgrade-file>/usr/local/share/gerbera/sqlite3-upgrade.xml</upgrade-file>
       </sqlite3>
       <mysql enabled="no">
         <host>localhost</host>
         <username>gerbera</username>
         <database>gerbera</database>
+        <port>0</port>
+        <socket></socket>
+        <password></password>
+        <init-sql-file>/usr/local/share/gerbera/mysql.sql</init-sql-file>
+        <upgrade-file>/usr/local/share/gerbera/mysql-upgrade.xml</upgrade-file>
       </mysql>
     </storage>
     <containers enabled="yes">
@@ -43,11 +79,12 @@
       </container>
     </containers>
     <extended-runtime-options>
-      <ffmpegthumbnailer enabled="yes">
+      <ffmpegthumbnailer enabled="yes" video-enabled="yes" image-enabled="yes">
         <thumbnail-size>160</thumbnail-size>
         <seek-percentage>5</seek-percentage>
         <filmstrip-overlay>no</filmstrip-overlay>
         <image-quality>8</image-quality>
+        <cache-dir enabled="yes"></cache-dir>
       </ffmpegthumbnailer>
       <mark-played-items enabled="no" suppress-cds-updates="yes">
         <string mode="prepend">*</string>
@@ -57,20 +94,30 @@
       </mark-played-items>
     </extended-runtime-options>
   </server>
-  <import hidden-files="no">
+  <import hidden-files="no" follow-symlinks="yes" default-date="yes" import-mode="mt" nomedia-file=".nomedia" readable-names="yes">
+    <autoscan use-inotify="auto">
+      <directory location="/media" mode="inotify" recursive="yes" hidden-files="yes" media-type="Any" />
+    </autoscan>
     <magic-file>magic.file</magic-file>
+    <virtual-directories></virtual-directories>
+    <filesystem-charset>UTF-8</filesystem-charset>
+    <metadata-charset>UTF-8</metadata-charset>
+    <playlist-charset>UTF-8</playlist-charset>
     <scripting script-charset="UTF-8">
       <script-folder>
         <common>/usr/local/share/gerbera/js</common>
+        <custom>/tmp/.config/gerbera/js</custom>
       </script-folder>
       <import-function>
-        <playlist>importPlaylist</playlist>
+        <playlist create-link="yes">importPlaylist</playlist>
         <meta-file>importMetadata</meta-file>
         <audio-file>importAudio</audio-file>
         <video-file>importVideo</video-file>
         <image-file>importImage</image-file>
       </import-function>
       <virtual-layout type="builtin">
+        <structured-layout skip-chars="" div-char="" />
+        <genre-map></genre-map>
         <boxlayout>
           <box key="Audio/allAlbums" title="Albums" class="object.container" />
           <box key="Audio/allArtists" title="Artists" class="object.container" />
@@ -105,14 +152,46 @@
           <box key="Image/allYears" title="Year" class="object.container" />
           <box key="Image/imageRoot" title="Photos" class="object.container" />
           <box key="Image/unknown" title="Unknown" class="object.container" />
+          <box key="Trailer/trailerRoot" title="Online Services" class="object.container" />
+          <box key="Trailer/allTrailers" title="All Trailers" class="object.container" />
+          <box key="Trailer/allGenres" title="Genres" class="object.container" />
+          <box key="Trailer/relDate" title="Release Date" class="object.container" />
+          <box key="Trailer/postDate" title="Post Date" class="object.container" />
+          <box key="Trailer/unknown" title="Unknown" class="object.container" />
           <box key="Playlist/playlistRoot" title="Playlists" class="object.container" />
           <box key="Playlist/allPlaylists" title="All Playlists" class="object.container" />
           <box key="Playlist/allDirectories" title="Directories" class="object.container" />
         </boxlayout>
       </virtual-layout>
     </scripting>
+    <library-options multi-value-separator="; " legacy-value-separator="">
+      <libexif charset="UTF-8">
+        <auxdata></auxdata>
+        <metadata></metadata>
+      </libexif>
+      <id3 charset="UTF-8">
+        <auxdata></auxdata>
+        <metadata></metadata>
+      </id3>
+      <ffmpeg charset="UTF-8">
+        <auxdata></auxdata>
+        <metadata></metadata>
+      </ffmpeg>
+    </library-options>
+    <system-directories></system-directories>
+    <visible-directories></visible-directories>
+    <resources case-sensitive="yes">
+      <order></order>
+      <fanart></fanart>
+      <subtitle></subtitle>
+      <metafile></metafile>
+      <resource></resource>
+      <container location="" parentCount="2" minDepth="2"></container>
+    </resources>
+    <layout parent-path="no"></layout>
+    <directories></directories>
     <mappings>
-      <extension-mimetype ignore-unknown="no">
+      <extension-mimetype ignore-unknown="no" case-sensitive="no">
         <map from="asf" to="video/x-ms-asf" />
         <map from="asx" to="video/x-ms-asx" />
         <map from="dff" to="audio/x-dff" />
@@ -205,15 +284,17 @@
         <map from="png" to="PNG_LRG" />
         <map from="wma" to="WMAFULL" />
       </contenttype-dlnaprofile>
+      <ignore-extensions></ignore-extensions>
     </mappings>
+    <online-content />
   </import>
-  <transcoding enabled="no">
-    <mimetype-profile-mappings>
+  <transcoding enabled="no" fetch-buffer-size="262144" fetch-buffer-fill-size="0">
+    <mimetype-profile-mappings allow-unused="no">
       <transcode mimetype="application/ogg" using="vlcmpeg" />
       <transcode mimetype="audio/ogg" using="ogg2mp3" />
       <transcode mimetype="video/x-flv" using="vlcmpeg" />
     </mimetype-profile-mappings>
-    <profiles>
+    <profiles allow-unused="no">
       <profile name="ogg2mp3" enabled="no" type="external">
         <mimetype>audio/mpeg</mimetype>
         <accept-url>no</accept-url>

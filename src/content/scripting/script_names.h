@@ -154,13 +154,14 @@ const static auto boxKeyNames = std::map<const std::string_view, const std::stri
     { "BK_imageRoot", BoxKeys::imageRoot },
     { "BK_imageUnknown", BoxKeys::imageUnknown },
 
-    { "BK_trailerApple", BoxKeys::trailerApple },
+#ifdef ONLINE_SERVICES
     { "BK_trailerAllGenres", BoxKeys::trailerAllGenres },
     { "BK_trailerAll", BoxKeys::trailerAll },
     { "BK_trailerPostDate", BoxKeys::trailerPostDate },
     { "BK_trailerRelDate", BoxKeys::trailerRelDate },
     { "BK_trailerRoot", BoxKeys::trailerRoot },
     { "BK_trailerUnknown", BoxKeys::trailerUnknown },
+#endif
 
     { "BK_playlistAll", BoxKeys::playlistAll },
     { "BK_playlistAllDirectories", BoxKeys::playlistAllDirectories },

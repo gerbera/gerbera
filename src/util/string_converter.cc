@@ -188,7 +188,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
 ConverterManager::ConverterManager(const std::shared_ptr<Config>& cm)
     : config(cm)
 {
-#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
+#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(HAVE_MATROSKA)
     charsets[ConfigVal::MAX] = DEFAULT_INTERNAL_CHARSET;
 #endif
     for (auto cv : std::array {
@@ -252,7 +252,7 @@ const std::shared_ptr<StringConverter> ConverterManager::f2i() const
     return converters.at(charsets.at(ConfigVal::IMPORT_FILESYSTEM_CHARSET));
 }
 
-#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(ATRAILERS) || defined(HAVE_MATROSKA)
+#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(HAVE_MATROSKA)
 const std::shared_ptr<StringConverter> ConverterManager::i2i() const
 {
     return converters.at(charsets.at(ConfigVal::MAX));

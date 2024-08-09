@@ -40,6 +40,7 @@ option(WITH_EXIV2             "Use libexiv2 to extract image metadata" ON)
 option(WITH_MATROSKA          "Use libmatroska to extract video/mkv metadata" ON)
 option(WITH_SYSTEMD           "Install Systemd unit file" ON)
 option(WITH_LASTFM            "Enable scrobbling to LastFM" OFF)
+option(WITH_ONLINE_SERVICES   "Enable support for Online Services" OFF) # currently there is no online service left, this enables compiling the empty shell
 option(WITH_DEBUG             "Enables debug logging" ON)
 option(WITH_DEBUG_OPTIONS     "Enables dedicated debug messages" ON)
 option(WITH_TESTS             "Build unit tests" OFF)
@@ -157,10 +158,6 @@ add_library(libgerbera STATIC
         src/content/layout/js_layout.h
         src/content/layout/layout.cc
         src/content/layout/layout.h
-        src/content/onlineservice/atrailers_content_handler.cc
-        src/content/onlineservice/atrailers_content_handler.h
-        src/content/onlineservice/atrailers_service.cc
-        src/content/onlineservice/atrailers_service.h
         src/content/onlineservice/curl_online_service.cc
         src/content/onlineservice/curl_online_service.h
         src/content/onlineservice/lastfm_scrobbler.cc
@@ -600,9 +597,13 @@ if(WITH_CURL)
     target_link_libraries(libgerbera PUBLIC CURL::libcurl)
 
     target_compile_definitions(libgerbera PUBLIC
-        HAVE_CURL
-        ONLINE_SERVICES
-        ATRAILERS)
+        HAVE_CURL)
+
+    if(WITH_ONLINE_SERVICES)
+        target_compile_definitions(libgerbera PUBLIC
+            ONLINE_SERVICES
+            )
+    endif()
 endif()
 
 if(WITH_TAGLIB)

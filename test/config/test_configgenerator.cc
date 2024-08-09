@@ -63,10 +63,14 @@ public:
     std::string magicFile;
 };
 
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(ONLINE_SERVICES)
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS)
 TEST_F(ConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 {
+#ifdef ONLINE_SERVICES
+    std::string mockXml = mockConfigXml("fixtures/mock-config-all-os.xml");
+#else
     std::string mockXml = mockConfigXml("fixtures/mock-config-all.xml");
+#endif
 
     std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 
@@ -253,20 +257,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSnorOnline)
 }
 #endif
 
-#if defined(ATRAILERS)
-TEST_F(ConfigGeneratorTest, GeneratesOnlineContentWithAppleTrailers)
-{
-    std::string mockXml = mockConfigXml("fixtures/mock-online-atrailers.xml");
-
-    subject->generateOnlineContent();
-    auto import = subject->getNode("/import");
-
-    std::ostringstream result;
-    import->first_child().print(result, "  ");
-
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
-}
-#else
+#ifdef ONLINE_SERVICES
 TEST_F(ConfigGeneratorTest, GeneratesOnlineContentEmpty)
 {
     std::string mockXml = "<online-content />\n";
@@ -340,11 +331,14 @@ public:
     std::string magicFile;
 };
 
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(ONLINE_SERVICES) && defined(HAVE_EXIV2)
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(HAVE_EXIV2)
 TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithExiv2AllDefinitions)
 {
+#ifdef ONLINE_SERVICES
+    std::string mockXml = mockConfigXml("fixtures/mock-example-exiv2-all-os.xml");
+#else
     std::string mockXml = mockConfigXml("fixtures/mock-example-exiv2-all.xml");
-
+#endif
     std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 
     // remove UUID, for simple compare...TODO: mock UUID?
@@ -355,11 +349,14 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithExiv2AllDefinitions
 }
 #endif
 
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(ONLINE_SERVICES) && !defined(HAVE_EXIV2)
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && !defined(HAVE_EXIV2)
 TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 {
+#ifdef ONLINE_SERVICES
+    std::string mockXml = mockConfigXml("fixtures/mock-example-all-os.xml");
+#else
     std::string mockXml = mockConfigXml("fixtures/mock-example-all.xml");
-
+#endif
     std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 
     // remove UUID, for simple compare...TODO: mock UUID?

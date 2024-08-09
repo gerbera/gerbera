@@ -24,6 +24,7 @@
 /// \file curl_online_service.cc
 
 #ifdef HAVE_CURL
+#ifdef ONLINE_SERVICES
 #define GRB_LOG_FAC GrbLogFacility::online
 #include "curl_online_service.h" // API
 
@@ -164,4 +165,5 @@ bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout
     return false;
 }
 
+#endif // ONLINE_SERVICES
 #endif // HAVE_CURL

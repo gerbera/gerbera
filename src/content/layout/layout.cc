@@ -53,7 +53,7 @@ void Layout::processCdsObject(const std::shared_ptr<CdsObject>& obj,
     std::vector<int> resObjects;
 #ifdef ONLINE_SERVICES
     if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
-        resObjects = addTrailer(clone, OnlineServiceType(std::stoi(clone->getAuxData(ONLINE_SERVICE_AUX_ID))), rootpath, containerMap);
+        resObjects = addOnlineItem(clone, OnlineServiceType(std::stoi(clone->getAuxData(ONLINE_SERVICE_AUX_ID))), rootpath, containerMap);
     } else {
 #endif
 

@@ -21,18 +21,20 @@ Gerbera - https://gerbera.io/
 
 #ifdef HAVE_JS
 
-#include <duktape.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <memory>
-
 #include "content/onlineservice/online_service.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
 
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
+
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
+
+#include <duktape.h>
+#include <fmt/format.h>
+#include <memory>
 
 class ImportScriptTest : public CommonScriptTestFixture {
 public:
@@ -284,7 +286,11 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     std::string mimetype = "video/mpeg";
     std::string id = "2";
     std::string location = "/home/gerbera/video.mp4";
-    auto onlineService = to_underlying(OnlineServiceType::OS_None);
+#ifdef ONLINE_SERVICES
+    auto onlineService = to_underlying(OnlineServiceType::None);
+#else
+    auto onlineService = 0;
+#endif
     int theora = 0;
     std::map<std::string, std::string> aux;
     std::vector<std::pair<std::string, std::string>> meta;
@@ -313,56 +319,6 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     executeScript(ctx);
 }
 
-TEST_F(ImportScriptTest, AddsAppleTrailerVideoItemToCdsContainerChains)
-{
-    std::string title = "Video Title";
-    std::string mimetype = "video/mpeg";
-    std::string date = "2018-01-01";
-    std::string genre = "Genre";
-    std::string id = "2";
-    std::string location = "/home/gerbera/video.mp4";
-    auto onlineService = to_underlying(OnlineServiceType::OS_ATrailers);
-    int theora = 0;
-    std::map<std::string, std::string> res;
-
-    std::vector<std::pair<std::string, std::string>> meta {
-        { "dc:date", date },
-        { "upnp:genre", genre },
-    };
-
-    std::map<std::string, std::string> aux {
-        { "T0", date },
-    };
-
-    // Represents the values passed to `addCdsObject`, extracted from keys defined there.
-    std::map<std::string, std::string> asVideoAllVideo {
-        { "title", title },
-        { "metaData['dc:date']", date },
-        { "metaData['upnp:genre']", genre },
-    };
-
-    // Expecting the common script calls
-    // and will proxy through the mock objects
-    // for verification.
-    EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("video/mpeg"))).WillOnce(Return(1));
-
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Online Services", "Apple Trailers", "All Trailers"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "80", UNDEFINED)).WillOnce(Return(0));
-
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Online Services", "Apple Trailers", "Genres", "Genre"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "81", UNDEFINED)).WillOnce(Return(0));
-
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Online Services", "Apple Trailers", "Release Date", "2018-01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "82", UNDEFINED)).WillOnce(Return(0));
-
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Online Services", "Apple Trailers", "Post Date", "2018-01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "83", UNDEFINED)).WillOnce(Return(0));
-
-    addGlobalFunctions(ctx, js_global_functions, {}, trailerBox);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
-    executeScript(ctx);
-}
-
 TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
 {
     std::string title = "Image Title";
@@ -370,7 +326,11 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     std::string date = "2018-01-01";
     std::string id = "2";
     std::string location = "/home/gerbera/image.jpg";
-    auto onlineService = to_underlying(OnlineServiceType::OS_ATrailers);
+#ifdef ONLINE_SERVICES
+    auto onlineService = to_underlying(OnlineServiceType::None);
+#else
+    auto onlineService = 0;
+#endif
     int theora = 0;
 
     std::vector<std::pair<std::string, std::string>> meta {
@@ -416,7 +376,11 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     std::string mimetype = "application/ogg";
     std::string id = "2";
     std::string location = "/home/gerbera/video.ogg";
-    auto onlineService = to_underlying(OnlineServiceType::OS_None);
+#ifdef ONLINE_SERVICES
+    auto onlineService = to_underlying(OnlineServiceType::None);
+#else
+    auto onlineService = 0;
+#endif
     int theora = 1;
     std::map<std::string, std::string> aux;
     std::vector<std::pair<std::string, std::string>> meta;

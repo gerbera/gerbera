@@ -79,11 +79,11 @@ The following properties are automatically extracted to metadata:
     +---------------+-----------------+---------------------+
     | Property      | Key             | Comment             |
     +===============+=================+=====================+
-    | director      | M_DIRECTOR      | Apple Trailer only  |
+    | director      | M_DIRECTOR      |                     |
     +---------------+-----------------+---------------------+
-    | rating        | M_RATING        | Apple Trailer only  |
+    | rating        | M_RATING        |                     |
     +---------------+-----------------+---------------------+
-    | studio        | M_PRODUCER      | Apple Trailer only  |
+    | studio        | M_PRODUCER      |                     |
     +---------------+-----------------+---------------------+
 
 

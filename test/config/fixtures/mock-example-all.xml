@@ -114,7 +114,6 @@
         <audio-file>importAudio</audio-file>
         <video-file>importVideo</video-file>
         <image-file>importImage</image-file>
-        <trailer>importTrailer</trailer>
       </import-function>
       <virtual-layout type="builtin">
         <structured-layout skip-chars="" div-char="" />
@@ -153,13 +152,6 @@
           <box key="Image/allYears" title="Year" class="object.container" />
           <box key="Image/imageRoot" title="Photos" class="object.container" />
           <box key="Image/unknown" title="Unknown" class="object.container" />
-          <box key="Trailer/trailerRoot" title="Online Services" class="object.container" />
-          <box key="Trailer/appleTrailers" title="Apple Trailers" class="object.container" />
-          <box key="Trailer/allTrailers" title="All Trailers" class="object.container" />
-          <box key="Trailer/allGenres" title="Genres" class="object.container" />
-          <box key="Trailer/relDate" title="Release Date" class="object.container" />
-          <box key="Trailer/postDate" title="Post Date" class="object.container" />
-          <box key="Trailer/unknown" title="Unknown" class="object.container" />
           <box key="Playlist/playlistRoot" title="Playlists" class="object.container" />
           <box key="Playlist/allPlaylists" title="All Playlists" class="object.container" />
           <box key="Playlist/allDirectories" title="Directories" class="object.container" />
@@ -288,9 +280,6 @@
       </contenttype-dlnaprofile>
       <ignore-extensions></ignore-extensions>
     </mappings>
-    <online-content>
-      <AppleTrailers enabled="no" refresh="43200" update-at-start="no" resolution="640" purge-after="43200" />
-    </online-content>
   </import>
   <transcoding enabled="no" fetch-buffer-size="262144" fetch-buffer-fill-size="0">
     <mimetype-profile-mappings allow-unused="no">

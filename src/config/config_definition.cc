@@ -68,10 +68,6 @@
 #define DEFAULT_RESOURCES_CASE_SENSITIVE YES
 #define DEFAULT_UPNP_STRING_LIMIT (-1)
 
-#ifdef ATRAILERS
-#define DEFAULT_ATRAILERS_REFRESH 43200
-#endif
-
 #define DEFAULT_LIBOPTS_ENTRY_SEPARATOR "; "
 
 /// \brief default values for ConfigVal::IMPORT_SYSTEM_DIRECTORIES
@@ -344,14 +340,14 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
     BoxLayout(BoxKeys::imageRoot, "Photos", "object.container"),
     BoxLayout(BoxKeys::imageUnknown, "Unknown", "object.container"),
 
+#ifdef ONLINE_SERVICES
     BoxLayout(BoxKeys::trailerRoot, "Online Services", "object.container"),
-    BoxLayout(BoxKeys::trailerApple, "Apple Trailers", "object.container"),
     BoxLayout(BoxKeys::trailerAll, "All Trailers", "object.container"),
     BoxLayout(BoxKeys::trailerAllGenres, "Genres", "object.container"),
     BoxLayout(BoxKeys::trailerRelDate, "Release Date", "object.container"),
     BoxLayout(BoxKeys::trailerPostDate, "Post Date", "object.container"),
     BoxLayout(BoxKeys::trailerUnknown, "Unknown", "object.container"),
-
+#endif
 #ifdef HAVE_JS
     BoxLayout(BoxKeys::playlistRoot, "Playlists", "object.container"),
     BoxLayout(BoxKeys::playlistAll, "All Playlists", "object.container"),
@@ -711,9 +707,6 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_LAYOUT_IMAGE,
         "/import/scripting/virtual-layout/attribute::image-layout", "config-import.html#scripting",
         ""),
-    std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_LAYOUT_TRAILER,
-        "/import/scripting/virtual-layout/attribute::trailer-layout", "config-import.html#scripting",
-        ""),
 
     std::make_shared<ConfigPathSetup>(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER,
         "/import/scripting/script-folder/common", "config-import.html#script-folder",
@@ -739,9 +732,11 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_IMAGEFILE,
         "/import/scripting/import-function/image-file", "config-import.html#import-function",
         "importImage"),
+#ifdef ONLINE_SERVICES
     std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER,
-        "/import/scripting/import-function/trailer", "config-import.html#import-function",
-        "importTrailer"),
+        "/import/scripting/import-function/online-item", "config-import.html#import-function",
+        "importOnlineItem"),
+#endif
 
     std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
         "/import/scripting/virtual-layout/script-options", "config-import.html#layout",
@@ -902,24 +897,6 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_EXTOPTS_LASTFM_PASSWORD,
         "/server/extended-runtime-options/lastfm/password", "config-extended.html#lastfm",
         false, "lastfmpass", true),
-#endif
-#ifdef ATRAILERS
-    std::make_shared<ConfigBoolSetup>(ConfigVal::ONLINE_CONTENT_ATRAILERS_ENABLED,
-        "/import/online-content/AppleTrailers/attribute::enabled", "config-online.html#appletrailers",
-        NO),
-    std::make_shared<ConfigIntSetup>(ConfigVal::ONLINE_CONTENT_ATRAILERS_REFRESH,
-        "/import/online-content/AppleTrailers/attribute::refresh", "config-online.html#appletrailers",
-        DEFAULT_ATRAILERS_REFRESH),
-    std::make_shared<ConfigBoolSetup>(ConfigVal::ONLINE_CONTENT_ATRAILERS_UPDATE_AT_START,
-        "/import/online-content/AppleTrailers/attribute::update-at-start", "config-online.html#appletrailers",
-        NO),
-    std::make_shared<ConfigIntSetup>(ConfigVal::ONLINE_CONTENT_ATRAILERS_PURGE_AFTER,
-        "/import/online-content/AppleTrailers/attribute::purge-after", "config-online.html#appletrailers",
-        DEFAULT_ATRAILERS_REFRESH),
-    std::make_shared<ConfigEnumSetup<AtrailerResolution>>(ConfigVal::ONLINE_CONTENT_ATRAILERS_RESOLUTION,
-        "/import/online-content/AppleTrailers/attribute::resolution", "config-online.html#appletrailers",
-        AtrailerResolution::Low,
-        std::map<std::string, AtrailerResolution>({ { "640", AtrailerResolution::Low }, { "720", AtrailerResolution::Hi }, { "720p", AtrailerResolution::Hi } })),
 #endif
 #ifdef HAVE_CURL
     std::make_shared<ConfigIntSetup>(ConfigVal::URL_REQUEST_CURL_BUFFER_SIZE,

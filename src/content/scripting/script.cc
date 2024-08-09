@@ -59,10 +59,6 @@
 #include "content/onlineservice/online_service.h"
 #endif
 
-#ifdef ATRAILERS
-#include "content/onlineservice/atrailers_content_handler.h"
-#endif
-
 #include <array>
 #include <fmt/chrono.h>
 
@@ -130,24 +126,14 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
         duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 #ifdef ONLINE_SERVICES
-    duk_push_int(ctx, to_underlying(OnlineServiceType::OS_None));
+    duk_push_int(ctx, to_underlying(OnlineServiceType::None));
     duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
     duk_push_int(ctx, -1);
     duk_put_global_string(ctx, "ONLINE_SERVICE_YOUTUBE");
-
-#ifdef ATRAILERS
-    duk_push_int(ctx, to_underlying(OnlineServiceType::OS_ATrailers));
-    duk_put_global_string(ctx, "ONLINE_SERVICE_APPLE_TRAILERS");
-    duk_push_string(ctx, ATRAILERS_AUXDATA_POST_DATE);
-    duk_put_global_string(ctx, "APPLE_TRAILERS_AUXDATA_POST_DATE");
-#else
     duk_push_int(ctx, -1);
     duk_put_global_string(ctx, "ONLINE_SERVICE_APPLE_TRAILERS");
-#endif // ATRAILERS
-
     duk_push_int(ctx, -1);
     duk_put_global_string(ctx, "ONLINE_SERVICE_SOPCAST");
-
 #else // ONLINE SERVICES
     duk_push_int(ctx, 0);
     duk_put_global_string(ctx, "ONLINE_SERVICE_NONE");
@@ -916,12 +902,6 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
         // stack: js aux_js
 
         auto aux = obj->getAuxData();
-
-#ifdef HAVE_ATRAILERS
-        auto tmp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
-        if (!tmp.empty())
-            aux[ATRAILERS_AUXDATA_POST_DATE] = tmp;
-#endif
 
         for (auto&& [key, attr] : aux) {
             setProperty(key, attr);

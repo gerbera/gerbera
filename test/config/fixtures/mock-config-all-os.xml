@@ -105,6 +105,12 @@
           <box key="Image/allYears" title="Year" class="object.container" />
           <box key="Image/imageRoot" title="Photos" class="object.container" />
           <box key="Image/unknown" title="Unknown" class="object.container" />
+          <box key="Trailer/trailerRoot" title="Online Services" class="object.container" />
+          <box key="Trailer/allTrailers" title="All Trailers" class="object.container" />
+          <box key="Trailer/allGenres" title="Genres" class="object.container" />
+          <box key="Trailer/relDate" title="Release Date" class="object.container" />
+          <box key="Trailer/postDate" title="Post Date" class="object.container" />
+          <box key="Trailer/unknown" title="Unknown" class="object.container" />
           <box key="Playlist/playlistRoot" title="Playlists" class="object.container" />
           <box key="Playlist/allPlaylists" title="All Playlists" class="object.container" />
           <box key="Playlist/allDirectories" title="Directories" class="object.container" />
@@ -206,6 +212,7 @@
         <map from="wma" to="WMAFULL" />
       </contenttype-dlnaprofile>
     </mappings>
+    <online-content />
   </import>
   <transcoding enabled="no">
     <mimetype-profile-mappings>

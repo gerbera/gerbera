@@ -314,14 +314,6 @@ void ConfigManager::load(const fs::path& userHome)
     }
 #endif
 
-    // read online content options
-#ifdef ATRAILERS
-    auto atrailersRefresh = setOption(root, ConfigVal::ONLINE_CONTENT_ATRAILERS_REFRESH)->getIntOption();
-
-    co = ConfigDefinition::findConfigSetup(ConfigVal::ONLINE_CONTENT_ATRAILERS_PURGE_AFTER);
-    co->makeOption(fmt::to_string(atrailersRefresh), self);
-#endif
-
     // read options that do not have special requirement and that are not yet loaded
     for (auto&& optionKey : ConfigOptionIterator()) {
         if (!options.at(to_underlying(optionKey)) && !ConfigDefinition::isDependent(optionKey)) {

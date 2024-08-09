@@ -78,13 +78,14 @@ public:
     static constexpr std::string_view imageRoot = "Image/imageRoot";
     static constexpr std::string_view imageUnknown = "Image/unknown";
 
-    static constexpr std::string_view trailerApple = "Trailer/appleTrailers";
+#ifdef ONLINE_SERVICES
     static constexpr std::string_view trailerAllGenres = "Trailer/allGenres";
     static constexpr std::string_view trailerAll = "Trailer/allTrailers";
     static constexpr std::string_view trailerPostDate = "Trailer/postDate";
     static constexpr std::string_view trailerRelDate = "Trailer/relDate";
     static constexpr std::string_view trailerRoot = "Trailer/trailerRoot";
     static constexpr std::string_view trailerUnknown = "Trailer/unknown";
+#endif
 
     static constexpr std::string_view playlistAll = "Playlist/allPlaylists";
     static constexpr std::string_view playlistAllDirectories = "Playlist/allDirectories";

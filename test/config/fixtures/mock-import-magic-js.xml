@@ -10,7 +10,6 @@
       <audio-file>importAudio</audio-file>
       <video-file>importVideo</video-file>
       <image-file>importImage</image-file>
-      <trailer>importTrailer</trailer>
     </import-function>
     <virtual-layout type="builtin">
       <boxlayout>
@@ -47,13 +46,6 @@
         <box key="Image/allYears" title="Year" class="object.container" />
         <box key="Image/imageRoot" title="Photos" class="object.container" />
         <box key="Image/unknown" title="Unknown" class="object.container" />
-        <box key="Trailer/trailerRoot" title="Online Services" class="object.container" />
-        <box key="Trailer/appleTrailers" title="Apple Trailers" class="object.container" />
-        <box key="Trailer/allTrailers" title="All Trailers" class="object.container" />
-        <box key="Trailer/allGenres" title="Genres" class="object.container" />
-        <box key="Trailer/relDate" title="Release Date" class="object.container" />
-        <box key="Trailer/postDate" title="Post Date" class="object.container" />
-        <box key="Trailer/unknown" title="Unknown" class="object.container" />
         <box key="Playlist/playlistRoot" title="Playlists" class="object.container" />
         <box key="Playlist/allPlaylists" title="All Playlists" class="object.container" />
         <box key="Playlist/allDirectories" title="Directories" class="object.container" />
@@ -98,10 +90,10 @@
       <!-- <map from="avi" to="video/avi" /> -->
     </extension-mimetype>
     <mimetype-upnpclass>
-      <map from="audio/*" to="object.item.audioItem.musicTrack" />
-      <map from="video/*" to="object.item.videoItem" />
-      <map from="image/*" to="object.item.imageItem" />
       <map from="application/ogg" to="object.item.audioItem.musicTrack" />
+      <map from="audio/*" to="object.item.audioItem.musicTrack" />
+      <map from="image/*" to="object.item.imageItem" />
+      <map from="video/*" to="object.item.videoItem" />
     </mimetype-upnpclass>
     <mimetype-contenttype>
       <treat mimetype="application/ogg" as="ogg" />

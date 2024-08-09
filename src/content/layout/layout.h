@@ -80,7 +80,7 @@ protected:
         = 0;
 
 #ifdef ONLINE_SERVICES
-    virtual std::vector<int> addTrailer(const std::shared_ptr<CdsObject>& obj,
+    virtual std::vector<int> addOnlineItem(const std::shared_ptr<CdsObject>& obj,
         OnlineServiceType serviceType,
         const fs::path& rootpath,
         const std::map<AutoscanMediaMode, std::string>& containerMap)

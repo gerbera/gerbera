@@ -649,7 +649,6 @@
                 <xs:element ref="image-file" minOccurs="0"/>
                 <xs:element ref="playlist" minOccurs="0"/>
                 <xs:element ref="meta-file" minOccurs="0"/>
-                <xs:element ref="trailer" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
@@ -657,7 +656,6 @@
     <xs:element name="video-file" type="xs:string"/>
     <xs:element name="image-file" type="xs:string"/>
     <xs:element name="meta-file" type="xs:string"/>
-    <xs:element name="trailer" type="xs:string"/>
     <xs:element name="playlist">
         <xs:complexType>
             <xs:simpleContent>
@@ -689,7 +687,6 @@
             <xs:attribute name="audio-layout" type="xs:string"/>
             <xs:attribute name="video-layout" type="xs:string"/>
             <xs:attribute name="image-layout" type="xs:string"/>
-            <xs:attribute name="trailer-layout" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -1266,43 +1263,8 @@
 
     <xs:element name="online-content">
         <xs:complexType>
-            <xs:all>
-                <xs:element ref="AppleTrailers" minOccurs="0"/>
-            </xs:all>
             <xs:attribute name="fetch-buffer-size" type="xs:positiveInteger" default="1048576"/>
             <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="AppleTrailers">
-        <xs:complexType>
-            <xs:attribute name="enabled" default="no">
-                <xs:simpleType>
-                    <xs:restriction base="xs:string">
-                        <xs:enumeration value="yes"/>
-                        <xs:enumeration value="no"/>
-                    </xs:restriction>
-                </xs:simpleType>
-            </xs:attribute>
-            <xs:attribute name="refresh" type="xs:nonNegativeInteger" default="43200"/>
-            <xs:attribute name="update-at-start" default="no">
-                <xs:simpleType>
-                    <xs:restriction base="xs:string">
-                        <xs:enumeration value="yes"/>
-                        <xs:enumeration value="no"/>
-                    </xs:restriction>
-                </xs:simpleType>
-            </xs:attribute>
-            <xs:attribute name="purge-after" type="xs:nonNegativeInteger" />
-            <xs:attribute name="resolution" type="xs:nonNegativeInteger" default="640"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="mimetype-mappings">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:sequence>
         </xs:complexType>
     </xs:element>
 </xs:schema>

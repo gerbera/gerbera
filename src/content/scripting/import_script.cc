@@ -122,7 +122,7 @@ std::vector<int> ImportScript::addImage(const std::shared_ptr<CdsObject>& obj, c
 }
 
 #ifdef ONLINE_SERVICES
-std::vector<int> ImportScript::addTrailer(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+std::vector<int> ImportScript::addOnlineItem(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     return callFunction(obj, nullptr, config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER), scriptPath, AutoscanMediaMode::Video, containerMap);
 }

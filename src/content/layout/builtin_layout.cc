@@ -47,14 +47,8 @@
 #include "util/tools.h"
 
 #ifdef ONLINE_SERVICES
-
 #include "content/onlineservice/online_service.h"
-
-#ifdef ATRAILERS
-#include "content/onlineservice/atrailers_content_handler.h"
 #endif
-
-#endif // ONLINE_SERVICES
 
 #include <regex>
 
@@ -87,11 +81,6 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
     }
 
 #ifdef ONLINE_SERVICES
-    if (config->getBoolOption(ConfigVal::ONLINE_CONTENT_ATRAILERS_ENABLED)) {
-#ifdef ATRAILERS
-        chain["/Online Services/Apple/All Trailers"] = this->content->addContainerTree({ containerAt(BoxKeys::trailerRoot), containerAt(BoxKeys::trailerApple), containerAt(BoxKeys::trailerAll) }, nullptr);
-#endif
-    }
 #endif
 }
 
@@ -463,88 +452,15 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
 }
 
 #ifdef ONLINE_SERVICES
-std::vector<int> BuiltinLayout::addTrailer(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+std::vector<int> BuiltinLayout::addOnlineItem(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     switch (serviceType) {
-#ifdef ATRAILERS
-    case OnlineServiceType::OS_ATrailers:
-        return addATrailers(obj);
-        break;
-#endif
-    case OnlineServiceType::OS_Max:
+    case OnlineServiceType::Max:
     default:
         log_warning("No handler for service type");
         break;
     }
     return {};
-}
-#endif
-
-#ifdef ATRAILERS
-std::vector<int> BuiltinLayout::addATrailers(const std::shared_ptr<CdsObject>& obj)
-{
-    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
-    std::vector<int> result;
-
-    log_debug("add trailer {}", obj->getLocation().string());
-    {
-        auto id = chain["/Online Services/Apple/All Trailers"];
-        if (obj->getID() != INVALID_OBJECT_ID) {
-            obj->setRefID(obj->getID());
-            result.push_back(add(obj, id));
-        } else {
-            result.push_back(add(obj, id));
-            obj->setRefID(obj->getID());
-        }
-    }
-
-    auto meta = obj->getMetaData();
-
-    if (blOption->get(BoxKeys::trailerAllGenres)->getEnabled() && blOption->get(BoxKeys::trailerApple)->getEnabled()) {
-        std::string temp = getValueOrDefault(meta, MetaEnumMapper::getMetaFieldName(MetadataFields::M_GENRE));
-        auto genreAr = splitString(temp, ',');
-        for (auto&& genre : genreAr) {
-            trimStringInPlace(genre);
-            genre = mapGenre(genre);
-            if (genre.empty())
-                continue;
-
-            std::vector<std::shared_ptr<CdsObject>> ct;
-            ct.push_back(containerAt(BoxKeys::trailerRoot));
-            ct.push_back(containerAt(BoxKeys::trailerApple));
-            ct.push_back(containerAt(BoxKeys::trailerAllGenres));
-            ct.push_back(std::make_shared<CdsContainer>(genre));
-            auto id = content->addContainerTree(ct, obj);
-            result.push_back(add(obj, id));
-        }
-    }
-
-    if (blOption->get(BoxKeys::trailerRelDate)->getEnabled() && blOption->get(BoxKeys::trailerApple)->getEnabled()) {
-        std::string temp = getValueOrDefault(meta, MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE));
-        if (temp.length() >= 7) {
-            std::vector<std::shared_ptr<CdsObject>> ct;
-            ct.push_back(containerAt(BoxKeys::trailerRoot));
-            ct.push_back(containerAt(BoxKeys::trailerApple));
-            ct.push_back(containerAt(BoxKeys::trailerRelDate));
-            ct.push_back(std::make_shared<CdsContainer>(temp.substr(0, 7)));
-            auto id = content->addContainerTree(ct, obj);
-            result.push_back(add(obj, id));
-        }
-    }
-
-    if (blOption->get(BoxKeys::trailerPostDate)->getEnabled() && blOption->get(BoxKeys::trailerApple)->getEnabled()) {
-        std::string temp = obj->getAuxData(ATRAILERS_AUXDATA_POST_DATE);
-        if (temp.length() >= 7) {
-            std::vector<std::shared_ptr<CdsObject>> ct;
-            ct.push_back(containerAt(BoxKeys::trailerRoot));
-            ct.push_back(containerAt(BoxKeys::trailerApple));
-            ct.push_back(containerAt(BoxKeys::trailerPostDate));
-            ct.push_back(std::make_shared<CdsContainer>(temp.substr(0, 7)));
-            auto id = content->addContainerTree(ct, obj);
-            result.push_back(add(obj, id));
-        }
-    }
-    return result;
 }
 #endif
 

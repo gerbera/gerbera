@@ -122,13 +122,6 @@
           <box key="Image/allYears" title="Year" class="object.container" />
           <box key="Image/imageRoot" title="Photos" class="object.container" />
           <box key="Image/unknown" title="Unknown" class="object.container" />
-          <box key="Trailer/trailerRoot" title="Online Services" class="object.container" />
-          <box key="Trailer/appleTrailers" title="Apple Trailers" class="object.container" />
-          <box key="Trailer/allTrailers" title="All Trailers" class="object.container" />
-          <box key="Trailer/allGenres" title="Genres" class="object.container" />
-          <box key="Trailer/relDate" title="Release Date" class="object.container" />
-          <box key="Trailer/postDate" title="Post Date" class="object.container" />
-          <box key="Trailer/unknown" title="Unknown" class="object.container" />
         </boxlayout>
       </virtual-layout>
     </scripting>

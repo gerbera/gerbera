@@ -12,10 +12,6 @@ Example of online content XML configuration
 
     <import>
         <online-content>
-            <AppleTrailers enabled="[yes,no]" refresh="[seconds]"
-                purge-after="[seconds]"
-                update-at-start="[yes,no]"
-                resolution="[640,720]"/>
         </online-content>
     </import>
 
@@ -55,74 +51,3 @@ This tag defines the online content section.
     should ensure a constant data flow in case of slow connections. Usually this setting is not needed, because most
     players will anyway have some kind of buffering, however if the connection is particularly slow you may want to try enable this setting.
 
-
-``AppleTrailers``
-~~~~~~~~~~~~~~~~~
-
-.. code-block:: xml
-
-    <AppleTrailers enabled="[yes,no]"
-        refresh="[seconds]" update-at-start="[yes,no]" resolution="[640,720]"/>
-
-* Optional
-
-This tag defines the online content for `Apple Trailers <https://trailers.apple.com/>`_
-
-    **Attributes**
-
-    .. code-block:: xml
-
-        enabled=...
-
-    * Default: **no**
-
-    .. code-block:: xml
-
-        refresh=...
-
-    * Default: **43200**
-
-    The amount of time to wait before refreshing the online content
-
-    .. code-block:: xml
-
-        update-at-start=...
-
-    * Default: **no**
-
-    Upon starting Gerbera, the Apple Trailers content will be refreshed.
-
-    .. code-block:: xml
-
-        resolution=...
-
-    * Default: **720**
-
-    Sets the Apple Trailers URL to retrieve the content, affecting the resolution size that is downloaded.
-
-``mimetype-mappings``
-----------------------
-::
-
-    <mimetype-mappings>
-
-* Optional
-
-This section holds the file name extension to mime type mappings.
-
-**Child tags:**
-
-``map``
--------
-
-::
-
-    <map from="wmv" to="video/x-ms-wmv"/>
-    <map from="mp3" to="audio/mpeg"/>
-    <map from="wma" to="audio/x-ms-wma"/>
-    <map from="*" to="application/octet-stream"/>
-
-* Optional
-
-Specifies a mapping from a certain file name extension (everything after the last dot ".") to mime type.
-``*`` is used to set the default value.

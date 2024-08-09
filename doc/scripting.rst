@@ -174,9 +174,6 @@ object.
     | ONLINE_SERVICE_NONE              | The item does not belong to an online service and does |
     |                                  | not have extended properties.                          |
     +----------------------------------+--------------------------------------------------------+
-    | ONLINE_SERVICE_APPLE_TRAILERS    | The item belongs to the Apple Trailers service and has |
-    |                                  | extended properties.                                   |
-    +----------------------------------+--------------------------------------------------------+
 
 
 .. js:attribute:: orig.mimetype
@@ -454,12 +451,10 @@ For default Photo Layout:
     +---------------------------------------+---------------------------------+
 
 
-For default Trailer Layout:
+For default Online Item Layout:
     +---------------------------------------+---------------------------------+
     | Constant                              | Value                           |
     +=======================================+=================================+
-    | ``BK_trailerApple``                   | Trailer/appleTrailers           |
-    +---------------------------------------+---------------------------------+
     | ``BK_trailerAllGenres``               | Trailer/allGenres               |
     +---------------------------------------+---------------------------------+
     | ``BK_trailerAll``                     | Trailer/allTrailers             |
@@ -846,17 +841,6 @@ keep it very simple - we just put everything into the 'All Video' container.
     :language: js
 
 
-Apple Trailers Content Handler
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-This function processes items that are imported via the Apple Trailers feature. We will organize the trailers by genre, post
-date and release date, additionally we will also add a container holding all trailers.
-
-.. literalinclude:: ../scripts/js/common.js
-    :start-after: // doc-add-trailer-begin
-    :end-before: // doc-add-trailer-end
-    :language: js
-
 Putting it all together
 ^^^^^^^^^^^^^^^^^^^^^^^
 
@@ -871,7 +855,6 @@ In the default configuration these functions are registered as entry points so t
         <image-file>importImage</image-file>
         <playlist create-link="yes">importPlaylist</playlist>
         <meta-file>importMetadata</meta-file>
-        <trailer>importTrailer</trailer>
     </import-function>
 
 If you set `import-script` in `config.xml` the script is fully evaluated and calls the wrapper to select the correct import function.

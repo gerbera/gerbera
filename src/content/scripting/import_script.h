@@ -63,7 +63,7 @@ public:
         const fs::path& scriptPath,
         const std::map<AutoscanMediaMode, std::string>& containerMap);
 #ifdef ONLINE_SERVICES
-    std::vector<int> addTrailer(const std::shared_ptr<CdsObject>& obj,
+    std::vector<int> addOnlineItem(const std::shared_ptr<CdsObject>& obj,
         const fs::path& scriptPath,
         const std::map<AutoscanMediaMode, std::string>& containerMap);
 #endif
