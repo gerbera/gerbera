@@ -10,6 +10,10 @@ Because of the extension of configuration of transcoding profiles, those produci
   <mime-property key="channels" resource="nrAudioChannels"/>
 </mimetype>
 ```
+After many years Apple discontinued their trailers app and we had drop
+Apple Trailer support as the last of Mediatombs online services. Thus online
+service support is disabled in our builds, also, leading to parts of the
+config being unused or triggering warnings.
 
 ### NEW Features
 
