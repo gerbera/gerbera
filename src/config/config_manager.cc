@@ -35,8 +35,10 @@
 #include "config_manager.h" // API
 
 #include "config/result/autoscan.h"
+#include "config/result/box_layout.h"
 #include "config/result/client_config.h"
 #include "config/result/transcoding.h"
+#include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_path.h"
 #include "config_definition.h"
 #include "config_option_enum.h"
@@ -404,6 +406,9 @@ bool ConfigManager::validate()
                                 "however you specified \"js\" to be used for the "
                                 "virtual-layout.");
 #endif
+    auto co = ConfigDefinition::findConfigSetup<ConfigBoxLayoutSetup>(ConfigVal::BOXLAYOUT_BOX);
+    if (!co->validate(getSelf(), getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX)))
+        throw_std_runtime_error("Validation of {} failed", co->xpath);
 
     log_info("Configuration check succeeded.");
     return true;

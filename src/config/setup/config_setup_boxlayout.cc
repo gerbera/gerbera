@@ -26,6 +26,7 @@
 #include "config_setup_boxlayout.h" // API
 
 #include "config/config_definition.h"
+#include "config/config_option_enum.h"
 #include "config/config_options.h"
 #include "config/config_val.h"
 #include "config/result/box_layout.h"
@@ -55,10 +56,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
         auto size = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
         auto enabled = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
 
-        if (std::find_if(defaultEntries.cbegin(), defaultEntries.cend(), [&key](auto& box) { return key == box.getKey(); }) == defaultEntries.cend()) {
-            // Warn the user that his option will be ignored in built-in layout. But allow to use "unknown" options for js
-            log_warning("Box key={}, title={}, objClass={}, enabled={}, size={} will be ignored in built-in layout. Unknown Key '{}'", key, title, objClass, enabled, size, key);
-        } else if (!enabled && ((key == BoxKeys::audioRoot) || (key == BoxKeys::audioAll) || (key == BoxKeys::imageRoot) || (key == BoxKeys::imageAll) || (key == BoxKeys::videoRoot) || (key == BoxKeys::videoAll))) {
+        if (!enabled && ((key == BoxKeys::audioRoot) || (key == BoxKeys::audioAll) || (key == BoxKeys::imageRoot) || (key == BoxKeys::imageAll) || (key == BoxKeys::videoRoot) || (key == BoxKeys::videoAll))) {
             log_warning("Box '{}' cannot be disabled", key);
             enabled = true;
         }
@@ -81,6 +79,23 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
         }
     }
 
+    return true;
+}
+
+bool ConfigBoxLayoutSetup::validate(const std::shared_ptr<Config>& config, const std::shared_ptr<BoxLayoutList>& values)
+{
+    auto layoutType = EnumOption<LayoutType>::getEnumOption(config, ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
+    if (layoutType == LayoutType::Js)
+        return true;
+
+    for (auto&& theBox : values->getArrayCopy()) {
+        if (std::find_if(defaultEntries.cbegin(), defaultEntries.cend(), [&theBox](auto& box) { return theBox->getKey() == box.getKey(); }) == defaultEntries.cend()) {
+            // Warn the user that his option will be ignored in built-in layout. But allow to use "unknown" options for js
+            log_warning("Box key={}, title={}, objClass={}, enabled={}, size={} will be ignored in built-in layout. Unknown Key '{}'",
+                theBox->getKey(), theBox->getTitle(), theBox->getClass(),
+                theBox->getEnabled(), theBox->getSize(), theBox->getKey());
+        }
+    }
     return true;
 }
 

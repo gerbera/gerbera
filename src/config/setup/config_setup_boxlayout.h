@@ -62,6 +62,8 @@ public:
     std::string getCurrentValue() const override { return {}; }
 
     const std::vector<BoxLayout>& getDefault() const { return defaultEntries; }
+
+    bool validate(const std::shared_ptr<Config>& config, const std::shared_ptr<BoxLayoutList>& values);
 };
 
 #endif // __CONFIG_SETUP_BOXLAYOUT_H__
