@@ -8,6 +8,7 @@
 - Clean up commented out code
 - Clean up URL handling
 - Configuration of additional target mimetype properties for transcoding
+- Drop Apple Trailer support
 - Extract image and video orientation to resource attributes
 - FIXME done: Remove fake resource
 - Improve docker instructions
