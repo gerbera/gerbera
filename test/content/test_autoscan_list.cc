@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     test_autoscan_list.cc - this file is part of Gerbera.
@@ -19,10 +20,11 @@
 
     $Id$
 */
-#include <gtest/gtest.h>
 
 #include "config/result/autoscan.h"
 #include "content/autoscan_list.h"
+
+#include <gtest/gtest.h>
 
 TEST(AutoscanListTest, create)
 {

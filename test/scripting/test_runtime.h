@@ -1,28 +1,30 @@
 /*GRB*
-  Gerbera - https://gerbera.io/
 
-  runtime_test.h - this file is part of Gerbera.
+    Gerbera - https://gerbera.io/
 
-  Copyright (C) 2016-2024 Gerbera Contributors
+    runtime_test.h - this file is part of Gerbera.
 
-  Gerbera is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License version 2
-  as published by the Free Software Foundation.
+    Copyright (C) 2016-2024 Gerbera Contributors
 
-  Gerbera is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
 
-  You should have received a copy of the GNU General Public License
-  along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-  $Id$
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
 */
+
 #ifndef __RUNTIME_TEST_H__
 #define __RUNTIME_TEST_H__
 
-#include "gtest/gtest.h"
+#include <gtest/gtest.h>
 
 class RuntimeTest : public ::testing::Test {
 protected:

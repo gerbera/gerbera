@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     duk_helper.cc - this file is part of Gerbera.
@@ -22,7 +23,7 @@
 #ifdef HAVE_JS
 
 #include "duk_helper.h"
-#include <duk_config.h>
+
 #include <duktape.h>
 #include <fmt/format.h>
 #if FMT_VERSION >= 100202

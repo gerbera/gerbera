@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     test_configgenerator.cc - this file is part of Gerbera.
@@ -19,12 +20,13 @@
 
     $Id$
 */
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 
 #include "config/config_generator.h"
 #include <fstream>
 #include <regex>
+
+#include <gmock/gmock.h>
+#include <gtest/gtest.h>
 
 using ::testing::MatchesRegex;
 

@@ -1,6 +1,6 @@
 /*GRB*
 
-Gerbera - https://gerbera.io/
+    Gerbera - https://gerbera.io/
 
     test_upnp_xml.cc - this file is part of Gerbera.
 
@@ -17,9 +17,9 @@ Gerbera - https://gerbera.io/
 
     You should have received a copy of the GNU General Public License
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
-#include <gtest/gtest.h>
+    $Id$
+*/
 
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
@@ -36,6 +36,8 @@ Gerbera - https://gerbera.io/
 
 #include "../mock/config_mock.h"
 #include "../mock/database_mock.h"
+
+#include <gtest/gtest.h>
 
 using ::testing::_;
 using ::testing::Return;

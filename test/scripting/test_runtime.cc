@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     runtime_test.cc - this file is part of Gerbera.
@@ -19,8 +20,10 @@
 
     $Id$
 */
-#include "test_runtime.h"
+
 #include "content/scripting/scripting_runtime.h"
+
+#include "test_runtime.h"
 
 TEST_F(RuntimeTest, CheckTestCodeLinksAgainstDependencies)
 {

@@ -1,6 +1,6 @@
 /*GRB*
 
-Gerbera - https://gerbera.io/
+    Gerbera - https://gerbera.io/
 
     test_sql_generators.cc - this file is part of Gerbera.
 
@@ -17,13 +17,15 @@ Gerbera - https://gerbera.io/
 
     You should have received a copy of the GNU General Public License
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
 */
 
 /// \file test_sql_generators.cc
+#include "database/sql_database.h"
+
 #include <fmt/core.h>
 #include <gtest/gtest.h>
-
-#include "database/sql_database.h"
 
 class TestDatabase : public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:

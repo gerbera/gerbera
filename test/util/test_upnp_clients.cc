@@ -19,8 +19,6 @@
 
     $Id$
 */
-#include <gtest/gtest.h>
-#include <upnp.h>
 
 #include "config/result/client_config.h"
 #include "util/grb_net.h"
@@ -28,6 +26,9 @@
 #include "upnp/clients.h"
 
 #include "../mock/config_mock.h"
+
+#include <gtest/gtest.h>
+#include <upnp.h>
 
 class MyConfigMock final : public ConfigMock {
 public:

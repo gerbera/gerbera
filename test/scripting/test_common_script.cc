@@ -1,6 +1,6 @@
 /*GRB*
 
-Gerbera - https://gerbera.io/
+    Gerbera - https://gerbera.io/
 
     test_common_script.cc - this file is part of Gerbera.
 
@@ -17,18 +17,17 @@ Gerbera - https://gerbera.io/
 
     You should have received a copy of the GNU General Public License
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
 */
-
 #ifdef HAVE_JS
-
-#include <duktape.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 
 #include "util/tools.h"
 
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
+
+#include <duktape.h>
 
 class CommonScriptTest : public ::testing::Test {
 

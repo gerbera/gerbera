@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     test_nfo_metafile.cc - this file is part of Gerbera.
@@ -21,13 +22,6 @@
 */
 #ifdef HAVE_JS
 
-#include <duktape.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <map>
-#include <memory>
-#include <pugixml.hpp>
-
 #include "cds/cds_objects.h"
 #include "exceptions.h"
 #include "upnp/upnp_common.h"
@@ -37,6 +31,11 @@
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
+
+#include <duktape.h>
+#include <map>
+#include <memory>
+#include <pugixml.hpp>
 
 // Extends ScriptTestFixture to allow
 // for unique testing of the External Metafile

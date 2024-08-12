@@ -19,9 +19,10 @@
 
     $Id$
 */
-#include <gtest/gtest.h>
 
 #include "upnp/headers.h"
+
+#include <gtest/gtest.h>
 
 class HeadersHelperTest : public ::testing::Test {
 

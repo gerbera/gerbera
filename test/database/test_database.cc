@@ -1,6 +1,6 @@
 /*GRB*
 
-Gerbera - https://gerbera.io/
+    Gerbera - https://gerbera.io/
 
     test_database.cc - this file is part of Gerbera.
 
@@ -17,12 +17,11 @@ Gerbera - https://gerbera.io/
 
     You should have received a copy of the GNU General Public License
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
 */
 
 /// \file test_database.cc
-#include <gtest/gtest.h>
-#include <pugixml.hpp>
-
 #include "cds/cds_objects.h"
 #include "config/result/autoscan.h"
 #include "database/sqlite3/sqlite_database.h"
@@ -35,6 +34,9 @@ Gerbera - https://gerbera.io/
 #include "database/mysql/mysql_database.h"
 #include "mysql_config_fake.h"
 #endif
+
+#include <gtest/gtest.h>
+#include <pugixml.hpp>
 
 class TestSqliteDatabase : public Sqlite3Database {
     friend class Sqlite3DatabaseTest;

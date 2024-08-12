@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     test_external_m3u_playlist.cc - this file is part of Gerbera.
@@ -20,10 +21,6 @@
     $Id$
 */
 #ifdef HAVE_JS
-#include <duktape.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <memory>
 
 #include "cds/cds_objects.h"
 #include "upnp/upnp_common.h"
@@ -32,6 +29,9 @@
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
+
+#include <duktape.h>
+#include <memory>
 
 // Extends ScriptTestFixture to allow
 // for unique testing of the External URL Playlist

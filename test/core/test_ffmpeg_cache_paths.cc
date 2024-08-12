@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     test_ffmpeg_cach_paths.cc - this file is part of Gerbera.
@@ -19,11 +20,12 @@
 
     $Id$
 */
-#include "../mock/config_mock.h"
 
 #include "config/config_val.h"
 #include "metadata/ffmpeg_thumbnailer_handler.h"
 #include "metadata/ffmpeg_handler.h"
+
+#include "../mock/config_mock.h"
 
 #include <gtest/gtest.h>
 

@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     script_test_fixture.h - this file is part of Gerbera.
@@ -23,15 +24,14 @@
 #ifndef GERBERA_SCRIPTTESTFIXTURE_H
 #define GERBERA_SCRIPTTESTFIXTURE_H
 
-#include <duktape.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <memory>
-#include <tuple>
-
 #include "util/string_converter.h"
 
 #include "common_script_mock.h"
+
+#include <duktape.h>
+#include <gtest/gtest.h>
+#include <memory>
+#include <tuple>
 
 using namespace ::testing;
 
