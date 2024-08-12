@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     test_import_struct_script.cc - this file is part of Gerbera.
@@ -24,9 +25,6 @@
 #include "content/onlineservice/online_service.h"
 #include "metadata/metadata_handler.h"
 #include "util/string_converter.h"
-
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
 
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"

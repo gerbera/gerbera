@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     test_configmanager.cc - this file is part of Gerbera.
@@ -19,18 +20,17 @@
 
     $Id$
 */
-#include <array>
-#include <fstream>
-#include <ftw.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <memory>
 
 #include "config/config_generator.h"
 #include "config/config_manager.h"
 #include "config/config_val.h"
 #include "exceptions.h"
 #include "util/tools.h"
+
+#include <array>
+#include <fstream>
+#include <gtest/gtest.h>
+#include <memory>
 
 class ConfigManagerTest : public ::testing::Test {
 

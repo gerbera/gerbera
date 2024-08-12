@@ -1,6 +1,6 @@
 /*GRB*
 
-Gerbera - https://gerbera.io/
+    Gerbera - https://gerbera.io/
 
     script_test_fixture.cc - this file is part of Gerbera.
 
@@ -17,8 +17,9 @@ Gerbera - https://gerbera.io/
 
     You should have received a copy of the GNU General Public License
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
-*/
 
+    $Id$
+*/
 #ifdef HAVE_JS
 
 #include <duktape.h>

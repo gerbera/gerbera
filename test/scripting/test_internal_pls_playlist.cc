@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     test_internal_pls_playlist.cc - this file is part of Gerbera.
@@ -21,17 +22,15 @@
 */
 #ifdef HAVE_JS
 
-#include <duktape.h>
-#include <gmock/gmock.h>
-#include <gtest/gtest.h>
-#include <memory>
-
 #include "cds/cds_objects.h"
 #include "util/string_converter.h"
 
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
+
+#include <duktape.h>
+#include <memory>
 
 // Extends ScriptTestFixture to allow
 // for unique testing of the Internal URL Playlist

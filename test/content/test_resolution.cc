@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     test_resolution.cc - this file is part of Gerbera.
@@ -19,9 +20,10 @@
 
     $Id$
 */
-#include <gtest/gtest.h>
 
 #include "metadata/resolution.h"
+
+#include <gtest/gtest.h>
 
 TEST(ResolutionTest, parse) {
     auto res = Resolution("122586668x448448485");

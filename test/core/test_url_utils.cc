@@ -1,23 +1,24 @@
 /*GRB*
-  Gerbera - https://gerbera.io/
 
-  test_request_handler.cc - this file is part of Gerbera.
+    Gerbera - https://gerbera.io/
 
-  Copyright (C) 2021-2024 Gerbera Contributors
+    test_request_handler.cc - this file is part of Gerbera.
 
-  Gerbera is free software; you can redistribute it and/or modify
-  it under the terms of the GNU General Public License version 2
-  as published by the Free Software Foundation.
+    Copyright (C) 2021-2024 Gerbera Contributors
 
-  Gerbera is distributed in the hope that it will be useful,
-  but WITHOUT ANY WARRANTY; without even the implied warranty of
-  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-  GNU General Public License for more details.
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
 
-  You should have received a copy of the GNU General Public License
-  along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
 
-  $Id$
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
 */
 
 #include "util/url_utils.h"

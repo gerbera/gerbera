@@ -1,4 +1,5 @@
 /*GRB*
+
     Gerbera - https://gerbera.io/
 
     test/content/main.cc - this file is part of Gerbera.
@@ -19,6 +20,7 @@
 
     $Id$
 */
+
 #include <gmock/gmock.h>
 
 int main(int argc, char** argv)

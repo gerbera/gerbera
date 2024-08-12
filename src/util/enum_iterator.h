@@ -1,5 +1,6 @@
 /*GRB*
-Gerbera - https://gerbera.io/
+
+    Gerbera - https://gerbera.io/
 
     enum_iterator.h - this file is part of Gerbera.
 
@@ -16,6 +17,8 @@ Gerbera - https://gerbera.io/
 
     You should have received a copy of the GNU General Public License
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
 */
 
 /// \file enum_iterator.h
@@ -23,6 +26,8 @@ Gerbera - https://gerbera.io/
 
 #ifndef __ENUM_ITERATOR_H__
 #define __ENUM_ITERATOR_H__
+
+#include <type_traits>
 
 /// \brief Iterator over values of a sequential enum between begin and end
 template <typename En, En beginVal, En endVal>

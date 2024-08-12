@@ -19,11 +19,14 @@
 
     $Id$
 */
-#ifdef HAVE_JS
 
 #ifndef GERBERA_COMMON_SCRIPT_MOCK_H
 #define GERBERA_COMMON_SCRIPT_MOCK_H
+
+#ifdef HAVE_JS
+
 #include <duk_config.h>
+#include <gmock/gmock.h>
 
 // The interface used to mock the `common.js` script functions and other global functions.
 // When testing scripts this mock allows for tracking of script calls and inputs.
@@ -69,5 +72,5 @@ public:
     MOCK_METHOD2(getRootPath, duk_ret_t(std::string objScriptPath, std::string location));
     MOCK_METHOD3(abcBox, duk_ret_t(std::string inputValue, int boxType, std::string divChar));
 };
-#endif //GERBERA_COMMON_SCRIPT_MOCK_H
 #endif //HAVE_JS
+#endif //GERBERA_COMMON_SCRIPT_MOCK_H
