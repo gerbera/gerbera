@@ -65,7 +65,8 @@ Optional Packages
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | duktape_            | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh           |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
-| ffmpeg/libav        | File metadata              | WITH\_AVCODEC           | Disabled |                              |
+| ffmpeg/libav        | File metadata.             | WITH\_AVCODEC           | Disabled |                              |
+|                     | Required for ``.m4a``.     |                         |          |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | ffmpegthumbnailer_  | Generate video thumbnails  | WITH\_FFMPEGTHUMBNAILER | Disabled | install-ffmpegthumbnailer.sh |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
@@ -75,7 +76,7 @@ Optional Packages
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | lastfmlib_          | Enables scrobbling         | WITH\_LASTFM            | Disabled | install-lastfm.sh            |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
-| libebml_            | required for MKV           | WITH\_MATROSKA          | Enabled  | install-ebml.sh              |
+| libebml_            | Required for MKV           | WITH\_MATROSKA          | Enabled  | install-ebml.sh              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | libexif_            | JPEG Exif metadata         | WITH\_EXIF              | Enabled  | install-libexif.sh           |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
@@ -112,7 +113,7 @@ Optional Packages
 Scripts for installation of (build) dependencies from source can be found under ``scripts``. They normally install the latest tested version
 of the package. The scripts automatically install prerequisites for debian/ubuntu and opensuse/suse.
 
-In order to build the whole package there are ``scripts/debian/build-deb.sh`` and ``scripts/opensuse/build-suse.sh`` which also take the 
+In order to build the whole package there are ``scripts/debian/build-deb.sh`` and ``scripts/opensuse/build-suse.sh`` which also take the
 different requirements of distribution versions into account.
 
 Make sure no conflicting versions of the development packages are installed.
