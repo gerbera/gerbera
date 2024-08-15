@@ -114,6 +114,28 @@ bool CdsObject::isSubClass(const std::string& cls) const
     return startswith(upnpClass, cls);
 }
 
+ObjectType CdsObject::getMediaType(const std::string& contentType) const
+{
+#ifdef ONLINE_SERVICES
+    if (getFlag(OBJECT_FLAG_ONLINE_SERVICE))
+        return ObjectType::OnlineService;
+#endif
+    if (contentType == CONTENT_TYPE_OGG) {
+        return (getFlag(OBJECT_FLAG_OGG_THEORA)) ? ObjectType::Video : ObjectType::Audio;
+    }
+    if (contentType == CONTENT_TYPE_PLAYLIST)
+        return ObjectType::Playlist;
+    if (isSubClass(UPNP_CLASS_CONTAINER))
+        return ObjectType::Folder;
+    if (isSubClass(UPNP_CLASS_VIDEO_ITEM))
+        return ObjectType::Video;
+    if (isSubClass(UPNP_CLASS_AUDIO_ITEM))
+        return ObjectType::Audio;
+    if (isSubClass(UPNP_CLASS_IMAGE_ITEM))
+        return ObjectType::Image;
+    return ObjectType::Unknown;
+}
+
 std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
 {
     if (IS_CDS_CONTAINER(objectType)) {

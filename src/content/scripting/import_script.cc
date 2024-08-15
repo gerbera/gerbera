@@ -118,7 +118,7 @@ std::vector<int> ImportScript::addVideo(const std::shared_ptr<CdsObject>& obj, c
 
 std::vector<int> ImportScript::addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
-    return callFunction(obj, cont, config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_IMAGEFILE), scriptPath, AutoscanMediaMode::Video, containerMap);
+    return callFunction(obj, cont, config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_IMAGEFILE), scriptPath, AutoscanMediaMode::Image, containerMap);
 }
 
 #ifdef ONLINE_SERVICES

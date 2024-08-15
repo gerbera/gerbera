@@ -14,10 +14,12 @@
 - FIXME done: Remove fake resource
 - Improve docker instructions
 - Improve handling of thumbnail profiles
+- Mention .m4a in compilation options
 - Refactor StringConverter
 - Refactor Upnp Services
 - Upgrade cxxopts.hpp to 3.2.1
 - Upgrade md5 to 2002 version
+- Upnp Classes for containers in physical tree
 - Use full client info as requestCookie
 - Warn about empty script result
 - Web security and upnp compatibility

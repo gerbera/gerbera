@@ -26,6 +26,7 @@ config being unused or triggering warnings.
 - Orientation for images and videos in resource attributes
 - Additional client filtering options with friendlyName, modelName, manufacturer
 - Configuration option to block clients
+- Upnp classes are assigned to containers in physical tree (PC Directory) depending on the majority of children (only in grb-mode)
 
 ### FIXES
 

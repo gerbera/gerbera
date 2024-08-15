@@ -45,6 +45,7 @@ const std::map<AutoscanMediaMode, std::string> AutoscanDirectory::ContainerTypes
     { AutoscanMediaMode::Audio, UPNP_CLASS_MUSIC_ALBUM },
     { AutoscanMediaMode::Image, UPNP_CLASS_PHOTO_ALBUM },
     { AutoscanMediaMode::Video, UPNP_CLASS_CONTAINER },
+    { AutoscanMediaMode::Mixed, UPNP_CLASS_CONTAINER },
 };
 
 AutoscanDirectory::AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent, unsigned int interval, bool hidden, bool followSymlinks, int mediaType, const std::map<AutoscanMediaMode, std::string>& containerMap)

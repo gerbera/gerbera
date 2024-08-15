@@ -71,6 +71,18 @@ enum class ResourcePurpose : int {
     Transcode
 };
 
+enum class ObjectType : int {
+    Unknown = 0,
+    Folder,
+    Playlist,
+    Audio,
+    Video,
+    Image,
+#ifdef ONLINE_SERVICES
+    OnlineService,
+#endif
+};
+
 enum class ResourceAttribute : int {
     SIZE = 0,
     DURATION,

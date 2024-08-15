@@ -77,7 +77,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& heade
         return;
     }
 
-    if (!startswith(item->getClass(), UPNP_CLASS_VIDEO_ITEM)) {
+    if (!item->isSubClass(UPNP_CLASS_VIDEO_ITEM)) {
         log_debug("addCaptionInfo only available for videos");
         return;
     }

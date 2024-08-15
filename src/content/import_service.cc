@@ -119,12 +119,46 @@ void UpnpMap::initMap(std::vector<UpnpMap>& target, const std::map<std::string, 
     }
 }
 
+ContentState::ContentState(fs::directory_entry dirEntry, ImportState state, std::chrono::seconds mtime, std::shared_ptr<CdsObject> cdsObject)
+    : state(state)
+    , dirEntry(std::move(dirEntry))
+    , mtime(mtime)
+    , cdsObject(std::move(cdsObject))
+{
+    itemCounter[ObjectType::Audio] = 0;
+    itemCounter[ObjectType::Video] = 0;
+    itemCounter[ObjectType::Image] = 0;
+    itemCounter[ObjectType::Playlist] = 0;
+    itemCounter[ObjectType::Folder] = 0;
+    itemCounter[ObjectType::Unknown] = 0;
+}
+
+AutoscanMediaMode ContentState::getMediaMode() const
+{
+    AutoscanMediaMode mediaMode = AutoscanMediaMode::Mixed;
+    std::size_t maxValue = 3; // at least 4 items are required to set upnp_class
+    if (itemCounter.at(ObjectType::Audio) > maxValue) {
+        mediaMode = AutoscanMediaMode::Audio;
+        maxValue = itemCounter.at(ObjectType::Audio);
+    }
+    if (itemCounter.at(ObjectType::Image) > maxValue) {
+        mediaMode = AutoscanMediaMode::Image;
+        maxValue = itemCounter.at(ObjectType::Image);
+    }
+    if (itemCounter.at(ObjectType::Video) > maxValue) {
+        mediaMode = AutoscanMediaMode::Video;
+        maxValue = itemCounter.at(ObjectType::Video);
+    }
+    return mediaMode;
+}
+
 ImportService::ImportService(std::shared_ptr<Context> context, std::shared_ptr<ConverterManager> converterManager)
     : context(std::move(context))
     , config(this->context->getConfig())
     , mime(this->context->getMime())
     , database(this->context->getDatabase())
     , converterManager(std::move(converterManager))
+    , containerTypeMap(AutoscanDirectory::ContainerTypesDefaults)
 {
     hasReadableNames = config->getBoolOption(ConfigVal::IMPORT_READABLE_NAMES);
     hasCaseSensitiveNames = config->getBoolOption(ConfigVal::IMPORT_CASE_SENSITIVE_TAGS);
@@ -145,6 +179,7 @@ void ImportService::run(std::shared_ptr<ContentManager> content, std::shared_ptr
     metadataService = std::make_shared<MetadataService>(context, this->content);
     if (autoScan) {
         this->autoscanDir = std::move(autoScan);
+        this->containerTypeMap = this->autoscanDir->getContainerTypes();
         this->rootPath = std::move(path);
     }
 }
@@ -249,7 +284,7 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
     removeHidden(settings);
     createContainers(CDS_ID_FS_ROOT, settings);
     createItems(settings);
-    updateFanArt();
+    updateFanArt(isDir);
     fillLayout(task);
 
     // update currentContent
@@ -525,6 +560,7 @@ void ImportService::createItems(AutoScanSetting& settings)
                 }
             }
             if (contState && cdsObj) {
+                contState->increaseItemCounter(cdsObj->getMediaType());
                 contState->setFirstObject(cdsObj);
             }
             if (parentContainer) {
@@ -628,7 +664,7 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
                 auto refObjects = state ? database->getRefObjects(cdsObject->getID()) : std::vector<int> {};
                 layout->processCdsObject(cdsObject, parent,
                     rootPath, contentType,
-                    autoscanDir ? autoscanDir->getContainerTypes() : AutoscanDirectory::ContainerTypesDefaults,
+                    containerTypeMap,
                     refObjects);
             } else {
                 log_debug("file ignored: {} autoscanDir={}, class={}, hasContent={}, mediaType={}", cdsObject->getLocation().string(), !!autoscanDir, cdsObject->getClass(), autoscanDir ? autoscanDir->hasContent(cdsObject->getClass()) : false, autoscanDir ? autoscanDir->getMediaType() : -2);
@@ -689,23 +725,32 @@ void ImportService::finishScan(const fs::path& location, const std::shared_ptr<C
                 count = std::distance(objectLocation.begin(), objectLocation.end()) - std::distance(location.begin(), location.end());
             }
             database->updateObject(parent, nullptr);
-            assignFanArt(parent, firstObject, count);
+            assignFanArt(parent, firstObject, AutoscanMediaMode::Mixed, false, count);
         }
     }
 }
 
-void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, int count)
+void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, AutoscanMediaMode mediaMode, bool isDir, int count)
 {
     if (!container)
         return;
 
-    if (refObj && refObj->getMTime() > container->getMTime()) {
-        container->setMTime(refObj->getMTime());
-        database->updateObject(container, nullptr);
+    bool doUpdate = false;
+    if (refObj) {
+        if (refObj->isItem() && isDir && container->getClass() != containerTypeMap.at(mediaMode)) {
+            container->setClass(containerTypeMap.at(mediaMode));
+            doUpdate = true;
+        }
+        if (refObj->getMTime() > container->getMTime()) {
+            container->setMTime(refObj->getMTime());
+            doUpdate = true;
+        }
     }
 
     if (containersWithFanArt.find(container->getID()) != containersWithFanArt.end()) {
         log_debug("Already assigned fanart {}", container->getID());
+        if (doUpdate)
+            database->updateObject(container, nullptr);
         return;
     }
 
@@ -719,12 +764,14 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
             }
         } catch (const ObjectNotFoundException&) {
             container->removeResource(fanart->getHandlerType());
+            doUpdate = true;
             fanart = nullptr;
         }
     }
     if (!fanart || fanart->getHandlerType() != ContentHandler::CONTAINERART) {
         if (fanart) {
             container->clearResources();
+            doUpdate = true;
         }
         metadataService->getHandler(ContentHandler::CONTAINERART)->fillMetadata(container);
         auto containerart = container->getResource(ResourcePurpose::Thumbnail);
@@ -770,9 +817,11 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
     if (fanart) {
         container->clearResources();
         container->addResource(fanart); // overwrite all other resources
-        database->updateObject(container, nullptr);
+        doUpdate = true;
         containersWithFanArt[container->getID()] = container;
     }
+    if (doUpdate)
+        database->updateObject(container, nullptr);
 }
 
 std::shared_ptr<CdsContainer> ImportService::getContainer(const fs::path& location) const
@@ -881,17 +930,17 @@ std::pair<int, bool> ImportService::addContainerTree(
         }
         count++;
         if (isVirtual) // && chain.size() - count < containerImageParentCount
-            assignFanArt(containerMap[subTree], refItem && count > containerImageMinDepth ? refItem : item, chain.size() - count);
+            assignFanArt(containerMap[subTree], refItem && count > containerImageMinDepth ? refItem : item, AutoscanMediaMode::Mixed, false, chain.size() - count);
     }
     return { result, isNew };
 }
 
-void ImportService::updateFanArt()
+void ImportService::updateFanArt(bool isDir)
 {
     for (auto&& [contPath, stateEntry] : contentStateCache) {
         if (!stateEntry || !stateEntry->getObject() || !stateEntry->getObject()->isContainer())
             continue;
         std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(stateEntry->getObject());
-        assignFanArt(container, stateEntry->getFirstObject(), 1);
+        assignFanArt(container, stateEntry->getFirstObject(), stateEntry->getMediaMode(), isDir, 1);
     }
 }

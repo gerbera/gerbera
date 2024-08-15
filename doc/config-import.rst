@@ -777,7 +777,7 @@ the removed directory if it becomes available/gets created again.
         * Optional
         * Default: **object.container.album.musicAlbum**/ **object.container.album.photoAlbum**/ **object.container**
 
-        Set the default container type for virtual containers during import.
+        Set the default container type for virtual containers and for physical containers in grb-mode during import.
         This is especially useful if the virtual layout simulates the filesystem structure and is not derived from metadata.
         The first object that is added to the container determines the property (audio/image/video) used.
 
