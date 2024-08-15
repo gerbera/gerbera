@@ -32,8 +32,10 @@
 #include <mutex>
 #include <unordered_set>
 
-class AutoScanSetting;
+// forward declarations
 class AutoscanDirectory;
+enum class AutoscanMediaMode;
+class AutoScanSetting;
 class CdsContainer;
 class CdsItem;
 class CdsObject;
@@ -48,10 +50,10 @@ class Layout;
 enum class LayoutType;
 class MetadataService;
 class Mime;
+enum class ObjectType;
 class ScriptingRuntime;
 class UpnpMap;
 
-// forward declarations
 #ifdef HAVE_JS
 class PlaylistParserScript;
 class MetafileParserScript;
@@ -80,18 +82,17 @@ private:
     std::shared_ptr<CdsObject> cdsObject;
     /// \brief CdsObject associated with the container (if cdsObject is a container)
     std::shared_ptr<CdsObject> firstObject;
+    /// \brief counters of child object types for container type
+    std::map<ObjectType, std::size_t> itemCounter;
 
     /// \brief parent container (if cdsObject is a item)
     std::shared_ptr<CdsContainer> parentObject;
 
 public:
-    ContentState(fs::directory_entry dirEntry, ImportState state, std::chrono::seconds mtime = std::chrono::seconds::zero(), std::shared_ptr<CdsObject> cdsObject = nullptr)
-        : state(state)
-        , dirEntry(std::move(dirEntry))
-        , mtime(mtime)
-        , cdsObject(std::move(cdsObject))
-    {
-    }
+    ContentState(fs::directory_entry dirEntry,
+        ImportState state,
+        std::chrono::seconds mtime = std::chrono::seconds::zero(),
+        std::shared_ptr<CdsObject> cdsObject = nullptr);
 
     void setObject(ImportState state, std::shared_ptr<CdsObject> cdsObject)
     {
@@ -118,6 +119,8 @@ public:
 
     ImportState getState() const { return state; }
     void setState(ImportState newState) { state = newState; }
+    void increaseItemCounter(ObjectType mt) { itemCounter[mt]++; }
+    AutoscanMediaMode getMediaMode() const;
 };
 
 class UpnpMap {
@@ -158,6 +161,7 @@ private:
     std::vector<UpnpMap> upnpMap {};
 
     std::shared_ptr<AutoscanDirectory> autoscanDir;
+    std::map<AutoscanMediaMode, std::string> containerTypeMap;
     fs::path rootPath;
     std::string noMediaName;
     bool hasReadableNames { false };
@@ -167,7 +171,7 @@ private:
     int containerImageMinDepth { 2 };
     std::vector<std::string> virtualDirKeys {};
 
-    ///\brief cache for containers while creating new layout
+    /// \brief cache for containers while creating new layout
     std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
     std::map<int, std::shared_ptr<CdsContainer>> containersWithFanArt;
 
@@ -186,14 +190,14 @@ private:
 
     void readDir(const fs::path& location, AutoScanSetting settings);
     void readFile(const fs::path& location);
-    ///\brief create containers for all discovered folders
+    /// \brief create containers for all discovered folders
     void createContainers(int parentContainerId, AutoScanSetting& settings);
-    ///\brief create items for all discovered files
+    /// \brief create items for all discovered files
     void createItems(AutoScanSetting& settings);
     void updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
     void fillLayout(const std::shared_ptr<GenericTask>& task);
-    void updateFanArt();
-    void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, int count);
+    void updateFanArt(bool isDir);
+    void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, AutoscanMediaMode mediaMode, bool isDir, int count);
     void removeHidden(const AutoScanSetting& settings);
 
     void cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime = std::chrono::seconds::zero(), const std::shared_ptr<CdsObject>& cdsObject = nullptr);

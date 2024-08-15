@@ -142,6 +142,7 @@ public:
     /// \brief Retrieve class
     std::string getClass() const { return upnpClass; }
     bool isSubClass(const std::string& cls) const;
+    ObjectType getMediaType(const std::string& contentType = "") const;
 
     /// \brief Set the physical location of the media (usually an absolute path)
     void setLocation(const fs::path& location) { this->location = location; }

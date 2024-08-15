@@ -60,7 +60,8 @@ enum class AutoscanScanMode {
 enum class AutoscanMediaMode {
     Audio,
     Image,
-    Video
+    Video,
+    Mixed,
 };
 
 /// \brief Provides information about one autoscan directory.

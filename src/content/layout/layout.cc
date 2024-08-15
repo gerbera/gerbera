@@ -34,7 +34,7 @@
 
 #ifdef ONLINE_SERVICES
 #include "content/onlineservice/online_service.h"
-#endif // ONLINE_SERVICES
+#endif
 
 #include <algorithm>
 
@@ -51,29 +51,26 @@ void Layout::processCdsObject(const std::shared_ptr<CdsObject>& obj,
     clone->setVirtual(true);
 
     std::vector<int> resObjects;
+    switch (obj->getMediaType(contentType)) {
 #ifdef ONLINE_SERVICES
-    if (clone->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
+    case ObjectType::OnlineService:
         resObjects = addOnlineItem(clone, OnlineServiceType(std::stoi(clone->getAuxData(ONLINE_SERVICE_AUX_ID))), rootpath, containerMap);
-    } else {
+        break;
 #endif
-
-        auto objCls = std::static_pointer_cast<CdsItem>(obj)->getClass();
-        if (contentType == CONTENT_TYPE_OGG) {
-            if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
-                resObjects = addVideo(clone, parent, rootpath, containerMap);
-            else
-                resObjects = addAudio(clone, parent, rootpath, containerMap);
-        } else if (startswith(objCls, UPNP_CLASS_VIDEO_ITEM)) {
-            resObjects = addVideo(clone, parent, rootpath, containerMap);
-        } else if (startswith(objCls, UPNP_CLASS_IMAGE_ITEM)) {
-            resObjects = addImage(clone, parent, rootpath, containerMap);
-        } else if (startswith(objCls, UPNP_CLASS_AUDIO_ITEM) && contentType != CONTENT_TYPE_PLAYLIST) {
-            resObjects = addAudio(clone, parent, rootpath, containerMap);
-        }
-
-#ifdef ONLINE_SERVICES
+    case ObjectType::Video:
+        resObjects = addVideo(clone, parent, rootpath, containerMap);
+        break;
+    case ObjectType::Image:
+        resObjects = addImage(clone, parent, rootpath, containerMap);
+        break;
+    case ObjectType::Audio:
+        resObjects = addAudio(clone, parent, rootpath, containerMap);
+        break;
+    default:
+        log_warning("Unknown media type {}", obj->getClass());
+        break;
     }
-#endif
+
     cleanUp(refObjects, resObjects);
 }
 

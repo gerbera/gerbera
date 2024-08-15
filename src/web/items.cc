@@ -126,7 +126,6 @@ void Web::Items::process()
 
     // ouput objects of container
     int cnt = start + 1;
-    auto cls = container->getClass();
     auto trackFmt = (param.getTotalMatches() >= 100) ? "{:03}" : "{:02}";
     for (auto&& arrayObj : arr) {
         auto item = items.append_child("item");
@@ -134,22 +133,21 @@ void Web::Items::process()
         item.append_child("title").append_child(pugi::node_pcdata).set_value(arrayObj->getTitle().c_str());
 
         auto objItem = std::static_pointer_cast<CdsItem>(arrayObj);
-        if (objItem->getPartNumber() > 0 && startswith(cls, UPNP_CLASS_MUSIC_ALBUM))
+        if (objItem->getPartNumber() > 0 && container->isSubClass(UPNP_CLASS_MUSIC_ALBUM))
             item.append_child("part").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", objItem->getPartNumber()).c_str());
-        if (objItem->getTrackNumber() > 0 && !startswith(cls, UPNP_CLASS_CONTAINER))
+        if (objItem->getTrackNumber() > 0 && !container->isSubClass(UPNP_CLASS_CONTAINER))
             item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, objItem->getTrackNumber()).c_str());
         else
             item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cnt).c_str());
         item.append_child("mtype").append_child(pugi::node_pcdata).set_value(objItem->getMimeType().c_str());
-        auto objClass = objItem->getClass();
-        item.append_child("upnp_class").append_child(pugi::node_pcdata).set_value(objClass.c_str());
+        item.append_child("upnp_class").append_child(pugi::node_pcdata).set_value(objItem->getClass().c_str());
         auto contRes = arrayObj->getResource(ResourcePurpose::Content);
         if (contRes) {
             item.append_child("size").append_child(pugi::node_pcdata).set_value(contRes->getAttributeValue(ResourceAttribute::SIZE).c_str());
-            if (!startswith(objClass, UPNP_CLASS_AUDIO_ITEM)) {
+            if (!objItem->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
                 item.append_child("resolution").append_child(pugi::node_pcdata).set_value(contRes->getAttribute(ResourceAttribute::RESOLUTION).c_str());
             }
-            if (!startswith(objClass, UPNP_CLASS_IMAGE_ITEM)) {
+            if (!objItem->isSubClass(UPNP_CLASS_IMAGE_ITEM)) {
                 item.append_child("duration").append_child(pugi::node_pcdata).set_value(contRes->getAttributeValue(ResourceAttribute::DURATION).c_str());
             }
         }

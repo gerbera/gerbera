@@ -34,6 +34,7 @@
 
 #include "metadata_service.h" // API
 
+#include "cds/cds_enums.h"
 #include "cds/cds_item.h"
 #include "config/config.h"
 #include "config/config_val.h"
@@ -125,11 +126,11 @@ void MetadataService::extractMetaData(const std::shared_ptr<CdsItem>& item, cons
     item->clearMetaData();
 
     std::string contentType = getValueOrDefault(mappings, mimetype);
-    auto itemCls = item->getClass();
-
     if ((contentType == CONTENT_TYPE_OGG) && (isTheora(item->getLocation()))) {
         item->setFlag(OBJECT_FLAG_OGG_THEORA);
     }
+
+    auto mediaType = item->getMediaType(contentType);
 
 #ifdef HAVE_TAGLIB
     if ((contentType == CONTENT_TYPE_MP3) || ((contentType == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) || (contentType == CONTENT_TYPE_WMA) || (contentType == CONTENT_TYPE_WAVPACK) || (contentType == CONTENT_TYPE_FLAC) || (contentType == CONTENT_TYPE_PCM) || (contentType == CONTENT_TYPE_AIFF) || (contentType == CONTENT_TYPE_APE) || (contentType == CONTENT_TYPE_MP4)) {
@@ -138,7 +139,7 @@ void MetadataService::extractMetaData(const std::shared_ptr<CdsItem>& item, cons
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_EXIV2
-    if (startswith(itemCls, UPNP_CLASS_IMAGE_ITEM)) {
+    if (mediaType == ObjectType::Image) {
         handlers[MetadataType::Exiv2]->fillMetadata(item);
     }
 #endif
@@ -162,7 +163,7 @@ void MetadataService::extractMetaData(const std::shared_ptr<CdsItem>& item, cons
 #endif
 
 #ifdef HAVE_FFMPEG
-    if (contentType != CONTENT_TYPE_PLAYLIST && (startswith(itemCls, UPNP_CLASS_AUDIO_ITEM) || startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))) {
+    if (mediaType == ObjectType::Audio || mediaType == ObjectType::Video) {
         handlers[MetadataType::Ffmpeg]->fillMetadata(item);
     }
 #else
@@ -175,19 +176,19 @@ void MetadataService::extractMetaData(const std::shared_ptr<CdsItem>& item, cons
 #endif // HAVE_FFMPEG
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
-    // Thumbnails for videos
-    if (startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))
+    // Thumbnails for videos and images
+    if (mediaType == ObjectType::Video)
         handlers[MetadataType::VideoThumbnailer]->fillMetadata(item);
-    else if (startswith(itemCls, UPNP_CLASS_IMAGE_ITEM))
+    else if (mediaType == ObjectType::Image)
         handlers[MetadataType::ImageThumbnailer]->fillMetadata(item);
 #endif
 
     // Fanart for audio and video
-    if (startswith(itemCls, UPNP_CLASS_AUDIO_ITEM) || startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))
+    if (mediaType == ObjectType::Audio || mediaType == ObjectType::Video)
         handlers[MetadataType::FanArt]->fillMetadata(item);
 
     // Subtitles for videos
-    if (startswith(itemCls, UPNP_CLASS_VIDEO_ITEM))
+    if (mediaType == ObjectType::Video)
         handlers[MetadataType::Subtitle]->fillMetadata(item);
 
     // Metadata from text files
