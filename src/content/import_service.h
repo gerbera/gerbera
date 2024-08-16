@@ -167,6 +167,7 @@ private:
     bool hasReadableNames { false };
     bool hasCaseSensitiveNames { true };
     bool hasDefaultDate { true };
+    bool pcDirTypes { true };
     int containerImageParentCount { 2 };
     int containerImageMinDepth { 2 };
     std::vector<std::string> virtualDirKeys {};

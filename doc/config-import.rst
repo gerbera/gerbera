@@ -700,6 +700,17 @@ the removed directory if it becomes available/gets created again.
 
         ::
 
+            dirtypes="yes|no"
+
+        * Optional
+        * Default: ``yes``
+
+        Values of ``yes`` or ``no`` are allowed, specifies if containers in
+        PC Directory will get container types like albums based on the majority
+        of child items.
+
+        ::
+
             hidden-files="yes|no"
 
         * Optional

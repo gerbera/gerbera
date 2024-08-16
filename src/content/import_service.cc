@@ -181,6 +181,7 @@ void ImportService::run(std::shared_ptr<ContentManager> content, std::shared_ptr
         this->autoscanDir = std::move(autoScan);
         this->containerTypeMap = this->autoscanDir->getContainerTypes();
         this->rootPath = std::move(path);
+        this->pcDirTypes = this->autoscanDir->hasDirTypes();
     }
 }
 
@@ -737,7 +738,7 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
 
     bool doUpdate = false;
     if (refObj) {
-        if (refObj->isItem() && isDir && container->getClass() != containerTypeMap.at(mediaMode)) {
+        if (isDir && pcDirTypes && refObj->isItem() && container->getClass() != containerTypeMap.at(mediaMode)) {
             container->setClass(containerTypeMap.at(mediaMode));
             doUpdate = true;
         }

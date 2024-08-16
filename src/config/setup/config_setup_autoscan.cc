@@ -88,6 +88,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
         }
 
         bool recursive = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE)->getXmlContent(child);
+        bool dirtypes = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES)->getXmlContent(child);
         int mt = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE)->getXmlContent(child);
         log_debug("mt = {} -> {}", mt, AutoscanDirectory::mapMediaType(mt));
 
@@ -108,6 +109,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
             containerMap[AutoscanMediaMode::Video] = ctVideo;
             auto adir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true, interval, hidden, follow, mt, containerMap);
             adir->setRetryCount(retryCount);
+            adir->setDirTypes(dirtypes);
             result.push_back(adir);
         } catch (const std::runtime_error& e) {
             log_error("Could not add {}: {}", location.string(), e.what());
@@ -157,6 +159,15 @@ bool ConfigAutoscanSetup::updateItem(std::size_t i, const std::string& optItem, 
             config->setOrigValue(index, entry->getRecursive());
         entry->setRecursive(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE)->checkValue(optValue));
         log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getRecursive());
+        return true;
+    }
+
+    index = getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES });
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->hasDirTypes());
+        entry->setDirTypes(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES)->checkValue(optValue));
+        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->hasDirTypes());
         return true;
     }
 

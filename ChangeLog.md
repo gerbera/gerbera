@@ -9,6 +9,7 @@
 - Clean up test code
 - Clean up URL handling
 - Configuration of additional target mimetype properties for transcoding
+- Config: Option to disable physical container types
 - Drop Apple Trailer support
 - Extract image and video orientation to resource attributes
 - FIXME done: Remove fake resource
