@@ -638,6 +638,11 @@
               "editable": true
             },
             {
+              "item": "/import/autoscan/timed/directory/attribute::dirtypes",
+              "caption": "Types for physical containers",
+              "editable": true
+            },
+            {
               "item": "/import/autoscan/timed/directory/attribute::media-type",
               "caption": "Mediatype",
               "editable": false
@@ -705,6 +710,11 @@
             {
               "item": "/import/autoscan/inotify/directory/attribute::recursive",
               "caption": "Recursive",
+              "editable": true
+            },
+            {
+              "item": "/import/autoscan/inotify/directory/attribute::dirtypes",
+              "caption": "Types for physical containers",
               "editable": true
             },
             {

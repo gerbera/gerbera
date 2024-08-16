@@ -131,6 +131,9 @@ public:
     void setHidden(bool hidden) { this->hidden = hidden; }
     bool getHidden() const { return hidden; }
 
+    void setDirTypes(bool dirTypes) { this->dirTypes = dirTypes; }
+    bool hasDirTypes() const { return dirTypes; }
+
     void setFollowSymlinks(bool followSymlinks) { this->followSymlinks = followSymlinks; }
     bool getFollowSymlinks() const { return followSymlinks; }
 
@@ -229,6 +232,7 @@ protected:
     bool isOrig {};
     bool recursive {};
     bool hidden {};
+    bool dirTypes { true };
     bool followSymlinks {};
     bool persistentFlag {};
     std::chrono::seconds interval = std::chrono::seconds::zero();
