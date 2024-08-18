@@ -1403,6 +1403,15 @@ Resource attributes can be seen in the details page for an item on the web UI. T
 This section holds the additional identifiers for virtual directories to make sure, e.g. albums with the same title
 are distiguished by their artist even if the displayed text is identical.
 
+* Default
+
+::
+
+    <virtual-directories>
+        <key metadata="M_ALBUMARTIST"/>
+        <key metadata="M_UPNP_DATE"/>
+    </virtual-directories>
+
 **Child tags:**
 
 ``key``
@@ -1415,14 +1424,14 @@ are distiguished by their artist even if the displayed text is identical.
 * Optional
 
 Specifies the metadata fields to add for identification internally. For a list of valid metadata see :ref:`Metadata <upnp-tags>`.
-In addition ``LOCATION`` references to the location property retreived from the layout script.
+In addition ``LOCATION`` references to the location property retrieved from the layout script.
 
 * Example
 
 ::
 
     <virtual-directories>
-        <key metadata="M_ALBUMARTIST"/>
+        <key metadata="LOCATION"/>
         <key metadata="M_UPNP_DATE"/>
     </virtual-directories>
 

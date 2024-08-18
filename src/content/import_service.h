@@ -188,6 +188,7 @@ private:
     fs::path activeScan {};
 
     std::string mimeTypeToUpnpClass(const std::string& mimeType);
+    std::string makeTitle(const fs::path& objectPath, const std::string upnpClass);
 
     void readDir(const fs::path& location, AutoScanSetting settings);
     void readFile(const fs::path& location);

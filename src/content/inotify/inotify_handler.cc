@@ -27,6 +27,7 @@
 #ifdef HAVE_INOTIFY
 #include "content/inotify/inotify_handler.h" // API
 
+#include "cds/cds_objects.h"
 #include "config/result/autoscan.h"
 #include "content/autoscan_setting.h"
 #include "content/content.h"
@@ -195,7 +196,7 @@ void InotifyHandler::doDirectory(AutoScanSetting& asSetting, const std::shared_p
     }
 }
 
-int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj, ImportMode importMode, bool isDir)
+int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj, ImportMode importMode, bool& isDir)
 {
     int result = INOTIFY_ROOT;
     if (!AUTOSCAN_IS_NEW(mask)) {
@@ -213,13 +214,14 @@ int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, co
             }
         }
 
-        if (!AUTOSCAN_IS_WRITTEN(mask) || importMode != ImportMode::Gerbera) {
-            auto object = database->findObjectByPath(path, isDir ? DbFileType::Directory : DbFileType::File);
-            log_debug("found {} -> {}", path.c_str(), !!object);
-            if (object) {
-                log_debug("deleting {}", path.c_str());
-                content->removeObject(adir, object, path, !AUTOSCAN_IS_MOVED(mask));
-            }
+        changedObject = database->findObjectByPath(path, DbFileType::Any);
+        log_debug("found {} -> {}", path.c_str(), changedObject ? changedObject->getID() : INVALID_OBJECT_ID);
+        if (changedObject)
+            isDir = changedObject->isContainer();
+        if (!AUTOSCAN_IS_WRITTEN(mask) && importMode != ImportMode::Gerbera && changedObject) {
+            log_debug("deleting {}", path.c_str());
+            content->removeObject(adir, changedObject, path, !AUTOSCAN_IS_MOVED(mask));
+            changedObject = nullptr;
         }
     }
     return result;
@@ -227,10 +229,14 @@ int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, co
 
 void InotifyHandler::doNewFile(AutoScanSetting& asSetting, const std::shared_ptr<Content>& content, bool isDir)
 {
+    if (changedObject)
+        asSetting.changedObject = changedObject;
+
     if (AUTOSCAN_IS_NEW_FILE(mask)) {
         log_debug("Adding {}", path.c_str());
         // dirEnt, path, rootPath, settings, lowPriority, cancellable
         content->addFile(dirEnt, adir->getLocation(), asSetting, true, false);
+        asSetting.changedObject = nullptr;
         if (isDir) {
             auto wdObjPath = ai->monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
             if (AUTOSCAN_IS_MOVED(mask) && wdObjPath) {

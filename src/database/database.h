@@ -31,18 +31,18 @@
 
 /// \file database.h
 
-#ifndef __STORAGE_H__
-#define __STORAGE_H__
+#ifndef __GRB_DATABASE_H__
+#define __GRB_DATABASE_H__
+
+#include "util/grb_fs.h"
 
 #include <map>
 #include <unordered_set>
 #include <vector>
 
-#include "util/grb_fs.h"
-
-// forward declaration
-class AutoscanList;
+// forward declarations
 class AutoscanDirectory;
+class AutoscanList;
 enum class AutoscanScanMode;
 class CdsContainer;
 class CdsObject;
@@ -194,6 +194,7 @@ enum class DbFileType {
     Directory,
     File,
     Virtual,
+    Any,
 };
 
 class Database {
@@ -367,4 +368,4 @@ protected:
     std::shared_ptr<Config> config;
 };
 
-#endif // __STORAGE_H__
+#endif // __GRB_DATABASE_H__

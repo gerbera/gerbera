@@ -32,6 +32,7 @@ config being unused or triggering warnings.
 
 - Warning in case import function does not return new ids.
 - Config values `<online-content fetch-buffer-size="262144" fetch-buffer-fill-size="0">` are implemented now.
+- Renaming of files or folders in grb-mode
 
 ### Code Improvements
 
