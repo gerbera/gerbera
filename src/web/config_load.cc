@@ -672,6 +672,10 @@ void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
             setValue(item, adir->getRecursive());
 
             item = values.append_child(CONFIG_LOAD_ITEM);
+            createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES);
+            setValue(item, adir->hasDirTypes());
+
+            item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(i, { ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE);
             setValue(item, AutoscanDirectory::mapMediaType(adir->getMediaType()));
 

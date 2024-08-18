@@ -247,15 +247,18 @@ std::string ImportService::mimeTypeToUpnpClass(const std::string& mimeType)
 
 void ImportService::clearCache()
 {
+    log_debug("Clearing Cache '{}'", rootPath.c_str());
     containerMap.clear();
     containersWithFanArt.clear();
 }
 
 void ImportService::doImport(const fs::path& location, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task)
 {
-    log_debug("start {} root '{}'", location.string(), rootPath.string());
+    log_debug("start {} root '{}' update {}", location.string(), rootPath.string(), !!settings.changedObject);
     if (activeScan.empty()) {
         contentStateCache.clear();
+        if (settings.changedObject)
+            clearCache();
         activeScan = location;
     } else {
         log_debug("Additional scan {}, already active {}", location.c_str(), activeScan.c_str());
@@ -276,7 +279,7 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
         return;
     }
 
-    cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)));
+    cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)), settings.changedObject);
     if (isDir) {
         readDir(location, settings);
     } else {
@@ -416,7 +419,7 @@ bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, co
     if (!noMediaName.empty()) {
         auto noMediaFile = (isDirectory) ? entryPath / noMediaName : entryPath.parent_path() / noMediaName;
         if (contentStateCache.find(noMediaFile) != contentStateCache.end()) {
-            return contentStateCache[noMediaFile]->getState() != ImportState::Broken; // broken means: file not found
+            return !contentStateCache.at(noMediaFile) || contentStateCache.at(noMediaFile)->getState() != ImportState::Broken; // broken means: file not found
         }
         auto noMediaEntry = fs::directory_entry(noMediaFile, ec);
         if (!noMediaEntry.exists(ec) || ec) {
@@ -437,8 +440,27 @@ void ImportService::createContainers(int parentContainerId, AutoScanSetting& set
         if (!stateEntry || stateEntry->getState() != ImportState::New)
             continue;
         auto dirEntry = stateEntry->getDirEntry();
+        bool doUpdate = false;
         if (dirEntry.exists(ec) && dirEntry.is_directory(ec)) {
-            auto cdsObj = database->findObjectByPath(contPath, DbFileType::Directory);
+            auto cdsObj = stateEntry->getObject();
+            if (cdsObj) {
+                auto oldLocation = cdsObj->getLocation();
+                cdsObj->setLocation(contPath);
+                log_debug("Container renamed {} {}", cdsObj->getTitle(), contPath.filename().string());
+                cdsObj->setTitle(contPath.filename().string());
+                doUpdate = true;
+                log_debug("Container moved {} {}", oldLocation.string(), contPath.string());
+                for (auto&& [childPath, childEntry] : contentStateCache) {
+                    // find direct folder entry with old name and rely on iteration to rename hierarchy
+                    if (childEntry && childPath.parent_path() == contPath) {
+                        auto childObj = database->findObjectByPath(oldLocation / childPath.filename(), DbFileType::Any);
+                        if (childObj)
+                            childEntry->setObject(ImportState::New, childObj);
+                    }
+                }
+            }
+            if (!cdsObj)
+                cdsObj = database->findObjectByPath(contPath, DbFileType::Directory);
 
             if (cdsObj) {
                 try {
@@ -446,13 +468,19 @@ void ImportService::createContainers(int parentContainerId, AutoScanSetting& set
                     if (!container || !cdsObj->isContainer()) {
                         throw_std_runtime_error("Object {} is not a container", cdsObj->getLocation().string());
                     }
-                    stateEntry->setObject(ImportState::Existing, container);
                     auto lastModified = toSeconds(dirEntry.last_write_time(ec));
                     if (lastModified > container->getMTime()) {
                         container->setMTime(lastModified);
+                        doUpdate = true;
                     }
-                    log_debug("Container found {} {}", contPath.string(), container->getID());
-
+                    if (doUpdate) {
+                        database->updateObject(cdsObj, nullptr);
+                        stateEntry->setObject(ImportState::Created, cdsObj);
+                        log_debug("Container updated {} {}", contPath.string(), container->getID());
+                    } else {
+                        stateEntry->setObject(ImportState::Existing, cdsObj);
+                        log_debug("Container found {} {}", contPath.string(), container->getID());
+                    }
                 } catch (const std::runtime_error& e) {
                     stateEntry->setObject(ImportState::Broken, cdsObj);
                     log_error("createContainers: Failed to load parent container {}, {}", contPath.c_str(), e.what());
@@ -517,28 +545,34 @@ void ImportService::createItems(AutoScanSetting& settings)
                 log_debug("Searching Item {} in database", itemPath.string());
                 cdsObj = database->findObjectByPath(itemPath, DbFileType::File);
             }
-            if (cdsObj && cdsObj->isItem() && stateEntry->getMTime() != cdsObj->getMTime()) {
-                // Update changed item in database
-                log_debug("Updating Item {} in database {}", itemPath.string(), cdsObj->getID());
-                auto item = std::dynamic_pointer_cast<CdsItem>(cdsObj);
-                item->clearMetaData();
-                item->clearAuxData();
-                item->clearResources();
-                updateSingleItem(dirEntry, item, item->getMimeType());
-                if (lastModifiedNewMax < cdsObj->getMTime())
-                    lastModifiedNewMax = cdsObj->getMTime();
-                database->updateObject(cdsObj, nullptr);
-                stateEntry->setObject(ImportState::Created, cdsObj);
-                log_debug("Item changed {} {}", itemPath.string(), cdsObj->getID());
-            } else if (cdsObj) {
-                // Store local item
-                if (contState && contState->getMTime() < cdsObj->getMTime()) {
-                    contState->setMTime(cdsObj->getMTime());
+            if (cdsObj && cdsObj->isItem()) {
+                auto isChanged = stateEntry->getMTime() != cdsObj->getMTime() || cdsObj->getLocation().string() != dirEntry.path().string();
+                if (isChanged) {
+                    // Update changed item in database
+                    log_debug("Updating Item {} in database {}", itemPath.string(), cdsObj->getID());
+                    auto item = std::dynamic_pointer_cast<CdsItem>(cdsObj);
+                    item->clearMetaData();
+                    item->clearAuxData();
+                    item->clearResources();
+                    log_debug("Changing location {} to {}", item->getLocation().string(), itemPath.string());
+                    item->setLocation(itemPath);
+                    item->setTitle(makeTitle(itemPath, item->getClass()));
+                    updateSingleItem(dirEntry, item, item->getMimeType());
                     if (lastModifiedNewMax < cdsObj->getMTime())
                         lastModifiedNewMax = cdsObj->getMTime();
+                    database->updateObject(cdsObj, nullptr);
+                    stateEntry->setObject(ImportState::Created, cdsObj);
+                    log_debug("Item changed {} {}", itemPath.string(), cdsObj->getID());
+                } else {
+                    // Store local item with updated status
+                    if (contState && contState->getMTime() < cdsObj->getMTime()) {
+                        contState->setMTime(cdsObj->getMTime());
+                        if (lastModifiedNewMax < cdsObj->getMTime())
+                            lastModifiedNewMax = cdsObj->getMTime();
+                    }
+                    stateEntry->setObject(ImportState::Existing, cdsObj);
+                    log_debug("Item found {} {}", itemPath.string(), cdsObj->getID());
                 }
-                stateEntry->setObject(ImportState::Existing, cdsObj);
-                log_debug("Item found {} {}", itemPath.string(), cdsObj->getID());
             } else {
                 // Create item from scratch
                 log_debug("Creating Item {}", itemPath.string());
@@ -613,17 +647,22 @@ std::pair<bool, std::shared_ptr<CdsObject>> ImportService::createSingleItem(cons
         item->setClass(upnpClass);
     }
 
+    item->setTitle(makeTitle(objectPath, upnpClass));
+    updateSingleItem(dirEntry, item, mimetype);
+
+    return { skip, item };
+}
+
+std::string ImportService::makeTitle(const fs::path& objectPath, const std::string upnpClass)
+{
     auto f2i = converterManager->f2i();
-    auto title = objectPath.filename().string();
+    std::string title = objectPath.filename().string();
     if (hasReadableNames && upnpClass != UPNP_CLASS_ITEM) {
         title = objectPath.stem().string();
         if (title.length() > 1)
             std::replace(title.begin() + 1, title.end() - 1, '_', ' ');
     }
-    item->setTitle(f2i->convert(title));
-    updateSingleItem(dirEntry, item, mimetype);
-
-    return { skip, item };
+    return f2i->convert(title);
 }
 
 void ImportService::updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype)
@@ -856,6 +895,7 @@ std::pair<int, bool> ImportService::addContainerTree(
     const std::shared_ptr<CdsObject>& refItem,
     std::vector<int>& createdIds)
 {
+    log_debug("start '{}' {}", rootPath.string(), parentContainerId);
     std::string tree; // accumulate path to container here
     int result = parentContainerId;
     bool isNew = false;
@@ -933,6 +973,7 @@ std::pair<int, bool> ImportService::addContainerTree(
         if (isVirtual) // && chain.size() - count < containerImageParentCount
             assignFanArt(containerMap[subTree], refItem && count > containerImageMinDepth ? refItem : item, AutoscanMediaMode::Mixed, false, chain.size() - count);
     }
+    log_debug("end '{}' {} {}", tree, result, isNew);
     return { result, isNew };
 }
 

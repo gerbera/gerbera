@@ -697,8 +697,8 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
     cdsObjectSql.emplace("last_updated", quote(currentTime().count()));
 
     int parentID = obj->getParentID();
-    if (obj->isContainer() && op == Operation::Update && obj->isVirtual()) {
-        fs::path dbLocation = addLocationPrefix(LOC_VIRT_PREFIX, obj->getLocation());
+    if (obj->isContainer() && op == Operation::Update) {
+        fs::path dbLocation = addLocationPrefix(obj->isVirtual() ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX, obj->getLocation());
         cdsObjectSql.emplace("location", quote(dbLocation));
         cdsObjectSql.emplace("location_hash", quote(stringHash(dbLocation.string())));
     } else if (obj->isItem()) {
@@ -1294,37 +1294,41 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
 
 std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpath, DbFileType fileType)
 {
-    std::string dbLocation = [&fullpath, fileType] {
-        std::error_code ec;
-        if (fileType == DbFileType::File || (fileType == DbFileType::Auto && isRegularFile(fullpath, ec)))
-            return addLocationPrefix(LOC_FILE_PREFIX, fullpath);
-        if (fileType == DbFileType::Virtual)
-            return addLocationPrefix(LOC_VIRT_PREFIX, fullpath);
-        return addLocationPrefix(LOC_DIR_PREFIX, fullpath);
-    }();
+    auto fileTypeList = fileType == DbFileType::Any ? std::vector<DbFileType> { DbFileType::File, DbFileType::Directory, DbFileType::Virtual } : std::vector<DbFileType> { fileType };
+    for (auto&& ft : fileTypeList) {
+        std::string dbLocation = [&fullpath, ft] {
+            std::error_code ec;
+            if (ft == DbFileType::File || (ft == DbFileType::Auto && isRegularFile(fullpath, ec)))
+                return addLocationPrefix(LOC_FILE_PREFIX, fullpath);
+            if (ft == DbFileType::Virtual)
+                return addLocationPrefix(LOC_VIRT_PREFIX, fullpath);
+            return addLocationPrefix(LOC_DIR_PREFIX, fullpath);
+        }();
 
-    auto where = std::vector {
-        fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::LocationHash), quote(stringHash(dbLocation))),
-        fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::Location), quote(dbLocation)),
-        fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseCol::RefId)),
-    };
-    auto findSql = fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", sql_browse_columns, sql_browse_query, fmt::join(where, " AND "));
+        auto where = std::vector {
+            fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::LocationHash), quote(stringHash(dbLocation))),
+            fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::Location), quote(dbLocation)),
+            fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseCol::RefId)),
+        };
+        auto findSql = fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", sql_browse_columns, sql_browse_query, fmt::join(where, " AND "));
 
-    beginTransaction("findObjectByPath");
-    auto res = select(findSql);
-    if (!res) {
-        commit("findObjectByPath");
-        throw_std_runtime_error("error while doing select: {}", findSql);
+        beginTransaction("findObjectByPath");
+        auto res = select(findSql);
+        log_debug("{} -> res={} ({})", findSql, !!res, res ? res->getNumRows() : -1);
+        if (!res) {
+            commit("findObjectByPath");
+            throw_std_runtime_error("error while doing select: {}", findSql);
+        }
+        auto row = res->nextRow();
+        if (row) {
+            auto result = createObjectFromRow(DEFAULT_CLIENT_GROUP, row);
+            commit("findObjectByPath");
+            return result;
+        }
     }
 
-    auto row = res->nextRow();
-    if (!row) {
-        commit("findObjectByPath");
-        return nullptr;
-    }
-    auto result = createObjectFromRow(DEFAULT_CLIENT_GROUP, row);
     commit("findObjectByPath");
-    return result;
+    return nullptr;
 }
 
 int SQLDatabase::findObjectIDByPath(const fs::path& fullpath, DbFileType fileType)

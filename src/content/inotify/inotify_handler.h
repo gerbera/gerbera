@@ -34,6 +34,7 @@
 class AutoscanInotify;
 class AutoScanSetting;
 class AutoscanDirectory;
+class CdsObject;
 class Content;
 class Database;
 class DirectoryWatch;
@@ -52,7 +53,7 @@ public:
     std::pair<bool, std::shared_ptr<AutoscanDirectory>> getAutoscanDirectory(const std::shared_ptr<DirectoryWatch>& wdObj);
     void doMove(const std::shared_ptr<DirectoryWatch>& wdObj);
     void doDirectory(AutoScanSetting& asSetting, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj);
-    int doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj, ImportMode importMode, bool isDir);
+    int doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj, ImportMode importMode, bool& isDir);
     void doNewFile(AutoScanSetting& asSetting, const std::shared_ptr<Content>& content, bool isDir);
     void doIgnored();
 
@@ -66,6 +67,7 @@ private:
     InotifyFlags mask;
     std::string name;
     std::shared_ptr<AutoscanDirectory> adir;
+    std::shared_ptr<CdsObject> changedObject;
     fs::directory_entry dirEnt;
     fs::path path;
 };

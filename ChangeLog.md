@@ -13,6 +13,7 @@
 - Drop Apple Trailer support
 - Extract image and video orientation to resource attributes
 - FIXME done: Remove fake resource
+- Import: Fix renaming of file or folder
 - Improve docker instructions
 - Improve handling of thumbnail profiles
 - Mention .m4a in compilation options

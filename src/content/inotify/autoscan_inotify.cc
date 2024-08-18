@@ -107,6 +107,7 @@ void AutoscanInotify::threadProc()
 {
     std::error_code ec;
     auto importMode = EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
+    AutoScanSetting asSetting;
     while (!shutdownFlag) {
         try {
             std::unique_lock<std::mutex> lock(mutex);
@@ -187,7 +188,6 @@ void AutoscanInotify::threadProc()
             /* --- */
 
             if (event) {
-                // lock.lock()
                 auto handler = InotifyHandler(this, event, events);
                 auto wdObj = getWatch(handler);
 
@@ -199,19 +199,14 @@ void AutoscanInotify::threadProc()
 
                 handler.doMove(wdObj);
 
-                AutoScanSetting asSetting;
                 asSetting.adir = adir;
                 asSetting.followSymlinks = adir ? adir->getFollowSymlinks() : defFollowSymlinks;
                 asSetting.recursive = adir ? adir->getRecursive() : false;
                 asSetting.hidden = adir ? adir->getHidden() : defHidden;
                 asSetting.rescanResource = true;
-                asSetting.async = true;
+                asSetting.async = false;
+                asSetting.resourcePatterns.clear();
                 asSetting.mergeOptions(config, path);
-
-                // target is directory
-                if (isDir) {
-                    handler.doDirectory(asSetting, content, wdObj);
-                }
 
                 // changed
                 if (adir && handler.hasEvent()) {
@@ -222,8 +217,11 @@ void AutoscanInotify::threadProc()
                     // new file
                     handler.doNewFile(asSetting, content, isDir);
                 }
+                // target is directory
+                if (isDir) {
+                    handler.doDirectory(asSetting, content, wdObj);
+                }
                 handler.doIgnored();
-                // lock.unlock()
             }
         } catch (const std::runtime_error& e) {
             log_error("Inotify thread caught exception: {}", e.what());
@@ -440,11 +438,11 @@ std::shared_ptr<DirectoryWatch> AutoscanInotify::monitorUnmonitorRecursive(const
 
         AutoScanSetting asSetting;
         asSetting.adir = adir;
-        asSetting.followSymlinks = adir ? adir->getFollowSymlinks() : defFollowSymlinks;
+        asSetting.followSymlinks = followSymlinks;
         asSetting.recursive = adir ? adir->getRecursive() : false;
         asSetting.hidden = adir ? adir->getHidden() : defHidden;
         asSetting.rescanResource = true;
-        asSetting.async = true;
+        asSetting.async = false;
         asSetting.mergeOptions(config, dirEnt.path());
 
         if (content->isHiddenFile(dirEnt, dirEnt.is_directory(ec), asSetting)) {
