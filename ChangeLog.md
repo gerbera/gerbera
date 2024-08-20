@@ -16,6 +16,7 @@
 - Import: Fix renaming of file or folder
 - Improve docker instructions
 - Improve handling of thumbnail profiles
+- Inotify: Fix deleting files
 - Mention .m4a in compilation options
 - Refactor StringConverter
 - Refactor Upnp Services
