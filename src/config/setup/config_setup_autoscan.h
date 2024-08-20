@@ -61,7 +61,8 @@ public:
 
     std::string getUniquePath() const override;
 
-    std::string getItemPath(int index, const std::vector<ConfigVal>& propOptions) const override;
+    std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const override;
+    std::string getItemPathRoot(bool prefix = false) const override;
 
     std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 

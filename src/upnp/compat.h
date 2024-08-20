@@ -33,6 +33,10 @@
 
 #if defined(USING_NPUPNP)
 
+#ifndef UPNP_VERSION
+#define UPNP_VERSION (NPUPNP_VERSION_MAJOR * 10000 + NPUPNP_VERSION_MINOR * 100 + NPUPNP_VERSION_PATCH)
+#endif
+
 #define GrbUpnpFileInfoSetContentType(i, mt) (i)->content_type = std::move((mt))
 #define GrbUpnpGetHeaders(i) (i)->request_headers
 #define GrbUpnpSetHeaders(i, h) std::copy((h).begin(), (h).end(), std::back_inserter((i)->response_headers))

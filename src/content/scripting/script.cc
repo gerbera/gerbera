@@ -178,7 +178,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             continue;
         auto value = scs->getCurrentValue();
         if (!value.empty()) {
-            setProperty(scs->getItemPath(ITEM_PATH_ROOT, {}), value);
+            setProperty(scs->getItemPathRoot(), value);
         }
     }
 
@@ -188,7 +188,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
         for (auto&& [key, val] : dictionary) {
             setProperty(key.substr(5), val);
         }
-        duk_put_prop_string(ctx, -2, dcs->getItemPath(ITEM_PATH_ROOT, {}).c_str());
+        duk_put_prop_string(ctx, -2, dcs->getItemPathRoot().c_str());
     }
 
     for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
@@ -199,7 +199,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             duk_push_string(ctx, entry.c_str());
             duk_put_prop_index(ctx, dukArray, i);
         }
-        duk_put_prop_string(ctx, -2, acs->getItemPath(ITEM_PATH_ROOT, {}).c_str());
+        duk_put_prop_string(ctx, -2, acs->getItemPathRoot().c_str());
     }
 
     duk_push_object(ctx); // autoscan
@@ -220,7 +220,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
 
             duk_put_prop_string(ctx, -2, fmt::to_string(adir->getScanID()).c_str());
         }
-        autoscanItemPath = ascs->getItemPath(ITEM_PATH_PREFIX, {}); // prefix
+        autoscanItemPath = ascs->getItemPathRoot(true); // prefix
     }
     duk_put_prop_string(ctx, -2, autoscanItemPath.c_str()); // autoscan
 
@@ -238,7 +238,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_CLASS), boxLayout->getClass());
             duk_put_prop_string(ctx, -2, boxLayout->getKey().c_str());
         }
-        boxLayoutItemPath = bcs->getItemPath(ITEM_PATH_PREFIX, {}); // prefix
+        boxLayoutItemPath = bcs->getItemPathRoot(true); // prefix
         duk_put_prop_string(ctx, -2, boxLayoutItemPath.c_str()); // box-layout
     }
 

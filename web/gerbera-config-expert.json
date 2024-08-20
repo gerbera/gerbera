@@ -497,11 +497,22 @@
           "editable": true
         },
         {
-          "item": "/server/ui/accounts",
+          "item": "/server/ui/accounts/account",
           "caption": "Accounts",
           "type": "List",
-          "editable": true,
-          "children": []
+          "editable": false,
+          "children": [
+             {
+               "item": "/server/ui/accounts/account/attribute::user",
+               "caption": "User",
+               "editable": false
+             },
+             {
+               "item": "/server/ui/accounts/account/attribute::password",
+               "caption": "Password",
+               "editable": false
+             }
+          ]
         },
         {
           "item": "/server/ui/items-per-page/attribute::default",
@@ -509,11 +520,18 @@
           "editable": true
         },
         {
-          "item": "/server/ui/items-per-page",
+          "item": "/server/ui/items-per-page/option",
           "caption": "Items Per Page",
           "type": "List",
-          "editable": true,
-          "children": []
+          "editable": false,
+          "children": [
+             {
+               "item": "/server/ui/items-per-page/option",
+               "caption": "Option",
+               "type": "Number",
+               "editable": false
+             }
+          ]
         }
       ]
     },
@@ -1902,7 +1920,7 @@
               "item": "/clients/client/map",
               "caption": "Mimetype Mappings",
               "type": "List",
-              "editable": true,
+              "editable": false,
               "children": [
                 {
                   "item": "/clients/client/map/attribute::from",
@@ -1912,6 +1930,24 @@
                 {
                   "item": "/clients/client/map/attribute::to",
                   "caption": "To",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/clients/client/header",
+              "caption": "Client Header",
+              "type": "List",
+              "editable": false,
+              "children": [
+                {
+                  "item": "/clients/client/header/attribute::key",
+                  "caption": "Key",
+                  "editable": true
+                },
+                {
+                  "item": "/clients/client/header/attribute::value",
+                  "caption": "Value",
                   "editable": true
                 }
               ]

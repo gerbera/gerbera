@@ -88,10 +88,10 @@ void ConfigClientSetup::makeOption(const pugi::xml_node& root, const std::shared
 
 bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status) const
 {
-    if (optItem == getItemPath(i, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+    if (optItem == getItemPath({ i }, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
-    auto index = getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_FLAGS });
+    auto index = getItemPath({ i }, { ConfigVal::A_CLIENTS_CLIENT_FLAGS });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
@@ -99,7 +99,7 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
         log_debug("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
         return true;
     }
-    index = getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_IP });
+    index = getItemPath({ i }, { ConfigVal::A_CLIENTS_CLIENT_IP });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getIp());
@@ -109,7 +109,7 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
             return true;
         }
     }
-    index = getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_GROUP });
+    index = getItemPath({ i }, { ConfigVal::A_CLIENTS_CLIENT_GROUP });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getGroup());
@@ -119,7 +119,7 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
             return true;
         }
     }
-    index = getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_ALLOWED });
+    index = getItemPath({ i }, { ConfigVal::A_CLIENTS_CLIENT_ALLOWED });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getAllowed());
@@ -127,7 +127,7 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
         log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getAllowed());
         return true;
     }
-    index = getItemPath(i, { ConfigVal::A_CLIENTS_CLIENT_USERAGENT });
+    index = getItemPath({ i }, { ConfigVal::A_CLIENTS_CLIENT_USERAGENT });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getUserAgent());
@@ -137,7 +137,7 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
             return true;
         }
     }
-    index = getItemPath(i, { ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT });
+    index = getItemPath({ i }, { ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getCaptionInfoCount());
@@ -145,7 +145,7 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
         log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getCaptionInfoCount());
         return true;
     }
-    index = getItemPath(i, { ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT });
+    index = getItemPath({ i }, { ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getStringLimit());
@@ -153,7 +153,7 @@ bool ConfigClientSetup::updateItem(std::size_t i, const std::string& optItem, co
         log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getStringLimit());
         return true;
     }
-    index = getItemPath(i, { ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE });
+    index = getItemPath({ i }, { ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getMultiValue());
@@ -212,19 +212,29 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
     return optionValue;
 }
 
-std::string ConfigClientSetup::getItemPath(int index, const std::vector<ConfigVal>& propOptions) const
+std::string ConfigClientSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
 {
-    if (index == ITEM_PATH_ROOT) {
-        return ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT);
-    }
-    if (index == ITEM_PATH_NEW) {
+    if (indexList.size() == 0) {
         if (propOptions.size() > 0) {
             return fmt::format("{}[_]/{}", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), ConfigDefinition::ensureAttribute(propOptions[0]));
         }
         return fmt::format("{}[_]", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT));
     }
     if (propOptions.size() > 0) {
-        return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), index, ConfigDefinition::ensureAttribute(propOptions[0]));
+        if (indexList.size() > 1) {
+            return fmt::format("{}[{}]/{}[{}]/{}",
+                ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT),
+                indexList[0],
+                ConfigDefinition::mapConfigOption(propOptions[0]),
+                indexList[1],
+                ConfigDefinition::ensureAttribute(propOptions[1]));
+        }
+        return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), indexList[0], ConfigDefinition::ensureAttribute(propOptions[0]));
     }
-    return fmt::format("{}[{}]", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), index);
+    return fmt::format("{}[{}]", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), indexList[0]);
+}
+
+std::string ConfigClientSetup::getItemPathRoot(bool prefix) const
+{
+    return ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT);
 }

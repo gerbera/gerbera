@@ -33,11 +33,12 @@ config being unused or triggering warnings.
 - Warning in case import function does not return new ids.
 - Config values `<online-content fetch-buffer-size="262144" fetch-buffer-fill-size="0">` are implemented now.
 - Renaming of files or folders in grb-mode
+- Nested arrays can be shown in config ui.
 
 ### Code Improvements
 
 - Build target for source documentation
-- Update versions of libexiv2 (0.28.3), fmt (11.0.2), googletest(1.15.0)
+- Update versions of libexiv2 (0.28.3), fmt (11.0.2), googletest (1.15.0), npupnp (6.2.0), taglib (2.0.2)
 - Upgrade contrib code cxxopts (3.2.1), md5 (2002)
 - Extract code for npupnp and pupnp specific handling
 - Refactoring of UPnP services

@@ -27,8 +27,8 @@ main_dir=$(realpath "${main_dir}")/
 VERSION="${TAGLIB-1.12}"
 
 script_dir=`pwd -P`
-src_dir="${main_dir}/taglib-${VERSION}"
-tgz_file="${main_dir}/taglib-${VERSION}.tgz"
+src_dir="${script_dir}/taglib-${VERSION}"
+tgz_file="${script_dir}/taglib-${VERSION}.tgz"
 patch_file="${main_dir}/${lsb_distro}/taglib.patch"
 
 downloadSource https://github.com/taglib/taglib/archive/v${VERSION}.tar.gz "-" "${patch_file}"
