@@ -74,8 +74,8 @@ void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, const std::sh
 
 bool ConfigDictionarySetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status) const
 {
-    auto keyIndex = getItemPath(i, { keyOption });
-    auto valIndex = getItemPath(i, { valOption });
+    auto keyIndex = getItemPath({ i }, { keyOption });
+    auto valIndex = getItemPath({ i }, { valOption });
     if (optItem == keyIndex || !status.empty()) {
         config->setOrigValue(keyIndex, optKey);
         if (status == STATUS_REMOVED) {
@@ -138,17 +138,21 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
     return false;
 }
 
-std::string ConfigDictionarySetup::getItemPath(int index, const std::vector<ConfigVal>& propOptions) const
+std::string ConfigDictionarySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
 {
     auto opt = propOptions.size() > 0 ? ConfigDefinition::ensureAttribute(propOptions[0]) : "";
-
-    if (index > ITEM_PATH_ROOT)
-        return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), index, opt);
-    if (index == ITEM_PATH_ROOT)
-        return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
-    if (index == ITEM_PATH_NEW)
+    if (indexList.size() == 0) {
         return fmt::format("{}/{}[_]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), opt);
-    return fmt::format("{}", xpath);
+    }
+
+    return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList[0], opt);
+}
+
+std::string ConfigDictionarySetup::getItemPathRoot(bool prefix) const
+{
+    if (prefix)
+        return xpath;
+    return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
 }
 
 std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pugi::xml_node& optValue)

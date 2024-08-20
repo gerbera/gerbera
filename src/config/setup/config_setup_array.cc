@@ -62,7 +62,7 @@ void ConfigArraySetup::makeOption(const pugi::xml_node& root, const std::shared_
 
 bool ConfigArraySetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status) const
 {
-    auto index = getItemPath(i, {});
+    auto index = getItemPath({ i }, {});
     if (optItem == index || !status.empty()) {
         auto realIndex = value->getIndex(i);
         if (realIndex < std::numeric_limits<std::size_t>::max()) {
@@ -115,12 +115,21 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
     return false;
 }
 
-std::string ConfigArraySetup::getItemPath(int index, const std::vector<ConfigVal>& propOptions) const
+std::string ConfigArraySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
 {
-    if (index < 0) {
-        return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
+    if (attrOption != ConfigVal::MAX) {
+        if (indexList.size() == 0)
+            return fmt::format("{}/{}[_]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), ConfigDefinition::ensureAttribute(attrOption));
+        return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList[0], ConfigDefinition::ensureAttribute(attrOption));
     }
-    return attrOption != ConfigVal::MAX ? fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), index, ConfigDefinition::ensureAttribute(attrOption)) : fmt::format("{}/{}[{}]", xpath, ConfigDefinition::mapConfigOption(nodeOption), index);
+    if (indexList.size() == 0)
+        return fmt::format("{}/{}[_]", xpath, ConfigDefinition::mapConfigOption(nodeOption));
+    return fmt::format("{}/{}[{}]", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList[0]);
+}
+
+std::string ConfigArraySetup::getItemPathRoot(bool prefix) const
+{
+    return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
 }
 
 std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& optValue)

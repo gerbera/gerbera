@@ -37,10 +37,6 @@
 #define YES "yes"
 #define NO "no"
 
-#define ITEM_PATH_ROOT (-1)
-#define ITEM_PATH_NEW (-2)
-#define ITEM_PATH_PREFIX (-3)
-
 using StringCheckFunction = std::function<bool(std::string& value)>;
 
 enum class ConfigVal;
@@ -157,7 +153,12 @@ public:
 
     virtual bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) { return false; }
 
-    virtual std::string getItemPath(int index, const std::vector<ConfigVal>& propOptions) const { return xpath; }
+    /// \brief calculate xpath for entry
+    /// \param indexList indexed for arrays
+    /// \param propOptions options to get section or attribute from
+    /// \return xpath of entry
+    virtual std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const { return xpath; }
+    virtual std::string getItemPathRoot(bool prefix = false) const { return xpath; }
 
     virtual std::string getUniquePath() const { return xpath; }
     virtual std::string getCurrentValue() const { return optionValue ? optionValue->getOption() : ""; }

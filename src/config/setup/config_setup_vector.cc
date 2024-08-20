@@ -87,7 +87,7 @@ bool ConfigVectorSetup::updateItem(std::size_t i, const std::string& optItem, co
     if (current.size() > i) {
         std::size_t optIndex = 0;
         for (auto&& [key, val] : current.at(i)) {
-            auto optionIndex = getItemPath(i, key);
+            auto optionIndex = getItemPath({ i }, key);
             if (optItem == optionIndex || !status.empty()) {
                 if (status == STATUS_RESET && !optValue.empty()) {
                     value->setValue(i, optIndex, config->getOrigValue(optionIndex));
@@ -144,28 +144,27 @@ bool ConfigVectorSetup::updateDetail(const std::string& optItem, std::string& op
     return false;
 }
 
-std::string ConfigVectorSetup::getItemPath(int index, const std::vector<ConfigVal>& propOptions) const
+std::string ConfigVectorSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
 {
     auto opt = ConfigDefinition::ensureAttribute(propOptions.size() > 0 ? propOptions[0] : ConfigVal::MAX);
-
-    if (index > ITEM_PATH_ROOT)
-        return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), index, opt);
-    if (index == ITEM_PATH_ROOT)
-        return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
-    if (index == ITEM_PATH_NEW)
+    if (indexList.size() == 0)
         return fmt::format("{}/{}[_]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), opt);
-    return fmt::format("{}", xpath);
+
+    return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList[0], opt);
 }
 
-std::string ConfigVectorSetup::getItemPath(int index, const std::string& propOption) const
+std::string ConfigVectorSetup::getItemPathRoot(bool prefix) const
 {
-    if (index > ITEM_PATH_ROOT)
-        return fmt::format("{}/{}[{}]/{}{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), index, ConfigDefinition::ATTRIBUTE, propOption);
-    if (index == ITEM_PATH_ROOT)
-        return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
-    if (index == ITEM_PATH_NEW)
+    if (prefix)
+        return fmt::format("{}", xpath);
+    return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
+}
+
+std::string ConfigVectorSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::string& propOption) const
+{
+    if (indexList.size() == 0)
         return fmt::format("{}/{}[_]/{}{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), ConfigDefinition::ATTRIBUTE, propOption);
-    return fmt::format("{}", xpath);
+    return fmt::format("{}/{}[{}]/{}{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList[0], ConfigDefinition::ATTRIBUTE, propOption);
 }
 
 std::vector<std::vector<std::pair<std::string, std::string>>> ConfigVectorSetup::getXmlContent(const pugi::xml_node& optValue)

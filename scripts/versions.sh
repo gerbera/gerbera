@@ -67,12 +67,12 @@ else
     GOOGLETEST="1.15.0"
     LASTFM="0.4.0"
     MATROSKA="1.7.1"
-    NPUPNP="6.1.2"
+    NPUPNP="6.2.0"
     PUGIXML="1.14"
     PUPNP="1.14.19"
     SPDLOG="1.14.1"
     WAVPACK="5.7.0"
-    TAGLIB="2.0.1"
+    TAGLIB="2.0.2"
 
 fi
 
