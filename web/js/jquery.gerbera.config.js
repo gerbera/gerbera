@@ -32,6 +32,7 @@ class TreeItem {
   origValue = undefined;
   itemStatus = 'unchanged';
   source = '';
+  _id = "-1";
 
   static RE = RegExp('[\\]/:[]', 'g');
   static LIST = 'grb_list_';
@@ -47,7 +48,8 @@ class TreeItem {
         this.config = m;
       });
     } else {
-      values.filter((v) => v.item === item.item).forEach((v) => {
+      const mapXPath = item.item ? item.item.replace(ParentTreeItem.idxReg, '') : item.item;
+      values.filter((v) => v.item === item.item || v.item.replace(ParentTreeItem.idxReg, '') === mapXPath).forEach((v) => {
         metaList.filter((m) => Number.parseInt(v.aid) === Number.parseInt(m.id)).forEach((m) => {
           this.config = m;
         });
@@ -61,8 +63,10 @@ class TreeItem {
     } else {
       this._value = item;
     }
-    this.itemStatus = (this._value && 'status' in this._value) ? this._value.status : this.itemStatus,
-      this.item = item;
+    this.source = 'source' in this._value ? this._value.source : 'default';
+    this.itemStatus = (this._value && 'status' in this._value) ? this._value.status : this.itemStatus;
+    this._id = (this._value && 'id' in this._value) ? this._value.id : this._id;
+    this.item = item;
     this.origValue = this.value;
 
     this.setEntryChanged = this.setEntryChanged.bind(this);
@@ -70,7 +74,6 @@ class TreeItem {
   }
 
   render(list, pane, level) {
-    // console.log(this);
     this.pane = pane;
     const line = $('<li></li>');
     line.attr('id', TreeItem.ITEM + this.item.item.replace(TreeItem.RE, '_'));
@@ -90,31 +93,46 @@ class TreeItem {
     }
   }
 
-  addResultItem(inheritStatus = false) {
-    if (this.itemStatus !== 'unchanged')
+  addResultItem() {
+    if (this.id && this.id !== '')
       this.pane.options.addResultItem(this.itemData);
   }
 
-  setInputAttr(input, value) {
+  setInputAttr(input) {
     input.hide();
   }
 
   setEntryChanged(event) {
-    this.source = "ui";
-    $(this.editor[0].parentElement).removeClass(this.itemStatus);
-    this.itemStatus = 'changed';
-    $(this.editor[0].parentElement).addClass(this.itemStatus);
-    this.addResultItem();
+    try {
+      this.source = "ui";
+      if (!this.itemStatus.match(/added/)) {
+        $(this.editor[0].parentElement).removeClass(this.itemStatus.replace(/^.*,/,''));
+        this.itemStatus = 'changed';
+        $(this.editor[0].parentElement).addClass(this.itemStatus.replace(/^.*,/,''));
+      }
+      this.addResultItem();
+    } catch (e) {
+      console.error(event, e);
+    }
+  }
+
+  resetValue() {
+    this.editor[0].value = this.origValue;
   }
 
   resetEntry(event) {
-    $(this.editor[0].parentElement).removeClass(this.itemStatus);
-    this.itemStatus = 'reset';
-    $(this.editor[0].parentElement).addClass(this.itemStatus);
-    this.addResultItem();
+    try {
+      $(this.editor[0].parentElement).removeClass(this.itemStatus.replace(/^.*,/,''));
+      this.itemStatus = 'reset';
+      this.resetValue();
+      $(this.editor[0].parentElement).addClass(this.itemStatus.replace(/^.*,/,''));
+      this.addResultItem();
+    } catch (e) {
+      console.error(event, e);
+    }
   }
 
-  renderItemEditor(list, pane, level = 0) {
+  renderItemEditor(list, pane) {
     const itemLine = $('<li></li>').addClass('grb-config');
     itemLine.attr('id', TreeItem.LINE + this.xpath.replace(TreeItem.RE, '_'));
     list.append(itemLine);
@@ -123,14 +141,12 @@ class TreeItem {
 
     var input = $('<input>', { "class": "configItemInput" });
     input.attr('id', TreeItem.VALUE + this.xpath.replace(TreeItem.RE, '_'));
-    this.source = this.config ? this.config.source : 'default';
     this.pane = pane;
     this.editor = input;
 
-    const itemKey = this.xpath;
     input.attr('title', this._value ? this._value.item : this.xpath);
 
-    itemLine.addClass(this.itemStatus);
+    itemLine.addClass(this.itemStatus.replace(/^.*,/,''));
 
     if (this.editable) {
       input.off('change').on('change', this.setEntryChanged);
@@ -174,11 +190,11 @@ class TreeItem {
       this.defaultText(link);
       link.click(this, this.resetEntry);
       link.appendTo(itemLine);
-    } else if (this.itemStatus !== 'added' && this.source === 'default') {
+    } else if (!this.itemStatus.match(/added/) && this.source === 'default') {
       const link = $('<a>', { "title": "copy", "style": "margin-left: 20px" });
       this.defaultText(link);
       link.appendTo(itemLine);
-    } else if (this.itemStatus !== 'unchanged') {
+    } else if (!this.itemStatus.match(/unchanged/)) {
       const link = $('<a>', { "title": "reset", "style": "margin-left: 20px" });
       if (this.origValue !== '') {
         link.append(` config.xml value is "${this.origValue}"`);
@@ -235,11 +251,13 @@ class TreeItem {
   }
 
   get id() {
+    if (this._id !== "-1")
+      return this._id;
     if (this._value && 'id' in this._value && this._value.id != undefined && this._value.id != null)
       return this._value.id;
     if (this.config && 'id' in this.config && this.config.id != undefined && this.config.id != null)
       return this.config.id;
-    return '';
+    return '-1';
   }
 
   get editable() {
@@ -254,6 +272,7 @@ class TreeItem {
 class ParentTreeItem extends TreeItem {
   buttonRoot = undefined;
   children = [];
+  static idxReg = RegExp('\\[[_0-9]+\\]', 'g');
 
   constructor(parentItem, meta, item, values, type = undefined) {
     super(parentItem, meta, item, values);
@@ -302,7 +321,7 @@ class ParentTreeItem extends TreeItem {
         }
       }
     } catch (e) {
-      console.log(event, e);
+      console.error(event, e);
     }
   }
 
@@ -310,23 +329,29 @@ class ParentTreeItem extends TreeItem {
     for (var i = 0; i < itemList.length; i++) {
       const item = itemList[i];
       var type = item.type;
+      const mapXPath = item.item.replace(ParentTreeItem.idxReg, '');
+
       if (type == undefined) {
-        const meta = metaList.filter((m) => m.item === item.item);
+        const meta = metaList.filter((m) => m.item === item.item || m.item.replace(ParentTreeItem.idxReg, '') === mapXPath);
         if (meta && meta.length > 0)
           type = meta[0].type;
       }
 
       if (type == undefined || type === 'Unset') {
-        values.filter((v) => v.item === item.item).forEach((v) => {
+        const itemMeta = [];
+        values.filter((v) => v.item === item.item || v.item.replace(ParentTreeItem.idxReg, '') === mapXPath).forEach((v) => {
           metaList.filter((m) => Number.parseInt(m.id) === Number.parseInt(v.aid)).forEach((m) => {
             const metaItem = JSON.parse(JSON.stringify(m)); // create deep copy
             metaItem.item = item.item + '/' + m.item;
-            metaList.push(metaItem);
+            itemMeta.push(metaItem);
             type = metaItem.type;
           });
         });
+        metaList = metaList.concat(itemMeta);
       }
+
       item.type = type;
+
       switch (type) {
         case 'Boolean': {
           this.children.push(new CheckTreeItem(this, metaList, item, values));
@@ -349,11 +374,11 @@ class ParentTreeItem extends TreeItem {
           break;
         }
         case 'Element': {
-          this.children.push(new ElementTreeItem(this, metaList, item, values));
+          this.children.push(new ElementTreeItem(this, metaList, item, values.filter((v) => v.item.startsWith(item.item))));
           break;
         }
         case 'List': {
-          this.children.push(new ListTreeItem(this, metaList, item, item.item, values));
+          this.children.push(new ListTreeItem(this, metaList, item, item.item, values.filter((v) => v.item.startsWith(item.item))));
           break;
         }
         case 'SubList': {
@@ -362,7 +387,7 @@ class ParentTreeItem extends TreeItem {
           break;
         }
         default:
-          console.debug(`Unknown item '${item.caption}' type '${item.type}'`);
+          console.warn(`Unknown item '${item.item}' with caption '${item.caption}' type '${item.type}'`);
       }
     }
   }
@@ -395,11 +420,11 @@ class ParentTreeItem extends TreeItem {
   }
 
   addResultItem(inheritStatus = false) {
-    if (this.itemStatus !== 'changed')
-      this.pane.options.addResultItem(this.itemDataRoot);
     this.children.forEach((child) => {
-      if (inheritStatus)
+      if (inheritStatus) {
         child.itemStatus = this.itemStatus;
+        child._id = child._id === '-1' ? this.id : child._id;
+      }
       child.addResultItem();
     });
   }
@@ -416,7 +441,6 @@ class RootTreeItem extends ParentTreeItem {
   }
 
   render(list, pane, level) {
-    // console.log(this);
     this.renderChildren(list, pane, level);
     this.renderTreeButtons();
   }
@@ -428,7 +452,6 @@ class ElementTreeItem extends ParentTreeItem {
   }
 
   render(list, pane, level) {
-    // console.log(this);
     this.pane = pane;
     const line = $('<li></li>');
     line.attr('id', TreeItem.LINE + this.xpath.replace(TreeItem.RE, '_'));
@@ -451,6 +474,7 @@ class ListTreeItem extends ParentTreeItem {
   itemCount = 0;
   constructor(parentItem, metaList, item, xpath, values) {
     super(parentItem, metaList, item, values);
+
     values.forEach(v => {
       if (v.item.startsWith(xpath)) {
         var entry = v.item.replace(xpath, '');
@@ -476,22 +500,27 @@ class ListTreeItem extends ParentTreeItem {
       }
     });
 
+    this.children = []; // Children are for internal items only
+
     for (var count = 0; count < this.itemCount; count++) {
       const listItem = JSON.parse(JSON.stringify(item)); // create deep copy
       listItem.item = listItem.item + `[${count}]`;
       const meta = this.initListMeta(item, listItem, metaList);
       this.prepareListMeta(item, listItem, meta, metaList, values);
-      this.children.push(new ListEntryTreeItem(this, metaList.concat(meta), listItem, values));
+      const entry = new ListEntryTreeItem(this, metaList.concat(meta), listItem, values);
+      if (entry.itemStatus.match(/killed/))
+        continue;
+      this.children.push(entry);
     }
-    if (this.item.editable) {
-      const listItem = JSON.parse(JSON.stringify(item)); // create deep copy
-      if (!listItem.item.match(/\[_\]/))
-        listItem.item = listItem.item + '[_]';
-      const meta = this.initListMeta(item, listItem, metaList);
-      this.prepareListMeta(item, listItem, meta, metaList, values);
 
-      console.log("ListTreeItem", listItem, this, values.filter(v => v.item.startsWith(this.parentItem.xpath)));
-      this.children.push(new AddEntryTreeItem(this, metaList.concat(meta), listItem, values));
+    if (this.item.editable) {
+      const addListItem = JSON.parse(JSON.stringify(item)); // create deep copy
+      if (!addListItem.item.match(/\[_\]/))
+        addListItem.item = addListItem.item + '[_]';
+      const meta = this.initListMeta(item, addListItem, metaList);
+      this.prepareListMeta(item, addListItem, meta, metaList, values);
+
+      this.children.push(new AddEntryTreeItem(this, metaList.concat(meta), addListItem, values));
     }
   }
 
@@ -547,7 +576,7 @@ class ListTreeItem extends ParentTreeItem {
       const listEntry = JSON.parse(JSON.stringify(subItem)); // create deep copy
       listEntry.item = subItem.item.replace(item.item, listItem.item);
       listItem.children.push(listEntry);
-      values.filter((v) => v.item === listEntry.item).forEach((v) => {
+      values.filter((v) => v.item.startsWith(listEntry.item)).forEach((v) => {
         metaList.filter((m) => { return Number.parseInt(m.id) === Number.parseInt(v.aid); }).forEach((m) => {
           const metaItem = JSON.parse(JSON.stringify(m)); // create deep copy
           metaItem.item = listEntry.item;
@@ -564,6 +593,10 @@ class ListTreeItem extends ParentTreeItem {
 class ListEntryTreeItem extends ParentTreeItem {
   constructor(parentItem, meta, item, values) {
     super(parentItem, meta, item, values, 'ListEntry');
+    if (this.children.length > 0) {
+        this.itemStatus = this.children[0].itemStatus; // pull status up
+        this._id = this.children[0]._id; // pull id up
+    }
     this.removeItemClicked = this.removeItemClicked.bind(this);
     this.resetEntry = this.resetEntry.bind(this);
   }
@@ -602,16 +635,16 @@ class ListEntryTreeItem extends ParentTreeItem {
       icon.appendTo(symbol);
       symbol.appendTo(line);
       this.editor = line;
-      this.editor.removeClass(this.itemStatus).removeClass('unchanged').removeClass('default');
+      this.editor.removeClass(this.itemStatus.replace(/^.*,/,'')).removeClass('unchanged').removeClass('default');
       if (this.editable) {
-        if (this.itemStatus === 'added') {
+        if (this.itemStatus.match(/added/)) {
           icon.removeClass('fa-undo');
           icon.addClass('fa-ban');
-        } else if (this.itemStatus === 'removed') {
+        } else if (this.itemStatus.match(/removed/)) {
           icon.removeClass('fa-ban');
           icon.addClass('fa-undo');
         }
-        this.editor.addClass(this.itemStatus);
+        this.editor.addClass(this.itemStatus.replace(/^.*,/,''));
         symbol.off('click').on('click', this.removeItemClicked);
       } else {
         icon.removeClass('fa-ban');
@@ -622,7 +655,7 @@ class ListEntryTreeItem extends ParentTreeItem {
       itemList.addClass('fa-ul');
       itemList.attr('id', itemId);
       line.append(itemList);
-      itemList.addClass(this.itemStatus);
+      itemList.addClass(this.itemStatus.replace(/^.*,/,''));
       if (level === -1) {
         line.insertBefore(list[0].lastChild);
       } else {
@@ -633,47 +666,52 @@ class ListEntryTreeItem extends ParentTreeItem {
   }
 
   removeItemClicked(event) {
-    this.source = "ui";
-    this.editor.removeClass(this.itemStatus);
-    const icon = $(this.editor).find('i')[0];
-    if (this.itemStatus === 'removed') {
-      this.itemStatus = 'reset';
-      $(icon).removeClass('fa-undo');
-      $(icon).addClass('fa-ban');
-    } else if (this.itemStatus === 'added' || this.itemStatus === 'manual') {
-      this.editor[0].parentElement.hidden = true;
-      this.itemStatus = 'killed';
-      $(icon).removeClass('fa-ban');
-      $(icon).addClass('fa-undo');
-    } else {
-      this.itemStatus = 'removed';
-      $(icon).removeClass('fa-ban');
-      $(icon).addClass('fa-undo');
+    try {
+      this.source = "ui";
+      this.editor.removeClass(this.itemStatus.replace(/^.*,/,''));
+      const icon = $(this.editor).find('i')[0];
+      if (this.itemStatus.match(/removed/)) {
+        this.itemStatus = 'reset';
+        $(icon).removeClass('fa-undo');
+        $(icon).addClass('fa-ban');
+      } else if (this.itemStatus.match(/added/) || this.itemStatus.match(/manual/)) {
+        this.editor[0].parentElement.hidden = true;
+        this.itemStatus = this.itemStatus.replace(/added|manual/, 'killed');
+        $(icon).removeClass('fa-ban');
+        $(icon).addClass('fa-undo');
+      } else {
+        this.itemStatus = 'removed';
+        $(icon).removeClass('fa-ban');
+        $(icon).addClass('fa-undo');
+      }
+
+      this.addResultItem(true);
+      this.editor.addClass(this.itemStatus.replace(/^.*,/,''));
+    } catch (e) {
+      console.error(event, e);
     }
-
-    this.addResultItem(true);
-    this.editor.addClass(this.itemStatus);
-
-    console.log(this, event);
   }
 }
 
 class AddEntryTreeItem extends ParentTreeItem {
   meta = [];
   values = [];
+
   constructor(parentItem, meta, item, values) {
     super(parentItem, meta, item, values);
     this.itemStatus = 'added';
 
-    this.meta = meta.filter((m) => { return m.item.startsWith(this.xpath); });
-    this.values = values.filter((v) => { return v.item.startsWith(this.xpath); });
+    const mapXPath = this.xpath.replace(/\[_\]/, '');
+    this.meta = meta.filter((m) => { return m.item.startsWith(this.xpath) || m.item.startsWith(mapXPath); });
+    this.values = values.filter((v) => { return v.item.startsWith(this.xpath) || v.item.startsWith(mapXPath); });
 
     this.addItemClicked = this.addItemClicked.bind(this);
   }
 
-  render(list, pane, level) {
+  render(list, pane) {
     this.pane = pane;
     const itemId = TreeItem.ITEM + this.xpath.replace(TreeItem.RE, '_') + "_new";
+
     var line = $('<li></li>');
     line.attr('id', TreeItem.LINE + this.item.item.replace(TreeItem.RE, '_') + "_new");
     var text = $('<span></span>');
@@ -691,27 +729,39 @@ class AddEntryTreeItem extends ParentTreeItem {
   }
 
   addItemClicked(event) {
-    this.source = "ui";
-    const newItem = JSON.parse(JSON.stringify(this.item)); // deep copy
-    const meta = JSON.parse(JSON.stringify(this.meta)); // deep copy
-    meta.forEach((m) => {
-      m.item = m.item.replace(/\[_\]/g, `[${this.parentItem.itemCount}]`);
-    });
-    const values = JSON.parse(JSON.stringify(this.values)); // deep copy
-    values.forEach((v) => {
-      v.item = v.item.replace(/\[_\]/g, `[${this.parentItem.itemCount}]`);
-    });
-    newItem.item = newItem.item.replace(/\[_\]/g, `[${this.parentItem.itemCount}]`);
-    newItem.children.forEach(child => {
-      child.item = child.item.replace(/\[_\]/g, `[${this.parentItem.itemCount}]`);
-    });
+    try {
+      this.source = "ui";
+      const newItem = JSON.parse(JSON.stringify(this.item)); // deep copy
+      const meta = JSON.parse(JSON.stringify(this.meta)); // deep copy
+      meta.forEach((m) => {
+        m.item = m.item.replace(/\[_\]/, `[${this.parentItem.itemCount}]`);
+      });
+      const values = JSON.parse(JSON.stringify(this.values)); // deep copy
+      values.forEach((v) => {
+        v.item = v.item.replace(/\[_\]/, `[${this.parentItem.itemCount}]`);
+      });
+      newItem.item = newItem.item.replace(/\[_\]/, `[${this.parentItem.itemCount}]`);
+      newItem.children.forEach(child => {
+        child.item = child.item.replace(/\[_\]/, `[${this.parentItem.itemCount}]`);
+      });
 
-    const treeItem = new ListEntryTreeItem(this.parentItem, this.meta, newItem, values);
-    treeItem.itemStatus = 'added';
-    this.parentItem.children.push(treeItem);
-    treeItem.render(this.parentItem.editor, this.pane, -1);
-    treeItem.addResultItem(true);
-    this.parentItem.itemCount++;
+      const treeItem = new ListEntryTreeItem(this.parentItem, this.meta, newItem, values);
+      treeItem.itemStatus = 'added';
+      this.parentItem.children.push(treeItem);
+      treeItem.render(this.parentItem.editor, this.pane, -1);
+      if (this.item.type === 'SubList') {
+        var checkParent = this.parentItem;
+        while (checkParent.item.type !== 'List' && checkParent !== checkParent.parentItem) {
+            checkParent = checkParent.parentItem;
+        }
+        treeItem._id = treeItem._id === '-1' ? checkParent.id : treeItem._id;
+        treeItem.itemStatus = 'changed,added';
+      }
+      treeItem.addResultItem(true);
+      this.parentItem.itemCount++;
+    } catch (e) {
+      console.error(event, e);
+    }
   }
 }
 
@@ -727,6 +777,10 @@ class CheckTreeItem extends TreeItem {
 
   get uiValue() {
     return this.editor ? this.editor.checked : this.value;
+  }
+
+  resetValue() {
+    this.editor[0].checked = this.origValue;
   }
 
   equals(firstValue, otherValue) {
@@ -785,10 +839,22 @@ $.widget('grb.config', {
     this.result = {};
     this.configModeChanged = this.options.configModeChanged;
 
+    const dbEntries = this.options.values.filter ((v) => v.source === 'database');
+    const dbEntryCount = dbEntries.length;
+    dbEntries.forEach((e) => {
+        this.options.addDatabaseItem({
+          item: e.item,
+          id: e.id,
+          value: e.value,
+          origValue: e.value,
+          status: e.item.split('[').length > 2 ? 'changed,killed' : 'killed'
+        });
+    });
     const cBox = $('<div></div>');
     cBox.attr('style', 'display: block; margin-top: -25px; position: absolute; right: 0px;');
     var tBox = $('<div></div>').addClass('small');
-    tBox.append($('<span>List Mode: </span>'));
+    tBox.append($(`<span style="margin-right: 20px"><strong>Database Entries:</strong>&nbsp;&nbsp;${dbEntryCount}</span>`));
+    tBox.append($('<span style="margin-right: 10px"><strong>List Mode:</strong> </span>'));
     cBox.append(tBox);
 
     Object.getOwnPropertyNames(chooser).forEach((choice) => {
@@ -817,10 +883,11 @@ $.widget('grb.config', {
     const configMode = this.element.find('input[name=configMode]');
     configMode.val([this.options.choice]);
     if (this.setup.length > 0) {
-      console.log(this.meta);
-      console.log(this.setup);
-      console.log(this.options.values);
-      const treeRoot = new RootTreeItem(this.meta, { children: this.setup }, this.options.values);
+      console.debug(this.meta);
+      console.debug(this.setup);
+      console.debug(this.options.values);
+      var rootItem = { children: this.setup, item: '/' };
+      const treeRoot = new RootTreeItem(this.meta, rootItem, this.options.values);
       treeRoot.render(list, this, 0);
     } else {
       line = $('<li></li>');

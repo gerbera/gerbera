@@ -39,11 +39,12 @@ let current_config = {
   values: null,
   meta: null,
   changedItems: {},
+  databaseItems: {},
   choice: 'expert',
   chooser: {
     minimal: { caption: 'Minimal', fileName: './assets/gerbera-config-minimal.json' },
     standard: { caption: 'Standard', fileName: './assets/gerbera-config-standard.json' },
-    expert: { caption: 'Expert', fileName: './assets/gerbera-config-expert.json' },
+    expert: { caption: 'Expert', fileName: './assets/gerbera-config-expert.json' }
   },
 };
 
@@ -127,6 +128,7 @@ const loadConfig = (response, item) => {
       datagrid.config('destroy');
     }
     current_config.changedItems = {};
+    current_config.databaseItems = {};
     datagrid.config({
       setup: current_config.config,
       values: current_config.values,
@@ -134,6 +136,7 @@ const loadConfig = (response, item) => {
       choice: current_config.choice,
       chooser: current_config.chooser,
       addResultItem: setChangedItem,
+      addDatabaseItem: setDatabaseItem,
       configModeChanged: configModeChanged,
       itemType: 'config'
     });
@@ -146,6 +149,11 @@ const loadConfig = (response, item) => {
 const setChangedItem = (itemValue) => {
   if (itemValue)
     current_config.changedItems[itemValue.item] = itemValue;
+};
+
+const setDatabaseItem = (itemValue) => {
+  if (itemValue)
+    current_config.databaseItems[itemValue.item] = itemValue;
 };
 
 const saveConfig = () => {
@@ -177,41 +185,71 @@ const saveConfig = () => {
         type: 'get',
         data: saveData
       })
-        .then(() => {
-          menuSelected();
-          Updates.showMessage('Successfully saved ' + saveData.data.length + ' config items', undefined, 'success', 'fa-check');
+        .then((response) => {
+          if (response.success) {
+            current_config.config = null;
+            current_config.values = null;
+            current_config.meta = null;
+            menuSelected();
+            Updates.showMessage(response.task.text, undefined, 'success', 'fa-check');
+          } else
+            Updates.showMessage(response.task.text, undefined, 'danger', 'fa-exclamation-triangle');
         })
         .catch((err) => GerberaApp.error(err));
     } catch (e) {
       GerberaApp.error(e);
     }
   } else {
-    console.log("Nothing to save");
+    Updates.showMessage('Nothing to save', undefined, 'warning', 'fa-check');
   }
 };
 
 const clearConfig = () => {
-  const saveData = {
-    req_type: 'config_save',
-    data: [],
-    action: 'clear',
-    changedCount: -1,
-    updates: 'check'
-  };
-  saveData[Auth.SID] = Auth.getSessionId();
+  const changedKeys = Object.getOwnPropertyNames(current_config.databaseItems);
+  if (changedKeys.length > 0) {
+    const saveData = {
+      req_type: 'config_save',
+      data: [],
+      action: 'clear',
+      changedCount: changedKeys.length,
+      updates: 'check'
+    };
+    saveData[Auth.SID] = Auth.getSessionId();
+    changedKeys.forEach((key) => {
+      let i = current_config.databaseItems[key];
+      if (i.item && i.item !== '') {
+        saveData.data.push({
+          item: i.item,
+          id: i.id,
+          value: i.value,
+          origValue: i.origValue,
+          status: i.status
+        });
+      }
+    });
 
-  try {
-    $.ajax({
-      url: GerberaApp.clientConfig.api,
-      type: 'get',
-      data: saveData
-    })
-      .then(() => {
-        menuSelected();
+    try {
+      $.ajax({
+        url: GerberaApp.clientConfig.api,
+        type: 'get',
+        data: saveData
       })
-      .catch((err) => GerberaApp.error(err));
-  } catch (e) {
-    GerberaApp.error(e);
+        .then((response) => {
+          if (response.success) {
+            current_config.config = null;
+            current_config.values = null;
+            current_config.meta = null;
+            menuSelected();
+            Updates.showMessage(response.task.text, undefined, 'success', 'fa-check');
+          } else
+            Updates.showMessage(response.task.text, undefined, 'danger', 'fa-exclamation-triangle');
+        })
+        .catch((err) => GerberaApp.error(err));
+    } catch (e) {
+      GerberaApp.error(e);
+    }
+  } else {
+    Updates.showMessage('Nothing to delete', undefined, 'warning', 'fa-check');
   }
 };
 

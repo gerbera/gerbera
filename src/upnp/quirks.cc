@@ -82,7 +82,7 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& heade
         return;
     }
 
-    auto subAdded = xmlBuilder->renderSubtitleURL(item, pClientProfile->mimeMappings);
+    auto subAdded = xmlBuilder->renderSubtitleURL(item, pClientProfile->mimeMappings.getDictionaryOption());
     if (subAdded) {
         log_debug("Call for Samsung CaptionInfo.sec: {}", subAdded.value());
         headers.addHeader("CaptionInfo.sec", subAdded.value());
@@ -293,7 +293,7 @@ bool Quirks::getMultiValue() const
 
 std::map<std::string, std::string> Quirks::getMimeMappings() const
 {
-    return pClientProfile ? pClientProfile->mimeMappings : std::map<std::string, std::string>();
+    return pClientProfile ? pClientProfile->mimeMappings.getDictionaryOption() : std::map<std::string, std::string>();
 }
 
 bool Quirks::isAllowed() const
@@ -303,7 +303,7 @@ bool Quirks::isAllowed() const
 
 void Quirks::updateHeaders(Headers& headers) const
 {
-    if (pClientProfile && !pClientProfile->headers.empty())
-        for (auto&& [key, value] : pClientProfile->headers)
+    if (pClientProfile && !pClientProfile->headers.getDictionaryOption().empty())
+        for (auto&& [key, value] : pClientProfile->headers.getDictionaryOption())
             headers.updateHeader(key, value);
 }

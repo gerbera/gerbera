@@ -27,11 +27,11 @@
 #ifndef __CLIENTCONFIG_H__
 #define __CLIENTCONFIG_H__
 
+#include "upnp/clients.h"
+
 #include <map>
 #include <mutex>
 #include <vector>
-
-#include "upnp/clients.h"
 
 // forward declaration
 class ClientConfig;
@@ -92,8 +92,15 @@ public:
     int getFlags() const { return this->clientProfile.flags; }
     void setFlags(int flags) { this->clientProfile.flags = flags; }
 
-    std::map<std::string, std::string> getMimeMapings() const { return this->clientProfile.mimeMappings; }
-    std::map<std::string, std::string> getHeaders() const { return this->clientProfile.headers; }
+    std::map<std::string, std::string> getMimeMappings() const { return this->clientProfile.mimeMappings.getDictionaryOption(); }
+    void setMimeMappings(const std::map<std::string, std::string>& mappings) { this->clientProfile.mimeMappings = DictionaryOption(mappings); }
+    void setMimeMappingsFrom(std::size_t j, const std::string& from);
+    void setMimeMappingsTo(std::size_t j, const std::string& to);
+
+    std::map<std::string, std::string> getHeaders() const { return this->clientProfile.headers.getDictionaryOption(); }
+    void setHeaders(const std::map<std::string, std::string>& headers) { this->clientProfile.headers = DictionaryOption(headers); }
+    void setHeadersKey(std::size_t j, const std::string& key);
+    void setHeadersValue(std::size_t j, const std::string& value);
 
     int getCaptionInfoCount() const { return this->clientProfile.captionInfoCount; }
     void setCaptionInfoCount(int captionInfoCount)
@@ -154,7 +161,7 @@ public:
 
 protected:
     bool isOrig {};
-    ClientProfile clientProfile {};
+    ClientProfile clientProfile;
 };
 
 #endif

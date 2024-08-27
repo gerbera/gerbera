@@ -623,7 +623,7 @@
           "editable": true
         },
         {
-          "item": "/import/attribute::inotify-attrib",
+          "item": "/import/autoscan/attribute::inotify-attrib",
           "caption": "Monitor Inotify Attribute Changes",
           "editable": false
         },
@@ -1075,11 +1075,6 @@
         {
           "item": "/import/scripting/import-function/meta-file",
           "caption": "Import Function for Meta Data File",
-          "editable": true
-        },
-        {
-          "item": "/import/scripting/import-function/trailer",
-          "caption": "Import Function for Trailer",
           "editable": true
         },
         {
@@ -1570,7 +1565,7 @@
           "children": [
             {
               "item": "/import/mappings/ignore-extensions/add-file/attribute::name",
-              "caption": "From",
+              "caption": "File Extension",
               "editable": true
             }
           ]

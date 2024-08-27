@@ -60,11 +60,8 @@ void Web::ConfigSave::process()
     } catch (const std::invalid_argument& ex) {
         log_error(ex.what());
     }
-    if (count == -1 && action == "clear") {
+    if (action == "clear") {
         database->removeConfigValue("*"); // remove all
-        auto taskEl = root.append_child("task");
-        taskEl.append_attribute("text") = "Removed all config values from database";
-        return;
     }
 
     // go through all config items from UI
@@ -74,12 +71,13 @@ void Web::ConfigSave::process()
             auto item = fmt::format("data[{}][{}]", i, "item");
             auto status = fmt::format("data[{}][{}]", i, "status");
             std::shared_ptr<ConfigSetup> cs;
-            log_debug("save item {}='{}' {}", param(item), param(key), param(status));
+            std::string parItem = param(item);
+            log_debug("save item {}='{}' {}", parItem, param(key), param(status));
             if (!param(key).empty() && param(key) != "-1") {
                 auto option = static_cast<ConfigVal>(std::stoi(param(key)));
                 cs = ConfigDefinition::findConfigSetup(option, true);
-            } else if (!param(item).empty()) {
-                cs = ConfigDefinition::findConfigSetupByPath(param(item), true);
+            } else if (!parItem.empty()) {
+                cs = ConfigDefinition::findConfigSetupByPath(parItem, true);
             } else {
                 log_error("{} has empty value", item);
                 continue;
@@ -92,23 +90,34 @@ void Web::ConfigSave::process()
                 log_debug("found option to update {}", cs->getUniquePath());
 
                 if (!param(orig).empty()) {
-                    config->setOrigValue(param(item), param(orig));
+                    config->setOrigValue(parItem, param(orig));
                 }
                 std::string parValue = param(value);
-                std::string parStatus = param(status);
-                bool update = param(status) == STATUS_CHANGED;
-                std::map<std::string, std::string> arguments { { "status", parStatus } };
-                if (parStatus == STATUS_RESET || parStatus == STATUS_KILLED) {
+                auto statusList = splitString(param(status), ',');
+                std::string parStatus = statusList[0];
+                bool update = parStatus == STATUS_CHANGED;
+                std::map<std::string, std::string> arguments { { "status", param(status) } };
+                if (parStatus == STATUS_KILLED || statusList.back() == STATUS_KILLED) {
+                    // remove added value
+                    database->removeConfigValue(parItem);
+                    log_debug("Dropping {}", parItem);
+                    parValue.clear();
+                    update = false;
+                    success = true;
+                    if (!cs->updateDetail(parItem, parValue, config, &arguments)) {
+                        log_debug("unhandled {} option {} != {}", parStatus, parItem, cs->getUniquePath());
+                    }
+                } else if (parStatus == STATUS_RESET || statusList.back() == STATUS_RESET) {
                     // remove value and restore original
-                    database->removeConfigValue(param(item));
-                    if (config->hasOrigValue(param(item))) {
-                        parValue = config->getOrigValue(param(item));
-                        log_debug("reset {} to '{}'", param(item), parValue);
+                    database->removeConfigValue(parItem);
+                    if (config->hasOrigValue(parItem)) {
+                        parValue = config->getOrigValue(parItem);
+                        log_debug("reset {} to '{}'", parItem, parValue);
                         success = false;
                         update = true;
-                    } else if (param(item).substr(param(item).length() - 1) == "]") {
+                    } else if (parItem.substr(parItem.length() - 1) == "]") {
                         parValue.clear();
-                        log_debug("dropping {}", param(item));
+                        log_debug("dropping {}", parItem);
                         success = false;
                         update = true;
                     } else {
@@ -116,41 +125,44 @@ void Web::ConfigSave::process()
                     }
                 } else if (parStatus == STATUS_ADDED || parStatus == STATUS_MANUAL) {
                     // add new value
-                    database->updateConfigValue(cs->getUniquePath(), param(item), parValue, std::string(STATUS_MANUAL));
-                    log_debug("added {}", param(item));
+                    database->updateConfigValue(cs->getUniquePath(), parItem, parValue, std::string(STATUS_MANUAL));
+                    log_debug("added {}", parItem);
                     success = false;
                     update = true;
                 } else if (parStatus == STATUS_REMOVED) {
                     // remove value
-                    cs->updateDetail(param(item), parValue, config, &arguments);
-                    database->updateConfigValue(cs->getUniquePath(), param(item), parValue, parStatus);
-                    log_debug("removed {}", param(item));
+                    cs->updateDetail(parItem, parValue, config, &arguments);
+                    database->updateConfigValue(cs->getUniquePath(), parItem, parValue, parStatus);
+                    log_debug("removed {}", parItem);
                     success = true;
                 }
                 if (update) {
                     // save option to database
-                    if (param(item) == cs->xpath) {
+                    if (parItem == cs->xpath) {
                         cs->makeOption(parValue, config);
                         success = true;
                     } else {
-                        if (!cs->updateDetail(param(item), parValue, config, &arguments)) {
-                            log_error("unhandled {} option {} != {}", parStatus, param(item), cs->getUniquePath());
+                        if (!cs->updateDetail(parItem, parValue, config, &arguments)) {
+                            log_error("unhandled {} option {} != {}", parStatus, parItem, cs->getUniquePath());
                         } else {
                             success = true;
                         }
                     }
                     if (parStatus == STATUS_CHANGED && success) {
-                        database->updateConfigValue(cs->getUniquePath(), param(item), param(value));
+                        database->updateConfigValue(cs->getUniquePath(), parItem, param(value), param(status));
                     }
                 }
             }
         } catch (const std::runtime_error& e) {
             log_error("error setting option {}. Exception {}", i, e.what());
         }
-
-        auto taskEl = root.append_child("task");
-        taskEl.append_attribute("text") = fmt::format("Successfully updated {} items", count).c_str();
     }
+
+    auto taskEl = root.append_child("task");
+    if (action == "clear")
+        taskEl.append_attribute("text") = "Removed all config values from database";
+    else if (action != "rescan")
+        taskEl.append_attribute("text") = fmt::format("Successfully updated {} items", count).c_str();
 
     // trigger rescan of database after update
     std::string target = param("target");
@@ -165,7 +177,6 @@ void Web::ConfigSave::process()
             int objectID = database->findObjectIDByPath(target);
             if (objectID > 0 && autoscan) {
                 content->rescanDirectory(autoscan, objectID, target);
-                auto taskEl = root.append_child("task");
                 taskEl.append_attribute("text") = fmt::format("Rescanning directory {}", target).c_str();
                 log_info("Rescanning directory {}", target);
             } else {

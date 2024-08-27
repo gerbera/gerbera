@@ -431,11 +431,12 @@ void ConfigManager::updateConfigFromDatabase(const std::shared_ptr<Database>& da
                     cs->makeOption(cfgValue.value, self);
                 } else {
                     std::string parValue = cfgValue.value;
-                    if (cfgValue.status == STATUS_CHANGED || cfgValue.status == STATUS_UNCHANGED) {
+                    auto statusList = splitString(cfgValue.status, ',');
+                    if (statusList.back() == STATUS_CHANGED || statusList.back() == STATUS_UNCHANGED) {
                         if (!cs->updateDetail(cfgValue.item, parValue, self)) {
                             log_error("unhandled {} option {} != {}", cfgValue.status, cfgValue.item, cs->xpath);
                         }
-                    } else if (cfgValue.status == STATUS_REMOVED || cfgValue.status == STATUS_ADDED || cfgValue.status == STATUS_MANUAL) {
+                    } else if (statusList.back() == STATUS_REMOVED || statusList.back() == STATUS_ADDED || statusList.back() == STATUS_MANUAL) {
                         std::map<std::string, std::string> arguments { { "status", cfgValue.status } };
                         if (!cs->updateDetail(cfgValue.item, parValue, self, &arguments)) {
                             log_error("unhandled {} option {} != {}", cfgValue.status, cfgValue.item, cs->xpath);

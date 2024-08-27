@@ -1610,11 +1610,15 @@ std::shared_ptr<ConfigSetup> ConfigDefinition::findConfigSetupByPath(const std::
         if (attrKey.find_first_of(']') != std::string::npos) {
             attrKey = attrKey.substr(attrKey.find_first_of(']') + 1);
         }
-        if (attrKey.find_first_of("attribute::") != std::string::npos) {
-            attrKey = attrKey.substr(attrKey.find_first_of("attribute::") + 11);
+        if (attrKey.find("attribute::") != std::string::npos) {
+            attrKey = attrKey.substr(attrKey.find("attribute::") + 11);
         }
 
-        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) { return s->getUniquePath() == attrKey && (parentOptions.find(s->option) == parentOptions.end() || parentOptions.at(s->option).end() != std::find(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), s->option)); });
+        co = std::find_if(complexOptions.begin(), complexOptions.end(), [&](auto&& s) {
+            return s->getUniquePath() == attrKey //
+                && (parentOptions.find(s->option) == parentOptions.end() //
+                    || parentOptions.at(s->option).end() != std::find(parentOptions.at(s->option).begin(), parentOptions.at(s->option).end(), s->option));
+        });
         if (co != complexOptions.end()) {
             log_debug("Config: attribute option found: '{}'", (*co)->xpath);
             return *co;
