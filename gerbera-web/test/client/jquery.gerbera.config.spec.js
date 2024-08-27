@@ -29,8 +29,8 @@ describe('The jQuery Configgrid', () => {
       itemType: 'config'
     });
 
-    expect(dataGrid.find('ul').length).toBe(65);
-    expect(dataGrid.find('li.grb-config').length).toBe(173);
+    expect(dataGrid.find('ul').length).toBe(67);
+    expect(dataGrid.find('li.grb-config').length).toBe(116);
     expect(dataGrid.find('li.grb-config').get(8).innerText).toContain('Model Number');
     expect(dataGrid.find('#grb_line__server_modelNumber').find('input').get(0).value).toContain('2.2.0');
   });

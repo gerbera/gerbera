@@ -52,7 +52,7 @@ describe('Gerbera Config', () => {
       Config.loadConfig(configMetaJson, 'config');
       Config.loadConfig(configValueJson, 'values');
       Config.loadConfig(configValueJson, 'meta');
-      expect($('#configgrid').find('li').length).toEqual(222);
+      expect($('#configgrid').find('li').length).toEqual(167);
       configMetaJson.success = true;
     });
 

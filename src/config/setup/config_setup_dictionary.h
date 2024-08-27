@@ -94,6 +94,7 @@ public:
 
     std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const override;
     std::string getItemPathRoot(bool prefix = false) const override;
+    std::string getUniquePath() const override;
 
     std::map<std::string, std::string> getXmlContent(const pugi::xml_node& optValue);
 

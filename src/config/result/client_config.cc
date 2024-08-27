@@ -33,6 +33,7 @@
 
 #include <algorithm>
 #include <array>
+#include <iterator>
 #include <numeric>
 
 ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent,
@@ -55,8 +56,8 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
             clientProfile.match = mLabel;
         }
     }
-    clientProfile.mimeMappings = mimeMappings;
-    clientProfile.headers = headers;
+    clientProfile.mimeMappings = DictionaryOption(mimeMappings);
+    clientProfile.headers = DictionaryOption(headers);
     clientProfile.group = group;
     clientProfile.flags = flags;
     clientProfile.captionInfoCount = captionInfoCount;
@@ -149,6 +150,26 @@ void ClientConfigList::remove(std::size_t id, bool edit)
         }
         log_debug("ID {} removed!", id);
     }
+}
+
+void ClientConfig::setMimeMappingsFrom(std::size_t j, const std::string& from)
+{
+    this->clientProfile.mimeMappings.setKey(j, from);
+}
+
+void ClientConfig::setMimeMappingsTo(std::size_t j, const std::string& to)
+{
+    this->clientProfile.mimeMappings.setValue(j, to);
+}
+
+void ClientConfig::setHeadersKey(std::size_t j, const std::string& key)
+{
+    this->clientProfile.headers.setKey(j, key);
+}
+
+void ClientConfig::setHeadersValue(std::size_t j, const std::string& value)
+{
+    this->clientProfile.headers.setValue(j, value);
 }
 
 static constexpr std::array clientTypes {

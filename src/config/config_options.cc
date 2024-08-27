@@ -74,6 +74,7 @@ void DictionaryOption::setKey(std::size_t keyIndex, const std::string& newKey)
         }
     } else if (!newKey.empty()) {
         indexMap[keyIndex] = newKey;
+        option[newKey] = "";
     }
 }
 

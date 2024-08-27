@@ -217,6 +217,8 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         }
     } catch (const Exiv2::AnyError& ex) {
         log_warning("Caught Exiv2 exception processing {}: '{}'", item->getLocation().c_str(), ex.what());
+    } catch (const std::runtime_error& e) {
+        log_warning("Caught exception processing {}: '{}'", item->getLocation().c_str(), e.what());
     }
 
     Exiv2::XmpProperties::unregisterNs();

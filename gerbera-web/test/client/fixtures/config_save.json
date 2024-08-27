@@ -1031,5 +1031,8 @@
 		}
 	],
 	"meta": [],
-	"success": true
+	"success": true,
+	"task": {
+		"text": "Successfully saved 1 config items"
+	}
 }

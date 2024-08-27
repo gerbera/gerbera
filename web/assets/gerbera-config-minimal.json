@@ -558,7 +558,7 @@
           "children": [
             {
               "item": "/import/mappings/ignore-extensions/add-file/attribute::name",
-              "caption": "From",
+              "caption": "File Extension",
               "editable": false
             }
           ]

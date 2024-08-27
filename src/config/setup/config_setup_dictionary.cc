@@ -77,24 +77,29 @@ bool ConfigDictionarySetup::updateItem(const std::vector<std::size_t>& indexList
     auto i = indexList.at(0);
     auto keyIndex = getItemPath(indexList, { keyOption });
     auto valIndex = getItemPath(indexList, { valOption });
+    auto configOption = config->getDictionaryOption(option);
     if (optItem == keyIndex || !status.empty()) {
         config->setOrigValue(keyIndex, optKey);
-        if (status == STATUS_REMOVED) {
+        if (status == STATUS_REMOVED && configOption.find(optKey) != configOption.end()) {
             config->setOrigValue(optItem, optKey);
-            config->setOrigValue(valIndex, value->getDictionaryOption()[optKey]);
+            config->setOrigValue(valIndex, value->getDictionaryOption().at(optKey));
         }
         value->setKey(i, optValue);
         if (status == STATUS_RESET && !optValue.empty()) {
             value->setValue(i, config->getOrigValue(valIndex));
-            log_debug("Reset Dictionary value {} {}", valIndex, config->getDictionaryOption(option)[optKey]);
+            log_debug("Reset Dictionary {} Value '{}'", valIndex, configOption.at(optKey));
         }
-        log_debug("New Dictionary key {} {}", keyIndex, optValue);
+        log_debug("New Dictionary {} Key '{}'", keyIndex, optValue);
         return true;
     }
     if (optItem == valIndex) {
-        config->setOrigValue(valIndex, value->getDictionaryOption()[optKey]);
-        value->setValue(i, optValue);
-        log_debug("New Dictionary value {} {}", valIndex, config->getDictionaryOption(option)[optKey]);
+        if (status != STATUS_REMOVED && status != STATUS_KILLED && configOption.find(optKey) != configOption.end()) {
+            config->setOrigValue(valIndex, value->getDictionaryOption().at(optKey));
+            value->setValue(i, optValue);
+            log_debug("New Dictionary {} Value '{}'", valIndex, config->getDictionaryOption(option).at(optKey));
+        } else {
+            value->setKey(i, ""); // key should already be removed
+        }
         return true;
     }
     return false;
@@ -157,6 +162,13 @@ std::string ConfigDictionarySetup::getItemPathRoot(bool prefix) const
 {
     if (prefix)
         return xpath;
+    return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
+}
+
+std::string ConfigDictionarySetup::getUniquePath() const
+{
+    if (!xpath)
+        return fmt::format("{}", ConfigDefinition::mapConfigOption(nodeOption));
     return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
 }
 

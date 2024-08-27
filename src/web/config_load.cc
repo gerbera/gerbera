@@ -339,7 +339,7 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
         {
             // Sub Dictionary ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE
             std::size_t j = 0;
-            for (auto&& [from, to] : client->getMimeMapings()) {
+            for (auto&& [from, to] : client->getMimeMappings()) {
                 item = values.append_child(CONFIG_LOAD_ITEM);
                 createItem(item, cs->getItemPath({ i, j }, { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM }), cs->option, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM, cs);
                 setValue(item, from);
@@ -737,97 +737,141 @@ void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
             auto&& entry = autoscan.at(i);
             std::vector<std::size_t> indexList = { i };
             auto&& adir = content->getAutoscanDirectory(entry->getLocation());
+
+            // path
             auto item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION);
             setValue(item, adir->getLocation());
 
+            // scan mode (timed|inotify)
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE);
             setValue(item, AutoscanDirectory::mapScanmode(adir->getScanMode()));
 
+            // interval for timed
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL);
             setValue(item, adir->getInterval().count());
 
+            // counter for retries
+            item = values.append_child(CONFIG_LOAD_ITEM);
+            createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_RETRYCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_RETRYCOUNT);
+            setValue(item, adir->getInterval().count());
+
+            // recursively import files
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE);
             setValue(item, adir->getRecursive());
 
+            // directory types
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES);
             setValue(item, adir->hasDirTypes());
 
+            // media types imported from directory
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE);
             setValue(item, AutoscanDirectory::mapMediaType(adir->getMediaType()));
 
+            // import hidden files
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES);
             setValue(item, adir->getHidden());
 
+            // follow symbolic links
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
             setValue(item, adir->getFollowSymlinks());
 
+            // container type for audio
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO);
             setValue(item, adir->getContainerTypes().at(AutoscanMediaMode::Audio));
 
+            // container type for images
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE);
             setValue(item, adir->getContainerTypes().at(AutoscanMediaMode::Image));
 
+            // container type for videos
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO);
             setValue(item, adir->getContainerTypes().at(AutoscanMediaMode::Video));
 
+            // active scan count
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT);
             setValue(item, adir->getActiveScanCount());
 
+            // active task count
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT);
             setValue(item, adir->getTaskCount());
 
+            // Last modified
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_LMT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT);
             setValue(item, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
         }
         // Allow creation of entry in blank config
         {
+            // path
             auto item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION));
 
+            // scan mode (timed|inotify)
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE));
 
+            // interval for timed
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL));
 
+            // counter for retries
+            item = values.append_child(CONFIG_LOAD_ITEM);
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_RETRYCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_RETRYCOUNT);
+
+            // recursively import files
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE));
 
+            // directory types
+            item = values.append_child(CONFIG_LOAD_ITEM);
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES);
+
+            // media types imported from directory
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE));
 
+            // import hidden files
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES));
 
+            // follow symbolic links
+            item = values.append_child(CONFIG_LOAD_ITEM);
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
+
+            // container type for audio
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO));
 
+            // container type for images
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE));
 
+            // container type for videos
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO));
 
+            // active scan count
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT));
 
+            // active task count
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT));
 
+            // Last modified
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_LMT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT));
         }

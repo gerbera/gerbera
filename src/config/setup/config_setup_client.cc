@@ -35,6 +35,7 @@
 #include "config_setup_string.h"
 #include "util/logger.h"
 
+#include <iterator>
 #include <numeric>
 
 /// \brief Creates an array of ClientConfig objects from a XML nodeset.
@@ -90,80 +91,162 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList, co
 {
     auto statusList = splitString(status, ',');
     auto i = indexList.at(0);
-    if (optItem == getItemPath(indexList, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+    if (optItem == getItemPath(indexList, {}) && (statusList[0] == STATUS_ADDED || statusList[0] == STATUS_MANUAL)) {
         return true;
     }
-    auto index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT_FLAGS });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
-        entry->setFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->checkIntValue(optValue));
-        log_debug("New Client Detail {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
-        return true;
-    }
-    index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT_IP });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getIp());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
-            entry->setIp(optValue);
-            log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getIp());
+    {
+        // set client flags
+        auto index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT_FLAGS });
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
+            entry->setFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->checkIntValue(optValue));
+            log_debug("New Client Flags {} {}", index, ClientConfig::mapFlags(config->getClientConfigListOption(option)->get(i)->getFlags()));
+            return true;
+        }
+        // set client ip
+        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT_IP });
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, entry->getIp());
+            if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
+                entry->setIp(optValue);
+                log_debug("New Client IP {} {}", index, config->getClientConfigListOption(option)->get(i)->getIp());
+                return true;
+            }
+        }
+        // set client group
+        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT_GROUP });
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, entry->getGroup());
+            if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->checkValue(optValue)) {
+                entry->setGroup(optValue);
+                log_debug("New Client Group {} {}", index, config->getClientConfigListOption(option)->get(i)->getGroup());
+                return true;
+            }
+        }
+        // set client allowed
+        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT_ALLOWED });
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, entry->getAllowed());
+            entry->setAllowed(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->checkValue(optValue));
+            log_debug("New Client Allow {} {}", index, config->getClientConfigListOption(option)->get(i)->getAllowed());
+            return true;
+        }
+        // set client userAgent
+        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT_USERAGENT });
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, entry->getUserAgent());
+            if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
+                entry->setUserAgent(optValue);
+                log_debug("New Client UserAgent {} {}", index, config->getClientConfigListOption(option)->get(i)->getUserAgent());
+                return true;
+            }
+        }
+        // set client upnp caption count
+        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT });
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, entry->getCaptionInfoCount());
+            entry->setCaptionInfoCount(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->checkIntValue(optValue));
+            log_debug("New Client CaptionInfoCount {} {}", index, config->getClientConfigListOption(option)->get(i)->getCaptionInfoCount());
+            return true;
+        }
+        // set client string limit
+        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT });
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, entry->getStringLimit());
+            entry->setStringLimit(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->checkIntValue(optValue));
+            log_debug("New Client StringLimit {} {}", index, config->getClientConfigListOption(option)->get(i)->getStringLimit());
+            return true;
+        }
+        // set client upnp multi value
+        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE });
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, entry->getMultiValue());
+            entry->setMultiValue(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->checkValue(optValue));
+            log_debug("New Client MultiValue {} {}", index, config->getClientConfigListOption(option)->get(i)->getMultiValue());
             return true;
         }
     }
-    index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT_GROUP });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getGroup());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->checkValue(optValue)) {
-            entry->setGroup(optValue);
-            log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getGroup());
+    // set client dictionaries
+    if (statusList.size() > 1) {
+        log_debug("New Client Dictionary {} {} ({}, {})", optItem, statusList[1], indexList[0], indexList[1]);
+        // set client mimetype from
+        auto keyIndex = getItemPath(indexList, { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM });
+        auto valIndex = getItemPath(indexList, { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO });
+        auto j = indexList.at(1);
+        if (optItem == keyIndex) {
+            auto mappings = entry->getMimeMappings();
+            auto optKey = j < mappings.size() ? (*(std::next(mappings.cbegin(), j))).first : "";
+            bool done = true;
+            if (statusList[1] == STATUS_REMOVED || statusList[1] == STATUS_KILLED) {
+                config->setOrigValue(optItem, optKey);
+                if (!optKey.empty())
+                    config->setOrigValue(valIndex, mappings.at(optKey));
+                done = false;
+            } else if (entry->getOrig())
+                config->setOrigValue(keyIndex, optKey);
+            entry->setMimeMappingsFrom(j, optValue);
+            if (statusList[1] == STATUS_RESET && !optValue.empty()) {
+                entry->setMimeMappingsFrom(j, config->getOrigValue(valIndex));
+                log_debug("Reset Client Mapping From{} {}", valIndex, entry->getMimeMappings().at(optKey));
+            }
+            if (done)
+                log_debug("New Client Mapping From {} {}", keyIndex, (*(std::next(config->getClientConfigListOption(option)->get(i)->getMimeMappings().cbegin(), j))).first);
+            return true;
+        }
+        // set client mimetype to
+        if (optItem == valIndex) {
+            auto mappings = entry->getMimeMappings();
+            if (entry->getOrig())
+                config->setOrigValue(valIndex, (*(std::next(mappings.cbegin(), j))).second);
+            entry->setMimeMappingsTo(j, optValue);
+            if (statusList[1] != STATUS_REMOVED && statusList[1] != STATUS_KILLED)
+                log_debug("New Client Mapping To {} {}", valIndex, (*(std::next(config->getClientConfigListOption(option)->get(i)->getMimeMappings().cbegin(), j))).second);
+            return true;
+        }
+
+        // set client headers key
+        keyIndex = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_HEADERS_HEADER, ConfigVal::A_CLIENTS_UPNP_HEADERS_KEY });
+        valIndex = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_HEADERS_HEADER, ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE });
+        if (optItem == keyIndex) {
+            auto headers = entry->getHeaders();
+            auto optKey = j < headers.size() ? (*(std::next(headers.cbegin(), j))).first : "";
+            bool done = true;
+            if (statusList[1] == STATUS_REMOVED || statusList[1] == STATUS_KILLED) {
+                config->setOrigValue(optItem, optKey);
+                if (!optKey.empty())
+                    config->setOrigValue(valIndex, headers.at(optKey));
+                done = false;
+            } else if (entry->getOrig())
+                config->setOrigValue(keyIndex, optKey);
+            entry->setHeadersKey(j, optValue);
+            if (statusList[1] == STATUS_RESET && !optValue.empty()) {
+                entry->setHeadersKey(j, config->getOrigValue(valIndex));
+                log_debug("Reset Client Mapping From{} {}", valIndex, entry->getHeaders().at(optKey));
+            }
+            if (done)
+                log_debug("New Client Headers Key {} {}", keyIndex, (*(std::next(config->getClientConfigListOption(option)->get(i)->getHeaders().cbegin(), j))).first);
+            return true;
+        }
+        // set client headers value
+        if (optItem == valIndex) {
+            auto headers = entry->getHeaders();
+            if (entry->getOrig())
+                config->setOrigValue(valIndex, (*(std::next(headers.cbegin(), j))).second);
+            entry->setHeadersValue(j, optValue);
+            if (statusList[1] != STATUS_REMOVED && statusList[1] != STATUS_KILLED)
+                log_debug("New Client Headers Key {} {}", valIndex, (*(std::next(config->getClientConfigListOption(option)->get(i)->getHeaders().cbegin(), j))).second);
             return true;
         }
     }
-    index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT_ALLOWED });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getAllowed());
-        entry->setAllowed(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->checkValue(optValue));
-        log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getAllowed());
-        return true;
-    }
-    index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT_USERAGENT });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getUserAgent());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
-            entry->setUserAgent(optValue);
-            log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getUserAgent());
-            return true;
-        }
-    }
-    index = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getCaptionInfoCount());
-        entry->setCaptionInfoCount(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->checkIntValue(optValue));
-        log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getCaptionInfoCount());
-        return true;
-    }
-    index = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getStringLimit());
-        entry->setStringLimit(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->checkIntValue(optValue));
-        log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getStringLimit());
-        return true;
-    }
-    index = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getMultiValue());
-        entry->setMultiValue(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->checkValue(optValue));
-        log_debug("New Client Detail {} {}", index, config->getClientConfigListOption(option)->get(i)->getMultiValue());
-        return true;
-    }
-    // todo : set dictionaries
+
     return false;
 }
 
@@ -174,20 +257,21 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
         auto value = std::dynamic_pointer_cast<ClientConfigListOption>(optionValue);
         auto list = value->getClientConfigListOption();
         auto indexList = extractIndexList(optItem);
+        std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+        auto statusList = splitString(status, ',');
 
         if (indexList.size() > 0) {
             auto entry = list->get(indexList.at(0), true);
-            std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 
-            if (!entry && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+            if (!entry && (statusList.front() == STATUS_ADDED || statusList.front() == STATUS_MANUAL)) {
                 entry = std::make_shared<ClientConfig>();
                 list->add(entry, indexList.at(0));
             }
-            if (entry && (status == STATUS_REMOVED || status == STATUS_KILLED)) {
+            if (entry && (statusList.front() == STATUS_REMOVED || statusList.front() == STATUS_KILLED)) {
                 list->remove(indexList.at(0), true);
                 return true;
             }
-            if (entry && status == STATUS_RESET) {
+            if (entry && statusList.front() == STATUS_RESET) {
                 list->add(entry, indexList.at(0));
             }
             if (entry && updateItem(indexList, optItem, config, entry, optValue, status)) {
@@ -199,7 +283,7 @@ bool ConfigClientSetup::updateDetail(const std::string& optItem, std::string& op
         for (std::size_t client = 0; client < list->size(); client++) {
             auto entry = value->getClientConfigListOption()->get(client);
             indexList[0] = client;
-            if (updateItem(indexList, optItem, config, entry, optValue)) {
+            if (updateItem(indexList, optItem, config, entry, optValue, status)) {
                 return true;
             }
         }

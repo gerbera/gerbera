@@ -878,14 +878,14 @@ The default playlist script implementation supports parsing of m3u and pls forma
 ASCII based playlist format.
 
 Adding Items
-::::::::::::
+^^^^^^^^^^^^
 
 We will first look at a helper function:
 
-.. js:function:: importPlaylist(obj, cont, rootPath, containerType)
+.. js:function:: addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result) {
 
-It is defined in playlists.js, it receives the location (path on disk or HTTP URL), the title and the desired position of the
-item in the database layout (remember the container chains used in the import script).
+It is defined in common.js, it receives the title, the location (path on disk or HTTP URL), the entry itself and the desired
+position of the item in the database layout (remember the container chains used in the import script).
 
 The function first decides if we are dealing with an item that represents a resource on the web, or if we are dealing with a
 local file. After that it populates all item fields accordingly and calls the addCdsObject() that was introduced earlier. Note,
@@ -901,9 +901,11 @@ Below is the complete function with some comments:
 Main Parsing
 ^^^^^^^^^^^^
 
-The actual parsing is done in the main part of the script. First, the type of the playlist is determined (based on the
-playlist mimetype), then the correct parser is chosen. The parsing itself is a loop, where each call to readln() returns
-exactly one line of text from the playlist. There is no possibility to go back, each readln() invocation will retrieve
+The actual parsing is done in the function ``importPlaylist`` in ``playlist.js``. First, the type of the playlist is determined (based on the
+playlist mimetype), then the correct parser is chosen.
+
+The parsing itself is done in the respective function for the playlist type like ``readM3uPlaylist``. Typically there is a loop, where each call
+to readln() returns exactly one line of text from the playlist. There is no possibility to go back, each readln() invocation will retrieve
 the next line until end of file is reached.
 
 To keep things easy we will only list the m3u parsing here. Again, if you are not familiar with regular expressions, now is

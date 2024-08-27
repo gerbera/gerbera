@@ -30,6 +30,7 @@
 
 #include "cds/cds_enums.h"
 #include "common.h"
+#include "config/config_options.h"
 #include "upnp/quirks.h"
 #include "util/grb_time.h"
 
@@ -74,8 +75,8 @@ struct ClientProfile {
     // to match the client
     ClientMatchType matchType { ClientMatchType::None };
     std::string match;
-    std::map<std::string, std::string> mimeMappings {};
-    std::map<std::string, std::string> headers {};
+    DictionaryOption mimeMappings = DictionaryOption({});
+    DictionaryOption headers = DictionaryOption({});
     int captionInfoCount { 1 };
     int stringLimit { -1 };
     bool multiValue { true };

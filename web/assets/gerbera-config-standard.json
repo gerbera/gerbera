@@ -588,11 +588,6 @@
           "editable": true
         },
         {
-          "item": "/import/scripting/import-function/trailer",
-          "caption": "Import Function for Trailer",
-          "editable": true
-        },
-        {
           "item": "/import/scripting/import-function/playlist/attribute::create-link",
           "caption": "Create Playlist Link",
           "editable": false
@@ -917,7 +912,7 @@
           "children": [
             {
               "item": "/import/mappings/ignore-extensions/add-file/attribute::name",
-              "caption": "From",
+              "caption": "File Extension",
               "editable": true
             }
           ]

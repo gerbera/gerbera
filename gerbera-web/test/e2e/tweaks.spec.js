@@ -76,7 +76,7 @@ describe('Tweaks Suite', () => {
       expect(result).to.be.false;
 
       result = await homePage.getToastMessage();
-      expect(result).to.equal('Successfully submitted directory tweak');
+      expect(result).to.equal('Successfully saved 1 config items');
 
       await homePage.closeToast();
     });
