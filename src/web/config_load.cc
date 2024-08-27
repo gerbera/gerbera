@@ -343,7 +343,7 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
                 createItem(item, cs->getItemPath({ i, j }, { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM }), cs->option, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM, cs);
                 setValue(item, from);
                 item = values.append_child(CONFIG_LOAD_ITEM);
-                createItem(item, cs->getItemPath({ i, j }, { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO }), cs->option, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM, cs);
+                createItem(item, cs->getItemPath({ i, j }, { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO }), cs->option, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO, cs);
                 setValue(item, to);
             }
         }
@@ -361,7 +361,7 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
         }
     }
     // Allow creation of entry in blank config
-    if (clientConfig->size() == 0) {
+    {
         auto item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT_FLAGS }), cs->option, ConfigVal::A_CLIENTS_CLIENT_FLAGS, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_FLAGS));
 
@@ -382,6 +382,18 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
 
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE }), cs->option, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE));
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM }), cs->option, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM, cs);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO }), cs->option, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO, cs);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_UPNP_HEADERS_HEADER, ConfigVal::A_CLIENTS_UPNP_HEADERS_KEY }), cs->option, ConfigVal::A_CLIENTS_UPNP_HEADERS_KEY, cs);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_UPNP_HEADERS_HEADER, ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE }), cs->option, ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE, cs);
     }
 }
 
@@ -437,6 +449,41 @@ void Web::ConfigLoad::writeImportTweaks(pugi::xml_node& values)
         createItem(item, cs->getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE);
         setValue(item, dir->hasMetafile() ? dir->getMetafile() : "");
     }
+    // Allow creation of entry in blank config
+    {
+        auto item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DIRECTORIES_TWEAK_LOCATION }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_LOCATION);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DIRECTORIES_TWEAK_INHERIT }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_INHERIT);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE }), cs->option, ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE);
+    }
 }
 
 /// \brief: write dynamic content
@@ -472,7 +519,7 @@ void Web::ConfigLoad::writeDynamicContent(pugi::xml_node& values)
         setValue(item, cont->getMaxCount());
     }
     // Allow creation of entry in blank config
-    if (dynContent->size() == 0) {
+    {
         auto item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_LOCATION }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_LOCATION));
 
@@ -522,7 +569,7 @@ void Web::ConfigLoad::writeBoxLayout(pugi::xml_node& values)
         setValue(item, cont->getEnabled());
     }
     // Allow creation of entry in blank config
-    if (boxlayoutContent->size() == 0) {
+    {
         auto item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_KEY }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_KEY, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_KEY));
 
@@ -740,7 +787,7 @@ void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
             setValue(item, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
         }
         // Allow creation of entry in blank config
-        if (autoscan.empty()) {
+        {
             auto item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION));
 
@@ -796,6 +843,13 @@ void Web::ConfigLoad::writeDictionaries(pugi::xml_node& values)
             setValue(item, val);
             i++;
         }
+        {
+            auto item = values.append_child(CONFIG_LOAD_ITEM);
+            createItem(item, dcs->getItemPath(ITEM_PATH_NEW, { dcs->keyOption }), dcs->option, dcs->keyOption, dcs);
+
+            item = values.append_child(CONFIG_LOAD_ITEM);
+            createItem(item, dcs->getItemPath(ITEM_PATH_NEW, { dcs->valOption }), dcs->option, dcs->valOption, dcs);
+        }
     }
 }
 
@@ -835,6 +889,10 @@ void Web::ConfigLoad::writeArrays(pugi::xml_node& values)
             auto item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, acs->getItemPath({ i }, {}), acs->option, acs->attrOption != ConfigVal::MAX ? acs->attrOption : acs->nodeOption, acs);
             setValue(item, entry);
+        }
+        {
+            auto item = values.append_child(CONFIG_LOAD_ITEM);
+            createItem(item, acs->getItemPath(ITEM_PATH_NEW, {}), acs->option, acs->attrOption != ConfigVal::MAX ? acs->attrOption : acs->nodeOption, acs);
         }
     }
 }

@@ -18,14 +18,14 @@
   "rules" : {
     "no-unused-expressions": "off",
     "no-unused-vars": [
-      "error",
+      "warn",
       {
-        "varsIgnorePattern": "should|expect|fixture|Cookies"
+        "varsIgnorePattern": "event|should|expect|fixture|Cookies"
       }
     ]
   },
   "parserOptions": {
-    "ecmaVersion": 2017,
+    "ecmaVersion": 2022,
     "sourceType": "module"
   }
 }

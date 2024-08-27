@@ -599,8 +599,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         || startswith(link, "/vendor")
         || startswith(link, "/js")
         || startswith(link, "/css")
-        || startswith(link, "/icons")
-        || startswith(link, "/gerbera-config-")) {
+        || startswith(link, "/icons")) {
         return std::make_unique<UIHandler>(content, upnpXmlBuilder, quirks, self);
     }
 
