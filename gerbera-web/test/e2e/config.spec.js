@@ -31,12 +31,12 @@ describe('Config Suite', () => {
       await driver.sleep(1000); // allow for load
       await homePage.showConfig('Server');
 
-      let result = await homePage.editOverlayFieldValue('value__server_modelNumber_7_0');
+      let result = await homePage.editOverlayFieldValue('grb_value__server_modelNumber');
       expect(result).to.equal('2.2.0');
 
-      await homePage.setEditorOverlayField('value__server_modelNumber_7_0', '43');
+      await homePage.setEditorOverlayField('grb_value__server_modelNumber', '43');
 
-      result = await homePage.editOverlayFieldValue('value__server_modelNumber_7_0');
+      result = await homePage.editOverlayFieldValue('grb_value__server_modelNumber');
       expect(result).to.equal('43');
 
       await homePage.clickTrail(1);

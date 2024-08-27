@@ -52,7 +52,7 @@ describe('Gerbera Config', () => {
       Config.loadConfig(configMetaJson, 'config');
       Config.loadConfig(configValueJson, 'values');
       Config.loadConfig(configValueJson, 'meta');
-      expect($('#configgrid').find('li').length).toEqual(149);
+      expect($('#configgrid').find('li').length).toEqual(222);
       configMetaJson.success = true;
     });
 
@@ -64,7 +64,7 @@ describe('Gerbera Config', () => {
       Config.loadConfig(configValueJson, 'meta');
       let node = $('#configgrid').find('li')[0];
       node.click();
-      expect($('#value__server_serialNumber_8_0').val()).toEqual('42');
+      expect($('#grb_value__server_serialNumber').val()).toEqual('42');
       configMetaJson.success = true;
     });
   });

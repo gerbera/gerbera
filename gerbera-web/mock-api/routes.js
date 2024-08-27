@@ -65,13 +65,7 @@ module.exports = function (app) {
         break;
     }
   });
-  app.get('/gerbera-config-minimal.json', (req, res) => {
-        res.send(require(configLoadMock.getResponse('')));
-  });
-  app.get('/gerbera-config-standard.json', (req, res) => {
-        res.send(require(configLoadMock.getResponse('')));
-  });
-  app.get('/gerbera-config-expert.json', (req, res) => {
+  app.get('/assets/*.json', (req, res) => {
         res.send(require(configLoadMock.getResponse('')));
   });
   app.get('/reset', (req, res) => {

@@ -1919,8 +1919,8 @@
             {
               "item": "/clients/client/map",
               "caption": "Mimetype Mappings",
-              "type": "List",
-              "editable": false,
+              "type": "SubList",
+              "editable": true,
               "children": [
                 {
                   "item": "/clients/client/map/attribute::from",
@@ -1937,8 +1937,8 @@
             {
               "item": "/clients/client/header",
               "caption": "Client Header",
-              "type": "List",
-              "editable": false,
+              "type": "SubList",
+              "editable": true,
               "children": [
                 {
                   "item": "/clients/client/header/attribute::key",

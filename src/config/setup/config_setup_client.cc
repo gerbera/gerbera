@@ -215,6 +215,9 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
 std::string ConfigClientSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
 {
     if (indexList.size() == 0) {
+        if (propOptions.size() > 1) {
+            return fmt::format("{}[_]/{}[_]/{}", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), ConfigDefinition::mapConfigOption(propOptions[0]), ConfigDefinition::ensureAttribute(propOptions[1]));
+        }
         if (propOptions.size() > 0) {
             return fmt::format("{}[_]/{}", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), ConfigDefinition::ensureAttribute(propOptions[0]));
         }

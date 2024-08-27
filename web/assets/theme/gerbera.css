@@ -440,6 +440,15 @@ body,
     background-color: lightgreen;
 }
 
+.configItemInput {
+    margin-left: 20px;
+    min-width: 400px;
+}
+.configItemLabel {
+    min-width: 240px;
+    display: inline-block;
+}
+
 .page-item.active .page-link {
     background-color: #ff7f00;
     border-color: #BF5F00;
