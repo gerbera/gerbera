@@ -105,12 +105,13 @@ void ConfigBoxLayoutSetup::makeOption(const pugi::xml_node& root, const std::sha
     setOption(config);
 }
 
-bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<BoxLayout>& entry, std::string& optValue, const std::string& status) const
+bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<BoxLayout>& entry, std::string& optValue, const std::string& status) const
 {
-    if (optItem == getItemPath({ i }, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+    if (optItem == getItemPath(indexList, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
-    auto index = getItemPath({ i }, { ConfigVal::A_BOXLAYOUT_BOX_KEY });
+    auto i = indexList.at(0);
+    auto index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_KEY });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getKey());
@@ -120,7 +121,7 @@ bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
-    index = getItemPath({ i }, { ConfigVal::A_BOXLAYOUT_BOX_TITLE });
+    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_TITLE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getTitle());
@@ -130,7 +131,7 @@ bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
-    index = getItemPath({ i }, { ConfigVal::A_BOXLAYOUT_BOX_CLASS });
+    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_CLASS });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getClass());
@@ -140,7 +141,7 @@ bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem,
             return true;
         }
     }
-    index = getItemPath({ i }, { ConfigVal::A_BOXLAYOUT_BOX_SIZE });
+    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_SIZE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getSize());
@@ -148,7 +149,7 @@ bool ConfigBoxLayoutSetup::updateItem(std::size_t i, const std::string& optItem,
         log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getSize());
         return true;
     }
-    index = getItemPath({ i }, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED });
+    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getEnabled());
@@ -165,9 +166,10 @@ bool ConfigBoxLayoutSetup::updateDetail(const std::string& optItem, std::string&
         log_debug("Updating BoxLayout Detail {} {} {}", xpath, optItem, optValue);
         auto value = std::dynamic_pointer_cast<BoxLayoutListOption>(optionValue);
         auto list = value->getBoxLayoutListOption();
-        auto index = extractIndex(optItem);
+        auto indexList = extractIndexList(optItem);
 
-        if (index < std::numeric_limits<std::size_t>::max()) {
+        if (indexList.size() > 0) {
+            auto index = indexList.at(0);
             auto entry = list->get(index, true);
             std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 
@@ -182,13 +184,16 @@ bool ConfigBoxLayoutSetup::updateDetail(const std::string& optItem, std::string&
             if (entry && status == STATUS_RESET) {
                 list->add(entry, index);
             }
-            if (entry && updateItem(index, optItem, config, entry, optValue, status)) {
+            if (entry && updateItem(indexList, optItem, config, entry, optValue, status)) {
                 return true;
             }
+        } else {
+            indexList.push_back(0);
         }
         for (std::size_t box = 0; box < list->size(); box++) {
             auto entry = value->getBoxLayoutListOption()->get(box);
-            if (updateItem(box, optItem, config, entry, optValue)) {
+            indexList[0] = box;
+            if (updateItem(indexList, optItem, config, entry, optValue)) {
                 return true;
             }
         }

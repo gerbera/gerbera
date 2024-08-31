@@ -107,13 +107,14 @@ void ConfigDirectorySetup::makeOption(const pugi::xml_node& root, const std::sha
     setOption(config);
 }
 
-bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status) const
+bool ConfigDirectorySetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status) const
 {
-    if (optItem == getItemPath({ i }, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+    if (optItem == getItemPath(indexList, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
 
-    auto index = getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_LOCATION });
+    auto index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_LOCATION });
+    auto i = indexList.at(0);
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getLocation());
@@ -125,7 +126,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         }
     }
     // inherit
-    index = getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_INHERIT });
+    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_INHERIT });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getInherit());
@@ -134,7 +135,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         return true;
     }
     // recursive
-    index = getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE });
+    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getRecursive());
@@ -143,7 +144,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         return true;
     }
     // hidden
-    index = getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN });
+    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getHidden());
@@ -152,7 +153,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         return true;
     }
     // case sensitive
-    index = getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE });
+    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getCaseSensitive());
@@ -161,7 +162,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         return true;
     }
     // follow symlinks
-    index = getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS });
+    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getFollowSymlinks());
@@ -170,7 +171,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         return true;
     }
     // charset
-    index = getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET });
+    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->hasMetaCharset() ? entry->getMetaCharset() : "");
@@ -181,7 +182,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         }
     }
     // fanart file
-    index = getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE });
+    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->hasFanArtFile() ? entry->getFanArtFile() : "");
@@ -192,7 +193,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         }
     }
     // resource file
-    index = getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE });
+    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->hasResourceFile() ? entry->getResourceFile() : "");
@@ -203,7 +204,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         }
     }
     // subtitle file
-    index = getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE });
+    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->hasSubTitleFile() ? entry->getSubTitleFile() : "");
@@ -214,7 +215,7 @@ bool ConfigDirectorySetup::updateItem(std::size_t i, const std::string& optItem,
         }
     }
     // metadata file
-    index = getItemPath({ i }, { ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE });
+    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->hasMetafile() ? entry->getMetafile() : "");
@@ -234,9 +235,10 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string&
         log_debug("Updating Client Detail {} {} {}", xpath, optItem, optValue);
         auto value = std::dynamic_pointer_cast<DirectoryTweakOption>(optionValue);
         auto list = value->getDirectoryTweakOption();
-        auto index = extractIndex(optItem);
+        auto indexList = extractIndexList(optItem);
 
-        if (index < std::numeric_limits<std::size_t>::max()) {
+        if (indexList.size() > 0) {
+            auto index = indexList.at(0);
             auto entry = list->get(index, true);
             std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 
@@ -251,13 +253,16 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string&
             if (entry && status == STATUS_RESET) {
                 list->add(entry, index);
             }
-            if (entry && updateItem(index, optItem, config, entry, optValue, status)) {
+            if (entry && updateItem(indexList, optItem, config, entry, optValue, status)) {
                 return true;
             }
+        } else {
+            indexList.push_back(0);
         }
         for (std::size_t tweak = 0; tweak < list->size(); tweak++) {
+            indexList[0] = tweak;
             auto entry = value->getDirectoryTweakOption()->get(tweak);
-            if (updateItem(tweak, optItem, config, entry, optValue)) {
+            if (updateItem(indexList, optItem, config, entry, optValue)) {
                 return true;
             }
         }

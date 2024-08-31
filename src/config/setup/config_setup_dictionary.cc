@@ -72,10 +72,11 @@ void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, const std::sh
     setOption(config);
 }
 
-bool ConfigDictionarySetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status) const
+bool ConfigDictionarySetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status) const
 {
-    auto keyIndex = getItemPath({ i }, { keyOption });
-    auto valIndex = getItemPath({ i }, { valOption });
+    auto i = indexList.at(0);
+    auto keyIndex = getItemPath(indexList, { keyOption });
+    auto valIndex = getItemPath(indexList, { valOption });
     if (optItem == keyIndex || !status.empty()) {
         config->setOrigValue(keyIndex, optKey);
         if (status == STATUS_REMOVED) {
@@ -105,19 +106,20 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
         auto value = std::dynamic_pointer_cast<DictionaryOption>(optionValue);
         log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue);
 
-        std::size_t i = extractIndex(optItem);
-        if (i < std::numeric_limits<std::size_t>::max()) {
-            if (updateItem(i, optItem, config, value, value->getKey(i), optValue)) {
+        auto indexList = extractIndexList(optItem);
+        if (indexList.size() > 0) {
+            auto i = indexList.at(0);
+            if (updateItem(indexList, optItem, config, value, value->getKey(i), optValue)) {
                 return true;
             }
             std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
             if (status == STATUS_REMOVED) {
-                if (updateItem(i, optItem, config, value, value->getKey(i), "", status)) {
+                if (updateItem(indexList, optItem, config, value, value->getKey(i), "", status)) {
                     return true;
                 }
             }
             if (status == STATUS_RESET) {
-                if (updateItem(i, optItem, config, value, optValue, optValue, status)) {
+                if (updateItem(indexList, optItem, config, value, optValue, optValue, status)) {
                     return true;
                 }
             }
@@ -125,11 +127,14 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
             if (status == STATUS_ADDED || status == STATUS_MANUAL) {
                 return true;
             }
+        } else {
+            indexList.push_back(0);
         }
 
-        i = 0;
+        std::size_t i = 0;
         for (auto&& [key, val] : value->getDictionaryOption()) {
-            if (updateItem(i, optItem, config, value, key, optValue)) {
+            indexList[0] = i;
+            if (updateItem(indexList, optItem, config, value, key, optValue)) {
                 return true;
             }
             i++;

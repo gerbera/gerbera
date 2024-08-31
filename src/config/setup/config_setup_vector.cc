@@ -81,13 +81,14 @@ void ConfigVectorSetup::makeOption(const pugi::xml_node& root, const std::shared
     setOption(config);
 }
 
-bool ConfigVectorSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<VectorOption>& value, const std::string& optValue, const std::string& status) const
+bool ConfigVectorSetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<VectorOption>& value, const std::string& optValue, const std::string& status) const
 {
     auto current = config->getVectorOption(option);
+    auto i = indexList.at(0);
     if (current.size() > i) {
         std::size_t optIndex = 0;
         for (auto&& [key, val] : current.at(i)) {
-            auto optionIndex = getItemPath({ i }, key);
+            auto optionIndex = getItemPath(indexList, key);
             if (optItem == optionIndex || !status.empty()) {
                 if (status == STATUS_RESET && !optValue.empty()) {
                     value->setValue(i, optIndex, config->getOrigValue(optionIndex));
@@ -112,19 +113,19 @@ bool ConfigVectorSetup::updateDetail(const std::string& optItem, std::string& op
         auto value = std::dynamic_pointer_cast<VectorOption>(optionValue);
         log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue);
 
-        std::size_t i = extractIndex(optItem);
-        if (i < std::numeric_limits<std::size_t>::max()) {
-            if (updateItem(i, optItem, config, value, optValue)) {
+        auto indexList = extractIndexList(optItem);
+        if (indexList.size() > 0) {
+            if (updateItem(indexList, optItem, config, value, optValue)) {
                 return true;
             }
             std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
             if (status == STATUS_REMOVED) {
-                if (updateItem(i, optItem, config, value, "", status)) {
+                if (updateItem(indexList, optItem, config, value, "", status)) {
                     return true;
                 }
             }
             if (status == STATUS_RESET) {
-                if (updateItem(i, optItem, config, value, optValue, status)) {
+                if (updateItem(indexList, optItem, config, value, optValue, status)) {
                     return true;
                 }
             }
@@ -132,11 +133,13 @@ bool ConfigVectorSetup::updateDetail(const std::string& optItem, std::string& op
             if (status == STATUS_ADDED || status == STATUS_MANUAL) {
                 return true;
             }
+        } else {
+            indexList.push_back(0);
         }
-
         auto editSize = value->getEditSize();
-        for (i = 0; i < editSize; ++i) {
-            if (updateItem(i, optItem, config, value, optValue)) {
+        for (std::size_t i = 0; i < editSize; ++i) {
+            indexList[0] = i;
+            if (updateItem(indexList, optItem, config, value, optValue)) {
                 return true;
             }
         }
@@ -146,11 +149,11 @@ bool ConfigVectorSetup::updateDetail(const std::string& optItem, std::string& op
 
 std::string ConfigVectorSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
 {
-    auto opt = ConfigDefinition::ensureAttribute(propOptions.size() > 0 ? propOptions[0] : ConfigVal::MAX);
+    auto opt = ConfigDefinition::ensureAttribute(propOptions.size() > 0 ? propOptions.at(0) : ConfigVal::MAX);
     if (indexList.size() == 0)
         return fmt::format("{}/{}[_]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), opt);
 
-    return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList[0], opt);
+    return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList.at(0), opt);
 }
 
 std::string ConfigVectorSetup::getItemPathRoot(bool prefix) const

@@ -40,7 +40,7 @@ protected:
     /// \param result contents of config.
     bool createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<BoxLayoutList>& result);
 
-    bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<BoxLayout>& entry, std::string& optValue, const std::string& status = "") const;
+    bool updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<BoxLayout>& entry, std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigBoxLayoutSetup(ConfigVal option, const char* xpath, const char* help, std::vector<BoxLayout> defaultEntries)
