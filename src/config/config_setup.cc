@@ -121,17 +121,26 @@ void ConfigSetup::makeOption(std::string optValue, const std::shared_ptr<Config>
     setOption(config);
 }
 
-std::size_t ConfigSetup::extractIndex(const std::string& item)
+std::vector<std::size_t> ConfigSetup::extractIndexList(const std::string& item)
 {
-    auto i = std::numeric_limits<std::size_t>::max();
-    if (item.find_first_of('[') != std::string::npos && item.find_first_of(']', item.find_first_of('[')) != std::string::npos) {
-        auto startPos = item.find_first_of('[') + 1;
-        auto endPos = item.find_first_of(']', startPos);
-        try {
-            i = std::stoi(item.substr(startPos, endPos - startPos));
-        } catch (const std::invalid_argument& ex) {
-            log_error(ex.what());
+    auto result = std::vector<std::size_t>();
+    std::size_t startPos = 0;
+    do {
+        startPos = item.find_first_of('[', startPos);
+        if (startPos != std::string::npos) {
+            startPos++;
+            auto endPos = item.find_first_of(']', startPos);
+            if (endPos != std::string::npos) {
+                try {
+                    std::size_t i = std::stoul(item.substr(startPos, endPos - startPos));
+                    result.push_back(i);
+                } catch (const std::invalid_argument& ex) {
+                    log_error(ex.what());
+                    result.push_back(0);
+                }
+            }
         }
-    }
-    return i;
+    } while (startPos != std::string::npos);
+
+    return result;
 }

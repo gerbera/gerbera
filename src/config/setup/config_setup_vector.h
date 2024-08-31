@@ -50,7 +50,7 @@ protected:
     /// list: { { "1", "3", "2" }, {"3", "", "4"}
     bool createOptionFromNode(const pugi::xml_node& element, std::vector<std::vector<std::pair<std::string, std::string>>>& result) const;
 
-    bool updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<VectorOption>& value, const std::string& optValue, const std::string& status = "") const;
+    bool updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<VectorOption>& value, const std::string& optValue, const std::string& status = "") const;
 
 public:
     ConfigVal nodeOption {};

@@ -33,6 +33,7 @@
 #include <map>
 #include <memory>
 #include <pugixml.hpp>
+#include <vector>
 
 #define YES "yes"
 #define NO "no"
@@ -68,7 +69,7 @@ protected:
     std::string defaultValue;
     const char* help;
 
-    static std::size_t extractIndex(const std::string& item);
+    static std::vector<std::size_t> extractIndexList(const std::string& item);
 
     void setOption(const std::shared_ptr<Config>& config)
     {

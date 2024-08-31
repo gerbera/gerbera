@@ -60,10 +60,11 @@ void ConfigArraySetup::makeOption(const pugi::xml_node& root, const std::shared_
     setOption(config);
 }
 
-bool ConfigArraySetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status) const
+bool ConfigArraySetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status) const
 {
-    auto index = getItemPath({ i }, {});
+    auto index = getItemPath(indexList, {});
     if (optItem == index || !status.empty()) {
+        auto i = indexList.at(0);
         auto realIndex = value->getIndex(i);
         if (realIndex < std::numeric_limits<std::size_t>::max()) {
             auto&& array = value->getArrayOption();
@@ -87,27 +88,30 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
         auto value = std::dynamic_pointer_cast<ArrayOption>(optionValue);
         log_debug("Updating Array Detail {} {} {}", xpath, optItem, optValue);
 
-        std::size_t i = extractIndex(optItem);
-        if (i < std::numeric_limits<std::size_t>::max()) {
-            if (updateItem(i, optItem, config, value, optValue)) {
+        auto indexList = extractIndexList(optItem);
+        if (indexList.size() > 0) {
+            if (updateItem(indexList, optItem, config, value, optValue)) {
                 return true;
             }
             std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
-            if (status == STATUS_REMOVED && updateItem(i, optItem, config, value, "", status)) {
+            if (status == STATUS_REMOVED && updateItem(indexList, optItem, config, value, "", status)) {
                 return true;
             }
-            if (status == STATUS_RESET && updateItem(i, optItem, config, value, config->getOrigValue(optItem), status)) {
+            if (status == STATUS_RESET && updateItem(indexList, optItem, config, value, config->getOrigValue(optItem), status)) {
                 return true;
             }
             // new entry has parent xpath, value is in other entry
             if (status == STATUS_ADDED || status == STATUS_MANUAL) {
                 return true;
             }
+        } else {
+            indexList.push_back(0);
         }
 
         auto editSize = value->getEditSize();
-        for (i = 0; i < editSize; i++) {
-            if (updateItem(i, optItem, config, value, optValue)) {
+        for (std::size_t i = 0; i < editSize; i++) {
+            indexList[0] = i;
+            if (updateItem(indexList, optItem, config, value, optValue)) {
                 return true;
             }
         }

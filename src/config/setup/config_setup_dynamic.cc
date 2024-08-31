@@ -84,13 +84,14 @@ void ConfigDynamicContentSetup::makeOption(const pugi::xml_node& root, const std
     setOption(config);
 }
 
-bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status) const
+bool ConfigDynamicContentSetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status) const
 {
-    if (optItem == getItemPath({ i }, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+    if (optItem == getItemPath(indexList, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
+    auto i = indexList.at(0);
 
-    auto index = getItemPath({ i }, { ConfigVal::A_DYNAMIC_CONTAINER_LOCATION });
+    auto index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_LOCATION });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getLocation());
@@ -101,7 +102,7 @@ bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& opt
             return true;
         }
     }
-    index = getItemPath({ i }, { ConfigVal::A_DYNAMIC_CONTAINER_IMAGE });
+    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_IMAGE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getImage());
@@ -111,7 +112,7 @@ bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& opt
             return true;
         }
     }
-    index = getItemPath({ i }, { ConfigVal::A_DYNAMIC_CONTAINER_TITLE });
+    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_TITLE });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getTitle());
@@ -121,7 +122,7 @@ bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& opt
             return true;
         }
     }
-    index = getItemPath({ i }, { ConfigVal::A_DYNAMIC_CONTAINER_FILTER });
+    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_FILTER });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getFilter());
@@ -131,7 +132,7 @@ bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& opt
             return true;
         }
     }
-    index = getItemPath({ i }, { ConfigVal::A_DYNAMIC_CONTAINER_SORT });
+    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_SORT });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getSort());
@@ -141,7 +142,7 @@ bool ConfigDynamicContentSetup::updateItem(std::size_t i, const std::string& opt
             return true;
         }
     }
-    index = getItemPath({ i }, { ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT });
+    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT });
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getMaxCount());
@@ -159,9 +160,10 @@ bool ConfigDynamicContentSetup::updateDetail(const std::string& optItem, std::st
         log_debug("Updating DynamicContent Detail {} {} {}", xpath, optItem, optValue);
         auto value = std::dynamic_pointer_cast<DynamicContentListOption>(optionValue);
         auto list = value->getDynamicContentListOption();
-        auto index = extractIndex(optItem);
+        auto indexList = extractIndexList(optItem);
 
-        if (index < std::numeric_limits<std::size_t>::max()) {
+        if (indexList.size() > 0) {
+            auto index = indexList.at(0);
             auto entry = list->get(index, true);
             std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 
@@ -176,13 +178,16 @@ bool ConfigDynamicContentSetup::updateDetail(const std::string& optItem, std::st
             if (entry && status == STATUS_RESET) {
                 list->add(entry, index);
             }
-            if (entry && updateItem(index, optItem, config, entry, optValue, status)) {
+            if (entry && updateItem(indexList, optItem, config, entry, optValue, status)) {
                 return true;
             }
+        } else {
+            indexList.push_back(0);
         }
         for (std::size_t tweak = 0; tweak < list->size(); tweak++) {
             auto entry = value->getDynamicContentListOption()->get(tweak);
-            if (updateItem(tweak, optItem, config, entry, optValue)) {
+            indexList[0] = tweak;
+            if (updateItem(indexList, optItem, config, entry, optValue)) {
                 return true;
             }
         }
