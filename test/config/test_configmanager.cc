@@ -134,10 +134,10 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
 {
     std::ostringstream expErrMsg;
     fs::path notExistsDir = home / "not_exists";
-    fs::path configFile = notExistsDir / confdir / "config.xml";
+    fs::path configFile = fs::weakly_canonical(notExistsDir / confdir / "config.xml");
 
     expErrMsg << "\nThe server configuration file could not be found: ";
-    expErrMsg << configFile << "\n";
+    expErrMsg << configFile.string() << "\n";
     expErrMsg << "Gerbera could not find a default configuration file.\n";
     expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
     expErrMsg << "For a list of options run: gerbera -h\n";

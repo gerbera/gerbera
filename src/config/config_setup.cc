@@ -53,6 +53,13 @@ bool ConfigSetup::hasXmlElement(const pugi::xml_node& root) const
         || root.select_node(xpath).attribute();
 }
 
+std::string ConfigSetup::getDocs()
+{
+    if (help)
+        return fmt::format(", see help https://docs.gerbera.io/en/stable/{}", help);
+    return ", see documentation https://docs.gerbera.io/en/stable/config-overview.html";
+}
+
 /// \brief Returns a config option with the given xpath, if option does not exist a default value is returned.
 std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
 {
@@ -61,7 +68,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
     if (xpathNode.node()) {
         std::string optValue = trim ? trimString(xpathNode.node().text().as_string()) : xpathNode.node().text().as_string();
         if (!checkValue(optValue)) {
-            throw_std_runtime_error("Invalid {}/{} value '{}'", root.path(), xpath, optValue.c_str());
+            throw_std_runtime_error("\nInvalid {}/{} value '{}'{}", root.path(), xpath, optValue.c_str(), getDocs());
         }
         return optValue;
     }
@@ -69,7 +76,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
     if (xpathNode.attribute()) {
         std::string optValue = trim ? trimString(xpathNode.attribute().value()) : xpathNode.attribute().value();
         if (!checkValue(optValue)) {
-            throw_std_runtime_error("Invalid {}/attribute::{} value '{}'", root.path(), xpath, optValue.c_str());
+            throw_std_runtime_error("\nInvalid {}/attribute::{} value '{}'{}", root.path(), xpath, optValue.c_str(), getDocs());
         }
         return optValue;
     }
@@ -79,7 +86,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
     if (root.attribute(xAttr.c_str())) {
         std::string optValue = trim ? trimString(root.attribute(xAttr.c_str()).as_string()) : root.attribute(xAttr.c_str()).as_string();
         if (!checkValue(optValue)) {
-            throw_std_runtime_error("Invalid {}/attribute::{} value '{}'", root.path(), xAttr, optValue);
+            throw_std_runtime_error("\nInvalid {}/attribute::{} value '{}'{}", root.path(), xAttr, optValue, getDocs());
         }
         return optValue;
     }
@@ -87,13 +94,13 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
     if (root.child(xpath)) {
         std::string optValue = trim ? trimString(root.child(xpath).text().as_string()) : root.child(xpath).text().as_string();
         if (!checkValue(optValue)) {
-            throw_std_runtime_error("Invalid {}/{} value '{}'", root.path(), xpath, optValue);
+            throw_std_runtime_error("\nInvalid {}/{} value '{}'{}", root.path(), xpath, optValue, getDocs());
         }
         return optValue;
     }
 
     if (required)
-        throw_std_runtime_error("Error in config file: {}/{} not found", root.path(), xpath);
+        throw_std_runtime_error("\nRequired option {}/{} not found{}", root.path(), xpath, getDocs());
 
     log_debug("Config: option not found: '{}/{}' using default value: '{}'", root.path(), xpath, defaultValue);
 

@@ -27,6 +27,7 @@ config being unused or triggering warnings.
 - Additional client filtering options with friendlyName, modelName, manufacturer
 - Configuration option to block clients
 - Upnp classes are assigned to containers in physical tree (PC Directory) depending on the majority of children (only in grb-mode)
+- Nested iterations are now supported in Config UI
 
 ### FIXES
 
@@ -34,6 +35,7 @@ config being unused or triggering warnings.
 - Config values `<online-content fetch-buffer-size="262144" fetch-buffer-fill-size="0">` are implemented now.
 - Renaming of files or folders in grb-mode
 - Nested arrays can be shown in config ui.
+- Made UDN mandatory for UPnP announcements to work
 
 ### Code Improvements
 

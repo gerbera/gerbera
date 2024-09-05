@@ -5,11 +5,14 @@
 - Add build target for source documentation
 - Add configuration option to block clients
 - Add Splitter and Resize to items grid
+- Bump webpack from 5.93.0 to 5.94.0 in /gerbera-web
 - Clean up commented out code
 - Clean up test code
 - Clean up URL handling
 - Configuration of additional target mimetype properties for transcoding
+- Config: Make UDN mandatory
 - Config: Option to disable physical container types
+- ConfigSetup: Allow multiple iterations for UI
 - Drop Apple Trailer support
 - Extract image and video orientation to resource attributes
 - FIXME done: Remove fake resource
