@@ -208,7 +208,7 @@ public:
     void updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view key, const T& value);
     void deleteAll(std::string_view tableName);
     template <typename T>
-    void deleteRow(std::string_view tableName, std::string_view key, const T& value);
+    void deleteRow(const std::string& tableName, const std::string& key, const T& value);
     void deleteRows(std::string_view tableName, const std::string& key, const std::vector<int>& values);
 
 protected:
@@ -336,9 +336,9 @@ void SQLDatabase::updateRow(std::string_view tableName, const std::vector<Column
 }
 
 template <typename T>
-void SQLDatabase::deleteRow(std::string_view tableName, std::string_view key, const T& value)
+void SQLDatabase::deleteRow(const std::string& tableName, const std::string& key, const T& value)
 {
-    exec(fmt::format("DELETE FROM {} WHERE {} = {}", identifier(std::string(tableName)), identifier(std::string(key)), quote(value)));
+    exec(fmt::format("DELETE FROM {} WHERE {} = {}", identifier(tableName), identifier(key), quote(value)));
 }
 
 class SqlWithTransactions {

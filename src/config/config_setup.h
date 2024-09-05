@@ -70,6 +70,7 @@ protected:
     const char* help;
 
     static std::vector<std::size_t> extractIndexList(const std::string& item);
+    std::string getDocs();
 
     void setOption(const std::shared_ptr<Config>& config)
     {

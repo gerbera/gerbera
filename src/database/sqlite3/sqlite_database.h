@@ -35,13 +35,13 @@
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
 
-#include <mutex>
-#include <queue>
-#include <sqlite3.h>
-
 #include "database/sql_database.h"
 #include "util/thread_runner.h"
 #include "util/timer.h"
+
+#include <mutex>
+#include <queue>
+#include <sqlite3.h>
 
 class Sqlite3Database;
 class Sqlite3Result;

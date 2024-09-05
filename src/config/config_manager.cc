@@ -70,12 +70,12 @@ ConfigManager::ConfigManager(fs::path filename,
         fs::path home = userHome / configDir;
         this->filename = home / DEFAULT_CONFIG_NAME;
     }
-
+    this->filename = fs::weakly_canonical(this->filename);
     std::error_code ec;
     if (!isRegularFile(this->filename, ec)) {
         std::ostringstream expErrMsg;
         expErrMsg << "\nThe server configuration file could not be found: ";
-        expErrMsg << this->filename << "\n";
+        expErrMsg << this->filename.string() << "\n";
         expErrMsg << "Gerbera could not find a default configuration file.\n";
         expErrMsg << "Try specifying an alternative configuration file on the command line.\n";
         expErrMsg << "For a list of options run: gerbera -h\n";
@@ -108,7 +108,7 @@ void ConfigManager::load(const fs::path& userHome)
     std::map<std::string, std::string> args;
     auto self = getSelf();
 
-    log_info("Loading configuration from: {}", filename.c_str());
+    log_info("Loading configuration from: {}", filename.string());
     pugi::xml_parse_result result = xmlDoc->load_file(filename.c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
         throw ConfigParseException(result.description());

@@ -3,6 +3,14 @@
 Troubleshooting
 ===============
 
+General
+~~~~~~~
+
+In case gerbera does not do what you think is the expected behaviour, generate a new config file with ``--create-config`` or ``--create-example-config``
+and try to apply your settings in the new version. For each setting you cannot find in the generated files look up the configuration section in this
+documentation to make sure you (still) have the correct understanding of the setting.
+
+
 Installation
 ~~~~~~~~~~~~
 
@@ -53,7 +61,7 @@ the correct IP address or the network interface.
 
     --ip or -i
 
-The server will bind to the given IP address, currently we can not bind to multiple interfaces so binding to ``0.0.0.0``
+The server will bind to the given IP address, currently gerbera cannot bind to multiple interfaces so binding to ``0.0.0.0``
 is not be possible.
 
 Network Interface
