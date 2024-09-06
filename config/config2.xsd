@@ -1180,10 +1180,7 @@
     <xs:element name="profile">
         <xs:complexType>
             <xs:all>
-                <xs:choice minOccurs="1" maxOccurs="1">
-                        <xs:element name="mimetype" type="xs:string"/>
-                        <xs:element ref="mimetype"/>
-                </xs:choice>
+                <xs:element ref="mimetype"/>
                 <xs:element ref="dlna-profile" minOccurs="0"/>
                 <xs:element ref="accept-url" minOccurs="0"/>
                 <xs:element ref="first-resource" minOccurs="0"/>
@@ -1192,7 +1189,7 @@
                 <xs:element ref="agent"/>
                 <xs:element ref="buffer"/>
                 <xs:element ref="sample-frequency" minOccurs="0"/>
-                <xs:element name="audio-channels"/>
+                <xs:element name="audio-channels" minOccurs="0"/>
                 <xs:element ref="resolution" minOccurs="0"/>
                 <xs:element ref="thumbnail" minOccurs="0"/>
             </xs:all>
@@ -1211,11 +1208,11 @@
 
     <xs:element name="dlna-profile" type="xs:string"/>
     <xs:element name="mimetype">
-        <xs:complexType>
+        <xs:complexType mixed="true">
             <xs:sequence>
                 <xs:element ref="mime-property" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
-            <xs:attribute name="value" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string"/>
         </xs:complexType>
     </xs:element>
     <xs:element name="mime-property">
