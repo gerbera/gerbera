@@ -1192,6 +1192,7 @@
                 <xs:element ref="agent"/>
                 <xs:element ref="buffer"/>
                 <xs:element ref="sample-frequency" minOccurs="0"/>
+                <xs:element name="audio-channels"/>
                 <xs:element ref="resolution" minOccurs="0"/>
                 <xs:element ref="thumbnail" minOccurs="0"/>
             </xs:all>
