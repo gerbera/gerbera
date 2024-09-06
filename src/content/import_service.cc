@@ -190,7 +190,7 @@ void ImportService::initLayout(LayoutType layoutType)
     if (!layout) {
         log_debug("virtual layout Type {}", layoutType);
         try {
-            std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
+            LayoutAutoLock lock(layoutMutex);
 
             if (layoutType == LayoutType::Js) {
 #ifdef HAVE_JS
@@ -256,6 +256,7 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
 {
     log_debug("start {} root '{}' update {}", location.string(), rootPath.string(), !!settings.changedObject);
     if (activeScan.empty()) {
+        auto cacheLock = CacheAutoLock(cacheMutex);
         contentStateCache.clear();
         if (settings.changedObject)
             clearCache();
@@ -332,7 +333,7 @@ void ImportService::readDir(const fs::path& location, AutoScanSetting settings)
     settings.mergeOptions(config, location);
     for (auto&& dirEntry : dirIterator) {
         auto&& entryPath = dirEntry.path();
-        if (isHiddenFile(entryPath, true, dirEntry, settings)) {
+        if (entryPath.empty() || isHiddenFile(entryPath, true, dirEntry, settings)) {
             continue;
         }
         cacheState(entryPath, dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
@@ -353,6 +354,11 @@ void ImportService::readDir(const fs::path& location, AutoScanSetting settings)
 
 void ImportService::cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime, const std::shared_ptr<CdsObject>& cdsObject)
 {
+    auto cacheLock = CacheAutoLock(cacheMutex);
+
+    if (entryPath.empty())
+        return;
+
     if (contentStateCache.find(entryPath) == contentStateCache.end()) {
         contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, state, mtime, cdsObject);
     } else {
@@ -372,7 +378,7 @@ void ImportService::readFile(const fs::path& location)
     cacheState(location.parent_path(), dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
 
     auto entryPath = dirEntry.path().parent_path();
-    while (entryPath != "/" && entryPath != rootPath) {
+    while (entryPath != "/" && !entryPath.empty() && entryPath != rootPath) {
         dirEntry.assign(entryPath, ec);
         if (ec) {
             cacheState(entryPath, dirEntry, ImportState::Broken);
@@ -396,12 +402,15 @@ void ImportService::removeHidden(const AutoScanSetting& settings)
         }
     }
 
-    for (auto&& hiddenPath : hiddenPaths) {
-        for (auto it = contentStateCache.begin(); it != contentStateCache.end();) {
-            if (startswith(it->first.string(), hiddenPath.string())) {
-                contentStateCache.erase(it++);
-            } else {
-                ++it;
+    {
+        auto cacheLock = CacheAutoLock(cacheMutex);
+        for (auto&& hiddenPath : hiddenPaths) {
+            for (auto it = contentStateCache.begin(); it != contentStateCache.end();) {
+                if (startswith(it->first.string(), hiddenPath.string())) {
+                    contentStateCache.erase(it++);
+                } else {
+                    ++it;
+                }
             }
         }
     }
@@ -418,16 +427,13 @@ bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, co
     }
     if (!noMediaName.empty()) {
         auto noMediaFile = (isDirectory) ? entryPath / noMediaName : entryPath.parent_path() / noMediaName;
-        if (contentStateCache.find(noMediaFile) != contentStateCache.end()) {
-            return !contentStateCache.at(noMediaFile) || contentStateCache.at(noMediaFile)->getState() != ImportState::Broken; // broken means: file not found
+        {
+            auto cacheLock = CacheAutoLock(cacheMutex);
+            if (contentStateCache.find(noMediaFile) != contentStateCache.end()) {
+                return !contentStateCache.at(noMediaFile) || contentStateCache.at(noMediaFile)->getState() != ImportState::Broken; // broken means: file not found
+            }
         }
-        auto noMediaEntry = fs::directory_entry(noMediaFile, ec);
-        if (!noMediaEntry.exists(ec) || ec) {
-            cacheState(noMediaEntry, noMediaEntry, ImportState::Broken, toSeconds(dirEntry.last_write_time(ec)));
-        } else {
-            // if file exists it will be automatically created
-            return true;
-        }
+        // if file exists it will be automatically created
     }
     return false;
 }
@@ -512,7 +518,7 @@ void ImportService::createItems(AutoScanSetting& settings)
         // cache containers as parent item for following item
         if (cdsObj && cdsObj->isContainer()) {
             std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
-            if (contPath != "") {
+            if (!contPath.empty()) {
                 contentStateCache[contPath]->setMTime(lastModifiedNewMax);
                 if (autoscanDir) {
                     autoscanDir->setCurrentLMT(contPath, lastModifiedNewMax);
@@ -699,7 +705,7 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
 
             if (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())) {
                 // only lock mutex while processing item layout
-                std::scoped_lock<decltype(layoutMutex)> lock(layoutMutex);
+                LayoutAutoLock lock(layoutMutex);
                 // get ref'd objects with last mod time
                 auto refObjects = state ? database->getRefObjects(cdsObject->getID()) : std::vector<int> {};
                 layout->processCdsObject(cdsObject, parent,

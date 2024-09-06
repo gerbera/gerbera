@@ -65,6 +65,17 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         const auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET, item->getLocation());
 
         const auto image = Exiv2::ImageFactory::open(item->getLocation());
+#if EXIV2_TEST_VERSION(0, 28, 0)
+        if (!image) { // is unique_ptr now
+            log_warning("Exiv2::ImageFactory could not open {}", item->getLocation().c_str());
+            return;
+        }
+#else
+        if (image.get() == nullptr) { // used to be auto_ptr
+            log_warning("Exiv2::ImageFactory could not open {}", item->getLocation().c_str());
+            return;
+        }
+#endif
         image->readMetadata();
         Exiv2::ExifData& exifData = image->exifData();
         Exiv2::XmpData& xmpData = image->xmpData();

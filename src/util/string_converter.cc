@@ -109,6 +109,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     char* output;
     try {
         output = new char[length];
+        output[0] = '\0';
     } catch (const std::bad_alloc& ex) {
         log_debug("Could not allocate memory for string conversion!\n{}", ex.what());
         throw_std_runtime_error("Could not allocate memory for string conversion");

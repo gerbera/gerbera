@@ -67,7 +67,7 @@ enum class ImportState {
     WithLayout,
     ToDelete,
     LayoutDeleted,
-    Broken,
+    Broken = 99,
 };
 
 class ContentState {
@@ -173,17 +173,21 @@ private:
     std::vector<std::string> virtualDirKeys {};
 
     /// \brief cache for containers while creating new layout
-    std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
-    std::map<int, std::shared_ptr<CdsContainer>> containersWithFanArt;
+    mutable std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
+    mutable std::map<int, std::shared_ptr<CdsContainer>> containersWithFanArt;
 
-    std::mutex layoutMutex;
-    std::shared_ptr<Layout> layout;
+    mutable std::mutex layoutMutex;
+    using LayoutAutoLock = std::scoped_lock<decltype(layoutMutex)>;
+    mutable std::shared_ptr<Layout> layout;
+
+    mutable std::mutex cacheMutex;
+    using CacheAutoLock = std::scoped_lock<decltype(cacheMutex)>;
 #ifdef HAVE_JS
     std::unique_ptr<PlaylistParserScript> playlistParserScript;
     std::unique_ptr<MetafileParserScript> metafileParserScript;
 #endif
 
-    std::map<fs::path, std::shared_ptr<ContentState>> contentStateCache = std::map<fs::path, std::shared_ptr<ContentState>>();
+    mutable std::map<fs::path, std::shared_ptr<ContentState>> contentStateCache = std::map<fs::path, std::shared_ptr<ContentState>>();
     std::error_code ec;
     fs::path activeScan {};
 
