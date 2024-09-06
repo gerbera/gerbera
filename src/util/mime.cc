@@ -93,12 +93,13 @@ std::string Mime::bufferToMimeType(const void* buffer, std::size_t length)
 
 std::pair<bool, std::string> Mime::getMimeType(const fs::path& path, const std::string& defval)
 {
-    std::string extension = path.extension();
-    if (!extension.empty())
+    auto extension = path.extension().string();
+    if (!extension.empty() && extension.at(0) == '.')
         extension.erase(0, 1); // remove leading .
 
-    if (!extension_map_case_sensitive)
+    if (!extension_map_case_sensitive) {
         extension = toLower(extension);
+    }
 
     if (std::find(ignoredExtensions.begin(), ignoredExtensions.end(), extension) != ignoredExtensions.end()) {
         log_debug("Ignoring file {} because of extension", path.string());

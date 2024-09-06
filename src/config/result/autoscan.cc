@@ -165,10 +165,10 @@ void AutoscanDirectory::setCurrentLMT(const fs::path& loc, std::chrono::seconds 
         lmt = current;
     if (!loc.empty()) {
         auto lmDir = lastModified.find(loc);
-        if (lmDir == lastModified.end() || lastModified.at(loc) > std::chrono::seconds::zero()) {
+        if (lmDir == lastModified.end() || (*lmDir).second > std::chrono::seconds::zero()) {
             firstScan = true;
         }
-        if (lmDir == lastModified.end() || lastModified.at(loc) == std::chrono::seconds::zero()) {
+        if (lmDir == lastModified.end() || (*lmDir).second == std::chrono::seconds::zero()) {
             activeScan = true;
         }
         lastModified[loc] = lmt;
@@ -202,8 +202,8 @@ bool AutoscanDirectory::updateLMT()
 std::chrono::seconds AutoscanDirectory::getPreviousLMT(const fs::path& loc, const std::shared_ptr<CdsContainer>& parent) const
 {
     auto lmDir = lastModified.find(loc);
-    if (!loc.empty() && lmDir != lastModified.end() && lastModified.at(loc) > std::chrono::seconds::zero()) {
-        return lastModified.at(loc);
+    if (!loc.empty() && lmDir != lastModified.end() && (*lmDir).second > std::chrono::seconds::zero()) {
+        return (*lmDir).second;
     }
     if (parent && parent->getMTime() > std::chrono::seconds::zero()) {
         return parent->getMTime();
