@@ -1,0 +1,163 @@
+<map from="asf" to="VC1_ASF_AP_L1_WMA"/>
+<map from="asf" to="VC1_ASF_AP_L2_WMA"/>
+<map from="asf" to="VC1_ASF_AP_L3_WMA"/>
+<map from="avi" to="AVI"/>
+<map from="dsd" to="DSF"/>
+<map from="flac" to="FLAC"/>
+<map from="flv" to="FLV"/>
+<map from="gif" to="GIF_LRG"/>
+<map from="jpg" to="JPEG_LRG"/>
+<map from="jpg" to="JPEG_MED"/>
+<map from="jpg" to="JPEG_SM"/>
+<map from="jpg" to="JPEG_TN"/>
+<map from="mkv" audioCodec="aac" to="AVC_MKV_HP_HD_AAC_MULT5"/>
+<map from="mkv" to="AVC_MKV_HP_HD_DTS"/>
+<map from="mkv" to="AVC_MKV_HP_HD_EAC3"/>
+<map from="mkv" to="AVC_MKV_HP_HD_MLP"/>
+<map from="mkv" to="AVC_MKV_HP_HD_MPEG1_L3"/>
+<map from="mkv" audioCodec="aac" to="AVC_MKV_MP_HD_AAC_MULT5"/>
+<map from="mkv" to="AVC_MKV_MP_HD_DTS"/>
+<map from="mkv" to="AVC_MKV_MP_HD_EAC3"/>
+<map from="mkv" to="AVC_MKV_MP_HD_MPEG1_L3"/>
+<map from="mkv" to="MATROSKA"/>
+<map from="mkv" audioCodec="ac3" to="AVC_MKV_HP_HD_AC3"/>
+<map from="mkv" audioCodec="ac3" to="AVC_MKV_MP_HD_AC3"/>
+<map from="mp3" to="MP2_MPS"/>
+<map from="mp3" to="MP3"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_BL_CIF15_AAC"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_BL_CIF15_AAC_520"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_BL_CIF15_AAC_LTP"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_BL_CIF15_AAC_LTP_520"/>
+<map from="mp4" to="AVC_MP4_BL_CIF15_AMR"/>
+<map from="mp4" to="AVC_MP4_BL_CIF15_BSAC"/>
+<map from="mp4" to="AVC_MP4_BL_CIF15_HEAAC"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_BL_CIF30_AAC_940"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_BL_CIF30_AAC_LTP"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_BL_CIF30_AAC_LTP_MULT5"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_BL_CIF30_AAC_MULT5"/>
+<map from="mp4" audioCodec="ac3" to="AVC_MP4_BL_CIF30_AC3"/>
+<map from="mp4" to="AVC_MP4_BL_CIF30_BSAC"/>
+<map from="mp4" to="AVC_MP4_BL_CIF30_BSAC_MULT5"/>
+<map from="mp4" to="AVC_MP4_BL_CIF30_HEAAC_L2"/>
+<map from="mp4" to="AVC_MP4_BL_CIF30_MPEG1_L3"/>
+<map from="mp4" to="AVC_MP4_BL_L12_CIF15_HEAAC"/>
+<map from="mp4" to="AVC_MP4_BL_L1B_QCIF15_HEAAC"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_BL_L2_CIF30_AAC"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_BL_L3L_SD_AAC"/>
+<map from="mp4" to="AVC_MP4_BL_L3L_SD_HEAAC"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_BL_L3_SD_AAC"/>
+<map from="mp4" to="AVC_MP4_EU"/>
+<map from="mp4" to="AVC_MP4_HP_HD_DTS"/>
+<map from="mp4" to="AVC_MP4_HP_HD_DTSHD"/>
+<map from="mp4" to="AVC_MP4_HP_HD_MLP"/>
+<map from="mp4" to="AVC_MP4_LPCM"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_MP_SD_AAC_LTP"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_MP_SD_AAC_LTP_MULT5"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_MP_SD_AAC_LTP_MULT7"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_MP_SD_AAC_MULT5"/>
+<map from="mp4" to="AVC_MP4_MP_SD_ATRAC3plus"/>
+<map from="mp4" to="AVC_MP4_MP_SD_BSAC"/>
+<map from="mp4" to="AVC_MP4_MP_SD_DTS"/>
+<map from="mp4" to="AVC_MP4_MP_SD_DTSHD"/>
+<map from="mp4" to="AVC_MP4_MP_SD_HEAAC_L2"/>
+<map from="mp4" to="AVC_MP4_MP_SD_MPEG1_L3"/>
+<map from="mp4" to="HEVC_MP4"/>
+<map from="mp4" to="MPEG4_P2_3GPP_SP_L0B_AMR"/>
+<map from="mp4" to="MPEG4_P2_MP4_ASP_ATRAC3plus"/>
+<map from="mp4" to="MPEG4_P2_MP4_ASP_HEAAC"/>
+<map from="mp4" to="MPEG4_P2_MP4_ASP_HEAAC_MULT5"/>
+<map from="mp4" audioCodec="ac3" to="MPEG4_P2_MP4_ASP_L4_SO_AAC"/>
+<map from="mp4" to="MPEG4_P2_MP4_ASP_L4_SO_HEAAC"/>
+<map from="mp4" to="MPEG4_P2_MP4_ASP_L4_SO_HEAAC_MULT5"/>
+<map from="mp4" audioCodec="aac" to="MPEG4_P2_MP4_ASP_L5_SO_AAC"/>
+<map from="mp4" to="MPEG4_P2_MP4_ASP_L5_SO_HEAAC"/>
+<map from="mp4" to="MPEG4_P2_MP4_ASP_L5_SO_HEAAC_MULT5"/>
+<map from="mp4" to="MPEG4_P2_MP4_NDSD"/>
+<map from="mp4" audioCodec="aac" to="MPEG4_P2_MP4_SP_AAC"/>
+<map from="mp4" audioCodec="aac" to="MPEG4_P2_MP4_SP_AAC_LTP"/>
+<map from="mp4" to="MPEG4_P2_MP4_SP_ATRAC3plus"/>
+<map from="mp4" to="MPEG4_P2_MP4_SP_HEAAC"/>
+<map from="mp4" audioCodec="aac" to="MPEG4_P2_MP4_SP_L2_AAC"/>
+<map from="mp4" to="MPEG4_P2_MP4_SP_L2_AMR"/>
+<map from="mp4" audioCodec="aac" to="MPEG4_P2_MP4_SP_VGA_AAC"/>
+<map from="mp4" to="MPEG4_P2_MP4_SP_VGA_HEAAC"/>
+<map from="mp4" audioCodec="aac" to="AVC_3GPP_BL_QCIF15_AAC"/>
+<map from="mp4" videoCodec="av1" audioCodec="aac" to="AVC_MP4_HP_HD_AAC"/>
+<map from="mp4" audioCodec="aac" to="AVC_MP4_MP_HD_1080i_AAC"/>
+<map from="mp4" audioCodec="aac" to="MPEG4_P2_3GPP_SP_L0B_AAC"/>
+<map from="mp4" audioCodec="aac" to="MPEG4_P2_MP4_ASP_AAC"/>
+<map from="mp4" audioCodec="aac" to="MPEG4_P2_MP4_SP_L6_AAC"/>
+<map from="mp4" videoCodec="h264" audioCodec="ac3" to="AVC_MP4_MP_SD_AC3"/>
+<map from="mp4" videoCodec="h264" audioCodec="aac" to="AVC_MP4_MP_HD_720p_AAC"/>
+<map from="mpa" audioCodec="aac" to="AAC_ISO"/>
+<map from="mpa" audioCodec="aac" to="AAC_ISO_320"/>
+<map from="mpeg" to="AVC_TS_DTSHD_MA_ISO"/>
+<map from="mpeg" to="AVC_TS_DTSHD_MA_T"/>
+<map from="mpeg" to="AVC_TS_HD_50_LPCM_T"/>
+<map from="mpeg" to="AVC_TS_HD_DTS_ISO"/>
+<map from="mpeg" to="AVC_TS_HD_DTS_T"/>
+<map from="mpeg" to="AVC_TS_HP_HD_MLP"/>
+<map from="mpeg" to="AVC_TS_HP_HD_MPEG1_L2_ISO"/>
+<map from="mpeg" to="AVC_TS_HP_HD_MPEG1_L2_T"/>
+<map from="mpeg" to="AVC_TS_HP_SD_MPEG1_L2_ISO"/>
+<map from="mpeg" to="AVC_TS_HP_SD_MPEG1_L2_T"/>
+<map from="mpeg" to="AVC_TS_MP_HD_MPEG1_L3"/>
+<map from="mpeg" to="AVC_TS_MP_HD_MPEG1_L3_ISO"/>
+<map from="mpeg" to="AVC_TS_MP_HD_MPEG1_L3_T"/>
+<map from="mpeg" to="AVC_TS_MP_SD_MPEG1_L3"/>
+<map from="mpeg" to="AVC_TS_MP_SD_MPEG1_L3_ISO"/>
+<map from="mpeg" to="AVC_TS_MP_SD_MPEG1_L3_T"/>
+<map from="mpeg" to="HEVC_TS"/>
+<map from="mpeg" to="MPEG1"/>
+<map from="mpeg" to="MPEG_PS_NTSC"/>
+<map from="mpeg" to="MPEG_PS_PAL"/>
+<map from="mpeg" to="MPEG_TS_JP_T"/>
+<map from="mpeg" to="MPEG_TS_SD_EU"/>
+<map from="mpeg" to="MPEG_TS_SD_EU_ISO"/>
+<map from="mpeg" to="MPEG_TS_SD_EU_T"/>
+<map from="mpeg" to="MPEG_TS_SD_KO"/>
+<map from="mpeg" to="MPEG_TS_SD_KO_ISO"/>
+<map from="mpeg" to="MPEG_TS_SD_KO_T"/>
+<map from="mpeg" to="MPEG_TS_SD_NA"/>
+<map from="mpeg" to="MPEG_TS_SD_NA_ISO"/>
+<map from="mpeg" to="MPEG_TS_SD_NA_T"/>
+<map from="mpeg" to="VC1_TS_HD_DTSHD_MA_ISO"/>
+<map from="mpeg" to="VC1_TS_HD_DTSHD_MA_T"/>
+<map from="mpeg" to="VC1_TS_HD_DTS_ISO"/>
+<map from="mpeg" to="VC1_TS_HD_DTS_T"/>
+<map from="mpeg" audioCodec="aac" to="AVC_TS_MP_HD_AAC_MULT5"/>
+<map from="mpeg" audioCodec="aac" to="AVC_TS_MP_HD_AAC_MULT5_ISO"/>
+<map from="mpeg" audioCodec="aac" to="AVC_TS_MP_HD_AAC_MULT5_T"/>
+<map from="mpeg" audioCodec="aac" to="AVC_TS_MP_SD_AAC_MULT5"/>
+<map from="mpeg" audioCodec="aac" to="AVC_TS_MP_SD_AAC_MULT5_ISO"/>
+<map from="mpeg" audioCodec="aac" to="AVC_TS_MP_SD_AAC_MULT5_T"/>
+<map from="mpeg" audioCodec="ac3" to="AVC_TS_MP_HD_AC3"/>
+<map from="mpeg" audioCodec="ac3" to="AVC_TS_MP_HD_AC3_ISO"/>
+<map from="mpeg" audioCodec="ac3" to="AVC_TS_MP_HD_AC3_T"/>
+<map from="mpeg" audioCodec="ac3" to="AVC_TS_MP_SD_AC3"/>
+<map from="mpeg" audioCodec="ac3" to="AVC_TS_MP_SD_AC3_ISO"/>
+<map from="mpeg" audioCodec="ac3" to="AVC_TS_MP_SD_AC3_T"/>
+<map from="mpeg" audioCodec="ac3" to="VC1_TS_AP_L1_AC3_ISO"/>
+<map from="mpeg" audioCodec="ac3" to="VC1_TS_AP_L2_AC3_ISO"/>
+<map from="mwv" to="VC1_ASF_AP_L1_WMA"/>
+<map from="mwv" to="VC1_ASF_AP_L2_WMA"/>
+<map from="mwv" to="VC1_ASF_AP_L3_WMA"/>
+<map from="mwv" to="WMVHIGH_FULL"/>
+<map from="mwv" to="WMVHIGH_PRO"/>
+<map from="mwv" to="WMVMED_BASE"/>
+<map from="mwv" to="WMVMED_FULL"/>
+<map from="mwv" to="WMVMED_PRO"/>
+<map from="ogg" to="OGG"/>
+<map from="ogg" to="OGV"/>
+<map from="pcm" to="WAV"/>
+<map from="pcm" sampleFrequency="44100" nrAudioChannels="1" to="LPCM16_44_MONO"/>
+<map from="pcm" sampleFrequency="44100" nrAudioChannels="2" to="LPCM16_44_STEREO"/>
+<map from="pcm" sampleFrequency="48000" nrAudioChannels="1" to="LPCM16_48_MONO"/>
+<map from="pcm" sampleFrequency="48000" nrAudioChannels="2" to="LPCM16_48_STEREO"/>
+<map from="png" to="PNG_LRG"/>
+<map from="png" to="PNG_TN"/>
+<map from="wma" to="WMABASE"/>
+<map from="wma" to="WMAFULL"/>
+<map from="wma" to="WMALSL"/>
+<map from="wma" to="WMALSL_MULT5"/>
+<map from="wma" to="WMAPRO"/>

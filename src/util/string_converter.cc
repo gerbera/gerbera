@@ -125,8 +125,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     auto inputBytes = str.length();
     auto outputBytes = length;
 
-    // log_debug(("iconv: BEFORE: input bytes left: {}  output bytes left: {}",
-    //        input_bytes, output_bytes));
+    // log_debug("iconv: BEFORE: input bytes left: {}  output bytes left: {}", inputBytes, outputBytes);
 #if defined(ICONV_CONST) || defined(SOLARIS)
     int ret = iconv(cd, inputPtr, &inputBytes,
         outputPtr, &outputBytes);
@@ -175,8 +174,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         throw_std_runtime_error(err);
     }
 
-    // log_debug("iconv: AFTER: input bytes left: {}  output bytes left: {}",
-    //        input_bytes, output_bytes);
+    // log_debug("iconv: AFTER: input bytes left: {}  output bytes left: {}", inputBytes, outputBytes);
     // log_debug("iconv: returned {}", ret);
 
     auto retStr = std::string(output, outputCopy - output);

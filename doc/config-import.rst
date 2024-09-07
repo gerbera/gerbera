@@ -111,7 +111,8 @@ The import settings define various options on how to aggregate the content.
     Whenever config entries in this section are changed, it is recommended to clear the database and restart a full import again. Otherwise the virtual layout can be broken or in some
     mixed state.
 
-::
+.. code:: xml
+
 
     <import hidden-files="no" follow-symlinks="no">
 
@@ -121,7 +122,7 @@ This tag defines the import section.
 
 **Attributes:**
 
-    ::
+    .. code:: xml
 
         hidden-files="yes|no"
 
@@ -132,7 +133,7 @@ This tag defines the import section.
     This attribute defines if files starting with a dot will be imported into the database (``yes``). Autoscan can
     override this attribute on a per directory basis. Hidden directories can also be marked with the ``nomedia-file``.
 
-    ::
+    .. code:: xml
 
         follow-symlinks="yes|no"
 
@@ -142,7 +143,7 @@ This tag defines the import section.
 
     This attribute defines if symbolic links should be treated as regular items and imported into the database (``yes``). This can cause duplicate entries if the link target is also scanned.
 
-    ::
+    .. code:: xml
 
         default-date="yes|no"
 
@@ -152,7 +153,7 @@ This tag defines the import section.
 
     This attribute defines that each imported item will get a default media date set based on the modification time in order to ensure that sorting by "dc:date" works on upnp requests.
 
-    ::
+    .. code:: xml
 
         nomedia-file=".skip"
 
@@ -162,7 +163,7 @@ This tag defines the import section.
 
     This attribute defines that a directory containing a file with this name is not imported into gerbera database. Only supported in "grb" import mode.
 
-    ::
+    .. code:: xml
 
         readable-names="yes|no"
 
@@ -172,7 +173,7 @@ This tag defines the import section.
 
     This attribute defines that filenames are made readable on import, i.e. underscores are replaced by space and extensions are removed. This changes the title of the entry if no metadata is available
 
-    ::
+    .. code:: xml
 
         case-sensitive-tags="yes|no"
 
@@ -183,7 +184,7 @@ This tag defines the import section.
     This attribute defines that virtual paths are case sensitive, e.g. artist names like `Ace Of Grace` and `Ace of Grace` are treated as different (``yes``) or identical (``no``).
     This changes the location property of created virtual entries.
 
-    ::
+    .. code:: xml
 
         import-mode="mt|grb"
 
@@ -202,7 +203,7 @@ This tag defines the import section.
 ``filesystem-charset``
 ~~~~~~~~~~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <filesystem-charset>UTF-8</filesystem-charset>
 
@@ -216,7 +217,7 @@ should specify that here. The server uses UTF-8 internally, this import paramete
 ``metadata-charset``
 ~~~~~~~~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <metadata-charset>UTF-8</metadata-charset>
 
@@ -229,7 +230,7 @@ Same as above, but defines the charset of the metadata (i.e. id3 tags, Exif info
 ``scripting``
 ~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <scripting script-charset="UTF-8">
 
@@ -237,7 +238,7 @@ Same as above, but defines the charset of the metadata (i.e. id3 tags, Exif info
 
 Defines the scripting section.
 
-    ::
+    .. code:: xml
 
         script-charset=...
 
@@ -249,7 +250,7 @@ Below are the available scripting options:
 ``script-folder``
 -----------------
 
-    ::
+    .. code:: xml
 
         <script-folder>
             <common>/usr/local/share/gerbera/js</common>
@@ -265,7 +266,7 @@ Below are the available scripting options:
 ``import-function``
 -------------------
 
-    ::
+    .. code:: xml
 
         <import-function>
             <audio-file>importAudioInitial</audio-file>
@@ -284,7 +285,7 @@ Below are the available scripting options:
 ``virtual-layout``
 ~~~~~~~~~~~~~~~~~~
 
-    ::
+    .. code:: xml
 
         <virtual-layout type="builtin" audio-layout="Default">
 
@@ -293,7 +294,7 @@ Below are the available scripting options:
     Defines options for the virtual container layout; the so called ”virtual container layout” is the way how the
     server organizes the media according to the extracted metadata. For example, it allows sorting audio files by Album, Artist, Year and so on.
 
-        ::
+        .. code:: xml
 
             type="builtin|js|disabled"
 
@@ -306,7 +307,7 @@ Below are the available scripting options:
         -  **js**: a user customizable javascript will be used (Gerbera must be compiled with js support)
         -  **disabled**: only PC-Directory structure will be created, i.e. no virtual layout
 
-        ::
+        .. code:: xml
 
             audio-layout="Default|Structured"
             video-layout="Default"
@@ -326,7 +327,7 @@ Below are the available scripting options:
 ``import-script``
 -----------------
 
-        ::
+        .. code:: xml
 
             <import-script>/path/to/my/import-script.js</import-script>
 
@@ -340,7 +341,7 @@ Below are the available scripting options:
 ``script-options``
 ------------------
 
-        ::
+        .. code:: xml
 
             <script-options></script-options>
 
@@ -356,7 +357,7 @@ Below are the available scripting options:
 ``script-option``
 ^^^^^^^^^^^^^^^^^
 
-            ::
+            .. code:: xml
 
                 <script-option name="test" value="42"/>
 
@@ -364,7 +365,7 @@ Below are the available scripting options:
 
             Set option `value` for option `name`
 
-                ::
+                .. code:: xml
 
                     name="..."
 
@@ -372,7 +373,7 @@ Below are the available scripting options:
 
                 Name of the option.
 
-                ::
+                .. code:: xml
 
                     to="..."
 
@@ -383,7 +384,7 @@ Below are the available scripting options:
 ``genre-map``
 -------------
 
-        ::
+        .. code:: xml
 
             <genre-map></genre-map>
 
@@ -397,7 +398,7 @@ Below are the available scripting options:
 ``genre``
 ^^^^^^^^^
 
-            ::
+            .. code:: xml
 
                 <genre from="Disco" to="Pop"/>
 
@@ -405,7 +406,7 @@ Below are the available scripting options:
 
             Replace genre `from` by genre `to`.
 
-                ::
+                .. code:: xml
 
                     from="..."
 
@@ -413,7 +414,7 @@ Below are the available scripting options:
 
                 Original genre value. Can be a regular expression.
 
-                ::
+                .. code:: xml
 
                     to="..."
 
@@ -425,7 +426,7 @@ Below are the available scripting options:
 ``structured-layout``
 ---------------------
 
-        ::
+        .. code:: xml
 
             <structured-layout skip-chars="" div-char="-" />
 
@@ -433,7 +434,7 @@ Below are the available scripting options:
 
         Adjust layout of boxes for large collections in structured layout. Set audio-layout to **Structured** and choose values best for your media library.
 
-            ::
+            .. code:: xml
 
                 div-char="-"
 
@@ -442,7 +443,7 @@ Below are the available scripting options:
 
             Symbols to use around the box text.
 
-            ::
+            .. code:: xml
 
                 skip-chars="-"
 
@@ -456,7 +457,7 @@ Below are the available scripting options:
 ``boxlayout``
 -------------
 
-        ::
+        .. code:: xml
 
             <boxlayout></boxlayout>
 
@@ -465,7 +466,7 @@ Below are the available scripting options:
 ``box``
 ^^^^^^^
 
-            ::
+            .. code:: xml
 
                 <box key=".." title=".." class=".." size=".." enabled=".." />
 
@@ -473,7 +474,7 @@ Below are the available scripting options:
 
             Configure Box `key`.
 
-            ::
+            .. code:: xml
 
                 key="Audio/audioRoot"
 
@@ -481,7 +482,7 @@ Below are the available scripting options:
 
             The key that is used in javascript and builtin layout to refer the the config.
 
-            ::
+            .. code:: xml
 
                 title="Music"
 
@@ -489,7 +490,7 @@ Below are the available scripting options:
 
             The title to use for the respective box.
 
-            ::
+            .. code:: xml
 
                 class="object.container.album.musicAlbum"
 
@@ -497,7 +498,7 @@ Below are the available scripting options:
 
             Set the upnp class for the respective box.
 
-            ::
+            .. code:: xml
 
                 enabled="no"
 
@@ -506,7 +507,7 @@ Below are the available scripting options:
 
             Disable the respective box. Not all boxes can be disabled.
 
-            ::
+            .. code:: xml
 
                 size="6"
 
@@ -530,7 +531,7 @@ Below are the available scripting options:
 ``common-script``
 ~~~~~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <common-script>/path/to/my/common-script.js</common-script>
 
@@ -544,7 +545,7 @@ For more details read :ref:`scripting <scripting>`
 ``custom-script``
 ~~~~~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <custom-script>/path/to/my/custom-script.js</custom-script>
 
@@ -559,7 +560,7 @@ For more details read :ref:`scripting <scripting>`
 ``playlist-script``
 ~~~~~~~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <playlist-script create-link="yes">/path/to/my/playlist-script.js</playlist-script>
 
@@ -570,7 +571,7 @@ For more details read :ref:`scripting <scripting>`
 Points to the script that is parsing various playlists, by default parsing of pls, m3u and asx playlists is implemented,
 however the script can be adapted to parse almost any kind of text based playlist. For more details read :ref:`scripting <scripting>`
 
-    ::
+    .. code:: xml
 
         create-link="yes|no"
 
@@ -584,7 +585,7 @@ however the script can be adapted to parse almost any kind of text based playlis
 ``metafile-script``
 ~~~~~~~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <metafile-script>/path/to/my/metadata-script.js</metafile-script>
 
@@ -601,7 +602,7 @@ The search pattern is set in resources section.
 ``magic-file``
 ~~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <magic-file>/path/to/my/magic-file</magic-file>
 
@@ -614,7 +615,7 @@ Specifies an alternative file for filemagic, containing mime type information.
 ``autoscan``
 ~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <autoscan use-inotify="auto" inotify-attrib="yes">
 
@@ -627,7 +628,7 @@ the difference is that autoscan directories that are defined via the config file
 Even if the directory gets removed on disk, the server will try to monitor the specified location and will re add
 the removed directory if it becomes available/gets created again.
 
-    ::
+    .. code:: xml
 
         use-inotify="yes|no|auto"
 
@@ -638,7 +639,7 @@ the removed directory if it becomes available/gets created again.
     availability of inotify support on the system will be detected automatically, it will then be used if available.
     Setting the option to 'no' will disable inotify even if it is available. Allowed values: "yes", "no", "auto"
 
-    ::
+    .. code:: xml
 
         inotify-attrib="yes|no"
 
@@ -652,7 +653,7 @@ the removed directory if it becomes available/gets created again.
 ``directory``
 -------------
 
-    ::
+    .. code:: xml
 
         <directory location="/media" mode="timed" interval="3600"
           recursive="no" hidden-files="no"/>
@@ -665,7 +666,7 @@ the removed directory if it becomes available/gets created again.
 
     The attributes specify various autoscan options:
 
-        ::
+        .. code:: xml
 
             location=...
 
@@ -673,7 +674,7 @@ the removed directory if it becomes available/gets created again.
 
         Absolute path to the directory that shall be monitored.
 
-        ::
+        .. code:: xml
 
             mode="inotify|timed"
 
@@ -682,7 +683,7 @@ the removed directory if it becomes available/gets created again.
         Scan mode, currently ``inotify`` and ``timed`` are supported. Timed mode rescans the given directory in specified
         intervals, inotify mode uses the kernel inotify mechanism to watch for filesystem events.
 
-        ::
+        .. code:: xml
 
             interval=...
 
@@ -690,7 +691,7 @@ the removed directory if it becomes available/gets created again.
 
         Scan interval in seconds. The value can be given in a valid time format.
 
-        ::
+        .. code:: xml
 
             recursive="yes|no"
 
@@ -698,7 +699,7 @@ the removed directory if it becomes available/gets created again.
 
         Values of ``yes`` or ``no`` are allowed, specifies if autoscan shall monitor the given directory including all sub directories.
 
-        ::
+        .. code:: xml
 
             dirtypes="yes|no"
 
@@ -709,7 +710,7 @@ the removed directory if it becomes available/gets created again.
         PC Directory will get container types like albums based on the majority
         of child items.
 
-        ::
+        .. code:: xml
 
             hidden-files="yes|no"
 
@@ -718,7 +719,7 @@ the removed directory if it becomes available/gets created again.
 
         Allowed values: ``yes`` or ``no``, process hidden files, overrides the ``hidden-files`` value in the ``<import/>`` tag.
 
-        ::
+        .. code:: xml
 
             follow-symlinks="yes|no"
 
@@ -729,7 +730,7 @@ the removed directory if it becomes available/gets created again.
         This can cause duplicate entries if the link target is also scanned
         overrides the ``follow-symlinks`` value in the ``<import/>`` tag.
 
-        ::
+        .. code:: xml
 
             retry-count="3"
 
@@ -743,7 +744,7 @@ the removed directory if it becomes available/gets created again.
         permission error and the import fails.
         This attribute is only available in config.xml at the moment.
 
-        ::
+        .. code:: xml
 
             media-type="Music|AudioBook"
 
@@ -779,7 +780,7 @@ the removed directory if it becomes available/gets created again.
         | TV               | object.item.videoItem.videoBroadcast |
         +------------------+--------------------------------------+
 
-        ::
+        .. code:: xml
 
             container-type-audio="object.container"
             container-type-image="object.container"
@@ -796,7 +797,7 @@ the removed directory if it becomes available/gets created again.
 ``system-directories``
 ~~~~~~~~~~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <system-directories>
 
@@ -811,7 +812,7 @@ If the element does not exists, the default list of system directories is set to
 ``add-path``
 ------------
 
-    ::
+    .. code:: xml
 
         <add-path name="/sys"/>
 
@@ -821,7 +822,7 @@ If the element does not exists, the default list of system directories is set to
 
     The attributes specify various options:
 
-        ::
+        .. code:: xml
 
             name=...
 
@@ -833,7 +834,7 @@ If the element does not exists, the default list of system directories is set to
 ``visible-directories``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <visible-directories>
 
@@ -849,7 +850,7 @@ This is the more forward way of defining content but cannot be defaulted.
 ``add-path``
 ------------
 
-    ::
+    .. code:: xml
 
         <add-path name="/home/media"/>
 
@@ -859,7 +860,7 @@ This is the more forward way of defining content but cannot be defaulted.
 
     The attributes specify various options:
 
-        ::
+        .. code:: xml
 
             name=...
 
@@ -871,7 +872,7 @@ This is the more forward way of defining content but cannot be defaulted.
 ``layout``
 ~~~~~~~~~~
 
-::
+.. code:: xml
 
     <layout>
 
@@ -879,7 +880,7 @@ This is the more forward way of defining content but cannot be defaulted.
 
 Defines various layout options for generated virtual layout.
 
-        ::
+        .. code:: xml
 
             parent-path="yes|no"
 
@@ -893,7 +894,7 @@ Defines various layout options for generated virtual layout.
 ``path``
 --------
 
-        ::
+        .. code:: xml
 
             <path from="Videos/Action" to="Action-Videos"/>
 
@@ -901,7 +902,7 @@ Defines various layout options for generated virtual layout.
 
         Map a virtual path element. This allows reducing path elements or merging different sources into a common tree. Thema replacement is executed after calculation of virtual layout, i.e. after buildin or layout script.
 
-            ::
+            .. code:: xml
 
                 from="..."
 
@@ -909,7 +910,7 @@ Defines various layout options for generated virtual layout.
 
             Source path. Can be a regular expression.
 
-            ::
+            .. code:: xml
 
                 to="..."
 
@@ -921,7 +922,7 @@ Defines various layout options for generated virtual layout.
 ``resources``
 ~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <resources case-sensitive="yes">
 
@@ -930,7 +931,7 @@ Defines various layout options for generated virtual layout.
 Defines various resource options for file based resources. Older versions of Gerbera added sereral files automatically. For performance reasons no pattern is added by default anymore.
 You can set up your correct fanart file by yourself, if no image is embedded in your media. If you have subtitle files, add the correct pattern, also.
 
-    ::
+    .. code:: xml
 
         case-sensitive="yes|no"
 
@@ -945,7 +946,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 ``order``
 ---------
 
-    ::
+    .. code:: xml
 
         <order>...</order>
 
@@ -958,10 +959,10 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 ``handler``
 ^^^^^^^^^^^
 
-        ::
+        .. code:: xml
 
             <handler name="Fanart"/>
-            name="..."
+                name="..."
 
         * Required
 
@@ -970,7 +971,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 ``container`` / ``fanart`` / ``subtitle`` / ``metafile`` / ``resource``
 -----------------------------------------------------------------------
 
-    ::
+    .. code:: xml
 
         <container>...</container>
         <fanart>...</fanart>
@@ -991,7 +992,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 ``container``
 ^^^^^^^^^^^^^
 
-    ::
+    .. code:: xml
 
         <container location="images" parentCount="2" minDepth="2"/>
 
@@ -1000,7 +1001,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
     Set up container images. The fanart of a media file is added automatically as a thumbnail to the container (e.g. the album container).
     The setting depends on the chosen layout and is only fully respected if the layout script does not set own properties (which was the case in older javascript layouts).
 
-        ::
+        .. code:: xml
 
             location="..."
 
@@ -1010,7 +1011,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         Drop your artists' images or logos for default containers here and they are displayed as thumbnail when browsing with a compatible client.
         If the image is not found in that location, it is also searched in the physical folder itself.
 
-        ::
+        .. code:: xml
 
             parentCount="..."
 
@@ -1021,7 +1022,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         A value of 2 means you propagate that image to the parent container as well (e.g. the Artist container).
         A value of 0 blocks propagation completely.
 
-        ::
+        .. code:: xml
 
             minDepth="..."
 
@@ -1034,14 +1035,14 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 ``add-file``
 ^^^^^^^^^^^^
 
-    ::
+    .. code:: xml
 
         <add-file name="cover.png"/>
         <add-file name="%filename%.srt"/>
 
     * Optional
 
-        ::
+        .. code:: xml
 
             name="..."
 
@@ -1060,7 +1061,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 ``add-dir``
 ^^^^^^^^^^^
 
-    ::
+    .. code:: xml
 
         <add-dir name="/data/subtitles/%title%" ext="srt"/>
         <add-dir name="/data/subtitles" ext="%title%*.srt"/>
@@ -1068,7 +1069,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
 
     * Optional
 
-        ::
+        .. code:: xml
 
             name="..."
 
@@ -1077,7 +1078,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         Add directory search pattern to resource handler. The search pattern can contain the same variables as ``add-file``.
         If the directory is relative the file is searched in a subdirectory of the directory containing the media file.
 
-        ::
+        .. code:: xml
 
             ext="..."
 
@@ -1092,26 +1093,26 @@ A sample configuration would be:
 
 .. code-block:: xml
 
-  <resources case-sensitive="no">
-      <fanart>
-          <add-file name="cover.png"/>
-      </fanart>
-      <subtitle>
-          <add-file name="%filename%.srt"/>
-          <add-dir name="/data/subtitles/%title%" ext="srt"/>
-      </subtitle>
-      <resource>
-          <add-file name="cover.png"/>
-          <add-file name="%filename%.srt"/>
-      </resource>
-  </resources>
+    <resources case-sensitive="no">
+        <fanart>
+            <add-file name="cover.png"/>
+        </fanart>
+        <subtitle>
+            <add-file name="%filename%.srt"/>
+            <add-dir name="/data/subtitles/%title%" ext="srt"/>
+        </subtitle>
+        <resource>
+            <add-file name="cover.png"/>
+            <add-file name="%filename%.srt"/>
+        </resource>
+    </resources>
 
 .. _import-mappings:
 
 ``mappings``
 ~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <mappings>
 
@@ -1126,7 +1127,7 @@ It is also helpful if you want to override auto detected mime types or simply sk
 
 ``ignore-extensions``
 ---------------------
-::
+.. code:: xml
 
     <ignore-extensions>
 
@@ -1139,7 +1140,7 @@ This section holds the file name extension to mime type mappings.
 ``add-file``
 ^^^^^^^^^^^^
 
-::
+.. code:: xml
 
     <add-file name="part"/>
 
@@ -1157,7 +1158,7 @@ Note:
 ``extension-mimetype``
 ----------------------
 
-::
+.. code:: xml
 
     <extension-mimetype ignore-unknown="no" case-sensitive="no">
 
@@ -1167,7 +1168,7 @@ This section holds the file name extension to mime type mappings.
 
     **Attributes:**
 
-        ::
+        .. code:: xml
 
             ignore-unknown=...
 
@@ -1176,7 +1177,7 @@ This section holds the file name extension to mime type mappings.
 
         If ignore-unknown is set to "yes", then only the extensions that are listed in this section are imported.
 
-        ::
+        .. code:: xml
 
             case-sensitive=...
 
@@ -1190,7 +1191,7 @@ This section holds the file name extension to mime type mappings.
 ``map``
 ^^^^^^^
 
-::
+.. code:: xml
 
     <map from="mp3" to="audio/mpeg"/>
 
@@ -1209,7 +1210,7 @@ Note:
 ``mimetype-upnpclass``
 ----------------------
 
-::
+.. code:: xml
 
     <mimetype-upnpclass>
 
@@ -1223,7 +1224,7 @@ This section holds the mime type to upnp:class mappings.
 ``map``
 ^^^^^^^
 
-::
+.. code:: xml
 
     <map from="audio/*" to="object.item.audioItem.musicTrack"/>
 
@@ -1238,7 +1239,7 @@ expanded to `if genre contains Book`.
 
 * Example
 
-::
+.. code:: xml
 
     <mimetype-upnpclass>
       <map from="application/ogg" to="object.item.audioItem.musicTrack"/>
@@ -1254,7 +1255,7 @@ expanded to `if genre contains Book`.
 ``mimetype-dlnatransfermode``
 -----------------------------
 
-::
+.. code:: xml
 
     <mimetype-dlnatransfermode>
 
@@ -1268,7 +1269,7 @@ This section holds the mime type to dlna transfer mode mappings. It is added to 
 ``map``
 ^^^^^^^
 
-::
+.. code:: xml
 
      <map from="audio/*" to="Streaming"/>
      <map from="video/*" to="Streaming"/>
@@ -1284,7 +1285,7 @@ attributes are case sensitive.
 ``mimetype-contenttype``
 ------------------------
 
-::
+.. code:: xml
 
   <mimetype-contenttype>
 
@@ -1303,9 +1304,10 @@ Note:
 ``treat``
 ^^^^^^^^^
 
-::
+.. code:: xml
 
-  <treat mimetype="audio/mpeg" as="mp3"/>
+
+    <treat mimetype="audio/mpeg" as="mp3"/>
 
 * Optional
 
@@ -1356,7 +1358,7 @@ The ``as`` attribute can have following values:
 ``contenttype-dlnaprofile``
 ---------------------------
 
-::
+.. code:: xml
 
     <contenttype-dlnaprofile>
 
@@ -1370,7 +1372,7 @@ This section holds the content type to dlnaprofile mappings.
 ``map``
 ^^^^^^^
 
-::
+.. code:: xml
 
     <map from="mp4" to="AVC_MP4_BL_CIF30_AAC_MULT5"/>
 
@@ -1384,17 +1386,27 @@ Resource attributes can be seen in the details page for an item on the web UI. T
 
 * Example:
 
-::
+.. code:: xml
 
     <map from="mp4" videoCodec="h264" audioCodec="aac" to="AVC_MP4_MP_HD_720p_AAC"/>
 
+* Profile Catalog:
+
+If you want to make your DLNA device play specific media the following list of profiles may be helpful:
+
+.. literalinclude:: ./profiles.xml
+    :language: xml
+
+.. Note::
+
+    Feel free to provide us improvements to this list!
 
 .. _virtual-directories:
 
 ``virtual-directories``
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-::
+.. code:: xml
 
     <virtual-directories>
 
@@ -1405,7 +1417,7 @@ are distiguished by their artist even if the displayed text is identical.
 
 * Default
 
-::
+.. code:: xml
 
     <virtual-directories>
         <key metadata="M_ALBUMARTIST"/>
@@ -1417,7 +1429,7 @@ are distiguished by their artist even if the displayed text is identical.
 ``key``
 -------
 
-::
+.. code:: xml
 
     <key metadata="M_ARTIST"/>
 
@@ -1428,7 +1440,7 @@ In addition ``LOCATION`` references to the location property retrieved from the 
 
 * Example
 
-::
+.. code:: xml
 
     <virtual-directories>
         <key metadata="LOCATION"/>
@@ -1440,7 +1452,8 @@ In addition ``LOCATION`` references to the location property retrieved from the 
 
 ``library-options``
 ~~~~~~~~~~~~~~~~~~~
-::
+
+.. code:: xml
 
     <library-options>
 
@@ -1472,7 +1485,7 @@ etc.
 
 **Attributes:**
 
-    ::
+    .. code:: xml
 
         multi-value-separator="..."
 
@@ -1481,7 +1494,7 @@ etc.
 
     This string is used to join multi-valued items (e.g. Composer, Performer) into one string.
 
-    ::
+    .. code:: xml
 
         legacy-value-separator="..."
 
@@ -1540,7 +1553,7 @@ Auxdata can be read by the import javascript to gain more control over the media
 ``add-data``
 ^^^^^^^^^^^^
 
-  .. code-block:: xml
+.. code-block:: xml
 
     <add-data tag="tag1"/>
     <add-data tag="tag2"/>
@@ -1567,7 +1580,7 @@ Metadata can be read by the import javascript as ``meta`` to gain more control o
 ``add-data``
 ^^^^^^^^^^^^
 
-  .. code-block:: xml
+.. code-block:: xml
 
     <add-data tag="tag3" key="upnp:Key"/>
     ...
@@ -1597,11 +1610,11 @@ A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-  <libexif>
-      <auxdata>
-          <add-data tag="EXIF_TAG_MODEL"/>
-      </auxdata>
-  </libexif>
+    <libexif>
+        <auxdata>
+            <add-data tag="EXIF_TAG_MODEL"/>
+        </auxdata>
+    </libexif>
 
 
 ``id3``
@@ -1609,7 +1622,7 @@ A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-  <id3> </id3>
+    <id3> </id3>
 
 * Optional
 
@@ -1637,16 +1650,16 @@ A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-  <id3>
-      <auxdata>
-          <add-data tag="TXXX:Work"/>
-          <add-data tag="WORK"/>
-          <add-data tag="TMCL"/>
-      </auxdata>
-      <metadata>
-          <add-data tag="PERFORMER" key="upnp:artist@role[Performer]"/>
-      </metadata>
-  </id3>
+    <id3>
+        <auxdata>
+            <add-data tag="TXXX:Work"/>
+            <add-data tag="WORK"/>
+            <add-data tag="TMCL"/>
+        </auxdata>
+        <metadata>
+            <add-data tag="PERFORMER" key="upnp:artist@role[Performer]"/>
+        </metadata>
+    </id3>
 
 
 ``ffmpeg``
@@ -1654,7 +1667,7 @@ A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-  <ffmpeg> </ffmpeg>
+    <ffmpeg> </ffmpeg>
 
 * Optional
 
@@ -1667,17 +1680,17 @@ A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-  <ffmpeg>
-      <auxdata>
-          <add-data tag="COLLECTION"/>
-          <add-data tag="SHOW"/>
-          <add-data tag="NETWORK"/>
-          <add-data tag="EPISODE-ID"/>
-      </auxdata>
-      <metadata>
-          <add-data tag="performer" key="upnp:artist@role[Performer]"/>
-      </metadata>
-  </ffmpeg>
+    <ffmpeg>
+        <auxdata>
+            <add-data tag="COLLECTION"/>
+            <add-data tag="SHOW"/>
+            <add-data tag="NETWORK"/>
+            <add-data tag="EPISODE-ID"/>
+        </auxdata>
+        <metadata>
+            <add-data tag="performer" key="upnp:artist@role[Performer]"/>
+        </metadata>
+    </ffmpeg>
 
 
 ``exiv2``
@@ -1685,7 +1698,7 @@ A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-  <exiv2> </exiv2>
+    <exiv2> </exiv2>
 
 * Optional
 
@@ -1698,23 +1711,23 @@ A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-  <exiv2>
-      <auxdata>
-          <add-data tag="Exif.Image.Model"/>
-          <add-data tag="Exif.Photo.DateTimeOriginal"/>
-          <add-data tag="Exif.Image.Orientation"/>
-          <add-data tag="Exif.Image.Rating"/>
-          <add-data tag="Xmp.xmp.Rating" />
-          <add-data tag="Xmp.dc.subject"/>
-      </auxdata>
-  </exiv2>
+    <exiv2>
+        <auxdata>
+            <add-data tag="Exif.Image.Model"/>
+            <add-data tag="Exif.Photo.DateTimeOriginal"/>
+            <add-data tag="Exif.Image.Orientation"/>
+            <add-data tag="Exif.Image.Rating"/>
+            <add-data tag="Xmp.xmp.Rating" />
+            <add-data tag="Xmp.dc.subject"/>
+        </auxdata>
+    </exiv2>
 
 ``mkv``
 -------
 
 .. code-block:: xml
 
-  <mkv/>
+    <mkv/>
 
 * Optional
 
@@ -1726,7 +1739,7 @@ These options apply to mkv library.
 
 .. code-block:: xml
 
-  <wavpack/>
+    <wavpack/>
 
 * Optional
 

@@ -77,6 +77,7 @@ struct ClientProfile {
     std::string match;
     DictionaryOption mimeMappings = DictionaryOption({});
     DictionaryOption headers = DictionaryOption({});
+    VectorOption dlnaMappings = VectorOption({});
     int captionInfoCount { 1 };
     int stringLimit { -1 };
     bool multiValue { true };

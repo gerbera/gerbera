@@ -25,6 +25,7 @@
 
 #include "config_setup_client.h" // API
 
+#include "cds/cds_resource.h"
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "config/config_val.h"
@@ -33,6 +34,7 @@
 #include "config_setup_dictionary.h"
 #include "config_setup_int.h"
 #include "config_setup_string.h"
+#include "config_setup_vector.h"
 #include "util/logger.h"
 
 #include <iterator>
@@ -59,6 +61,7 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, cons
         auto isAllowed = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->getXmlContent(child);
         auto mappings = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child);
         auto headers = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS)->getXmlContent(child);
+        auto profiles = ConfigDefinition::findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE)->getXmlContent(child);
         auto matchValues = std::map<ClientMatchType, std::string>();
         for (auto&& attr : child.attributes()) {
             auto matchType = ClientConfig::remapMatchType(attr.name());
@@ -67,8 +70,14 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, cons
             }
         }
 
-        auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, mappings, headers, matchValues, captionInfoCount, stringLimit, multiValue, isAllowed);
+        auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, matchValues, captionInfoCount, stringLimit, multiValue, isAllowed);
         try {
+            if (!mappings.empty())
+                client->setMimeMappings(mappings);
+            if (!headers.empty())
+                client->setHeaders(headers);
+            if (!profiles.empty())
+                client->setDlnaMappings(profiles);
             result->add(client);
         } catch (const std::runtime_error& e) {
             throw_std_runtime_error("Could not add {} client: {}", ip, e.what());
@@ -91,7 +100,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList, co
 {
     auto statusList = splitString(status, ',');
     auto i = indexList.at(0);
-    if (optItem == getItemPath(indexList, {}) && (statusList[0] == STATUS_ADDED || statusList[0] == STATUS_MANUAL)) {
+    if (optItem == getItemPath(indexList, {}) && (statusList.at(0) == STATUS_ADDED || statusList.at(0) == STATUS_MANUAL)) {
         return true;
     }
     {
@@ -176,16 +185,16 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList, co
     }
     // set client dictionaries
     if (statusList.size() > 1) {
-        log_debug("New Client Dictionary {} {} ({}, {})", optItem, statusList[1], indexList[0], indexList[1]);
+        log_debug("New Client Dictionary {} {} ({}, {})", optItem, statusList.at(1), indexList.at(0), indexList.at(1));
         // set client mimetype from
         auto keyIndex = getItemPath(indexList, { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM });
         auto valIndex = getItemPath(indexList, { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO });
         auto j = indexList.at(1);
         if (optItem == keyIndex) {
-            auto mappings = entry->getMimeMappings();
+            auto mappings = entry->getMimeMappings(true);
             auto optKey = j < mappings.size() ? (*(std::next(mappings.cbegin(), j))).first : "";
             bool done = true;
-            if (statusList[1] == STATUS_REMOVED || statusList[1] == STATUS_KILLED) {
+            if (statusList.at(1) == STATUS_REMOVED || statusList.at(1) == STATUS_KILLED) {
                 config->setOrigValue(optItem, optKey);
                 if (!optKey.empty())
                     config->setOrigValue(valIndex, mappings.at(optKey));
@@ -193,7 +202,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList, co
             } else if (entry->getOrig())
                 config->setOrigValue(keyIndex, optKey);
             entry->setMimeMappingsFrom(j, optValue);
-            if (statusList[1] == STATUS_RESET && !optValue.empty()) {
+            if (statusList.at(1) == STATUS_RESET && !optValue.empty()) {
                 entry->setMimeMappingsFrom(j, config->getOrigValue(valIndex));
                 log_debug("Reset Client Mapping From{} {}", valIndex, entry->getMimeMappings().at(optKey));
             }
@@ -203,11 +212,11 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList, co
         }
         // set client mimetype to
         if (optItem == valIndex) {
-            auto mappings = entry->getMimeMappings();
+            auto mappings = entry->getMimeMappings(true);
             if (entry->getOrig())
                 config->setOrigValue(valIndex, (*(std::next(mappings.cbegin(), j))).second);
             entry->setMimeMappingsTo(j, optValue);
-            if (statusList[1] != STATUS_REMOVED && statusList[1] != STATUS_KILLED)
+            if (statusList.at(1) != STATUS_REMOVED && statusList.at(1) != STATUS_KILLED)
                 log_debug("New Client Mapping To {} {}", valIndex, (*(std::next(config->getClientConfigListOption(option)->get(i)->getMimeMappings().cbegin(), j))).second);
             return true;
         }
@@ -216,10 +225,10 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList, co
         keyIndex = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_HEADERS_HEADER, ConfigVal::A_CLIENTS_UPNP_HEADERS_KEY });
         valIndex = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_HEADERS_HEADER, ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE });
         if (optItem == keyIndex) {
-            auto headers = entry->getHeaders();
+            auto headers = entry->getHeaders(true);
             auto optKey = j < headers.size() ? (*(std::next(headers.cbegin(), j))).first : "";
             bool done = true;
-            if (statusList[1] == STATUS_REMOVED || statusList[1] == STATUS_KILLED) {
+            if (statusList.at(1) == STATUS_REMOVED || statusList.at(1) == STATUS_KILLED) {
                 config->setOrigValue(optItem, optKey);
                 if (!optKey.empty())
                     config->setOrigValue(valIndex, headers.at(optKey));
@@ -227,7 +236,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList, co
             } else if (entry->getOrig())
                 config->setOrigValue(keyIndex, optKey);
             entry->setHeadersKey(j, optValue);
-            if (statusList[1] == STATUS_RESET && !optValue.empty()) {
+            if (statusList.at(1) == STATUS_RESET && !optValue.empty()) {
                 entry->setHeadersKey(j, config->getOrigValue(valIndex));
                 log_debug("Reset Client Mapping From{} {}", valIndex, entry->getHeaders().at(optKey));
             }
@@ -237,13 +246,80 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList, co
         }
         // set client headers value
         if (optItem == valIndex) {
-            auto headers = entry->getHeaders();
+            auto headers = entry->getHeaders(true);
             if (entry->getOrig())
                 config->setOrigValue(valIndex, (*(std::next(headers.cbegin(), j))).second);
             entry->setHeadersValue(j, optValue);
-            if (statusList[1] != STATUS_REMOVED && statusList[1] != STATUS_KILLED)
+            if (statusList.at(1) != STATUS_REMOVED && statusList.at(1) != STATUS_KILLED)
                 log_debug("New Client Headers Key {} {}", valIndex, (*(std::next(config->getClientConfigListOption(option)->get(i)->getHeaders().cbegin(), j))).second);
             return true;
+        }
+
+        // set known client dlna values
+        keyIndex = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE_PROFILE, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM });
+        if (optItem == keyIndex) {
+            auto profiles = entry->getDlnaMappings(true).at(j);
+            std::size_t k = 0;
+            auto tag = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM);
+            for (auto&& [key, val] : profiles) {
+                if (key == tag)
+                    break;
+                ++k;
+            }
+            if (status == STATUS_RESET && !optValue.empty()) {
+                entry->setDlnaMapping(j, k, config->getOrigValue(keyIndex));
+                log_debug("Reset dlna value {} {}", keyIndex, entry->getDlnaMappings(true).at(j).at(k).second);
+            } else {
+                config->setOrigValue(keyIndex, profiles.at(k).second);
+                entry->setDlnaMapping(j, k, optValue);
+                log_debug("New dlna value {} {}", keyIndex, optValue);
+            }
+            return true;
+        }
+        valIndex = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE_PROFILE, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO });
+        if (optItem == valIndex) {
+            auto profiles = entry->getDlnaMappings(true).at(j);
+            std::size_t k = 0;
+            auto tag = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO);
+            for (auto&& [key, val] : profiles) {
+                if (key == tag)
+                    break;
+                ++k;
+            }
+            if (status == STATUS_RESET && !optValue.empty()) {
+                entry->setDlnaMapping(j, k, config->getOrigValue(valIndex));
+                log_debug("Reset dlna value {} {}", valIndex, entry->getDlnaMappings(true).at(j).at(k).second);
+            } else {
+                config->setOrigValue(valIndex, profiles.at(k).second);
+                entry->setDlnaMapping(j, k, optValue);
+                log_debug("New dlna value {} {}", valIndex, optValue);
+            }
+            return true;
+        }
+        // set free client dlna values
+        {
+            for (auto&& attr : ResourceAttributeIterator()) {
+                auto tag = EnumMapper::getAttributeDisplay(attr);
+                valIndex = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE_PROFILE }, tag);
+                if (optItem == valIndex) {
+                    auto profiles = entry->getDlnaMappings(true).at(j);
+                    std::size_t k = 0;
+                    for (auto&& [key, val] : profiles) {
+                        if (key == tag)
+                            break;
+                        ++k;
+                    }
+                    if (status == STATUS_RESET && !optValue.empty()) {
+                        entry->setDlnaMapping(j, k, config->getOrigValue(valIndex));
+                        log_debug("Reset dlna value {} {}", valIndex, entry->getDlnaMappings(true).at(j).at(k).second);
+                    } else {
+                        config->setOrigValue(valIndex, profiles.at(k).second);
+                        entry->setDlnaMapping(j, k, optValue);
+                        log_debug("New dlna value {} {}", valIndex, optValue);
+                    }
+                    return true;
+                }
+            }
         }
     }
 
@@ -302,29 +378,55 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
     return optionValue;
 }
 
-std::string ConfigClientSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
+std::string ConfigClientSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
     if (indexList.size() == 0) {
+        if (!propText.empty()) {
+            return fmt::format("{}[_]/{}[_]/{}{}",
+                ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT),
+                ConfigDefinition::mapConfigOption(propOptions.at(0)),
+                ConfigDefinition::ATTRIBUTE,
+                propText);
+        }
         if (propOptions.size() > 1) {
-            return fmt::format("{}[_]/{}[_]/{}", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), ConfigDefinition::mapConfigOption(propOptions[0]), ConfigDefinition::ensureAttribute(propOptions[1]));
+            return fmt::format("{}[_]/{}[_]/{}",
+                ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT),
+                ConfigDefinition::mapConfigOption(propOptions.at(0)),
+                ConfigDefinition::ensureAttribute(propOptions.at(1)));
         }
         if (propOptions.size() > 0) {
-            return fmt::format("{}[_]/{}", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), ConfigDefinition::ensureAttribute(propOptions[0]));
+            return fmt::format("{}[_]/{}",
+                ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT),
+                ConfigDefinition::ensureAttribute(propOptions.at(0)));
         }
         return fmt::format("{}[_]", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT));
     }
     if (propOptions.size() > 0) {
-        if (indexList.size() > 1) {
+        if (!propText.empty() && indexList.size() > 1) {
+            return fmt::format("{}[{}]/{}[{}]/{}{}",
+                ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT),
+                indexList.at(0),
+                ConfigDefinition::mapConfigOption(propOptions.at(0)),
+                indexList.at(1),
+                ConfigDefinition::ATTRIBUTE,
+                propText);
+        }
+        if (propOptions.size() > 1 && indexList.size() > 1) {
             return fmt::format("{}[{}]/{}[{}]/{}",
                 ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT),
-                indexList[0],
-                ConfigDefinition::mapConfigOption(propOptions[0]),
-                indexList[1],
-                ConfigDefinition::ensureAttribute(propOptions[1]));
+                indexList.at(0),
+                ConfigDefinition::mapConfigOption(propOptions.at(0)),
+                indexList.at(1),
+                ConfigDefinition::ensureAttribute(propOptions.at(1)));
         }
-        return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), indexList[0], ConfigDefinition::ensureAttribute(propOptions[0]));
+        return fmt::format("{}[{}]/{}",
+            ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT),
+            indexList.at(0),
+            ConfigDefinition::ensureAttribute(propOptions.at(0)));
     }
-    return fmt::format("{}[{}]", ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT), indexList[0]);
+    return fmt::format("{}[{}]",
+        ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT),
+        indexList.at(0));
 }
 
 std::string ConfigClientSetup::getItemPathRoot(bool prefix) const

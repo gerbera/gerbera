@@ -206,7 +206,7 @@ std::shared_ptr<ConfigOption> ConfigDynamicContentSetup::newOption(const pugi::x
     return optionValue;
 }
 
-std::string ConfigDynamicContentSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
+std::string ConfigDynamicContentSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
     if (indexList.size() == 0) {
         if (propOptions.size() > 0) {

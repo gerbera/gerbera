@@ -148,7 +148,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string
     return false;
 }
 
-std::string ConfigDictionarySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
+std::string ConfigDictionarySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
     auto opt = propOptions.size() > 0 ? ConfigDefinition::ensureAttribute(propOptions[0]) : "";
     if (indexList.size() == 0) {

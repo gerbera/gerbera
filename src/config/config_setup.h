@@ -158,8 +158,9 @@ public:
     /// \brief calculate xpath for entry
     /// \param indexList indexed for arrays
     /// \param propOptions options to get section or attribute from
+    /// \param propText text option (mostly for dynamic vectors)
     /// \return xpath of entry
-    virtual std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const { return xpath; }
+    virtual std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText = "") const { return xpath; }
     virtual std::string getItemPathRoot(bool prefix = false) const { return xpath; }
 
     virtual std::string getUniquePath() const { return xpath; }

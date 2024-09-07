@@ -228,7 +228,7 @@ void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, con
     }
 }
 
-void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks) const
+void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, const std::shared_ptr<Quirks>& quirks) const
 {
     auto result = parent.append_child("");
 
@@ -545,9 +545,9 @@ std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, cons
     return {};
 }
 
-std::string UpnpXMLBuilder::getDLNAContentHeader(const std::string& contentType, const std::shared_ptr<CdsResource>& res) const
+std::string UpnpXMLBuilder::getDLNAContentHeader(const std::string& contentType, const std::shared_ptr<CdsResource>& res, const std::shared_ptr<Quirks>& quirks) const
 {
-    std::string contentParameter = dlnaProfileString(*res, contentType);
+    std::string contentParameter = dlnaProfileString(*res, contentType, quirks);
     return fmt::format("{}{}={};{}={};{}={}", contentParameter, //
         UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, //
         UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION, //
@@ -580,7 +580,7 @@ static const std::map<std::string_view, std::map<std::string_view, std::string_v
                         } },
 };
 
-std::string UpnpXMLBuilder::dlnaProfileString(const CdsResource& res, const std::string& contentType, bool formatted) const
+std::string UpnpXMLBuilder::dlnaProfileString(const CdsResource& res, const std::string& contentType, const std::shared_ptr<Quirks>& quirks, bool formatted) const
 {
     std::string dlnaProfile = res.getOption("dlnaProfile");
     if (profileList.find(contentType) != profileList.end()) {
@@ -594,7 +594,7 @@ std::string UpnpXMLBuilder::dlnaProfileString(const CdsResource& res, const std:
     }
     if (dlnaProfile.empty()) {
         /* handle audio/video content */
-        dlnaProfile = findDlnaProfile(res, contentType);
+        dlnaProfile = findDlnaProfile(res, contentType, quirks);
     }
 
     if (formatted && !dlnaProfile.empty())
@@ -602,33 +602,36 @@ std::string UpnpXMLBuilder::dlnaProfileString(const CdsResource& res, const std:
     return dlnaProfile;
 }
 
-std::string UpnpXMLBuilder::findDlnaProfile(const CdsResource& res, const std::string& contentType) const
+std::string UpnpXMLBuilder::findDlnaProfile(const CdsResource& res, const std::string& contentType, const std::shared_ptr<Quirks>& quirks) const
 {
     std::string dlnaProfile;
     static auto fromKey = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM);
     static auto toKey = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO);
     auto legacyKey = fmt::format("{}-{}-{}", contentType, res.getAttribute(ResourceAttribute::VIDEOCODEC), res.getAttribute(ResourceAttribute::AUDIOCODEC));
     std::size_t matchLength = 0;
-    for (auto&& map : profMappings) {
-        std::string profCand;
-        bool match = true;
-        for (auto&& [key, val] : map) {
-            if (key == fromKey && (val.empty() || (val != contentType && val != legacyKey))) {
-                match = false;
-            }
-            if (key == toKey && !val.empty()) {
-                profCand = val;
-            }
-            for (auto&& attr : ResourceAttributeIterator()) {
-                auto attrName = EnumMapper::getAttributeDisplay(attr);
-                if (key == attrName && val != res.getAttributeValue(attr) && val != res.getAttribute(attr)) {
+    auto clientMappings = quirks ? quirks->getDlnaMappings() : std::vector<std::vector<std::pair<std::string, std::string>>>();
+    for (auto&& mappings : { profMappings, clientMappings }) {
+        for (auto&& map : mappings) {
+            std::string profCand;
+            bool match = true;
+            for (auto&& [key, val] : map) {
+                if (key == fromKey && (val.empty() || (val != contentType && val != legacyKey))) {
                     match = false;
                 }
+                if (key == toKey && !val.empty()) {
+                    profCand = val;
+                }
+                for (auto&& attr : ResourceAttributeIterator()) {
+                    auto attrName = EnumMapper::getAttributeDisplay(attr);
+                    if (key == attrName && val != res.getAttributeValue(attr) && val != res.getAttribute(attr)) {
+                        match = false;
+                    }
+                }
             }
-        }
-        if (match && matchLength < map.size() && !profCand.empty()) {
-            matchLength = map.size();
-            dlnaProfile = profCand;
+            if (match && matchLength < map.size() && !profCand.empty()) {
+                matchLength = map.size();
+                dlnaProfile = profCand;
+            }
         }
     }
     return dlnaProfile;
@@ -653,7 +656,7 @@ std::deque<std::shared_ptr<CdsResource>> UpnpXMLBuilder::getOrderedResources(con
     return orderedResources;
 }
 
-std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::unique_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL) const
+std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<Quirks>& quirks, std::deque<std::shared_ptr<CdsResource>>& orderedResources, bool skipURL) const
 {
     bool hideOriginalResource = false;
     int originalResource = -1;
@@ -669,7 +672,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
         auto mainResource = item->getResource(ResourcePurpose::Content);
         auto itemMime = item->getMimeType();
         std::string ct = getValueOrDefault(ctMappings, itemMime);
-        auto sourceProfile = dlnaProfileString(*mainResource, ct, false);
+        auto sourceProfile = dlnaProfileString(*mainResource, ct, quirks, false);
         for (auto&& filter : filterList) {
             if (!filter)
                 throw_std_runtime_error("Invalid profile encountered");
@@ -812,7 +815,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
     return { hideOriginalResource, originalResource };
 }
 
-void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::unique_ptr<Quirks>& quirks) const
+void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::shared_ptr<Quirks>& quirks) const
 {
     bool isExternalURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
 
@@ -839,7 +842,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
             aa.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_METADATA_NAMESPACE;
             auto mimeType = getMimeType(*res, mimeMappings);
             auto contentType = getValueOrDefault(ctMappings, mimeType);
-            aa.append_attribute("dlna:profileID") = dlnaProfileString(*res, contentType, false).c_str();
+            aa.append_attribute("dlna:profileID") = dlnaProfileString(*res, contentType, quirks, false).c_str();
             continue;
         }
 
@@ -895,7 +898,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         bool transcoded = purpose == ResourcePurpose::Transcode;
         auto clientGroup = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
 
-        buildProtocolInfo(*res, mimeMappings);
+        buildProtocolInfo(*res, mimeMappings, quirks);
 
         if (!hideOriginalResource || transcoded || originalResource != res->getResId())
             renderResource(*item, *res, parent, clientSpecficAttrs, clientGroup, mimeMappings);
@@ -918,13 +921,13 @@ std::string UpnpXMLBuilder::getMimeType(const CdsResource& resource, const std::
     return mimeType;
 }
 
-std::string UpnpXMLBuilder::buildProtocolInfo(CdsResource& resource, const std::map<std::string, std::string>& mimeMappings) const
+std::string UpnpXMLBuilder::buildProtocolInfo(CdsResource& resource, const std::map<std::string, std::string>& mimeMappings, const std::shared_ptr<Quirks>& quirks) const
 {
     // Why is this here? Just for transcoding maybe?
 
     auto mimeType = getMimeType(resource, mimeMappings);
     auto contentType = getValueOrDefault(ctMappings, mimeType);
-    auto extend = dlnaProfileString(resource, contentType);
+    auto extend = dlnaProfileString(resource, contentType, quirks);
     // we do not support seeking at all, so 00
     // and the media is converted, so set CI to 1
     if (resource.getPurpose() == ResourcePurpose::Transcode) {

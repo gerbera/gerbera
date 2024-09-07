@@ -1651,21 +1651,25 @@
             {
               "item": "/import/mappings/contenttype-dlnaprofile/map/attribute::from",
               "caption": "From",
+              "type": "String",
               "editable": true
             },
             {
               "item": "/import/mappings/contenttype-dlnaprofile/map/attribute::to",
               "caption": "To",
+              "type": "String",
               "editable": true
             },
             {
               "item": "/import/mappings/contenttype-dlnaprofile/map/attribute::videoCodec",
               "caption": "Video Codec",
+              "type": "String",
               "editable": true
             },
             {
               "item": "/import/mappings/contenttype-dlnaprofile/map/attribute::audioCodec",
               "caption": "Audio Codec",
+              "type": "String",
               "editable": true
             }
           ]
@@ -1943,6 +1947,38 @@
                 {
                   "item": "/clients/client/header/attribute::value",
                   "caption": "Value",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/clients/client/dlna",
+              "caption": "DLNA Profiles",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/clients/client/dlna/attribute::from",
+                  "type": "String",
+                  "caption": "From",
+                  "editable": true
+                },
+                {
+                  "item": "/clients/client/dlna/attribute::to",
+                  "type": "String",
+                  "caption": "To",
+                  "editable": true
+                },
+                {
+                  "item": "/clients/client/dlna/attribute::videoCodec",
+                  "type": "String",
+                  "caption": "Video Codec",
+                  "editable": true
+                },
+                {
+                  "item": "/clients/client/dlna/attribute::audioCodec",
+                  "type": "String",
+                  "caption": "Audio Codec",
                   "editable": true
                 }
               ]

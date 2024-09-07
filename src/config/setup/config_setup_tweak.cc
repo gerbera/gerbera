@@ -281,7 +281,7 @@ std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(const pugi::xml_no
     return optionValue;
 }
 
-std::string ConfigDirectorySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
+std::string ConfigDirectorySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
     if (indexList.size() == 0) {
         if (propOptions.size() > 0) {

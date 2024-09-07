@@ -37,8 +37,6 @@
 #include <numeric>
 
 ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent,
-    const std::map<std::string, std::string>& mimeMappings,
-    const std::map<std::string, std::string>& headers,
     const std::map<ClientMatchType, std::string>& matchValues,
     int captionInfoCount, int stringLimit, bool multiValue, bool isAllowed)
 {
@@ -56,8 +54,8 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
             clientProfile.match = mLabel;
         }
     }
-    clientProfile.mimeMappings = DictionaryOption(mimeMappings);
-    clientProfile.headers = DictionaryOption(headers);
+    clientProfile.mimeMappings = DictionaryOption({});
+    clientProfile.headers = DictionaryOption({});
     clientProfile.group = group;
     clientProfile.flags = flags;
     clientProfile.captionInfoCount = captionInfoCount;
@@ -170,6 +168,11 @@ void ClientConfig::setHeadersKey(std::size_t j, const std::string& key)
 void ClientConfig::setHeadersValue(std::size_t j, const std::string& value)
 {
     this->clientProfile.headers.setValue(j, value);
+}
+
+void ClientConfig::setDlnaMapping(std::size_t j, std::size_t k, const std::string& value)
+{
+    this->clientProfile.dlnaMappings.setValue(j, k, value);
 }
 
 static constexpr std::array clientTypes {

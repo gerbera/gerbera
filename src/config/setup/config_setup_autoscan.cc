@@ -45,7 +45,7 @@ std::string ConfigAutoscanSetup::getUniquePath() const
     return fmt::format("{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode));
 }
 
-std::string ConfigAutoscanSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
+std::string ConfigAutoscanSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
     if (indexList.size() == 0) {
         if (propOptions.size() > 0)

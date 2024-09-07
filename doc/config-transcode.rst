@@ -18,7 +18,7 @@ This tag defines the transcoding section.
 
 **Attributes:**
 
-    ::
+    .. code:: xml
 
         enabled=...
 
@@ -27,7 +27,7 @@ This tag defines the transcoding section.
 
     This attribute defines if transcoding is enabled as a whole, possible values are ”yes” or ”no”.
 
-    ::
+    .. code:: xml
 
         fetch-buffer-size=...
 
@@ -39,7 +39,7 @@ This tag defines the transcoding section.
     defines the buffer size in bytes, that will be used when fetching content from the web. The value must not be less
     than allowed by the curl library (usually 16384 bytes).
 
-    ::
+    .. code:: xml
 
         fetch-buffer-fill-size=...
 
@@ -66,13 +66,16 @@ Different mime types can map to the same profile in case that the transcoder in 
 The same mime type can also map to several profiles, in this case multiple resources in the XML will be generated,
 allowing the player to decide which one to take.
 
-The mappings under mimetype-profile are defined in the following manner:
-
-    ::
+    .. code:: xml
 
         allow-unused=...
 
-    Suppress errors when loading profiles. Default **no**: Unused mappings are not allowed in config.
+    * Default: **no**
+
+    Suppress errors when loading profiles. Mappings pointing to missing transcoding
+    profiles are ignored as well as missing mimetypes.
+
+The mappings under mimetype-profile are defined in the following manner:
 
 ``transcode``
 -------------
@@ -86,7 +89,7 @@ The mappings under mimetype-profile are defined in the following manner:
 In this example we want to transcode our flac audio files (they have the mimetype audio/x-flac) using the ”oggflac-pcm”
 profile which is defined below.
 
-    ::
+    .. code:: xml
 
         mimetype=...
         mimetype="video/*" no-transcoding="video/mpeg,video/mp4"
@@ -107,7 +110,7 @@ profile which is defined below.
     Defines the DLNA profile string of the transcoding source. If set, only files with the DLNA profile are transcoded.
     See :ref:`Import section <contenttype-dlnaprofile>` how to determine the profile.
 
-    ::
+    .. code:: xml
 
         client-flags=...
 
@@ -116,7 +119,7 @@ profile which is defined below.
     If the flags match the ones defined in :ref:`Supported Devices <supported-devices>`, the profile is selected for that client.
     Choose ``TRANSCODE1``, ``TRANSCODE2``, ``TRANSCODE3`` or an unused flag, e.g. "0x100000", to avoid collisions with other features.
 
-    ::
+    .. code:: xml
 
         using=...
 
@@ -133,7 +136,7 @@ profile which is defined below.
 
 This section defines the various transcoding profiles.
 
-    ::
+    .. code:: xml
 
         allow-unused=...
 
@@ -147,7 +150,7 @@ This section defines the various transcoding profiles.
 
     Definition of a transcoding profile.
 
-        ::
+        .. code:: xml
 
             name=...
 
@@ -155,7 +158,7 @@ This section defines the various transcoding profiles.
 
         Name of the transcoding profile, this is the name that is specified in the mime type to profile mappings.
 
-        ::
+        .. code:: xml
 
             enabled=...
 
@@ -163,7 +166,7 @@ This section defines the various transcoding profiles.
 
         Enables or disables the profile, allowed values are ``yes`` or ``no``.
 
-        ::
+        .. code:: xml
 
             client-flags=...
 
@@ -173,7 +176,7 @@ This section defines the various transcoding profiles.
         There are are ``TRANSCODE1``, ``TRANSCODE2``, ``TRANSCODE3`` or choose an unused flag,
         e.g. ``0x10000``, to avoid collisions with other features.
 
-        ::
+        .. code:: xml
 
             type=...
 
@@ -197,7 +200,7 @@ This section defines the various transcoding profiles.
     The second version allows setting additional properties which will be appended to the mimetype if the
     respective property value is not empty. The above example will produce, e.g. ``audio/L16;rate=16000;channels=2;date=2024-07-22``.
 
-        ::
+        .. code:: xml
 
             key=...
 
@@ -205,7 +208,7 @@ This section defines the various transcoding profiles.
 
         Key printed in front of the property value.
 
-        ::
+        .. code:: xml
 
             resource=...
 
@@ -214,7 +217,7 @@ This section defines the various transcoding profiles.
         Name of a resource attribute to read. The attribute name must match one of the resource attributes and
         must be available on the content resource. See :ref:`Supported Properties <supported-properties>`.
 
-        ::
+        .. code:: xml
 
             metadata=...
 
@@ -294,7 +297,7 @@ This section defines the various transcoding profiles.
     Note:
         this option has no effect on non AVI content.
 
-        ::
+        .. code:: xml
 
             mode=...
 
@@ -302,13 +305,13 @@ This section defines the various transcoding profiles.
 
         Specifies how the list should be handled by the transcoding engine, possible values are:
 
-        ::
+        .. code:: xml
 
             "disabled"
 
         The option is completely disabled, fourcc list is not being processed.
 
-        ::
+        .. code:: xml
 
             "process"
 
@@ -316,7 +319,7 @@ This section defines the various transcoding profiles.
         fourcc strings will be ignored. Setting this is useful if you want to transcode only some specific
         fourcc's and not transcode the rest.
 
-        ::
+        .. code:: xml
 
             "ignore"
 
@@ -345,7 +348,7 @@ This section defines the various transcoding profiles.
 
     Defines the transcoding agent and the parameters, in the example above we use ogg123 to convert ogg or flac to wav.
 
-        ::
+        .. code:: xml
 
             command=...
 
@@ -356,7 +359,7 @@ This section defines the various transcoding profiles.
         some applications, for example ffmpeg, have problems with that. The command line arguments are specified
         separately (see below).
 
-        ::
+        .. code:: xml
 
             arguments=...
 
@@ -365,14 +368,14 @@ This section defines the various transcoding profiles.
         Specifies the command line arguments that will be given to the transcoder application upon execution.
         There are two special tokens:
 
-            ::
+            .. code:: xml
 
                 %in
                 %out
 
             Those tokens get substituted by the input file name and the output FIFO name before execution.
 
-        ::
+        .. code:: xml
 
             <environ name="..." value=".."/>
 
@@ -392,7 +395,7 @@ This section defines the various transcoding profiles.
     The prefill should give you enough space to overcome some high bitrate scenes in case your system can not
     transcode them in real time.
 
-        ::
+        .. code:: xml
 
             size=...
 
@@ -400,7 +403,7 @@ This section defines the various transcoding profiles.
 
         Size of the buffer in bytes.
 
-        ::
+        .. code:: xml
 
             chunk-size=...
 
@@ -409,7 +412,7 @@ This section defines the various transcoding profiles.
         Size of chunks in bytes, that are read by the buffer from the transcoder. Smaller chunks will produce a
         more constant buffer fill ratio, however too small chunks may slow things down.
 
-        ::
+        .. code:: xml
 
             fill-size=...
 

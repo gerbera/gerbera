@@ -12,9 +12,11 @@
 - Configuration of additional target mimetype properties for transcoding
 - Config: Make UDN mandatory
 - Config: Option to disable physical container types
+- Config: Client specific DLNA profiles
 - ConfigSetup: Allow multiple iterations for UI
 - Drop Apple Trailer support
 - Extract image and video orientation to resource attributes
+- Fix config2.xsd
 - FIXME done: Remove fake resource
 - Import: Fix renaming of file or folder
 - Improve docker instructions
