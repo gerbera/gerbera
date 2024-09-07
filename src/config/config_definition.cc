@@ -1357,6 +1357,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/clients/client", "config-import.html#map",
         ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO,
         false, false, false),
+    std::make_shared<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE,
+        "/clients/client", "config-import.html#contenttype-dlnaprofile",
+        ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE_PROFILE, std::vector<ConfigVal> { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO },
+        false, false, true),
     std::make_shared<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT,
         "attribute::caption-info-count", "config-clients.html#caption-info-count",
         1, 0, ConfigIntSetup::CheckMinValue),
@@ -1413,6 +1417,8 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "handler", ""),
     std::make_shared<ConfigSetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS_HEADER,
         "header", ""),
+    std::make_shared<ConfigSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE_PROFILE,
+        "dlna", ""),
     std::make_shared<ConfigStringSetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS_KEY,
         "attribute::key", "config-import.html#headers", ""),
     std::make_shared<ConfigStringSetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE,
@@ -1509,6 +1515,7 @@ const std::map<ConfigVal, std::vector<ConfigVal>> ConfigDefinition::parentOption
                                                       ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
                                                       ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST,
                                                       ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
+                                                      ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE,
                                                   } },
     { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO, {
                                                     ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST,
@@ -1516,6 +1523,7 @@ const std::map<ConfigVal, std::vector<ConfigVal>> ConfigDefinition::parentOption
                                                     ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
                                                     ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST,
                                                     ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
+                                                    ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE,
                                                 } },
 
     { ConfigVal::A_IMPORT_RESOURCES_NAME, { ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, //

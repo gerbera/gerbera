@@ -119,7 +119,7 @@ bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& opt
     return false;
 }
 
-std::string ConfigArraySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
+std::string ConfigArraySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
     if (attrOption != ConfigVal::MAX) {
         if (indexList.size() == 0)

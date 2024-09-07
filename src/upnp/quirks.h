@@ -199,6 +199,13 @@ public:
      */
     std::map<std::string, std::string> getMimeMappings() const;
 
+    /** \brief Get dlna profile mappings for client
+     *
+     * \return dlna profile mappings
+     *
+     */
+    std::vector<std::vector<std::pair<std::string, std::string>>> getDlnaMappings() const;
+
     /** \brief Update Headers with overwrites for client
      */
     void updateHeaders(Headers& headers) const;

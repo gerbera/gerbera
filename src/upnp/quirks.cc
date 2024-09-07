@@ -296,6 +296,11 @@ std::map<std::string, std::string> Quirks::getMimeMappings() const
     return pClientProfile ? pClientProfile->mimeMappings.getDictionaryOption() : std::map<std::string, std::string>();
 }
 
+std::vector<std::vector<std::pair<std::string, std::string>>> Quirks::getDlnaMappings() const
+{
+    return pClientProfile ? pClientProfile->dlnaMappings.getVectorOption() : std::vector<std::vector<std::pair<std::string, std::string>>>();
+}
+
 bool Quirks::isAllowed() const
 {
     return !pClientProfile || pClientProfile->isAllowed;

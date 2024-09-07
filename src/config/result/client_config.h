@@ -74,16 +74,12 @@ public:
     /// \param group client group
     /// \param ip ip address
     /// \param userAgent user agent
-    /// \param mimeMappings special mappings for client
-    /// \param headers additional headers from client
     /// \param matchValues additional matches, last one wins
     /// \param captionInfoCount max count if \<captionInfo\> tags
     /// \param stringLimit maximum length of name strings
     /// \param multiValue client support multi value attributes
     /// \param isAllowed client is allowed to connect to server
     ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent,
-        const std::map<std::string, std::string>& mimeMappings,
-        const std::map<std::string, std::string>& headers,
         const std::map<ClientMatchType, std::string>& matchValues,
         int captionInfoCount, int stringLimit, bool multiValue, bool isAllowed);
 
@@ -92,15 +88,22 @@ public:
     int getFlags() const { return this->clientProfile.flags; }
     void setFlags(int flags) { this->clientProfile.flags = flags; }
 
-    std::map<std::string, std::string> getMimeMappings() const { return this->clientProfile.mimeMappings.getDictionaryOption(); }
+    /// \brief mimeMappings special mappings for client
+    std::map<std::string, std::string> getMimeMappings(bool edit = false) const { return this->clientProfile.mimeMappings.getDictionaryOption(edit); }
     void setMimeMappings(const std::map<std::string, std::string>& mappings) { this->clientProfile.mimeMappings = DictionaryOption(mappings); }
     void setMimeMappingsFrom(std::size_t j, const std::string& from);
     void setMimeMappingsTo(std::size_t j, const std::string& to);
 
-    std::map<std::string, std::string> getHeaders() const { return this->clientProfile.headers.getDictionaryOption(); }
+    /// \brief headers additional headers from client
+    std::map<std::string, std::string> getHeaders(bool edit = false) const { return this->clientProfile.headers.getDictionaryOption(edit); }
     void setHeaders(const std::map<std::string, std::string>& headers) { this->clientProfile.headers = DictionaryOption(headers); }
     void setHeadersKey(std::size_t j, const std::string& key);
     void setHeadersValue(std::size_t j, const std::string& value);
+
+    /// \brief dlnaMappings additional dlna profiles mappings from client
+    std::vector<std::vector<std::pair<std::string, std::string>>> getDlnaMappings(bool edit = false) const { return this->clientProfile.dlnaMappings.getVectorOption(edit); }
+    void setDlnaMappings(const std::vector<std::vector<std::pair<std::string, std::string>>>& dlnaMappings) { this->clientProfile.dlnaMappings = VectorOption(dlnaMappings); }
+    void setDlnaMapping(std::size_t j, std::size_t k, const std::string& value);
 
     int getCaptionInfoCount() const { return this->clientProfile.captionInfoCount; }
     void setCaptionInfoCount(int captionInfoCount)

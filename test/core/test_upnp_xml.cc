@@ -187,7 +187,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithEscapes)
     auto clientConfig = std::make_shared<MyConfigMock>();
     auto clientManager = std::make_shared<ClientManager>(clientConfig, database);
     auto addr = std::make_shared<GrbNet>("192.168.99.100");
-    auto quirks = std::make_unique<Quirks>(subject, clientManager, addr, "DLNADOC/1.50");
+    auto quirks = std::make_shared<Quirks>(subject, clientManager, addr, "DLNADOC/1.50");
 
     std::ostringstream expectedXml;
     expectedXml << "<DIDL-Lite>\n";
@@ -234,7 +234,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithStrictXmlQuirks)
     auto clientConfig = std::make_shared<MyConfigMock>();
     auto clientManager = std::make_shared<ClientManager>(clientConfig, database);
     auto addr = std::make_shared<GrbNet>("192.168.99.100");
-    auto quirks = std::make_unique<Quirks>(subject, clientManager, addr, "Allegro-Software-WebClient/5.40b1 DLNADOC/1.50");
+    auto quirks = std::make_shared<Quirks>(subject, clientManager, addr, "Allegro-Software-WebClient/5.40b1 DLNADOC/1.50");
 
     std::ostringstream expectedXml;
     expectedXml << "<DIDL-Lite>\n";

@@ -20,6 +20,7 @@ config being unused or triggering warnings.
 - Higher cross site scripting security in web ui
 - Styles for xml documents when shown in browser
 - Configuration of additional target mimetype properties for transcoding (e.g. needed for PCM output)
+- Configuration of DLNA profile mappings for a client
 - Display media details in web ui
 - Image and thumbnail profiles support PNG images
 - Page layout of items page with splitter and resize button

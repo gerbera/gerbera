@@ -82,9 +82,9 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         result->add(filter);
     }
 
-    bool allowUnusedProfiles = !ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED)->getXmlContent(root);
+    bool allowUnusedProfiles = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED)->getXmlContent(root);
     if (!allowUnusedProfiles && trFilters.empty()) {
-        log_error("error in configuration: transcoding "
+        log_error("Error in configuration: transcoding "
                   "profiles exist, but no mimetype to profile mappings specified");
         return false;
     }
@@ -230,20 +230,23 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
         }
 
         if (!set) {
-            log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but no match for profile \"{}\" exists", prof->getName());
             if (!allowUnusedProfiles) {
+                log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but no match for profile \"{}\" exists", prof->getName());
                 return false;
             }
+            log_warning("You specified a mimetype to transcoding profile mapping, but no match for profile \"{}\" exists", prof->getName());
         }
     }
 
     // validate profiles
+    bool allowUnusedFilter = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(root);
     for (auto&& filter : trFilters) {
         if (!filter->getTranscodingProfile()) {
-            log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", filter->getTranscoderName(), filter->getMimeType());
-            if (!ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED)->getXmlContent(root)) {
+            if (!allowUnusedFilter) {
+                log_error("Error in configuration: you specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", filter->getTranscoderName(), filter->getMimeType());
                 return false;
             }
+            log_warning("You specified a mimetype to transcoding profile mapping, but the profile \"{}\" for mimetype \"{}\" does not exists", filter->getTranscoderName(), filter->getMimeType());
         }
     }
     return true;
@@ -258,7 +261,7 @@ void ConfigTranscodingSetup::makeOption(const pugi::xml_node& root, const std::s
     setOption(config);
 }
 
-std::string ConfigTranscodingSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions) const
+std::string ConfigTranscodingSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
     auto opt2 = ConfigDefinition::ensureAttribute(propOptions.size() > 1 ? propOptions[1] : ConfigVal::MAX, propOptions.size() == 2);
     auto opt3 = ConfigDefinition::ensureAttribute(propOptions.size() > 2 ? propOptions[2] : ConfigVal::MAX, propOptions.size() == 3);

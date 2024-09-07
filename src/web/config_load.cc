@@ -339,7 +339,7 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
         {
             // Sub Dictionary ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE
             std::size_t j = 0;
-            for (auto&& [from, to] : client->getMimeMappings()) {
+            for (auto&& [from, to] : client->getMimeMappings(true)) {
                 item = values.append_child(CONFIG_LOAD_ITEM);
                 createItem(item, cs->getItemPath({ i, j }, { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM }), cs->option, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM, cs);
                 setValue(item, from);
@@ -351,13 +351,35 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
         {
             // Sub Dictionary ConfigVal::A_CLIENTS_UPNP_HEADERS
             std::size_t j = 0;
-            for (auto&& [key, value] : client->getHeaders()) {
+            for (auto&& [key, value] : client->getHeaders(true)) {
                 item = values.append_child(CONFIG_LOAD_ITEM);
                 createItem(item, cs->getItemPath({ i, j }, { ConfigVal::A_CLIENTS_UPNP_HEADERS_HEADER, ConfigVal::A_CLIENTS_UPNP_HEADERS_KEY }), cs->option, ConfigVal::A_CLIENTS_UPNP_HEADERS_KEY, cs);
                 setValue(item, key);
                 item = values.append_child(CONFIG_LOAD_ITEM);
                 createItem(item, cs->getItemPath({ i, j }, { ConfigVal::A_CLIENTS_UPNP_HEADERS_HEADER, ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE }), cs->option, ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE, cs);
                 setValue(item, value);
+            }
+        }
+        {
+            // Sub Dictionary ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE
+            std::size_t j = 0;
+            auto vcs = ConfigDefinition::findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE);
+            for (auto&& map : client->getDlnaMappings(true)) {
+                std::vector<std::string> attrList;
+                attrList.reserve(vcs->optionList.size());
+                for (const auto& opt : vcs->optionList) {
+                    attrList.push_back(ConfigDefinition::removeAttribute(opt));
+                }
+                for (auto&& [key, val] : map) {
+                    auto item = values.append_child(CONFIG_LOAD_ITEM);
+                    std::size_t k = 0;
+                    auto pos = std::find(attrList.begin(), attrList.end(), key);
+                    if (pos != attrList.end())
+                        k = std::distance(attrList.begin(), pos);
+                    createItem(item, cs->getItemPath({ i, j }, { ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE_PROFILE }, key), cs->option, vcs->optionList[k], cs);
+                    setValue(item, val);
+                }
+                j++;
             }
         }
     }
@@ -395,6 +417,27 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
 
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_UPNP_HEADERS_HEADER, ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE }), cs->option, ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE, cs);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE_PROFILE, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM }), cs->option, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM, cs);
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE_PROFILE, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO }), cs->option, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO, cs);
+        // special treatment for vector
+        auto vcs = ConfigDefinition::findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE);
+        std::vector<std::string> attrList;
+        attrList.reserve(vcs->optionList.size());
+        for (const auto& opt : vcs->optionList) {
+            attrList.push_back(ConfigDefinition::removeAttribute(opt));
+        }
+        for (auto&& key : { "audioCodec", "videoCodec" }) {
+            auto item = values.append_child(CONFIG_LOAD_ITEM);
+            std::size_t k = 0;
+            auto pos = std::find(attrList.begin(), attrList.end(), key);
+            if (pos != attrList.end())
+                k = std::distance(attrList.begin(), pos);
+            createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE_PROFILE }, key), cs->option, vcs->optionList[k], cs);
+        }
     }
 }
 
@@ -923,7 +966,7 @@ void Web::ConfigLoad::writeVectors(pugi::xml_node& values)
                 auto pos = std::find(attrList.begin(), attrList.end(), key);
                 if (pos != attrList.end())
                     j = std::distance(attrList.begin(), pos);
-                createItem(item, vcs->getItemPath({ i }, { key }), vcs->option, vcs->optionList[j], vcs);
+                createItem(item, vcs->getItemPath({ i }, {}, { key }), vcs->option, vcs->optionList[j], vcs);
                 setValue(item, val);
             }
             i++;
