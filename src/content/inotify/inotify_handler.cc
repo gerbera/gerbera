@@ -161,7 +161,7 @@ std::pair<bool, std::shared_ptr<AutoscanDirectory>> InotifyHandler::getAutoscanD
     if (!watchAs || !adir) {
         log_debug("autoscan not found in watches? ({}, watchAs:{}, adir:{}, {})", wd, watchAs != nullptr, adir != nullptr, path.c_str());
     } else if (ec && !AUTOSCAN_WAS_REMOVED(mask)) {
-        log_error("Failed to read {}: {}", path.c_str(), ec.message());
+        log_error("Failed to read {} for event {}: {}", path.c_str(), mapFlags(mask), ec.message());
     }
     log_debug("autoscan for watch (isDir:{}, adir:{}, {})", isDir, adir != nullptr, path.c_str());
     return { isDir, adir };

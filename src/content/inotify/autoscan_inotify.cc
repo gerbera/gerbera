@@ -175,7 +175,7 @@ void AutoscanInotify::threadProc()
                     }
                     content->rescanDirectory(adir, adir->getObjectID(), location, false);
                 } else {
-                    log_error("Failed to read {}: {}", location.c_str(), ec.message());
+                    log_error("Failed to read autoscan directory {}: {}", location.c_str(), ec.message());
                 }
 
                 lock.lock();
