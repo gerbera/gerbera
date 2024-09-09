@@ -17,6 +17,7 @@
 - Drop Apple Trailer support
 - Extract image and video orientation to resource attributes
 - Fix config2.xsd
+- Fix ipv6 handling
 - FIXME done: Remove fake resource
 - Import: Fix renaming of file or folder
 - Improve docker instructions

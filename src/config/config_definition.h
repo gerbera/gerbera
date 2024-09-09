@@ -46,6 +46,8 @@
 #define DEFAULT_WEB_DIR "web"
 #define DEFAULT_JS_DIR "js"
 
+#define GRB_UDN_AUTO "grb_udn_auto"
+
 #define DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE "prepend"
 
 #define DEFAULT_AUDIO_BUFFER_SIZE 1048576
