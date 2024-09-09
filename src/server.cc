@@ -36,7 +36,9 @@
 
 #include "action_request.h"
 #include "config/config.h"
+#include "config/config_definition.h"
 #include "config/config_option_enum.h"
+#include "config/config_setup.h"
 #include "config/config_val.h"
 #include "content/content_manager.h"
 #include "context.h"
@@ -102,9 +104,6 @@ void Server::init(bool offln)
 {
     offline = offln;
 
-    serverUDN = config->getOption(ConfigVal::SERVER_UDN);
-    aliveAdvertisementInterval = config->getIntOption(ConfigVal::SERVER_ALIVE_INTERVAL);
-
 #ifdef HAVE_CURL
     curl_global_init(CURL_GLOBAL_ALL);
 #endif
@@ -118,6 +117,15 @@ void Server::init(bool offln)
     converterManager = std::make_shared<ConverterManager>(config);
     database = Database::createInstance(config, mime, converterManager, timer);
     config->updateConfigFromDatabase(database);
+
+    serverUDN = config->getOption(ConfigVal::SERVER_UDN);
+    if (serverUDN == GRB_UDN_AUTO) {
+        serverUDN = fmt::format("uuid:{}", generateRandomId());
+        auto cs = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_UDN);
+        database->updateConfigValue(cs->getUniquePath(), cs->getItemPath({}, {}), serverUDN, "added");
+        log_info("Generated UDN '{}' and saved in database", serverUDN);
+    }
+    aliveAdvertisementInterval = config->getIntOption(ConfigVal::SERVER_ALIVE_INTERVAL);
 
     clientManager = std::make_shared<ClientManager>(config, database);
     sessionManager = std::make_shared<Web::SessionManager>(config, timer);
@@ -597,6 +605,8 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
         || startswith(link, "/favicon.ico")
         || startswith(link, "/assets")
         || startswith(link, "/vendor")
+        || startswith(link, "/doc")
+        || startswith(link, "/dev")
         || startswith(link, "/js")
         || startswith(link, "/css")
         || startswith(link, "/icons")) {

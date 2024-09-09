@@ -403,7 +403,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         UrlAppendMode::none,
         std::map<std::string, UrlAppendMode>({ { "none", UrlAppendMode::none }, { "ip", UrlAppendMode::ip }, { "port", UrlAppendMode::port } })),
     std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_UDN,
-        "/server/udn", "config-server.html#udn", true),
+        "/server/udn", "config-server.html#udn", GRB_UDN_AUTO),
     std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_HOME,
         "/server/home", "config-server.html#home"),
     std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_HOME_OVERRIDE,

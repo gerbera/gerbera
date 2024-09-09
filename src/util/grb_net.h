@@ -34,7 +34,7 @@ private:
     std::string hostName;
 
 public:
-    explicit GrbNet(const std::string& addr, int af = AF_INET);
+    explicit GrbNet(std::string addr, int af = AF_INET);
     explicit GrbNet(const struct sockaddr_storage* addr);
 
     void setPort(in_port_t port);
@@ -50,10 +50,10 @@ public:
     /// \brief Finds the Interface with the specified IP address.
     /// \param ip i.e. 192.168.4.56.
     /// \return Interface name or nullptr if IP was not found.
-    static std::string ipToInterface(std::string_view ip);
+    static std::string ipToInterface(const std::string& ip);
 
     /// \brief Render browser friendly uri (handle IPv6)
-    static std::string renderWebUri(std::string_view ip, in_port_t port);
+    static std::string renderWebUri(const std::string& ip, in_port_t port);
 };
 
 #endif // __GRB_NET_H__

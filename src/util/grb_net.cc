@@ -29,6 +29,7 @@ Gerbera - https://gerbera.io/
 #include <arpa/inet.h>
 #include <ifaddrs.h>
 #include <netdb.h>
+#include <regex>
 
 #ifdef SOLARIS
 #include <sys/sockio.h>
@@ -75,10 +76,13 @@ static int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb,
     throw_std_runtime_error("Unsupported address family: {}", sa->sa_family);
 }
 
-GrbNet::GrbNet(const std::string& addr, int af)
+GrbNet::GrbNet(std::string addr, int af)
 {
-    if (addr.find(':') != std::string::npos)
+    if (addr.find(':') != std::string::npos) {
         af = AF_INET6;
+        auto re = std::regex("%.*$");
+        addr = std::regex_replace(addr, re, "");
+    }
     reinterpret_cast<struct sockaddr*>(&sockAddr)->sa_family = af;
     int err = 0;
     if (af == AF_INET) {
@@ -182,7 +186,7 @@ std::string GrbNet::getNameInfo(bool withPort) const
     return withPort ? fmt::format("{}:{}", hoststr, portstr) : hoststr;
 }
 
-std::string GrbNet::ipToInterface(std::string_view ip)
+std::string GrbNet::ipToInterface(const std::string& ip)
 {
     if (ip.empty()) {
         return {};
@@ -228,7 +232,7 @@ std::string GrbNet::ipToInterface(std::string_view ip)
     return {};
 }
 
-std::string GrbNet::renderWebUri(std::string_view ip, in_port_t port)
+std::string GrbNet::renderWebUri(const std::string& ip, in_port_t port)
 {
     if (port == 0) {
         if (ip.find(':') != std::string_view::npos) {
