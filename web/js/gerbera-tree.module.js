@@ -220,6 +220,8 @@ const transformContainers = (response, createParent) => {
     node.gerbera = {
       id: item.id,
       childCount: item.child_count,
+      path: item.location ?? null,
+      upnpClass: item.upnp_class ?? null,
       autoScanMode: item.autoscan_mode,
       autoScanType: item.autoscan_type,
       image: ('image' in item) ? item.image : null

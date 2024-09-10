@@ -126,7 +126,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element,
                         auto key = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE_PROPERTIES_KEY)->getXmlContent(prop);
                         auto resource = ConfigDefinition::findConfigSetup<ConfigEnumSetup<ResourceAttribute>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE_PROPERTIES_RESOURCE)->getXmlContent(prop);
                         auto metadata = ConfigDefinition::findConfigSetup<ConfigEnumSetup<MetadataFields>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE_PROPERTIES_METADATA)->getXmlContent(prop);
-                        prof->addTargetMimeProperty(std::move(TranscodingMimeProperty(key, resource, metadata)));
+                        prof->addTargetMimeProperty(TranscodingMimeProperty(key, resource, metadata));
                         log_debug("MimeProperty {}, key={}, resource={}, metadata={}", mimetype, key, EnumMapper::getAttributeName(resource), MetaEnumMapper::getMetaFieldName(metadata));
                     }
                 } else {

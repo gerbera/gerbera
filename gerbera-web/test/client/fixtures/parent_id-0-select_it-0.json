@@ -23,7 +23,9 @@
         "child_count": 2,
         "autoscan_type": "none",
         "autoscan_mode": "none",
-        "title": "Photos"
+        "title": "Photos",
+        "location": "/my/Directory/",
+        "upnp_class": "upnp.class"
       },
       {
         "id": 3808,

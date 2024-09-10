@@ -68,7 +68,7 @@ describe('Gerbera Tree', () => {
       expect(trail.trail('length')).toBe(1);
     });
   });
-  describe('transformContainers', () => {
+  describe('transformContainers()', () => {
     let result;
 
     it('transforms containers response suitable for treeview load', () => {
@@ -198,7 +198,17 @@ describe('Gerbera Tree', () => {
 
       expect(Items.treeItemSelected).toHaveBeenCalled();
       expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
-        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none', image: null}}
+        { title: 'Photos',
+          badge: [2],
+          nodes: [],
+          gerbera: {
+            id: 2779,
+            childCount: 2,
+            autoScanMode: 'none',
+            autoScanType: 'none',
+            image: null,
+            path: "/my/Directory/",
+            upnpClass: "upnp.class" }}
       );
     });
 
@@ -217,7 +227,17 @@ describe('Gerbera Tree', () => {
 
       expect(Items.treeItemSelected).toHaveBeenCalled();
       expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
-        {title: 'Photos', badge: [2], nodes: [], gerbera: {id: 2779, childCount: 2, autoScanMode: 'none', autoScanType: 'none', image: null}}
+        { title: 'Photos',
+          badge: [2],
+          nodes: [],
+          gerbera: {
+            id: 2779,
+            childCount: 2,
+            autoScanMode: 'none',
+            autoScanType: 'none',
+            image: null,
+            path: "/my/Directory/",
+            upnpClass: "upnp.class" }}
       );
     });
 
@@ -353,7 +373,7 @@ describe('Gerbera Tree', () => {
         title: 'Audio',
         badge: [6],
         nodes: [],
-        gerbera: { id: 8, childCount: 6, autoScanMode: 'none', autoScanType: 'none', image: null }
+        gerbera: { id: 8, childCount: 6, autoScanMode: 'none', autoScanType: 'none', image: null, path: null, upnpClass: null }
       });
     });
   });
