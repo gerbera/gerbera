@@ -131,5 +131,7 @@ void Web::Directories::process()
             }
         }
         ce.append_attribute("title") = f2i->convert(file.filename()).c_str();
+        ce.append_attribute("location") = f2i->convert(file).c_str();
+        ce.append_attribute("upnp_class") = "folder";
     }
 }

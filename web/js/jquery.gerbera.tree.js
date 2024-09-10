@@ -57,7 +57,7 @@ $.widget('grb.tree', {
       item.prop('id', 'grb-tree-' + data[i].gerbera.id);
 
       const icon = $('<span></span>').addClass(config.closedIcon).addClass('folder-icon');
-      let title = $('<span></span>').addClass(config.titleClass).text(data[i].title);
+      let title = $('<span></span>').addClass(config.titleClass).text(data[i].title).prop('title', `${data[i].gerbera.path} (${data[i].gerbera.upnpClass})`);
       if (config.onSelection) {
         title.click(data[i], config.onSelection);
       }

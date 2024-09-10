@@ -9,20 +9,22 @@
 - Clean up commented out code
 - Clean up test code
 - Clean up URL handling
-- Configuration of additional target mimetype properties for transcoding
+- Config: Client specific DLNA profiles
 - Config: Make UDN mandatory
 - Config: Option to disable physical container types
-- Config: Client specific DLNA profiles
 - ConfigSetup: Allow multiple iterations for UI
+- Configuration of additional target mimetype properties for transcoding
 - Drop Apple Trailer support
 - Extract image and video orientation to resource attributes
 - Fix config2.xsd
 - Fix ipv6 handling
+- Fix NPUPnP version
 - FIXME done: Remove fake resource
 - Import: Fix renaming of file or folder
 - Improve docker instructions
 - Improve handling of thumbnail profiles
 - Inotify: Fix deleting files
+- Link to UPnP specification for search syntax
 - Mention .m4a in compilation options
 - Refactor StringConverter
 - Refactor Upnp Services
@@ -33,6 +35,7 @@
 - Use full client info as requestCookie
 - Warn about empty script result
 - Web security and upnp compatibility
+- Web UI: Display tootip on containers in tree
 
 ### v2.2.0
 

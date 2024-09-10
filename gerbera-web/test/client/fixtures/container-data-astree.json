@@ -16,7 +16,9 @@
           "childCount": 6,
           "autoScanMode": "none",
           "autoScanType": "none",
-          "image": null
+          "image": null,
+          "path": null,
+          "upnpClass": null
         }
       },
       {
@@ -28,7 +30,9 @@
           "childCount": 1,
           "autoScanMode": "none",
           "autoScanType": "none",
-          "image": null
+          "image": null,
+          "path": null,
+          "upnpClass": null
         }
       },
       {
@@ -40,7 +44,9 @@
           "childCount": 2,
           "autoScanMode": "none",
           "autoScanType": "none",
-          "image": null
+          "image": null,
+          "path": "/my/Directory/",
+          "upnpClass": "upnp.class"
         }
       },
       {
@@ -52,7 +58,9 @@
           "childCount": 2,
           "autoScanMode": "none",
           "autoScanType": "ui",
-          "image": null
+          "image": null,
+          "path": null,
+          "upnpClass": null
         }
       },
       {
@@ -64,7 +72,9 @@
           "childCount": 2,
           "autoScanMode": "none",
           "autoScanType": "persistent",
-          "image": null
+          "image": null,
+          "path": null,
+          "upnpClass": null
         }
       }
     ]
