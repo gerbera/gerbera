@@ -1133,10 +1133,17 @@ This section sets the rules for additional containers which have calculated cont
         * Required
 
         Define a filter to run in order to get the contents of the container.
-        The filter uses the syntax of UPnP search with additional properties ``last_modified`` (date), ``last_updated`` (date),
+        The ``<filter>`` uses the syntax of UPnP search with additional properties ``last_modified`` (date), ``last_updated`` (date),
         ``upnp:lastPlaybackTime`` (date), ``play_group`` (string, ``group`` from client config) and ``upnp:playbackCount`` (number).
         Date properties support comparing against a special value ``"@last*"`` where ``*`` can be any integer which evaluates to
         the current time minus the number of days as specified.
+
+        UPnP search syntax is defined in
+        `UPnP ContentDirectory:1 <https://upnp.org/specs/av/UPnP-av-ContentDirectory-v1-Service.pdf>`_ section 2.5.5,
+        `UPnP ContentDirectory:2 <https://upnp.org/specs/av/UPnP-av-ContentDirectory-v1-Service.pdf>`_ section 2.3.11.1,
+        `UPnP ContentDirectory:3 <https://upnp.org/specs/av/UPnP-av-ContentDirectory-v3-Service.pdf>`_ section 2.3.13.1
+        and
+        `UPnP ContentDirectory:4 <https://upnp.org/specs/av//UPnP-av-ContentDirectory-v4-Service.pdf>`_ section 5.3.16.1.
 
         ::
 
