@@ -184,7 +184,7 @@ void SearchParser::getNextToken()
 std::unique_ptr<ASTNode> SearchParser::parse()
 {
     getNextToken();
-    if (currentToken->getType() == TokenType::ASTERISK)
+    if (currentToken && currentToken->getType() == TokenType::ASTERISK)
         return std::make_unique<ASTAsterisk>(sqlEmitter, currentToken->getValue());
 
     return parseSearchExpression();
@@ -292,27 +292,27 @@ std::unique_ptr<ASTNode> SearchParser::parseParenthesis()
 
 std::unique_ptr<ASTNode> SearchParser::parseRelationshipExpression()
 {
-    if (currentToken->getType() != TokenType::PROPERTY)
+    if (!currentToken || currentToken->getType() != TokenType::PROPERTY)
         throw_std_runtime_error("Failed to parse search criteria - expecting a property name");
 
     auto property = std::make_unique<ASTProperty>(sqlEmitter, currentToken->getValue());
 
     getNextToken();
-    if (currentToken->getType() == TokenType::COMPAREOP) {
+    if (currentToken && currentToken->getType() == TokenType::COMPAREOP) {
         auto operatr = std::make_unique<ASTCompareOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
         auto quotedString = parseQuotedString();
         return std::make_unique<ASTCompareExpression>(sqlEmitter, std::move(property), std::move(operatr), std::move(quotedString));
     }
 
-    if (currentToken->getType() == TokenType::STRINGOP) {
+    if (currentToken && currentToken->getType() == TokenType::STRINGOP) {
         auto operatr = std::make_unique<ASTStringOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
         auto quotedString = parseQuotedString();
         return std::make_unique<ASTStringExpression>(sqlEmitter, std::move(property), std::move(operatr), std::move(quotedString));
     }
 
-    if (currentToken->getType() == TokenType::EXISTS) {
+    if (currentToken && currentToken->getType() == TokenType::EXISTS) {
         auto operatr = std::make_unique<ASTExistsOperator>(sqlEmitter, currentToken->getValue());
         getNextToken();
         auto booleanValue = std::make_unique<ASTBoolean>(sqlEmitter, currentToken->getValue());
@@ -324,18 +324,18 @@ std::unique_ptr<ASTNode> SearchParser::parseRelationshipExpression()
 
 std::unique_ptr<ASTQuotedString> SearchParser::parseQuotedString()
 {
-    if (currentToken->getType() != TokenType::DQUOTE)
+    if (!currentToken || currentToken->getType() != TokenType::DQUOTE)
         throw_std_runtime_error("Failed to parse search criteria - expecting a double-quote");
     auto openQuote = std::make_unique<ASTDQuote>(sqlEmitter, currentToken->getValue());
     getNextToken();
 
-    if (currentToken->getType() != TokenType::ESCAPEDSTRING)
+    if (!currentToken || currentToken->getType() != TokenType::ESCAPEDSTRING)
         throw_std_runtime_error("Failed to parse search criteria - expecting an escaped string value");
 
     auto escapedString = std::make_unique<ASTEscapedString>(sqlEmitter, currentToken->getValue());
     getNextToken();
 
-    if (currentToken->getType() != TokenType::DQUOTE)
+    if (!currentToken || currentToken->getType() != TokenType::DQUOTE)
         throw_std_runtime_error("Failed to parse search criteria - expecting a double-quote");
     auto closeQuote = std::make_unique<ASTDQuote>(sqlEmitter, currentToken->getValue());
 
@@ -583,21 +583,22 @@ static const std::map<std::string, std::string> logicOperator {
     { "@compare", "({2}LOWER('{3}'))" }, // lower
 };
 
-std::pair<std::string, std::string> DefaultSQLEmitter::getPropertyStatement(const std::string& property) const
+std::tuple<std::string, std::string, FieldType> DefaultSQLEmitter::getPropertyStatement(const std::string& property) const
 {
     if (colMapper && colMapper->hasEntry(property)) {
-        return { colMapper->mapQuoted(property), colMapper->mapQuotedLower(property) };
+        return { colMapper->mapQuoted(property), colMapper->mapQuotedLower(property), colMapper->getFieldType(property) };
     }
     if (resMapper && resMapper->hasEntry(property)) {
-        return { resMapper->mapQuoted(property), resMapper->mapQuotedLower(property) };
+        return { resMapper->mapQuoted(property), resMapper->mapQuotedLower(property), resMapper->getFieldType(property) };
     }
     if (plyMapper && plyMapper->hasEntry(property)) {
-        return { plyMapper->mapQuoted(property), plyMapper->mapQuotedLower(property) };
+        return { plyMapper->mapQuoted(property), plyMapper->mapQuotedLower(property), plyMapper->getFieldType(property) };
     }
     if (metaMapper) {
         return {
             fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuoted(META_VALUE), property),
-            fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuotedLower(META_VALUE), property)
+            fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuotedLower(META_VALUE), property),
+            metaMapper->getFieldType(property)
         };
     }
     log_warning("Property {} not yet supported. Search may return no result!", property);
@@ -608,21 +609,29 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
     const std::string& value) const
 {
     auto operatr = node->getValue();
-    auto [prpUpper, prpLower] = getPropertyStatement(property);
+    auto [prpUpper, prpLower, prpType] = getPropertyStatement(property);
 
-    if ((operatr == ">" || operatr == ">=") && startswith(value, "@last")) {
-        auto dateVal = currentTime() - std::chrono::hours(24 * stoiString(value.substr(5)));
-        return fmt::format(logicOperator.at("newer"), "", fmt::format("{} {}", prpUpper, operatr), fmt::format("{} {}", prpLower, operatr), dateVal.count());
+    if (prpType == FieldType::Date) {
+        if ((operatr == ">" || operatr == ">=") && startswith(value, "@last")) {
+            auto dateVal = currentTime() - std::chrono::hours(24 * stoiString(value.substr(5)));
+            return fmt::format(logicOperator.at("newer"), "", fmt::format("{} {}", prpUpper, operatr), fmt::format("{} {}", prpLower, operatr), dateVal.count());
+        }
+        if (operatr == ">" || operatr == ">=" || operatr == "<" || operatr == "<=") {
+            std::chrono::seconds dateVal(0);
+            if (parseSimpleDate(value, dateVal)) {
+                log_debug("parseSimpleDate {} -> {}", value, dateVal.count());
+                return fmt::format(logicOperator.at("newer"), "", fmt::format("{} {}", prpUpper, operatr), fmt::format("{} {}", prpLower, operatr), dateVal.count());
+            }
+        }
     }
-
-    if ((operatr == ">" || operatr == ">=") && stoiString(value) > 0 && property == UPNP_SEARCH_PLAY_COUNT) {
+    if (prpType == FieldType::Integer && (operatr == ">" || operatr == ">=" || operatr == "<" || operatr == "<=")) {
         return fmt::format("{} {} {}", prpUpper, operatr, stoiString(value));
     }
 
     if (operatr != "=")
-        throw_std_runtime_error("Operator '{}' not yet supported", operatr);
+        throw_std_runtime_error("Operation '{}' '{}' not yet supported", operatr, value);
 
-    auto [clsUpper, clcLower] = getPropertyStatement(UPNP_SEARCH_CLASS);
+    auto [clsUpper, clsLower, clsType] = getPropertyStatement(UPNP_SEARCH_CLASS);
     return fmt::format(logicOperator.at((property[0] == '@') ? "@compare" : "compare"), clsUpper,
         fmt::format("{}{}", prpUpper, operatr), fmt::format("{}{}", prpLower, operatr), value);
 }
@@ -633,8 +642,8 @@ std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::st
     if (logicOperator.find(stringOperator) == logicOperator.end()) {
         throw_std_runtime_error("Operation '{}' not yet supported", stringOperator);
     }
-    auto [prpUpper, prpLower] = getPropertyStatement(property);
-    auto [clsUpper, clsLower] = getPropertyStatement(UPNP_SEARCH_CLASS);
+    auto [prpUpper, prpLower, prpType] = getPropertyStatement(property);
+    auto clsUpper = std::get<0>(getPropertyStatement(UPNP_SEARCH_CLASS));
     return fmt::format(logicOperator.at(stringOperator), clsUpper, prpUpper, prpLower, value);
 }
 
@@ -648,8 +657,8 @@ std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::st
     } else {
         throw_std_runtime_error("Invalid value '{}' on rhs of 'exists' operator", value);
     }
-    auto [prpUpper, prpLower] = getPropertyStatement(property);
-    auto [clsUpper, clsLower] = getPropertyStatement(UPNP_SEARCH_CLASS);
+    auto [prpUpper, prpLower, prpType] = getPropertyStatement(property);
+    auto [clsUpper, clsLower, clsType] = getPropertyStatement(UPNP_SEARCH_CLASS);
     return fmt::format(logicOperator.at((property[0] == '@') ? "@exists" : "exists"), clsUpper, prpUpper, prpLower, exists);
 }
 

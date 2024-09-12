@@ -29,6 +29,7 @@ config being unused or triggering warnings.
 - Configuration option to block clients
 - Upnp classes are assigned to containers in physical tree (PC Directory) depending on the majority of children (only in grb-mode)
 - Nested iterations are now supported in Config UI
+- UPnP Search support for integer and date comparison
 
 ### FIXES
 

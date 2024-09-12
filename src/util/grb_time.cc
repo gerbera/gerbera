@@ -119,10 +119,27 @@ std::string makeSimpleDate(std::string& s)
         log_debug("{} -> {:%FT%H:%M:%SZ}... {}-{}", s, dt, -tz / 100, -tz % 100);
         return fmt::format("{:%FT%H:%M:%SZ}", dt);
     }
-    log_debug("Failed to convert {}", s);
+    log_warning("Failed to convert {}", s);
     replaceAllString(s, "+0100", "Z");
     replaceAllString(s, "+0200", "Z");
     return s;
+}
+
+bool parseSimpleDate(const std::string& s, std::chrono::seconds& date)
+{
+    std::string_view date_time_format { "%Y-%m-%dT%H:%M:%S" };
+    std::istringstream ss { s };
+    std::tm dt {};
+
+    ss >> std::get_time(&dt, date_time_format.data());
+    if (!ss.fail()) {
+        auto t = std::mktime(&dt);
+        date = std::chrono::seconds(t);
+        log_debug("{} -> {:%FT%H:%M:%SZ}", s, dt);
+        return true;
+    }
+    log_warning("Failed to convert {}", s);
+    return false;
 }
 
 bool parseTime(int& value, std::string& timeValue, bool seconds)

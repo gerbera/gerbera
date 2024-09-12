@@ -34,6 +34,7 @@
 #include <fmt/core.h>
 #include <map>
 #include <memory>
+#include <tuple>
 #include <unordered_map>
 #include <vector>
 
@@ -306,6 +307,12 @@ public:
         const std::string& lhs, const std::string& rhs) const = 0;
 };
 
+enum class FieldType {
+    String,
+    Integer,
+    Date,
+};
+
 class ColumnMapper {
 public:
     virtual ~ColumnMapper() = default;
@@ -315,7 +322,28 @@ public:
     virtual std::string mapQuoted(const std::string& tag, bool noAlias = false) const = 0;
     virtual bool mapQuotedList(std::vector<std::string>& sort, const std::string& tag, const std::string& desc) const = 0;
     virtual std::string mapQuotedLower(const std::string& tag) const = 0;
+    virtual FieldType getFieldType(const std::string& tag) const = 0;
     virtual std::string quote(const std::string& tag) const = 0;
+};
+
+struct SearchProperty {
+    std::string alias;
+    std::string field;
+    FieldType type;
+
+    std::string print(char table_quote_begin, char table_quote_end, bool noAlias) const
+    {
+        if (alias.empty() || noAlias) // no column alias
+            return fmt::format("{}{}{}", table_quote_begin, field, table_quote_end);
+        return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, alias, field, table_quote_end);
+    }
+
+    std::string convert(char table_quote_begin, char table_quote_end) const
+    {
+        if (alias.empty()) // no column
+            return fmt::format("LOWER({}{}{})", table_quote_begin, field, table_quote_end);
+        return fmt::format("LOWER({0}{1}{3}.{0}{2}{3})", table_quote_begin, alias, field, table_quote_end);
+    }
 };
 
 class DefaultSQLEmitter : public SQLEmitter {
@@ -344,7 +372,7 @@ private:
     std::shared_ptr<ColumnMapper> resMapper;
     std::shared_ptr<ColumnMapper> plyMapper;
 
-    std::pair<std::string, std::string> getPropertyStatement(const std::string& property) const;
+    std::tuple<std::string, std::string, FieldType> getPropertyStatement(const std::string& property) const;
 };
 
 class SearchParser {
@@ -369,7 +397,7 @@ template <class En>
 class EnumColumnMapper : public ColumnMapper {
 public:
     explicit EnumColumnMapper(const char tabQuoteBegin, const char tabQuoteEnd, std::string tableAlias, std::string tableName,
-        std::vector<std::pair<std::string, En>> keyMap, std::map<En, std::pair<std::string, std::string>> colMap)
+        std::vector<std::pair<std::string, En>> keyMap, std::map<En, SearchProperty> colMap)
         : table_quote_begin(tabQuoteBegin)
         , table_quote_end(tabQuoteEnd)
         , tableAlias(std::move(tableAlias))
@@ -396,9 +424,7 @@ public:
     {
         auto it = std::find_if(colMap.begin(), colMap.end(), [=](auto&& map) { return map.first == tag; });
         if (it != colMap.end()) {
-            if (colMap.at(tag).first.empty()) // no column
-                return colMap.at(tag).second;
-            return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(tag).first, colMap.at(tag).second, table_quote_end);
+            return colMap.at(tag).print(table_quote_begin, table_quote_end, false);
         }
         return {};
     }
@@ -414,11 +440,7 @@ public:
         for (auto&& [key, value] : keyMap) {
             if (key == tag) {
                 result = true;
-                std::string sortCol;
-                if (colMap.at(value).first.empty())
-                    sortCol = fmt::format("{}{}{}", table_quote_begin, colMap.at(value).second, table_quote_end);
-                else
-                    sortCol = fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(value).first, colMap.at(value).second, table_quote_end);
+                auto sortCol = colMap.at(value).print(table_quote_begin, table_quote_end, false);
                 auto it = std::find_if(sort.begin(), sort.end(), [=](auto&& col) { return startswith(col, sortCol); });
                 if (it == sort.end())
                     sort.push_back(fmt::format("{} {}", sortCol, desc));
@@ -431,12 +453,11 @@ public:
     {
         auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
         if (it != keyMap.end()) {
-            if (colMap.at(it->second).first.empty() || noAlias) // no column alias
-                return fmt::format("{}{}{}", table_quote_begin, colMap.at(it->second).second, table_quote_end);
-            return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, colMap.at(it->second).first, colMap.at(it->second).second, table_quote_end);
+            return colMap.at(it->second).print(table_quote_begin, table_quote_end, noAlias);
         }
         return {};
     }
+
     std::string quote(const std::string& tag) const override
     {
         if (!tag.empty()) {
@@ -444,15 +465,23 @@ public:
         }
         return {};
     }
+
     std::string mapQuotedLower(const std::string& tag) const override
     {
         auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
         if (it != keyMap.end()) {
-            if (colMap.at(it->second).first.empty()) // no column
-                return fmt::format("LOWER({})", colMap.at(it->second).second);
-            return fmt::format("LOWER({0}{1}{3}.{0}{2}{3})", table_quote_begin, colMap.at(it->second).first, colMap.at(it->second).second, table_quote_end);
+            return colMap.at(it->second).convert(table_quote_begin, table_quote_end);
         }
         return {};
+    }
+
+    FieldType getFieldType(const std::string& tag) const override
+    {
+        auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
+        if (it != keyMap.end()) {
+            return colMap.at(it->second).type;
+        }
+        return FieldType::String;
     }
 
 private:
@@ -461,7 +490,7 @@ private:
     std::string tableAlias;
     std::string tableName;
     std::vector<std::pair<std::string, En>> keyMap;
-    std::map<En, std::pair<std::string, std::string>> colMap;
+    std::map<En, SearchProperty> colMap;
 };
 
 class SortParser {

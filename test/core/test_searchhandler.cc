@@ -266,7 +266,7 @@ class ParserTest : public ::testing::Test {
 public:
     std::string otn;
     std::vector<std::pair<std::string, TestCol>> testSortMap;
-    std::map<TestCol, std::pair<std::string, std::string>> testColMap;
+    std::map<TestCol, SearchProperty> testColMap;
     std::shared_ptr<EnumColumnMapper<TestCol>> columnMapper;
 
     ParserTest() = default;
@@ -281,6 +281,7 @@ public:
             { UPNP_SEARCH_ID, TestCol::ItemId },
             { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), TestCol::Number1 },
             { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), TestCol::Number2 },
+            { MetaEnumMapper::getMetaFieldName(MetadataFields::M_PARTNUMBER), TestCol::Number2 },
             { "double_name", TestCol::PropertyName },
             { META_NAME, TestCol::PropertyName },
             { META_NAME, TestCol::PropertyName2 },
@@ -294,12 +295,12 @@ public:
             { TestCol::ItemId, { "t", "item_id" } },
             { TestCol::PropertyName, { "t", "property_name" } },
             { TestCol::PropertyName2, { "t", "property_name2" } },
-            { TestCol::Number1, { "t", "number1" } },
-            { TestCol::Number2, { "t", "number2" } },
+            { TestCol::Number1, { "t", "number1", FieldType::Integer } },
+            { TestCol::Number2, { "t", "number2", FieldType::Integer } },
             { TestCol::PropertyValue, { "t", "property_value" } },
             { TestCol::UpnpClass, { "t", "upnp_class" } },
             { TestCol::RefId, { "t", "ref_id" } },
-            { TestCol::LastUpdated, { "t", "last_updated" } },
+            { TestCol::LastUpdated, { "t", "last_updated", FieldType::Date } },
         };
         columnMapper = std::make_shared<EnumColumnMapper<TestCol>>('_', '_', "t", "TestTable", testSortMap, testColMap);
     }
@@ -477,6 +478,31 @@ TEST_F(ParserTest, SearchCriteriaDynamic)
     EXPECT_TRUE(executeSearchParserTest("upnp:class derivedfrom \"object.item\" and last_updated > \"@last7\"",
         "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item%')) AND (_t_._last_updated_ > [0-9]+))",
         R"(\(LOWER\(_t_\._upnp_class_\) LIKE LOWER\('object\.item%'\)\) AND \(_t_\._last_updated_ > [0-9]+\))")); // regular expression because last7 is dynamic
+}
+
+TEST_F(ParserTest, SearchCriteriaCompare)
+{
+    EXPECT_TRUE(executeSearchParserTest("upnp:class derivedfrom \"object.item\" and last_updated > \"2024-09-12\"",
+        "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item%')) AND (_t_._last_updated_ > 1726092000)",
+        R"(\(LOWER\(_t_\._upnp_class_\) LIKE LOWER\('object\.item%'\)\) AND \(_t_\._last_updated_ > [0-9]+\))")); // regular expression because date depends on localtime and architecture
+
+    EXPECT_TRUE(executeSearchParserTest("upnp:class derivedfrom \"object.item\" and last_updated < \"2016-12-30\"",
+        "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item%')) AND (_t_._last_updated_ < 1481871180)",
+        R"(\(LOWER\(_t_\._upnp_class_\) LIKE LOWER\('object\.item%'\)\) AND \(_t_\._last_updated_ < [0-9]+\))")); // regular expression because date depends on localtime and architecture
+
+    EXPECT_TRUE(executeSearchParserTest("upnp:class derivedfrom \"object.item\" and upnp:originalTrackNumber > \"1\"",
+        "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item%')) AND _t_._number1_ > 1"));
+
+    EXPECT_TRUE(executeSearchParserTest("upnp:class derivedfrom \"object.item\" and upnp:originalTrackNumber < \"10\"",
+        "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item%')) AND _t_._number1_ < 10"));
+}
+
+TEST_F(ParserTest, SearchCriteriaBroken)
+{
+    EXPECT_FALSE(executeSearchParserTest("upnp:class derivedfrom \"object.item.videoItem\" and last_updated > \"2024-09-12",
+        ""));
+    EXPECT_FALSE(executeSearchParserTest("upnp:class derivedfrom \"object.item.videoItem and last_updated > \"2024-09-12",
+        ""));
 }
 
 TEST_F(ParserTest, SortCriteria)

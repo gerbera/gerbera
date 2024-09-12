@@ -227,7 +227,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         results = database->search(searchParam, &numMatches);
         log_debug("Found {}/{} items", results.size(), numMatches);
     } catch (const std::runtime_error& e) {
-        log_debug(e.what());
+        log_warning(e.what());
         throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
     }
 
