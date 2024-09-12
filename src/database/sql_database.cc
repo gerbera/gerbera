@@ -176,7 +176,7 @@ enum class PlaystatusCol {
 
 /// \brief Map browse column ids to column names
 // map ensures entries are in correct order, each value of BrowseCol must be present
-static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColMap {
+static const std::map<BrowseCol, SearchProperty> browseColMap {
     { BrowseCol::Id, { ITM_ALIAS, "id" } },
     { BrowseCol::RefId, { ITM_ALIAS, "ref_id" } },
     { BrowseCol::ParentId, { ITM_ALIAS, "parent_id" } },
@@ -189,11 +189,11 @@ static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
     { BrowseCol::UpdateId, { ITM_ALIAS, "update_id" } },
     { BrowseCol::MimeType, { ITM_ALIAS, "mime_type" } },
     { BrowseCol::Flags, { ITM_ALIAS, "flags" } },
-    { BrowseCol::PartNumber, { ITM_ALIAS, "part_number" } },
-    { BrowseCol::TrackNumber, { ITM_ALIAS, "track_number" } },
+    { BrowseCol::PartNumber, { ITM_ALIAS, "part_number", FieldType::Integer } },
+    { BrowseCol::TrackNumber, { ITM_ALIAS, "track_number", FieldType::Integer } },
     { BrowseCol::ServiceId, { ITM_ALIAS, "service_id" } },
-    { BrowseCol::LastModified, { ITM_ALIAS, "last_modified" } },
-    { BrowseCol::LastUpdated, { ITM_ALIAS, "last_updated" } },
+    { BrowseCol::LastModified, { ITM_ALIAS, "last_modified", FieldType::Date } },
+    { BrowseCol::LastUpdated, { ITM_ALIAS, "last_updated", FieldType::Date } },
     { BrowseCol::RefUpnpClass, { REF_ALIAS, "upnp_class" } },
     { BrowseCol::RefLocation, { REF_ALIAS, "location" } },
     { BrowseCol::RefAuxdata, { REF_ALIAS, "auxdata" } },
@@ -204,7 +204,7 @@ static const std::map<BrowseCol, std::pair<std::string, std::string>> browseColM
 
 /// \brief Map search column ids to column names
 // map ensures entries are in correct order, each value of SearchCol must be present
-static const std::map<SearchCol, std::pair<std::string, std::string>> searchColMap {
+static const std::map<SearchCol, SearchProperty> searchColMap {
     { SearchCol::Id, { SRC_ALIAS, "id" } },
     { SearchCol::RefId, { SRC_ALIAS, "ref_id" } },
     { SearchCol::ParentId, { SRC_ALIAS, "parent_id" } },
@@ -212,17 +212,17 @@ static const std::map<SearchCol, std::pair<std::string, std::string>> searchColM
     { SearchCol::UpnpClass, { SRC_ALIAS, "upnp_class" } },
     { SearchCol::DcTitle, { SRC_ALIAS, "dc_title" } },
     { SearchCol::MimeType, { SRC_ALIAS, "mime_type" } },
-    { SearchCol::Flags, { SRC_ALIAS, "flags" } },
-    { SearchCol::PartNumber, { SRC_ALIAS, "part_number" } },
-    { SearchCol::TrackNumber, { SRC_ALIAS, "track_number" } },
+    { SearchCol::Flags, { SRC_ALIAS, "flags", FieldType::Integer } },
+    { SearchCol::PartNumber, { SRC_ALIAS, "part_number", FieldType::Integer } },
+    { SearchCol::TrackNumber, { SRC_ALIAS, "track_number", FieldType::Integer } },
     { SearchCol::Location, { SRC_ALIAS, "location" } },
-    { SearchCol::LastModified, { SRC_ALIAS, "last_modified" } },
-    { SearchCol::LastUpdated, { SRC_ALIAS, "last_updated" } },
+    { SearchCol::LastModified, { SRC_ALIAS, "last_modified", FieldType::Date } },
+    { SearchCol::LastUpdated, { SRC_ALIAS, "last_updated", FieldType::Date } },
 };
 
 /// \brief Map meta column ids to column names
 // map ensures entries are in correct order, each value of MetadataCol must be present
-static const std::map<MetadataCol, std::pair<std::string, std::string>> metaColMap {
+static const std::map<MetadataCol, SearchProperty> metaColMap {
     { MetadataCol::ItemId, { MTA_ALIAS, "item_id" } },
     { MetadataCol::PropertyName, { MTA_ALIAS, "property_name" } },
     { MetadataCol::PropertyValue, { MTA_ALIAS, "property_value" } },
@@ -230,15 +230,15 @@ static const std::map<MetadataCol, std::pair<std::string, std::string>> metaColM
 
 /// \brief Map autoscan column ids to column names
 // map ensures entries are in correct order, each value of AutoscanCol must be present
-static const std::map<AutoscanCol, std::pair<std::string, std::string>> asColMap {
+static const std::map<AutoscanCol, SearchProperty> asColMap {
     { AutoscanCol::Id, { AUS_ALIAS, "id" } },
     { AutoscanCol::ObjId, { AUS_ALIAS, "obj_id" } },
-    { AutoscanCol::Persistent, { AUS_ALIAS, "persistent" } },
+    { AutoscanCol::Persistent, { AUS_ALIAS, "persistent", FieldType::Integer } },
 };
 
 /// \brief Map autoscan column ids to column names
 // map ensures entries are in correct order, each value of AutoscanColumn must be present
-static const std::map<AutoscanColumn, std::pair<std::string, std::string>> autoscanColMap {
+static const std::map<AutoscanColumn, SearchProperty> autoscanColMap {
     { AutoscanColumn::Id, { AUS_ALIAS, "id" } },
     { AutoscanColumn::ObjId, { AUS_ALIAS, "obj_id" } },
     { AutoscanColumn::ScanMode, { AUS_ALIAS, "scan_mode" } },
@@ -247,10 +247,10 @@ static const std::map<AutoscanColumn, std::pair<std::string, std::string>> autos
     { AutoscanColumn::CtAudio, { AUS_ALIAS, "ct_audio" } },
     { AutoscanColumn::CtImage, { AUS_ALIAS, "ct_image" } },
     { AutoscanColumn::CtVideo, { AUS_ALIAS, "ct_video" } },
-    { AutoscanColumn::Hidden, { AUS_ALIAS, "hidden" } },
-    { AutoscanColumn::FollowSymlinks, { AUS_ALIAS, "follow_symlinks" } },
-    { AutoscanColumn::Interval, { AUS_ALIAS, "interval" } },
-    { AutoscanColumn::LastModified, { AUS_ALIAS, "last_modified" } },
+    { AutoscanColumn::Hidden, { AUS_ALIAS, "hidden", FieldType::Integer } },
+    { AutoscanColumn::FollowSymlinks, { AUS_ALIAS, "follow_symlinks", FieldType::Integer } },
+    { AutoscanColumn::Interval, { AUS_ALIAS, "interval", FieldType::Integer } },
+    { AutoscanColumn::LastModified, { AUS_ALIAS, "last_modified", FieldType::Date } },
     { AutoscanColumn::Persistent, { AUS_ALIAS, "persistent" } },
     { AutoscanColumn::Location, { AUS_ALIAS, "location" } },
     { AutoscanColumn::ObjLocation, { ITM_ALIAS, "location" } },
@@ -303,11 +303,11 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
 
 /// \brief Map playstatus column ids to column names
 // map ensures entries are in correct order, each value of PlaystatusCol must be present
-static std::map<PlaystatusCol, std::pair<std::string, std::string>> playstatusColMap {
+static std::map<PlaystatusCol, SearchProperty> playstatusColMap {
     { PlaystatusCol::Group, { PLY_ALIAS, "group" } },
     { PlaystatusCol::ItemId, { PLY_ALIAS, "item_id" } },
-    { PlaystatusCol::PlayCount, { PLY_ALIAS, "playCount" } },
-    { PlaystatusCol::LastPlayed, { PLY_ALIAS, "lastPlayed" } },
+    { PlaystatusCol::PlayCount, { PLY_ALIAS, "playCount", FieldType::Integer } },
+    { PlaystatusCol::LastPlayed, { PLY_ALIAS, "lastPlayed", FieldType::Date } },
 };
 
 /// \brief Playstatus search keys to column ids
@@ -391,7 +391,7 @@ void SQLDatabase::init()
     };
     /// \brief Map resource column ids to column names
     // map ensures entries are in correct order, each value of ResourceCol must be present
-    std::map<int, std::pair<std::string, std::string>> resourceColMap {
+    std::map<int, SearchProperty> resourceColMap {
         { to_underlying(ResourceCol::ItemId), { RES_ALIAS, "item_id" } },
         { to_underlying(ResourceCol::ResId), { RES_ALIAS, "res_id" } },
         { to_underlying(ResourceCol::HandlerType), { RES_ALIAS, "handlerType" } },
@@ -410,7 +410,7 @@ void SQLDatabase::init()
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto attrName = EnumMapper::getAttributeName(resAttrId);
         resourceTagMap.emplace_back(fmt::format("res@{}", attrName), to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId));
-        resourceColMap.emplace(to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId), std::pair(RES_ALIAS, attrName));
+        resourceColMap.emplace(to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId), SearchProperty { RES_ALIAS, attrName });
         tableColumnOrder[RESOURCE_TABLE].push_back(std::move(attrName));
     }
 
@@ -431,10 +431,10 @@ void SQLDatabase::init()
         std::vector<std::string> buf;
         buf.reserve(browseColMap.size());
         for (auto&& [key, col] : browseColMap) {
-            buf.push_back(fmt::format("{}.{}", identifier(col.first), identifier(col.second)));
+            buf.push_back(fmt::format("{}.{}", identifier(col.alias), identifier(col.field)));
         }
         auto join1 = fmt::format("LEFT JOIN {0} {1} ON {2} = {1}.{3}",
-            identifier(CDS_OBJECT_TABLE), identifier(REF_ALIAS), browseColumnMapper->mapQuoted(BrowseCol::RefId), identifier(browseColMap.at(BrowseCol::Id).second));
+            identifier(CDS_OBJECT_TABLE), identifier(REF_ALIAS), browseColumnMapper->mapQuoted(BrowseCol::RefId), identifier(browseColMap.at(BrowseCol::Id).field));
         auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", asColumnMapper->tableQuoted(), asColumnMapper->mapQuoted(AutoscanCol::ObjId), browseColumnMapper->mapQuoted(BrowseCol::Id));
         auto join3 = fmt::format("LEFT JOIN {} ON {} = {}", playstatusColumnMapper->tableQuoted(), playstatusColumnMapper->mapQuoted(PlaystatusCol::ItemId), browseColumnMapper->mapQuoted(BrowseCol::Id));
         this->sql_browse_columns = fmt::format("{}", fmt::join(buf, ", "));
@@ -445,7 +445,7 @@ void SQLDatabase::init()
         std::vector<std::string> colBuf;
         colBuf.reserve(searchColMap.size());
         for (auto&& [key, col] : searchColMap) {
-            colBuf.push_back(fmt::format("{}.{}", identifier(col.first), identifier(col.second)));
+            colBuf.push_back(fmt::format("{}.{}", identifier(col.alias), identifier(col.field)));
         }
         this->sql_search_columns = fmt::format("{}", fmt::join(colBuf, ", "));
 
@@ -463,7 +463,7 @@ void SQLDatabase::init()
         std::vector<SQLIdentifier> buf;
         buf.reserve(metaColMap.size());
         for (auto&& [key, col] : metaColMap) {
-            buf.push_back(identifier(col.second)); // currently no alias
+            buf.push_back(identifier(col.field)); // currently no alias
         }
         this->sql_meta_query = fmt::format("SELECT {} ", fmt::join(buf, ", "));
     }
@@ -472,7 +472,7 @@ void SQLDatabase::init()
         std::vector<std::string> buf;
         buf.reserve(autoscanColMap.size());
         for (auto&& [key, col] : autoscanColMap) {
-            buf.push_back(fmt::format("{}.{}", identifier(col.first), identifier(col.second)));
+            buf.push_back(fmt::format("{}.{}", identifier(col.alias), identifier(col.field)));
         }
         auto join = fmt::format("LEFT JOIN {} ON {} = {}", browseColumnMapper->tableQuoted(), autoscanColumnMapper->mapQuoted(AutoscanColumn::ObjId), browseColumnMapper->mapQuoted(BrowseCol::Id));
         this->sql_autoscan_query = fmt::format("SELECT {} FROM {} {}", fmt::join(buf, ", "), autoscanColumnMapper->tableQuoted(), join);
@@ -482,7 +482,7 @@ void SQLDatabase::init()
         std::vector<SQLIdentifier> buf;
         buf.reserve(resourceColMap.size());
         for (auto&& [key, col] : resourceColMap) {
-            buf.push_back(identifier(col.second)); // currently no alias
+            buf.push_back(identifier(col.field)); // currently no alias
         }
         this->sql_resource_query = fmt::format("SELECT {} ", fmt::join(buf, ", "));
     }
@@ -1135,7 +1135,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     }
     log_debug("Search resolves to SQL [{}]", searchSQL);
 
-    bool rootContainer = param.getContainerID() == "0";
+    bool rootContainer = param.getContainerID().empty() || param.getContainerID() == "0";
 
     std::string countSQL;
     if (rootContainer) {

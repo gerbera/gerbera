@@ -49,6 +49,7 @@ std::chrono::milliseconds currentTimeMS();
 std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms);
 std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second);
 
+bool parseSimpleDate(const std::string& s, std::chrono::seconds& date);
 bool parseTime(int& value, std::string& timeValue, bool seconds = true);
 std::string makeSimpleDate(std::string& s);
 

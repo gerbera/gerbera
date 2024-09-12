@@ -32,6 +32,7 @@
 - Upgrade cxxopts.hpp to 3.2.1
 - Upgrade md5 to 2002 version
 - Upnp Classes for containers in physical tree
+- UPnP Search: Support integer and date comparison
 - Use full client info as requestCookie
 - Warn about empty script result
 - Web security and upnp compatibility
