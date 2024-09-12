@@ -44,7 +44,7 @@
 #define UPNP_NEEDS_LITERAL_HOST_REDIRECT
 extern "C" void UpnpSetAllowLiteralHostRedirection(int);
 
-#if (UPNP_VERSION <= 60102)
+#if (UPNP_VERSION <= 60103)
 // new method added
 #define UPNP_NEEDS_CORS
 extern "C" int UpnpSetWebServerCorsString(const char*);
