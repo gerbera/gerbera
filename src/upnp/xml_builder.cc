@@ -133,7 +133,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::st
     return response;
 }
 
-static std::string encodeEscapes(std::string& s)
+std::string UpnpXMLBuilder::encodeEscapes(std::string s)
 {
     replaceAllString(s, "&", "&amp;");
     replaceAllString(s, "'", "&apos;");
@@ -160,7 +160,7 @@ static std::string formatXmlString(bool strictXml, std::size_t stringLimit, cons
     std::string s = input;
     // Do nothing if disabled
     if (strictXml)
-        s = encodeEscapes(s);
+        s = UpnpXMLBuilder::encodeEscapes(s);
     // Do nothing if disabled
     if (stringLimit != std::string::npos)
         s = limitString(stringLimit, s);

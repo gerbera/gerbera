@@ -137,9 +137,15 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
             arr = database->browse(param);
         else
             param.setTotalMatches(arr.size());
+    } catch (const SearchParseException& srcEx) {
+        log_warning(srcEx.what());
+        throw UpnpException(UPNP_E_INVALID_ARGUMENT, srcEx.getUserMessage());
+    } catch (const DatabaseException& dbEx) {
+        log_warning(dbEx.what());
+        throw UpnpException(UPNP_E_NO_SUCH_ID, dbEx.getUserMessage());
     } catch (const std::runtime_error& e) {
-        log_error("No such object: {}", e.what());
-        throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
+        log_warning(e.what());
+        throw UpnpException(UPNP_E_BAD_REQUEST, UpnpXMLBuilder::encodeEscapes(e.what()));
     }
 
     pugi::xml_document didlLite;
@@ -226,9 +232,15 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     try {
         results = database->search(searchParam, &numMatches);
         log_debug("Found {}/{} items", results.size(), numMatches);
+    } catch (const SearchParseException& srcEx) {
+        log_warning(srcEx.what());
+        throw UpnpException(UPNP_E_INVALID_ARGUMENT, srcEx.getUserMessage());
+    } catch (const DatabaseException& dbEx) {
+        log_warning(dbEx.what());
+        throw UpnpException(UPNP_E_NO_SUCH_ID, dbEx.getUserMessage());
     } catch (const std::runtime_error& e) {
         log_warning(e.what());
-        throw UpnpException(UPNP_E_NO_SUCH_ID, "no such object");
+        throw UpnpException(UPNP_E_BAD_REQUEST, UpnpXMLBuilder::encodeEscapes(e.what()));
     }
 
     auto stringLimitClient = stringLimit;

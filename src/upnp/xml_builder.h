@@ -113,6 +113,7 @@ public:
 
     /// \brief convert xml tree to string
     static std::string printXml(const pugi::xml_node& entry, const char* indent = PUGIXML_TEXT("\t"), int flags = pugi::format_default);
+    static std::string encodeEscapes(std::string s);
 
     std::string getDLNAContentHeader(const std::string& contentType, const std::shared_ptr<CdsResource>& res, const std::shared_ptr<Quirks>& quirks) const;
     std::string getDLNATransferHeader(const std::string& mimeType) const;

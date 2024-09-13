@@ -541,6 +541,7 @@
             <xs:sequence>
                 <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
                 <xs:element ref="header" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="dlna" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
             <xs:attribute name="ip" type="xs:string"/>
             <xs:attribute name="userAgent" type="xs:string"/>
@@ -559,6 +560,13 @@
         <xs:complexType>
             <xs:attribute name="key" type="xs:string" use="required"/>
             <xs:attribute name="value" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="dlna">
+        <xs:complexType>
+            <xs:attribute name="from" type="xs:string" use="required"/>
+            <xs:attribute name="to" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 

@@ -356,7 +356,7 @@ SQLDatabase::SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<
 void SQLDatabase::init()
 {
     if (table_quote_begin == '\0' || table_quote_end == '\0')
-        throw_std_runtime_error("quote vars need to be overridden");
+        throw DatabaseException("quote vars need to be overridden", LINE_MESSAGE);
 
     browseSortMap = {
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_PARTNUMBER), BrowseCol::PartNumber },
@@ -518,14 +518,14 @@ void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsig
             }
         } else {
             log_error("Wrong hash for version {}: {} != {}", version + 1, myHash, hashies.at(version));
-            throw_std_runtime_error("Wrong hash for version {}", version + 1);
+            throw DatabaseException(fmt::format("Wrong hash for version {}", version + 1), LINE_MESSAGE);
         }
         dbUpdates.push_back(std::move(versionCmds));
         version++;
     }
 
     if (version != DBVERSION)
-        throw_std_runtime_error("The database upgrade file {} seems to be from another Gerbera version. Expected {}, actual {}", upgradeFile.c_str(), DBVERSION, dbVersion);
+        throw DatabaseException(fmt::format("The database upgrade file {} seems to be from another Gerbera version. Expected {}, actual {}", upgradeFile.c_str(), DBVERSION, dbVersion), LINE_MESSAGE);
 
     version = 1;
     static const std::map<std::string, bool (SQLDatabase::*)()> migActions {
@@ -553,7 +553,7 @@ void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsig
     }
 
     if (dbVersion != DBVERSION)
-        throw_std_runtime_error("The database seems to be from another Gerbera version. Expected {}, actual {}", DBVERSION, dbVersion);
+        throw DatabaseException(fmt::format("The database seems to be from another Gerbera version. Expected {}, actual {}", DBVERSION, dbVersion), LINE_MESSAGE);
 
     prepareResourceTable(addResourceColumnCmd);
 }
@@ -603,13 +603,13 @@ std::string SQLDatabase::getSearchCapabilities()
 std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObject>& obj)
 {
     if (!obj->isVirtual())
-        throw_std_runtime_error("checkRefID called for a non-virtual object");
+        throw DatabaseException("checkRefID called for a non-virtual object", LINE_MESSAGE);
 
     int refID = obj->getRefID();
     fs::path location = obj->getLocation();
 
     if (location.empty())
-        throw_std_runtime_error("tried to check refID without a location set");
+        throw DatabaseException("tried to check refID without a location set", LINE_MESSAGE);
 
     if (refID > 0) {
         try {
@@ -617,7 +617,7 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
             if (refObj && refObj->getLocation() == location)
                 return refObj;
         } catch (const std::runtime_error&) {
-            throw_std_runtime_error("illegal refID was set");
+            throw DatabaseException("illegal refID was set", LINE_MESSAGE);
         }
     }
 
@@ -635,28 +635,28 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
     bool playlistRef = obj->getFlag(OBJECT_FLAG_PLAYLIST_REF);
     if (playlistRef) {
         if (obj->isPureItem())
-            throw_std_runtime_error("Tried to add pure item with PLAYLIST_REF flag set");
+            throw DatabaseException("Tried to add pure item with PLAYLIST_REF flag set", LINE_MESSAGE);
         if (obj->getRefID() <= 0)
-            throw_std_runtime_error("PLAYLIST_REF flag set for '{}' but refId is <=0", obj->getLocation().c_str());
+            throw DatabaseException(fmt::format("PLAYLIST_REF flag set for '{}' but refId is <=0", obj->getLocation().c_str()), LINE_MESSAGE);
         refObj = loadObject(obj->getRefID());
         if (!refObj)
-            throw_std_runtime_error("PLAYLIST_REF flag set but refId doesn't point to an existing object");
+            throw DatabaseException("PLAYLIST_REF flag set but refId doesn't point to an existing object", LINE_MESSAGE);
     } else if (obj->isVirtual() && obj->isPureItem()) {
         hasReference = true;
         refObj = checkRefID(obj);
         if (!refObj)
-            throw_std_runtime_error("Tried to add or update a virtual object with illegal reference id and an illegal location");
+            throw DatabaseException("Tried to add or update a virtual object with illegal reference id and an illegal location", LINE_MESSAGE);
     } else if (obj->getRefID() > 0) {
         if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
             hasReference = true;
             refObj = loadObject(obj->getRefID());
             if (!refObj)
-                throw_std_runtime_error("OBJECT_FLAG_ONLINE_SERVICE and refID set but refID doesn't point to an existing object");
+                throw DatabaseException("OBJECT_FLAG_ONLINE_SERVICE and refID set but refID doesn't point to an existing object", LINE_MESSAGE);
         } else if (obj->isContainer()) {
             // in this case it's a playlist-container. that's ok
             // we don't need to do anything
         } else
-            throw_std_runtime_error("refId set, but it makes no sense");
+            throw DatabaseException("refId set, but it makes no sense", LINE_MESSAGE);
     }
 
     std::map<std::string, std::string> cdsObjectSql;
@@ -707,7 +707,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
         if (!hasReference) {
             fs::path loc = item->getLocation();
             if (loc.empty())
-                throw_std_runtime_error("tried to create or update a non-referenced item without a location set");
+                throw DatabaseException("tried to create or update a non-referenced item without a location set", LINE_MESSAGE);
             if (obj->isPureItem()) {
                 if (parentID < 0) {
                     parentID = ensurePathExistence(loc.parent_path(), changedContainer);
@@ -751,7 +751,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
     }
 
     if (obj->getParentID() == INVALID_OBJECT_ID) {
-        throw_std_runtime_error("Tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID());
+        throw DatabaseException(fmt::format("Tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID()), LINE_MESSAGE);
     }
 
     cdsObjectSql.emplace("parent_id", quote(parentID));
@@ -791,7 +791,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
 void SQLDatabase::addObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer)
 {
     if (obj->getID() != INVALID_OBJECT_ID)
-        throw_std_runtime_error("Tried to add an object with an object ID set");
+        throw DatabaseException("Tried to add an object with an object ID set", LINE_MESSAGE);
 
     auto tables = _addUpdateObject(obj, Operation::Insert, changedContainer);
 
@@ -822,7 +822,7 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
         data.emplace_back(CDS_OBJECT_TABLE, std::move(cdsObjectSql), Operation::Update);
     } else {
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
-            throw_std_runtime_error("Tried to update an object with a forbidden ID ({})", obj->getID());
+            throw DatabaseException(fmt::format("Tried to update an object with a forbidden ID ({})", obj->getID()), LINE_MESSAGE);
         data = _addUpdateObject(obj, Operation::Update, changedContainer);
     }
 
@@ -938,7 +938,7 @@ std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
     auto res = select(getSql);
     commit("getServiceObjectIDs");
     if (!res)
-        throw_std_runtime_error("db error");
+        throw DatabaseException(fmt::format("error selecting form {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
 
     std::vector<int> objectIDs;
     objectIDs.reserve(res->getNumRows());
@@ -1128,7 +1128,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     std::shared_ptr<ASTNode> rootNode = searchParser.parse();
     std::string searchSQL(rootNode->emitSQL());
     if (searchSQL.empty())
-        throw_std_runtime_error("failed to generate SQL for search");
+        throw DatabaseException("failed to generate SQL for search", LINE_MESSAGE);
     if (param.getSearchableContainers()) {
         searchSQL.append(fmt::format(" AND ({0} & {1} = {1} OR {2} != {3})",
             searchColumnMapper->mapQuoted(SearchCol::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER));
@@ -1280,7 +1280,7 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
     commit("getMimeTypes");
 
     if (!res)
-        throw_std_runtime_error("db error");
+        throw DatabaseException(fmt::format("error selecting form {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
 
     std::vector<std::string> arr;
     arr.reserve(res->getNumRows());
@@ -1317,7 +1317,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
         log_debug("{} -> res={} ({})", findSql, !!res, res ? res->getNumRows() : -1);
         if (!res) {
             commit("findObjectByPath");
-            throw_std_runtime_error("error while doing select: {}", findSql);
+            throw DatabaseException(fmt::format("error while doing select: {}", findSql), LINE_MESSAGE);
         }
         auto row = res->nextRow();
         if (row) {
@@ -1365,12 +1365,12 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
 
 int SQLDatabase::createContainer(int parentID, const std::string& name, const std::string& virtualPath, int flags, bool isVirtual, const std::string& upnpClass, int refID, const std::vector<std::pair<std::string, std::string>>& itemMetadata, const std::vector<std::shared_ptr<CdsResource>>& itemResources)
 {
-    // log_debug("Creating Container: parent: {}, name: {}, path {}, isVirt: {}, upnpClass: {}, refId: {}",
-    // parentID, name.c_str(), path.c_str(), isVirtual, upnpClass.c_str(), refID);
+    log_debug("Creating Container: parent: {}, name: '{}', path '{}', flags: {}, isVirt: {}, upnpClass: '{}', refId: {}",
+        parentID, name, virtualPath, flags, isVirtual, upnpClass, refID);
     if (refID > 0) {
         auto refObj = loadObject(refID);
         if (!refObj)
-            throw_std_runtime_error("tried to create container with refID set, but refID doesn't point to an existing object");
+            throw DatabaseException("tried to create container with refID set, but refID doesn't point to an existing object", LINE_MESSAGE);
     }
     std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
 
@@ -1511,7 +1511,7 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
 
     auto [path, prefix] = stripLocationPrefix(fmt::format("{}{}{}", row->col(0), VIRTUAL_CONTAINER_SEPARATOR, title));
     if (prefix != LOC_VIRT_PREFIX)
-        throw_std_runtime_error("Tried to build a virtual container path with an non-virtual parentID");
+        throw DatabaseException("Tried to build a virtual container path with an non-virtual parentID", LINE_MESSAGE);
 
     return path.relative_path();
 }
@@ -1634,7 +1634,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
 
     if (obj->isItem()) {
         if (!resourceZeroOk)
-            throw_std_runtime_error("tried to create object without at least one resource");
+            throw DatabaseException("tried to create object without at least one resource", LINE_MESSAGE);
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
         item->setMimeType(fallbackString(getCol(row, BrowseCol::MimeType), getCol(row, BrowseCol::RefMimeType)));
@@ -1665,7 +1665,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
     }
 
     if (!matchedTypes) {
-        throw DatabaseException("", fmt::format("Unknown object type: {}", objectType));
+        throw DatabaseException(fmt::format("Unknown object type: {}", objectType), LINE_MESSAGE);
     }
 
     return obj;
@@ -1704,7 +1704,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::str
 
     if (obj->isItem()) {
         if (!resourceZeroOk)
-            throw_std_runtime_error("tried to create object without at least one resource");
+            throw DatabaseException("tried to create object without at least one resource", LINE_MESSAGE);
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
         item->setMimeType(getCol(row, SearchCol::MimeType));
@@ -1721,7 +1721,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::str
         if (playStatus)
             item->setPlayStatus(playStatus);
     } else if (!obj->isContainer()) {
-        throw DatabaseException("", fmt::format("Unknown object type: {}", objectType));
+        throw DatabaseException(fmt::format("Unknown object type: {}", objectType), LINE_MESSAGE);
     }
 
     return obj;
@@ -1830,7 +1830,7 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
         identifier("id"), identifier("update_id"), identifier(CDS_OBJECT_TABLE), fmt::join(ids, ",")));
     if (!res) {
         rollback("incrementUpdateIDs 2");
-        throw_std_runtime_error("Error while fetching update ids");
+        throw DatabaseException("Error while fetching update ids", LINE_MESSAGE);
     }
     commit("incrementUpdateIDs 2");
 
@@ -1857,7 +1857,7 @@ std::size_t SQLDatabase::getObjects(int parentID, bool withoutContainer, std::un
     auto getSql = fmt::format("SELECT {}, {} FROM {} WHERE {} = {}", colId, colObjType, table, colParentId, parentID);
     auto res = select(getSql);
     if (!res)
-        throw_std_runtime_error("db error");
+        throw DatabaseException(fmt::format("error selecting form {}", table), LINE_MESSAGE);
 
     if (res->getNumRows() == 0)
         return 0;
@@ -1883,7 +1883,7 @@ std::vector<int> SQLDatabase::getRefObjects(int objectId)
 
     auto res = select(getSql);
     if (!res)
-        throw_std_runtime_error("db error");
+        throw DatabaseException(fmt::format("error selecting form {}", table), LINE_MESSAGE);
 
     std::vector<int> result;
     if (res->getNumRows() == 0)
@@ -1905,7 +1905,7 @@ std::unordered_set<int> SQLDatabase::getUnreferencedObjects()
     auto getSql = fmt::format("SELECT {} FROM {} WHERE {} IS NOT NULL AND {} NOT IN (SELECT {} FROM {})", colId, table, colRefId, colRefId, colId, table);
     auto res = select(getSql);
     if (!res)
-        throw_std_runtime_error("db error");
+        throw DatabaseException(fmt::format("error selecting form {}", table), LINE_MESSAGE);
 
     std::unordered_set<int> ret;
     if (res->getNumRows() == 0)
@@ -1926,13 +1926,13 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
 
     auto it = std::find_if(list.begin(), list.end(), IS_FORBIDDEN_CDS_ID);
     if (it != list.end()) {
-        throw_std_runtime_error("Tried to delete a forbidden ID ({})", *it);
+        throw DatabaseException(fmt::format("Tried to delete a forbidden ID ({})", *it), LINE_MESSAGE);
     }
 
     auto res = select(fmt::format("SELECT {0}, {1} FROM {2} WHERE {0} IN ({3})",
         identifier("id"), identifier("object_type"), identifier(CDS_OBJECT_TABLE), fmt::join(list, ",")));
     if (!res)
-        throw_std_runtime_error("sql error");
+        throw DatabaseException(fmt::format("error selecting form {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
 
     std::vector<std::int32_t> items;
     std::vector<std::int32_t> containers;
@@ -2012,7 +2012,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
         }
     }
     if (IS_FORBIDDEN_CDS_ID(objectID))
-        throw_std_runtime_error("Tried to delete a forbidden ID ({})", objectID);
+        throw DatabaseException(fmt::format("Tried to delete a forbidden ID ({})", objectID), LINE_MESSAGE);
     std::vector<std::int32_t> itemIds;
     std::vector<std::int32_t> containerIds;
     if (isContainer) {
@@ -2055,7 +2055,7 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
         auto sql = fmt::format("{} ({})", parentSql, fmt::join(parentIds, ","));
         res = select(sql);
         if (!res)
-            throw DatabaseException("", fmt::format("Sql error: {}", sql));
+            throw DatabaseException(fmt::format("Sql error: {}", sql), LINE_MESSAGE);
         parentIds.clear();
         while ((row = res->nextRow())) {
             changedContainers.ui.push_back(row->col_int(0, INVALID_OBJECT_ID));
@@ -2071,7 +2071,7 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
             auto sql = fmt::format("{} ({})", parentSql, fmt::join(parentIds, ","));
             res = select(sql);
             if (!res)
-                throw DatabaseException("", fmt::format("Sql error: {}", sql));
+                throw DatabaseException(fmt::format("Sql error: {}", sql), LINE_MESSAGE);
             parentIds.clear();
             while ((row = res->nextRow())) {
                 changedContainers.upnp.push_back(row->col_int(0, INVALID_OBJECT_ID));
@@ -2083,7 +2083,7 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
             auto sql = fmt::format("{} ({})", itemSql, fmt::join(itemIds, ","));
             res = select(sql);
             if (!res)
-                throw DatabaseException("", fmt::format("Sql error: {}", sql));
+                throw DatabaseException(fmt::format("Sql error: {}", sql), LINE_MESSAGE);
             itemIds.clear();
             while ((row = res->nextRow())) {
                 removeIds.push_back(row->col_int(0, INVALID_OBJECT_ID));
@@ -2096,7 +2096,7 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
             auto sql = fmt::format("{} ({})", containersSql, fmt::join(containerIds, ","));
             res = select(sql);
             if (!res)
-                throw DatabaseException("", fmt::format("Sql error: {}", sql));
+                throw DatabaseException(fmt::format("Sql error: {}", sql), LINE_MESSAGE);
             containerIds.clear();
             while ((row = res->nextRow())) {
                 const int objId = row->col_int(0, INVALID_OBJECT_ID);
@@ -2130,7 +2130,7 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
         }
 
         if (count++ > MAX_REMOVE_RECURSION)
-            throw_std_runtime_error("There seems to be an infinite loop...");
+            throw DatabaseException("There seems to be an infinite loop...", LINE_MESSAGE);
     }
 
     if (!removeIds.empty())
@@ -2176,7 +2176,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             std::shared_ptr<SQLResult> res = select(sql);
             selUpnp.clear();
             if (!res)
-                throw_std_runtime_error("db error");
+                throw DatabaseException(fmt::format("error selecting form {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
             while ((row = res->nextRow())) {
                 const int flags = row->col_int(3, 0);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
@@ -2196,7 +2196,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             std::shared_ptr<SQLResult> res = select(sql);
             selUi.clear();
             if (!res)
-                throw_std_runtime_error("db error");
+                throw DatabaseException(fmt::format("error selecting form {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
             while ((row = res->nextRow())) {
                 const int flags = row->col_int(3, 0);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER) {
@@ -2219,7 +2219,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
                 again = true;
         }
         if (count++ >= MAX_REMOVE_RECURSION)
-            throw_std_runtime_error("there seems to be an infinite loop...");
+            throw DatabaseException("there seems to be an infinite loop...", LINE_MESSAGE);
     } while (again);
 
     auto& changedUi = changedContainers->ui;
@@ -2519,7 +2519,7 @@ void SQLDatabase::updateAutoscanList(AutoscanScanMode scanmode, const std::share
 
         fs::path location = ad->getLocation();
         if (location.empty())
-            throw_std_runtime_error("AutoscanDirectoy with illegal location given to SQLDatabase::updateAutoscanPersistentList");
+            throw DatabaseException("AutoscanDirectoy with illegal location given to SQLDatabase::updateAutoscanPersistentList", LINE_MESSAGE);
 
         int objectID = findObjectIDByPath(location);
         log_debug("objectID = {}", objectID);
@@ -2529,7 +2529,7 @@ void SQLDatabase::updateAutoscanList(AutoscanScanMode scanmode, const std::share
         auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} LIMIT 1", identifier("id"), identifier(AUTOSCAN_TABLE), where));
         if (!res) {
             rollback("updateAutoscanList x");
-            throw DatabaseException("", "query error while selecting from autoscan list");
+            throw DatabaseException("query error while selecting from autoscan list", LINE_MESSAGE);
         }
         commit("updateAutoscanList x");
 
@@ -2552,7 +2552,7 @@ std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(AutoscanScanMode scan
 
     auto res = select(selectSql);
     if (!res)
-        throw DatabaseException("", "query error while fetching autoscan list");
+        throw DatabaseException("query error while fetching autoscan list", LINE_MESSAGE);
 
     auto ret = std::make_shared<AutoscanList>();
     std::unique_ptr<SQLRow> row;
@@ -2572,7 +2572,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::getAutoscanDirectory(int objectI
 
     auto res = select(selectSql);
     if (!res)
-        throw DatabaseException("", "query error while fetching autoscan");
+        throw DatabaseException("query error while fetching autoscan", LINE_MESSAGE);
 
     auto row = res->nextRow();
     if (!row)
@@ -2630,12 +2630,12 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
 void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     if (!adir)
-        throw_std_runtime_error("addAutoscanDirectory called with adir==nullptr");
+        throw DatabaseException("addAutoscanDirectory called with adir==nullptr", LINE_MESSAGE);
     if (adir->getDatabaseID() >= 0)
-        throw_std_runtime_error("tried to add autoscan directory with a database id set");
+        throw DatabaseException("tried to add autoscan directory with a database id set", LINE_MESSAGE);
     int objectID = (adir->getLocation() == FS_ROOT_DIRECTORY) ? CDS_ID_FS_ROOT : findObjectIDByPath(adir->getLocation());
     if (!adir->persistent() && objectID < 0)
-        throw_std_runtime_error("tried to add non-persistent autoscan directory with an illegal objectID or location");
+        throw DatabaseException("tried to add non-persistent autoscan directory with an illegal objectID or location", LINE_MESSAGE);
 
     auto pathIds = _checkOverlappingAutoscans(adir);
 
@@ -2679,7 +2679,7 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
 void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     if (!adir)
-        throw_std_runtime_error("updateAutoscanDirectory called with adir==nullptr");
+        throw DatabaseException("updateAutoscanDirectory called with adir==nullptr", LINE_MESSAGE);
 
     log_debug("id: {}, obj_id: {}", adir->getDatabaseID(), adir->getObjectID());
 
@@ -2733,7 +2733,7 @@ int SQLDatabase::_getAutoscanObjectID(int autoscanID)
     auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} LIMIT 1",
         identifier("obj_id"), identifier(AUTOSCAN_TABLE), identifier("id"), autoscanID));
     if (!res)
-        throw DatabaseException("", "error while doing select on ");
+        throw DatabaseException("error while doing select on autoscan", LINE_MESSAGE);
     auto row = res->nextRow();
     if (row && !row->isNullOrEmpty(0))
         return row->col_int(0, INVALID_OBJECT_ID);
@@ -2757,7 +2757,7 @@ void SQLDatabase::checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirect
 std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
 {
     if (!adir)
-        throw_std_runtime_error("_checkOverlappingAutoscans called with adir==nullptr");
+        throw DatabaseException("_checkOverlappingAutoscans called with adir==nullptr", LINE_MESSAGE);
     int checkObjectID = adir->getObjectID();
     if (checkObjectID == INVALID_OBJECT_ID)
         return {};
@@ -2773,15 +2773,15 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
 
         auto res = select(fmt::format("SELECT {} FROM {} WHERE {}", identifier("id"), identifier(AUTOSCAN_TABLE), fmt::join(where, " AND ")));
         if (!res)
-            throw_std_runtime_error("SQL error");
+            throw DatabaseException(fmt::format("error selecting form {}", AUTOSCAN_TABLE), LINE_MESSAGE);
 
         row = res->nextRow();
         if (row) {
             auto obj = loadObject(checkObjectID);
             if (!obj)
-                throw_std_runtime_error("Referenced object (by Autoscan) not found.");
+                throw DatabaseException("Referenced object (by Autoscan) not found.", LINE_MESSAGE);
             log_error("There is already an Autoscan set on {}", obj->getLocation().c_str());
-            throw_std_runtime_error("There is already an Autoscan set on {}", obj->getLocation().c_str());
+            throw DatabaseException(fmt::format("There is already an Autoscan set on {}", obj->getLocation().c_str()), LINE_MESSAGE);
         }
     }
 
@@ -2795,23 +2795,23 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
         log_debug("------------ {}", qRec);
         auto res = select(qRec);
         if (!res)
-            throw_std_runtime_error("SQL error");
+            throw DatabaseException(fmt::format("error selecting form {}", AUTOSCAN_TABLE), LINE_MESSAGE);
         row = res->nextRow();
         if (row) {
             const int objectID = row->col_int(0, INVALID_OBJECT_ID);
             log_debug("-------------- {}", objectID);
             auto obj = loadObject(objectID);
             if (!obj)
-                throw_std_runtime_error("Referenced object (by Autoscan) not found.");
+                throw DatabaseException("Referenced object (by Autoscan) not found.", LINE_MESSAGE);
             log_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on {}", obj->getLocation().c_str());
-            throw_std_runtime_error("Overlapping Autoscans are not allowed. There is already an Autoscan set on {}", obj->getLocation().c_str());
+            throw DatabaseException(fmt::format("Overlapping Autoscans are not allowed. There is already an Autoscan set on {}", obj->getLocation().c_str()), LINE_MESSAGE);
         }
     }
 
     {
         auto pathIDs = getPathIDs(checkObjectID);
         if (pathIDs.empty())
-            throw_std_runtime_error("getPathIDs returned nullptr");
+            throw DatabaseException("getPathIDs returned nullptr", LINE_MESSAGE);
 
         auto where = std::vector {
             fmt::format("{} IN ({})", identifier("obj_id"), fmt::join(pathIDs, ",")),
@@ -2821,7 +2821,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
             where.push_back(fmt::format("{} != {}", identifier("id"), databaseID));
         auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", identifier("obj_id"), identifier(AUTOSCAN_TABLE), fmt::join(where, " AND ")));
         if (!res)
-            throw_std_runtime_error("SQL error");
+            throw DatabaseException(fmt::format("error selecting form {}", AUTOSCAN_TABLE), LINE_MESSAGE);
         if (!(row = res->nextRow()))
             return pathIDs;
     }
@@ -2829,10 +2829,10 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
     const int objectID = row->col_int(0, INVALID_OBJECT_ID);
     auto obj = loadObject(objectID);
     if (!obj) {
-        throw_std_runtime_error("Referenced object (by Autoscan) not found.");
+        throw DatabaseException("Referenced object (by Autoscan) not found.", LINE_MESSAGE);
     }
     log_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
-    throw_std_runtime_error("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str());
+    throw DatabaseException(fmt::format("Overlapping Autoscans are not allowed. There is already a recursive Autoscan set on {}", obj->getLocation().c_str()), LINE_MESSAGE);
 }
 
 std::vector<int> SQLDatabase::getPathIDs(int objectID)
@@ -2975,7 +2975,7 @@ std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, con
     const std::string& tableName = addUpdateTable.getTableName();
 
     if (tableName == CDS_OBJECT_TABLE && obj->getID() != INVALID_OBJECT_ID) {
-        throw_std_runtime_error("Attempted to insert new object with ID!");
+        throw DatabaseException("Attempted to insert new object with ID!", LINE_MESSAGE);
     }
 
     const auto& dict = addUpdateTable.getDict();
@@ -3005,7 +3005,7 @@ std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, con
     const auto& dict = addUpdateTable.getDict();
 
     if (tableName == METADATA_TABLE && dict.size() != 2)
-        throw_std_runtime_error("sqlForUpdate called with invalid arguments");
+        throw DatabaseException("sqlForUpdate called with invalid arguments", LINE_MESSAGE);
 
     std::vector<std::string> fields;
     fields.reserve(dict.size());
@@ -3041,7 +3041,7 @@ std::string SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, con
         where.push_back(fmt::format("{} = {}", identifier("res_id"), dict.at("res_id")));
     } else if (tableName == METADATA_TABLE) {
         if (!dict.empty() && dict.size() != 2)
-            throw_std_runtime_error("sqlForDelete called with invalid arguments");
+            throw DatabaseException("sqlForDelete called with invalid arguments", LINE_MESSAGE);
         // relying on only one element when tableName is mt_metadata
         where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
         if (!dict.empty())

@@ -461,9 +461,12 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
             request.update();
         } catch (const UpnpException& upnpE) {
             ret = upnpE.getErrorCode();
+            log_warning("UpnpException: {} -> {}", ret, upnpE.what());
             UpnpActionRequest_set_ErrCode(const_cast<UpnpActionRequest*>(static_cast<const UpnpActionRequest*>(event)), ret);
+            UpnpActionRequest_strcpy_ErrStr(const_cast<UpnpActionRequest*>(static_cast<const UpnpActionRequest*>(event)), upnpE.what());
         } catch (const std::runtime_error& e) {
-            log_info("Exception: {}", e.what());
+            log_warning("Exception: {}", e.what());
+            ret = UPNP_E_BAD_REQUEST;
         }
         break;
 

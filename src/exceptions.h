@@ -38,6 +38,7 @@
 #include <stdexcept>
 #include <string>
 
+#define LINE_MESSAGE fmt::format("[{}:{}] {}", __FILE__, __LINE__, __PRETTY_FUNCTION__)
 #define throw_std_runtime_error(...) throw std::runtime_error(fmt::format("[{}:{}] {} Error: {}", __FILE__, __LINE__, __PRETTY_FUNCTION__, fmt::format(__VA_ARGS__)))
 #define throw_fmt_system_error(...) throw fmt::system_error(errno, "[{}:{}] {} Error: {}", __FILE__, __LINE__, __PRETTY_FUNCTION__, fmt::format(__VA_ARGS__))
 
@@ -61,6 +62,10 @@ protected:
 public:
     DatabaseException(std::string userMessage, const std::string& message);
     std::string getUserMessage() const { return (!userMessage.empty() ? userMessage : what()); }
+};
+
+class SearchParseException : public DatabaseException {
+    using DatabaseException::DatabaseException;
 };
 
 class ObjectNotFoundException : public DatabaseException {

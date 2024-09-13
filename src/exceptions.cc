@@ -34,7 +34,7 @@
 #include "exceptions.h" // API
 
 DatabaseException::DatabaseException(std::string userMessage, const std::string& message)
-    : std::runtime_error(message)
+    : std::runtime_error(fmt::format("{}: Error: {}", message, userMessage))
     , userMessage(std::move(userMessage))
 {
 }
