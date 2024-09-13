@@ -30,6 +30,7 @@ config being unused or triggering warnings.
 - Upnp classes are assigned to containers in physical tree (PC Directory) depending on the majority of children (only in grb-mode)
 - Nested iterations are now supported in Config UI
 - UPnP Search support for integer and date comparison
+- Failed UPnP requests return error messages
 
 ### FIXES
 
@@ -42,7 +43,7 @@ config being unused or triggering warnings.
 ### Code Improvements
 
 - Build target for source documentation
-- Update versions of libexiv2 (0.28.3), fmt (11.0.2), googletest (1.15.2), npupnp (6.2.0), taglib (2.0.2)
+- Update versions of libexiv2 (0.28.3), fmt (11.0.2), googletest (1.15.2), npupnp (6.2.0), taglib (2.0.2), ffmpegthumbnailer (2.2.3)
 - Upgrade contrib code cxxopts (3.2.1), md5 (2002)
 - Extract code for npupnp and pupnp specific handling
 - Refactoring of UPnP services

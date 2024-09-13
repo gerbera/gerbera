@@ -21,5 +21,5 @@
 
 sudo zypper install --no-confirm \
        ffmpeg-4 ffmpeg-4-libavfilter-devel ffmpeg-4-libavcodec-devel ffmpeg-4-libavutil-devel \
-       libjpeg-dev libpng-dev \
+       libjpeg-devel libpng-devel \
        ffmpeg-4-libavdevice-devel ffmpeg-4-libswresample-devel ffmpeg-4-libavresample-devel

@@ -157,7 +157,7 @@ std::string SearchLexer::nextStringToken(const std::string& input)
             break;
     }
     if (startPos == currentPos)
-        throw_std_runtime_error("String expected, found '{}' instead", input[currentPos]);
+        throw SearchParseException(fmt::format("String expected, found '{}' instead", input[currentPos]), LINE_MESSAGE);
     return input.substr(startPos, currentPos - startPos);
 }
 
@@ -201,18 +201,18 @@ std::unique_ptr<ASTNode> SearchParser::parseSearchExpression()
             auto expressionNode = parseRelationshipExpression();
             if (currentOperator == TokenType::AND) {
                 if (!nodeStack.top())
-                    throw_std_runtime_error("Cannot construct ASTAndOperator without lhs");
+                    throw SearchParseException("Cannot construct ASTAndOperator without lhs", LINE_MESSAGE);
                 if (!expressionNode)
-                    throw_std_runtime_error("Cannot construct ASTAndOperator without rhs");
+                    throw SearchParseException("Cannot construct ASTAndOperator without rhs", LINE_MESSAGE);
                 auto lhs = std::move(nodeStack.top());
                 nodeStack.pop();
                 nodeStack.push(std::make_unique<ASTAndOperator>(sqlEmitter, std::move(lhs), std::move(expressionNode)));
                 operatorStack.pop();
             } else if (currentOperator == TokenType::OR) {
                 if (!nodeStack.top())
-                    throw_std_runtime_error("Cannot construct ASTOrOperator without lhs");
+                    throw SearchParseException("Cannot construct ASTOrOperator without lhs", LINE_MESSAGE);
                 if (!expressionNode)
-                    throw_std_runtime_error("Cannot construct ASTOrOperator without rhs");
+                    throw SearchParseException("Cannot construct ASTOrOperator without rhs", LINE_MESSAGE);
                 auto lhs = std::move(nodeStack.top());
                 nodeStack.pop();
                 nodeStack.push(std::make_unique<ASTOrOperator>(sqlEmitter, std::move(lhs), std::move(expressionNode)));
@@ -246,7 +246,7 @@ std::unique_ptr<ASTNode> SearchParser::parseSearchExpression()
                 else
                     root = std::make_unique<ASTOrOperator>(sqlEmitter, std::move(lhs), std::move(root));
             } else
-                throw_std_runtime_error("Cannot construct ASTOrOperator/ASTAndOperator without rhs");
+                throw SearchParseException("Cannot construct ASTOrOperator/ASTAndOperator without rhs", LINE_MESSAGE);
         }
     }
     return root;
@@ -255,7 +255,7 @@ std::unique_ptr<ASTNode> SearchParser::parseSearchExpression()
 std::unique_ptr<ASTNode> SearchParser::parseParenthesis()
 {
     if (currentToken->getType() != TokenType::LPAREN)
-        throw_std_runtime_error("Failed to parse search criteria - expecting a ')'");
+        throw SearchParseException("Failed to parse search criteria - expecting a ')'", LINE_MESSAGE);
 
     std::unique_ptr<ASTNode> currentNode;
     getNextToken();
@@ -276,7 +276,7 @@ std::unique_ptr<ASTNode> SearchParser::parseParenthesis()
             else if (tokenType == TokenType::OR)
                 currentNode = std::make_unique<ASTOrOperator>(sqlEmitter, std::move(lhsNode), std::move(rhsNode));
             else
-                throw_std_runtime_error("Failed to parse search criteria - expected and/or");
+                throw SearchParseException("Failed to parse search criteria - expected and/or", LINE_MESSAGE);
 
             getNextToken();
         } else if (currentToken->getType() == TokenType::LPAREN) {
@@ -285,7 +285,7 @@ std::unique_ptr<ASTNode> SearchParser::parseParenthesis()
         }
     }
     if (!currentNode)
-        throw_std_runtime_error("Failed to parse search criteria - bad expression between parenthesis");
+        throw SearchParseException("Failed to parse search criteria - bad expression between parenthesis", LINE_MESSAGE);
 
     return std::make_unique<ASTParenthesis>(sqlEmitter, std::move(currentNode));
 }
@@ -319,7 +319,7 @@ std::unique_ptr<ASTNode> SearchParser::parseRelationshipExpression()
         return std::make_unique<ASTExistsExpression>(sqlEmitter, std::move(property), std::move(operatr), std::move(booleanValue));
     }
 
-    throw_std_runtime_error("Failed to parse search criteria - expecting a comparison, exists, or string operator");
+    throw SearchParseException("Failed to parse search criteria - expecting a comparison, exists, or string operator", LINE_MESSAGE);
 }
 
 std::unique_ptr<ASTQuotedString> SearchParser::parseQuotedString()
@@ -330,13 +330,13 @@ std::unique_ptr<ASTQuotedString> SearchParser::parseQuotedString()
     getNextToken();
 
     if (!currentToken || currentToken->getType() != TokenType::ESCAPEDSTRING)
-        throw_std_runtime_error("Failed to parse search criteria - expecting an escaped string value");
+        throw SearchParseException("Failed to parse search criteria - expecting an escaped string value", LINE_MESSAGE);
 
     auto escapedString = std::make_unique<ASTEscapedString>(sqlEmitter, currentToken->getValue());
     getNextToken();
 
     if (!currentToken || currentToken->getType() != TokenType::DQUOTE)
-        throw_std_runtime_error("Failed to parse search criteria - expecting a double-quote");
+        throw SearchParseException("Failed to parse search criteria - expecting a double-quote", LINE_MESSAGE);
     auto closeQuote = std::make_unique<ASTDQuote>(sqlEmitter, currentToken->getValue());
 
     return std::make_unique<ASTQuotedString>(sqlEmitter, std::move(openQuote), std::move(escapedString), std::move(closeQuote));
@@ -640,7 +640,7 @@ std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::st
 {
     auto stringOperator = toLower(node->getValue());
     if (logicOperator.find(stringOperator) == logicOperator.end()) {
-        throw_std_runtime_error("Operation '{}' not yet supported", stringOperator);
+        throw SearchParseException(fmt::format("Operation '{}' not yet supported", stringOperator), LINE_MESSAGE);
     }
     auto [prpUpper, prpLower, prpType] = getPropertyStatement(property);
     auto clsUpper = std::get<0>(getPropertyStatement(UPNP_SEARCH_CLASS));
@@ -655,7 +655,7 @@ std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::st
     } else if (value == "false") {
         exists = "NULL";
     } else {
-        throw_std_runtime_error("Invalid value '{}' on rhs of 'exists' operator", value);
+        throw SearchParseException(fmt::format("Invalid value '{}' on rhs of 'exists' operator", value), LINE_MESSAGE);
     }
     auto [prpUpper, prpLower, prpType] = getPropertyStatement(property);
     auto [clsUpper, clsLower, clsType] = getPropertyStatement(UPNP_SEARCH_CLASS);
