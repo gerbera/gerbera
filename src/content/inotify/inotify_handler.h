@@ -43,7 +43,7 @@ enum class ImportMode;
 
 class InotifyHandler {
 public:
-    InotifyHandler(AutoscanInotify* ai, struct inotify_event* event, InotifyFlags monitoredEvents);
+    InotifyHandler(AutoscanInotify* ai, struct inotify_event* event, InotifyFlags maskedEvent);
 
     static std::string mapFlags(InotifyFlags flags);
     static InotifyFlags makeFlags(const std::string& optValue);

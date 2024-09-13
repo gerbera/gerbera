@@ -2862,20 +2862,14 @@ void SQLDatabase::generateMetaDataDBOperations(const std::shared_ptr<CdsObject>&
     operations.reserve(operations.size() + dict.size());
     if (op == Operation::Insert) {
         for (auto&& [key, val] : dict) {
-            std::map<std::string, std::string> metadataSql;
-            metadataSql.emplace("property_name", quote(key));
-            metadataSql.emplace("property_value", quote(val));
-            operations.emplace_back(METADATA_TABLE, std::move(metadataSql), Operation::Insert);
+            operations.emplace_back(METADATA_TABLE, std::map<std::string, std::string> { { "property_name", quote(key) }, { "property_value", quote(val) } }, Operation::Insert);
         }
     } else {
         // delete current metadata from DB
         operations.emplace_back(METADATA_TABLE, std::map<std::string, std::string>(), Operation::Delete);
         if (op != Operation::Delete) {
             for (auto&& [key, val] : dict) {
-                std::map<std::string, std::string> metadataSql;
-                metadataSql.emplace("property_name", quote(key));
-                metadataSql.emplace("property_value", quote(val));
-                operations.emplace_back(METADATA_TABLE, std::move(metadataSql), Operation::Insert);
+                operations.emplace_back(METADATA_TABLE, std::map<std::string, std::string> { { "property_name", quote(key) }, { "property_value", quote(val) } }, Operation::Insert);
             }
         }
     }

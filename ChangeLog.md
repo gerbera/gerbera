@@ -23,6 +23,7 @@
 - Import: Fix renaming of file or folder
 - Improve docker instructions
 - Improve handling of thumbnail profiles
+- Inotify: Don't handle 0 events
 - Inotify: Fix deleting files
 - Link to UPnP specification for search syntax
 - Mention .m4a in compilation options
