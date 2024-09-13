@@ -187,8 +187,8 @@ void AutoscanInotify::threadProc()
             inotify_event* event = inotify->nextEvent();
             /* --- */
 
-            if (event) {
-                auto handler = InotifyHandler(this, event, events);
+            if (event && (event->mask & events)) {
+                auto handler = InotifyHandler(this, event, event->mask & events);
                 auto wdObj = getWatch(handler);
 
                 if (!wdObj)

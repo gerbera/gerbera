@@ -86,10 +86,10 @@ static constexpr std::array<std::pair<std::string_view, InotifyFlags>, 22> inoti
     std::pair("ONESHOT", IN_ONESHOT), /* only send event once */
 };
 
-InotifyHandler::InotifyHandler(AutoscanInotify* ai, struct inotify_event* event, InotifyFlags monitoredEvents)
+InotifyHandler::InotifyHandler(AutoscanInotify* ai, struct inotify_event* event, InotifyFlags maskedEvent)
     : ai(ai)
     , wd(event->wd)
-    , mask(event->mask & monitoredEvents)
+    , mask(maskedEvent)
     , name(event->len > 0 ? event->name : "") // The name field is only present when an event is returned for a file inside a watched directory
 {
     log_debug("inotify event: {} mask={} name={}", wd, mapFlags(mask), name);
