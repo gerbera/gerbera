@@ -300,15 +300,18 @@ int Server::startupInterface(const std::string& iface, in_port_t inPort)
             break;
 
 #ifdef UPNP_HAVE_TOOLS
-        log_warning("UPnP Init {}:{} failed: {} ({}). Retrying in {} seconds...", ifName, inPort, UpnpGetErrorMessage(ret), ret, attempt + 1);
+        auto errorMsg = UpnpGetErrorMessage(ret);
 #else
-        log_warning("UPnP Init {}:{} failed: ({}). Retrying in {} seconds...", ifName, inPort, ret, attempt + 1);
+        auto errorMsg = "";
 #endif
+        log_warning("UPnP Init {}:{} failed: {} ({}). Retrying in {} seconds...",
+            ifName ? ifName : "<unset>", inPort,
+            errorMsg ? errorMsg : "???", ret, attempt + 1);
         std::this_thread::sleep_for(std::chrono::seconds(attempt + 1));
     }
 
     if (ret != UPNP_E_SUCCESS) {
-        throw UpnpException(ret, fmt::format("run: UpnpInit failed with {} {}", ifName, inPort));
+        throw UpnpException(ret, fmt::format("run: UpnpInit failed with {} {}", ifName ? ifName : "<unset>", inPort));
     }
 
     port = UpnpGetServerPort();
