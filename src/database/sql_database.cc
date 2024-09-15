@@ -953,24 +953,27 @@ std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
 {
     const auto parent = param.getObject();
+    bool getContainers = param.getFlag(BROWSE_CONTAINERS);
+    bool getItems = param.getFlag(BROWSE_ITEMS);
 
     if (param.getDynamicContainers() && dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
         auto dynConfig = config->getDynamicContentListOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
         if (dynConfig) {
             auto reqCount = (param.getRequestedCount() <= 0 || param.getRequestedCount() > dynConfig->getMaxCount()) ? dynConfig->getMaxCount() : param.getRequestedCount();
             auto srcParam = SearchParam(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
-                param.getStartingIndex(), reqCount, false, param.getGroup()); // get params from browse
+                param.getStartingIndex(), reqCount, false, param.getGroup(),
+                getContainers, getItems); // get params from browse
             int numMatches = 0;
+            log_debug("Running Dynamic search {} in {} '{}'", parent->getID(), parent->getParentID(), dynConfig->getFilter());
             auto result = this->search(srcParam, &numMatches);
             numMatches = numMatches > dynConfig->getMaxCount() ? dynConfig->getMaxCount() : numMatches;
+            log_debug("Dynamic search {} returned {}", parent->getID(), numMatches);
             param.setTotalMatches(numMatches);
             return result;
         }
         log_warning("Dynamic content {} error '{}'", parent->getID(), parent->getLocation().string());
     }
 
-    bool getContainers = param.getFlag(BROWSE_CONTAINERS);
-    bool getItems = param.getFlag(BROWSE_ITEMS);
     bool hideFsRoot = param.getFlag(BROWSE_HIDE_FS_ROOT);
     int childCount = 1;
     if (param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
@@ -1129,6 +1132,13 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     std::string searchSQL(rootNode->emitSQL());
     if (searchSQL.empty())
         throw DatabaseException("failed to generate SQL for search", LINE_MESSAGE);
+    bool getContainers = param.getContainers();
+    bool getItems = param.getItems();
+    if (getContainers && !getItems) {
+        searchSQL.append(fmt::format(" AND ({} = {:d})", searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER));
+    } else if (!getContainers && getItems) {
+        searchSQL.append(fmt::format(" AND (({0} & {1}) = {1})", searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_ITEM));
+    }
     if (param.getSearchableContainers()) {
         searchSQL.append(fmt::format(" AND ({0} & {1} = {1} OR {2} != {3})",
             searchColumnMapper->mapQuoted(SearchCol::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER));

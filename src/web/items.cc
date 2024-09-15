@@ -132,6 +132,10 @@ void Web::Items::process()
         item.append_attribute("id") = arrayObj->getID();
         item.append_child("title").append_child(pugi::node_pcdata).set_value(arrayObj->getTitle().c_str());
 
+        if (!arrayObj->isItem()) {
+            cnt++;
+            continue;
+        }
         auto objItem = std::static_pointer_cast<CdsItem>(arrayObj);
         if (objItem->getPartNumber() > 0 && container->isSubClass(UPNP_CLASS_MUSIC_ALBUM))
             item.append_child("part").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", objItem->getPartNumber()).c_str());
