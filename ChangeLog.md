@@ -29,6 +29,8 @@
 - Mention .m4a in compilation options
 - Refactor StringConverter
 - Refactor Upnp Services
+- Restrict dynamic folders to browse flags
+- Server logging for failed UpnpInit
 - Stability fixes
 - Upgrade cxxopts.hpp to 3.2.1
 - Upgrade md5 to 2002 version

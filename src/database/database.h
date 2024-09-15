@@ -140,10 +140,14 @@ protected:
     int requestedCount;
     bool searchableContainers;
     std::string group;
+    bool searchContainers;
+    bool searchItems;
 
 public:
     SearchParam(std::string containerID, std::string searchCriteria, std::string sortCriteria, int startingIndex,
-        int requestedCount, bool searchableContainers, std::string group)
+        int requestedCount, bool searchableContainers, std::string group,
+        bool searchContainers = true,
+        bool searchItems = true)
         : containerID(std::move(containerID))
         , searchCrit(std::move(searchCriteria))
         , sortCrit(std::move(sortCriteria))
@@ -151,6 +155,8 @@ public:
         , requestedCount(requestedCount)
         , searchableContainers(searchableContainers)
         , group(std::move(group))
+        , searchContainers(searchContainers)
+        , searchItems(searchItems)
     {
     }
     const std::string& getSearchCriteria() const { return searchCrit; }
@@ -160,6 +166,8 @@ public:
     int getRequestedCount() const { return requestedCount; }
     const std::string& getSortCriteria() const { return sortCrit; }
     const std::string& getGroup() const { return group; }
+    bool getContainers() const { return searchContainers; }
+    bool getItems() const { return searchItems; }
 };
 
 class StatsParam {
