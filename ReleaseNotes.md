@@ -1,6 +1,6 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v2.3.0
 
 Because of the extension of configuration of transcoding profiles, those producing PCM output have to be updated:
 `<mimetype>audio/L16</mimetype>` must become

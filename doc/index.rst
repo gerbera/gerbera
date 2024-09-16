@@ -72,7 +72,7 @@ Acknowledgments
 
 We are using the following code in our tree:
 
-- md5 implementation by L. Peter Deutsch <ghost at aladdin dot com>, Copyright (c) 1999 Aladdin Enterprises. All rights reserved. (See source headers for further details)
+- md5 implementation by L. Peter Deutsch <ghost at aladdin dot com>, Copyright (c) 1999-2002 Aladdin Enterprises. All rights reserved. (See source headers for further details)
 - md5 javascript implementation distributed under BSD License, Copyright (c) Paul Johnston 1999 - 2002. http://pajhome.org.uk/crypt/md5
 - Prototype JavaScript Framework http://www.prototypejs.org/ (c) 2005-2007 Sam Stephenson, MIT-style license.
 - (heavily modified version of) NanoTree http://nanotree.sourceforge.net/ (c) 2003 (?) Martin Mouritzen <martin at nano dot dk>; LGPL

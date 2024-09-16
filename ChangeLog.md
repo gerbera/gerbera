@@ -1,6 +1,6 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v2.3.0
 
 - Add build target for source documentation
 - Add configuration option to block clients

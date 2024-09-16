@@ -91,6 +91,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
         }
 #endif
 
+    // prepare browse parameters
     std::string objID = reqRoot.child("ObjectID").text().as_string();
     std::string browseFlag = reqRoot.child("BrowseFlag").text().as_string();
     // std::string filter; // not yet supported
@@ -132,6 +133,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     param.setSortCriteria(trimString(sortCriteria));
     param.setGroup(quirks->getGroup());
 
+    // Execute database browse
     try {
         if (arr.empty())
             arr = database->browse(param);
@@ -148,6 +150,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
         throw UpnpException(UPNP_E_BAD_REQUEST, UpnpXMLBuilder::encodeEscapes(e.what()));
     }
 
+    // build response
     pugi::xml_document didlLite;
     if (!quirks->blockXmlDeclaration()) {
         auto decl = didlLite.prepend_child(pugi::node_declaration);
@@ -198,6 +201,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         }
 #endif
 
+    // prepare search parameters
     std::string containerID = reqRoot.child("ContainerID").text().as_string();
     std::string searchCriteria = reqRoot.child("SearchCriteria").text().as_string();
     std::string startingIndex = reqRoot.child("StartingIndex").text().as_string();
@@ -227,6 +231,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
         stoiString(startingIndex), stoiString(requestedCount), searchableContainers, quirks->getGroup());
 
+    // Execute database search
     std::vector<std::shared_ptr<CdsObject>> results;
     int numMatches = 0;
     try {
@@ -243,6 +248,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         throw UpnpException(UPNP_E_BAD_REQUEST, UpnpXMLBuilder::encodeEscapes(e.what()));
     }
 
+    // build response
     auto stringLimitClient = stringLimit;
     if (quirks->getStringLimit() > -1) {
         stringLimitClient = quirks->getStringLimit();
