@@ -28,7 +28,7 @@ able to access the container from the docker host with this method by default.
 
 # Transcoding Tools
 Transcoding tools are made available in a separate image with the `-transcoding` suffix.
-e.g. `gerbera/gerbera:2.2.0-transcoding`. Includes tools such as ffmpeg and vlc.
+e.g. `gerbera/gerbera:2.3.0-transcoding`. Includes tools such as ffmpeg and vlc.
 
 # Examples
 
@@ -38,14 +38,14 @@ $ docker run \
     --name some-gerbera \
     --network=host \
     -v /some/files:/mnt/content:ro \
-     gerbera/gerbera:vX.X.X
+     gerbera/gerbera:2.3.0
 ```
 
 or for those that prefer docker-compose:
 
 ```console
 ---
-version: "2.2"
+version: "2.3"
 services:
   gerbera:
     image: gerbera/gerbera
@@ -74,7 +74,7 @@ $ docker run \
     --network=host \
     -v /some/files:/mnt/content:ro \
     -v /some/path/config.xml:/var/run/gerbera/config.xml \
-     gerbera/gerbera:vX.X.X
+     gerbera/gerbera:2.3.0
 ```
 
 ## Overwrite default ports
@@ -87,5 +87,5 @@ $ docker run \
     --network=host \
     --expose <your-port>:<your-port> \
     -v /some/files:/mnt/content:ro \
-     gerbera/gerbera:vX.X.X gerbera --port <your-port> --config /var/run/gerbera/config.xml
+     gerbera/gerbera:2.3.0 gerbera --port <your-port> --config /var/run/gerbera/config.xml
 ```

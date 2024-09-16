@@ -78,7 +78,7 @@ bool UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
     }
 
     auto headers = Headers();
-    headers.addHeader("Content-Security-Policy", fmt::format("default-src {} 'unsafe-inline'; img-src *; media-src *; child-src 'none';", fmt::join(server->getCorsHosts(), " ")));
+    headers.addHeader("Content-Security-Policy", fmt::format("default-src {} 'unsafe-eval' 'unsafe-inline'; img-src *; media-src *; child-src 'none';", fmt::join(server->getCorsHosts(), " ")));
     headers.addHeader("SameSite", "Lax");
     if (quirks)
         quirks->updateHeaders(headers);
