@@ -32,7 +32,7 @@ describe('Config Suite', () => {
       await homePage.showConfig('Server');
 
       let result = await homePage.editOverlayFieldValue('grb_value__server_modelNumber');
-      expect(result).to.equal('2.2.0');
+      expect(result).to.equal('2.3.0');
 
       await homePage.setEditorOverlayField('grb_value__server_modelNumber', '43');
 

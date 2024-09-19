@@ -274,6 +274,8 @@
             <xs:all>
                 <xs:element ref="accounts" minOccurs="0"/>
                 <xs:element ref="items-per-page" minOccurs="0"/>
+                <xs:element name="source-docs-link" minOccurs="0" type="xs:string"/>
+                <xs:element name="user-docs-link" minOccurs="0" type="xs:string"/>
                 <xs:element name="content-security-policy" minOccurs="0" type="xs:string"/>
                 <xs:element ref="extension-mimetype" minOccurs="0"/>
             </xs:all>

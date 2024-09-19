@@ -375,6 +375,8 @@ target_compile_definitions(libgerbera PRIVATE GIT_COMMIT_HASH="${GIT_COMMIT_HASH
 if ((${GERBERA_VERSION} STREQUAL "git") AND (NOT "${GIT_TAG}" STREQUAL ""))
     # Master/git build so use git info
     set(GERBERA_VERSION ${GIT_TAG})
+else()
+    target_compile_definitions(libgerbera PUBLIC GERBERA_RELEASE)
 endif()
 message(STATUS "Gerbera Version: ${GERBERA_VERSION}")
 target_compile_definitions(libgerbera PUBLIC GERBERA_VERSION="${GERBERA_VERSION}")
