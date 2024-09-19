@@ -501,6 +501,47 @@ Note:
 
    **Child tags:**
 
+``content-security-policy``
+---------------------------
+
+    .. code-block:: xml
+
+       <content-security-policy>default-src %HOSTS% 'unsafe-eval' 'unsafe-inline'; img-src *; media-src *; child-src 'none';</content-security-policy>
+
+    * Optional
+    * Default: **default-src %HOSTS% 'unsafe-eval' 'unsafe-inline'; img-src *; media-src *; child-src 'none';**
+
+    Define the "Content-Security-Policy" string for the web ui. The string ``%HOHSTS%`` will be replaced by the IP adress and known server names.
+
+``extension-mimetype``
+----------------------
+
+    .. code-block:: xml
+
+       <extension-mimetype default="application/octet-stream">
+           <map from="html" to="text/html"/>
+           <map from="js" to="application/javascript"/>
+           <map from="json" to="application/json"/>
+           <map from="css" to="text/css"/>
+       </extension-mimetype>
+
+    * Optional
+    * Default: see above
+
+    For description see :ref:`Import Extension Mimetype Mapping <extension-mimetype>`.
+
+    Attributes:
+
+        ::
+
+            default="application/octet-stream"
+
+    * Optional
+    * Default: **application/octet-stream**
+
+``accounts``
+------------
+
     .. code-block:: xml
 
        <accounts enabled="yes" session-timeout="30"/>

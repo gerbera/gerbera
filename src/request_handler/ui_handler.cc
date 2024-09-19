@@ -35,8 +35,7 @@
 #include "util/logger.h"
 #include "util/mime.h"
 #include "util/tools.h"
-
-#include <sstream>
+#include "util/url_utils.h"
 
 UIHandler::UIHandler(const std::shared_ptr<Content>& content,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, const std::shared_ptr<Quirks>& quirks,
@@ -44,30 +43,32 @@ UIHandler::UIHandler(const std::shared_ptr<Content>& content,
     : RequestHandler(content, xmlBuilder, quirks)
     , webRoot(config->getOption(ConfigVal::SERVER_WEBROOT))
     , uiEnabled(config->getBoolOption(ConfigVal::SERVER_UI_ENABLED))
+    , csp(config->getOption(ConfigVal::SERVER_UI_CONTENT_SECURITY_POLICY))
+    , defaultMimetype(config->getOption(ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_DEFAULT))
+    , extensionMimetypeMapping(config->getDictionaryOption(ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_MAPPING))
     , server(std::move(server))
 {
+    replaceAllString(csp, "%HOSTS%", fmt::format("{}", fmt::join(this->server->getCorsHosts(), " ")));
+    replaceAllString(csp, "\n", ";");
+    replaceAllString(csp, "\t", " ");
+    replaceAllString(csp, "  ", " ");
+    replaceAllString(csp, ";;", ";");
 }
 
-std::string getMime(const std::shared_ptr<Mime>& mime, std::string_view path)
+std::string UIHandler::getMimeType(const fs::path& path) const
 {
-    if (endswith(path, ".html")) {
-        return "text/html";
-    }
-    if (endswith(path, ".js")) {
-        return "application/javascript";
-    }
-    if (endswith(path, ".json")) {
-        return "application/json";
-    }
-    if (endswith(path, ".css")) {
-        return "text/css";
-    }
-
-    auto [err, mimeType] = mime->getMimeType(path, "application/octet-stream");
-    if (!err) {
+    auto extension = path.extension().string();
+    if (!extension.empty() && extension.at(0) == '.')
+        extension.erase(0, 1); // remove leading .
+    std::string mimeType = getValueOrDefault(extensionMimetypeMapping, extension, "");
+    if (!mimeType.empty()) {
         return mimeType;
     }
-    return "application/octet-stream";
+    auto [err, mimeTypeServer] = mime->getMimeType(path, defaultMimetype);
+    if (!err && !mimeTypeServer.empty()) {
+        return mimeTypeServer;
+    }
+    return defaultMimetype;
 }
 
 bool UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
@@ -78,7 +79,7 @@ bool UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
     }
 
     auto headers = Headers();
-    headers.addHeader("Content-Security-Policy", fmt::format("default-src {} 'unsafe-eval' 'unsafe-inline'; img-src *; media-src *; child-src 'none';", fmt::join(server->getCorsHosts(), " ")));
+    headers.addHeader("Content-Security-Policy", csp);
     headers.addHeader("SameSite", "Lax");
     if (quirks)
         quirks->updateHeaders(headers);
@@ -93,11 +94,10 @@ bool UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
         UpnpFileInfo_set_LastModified(info, currentTime().count());
         return quirks && quirks->getClient();
     }
-
-    auto webFile = fmt::format("{}{}", webRoot, path);
+    auto webFile = fmt::format("{}{}", webRoot, URLUtils::getFile(path));
     log_debug("UI: file: {}", webFile);
 
-    auto mime = getMime(context->getMime(), webFile);
+    auto mime = getMimeType(webFile);
     log_debug("Got mime: {}", mime);
 
     // We should be able to do the generation here, but libupnp doesn't support the request cookies yet
@@ -119,7 +119,7 @@ std::unique_ptr<IOHandler> UIHandler::open(const char* filename, const std::shar
         path = "/index.html";
     }
 
-    auto webFile = fmt::format("{}{}", webRoot, path);
+    auto webFile = fmt::format("{}{}", webRoot, URLUtils::getFile(path));
     log_debug("UI: file: {}", webFile);
 
     auto ioHandler = std::make_unique<FileIOHandler>(webFile);
