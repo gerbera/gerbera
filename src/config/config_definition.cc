@@ -562,6 +562,17 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_DEFAULT,
         "/server/ui/extension-mimetype/attribute::default", "config-server.html#ui",
         "application/octet-stream"),
+    std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_UI_DOCUMENTATION_SOURCE,
+        "/server/ui/source-docs-link", "config-server.html#ui",
+        ""),
+    std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_UI_DOCUMENTATION_USER,
+        "/server/ui/user-docs-link", "config-server.html#ui",
+#ifdef GERBERA_RELEASE
+        "https://docs.gerbera.io/en/stable/"
+#else
+        "https://docs.gerbera.io/en/latest/"
+#endif
+        ),
 
 #ifdef GRBDEBUG
     std::make_shared<ConfigIntSetup>(ConfigVal::SERVER_LOG_DEBUG_MODE,

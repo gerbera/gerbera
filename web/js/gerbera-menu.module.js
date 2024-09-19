@@ -56,6 +56,14 @@ const initialize = () => {
     if(GerberaApp.serverConfig.friendlyName && GerberaApp.serverConfig.friendlyName !== "Gerbera") {
       $('#server-name').text(GerberaApp.serverConfig.friendlyName);
     }
+    $('#source-docs').hide();
+    if(GerberaApp.serverConfig.sourceDocs && GerberaApp.serverConfig.sourceDocs !== "") {
+      $('#source-docs').show();
+      $('#devs').attr('href', GerberaApp.serverConfig.sourceDocs);
+    }
+    if(GerberaApp.serverConfig.userDocs && GerberaApp.serverConfig.userDocs !== "") {
+      $('#docs').attr('href', GerberaApp.serverConfig.userDocs);
+    }
     const titleVersion = $('#gerbera-title-version');
     if(GerberaApp.serverConfig.version) {
       titleVersion.text(GerberaApp.serverConfig.version);

@@ -9,6 +9,7 @@
     "poll-when-idle": false,
     "poll-interval": 2,
     "have-inotify": true,
+    "sourceDocs": "./dev/index.html",
     "items-per-page": {
       "default": 25,
       "option": [
@@ -22,6 +23,6 @@
       "action": []
     },
     "friendlyName" : "Wombat",
-    "version": "2.2.0"
+    "version": "2.3.0"
   }
 }
