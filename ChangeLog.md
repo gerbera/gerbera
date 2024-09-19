@@ -1,5 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### HEAD
+
+- Config: UI handler mimetypes and CSP
+
 ### v2.3.0
 
 - Add build target for source documentation

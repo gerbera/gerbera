@@ -25,7 +25,9 @@
 #define GERBERA_UI_HANDLER_H
 
 #include "request_handler.h"
+#include "util/grb_fs.h"
 
+#include <map>
 #include <memory>
 #include <string>
 
@@ -44,7 +46,12 @@ public:
 private:
     std::string webRoot;
     bool uiEnabled;
+    std::string csp;
+    std::string defaultMimetype;
+    std::map<std::string, std::string> extensionMimetypeMapping;
     std::shared_ptr<Server> server;
+
+    std::string getMimeType(const fs::path& path) const;
 };
 
 #endif // GERBERA_UI_HANDLER_H

@@ -487,6 +487,29 @@
           "editable": true
         },
         {
+          "item": "/server/ui/extension-mimetype/attribute::default",
+          "caption": "Default UI Mimetype",
+          "editable": false
+        },
+        {
+          "item": "/server/ui/extension-mimetype/map",
+          "caption": "Mimetype mapping",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/server/ui/extension-mimetype/map/attribute::from",
+              "caption": "File Extension",
+              "editable": false
+            },
+            {
+              "item": "/server/ui/extension-mimetype/map/attribute::to",
+              "caption": "Mimetype",
+              "editable": false
+            }
+          ]
+        },
+        {
           "item": "/server/ui/accounts/attribute::enabled",
           "caption": "Accounts enabled",
           "editable": true

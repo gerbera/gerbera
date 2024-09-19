@@ -233,6 +233,14 @@ static const std::map<std::string, std::string> extMtDefaults {
     { "wvx", "video/x-ms-wvx" },
 };
 
+/// \brief default values for ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_MAPPING
+static const std::map<std::string, std::string> uiExtMtDefaults {
+    { "css", "text/css" },
+    { "html", "text/html" },
+    { "js", "application/javascript" },
+    { "json", "application/json" },
+};
+
 /// \brief default values for ConfigVal::IMPORT_MAPPINGS_IGNORED_EXTENSIONS
 static const std::vector<std::string> ignoreDefaults {
     "part",
@@ -544,6 +552,16 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_UI_SHOW_TOOLTIPS,
         "/server/ui/attribute::show-tooltips", "config-server.html#ui",
         YES),
+    std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_UI_CONTENT_SECURITY_POLICY,
+        "/server/ui/content-security-policy", "config-server.html#ui",
+        "default-src %HOSTS% 'unsafe-eval' 'unsafe-inline'; img-src *; media-src *; child-src 'none';"),
+    std::make_shared<ConfigDictionarySetup>(ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_MAPPING,
+        "/server/ui/extension-mimetype", "config-import.html#extension-mimetype",
+        ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO,
+        false, false, true, uiExtMtDefaults),
+    std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_DEFAULT,
+        "/server/ui/extension-mimetype/attribute::default", "config-server.html#ui",
+        "application/octet-stream"),
 
 #ifdef GRBDEBUG
     std::make_shared<ConfigIntSetup>(ConfigVal::SERVER_LOG_DEBUG_MODE,
@@ -1515,6 +1533,7 @@ const std::map<ConfigVal, std::vector<ConfigVal>> ConfigDefinition::parentOption
                                                       ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
                                                       ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST,
                                                       ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
+                                                      ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_MAPPING,
                                                       ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE,
                                                   } },
     { ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO, {
@@ -1523,6 +1542,7 @@ const std::map<ConfigVal, std::vector<ConfigVal>> ConfigDefinition::parentOption
                                                     ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST,
                                                     ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST,
                                                     ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
+                                                    ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_MAPPING,
                                                     ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE,
                                                 } },
 

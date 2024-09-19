@@ -1,5 +1,16 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
+### NEW Features
+
+- Configuration of ui handler to allow hosting of docs and doxygen output
+
+### FIXES
+
+### Code Improvements
+
+
 ## v2.3.0
 
 Because of the extension of configuration of transcoding profiles, those producing PCM output have to be updated:

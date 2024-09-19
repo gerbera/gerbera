@@ -1155,6 +1155,8 @@ Note:
     The extension is case sensitive, if `case-sensitive` in the element `extension-mimetype` is set to `yes`
 
 
+.. _extension-mimetype:
+
 ``extension-mimetype``
 ----------------------
 

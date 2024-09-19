@@ -72,6 +72,11 @@ std::string_view getQuery(std::string_view url)
     return splitUrl(url, URL_UI_PARAM_SEPARATOR).second;
 }
 
+std::string_view getFile(std::string_view url)
+{
+    return splitUrl(url, URL_UI_PARAM_SEPARATOR).first;
+}
+
 std::string joinUrl(const std::vector<std::string>& components, bool addToEnd, std::string_view separator)
 {
     if (components.empty())
