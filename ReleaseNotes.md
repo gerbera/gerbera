@@ -8,6 +8,8 @@
 
 ### FIXES
 
+- Handling of checkbox values on web ui
+
 ### Code Improvements
 
 

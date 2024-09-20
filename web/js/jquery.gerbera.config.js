@@ -776,7 +776,7 @@ class CheckTreeItem extends TreeItem {
   }
 
   get uiValue() {
-    return this.editor ? this.editor.checked : this.value;
+    return (this.editor ? this.editor[0].checked : this.value) ? 'yes' : 'no';
   }
 
   resetValue() {

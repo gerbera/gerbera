@@ -30,6 +30,7 @@
 #include "config/config_options.h"
 #include "util/logger.h"
 #include "util/string_converter.h"
+#include "util/tools.h"
 
 #include <array>
 
@@ -60,5 +61,14 @@ bool ConfigStringSetup::CheckCharset(std::string& value)
         log_error("Error in config file: unsupported charset specified: {}\n{}", value, e.what());
         return false;
     }
+    return true;
+}
+
+bool ConfigStringSetup::MergeContentSecurityPolicy(std::string& value)
+{
+    replaceAllString(value, "\n", ";");
+    replaceAllString(value, "\t", " ");
+    replaceAllString(value, "  ", " ");
+    replaceAllString(value, ";;", ";");
     return true;
 }

@@ -49,10 +49,6 @@ UIHandler::UIHandler(const std::shared_ptr<Content>& content,
     , server(std::move(server))
 {
     replaceAllString(csp, "%HOSTS%", fmt::format("{}", fmt::join(this->server->getCorsHosts(), " ")));
-    replaceAllString(csp, "\n", ";");
-    replaceAllString(csp, "\t", " ");
-    replaceAllString(csp, "  ", " ");
-    replaceAllString(csp, ";;", ";");
 }
 
 std::string UIHandler::getMimeType(const fs::path& path) const

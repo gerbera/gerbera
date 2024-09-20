@@ -3,6 +3,7 @@
 ### HEAD
 
 - Config: UI handler mimetypes and CSP
+- Fix handling of checkbox values on web ui
 
 ### v2.3.0
 
