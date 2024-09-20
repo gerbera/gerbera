@@ -55,7 +55,7 @@ static bool validateYesNo(std::string_view value)
 void ConfigBoolSetup::makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
     if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
-        throw_std_runtime_error("Invalid {} value {}", xpath, optValue);
+        throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
     optionValue = std::make_shared<BoolOption>(optValue == YES || optValue == B_TRUE);
     setOption(config);
 }
@@ -73,7 +73,7 @@ bool ConfigBoolSetup::checkValue(std::string& optValue, const std::string& pathN
     }
 
     if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
-        throw_std_runtime_error("Invalid {}/{} value {}", pathName, xpath, optValue);
+        throw_std_runtime_error("Invalid {}/{} value '{}'", pathName, xpath, optValue);
     return optValue == YES || optValue == B_TRUE;
 }
 
