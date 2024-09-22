@@ -1622,7 +1622,7 @@ void ContentManager::triggerPlayHook(const std::string& group, const std::shared
     playStatus->setLastPlayed();
     database->savePlayStatus(playStatus);
 
-    bool suppress = config->getBoolOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
+    bool suppress = config->getBoolOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && config->getBoolOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
     log_debug("Marking object {} as played", obj->getTitle());
     if (!suppress)
         updateObject(obj, true);

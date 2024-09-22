@@ -115,12 +115,13 @@ TEST_F(ServerTest, ServerOutputsCompileInformationIncludingGit)
     fs::path cmd = fs::path(CMAKE_BINARY_DIR) / "gerbera --compile-info 2>&1";
     std::string output = exec(cmd.c_str());
 
-    ASSERT_THAT(output, HasSubstr("Compile info\n-------------\nWITH_"));
+    ASSERT_THAT(output, HasSubstr("Compile info:\n-------------\nWITH_"));
+    ASSERT_THAT(output, HasSubstr("Build info:\n-----------\nUSING"));
     if constexpr (!gitBranch.empty()) {
-        ASSERT_THAT(output, HasSubstr("Git info:\n-------------\n"));
+        ASSERT_THAT(output, HasSubstr("Git info:\n---------\n"));
         ASSERT_THAT(output, HasSubstr("Git Branch: "));
     } else {
-        ASSERT_THAT(output, Not(HasSubstr("Git info:\n-------------\n")));
+        ASSERT_THAT(output, Not(HasSubstr("Git info:\n---------\n")));
         ASSERT_THAT(output, Not(HasSubstr("Git Branch: ")));
     }
     if constexpr (!gitCommitHash.empty()) {
