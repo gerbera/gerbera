@@ -12,6 +12,7 @@
 
 ### Code Improvements
 
+- Build without ffmpeg leaves option unset
 
 ## v2.3.0
 

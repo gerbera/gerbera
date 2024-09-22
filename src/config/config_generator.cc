@@ -386,27 +386,26 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
 
 void ConfigGenerator::generateExtendedRuntime()
 {
-    auto options = std::vector<std::pair<ConfigVal, bool>>
-    {
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
+    auto options = std::vector<std::pair<ConfigVal, bool>> {
+#ifdef HAVE_FFMPEGTHUMBNAILER
         { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED, true }, // clang does require additional indentation
-            { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE, true },
-            { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE, true },
-            { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY, true },
-            { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY, true },
-            { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED, false },
-            { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_ENABLED, false },
-            { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED, false },
-            { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR, false },
+        { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE, true },
+        { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE, true },
+        { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY, true },
+        { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY, true },
+        { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED, false },
+        { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_ENABLED, false },
+        { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED, false },
+        { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR, false },
 #endif
-            { ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED, true },
-            { ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES, true },
-            { ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND, true },
-            { ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING, true },
+        { ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED, true },
+        { ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES, true },
+        { ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND, true },
+        { ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING, true },
 #ifdef HAVE_LASTFMLIB
-            { ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED, false },
-            { ConfigVal::SERVER_EXTOPTS_LASTFM_USERNAME, false },
-            { ConfigVal::SERVER_EXTOPTS_LASTFM_PASSWORD, false },
+        { ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED, false },
+        { ConfigVal::SERVER_EXTOPTS_LASTFM_USERNAME, false },
+        { ConfigVal::SERVER_EXTOPTS_LASTFM_PASSWORD, false },
 #endif
     };
     generateOptions(options);
