@@ -9,10 +9,12 @@
 ### FIXES
 
 - Handling of checkbox values on web ui
+- Access to cache option if thumbnailer is disabled
 
 ### Code Improvements
 
 - Build without ffmpeg leaves option unset
+- Logging of build info
 
 ## v2.3.0
 

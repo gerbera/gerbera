@@ -154,12 +154,14 @@ FfmpegThumbnailerHandler::FfmpegThumbnailerHandler(const std::shared_ptr<Context
     : MediaMetadataHandler(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)
 {
     isEnabled = this->isEnabled && config->getBoolOption(checkOption);
-    auto configuredDir = config->getOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
-    if (!configuredDir.empty()) {
-        cachePath = configuredDir;
-    } else {
-        auto home = config->getOption(ConfigVal::SERVER_HOME);
-        cachePath = fs::path(home) / "cache-dir";
+    if (isEnabled) {
+        auto configuredDir = config->getOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+        if (!configuredDir.empty()) {
+            cachePath = configuredDir;
+        } else {
+            auto home = config->getOption(ConfigVal::SERVER_HOME);
+            cachePath = fs::path(home) / "cache-dir";
+        }
     }
 }
 

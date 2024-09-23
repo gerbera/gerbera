@@ -45,7 +45,17 @@ public:
     std::uint32_t getUIntOption(ConfigVal option) const override { return 0; }
     std::int64_t getLongOption(ConfigVal option) const override { return 0; }
     std::shared_ptr<ConfigOption> getConfigOption(ConfigVal option) const override { return {}; }
-    bool getBoolOption(ConfigVal option) const override { return false; }
+    bool getBoolOption(ConfigVal option) const override
+    {
+        switch (option) {
+#ifdef HAVE_FFMPEGTHUMBNAILER
+        case ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED:
+            return true;
+#endif
+        default:
+            return false;
+        }
+    }
     std::map<std::string, std::string> getDictionaryOption(ConfigVal option) const override
     {
         switch (option) {
