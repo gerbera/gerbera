@@ -3,6 +3,7 @@
 ### HEAD
 
 - Config: UI handler mimetypes and CSP
+- Fix access to cache option if thumbnailer disabled
 - Fix build without ffmpeg
 - Fix handling of checkbox values on web ui
 
