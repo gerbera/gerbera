@@ -493,7 +493,7 @@ void ImportService::createContainers(int parentContainerId, AutoScanSetting& set
                 }
             } else {
                 // Create container
-                stateEntry->setObject(ImportState::Created, createSingleContainer(parentContainerId, dirEntry, UPNP_CLASS_CONTAINER));
+                stateEntry->setObject(ImportState::Created, createSingleContainer(parentContainerId, dirEntry, UPNP_CLASS_CONTAINER_FOLDER));
             }
         }
     }

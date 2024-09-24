@@ -94,13 +94,13 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     // prepare browse parameters
     std::string objID = reqRoot.child("ObjectID").text().as_string();
     std::string browseFlag = reqRoot.child("BrowseFlag").text().as_string();
-    // std::string filter; // not yet supported
     std::string startingIndex = reqRoot.child("StartingIndex").text().as_string();
+    std::string filter = reqRoot.child("Filter").text().as_string();
     std::string requestedCount = reqRoot.child("RequestedCount").text().as_string();
     std::string sortCriteria = reqRoot.child("SortCriteria").text().as_string();
 
-    log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] RequestedCount [{}] SortCriteria [{}]",
-        objID, browseFlag, startingIndex, requestedCount, sortCriteria);
+    log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] Filter [{}] RequestedCount [{}] SortCriteria [{}]",
+        objID, browseFlag, startingIndex, filter, requestedCount, sortCriteria);
 
     if (objID.empty())
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
@@ -121,7 +121,8 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     auto upnpClass = parent->getClass();
     if (sortCriteria.empty() && (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)))
         flag |= BROWSE_TRACK_SORT;
-
+    if (filter.empty())
+        filter = "*";
     if (config->getBoolOption(ConfigVal::SERVER_HIDE_PC_DIRECTORY))
         flag |= BROWSE_HIDE_FS_ROOT;
 
@@ -170,7 +171,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
 
     for (auto&& obj : arr) {
         markPlayedItem(obj, obj->getTitle());
-        xmlBuilder->renderObject(obj, stringLimitClient, didlLiteRoot, quirks);
+        xmlBuilder->renderObject(obj, splitString(filter, ','), stringLimitClient, didlLiteRoot, quirks);
     }
 
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks && quirks->needsStrictXml() ? pugi::format_no_escapes : 0);
@@ -205,11 +206,12 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     std::string containerID = reqRoot.child("ContainerID").text().as_string();
     std::string searchCriteria = reqRoot.child("SearchCriteria").text().as_string();
     std::string startingIndex = reqRoot.child("StartingIndex").text().as_string();
+    std::string filter = reqRoot.child("Filter").text().as_string();
     std::string requestedCount = reqRoot.child("RequestedCount").text().as_string();
     std::string sortCriteria = reqRoot.child("SortCriteria").text().as_string();
 
-    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] SortCriteria [{}] StartingIndex [{}] RequestedCount [{}]",
-        containerID, searchCriteria, sortCriteria, startingIndex, requestedCount);
+    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] SortCriteria [{}] StartingIndex [{}] Filter [{}] RequestedCount [{}]",
+        containerID, searchCriteria, sortCriteria, startingIndex, filter, requestedCount);
 
     auto&& quirks = request.getQuirks();
     pugi::xml_document didlLite;
@@ -228,6 +230,8 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     if (sortCriteria.empty()) {
         sortCriteria = fmt::format("+{}", MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE));
     }
+    if (filter.empty())
+        filter = "*";
     const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
         stoiString(startingIndex), stoiString(requestedCount), searchableContainers, quirks->getGroup());
 
@@ -256,7 +260,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
 
     for (auto&& cdsObject : results) {
         if (!cdsObject->isItem()) {
-            xmlBuilder->renderObject(cdsObject, stringLimitClient, didlLiteRoot);
+            xmlBuilder->renderObject(cdsObject, splitString(filter, ','), stringLimitClient, didlLiteRoot);
             continue;
         }
 
@@ -274,7 +278,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         }
 
         markPlayedItem(cdsObject, title);
-        xmlBuilder->renderObject(cdsObject, stringLimitClient, didlLiteRoot);
+        xmlBuilder->renderObject(cdsObject, splitString(filter, ','), stringLimitClient, didlLiteRoot);
     }
 
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks && quirks->needsStrictXml() ? pugi::format_no_escapes : 0);

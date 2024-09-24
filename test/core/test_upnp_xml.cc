@@ -119,7 +119,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     expectedXml << "</DIDL-Lite>\n";
 
     // act
-    subject->renderObject(obj, std::string::npos, root);
+    subject->renderObject(obj, { "*" }, std::string::npos, root);
 
     // assert
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "");
@@ -161,7 +161,7 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
         .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
 
     // act
-    subject->renderObject(obj, std::string::npos, root);
+    subject->renderObject(obj, { "*" }, std::string::npos, root);
 
     // assert
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "");
@@ -208,7 +208,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithEscapes)
         .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
 
     // act
-    subject->renderObject(obj, std::string::npos, root, quirks);
+    subject->renderObject(obj, { "*" }, std::string::npos, root, quirks);
 
     // assert
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "");
@@ -255,7 +255,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithStrictXmlQuirks)
         .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
 
     // act
-    subject->renderObject(obj, std::string::npos, root, quirks);
+    subject->renderObject(obj, { "*" }, std::string::npos, root, quirks);
 
     // assert
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", pugi::format_no_escapes);
@@ -332,7 +332,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
         .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
 
     // act
-    subject->renderObject(obj, std::string::npos, root);
+    subject->renderObject(obj, { "*" }, std::string::npos, root);
 
     // assert
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "");

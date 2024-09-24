@@ -167,30 +167,39 @@ static std::string formatXmlString(bool strictXml, std::size_t stringLimit, cons
     return s;
 }
 
-void UpnpXMLBuilder::addPropertyList(bool strictXml, std::size_t stringLimit, pugi::xml_node& result, const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& auxData,
-    ConfigVal itemProps, ConfigVal nsProp) const
+std::vector<std::string> UpnpXMLBuilder::addPropertyList(
+    bool strictXml,
+    std::size_t stringLimit,
+    pugi::xml_node& result,
+    const std::vector<std::string>& filter,
+    const std::vector<std::pair<std::string, std::string>>& meta,
+    const std::map<std::string, std::string>& auxData,
+    ConfigVal itemProps,
+    ConfigVal nsProp) const
 {
     auto namespaceMap = config->getDictionaryOption(nsProp);
     for (auto&& [xmlns, uri] : namespaceMap) {
         result.append_attribute(fmt::format("xmlns:{}", xmlns).c_str()) = uri.c_str();
     }
     auto propertyMap = config->getDictionaryOption(itemProps);
+    std::vector<std::string> propNames;
     for (auto&& [tag, field] : propertyMap) {
         auto metaField = MetaEnumMapper::remapMetaDataField(field);
         bool wasMeta = false;
         for (auto&& [mkey, mvalue] : meta) {
             if ((metaField != MetadataFields::M_MAX && mkey == MetaEnumMapper::getMetaFieldName(metaField)) || mkey == field) {
-                addField(result, tag, formatXmlString(strictXml, stringLimit, mvalue));
+                propNames.push_back(addField(result, filter, tag, formatXmlString(strictXml, stringLimit, mvalue)));
                 wasMeta = true;
             }
         }
         if (!wasMeta) {
             auto avalue = getValueOrDefault(auxData, field);
             if (!avalue.empty()) {
-                addField(result, tag, formatXmlString(strictXml, stringLimit, avalue));
+                propNames.push_back(addField(result, filter, tag, formatXmlString(strictXml, stringLimit, avalue)));
             }
         }
     }
+    return propNames;
 }
 
 std::string UpnpXMLBuilder::printXml(const pugi::xml_node& entry, const char* indent, int flags)
@@ -200,36 +209,73 @@ std::string UpnpXMLBuilder::printXml(const pugi::xml_node& entry, const char* in
     return buf.str();
 }
 
-void UpnpXMLBuilder::addField(pugi::xml_node& entry, const std::string& key, const std::string& val) const
+std::string UpnpXMLBuilder::addField(
+    pugi::xml_node& entry,
+    const std::vector<std::string>& filter,
+    const std::string& key,
+    const std::string& val) const
 {
     auto i = key.find('@');
     auto j = key.find('[', i + 1);
+    auto filterActive = !(filter.size() == 1 && filter[0] == "*");
     if (i != std::string::npos && j != std::string::npos && key[key.length() - 1] == ']') {
         // e.g. used for MetadataFields::M_ALBUMARTIST
         // name@attr[val] => <name attr="val">
         std::string attrName = key.substr(i + 1, j - i - 1);
         std::string attrValue = key.substr(j + 1, key.length() - j - 2);
         std::string name = key.substr(0, i);
+        auto upnpElement = fmt::format("{}@{}", name, attrName);
+        if (filterActive && std::find(filter.begin(), filter.end(), upnpElement) != filter.end())
+            return "";
         auto node = entry.append_child(name.c_str());
         node.append_attribute(attrName.c_str()) = attrValue.c_str();
         node.append_child(pugi::node_pcdata).set_value(val.c_str());
+        return upnpElement;
     } else if (i != std::string::npos) {
         // name@attr val => <name attr="val">
         std::string name = key.substr(0, i);
         std::string attrName = key.substr(i + 1);
+        auto upnpElement = fmt::format("{}@{}", name, attrName);
+        if (filterActive && std::find(filter.begin(), filter.end(), upnpElement) != filter.end())
+            return "";
         auto child = entry.child(name.c_str());
         if (child) {
             child.append_attribute(attrName.c_str()) = val.c_str();
         } else {
-            entry.append_child(key.c_str()).append_attribute(attrName.c_str()) = val.c_str();
+            entry.append_child(name.c_str()).append_attribute(attrName.c_str()) = val.c_str();
         }
+        return upnpElement;
     } else {
+        if (filterActive && std::find(filter.begin(), filter.end(), key) != filter.end())
+            return "";
         entry.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(val.c_str());
+        return key;
     }
 }
 
-void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::size_t stringLimit, pugi::xml_node& parent, const std::shared_ptr<Quirks>& quirks) const
+void UpnpXMLBuilder::renderObject(
+    const std::shared_ptr<CdsObject>& obj,
+    const std::vector<std::string>& filter,
+    std::size_t stringLimit,
+    pugi::xml_node& parent,
+    const std::shared_ptr<Quirks>& quirks) const
 {
+    std::vector<std::string> objFilter;
+    std::vector<std::string> resFilter;
+    for (auto&& f : filter) {
+        if (f == "*") {
+            objFilter.push_back(f);
+            resFilter.push_back(f);
+        } else if (f == "res#") {
+            resFilter.push_back("*");
+        } else if (startswith(f, "res@")) {
+            std::string resFlt = f;
+            replaceAllString(resFlt, "res@", "");
+            resFilter.push_back(resFlt);
+        } else {
+            objFilter.push_back(f);
+        }
+    }
     auto result = parent.append_child("");
 
     result.append_attribute("id") = obj->getID();
@@ -247,6 +293,7 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
     auto mvMeta = multiValue;
     auto simpleDate = false;
 
+    std::vector<std::string> propNames;
     if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
@@ -270,9 +317,9 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
                     else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER))
                         result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                     else if (simpleDate && key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE))
-                        addField(result, key, makeSimpleDate(str));
+                        propNames.push_back(addField(result, objFilter, key, makeSimpleDate(str)));
                     else if (key != MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE))
-                        addField(result, key, str);
+                        propNames.push_back(addField(result, objFilter, key, str));
                 }
             } else {
                 // Trim metadata value as needed
@@ -282,9 +329,9 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
                 else if (startswith(upnpClass, UPNP_CLASS_MUSIC_TRACK) && key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER))
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                 else if (simpleDate && key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE))
-                    addField(result, key, makeSimpleDate(str));
+                    propNames.push_back(addField(result, objFilter, key, makeSimpleDate(str)));
                 else if (key != MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE))
-                    addField(result, key, str);
+                    propNames.push_back(addField(result, objFilter, key, str));
             }
         }
         auto meta = obj->getMetaData();
@@ -301,13 +348,14 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
             auxData["upnp:playbackCount"] = fmt::format("{}", playStatus->getPlayCount());
             auxData["upnp:lastPlaybackTime"] = fmt::format("{:%Y-%m-%d T %H:%M:%S}", fmt::localtime(playStatus->getLastPlayed().count()));
             auxData["upnp:lastPlaybackPosition"] = fmt::format("{}", millisecondsToHMSF(playStatus->getLastPlayedPosition().count()));
-            addField(result, "upnp:playbackCount", auxData["upnp:playbackCount"]);
-            addField(result, "upnp:lastPlaybackTime", auxData["upnp:lastPlaybackTime"]);
-            addField(result, "upnp:lastPlaybackPosition", auxData["upnp:lastPlaybackPosition"]);
+            propNames.push_back(addField(result, objFilter, "upnp:playbackCount", auxData["upnp:playbackCount"]));
+            propNames.push_back(addField(result, objFilter, "upnp:lastPlaybackTime", auxData["upnp:lastPlaybackTime"]));
+            propNames.push_back(addField(result, objFilter, "upnp:lastPlaybackPosition", auxData["upnp:lastPlaybackPosition"]));
         }
 
-        addPropertyList(strictXml, stringLimit, result, meta, auxData, ConfigVal::UPNP_TITLE_PROPERTIES, ConfigVal::UPNP_TITLE_NAMESPACES);
-        addResources(item, result, quirks);
+        auto propNamesMeta = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, ConfigVal::UPNP_TITLE_PROPERTIES, ConfigVal::UPNP_TITLE_NAMESPACES);
+        propNames.insert(propNames.end(), propNamesMeta.begin(), propNamesMeta.end());
+        addResources(item, result, resFilter, quirks);
 
         result.set_name("item");
     } else if (obj->isContainer()) {
@@ -322,13 +370,13 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
         log_debug("container is class: {}", upnpClass.c_str());
         auto&& meta = obj->getMetaData();
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM)) {
-            addPropertyList(strictXml, stringLimit, result, meta, auxData, ConfigVal::UPNP_ALBUM_PROPERTIES, ConfigVal::UPNP_ALBUM_NAMESPACES);
+            propNames = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, ConfigVal::UPNP_ALBUM_PROPERTIES, ConfigVal::UPNP_ALBUM_NAMESPACES);
         } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST)) {
-            addPropertyList(strictXml, stringLimit, result, meta, auxData, ConfigVal::UPNP_ARTIST_PROPERTIES, ConfigVal::UPNP_ARTIST_NAMESPACES);
+            propNames = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, ConfigVal::UPNP_ARTIST_PROPERTIES, ConfigVal::UPNP_ARTIST_NAMESPACES);
         } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_GENRE)) {
-            addPropertyList(strictXml, stringLimit, result, meta, auxData, ConfigVal::UPNP_GENRE_PROPERTIES, ConfigVal::UPNP_GENRE_NAMESPACES);
+            propNames = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, ConfigVal::UPNP_GENRE_PROPERTIES, ConfigVal::UPNP_GENRE_NAMESPACES);
         } else if (startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
-            addPropertyList(strictXml, stringLimit, result, meta, auxData, ConfigVal::UPNP_PLAYLIST_PROPERTIES, ConfigVal::UPNP_PLAYLIST_NAMESPACES);
+            propNames = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, ConfigVal::UPNP_PLAYLIST_PROPERTIES, ConfigVal::UPNP_PLAYLIST_NAMESPACES);
         }
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST) || startswith(upnpClass, UPNP_CLASS_CONTAINER) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
             auto url = renderContainerImageURL(cont);
@@ -343,6 +391,13 @@ void UpnpXMLBuilder::renderObject(const std::shared_ptr<CdsObject>& obj, std::si
     if (!dateNode) {
         auto fDate = fmt::format("{:%FT%T%z}", fmt::localtime(obj->getMTime().count()));
         result.append_child("dc:date").append_child(pugi::node_pcdata).set_value(fDate.c_str());
+    }
+    auto filterActive = !(objFilter.size() == 1 && objFilter[0] == "*");
+    if (filterActive) {
+        for (auto&& f : objFilter) {
+            if (std::find(propNames.begin(), propNames.end(), f) == propNames.end())
+                result.append_child(f.c_str()).append_child(pugi::node_pcdata).set_value("");
+        }
     }
     log_debug("Rendered DIDL: {}", printXml(result, "  "));
 }
@@ -359,6 +414,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet() con
     return doc;
 }
 
+/// \brief: gerbera uses these resource attributes for internal mechanisms
 static bool isPrivateAttribute(ResourceAttribute attribute)
 {
     switch (attribute) {
@@ -373,7 +429,13 @@ static bool isPrivateAttribute(ResourceAttribute attribute)
     }
 }
 
-void UpnpXMLBuilder::renderResource(const CdsObject& object, const CdsResource& resource, pugi::xml_node& parent, const std::map<std::string, std::string>& clientSpecificAttrs, const std::string& clientGroup, const std::map<std::string, std::string>& mimeMappings) const
+void UpnpXMLBuilder::renderResource(const CdsObject& object,
+    const CdsResource& resource,
+    pugi::xml_node& parent,
+    const std::vector<std::string>& filter,
+    const std::map<std::string, std::string>& clientSpecificAttrs,
+    const std::string& clientGroup,
+    const std::map<std::string, std::string>& mimeMappings) const
 {
     auto res = parent.append_child("res");
 
@@ -381,15 +443,29 @@ void UpnpXMLBuilder::renderResource(const CdsObject& object, const CdsResource& 
 
     res.append_child(pugi::node_pcdata).set_value(url.c_str());
 
+    auto filterActive = !(filter.size() == 1 && filter[0] == "*");
+    std::vector<std::string> propNames;
     for (auto&& [attr, val] : resource.getAttributes()) {
         if (isPrivateAttribute(attr)) {
             continue;
         }
+        if (filterActive && std::find(filter.begin(), filter.end(), EnumMapper::getAttributeName(attr)) != filter.end())
+            continue;
         res.append_attribute(EnumMapper::getAttributeName(attr).c_str()) = val.c_str();
+        propNames.push_back(EnumMapper::getAttributeName(attr));
     }
 
     for (auto&& [k, v] : clientSpecificAttrs) {
+        if (filterActive && std::find(filter.begin(), filter.end(), k) != filter.end())
+            continue;
         res.append_attribute(k.c_str()) = v.c_str();
+        propNames.push_back(k);
+    }
+    if (filterActive) {
+        for (auto&& f : filter) {
+            if (std::find(propNames.begin(), propNames.end(), f) == propNames.end())
+                res.append_attribute(f.c_str()) = "";
+        }
     }
 }
 
@@ -815,7 +891,11 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(const std::sh
     return { hideOriginalResource, originalResource };
 }
 
-void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xml_node& parent, const std::shared_ptr<Quirks>& quirks) const
+void UpnpXMLBuilder::addResources(
+    const std::shared_ptr<CdsItem>& item,
+    pugi::xml_node& parent,
+    const std::vector<std::string>& filter,
+    const std::shared_ptr<Quirks>& quirks) const
 {
     bool isExternalURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
 
@@ -901,7 +981,7 @@ void UpnpXMLBuilder::addResources(const std::shared_ptr<CdsItem>& item, pugi::xm
         buildProtocolInfo(*res, mimeMappings, quirks);
 
         if (!hideOriginalResource || transcoded || originalResource != res->getResId())
-            renderResource(*item, *res, parent, clientSpecficAttrs, clientGroup, mimeMappings);
+            renderResource(*item, *res, parent, filter, clientSpecficAttrs, clientGroup, mimeMappings);
     }
 }
 
