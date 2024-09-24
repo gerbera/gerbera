@@ -487,6 +487,11 @@
           "editable": true
         },
         {
+          "item": "/server/ui/content-security-policy",
+          "caption": "Content Security Policy",
+          "editable": false
+        },
+        {
           "item": "/server/ui/extension-mimetype/attribute::default",
           "caption": "Default UI Mimetype",
           "editable": false
@@ -1936,6 +1941,11 @@
             {
               "item": "/clients/client/attribute::multi-value",
               "caption": "Multi-Value Metadata",
+              "editable": true
+            },
+            {
+              "item": "/clients/client/attribute::full-filter",
+              "caption": "Full UPnP Filter creation",
               "editable": true
             },
             {

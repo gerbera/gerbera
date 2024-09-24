@@ -37,10 +37,10 @@
 #include "util/tools.h"
 
 std::map<MetadataFields, std::string> MetaEnumMapper::mt_keys = std::map<MetadataFields, std::string> {
-    std::pair(MetadataFields::M_TITLE, "dc:title"),
+    std::pair(MetadataFields::M_TITLE, DC_TITLE),
     std::pair(MetadataFields::M_ARTIST, "upnp:artist"),
     std::pair(MetadataFields::M_ALBUM, "upnp:album"),
-    std::pair(MetadataFields::M_DATE, "dc:date"),
+    std::pair(MetadataFields::M_DATE, DC_DATE),
     std::pair(MetadataFields::M_CREATION_DATE, "dc:created"),
     std::pair(MetadataFields::M_UPNP_DATE, "upnp:date"),
     std::pair(MetadataFields::M_GENRE, "upnp:genre"),

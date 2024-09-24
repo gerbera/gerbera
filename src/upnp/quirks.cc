@@ -291,6 +291,11 @@ bool Quirks::getMultiValue() const
     return pClientProfile ? pClientProfile->multiValue : true;
 }
 
+bool Quirks::getFullFilter() const
+{
+    return pClientProfile ? pClientProfile->fullFilter : false;
+}
+
 std::map<std::string, std::string> Quirks::getMimeMappings() const
 {
     return pClientProfile ? pClientProfile->mimeMappings.getDictionaryOption() : std::map<std::string, std::string>();

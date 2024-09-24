@@ -269,7 +269,7 @@ static const std::map<std::string, std::string> upnpAlbumPropDefaults {
     { "upnp:conductor", "M_CONDUCTOR" },
     { "upnp:orchestra", "M_ORCHESTRA" },
     { "upnp:date", "M_UPNP_DATE" },
-    { "dc:date", "M_UPNP_DATE" },
+    { DC_DATE, "M_UPNP_DATE" },
     { "upnp:producer", "M_PRODUCER" },
     { "dc:publisher", "M_PUBLISHER" },
     { "upnp:genre", "M_GENRE" },
@@ -289,7 +289,7 @@ static const std::map<std::string, std::string> upnpGenrePropDefaults {
 
 /// \brief default values for ConfigVal::UPNP_PLAYLIST_PROPERTIES
 static const std::map<std::string, std::string> upnpPlaylistPropDefaults {
-    { "dc:date", "M_UPNP_DATE" },
+    { DC_DATE, "M_UPNP_DATE" },
 };
 
 /// \brief default values for ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST
@@ -1400,6 +1400,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE,
         "attribute::multi-value", "config-clients.html#multi-value",
         YES),
+    std::make_shared<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL,
+        "attribute::full-filter", "config-clients.html#full-filter",
+        NO),
     std::make_shared<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS,
         "/clients/client", "config-import.html#headers",
         ConfigVal::A_CLIENTS_UPNP_HEADERS_HEADER, ConfigVal::A_CLIENTS_UPNP_HEADERS_KEY, ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE,
