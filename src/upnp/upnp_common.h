@@ -54,6 +54,7 @@
 #define UPNP_CLASS_BOOKMARK_ITEM "object.item.bookmarkItem"
 
 #define UPNP_CLASS_CONTAINER "object.container"
+#define UPNP_CLASS_CONTAINER_FOLDER "object.container.storageFolder"
 #define UPNP_CLASS_PHOTO_ALBUM "object.container.album.photoAlbum"
 #define UPNP_CLASS_MUSIC_ALBUM "object.container.album.musicAlbum"
 #define UPNP_CLASS_MUSIC_GENRE "object.container.genre.musicGenre"
