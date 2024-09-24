@@ -123,6 +123,12 @@ public:
         this->clientProfile.multiValue = multiValue;
     }
 
+    bool getFullFilter() const { return this->clientProfile.fullFilter; }
+    void setFullFilter(bool fullFilter)
+    {
+        this->clientProfile.fullFilter = fullFilter;
+    }
+
     bool getAllowed() const { return this->clientProfile.isAllowed; }
     void setAllowed(bool isAllowed)
     {

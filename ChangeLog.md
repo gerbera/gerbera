@@ -6,6 +6,7 @@
 - Fix access to cache option if thumbnailer disabled
 - Fix build without ffmpeg
 - Fix handling of checkbox values on web ui
+- UPnP: Add support for filters
 
 ### v2.3.0
 

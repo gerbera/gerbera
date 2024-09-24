@@ -61,6 +61,9 @@
 
 #define MIME_TYPE_ASX_PLAYLIST "video/x-ms-asx"
 
+#define DC_DATE "dc:date"
+#define DC_TITLE "dc:title"
+
 enum class MetadataFields {
     M_TITLE = 0,
     M_ARTIST,

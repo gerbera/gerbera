@@ -96,14 +96,16 @@ public:
     /// \param obj Object containing this resource
     /// \param resource The CDSResource itself
     /// \param parent Parent node to render the result into
-    /// \param clientSpecificAttrs A map containing extra client specific res attributes (like resolution, etc.)
     /// \param filter upnp attribute filter
+    /// \param quirks inject special handling for clients
+    /// \param clientSpecificAttrs A map containing extra client specific res attributes (like resolution, etc.)
     /// \param clientGroup The clients group for play tracking
     /// \param mimeMappings mappings of mime-types
     void renderResource(
         const CdsObject& obj,
         const CdsResource& resource, pugi::xml_node& parent,
         const std::vector<std::string>& filter,
+        const std::shared_ptr<Quirks>& quirks,
         const std::map<std::string, std::string>& clientSpecificAttrs,
         const std::string& clientGroup,
         const std::map<std::string, std::string>& mimeMappings) const;

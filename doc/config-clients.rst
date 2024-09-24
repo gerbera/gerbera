@@ -146,6 +146,18 @@ This section defines the client behaviour for one client.
 
     .. code:: xml
 
+        full-filter="yes"
+
+    * Optional
+
+    * Default: **no**
+
+    Enable the full UPnP filter support for this client. This means that all requested
+    elements from the filter request property will be created in the response.
+    Make sure that the namespaces are added with the the upnp section :ref:`upnp`
+
+    .. code:: xml
+
         allowed="no"
 
     * Optional

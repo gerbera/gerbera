@@ -185,6 +185,13 @@ public:
      */
     bool getMultiValue() const;
 
+    /** \brief Get full upnp filter creation
+     *
+     * \return true if full-filter is enabled for client
+     *
+     */
+    bool getFullFilter() const;
+
     /** \brief Get group for ClientStatusDetail
      *
      * \return group for ClientStatusDetail

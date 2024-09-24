@@ -556,6 +556,7 @@
             <xs:attribute name="caption-info-count" type="xs:positiveInteger" default="1"/>
             <xs:attribute name="upnp-string-limit" default="-1"/>
             <xs:attribute name="multi-value" type="boolean" default="yes"/>
+            <xs:attribute name="full-filter" type="boolean" default="no"/>
             <xs:attribute name="allowed" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>

@@ -58,6 +58,7 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, cons
         auto captionInfoCount = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
         auto stringLimit = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->getXmlContent(child);
         auto multiValue = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->getXmlContent(child);
+        auto fullFilter = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL)->getXmlContent(child);
         auto isAllowed = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->getXmlContent(child);
         auto mappings = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child);
         auto headers = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS)->getXmlContent(child);
@@ -72,6 +73,7 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, cons
 
         auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, matchValues, captionInfoCount, stringLimit, multiValue, isAllowed);
         try {
+            client->setFullFilter(fullFilter);
             if (!mappings.empty())
                 client->setMimeMappings(mappings);
             if (!headers.empty())
@@ -180,6 +182,15 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList, co
                 config->setOrigValue(index, entry->getMultiValue());
             entry->setMultiValue(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->checkValue(optValue));
             log_debug("New Client MultiValue {} {}", index, config->getClientConfigListOption(option)->get(i)->getMultiValue());
+            return true;
+        }
+        // set client upnp full filter
+        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_UPNP_FILTER_FULL });
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, entry->getFullFilter());
+            entry->setFullFilter(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL)->checkValue(optValue));
+            log_debug("New Client FullFilter {} {}", index, config->getClientConfigListOption(option)->get(i)->getFullFilter());
             return true;
         }
     }

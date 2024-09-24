@@ -873,6 +873,7 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
 
         The full path to the upgrade settings for the database
 
+.. _upnp:
 
 ``upnp``
 ~~~~~~~~
