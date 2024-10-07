@@ -20,10 +20,10 @@
 
     $Id$
 */
-import {GerberaApp} from './gerbera-app.module.js';
-import {Auth} from './gerbera-auth.module.js';
-import {Trail} from './gerbera-trail.module.js';
-import {Updates} from "./gerbera-updates.module.js";
+import { GerberaApp } from './gerbera-app.module.js';
+import { Auth } from './gerbera-auth.module.js';
+import { Trail } from './gerbera-trail.module.js';
+import { Updates } from "./gerbera-updates.module.js";
 
 const destroy = () => {
   const datagrid = $('#datagrid');
@@ -34,82 +34,187 @@ const destroy = () => {
   }
 };
 
+let currentItemView = undefined;
+
+export class ItemView {
+  parentId = -1;
+  start = 0;
+  count = 10;
+  action = 'browse';
+  constructor(pId, act) {
+    this.parentId = pId;
+    this.action = act;
+    $('#search').hide();
+  }
+  get requestData() {
+    let result = {
+      parent_id: this.parentId,
+      action: this.action,
+      req_type: 'items',
+      start: this.start,
+      count: this.count,
+      select_it: 0
+    };
+    result[Auth.SID] = Auth.getSessionId();
+    return result;
+  }
+
+  retrieveGerberaItems(pId = -1) {
+    if (pId === -1)
+      this.parentId = GerberaApp.currentTreeItem.gerbera.id;
+    else
+      this.parentId = pId;
+    this.count = GerberaApp.viewItems();
+    const data = this.requestData; // ensure call sequence
+    return $.ajax({
+      url: GerberaApp.clientConfig.api,
+      type: 'get',
+      data: data
+    });
+  }
+
+  dataItems(response) {
+    const items = Items.transformItems(response.items.item);
+    setPage(1); // reset page
+    let pager = {
+      currentPage: Math.ceil(response.items.start / GerberaApp.viewItems()) + 1,
+      pageCount: 10,
+      gridMode: GerberaApp.gridMode(),
+      onClick: Items.retrieveItemsForPage,
+      onNext: Items.nextPage,
+      onPrevious: Items.previousPage,
+      onItemsPerPage: Items.changeItemsPerPage,
+      onModeSelect: Items.changeGridMode,
+      totalMatches: response.items.total_matches,
+      itemsPerPage: GerberaApp.viewItems(),
+      ippOptions: GerberaApp.itemsPerPage(),
+      parentId: response.items.parent_id
+    };
+    return {
+      data: items,
+      pager: pager,
+      onEdit: Items.editItem,
+      onDelete: Items.deleteItemFromList,
+      onDownload: Items.downloadItem,
+      onAdd: Items.addFileItem,
+      itemType: GerberaApp.getType(),
+      parentItem: response.items
+    }
+  }
+}
+
+export class BrowseItemView extends ItemView {
+  constructor(pId) {
+    super(pId, 'browse');
+  }
+  get requestData() {
+    let result = super.requestData;
+    result.updates = 'check';
+    return result;
+  }
+}
+
+export class SearchItemView extends ItemView {
+  searchCriteria = '';
+  sortCriteria = '';
+  searchableContainers = false;
+
+  constructor(pId) {
+    super(pId, 'search');
+    this.searchGerberaItems = this.searchGerberaItems.bind(this);
+    $('#search').show();
+    $('#datagrid').hide();
+    $('#searchButton').off('click').on('click', this.searchGerberaItems);
+
+    $('#searchCaps').text(GerberaApp.serverConfig.searchCaps.split(',').join(', '));
+    $('#sortCaps').text(GerberaApp.serverConfig.sortCaps.split(',').join(', '));
+    const search = GerberaApp.getSearch();
+    $('#searchQuery').val(search[0]);
+    $('#searchSort').val(search[1]);
+  }
+
+  get requestData() {
+    let result = super.requestData;
+    result.searchCriteria = this.searchCriteria;
+    result.sortCriteria = this.sortCriteria;
+    result.searchableContainers = this.searchableContainers;
+    return result;
+  }
+
+  searchGerberaItems() {
+    this.searchCriteria = $('#searchQuery').val();
+    this.sortCriteria = $('#searchSort').val();
+    GerberaApp.setSearch(this.searchCriteria, this.sortCriteria);
+    $('#datagrid').show();
+
+    this.retrieveGerberaItems()
+      .then((response) => Items.loadItems(response))
+      .catch((err) => GerberaApp.error(err));
+  }
+}
+
+export class FileItemView extends ItemView {
+  constructor(pId) {
+    super(pId, 'files');
+  }
+  get requestData() {
+    let result = super.requestData;
+    result.req_type = 'files';
+    return result;
+  }
+  dataItems(response) {
+    return {
+      data: Items.transformFiles(response.files.file),
+      pager: undefined,
+      onEdit: Items.editItem,
+      onDelete: Items.deleteItemFromList,
+      onDownload: Items.downloadItem,
+      onAdd: Items.addFileItem,
+      itemType: GerberaApp.getType(),
+      parentItem: response.files
+    }
+  }
+}
+
 const initialize = () => {
   $('#datagrid').html('');
+  $('#search').hide();
   return Promise.resolve();
 };
 
-const treeItemSelected = function (data) {
-  const linkType = (GerberaApp.getType() === 'db') ? 'items' : 'files';
+const viewFactory = function (data) {
   GerberaApp.currentTreeItem = data;
-  retrieveGerberaItems(linkType, data.gerbera.id, 0, GerberaApp.viewItems())
-    .then((response) => loadItems(response))
-    .catch((err) => GerberaApp.error(err));
+  switch (GerberaApp.getType()) {
+    case 'search':
+      currentItemView = new SearchItemView(data.gerbera.id);
+      return undefined;
+    case 'db':
+      currentItemView = new BrowseItemView(data.gerbera.id);
+      break;
+    default:
+      currentItemView = new FileItemView(data.gerbera.id);
+      break;
+  }
+  return currentItemView;
 };
 
-const retrieveGerberaItems = (type, parentId, start, count) => {
-  var requestData = {
-    req_type: type,
-    parent_id: parentId,
-    start: start,
-    count: count,
-    updates: 'check'
-  };
-  requestData[Auth.SID] = Auth.getSessionId();
-  return $.ajax({
-    url: GerberaApp.clientConfig.api,
-    type: 'get',
-    data: requestData
-  });
+const treeItemSelected = function (data) {
+  if (viewFactory(data))
+    currentItemView.retrieveGerberaItems()
+      .then((response) => loadItems(response))
+      .catch((err) => GerberaApp.error(err));
 };
 
 const loadItems = (response) => {
   if (response.success) {
-    const type = GerberaApp.getType();
-    let items;
-    let parentItem;
-    let pager;
-
-    if (type === 'db') {
-      items = transformItems(response.items.item);
-      parentItem = response.items;
-      setPage(1); // reset page
-      pager = {
-        currentPage: Math.ceil(response.items.start / GerberaApp.viewItems()) + 1,
-        pageCount: 10,
-        gridMode: GerberaApp.gridMode(),
-        onClick: Items.retrieveItemsForPage,
-        onNext: Items.nextPage,
-        onPrevious: Items.previousPage,
-        onItemsPerPage: Items.changeItemsPerPage,
-        onModeSelect: Items.changeGridMode,
-        totalMatches: response.items.total_matches,
-        itemsPerPage: GerberaApp.viewItems(),
-        ippOptions: GerberaApp.itemsPerPage(),
-        parentId: response.items.parent_id
-      };
-    } else if (type === 'fs') {
-      items = transformFiles(response.files.file);
-      parentItem = response.files;
-    }
-
+    const dataItems = currentItemView.dataItems(response);
     const datagrid = $('#datagrid');
 
     if (datagrid.hasClass('grb-dataitems')) {
       datagrid.dataitems('destroy');
     }
-
-    datagrid.dataitems({
-      data: items,
-      pager: pager,
-      onEdit: editItem,
-      onDelete: deleteItemFromList,
-      onDownload: downloadItem,
-      onAdd: addFileItem,
-      itemType: GerberaApp.getType()
-    });
-
-    Trail.makeTrailFromItem(parentItem);
+    datagrid.dataitems(dataItems);
+    Trail.makeTrailFromItem(dataItems.parentItem);
   }
 };
 
@@ -282,7 +387,7 @@ const addVirtualItem = (event) => {
   const item = event.data;
   const editModal = $('#editModal');
   if (item) {
-    editModal.editmodal('addNewItem', {type: 'container', item: item, onSave: addObject});
+    editModal.editmodal('addNewItem', { type: 'container', item: item, onSave: addObject });
     editModal.editmodal('show');
   }
 };
@@ -385,10 +490,10 @@ const transformFiles = (files) => {
 
 const retrieveItemsForPage = (event) => {
   const pageItem = event.data;
-  const linkType = (GerberaApp.getType() === 'db') ? 'items' : 'files';
-  const itemsPerPage = pageItem.gridMode === 3 ? 1 : pageItem.itemsPerPage;
-  const start = (pageItem.pageNumber * itemsPerPage) - itemsPerPage;
-  return retrieveGerberaItems(linkType, pageItem.parentId, start, itemsPerPage)
+  currentItemView.parentId = pageItem.parentId;
+  currentItemView.count = pageItem.gridMode === 3 ? 1 : pageItem.itemsPerPage;
+  currentItemView.start = (pageItem.pageNumber * currentItemView.count) - currentItemView.count;
+  return currentItemView.retrieveGerberaItems()
     .then((response) => loadItems(response))
     .then(() => {
       setPage(pageItem.pageNumber)
@@ -446,11 +551,13 @@ export const Items = {
   deleteItemFromList,
   deleteGerberaItem,
   destroy,
+  downloadItem,
   editItem,
   loadEditItem,
   loadItems,
   initialize,
-  retrieveGerberaItems,
+  transformFiles,
+  transformItems,
   retrieveItemsForPage,
   saveItem,
   saveItemComplete,
@@ -459,6 +566,6 @@ export const Items = {
   changeGridMode,
   nextPage,
   previousPage,
-  transformItems,
   treeItemSelected,
+  viewFactory,
 };

@@ -104,9 +104,11 @@ describe('Gerbera Trail', () => {
   });
   describe('deleteItem()', () => {
     let deleteResponse, event, appErrorSpy;
+
     beforeEach(() => {
       fixture.setBase('test/client/fixtures');
       fixture.load('trail.html');
+      Tree.viewFactory('db', 0);
       deleteResponse = { success: true };
       event = {data: { id: 8 }};
 
@@ -152,6 +154,7 @@ describe('Gerbera Trail', () => {
     beforeEach(() => {
       fixture.setBase('test/client/fixtures');
       fixture.load('trail.html');
+      Tree.viewFactory('db', 0);
       deleteResponse = {success: true};
       event = {data: {id: 8}};
       appErrorSpy = spyOn(GerberaApp, 'error');

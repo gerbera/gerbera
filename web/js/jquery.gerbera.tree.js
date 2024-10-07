@@ -57,7 +57,11 @@ $.widget('grb.tree', {
       item.prop('id', 'grb-tree-' + data[i].gerbera.id);
 
       const icon = $('<span></span>').addClass(config.closedIcon).addClass('folder-icon');
-      let title = $('<span></span>').addClass(config.titleClass).text(data[i].title).prop('title', `${data[i].gerbera.path} (${data[i].gerbera.upnpClass})`);
+      let title = $('<span></span>');
+      title.addClass(config.titleClass);
+      title.text(data[i].title);
+      title.prop('title', `${data[i].gerbera.path} (${data[i].gerbera.upnpClass})`);
+      title.prop('style', 'width: 100%');
       if (config.onSelection) {
         title.click(data[i], config.onSelection);
       }
@@ -71,7 +75,7 @@ $.widget('grb.tree', {
           if (badgeData === 'a') {
             const aBadge = $('<a href="#"></a>').addClass('badge badge-secondary').html('<i class="fa fa-refresh"></i> Autoscan');
             aBadge.addClass('pull-right autoscan');
-            aBadge.click({id: data[i].gerbera.id}, config.onAutoscanEdit);
+            aBadge.click({ id: data[i].gerbera.id }, config.onAutoscanEdit);
             aBadge.prop('title', 'Autoscan: ' + data[i].gerbera.autoScanType);
             badges.push(aBadge);
           } else if (badgeData === 'p') {

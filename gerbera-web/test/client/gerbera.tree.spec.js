@@ -41,6 +41,7 @@ describe('Gerbera Tree', () => {
     beforeEach(() => {
       trailConfig = {};
       trail = $('#trail');
+      Tree.viewFactory('db', 0);
     });
 
     it('renders the tree with parent and children', () => {
@@ -69,6 +70,10 @@ describe('Gerbera Tree', () => {
     });
   });
   describe('transformContainers()', () => {
+    beforeEach(() => {
+      Tree.viewFactory('db', 0);
+    });
+
     let result;
 
     it('transforms containers response suitable for treeview load', () => {
@@ -177,6 +182,7 @@ describe('Gerbera Tree', () => {
 
     beforeEach(() => {
       ajaxSpy = spyOn($, 'ajax');
+      Tree.viewFactory('db', 0);
     });
 
     afterEach(() => {
@@ -262,6 +268,7 @@ describe('Gerbera Tree', () => {
 
     beforeEach(() => {
       ajaxSpy = spyOn($, 'ajax');
+      Tree.viewFactory('db', 0);
     });
 
     afterEach(() => {
@@ -292,6 +299,7 @@ describe('Gerbera Tree', () => {
 
     beforeEach(() => {
       ajaxSpy = spyOn($, 'ajax');
+      Tree.viewFactory('db', 0);
     });
 
     afterEach(() => {
@@ -318,6 +326,7 @@ describe('Gerbera Tree', () => {
 
     beforeEach(() => {
       ajaxSpy = spyOn($, 'ajax');
+      Tree.viewFactory('db', 0);
     });
 
     afterEach(() => {
@@ -342,6 +351,7 @@ describe('Gerbera Tree', () => {
 
     beforeEach(() => {
       ajaxSpy = spyOn($, 'ajax');
+      Tree.viewFactory('db', 0);
     });
 
     afterEach(() => {
@@ -363,6 +373,10 @@ describe('Gerbera Tree', () => {
     });
   });
   describe('getTreeElementById()', () => {
+    beforeEach(() => {
+      Tree.viewFactory('db', 0);
+    });
+
     it('finds the HTML element given the gerbera id', () => {
       Tree.loadTree(treeResponse);
 

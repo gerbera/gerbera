@@ -58,6 +58,12 @@
                 </a>
               </li>
               <li class="nav-item" style="display: none">
+                <a id="nav-search" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="search">
+                  <i class="fa fa-search"></i>
+                  <span>Search</span>
+                </a>
+              </li>
+              <li class="nav-item" style="display: none">
                 <a id="nav-fs" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs">
                   <i class="fa fa-folder-open"></i>
                   <span>File System</span>
@@ -164,8 +170,8 @@
                     onclick="$('#nav-fs').click(); // Replace with hashchange handling"
                   >
                     <div class="sublink d-flex card-style-bottom p-3">
-                      <i class="fa fa-fw fa-plus-square-o fa-3x text-center" style="width: 10%"></i>
-                      <div class="ml-2">
+                      <i class="fa fa-fw fa-plus-square-o fa-3x text-center" style="width: 2em"></i>
+                      <div class="ml-2" style="width: 80%">
                         <h4>Add some files</h4>
                         <span>Browse and import your multimedia files into Gerbera.</span>
                       </div>
@@ -174,20 +180,33 @@
                   <a
                     id="viewlink"
                     href="javascript:;"
-                    onclick="$('#nav-db').click(); // Replace with hashchange handling"
+                    onclick="$('#nav-db').click();"
                   >
                     <div class="sublink d-flex card-style-bottom px-3 py-3">
-                      <i class="fa fa-fw fa-files-o fa-3x text-center" style="width: 10%"></i>
-                      <div class="ml-2">
+                      <i class="fa fa-fw fa-files-o fa-3x text-center" style="width: 2em"></i>
+                      <div class="ml-2" style="width: 80%">
                         <h4>Browse indexed files</h4>
                         <span>View, update and remove files from Gerbera.</span>
                       </div>
                     </div>
                   </a>
+                  <a
+                    id="searchlink"
+                    href="javascript:;"
+                    onclick="$('#nav-search').click();"
+                  >
+                    <div class="sublink d-flex card-style-bottom px-3 py-3">
+                      <i class="fa fa-fw fa-search fa-3x text-center" style="width: 2em"></i>
+                      <div class="ml-2" style="width: 80%">
+                        <h4>Search indexed entries</h4>
+                        <span>Find files managed by Gerbera.</span>
+                      </div>
+                    </div>
+                  </a>
                   <a id="clientlink" href="javascript:;" onclick="$('#nav-clients').click();">
                     <div class="sublink d-flex card-style-bottom px-3 py-3">
-                      <i class="fa fa-fw fa-desktop fa-3x text-center" style="width: 10%"></i>
-                      <div class="ml-2">
+                      <i class="fa fa-fw fa-desktop fa-3x text-center" style="width: 2em"></i>
+                      <div class="ml-2" style="width: 80%">
                         <h4>Show connected clients</h4>
                         <span>View clients detected by Gerbera and their profile details.</span>
                       </div>
@@ -195,8 +214,8 @@
                   </a>
                   <a id="configlink" href="javascript:;" onclick="$('#nav-config').click();">
                     <div class="sublink d-flex card-style-bottom px-3 py-3">
-                      <i class="fa fa-fw fa-sliders fa-3x text-center" style="width: 10%"></i>
-                      <div class="ml-2">
+                      <i class="fa fa-fw fa-sliders fa-3x text-center" style="width: 2em"></i>
+                      <div class="ml-2" style="width: 80%">
                         <h4>Edit Configuration</h4>
                         <span>Change settings for Gerbera.</span>
                       </div>
@@ -447,6 +466,23 @@
           </button>
         </div>
         <div id="right">
+          <div id="search" style="display: none; padding: 20px">
+            <h3><i class="fa fa-search"></i>&nbsp;Search</h3>
+            <span class="small text-muted">Please use UPnP syntax for Query and Sort</span>
+            <ul>
+              <li>
+                <label class="searchLabel">Query: <span class="small text-muted">upnp:class derivedfrom "object.item" and dc:title contains "music"</span></label>
+                <br/><textarea id="searchQuery" cols="50" rows="2"></textarea>
+                <br/><span class="small text-muted" id="searchCaps"></span>
+              </li>
+              <li>
+                <label class="searchLabel">Sort: <span class="small text-muted">-dc:title</span></label>
+                <br/><textarea id="searchSort" cols="50" rows="1"></textarea>
+                <br/><span class="small text-muted" id="sortCaps"></span>
+              </li>
+            </ul>
+            <button id="searchButton" class="btn btn-primary">Execute</button>
+          </div>
           <div id="datagrid"></div>
         </div>
       </div>

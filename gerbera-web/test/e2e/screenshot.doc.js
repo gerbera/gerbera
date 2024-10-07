@@ -1,10 +1,9 @@
 /* global process */
-const {expect} = require('chai');
-const {Builder} = require('selenium-webdriver');
-const {suite} = require('selenium-webdriver/testing');
+const { Builder } = require('selenium-webdriver');
+const { suite } = require('selenium-webdriver/testing');
 let chrome = require('selenium-webdriver/chrome');
 const mockWebServer = 'http://' + process.env.npm_package_config_webserver_host + ':' + process.env.npm_package_config_webserver_port;
-const {argv} = require('yargs');
+const { argv } = require('yargs');
 const Jimp = require('jimp');
 let driver;
 
@@ -31,7 +30,7 @@ suite(() => {
 
   describe('The screenshot documentation spec takes screenshots', () => {
 
-    beforeEach(async() => {
+    beforeEach(async () => {
       await driver.get(mockWebServer + '/disabled.html');
       await driver.manage().deleteAllCookies();
       await driver.executeScript("localStorage.clear()");
@@ -153,6 +152,20 @@ suite(() => {
       await homePage.clickMenu('nav-db');
       await homePage.clickTree('Photos');
       await homePage.setSelectValue('gridSelect', 3);
+
+      await homePage.takeScreenshot(fileName);
+
+      const image = await Jimp.read(fileName);
+      image.resize(1280, Jimp.AUTO).write(fileName);
+    });
+
+    it('for [search view]', async () => {
+      const fileName = DEFAULT_FOLDER_STORE + 'search-view.png';
+      await loginPage.username('user');
+      await loginPage.password('pwd');
+      await loginPage.submitLogin();
+      await homePage.clickMenu('nav-search');
+      await homePage.clickTree('Photos');
 
       await homePage.takeScreenshot(fileName);
 
@@ -394,7 +407,6 @@ suite(() => {
       const image = await Jimp.read(fileName);
       image.resize(1280, Jimp.AUTO).write(fileName);
     });
-
   });
 });
 

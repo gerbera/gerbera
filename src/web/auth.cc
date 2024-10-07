@@ -36,6 +36,7 @@
 
 #include "config/config.h"
 #include "config/config_val.h"
+#include "database/sql_database.h"
 #include "exceptions.h"
 #include "session_manager.h"
 #include "util/tools.h"
@@ -93,6 +94,8 @@ void Web::Auth::process()
         cfg.append_attribute("poll-interval") = config->getIntOption(ConfigVal::SERVER_UI_POLL_INTERVAL);
         cfg.append_child("sourceDocs").append_child(pugi::node_pcdata).set_value(config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_SOURCE).c_str());
         cfg.append_child("userDocs").append_child(pugi::node_pcdata).set_value(config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_USER).c_str());
+        cfg.append_child("searchCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSearchCapabilities().c_str());
+        cfg.append_child("sortCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSortCapabilities().c_str());
 
         /// CREATE XML FRAGMENT FOR ITEMS PER PAGE
         auto ipp = cfg.append_child("items-per-page");

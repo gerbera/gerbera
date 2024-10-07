@@ -113,6 +113,20 @@ class Items : public WebRequestHandler {
 
 public:
     void process() override;
+
+protected:
+    std::vector<std::shared_ptr<CdsObject>> doBrowse(
+        const std::shared_ptr<CdsObject>& container,
+        int start,
+        int count,
+        pugi::xml_node& items,
+        std::string& trackFmt);
+    std::vector<std::shared_ptr<CdsObject>> doSearch(
+        const std::shared_ptr<CdsObject>& container,
+        int start,
+        int count,
+        pugi::xml_node& items,
+        std::string& trackFmt);
 };
 
 /// \brief Call from WebUi to add item from filesystem view

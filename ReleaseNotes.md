@@ -6,6 +6,7 @@
 
 - Configuration of ui handler to allow hosting of docs and doxygen output
 - Support for UPnP filters
+- Search page in web UI
 
 ### FIXES
 

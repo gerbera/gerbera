@@ -29,6 +29,12 @@
               <span>Database</span>
             </a>
           </li>
+          <li class="nav-item" style="display: none">
+            <a id="nav-search" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="search">
+              <i class="fa fa-search"></i>
+              <span>Search</span>
+            </a>
+          </li>
           <li class="nav-item">
             <a id="nav-fs" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs">
               <i class="fa fa-folder-open"></i>
@@ -140,6 +146,15 @@
                   View indexed files
                 </h4>
                 <span>View, update and remove files from Gerbera.</span>
+              </a>
+              <a id="searchlink" href="javascript:;" onclick="$('#nav-search').click();" >
+                <div>
+                  <h4>
+                    <i class="fa fa-search"></i>
+                    Search indexed entries
+                  </h4>
+                  <span>Find files managed by Gerbera.</span>
+                </div>
               </a>
               <a id="clientlink" href="javascript:;" onclick="$('#nav-clients').click();">
                 <h4>
@@ -374,6 +389,23 @@
       </button>
     </div>
     <div id="right">
+      <div id="search" style="display: none; padding: 20px">
+        <h3><i class="fa fa-search"></i>&nbsp;Search</h3>
+        <span class="small text-muted">Please use UPnP syntax for Query and Sort</span>
+        <ul>
+          <li>
+            <label class="searchLabel">Query: <span class="small text-muted">upnp:class derivedfrom "object.item" and dc:title contains "music"</span></label>
+            <br/><textarea id="searchQuery" cols="50" rows="2"></textarea>
+            <br/><span class="small text-muted" id="searchCaps"></span>
+          </li>
+          <li>
+            <label class="searchLabel">Sort: <span class="small text-muted">-dc:title</span></label>
+            <br/><textarea id="searchSort" cols="50" rows="1"></textarea>
+            <br/><span class="small text-muted" id="sortCaps"></span>
+          </li>
+        </ul>
+        <button id="searchButton" class="btn btn-primary">Execute</button>
+      </div>
       <div id="datagrid"></div>
     </div>
   </div>

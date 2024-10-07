@@ -14,17 +14,17 @@ Enable/Disable
 
 The Gerbera UI is enabled or disabled using the `config.xml` file.
 
-::
+.. code-block:: xml
 
-    <config>
-      <server>
-        <ui enabled="no" show-tooltips="yes">
-          <accounts enabled="no" session-timeout="30">
-            <account user="" password=""/>
-          </accounts>
-        </ui>
-      </server>
-    </config>
+   <config>
+     <server>
+       <ui enabled="no" show-tooltips="yes">
+         <accounts enabled="no" session-timeout="30">
+           <account user="" password=""/>
+         </accounts>
+       </ui>
+     </server>
+   </config>
 
 
 When the Gerbera server starts successfully it reports the location of the web browser user interface
@@ -70,6 +70,8 @@ The main view offers the same links to the sub pages as the menu. It also displa
     *Returns to the start page*
 * Database // Browse indexed files
     *Browse the contents of the database without UPnP client*
+* Search // Search indexed files
+    *Search the contents of the database without UPnP client*
 * Filesystem // Add some files
     *Show the filesystem tree of the server to add further contents*
 * Clients // Show connected clients
@@ -88,6 +90,7 @@ The Gerbera web UI has several features to maintain your media.
 
 * Filesystem Items View
 * Database Items View
+* Search View
 * Clients View
 * Config View
 * Item Operations
@@ -154,6 +157,16 @@ The single item view is designed to display images. To avoid critical clicks, de
 .. image:: _static/database-single-view.png
    :alt: Database view with single item
    :target: _static/database-single-view.png
+
+
+Seach View
+~~~~~~~~~~
+
+The search view allows searching the database with upnp search queries like a regular upnp client may do as well
+
+.. image:: _static/search-view.png
+   :alt: Search item
+   :target: _static/search-view.png
 
 
 Clients View

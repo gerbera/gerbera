@@ -20,12 +20,12 @@
 
     $Id$
 */
-import {Autoscan} from "./gerbera-autoscan.module.js";
-import {Auth} from "./gerbera-auth.module.js";
-import {GerberaApp} from "./gerbera-app.module.js";
-import {Trail} from "./gerbera-trail.module.js";
-import {Items} from "./gerbera-items.module.js";
-import {Updates} from "./gerbera-updates.module.js";
+import { Autoscan } from "./gerbera-autoscan.module.js";
+import { Auth } from "./gerbera-auth.module.js";
+import { GerberaApp } from "./gerbera-app.module.js";
+import { Trail } from "./gerbera-trail.module.js";
+import { Items } from "./gerbera-items.module.js";
+import { Updates } from "./gerbera-updates.module.js";
 
 const treeViewCss = {
   titleClass: 'folder-title',
@@ -35,11 +35,13 @@ const treeViewCss = {
 
 let currentTree = [];
 let currentType = 'db';
+let currentView = undefined;
 let pendingItems = [];
 
 const destroy = () => {
   currentTree = [];
   currentType = 'db';
+  currentView = undefined;
   const tree = $('#tree');
   if (tree.hasClass('grb-tree')) {
     tree.tree('destroy');
@@ -47,28 +49,95 @@ const destroy = () => {
   return Promise.resolve();
 };
 
+class TreeView {
+  parentId = -1;
+  constructor(pId) {
+    this.parentId = pId;
+  }
+  get requestData() {
+    let result = {
+      parent_id: this.parentId,
+      select_it: 0
+    };
+    result[Auth.SID] = Auth.getSessionId();
+    return result;
+  }
+  checkForUpdates() {
+    return Promise.resolve();
+  }
+  hasClass() { return true; }
+}
+
+class BrowseTreeView extends TreeView {
+  constructor(pId) {
+    super(pId);
+  }
+  get requestData() {
+    let result = super.requestData;
+    result.req_type = 'containers';
+    result.action = 'browse';
+    return result;
+  }
+  checkForUpdates() {
+    return Updates.getUpdates(true);
+  }
+}
+
+class SearchTreeView extends TreeView {
+  constructor(pId) {
+    super(pId);
+  }
+  get requestData() {
+    let result = super.requestData;
+    result.req_type = 'containers';
+    result.action = 'search';
+    return result;
+  }
+  hasClass(cls) { return (cls === undefined || !cls.endsWith('dynamicFolder')); }
+}
+
+class FileTreeView extends TreeView {
+  constructor(pId) {
+    super(pId);
+  }
+  get requestData() {
+    let result = super.requestData;
+    result.req_type = 'directories';
+    result.action = 'browse';
+    return result;
+  }
+}
+
 const initialize = () => {
   $('#tree').html('');
   return Promise.resolve();
 };
 
-const selectType = (type, parentId) => {
+const viewFactory = (type, parentId) => {
   currentType = type;
-  const linkType = (currentType === 'db') ? 'containers' : 'directories';
+  switch (currentType) {
+    case 'db':
+      currentView = new BrowseTreeView(parentId);
+      break;
+    case 'search':
+      currentView = new SearchTreeView(parentId);
+      break;
+    default:
+      currentView = new FileTreeView(parentId);
+      break;
+  }
+  return currentView;
+};
 
-  var requestData = {
-    req_type: linkType,
-    parent_id: parentId,
-    select_it: 0
-  };
-  requestData[Auth.SID] = Auth.getSessionId();
+const selectType = (type, parentId) => {
+  viewFactory(type, parentId);
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: requestData
+    data: currentView.requestData
   })
     .then((response) => loadTree(response))
-    .then(() => checkForUpdates())
+    .then(() => currentView.checkForUpdates())
     .catch((err) => GerberaApp.error(err))
 };
 
@@ -142,7 +211,7 @@ const loadTree = (response, config) => {
 
     pendingItems = GerberaApp.currentItem();
 
-    if (pendingItems){
+    if (pendingItems) {
       initSelection(pendingItems);
     }
   }
@@ -169,21 +238,15 @@ const initSelection = (currentItems) => {
 
 const fetchChildren = (gerberaData) => {
   currentType = GerberaApp.getType();
-  const linkType = (currentType === 'db') ? 'containers' : 'directories';
-  var requestData = {
-    req_type: linkType,
-    parent_id: gerberaData.id,
-    select_it: 0
-  };
-  requestData[Auth.SID] = Auth.getSessionId();
+  currentView.parentId = gerberaData.id;
   return $.ajax({
     url: GerberaApp.clientConfig.api,
     type: 'get',
-    data: requestData
+    data: currentView.requestData
   })
-  .catch((err) => {
-    GerberaApp.error(err);
-  });
+    .catch((err) => {
+      GerberaApp.error(err);
+    });
 };
 
 const transformContainers = (response, createParent) => {
@@ -211,6 +274,8 @@ const transformContainers = (response, createParent) => {
 
   for (let i = 0; i < items.length; i++) {
     const item = items[i];
+    if (currentView && !currentView.hasClass(item.upnp_class))
+      continue;
     const node = {};
     node.title = item.title;
     node.badge = generateBadges(item);
@@ -281,14 +346,6 @@ const reloadParentTreeItem = (id) => {
   }
 };
 
-const checkForUpdates = () => {
-  if (GerberaApp.getType() === 'db') {
-    return Updates.getUpdates(true);
-  } else {
-    return Promise.resolve();
-  }
-};
-
 const getTreeElementById = (id) => {
   return $('#tree').tree('getElement', id);
 };
@@ -303,6 +360,7 @@ export const Tree = {
   reloadTreeItem,
   reloadTreeItemById,
   selectType,
+  viewFactory,
   transformContainers,
   currentTree,
 };
