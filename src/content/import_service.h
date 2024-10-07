@@ -242,7 +242,7 @@ public:
 
     void finishScan(const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject = nullptr);
 
-    std::shared_ptr<CdsContainer> getContainer(const fs::path& location) const;
+    std::shared_ptr<CdsContainer> getContainer(const std::string& location) const;
     std::shared_ptr<CdsObject> getObject(const fs::path& location) const;
     std::shared_ptr<Layout> getLayout() const { return layout; }
     std::shared_ptr<MetadataService> getMetadataService() const { return metadataService; }

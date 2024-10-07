@@ -1131,7 +1131,7 @@ std::shared_ptr<CdsContainer> ContentManager::addContainer(int parentID, const s
         cVec.push_back(std::make_shared<CdsContainer>(segment.string(), upnpClass));
     }
     addContainerTree(cVec, nullptr);
-    return importService->getContainer(cPath);
+    return importService->getContainer(fmt::format("/{}", cPath.string()));
 }
 
 std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain, const std::shared_ptr<CdsObject>& refItem)
