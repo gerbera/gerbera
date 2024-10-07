@@ -219,6 +219,18 @@ public:
         auto it = std::find_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; });
         return it != metaData.end() ? it->second : std::string();
     }
+    /// \brief Query multivalue metadata.
+    std::vector<std::string> getMetaGroup(const std::string& field) const
+    {
+        std::vector<std::string> metaGroup;
+        for (auto&& [mkey, mvalue] : metaData) {
+            if (mkey != field)
+                continue;
+            metaGroup.push_back(mvalue);
+        }
+        return metaGroup;
+    }
+    /// \brief Query multivalue metadata groups.
     std::map<std::string, std::vector<std::string>> getMetaGroups() const
     {
         std::map<std::string, std::vector<std::string>> metaGroups;

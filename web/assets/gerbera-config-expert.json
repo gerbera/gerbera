@@ -941,6 +941,25 @@
           ]
         },
         {
+          "item": "/import/virtual-directories/key",
+          "caption": "Virtual Directory Identificaton",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/virtual-directories/key/attribute::metadata",
+              "caption": "Metadata",
+              "editable": true
+            },
+            {
+              "item": "/import/virtual-directories/key/attribute::class",
+              "caption": "UPnP class Filter",
+              "type": "String",
+              "editable": true
+            }
+          ]
+        },
+        {
           "item": "/import/scripting/virtual-layout/genre-map/genre",
           "caption": "Genre Map",
           "type": "List",

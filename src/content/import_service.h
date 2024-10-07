@@ -170,7 +170,7 @@ private:
     bool pcDirTypes { true };
     int containerImageParentCount { 2 };
     int containerImageMinDepth { 2 };
-    std::vector<std::string> virtualDirKeys {};
+    std::vector<std::vector<std::pair<std::string, std::string>>> virtualDirKeys {};
 
     /// \brief cache for containers while creating new layout
     mutable std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;

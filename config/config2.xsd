@@ -738,6 +738,7 @@
     <xs:element name="key">
         <xs:complexType>
             <xs:attribute name="metadata" type="xs:string" use="required"/>
+            <xs:attribute name="class" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
