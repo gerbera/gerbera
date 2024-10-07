@@ -10,6 +10,10 @@ module.exports = function (driver) {
     return await driver.findElement(By.id('nav-fs'));
   };
 
+  this.getSearchMenu = async () => {
+    return await driver.findElement(By.id('nav-search'));
+  };
+
   this.getClientsMenu = async () => {
     return await driver.findElement(By.id('nav-clients'));
   };
@@ -30,15 +34,15 @@ module.exports = function (driver) {
     if (menuId === 'nav-home' || menuId === 'nav-clients' || menuId == 'nav-config') {
       return await driver.findElement(By.id(menuId)).click()
     } else {
-      const tree = await driver.findElement(By.id('tree'));
       await driver.findElement(By.id(menuId)).click();
+      const tree = await driver.findElement(By.id('tree'));
       return await driver.wait(until.elementIsVisible(tree), 5000)
     }
   };
 
   this.clickMenuIcon = async (menuId) => {
     const tree = await driver.findElement(By.id('tree'));
-    if (menuId === 'nav-home' || menuId === 'nav-clients'|| menuId == 'nav-config') {
+    if (menuId === 'nav-home' || menuId === 'nav-clients' || menuId == 'nav-config') {
       return await driver.findElement(By.css('#'+ menuId + ' i')).click();
     } else {
       await driver.findElement(By.css('#'+ menuId + ' i')).click();

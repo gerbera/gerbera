@@ -1,6 +1,6 @@
 {
   "name": "gerbera-web",
-  "version": "2.2.1",
+  "version": "2.3.1",
   "repository": "https://github.com/gerbera/gerbera",
   "license": "GPLv2",
   "scripts": {
@@ -29,7 +29,7 @@
     "bootstrap": "^4.6.2",
     "braces": "^3.0.3",
     "chai": "^4.5.0",
-    "chromedriver": "128.0",
+    "chromedriver": "129.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.0",
     "eslint-config-standard": "^17.1.0",

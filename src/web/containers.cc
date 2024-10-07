@@ -48,6 +48,7 @@ void Web::Containers::process()
     checkRequest();
 
     int parentID = intParam("parent_id", INVALID_OBJECT_ID);
+    std::string action = param("action");
     if (parentID == INVALID_OBJECT_ID)
         throw_std_runtime_error("no parent_id given");
 
@@ -57,10 +58,11 @@ void Web::Containers::process()
     xml2Json->setArrayName(containers, "container");
     xml2Json->setFieldType("title", FieldType::STRING);
     containers.append_attribute("parent_id") = parentID;
-    containers.append_attribute("type") = "database";
+    containers.append_attribute("type") = action == "browse" ? "database" : "search";
     if (!param("select_it").empty())
         containers.append_attribute("select_it") = param("select_it").c_str();
 
+    log_debug("{} {}", action, parentID);
     auto browseParam = BrowseParam(database->loadObject(DEFAULT_CLIENT_GROUP, parentID), BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
     auto arr = database->browse(browseParam);
     for (auto&& obj : arr) {

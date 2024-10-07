@@ -9,6 +9,7 @@
 - Fix handling of checkbox values on web ui
 - Improve handling multivalue tags in virtual paths
 - UPnP: Add support for filters
+- Web UI: Add Search page
 
 ### v2.3.0
 

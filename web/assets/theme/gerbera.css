@@ -311,7 +311,8 @@ body,
 #right {
     flex: 1;
     width: 100%;
-    overflow-y: hidden;
+    overflow-y: auto;
+    /* overflow-y: hidden; */
     flex-grow: 5;
     flex-shrink: 1;
 }
@@ -323,6 +324,10 @@ body,
     flex-grow: 2;
     flex-shrink: 0;
     background-color: #fefefe;
+}
+
+.grb-dataitems-search {
+    height: unset !important;
 }
 
 #configframe {
@@ -361,6 +366,9 @@ body,
 .grb-table-db tbody {
     height: calc( 100vh - 215px );
 }
+.grb-table-search tbody {
+    height: calc( 100vh - 215px );
+}
 
 #clientgrid table tbody,
 #clientgrid table thead {
@@ -389,6 +397,10 @@ body,
 .datagrid-row:hover,
 #clientgrid table tbody tr:hover {
     background-color: #e9ecef;
+}
+
+.searchLabel {
+    width: 66%;
 }
 
 #clientgrid,
@@ -512,6 +524,10 @@ body,
 .list-group-item:first-child,
 .list-group-item:last-child {
     border-radius: 0px;
+}
+
+.selected-item > span.folder-title {
+    background-color: #ff7f00;
 }
 
 .list-group {

@@ -34,6 +34,7 @@
 
 #include "pages.h" // API
 
+#include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
@@ -51,6 +52,7 @@ void Web::Items::process()
     int parentID = intParam("parent_id");
     int start = intParam("start");
     int count = intParam("count");
+    std::string action = param("action");
     if (start < 0)
         throw_std_runtime_error("illegal start parameter");
     if (count < 0)
@@ -66,24 +68,84 @@ void Web::Items::process()
     items.append_attribute("parent_id") = parentID;
 
     auto container = database->loadObject(DEFAULT_CLIENT_GROUP, parentID);
-    auto param = BrowseParam(container, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
-    param.setRange(start, count);
+    std::string trackFmt = "{:02}";
+    auto result = action == "browse"
+        ? doBrowse(container, start, count, items, trackFmt)
+        : doSearch(container, start, count, items, trackFmt);
+
+    // ouput objects of container
+    int cnt = start + 1;
+    for (auto&& cdsObj : result) {
+        auto item = items.append_child("item");
+        item.append_attribute("id") = cdsObj->getID();
+        item.append_child("title").append_child(pugi::node_pcdata).set_value(cdsObj->getTitle().c_str());
+        item.append_child("upnp_class").append_child(pugi::node_pcdata).set_value(cdsObj->getClass().c_str());
+
+        if (!cdsObj->isItem()) {
+            auto cdsItem = std::static_pointer_cast<CdsItem>(cdsObj);
+            if (cdsItem->getPartNumber() > 0 && container->isSubClass(UPNP_CLASS_MUSIC_ALBUM))
+                item.append_child("part").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", cdsItem->getPartNumber()).c_str());
+            if (cdsItem->getTrackNumber() > 0 && !container->isSubClass(UPNP_CLASS_CONTAINER))
+                item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cdsItem->getTrackNumber()).c_str());
+            else
+                item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cnt).c_str());
+            item.append_child("mtype").append_child(pugi::node_pcdata).set_value(cdsItem->getMimeType().c_str());
+            auto contRes = cdsObj->getResource(ResourcePurpose::Content);
+            if (contRes) {
+                item.append_child("size").append_child(pugi::node_pcdata).set_value(contRes->getAttributeValue(ResourceAttribute::SIZE).c_str());
+                if (!cdsItem->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
+                    item.append_child("resolution").append_child(pugi::node_pcdata).set_value(contRes->getAttribute(ResourceAttribute::RESOLUTION).c_str());
+                }
+                if (!cdsItem->isSubClass(UPNP_CLASS_IMAGE_ITEM)) {
+                    item.append_child("duration").append_child(pugi::node_pcdata).set_value(contRes->getAttributeValue(ResourceAttribute::DURATION).c_str());
+                }
+            }
+            std::string resPath = xmlBuilder->getFirstResourcePath(cdsItem);
+            if (!resPath.empty())
+                item.append_child("res").append_child(pugi::node_pcdata).set_value(resPath.c_str());
+            auto url = xmlBuilder->renderItemImageURL(cdsItem);
+            if (url) {
+                item.append_child("image").append_child(pugi::node_pcdata).set_value(url.value().c_str());
+            }
+        } else {
+            auto cdsCont = std::static_pointer_cast<CdsContainer>(cdsObj);
+            auto url = xmlBuilder->renderContainerImageURL(cdsCont);
+            if (url) {
+                item.append_child("image").append_child(pugi::node_pcdata).set_value(url.value().c_str());
+            }
+        }
+        cnt++;
+    }
+    log_debug("end process()");
+}
+
+std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
+    const std::shared_ptr<CdsObject>& container,
+    int start,
+    int count,
+    pugi::xml_node& items,
+    std::string& trackFmt)
+{
+    log_debug("start");
+    auto browseParam = BrowseParam(container, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
+    browseParam.setRange(start, count);
 
     if (container->isSubClass(UPNP_CLASS_MUSIC_ALBUM) || container->isSubClass(UPNP_CLASS_PLAYLIST_CONTAINER))
-        param.setFlag(BROWSE_TRACK_SORT);
+        browseParam.setFlag(BROWSE_TRACK_SORT);
 
     // get contents of request
-    auto arr = database->browse(param);
+    auto result = database->browse(browseParam);
     items.append_attribute("virtual") = container->isVirtual();
     items.append_attribute("start") = start;
-    // items.append_attribute("returned") = arr->size();
-    items.append_attribute("total_matches") = param.getTotalMatches();
+    // items.append_attribute("returned") = result->size();
+    items.append_attribute("total_matches") = browseParam.getTotalMatches();
 
     bool protectContainer = container->isSubClass(UPNP_CLASS_DYNAMIC_CONTAINER);
     bool protectItems = container->isSubClass(UPNP_CLASS_DYNAMIC_CONTAINER);
     std::string autoscanMode = "none";
 
-    auto parentDir = database->getAutoscanDirectory(parentID);
+    int containerId = container->getID();
+    auto parentDir = database->getAutoscanDirectory(containerId);
     int autoscanType = 0;
     if (parentDir) {
         autoscanType = parentDir->persistent() ? 2 : 1;
@@ -95,7 +157,7 @@ void Web::Items::process()
         // check for inotify mode
         int startpointId = INVALID_OBJECT_ID;
         if (autoscanType == 0) {
-            auto pathIDs = database->getPathIDs(parentID);
+            auto pathIDs = database->getPathIDs(containerId);
             for (int pathId : pathIDs) {
                 auto pathDir = database->getAutoscanDirectory(pathId);
                 if (pathDir && pathDir->getRecursive()) {
@@ -104,7 +166,7 @@ void Web::Items::process()
                 }
             }
         } else {
-            startpointId = parentID;
+            startpointId = containerId;
         }
 
         if (startpointId != INVALID_OBJECT_ID) {
@@ -124,46 +186,57 @@ void Web::Items::process()
     items.append_attribute("protect_container") = protectContainer;
     items.append_attribute("protect_items") = protectItems;
 
-    // ouput objects of container
-    int cnt = start + 1;
-    auto trackFmt = (param.getTotalMatches() >= 100) ? "{:03}" : "{:02}";
-    for (auto&& arrayObj : arr) {
-        auto item = items.append_child("item");
-        item.append_attribute("id") = arrayObj->getID();
-        item.append_child("title").append_child(pugi::node_pcdata).set_value(arrayObj->getTitle().c_str());
+    if (browseParam.getTotalMatches() >= 100)
+        trackFmt = "{:03}";
 
-        if (!arrayObj->isItem()) {
-            cnt++;
-            continue;
-        }
-        auto objItem = std::static_pointer_cast<CdsItem>(arrayObj);
-        if (objItem->getPartNumber() > 0 && container->isSubClass(UPNP_CLASS_MUSIC_ALBUM))
-            item.append_child("part").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", objItem->getPartNumber()).c_str());
-        if (objItem->getTrackNumber() > 0 && !container->isSubClass(UPNP_CLASS_CONTAINER))
-            item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, objItem->getTrackNumber()).c_str());
-        else
-            item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cnt).c_str());
-        item.append_child("mtype").append_child(pugi::node_pcdata).set_value(objItem->getMimeType().c_str());
-        item.append_child("upnp_class").append_child(pugi::node_pcdata).set_value(objItem->getClass().c_str());
-        auto contRes = arrayObj->getResource(ResourcePurpose::Content);
-        if (contRes) {
-            item.append_child("size").append_child(pugi::node_pcdata).set_value(contRes->getAttributeValue(ResourceAttribute::SIZE).c_str());
-            if (!objItem->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
-                item.append_child("resolution").append_child(pugi::node_pcdata).set_value(contRes->getAttribute(ResourceAttribute::RESOLUTION).c_str());
-            }
-            if (!objItem->isSubClass(UPNP_CLASS_IMAGE_ITEM)) {
-                item.append_child("duration").append_child(pugi::node_pcdata).set_value(contRes->getAttributeValue(ResourceAttribute::DURATION).c_str());
-            }
-        }
-        std::string resPath = xmlBuilder->getFirstResourcePath(objItem);
-        if (!resPath.empty())
-            item.append_child("res").append_child(pugi::node_pcdata).set_value(resPath.c_str());
+    return result;
+}
 
-        auto url = xmlBuilder->renderItemImageURL(objItem);
-        if (url) {
-            item.append_child("image").append_child(pugi::node_pcdata).set_value(url.value().c_str());
-        }
-        cnt++;
+std::vector<std::shared_ptr<CdsObject>> Web::Items::doSearch(
+    const std::shared_ptr<CdsObject>& container,
+    int start,
+    int count,
+    pugi::xml_node& items,
+    std::string& trackFmt)
+{
+    log_debug("start");
+    std::vector<std::shared_ptr<CdsObject>> result;
+
+    std::string searchCriteria = param("searchCriteria");
+    std::string sortCriteria = param("sortCriteria");
+    bool searchableContainers = boolParam("searchableContainers");
+    int containerId = container->getID();
+
+    log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] SortCriteria [{}] StartingIndex [{}] Filter [{}] RequestedCount [{}]",
+        containerId, searchCriteria, sortCriteria, start, '*', count);
+    if (searchCriteria.empty()) {
+        log_warning("Empty query string");
+        throw UpnpException(UPNP_E_INVALID_ARGUMENT, "Empty query string");
     }
-    log_debug("end process()");
+    const auto searchParam = SearchParam(fmt::format("{}", containerId), searchCriteria, sortCriteria,
+        start, count, searchableContainers, DEFAULT_CLIENT_GROUP);
+    // Execute database search
+    int numMatches = 0;
+    try {
+        result = database->search(searchParam, &numMatches);
+        log_debug("Found {}/{} items", result.size(), numMatches);
+    } catch (const SearchParseException& srcEx) {
+        log_warning(srcEx.what());
+        throw UpnpException(UPNP_E_INVALID_ARGUMENT, srcEx.getUserMessage());
+    } catch (const DatabaseException& dbEx) {
+        log_warning(dbEx.what());
+        throw UpnpException(UPNP_E_NO_SUCH_ID, dbEx.getUserMessage());
+    } catch (const std::runtime_error& e) {
+        log_warning(e.what());
+        throw UpnpException(UPNP_E_BAD_REQUEST, UpnpXMLBuilder::encodeEscapes(e.what()));
+    }
+    items.append_attribute("virtual") = container->isVirtual();
+    items.append_attribute("start") = start;
+    // items.append_attribute("returned") = result->size();
+    items.append_attribute("total_matches") = numMatches;
+
+    if (numMatches >= 100)
+        trackFmt = "{:03}";
+
+    return result;
 }

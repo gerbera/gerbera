@@ -28,12 +28,13 @@ $.widget('grb.dataitems', {
     const onEdit = this.options.onEdit;
     const onDownload = this.options.onDownload;
     const onAdd = this.options.onAdd;
-    const itemType = this.options.itemType;
+    let itemType = this.options.itemType;
     const pager = this.options.pager;
 
     this.element.html('');
-    this.element.addClass('grb-dataitems');
-    const table = $('<table></table>').addClass('table').addClass('grb-table-'+ itemType);
+    this.element.addClass('grb-dataitems'); // signals module to destroy first
+    this.element.addClass('grb-dataitems-' + itemType);
+    const table = $('<table></table>').addClass('table').addClass('grb-table-' + itemType);
     const tbody = $('<tbody></tbody>');
     let tcontainer = tbody;
     let row, content, text;
@@ -41,9 +42,12 @@ $.widget('grb.dataitems', {
     if (data.length === 0) {
       /* Show a friendly message if there are no rows */
       this.element.append("<h5 class=\"mt-4 text-center text-muted\">Empty</h5>" +
-          "<h6 class=\"mt-0 text-center text-muted\">Please pick another container from the tree</h6>");
+        "<h6 class=\"mt-0 text-center text-muted\">Please pick another container from the tree</h6>");
       return;
     }
+
+    if (itemType === 'search')
+      itemType = 'db';
 
     if (data.length > 0) {
       if (itemType === 'db' && pager && pager.gridMode > 0) {
@@ -124,9 +128,9 @@ $.widget('grb.dataitems', {
         if (item.image) {
           if (pager && pager.gridMode === 3) {
             if (item.upnp_class.startsWith("object.item.imageItem"))
-               text.prepend($('<img class="pull-left grb-image" src="' + item.url + '"/>'));
-             else
-               text.prepend($('<img class="pull-left grb-image" src="' + item.image + '"/>'));
+              text.prepend($('<img class="pull-left grb-image" src="' + item.url + '"/>'));
+            else
+              text.prepend($('<img class="pull-left grb-image" src="' + item.image + '"/>'));
           } else {
             text.prepend($('<img class="pull-left rounded grb-thumbnail" src="' + item.image + '"/>'));
           }
@@ -139,6 +143,8 @@ $.widget('grb.dataitems', {
               icon = "fa-film";
             } else if (item.upnp_class.startsWith("object.item.imageItem")) {
               icon = "fa-camera";
+            } else if (item.upnp_class.startsWith("object.container")) {
+              icon = "fa-folder-o";
             }
           }
           text.prepend($('<div class="d-flex pull-left rounded grb-thumbnail justify-content-center align-items-center"><i class="grb-item-icon text-muted fa ' + icon + '"></i></div>'));
@@ -157,13 +163,14 @@ $.widget('grb.dataitems', {
         }
         if (itemType === 'db') {
           buttons.addClass('pull-right justify-content-center align-items-center');
-
-          const downloadIcon = $('<span></span>');
-          downloadIcon.prop('title', 'Download item');
-          downloadIcon.addClass('grb-item-download fa fa-download');
-          downloadIcon.appendTo(buttons);
-          if (onDownload) {
-            downloadIcon.click(item, onDownload);
+          if (!item.upnp_class || !item.upnp_class.startsWith("object.container")) {
+            const downloadIcon = $('<span></span>');
+            downloadIcon.prop('title', 'Download item');
+            downloadIcon.addClass('grb-item-download fa fa-download');
+            downloadIcon.appendTo(buttons);
+            if (onDownload) {
+              downloadIcon.click(item, onDownload);
+            }
           }
 
           if (!pager || pager.gridMode === 0) {
@@ -174,16 +181,19 @@ $.widget('grb.dataitems', {
             if (onEdit) {
               editIcon.click(item, onEdit);
             }
-            const deleteIcon = $('<span></span>');
-            deleteIcon.prop('title', 'Delete item');
-            deleteIcon.addClass('grb-item-delete fa fa-trash-o');
-            deleteIcon.appendTo(buttons);
-            if (onDelete) {
-              deleteIcon.click(item, function (event) {
-                row.remove();
-                onDelete(event);
-              });
-          }}
+            if (!item.upnp_class || !item.upnp_class.startsWith("object.container")) {
+              const deleteIcon = $('<span></span>');
+              deleteIcon.prop('title', 'Delete item');
+              deleteIcon.addClass('grb-item-delete fa fa-trash-o');
+              deleteIcon.appendTo(buttons);
+              if (onDelete) {
+                deleteIcon.click(item, function (event) {
+                  row.remove();
+                  onDelete(event);
+                });
+              }
+            }
+          }
         } else if (itemType === 'fs') {
           buttons.addClass('grb-item-buttons pull-right');
 
@@ -220,7 +230,7 @@ $.widget('grb.dataitems', {
     this.element.append(table);
     const activePagerItem = this.element.find('#activePagerItem');
     if (activePagerItem && activePagerItem[0] && activePagerItem[0].nextSibling) {
-      activePagerItem[0].nextSibling.scrollIntoView({ behavior: 'smooth'});
+      activePagerItem[0].nextSibling.scrollIntoView({ behavior: 'smooth' });
     }
     this.element.addClass('with-data');
   },
@@ -232,7 +242,7 @@ $.widget('grb.dataitems', {
     const itemsPerPage = pager && pager.gridMode === 3 ? 1 : (pager && pager.itemsPerPage ? pager.itemsPerPage : 0);
     if (pager && pager.onItemsPerPage && pager.ippOptions) {
       const list = $('<ul class="pagination"></ul>');
-      const ippSelect = $('<select '+ (pager.gridMode === 3 ? 'hidden ' : '') +'name="ippSelect" id="ippSelect" style="margin-right: 10px" class="page-link page-select"></select>');
+      const ippSelect = $('<select ' + (pager.gridMode === 3 ? 'hidden ' : '') + 'name="ippSelect" id="ippSelect" style="margin-right: 10px" class="page-link page-select"></select>');
 
       const ippOptions = pager.ippOptions;
       const pageParams = {
@@ -242,7 +252,7 @@ $.widget('grb.dataitems', {
         parentId: pager.parentId
       };
       for (let ipp in ippOptions) {
-        const ippOption = $('<option' + (pager.itemsPerPage === ippOptions[ipp] ? ' selected="selected" ' : ' ') + 'value="' + ippOptions[ipp] + '">' + ippOptions[ipp] + '</option>' );
+        const ippOption = $('<option' + (pager.itemsPerPage === ippOptions[ipp] ? ' selected="selected" ' : ' ') + 'value="' + ippOptions[ipp] + '">' + ippOptions[ipp] + '</option>');
         ippOption.appendTo(ippSelect);
       }
       $('<option' + (pager.itemsPerPage === 0 ? ' selected="selected" ' : ' ') + 'value="0">All</option>').appendTo(ippSelect);
@@ -267,7 +277,7 @@ $.widget('grb.dataitems', {
       };
       const gmSelect = $('<select name="gridSelect" id="gridSelect" style="margin-right: 10px" class="page-link page-select"></select>');
       for (let gm in gridModes) {
-        const gridModeOption = $('<option' + (pager.gridMode === gridModes[gm].id ? ' selected="selected" ' : ' ') + 'value="' + gridModes[gm].id + '">' + gridModes[gm].label + '</option>' );
+        const gridModeOption = $('<option' + (pager.gridMode === gridModes[gm].id ? ' selected="selected" ' : ' ') + 'value="' + gridModes[gm].id + '">' + gridModes[gm].label + '</option>');
         gridModeOption.appendTo(gmSelect);
       }
       list.append(gmSelect);
@@ -278,20 +288,20 @@ $.widget('grb.dataitems', {
     if (pager && pager.pageCount && itemsPerPage > 0) {
       let list = $('<ul class="pagination"></ul>');
       const previous = $('<li class="page-item">' +
-          '<a class="page-link" aria-label="Previous">' +
-          '<span aria-hidden="true">&laquo;</span>' +
-          '<span class="sr-only">Previous</span></a>' +
-          '</li>');
+        '<a class="page-link" aria-label="Previous">' +
+        '<span aria-hidden="true">&laquo;</span>' +
+        '<span class="sr-only">Previous</span></a>' +
+        '</li>');
       const next = $('<li class="page-item">' +
         '<a class="page-link" aria-label="Next">' +
         '<span aria-hidden="true">&raquo;</span>' +
         '<span class="sr-only">Next</span></a>' +
         '</li>');
       const previous10 = $('<li class="page-item">' +
-          '<a class="page-link" aria-label="Previous">' +
-          '<span aria-hidden="true">&laquo;&laquo;</span>' +
-          '<span class="sr-only">Previous</span></a>' +
-          '</li>');
+        '<a class="page-link" aria-label="Previous">' +
+        '<span aria-hidden="true">&laquo;&laquo;</span>' +
+        '<span class="sr-only">Previous</span></a>' +
+        '</li>');
       const next10 = $('<li class="page-item">' +
         '<a class="page-link" aria-label="Next">' +
         '<span aria-hidden="true">&raquo;&raquo; </span>' +
@@ -348,7 +358,7 @@ $.widget('grb.dataitems', {
 
           if (page === pager.currentPage) {
             pageItem.addClass('active');
-            pageItem.attr('id','activePagerItem');
+            pageItem.attr('id', 'activePagerItem');
           }
 
           list.append(pageItem);

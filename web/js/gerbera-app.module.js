@@ -20,16 +20,16 @@
 
     $Id$
 */
-import {Auth} from './gerbera-auth.module.js';
-import {Autoscan} from './gerbera-autoscan.module.js';
-import {Items} from './gerbera-items.module.js';
-import {Menu} from './gerbera-menu.module.js';
-import {Trail} from './gerbera-trail.module.js';
-import {Tweaks} from "./gerbera-tweak.module.js";
-import {Tree} from './gerbera-tree.module.js';
-import {Updates} from './gerbera-updates.module.js';
-import {Clients} from './gerbera-clients.module.js';
-import {Config} from './gerbera-config.module.js';
+import { Auth } from './gerbera-auth.module.js';
+import { Autoscan } from './gerbera-autoscan.module.js';
+import { Items } from './gerbera-items.module.js';
+import { Menu } from './gerbera-menu.module.js';
+import { Trail } from './gerbera-trail.module.js';
+import { Tweaks } from "./gerbera-tweak.module.js";
+import { Tree } from './gerbera-tree.module.js';
+import { Updates } from './gerbera-updates.module.js';
+import { Clients } from './gerbera-clients.module.js';
+import { Config } from './gerbera-config.module.js';
 
 export class App {
   constructor(clientConfig, serverConfig) {
@@ -41,6 +41,8 @@ export class App {
     this.pageInfo = {
       dbType: 'home',
       configMode: 'minimal',
+      search: '',
+      sort: '',
       currentPage: 0,
       viewItems: 25,
       viewItemsOld: 25,
@@ -48,6 +50,7 @@ export class App {
       currentItem: {
         'home': [],
         'db': [],
+        'search': [],
         'fs': [],
         'clients': [],
         'config': [],
@@ -56,6 +59,7 @@ export class App {
     this.navLinks = {
       'home': '#nav-home',
       'db': '#nav-db',
+      'search': '#nav-search',
       'fs': '#nav-fs',
       'clients': '#nav-clients',
       'config': '#nav-config',
@@ -70,6 +74,10 @@ export class App {
     return this.pageInfo.dbType;
   }
 
+  getSearch() {
+    return [this.pageInfo.search, this.pageInfo.sort];
+  }
+
   writeLocalStorage() {
     if (this.initDone) {
       localStorage.setItem('pageInfo', JSON.stringify(this.pageInfo));
@@ -78,6 +86,12 @@ export class App {
 
   setType(type) {
     this.pageInfo.dbType = type;
+    this.writeLocalStorage();
+  }
+
+  setSearch(query, sort) {
+    this.pageInfo.search = query;
+    this.pageInfo.sort = sort;
     this.writeLocalStorage();
   }
 
@@ -125,7 +139,7 @@ export class App {
 
   setViewItems(items) {
     if (this.pageInfo.viewItems !== items)
-        this.pageInfo.viewItemsOld = this.pageInfo.viewItems;
+      this.pageInfo.viewItemsOld = this.pageInfo.viewItems;
     this.pageInfo.viewItems = items;
     this.writeLocalStorage();
   }
@@ -145,11 +159,11 @@ export class App {
     this.writeLocalStorage();
   }
 
-  isLoggedIn(){
+  isLoggedIn() {
     return this.loggedIn;
   }
 
-  setLoggedIn(isLoggedIn){
+  setLoggedIn(isLoggedIn) {
     this.loggedIn = isLoggedIn;
     if (this.loggedIn) {
       this.getStatus(this.clientConfig)
@@ -158,7 +172,7 @@ export class App {
     }
   }
 
-  initialize () {
+  initialize() {
     $('#server-status').hide();
 
     this.pageInfo = {
@@ -170,6 +184,7 @@ export class App {
       currentItem: {
         'home': [],
         'db': [],
+        'search': [],
         'fs': [],
         'clients': [],
         'config': [],
@@ -207,8 +222,9 @@ export class App {
               this.pageInfo.viewItems = itemsPerPage.default;
             } else {
               this.pageInfo.viewItems = 25;
-          }}
-          if(this.pageInfo.dbType && this.pageInfo.dbType in this.navLinks) {
+            }
+          }
+          if (this.pageInfo.dbType && this.pageInfo.dbType in this.navLinks) {
             $(this.navLinks[this.pageInfo.dbType]).click();
           }
         }
@@ -219,7 +235,7 @@ export class App {
       });
   }
 
-  configureDefaults () {
+  configureDefaults() {
     if (this.getType() === undefined) {
       this.setType('db');
     }
@@ -231,7 +247,7 @@ export class App {
     return Promise.resolve();
   }
 
-  getStatus (clientConfig) {
+  getStatus(clientConfig) {
     var data = {
       req_type: 'config_load',
       action: 'status',
@@ -258,19 +274,19 @@ export class App {
     return "";
   }
 
-  showStatus (itemList, key) {
-      const cnt = this.getStatusValue(itemList, key + 'Count');
-      if (cnt && cnt !== '') {
-        $('#status-' + key + '-count').html(cnt);
-        $('#status-' + key + '-size').html(this.getStatusValue(itemList, key + 'Size'));
-        return Number.parseInt(cnt);
-      } else {
-        $('#status-'+key).hide();
-        return 0;
-      }
+  showStatus(itemList, key) {
+    const cnt = this.getStatusValue(itemList, key + 'Count');
+    if (cnt && cnt !== '') {
+      $('#status-' + key + '-count').html(cnt);
+      $('#status-' + key + '-size').html(this.getStatusValue(itemList, key + 'Size'));
+      return Number.parseInt(cnt);
+    } else {
+      $('#status-' + key).hide();
+      return 0;
+    }
   }
 
-  displayStatus (response) {
+  displayStatus(response) {
     let cnt = 0;
     if (response.success && response.values) {
       cnt += this.showStatus(response.values.item, 'total');
@@ -295,7 +311,7 @@ export class App {
     return Promise.resolve();
   }
 
-  getConfig (clientConfig) {
+  getConfig(clientConfig) {
     var data = {
       req_type: 'auth',
       action: 'get_config'
@@ -309,15 +325,15 @@ export class App {
     });
   }
 
-  loadConfig (response) {
+  loadConfig(response) {
     return new Promise((resolve, reject) => {
       let serverConfig;
       if (response.success) {
         serverConfig = $.extend({}, response.config);
         var pollingInterval = response.config['poll-interval'];
         serverConfig['poll-interval'] = parseInt(pollingInterval) * 1000;
-        if(serverConfig.friendlyName && serverConfig.friendlyName !== "Gerbera") {
-          $(document).attr('title', serverConfig.friendlyName  + " | Gerbera Media Server");
+        if (serverConfig.friendlyName && serverConfig.friendlyName !== "Gerbera") {
+          $(document).attr('title', serverConfig.friendlyName + " | Gerbera Media Server");
         }
         resolve(serverConfig);
       } else {
@@ -326,21 +342,21 @@ export class App {
     });
   }
 
-  viewItems () {
+  viewItems() {
     return this.pageInfo.viewItems;
   }
 
-  gridMode () {
+  gridMode() {
     return this.pageInfo.gridMode;
   }
 
-  itemsPerPage () {
+  itemsPerPage() {
     if (this.serverConfig['items-per-page'] && this.serverConfig['items-per-page'].option)
       return this.serverConfig['items-per-page'].option;
-    return [10,25,50,100];
+    return [10, 25, 50, 100];
   }
 
-  displayLogin (loggedIn) {
+  displayLogin(loggedIn) {
     $('#server-status').hide();
     $('#server-empty').hide();
     $('#homelinks').hide();
@@ -373,7 +389,7 @@ export class App {
     return Promise.resolve();
   }
 
-  error (event) {
+  error(event) {
     let message, type, icon;
     if (typeof event === 'string') {
       message = event;
