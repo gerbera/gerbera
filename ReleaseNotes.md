@@ -11,6 +11,7 @@
 
 - Handling of checkbox values on web ui
 - Access to cache option if thumbnailer is disabled
+- Container creation in web ui
 
 ### Code Improvements
 

@@ -67,15 +67,15 @@ std::shared_ptr<CdsItem> Web::AddObject::addItem(int parentID, const std::string
         log_debug("Hidden file '{}' cannot be added", item->getLocation().c_str());
         return {};
     }
-    std::string tmp = param("description");
-    if (!tmp.empty()) {
-        item->addMetaData(MetadataFields::M_DESCRIPTION, tmp);
+    std::string desc = param("description");
+    if (!desc.empty()) {
+        item->addMetaData(MetadataFields::M_DESCRIPTION, desc);
     }
 
-    tmp = param("mime-type");
-    if (tmp.empty())
-        tmp = MIMETYPE_DEFAULT;
-    item->setMimeType(tmp);
+    std::string mime = param("mime-type");
+    if (mime.empty())
+        mime = MIMETYPE_DEFAULT;
+    item->setMimeType(mime);
 
     std::string flags = param("flags");
     if (!flags.empty())

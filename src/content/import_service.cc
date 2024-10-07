@@ -355,6 +355,7 @@ void ImportService::readDir(const fs::path& location, AutoScanSetting settings)
 void ImportService::cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime, const std::shared_ptr<CdsObject>& cdsObject)
 {
     auto cacheLock = CacheAutoLock(cacheMutex);
+    log_debug("cache '{}' , '{}' ({})", entryPath.string(), dirEntry.path().string(), state);
 
     if (entryPath.empty())
         return;
@@ -870,8 +871,12 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
         database->updateObject(container, nullptr);
 }
 
-std::shared_ptr<CdsContainer> ImportService::getContainer(const fs::path& location) const
+std::shared_ptr<CdsContainer> ImportService::getContainer(const std::string& location) const
 {
+    if (!hasCaseSensitiveNames) {
+        auto llocation = toLower(location);
+        return containerMap.at(llocation);
+    }
     return containerMap.at(location);
 }
 
