@@ -1422,8 +1422,8 @@ are distiguished by their artist even if the displayed text is identical.
 .. code:: xml
 
     <virtual-directories>
-        <key metadata="M_ALBUMARTIST"/>
-        <key metadata="M_UPNP_DATE"/>
+        <key metadata="M_ALBUMARTIST" class="object.container.album.musicAlbum"/>
+        <key metadata="M_UPNP_DATE" class="object.container.album.musicAlbum"/>
     </virtual-directories>
 
 **Child tags:**
@@ -1433,20 +1433,22 @@ are distiguished by their artist even if the displayed text is identical.
 
 .. code:: xml
 
-    <key metadata="M_ARTIST"/>
+    <key metadata="M_ARTIST" class="object.container.album"/>
 
 * Optional
 
 Specifies the metadata fields to add for identification internally. For a list of valid metadata see :ref:`Metadata <upnp-tags>`.
+If ``_1`` is added to the name of the key only the first item in the list is picked (if there are multiple like for ``M_ARTIST``.
 In addition ``LOCATION`` references to the location property retrieved from the layout script.
+The attribute ``class`` can be used to restrict the key to the upnp class.
 
 * Example
 
 .. code:: xml
 
     <virtual-directories>
-        <key metadata="LOCATION"/>
-        <key metadata="M_UPNP_DATE"/>
+        <key metadata="LOCATION" class="object.container.album.musicAlbum"/>
+        <key metadata="M_ARTIST_1" class="object.container.album.musicAlbum"/>
     </virtual-directories>
 
 

@@ -168,7 +168,7 @@ ImportService::ImportService(std::shared_ptr<Context> context, std::shared_ptr<C
     configLayoutMapping = config->getDictionaryOption(ConfigVal::IMPORT_LAYOUT_MAPPING);
     containerImageParentCount = config->getIntOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT);
     containerImageMinDepth = config->getIntOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_MINDEPTH);
-    virtualDirKeys = config->getArrayOption(ConfigVal::IMPORT_VIRTUAL_DIRECTORY_KEYS);
+    virtualDirKeys = config->getVectorOption(ConfigVal::IMPORT_VIRTUAL_DIRECTORY_KEYS);
     noMediaName = config->getOption(ConfigVal::IMPORT_NOMEDIA_FILE);
     UpnpMap::initMap(upnpMap, mimetypeUpnpclassMap);
 }
@@ -925,18 +925,32 @@ std::pair<int, bool> ImportService::addContainerTree(
                 tree = std::regex_replace(tree, std::regex(key), val);
             }
             auto dirKeyValues = std::vector<std::string>();
-            for (auto&& field : virtualDirKeys) {
+            for (auto&& vdirSetting : virtualDirKeys) {
+                std::string field;
+                std::string upnpClass;
+                for (auto&& [key, vdirField] : vdirSetting) {
+                    if (key == "metadata")
+                        field = vdirField;
+                    if (key == "class")
+                        upnpClass = vdirField;
+                }
+                if (!item->isSubClass(upnpClass))
+                    continue;
                 if (field == "LOCATION") {
                     std::string location = item->getLocation().c_str();
                     if (!location.empty()) {
                         dirKeyValues.push_back(location);
                         item->setLocation("");
                     }
-                } else {
-                    auto metaField = MetaEnumMapper::remapMetaDataField(field);
-                    auto keyValue = item->getMetaData(metaField);
+                } else if (endswith(field, "_1")) {
+                    auto keyValue = item->getMetaData(field.replace(field.end() - 2, field.end(), ""));
                     if (!keyValue.empty())
                         dirKeyValues.push_back(keyValue);
+                } else {
+                    auto keyValueGroup = item->getMetaGroup(field);
+                    if (!keyValueGroup.empty())
+                        for (auto&& keyValue : keyValueGroup)
+                            dirKeyValues.push_back(keyValue);
                 }
             }
             if (!dirKeyValues.empty()) {
