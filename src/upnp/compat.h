@@ -44,6 +44,9 @@
 #define UPNP_NEEDS_LITERAL_HOST_REDIRECT
 extern "C" void UpnpSetAllowLiteralHostRedirection(int);
 
+#define UPNP_NEEDS_JOBS_TOTAL
+extern "C" void UpnpSetMaxJobsTotal(int mjt);
+
 #if (UPNP_VERSION <= 60103)
 // new method added
 #define UPNP_NEEDS_CORS
@@ -69,6 +72,9 @@ void UpnpSetHeadersCompat(const UpnpFileInfo* fileInfo, const std::map<std::stri
 // new method added
 #define UPNP_NEEDS_CORS
 extern "C" int UpnpSetWebServerCorsString(const char*);
+
+#define UPNP_NEEDS_JOBS_TOTAL
+extern "C" void UpnpSetMaxJobsTotal(int mjt);
 #endif
 
 #endif

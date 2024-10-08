@@ -1,4 +1,4 @@
-const {By, until} = require('selenium-webdriver');
+const { By, until } = require('selenium-webdriver');
 const fs = require('fs');
 
 module.exports = function (driver) {
@@ -43,9 +43,9 @@ module.exports = function (driver) {
   this.clickMenuIcon = async (menuId) => {
     const tree = await driver.findElement(By.id('tree'));
     if (menuId === 'nav-home' || menuId === 'nav-clients' || menuId == 'nav-config') {
-      return await driver.findElement(By.css('#'+ menuId + ' i')).click();
+      return await driver.findElement(By.css('#' + menuId + ' i')).click();
     } else {
-      await driver.findElement(By.css('#'+ menuId + ' i')).click();
+      await driver.findElement(By.css('#' + menuId + ' i')).click();
       return await driver.wait(until.elementIsVisible(tree), 5000);
     }
   };
@@ -58,7 +58,7 @@ module.exports = function (driver) {
   };
   this.treeItemChildItems = async (text) => {
     const items = await driver.findElements(By.xpath('//li[.//span[contains(text(),\'' + text + '\')]]'));
-      // the xpath finds both <database> and <Video>  TODO: needs work
+    // the xpath finds both <database> and <Video>  TODO: needs work
     return await items[1].findElements(By.css('li.list-group-item'));
   };
   this.showConfig = async (text) => {
@@ -123,7 +123,7 @@ module.exports = function (driver) {
     return await driver.findElement(By.id(fieldName));
   };
 
-  this.editorOverlayFieldDisplayed = async(fieldName) => {
+  this.editorOverlayFieldDisplayed = async (fieldName) => {
     return await driver.findElement(By.id(fieldName)).isDisplayed();
   };
 
@@ -167,7 +167,7 @@ module.exports = function (driver) {
   this.hasDeleteIcon = async (grbItem) => {
     try {
       return await grbItem.findElement(By.css('.grb-item-delete')).isDisplayed();
-    } catch(e) {
+    } catch (e) {
       return false;
     }
   };
@@ -251,7 +251,7 @@ module.exports = function (driver) {
   };
 
   this.setAutoscanMode = async (mode) => {
-    return await driver.findElement(By.id('autoscanMode'+ mode)).click();
+    return await driver.findElement(By.id('autoscanMode' + mode)).click();
   };
 
   this.autoscanOverlayDisplayed = async () => {
@@ -365,7 +365,7 @@ module.exports = function (driver) {
   };
 
   this.mockTaskMessage = async (msg) => {
-    return await driver.executeScript('return $(\'#toast\').toast(\'showTask\', {message: "'+ msg +'", type: "info", icon: "fa-refresh fa-spin fa-fw"});')
+    return await driver.executeScript('return $(\'#toast\').toast(\'showTask\', {message: "' + msg + '", type: "info", icon: "fa-refresh fa-spin fa-fw"});')
   };
 
   this.getVersion = async () => {

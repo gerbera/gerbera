@@ -40,6 +40,16 @@ This section defines the server configuration parameters.
 
       * Example: ”Cds|Content|Web” for messages when accessing the server via upnp or web.
 
+        ::
+
+            upnp-max-jobs="300"
+
+      * Optional
+      * Default: **500**
+
+      Set maximum number of jobs in libpupnp internal threadpool.
+      Allows pending requests to be handled.
+
 ``port``
 ~~~~~~~~
 

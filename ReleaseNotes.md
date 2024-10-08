@@ -14,11 +14,13 @@
 - Access to cache option if thumbnailer is disabled
 - Container creation in web ui
 - Handling of multivalued tag in virtual paths
+- Increase of pupnp threadpool size
 
 ### Code Improvements
 
 - Build without ffmpeg leaves option unset
 - Logging of build info
+- Update versions of libpupnp (1.14.20)
 
 ## v2.3.0
 

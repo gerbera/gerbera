@@ -1,4 +1,4 @@
-const {expect} = require('chai');
+const { expect } = require('chai');
 const TestUtils = require('./page/test-utils');
 let driver;
 
