@@ -26,6 +26,8 @@
 
 #include "util/enum_iterator.h"
 
+#include <upnpconfig.h>
+
 #define CFG_MIN ConfigVal::SERVER_PORT
 enum class ConfigVal {
     SERVER_PORT = 0,
@@ -112,6 +114,9 @@ enum class ConfigVal {
     SERVER_EXTOPTS_LASTFM_ENABLED,
     SERVER_EXTOPTS_LASTFM_USERNAME,
     SERVER_EXTOPTS_LASTFM_PASSWORD,
+#endif
+#ifdef UPNP_HAVE_TOOLS
+    SERVER_UPNP_MAXJOBS,
 #endif
     IMPORT_HIDDEN_FILES,
     IMPORT_FOLLOW_SYMLINKS,

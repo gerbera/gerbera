@@ -54,6 +54,12 @@ int UpnpSetWebServerCorsString(const char* _)
 }
 #endif
 
+#ifdef UPNP_NEEDS_JOBS_TOTAL
+void UpnpSetMaxJobsTotal(int mjt)
+{
+}
+#endif
+
 #ifdef UPNP_NEEDS_NOTIFY_XML
 int UpnpNotifyXML(UpnpDevice_Handle deviceHandle, const char* devID, const char* servName, const std::string& propertySet)
 {

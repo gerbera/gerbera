@@ -8,6 +8,7 @@
 - Fix creating containers in web ui
 - Fix handling of checkbox values on web ui
 - Improve handling multivalue tags in virtual paths
+- Increase size of pupnp threadpool
 - UPnP: Add support for filters
 - Web UI: Add Search page
 

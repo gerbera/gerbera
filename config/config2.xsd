@@ -89,6 +89,7 @@
                 <xs:element ref="containers" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="debug-mode" type="xs:string"/>
+            <xs:attribute name="upnp-max-jobs" type="xs:nonNegativeInteger"/>
         </xs:complexType>
     </xs:element>
 

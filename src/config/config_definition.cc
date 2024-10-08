@@ -57,6 +57,7 @@
 #include "upnp/upnp_common.h"
 
 #include <algorithm>
+#include <upnpconfig.h>
 
 #ifdef HAVE_CURL
 #include <curl/curl.h>
@@ -586,6 +587,11 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigUIntSetup>(ConfigVal::SERVER_LOG_ROTATE_COUNT,
         "/server/logging/attribute::rotate-file-count", "config-server.html#logging",
         10),
+#ifdef UPNP_HAVE_TOOLS
+    std::make_shared<ConfigUIntSetup>(ConfigVal::SERVER_UPNP_MAXJOBS,
+        "/server/attribute::upnp-max-jobs", "config-server.html#upnp-max-jobs",
+        500),
+#endif
 
     std::make_shared<ConfigClientSetup>(ConfigVal::CLIENTS_LIST,
         "/clients", "config-clients.html#clients"),
