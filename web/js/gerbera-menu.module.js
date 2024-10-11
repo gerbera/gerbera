@@ -21,12 +21,12 @@
     $Id$
 */
 
-import {Items} from "./gerbera-items.module.js";
-import {GerberaApp} from "./gerbera-app.module.js";
-import {Trail} from "./gerbera-trail.module.js";
-import {Tree} from "./gerbera-tree.module.js";
-import {Clients} from "./gerbera-clients.module.js";
-import {Config} from "./gerbera-config.module.js";
+import { Items } from "./gerbera-items.module.js";
+import { GerberaApp } from "./gerbera-app.module.js";
+import { Trail } from "./gerbera-trail.module.js";
+import { Tree } from "./gerbera-tree.module.js";
+import { Clients } from "./gerbera-clients.module.js";
+import { Config } from "./gerbera-config.module.js";
 
 const disable = () => {
   const allLinks = $('nav li a, nav > a.navbar-brand');
@@ -53,23 +53,24 @@ const initialize = () => {
     allLinks.click(Menu.click);
     allLinks.removeClass('disabled');
     $('#nav-home').click();
-    if(GerberaApp.serverConfig.friendlyName && GerberaApp.serverConfig.friendlyName !== "Gerbera") {
+    if (GerberaApp.serverConfig.friendlyName && GerberaApp.serverConfig.friendlyName !== "Gerbera") {
       $('#server-name').text(GerberaApp.serverConfig.friendlyName);
     }
     $('#source-docs').hide();
-    if(GerberaApp.serverConfig.sourceDocs && GerberaApp.serverConfig.sourceDocs !== "") {
+    if (GerberaApp.serverConfig.sourceDocs && GerberaApp.serverConfig.sourceDocs !== "") {
       $('#source-docs').show();
       $('#devs').attr('href', GerberaApp.serverConfig.sourceDocs);
     }
-    if(GerberaApp.serverConfig.userDocs && GerberaApp.serverConfig.userDocs !== "") {
+    if (GerberaApp.serverConfig.userDocs && GerberaApp.serverConfig.userDocs !== "") {
       $('#docs').attr('href', GerberaApp.serverConfig.userDocs);
+      $('#docsMain').attr('href', GerberaApp.serverConfig.userDocs);
     }
     const titleVersion = $('#gerbera-title-version');
-    if(GerberaApp.serverConfig.version) {
+    if (GerberaApp.serverConfig.version) {
       titleVersion.text(GerberaApp.serverConfig.version);
     }
     const version = $('#gerbera-version');
-    if(GerberaApp.serverConfig.version) {
+    if (GerberaApp.serverConfig.version) {
       version.children('span').text(GerberaApp.serverConfig.version);
       version.parent('li').removeAttr('hidden');
     } else {

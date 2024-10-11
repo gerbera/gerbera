@@ -2,6 +2,8 @@
 
 ## HEAD
 
+There are two new noteworthy features in this release: the search page and support for UPnP filters in requests.
+
 ### NEW Features
 
 - Configuration of ui handler to allow hosting of docs and doxygen output
