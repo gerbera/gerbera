@@ -153,6 +153,7 @@ protected:
     std::map<std::string, std::string> ctMappings;
     std::vector<std::vector<std::pair<std::string, std::string>>> profMappings;
     std::map<std::string, std::string> transferMappings;
+    std::map<ConfigVal, std::map<std::string, std::string>> objectNamespaces;
 
     std::deque<std::shared_ptr<CdsResource>> getOrderedResources(const CdsObject& object) const;
     std::pair<bool, int> insertTempTranscodingResource(
@@ -160,6 +161,8 @@ protected:
         const std::shared_ptr<Quirks>& quirks,
         std::deque<std::shared_ptr<CdsResource>>& orderedResources,
         bool skipURL) const;
+
+    bool checkFilterNamespace(const std::string& f, ConfigVal nsProp) const;
 
     std::string renderExtension(
         const std::string& contentType,

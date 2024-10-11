@@ -38,12 +38,12 @@
 
 std::map<MetadataFields, std::string> MetaEnumMapper::mt_keys = std::map<MetadataFields, std::string> {
     std::pair(MetadataFields::M_TITLE, DC_TITLE),
-    std::pair(MetadataFields::M_ARTIST, "upnp:artist"),
+    std::pair(MetadataFields::M_ARTIST, UPNP_SEARCH_ARTIST),
     std::pair(MetadataFields::M_ALBUM, "upnp:album"),
     std::pair(MetadataFields::M_DATE, DC_DATE),
     std::pair(MetadataFields::M_CREATION_DATE, "dc:created"),
     std::pair(MetadataFields::M_UPNP_DATE, "upnp:date"),
-    std::pair(MetadataFields::M_GENRE, "upnp:genre"),
+    std::pair(MetadataFields::M_GENRE, UPNP_SEARCH_GENRE),
     std::pair(MetadataFields::M_DESCRIPTION, "dc:description"),
     std::pair(MetadataFields::M_LONGDESCRIPTION, "upnp:longDescription"),
     std::pair(MetadataFields::M_PARTNUMBER, "upnp:episodeSeason"),
@@ -57,7 +57,7 @@ std::map<MetadataFields, std::string> MetaEnumMapper::mt_keys = std::map<Metadat
     std::pair(MetadataFields::M_RATING, "upnp:rating"),
     std::pair(MetadataFields::M_ACTOR, "upnp:actor"),
     std::pair(MetadataFields::M_PRODUCER, "upnp:producer"),
-    std::pair(MetadataFields::M_ALBUMARTIST, "upnp:artist@role[AlbumArtist]"),
+    std::pair(MetadataFields::M_ALBUMARTIST, UPNP_SEARCH_ARTIST "@role[AlbumArtist]"),
     std::pair(MetadataFields::M_COMPOSER, "upnp:composer"),
     std::pair(MetadataFields::M_CONDUCTOR, "upnp:conductor"),
     std::pair(MetadataFields::M_ORCHESTRA, "upnp:orchestra"),

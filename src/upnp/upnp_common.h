@@ -36,6 +36,11 @@
 // UPnP default classes
 #define UPNP_CLASS_ITEM "object.item"
 #define UPNP_CLASS_PLAYLIST_ITEM "object.item.playlistItem"
+#define UPNP_SEARCH_CLASS "upnp:class"
+#define UPNP_SEARCH_ARTIST "upnp:artist"
+#define UPNP_SEARCH_GENRE "upnp:genre"
+#define UPNP_SEARCH_LAST_PLAYED "upnp:lastPlaybackTime"
+#define UPNP_SEARCH_PLAY_COUNT "upnp:playbackCount"
 
 #define UPNP_CLASS_AUDIO_ITEM "object.item.audioItem"
 #define UPNP_CLASS_MUSIC_TRACK "object.item.audioItem.musicTrack"
