@@ -264,7 +264,7 @@ static const std::vector<std::string> upnpSearchSegmentDefaults {
 /// \brief default values for ConfigVal::UPNP_ALBUM_PROPERTIES
 static const std::map<std::string, std::string> upnpAlbumPropDefaults {
     { "dc:creator", "M_ALBUMARTIST" },
-    { "upnp:artist", "M_ALBUMARTIST" },
+    { UPNP_SEARCH_ARTIST, "M_ALBUMARTIST" },
     { "upnp:albumArtist", "M_ALBUMARTIST" },
     { "upnp:composer", "M_COMPOSER" },
     { "upnp:conductor", "M_CONDUCTOR" },
@@ -273,19 +273,19 @@ static const std::map<std::string, std::string> upnpAlbumPropDefaults {
     { DC_DATE, "M_UPNP_DATE" },
     { "upnp:producer", "M_PRODUCER" },
     { "dc:publisher", "M_PUBLISHER" },
-    { "upnp:genre", "M_GENRE" },
+    { UPNP_SEARCH_GENRE, "M_GENRE" },
 };
 
 /// \brief default values for ConfigVal::UPNP_ARTIST_PROPERTIES
 static const std::map<std::string, std::string> upnpArtistPropDefaults {
-    { "upnp:artist", "M_ALBUMARTIST" },
+    { UPNP_SEARCH_ARTIST, "M_ALBUMARTIST" },
     { "upnp:albumArtist", "M_ALBUMARTIST" },
-    { "upnp:genre", "M_GENRE" },
+    { UPNP_SEARCH_GENRE, "M_GENRE" },
 };
 
 /// \brief default values for ConfigVal::UPNP_GENRE_PROPERTIES
 static const std::map<std::string, std::string> upnpGenrePropDefaults {
-    { "upnp:genre", "M_GENRE" },
+    { UPNP_SEARCH_GENRE, "M_GENRE" },
 };
 
 /// \brief default values for ConfigVal::UPNP_PLAYLIST_PROPERTIES
@@ -295,12 +295,12 @@ static const std::map<std::string, std::string> upnpPlaylistPropDefaults {
 
 /// \brief default values for ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST
 static const std::map<std::string, std::string> id3SpecialPropertyMap {
-    { "PERFORMER", "upnp:artist@role[Performer]" },
+    { "PERFORMER", UPNP_SEARCH_ARTIST "@role[Performer]" },
 };
 
 /// \brief default values for ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST
 static const std::map<std::string, std::string> ffmpegSpecialPropertyMap {
-    { "performer", "upnp:artist@role[Performer]" },
+    { "performer", UPNP_SEARCH_ARTIST "@role[Performer]" },
 };
 
 /// \brief default values for ConfigVal::IMPORT_VIRTUAL_DIRECTORY_KEYS

@@ -122,6 +122,13 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
     ctMappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     profMappings = config->getVectorOption(ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST);
     transferMappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST);
+    objectNamespaces = {
+        { ConfigVal::UPNP_TITLE_NAMESPACES, config->getDictionaryOption(ConfigVal::UPNP_TITLE_NAMESPACES) },
+        { ConfigVal::UPNP_ALBUM_NAMESPACES, config->getDictionaryOption(ConfigVal::UPNP_ALBUM_NAMESPACES) },
+        { ConfigVal::UPNP_ARTIST_NAMESPACES, config->getDictionaryOption(ConfigVal::UPNP_ARTIST_NAMESPACES) },
+        { ConfigVal::UPNP_GENRE_NAMESPACES, config->getDictionaryOption(ConfigVal::UPNP_GENRE_NAMESPACES) },
+        { ConfigVal::UPNP_PLAYLIST_NAMESPACES, config->getDictionaryOption(ConfigVal::UPNP_PLAYLIST_NAMESPACES) },
+    };
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType) const
@@ -177,7 +184,7 @@ std::vector<std::string> UpnpXMLBuilder::addPropertyList(
     ConfigVal itemProps,
     ConfigVal nsProp) const
 {
-    auto namespaceMap = config->getDictionaryOption(nsProp);
+    auto namespaceMap = objectNamespaces.at(nsProp);
     for (auto&& [xmlns, uri] : namespaceMap) {
         result.append_attribute(fmt::format("xmlns:{}", xmlns).c_str()) = uri.c_str();
     }
@@ -253,6 +260,26 @@ std::string UpnpXMLBuilder::addField(
     }
 }
 
+bool UpnpXMLBuilder::checkFilterNamespace(const std::string& f, ConfigVal nsProp) const
+{
+    /*
+     * request Filter =
+     *    Sony-Bluray:
+     *    @id,upnp:class,res,res@protocolInfo,res@av:authenticationUri,res@size,dc:title,upnp:albumArtURI,res@dlna:ifoFileURI,res@protection,res@bitrate,res@duration,res@sampleFrequency,res@bitsPerSample,res@nrAudioChannels,res@resolution,res@colorDepth,dc:date,av:dateTime,upnp:artist,upnp:album,upnp:genre,dc:contributer,upnp:storageFree,upnp:storageUsed,upnp:originalTrackNumber,dc:publisher,dc:language,dc:region,dc:description,upnp:toc,@childCount,upnp:albumArtURI@dlna:profileID,res@dlna:cleartextSize,@restricted,@dlna:dlnaManaged
+     *
+     *    KODI:
+     *    dc:date,dc:description,upnp:longDescription,upnp:genre,res,res@duration,res@size,upnp:albumArtURI,upnp:rating,upnp:lastPlaybackPosition,upnp:lastPlaybackTime,upnp:playbackCount,upnp:originalTrackNumber,upnp:episodeNumber,upnp:programTitle,upnp:seriesTitle,upnp:album,upnp:artist,upnp:author,upnp:director,dc:publisher,searchable,childCount,dc:title,dc:creator,upnp:actor,res@resolution,upnp:episodeCount,upnp:episodeSeason,xbmc:lastPlayerState,xbmc:dateadded,xbmc:rating,xbmc:votes,xbmc:artwork,xbmc:uniqueidentifier,xbmc:country,xbmc:userrating
+     */
+    auto parts = splitString(f, ':');
+    auto namespaceMap = objectNamespaces.at(nsProp);
+    if (parts.size() > 1) {
+        auto nsp = parts.at(0);
+        if (nsp != "dc" && nsp != "upnp" && namespaceMap.find(nsp) == namespaceMap.end())
+            return false;
+    }
+    return true;
+}
+
 void UpnpXMLBuilder::renderObject(
     const std::shared_ptr<CdsObject>& obj,
     const std::vector<std::string>& filter,
@@ -260,16 +287,27 @@ void UpnpXMLBuilder::renderObject(
     pugi::xml_node& parent,
     const std::shared_ptr<Quirks>& quirks) const
 {
+    ConfigVal itemProps = ConfigVal::UPNP_TITLE_PROPERTIES;
+    ConfigVal nsProp = ConfigVal::UPNP_TITLE_NAMESPACES;
+    const std::string upnpClass = obj->getClass();
+    if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM)) {
+        itemProps = ConfigVal::UPNP_ALBUM_PROPERTIES;
+        nsProp = ConfigVal::UPNP_ALBUM_NAMESPACES;
+    } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST)) {
+        itemProps = ConfigVal::UPNP_ARTIST_PROPERTIES;
+        nsProp = ConfigVal::UPNP_ARTIST_NAMESPACES;
+    } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_GENRE)) {
+        itemProps = ConfigVal::UPNP_GENRE_PROPERTIES;
+        nsProp = ConfigVal::UPNP_GENRE_NAMESPACES;
+    } else if (startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
+        itemProps = ConfigVal::UPNP_PLAYLIST_PROPERTIES;
+        nsProp = ConfigVal::UPNP_PLAYLIST_NAMESPACES;
+    }
+
     std::vector<std::string> contFilter;
     std::vector<std::string> objFilter;
     std::vector<std::string> resFilter;
     for (auto&& f : filter) {
-        auto parts = splitString(f, ':');
-        if (parts.size() > 1) {
-            auto nsp = parts.at(0);
-            if (nsp != "dc" && nsp != "upnp")
-                continue;
-        }
         if (f == "*") {
             objFilter.push_back(f);
             resFilter.push_back(f);
@@ -280,13 +318,16 @@ void UpnpXMLBuilder::renderObject(
         } else if (startswith(f, "res@")) {
             std::string resFlt = f;
             replaceAllString(resFlt, "res@", "");
-            resFilter.push_back(resFlt);
+            if (checkFilterNamespace(resFlt, nsProp))
+                resFilter.push_back(resFlt);
         } else if (startswith(f, "container@")) {
             std::string contFlt = f;
             replaceAllString(contFlt, "container@", "");
-            contFilter.push_back(contFlt);
+            if (checkFilterNamespace(contFlt, nsProp))
+                contFilter.push_back(contFlt);
         } else {
-            objFilter.push_back(f);
+            if (checkFilterNamespace(f, nsProp))
+                objFilter.push_back(f);
         }
     }
     auto result = parent.append_child("");
@@ -297,10 +338,9 @@ void UpnpXMLBuilder::renderObject(
 
     auto strictXml = quirks && quirks->needsStrictXml();
     const std::string title = obj->getTitle();
-    const std::string upnpClass = obj->getClass();
 
     result.append_child(DC_TITLE).append_child(pugi::node_pcdata).set_value(formatXmlString(strictXml, stringLimit, title).c_str());
-    result.append_child("upnp:class").append_child(pugi::node_pcdata).set_value(upnpClass.c_str());
+    result.append_child(UPNP_SEARCH_CLASS).append_child(pugi::node_pcdata).set_value(upnpClass.c_str());
 
     auto auxData = obj->getAuxData();
     auto mvMeta = multiValue;
@@ -364,15 +404,15 @@ void UpnpXMLBuilder::renderObject(
         // add playback statistics
         auto playStatus = item->getPlayStatus();
         if (playStatus) {
-            auxData["upnp:playbackCount"] = fmt::format("{}", playStatus->getPlayCount());
-            auxData["upnp:lastPlaybackTime"] = fmt::format("{:%Y-%m-%d T %H:%M:%S}", fmt::localtime(playStatus->getLastPlayed().count()));
+            auxData[UPNP_SEARCH_PLAY_COUNT] = fmt::format("{}", playStatus->getPlayCount());
+            auxData[UPNP_SEARCH_LAST_PLAYED] = fmt::format("{:%Y-%m-%d T %H:%M:%S}", fmt::localtime(playStatus->getLastPlayed().count()));
             auxData["upnp:lastPlaybackPosition"] = fmt::format("{}", millisecondsToHMSF(playStatus->getLastPlayedPosition().count()));
-            propNames.push_back(addField(result, objFilter, "upnp:playbackCount", auxData["upnp:playbackCount"]));
-            propNames.push_back(addField(result, objFilter, "upnp:lastPlaybackTime", auxData["upnp:lastPlaybackTime"]));
+            propNames.push_back(addField(result, objFilter, UPNP_SEARCH_PLAY_COUNT, auxData[UPNP_SEARCH_PLAY_COUNT]));
+            propNames.push_back(addField(result, objFilter, UPNP_SEARCH_LAST_PLAYED, auxData[UPNP_SEARCH_LAST_PLAYED]));
             propNames.push_back(addField(result, objFilter, "upnp:lastPlaybackPosition", auxData["upnp:lastPlaybackPosition"]));
         }
 
-        auto propNamesMeta = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, ConfigVal::UPNP_TITLE_PROPERTIES, ConfigVal::UPNP_TITLE_NAMESPACES);
+        auto propNamesMeta = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, itemProps, nsProp);
         propNames.insert(propNames.end(), propNamesMeta.begin(), propNamesMeta.end());
         addResources(item, result, resFilter, quirks);
 
@@ -388,15 +428,7 @@ void UpnpXMLBuilder::renderObject(
         // add metadata
         log_debug("container is class: {}", upnpClass.c_str());
         auto&& meta = obj->getMetaData();
-        if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM)) {
-            propNames = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, ConfigVal::UPNP_ALBUM_PROPERTIES, ConfigVal::UPNP_ALBUM_NAMESPACES);
-        } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST)) {
-            propNames = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, ConfigVal::UPNP_ARTIST_PROPERTIES, ConfigVal::UPNP_ARTIST_NAMESPACES);
-        } else if (startswith(upnpClass, UPNP_CLASS_MUSIC_GENRE)) {
-            propNames = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, ConfigVal::UPNP_GENRE_PROPERTIES, ConfigVal::UPNP_GENRE_NAMESPACES);
-        } else if (startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
-            propNames = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, ConfigVal::UPNP_PLAYLIST_PROPERTIES, ConfigVal::UPNP_PLAYLIST_NAMESPACES);
-        }
+        propNames = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, itemProps, nsProp);
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST) || startswith(upnpClass, UPNP_CLASS_CONTAINER) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
             auto url = renderContainerImageURL(cont);
             if (url) {
@@ -413,7 +445,7 @@ void UpnpXMLBuilder::renderObject(
         propNames.emplace_back(DC_DATE);
     }
     propNames.emplace_back(DC_TITLE);
-    propNames.emplace_back("upnp:class");
+    propNames.emplace_back(UPNP_SEARCH_CLASS);
     auto filterActive = !(objFilter.size() == 1 && objFilter[0] == "*");
     if (filterActive && quirks && quirks->getFullFilter()) {
         if (obj->isItem()) {

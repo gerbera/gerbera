@@ -28,6 +28,7 @@
 #ifndef __SEARCH_HANDLER_H__
 #define __SEARCH_HANDLER_H__
 
+#include "upnp/upnp_common.h"
 #include "util/tools.h"
 
 #include <algorithm>
@@ -38,14 +39,11 @@
 #include <unordered_map>
 #include <vector>
 
-#define UPNP_SEARCH_CLASS "upnp:class"
 #define UPNP_SEARCH_ID "@id"
 #define UPNP_SEARCH_REFID "@refID"
 #define UPNP_SEARCH_PARENTID "@parentID"
 #define UPNP_SEARCH_LAST_UPDATED "last_updated"
 #define UPNP_SEARCH_LAST_MODIFIED "last_modified"
-#define UPNP_SEARCH_LAST_PLAYED "upnp:lastPlaybackTime"
-#define UPNP_SEARCH_PLAY_COUNT "upnp:playbackCount"
 #define UPNP_SEARCH_PLAY_GROUP "play_group"
 #define UPNP_SEARCH_PATH "path"
 #define META_NAME "name"
