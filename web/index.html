@@ -58,7 +58,12 @@
                 </a>
               </li>
               <li class="nav-item" style="display: none">
-                <a id="nav-search" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="search">
+                <a
+                  id="nav-search"
+                  class="nav-link disabled"
+                  data-gerbera-menu-cmd="SELECT_TYPE"
+                  data-gerbera-type="search"
+                >
                   <i class="fa fa-search"></i>
                   <span>Search</span>
                 </a>
@@ -177,11 +182,7 @@
                       </div>
                     </div>
                   </a>
-                  <a
-                    id="viewlink"
-                    href="javascript:;"
-                    onclick="$('#nav-db').click();"
-                  >
+                  <a id="viewlink" href="javascript:;" onclick="$('#nav-db').click();">
                     <div class="sublink d-flex card-style-bottom px-3 py-3">
                       <i class="fa fa-fw fa-files-o fa-3x text-center" style="width: 2em"></i>
                       <div class="ml-2" style="width: 80%">
@@ -190,11 +191,7 @@
                       </div>
                     </div>
                   </a>
-                  <a
-                    id="searchlink"
-                    href="javascript:;"
-                    onclick="$('#nav-search').click();"
-                  >
+                  <a id="searchlink" href="javascript:;" onclick="$('#nav-search').click();">
                     <div class="sublink d-flex card-style-bottom px-3 py-3">
                       <i class="fa fa-fw fa-search fa-3x text-center" style="width: 2em"></i>
                       <div class="ml-2" style="width: 80%">
@@ -399,9 +396,9 @@
                   </p>
                   <p>
                     Take a minute to check out the
-                    <a target="_blank" href="http://docs.gerbera.io"
-                      >documentation
-                      <i class="fa fa-external-link"></i>
+                    <a id="docsMain" href="https://docs.gerbera.io/en/stable/" target="_blank">
+                      <i class="fa fa-question-circle"></i>
+                      <span>documentation</span>
                     </a>
                   </p>
                   <h4>Adding Content</h4>
@@ -471,14 +468,23 @@
             <span class="small text-muted">Please use UPnP syntax for Query and Sort</span>
             <ul>
               <li>
-                <label class="searchLabel">Query: <span class="small text-muted">upnp:class derivedfrom "object.item" and dc:title contains "music"</span></label>
-                <br/><textarea id="searchQuery" cols="50" rows="2"></textarea>
-                <br/><span class="small text-muted" id="searchCaps"></span>
+                <label class="searchLabel"
+                  >Query:
+                  <span class="small text-muted"
+                    >upnp:class derivedfrom "object.item" and dc:title contains "music"</span
+                  ></label
+                >
+                <br /><textarea id="searchQuery" cols="50" rows="2"></textarea> <br /><span
+                  class="small text-muted"
+                  id="searchCaps"
+                ></span>
               </li>
               <li>
                 <label class="searchLabel">Sort: <span class="small text-muted">-dc:title</span></label>
-                <br/><textarea id="searchSort" cols="50" rows="1"></textarea>
-                <br/><span class="small text-muted" id="sortCaps"></span>
+                <br /><textarea id="searchSort" cols="50" rows="1"></textarea> <br /><span
+                  class="small text-muted"
+                  id="sortCaps"
+                ></span>
               </li>
             </ul>
             <button id="searchButton" class="btn btn-primary">Execute</button>

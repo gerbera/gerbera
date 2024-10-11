@@ -1,14 +1,13 @@
-import {Autoscan} from "../../../web/js/gerbera-autoscan.module";
-import {GerberaApp} from "../../../web/js/gerbera-app.module";
-import {Tree} from '../../../web/js/gerbera-tree.module';
-import {Items} from "../../../web/js/gerbera-items.module";
-import {Updates} from "../../../web/js/gerbera-updates.module";
-import {Trail} from "../../../web/js/gerbera-trail.module";
+import { Autoscan } from "../../../web/js/gerbera-autoscan.module";
+import { GerberaApp } from "../../../web/js/gerbera-app.module";
+import { Tree } from '../../../web/js/gerbera-tree.module';
+import { Items } from "../../../web/js/gerbera-items.module";
+import { Updates } from "../../../web/js/gerbera-updates.module";
+import { Trail } from "../../../web/js/gerbera-trail.module";
 import treeResponse from './fixtures/parent_id-0-select_it-0';
 import childTreeResponse from './fixtures/parent_id-7443-select_it-0';
 import trailData from './fixtures/trail-data';
 import containerAsTree from './fixtures/container-data-astree';
-
 
 describe('Gerbera Tree', () => {
   let tree, lsSpy;
@@ -21,7 +20,7 @@ describe('Gerbera Tree', () => {
     fixture.load('index.html');
     tree = $('#tree');
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
-        return;
+      return;
     });
     GerberaApp.setType('db');
     GerberaApp.setCurrentItem([]);
@@ -36,7 +35,7 @@ describe('Gerbera Tree', () => {
     });
   });
   describe('loadTree()', () => {
-    let response, trailConfig, trail;
+    let trailConfig, trail;
 
     beforeEach(() => {
       trailConfig = {};
@@ -204,7 +203,8 @@ describe('Gerbera Tree', () => {
 
       expect(Items.treeItemSelected).toHaveBeenCalled();
       expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
-        { title: 'Photos',
+        {
+          title: 'Photos',
           badge: [2],
           nodes: [],
           gerbera: {
@@ -214,7 +214,9 @@ describe('Gerbera Tree', () => {
             autoScanType: 'none',
             image: null,
             path: "/my/Directory/",
-            upnpClass: "upnp.class" }}
+            upnpClass: "upnp.class"
+          }
+        }
       );
     });
 
@@ -233,7 +235,8 @@ describe('Gerbera Tree', () => {
 
       expect(Items.treeItemSelected).toHaveBeenCalled();
       expect(Items.treeItemSelected.calls.mostRecent().args[0]).toEqual(
-        { title: 'Photos',
+        {
+          title: 'Photos',
           badge: [2],
           nodes: [],
           gerbera: {
@@ -243,7 +246,9 @@ describe('Gerbera Tree', () => {
             autoScanType: 'none',
             image: null,
             path: "/my/Directory/",
-            upnpClass: "upnp.class" }}
+            upnpClass: "upnp.class"
+          }
+        }
       );
     });
 

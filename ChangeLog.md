@@ -11,6 +11,7 @@
 - Increase size of pupnp threadpool
 - UPnP: Add support for filters
 - Web UI: Add Search page
+- Web UI: Fix detail display
 
 ### v2.3.0
 

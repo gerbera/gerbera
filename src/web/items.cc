@@ -81,7 +81,7 @@ void Web::Items::process()
         item.append_child("title").append_child(pugi::node_pcdata).set_value(cdsObj->getTitle().c_str());
         item.append_child("upnp_class").append_child(pugi::node_pcdata).set_value(cdsObj->getClass().c_str());
 
-        if (!cdsObj->isItem()) {
+        if (cdsObj->isItem()) {
             auto cdsItem = std::static_pointer_cast<CdsItem>(cdsObj);
             if (cdsItem->getPartNumber() > 0 && container->isSubClass(UPNP_CLASS_MUSIC_ALBUM))
                 item.append_child("part").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", cdsItem->getPartNumber()).c_str());
