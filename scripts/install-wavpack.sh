@@ -20,11 +20,12 @@
 # $Id$
 set -Eeuo pipefail
 
-. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+main_dir=$(dirname "${BASH_SOURCE[0]}")
+main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/versions.sh
 
 VERSION="${WAVPACK-5.4.0}"
 
-#script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 script_dir=`pwd -P`
 src_dir="${script_dir}/wavpack-${VERSION}"
 tgz_file="${script_dir}/wavpack-${VERSION}.tar.xz"

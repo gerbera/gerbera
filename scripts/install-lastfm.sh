@@ -19,7 +19,10 @@
 #
 # $Id$
 set -ex
-. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+
+main_dir=$(dirname "${BASH_SOURCE[0]}")
+main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/versions.sh
 
 VERSION="${LASTFM-0.4.0}"
 wget "https://storage.googleapis.com/google-code-archive-downloads/v2/code.google.com/lastfmlib/lastfmlib-${VERSION}.tar.gz"

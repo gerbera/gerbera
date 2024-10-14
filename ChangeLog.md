@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Bump cookie, express and socket.io in /gerbera-web
 - Config: UI handler mimetypes and CSP
 - Fix access to cache option if thumbnailer disabled
 - Fix build without ffmpeg

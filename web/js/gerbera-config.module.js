@@ -41,6 +41,7 @@ let current_config = {
   changedItems: {},
   databaseItems: {},
   choice: 'expert',
+  userDocs: 'https://docs.gerbera.io/en/stable/',
   chooser: {
     minimal: { caption: 'Minimal', fileName: './assets/gerbera-config-minimal.json' },
     standard: { caption: 'Standard', fileName: './assets/gerbera-config-standard.json' },
@@ -53,6 +54,7 @@ const initialize = () => {
   current_config.values = null;
   current_config.meta = null;
   current_config.choice = GerberaApp.configMode();
+  current_config.userDocs = GerberaApp.serverConfig ? GerberaApp.serverConfig.userDocs : '',
   $('#configgrid').html('');
   return Promise.resolve();
 };
@@ -135,6 +137,7 @@ const loadConfig = (response, item) => {
       meta: current_config.meta,
       choice: current_config.choice,
       chooser: current_config.chooser,
+      userDocs: current_config.userDocs,
       addResultItem: setChangedItem,
       addDatabaseItem: setDatabaseItem,
       configModeChanged: configModeChanged,
