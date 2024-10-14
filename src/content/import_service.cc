@@ -242,7 +242,7 @@ std::string ImportService::mimeTypeToUpnpClass(const std::string& mimeType)
     if (parts.size() != 2)
         return {};
 
-    return getValueOrDefault(mimetypeUpnpclassMap, parts[0] + "/*");
+    return getValueOrDefault(mimetypeUpnpclassMap, parts.at(0) + "/*");
 }
 
 void ImportService::clearCache()
@@ -363,13 +363,13 @@ void ImportService::cacheState(const fs::path& entryPath, const fs::directory_en
     if (contentStateCache.find(entryPath) == contentStateCache.end()) {
         contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, state, mtime, cdsObject);
     } else {
-        state = contentStateCache[entryPath]->getState() < state ? state : contentStateCache[entryPath]->getState();
+        state = contentStateCache.at(entryPath)->getState() < state ? state : contentStateCache[entryPath]->getState();
         if (!cdsObject)
-            contentStateCache[entryPath]->setState(state);
+            contentStateCache.at(entryPath)->setState(state);
         else
-            contentStateCache[entryPath]->setObject(state, cdsObject);
+            contentStateCache.at(entryPath)->setObject(state, cdsObject);
         if (mtime > std::chrono::seconds::zero())
-            contentStateCache[entryPath]->setMTime(mtime);
+            contentStateCache.at(entryPath)->setMTime(mtime);
     }
 }
 
@@ -420,7 +420,7 @@ void ImportService::removeHidden(const AutoScanSetting& settings)
 bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, const AutoScanSetting& settings)
 {
     auto&& name = entryPath.filename().string();
-    if ((name[0] == '.' && !settings.hidden)
+    if ((name.at(0) == '.' && !settings.hidden)
         || (!settings.followSymlinks && dirEntry.is_symlink())
         || config->getConfigFilename() == entryPath) {
         cacheState(entryPath, dirEntry, ImportState::ToDelete);
@@ -520,7 +520,7 @@ void ImportService::createItems(AutoScanSetting& settings)
         if (cdsObj && cdsObj->isContainer()) {
             std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
             if (!contPath.empty()) {
-                contentStateCache[contPath]->setMTime(lastModifiedNewMax);
+                contentStateCache.at(contPath)->setMTime(lastModifiedNewMax);
                 if (autoscanDir) {
                     autoscanDir->setCurrentLMT(contPath, lastModifiedNewMax);
                 }
@@ -541,7 +541,7 @@ void ImportService::createItems(AutoScanSetting& settings)
         auto dirEntry = stateEntry->getDirEntry();
         if (isRegularFile(dirEntry, ec)) {
             // Start with cached item
-            auto contState = contentStateCache[itemPath.parent_path()];
+            auto contState = contentStateCache.at(itemPath.parent_path());
             if (contState)
                 parentContainer = std::dynamic_pointer_cast<CdsContainer>(contState->getObject());
             else
@@ -679,8 +679,12 @@ void ImportService::updateSingleItem(const fs::directory_entry& dirEntry, const 
     item->setUTime(mTime);
     item->setSizeOnDisk(getFileSize(dirEntry));
 
-    metadataService->extractMetaData(item, dirEntry);
-    updateItemData(item, mimetype);
+    try {
+        metadataService->extractMetaData(item, dirEntry);
+        updateItemData(item, mimetype);
+    } catch (const std::runtime_error& ex) {
+        log_error("updateSingleItem '{}' failed: {}", dirEntry.path().string(), ex.what());
+    }
 }
 
 void ImportService::fillLayout(const std::shared_ptr<GenericTask>& task)
@@ -688,7 +692,7 @@ void ImportService::fillLayout(const std::shared_ptr<GenericTask>& task)
     for (auto&& [contPath, stateEntry] : contentStateCache) {
         if (!stateEntry || stateEntry->getState() != ImportState::Created)
             continue;
-        contentStateCache[contPath]->setObject(ImportState::Loaded, stateEntry->getObject());
+        contentStateCache.at(contPath)->setObject(ImportState::Loaded, stateEntry->getObject());
         fillSingleLayout(stateEntry, nullptr, stateEntry->getParentObject(), task);
     }
 }
@@ -728,8 +732,8 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
             if (contentType == CONTENT_TYPE_PLAYLIST)
                 log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", cdsObject->getLocation().c_str());
 #endif // HAVE_JS
-        } catch (const std::runtime_error& e) {
-            log_error("{}", e.what());
+        } catch (const std::runtime_error& ex) {
+            log_error("{}", ex.what());
         }
     }
 }
@@ -961,7 +965,7 @@ std::pair<int, bool> ImportService::addContainerTree(
             if (!hasCaseSensitiveNames) {
                 subTree = toLower(subTree);
             }
-            if (containerMap.find(subTree) == containerMap.end() || !containerMap[subTree]) {
+            if (containerMap.find(subTree) == containerMap.end() || !containerMap.at(subTree)) {
                 auto cont = database->findObjectByPath(subTree, DbFileType::Virtual);
                 if (cont && cont->isContainer())
                     containerMap[subTree] = std::dynamic_pointer_cast<CdsContainer>(cont);
@@ -972,7 +976,7 @@ std::pair<int, bool> ImportService::addContainerTree(
         } else if (subTree.empty()) {
             subTree = tree;
         }
-        if (containerMap.find(subTree) == containerMap.end() || !containerMap[subTree]) {
+        if (containerMap.find(subTree) == containerMap.end() || !containerMap.at(subTree)) {
             item->removeMetaData(MetadataFields::M_TITLE);
             item->addMetaData(MetadataFields::M_TITLE, item->getTitle());
             item->setParentID(result);
@@ -989,14 +993,14 @@ std::pair<int, bool> ImportService::addContainerTree(
             }
             isNew = true;
         } else {
-            result = containerMap[subTree]->getID();
-            if (item->getMTime() > containerMap[subTree]->getMTime()) {
+            result = containerMap.at(subTree)->getID();
+            if (item->getMTime() > containerMap.at(subTree)->getMTime()) {
                 createdIds.push_back(result);
             }
         }
         count++;
         if (isVirtual) // && chain.size() - count < containerImageParentCount
-            assignFanArt(containerMap[subTree], refItem && count > containerImageMinDepth ? refItem : item, AutoscanMediaMode::Mixed, false, chain.size() - count);
+            assignFanArt(containerMap.at(subTree), refItem && count > containerImageMinDepth ? refItem : item, AutoscanMediaMode::Mixed, false, chain.size() - count);
     }
     log_debug("end '{}' {} {}", tree, result, isNew);
     return { result, isNew };

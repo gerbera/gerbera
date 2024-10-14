@@ -62,8 +62,13 @@ const initialize = () => {
       $('#devs').attr('href', GerberaApp.serverConfig.sourceDocs);
     }
     if (GerberaApp.serverConfig.userDocs && GerberaApp.serverConfig.userDocs !== "") {
-      $('#docs').attr('href', GerberaApp.serverConfig.userDocs);
-      $('#docsMain').attr('href', GerberaApp.serverConfig.userDocs);
+      const srcLink = new RegExp('https://docs\\.gerbera\\.io/en/stable/', 'i');
+      const tgtLink = GerberaApp.serverConfig.userDocs.replace(/index\.html/, '');
+      ['docs', 'docsMain', 'docsImport'].forEach(k => {
+        const current = $('#' + k).attr('href');
+        const val = current.replace(srcLink, tgtLink);
+        $('#' + k).attr('href', val);
+      });
     }
     const titleVersion = $('#gerbera-title-version');
     if (GerberaApp.serverConfig.version) {

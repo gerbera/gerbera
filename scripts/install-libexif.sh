@@ -27,7 +27,6 @@ main_dir=$(realpath "${main_dir}")/
 VERSION="${EXIF-v0.6.24}"
 COMMIT="${EXIF_commit-0}"
 
-#script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 script_dir=`pwd -P`
 src_dir="${script_dir}/libexif-${VERSION}"
 tgz_file="${script_dir}/libexif-${VERSION}.tar.gz"

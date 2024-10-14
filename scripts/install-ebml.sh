@@ -20,11 +20,12 @@
 # $Id$
 set -Eeuo pipefail
 
-. $(dirname "${BASH_SOURCE[0]}")/versions.sh
+main_dir=$(dirname "${BASH_SOURCE[0]}")
+main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/versions.sh
 
 VERSION="${EBML-1.4.2}"
 
-#script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 script_dir=`pwd -P`
 src_dir="${script_dir}/libebml-${VERSION}"
 tgz_file="${script_dir}/libebml-${VERSION}.tar.gz"

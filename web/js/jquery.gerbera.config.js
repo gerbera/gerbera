@@ -34,6 +34,7 @@ class TreeItem {
   source = '';
   _id = "-1";
 
+  static userDocs = 'https://docs.gerbera.io/en/stable/';
   static RE = RegExp('[\\]/:[]', 'g');
   static LIST = 'grb_list_';
   static LINE = 'grb_line_';
@@ -157,7 +158,7 @@ class TreeItem {
 
     itemLine.append(input);
     if (this.help) {
-      const link = $('<a>', { "title": "help", "target": "_blank", "style": "margin-left: 20px", "class": "", "href": "https://docs.gerbera.io/en/stable/" + this.help });
+      const link = $('<a>', { "title": "help", "target": "_blank", "style": "margin-left: 20px", "class": "", "href": TreeItem.userDocs + this.help });
       const icon = $('<i></i>', { "class": "fa " + "fa-info" });
       link.append(icon);
       link.appendTo(itemLine);
@@ -834,6 +835,8 @@ $.widget('grb.config', {
     const chooser = this.options.chooser;
     this.setup = this.options.setup;
     this.meta = this.options.meta;
+    if (this.options.userDocs && this.options.userDocs !== "")
+      TreeItem.userDocs = this.options.userDocs;
 
     var line;
     this.result = {};

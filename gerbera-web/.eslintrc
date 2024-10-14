@@ -17,6 +17,7 @@
   ],
   "rules" : {
     "no-unused-expressions": "off",
+    "no-useless-escape": "warn",
     "no-unused-vars": [
       "warn",
       {

@@ -105,7 +105,13 @@
                 </a>
               </li>
               <li class="nav-item" id="user-docs">
-                <a id="docs" class="nav-link noactive" href="https://docs.gerbera.io/en/stable/" target="_blank">
+                <a
+                  id="docs"
+                  class="nav-link noactive"
+                  href="https://docs.gerbera.io/en/stable/index.html"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   <i class="fa fa-question-circle"></i>
                   <span>Documentation</span>
                 </a>
@@ -116,10 +122,11 @@
                   class="nav-link noactive"
                   href="https://github.com/gerbera/gerbera/issues"
                   target="_blank"
+                  rel="noopener noreferrer"
                 >
                   <i class="fa fa-bug"></i>
-                  <span
-                    >Report an Issue
+                  <span>
+                    Report an Issue
                     <i class="fa fa-external-link" aria-hidden="true"></i>
                   </span>
                 </a>
@@ -146,8 +153,8 @@
                   <span id="gerbera-title-version"></span>
                 </h2>
                 <p>
-                  <a href="https://github.com/gerbera/gerbera">Gerbera</a>
-                  is an open source UPnP-AV media server.
+                  <a href="https://github.com/gerbera/gerbera" rel="noopener noreferrer" target="_blank"> Gerbera</a> is
+                  an open source UPnP-AV media server.
                 </p>
               </div>
             </div>
@@ -169,11 +176,7 @@
             <div class="row">
               <div class="col-md-6 col-12" id="homelinks" style="display: none">
                 <div class="card-style mt-3">
-                  <a
-                    id="addlink"
-                    href="javascript:;"
-                    onclick="$('#nav-fs').click(); // Replace with hashchange handling"
-                  >
+                  <a id="addlink" href="javascript:;" onclick="$('#nav-fs').click();">
                     <div class="sublink d-flex card-style-bottom p-3">
                       <i class="fa fa-fw fa-plus-square-o fa-3x text-center" style="width: 2em"></i>
                       <div class="ml-2" style="width: 80%">
@@ -396,7 +399,12 @@
                   </p>
                   <p>
                     Take a minute to check out the
-                    <a id="docsMain" href="https://docs.gerbera.io/en/stable/" target="_blank">
+                    <a
+                      id="docsMain"
+                      href="https://docs.gerbera.io/en/stable/index.html"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
                       <i class="fa fa-question-circle"></i>
                       <span>documentation</span>
                     </a>
@@ -432,8 +440,13 @@
                       <ol>
                         <li>
                           Add an Autoscan entry in config.xml (
-                          <a target="_blank" href="https://docs.gerbera.io/en/latest/config-import.html#autoscan"
-                            >See documentation
+                          <a
+                            id="docsImport"
+                            href="https://docs.gerbera.io/en/stable/config-import.html#autoscan"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            See documentation
                             <i class="fa fa-external-link"></i>
                           </a>
                           )

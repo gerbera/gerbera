@@ -26,7 +26,6 @@ main_dir=$(realpath "${main_dir}")/
 
 VERSION="${EXIV2-v0.27.7}"
 
-#script_dir=$(cd "$(dirname "${BASH_SOURCE[0]}")" &>/dev/null && pwd -P)
 script_dir=`pwd -P`
 src_dir="${script_dir}/libexiv2-${VERSION}"
 tgz_file="${script_dir}/libexiv2-${VERSION}.tar.gz"

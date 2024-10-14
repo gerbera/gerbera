@@ -27,8 +27,8 @@ main_dir=$(realpath "${main_dir}")/
 VERSION="${PUPNP-1.14.12}"
 
 script_dir=`pwd -P`
-src_dir="${main_dir}/pupnp-${VERSION}"
-tgz_file="${main_dir}/pupnp-${VERSION}.tgz"
+src_dir="${script_dir}/pupnp-${VERSION}"
+tgz_file="${script_dir}/pupnp-${VERSION}.tgz"
 patch_file="${main_dir}/${lsb_distro}/pupnp.patch"
 
 downloadSource "https://github.com/pupnp/pupnp/archive/release-${VERSION}.tar.gz" "-" "${patch_file}"
