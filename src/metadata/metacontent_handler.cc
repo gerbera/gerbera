@@ -28,11 +28,13 @@
 
 #include "cds/cds_objects.h"
 #include "config/config.h"
+#include "config/config_definition.h"
 #include "config/config_val.h"
 #include "config/result/directory_tweak.h"
 #include "content/content.h"
 #include "iohandler/file_io_handler.h"
 #include "util/mime.h"
+#include "util/string_converter.h"
 #include "util/tools.h"
 
 #include <array>
@@ -42,7 +44,7 @@
 ContentPathSetup::ContentPathSetup(std::shared_ptr<Config> config, ConfigVal fileListOption, ConfigVal dirListOption)
     : config(std::move(config))
     , names(this->config->getArrayOption(fileListOption))
-    , patterns(this->config->getDictionaryOption(dirListOption))
+    , patterns(this->config->getVectorOption(dirListOption))
     , allTweaks(this->config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST))
     , caseSensitive(this->config->getBoolOption(ConfigVal::IMPORT_RESOURCES_CASE_SENSITIVE))
 {
@@ -54,6 +56,10 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
     auto tweak = allTweaks->get(objLocation);
     auto files = !tweak || !tweak->hasSetting(setting) ? this->names : std::vector<std::string> { tweak->getSetting(setting) };
     auto isCaseSensitive = tweak && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : this->caseSensitive;
+
+    static auto nameOption = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_RESOURCES_NAME);
+    static auto extOption = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_RESOURCES_EXT);
+    static auto pttOption = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_RESOURCES_PTT);
 
     std::vector<fs::path> result;
 
@@ -91,15 +97,30 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
             }
         }
         if (!patterns.empty()) {
-            for (auto&& [dir, ext] : patterns) {
+            for (auto&& pattern : patterns) {
+                std::string dir;
+                std::string ext;
+                std::string ptt;
+                for (auto&& [key, val] : pattern) {
+                    if (key == nameOption)
+                        dir = val;
+                    else if (key == extOption)
+                        ext = val;
+                    else if (key == pttOption)
+                        ptt = val;
+                }
                 auto contentPath = fs::path(expandName(dir, obj));
                 auto extn = fs::path(expandName(ext, obj));
+                ptt = expandName(ptt, obj);
                 auto stem = isCaseSensitive ? extn.stem().string() : toLower(extn.stem().string());
                 if (extn.has_extension()) {
                     extn = isCaseSensitive ? extn.extension().string() : toLower(extn.extension().string());
                 } else {
                     extn = fmt::format(".{}", isCaseSensitive ? ext : toLower(ext));
                     stem.clear();
+                }
+                if (!ptt.empty()) {
+                    stem = fmt::format("{}{}", ptt, stem);
                 }
                 std::error_code ec;
                 if (contentPath.is_relative()) {
@@ -110,13 +131,14 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                     continue;
                 }
                 for (auto&& contentFile : fs::directory_iterator(contentPath, ec)) {
-                    if (isRegularFile(contentFile, ec) && ((isCaseSensitive && contentFile.path().extension() == extn) || (!isCaseSensitive && toLower(contentFile.path().extension().string()) == extn)) && contentFile.path() != objLocation) {
+                    if (isRegularFile(contentFile, ec)
+                        && (ext.empty() || (isCaseSensitive && contentFile.path().extension() == extn) || (!isCaseSensitive && toLower(contentFile.path().extension().string()) == extn))
+                        && contentFile.path() != objLocation) {
                         if (!stem.empty()) {
+                            replaceAllString(stem, "?", ".");
                             replaceAllString(stem, "*", ".*");
-                            replaceAllString(stem, ".", "?");
                             auto re = std::regex(fmt::format("^{}$", stem));
-                            std::cmatch m;
-                            if (std::regex_match(contentFile.path().stem().string().c_str(), m, re)) {
+                            if (std::regex_match(contentFile.path().stem().string(), re)) {
                                 log_debug("{}: found", contentFile.path().string());
                                 result.push_back(contentFile.path());
                             }
@@ -143,9 +165,15 @@ static constexpr std::array metaTags {
     std::pair("%composer%", MetadataFields::M_COMPOSER),
 };
 
-std::string ContentPathSetup::expandName(std::string_view name, const std::shared_ptr<CdsObject>& obj)
+std::string ContentPathSetup::expandName(const std::string& name, const std::shared_ptr<CdsObject>& obj)
 {
     std::string copy(name);
+    auto path = (obj->isItem()) ? obj->getLocation().parent_path().string() : obj->getLocation().string();
+    if (name.empty())
+        return path;
+    else if (name.at(0) == '.') {
+        return copy.replace(0, 1, path);
+    }
 
     for (auto&& [key, val] : metaTags)
         replaceString(copy, key, obj->getMetaData(val));
@@ -165,6 +193,12 @@ std::string ContentPathSetup::expandName(std::string_view name, const std::share
 }
 
 std::unique_ptr<ContentPathSetup> FanArtHandler::setup {};
+
+MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
+    : MetadataHandler(context)
+    , f2i(context->getConverterManager()->f2i())
+{
+}
 
 FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
@@ -241,7 +275,7 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             auto [skip, mimeType] = mime->getMimeType(path, fmt::format("image/{}", type));
             if (!mimeType.empty()) {
                 resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, path.string());
+                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, f2i->convert(path.string()));
             }
             obj->addResource(resource);
         }
@@ -298,7 +332,7 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             }
 
             resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, path.string());
+            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, f2i->convert(path.string()));
             resource->addAttribute(ResourceAttribute::TYPE, type);
             auto lang = path.stem().string();
             if (startswith(lang, objFilename)) {
@@ -386,7 +420,7 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             log_debug("Running resource handler check on {} -> {}", obj->getLocation().string(), path.string());
             auto resource = std::make_shared<CdsResource>(ContentHandler::RESOURCE, ResourcePurpose::Thumbnail);
             resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("res"));
-            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, path.string());
+            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, f2i->convert(path.string()));
             obj->addResource(resource);
         }
     }

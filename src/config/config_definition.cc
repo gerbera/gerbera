@@ -819,6 +819,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_LIBOPTS_ENTRY_LEGACY_SEP,
         "/import/library-options/attribute::legacy-value-separator", "config-import.html#library-options",
         ""),
+
     std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_RESOURCES_CASE_SENSITIVE,
         "/import/resources/attribute::case-sensitive", "config-import.html#resources",
         DEFAULT_RESOURCES_CASE_SENSITIVE),
@@ -826,17 +827,21 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/import/resources/fanart", "config-import.html#resources",
         ConfigVal::A_IMPORT_RESOURCES_ADD_FILE, ConfigVal::A_IMPORT_RESOURCES_NAME,
         false, false, defaultFanArtFile),
-    std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST,
+    std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST,
         "/import/resources/fanart", "config-import.html#resources",
-        ConfigVal::A_IMPORT_RESOURCES_ADD_DIR, ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_EXT),
+        ConfigVal::A_IMPORT_RESOURCES_ADD_DIR,
+        std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT },
+        false, false, false),
 
     std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST,
         "/import/resources/container", "config-import.html#container",
         ConfigVal::A_IMPORT_RESOURCES_ADD_FILE, ConfigVal::A_IMPORT_RESOURCES_NAME,
         false, false, defaultContainerArtFile),
-    std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST,
+    std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST,
         "/import/resources/container", "config-import.html#container",
-        ConfigVal::A_IMPORT_RESOURCES_ADD_DIR, ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_EXT),
+        ConfigVal::A_IMPORT_RESOURCES_ADD_DIR,
+        std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT },
+        false, false, false),
     std::make_shared<ConfigPathSetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION,
         "/import/resources/container/attribute::location", "config-import.html#container",
         ""),
@@ -851,23 +856,31 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/import/resources/subtitle", "config-import.html#resources",
         ConfigVal::A_IMPORT_RESOURCES_ADD_FILE, ConfigVal::A_IMPORT_RESOURCES_NAME,
         false, false, defaultSubtitleFile),
-    std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST,
+    std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST,
         "/import/resources/subtitle", "config-import.html#resources",
-        ConfigVal::A_IMPORT_RESOURCES_ADD_DIR, ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_EXT),
+        ConfigVal::A_IMPORT_RESOURCES_ADD_DIR,
+        std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT },
+        false, false, false),
+
     std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST,
         "/import/resources/metafile", "config-import.html#resources",
         ConfigVal::A_IMPORT_RESOURCES_ADD_FILE, ConfigVal::A_IMPORT_RESOURCES_NAME,
         false, false, defaultMetadataFile),
-    std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST,
+    std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST,
         "/import/resources/metafile", "config-import.html#resources",
-        ConfigVal::A_IMPORT_RESOURCES_ADD_DIR, ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_EXT),
+        ConfigVal::A_IMPORT_RESOURCES_ADD_DIR,
+        std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT },
+        false, false, false),
+
     std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST,
         "/import/resources/resource", "config-import.html#resources",
         ConfigVal::A_IMPORT_RESOURCES_ADD_FILE, ConfigVal::A_IMPORT_RESOURCES_NAME,
         false, false, defaultResourceFile),
-    std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST,
+    std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST,
         "/import/resources/resource", "config-import.html#resources",
-        ConfigVal::A_IMPORT_RESOURCES_ADD_DIR, ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_EXT),
+        ConfigVal::A_IMPORT_RESOURCES_ADD_DIR,
+        std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT },
+        false, false, false),
 
     std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_ORDER,
         "/import/resources/order", "config-import.html#resources-order",
@@ -1259,7 +1272,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ConfigVal::A_IMPORT_RESOURCES_NAME,
         "attribute::name", "config-import.html#resources",
         ""),
-
+    std::make_shared<ConfigStringSetup>(ConfigVal::A_IMPORT_RESOURCES_PTT,
+        "attribute::pattern", "config-import.html#resources",
+        ""),
     std::make_shared<ConfigStringSetup>(ConfigVal::A_IMPORT_RESOURCES_EXT,
         "attribute::ext", "config-import.html#resources",
         ""),
@@ -1572,10 +1587,15 @@ const std::map<ConfigVal, std::vector<ConfigVal>> ConfigDefinition::parentOption
                                                     ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE,
                                                 } },
 
-    { ConfigVal::A_IMPORT_RESOURCES_NAME, { ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, //
-                                              ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST, //
+    { ConfigVal::A_IMPORT_RESOURCES_NAME, { ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, //
+                                              ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, //
+                                              ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, //
+                                              ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST, //
                                               ConfigVal::IMPORT_SYSTEM_DIRECTORIES, ConfigVal::IMPORT_RESOURCES_ORDER } },
-    { ConfigVal::A_IMPORT_RESOURCES_EXT, { ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST } },
+    { ConfigVal::A_IMPORT_RESOURCES_EXT, { ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, //
+                                             ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST } },
+    { ConfigVal::A_IMPORT_RESOURCES_PTT, { ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, //
+                                             ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST } },
 
     { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, { ConfigVal::IMPORT_LAYOUT_MAPPING, ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
     { ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO, { ConfigVal::IMPORT_LAYOUT_MAPPING, ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },

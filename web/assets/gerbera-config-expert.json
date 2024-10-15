@@ -1257,6 +1257,11 @@
                   "editable": true
                 },
                 {
+                  "item": "/import/resources/container/add-dir/attribute::pattern",
+                  "caption": "File Pattern",
+                  "editable": true
+                },
+                {
                   "item": "/import/resources/container/add-dir/attribute::ext",
                   "caption": "File Extension",
                   "editable": true
@@ -1287,6 +1292,11 @@
             {
               "item": "/import/resources/fanart/add-dir/attribute::name",
               "caption": "Directory Name",
+              "editable": true
+            },
+            {
+              "item": "/import/resources/fanart/add-dir/attribute::pattern",
+              "caption": "File Pattern",
               "editable": true
             },
             {
@@ -1321,6 +1331,11 @@
               "editable": true
             },
             {
+              "item": "/import/resources/subtitle/add-dir/attribute::pattern",
+              "caption": "File Pattern",
+              "editable": true
+            },
+            {
               "item": "/import/resources/subtitle/add-dir/attribute::ext",
               "caption": "File Extension",
               "editable": true
@@ -1352,6 +1367,11 @@
               "editable": true
             },
             {
+              "item": "/import/resources/metafile/add-dir/attribute::pattern",
+              "caption": "File Pattern",
+              "editable": true
+            },
+            {
               "item": "/import/resources/metafile/add-dir/attribute::ext",
               "caption": "File Extension",
               "editable": true
@@ -1380,6 +1400,11 @@
             {
               "item": "/import/resources/resource/add-dir/attribute::name",
               "caption": "Directory Name",
+              "editable": true
+            },
+            {
+              "item": "/import/resources/resource/add-dir/attribute::pattern",
+              "caption": "File Pattern",
               "editable": true
             },
             {
