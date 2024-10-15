@@ -33,6 +33,7 @@
 #include "metadata_handler.h"
 
 class Content;
+class StringConverter;
 
 class ContentPathSetup {
 public:
@@ -42,15 +43,19 @@ public:
 private:
     std::shared_ptr<Config> config;
     std::vector<std::string> names;
-    std::map<std::string, std::string> patterns;
+    std::vector<std::vector<std::pair<std::string, std::string>>> patterns;
     std::shared_ptr<DirectoryConfigList> allTweaks;
-    static std::string expandName(std::string_view name, const std::shared_ptr<CdsObject>& obj);
+    static std::string expandName(const std::string& name, const std::shared_ptr<CdsObject>& obj);
     bool caseSensitive;
 };
 
 /// \brief This class is responsible for populating filesystem based metadata
 class MetacontentHandler : public MetadataHandler {
-    using MetadataHandler::MetadataHandler;
+public:
+    explicit MetacontentHandler(const std::shared_ptr<Context>& context);
+
+protected:
+    const std::shared_ptr<StringConverter> f2i;
 };
 
 /// \brief This class is responsible for populating filesystem based album and fan art
