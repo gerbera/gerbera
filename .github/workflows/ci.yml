@@ -15,16 +15,26 @@ jobs:
     # ubuntu-latest is not latest....
     # until https://github.com/conan-io/conan-docker-tools/issues/205 is fixed:
     # libsqlite3.so: undefined reference to `fcntl64@GLIBC_2.28
-    runs-on: ubuntu-20.04
     strategy:
       matrix:
         compiler:
           - name: gcc
             cc: gcc-9
             cxx: g++-9
+            system: ubuntu-20.04
           - name: clang
             cc: clang-11
             cxx: clang++-11
+            system: ubuntu-20.04
+          - name: gcc-13
+            cc: gcc-13
+            cxx: g++-13
+            system: ubuntu-24.04
+          - name: clang-18
+            cc: clang-18
+            cxx: clang++-18
+            system: ubuntu-24.04
+    runs-on: ${{ matrix.compiler.system }}
     name: Compile ${{ matrix.compiler.name }}
     env:
       CC: ${{ matrix.compiler.cc }}
@@ -35,7 +45,8 @@ jobs:
       # Alternatively: uses: docker://conanio/gcc9:latest
       - name: Update package list
         run: |
-          sudo apt-get update
+          sudo apt-get update -y
+          sudo apt-get install -y openssl
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -63,9 +74,17 @@ jobs:
           conan remove '*' -c
 
   head-check:
+    strategy:
+       matrix:
+         head:
+           - name: check
+             lib: pupnp
+           - name: npupnp
+             lib: npupnp
     runs-on: ubuntu-latest
+    name: head-${{ matrix.head.name }}
     container:
-      image: "ubuntu:22.04"
+      image: "ubuntu:24.04"
       env:
         DEBIAN_FRONTEND: noninteractive
         TZ: Etc/UTC
@@ -84,28 +103,4 @@ jobs:
 
       - name: Build and test
         run: |
-          bash scripts/debian/build-deb.sh HEAD
-
-  head-npupnp:
-    runs-on: ubuntu-latest
-    container:
-      image: "ubuntu:22.04"
-      env:
-        DEBIAN_FRONTEND: noninteractive
-        TZ: Etc/UTC
-        GH_ACTIONS: y
-    steps:
-      - name: Install script pre-reqs
-        shell: bash
-        run: |
-          ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-          apt-get update -y
-          apt-get install -y lsb-release sudo wget curl git
-
-      - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 # We need history/tags to generate version info
-
-      - name: Build and test
-        run: |
-          bash scripts/debian/build-deb.sh HEAD npupnp
+          bash scripts/debian/build-deb.sh HEAD ${{ matrix.head.lib }}
