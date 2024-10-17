@@ -8,5 +8,8 @@ tools.system.package_manager:sudo=true
 
 [options]
 pupnp/*:ipv6=True
+pupnp/*:open_ssl=False
 pupnp/*:reuseaddr=True
 pupnp/*:blocking-tcp=False
+mariadb-connector-c/*:with_ssl=False
+libcurl/*:with_ssl=False
