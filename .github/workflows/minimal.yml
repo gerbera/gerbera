@@ -15,7 +15,7 @@ jobs:
     strategy:
       matrix:
         platform: ['x86_64', 'x86', 'armhf', 'armv7', 'aarch64', 'ppc64le']
-        branch: ['v3.19']
+        branch: ['v3.20']
         include:
           - platform: 'riscv64'
             branch: 'edge'
