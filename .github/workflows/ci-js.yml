@@ -12,7 +12,7 @@ concurrency:
 
 jobs:
   js:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
     env:
       DETECT_CHROMEDRIVER_VERSION: true
     steps:

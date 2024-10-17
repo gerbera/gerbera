@@ -15,7 +15,7 @@ concurrency:
 jobs:
   analyze:
     name: Analyze
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-24.04
 
     strategy:
       fail-fast: false
@@ -32,8 +32,8 @@ jobs:
          sudo apt-get update && \
          sudo apt-get install -y \
             libpugixml-dev libexiv2-dev libsqlite3-dev \
-            libduktape205 duktape-dev \
-            lsb-release \
+            libduktape207 duktape-dev \
+            lsb-release uuid-dev\
             libmagic-dev libmatroska-dev libexif-dev
 
          sudo bash ./scripts/install-pupnp.sh
