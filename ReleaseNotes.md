@@ -9,6 +9,7 @@ There are two new noteworthy features in this release: the search page and suppo
 - Configuration of ui handler to allow hosting of docs and doxygen output
 - Support for UPnP filters
 - Search page in web UI
+- Provide packages for Ubuntu-24.10
 
 ### FIXES
 
@@ -23,6 +24,7 @@ There are two new noteworthy features in this release: the search page and suppo
 - Build without ffmpeg leaves option unset
 - Logging of build info
 - Update versions of libpupnp (1.14.20)
+- Update Build Environment
 
 ## v2.3.0
 
