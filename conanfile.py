@@ -48,12 +48,12 @@ class GerberaConan(ConanFile):
     scm = {"type": "git", "url": "auto", "revision": "auto"}
 
     requires = [
-        "fmt/10.2.1",
-        "spdlog/1.13.0",
+        "fmt/10.2.1", # spdlog/1.14.1 set this version
+        "spdlog/1.14.1",
         "pugixml/1.14",
         "libiconv/[>=1.16]",
         "sqlite3/[>=3.35.5]",
-        "zlib/1.2.13",
+        "zlib/1.3.1",
         "pupnp/[>=1.14.16]",
         "taglib/[>=1.12 <2.0]",
         "openssl/1.1.1w", # Needed to fix conflicts
