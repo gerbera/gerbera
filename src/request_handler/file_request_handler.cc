@@ -104,7 +104,7 @@ bool FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     int ret = stat(path.c_str(), &statbuf);
     if (ret != 0) {
         if (isResourceFile) {
-            throw SubtitlesNotFoundException(fmt::format("Subtitle file {} is not available.", path.c_str()));
+            throw ResourceNotFoundException(fmt::format("{} file {} is not available.", EnumMapper::getPurposeDisplay(resource->getPurpose()), path.c_str()));
         }
         throw_fmt_system_error("Failed to open {}", path.c_str());
     }

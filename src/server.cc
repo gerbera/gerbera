@@ -677,8 +677,8 @@ int Server::GetInfoCallback(const char* filename, UpnpFileInfo* info, const void
         return 0;
     } catch (const ServerShutdownException&) {
         return -1;
-    } catch (const SubtitlesNotFoundException& stex) {
-        log_warning("SubtitlesNotFoundException: {}", stex.what());
+    } catch (const ResourceNotFoundException& stex) {
+        log_warning("ResourceNotFoundException: {}", stex.what());
         return -1;
     } catch (const std::runtime_error& e) {
         log_error("Exception: {}", e.what());
@@ -708,8 +708,8 @@ UpnpWebFileHandle Server::OpenCallback(const char* filename, enum UpnpOpenFileMo
         return nullptr;
     } catch (const ServerShutdownException&) {
         return nullptr;
-    } catch (const SubtitlesNotFoundException& stex) {
-        log_warning("SubtitlesNotFoundException: {}", stex.what());
+    } catch (const ResourceNotFoundException& stex) {
+        log_warning("ResourceNotFoundException: {}", stex.what());
         return nullptr;
     } catch (const std::runtime_error& ex) {
         log_error("Exception: {}", ex.what());

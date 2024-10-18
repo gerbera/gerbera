@@ -73,7 +73,7 @@ public:
     explicit ObjectNotFoundException(const std::string& message);
 };
 
-class SubtitlesNotFoundException : public std::runtime_error {
+class ResourceNotFoundException : public std::runtime_error {
     using std::runtime_error::runtime_error;
 };
 

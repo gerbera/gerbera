@@ -420,6 +420,8 @@ void ImportService::removeHidden(const AutoScanSetting& settings)
 bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, const AutoScanSetting& settings)
 {
     auto&& name = entryPath.filename().string();
+    if (name.empty())
+        return true;
     if ((name.at(0) == '.' && !settings.hidden)
         || (!settings.followSymlinks && dirEntry.is_symlink())
         || config->getConfigFilename() == entryPath) {
