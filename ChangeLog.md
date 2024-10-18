@@ -5,6 +5,7 @@
 - Bump cookie, express and socket.io in /gerbera-web
 - Config: UI handler mimetypes and CSP
 - Fix access to cache option if thumbnailer disabled
+- Fix autoscan issue with empty filename
 - Fix build without ffmpeg
 - Fix creating containers in web ui
 - Fix handling of checkbox values on web ui
