@@ -358,7 +358,7 @@ void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool 
     if (ec || !isRegularFile(dirEnt, ec))
         throw_std_runtime_error("Not a file: {} - {}", path.c_str(), ec.message());
 
-    auto pcdir = database->findObjectByPath(path);
+    auto pcdir = database->findObjectByPath(path, UNUSED_CLIENT_GROUP);
     if (!pcdir) {
         auto adir = findAutoscanDirectory(path);
         pcdir = createObjectFromFile(adir, dirEnt, true, allowFifo);
@@ -385,7 +385,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(
     const std::shared_ptr<AutoscanDirectory>& adir,
     const std::shared_ptr<CMAddFileTask>& task)
 {
-    auto obj = checkDatabase ? database->findObjectByPath(dirEnt.path()) : nullptr;
+    auto obj = checkDatabase ? database->findObjectByPath(dirEnt.path(), DEFAULT_CLIENT_GROUP) : nullptr;
     bool isNew = false;
 
     if (!obj) {
@@ -440,7 +440,7 @@ std::shared_ptr<CdsObject> ContentManager::_addFile(const fs::directory_entry& d
     }
     // checkDatabase, don't process existing
     std::shared_ptr<CdsContainer> parent;
-    auto parentObject = database->findObjectByPath(dirEnt.path().parent_path(), DbFileType::Directory);
+    auto parentObject = database->findObjectByPath(dirEnt.path().parent_path(), UNUSED_CLIENT_GROUP, DbFileType::Directory);
     if (parentObject && parentObject->isContainer())
         parent = std::dynamic_pointer_cast<CdsContainer>(parentObject);
     auto obj = createSingleItem(dirEnt, parent, rootPath, asSetting.followSymlinks, true, false, false, asSetting.adir, task);
@@ -464,7 +464,7 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
         return false;
 
     bool parentRemoved = false;
-    auto parentObject = database->findObjectByPath(parentPath, DbFileType::Auto);
+    auto parentObject = database->findObjectByPath(parentPath, UNUSED_CLIENT_GROUP, DbFileType::Auto);
     if (parentObject) {
         // as there is no proper way to force refresh of unchanged files, delete whole dir and rescan it
         _removeObject(adir, parentObject, parentPath, false, all);
@@ -688,7 +688,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             }
 
             if (!asSetting.followSymlinks && dirEnt.is_symlink()) {
-                auto object = database->findObjectByPath(newPath);
+                auto object = database->findObjectByPath(newPath, UNUSED_CLIENT_GROUP);
                 if (object) {
                     list.erase(object->getID());
                     removeObject(adir, object, newPath, false);
@@ -704,7 +704,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             auto lwt = toSeconds(dirEnt.last_write_time(ec));
 
             if (isRegularFile(dirEnt, ec)) {
-                auto newObject = database->findObjectByPath(newPath);
+                auto newObject = database->findObjectByPath(newPath, UNUSED_CLIENT_GROUP);
                 if (newObject) {
                     list.erase(newObject->getID());
 
@@ -741,7 +741,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                     }
                 }
             } else if (dirEnt.is_directory(ec) && asSetting.recursive) {
-                auto newObject = database->findObjectByPath(newPath);
+                auto newObject = database->findObjectByPath(newPath, UNUSED_CLIENT_GROUP);
                 if (lastModifiedNewMax < lwt && lwt <= currentTme)
                     lastModifiedNewMax = lwt;
                 if (newObject) {
@@ -777,7 +777,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
                 }
             }
             if (!parentContainer && !location.empty()) {
-                std::shared_ptr<CdsObject> obj = database->findObjectByPath(location, DbFileType::Directory);
+                std::shared_ptr<CdsObject> obj = database->findObjectByPath(location, UNUSED_CLIENT_GROUP, DbFileType::Directory);
                 if (!obj || !obj->isContainer()) {
                     log_error("Updated parent {} is not available or no container", location.string());
                 } else {
@@ -1486,7 +1486,7 @@ std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(int obje
 
 std::shared_ptr<AutoscanDirectory> ContentManager::getAutoscanDirectory(const fs::path& location) const
 {
-    return autoscanList->get(location);
+    return autoscanList->getKey(location);
 }
 
 std::vector<std::shared_ptr<AutoscanDirectory>> ContentManager::getAutoscanDirectories() const

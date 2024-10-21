@@ -26,6 +26,7 @@
 #ifndef __AUTOSCAN_LIST_H__
 #define __AUTOSCAN_LIST_H__
 
+#include "config/result/edit_helper.h"
 #include "util/timer.h"
 
 // forward declaration
@@ -34,35 +35,17 @@ class Content;
 class Context;
 class Database;
 class Timer;
+using EditHelperAutoscanDirectory = EditHelper<AutoscanDirectory>;
 
 #ifdef HAVE_INOTIFY
 class AutoscanInotify;
 #endif
 
-class AutoscanList {
+class AutoscanList : public EditHelperAutoscanDirectory {
 public:
-    /// \brief Adds a new AutoscanDirectory to the list.
-    ///
-    /// The scanID of the directory is invalidated and set to
-    /// the index in the AutoscanList.
-    ///
-    /// \param dir AutoscanDirectory to add to the list.
-    /// \param index position of new entry
-    /// \return scanID of the newly added AutoscanDirectory
-    int add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index = std::numeric_limits<std::size_t>::max());
-
-    std::shared_ptr<AutoscanDirectory> get(std::size_t id, bool edit = false) const;
-
-    std::shared_ptr<AutoscanDirectory> get(const fs::path& location) const;
+    std::shared_ptr<AutoscanDirectory> getKey(const fs::path& location) const;
 
     std::shared_ptr<AutoscanDirectory> getByObjectID(int objectID) const;
-
-    std::size_t getEditSize() const;
-
-    std::size_t size() const { return list.size(); }
-
-    /// \brief removes the AutoscanDirectory given by its scan ID
-    void remove(std::size_t id, bool edit = false);
 
     /// \brief removes the AutoscanDirectory if it is a subdirectory of a given location.
     /// \param parent parent directory.
@@ -78,9 +61,6 @@ public:
     /// \brief updates the last_modified data for all AutoscanDirectories.
     void updateLMinDB(Database& database);
 
-    /// \brief returns a copy of the autoscan list in the form of an array
-    std::vector<std::shared_ptr<AutoscanDirectory>> getArrayCopy() const;
-
     void initTimer(
         std::shared_ptr<Content>& content,
         std::shared_ptr<Timer>& timer
@@ -89,16 +69,6 @@ public:
         bool doInotify, std::unique_ptr<AutoscanInotify>& inotify
 #endif
     );
-
-protected:
-    std::size_t origSize {};
-    std::map<std::size_t, std::shared_ptr<AutoscanDirectory>> indexMap;
-
-    mutable std::recursive_mutex mutex;
-    using AutoLock = std::scoped_lock<std::recursive_mutex>;
-
-    std::vector<std::shared_ptr<AutoscanDirectory>> list;
-    int _add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index);
 };
 
 #endif //__AUTOSCAN_LIST_H__

@@ -72,7 +72,13 @@ void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, const std::sh
     setOption(config);
 }
 
-bool ConfigDictionarySetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status) const
+bool ConfigDictionarySetup::updateItem(const std::vector<std::size_t>& indexList,
+    const std::string& optItem,
+    const std::shared_ptr<Config>& config,
+    const std::shared_ptr<DictionaryOption>& value,
+    const std::string& optKey,
+    const std::string& optValue,
+    const std::string& status) const
 {
     auto i = indexList.at(0);
     auto keyIndex = getItemPath(indexList, { keyOption });
@@ -105,7 +111,10 @@ bool ConfigDictionarySetup::updateItem(const std::vector<std::size_t>& indexList
     return false;
 }
 
-bool ConfigDictionarySetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+bool ConfigDictionarySetup::updateDetail(const std::string& optItem,
+    std::string& optValue,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     if (startswith(optItem, xpath) && optionValue) {
         auto value = std::dynamic_pointer_cast<DictionaryOption>(optionValue);

@@ -462,14 +462,14 @@ void ImportService::createContainers(int parentContainerId, AutoScanSetting& set
                 for (auto&& [childPath, childEntry] : contentStateCache) {
                     // find direct folder entry with old name and rely on iteration to rename hierarchy
                     if (childEntry && childPath.parent_path() == contPath) {
-                        auto childObj = database->findObjectByPath(oldLocation / childPath.filename(), DbFileType::Any);
+                        auto childObj = database->findObjectByPath(oldLocation / childPath.filename(), UNUSED_CLIENT_GROUP, DbFileType::Any);
                         if (childObj)
                             childEntry->setObject(ImportState::New, childObj);
                     }
                 }
             }
             if (!cdsObj)
-                cdsObj = database->findObjectByPath(contPath, DbFileType::Directory);
+                cdsObj = database->findObjectByPath(contPath, UNUSED_CLIENT_GROUP, DbFileType::Directory);
 
             if (cdsObj) {
                 try {
@@ -552,7 +552,7 @@ void ImportService::createItems(AutoScanSetting& settings)
             if (!cdsObj) {
                 // Search item in database
                 log_debug("Searching Item {} in database", itemPath.string());
-                cdsObj = database->findObjectByPath(itemPath, DbFileType::File);
+                cdsObj = database->findObjectByPath(itemPath, UNUSED_CLIENT_GROUP, DbFileType::File);
             }
             if (cdsObj && cdsObj->isItem()) {
                 auto isChanged = stateEntry->getMTime() != cdsObj->getMTime() || cdsObj->getLocation().string() != dirEntry.path().string();
@@ -968,7 +968,7 @@ std::pair<int, bool> ImportService::addContainerTree(
                 subTree = toLower(subTree);
             }
             if (containerMap.find(subTree) == containerMap.end() || !containerMap.at(subTree)) {
-                auto cont = database->findObjectByPath(subTree, DbFileType::Virtual);
+                auto cont = database->findObjectByPath(subTree, UNUSED_CLIENT_GROUP, DbFileType::Virtual);
                 if (cont && cont->isContainer())
                     containerMap[subTree] = std::dynamic_pointer_cast<CdsContainer>(cont);
                 else

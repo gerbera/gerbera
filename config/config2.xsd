@@ -534,6 +534,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="client" minOccurs="0"/>
+                <xs:element ref="group" minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="enabled" type="boolean" default="no"/>
             <xs:attribute name="cache-threshold" type="xs:positiveInteger" default="6"/>
@@ -573,6 +574,21 @@
         <xs:complexType>
             <xs:attribute name="from" type="xs:string" use="required"/>
             <xs:attribute name="to" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="group">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="hide" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="hide">
+        <xs:complexType>
+            <xs:attribute name="location" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 

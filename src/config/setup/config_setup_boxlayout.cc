@@ -33,6 +33,7 @@
 #include "config_setup_bool.h"
 #include "config_setup_int.h"
 #include "config_setup_string.h"
+#include "setup_util.h"
 #include "util/logger.h"
 
 #include <algorithm>
@@ -105,7 +106,12 @@ void ConfigBoxLayoutSetup::makeOption(const pugi::xml_node& root, const std::sha
     setOption(config);
 }
 
-bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<BoxLayout>& entry, std::string& optValue, const std::string& status) const
+bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
+    const std::string& optItem,
+    const std::shared_ptr<Config>& config,
+    std::shared_ptr<BoxLayout>& entry,
+    std::string& optValue,
+    const std::string& status) const
 {
     if (optItem == getItemPath(indexList, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
@@ -160,43 +166,19 @@ bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
     return false;
 }
 
-bool ConfigBoxLayoutSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+bool ConfigBoxLayoutSetup::updateDetail(const std::string& optItem,
+    std::string& optValue,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     if (startswith(optItem, xpath) && optionValue) {
         log_debug("Updating BoxLayout Detail {} {} {}", xpath, optItem, optValue);
         auto value = std::dynamic_pointer_cast<BoxLayoutListOption>(optionValue);
         auto list = value->getBoxLayoutListOption();
         auto indexList = extractIndexList(optItem);
-
-        if (indexList.size() > 0) {
-            auto index = indexList.at(0);
-            auto entry = list->get(index, true);
-            std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
-
-            if (!entry && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
-                entry = std::make_shared<BoxLayout>();
-                list->add(entry, index);
-            }
-            if (entry && (status == STATUS_REMOVED || status == STATUS_KILLED)) {
-                list->remove(index, true);
-                return true;
-            }
-            if (entry && status == STATUS_RESET) {
-                list->add(entry, index);
-            }
-            if (entry && updateItem(indexList, optItem, config, entry, optValue, status)) {
-                return true;
-            }
-        } else {
-            indexList.push_back(0);
-        }
-        for (std::size_t box = 0; box < list->size(); box++) {
-            auto entry = value->getBoxLayoutListOption()->get(box);
-            indexList[0] = box;
-            if (updateItem(indexList, optItem, config, entry, optValue)) {
-                return true;
-            }
-        }
+        std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+        if (updateConfig<EditHelperBoxLayout, ConfigBoxLayoutSetup, BoxLayoutListOption, BoxLayout>(list, config, this, value, optItem, optValue, indexList, status))
+            return true;
     }
     return false;
 }

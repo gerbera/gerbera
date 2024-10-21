@@ -30,13 +30,8 @@
 
 #include <algorithm>
 
-void DynamicContentList::add(const std::shared_ptr<DynamicContent>& cont, std::size_t index)
-{
-    AutoLock lock(mutex);
-    _add(cont, index);
-}
-
-void DynamicContentList::_add(const std::shared_ptr<DynamicContent>& cont, std::size_t index)
+template <>
+void EditHelper<DynamicContent>::_add(const std::shared_ptr<DynamicContent>& cont, std::size_t index)
 {
     if (index == std::numeric_limits<std::size_t>::max()) {
         index = getEditSize();
@@ -51,36 +46,7 @@ void DynamicContentList::_add(const std::shared_ptr<DynamicContent>& cont, std::
     indexMap[index] = cont;
 }
 
-std::size_t DynamicContentList::getEditSize() const
-{
-    if (indexMap.empty()) {
-        return 0;
-    }
-    return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
-}
-
-std::vector<std::shared_ptr<DynamicContent>> DynamicContentList::getArrayCopy() const
-{
-    AutoLock lock(mutex);
-    return list;
-}
-
-std::shared_ptr<DynamicContent> DynamicContentList::get(std::size_t id, bool edit) const
-{
-    AutoLock lock(mutex);
-    if (!edit) {
-        if (id >= list.size())
-            return nullptr;
-
-        return list[id];
-    }
-    if (indexMap.find(id) != indexMap.end()) {
-        return indexMap.at(id);
-    }
-    return nullptr;
-}
-
-std::shared_ptr<DynamicContent> DynamicContentList::get(const fs::path& location) const
+std::shared_ptr<DynamicContent> DynamicContentList::getKey(const fs::path& location) const
 {
     AutoLock lock(mutex);
     auto entry = std::find_if(list.begin(), list.end(), [=](auto&& c) { return c->getLocation() == location; });
@@ -88,31 +54,4 @@ std::shared_ptr<DynamicContent> DynamicContentList::get(const fs::path& location
         return *entry;
     }
     return nullptr;
-}
-
-void DynamicContentList::remove(std::size_t id, bool edit)
-{
-    AutoLock lock(mutex);
-
-    if (!edit) {
-        if (id >= list.size()) {
-            log_debug("No such ID {}!", id);
-            return;
-        }
-
-        list.erase(list.begin() + id);
-        log_debug("ID {} removed!", id);
-    } else {
-        if (indexMap.find(id) == indexMap.end()) {
-            log_debug("No such index ID {}!", id);
-            return;
-        }
-        auto&& dir = indexMap[id];
-        auto entry = std::find_if(list.begin(), list.end(), [loc = dir->getLocation()](auto&& item) { return loc == item->getLocation(); });
-        list.erase(entry);
-        if (id >= origSize) {
-            indexMap.erase(id);
-        }
-        log_debug("ID {} removed!", id);
-    }
 }

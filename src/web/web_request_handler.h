@@ -91,6 +91,8 @@ protected:
     /// \return Value of the parameter with the given name or \c nullptr if not found.
     std::string param(const std::string& name) const { return getValueOrDefault(params, name); }
 
+    std::string getGroup() const;
+
     int intParam(const std::string& name, int invalid = 0) const;
     bool boolParam(const std::string& name) const;
 

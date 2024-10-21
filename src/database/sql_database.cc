@@ -41,6 +41,7 @@
 #include "config/result/autoscan.h"
 #include "config/result/dynamic_content.h"
 #include "content/autoscan_list.h"
+#include "db_param.h"
 #include "exceptions.h"
 #include "metadata/metadata_enums.h"
 #include "search_handler.h"
@@ -625,7 +626,7 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
     // It means that something doesn't set the refID correctly
     log_warning("Failed to loadObject with refid: {}", refID);
 
-    return findObjectByPath(location);
+    return findObjectByPath(location, UNUSED_CLIENT_GROUP);
 }
 
 std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer)
@@ -867,7 +868,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
     if (res) {
         auto row = res->nextRow();
         if (row) {
-            auto result = createObjectFromRow("", row);
+            auto result = createObjectFromRow(UNUSED_CLIENT_GROUP, row);
             commit("loadObject");
             return result;
         }
@@ -899,7 +900,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(const std::string& group, int
     throw ObjectNotFoundException(fmt::format("Object not found: {}", objectID));
 }
 
-std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string& serviceID)
+std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string& serviceID, const std::string& group)
 {
     auto loadSql = fmt::format("SELECT {} FROM {} WHERE {} = {}", sql_browse_columns, sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::ServiceId), quote(serviceID));
     beginTransaction("loadObjectByServiceID");
@@ -908,7 +909,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
         auto row = res->nextRow();
         if (row) {
             commit("loadObjectByServiceID");
-            return createObjectFromRow(DEFAULT_CLIENT_GROUP, row);
+            return createObjectFromRow(group, row);
         }
     }
     commit("loadObjectByServiceID");
@@ -916,15 +917,14 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
     return {};
 }
 
-std::vector<std::shared_ptr<CdsObject>> SQLDatabase::findObjectByContentClass(const std::string& contentClass)
+std::vector<std::shared_ptr<CdsObject>> SQLDatabase::findObjectByContentClass(const std::string& contentClass, const std::string& group)
 {
     auto srcParam = SearchParam(fmt::to_string(CDS_ID_ROOT),
         fmt::format("{}=\"{}\"", MetaEnumMapper::getMetaFieldName(MetadataFields::M_CONTENT_CLASS), contentClass),
-        "", 0, 1, false, DEFAULT_CLIENT_GROUP);
-    int numMatches = 0;
+        "", 0, 1, false, group);
     log_debug("Running content class search for '{}'", contentClass);
-    auto result = this->search(srcParam, &numMatches);
-    log_debug("Content class search {} returned {}", contentClass, numMatches);
+    auto result = this->search(srcParam);
+    log_debug("Content class search {} returned {}", contentClass, srcParam.getTotalMatches());
     return result;
 }
 
@@ -955,18 +955,19 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     const auto parent = param.getObject();
     bool getContainers = param.getFlag(BROWSE_CONTAINERS);
     bool getItems = param.getFlag(BROWSE_ITEMS);
+    const auto forbiddenDirectories = param.getForbiddenDirectories();
 
     if (param.getDynamicContainers() && dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
-        auto dynConfig = config->getDynamicContentListOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
+        auto dynConfig = config->getDynamicContentListOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST)->getKey(parent->getLocation());
         if (dynConfig) {
             auto reqCount = (param.getRequestedCount() <= 0 || param.getRequestedCount() > dynConfig->getMaxCount()) ? dynConfig->getMaxCount() : param.getRequestedCount();
             auto srcParam = SearchParam(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
                 param.getStartingIndex(), reqCount, false, param.getGroup(),
                 getContainers, getItems); // get params from browse
-            int numMatches = 0;
+            srcParam.setForbiddenDirectories(forbiddenDirectories);
             log_debug("Running Dynamic search {} in {} '{}'", parent->getID(), parent->getParentID(), dynConfig->getFilter());
-            auto result = this->search(srcParam, &numMatches);
-            numMatches = numMatches > dynConfig->getMaxCount() ? dynConfig->getMaxCount() : numMatches;
+            auto result = this->search(srcParam);
+            auto numMatches = srcParam.getTotalMatches() > dynConfig->getMaxCount() ? dynConfig->getMaxCount() : srcParam.getTotalMatches();
             log_debug("Dynamic search {} returned {}", parent->getID(), numMatches);
             param.setTotalMatches(numMatches);
             return result;
@@ -1003,6 +1004,15 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
 
         if (parent->getID() == CDS_ID_ROOT && hideFsRoot)
             where.push_back(fmt::format("{} != {:d}", browseColumnMapper->mapQuoted(BrowseCol::Id), CDS_ID_FS_ROOT));
+
+        if (getItems && !forbiddenDirectories.empty()) {
+            std::vector<std::string> forbiddenList;
+            for (auto&& forbDir : forbiddenDirectories) {
+                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseCol::RefLocation), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
+                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseCol::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
+            }
+            where.push_back(fmt::format("(NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
+        }
 
         // order by code..
         auto orderByCode = [&]() {
@@ -1125,13 +1135,14 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     return result;
 }
 
-std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& param, int* numMatches)
+std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
 {
     auto searchParser = SearchParser(*sqlEmitter, param.getSearchCriteria());
     std::shared_ptr<ASTNode> rootNode = searchParser.parse();
     std::string searchSQL(rootNode->emitSQL());
     if (searchSQL.empty())
         throw DatabaseException("failed to generate SQL for search", LINE_MESSAGE);
+    const auto forbiddenDirectories = param.getForbiddenDirectories();
     bool getContainers = param.getContainers();
     bool getItems = param.getItems();
     if (getContainers && !getItems) {
@@ -1142,6 +1153,14 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     if (param.getSearchableContainers()) {
         searchSQL.append(fmt::format(" AND ({0} & {1} = {1} OR {2} != {3})",
             searchColumnMapper->mapQuoted(SearchCol::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER));
+    }
+
+    if (getItems && !forbiddenDirectories.empty()) {
+        std::vector<std::string> forbiddenList;
+        for (auto&& forbDir : forbiddenDirectories) {
+            forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", searchColumnMapper->mapQuoted(SearchCol::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
+        }
+        searchSQL.append(fmt::format("AND (NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
     }
     log_debug("Search resolves to SQL [{}]", searchSQL);
 
@@ -1165,7 +1184,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
 
     auto countRow = sqlResult->nextRow();
     if (countRow) {
-        *numMatches = countRow->col_int(0, 0);
+        param.setTotalMatches(countRow->col_int(0, 0));
     }
 
     std::string addColumns;
@@ -1213,7 +1232,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     }
 
     if (result.size() < requestedCount) {
-        *numMatches = startingIndex + result.size(); // make sure we do not report too many hits
+        param.setTotalMatches(startingIndex + result.size()); // make sure we do not report too many hits
     }
 
     return result;
@@ -1302,7 +1321,7 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
     return arr;
 }
 
-std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpath, DbFileType fileType)
+std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpath, const std::string& group, DbFileType fileType)
 {
     auto fileTypeList = fileType == DbFileType::Any ? std::vector<DbFileType> { DbFileType::File, DbFileType::Directory, DbFileType::Virtual } : std::vector<DbFileType> { fileType };
     for (auto&& ft : fileTypeList) {
@@ -1331,7 +1350,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
         }
         auto row = res->nextRow();
         if (row) {
-            auto result = createObjectFromRow(DEFAULT_CLIENT_GROUP, row);
+            auto result = createObjectFromRow(group, row);
             commit("findObjectByPath");
             return result;
         }
@@ -1343,7 +1362,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
 
 int SQLDatabase::findObjectIDByPath(const fs::path& fullpath, DbFileType fileType)
 {
-    auto obj = findObjectByPath(fullpath, fileType);
+    auto obj = findObjectByPath(fullpath, UNUSED_CLIENT_GROUP, fileType);
     if (!obj)
         return INVALID_OBJECT_ID;
     return obj->getID();
@@ -1357,7 +1376,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     if (path == std::string(1, DIR_SEPARATOR))
         return CDS_ID_FS_ROOT;
 
-    auto obj = findObjectByPath(path, DbFileType::Directory);
+    auto obj = findObjectByPath(path, UNUSED_CLIENT_GROUP, DbFileType::Directory);
     if (obj)
         return obj->getID();
 
@@ -1564,9 +1583,9 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     return true;
 }
 
-std::string SQLDatabase::addLocationPrefix(char prefix, const fs::path& path)
+std::string SQLDatabase::addLocationPrefix(char prefix, const fs::path& path, const std::string_view& suffix)
 {
-    return fmt::format("{}{}", prefix, path.string());
+    return fmt::format("{}{}{}", prefix, path.string(), suffix);
 }
 
 std::pair<fs::path, char> SQLDatabase::stripLocationPrefix(std::string_view dbLocation)

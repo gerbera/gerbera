@@ -43,11 +43,11 @@ public:
     void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override { }
 
     std::vector<std::shared_ptr<CdsObject>> browse(BrowseParam& param) override { return {}; }
-    std::vector<std::shared_ptr<CdsObject>> search(const SearchParam& param, int* numMatches) override { return {}; }
+    std::vector<std::shared_ptr<CdsObject>> search(SearchParam& param) override { return {}; }
 
     std::vector<std::string> getMimeTypes() override { return {}; }
-    std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass) override { return {}; }
-    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, DbFileType fileType = DbFileType::Auto) override { return {}; }
+    std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass, const std::string& group) override { return {}; }
+    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, const std::string& group, DbFileType fileType = DbFileType::Auto) override { return {}; }
     int findObjectIDByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) override { return INVALID_OBJECT_ID; }
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override { return {}; }
 
@@ -63,7 +63,7 @@ public:
 
     std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override { return {}; }
 
-    std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override { return {}; }
+    std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID, const std::string& group) override { return {}; }
     std::vector<int> getServiceObjectIDs(char servicePrefix) override { return {}; }
 
     long long getFileStats(const StatsParam& stats) override { return 0; }

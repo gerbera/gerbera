@@ -232,7 +232,7 @@ const std::shared_ptr<StringConverter> ConverterManager::m2i(ConfigVal option, c
         charset = config->getOption(ConfigVal::IMPORT_METADATA_CHARSET);
         charsets[option] = charset;
     }
-    auto tweak = config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST)->get(!location.empty() ? location : "/");
+    auto tweak = config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST)->getKey(!location.empty() ? location : "/");
     if (tweak && tweak->hasMetaCharset()) {
         charset = tweak->getMetaCharset();
         if (converters.find(charset) == converters.end()) {

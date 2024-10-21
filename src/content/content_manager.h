@@ -106,6 +106,12 @@ public:
     std::shared_ptr<CdsObject> addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
         bool lowPriority = false, bool cancellable = true) override;
 
+    /// \brief Ensures that a container given by it's location on disk is
+    /// present in the database. If it does not exist it will be created, but
+    /// it's content will not be added.
+    ///
+    /// \param path location of the container to handle
+    /// \return objectID of the container given by path
     int ensurePathExistence(const fs::path& path) const override;
     std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& path, bool rescanResource, bool async = true, bool all = false) override;
 

@@ -2,7 +2,10 @@
 
 ## HEAD
 
-There are two new noteworthy features in this release: the search page and support for UPnP filters in requests.
+There are three new noteworthy features in this release:
+- the search page,
+- access permissions for files and
+- support for UPnP filters in requests.
 
 ### NEW Features
 

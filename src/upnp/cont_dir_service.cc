@@ -43,6 +43,7 @@
 #include "config/config_val.h"
 #include "context.h"
 #include "database/database.h"
+#include "database/db_param.h"
 #include "database/sql_database.h"
 #include "exceptions.h"
 #include "subscription_request.h"
@@ -128,11 +129,13 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
 
     auto param = BrowseParam(parent, flag);
 
-    param.setDynamicContainers(!quirks->checkFlags(QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC));
+    param.setDynamicContainers(!quirks || !quirks->checkFlags(QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC));
     param.setStartingIndex(stoiString(startingIndex));
     param.setRequestedCount(stoiString(requestedCount));
     param.setSortCriteria(trimString(sortCriteria));
     param.setGroup(quirks->getGroup());
+    if (quirks)
+        param.setForbiddenDirectories(quirks->getForbiddenDirectories());
 
     // Execute database browse
     try {
@@ -215,7 +218,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
 
     auto&& quirks = request.getQuirks();
     pugi::xml_document didlLite;
-    if (!quirks->blockXmlDeclaration()) {
+    if (!quirks || !quirks->blockXmlDeclaration()) {
         auto decl = didlLite.prepend_child(pugi::node_declaration);
         decl.append_attribute("version") = "1.0";
         decl.append_attribute("encoding") = "UTF-8";
@@ -232,15 +235,16 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     }
     if (filter.empty())
         filter = "*";
-    const auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
+    auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
         stoiString(startingIndex), stoiString(requestedCount), searchableContainers, quirks->getGroup());
+    if (quirks)
+        searchParam.setForbiddenDirectories(quirks->getForbiddenDirectories());
 
     // Execute database search
     std::vector<std::shared_ptr<CdsObject>> results;
-    int numMatches = 0;
     try {
-        results = database->search(searchParam, &numMatches);
-        log_debug("Found {}/{} items", results.size(), numMatches);
+        results = database->search(searchParam);
+        log_debug("Found {}/{} items", results.size(), searchParam.getTotalMatches());
     } catch (const SearchParseException& srcEx) {
         log_warning(srcEx.what());
         throw UpnpException(UPNP_E_INVALID_ARGUMENT, srcEx.getUserMessage());
@@ -288,7 +292,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     auto respRoot = response->document_element();
     respRoot.append_child("Result").append_child(pugi::node_pcdata).set_value(didlLiteXml.c_str());
     respRoot.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(results.size()).c_str());
-    respRoot.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(numMatches).c_str());
+    respRoot.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(searchParam.getTotalMatches()).c_str());
     respRoot.append_child("UpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
     request.setResponse(std::move(response));
 

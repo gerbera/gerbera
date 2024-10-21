@@ -191,5 +191,5 @@ void Web::ConfigSave::process()
         }
     }
 
-    context->getClients()->refresh(context->getConfig());
+    context->getClients()->refresh();
 }

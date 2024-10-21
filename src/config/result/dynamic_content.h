@@ -27,52 +27,25 @@
 #ifndef __DYNAMICCONTENT_H__
 #define __DYNAMICCONTENT_H__
 
+#include "edit_helper.h"
+#include "util/grb_fs.h"
+
 #include <map>
 #include <mutex>
 #include <vector>
 
-#include "util/grb_fs.h"
-
 // forward declarations
 class Config;
 class DynamicContent;
+using EditHelperDynamicContent = EditHelper<DynamicContent>;
 
-class DynamicContentList {
+class DynamicContentList : public EditHelperDynamicContent {
 public:
-    /// \brief Adds a new DynamicContent to the list.
-    ///
-    /// \param cont DynamicContent to add to the list.
-    /// \param index position of new entry
-    /// \return index of the newly added DynamicContent
-    void add(const std::shared_ptr<DynamicContent>& cont, std::size_t index = std::numeric_limits<std::size_t>::max());
-
-    std::shared_ptr<DynamicContent> get(std::size_t id, bool edit = false) const;
-
-    std::shared_ptr<DynamicContent> get(const fs::path& location) const;
-
-    std::size_t getEditSize() const;
-
-    std::size_t size() const { return list.size(); }
-
-    /// \brief removes the DynamicContent given by its ID
-    void remove(std::size_t id, bool edit = false);
-
-    /// \brief returns a copy of the directory config list in the form of an array
-    std::vector<std::shared_ptr<DynamicContent>> getArrayCopy() const;
-
-protected:
-    std::size_t origSize {};
-    std::map<std::size_t, std::shared_ptr<DynamicContent>> indexMap;
-
-    mutable std::recursive_mutex mutex;
-    using AutoLock = std::scoped_lock<std::recursive_mutex>;
-
-    std::vector<std::shared_ptr<DynamicContent>> list;
-    void _add(const std::shared_ptr<DynamicContent>& cont, std::size_t index);
+    std::shared_ptr<DynamicContent> getKey(const fs::path& location) const;
 };
 
 /// \brief dynamic content reader
-class DynamicContent {
+class DynamicContent : public Editable {
 public:
     DynamicContent() = default;
     explicit DynamicContent(fs::path location)
@@ -81,6 +54,7 @@ public:
         if (this->location.empty())
             this->location = "/Auto";
     }
+    bool equals(const std::shared_ptr<DynamicContent>& other) { return this->location == other->location; }
 
     void setLocation(const fs::path& location)
     {
@@ -88,9 +62,6 @@ public:
             this->location = location;
     }
     fs::path getLocation() const { return location; }
-
-    void setOrig(bool orig) { this->isOrig = orig; }
-    bool getOrig() const { return isOrig; }
 
     void setFilter(std::string filter) { this->filter = std::move(filter); }
     std::string getFilter() const { return filter; }
@@ -125,8 +96,6 @@ private:
 
     /// \brief folder image
     fs::path image;
-
-    bool isOrig {};
 };
 
 #endif
