@@ -63,6 +63,11 @@ WebRequestHandler::WebRequestHandler(const std::shared_ptr<Content>& content,
 {
 }
 
+std::string WebRequestHandler::getGroup() const
+{
+    return quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
+}
+
 int WebRequestHandler::intParam(const std::string& name, int invalid) const
 {
     std::string value = param(name);

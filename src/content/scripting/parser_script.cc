@@ -130,7 +130,7 @@ duk_ret_t jsGetCdsObject(duk_context* ctx)
         return 0;
 
     auto database = self->getDatabase();
-    auto obj = database->findObjectByPath(path);
+    auto obj = database->findObjectByPath(path, DEFAULT_CLIENT_GROUP);
     if (!obj) {
         auto cm = self->getContent();
         ec.clear();

@@ -39,7 +39,9 @@
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "database/database.h"
+#include "database/db_param.h"
 #include "exceptions.h"
+#include "upnp/quirks.h"
 #include "upnp/xml_builder.h"
 #include "util/xml_to_json.h"
 
@@ -67,7 +69,7 @@ void Web::Items::process()
     xml2Json->setFieldType("track", FieldType::STRING);
     items.append_attribute("parent_id") = parentID;
 
-    auto container = database->loadObject(DEFAULT_CLIENT_GROUP, parentID);
+    auto container = database->loadObject(getGroup(), parentID);
     std::string trackFmt = "{:02}";
     auto result = action == "browse"
         ? doBrowse(container, start, count, items, trackFmt)
@@ -129,6 +131,8 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
     log_debug("start");
     auto browseParam = BrowseParam(container, BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
     browseParam.setRange(start, count);
+    if (quirks)
+        browseParam.setForbiddenDirectories(quirks->getForbiddenDirectories());
 
     if (container->isSubClass(UPNP_CLASS_MUSIC_ALBUM) || container->isSubClass(UPNP_CLASS_PLAYLIST_CONTAINER))
         browseParam.setFlag(BROWSE_TRACK_SORT);
@@ -213,13 +217,15 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doSearch(
         log_warning("Empty query string");
         throw UpnpException(UPNP_E_INVALID_ARGUMENT, "Empty query string");
     }
-    const auto searchParam = SearchParam(fmt::format("{}", containerId), searchCriteria, sortCriteria,
-        start, count, searchableContainers, DEFAULT_CLIENT_GROUP);
+    auto searchParam = SearchParam(fmt::format("{}", containerId), searchCriteria, sortCriteria,
+        start, count, searchableContainers, getGroup());
+    if (quirks)
+        searchParam.setForbiddenDirectories(quirks->getForbiddenDirectories());
     // Execute database search
-    int numMatches = 0;
+
     try {
-        result = database->search(searchParam, &numMatches);
-        log_debug("Found {}/{} items", result.size(), numMatches);
+        result = database->search(searchParam);
+        log_debug("Found {}/{} items", result.size(), searchParam.getTotalMatches());
     } catch (const SearchParseException& srcEx) {
         log_warning(srcEx.what());
         throw UpnpException(UPNP_E_INVALID_ARGUMENT, srcEx.getUserMessage());
@@ -233,9 +239,9 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doSearch(
     items.append_attribute("virtual") = container->isVirtual();
     items.append_attribute("start") = start;
     // items.append_attribute("returned") = result->size();
-    items.append_attribute("total_matches") = numMatches;
+    items.append_attribute("total_matches") = searchParam.getTotalMatches();
 
-    if (numMatches >= 100)
+    if (searchParam.getTotalMatches() >= 100)
         trackFmt = "{:03}";
 
     return result;

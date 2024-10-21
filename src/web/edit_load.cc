@@ -55,7 +55,7 @@ void Web::EditLoad::process()
         throw_std_runtime_error("invalid object id");
 
     auto objectID = std::stoi(objID);
-    auto obj = database->loadObject(DEFAULT_CLIENT_GROUP, objectID);
+    auto obj = database->loadObject(getGroup(), objectID);
 
     // set handling of json properties
     auto root = xmlDoc->document_element();

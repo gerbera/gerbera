@@ -32,6 +32,7 @@
 #include "config_setup_bool.h"
 #include "config_setup_path.h"
 #include "config_setup_string.h"
+#include "setup_util.h"
 #include "util/logger.h"
 
 #include <numeric>
@@ -229,43 +230,19 @@ bool ConfigDirectorySetup::updateItem(const std::vector<std::size_t>& indexList,
     return false;
 }
 
-bool ConfigDirectorySetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+bool ConfigDirectorySetup::updateDetail(const std::string& optItem,
+    std::string& optValue,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     if (startswith(optItem, xpath) && optionValue) {
         log_debug("Updating Client Detail {} {} {}", xpath, optItem, optValue);
         auto value = std::dynamic_pointer_cast<DirectoryTweakOption>(optionValue);
         auto list = value->getDirectoryTweakOption();
         auto indexList = extractIndexList(optItem);
-
-        if (indexList.size() > 0) {
-            auto index = indexList.at(0);
-            auto entry = list->get(index, true);
-            std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
-
-            if (!entry && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
-                entry = std::make_shared<DirectoryTweak>();
-                list->add(entry, index);
-            }
-            if (entry && (status == STATUS_REMOVED || status == STATUS_KILLED)) {
-                list->remove(index, true);
-                return true;
-            }
-            if (entry && status == STATUS_RESET) {
-                list->add(entry, index);
-            }
-            if (entry && updateItem(indexList, optItem, config, entry, optValue, status)) {
-                return true;
-            }
-        } else {
-            indexList.push_back(0);
-        }
-        for (std::size_t tweak = 0; tweak < list->size(); tweak++) {
-            indexList[0] = tweak;
-            auto entry = value->getDirectoryTweakOption()->get(tweak);
-            if (updateItem(indexList, optItem, config, entry, optValue)) {
-                return true;
-            }
-        }
+        std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+        if (updateConfig<EditHelperDirectoryTweak, ConfigDirectorySetup, DirectoryTweakOption, DirectoryTweak>(list, config, this, value, optItem, optValue, indexList, status))
+            return true;
     }
     return false;
 }

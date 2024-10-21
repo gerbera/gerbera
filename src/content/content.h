@@ -62,6 +62,13 @@ public:
     virtual void parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const = 0;
 
     virtual bool isHiddenFile(const fs::directory_entry& dirEntry, bool isDirectory, const AutoScanSetting& settings) = 0;
+
+    /// \brief Ensures that a container given by it's location on disk is
+    /// present in the database. If it does not exist it will be created, but
+    /// it's content will not be added.
+    ///
+    /// \param path location of the container to handle
+    /// \return objectID of the container given by path
     virtual int ensurePathExistence(const fs::path& path) const = 0;
     virtual void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath = {}, bool cancellable = true) = 0;
     virtual void handlePersistentAutoscanRecreate(const std::shared_ptr<AutoscanDirectory>& adir) = 0;

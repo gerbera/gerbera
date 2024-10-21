@@ -26,6 +26,8 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
+#include "util/grb_fs.h"
+
 #include <cinttypes>
 #include <map>
 #include <memory>
@@ -222,6 +224,8 @@ public:
     bool isAllowed() const;
 
     bool hasFlag(QuirkFlags flag) const;
+    std::vector<std::string> getForbiddenDirectories() const;
+
     const struct ClientProfile* getProfile() const { return pClientProfile; }
     const struct ClientObservation* getClient() const { return pClient; }
 

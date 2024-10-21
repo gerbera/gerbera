@@ -214,7 +214,7 @@ int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, co
             }
         }
 
-        changedObject = database->findObjectByPath(path, DbFileType::Any);
+        changedObject = database->findObjectByPath(path, UNUSED_CLIENT_GROUP, DbFileType::Any);
         log_debug("found {} -> {}", path.c_str(), changedObject ? changedObject->getID() : INVALID_OBJECT_ID);
         if (changedObject)
             isDir = changedObject->isContainer();

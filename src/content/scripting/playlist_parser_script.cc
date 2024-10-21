@@ -75,7 +75,7 @@ std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cd
     std::error_code ec;
     auto dirEnt = fs::directory_entry(loc, ec);
     if (!ec && isRegularFile(dirEnt, ec)) {
-        auto mainObj = database->findObjectByPath(dirEnt.path());
+        auto mainObj = database->findObjectByPath(dirEnt.path(), UNUSED_CLIENT_GROUP);
 
         if (!mainObj) {
             AutoScanSetting asSetting;

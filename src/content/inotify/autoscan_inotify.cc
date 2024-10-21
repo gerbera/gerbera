@@ -364,7 +364,7 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<DirectoryWa
                         content->handlePeristentAutoscanRemove(adir);
                     }
 
-                    auto object = database->findObjectByPath(path, DbFileType::File);
+                    auto object = database->findObjectByPath(path, UNUSED_CLIENT_GROUP, DbFileType::File);
                     if (object)
                         content->removeObject(adir, object, path, false);
                 }

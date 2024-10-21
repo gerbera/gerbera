@@ -145,7 +145,7 @@ public:
     std::unique_ptr<ChangedContainers> removeObject(int objectID, const fs::path& path, bool all) override;
     std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override;
 
-    std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) override;
+    std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID, const std::string& group) override;
     std::vector<int> getServiceObjectIDs(char servicePrefix) override;
 
     /* accounting methods */
@@ -153,13 +153,12 @@ public:
     std::map<std::string, long long> getGroupStats(const StatsParam& stats) override;
 
     std::vector<std::shared_ptr<CdsObject>> browse(BrowseParam& param) override;
-    std::vector<std::shared_ptr<CdsObject>> search(const SearchParam& param, int* numMatches) override;
+    std::vector<std::shared_ptr<CdsObject>> search(SearchParam& param) override;
 
     std::vector<std::string> getMimeTypes() override;
 
-    std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass) override;
-    // virtual std::shared_ptr<CdsObject> findObjectByTitle(std::string title, int parentID);
-    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) override;
+    std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass, const std::string& group) override;
+    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& fullpath, const std::string& group, DbFileType fileType = DbFileType::Auto) override;
     int findObjectIDByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) override;
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override;
 
@@ -313,7 +312,7 @@ private:
     std::vector<int> _checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir);
 
     /* location helper: filesystem path or virtual path to db location*/
-    static std::string addLocationPrefix(char prefix, const fs::path& path);
+    static std::string addLocationPrefix(char prefix, const fs::path& path, const std::string_view& suffix = "");
     /* location helpers: db location to filesystem path */
     static std::pair<fs::path, char> stripLocationPrefix(std::string_view dbLocation);
 

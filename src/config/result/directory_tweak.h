@@ -27,49 +27,22 @@
 #ifndef __DIRECTORYTWEAK_H__
 #define __DIRECTORYTWEAK_H__
 
+#include "edit_helper.h"
+#include "util/grb_fs.h"
+
 #include <map>
 #include <mutex>
 #include <vector>
-
-#include "util/grb_fs.h"
 
 // forward declaration
 class AutoscanDirectory;
 class Config;
 class DirectoryTweak;
+using EditHelperDirectoryTweak = EditHelper<DirectoryTweak>;
 
-class DirectoryConfigList {
+class DirectoryConfigList : public EditHelperDirectoryTweak {
 public:
-    /// \brief Adds a new DirectoryTweak to the list.
-    ///
-    /// \param dir DirectoryTweak to add to the list.
-    /// \param index position of new entry
-    /// \return scanID of the newly added DirectoryTweak
-    void add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index = std::numeric_limits<std::size_t>::max());
-
-    std::shared_ptr<DirectoryTweak> get(std::size_t id, bool edit = false) const;
-
-    std::shared_ptr<DirectoryTweak> get(const fs::path& location) const;
-
-    std::size_t getEditSize() const;
-
-    std::size_t size() const { return list.size(); }
-
-    /// \brief removes the DirectoryTweak given by its ID
-    void remove(std::size_t id, bool edit = false);
-
-    /// \brief returns a copy of the directory config list in the form of an array
-    std::vector<std::shared_ptr<DirectoryTweak>> getArrayCopy() const;
-
-protected:
-    std::size_t origSize {};
-    std::map<std::size_t, std::shared_ptr<DirectoryTweak>> indexMap;
-
-    mutable std::recursive_mutex mutex;
-    using AutoLock = std::scoped_lock<std::recursive_mutex>;
-
-    std::vector<std::shared_ptr<DirectoryTweak>> list;
-    void _add(const std::shared_ptr<DirectoryTweak>& dir, std::size_t index);
+    std::shared_ptr<DirectoryTweak> getKey(const fs::path& location) const;
 };
 
 #define SETTING_FANART "FanArt"
@@ -79,7 +52,7 @@ protected:
 #define SETTING_RESOURCE "Resource"
 
 /// \brief Provides information about one directory.
-class DirectoryTweak {
+class DirectoryTweak : public Editable {
 public:
     DirectoryTweak() = default;
     explicit DirectoryTweak(fs::path location, bool inherit)
@@ -87,15 +60,13 @@ public:
         , inherit(inherit)
     {
     }
+    bool equals(const std::shared_ptr<DirectoryTweak>& other) { return this->location == other->location; }
 
     void setLocation(fs::path location) { this->location = std::move(location); }
     fs::path getLocation() const { return location; }
 
     void setInherit(bool inherit) { this->inherit = inherit; }
     bool getInherit() const { return inherit; }
-
-    void setOrig(bool orig) { this->isOrig = orig; }
-    bool getOrig() const { return isOrig; }
 
     void setRecursive(bool recursive) { this->flags["Recursive"] = recursive; }
     bool hasRecursive() const { return flags.find("Recursive") != flags.end(); }
@@ -138,7 +109,6 @@ public:
 
 protected:
     fs::path location;
-    bool isOrig {};
     bool inherit { true };
     std::map<std::string, std::string> resourceFiles;
     std::map<std::string, bool> flags;

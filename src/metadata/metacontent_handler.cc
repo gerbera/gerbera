@@ -53,7 +53,7 @@ ContentPathSetup::ContentPathSetup(std::shared_ptr<Config> config, ConfigVal fil
 std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<CdsObject>& obj, const std::string& setting, fs::path folder) const
 {
     auto objLocation = obj->getLocation();
-    auto tweak = allTweaks->get(objLocation);
+    auto tweak = allTweaks->getKey(objLocation);
     auto files = !tweak || !tweak->hasSetting(setting) ? this->names : std::vector<std::string> { tweak->getSetting(setting) };
     auto isCaseSensitive = tweak && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : this->caseSensitive;
 
@@ -70,6 +70,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
         log_debug("Folder name: {}", folder.c_str());
 
         if (isCaseSensitive) {
+            // directly search files using name
             for (auto&& name : files) {
                 auto contentFile = folder / expandName(name, obj);
                 std::error_code ec;
@@ -82,10 +83,12 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
         } else {
             std::map<std::string, fs::path> fileNames;
             std::error_code ec;
+            // get all files in lowercase
             for (auto&& p : fs::directory_iterator(folder, ec))
                 if (isRegularFile(p, ec) && p.path() != objLocation)
                     fileNames[toLower(p.path().filename().string())] = p;
 
+            // filter files matching filenames
             for (auto&& name : files) {
                 auto fileName = toLower(expandName(name, obj));
                 for (auto&& [f, s] : fileNames) {
@@ -97,6 +100,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
             }
         }
         if (!patterns.empty()) {
+            // filter files matching patterns
             for (auto&& pattern : patterns) {
                 std::string dir;
                 std::string ext;
@@ -130,6 +134,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                     log_debug("{}: not a directory", contentPath.string());
                     continue;
                 }
+                // Check files using patterns
                 for (auto&& contentFile : fs::directory_iterator(contentPath, ec)) {
                     if (isRegularFile(contentFile, ec)
                         && (ext.empty() || (isCaseSensitive && contentFile.path().extension() == extn) || (!isCaseSensitive && toLower(contentFile.path().extension().string()) == extn))

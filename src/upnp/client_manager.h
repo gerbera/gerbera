@@ -44,8 +44,8 @@ struct ClientObservation;
 
 class ClientManager {
 public:
-    explicit ClientManager(const std::shared_ptr<Config>& config, std::shared_ptr<Database> database);
-    void refresh(const std::shared_ptr<Config>& config);
+    explicit ClientManager(std::shared_ptr<Config> config, std::shared_ptr<Database> database);
+    void refresh();
 
     // always return something, 'Unknown' if we do not know better
     const ClientObservation* getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent) const;
@@ -68,6 +68,7 @@ private:
 
     std::vector<ClientProfile> clientProfile;
     std::shared_ptr<Database> database;
+    std::shared_ptr<Config> config;
     std::chrono::hours cacheThreshold;
 };
 

@@ -2066,6 +2066,30 @@
               ]
             }
           ]
+        },
+        {
+          "item": "/clients/group",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/clients/group/attribute::name",
+              "caption": "Group Name",
+              "editable": true
+            },
+            {
+              "item": "/clients/group/hide",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/clients/group/hide/attribute::location",
+                  "caption": "Forbidden Directory",
+                  "editable": true
+                }
+              ]
+            }
+          ]
         }
       ]
     },

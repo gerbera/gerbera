@@ -28,6 +28,7 @@
 
 #include "action_request.h"
 #include "cds/cds_item.h"
+#include "config/result/client_config.h"
 #include "database/database.h"
 #include "upnp/client_manager.h"
 #include "upnp/clients.h"
@@ -142,7 +143,7 @@ std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std:
         // { "T", "object.item.textItem" },
     };
     if (containers.find(objId) != containers.end()) {
-        return database->findObjectByContentClass(containers.at(objId));
+        return database->findObjectByContentClass(containers.at(objId), getGroup());
     }
 
     return {};
@@ -310,6 +311,12 @@ bool Quirks::isAllowed() const
 {
     return !pClientProfile || pClientProfile->isAllowed;
 };
+
+std::vector<std::string> Quirks::getForbiddenDirectories() const
+{
+    static auto empty = std::vector<std::string>();
+    return (pClientProfile && pClientProfile->groupConfig) ? pClientProfile->groupConfig->getForbiddenDirectories() : empty;
+}
 
 void Quirks::updateHeaders(Headers& headers) const
 {

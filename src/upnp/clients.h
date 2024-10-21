@@ -36,7 +36,8 @@
 
 #include <vector>
 
-// forward declaration
+// forward declarations
+class ClientGroupConfig;
 class GrbNet;
 
 // specific customer products
@@ -84,6 +85,7 @@ struct ClientProfile {
     bool fullFilter { false };
     bool isAllowed { true };
     std::vector<ResourcePurpose> supportedResources { ResourcePurpose::Content, ResourcePurpose::Thumbnail, ResourcePurpose::Subtitle, ResourcePurpose::Transcode };
+    std::shared_ptr<ClientGroupConfig> groupConfig;
 };
 
 struct ClientObservation {

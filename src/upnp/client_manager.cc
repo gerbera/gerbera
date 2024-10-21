@@ -39,11 +39,12 @@
 #include <sys/socket.h>
 #include <upnp.h>
 
-ClientManager::ClientManager(const std::shared_ptr<Config>& config, std::shared_ptr<Database> database)
+ClientManager::ClientManager(std::shared_ptr<Config> config, std::shared_ptr<Database> database)
     : database(std::move(database))
-    , cacheThreshold(config->getIntOption(ConfigVal::CLIENTS_CACHE_THRESHOLD))
+    , config(std::move(config))
+    , cacheThreshold(this->config->getIntOption(ConfigVal::CLIENTS_CACHE_THRESHOLD))
 {
-    refresh(config);
+    refresh();
     if (this->database) {
         auto dbCache = this->database->getClients();
         for (auto&& entry : dbCache) {
@@ -61,7 +62,7 @@ ClientManager::ClientManager(const std::shared_ptr<Config>& config, std::shared_
     }
 }
 
-void ClientManager::refresh(const std::shared_ptr<Config>& config)
+void ClientManager::refresh()
 {
     // table of supported clients (reverse search, sequence of entries matters!)
     clientProfile = {
@@ -194,7 +195,17 @@ void ClientManager::refresh(const std::shared_ptr<Config>& config)
         },
     };
 
-    auto clientConfigList = config->getClientConfigListOption(ConfigVal::CLIENTS_LIST);
+    auto configList = config->getClientConfigListOption(ConfigVal::CLIENTS_LIST);
+    if (!configList)
+        return;
+
+    auto defaultGroup = configList->getGroup(DEFAULT_CLIENT_GROUP);
+    if (defaultGroup) {
+        for (auto&& cp : clientProfile) {
+            cp.groupConfig = defaultGroup;
+        }
+    }
+    auto clientConfigList = EDIT_CAST(EditHelperClientConfig, configList);
     for (std::size_t i = 0; i < clientConfigList->size(); i++) {
         auto clientConfig = clientConfigList->get(i);
         clientProfile.push_back(clientConfig->getClientProfile());
@@ -280,7 +291,8 @@ const ClientProfile* ClientManager::getInfoByAddr(const std::shared_ptr<GrbNet>&
 const ClientProfile* ClientManager::getInfoByType(const std::string& match, ClientMatchType type) const
 {
     if (!match.empty()) {
-        auto it = std::find_if(clientProfile.rbegin(), clientProfile.rend(), [=](auto&& c) { return c.matchType == type && match.find(c.match) != std::string::npos; });
+        auto it = std::find_if(clientProfile.rbegin(), clientProfile.rend(), [=](auto&& c) //
+            { return c.matchType == type && match.find(c.match) != std::string::npos; });
         if (it != clientProfile.rend()) {
             log_debug("found client by type (match='{}')", match);
             return &(*it);

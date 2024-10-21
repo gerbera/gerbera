@@ -27,6 +27,7 @@
 #ifndef __CLIENTCONFIG_H__
 #define __CLIENTCONFIG_H__
 
+#include "edit_helper.h"
 #include "upnp/clients.h"
 
 #include <map>
@@ -35,37 +36,41 @@
 
 // forward declaration
 class ClientConfig;
+class ClientGroupConfig;
 
-class ClientConfigList {
+using EditHelperClientConfig = EditHelper<ClientConfig>;
+using EditHelperClientGroupConfig = EditHelper<ClientGroupConfig>;
+
+/// \brief Store configuration of clients
+class ClientConfigList : public EditHelperClientConfig, public EditHelperClientGroupConfig {
 public:
-    /// \brief Adds a new ClientConfig to the list.
-    void add(const std::shared_ptr<ClientConfig>& client, std::size_t index = std::numeric_limits<std::size_t>::max());
+    std::shared_ptr<ClientGroupConfig> getGroup(const std::string& name) const;
+};
 
-    std::shared_ptr<ClientConfig> get(std::size_t id, bool edit = false) const;
+/// \brief Provides information about client group settings.
+class ClientGroupConfig : public Editable {
+public:
+    ClientGroupConfig(const std::string& name = "")
+        : groupName(name)
+    {
+    }
 
-    std::size_t getEditSize() const;
+    bool equals(const std::shared_ptr<ClientGroupConfig>& other) { return this->groupName == other->groupName; }
 
-    std::size_t size() const { return list.size(); }
+    /// \brief get list of forbidden directories
+    std::vector<std::string> getForbiddenDirectories(bool edit = false) const { return forbidden.getArrayOption(edit); }
+    void setForbiddenDirectories(const std::vector<std::string>& forbidden) { this->forbidden = ArrayOption(forbidden); }
+    void setForbiddenDirectory(std::size_t j, const std::string& value) { this->forbidden.setItem(j, value); }
 
-    /// \brief removes the ClientConfig given by its scan ID
-    void remove(std::size_t id, bool edit = false);
+    std::string getGroupName() { return groupName; }
 
-    /// \brief returns a copy of the client config list in the form of an array
-    std::vector<std::shared_ptr<ClientConfig>> getArrayCopy() const;
-
-protected:
-    std::size_t origSize {};
-    std::map<std::size_t, std::shared_ptr<ClientConfig>> indexMap;
-
-    mutable std::recursive_mutex mutex;
-    using AutoLock = std::scoped_lock<std::recursive_mutex>;
-
-    std::vector<std::shared_ptr<ClientConfig>> list;
-    void _add(const std::shared_ptr<ClientConfig>& client, std::size_t index);
+private:
+    std::string groupName { DEFAULT_CLIENT_GROUP };
+    ArrayOption forbidden = ArrayOption({});
 };
 
 /// \brief Provides information about one manual client.
-class ClientConfig {
+class ClientConfig : public Editable {
 public:
     ClientConfig() = default;
 
@@ -83,6 +88,7 @@ public:
         const std::map<ClientMatchType, std::string>& matchValues,
         int captionInfoCount, int stringLimit, bool multiValue, bool isAllowed);
 
+    bool equals(const std::shared_ptr<ClientConfig>& other) { return this->getIp() == other->getIp() && this->getUserAgent() == other->getUserAgent(); }
     const ClientProfile& getClientProfile() const { return clientProfile; }
 
     int getFlags() const { return this->clientProfile.flags; }
@@ -142,10 +148,12 @@ public:
         this->clientProfile.match = ip;
     }
 
-    std::string getGroup() const { return this->clientProfile.group; }
-    void setGroup(std::string_view group)
+    std::string getGroup() const { return this->clientProfile.groupConfig ? this->clientProfile.groupConfig->getGroupName() : this->clientProfile.group; }
+    void setGroup(std::string_view group, std::shared_ptr<ClientGroupConfig> groupConfig = {})
     {
-        this->clientProfile.group = group;
+        this->clientProfile.groupConfig = groupConfig;
+        if (groupConfig)
+            this->clientProfile.group = groupConfig->getGroupName();
     }
 
     std::string getUserAgent() const { return (this->clientProfile.matchType == ClientMatchType::UserAgent) ? this->clientProfile.match : ""; }
@@ -164,12 +172,7 @@ public:
 
     static std::string mapFlags(QuirkFlags flags);
 
-    void setOrig(bool orig) { this->isOrig = orig; }
-
-    bool getOrig() const { return isOrig; }
-
 protected:
-    bool isOrig {};
     ClientProfile clientProfile;
 };
 
