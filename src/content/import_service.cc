@@ -994,6 +994,10 @@ std::pair<int, bool> ImportService::addContainerTree(
                 createdIds.push_back(result); // ensure update
             }
             isNew = true;
+            if (item->isContainer()) {
+                std::shared_ptr<CdsContainer> itemContainer = std::dynamic_pointer_cast<CdsContainer>(item);
+                container->setUpnpShortcut(itemContainer->getUpnpShortcut());
+            }
         } else {
             result = containerMap.at(subTree)->getID();
             if (item->getMTime() > containerMap.at(subTree)->getMTime()) {

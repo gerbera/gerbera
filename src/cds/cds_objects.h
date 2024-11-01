@@ -256,6 +256,8 @@ public:
     /// \brief Add a single metadata value.
     void addMetaData(const MetadataFields key, const std::string& value)
     {
+        if (mt_single.at(key))
+            removeMetaData(key);
         metaData.emplace_back(MetaEnumMapper::getMetaFieldName(key), value);
     }
     /// \brief Add a single metadata value.
