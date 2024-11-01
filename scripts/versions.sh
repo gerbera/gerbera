@@ -60,7 +60,7 @@ else
     EBML="1.4.5"
     EXIV2="v0.28.3"
     EXIF="v0.6.24"
-    EXIF_commit="2ed252de3ece73e85247d5a5df5a4eb6420a494d"
+    EXIF_commit="00ee559ac8293c6ab9b0b4d26d3650ec89d2b1fc"
     FFMPEGTHUMBNAILER="2.2.3"
     FMT="11.0.2"
     GOOGLETEST="1.15.2"
@@ -69,7 +69,7 @@ else
     NPUPNP="6.2.0"
     PUGIXML="1.14"
     PUPNP="1.14.20"
-    SPDLOG="1.14.1"
+    SPDLOG="1.15.0"
     WAVPACK="5.7.0"
     TAGLIB="2.0.2"
 

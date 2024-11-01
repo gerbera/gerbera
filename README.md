@@ -54,7 +54,7 @@ sudo make install
 | sqlite3             | 3.7.0       | 3.35.5      | 3.36.0              | Required      | Database storage           |          |
 | zlib                |             |             |                     | Required      | Data compression           |          |
 | [fmtlib]            | 7.1.3       | 9.1.0       | 11.0.2              | Required      | Fast string formatting     |          |
-| [spdlog]            | 1.8.1       | 1.11.0      | 1.14.1              | Required      | Runtime logging            |          |
+| [spdlog]            | 1.8.1       | 1.11.0      | 1.15.0              | Required      | Runtime logging            |          |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0               | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |                     | Optional      | Alternate database storage | Disabled |
 | curl                |             |             |                     | Optional      | Enables web services       | Enabled  |

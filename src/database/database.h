@@ -123,6 +123,7 @@ public:
     virtual std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass, const std::string& group) = 0;
 
     virtual std::vector<std::string> getMimeTypes() = 0;
+    virtual std::map<std::string, std::shared_ptr<CdsContainer>> getShortcuts() = 0;
 
     /// \brief Loads a given (pc directory) object, identified by the given path
     /// from the database

@@ -319,8 +319,8 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
     BoxLayout(BoxKeys::audioAllComposers, "Composers", UPNP_CLASS_CONTAINER),
     BoxLayout(BoxKeys::audioAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_FOLDER_STRUCTURE"),
     BoxLayout(BoxKeys::audioAllGenres, "Genres", UPNP_CLASS_CONTAINER, "MUSIC_GENRES"),
-    BoxLayout(BoxKeys::audioAllSongs, "All Songs", UPNP_CLASS_CONTAINER, "MUSIC_ALL"),
-    BoxLayout(BoxKeys::audioAllTracks, "All - full name", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::audioAllSongs, "All Songs", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::audioAllTracks, "All - full name", UPNP_CLASS_CONTAINER, "MUSIC_ALL"),
     BoxLayout(BoxKeys::audioAllYears, "Year", UPNP_CLASS_CONTAINER),
     BoxLayout(BoxKeys::audioRoot, "Audio", UPNP_CLASS_CONTAINER),
     BoxLayout(BoxKeys::audioArtistChronology, "Album Chronology", UPNP_CLASS_CONTAINER),
@@ -349,16 +349,16 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
     // VIDEOS_LAST_PLAYED
     // VIDEOS_RECORDINGS
 
+    // IMAGES_ALBUM
+    // IMAGES_SLIDESHOWS
+    // IMAGES_RECENTLY_ADDED
+    // IMAGES_LAST_WATCHED
     BoxLayout(BoxKeys::imageAllDates, "Date", UPNP_CLASS_CONTAINER, "IMAGES_YEARS_MONTH"),
     BoxLayout(BoxKeys::imageAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "IMAGES_FOLDER_STRUCTURE"),
     BoxLayout(BoxKeys::imageAll, "All Photos", UPNP_CLASS_CONTAINER, "IMAGES_ALL"),
     BoxLayout(BoxKeys::imageAllYears, "Year", UPNP_CLASS_CONTAINER, "IMAGES_YEARS"),
     BoxLayout(BoxKeys::imageRoot, "Photos", UPNP_CLASS_CONTAINER, "IMAGES"),
     BoxLayout(BoxKeys::imageUnknown, "Unknown", UPNP_CLASS_CONTAINER),
-    // IMAGES_ALBUM
-    // IMAGES_SLIDESHOWS
-    // IMAGES_RECENTLY_ADDED
-    // IMAGES_LAST_WATCHED
 
 #ifdef ONLINE_SERVICES
     BoxLayout(BoxKeys::trailerRoot, "Online Services", UPNP_CLASS_CONTAINER),

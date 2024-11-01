@@ -98,8 +98,8 @@
           <box key="Audio/allComposers" title="Composers" class="object.container" />
           <box key="Audio/allDirectories" title="Directories" class="object.container" upnp-shortcut="MUSIC_FOLDER_STRUCTURE" />
           <box key="Audio/allGenres" title="Genres" class="object.container" upnp-shortcut="MUSIC_GENRES" />
-          <box key="Audio/allSongs" title="All Songs" class="object.container" upnp-shortcut="MUSIC_ALL" />
-          <box key="Audio/allTracks" title="All - full name" class="object.container" />
+          <box key="Audio/allSongs" title="All Songs" class="object.container" />
+          <box key="Audio/allTracks" title="All - full name" class="object.container" upnp-shortcut="MUSIC_ALL" />
           <box key="Audio/allYears" title="Year" class="object.container" />
           <box key="Audio/audioRoot" title="Audio" class="object.container" />
           <box key="Audio/artistChronology" title="Album Chronology" class="object.container" />

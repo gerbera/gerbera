@@ -2,16 +2,21 @@
 
 ## HEAD
 
-There are three new noteworthy features in this release:
+Rerun `gerbera --create-config="Boxlayout|DynamicContainer"` and merge changes to the `boxlayout` and `containers` the get support for upnp shortcut list feature.
+
+There are four new noteworthy features in this release:
 - the search page,
 - access permissions for files and
-- support for UPnP filters in requests.
+- support for UPnP filters in requests
+- support for UPnP CONTAINER_SHORTCUTS feature.
 
 ### NEW Features
 
 - Configuration of ui handler to allow hosting of docs and doxygen output
 - Support for UPnP filters
+- Support for UPnP shortcuts
 - Search page in web UI
+- command line option `--create-config` and `--create-example-config` support arguments
 - Provide packages for Ubuntu-24.10
 
 ### FIXES
@@ -26,7 +31,7 @@ There are three new noteworthy features in this release:
 
 - Build without ffmpeg leaves option unset
 - Logging of build info
-- Update versions of libpupnp (1.14.20)
+- Update versions of libpupnp (1.14.20), spdlog (1.15.0)
 - Update Build Environment
 
 ## v2.3.0

@@ -69,39 +69,44 @@ public:
 TEST_F(ConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 {
 #ifdef ONLINE_SERVICES
-    std::string mockXml = mockConfigXml("fixtures/mock-config-all-os.xml");
+    const std::string fileName = "fixtures/mock-config-all-os.xml";
 #else
-    std::string mockXml = mockConfigXml("fixtures/mock-config-all.xml");
+    const std::string fileName = "fixtures/mock-config-all.xml";
 #endif
-
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
     std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 
     // remove UUID, for simple compare...TODO: mock UUID?
     std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
     result = std::regex_replace(result, reg, "<udn/>");
 
-    EXPECT_STREQ(mockXml.c_str(), result.c_str());
+    auto outXml = std::pair { fileName, result };
+    EXPECT_EQ(mockXml, outXml);
 }
 #endif
 
 #if !defined(HAVE_FFMPEG) && !defined(HAVE_FFMPEGTHUMBNAILER) && !defined(HAVE_MYSQL) && !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
 TEST_F(ConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-config-minimal.xml");
+    const std::string fileName = "fixtures/mock-config-minimal.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 
     // remove UUID, for simple compare...TODO: mock UUID?
     std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
     result = std::regex_replace(result, reg, "<udn/>");
-    EXPECT_STREQ(mockXml.c_str(), result.c_str());
+
+    auto outXml = std::pair { fileName, result };
+    EXPECT_EQ(mockXml, outXml);
 }
 #endif
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL)
 TEST_F(ConfigGeneratorTest, GeneratesFullServerXmlWithAllDefinitions)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-server-all.xml");
+    const std::string fileName = "fixtures/mock-server-all.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateServer(homePath, configDir, prefixDir);
     auto config = subject->getNode("");
@@ -112,13 +117,15 @@ TEST_F(ConfigGeneratorTest, GeneratesFullServerXmlWithAllDefinitions)
     std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
     std::string resultStr = std::regex_replace(result.str(), reg, "<udn/>");
 
-    EXPECT_STREQ(mockXml.c_str(), resultStr.c_str());
+    auto outXml = std::pair { fileName, resultStr };
+    EXPECT_EQ(mockXml, outXml);
 }
 #endif
 
 TEST_F(ConfigGeneratorTest, GeneratesUiAllTheTime)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-ui.xml");
+    const std::string fileName = "fixtures/mock-ui.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateUi();
     auto server = subject->getNode("/server");
@@ -126,12 +133,14 @@ TEST_F(ConfigGeneratorTest, GeneratesUiAllTheTime)
     std::ostringstream result;
     server->first_child().print(result, "  ");
 
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    auto outXml = std::pair { fileName, result.str() };
+    EXPECT_EQ(mockXml, outXml);
 }
 
 TEST_F(ConfigGeneratorTest, GeneratesImportMappingsAllTheTime)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-import-mappings.xml");
+    const std::string fileName = "fixtures/mock-import-mappings.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateMappings();
     auto import = subject->getNode("/import");
@@ -139,13 +148,15 @@ TEST_F(ConfigGeneratorTest, GeneratesImportMappingsAllTheTime)
     std::ostringstream result;
     import->first_child().print(result, "  ");
 
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    auto outXml = std::pair { fileName, result.str() };
+    EXPECT_EQ(mockXml, outXml);
 }
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER)
 TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithFFMPEG)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-extended-ffmpeg.xml");
+    const std::string fileName = "fixtures/mock-extended-ffmpeg.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateExtendedRuntime();
     auto server = subject->getNode("/server");
@@ -153,14 +164,16 @@ TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithFFMPEG)
     std::ostringstream result;
     server->first_child().print(result, "  ");
 
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    auto outXml = std::pair { fileName, result.str() };
+    EXPECT_EQ(mockXml, outXml);
 }
 #endif
 
 #if !defined(HAVE_FFMPEG) || !defined(HAVE_FFMPEGTHUMBNAILER)
 TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithoutFFMPEG)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-extended.xml");
+    const std::string fileName = "fixtures/mock-extended.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateExtendedRuntime();
     auto server = subject->getNode("/server");
@@ -168,14 +181,16 @@ TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithoutFFMPEG)
     std::ostringstream result;
     server->first_child().print(result, "  ");
 
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    auto outXml = std::pair { fileName, result.str() };
+    EXPECT_EQ(mockXml, outXml);
 }
 #endif
 
 #if defined(HAVE_MYSQL)
 TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithMySQLAndSqlLite)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-database-mysql.xml");
+    const std::string fileName = "fixtures/mock-database-mysql.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateDatabase(prefixDir);
     auto server = subject->getNode("/server");
@@ -183,14 +198,16 @@ TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithMySQLAndSqlLite)
     std::ostringstream result;
     server->first_child().print(result, "  ");
 
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    auto outXml = std::pair { fileName, result.str() };
+    EXPECT_EQ(mockXml, outXml);
 }
 #endif
 
 #if !defined(HAVE_MYSQL)
 TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithSqlLiteOnly)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-database-sqlite.xml");
+    const std::string fileName = "fixtures/mock-database-sqlite.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateDatabase(prefixDir);
     auto server = subject->getNode("/server");
@@ -198,14 +215,16 @@ TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithSqlLiteOnly)
     std::ostringstream result;
     server->first_child().print(result, "  ");
 
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    auto outXml = std::pair { fileName, result.str() };
+    EXPECT_EQ(mockXml, outXml);
 }
 #endif
 
 #if defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
 TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicFile)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-import-magic.xml");
+    const std::string fileName = "fixtures/mock-import-magic.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateImport(prefixDir, configDir, magicFile);
     auto config = subject->getNode("");
@@ -213,13 +232,15 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicFile)
     std::ostringstream result;
     config->first_child().print(result, "  ");
 
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    auto outXml = std::pair { fileName, result.str() };
+    EXPECT_EQ(mockXml, outXml);
 }
 
 #elif defined(HAVE_MAGIC) && defined(HAVE_JS) && !defined(ONLINE_SERVICES)
 TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicAndJS)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-import-magic-js.xml");
+    const std::string fileName = "fixtures/mock-import-magic-js.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateImport(prefixDir, configDir, magicFile);
     auto config = subject->getNode("");
@@ -227,13 +248,15 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicAndJS)
     std::ostringstream result;
     config->first_child().print(result, "  ");
 
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    auto outXml = std::pair { fileName, result.str() };
+    EXPECT_EQ(mockXml, outXml);
 }
 
 #elif defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(ONLINE_SERVICES)
 TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicJSandOnline)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-import-magic-js-online.xml");
+    const std::string fileName = "fixtures/mock-import-magic-js-online.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateImport(prefixDir, configDir, magicFile);
     auto config = subject->getNode("");
@@ -241,13 +264,15 @@ TEST_F(ConfigGeneratorTest, GeneratesImportWithMagicJSandOnline)
     std::ostringstream result;
     config->first_child().print(result, "  ");
 
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    auto outXml = std::pair { fileName, result.str() };
+    EXPECT_EQ(mockXml, outXml);
 }
 
 #elif !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
 TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSnorOnline)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-import-none.xml");
+    const std::string fileName = "fixtures/mock-import-none.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateImport(prefixDir, configDir, magicFile);
     auto config = subject->getNode("");
@@ -255,7 +280,8 @@ TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSnorOnline)
     std::ostringstream result;
     config->first_child().print(result, "  ");
 
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    auto outXml = std::pair { fileName, result.str() };
+    EXPECT_EQ(mockXml, outXml);
 }
 #endif
 
@@ -270,21 +296,22 @@ TEST_F(ConfigGeneratorTest, GeneratesOnlineContentEmpty)
     std::ostringstream result;
     import->first_child().print(result, "  ");
 
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    EXPECT_EQ(mockXml, result.str());
 }
 #endif
 
 TEST_F(ConfigGeneratorTest, GeneratesTranscodingProfilesAlways)
 {
-    std::string mockXml = mockConfigXml("fixtures/mock-transcoding.xml");
+    const std::string fileName = "fixtures/mock-transcoding.xml";
+    auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateTranscoding();
     auto config = subject->getNode("");
 
     std::ostringstream result;
     config->first_child().print(result, "  ");
-
-    EXPECT_STREQ(mockXml.c_str(), result.str().c_str());
+    auto outXml = std::pair { fileName, result.str() };
+    EXPECT_EQ(mockXml, outXml);
 }
 
 TEST_F(ConfigGeneratorTest, GeneratesUdnWithUUID)

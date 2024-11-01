@@ -91,7 +91,6 @@ public:
 
     void setUpnpShortcut(const std::string& upnpShortcut) { addMetaData(MetadataFields::M_UPNP_SHORTCUT, upnpShortcut); }
     std::string getUpnpShortcut() const { return getMetaData(MetadataFields::M_UPNP_SHORTCUT); }
-
 };
 
 #endif // __CDS_CONTAINER_H__

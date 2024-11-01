@@ -15,6 +15,7 @@
 - Resource directory configuration and cleanup collection
 - Update Build Environment
 - UPnP: Add support for filters
+- UPnP Shortcuts feature
 - Web UI: Add Search page
 - Web UI: Fix detail display
 

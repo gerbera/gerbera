@@ -99,6 +99,15 @@ public:
      */
     void saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& database, ActionRequest& request) const;
 
+    /** \brief get UPnP shortcut List
+     *
+     * \param database DB interface
+     * \param features pugi::xml_node item in response
+     * \return void
+     *
+     */
+    void getShortCutList(const std::shared_ptr<Database>& database, pugi::xml_node& features) const;
+
     /** \brief get Samsung Feature List
      *
      * \param request const std::unique_ptr<ActionRequest>& request sent by Samsung client

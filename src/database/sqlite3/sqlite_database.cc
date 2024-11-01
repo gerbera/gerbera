@@ -173,6 +173,8 @@ void Sqlite3Database::init()
         shutdown();
         throw_std_runtime_error(e.what());
     }
+
+    initDynContainers();
 }
 
 std::shared_ptr<Database> Sqlite3Database::getSelf()

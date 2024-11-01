@@ -329,11 +329,13 @@ std::unique_ptr<ASTQuotedString> SearchParser::parseQuotedString()
     auto openQuote = std::make_unique<ASTDQuote>(sqlEmitter, currentToken->getValue());
     getNextToken();
 
-    if (!currentToken || currentToken->getType() != TokenType::ESCAPEDSTRING)
+    if (!currentToken || (currentToken->getType() != TokenType::ESCAPEDSTRING && currentToken->getType() != TokenType::DQUOTE)) {
         throw SearchParseException("Failed to parse search criteria - expecting an escaped string value", LINE_MESSAGE);
+    }
 
-    auto escapedString = std::make_unique<ASTEscapedString>(sqlEmitter, currentToken->getValue());
-    getNextToken();
+    auto escapedString = currentToken->getType() != TokenType::DQUOTE ? std::make_unique<ASTEscapedString>(sqlEmitter, currentToken->getValue()) : std::make_unique<ASTEscapedString>(sqlEmitter, "");
+    if (currentToken && currentToken->getType() != TokenType::DQUOTE)
+        getNextToken();
 
     if (!currentToken || currentToken->getType() != TokenType::DQUOTE)
         throw SearchParseException("Failed to parse search criteria - expecting a double-quote", LINE_MESSAGE);
@@ -581,6 +583,8 @@ static const std::map<std::string, std::string> logicOperator {
     { "newer", "({1} {3})" },
     { "compare", "({2}LOWER('{3}'))" }, // lower
     { "@compare", "({2}LOWER('{3}'))" }, // lower
+    { "neq", "({2}LOWER('{3}'))" }, // lower
+    { "@neq", "({2}LOWER('{3}'))" }, // lower
 };
 
 std::tuple<std::string, std::string, FieldType> DefaultSQLEmitter::getPropertyStatement(const std::string& property) const
@@ -628,11 +632,14 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
         return fmt::format("{} {} {}", prpUpper, operatr, stoiString(value));
     }
 
-    if (operatr != "=")
+    auto cmpOp = (property[0] == '@') ? "@compare" : "compare";
+    if (operatr == "!=")
+        cmpOp = (property[0] == '@') ? "@neq" : "neq";
+    else if (operatr != "=")
         throw_std_runtime_error("Operation '{}' '{}' not yet supported", operatr, value);
 
     auto [clsUpper, clsLower, clsType] = getPropertyStatement(UPNP_SEARCH_CLASS);
-    return fmt::format(logicOperator.at((property[0] == '@') ? "@compare" : "compare"), clsUpper,
+    return fmt::format(logicOperator.at(cmpOp), clsUpper,
         fmt::format("{}{}", prpUpper, operatr), fmt::format("{}{}", prpLower, operatr), value);
 }
 
