@@ -189,6 +189,8 @@ void MySQLDatabase::init()
 
     upgradeDatabase(std::stoul(dbVersion), hashies, ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, mysqlUpdateVersion, mysqlAddResourceAttr);
 
+    initDynContainers();
+
     lock.unlock();
 
     log_debug("end");

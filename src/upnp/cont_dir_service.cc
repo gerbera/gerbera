@@ -363,6 +363,9 @@ void ContentDirectoryService::doGetFeatureList(ActionRequest& request) const
     features.append_attribute("xmlns") = "urn:schemas-upnp-org:av:avs";
     features.append_attribute("xmlns:xsi") = "http://www.w3.org/2001/XMLSchema-instance";
     features.append_attribute("xsi:schemaLocation") = "urn:schemas-upnp-org:av:avs http://www.upnp.org/schemas/av/avs.xsd";
+    auto&& quirks = request.getQuirks();
+    if (quirks)
+        quirks->getShortCutList(database, features);
     root.append_child("FeatureList").append_child(pugi::node_pcdata).set_value(UpnpXMLBuilder::printXml(respRoot, "", 0).c_str());
     request.setResponse(std::move(response));
 

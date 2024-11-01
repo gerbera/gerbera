@@ -103,6 +103,7 @@ public:
 class BoxLayout : public Editable {
 public:
     BoxLayout() = default;
+    virtual ~BoxLayout() = default;
     explicit BoxLayout(const std::string_view& key, std::string title, std::string objClass, std::string upnpShortcut = "", bool enabled = true, int size = 1)
         : key(key)
         , title(std::move(title))

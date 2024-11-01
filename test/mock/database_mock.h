@@ -46,6 +46,7 @@ public:
     std::vector<std::shared_ptr<CdsObject>> search(SearchParam& param) override { return {}; }
 
     std::vector<std::string> getMimeTypes() override { return {}; }
+    std::map<std::string, std::shared_ptr<CdsContainer>> getShortcuts() override { return {}; }
     std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass, const std::string& group) override { return {}; }
     std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, const std::string& group, DbFileType fileType = DbFileType::Auto) override { return {}; }
     int findObjectIDByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) override { return INVALID_OBJECT_ID; }

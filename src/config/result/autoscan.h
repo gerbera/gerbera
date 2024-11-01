@@ -109,6 +109,7 @@ public:
     AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent,
         unsigned int interval = 0, bool hidden = false, bool followSymlinks = false, int mediaType = -1,
         const std::map<AutoscanMediaMode, std::string>& containerMap = ContainerTypesDefaults);
+    virtual ~AutoscanDirectory() = default;
 
     bool equals(const std::shared_ptr<AutoscanDirectory>& other) { return this->getScanID() == other->getScanID(); }
 

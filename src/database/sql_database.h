@@ -156,6 +156,7 @@ public:
     std::vector<std::shared_ptr<CdsObject>> search(SearchParam& param) override;
 
     std::vector<std::string> getMimeTypes() override;
+    std::map<std::string, std::shared_ptr<CdsContainer>> getShortcuts() override;
 
     std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass, const std::string& group) override;
     std::shared_ptr<CdsObject> findObjectByPath(const fs::path& fullpath, const std::string& group, DbFileType fileType = DbFileType::Auto) override;
@@ -213,6 +214,7 @@ public:
 protected:
     explicit SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, std::shared_ptr<ConverterManager> converterManager);
     void init() override;
+    void initDynContainers(const std::shared_ptr<CdsObject>& sParent = {});
 
     /// \brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
     bool doMetadataMigration();
@@ -255,6 +257,10 @@ private:
     /// \brief List of column names to be used in insert and update to ensure correct order of columns
     // only columns listed here are added to the insert and update statements
     std::map<std::string, std::vector<std::string>> tableColumnOrder;
+
+    /// \brief Configuration content for dynamic folders
+    std::shared_ptr<DynamicContentList> dynamicContentList;
+    bool dynamicContentEnabled;
 
     std::shared_ptr<CdsObject> createObjectFromRow(const std::string& group, const std::unique_ptr<SQLRow>& row);
     std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::string& group, const std::unique_ptr<SQLRow>& row);

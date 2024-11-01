@@ -343,6 +343,7 @@
             <xs:attribute name="title" type="xs:string"/>
             <xs:attribute name="image" type="xs:string"/>
             <xs:attribute name="sort" type="xs:string"/>
+            <xs:attribute name="upnp-shortcut" type="xs:string"/>
             <xs:attribute name="max-count" type="xs:positiveInteger" default="500"/>
         </xs:complexType>
     </xs:element>
@@ -802,6 +803,7 @@
             <xs:attribute name="key" type="xs:string"/>
             <xs:attribute name="title" type="xs:string"/>
             <xs:attribute name="class" type="xs:string"/>
+            <xs:attribute name="upnp-shortcut" type="xs:string"/>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="size" type="xs:positiveInteger" default="1"/>
         </xs:complexType>

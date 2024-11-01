@@ -39,6 +39,7 @@
 
 class Editable {
 public:
+    virtual ~Editable() = default;
     virtual void validate(bool newEntry, std::size_t index) { }
     virtual void invalidate() { }
 
