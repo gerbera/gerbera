@@ -78,13 +78,13 @@ static constexpr std::array jsGlobalFunctions {
 void Script::setProperty(const std::string& name, const std::string& value)
 {
     duk_push_string(ctx, value.c_str());
-    duk_put_prop_string(ctx, -2, name.c_str());
+    duk_put_prop_string(ctx, -2, camelCaseString(name).c_str());
 }
 
 void Script::setIntProperty(const std::string& name, int value)
 {
     duk_push_int(ctx, value);
-    duk_put_prop_string(ctx, -2, name.c_str());
+    duk_put_prop_string(ctx, -2, camelCaseString(name).c_str());
 }
 
 /* **************** */
@@ -236,6 +236,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_ENABLED), boxLayout->getEnabled());
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_TITLE), boxLayout->getTitle());
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_CLASS), boxLayout->getClass());
+            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT), boxLayout->getUpnpShortcut());
             duk_put_prop_string(ctx, -2, boxLayout->getKey().c_str());
         }
         boxLayoutItemPath = bcs->getItemPathRoot(true); // prefix
@@ -784,6 +785,12 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         log_debug("{} searchable {}", cont->getTitle(), searchable);
         if (searchable >= 0)
             cont->setSearchable(searchable);
+
+        auto upnpShortcut = ScriptNamedProperty(ctx, "upnpShortcut").getStringValue();
+        if (!upnpShortcut.empty()) {
+            upnpShortcut = sc->convert(upnpShortcut);
+            cont->setUpnpShortcut(upnpShortcut);
+        }
 
         handleObject2cdsContainer(ctx, pcd, cont);
     }

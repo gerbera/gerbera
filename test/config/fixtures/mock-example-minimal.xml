@@ -67,6 +67,9 @@
       <container location="/LastModified" title="Recently Modified" sort="-last_modified">
         <filter>upnp:class derivedfrom "object.item" and last_modified &gt; "@last7"</filter>
       </container>
+      <container location="/LastPlayed" title="Music Recently Played" sort="-upnp:lastPlaybackTime" upnp-shortcut="MUSIC_LAST_PLAYED">
+        <filter>upnp:class derivedfrom "object.item.audioItem" and upnp:lastPlaybackTime &gt; "@last7"</filter>
+      </container>
     </containers>
     <extended-runtime-options>
       <mark-played-items enabled="no" suppress-cds-updates="yes">
@@ -89,13 +92,13 @@
       <virtual-layout type="builtin">
         <genre-map></genre-map>
         <boxlayout>
-          <box key="Audio/allAlbums" title="Albums" class="object.container" />
-          <box key="Audio/allArtists" title="Artists" class="object.container" />
+          <box key="Audio/allAlbums" title="Albums" class="object.container" upnp-shortcut="MUSIC_ALBUMS" />
+          <box key="Audio/allArtists" title="Artists" class="object.container" upnp-shortcut="MUSIC_ARTISTS" />
           <box key="Audio/allAudio" title="All Audio" class="object.container" />
           <box key="Audio/allComposers" title="Composers" class="object.container" />
-          <box key="Audio/allDirectories" title="Directories" class="object.container" />
-          <box key="Audio/allGenres" title="Genres" class="object.container" />
-          <box key="Audio/allSongs" title="All Songs" class="object.container" />
+          <box key="Audio/allDirectories" title="Directories" class="object.container" upnp-shortcut="MUSIC_FOLDER_STRUCTURE" />
+          <box key="Audio/allGenres" title="Genres" class="object.container" upnp-shortcut="MUSIC_GENRES" />
+          <box key="Audio/allSongs" title="All Songs" class="object.container" upnp-shortcut="MUSIC_ALL" />
           <box key="Audio/allTracks" title="All - full name" class="object.container" />
           <box key="Audio/allYears" title="Year" class="object.container" />
           <box key="Audio/audioRoot" title="Audio" class="object.container" />
@@ -103,24 +106,24 @@
           <box key="AudioInitial/abc" title="ABC" class="object.container" />
           <box key="AudioInitial/allArtistTracks" title="000 All" class="object.container" />
           <box key="AudioInitial/allBooks" title="Books" class="object.container" />
-          <box key="AudioInitial/audioBookRoot" title="AudioBooks" class="object.container" />
-          <box key="AudioStructured/allAlbums" title="-Album-" class="object.container" size="6" />
+          <box key="AudioInitial/audioBookRoot" title="AudioBooks" class="object.container" upnp-shortcut="MUSIC_AUDIOBOOKS" />
+          <box key="AudioStructured/allAlbums" title="-Album-" class="object.container" upnp-shortcut="MUSIC_ALBUMS" size="6" />
           <box key="AudioStructured/allArtistTracks" title="all" class="object.container" />
-          <box key="AudioStructured/allArtists" title="-Artist-" class="object.container" size="9" />
-          <box key="AudioStructured/allGenres" title="-Genre-" class="object.container" size="6" />
-          <box key="AudioStructured/allTracks" title="-Track-" class="object.container" size="6" />
+          <box key="AudioStructured/allArtists" title="-Artist-" class="object.container" upnp-shortcut="MUSIC_ARTISTS" size="9" />
+          <box key="AudioStructured/allGenres" title="-Genre-" class="object.container" upnp-shortcut="MUSIC_GENRES" size="6" />
+          <box key="AudioStructured/allTracks" title="-Track-" class="object.container" upnp-shortcut="MUSIC_ALL" size="6" />
           <box key="AudioStructured/allYears" title="-Year-" class="object.container" />
-          <box key="Video/allDates" title="Date" class="object.container" />
-          <box key="Video/allDirectories" title="Directories" class="object.container" />
-          <box key="Video/allVideo" title="All Video" class="object.container" />
-          <box key="Video/allYears" title="Year" class="object.container" />
+          <box key="Video/allDates" title="Date" class="object.container" upnp-shortcut="VIDEOS_YEARS_MONTH" />
+          <box key="Video/allDirectories" title="Directories" class="object.container" upnp-shortcut="VIDEOS_FOLDER_STRUCTURE" />
+          <box key="Video/allVideo" title="All Video" class="object.container" upnp-shortcut="VIDEOS_ALL" />
+          <box key="Video/allYears" title="Year" class="object.container" upnp-shortcut="VIDEOS_YEARS" />
           <box key="Video/unknown" title="Unknown" class="object.container" />
-          <box key="Video/videoRoot" title="Video" class="object.container" />
-          <box key="Image/allDates" title="Date" class="object.container" />
-          <box key="Image/allDirectories" title="Directories" class="object.container" />
-          <box key="Image/allImages" title="All Photos" class="object.container" />
-          <box key="Image/allYears" title="Year" class="object.container" />
-          <box key="Image/imageRoot" title="Photos" class="object.container" />
+          <box key="Video/videoRoot" title="Video" class="object.container" upnp-shortcut="VIDEOS" />
+          <box key="Image/allDates" title="Date" class="object.container" upnp-shortcut="IMAGES_YEARS_MONTH" />
+          <box key="Image/allDirectories" title="Directories" class="object.container" upnp-shortcut="IMAGES_FOLDER_STRUCTURE" />
+          <box key="Image/allImages" title="All Photos" class="object.container" upnp-shortcut="IMAGES_ALL" />
+          <box key="Image/allYears" title="Year" class="object.container" upnp-shortcut="IMAGES_YEARS" />
+          <box key="Image/imageRoot" title="Photos" class="object.container" upnp-shortcut="IMAGES" />
           <box key="Image/unknown" title="Unknown" class="object.container" />
         </boxlayout>
       </virtual-layout>

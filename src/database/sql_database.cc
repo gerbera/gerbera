@@ -1103,6 +1103,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
                         dynFolder->setParentID(parent->getID());
                         dynFolder->setLocation(dynConfig->getLocation());
                         dynFolder->setClass(UPNP_CLASS_DYNAMIC_CONTAINER);
+                        dynFolder->setUpnpShortcut(dynConfig->getUpnpShortcut());
 
                         auto image = dynConfig->getImage();
                         std::error_code ec;

@@ -75,6 +75,9 @@ public:
     void setTitle(std::string title) { this->title = std::move(title); }
     std::string getTitle() const { return title; }
 
+    void setUpnpShortcut(std::string upnpShortcut) { this->upnpShortcut = std::move(upnpShortcut); }
+    std::string getUpnpShortcut() const { return upnpShortcut; }
+
     void setMaxCount(int maxCount) { this->maxCount = maxCount; }
     int getMaxCount() const { return maxCount; }
 
@@ -90,6 +93,9 @@ private:
 
     /// \brief sort criteria
     std::string sort;
+
+    /// \brief shortcut name for upnp shortcuts list
+    std::string upnpShortcut;
 
     /// \brief maximum request count
     int maxCount {};

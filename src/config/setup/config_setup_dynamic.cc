@@ -64,6 +64,8 @@ bool ConfigDynamicContentSetup::createOptionFromNode(const pugi::xml_node& eleme
             cont->setSort(cs->getXmlContent(child));
             cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_FILTER);
             cont->setFilter(cs->getXmlContent(child));
+            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT);
+            cont->setUpnpShortcut(cs->getXmlContent(child));
         }
         {
             auto cs = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT);
@@ -130,6 +132,16 @@ bool ConfigDynamicContentSetup::updateItem(const std::vector<std::size_t>& index
         if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_FILTER)->checkValue(optValue)) {
             entry->setFilter(optValue);
             log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getFilter());
+            return true;
+        }
+    }
+    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT });
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getUpnpShortcut());
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT)->checkValue(optValue)) {
+            entry->setUpnpShortcut(optValue);
+            log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getUpnpShortcut());
             return true;
         }
     }

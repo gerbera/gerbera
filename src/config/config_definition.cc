@@ -311,13 +311,15 @@ static const std::vector<std::vector<std::pair<std::string, std::string>>> virtu
 
 /// \brief default values for ConfigVal::BOXLAYOUT_BOX
 static const std::vector<BoxLayout> boxLayoutDefaults {
-    BoxLayout(BoxKeys::audioAllAlbums, "Albums", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioAllArtists, "Artists", UPNP_CLASS_CONTAINER),
+    // FOLDER_STRUCTURE
+
+    BoxLayout(BoxKeys::audioAllAlbums, "Albums", UPNP_CLASS_CONTAINER, "MUSIC_ALBUMS"),
+    BoxLayout(BoxKeys::audioAllArtists, "Artists", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS"),
     BoxLayout(BoxKeys::audioAll, "All Audio", UPNP_CLASS_CONTAINER),
     BoxLayout(BoxKeys::audioAllComposers, "Composers", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioAllDirectories, "Directories", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioAllGenres, "Genres", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioAllSongs, "All Songs", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::audioAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_FOLDER_STRUCTURE"),
+    BoxLayout(BoxKeys::audioAllGenres, "Genres", UPNP_CLASS_CONTAINER, "MUSIC_GENRES"),
+    BoxLayout(BoxKeys::audioAllSongs, "All Songs", UPNP_CLASS_CONTAINER, "MUSIC_ALL"),
     BoxLayout(BoxKeys::audioAllTracks, "All - full name", UPNP_CLASS_CONTAINER),
     BoxLayout(BoxKeys::audioAllYears, "Year", UPNP_CLASS_CONTAINER),
     BoxLayout(BoxKeys::audioRoot, "Audio", UPNP_CLASS_CONTAINER),
@@ -326,28 +328,37 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
     BoxLayout(BoxKeys::audioInitialAbc, "ABC", UPNP_CLASS_CONTAINER),
     BoxLayout(BoxKeys::audioInitialAllArtistTracks, "000 All", UPNP_CLASS_CONTAINER),
     BoxLayout(BoxKeys::audioInitialAllBooks, "Books", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioInitialAudioBookRoot, "AudioBooks", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::audioInitialAudioBookRoot, "AudioBooks", UPNP_CLASS_CONTAINER, "MUSIC_AUDIOBOOKS"),
 
-    BoxLayout(BoxKeys::audioStructuredAllAlbums, "-Album-", UPNP_CLASS_CONTAINER, true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllAlbums, "-Album-", UPNP_CLASS_CONTAINER, "MUSIC_ALBUMS", true, 6),
     BoxLayout(BoxKeys::audioStructuredAllArtistTracks, "all", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", UPNP_CLASS_CONTAINER, true, 9),
-    BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", UPNP_CLASS_CONTAINER, true, 6),
-    BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", UPNP_CLASS_CONTAINER, true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS", true, 9),
+    BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", UPNP_CLASS_CONTAINER, "MUSIC_GENRES", true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", UPNP_CLASS_CONTAINER, "MUSIC_ALL", true, 6),
     BoxLayout(BoxKeys::audioStructuredAllYears, "-Year-", UPNP_CLASS_CONTAINER),
 
-    BoxLayout(BoxKeys::videoAllDates, "Date", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::videoAllDirectories, "Directories", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::videoAll, "All Video", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::videoAllYears, "Year", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::videoAllDates, "Date", UPNP_CLASS_CONTAINER, "VIDEOS_YEARS_MONTH"),
+    BoxLayout(BoxKeys::videoAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "VIDEOS_FOLDER_STRUCTURE"),
+    BoxLayout(BoxKeys::videoAll, "All Video", UPNP_CLASS_CONTAINER, "VIDEOS_ALL"),
+    BoxLayout(BoxKeys::videoAllYears, "Year", UPNP_CLASS_CONTAINER, "VIDEOS_YEARS"),
     BoxLayout(BoxKeys::videoUnknown, "Unknown", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::videoRoot, "Video", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::videoRoot, "Video", UPNP_CLASS_CONTAINER, "VIDEOS"),
+    // VIDEOS_GENRES
+    // VIDEOS_ALBUM
+    // VIDEOS_RECENTLY_ADDED
+    // VIDEOS_LAST_PLAYED
+    // VIDEOS_RECORDINGS
 
-    BoxLayout(BoxKeys::imageAllDates, "Date", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::imageAllDirectories, "Directories", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::imageAll, "All Photos", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::imageAllYears, "Year", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::imageRoot, "Photos", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::imageAllDates, "Date", UPNP_CLASS_CONTAINER, "IMAGES_YEARS_MONTH"),
+    BoxLayout(BoxKeys::imageAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "IMAGES_FOLDER_STRUCTURE"),
+    BoxLayout(BoxKeys::imageAll, "All Photos", UPNP_CLASS_CONTAINER, "IMAGES_ALL"),
+    BoxLayout(BoxKeys::imageAllYears, "Year", UPNP_CLASS_CONTAINER, "IMAGES_YEARS"),
+    BoxLayout(BoxKeys::imageRoot, "Photos", UPNP_CLASS_CONTAINER, "IMAGES"),
     BoxLayout(BoxKeys::imageUnknown, "Unknown", UPNP_CLASS_CONTAINER),
+    // IMAGES_ALBUM
+    // IMAGES_SLIDESHOWS
+    // IMAGES_RECENTLY_ADDED
+    // IMAGES_LAST_WATCHED
 
 #ifdef ONLINE_SERVICES
     BoxLayout(BoxKeys::trailerRoot, "Online Services", UPNP_CLASS_CONTAINER),
@@ -360,7 +371,7 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
 #ifdef HAVE_JS
     BoxLayout(BoxKeys::playlistRoot, "Playlists", UPNP_CLASS_CONTAINER),
     BoxLayout(BoxKeys::playlistAll, "All Playlists", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::playlistAllDirectories, "Directories", UPNP_CLASS_CONTAINER, true, 1),
+    BoxLayout(BoxKeys::playlistAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_PLAYLISTS", true, 1),
 #endif
 };
 
@@ -651,6 +662,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS,
         "attribute::class", "config-import.html#boxlayout",
         UPNP_CLASS_CONTAINER),
+    std::make_shared<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT,
+        "attribute::upnp-shortcut", "config-import.html#boxlayout",
+        ""),
     std::make_shared<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE,
         "attribute::size", "config-import.html#boxlayout",
         1, -10, ConfigIntSetup::CheckMinValue),
@@ -1416,6 +1430,9 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
     std::make_shared<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_FILTER,
         "filter", "config-server.html#filter",
         true, "last_updated > \"@last31\""),
+    std::make_shared<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT,
+        "attribute::upnp-shortcut", "config-server.html#upnp-shortcut",
+        ""),
     std::make_shared<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_SORT,
         "attribute::sort", "config-server.html#sort",
         ""),
