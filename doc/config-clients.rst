@@ -195,7 +195,7 @@ This section defines the client behaviour for one client.
     It overwrites general settings from ``contenttype-dlnaprofile`` with the same format, see :ref:`contenttype-dlnaprofile`.
 
 ``group``
-~~~~~~~~~~
+~~~~~~~~~
 
 .. code-block:: xml
 
@@ -219,7 +219,7 @@ This section defines the behaviour for a group of clients.
 
     .. code:: xml
 
-        <hide location="/path/no/visible"/>
+        <hide location="/path/not/visible"/>
 
     * required
 

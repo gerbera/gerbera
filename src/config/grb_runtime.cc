@@ -531,12 +531,6 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
     return true;
 }
 
-bool GerberaRuntime::createExampleConfig(const std::string& arg)
-{
-    exampleConfigSet = true;
-    return true;
-}
-
 bool GerberaRuntime::printCopyright(const std::string& arg)
 {
     fmt::print("\nGerbera UPnP Server {}\n"
@@ -548,9 +542,21 @@ bool GerberaRuntime::printCopyright(const std::string& arg)
     return true;
 }
 
+bool GerberaRuntime::createExampleConfig(const std::string& arg)
+{
+    exampleConfigSet = true;
+    std::optional<std::string> sectionString = (*results)[arg].as<std::string>();
+
+    sections = ConfigGenerator::makeSections(sectionString.value_or("All"));
+    return true;
+}
+
 bool GerberaRuntime::createConfig(const std::string& arg)
 {
     createConfigSet = true;
+    std::optional<std::string> sectionString = (*results)[arg].as<std::string>();
+
+    sections = ConfigGenerator::makeSections(sectionString.value_or("All"));
     return true;
 }
 
@@ -597,7 +603,7 @@ bool GerberaRuntime::checkDirs()
 
 bool GerberaRuntime::printConfig()
 {
-    ConfigGenerator configGenerator(exampleConfigSet);
+    ConfigGenerator configGenerator(exampleConfigSet, sections);
     if (!configDirSet) {
         confDir = "";
     }

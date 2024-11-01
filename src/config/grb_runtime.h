@@ -131,6 +131,7 @@ private:
     bool debug = false;
     bool offline = false;
     bool exampleConfigSet = false;
+    int sections;
     bool createConfigSet = false;
     bool configDirSet = false;
     pid_t pid;
