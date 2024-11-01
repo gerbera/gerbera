@@ -30,10 +30,25 @@
 
 #include "config/config.h"
 
+enum class GeneratorSections {
+    Server,
+    Ui,
+    ExtendedRuntime,
+    DynamicContainer,
+    Database,
+    Import,
+    Mappings,
+    Boxlayout,
+    Transcoding,
+    OnlineContent,
+    All,
+};
+
 class ConfigGenerator {
 public:
-    ConfigGenerator(bool example)
+    ConfigGenerator(bool example, int sections = 0)
         : example(example)
+        , generateSections(sections)
     {
     }
     std::string generate(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir, const fs::path& magicFile);
@@ -54,12 +69,20 @@ public:
 
     std::shared_ptr<pugi::xml_node> getNode(const std::string& tag) const;
 
+    static int remapGeneratorSections(const std::string& arg);
+    static std::string printSections(int section);
+    static int makeSections(const std::string& optValue);
+    bool isGenerated(GeneratorSections section);
+
 protected:
     bool example { false };
+    int generateSections { 0 };
     std::map<std::string, std::shared_ptr<pugi::xml_node>> generated;
     pugi::xml_document doc;
     void generateOptions(const std::vector<std::pair<ConfigVal, bool>>& options);
     std::shared_ptr<pugi::xml_node> setValue(const std::string& tag, const std::string& value = "", bool makeLastChild = false);
+    void generateServerOptions(std::shared_ptr<pugi::xml_node>& server, const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir);
+    void generateImportOptions(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile);
 
     std::shared_ptr<pugi::xml_node> setDictionary(ConfigVal option);
     std::shared_ptr<pugi::xml_node> setVector(ConfigVal option);
@@ -69,6 +92,7 @@ protected:
     std::shared_ptr<pugi::xml_node> setValue(ConfigVal option, ConfigVal dict, ConfigVal attr, const std::string& value);
 
     static std::shared_ptr<pugi::xml_node> setValue(const std::shared_ptr<pugi::xml_node>& parent, ConfigVal option, const std::string& value);
+    static std::map<GeneratorSections, std::string_view> sections;
 };
 
 #endif // GERBERA_CONFIG_GENERATOR_H

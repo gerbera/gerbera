@@ -24,9 +24,9 @@ gerbera \- UPnP MediaServer
 ] [
 \fB--compile-info\fR
 ] [
-\fB--create-config\fR
+\fB--create-config=Sections\fR
 ] [
-\fB--create-example-config\fR
+\fB--create-example-config=Sections\fR
 ] [
 \fB--check-config\fR
 ] [
@@ -158,10 +158,11 @@ Daemonize after startup.
 \*(T<\fB\-\-compile\-info\fR\*(T>
 Print the compilation configuration (defaults for used libraries and enabled features) and exit.
 .TP
-\*(T<\fB\-\-create\-config\fR\*(T>
-\*(T<\fB\-\-create\-example\-config\fR\*(T>
+\*(T<\fB\-\-create\-config=Section\fR\*(T>
+\*(T<\fB\-\-create\-example\-config=Section\fR\*(T>
 Output the default/example configuration to stdout and exit.
 Copy the output to your config.xml and adjust to your needs.
+You can provide the names of sections separated by | to get the section only.
 .TP
 \*(T<\fB\-\-check\-config\fR\*(T>
 Check the current configuration before running the service and exit. Helpful in conjunction with --debug.
