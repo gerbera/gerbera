@@ -103,10 +103,11 @@ public:
 class BoxLayout : public Editable {
 public:
     BoxLayout() = default;
-    explicit BoxLayout(const std::string_view& key, std::string title, std::string objClass, bool enabled = true, int size = 1)
+    explicit BoxLayout(const std::string_view& key, std::string title, std::string objClass, std::string upnpShortcut = "", bool enabled = true, int size = 1)
         : key(key)
         , title(std::move(title))
         , objClass(std::move(objClass))
+        , upnpShortcut(std::move(upnpShortcut))
         , enabled(enabled)
         , size(size)
     {
@@ -119,6 +120,9 @@ public:
 
     void setTitle(std::string title) { this->title = std::move(title); }
     std::string getTitle() const { return title; }
+
+    void setUpnpShortcut(std::string upnpShortcut) { this->upnpShortcut = std::move(upnpShortcut); }
+    std::string getUpnpShortcut() const { return upnpShortcut; }
 
     void setClass(std::string objClass) { this->objClass = std::move(objClass); }
     std::string getClass() const { return objClass; }
@@ -133,11 +137,19 @@ public:
     int getId() const { return id; }
 
 protected:
+    /// \brief key for the box to be referenced in layouts
     std::string key;
+    /// \brief title string for the box
     std::string title;
+    /// \brief object class to be used for new containers
     std::string objClass;
+    /// \brief shortcut name for upnp shortcuts list
+    std::string upnpShortcut;
+    /// \brief allow to disable boxes
     bool enabled { true };
+    /// \brief size value for the box, esp. in structured layout
     int size { 1 };
+    /// \brief objectId of the box when existing
     int id { INVALID_OBJECT_ID };
 };
 

@@ -93,7 +93,9 @@ enum class MetadataFields {
     M_CONDUCTOR,
     M_ORCHESTRA,
 
+    // For containers
     M_CONTENT_CLASS,
+    M_UPNP_SHORTCUT,
 
     M_MAX
 };

@@ -62,6 +62,7 @@ std::map<MetadataFields, std::string> MetaEnumMapper::mt_keys = std::map<Metadat
     std::pair(MetadataFields::M_CONDUCTOR, "upnp:conductor"),
     std::pair(MetadataFields::M_ORCHESTRA, "upnp:orchestra"),
     std::pair(MetadataFields::M_CONTENT_CLASS, "upnp:contentClass"),
+    std::pair(MetadataFields::M_UPNP_SHORTCUT, "upnp:shortcut"),
 };
 
 MetadataFields MetaEnumMapper::remapMetaDataField(const std::string& fieldName)

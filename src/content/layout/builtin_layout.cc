@@ -62,6 +62,8 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
     for (auto&& bl : blOption->getArrayCopy()) {
         // We could copy only the enabled containers, but to avoid checking dependencies here, we copy all of them!
         container[bl->getKey()] = std::make_shared<CdsContainer>(bl->getTitle());
+        if (!bl->getUpnpShortcut().empty())
+            container[bl->getKey()]->setUpnpShortcut(bl->getUpnpShortcut());
     }
 
     containerAt(BoxKeys::videoRoot)->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_VIDEO_ITEM);

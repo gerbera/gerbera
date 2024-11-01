@@ -588,6 +588,10 @@ void Web::ConfigLoad::writeDynamicContent(pugi::xml_node& values)
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT);
         setValue(item, cont->getMaxCount());
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT);
+        setValue(item, cont->getUpnpShortcut());
     }
     // Allow creation of entry in blank config
     {
@@ -608,6 +612,9 @@ void Web::ConfigLoad::writeDynamicContent(pugi::xml_node& values)
 
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT));
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT));
     }
 }
 
@@ -639,6 +646,10 @@ void Web::ConfigLoad::writeBoxLayout(pugi::xml_node& values)
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_ENABLED);
         setValue(item, cont->getEnabled());
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT);
+        setValue(item, cont->getUpnpShortcut());
     }
     // Allow creation of entry in blank config
     {
@@ -656,6 +667,9 @@ void Web::ConfigLoad::writeBoxLayout(pugi::xml_node& values)
 
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_ENABLED));
+
+        item = values.append_child(CONFIG_LOAD_ITEM);
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT));
     }
 }
 
