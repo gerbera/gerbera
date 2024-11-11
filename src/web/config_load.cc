@@ -26,6 +26,7 @@
 
 #include "pages.h" // API
 
+#include "cds/cds_container.h"
 #include "config/config_definition.h"
 #include "config/config_option_enum.h"
 #include "config/config_setup.h"
@@ -166,6 +167,7 @@ void Web::ConfigLoad::process()
         addTypeMeta(meta, cs);
     }
 
+    writeShortcuts(values);
     writeSimpleProperties(values);
     writeClientConfig(values);
     writeImportTweaks(values);
@@ -275,6 +277,28 @@ void Web::ConfigLoad::writeDatabaseStatus(pugi::xml_node& values)
             auto item3 = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item3, fmt::format("/status/attribute::{}Bytes", attr), ConfigVal::MAX, ConfigVal::MAX);
             setValue(item3, totalSize);
+        }
+    }
+}
+
+/// \brief: write upnp shortcuts
+void Web::ConfigLoad::writeShortcuts(pugi::xml_node& values)
+{
+    auto shortcuts = database->getShortcuts();
+    std::size_t idx = 0;
+    for (auto&& [shortcut, cont] : shortcuts) {
+        if (!shortcut.empty()) {
+            log_debug("shortcut {}={}", shortcut, cont->getID());
+            auto item = values.append_child(CONFIG_LOAD_ITEM);
+            createItem(item, fmt::format("/status/shortcut[{}]/attribute::name", idx), ConfigVal::MAX, ConfigVal::MAX);
+            setValue(item, shortcut);
+            item = values.append_child(CONFIG_LOAD_ITEM);
+            createItem(item, fmt::format("/status/shortcut[{}]/attribute::id", idx), ConfigVal::MAX, ConfigVal::MAX);
+            setValue(item, cont->getID());
+            item = values.append_child(CONFIG_LOAD_ITEM);
+            createItem(item, fmt::format("/status/shortcut[{}]/attribute::location", idx), ConfigVal::MAX, ConfigVal::MAX);
+            setValue(item, cont->getLocation());
+            idx++;
         }
     }
 }

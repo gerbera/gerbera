@@ -242,6 +242,7 @@ protected:
     void createItem(pugi::xml_node& item, const std::string& name, ConfigVal id, ConfigVal aid, const std::shared_ptr<ConfigSetup>& cs = nullptr);
 
     void writeDatabaseStatus(pugi::xml_node& values);
+    void writeShortcuts(pugi::xml_node& values);
     void writeSimpleProperties(pugi::xml_node& values);
     void writeClientConfig(pugi::xml_node& values);
     void writeImportTweaks(pugi::xml_node& values);

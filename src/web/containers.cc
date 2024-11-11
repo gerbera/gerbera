@@ -94,6 +94,7 @@ void Web::Containers::process()
         ce.append_attribute("autoscan_mode") = autoscanMode.c_str();
         ce.append_attribute("title") = cont->getTitle().c_str();
         ce.append_attribute("location") = cont->getLocation().c_str();
+        ce.append_attribute("upnp_shortcut") = cont->getUpnpShortcut().c_str();
         ce.append_attribute("upnp_class") = cont->getClass().c_str();
     }
     log_debug("end process()");

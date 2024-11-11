@@ -214,6 +214,7 @@ describe('Gerbera Tree', () => {
             autoScanType: 'none',
             image: null,
             path: "/my/Directory/",
+            upnpShortcut: null,
             upnpClass: "upnp.class"
           }
         }
@@ -246,6 +247,7 @@ describe('Gerbera Tree', () => {
             autoScanType: 'none',
             image: null,
             path: "/my/Directory/",
+            upnpShortcut: null,
             upnpClass: "upnp.class"
           }
         }
@@ -392,7 +394,16 @@ describe('Gerbera Tree', () => {
         title: 'Audio',
         badge: [6],
         nodes: [],
-        gerbera: { id: 8, childCount: 6, autoScanMode: 'none', autoScanType: 'none', image: null, path: null, upnpClass: null }
+        gerbera: {
+          id: 8,
+          childCount: 6,
+          autoScanMode: 'none',
+          autoScanType: 'none',
+          image: null,
+          path: null,
+          upnpShortcut: null,
+          upnpClass: null
+        }
       });
     });
   });

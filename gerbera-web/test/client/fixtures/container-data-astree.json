@@ -18,6 +18,7 @@
           "autoScanType": "none",
           "image": null,
           "path": null,
+          "upnpShortcut": null,
           "upnpClass": null
         }
       },
@@ -32,6 +33,7 @@
           "autoScanType": "none",
           "image": null,
           "path": null,
+          "upnpShortcut": null,
           "upnpClass": null
         }
       },
@@ -46,6 +48,7 @@
           "autoScanType": "none",
           "image": null,
           "path": "/my/Directory/",
+          "upnpShortcut": null,
           "upnpClass": "upnp.class"
         }
       },
@@ -60,6 +63,7 @@
           "autoScanType": "ui",
           "image": null,
           "path": null,
+          "upnpShortcut": null,
           "upnpClass": null
         }
       },
@@ -74,6 +78,7 @@
           "autoScanType": "persistent",
           "image": null,
           "path": null,
+          "upnpShortcut": null,
           "upnpClass": null
         }
       }
