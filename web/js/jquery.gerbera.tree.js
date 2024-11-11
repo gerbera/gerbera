@@ -89,6 +89,12 @@ $.widget('grb.tree', {
           }
         }
       }
+      if (data[i].gerbera.upnpShortcut && data[i].gerbera.upnpShortcut !== '') {
+        const aBadge = $('<a></a>').addClass('badge badge-secondary').html('<i class="fa fa-bookmark"/> Shortcut');
+        aBadge.addClass('pull-right autoscan');
+        aBadge.prop('title', 'UPnP Shortcut ' + data[i].gerbera.upnpShortcut);
+        badges.push(aBadge);
+      }
       if (data[i].gerbera.image) {
         title.prepend($('<img class="rounded" style="margin-right: 10px" width="36" src="' + data[i].gerbera.image + '"/>'));
       }
