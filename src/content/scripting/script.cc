@@ -585,10 +585,12 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
         if (flags >= 0)
             obj->setFlags(flags);
 
+        // get resources
         ScriptNamedProperty(ctx, "res").getObject([&]() {
             auto keys = ScriptProperty(ctx).getPropertyNames();
 
             int resCount = 0;
+            // read resources
             for (auto&& sym : keys) {
                 if (sym.find("handlerType") != std::string::npos) {
                     int ht = ScriptNamedProperty(ctx, sym).getIntValue(-1);
@@ -602,6 +604,7 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
                     resCount++;
                 }
             }
+            // update resource attributes
             for (auto&& res : obj->getResources()) {
                 resCount = res->getResId();
                 // only attributes enumerated in res_names are allowed
@@ -631,6 +634,7 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
             }
         });
 
+        // update aux data
         ScriptNamedProperty(ctx, "aux").getObject([&]() {
             auto keys = ScriptProperty(ctx).getPropertyNames();
             for (auto&& sym : keys) {
@@ -657,6 +661,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         obj->setMTime(std::chrono::seconds(mtime));
     }
 
+    // update title
     {
         auto val = ScriptNamedProperty(ctx, "title").getStringValue();
         if (!val.empty()) {
@@ -667,6 +672,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         }
     }
 
+    // update upnpclass
     {
         auto val = ScriptNamedProperty(ctx, "upnpclass").getStringValue();
         if (!val.empty()) {
@@ -677,10 +683,12 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         }
     }
 
+    // update restricted
     int restricted = ScriptNamedProperty(ctx, "restricted").getBoolValue();
     if (restricted >= 0)
         obj->setRestricted(restricted);
 
+    // update metaData
     ScriptNamedProperty(ctx, "metaData").getObject([&]() {
         auto item = std::static_pointer_cast<CdsItem>(obj);
         auto keys = ScriptProperty(ctx).getPropertyNames();
@@ -700,6 +708,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         obj->setLocation(location);
     }
 
+    // update description
     auto description = ScriptNamedProperty(ctx, "description").getStringValue();
     if (!description.empty()) {
         description = sc->convert(description);
@@ -715,6 +724,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         if (pcd)
             pcdItem = std::static_pointer_cast<CdsItem>(pcd);
 
+        // update mimetype
         auto mimetype = ScriptNamedProperty(ctx, "mimetype").getStringValue();
         if (!mimetype.empty()) {
             mimetype = sc->convert(mimetype);
@@ -723,12 +733,14 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             item->setMimeType(pcdItem->getMimeType());
         }
 
+        // update serviceID for onlineservice
         auto serviceID = ScriptNamedProperty(ctx, "serviceID").getStringValue();
         if (!serviceID.empty()) {
             serviceID = sc->convert(serviceID);
             item->setServiceID(serviceID);
         }
 
+        // update description if not set in script
         {
             auto val = ScriptNamedProperty(ctx, "description").getStringValue();
             if (!val.empty()) {
@@ -740,15 +752,18 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             }
         }
 
+        // update location if not set in script
         if (location.empty() && pcd) {
             obj->setLocation(pcd->getLocation());
         }
 
+        // CdsExternalItem (like links)
         if (obj->isExternalItem()) {
             std::string protocolInfo;
 
             obj->setRestricted(true);
 
+            // update protocol
             auto protocol = ScriptNamedProperty(ctx, "protocol").getStringValue();
             if (!protocol.empty()) {
                 protocol = sc->convert(protocol);
@@ -757,6 +772,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 protocolInfo = renderProtocolInfo(item->getMimeType(), PROTOCOL);
             }
 
+            // add resources
             std::shared_ptr<CdsResource> resource;
             if (item->getResourceCount() == 0) {
                 resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
@@ -781,11 +797,13 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         if (id >= CDS_ID_ROOT)
             cont->setUpdateID(id);
 
+        // update searchable
         int searchable = ScriptNamedProperty(ctx, "searchable").getBoolValue();
         log_debug("{} searchable {}", cont->getTitle(), searchable);
         if (searchable >= 0)
             cont->setSearchable(searchable);
 
+        // update upnpShortcut
         auto upnpShortcut = ScriptNamedProperty(ctx, "upnpShortcut").getStringValue();
         if (!upnpShortcut.empty()) {
             upnpShortcut = sc->convert(upnpShortcut);

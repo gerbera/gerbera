@@ -3,12 +3,14 @@
 ### HEAD
 
 - Access permissions for files by client
+- Add variables to docker images
 - Bump cookie, express and socket.io in /gerbera-web
 - Config: UI handler mimetypes and CSP
 - Fix access to cache option if thumbnailer disabled
 - Fix autoscan issue with empty filename
 - Fix build without ffmpeg
 - Fix creating containers in web ui
+- Fix Handling command line options
 - Fix handling of checkbox values on web ui
 - Improve handling multivalue tags in virtual paths
 - Increase size of pupnp threadpool

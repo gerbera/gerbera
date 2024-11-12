@@ -79,7 +79,12 @@ public:
     void load(const fs::path& scriptPath);
     void loadFolder(const fs::path& scriptFolder);
 
+    /// \brief Convert javascript object back to CdsObject
+    /// \param pcd Parent object that was added to the script context
     std::shared_ptr<CdsObject> dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd);
+
+    /// \brief Convert CdsObject to javascript object
+    /// \param obj CdsObject to convert
     void cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj);
 
     /// \brief get hidden file setting from content manager
@@ -109,7 +114,7 @@ protected:
     virtual void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) { }
     virtual std::shared_ptr<CdsObject> createObject(const std::shared_ptr<CdsObject>& pcd);
 
-    // object that is currently being processed by the script (set in import script)
+    /// \brief object that is currently being processed by the script (set in import script)
     std::shared_ptr<CdsObject> processed;
 
     duk_context* ctx;

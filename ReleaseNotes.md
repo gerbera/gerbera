@@ -21,6 +21,7 @@ There are four new noteworthy features in this release:
 
 ### FIXES
 
+- Handling of logging command line options
 - Handling of checkbox values on web ui
 - Access to cache option if thumbnailer is disabled
 - Container creation in web ui
