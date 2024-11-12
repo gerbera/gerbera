@@ -850,14 +850,15 @@ In the default configuration these functions are registered as entry points so t
 .. code-block:: xml
 
     <import-function>
-        <audio-file>importAudioKarl</audio-file>
+        <audio-file>importAudioInitial</audio-file>
         <video-file>importVideo</video-file>
         <image-file>importImage</image-file>
         <playlist create-link="yes">importPlaylist</playlist>
         <meta-file>importMetadata</meta-file>
     </import-function>
 
-If you set `import-script` in `config.xml` the script is fully evaluated and calls the wrapper to select the correct import function.
+If you set the deprecated `import-script` in `config.xml` the script is fully
+evaluated for each file and calls the wrapper to select the correct import function.
 
 .. literalinclude:: ../scripts/js/import.js
     :start-after: // Global Variables
@@ -1344,7 +1345,7 @@ Enable transcoding and set the correct path to the transcoding script.
 Have fun!
 
 
-Best practices for testing
+Best Practices for Testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
 Writing a custom import script can be tricky.
 Here are some hints:
@@ -1357,6 +1358,6 @@ Here are some hints:
   ``touch /path/to/file.ogg``.
   The "Add" button in the web interface does not trigger the import script
   if Gerbera already knows about the file.
-- Do not modify the provided ``common.js`` file.
+- Do not modify the provided files.
   Override its functions in a separate file and let Gerbera load it by
-  specifying it in ``custom-script`` in ``config.xml``.
+  specifying it in ``script-folder/custom`` in ``config.xml``.

@@ -52,7 +52,7 @@ services:
     container_name: gerbera
     network_mode: host
     volumes:
-      - gerbera-config:/var/run/gerbera
+      - ./gerbera-config:/var/run/gerbera
       - /some/files:/mnt/content:ro
 
 volumes:
@@ -89,3 +89,58 @@ $ docker run \
     -v /some/files:/mnt/content:ro \
      gerbera/gerbera:2.3.0 gerbera --port <your-port> --config /var/run/gerbera/config.xml
 ```
+
+## Overwrite default user and group id
+
+In cases (e.g. running multiple gerbera containers with different versions) you can override the exported ports
+
+```console
+$ docker run \
+    --name another-gerbera \
+    --network=host \
+    --env UID=<newuid> \
+    --env GID=<newgid> \
+    -v /some/files:/mnt/content:ro \
+     gerbera/gerbera:2.3.0 gerbera --config /var/run/gerbera/config.xml
+```
+
+# Build Variables
+
+There are some variables in Dockerfile which allow overwriting the defaults if you build the container by yourself
+
+```console
+$ cd /src
+$ git clone https://github.com/gerbera/gerbera.git
+$ cd /src/gerbera
+$ docker build \
+    --build-arg IMAGE_USER=grbr1 \
+    --build-arg IMAGE_GROUP=grbr1 \
+    --build-arg IMAGE_UID=1969 \
+    --build-arg IMAGE_GID=1969 \
+    --build-arg IMAGE_PORT=50500 \
+    -t gerbera .
+```
+
+## BASE_IMAGE
+
+Use a different base image for container. Changing this may lead to build problems if the required packages are not available.
+
+- Default: alpine:3.20
+
+## IMAGE_USER, IMAGE_GROUP
+
+Set a different user/group name in the image to match user/group names on your host
+
+- Default: gerbera
+
+## IMAGE_UID, IMAGE_GID
+
+Set a different user/group id in the image to match user/group ids on your host
+
+- Default: 1042
+
+## IMAGE_PORT
+
+Change the port of gerbera in the image so you don't have to overwrite the port settings on startup.
+
+- Default: 49494

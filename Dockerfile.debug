@@ -1,5 +1,6 @@
 # docker build -t gerbera-debug . -f Dockerfile.debug
 ARG BASE_IMAGE=alpine:edge
+
 FROM ${BASE_IMAGE} AS builder
 
 RUN apk add --no-cache  \
@@ -31,6 +32,12 @@ RUN apk add --no-cache  \
     wget \
     file
 
+# Build googletest
+WORKDIR /gtest_build
+COPY scripts/install-googletest.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
+RUN ./install-googletest.sh
+
 # Build fmt
 WORKDIR /fmt_build
 COPY scripts/install-fmt.sh scripts/versions.sh ./
@@ -43,17 +50,17 @@ COPY scripts/install-spdlog.sh scripts/versions.sh ./
 COPY scripts/alpine/* ./alpine/
 RUN ./install-spdlog.sh
 
+# Build pugixml
+WORKDIR /pugixml_build
+COPY scripts/install-pugixml.sh scripts/versions.sh ./
+COPY scripts/alpine/* ./alpine/
+RUN ./install-pugixml.sh
+
 # Build taglib
 WORKDIR /taglib_build
 COPY scripts/install-taglib.sh scripts/versions.sh ./
 COPY scripts/alpine/* ./alpine/
 RUN ./install-taglib.sh
-
-# Build ffmpegthumbnailer
-WORKDIR /ffmpegthumbnailer_build
-COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh ./
-COPY scripts/alpine/* ./alpine/
-RUN ./install-ffmpegthumbnailer.sh
 
 # Build wavpack
 WORKDIR /wavpack_build
@@ -73,29 +80,23 @@ COPY scripts/install-matroska.sh scripts/versions.sh ./
 COPY scripts/alpine/* ./alpine/
 RUN ./install-matroska.sh
 
-# Build pugixml
-WORKDIR /pugixml_build
-COPY scripts/install-pugixml.sh scripts/versions.sh ./
+# Build duktape
+WORKDIR /duktape_build
+COPY scripts/install-duktape.sh scripts/versions.sh ./
 COPY scripts/alpine/* ./alpine/
-RUN ./install-pugixml.sh
+RUN ./install-duktape.sh
 
-# Build googletest
-WORKDIR /gtest_build
-COPY scripts/install-googletest.sh scripts/versions.sh ./
+# Build ffmpegthumbnailer
+WORKDIR /ffmpegthumbnailer_build
+COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh ./
 COPY scripts/alpine/* ./alpine/
-RUN ./install-googletest.sh
+RUN ./install-ffmpegthumbnailer.sh
 
 # Build libupnp
 WORKDIR /libupnp_build
 COPY scripts/install-pupnp.sh scripts/versions.sh ./
 COPY scripts/alpine/* ./alpine/
 RUN ./install-pupnp.sh
-
-# Build duktape
-WORKDIR /duktape_build
-COPY scripts/install-duktape.sh scripts/versions.sh ./
-COPY scripts/alpine/* ./alpine/
-RUN ./install-duktape.sh
 
 # Build libexiv2
 WORKDIR /libexiv2_build
@@ -114,6 +115,7 @@ WORKDIR /gerbera_build
 COPY . .
 RUN cmake -S . -B build --preset=develop \
         -DWITH_SYSTEMD=NO \
+        -DBUILD_DOC=NO \
         -DCMAKE_FIND_PACKAGE_PREFER_CONFIG=NO \
     && \
     cmake --build build -v -j$(nproc) && \
@@ -121,9 +123,16 @@ RUN cmake -S . -B build --preset=develop \
 
 FROM ${BASE_IMAGE} AS gerbera
 RUN apk add --no-cache \
+    sudo \
+    bash \
+    shadow \
     curl \
+    ffmpeg4-libavutil \
+    ffmpeg4-libavformat \
+    ffmpeg4-libavcodec \
+    ffmpeg4-libavfilter \
+    libjpeg \
     file \
-    gdb \
     libexif \
     expat brotli inih inih-inireader \
     mariadb-connector-c \
@@ -134,21 +143,24 @@ RUN apk add --no-cache \
     tzdata \
     util-linux \
     zlib \
-    ffmpeg4 \
-    ffmpeg4-libavutil \
-    ffmpeg4-libavformat \
-    ffmpeg4-libavcodec \
-    ffmpeg4-libavfilter \
-    libjpeg \
-    libheif-tools \
     # libexecinfo \
+    # Transcoding #
+    ffmpeg4 \
     ffmpeg \
-    vlc
+    libheif-tools \
+    vlc \
+    # Debugging
+    gdb
 
 # Copy libupnp
 COPY --from=builder /usr/local/lib/libixml.so* /usr/local/lib/libupnp.so* /usr/lib/
+# Copy libexiv2
+COPY --from=builder /usr/local/lib/libexiv2.so* /usr/lib/
+# Copy libexif
+COPY --from=builder /usr/local/lib/libexif.so* /usr/lib/
 # Copy ffmpegthumbnailer
 COPY --from=builder /usr/local/lib/libffmpegthumbnailer.so* /usr/lib/
+
 # Copy ebml
 COPY --from=builder /usr/local/lib/libebml.so* /usr/lib/
 # Copy mastroska
@@ -161,10 +173,6 @@ COPY --from=builder /usr/local/lib/libfmt.so* /usr/lib/
 COPY --from=builder /usr/local/lib/libspdlog.so* /usr/lib/
 # Copy duktape
 COPY --from=builder /usr/local/lib/libduktape.so* /usr/lib/
-# Copy libexiv2
-COPY --from=builder /usr/local/lib/libexiv2.so* /usr/lib/
-# Copy libexif
-COPY --from=builder /usr/local/lib/libexif.so* /usr/lib/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
@@ -173,17 +181,31 @@ COPY --from=builder /gerbera_build/web /usr/local/share/gerbera/web
 COPY --from=builder /gerbera_build/src/database/*/*.sql /gerbera_build/src/database/*/*.xml /usr/local/share/gerbera/
 COPY --from=builder /gerbera_build/scripts/docker/docker-entrypoint.sh /usr/local/bin
 
-RUN addgroup -S gerbera 2>/dev/null && \
-    adduser -S -D -H -h /var/run/gerbera -s /sbin/nologin -G gerbera -g gerbera gerbera 2>/dev/null && \
+ARG IMAGE_USER=gerbera
+ARG IMAGE_GROUP=gerbera
+ARG IMAGE_UID=1042
+ARG IMAGE_GID=1042
+ARG IMAGE_PORT=49494
+
+RUN addgroup -S ${IMAGE_GROUP} --gid=${IMAGE_GID} 2>/dev/null && \
+    adduser -S -D -H -h /var/run/gerbera -s /sbin/nologin -G ${IMAGE_GROUP} -g ${IMAGE_GROUP} --uid=${IMAGE_UID} ${IMAGE_USER} 2>/dev/null && \
+    addgroup ${IMAGE_USER} video && \
     mkdir /var/run/gerbera/ && chmod 2775 /var/run/gerbera/ && \
     mkdir /content && chmod 777 /content && ln -s /content /mnt/content && \
     mkdir -p /mnt/customization/js && mkdir -p /mnt/customization/shell && \
     chmod -R 777 /mnt/customization
 
-EXPOSE 49494
+# Update entrypoint
+RUN chmod 0755 /usr/local/bin/docker-entrypoint.sh \
+ && sed "s/\$IMAGE_UID/$IMAGE_UID/g" -i /usr/local/bin/docker-entrypoint.sh \
+ && sed "s/\$IMAGE_GID/$IMAGE_GID/g" -i /usr/local/bin/docker-entrypoint.sh \
+ && sed "s/\$IMAGE_USER/$IMAGE_USER/g" -i /usr/local/bin/docker-entrypoint.sh \
+ && sed "s/\$IMAGE_GROUP/$IMAGE_GROUP/g" -i /usr/local/bin/docker-entrypoint.sh
+
+EXPOSE ${IMAGE_PORT}
 EXPOSE 1900/udp
 
 ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
-CMD ["gerbera","--port", "49494", "--config", "/var/run/gerbera/config.xml"]
+CMD ["gerbera", "--port", "${IMAGE_PORT}", "--config", "/var/run/gerbera/config.xml"]
 
 FROM gerbera AS default
