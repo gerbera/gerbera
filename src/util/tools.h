@@ -73,7 +73,7 @@ constexpr bool startswith(std::string_view str, std::string_view prefix)
 constexpr bool endswith(std::string_view str, std::string_view suffix)
 {
 #if __cpp_lib_starts_ends_with
-    return str.ends_with(check);
+    return str.ends_with(suffix);
 #else
     return str.size() >= suffix.size() && str.compare(str.size() - suffix.size(), suffix.size(), suffix) == 0;
 #endif
