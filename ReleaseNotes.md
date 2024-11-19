@@ -34,6 +34,7 @@ There are four new noteworthy features in this release:
 - Logging of build info
 - Update versions of libpupnp (1.14.20), spdlog (1.15.0)
 - Update Build Environment
+- Update versions of js vendor files jquery-ui (v1.13.2 -> v1.14.1), js-cookie (v3.0.1 -> v3.0.5), @popperjs/core (v2.11.6 -> v2.11.8)
 
 ## v2.3.0
 

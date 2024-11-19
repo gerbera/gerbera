@@ -16,6 +16,7 @@
 - Increase size of pupnp threadpool
 - Resource directory configuration and cleanup collection
 - Update Build Environment
+- Update js vendor files
 - UPnP: Add support for filters
 - UPnP Shortcuts feature
 - Web UI: Add Search page
