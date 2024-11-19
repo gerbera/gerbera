@@ -214,7 +214,7 @@ describe('The jQuery Items Datagrid', () => {
         currentPage: 2,
         totalMatches: 20,
         onItemsPerPage: '-',
-        ippOptions: [10, 20, 30],
+        ippOptions: { option: [10, 20, 30], default: 30 },
         itemsPerPage: 10
         }
     });
