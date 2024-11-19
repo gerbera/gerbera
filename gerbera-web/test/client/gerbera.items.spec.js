@@ -68,8 +68,7 @@ describe('Gerbera Items', () => {
 
     it('updates the breadcrumb based on the selected item', async () => {
       spyOn(GerberaApp, 'getType').and.returnValue('db');
-      GerberaApp.serverConfig = {};
-      GerberaApp.pageInfo.viewItems = 25;
+      GerberaApp.serverConfig = mockConfig.config;
 
       await Items.initialize();
       Items.treeItemSelected(viewFactoryData);
@@ -79,14 +78,14 @@ describe('Gerbera Items', () => {
       expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('items');
       expect(ajaxSpy.calls.mostRecent().args[0].data.parent_id).toBe(1235);
       expect(ajaxSpy.calls.mostRecent().args[0].data.start).toBe(0);
-      expect(ajaxSpy.calls.mostRecent().args[0].data.count).toBe(25);
+      expect(ajaxSpy.calls.mostRecent().args[0].data.count).toBe(50);
     });
   });
   describe('transformItems()', () => {
     let widgetList;
 
     beforeEach(() => {
-      GerberaApp.serverConfig = {};
+      GerberaApp.serverConfig = mockConfig.config;
     });
 
     it('converts a gerbera list of items to the widget accepted list', () => {
@@ -96,7 +95,7 @@ describe('Gerbera Items', () => {
   });
   describe('loadItems()', () => {
     beforeEach(() => {
-      GerberaApp.serverConfig = {};
+      GerberaApp.serverConfig = mockConfig.config;
       spyOn(GerberaApp, 'getType').and.returnValue('db');
       spyOn(GerberaApp, 'gridMode').and.returnValue(0);
       Items.viewFactory(viewFactoryData);
@@ -155,7 +154,7 @@ describe('Gerbera Items', () => {
     let response;
 
     beforeEach(() => {
-      GerberaApp.serverConfig = {};
+      GerberaApp.serverConfig = mockConfig.config;
       spyOn(GerberaApp, 'getType').and.returnValue('fs');
       Items.viewFactory(viewFactoryData);
       $('#tree').tree({
@@ -681,7 +680,7 @@ describe('Gerbera Items', () => {
 
     afterEach(() => {
       ajaxSpy.and.callThrough();
-      GerberaApp.serverConfig = {};
+      GerberaApp.serverConfig = mockConfig.config;
     });
 
     it('calls the server for items given correct parameters', async () => {
@@ -689,14 +688,14 @@ describe('Gerbera Items', () => {
 
       const view = new BrowseItemView(0);
       view.start = 0;
-      view.count = 25;
+      // view.count = 25;
       await view.retrieveGerberaItems(0);
       var data = {
         req_type: 'items',
         action: 'browse',
         parent_id: 0,
         start: 0,
-        count: 25,
+        count: 50,
         select_it: 0,
         updates: 'check'
       };
@@ -709,7 +708,7 @@ describe('Gerbera Items', () => {
       spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
       const view = new SearchItemView(0);
       view.start = 0;
-      view.count = 25;
+      view.count = 50;
       view.searchCriteria = 'dc:title contains "music"';
       view.sortCriteria = '-dc:title';
       await view.retrieveGerberaItems(0);
@@ -718,7 +717,7 @@ describe('Gerbera Items', () => {
         action: 'search',
         parent_id: 0,
         start: 0,
-        count: 25,
+        count: 50,
         select_it: 0,
         searchCriteria: 'dc:title contains "music"',
         sortCriteria: '-dc:title',
@@ -733,14 +732,13 @@ describe('Gerbera Items', () => {
       spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
       const view = new FileItemView(0);
       view.start = 0;
-      view.count = 25;
       await view.retrieveGerberaItems(0);
       var data = {
         req_type: 'files',
         action: 'files',
         parent_id: 0,
         start: 0,
-        count: 25,
+        count: 50,
         select_it: 0
       };
       data[Auth.SID] = 'SESSION_ID';
@@ -753,7 +751,6 @@ describe('Gerbera Items', () => {
 
     beforeEach(async () => {
       GerberaApp.serverConfig = mockConfig.config;
-      GerberaApp.serverConfig = {};
 
       await Items.initialize();
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
@@ -766,12 +763,12 @@ describe('Gerbera Items', () => {
     });
 
 
-    it('sends the page number, items per page, and total items to retreive items', async () => {
+    it('sends the page number, items per page, and total items to retrieve items', async () => {
       const event = {
         data: {
           gridMode: 0,
           pageNumber: 1,
-          itemsPerPage: 25,
+          itemsPerPage: 50,
           parentId: 1235
         }
       };
@@ -785,7 +782,7 @@ describe('Gerbera Items', () => {
         action: 'browse',
         parent_id: 1235,
         start: 0,
-        count: 25,
+        count: 50,
         select_it: 0,
         updates: 'check'
       };
@@ -800,7 +797,7 @@ describe('Gerbera Items', () => {
         data: {
           gridMode: 0,
           pageNumber: 5,
-          itemsPerPage: 25,
+          itemsPerPage: 50,
           parentId: 1235
         }
       };
@@ -814,8 +811,8 @@ describe('Gerbera Items', () => {
         req_type: 'items',
         action: 'browse',
         parent_id: 1235,
-        start: 100,
-        count: 25,
+        start: 200,
+        count: 50,
         select_it: 0,
         updates: 'check'
       };
@@ -844,7 +841,7 @@ describe('Gerbera Items', () => {
       const event = {
         data: {
           gridMode: 0,
-          itemsPerPage: 25,
+          itemsPerPage: 50,
           totalMatches: 100,
           parentId: 1235
         }
@@ -859,8 +856,8 @@ describe('Gerbera Items', () => {
         req_type: 'items',
         action: 'browse',
         parent_id: 1235,
-        start: 25,
-        count: 25,
+        start: 50,
+        count: 50,
         select_it: 0,
         updates: 'check'
       };
@@ -890,7 +887,7 @@ describe('Gerbera Items', () => {
       const event = {
         data: {
           gridMode: 0,
-          itemsPerPage: 25,
+          itemsPerPage: 50,
           totalMatches: 100,
           parentId: 1235
         }
@@ -906,7 +903,7 @@ describe('Gerbera Items', () => {
         action: 'browse',
         parent_id: 1235,
         start: 0,
-        count: 25,
+        count: 50,
         select_it: 0,
         updates: 'check'
       };

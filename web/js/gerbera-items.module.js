@@ -258,7 +258,7 @@ const changeGridMode = (pageItem, newValue) => {
   pageItem.itemsPerPage = GerberaApp.setGridMode(newValue);
   const pageEvent = {
     data: {
-      pageNumber: pageItem.pageNumber,
+      pageNumber: (pageItem.gridMode === 3 && pageItem.gridMode != newValue) ? 1 : pageItem.pageNumber,
       itemsPerPage: pageItem.itemsPerPage,
       gridMode: newValue,
       parentId: pageItem.parentId
