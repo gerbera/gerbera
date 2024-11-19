@@ -202,12 +202,13 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
         duk_put_prop_string(ctx, -2, acs->getItemPathRoot().c_str());
     }
 
-    duk_push_object(ctx); // autoscan
-    std::string autoscanItemPath;
     for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
+        duk_push_object(ctx); // autoscan
         auto autoscan = ascs->getValue()->getAutoscanListOption();
+
         for (const auto& adir : content->getAutoscanDirectories()) {
             duk_push_object(ctx);
+
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
             setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
@@ -220,13 +221,13 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
 
             duk_put_prop_string(ctx, -2, fmt::to_string(adir->getScanID()).c_str());
         }
-        autoscanItemPath = ascs->getItemPathRoot(true); // prefix
+        std::string autoscanItemPath = ascs->getItemPathRoot(true); // prefix
+        duk_put_prop_string(ctx, -2, autoscanItemPath.c_str()); // autoscan
+        log_debug("Adding config[{}] {}", autoscanItemPath, content->getAutoscanDirectories().size());
     }
-    duk_put_prop_string(ctx, -2, autoscanItemPath.c_str()); // autoscan
 
     for (auto&& bcs : ConfigDefinition::getConfigSetupList<ConfigBoxLayoutSetup>()) {
         duk_push_object(ctx); // box-layout
-        std::string boxLayoutItemPath;
         auto boxLayoutList = bcs->getValue()->getBoxLayoutListOption();
         for (std::size_t i = 0; i < boxLayoutList->size(); i++) {
             duk_push_object(ctx);
@@ -239,8 +240,9 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT), boxLayout->getUpnpShortcut());
             duk_put_prop_string(ctx, -2, boxLayout->getKey().c_str());
         }
-        boxLayoutItemPath = bcs->getItemPathRoot(true); // prefix
+        std::string boxLayoutItemPath = bcs->getItemPathRoot(true); // prefix
         duk_put_prop_string(ctx, -2, boxLayoutItemPath.c_str()); // box-layout
+        log_debug("Adding config[{}] {}", boxLayoutItemPath, boxLayoutList->size());
     }
 
     duk_put_global_string(ctx, "config");
