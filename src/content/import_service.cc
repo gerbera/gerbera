@@ -952,7 +952,7 @@ std::pair<int, bool> ImportService::addContainerTree(
                     auto keyValue = item->getMetaData(field.replace(field.end() - 2, field.end(), ""));
                     if (!keyValue.empty())
                         dirKeyValues.push_back(keyValue);
-                } else {
+                } else if (!field.empty()) {
                     auto keyValueGroup = item->getMetaGroup(field);
                     if (!keyValueGroup.empty())
                         for (auto&& keyValue : keyValueGroup)

@@ -82,8 +82,6 @@ describe('Gerbera Items', () => {
     });
   });
   describe('transformItems()', () => {
-    let widgetList;
-
     beforeEach(() => {
       GerberaApp.serverConfig = mockConfig.config;
     });
@@ -151,8 +149,6 @@ describe('Gerbera Items', () => {
     });
   });
   describe('loadItems() for files', () => {
-    let response;
-
     beforeEach(() => {
       GerberaApp.serverConfig = mockConfig.config;
       spyOn(GerberaApp, 'getType').and.returnValue('fs');

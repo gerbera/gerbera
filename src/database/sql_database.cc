@@ -1617,7 +1617,10 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     std::string dbLocation = addLocationPrefix(cont->isVirtual() ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX, virtualPath);
 
     beginTransaction("addContainer");
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} = {} LIMIT 1", identifier("id"), identifier(CDS_OBJECT_TABLE), identifier("location_hash"), quote(stringHash(dbLocation)), identifier("location"), quote(dbLocation)));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} = {} LIMIT 1",
+        identifier("id"), identifier(CDS_OBJECT_TABLE),
+        identifier("location_hash"), quote(stringHash(dbLocation)),
+        identifier("location"), quote(dbLocation)));
     if (res) {
         auto row = res->nextRow();
         if (row) {
@@ -1693,9 +1696,9 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
         }
     }
 
-    obj->setVirtual((obj->getRefID() && obj->isPureItem()) || (obj->isItem() && !obj->isPureItem())); // gets set to true for virtual containers below
+    obj->setVirtual((obj->getRefID() != CDS_ID_ROOT && obj->isPureItem()) || (obj->isItem() && !obj->isPureItem())); // gets set to true for virtual containers below
 
-    int matchedTypes = 0;
+    bool matchedType = false;
 
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
@@ -1713,10 +1716,8 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
                 cont->setAutoscanType(OBJECT_AUTOSCAN_UI);
         } else
             cont->setAutoscanType(OBJECT_AUTOSCAN_NONE);
-        matchedTypes++;
-    }
-
-    if (obj->isItem()) {
+        matchedType = true;
+    } else if (obj->isItem()) {
         if (!resourceZeroOk)
             throw DatabaseException("tried to create object without at least one resource", LINE_MESSAGE);
 
@@ -1727,8 +1728,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
                 item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::Location)).first);
             else
                 item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::RefLocation)).first);
-        } else // URLs
-        {
+        } else { // URLs
             item->setLocation(fallbackString(getCol(row, BrowseCol::Location), getCol(row, BrowseCol::RefLocation)));
         }
 
@@ -1745,10 +1745,10 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
             if (playStatus)
                 item->setPlayStatus(playStatus);
         }
-        matchedTypes++;
+        matchedType = true;
     }
 
-    if (!matchedTypes) {
+    if (!matchedType) {
         throw DatabaseException(fmt::format("Unknown object type: {}", objectType), LINE_MESSAGE);
     }
 
