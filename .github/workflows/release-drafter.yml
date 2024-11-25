@@ -13,17 +13,17 @@ on:
   pull_request_target:
     types: [opened, reopened, synchronize]
 
-permissions:
-  contents: read
+permissions: read-all
+  #contents: read
 
 jobs:
   update_release_draft:
-    permissions:
+    permissions: write-all
       # write permission is required to create a github release
-      contents: write
+      # contents: write
       # write permission is required for autolabeler
       # otherwise, read permission is required at least
-      pull-requests: write
+      # pull-requests: write
     runs-on: ubuntu-latest
     steps:
       # (Optional) GitHub Enterprise requires GHE_HOST variable set
