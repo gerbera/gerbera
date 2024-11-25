@@ -8,6 +8,7 @@
     "upnp_class": null,
     "part": null,
     "track": null,
+    "index": null,
     "size": "1 MB",
     "duration": "1:42:00.448",
     "resolution": "720x756"
@@ -21,6 +22,7 @@
     "upnp_class": null,
     "part": null,
     "track": null,
+    "index": null,
     "size": "2 MB",
     "duration": "1:42:00.448",
     "resolution": "720x756"
@@ -34,6 +36,7 @@
     "upnp_class": null,
     "part": null,
     "track": null,
+    "index": null,
     "size": "3 MB",
     "duration": "1:42:00.448",
     "resolution": "720x756"
@@ -47,6 +50,7 @@
     "upnp_class": null,
     "part": null,
     "track": null,
+    "index": null,
     "size": "4 MB",
     "duration": "1:42:00.448",
     "resolution": "720x756"
@@ -60,6 +64,7 @@
     "upnp_class": null,
     "part": null,
     "track": null,
+    "index": null,
     "size": "5 MB",
     "duration": "1:42:00.448",
     "resolution": "720x756"
@@ -73,6 +78,7 @@
     "upnp_class": null,
     "part": null,
     "track": null,
+    "index": null,
     "size": "6 MB",
     "duration": null,
     "resolution": "756x568"
@@ -86,6 +92,7 @@
     "upnp_class": null,
     "part": null,
     "track": null,
+    "index": null,
     "size": "7 MB",
     "duration": "1:42:00.448",
     "resolution": null
@@ -99,6 +106,7 @@
     "upnp_class": null,
     "part": null,
     "track": null,
+    "index": null,
     "size": "8 MB",
     "duration": "1:42:00.448",
     "resolution": "720x756"
@@ -112,6 +120,7 @@
     "upnp_class": null,
     "part": null,
     "track": null,
+    "index": null,
     "size": "9 MB",
     "duration": "1:42:00.448",
     "resolution": "720x756"
@@ -125,6 +134,7 @@
     "upnp_class": null,
     "part": null,
     "track": null,
+    "index": null,
     "size": "10 MB",
     "duration": "1:42:00.448",
     "resolution": "720x756"

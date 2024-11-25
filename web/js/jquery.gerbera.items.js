@@ -88,6 +88,9 @@ $.widget('grb.dataitems', {
         if (item.part) {
           itemText = item.part + ' ' + itemText;
         }
+        if (item.index) {
+          itemText = item.index + ' ' + itemText;
+        }
 
         if (item.url) {
           text = $('<a></a>');

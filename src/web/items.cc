@@ -67,6 +67,7 @@ void Web::Items::process()
     xml2Json->setFieldType("title", FieldType::STRING);
     xml2Json->setFieldType("part", FieldType::STRING);
     xml2Json->setFieldType("track", FieldType::STRING);
+    xml2Json->setFieldType("index", FieldType::STRING);
     items.append_attribute("parent_id") = parentID;
 
     auto container = database->loadObject(getGroup(), parentID);
@@ -83,14 +84,13 @@ void Web::Items::process()
         item.append_child("title").append_child(pugi::node_pcdata).set_value(cdsObj->getTitle().c_str());
         item.append_child("upnp_class").append_child(pugi::node_pcdata).set_value(cdsObj->getClass().c_str());
 
+        item.append_child("index").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cnt).c_str());
         if (cdsObj->isItem()) {
             auto cdsItem = std::static_pointer_cast<CdsItem>(cdsObj);
             if (cdsItem->getPartNumber() > 0 && container->isSubClass(UPNP_CLASS_MUSIC_ALBUM))
                 item.append_child("part").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", cdsItem->getPartNumber()).c_str());
             if (cdsItem->getTrackNumber() > 0 && !container->isSubClass(UPNP_CLASS_CONTAINER))
                 item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cdsItem->getTrackNumber()).c_str());
-            else
-                item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cnt).c_str());
             item.append_child("mtype").append_child(pugi::node_pcdata).set_value(cdsItem->getMimeType().c_str());
             auto contRes = cdsObj->getResource(ResourcePurpose::Content);
             if (contRes) {

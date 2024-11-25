@@ -1,3 +1,25 @@
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    jquery.gerbera.items.spec.js - this file is part of Gerbera.
+
+    Copyright (C) 2016-2024 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
 import datagridData from './fixtures/datagrid-data';
 
 describe('The jQuery Items Datagrid', () => {
@@ -135,10 +157,12 @@ describe('The jQuery Items Datagrid', () => {
     dataGrid.dataitems({
       itemType: 'db',
       data: datagridData,
-      pager: {pageCount: 10,
+      pager: {
+        pageCount: 10,
         currentPage: 1,
         totalMatches: 1000,
-        itemsPerPage: 10}
+        itemsPerPage: 10
+      }
     });
 
     expect(dataGrid.find('tfoot').length).toBe(1);
@@ -149,10 +173,12 @@ describe('The jQuery Items Datagrid', () => {
     dataGrid.dataitems({
       itemType: 'db',
       data: datagridData,
-      pager: {pageCount: 10,
+      pager: {
+        pageCount: 10,
         currentPage: 1,
         totalMatches: 1000,
-        itemsPerPage: 10}
+        itemsPerPage: 10
+      }
     });
 
     expect(dataGrid.find('tfoot').length).toBe(1);
@@ -163,10 +189,12 @@ describe('The jQuery Items Datagrid', () => {
     dataGrid.dataitems({
       itemType: 'db',
       data: datagridData,
-      pager: {pageCount: 10,
+      pager: {
+        pageCount: 10,
         currentPage: 1,
         totalMatches: 20,
-        itemsPerPage: 10}
+        itemsPerPage: 10
+      }
     });
 
     expect(dataGrid.find('tfoot').length).toBe(1);
@@ -177,10 +205,12 @@ describe('The jQuery Items Datagrid', () => {
     dataGrid.dataitems({
       itemType: 'db',
       data: datagridData,
-      pager: {pageCount: 10,
+      pager: {
+        pageCount: 10,
         currentPage: 2,
         totalMatches: 20,
-        itemsPerPage: 10}
+        itemsPerPage: 10
+      }
     });
 
     expect(dataGrid.find('tfoot').length).toBe(1);
@@ -191,7 +221,7 @@ describe('The jQuery Items Datagrid', () => {
     dataGrid.dataitems({
       itemType: 'db',
       data: datagridData,
-      pager: {pageCount: 0}
+      pager: { pageCount: 0 }
     });
 
     expect($('#datagrid nav.grb-pager > ul > li').length).toBe(0);
@@ -210,13 +240,14 @@ describe('The jQuery Items Datagrid', () => {
     dataGrid.dataitems({
       itemType: 'db',
       data: datagridData,
-      pager: {pageCount: 10,
+      pager: {
+        pageCount: 10,
         currentPage: 2,
         totalMatches: 20,
         onItemsPerPage: '-',
         ippOptions: { option: [10, 20, 30], default: 30 },
         itemsPerPage: 10
-        }
+      }
     });
 
     expect($('#datagrid nav.grb-pager > ul > select').length).toBe(1);

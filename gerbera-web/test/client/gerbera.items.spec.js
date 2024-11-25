@@ -1,6 +1,28 @@
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    gerbera.items.spec.js - this file is part of Gerbera.
+
+    Copyright (C) 2016-2024 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
 import { GerberaApp } from "../../../web/js/gerbera-app.module";
 import { Items, BrowseItemView, SearchItemView, FileItemView } from '../../../web/js/gerbera-items.module';
-import { Trail} from "../../../web/js/gerbera-trail.module";
+import { Trail } from "../../../web/js/gerbera-trail.module";
 import { Updates } from "../../../web/js/gerbera-updates.module";
 import { Auth } from "../../../web/js/gerbera-auth.module";
 
@@ -28,11 +50,11 @@ describe('Gerbera Items', () => {
       }
     };
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
-        return;
+      return;
     });
   });
   afterEach((done) => {
-    $("body").on('transitionend', function(event){
+    $("body").on('transitionend', function (event) {
       $('#editModal').remove();
       $('.modal-backdrop').remove();
     });
@@ -40,19 +62,19 @@ describe('Gerbera Items', () => {
     done();
   });
   beforeAll(() => {
-    spyOn(GerberaApp, 'writeLocalStorage').and.callFake(() => {});
+    spyOn(GerberaApp, 'writeLocalStorage').and.callFake(() => { });
   });
 
   describe('initialize()', () => {
-   beforeEach(() => {
-     GerberaApp.serverConfig = mockConfig.config;
-   });
+    beforeEach(() => {
+      GerberaApp.serverConfig = mockConfig.config;
+    });
 
-   it('clears the datagrid', async () => {
-     await Items.initialize();
-     expect($('#datagrid').text()).toBe('');
-   });
- });
+    it('clears the datagrid', async () => {
+      await Items.initialize();
+      expect($('#datagrid').text()).toBe('');
+    });
+  });
   describe('treeItemSelected()', () => {
     let ajaxSpy;
 
@@ -559,7 +581,7 @@ describe('Gerbera Items', () => {
       spyOn(Updates, 'updateTreeByIds');
       spyOn(Updates, 'showMessage');
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
-        return Promise.resolve({success: true});
+        return Promise.resolve({ success: true });
       });
       item = {
         id: 9999
@@ -572,7 +594,7 @@ describe('Gerbera Items', () => {
     });
 
     it('calls the server with the item details to add', async () => {
-      editModal.editmodal('addNewItem', {type: 'item', item: item});
+      editModal.editmodal('addNewItem', { type: 'item', item: item });
 
       await Items.addObject();
       var data = {
@@ -596,7 +618,7 @@ describe('Gerbera Items', () => {
       const parentId = {
         id: 0
       };
-      editModal.editmodal('addNewItem', {type: 'container', item: parentId});
+      editModal.editmodal('addNewItem', { type: 'container', item: parentId });
 
       await Items.addObject();
       var data = {
@@ -615,7 +637,7 @@ describe('Gerbera Items', () => {
     });
 
     it('calls the server with the `container` details', async () => {
-      editModal.editmodal('addNewItem', {type: 'container', item: item});
+      editModal.editmodal('addNewItem', { type: 'container', item: item });
 
       await Items.addObject();
       var data = {
@@ -634,7 +656,7 @@ describe('Gerbera Items', () => {
     });
 
     it('calls the server with the `external_url` details', async () => {
-      editModal.editmodal('addNewItem', {type: 'external_url', item: item});
+      editModal.editmodal('addNewItem', { type: 'external_url', item: item });
 
       await Items.addObject();
       var data = {
@@ -657,7 +679,7 @@ describe('Gerbera Items', () => {
     });
 
     it('when successful adds a GERBERA.Updates UI timer to check for updates later', async () => {
-      editModal.editmodal('addNewItem', {type: 'item', item: item});
+      editModal.editmodal('addNewItem', { type: 'item', item: item });
       GerberaApp.currentTreeItem = {};
       await Items.addObject();
 

@@ -700,7 +700,10 @@ void ImportService::fillLayout(const std::shared_ptr<GenericTask>& task)
 }
 
 /// \param object used to make code compatible with legacy scan
-void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state, std::shared_ptr<CdsObject> object, const std::shared_ptr<CdsContainer>& parent, const std::shared_ptr<GenericTask>& task)
+void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
+    std::shared_ptr<CdsObject> object,
+    const std::shared_ptr<CdsContainer>& parent,
+    const std::shared_ptr<GenericTask>& task)
 {
     std::shared_ptr<CdsObject> cdsObject = state ? state->getObject() : std::move(object);
     log_debug("cds {}, layout {}, autoscanDir {}", !!cdsObject, !!layout, !!autoscanDir);
@@ -710,7 +713,18 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
             std::string mimetype = std::static_pointer_cast<CdsItem>(cdsObject)->getMimeType();
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
 
-            if (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())) {
+            if (contentType == CONTENT_TYPE_PLAYLIST) {
+#ifdef HAVE_JS
+                try {
+                    if (playlistParserScript)
+                        playlistParserScript->processPlaylistObject(cdsObject, task, rootPath);
+                } catch (const std::runtime_error& e) {
+                    log_error("{}", e.what());
+                }
+#else
+                log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", cdsObject->getLocation().c_str());
+#endif // HAVE_JS
+            } else if (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())) {
                 // only lock mutex while processing item layout
                 LayoutAutoLock lock(layoutMutex);
                 // get ref'd objects with last mod time
@@ -720,20 +734,9 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
                     containerTypeMap,
                     refObjects);
             } else {
-                log_debug("file ignored: {} autoscanDir={}, class={}, hasContent={}, mediaType={}", cdsObject->getLocation().string(), !!autoscanDir, cdsObject->getClass(), autoscanDir ? autoscanDir->hasContent(cdsObject->getClass()) : false, autoscanDir ? autoscanDir->getMediaType() : -2);
+                log_debug("File ignored: {} autoscanDir={}, class={}, hasContent={}, mediaType={}", cdsObject->getLocation().string(), !!autoscanDir, cdsObject->getClass(), autoscanDir ? autoscanDir->hasContent(cdsObject->getClass()) : false, autoscanDir ? autoscanDir->getMediaType() : -2);
             }
 
-#ifdef HAVE_JS
-            try {
-                if (playlistParserScript && contentType == CONTENT_TYPE_PLAYLIST)
-                    playlistParserScript->processPlaylistObject(cdsObject, task, rootPath);
-            } catch (const std::runtime_error& e) {
-                log_error("{}", e.what());
-            }
-#else
-            if (contentType == CONTENT_TYPE_PLAYLIST)
-                log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", cdsObject->getLocation().c_str());
-#endif // HAVE_JS
         } catch (const std::runtime_error& ex) {
             log_error("{}", ex.what());
         }

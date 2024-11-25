@@ -106,6 +106,7 @@ export class ItemView {
 export class BrowseItemView extends ItemView {
   constructor(pId) {
     super(pId, 'browse');
+    $('#datagrid').show();
   }
   get requestData() {
     let result = super.requestData;
@@ -156,6 +157,7 @@ export class SearchItemView extends ItemView {
 export class FileItemView extends ItemView {
   constructor(pId) {
     super(pId, 'files');
+    $('#datagrid').show();
   }
   get requestData() {
     let result = super.requestData;
@@ -452,6 +454,7 @@ const transformItems = (items) => {
       mtype: ('mtype' in gItem) ? gItem.mtype : null,
       upnp_class: ('upnp_class' in gItem) ? gItem.upnp_class : null,
       image: ('image' in gItem) ? gItem.image : null,
+      index: ('index' in gItem) ? gItem.index : null,
       part: ('part' in gItem) ? gItem.part : null,
       track: ('track' in gItem) ? gItem.track : null,
       size: ('size' in gItem) ? gItem.size : null,
@@ -462,6 +465,7 @@ const transformItems = (items) => {
     if (!GerberaApp.serverConfig.enableNumbering) {
       item.part = null;
       item.track = null;
+      item.index = null;
     }
     if (!GerberaApp.serverConfig.enableThumbnail) {
       item.image = null;
