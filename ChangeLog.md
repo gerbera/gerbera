@@ -20,6 +20,7 @@
 - UPnP: Add support for filters
 - UPnP Shortcuts feature
 - Web UI: Add Search page
+- Web UI: Cleanup display of item number
 - Web UI: Fix detail display
 
 ### v2.3.0
