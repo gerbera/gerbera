@@ -2,9 +2,9 @@
 #
 #  Gerbera - https://gerbera.io/
 #
-#  CMakeLists.txt - this file is part of Gerbera.
+#  CTestManip.cmake - this file is part of Gerbera.
 #
-#  Copyright (C) 2016-2024 Gerbera Contributors
+#  Copyright (C) 2024 Gerbera Contributors
 #
 #  Gerbera is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU General Public License version 2
@@ -20,24 +20,5 @@
 #
 #  $Id$
 
-add_executable(testcontent
-    main.cc
-    test_autoscan_list.cc
-    test_resolution.cc
-)
-
-if (NOT TARGET GTest::gmock)
-    target_link_libraries(testcontent PRIVATE
-        libgerbera
-        GTest::GTest
-    )
-else()
-    target_link_libraries(testcontent PRIVATE
-        libgerbera
-        GTest::gmock
-    )
-endif()
-add_dependencies(testcontent libgerbera gerbera)
-
-include(GoogleTest)
-gtest_discover_tests(testcontent DISCOVERY_TIMEOUT 60)
+set_tests_properties(${GRB_UTIL_TESTS} PROPERTIES FIXTURES_REQUIRED GrbUtil)
+MESSAGE("Copying Util Test Data")
