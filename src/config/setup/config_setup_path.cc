@@ -65,13 +65,16 @@ bool ConfigPathSetup::checkExecutable(std::string& optValue) const
     return true;
 }
 
-std::string ConfigPathSetup::getXmlContent(const pugi::xml_node& root)
+fs::path ConfigPathSetup::getXmlContent(const pugi::xml_node& root, bool doResolve)
 {
     auto optValue = ConfigSetup::getXmlContent(root, true);
     if (isSet(ConfigPathArguments::isExe)) {
         if (!checkExecutable(optValue)) {
             throw_std_runtime_error("Invalid {} file is not an executable '{}'", xpath, optValue);
         }
+    }
+    if (doResolve) {
+        return resolvePath(optValue);
     }
     return optValue;
 }
@@ -109,6 +112,8 @@ fs::path ConfigPathSetup::resolvePath(fs::path path) const
             throw_std_runtime_error("Directory '{}' does not exist for '{}'", path.string(), cpath);
         }
     }
+
+    path = fs::weakly_canonical(path); // removes trailing "/"
 
     log_debug("resolvePath {} = {}", xpath, path.string());
     return path;

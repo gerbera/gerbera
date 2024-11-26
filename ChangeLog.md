@@ -5,7 +5,9 @@
 - Access permissions for files by client
 - Add variables to docker images
 - Bump cookie, express and socket.io in /gerbera-web
+- Config: Unify path handling
 - Config: UI handler mimetypes and CSP
+- Drop Build Support for Ubuntu 23.04
 - Fix access to cache option if thumbnailer disabled
 - Fix autoscan issue with empty filename
 - Fix build without ffmpeg

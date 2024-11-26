@@ -27,6 +27,7 @@ There are four new noteworthy features in this release:
 - Container creation in web ui
 - Handling of multivalued tag in virtual paths
 - Increase of pupnp threadpool size
+- Drop Build Support for Ubuntu 23.04 and 23.10
 
 ### Code Improvements
 
