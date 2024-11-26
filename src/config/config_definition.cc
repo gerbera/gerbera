@@ -1008,7 +1008,7 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         AutoscanScanMode::Timed),
     std::make_shared<ConfigPathSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION,
         "attribute::location", "config-import.html#autoscan",
-        "", ConfigPathArguments::mustExist | ConfigPathArguments::notEmpty | ConfigPathArguments::resolveEmpty),
+        "", ConfigPathArguments::notEmpty | ConfigPathArguments::resolveEmpty),
     std::make_shared<ConfigEnumSetup<AutoscanScanMode>>(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE,
         "attribute::mode", "config-import.html#autoscan",
         std::map<std::string, AutoscanScanMode>({ { AUTOSCAN_TIMED, AutoscanScanMode::Timed }, { AUTOSCAN_INOTIFY, AutoscanScanMode::INotify } })),

@@ -269,7 +269,7 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
         auto rootDirEntry = fs::directory_entry(rootPath);
         cacheState(rootPath, rootDirEntry, ImportState::New, toSeconds(rootDirEntry.last_write_time(ec)));
     }
-    auto rootEntry = fs::directory_entry(location);
+    auto rootEntry = fs::directory_entry(location, ec);
     if (ec) {
         log_error("Failed to start {}, {}", location.c_str(), ec.message());
         return;
