@@ -47,18 +47,9 @@ void CdsContainer::copyTo(const std::shared_ptr<CdsObject>& obj)
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     cont->setUpdateID(updateID);
 }
+
 bool CdsContainer::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) const
 {
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     return CdsObject::equals(obj, exactly) && isSearchable() == cont->isSearchable();
 }
-
-/*
-void CdsContainer::validate() const
-{
-    CdsObject::validate();
-    /// \todo well.. we have to know if a container is a real directory or just a virtual container in the database
-      if (!fs::is_directory(this->location, true))
-        throw_std_runtime_error("validation failed");
-}
-*/

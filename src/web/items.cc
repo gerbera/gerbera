@@ -141,7 +141,7 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
     auto result = database->browse(browseParam);
     items.append_attribute("virtual") = container->isVirtual();
     items.append_attribute("start") = start;
-    // items.append_attribute("returned") = result->size();
+    items.append_attribute("result_size") = result.size();
     items.append_attribute("total_matches") = browseParam.getTotalMatches();
 
     bool protectContainer = container->isSubClass(UPNP_CLASS_DYNAMIC_CONTAINER);
@@ -238,7 +238,7 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doSearch(
     }
     items.append_attribute("virtual") = container->isVirtual();
     items.append_attribute("start") = start;
-    // items.append_attribute("returned") = result->size();
+    items.append_attribute("result_size") = result.size();
     items.append_attribute("total_matches") = searchParam.getTotalMatches();
 
     if (searchParam.getTotalMatches() >= 100)

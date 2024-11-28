@@ -41,7 +41,7 @@ Gerbera - https://gerbera.io/
 CdsItem::CdsItem()
 {
     objectType = OBJECT_TYPE_ITEM;
-    upnpClass = "object.item";
+    upnpClass = UPNP_CLASS_ITEM;
     mtime = currentTime();
 }
 
@@ -50,8 +50,9 @@ void CdsItem::copyTo(const std::shared_ptr<CdsObject>& obj)
     CdsObject::copyTo(obj);
     if (!obj->isItem())
         return;
+
     auto item = std::static_pointer_cast<CdsItem>(obj);
-    //    item->setDescription(description);
+    // description is not copied to target object
     item->setMimeType(mimeType);
     item->setTrackNumber(trackNumber);
     item->setPartNumber(partNumber);
@@ -71,19 +72,22 @@ bool CdsItem::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) const
 void CdsItem::validate() const
 {
     CdsObject::validate();
-    //    log_info("mime: [{}] loc [{}]", this->mimeType.c_str(), this->location.c_str());
+
     if (this->mimeType.empty())
         throw_std_runtime_error("Item validation failed: missing mimetype");
-
-    if (this->location.empty())
-        throw_std_runtime_error("Item validation failed: missing location");
 
     if (isExternalItem())
         return;
 
+    if (this->location.empty())
+        throw_std_runtime_error("Item validation failed: missing location");
+
     std::error_code ec;
-    if (!isRegularFile(location, ec))
+    if (!isRegularFile(location, ec)) {
+        if (ec)
+            throw_std_runtime_error("Item validation failed: file {} not found: {}", location.c_str(), ec.message());
         throw_std_runtime_error("Item validation failed: file {} not found", location.c_str());
+    }
 }
 
 //---------
@@ -91,15 +95,12 @@ void CdsItem::validate() const
 CdsItemExternalURL::CdsItemExternalURL()
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
-
     upnpClass = UPNP_CLASS_ITEM;
 }
 
 void CdsItemExternalURL::validate() const
 {
     CdsItem::validate();
-    if (this->mimeType.empty())
-        throw_std_runtime_error("URL Item validation failed: missing mimetype");
 
     if (this->location.empty())
         throw_std_runtime_error("URL Item validation failed: missing URL");

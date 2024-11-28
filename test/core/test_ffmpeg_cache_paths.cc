@@ -22,6 +22,7 @@
 */
 
 #include "config/config_val.h"
+#include "context.h"
 #include "metadata/ffmpeg_thumbnailer_handler.h"
 #include "metadata/ffmpeg_handler.h"
 

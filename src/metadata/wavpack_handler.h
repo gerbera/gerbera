@@ -33,6 +33,9 @@
 
 #include <wavpack/wavpack.h>
 
+// forward declarations
+class CdsItem;
+
 /// \brief This class is responsible for reading wavpack tags metadata
 class WavPackHandler : public MediaMetadataHandler {
 public:

@@ -39,6 +39,7 @@
 #include "config/config.h"
 #include "config/config_val.h"
 #include "content/scripting/script_names.h"
+#include "context.h"
 #include "exceptions.h"
 #include "metadata_enums.h"
 #include "util/tools.h"
@@ -67,7 +68,10 @@
 #include "metadata/wavpack_handler.h"
 #endif
 
+#ifdef HAVE_FFMPEGTHUMBNAILER
 #include "ffmpeg_thumbnailer_handler.h"
+#endif
+
 #include "metadata/metacontent_handler.h"
 
 MetadataService::MetadataService(const std::shared_ptr<Context>& context, const std::shared_ptr<Content>& content)

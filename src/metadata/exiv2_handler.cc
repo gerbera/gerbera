@@ -37,6 +37,7 @@
 
 #include "cds/cds_item.h"
 #include "config/config_val.h"
+#include "context.h"
 #include "iohandler/io_handler.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -121,8 +122,8 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
         // if the image has no comment, compose something nice out of the exiv information
         // Not convinced that this is useful - comment it out for now ...
-        /*    if (comment.empty())
-        {
+#if 0
+        if (comment.empty()) {
             std::string cam_model;
             std::string flash;
             std::string focal_length;
@@ -136,37 +137,33 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
                 flash = (char *)md->toString().c_str();
 
             md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.FocalLength"));
-            if (md !=  exifData.end())
-            {
+            if (md !=  exifData.end()) {
                 focal_length = (char *)md->toString().c_str();
                 md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.FocalLengthIn35mmFilm"));
-                if (md !=  exifData.end())
-                {
+                if (md !=  exifData.end()) {
                     focal_length = focal_length + " (35 mm equivalent: " + (char *)md->toString().c_str() + ")";
                 }
             }
 
-
             if (!cam_model.empty())
                 comment = "Taken with " + cam_model;
 
-            if (!flash.empty())
-            {
+            if (!flash.empty()) {
                 if (!comment.empty())
                     comment = comment + ", Flash setting:" + flash;
                 else
                     comment = "Flash setting: " + flash;
             }
 
-            if (!focal_length.empty())
-            {
+            if (!focal_length.empty()) {
                 if (!comment.empty())
                     comment = comment + ", Focal length: " + focal_length;
                 else
                     comment = "Focal length: " + focal_length;
             }
-        log_debug("Fabricated Comment: {}", comment.c_str());
-        }  */
+            log_debug("Fabricated Comment: {}", comment.c_str());
+        }
+#endif
 
         if (!comment.empty()) {
             item->addMetaData(MetadataFields::M_DESCRIPTION, sc->convert(comment));

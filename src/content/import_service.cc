@@ -32,6 +32,7 @@
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "content_manager.h"
+#include "context.h"
 #include "database/database.h"
 #include "exceptions.h"
 #include "layout/builtin_layout.h"

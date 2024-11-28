@@ -642,6 +642,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
         if (obj->getRefID() <= 0)
             throw DatabaseException(fmt::format("PLAYLIST_REF flag set for '{}' but refId is <=0", obj->getLocation().c_str()), LINE_MESSAGE);
         refObj = loadObject(obj->getRefID());
+        log_vdebug("Setting Playlist {} ref to {}", obj->getLocation().c_str(), refObj->getLocation().c_str());
         if (!refObj)
             throw DatabaseException("PLAYLIST_REF flag set but refId doesn't point to an existing object", LINE_MESSAGE);
     } else if (obj->isVirtual() && obj->isPureItem()) {
@@ -785,6 +786,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
     }
 
     if (!hasReference || (!useResourceRef && !refObj->resourcesEqual(obj))) {
+        log_debug("Updating Resources {}", obj->getLocation().string());
         generateResourceDBOperations(obj, op, returnVal);
     }
 
@@ -958,6 +960,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     bool getContainers = param.getFlag(BROWSE_CONTAINERS);
     bool getItems = param.getFlag(BROWSE_ITEMS);
     const auto forbiddenDirectories = param.getForbiddenDirectories();
+    log_vdebug("browse forbiddenDirectories {}", fmt::join(forbiddenDirectories, ","));
 
     if (param.getDynamicContainers() && dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
         auto dynConfig = dynamicContentList->getKey(parent->getLocation());
@@ -1164,7 +1167,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
     std::string searchSQL(rootNode->emitSQL());
     if (searchSQL.empty())
         throw DatabaseException("failed to generate SQL for search", LINE_MESSAGE);
-    const auto forbiddenDirectories = param.getForbiddenDirectories();
+
     bool getContainers = param.getContainers();
     bool getItems = param.getItems();
     if (getContainers && !getItems) {
@@ -1177,6 +1180,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
             searchColumnMapper->mapQuoted(SearchCol::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER));
     }
 
+    const auto forbiddenDirectories = param.getForbiddenDirectories();
+    log_vdebug("search forbiddenDirectories {}", fmt::join(forbiddenDirectories, ","));
     if (getItems && !forbiddenDirectories.empty()) {
         std::vector<std::string> forbiddenList;
         for (auto&& forbDir : forbiddenDirectories) {
@@ -1237,6 +1242,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
     };
 
     std::string limit = limitCode();
+    log_vdebug("limitCode {}", limit);
 
     std::string retrievalSQL;
     if (rootContainer) {
@@ -2091,6 +2097,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
 
     const int objectType = row->col_int(0, 0);
     bool isContainer = IS_CDS_CONTAINER(objectType);
+    log_vdebug("Removing {} from {}", row->col(2), row->col(3));
     if (all && !isContainer) {
         if (!row->isNullOrEmpty(1)) {
             const int refId = row->col_int(1, INVALID_OBJECT_ID);
@@ -2298,7 +2305,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             }
         }
 
-        // log_debug("selecting: {}; removing: {}", selectSql, fmt::join(del, ","));
+        log_vdebug("selecting: {}; removing: {}", selectSql, fmt::join(del, ","));
         if (!del.empty()) {
             _removeObjects(del);
             del.clear();
@@ -2318,9 +2325,9 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     if (!selUpnp.empty()) {
         std::copy(selUpnp.begin(), selUpnp.end(), std::back_inserter(changedUpnp));
     }
-    // log_debug("end; changedContainers (upnp): {}", fmt::join(changedUpnp, ","));
-    // log_debug("end; changedContainers (ui): {}", fmt::join(changedUi, ","));
+    log_vdebug("end; changedContainers (upnp): {}", fmt::join(changedUpnp, ","));
     log_debug("end; changedContainers (upnp): {}", changedUpnp.size());
+    log_vdebug("end; changedContainers (ui): {}", fmt::join(changedUi, ","));
     log_debug("end; changedContainers (ui): {}", changedUi.size());
 
     return changedContainers;
