@@ -11,6 +11,7 @@
 - Fix access to cache option if thumbnailer disabled
 - Fix autoscan issue with empty filename
 - Fix build without ffmpeg
+- Fix CodeQL messages
 - Fix creating containers in web ui
 - Fix Handling command line options
 - Fix handling of checkbox values on web ui

@@ -225,7 +225,7 @@ void FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         if (!path.empty()) {
             auto resource = std::make_shared<CdsResource>(ContentHandler::FANART, ResourcePurpose::Thumbnail);
             std::string type = path.extension().string().substr(1);
-            auto [skip, mimeType] = mime->getMimeType(path, fmt::format("image/{}", type));
+            auto mimeType = std::get<1>(mime->getMimeType(path, fmt::format("image/{}", type)));
 
             if (!mimeType.empty()) {
                 resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
@@ -277,7 +277,7 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             log_debug("Running ContainerArt handler on {}", !path.empty() ? path.c_str() : obj->getLocation().c_str());
             auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
             std::string type = path.extension().string().substr(1);
-            auto [skip, mimeType] = mime->getMimeType(path, fmt::format("image/{}", type));
+            auto mimeType = std::get<1>(mime->getMimeType(path, fmt::format("image/{}", type)));
             if (!mimeType.empty()) {
                 resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
                 resource->addAttribute(ResourceAttribute::RESOURCE_FILE, f2i->convert(path.string()));
@@ -330,7 +330,7 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             auto resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, ResourcePurpose::Subtitle);
             std::string type = path.extension().string().substr(1);
 
-            auto [skip, mimeType] = mime->getMimeType(path, fmt::format("text/{}", type));
+            auto mimeType = std::get<1>(mime->getMimeType(path, fmt::format("text/{}", type)));
             auto pos = mimeType.find("plain");
             if (pos != std::string::npos) {
                 mimeType = fmt::format("{}{}", mimeType.substr(0, pos), type);

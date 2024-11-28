@@ -2055,7 +2055,7 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
             const int colId = row->col_int(0, INVALID_OBJECT_ID); // AutoscanCol::id
             bool persistent = remapBool(row->col_int(1, 0));
             if (persistent) {
-                auto [location, prefix] = stripLocationPrefix(row->col(2));
+                auto location = std::get<0>(stripLocationPrefix(row->col(2)));
                 auto values = std::vector {
                     ColumnUpdate(identifier("obj_id"), SQL_NULL),
                     ColumnUpdate(identifier("location"), quote(location.string())),

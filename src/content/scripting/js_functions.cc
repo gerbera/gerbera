@@ -125,7 +125,7 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
         } else
             log_debug("lastItem {}, resSize {}, refID {}", lastItem->getTitle(), lastItem->getResourceCount(), lastItem->getRefID());
         auto cm = self->getContent();
-        auto [containerId, containerStatus] = cm->addContainerTree(chain, lastItem);
+        auto containerId = std::get<0>(cm->addContainerTree(chain, lastItem));
         if (containerId != INVALID_OBJECT_ID) {
             /* setting last container ID as return value */
             log_debug("container {}", containerId);
