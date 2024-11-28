@@ -4,8 +4,6 @@ import newTweakItem from './fixtures/dirtweak-item-new';
 
 describe('The jQuery Gerbera DirTweak Overlay', () => {
   'use strict';
-  let item;
-
   let dirTweakLocation;
   let dirTweakId;
   let dirTweakIndex;
