@@ -44,6 +44,8 @@
 #include <type_traits>
 
 #define log_debug SPDLOG_TRACE
+#define log_vdebug(...) (void)0
+#define log_none(...) (void)0
 #define log_dbg SPDLOG_TRACE
 #define log_faci SPDLOG_DEBUG
 #define log_info SPDLOG_INFO
@@ -82,6 +84,8 @@ enum class GrbLogFacility {
     metadata,
     matroska,
     curl,
+    util,
+    verbose,
 
     log_MAX,
 };
@@ -106,6 +110,10 @@ public:
     {
         return GrbLogger::Logger.hasDebugging[to_underlying(facility)];
     }
+    bool isDebugging(GrbLogFacility facility, GrbLogFacility facility2)
+    {
+        return GrbLogger::Logger.hasDebugging[to_underlying(facility)] && GrbLogger::Logger.hasDebugging[to_underlying(facility2)];
+    }
     static std::string_view mapFacility(GrbLogFacility facility)
     {
         return GrbLogger::facilities[facility];
@@ -125,11 +133,14 @@ private:
 };
 
 #define log_facility(fac, ...) GrbLogger::Logger.isDebugging((fac)) ? log_faci(__VA_ARGS__) : log_dbg(__VA_ARGS__)
+#define log_facility2(fac, fac2, ...) GrbLogger::Logger.isDebugging((fac), (fac2)) ? log_faci(__VA_ARGS__) : log_none(__VA_ARGS__)
 
 #ifdef GRB_LOG_FAC
 
 #undef log_debug
+#undef log_vdebug
 #define log_debug(...) log_facility(GRB_LOG_FAC, __VA_ARGS__)
+#define log_vdebug(...) log_facility2(GRB_LOG_FAC, GrbLogFacility::verbose, __VA_ARGS__)
 
 #endif
 

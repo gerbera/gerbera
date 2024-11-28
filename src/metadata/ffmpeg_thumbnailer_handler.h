@@ -27,6 +27,8 @@ Gerbera - https://gerbera.io/
 
 #include "metadata_handler.h"
 
+#include "util/grb_fs.h"
+
 #include <memory>
 #include <mutex>
 

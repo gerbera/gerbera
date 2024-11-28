@@ -32,6 +32,7 @@
 #include "config/config_val.h"
 #include "config/result/directory_tweak.h"
 #include "content/content.h"
+#include "context.h"
 #include "iohandler/file_io_handler.h"
 #include "util/mime.h"
 #include "util/string_converter.h"

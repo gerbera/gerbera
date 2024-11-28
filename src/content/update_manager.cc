@@ -58,14 +58,17 @@ UpdateManager::UpdateManager(std::shared_ptr<Config> config, std::shared_ptr<Dat
 
 void UpdateManager::run()
 {
+    log_debug("start");
     threadRunner = std::make_unique<StdThreadRunner>(
         "UpdateThread", [](void* arg) {
             auto inst = static_cast<UpdateManager*>(arg);
             inst->threadProc();
         },
         this);
+    log_vdebug("running");
     // wait for thread to become ready
     threadRunner->waitForReady();
+    log_debug("end");
 }
 
 UpdateManager::~UpdateManager() { log_debug("UpdateManager destroyed"); }
@@ -76,7 +79,7 @@ void UpdateManager::shutdown()
     auto lock = threadRunner->uniqueLock();
     shutdownFlag = true;
 
-    log_debug("signalling...");
+    log_vdebug("signalling...");
     threadRunner->notify();
     lock.unlock();
 
@@ -86,6 +89,7 @@ void UpdateManager::shutdown()
 
 void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flushPolicy)
 {
+    log_debug("start");
     auto lock = threadRunner->uniqueLock();
     // signalling thread if it could have been idle, because
     // there were no unprocessed updates
@@ -102,11 +106,11 @@ void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flu
     bool split = (hashSize + size >= MAX_OBJECT_IDS + MAX_OBJECT_IDS_OVERLOAD);
     for (int objectID : objectIDs) {
         if (objectID != lastContainerChanged) {
-            // log_debug("containerChanged. id: {}, signal: {}", objectID, signal);
+            log_vdebug("containerChanged. id: {}, signal: {}", objectID, signal);
             objectIDHash.insert(objectID);
             if (split && objectIDHash.size() > MAX_OBJECT_IDS) {
                 while (objectIDHash.size() > MAX_OBJECT_IDS) {
-                    log_debug("in-between signalling...");
+                    log_vdebug("in-between signalling...");
                     threadRunner->notify();
                     lock.unlock();
                     lock.lock();
@@ -117,13 +121,15 @@ void UpdateManager::containersChanged(const std::vector<int>& objectIDs, int flu
     if (objectIDHash.size() >= MAX_OBJECT_IDS)
         signal = true;
     if (signal) {
-        log_debug("signalling...");
+        log_vdebug("signalling...");
         threadRunner->notify();
     }
+    log_debug("end");
 }
 
 void UpdateManager::containerChanged(int objectID, int flushPolicy)
 {
+    log_debug("start");
     if (objectID == INVALID_OBJECT_ID)
         return;
 
@@ -133,7 +139,7 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
         // signalling thread if it could have been idle, because
         // there were no unprocessed updates
         bool signal = (!haveUpdates());
-        log_debug("containerChanged. id: {}, signal: {}", objectID, signal);
+        log_vdebug("containerChanged. id: {}, signal: {}", objectID, signal);
         objectIDHash.insert(objectID);
 
         // signalling if the hash gets too full
@@ -162,15 +168,18 @@ void UpdateManager::containerChanged(int objectID, int flushPolicy)
 
 void UpdateManager::threadProc()
 {
+    log_debug("start");
     StdThreadRunner::waitFor("UpdateManager", [this] { return threadRunner != nullptr; });
 
     auto lock = threadRunner->uniqueLockS("threadProc");
     // tell run() that we are ready
     threadRunner->setReady();
+    log_vdebug("ready");
 
     auto lastUpdate = currentTimeMS();
     while (!shutdownFlag) {
         if (haveUpdates()) {
+            log_vdebug("haveUpdates");
             std::chrono::milliseconds sleepMillis {};
             auto now = currentTimeMS();
             auto timeDiff = getDeltaMillis(lastUpdate, now);
@@ -184,7 +193,7 @@ void UpdateManager::threadProc()
             }
             bool sendUpdates = true;
             if (sleepMillis >= minSleep && objectIDHash.size() < MAX_OBJECT_IDS) {
-                log_debug("threadProc: sleeping for {} millis", sleepMillis.count());
+                log_vdebug("sleeping for {} millis", sleepMillis.count());
                 auto ret = threadRunner->waitFor(lock, sleepMillis);
 
                 if (!shutdownFlag) {
@@ -211,7 +220,7 @@ void UpdateManager::threadProc()
                 lock.unlock(); // we don't need to hold the lock during the sending of the updates
                 if (!updateString.empty()) {
                     try {
-                        log_debug("updates sent: \"{}\"", updateString);
+                        log_vdebug("updates sent: \"{}\"", updateString);
                         server->sendSubscriptionUpdate(updateString, UPNP_DESC_CDS_SERVICE_ID);
                         lastUpdate = currentTimeMS();
                     } catch (const std::runtime_error& e) {
@@ -226,9 +235,12 @@ void UpdateManager::threadProc()
             }
         } else {
             // nothing to do
+            log_vdebug("wait");
             threadRunner->wait(lock);
         }
     }
+    log_debug("threadCleanup");
 
     database->threadCleanup();
+    log_debug("end");
 }

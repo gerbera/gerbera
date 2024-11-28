@@ -27,6 +27,7 @@
 #include "config/result/client_config.h"
 #include "config/result/transcoding.h"
 #include "config/config_setup.h"
+#include "context.h"
 #include "metadata/metadata_handler.h"
 #include "upnp/client_manager.h"
 #include "upnp/xml_builder.h"

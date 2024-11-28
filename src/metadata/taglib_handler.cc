@@ -274,9 +274,9 @@ void TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     if (!item || !isEnabled)
         return;
 
-    auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string contentType = getValueOrDefault(mappings, item->getMimeType());
+    std::string contentType = getValueOrDefault(mimeContentTypeMappings, item->getMimeType());
 
+    log_debug("Reading {}, content type {}", item->getLocation().c_str(), contentType);
     auto fs = TagLib::FileStream(item->getLocation().c_str(), true); // true = Read only
 
     if (contentType == CONTENT_TYPE_MP3) {
@@ -296,9 +296,9 @@ void TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     } else if (contentType == CONTENT_TYPE_AIFF) {
         extractAiff(fs, item);
     } else {
-        log_warning("TagLibHandler {}: Does not handle the {} content type", item->getLocation().c_str(), contentType.c_str());
+        log_warning("TagLibHandler: File '{}' has unhandled content type '{}'", item->getLocation().c_str(), contentType.c_str());
     }
-    log_debug("TagLib handler done.");
+    log_debug("Done {}", item->getLocation().c_str());
 }
 
 bool TagLibHandler::isValidArtworkContentType(std::string_view artMimetype)
@@ -341,8 +341,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(const std::shared_ptr<Cds
     if (!item) // not streamable
         return nullptr;
 
-    auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-    std::string contentType = getValueOrDefault(mappings, item->getMimeType());
+    std::string contentType = getValueOrDefault(mimeContentTypeMappings, item->getMimeType());
     auto itemLocation = item->getLocation().c_str();
 
     auto roStream = TagLib::FileStream(itemLocation, true); // Open read only
@@ -517,7 +516,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr
             }
         } else if (hasTXXXFrames && startswith(desiredFrame, "TXXX:")) {
             auto&& frameList = frameListMap["TXXX"];
-            // log_debug("TXXX Frame list has {} elements", frameList.size());
+            log_debug("TXXX Frame list has {} elements", frameList.size());
 
             std::string desiredSubTag = desiredFrame.substr(5);
             if (desiredSubTag.empty())

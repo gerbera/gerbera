@@ -41,13 +41,13 @@
 #define __FFMPEG_HANDLER_H__
 #ifdef HAVE_FFMPEG
 
-#include <array>
-#include <optional>
-
 #include "metadata_enums.h"
 #include "metadata_handler.h"
 
-// forward declaration
+#include <array>
+
+// forward declarations
+class CdsItem;
 class IOHandler;
 struct AVFormatContext;
 class StringConverter;
@@ -61,8 +61,6 @@ public:
     std::string getMimeType() const override;
 
 private:
-    std::map<std::string, std::string> mappings;
-
     void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const;
     void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const;
     static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx);

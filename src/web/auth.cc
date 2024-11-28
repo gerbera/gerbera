@@ -115,8 +115,6 @@ void Web::Auth::process()
 
         auto actions = cfg.append_child("actions");
         xml2Json->setArrayName(actions, "action");
-        // actions->appendTextChild("action", "fokel1");
-        // actions->appendTextChild("action", "fokel2");
 
         auto friendlyName = cfg.append_child("friendlyName").append_child(pugi::node_pcdata);
         friendlyName.set_value(config->getOption(ConfigVal::SERVER_NAME).c_str());
@@ -139,7 +137,6 @@ void Web::Auth::process()
 
         if (!session->isLoggedIn() && !accountsEnabled) {
             session->logIn();
-            // throw SessionException("not logged in");
         }
         root.append_attribute("logged_in") = session->isLoggedIn();
     } else if (action == "logout") {

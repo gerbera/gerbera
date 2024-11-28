@@ -37,12 +37,15 @@
 
 #ifdef HAVE_TAGLIB
 
+#include "metadata_handler.h"
+
+#include <map>
 #include <tbytevector.h>
 #include <tfile.h>
 #include <tiostream.h>
 
-#include "metadata_handler.h"
-
+// forward declarations
+class CdsItem;
 class StringConverter;
 
 /// \brief This class is responsible for reading id3 or ogg tags metadata

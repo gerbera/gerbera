@@ -54,6 +54,7 @@
 #include "util/tools.h"
 
 #include <algorithm>
+#include <cinttypes>
 #include <fmt/chrono.h>
 
 extern "C" {
@@ -135,7 +136,6 @@ int FfmpegLogger::logLevel = AV_LOG_INFO;
 FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context, ConfigVal::IMPORT_LIBOPTS_FFMPEG_ENABLED, ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST, ConfigVal::IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST)
 {
-    mappings = this->config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
 }
 
 void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const
@@ -402,6 +402,6 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<Cds
 
 std::string FfmpegHandler::getMimeType() const
 {
-    return getValueOrDefault(mappings, CONTENT_TYPE_JPG, "image/jpeg");
+    return getValueOrDefault(mimeContentTypeMappings, CONTENT_TYPE_JPG, "image/jpeg");
 }
 #endif // HAVE_FFMPEG
