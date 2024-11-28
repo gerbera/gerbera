@@ -115,7 +115,7 @@ void UpnpMap::initMap(std::vector<UpnpMap>& target, const std::map<std::string, 
                 filters.emplace_back(match[1], match[2], match[3]);
             }
         }
-        log_debug("UpnpMap: {} -> {}", mt, cls);
+        log_vdebug("UpnpMap: {} -> {}", mt, cls);
         target.emplace_back(mt, cls, filters);
     }
 }
@@ -427,6 +427,7 @@ bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, co
         || (!settings.followSymlinks && dirEntry.is_symlink())
         || config->getConfigFilename() == entryPath) {
         cacheState(entryPath, dirEntry, ImportState::ToDelete);
+        log_vdebug("hidden {}", entryPath.string());
         return true;
     }
     if (!noMediaName.empty()) {
@@ -713,6 +714,7 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
         try {
             std::string mimetype = std::static_pointer_cast<CdsItem>(cdsObject)->getMimeType();
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
+            log_vdebug("mimetype {}, contentype {}, autoscanDir {}", mimetype, contentType, (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())));
 
             if (contentType == CONTENT_TYPE_PLAYLIST) {
 #ifdef HAVE_JS
