@@ -111,6 +111,7 @@ add_library(libgerbera STATIC
         src/config/config_setup.cc
         src/config/config_setup.h
         src/config/config_val.h
+        src/config/grb_compile_info.cc
         src/config/grb_runtime.cc
         src/config/grb_runtime.h
         src/config/result/autoscan.cc

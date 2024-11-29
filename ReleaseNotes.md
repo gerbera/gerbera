@@ -4,10 +4,10 @@
 
 Rerun `gerbera --create-config="Boxlayout|DynamicContainer"` and merge changes to the `boxlayout` and `containers` the get support for upnp shortcut list feature.
 
-There are four new noteworthy features in this release:
-- the search page,
-- access permissions for files and
-- support for UPnP filters in requests
+There are some noteworthy new features in this release:
+- the search page: Query your database with UPnP search statements in Web UI,
+- access permissions for files: Restrict access to directories via client groups,
+- support for UPnP filters in requests,
 - support for UPnP CONTAINER_SHORTCUTS feature.
 
 ### NEW Features
@@ -32,7 +32,8 @@ There are four new noteworthy features in this release:
 ### Code Improvements
 
 - Build without ffmpeg leaves option unset
-- Logging of build info
+- Compatibility with ffmpeg > 6.0
+- Logging of build info with `--compile-info`
 - Update versions of libpupnp (1.14.20), spdlog (1.15.0)
 - Update Build Environment
 - Update versions of js vendor files jquery-ui (v1.13.2 -> v1.14.1), js-cookie (v3.0.1 -> v3.0.5), @popperjs/core (v2.11.6 -> v2.11.8)
