@@ -79,7 +79,6 @@ public:
         av_log_set_level(logLevel);
         av_log_set_callback(&FfmpegLogger::LogFfmpegMessage);
     }
-
     ~FfmpegLogger()
     {
         av_log_set_callback(nullptr);
@@ -87,7 +86,6 @@ public:
 
 private:
     FfmpegLogger(const FfmpegLogger&) = delete;
-
     FfmpegLogger& operator=(const FfmpegLogger&) = delete;
 
     static int printPrefix;
@@ -144,7 +142,8 @@ FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
 {
 }
 
-void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc,
+void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<StringConverter>& sc,
     const AVFormatContext* pFormatCtx) const
 {
     if (!pFormatCtx->metadata) {
@@ -163,7 +162,8 @@ void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item,
     }
 } // addFfmpegAuxdataFields
 
-void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc,
+void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<StringConverter>& sc,
     const AVFormatContext* pFormatCtx) const
 {
     AVDictionaryEntry* e = nullptr;
@@ -282,6 +282,13 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
                     rot = stoiString(entry->value);
                     log_debug("{} = {}", "rotate", rot);
                 } else {
+#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(60, 0, 0))
+                    auto displaymatrix = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, nullptr);
+                    if (displaymatrix) {
+                        rot = get_rotation(reinterpret_cast<std::int32_t*>(displaymatrix));
+                        log_debug("{} = {}", "displaymatrix", rot);
+                    }
+#else
                     int32_t* displayMatrix = nullptr;
                     auto psd = av_packet_side_data_get(as_codecpar(st)->coded_side_data,
                         as_codecpar(st)->nb_coded_side_data, AV_PKT_DATA_DISPLAYMATRIX);
@@ -291,6 +298,7 @@ void FfmpegHandler::addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item
                         rot = get_rotation(displayMatrix);
                         log_debug("{} = {}", "displayMatrix", rot);
                     }
+#endif
                 }
                 int orientation = 0;
                 if (rot == 0) {
@@ -407,8 +415,8 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     avformat_close_input(&pFormatCtx);
 }
 
-std::unique_ptr<IOHandler>
-FfmpegHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
+std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<CdsObject>& obj,
+    const std::shared_ptr<CdsResource>& resource)
 {
     return nullptr;
 }
