@@ -414,7 +414,6 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     // Close the video file
     avformat_close_input(&pFormatCtx);
 }
-// https://stackoverflow.com/questions/13592709/retrieve-album-art-using-ffmpeg
 
 std::unique_ptr<IOHandler> FfmpegHandler::serveContent(const std::shared_ptr<CdsObject>& obj,
     const std::shared_ptr<CdsResource>& resource)
