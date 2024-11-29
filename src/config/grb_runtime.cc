@@ -47,9 +47,6 @@ Gerbera - https://gerbera.io/
 #include <sys/types.h>
 #include <unistd.h>
 
-static constexpr auto gitBranch = std::string_view(GIT_BRANCH);
-static constexpr auto gitCommitHash = std::string_view(GIT_COMMIT_HASH);
-
 GerberaRuntime::GerberaRuntime()
     : confDir(DEFAULT_CONFIG_HOME)
 {
@@ -406,126 +403,6 @@ bool GerberaRuntime::addFile(const std::string& arg)
             log_error("{}", e.what());
             this->exit(EXIT_FAILURE);
         }
-    }
-
-    return true;
-}
-
-bool GerberaRuntime::printCompileInfo(const std::string& arg)
-{
-    printCopyright(arg);
-    // Info from cmake
-    fmt::print(
-        "Compile info:\n"
-        "-------------\n"
-        "{}\n\n",
-        COMPILE_INFO);
-
-    // Active defines
-    std::vector<std::string_view> buildOptions {
-#ifdef USING_NPUPNP
-        "USING_NPUPNP",
-#else
-        "USING_PUPNP",
-#endif
-#ifdef UPNP_HAVE_TOOLS
-        "UPNP_HAVE_TOOLS",
-#endif
-#ifdef HAVE_NL_LANGINFO
-        "HAVE_NL_LANGINFO",
-#endif
-#ifdef HAVE_SETLOCALE
-        "HAVE_SETLOCALE",
-#endif
-#ifdef HAVE_EXECINFO
-        "HAVE_EXECINFO",
-#endif
-#ifdef HAVE_INOTIFY
-        "HAVE_INOTIFY",
-#endif
-#ifdef HAVE_JS
-        "HAVE_JS",
-#endif
-#ifdef SQLITE_BACKUP_ENABLED
-        "SQLITE_BACKUP_ENABLED",
-#endif
-#ifdef HAVE_MYSQL
-        "HAVE_MYSQL",
-#endif
-#ifdef HAVE_CURL
-        "HAVE_CURL",
-#endif
-#ifdef HAVE_TAGLIB
-        "HAVE_TAGLIB",
-#endif
-#ifdef HAVE_WAVPACK
-        "HAVE_WAVPACK",
-#endif
-#ifdef HAVE_MAGIC
-        "HAVE_MAGIC",
-#endif
-#ifdef HAVE_FFMPEG
-        "HAVE_FFMPEG",
-#endif
-#ifdef HAVE_AVSTREAM_CODECPAR
-        "HAVE_AVSTREAM_CODECPAR",
-#endif
-#ifdef HAVE_FFMPEGTHUMBNAILER
-        "HAVE_FFMPEGTHUMBNAILER",
-#endif
-#ifdef HAVE_LIBEXIF
-        "HAVE_LIBEXIF",
-#endif
-#ifdef HAVE_EXIV2
-        "HAVE_EXIV2",
-#endif
-#ifdef HAVE_MATROSKA
-        "HAVE_MATROSKA",
-#endif
-#ifdef ONLINE_SERVICES
-        "ONLINE_SERVICES",
-#endif
-#ifdef HAVE_LASTFMLIB
-        "HAVE_LASTFMLIB",
-#endif
-#ifdef ICONV_CONST
-        "ICONV_CONST",
-#endif
-#ifdef GRBDEBUG
-        "GRBDEBUG",
-#endif
-#ifdef TOMBDEBUG
-        "TOMBDEBUG",
-#endif
-#ifdef SOLARIS
-        "SOLARIS",
-#endif
-#ifdef BSD
-        "BSD",
-#endif
-#ifdef HAVE_ATOMIC
-        "HAVE_ATOMIC",
-#endif
-    };
-    // Print active defines
-    fmt::print(
-        "Build info:\n"
-        "-----------\n"
-        "{}\n\n",
-        fmt::join(buildOptions, "\n"));
-
-    // Print git branch
-    if (!gitBranch.empty()) {
-        fmt::print(
-            "Git info:\n"
-            "---------\n"
-            "Git Branch: {}\n",
-            gitBranch);
-    }
-
-    // Print git commit hash
-    if (!gitCommitHash.empty()) {
-        fmt::print("Git Commit: {}\n", gitCommitHash);
     }
 
     return true;

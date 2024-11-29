@@ -116,7 +116,7 @@ TEST_F(ServerTest, ServerOutputsCompileInformationIncludingGit)
     std::string output = exec(cmd.c_str());
 
     ASSERT_THAT(output, HasSubstr("Compile info:\n-------------\nWITH_"));
-    ASSERT_THAT(output, HasSubstr("Build info:\n-----------\nUSING"));
+    ASSERT_THAT(output, HasSubstr("Build info:\n-----------\nFMT"));
     if constexpr (!gitBranch.empty()) {
         ASSERT_THAT(output, HasSubstr("Git info:\n---------\n"));
         ASSERT_THAT(output, HasSubstr("Git Branch: "));

@@ -3,10 +3,12 @@
 ### HEAD
 
 - Access permissions for files by client
+- actions: clang-format 18
 - Add variables to docker images
 - Bump cookie, express and socket.io in /gerbera-web
 - Config: Unify path handling
 - Config: UI handler mimetypes and CSP
+- deps: Fix build with ffmpeg 6.1
 - Drop Build Support for Ubuntu 23.04
 - Fix access to cache option if thumbnailer disabled
 - Fix autoscan issue with empty filename
@@ -15,6 +17,7 @@
 - Fix creating containers in web ui
 - Fix Handling command line options
 - Fix handling of checkbox values on web ui
+- Improve compile info contents
 - Improve handling multivalue tags in virtual paths
 - Increase size of pupnp threadpool
 - Resource directory configuration and cleanup collection
