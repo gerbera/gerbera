@@ -93,12 +93,43 @@ enum class MetadataFields {
     M_CONDUCTOR,
     M_ORCHESTRA,
 
+    // For containers
     M_CONTENT_CLASS,
+    M_UPNP_SHORTCUT,
 
     M_MAX
 };
 
 using MetadataIterator = EnumIterator<MetadataFields, MetadataFields::M_TITLE, MetadataFields::M_MAX>;
+
+const static auto mt_single = std::map<MetadataFields, bool> {
+    std::pair(MetadataFields::M_TITLE, true),
+    std::pair(MetadataFields::M_ARTIST, false),
+    std::pair(MetadataFields::M_ALBUM, true),
+    std::pair(MetadataFields::M_DATE, true),
+    std::pair(MetadataFields::M_CREATION_DATE, true),
+    std::pair(MetadataFields::M_UPNP_DATE, true),
+    std::pair(MetadataFields::M_GENRE, false),
+    std::pair(MetadataFields::M_DESCRIPTION, false),
+    std::pair(MetadataFields::M_LONGDESCRIPTION, false),
+    std::pair(MetadataFields::M_PARTNUMBER, true),
+    std::pair(MetadataFields::M_TRACKNUMBER, true),
+    std::pair(MetadataFields::M_ALBUMARTURI, false),
+    std::pair(MetadataFields::M_REGION, false),
+    std::pair(MetadataFields::M_CREATOR, false),
+    std::pair(MetadataFields::M_AUTHOR, false),
+    std::pair(MetadataFields::M_DIRECTOR, false),
+    std::pair(MetadataFields::M_PUBLISHER, false),
+    std::pair(MetadataFields::M_RATING, true),
+    std::pair(MetadataFields::M_ACTOR, false),
+    std::pair(MetadataFields::M_PRODUCER, false),
+    std::pair(MetadataFields::M_ALBUMARTIST, false),
+    std::pair(MetadataFields::M_COMPOSER, false),
+    std::pair(MetadataFields::M_CONDUCTOR, false),
+    std::pair(MetadataFields::M_ORCHESTRA, false),
+    std::pair(MetadataFields::M_CONTENT_CLASS, true),
+    std::pair(MetadataFields::M_UPNP_SHORTCUT, true),
+};
 
 class MetaEnumMapper {
 public:

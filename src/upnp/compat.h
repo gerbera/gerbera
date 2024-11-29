@@ -82,4 +82,8 @@ extern "C" void UpnpSetMaxJobsTotal(int mjt);
 #define GrbUpnpNotify(handle, udn, serviceId, xml) UpnpNotifyXML(handle, (udn).c_str(), (serviceId).c_str(), xml)
 #define GrbUpnpAcceptSubscription(handle, udn, serviceId, xml, subsId) UpnpAcceptSubscriptionXML(handle, (udn).c_str(), (serviceId).c_str(), xml, subsId)
 
+#ifndef UPNP_USING_CHUNKED
+#define UPNP_USING_CHUNKED (-1)
+#endif
+
 #endif // GRB_UPNP_COMPAT_H__

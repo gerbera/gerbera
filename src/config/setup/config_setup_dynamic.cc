@@ -32,6 +32,7 @@
 #include "config_setup_int.h"
 #include "config_setup_path.h"
 #include "config_setup_string.h"
+#include "setup_util.h"
 #include "util/logger.h"
 
 #include <numeric>
@@ -63,6 +64,8 @@ bool ConfigDynamicContentSetup::createOptionFromNode(const pugi::xml_node& eleme
             cont->setSort(cs->getXmlContent(child));
             cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_FILTER);
             cont->setFilter(cs->getXmlContent(child));
+            cs = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT);
+            cont->setUpnpShortcut(cs->getXmlContent(child));
         }
         {
             auto cs = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT);
@@ -132,6 +135,16 @@ bool ConfigDynamicContentSetup::updateItem(const std::vector<std::size_t>& index
             return true;
         }
     }
+    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT });
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getUpnpShortcut());
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT)->checkValue(optValue)) {
+            entry->setUpnpShortcut(optValue);
+            log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getUpnpShortcut());
+            return true;
+        }
+    }
     index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_SORT });
     if (optItem == index) {
         if (entry->getOrig())
@@ -154,43 +167,19 @@ bool ConfigDynamicContentSetup::updateItem(const std::vector<std::size_t>& index
     return false;
 }
 
-bool ConfigDynamicContentSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+bool ConfigDynamicContentSetup::updateDetail(const std::string& optItem,
+    std::string& optValue,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     if (startswith(optItem, xpath) && optionValue) {
         log_debug("Updating DynamicContent Detail {} {} {}", xpath, optItem, optValue);
         auto value = std::dynamic_pointer_cast<DynamicContentListOption>(optionValue);
         auto list = value->getDynamicContentListOption();
         auto indexList = extractIndexList(optItem);
-
-        if (indexList.size() > 0) {
-            auto index = indexList.at(0);
-            auto entry = list->get(index, true);
-            std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
-
-            if (!entry && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
-                entry = std::make_shared<DynamicContent>();
-                list->add(entry, index);
-            }
-            if (entry && (status == STATUS_REMOVED || status == STATUS_KILLED)) {
-                list->remove(index, true);
-                return true;
-            }
-            if (entry && status == STATUS_RESET) {
-                list->add(entry, index);
-            }
-            if (entry && updateItem(indexList, optItem, config, entry, optValue, status)) {
-                return true;
-            }
-        } else {
-            indexList.push_back(0);
-        }
-        for (std::size_t tweak = 0; tweak < list->size(); tweak++) {
-            auto entry = value->getDynamicContentListOption()->get(tweak);
-            indexList[0] = tweak;
-            if (updateItem(indexList, optItem, config, entry, optValue)) {
-                return true;
-            }
-        }
+        std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+        if (updateConfig<EditHelperDynamicContent, ConfigDynamicContentSetup, DynamicContentListOption, DynamicContent>(list, config, this, value, optItem, optValue, indexList, status))
+            return true;
     }
     return false;
 }

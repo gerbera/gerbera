@@ -140,7 +140,7 @@ bool CurlOnlineService::refreshServiceData(const std::shared_ptr<Layout>& layout
         obj->setVirtual(true);
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        auto old = database->loadObjectByServiceID(item->getServiceID());
+        auto old = database->loadObjectByServiceID(item->getServiceID(), DEFAULT_CLIENT_GROUP);
         if (!old) {
             log_debug("Adding new {} object", serviceName);
 

@@ -81,7 +81,12 @@ void ConfigVectorSetup::makeOption(const pugi::xml_node& root, const std::shared
     setOption(config);
 }
 
-bool ConfigVectorSetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<VectorOption>& value, const std::string& optValue, const std::string& status) const
+bool ConfigVectorSetup::updateItem(const std::vector<std::size_t>& indexList,
+    const std::string& optItem,
+    const std::shared_ptr<Config>& config,
+    const std::shared_ptr<VectorOption>& value,
+    const std::string& optValue,
+    const std::string& status) const
 {
     auto current = config->getVectorOption(option);
     auto i = indexList.at(0);
@@ -107,7 +112,10 @@ bool ConfigVectorSetup::updateItem(const std::vector<std::size_t>& indexList, co
     return false;
 }
 
-bool ConfigVectorSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+bool ConfigVectorSetup::updateDetail(const std::string& optItem,
+    std::string& optValue,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     if (startswith(optItem, xpath) && optionValue) {
         auto value = std::dynamic_pointer_cast<VectorOption>(optionValue);

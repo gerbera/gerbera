@@ -4,6 +4,8 @@
 
 [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg?style=for-the-badge)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://img.shields.io/github/actions/workflow/status/gerbera/gerbera/ci.yml?style=for-the-badge&branch=master)](https://github.com/gerbera/gerbera/actions?query=workflow%3A%22CI+validation%22+branch%3Amaster) [![Docker Version](https://img.shields.io/docker/v/gerbera/gerbera?color=teal&label=docker&logoColor=white&sort=semver&style=for-the-badge)](https://hub.docker.com/r/gerbera/gerbera/tags?name=2.) [![Documentation Status](https://img.shields.io/readthedocs/gerbera?style=for-the-badge)](http://docs.gerbera.io/en/stable/?badge=stable) [![IRC](https://img.shields.io/badge/IRC-on%20freenode-orange.svg?style=for-the-badge)](https://webchat.freenode.net/?channels=#gerbera)
 
+[![Packaging status](https://repology.org/badge/tiny-repos/gerbera.svg?header=PACKAGES&style=for-the-badge)](https://repology.org/metapackage/gerbera/versions)
+
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
 ## Documentation
@@ -52,7 +54,7 @@ services:
     container_name: gerbera
     network_mode: host
     volumes:
-      - gerbera-config:/var/run/gerbera
+      - ./gerbera-config:/var/run/gerbera
       - /some/files:/mnt/content:ro
 
 volumes:
@@ -89,3 +91,58 @@ $ docker run \
     -v /some/files:/mnt/content:ro \
      gerbera/gerbera:2.3.0 gerbera --port <your-port> --config /var/run/gerbera/config.xml
 ```
+
+## Overwrite default user and group id
+
+In cases (e.g. running multiple gerbera containers with different versions) you can override the exported ports
+
+```console
+$ docker run \
+    --name another-gerbera \
+    --network=host \
+    --env UID=<newuid> \
+    --env GID=<newgid> \
+    -v /some/files:/mnt/content:ro \
+     gerbera/gerbera:2.3.0 gerbera --config /var/run/gerbera/config.xml
+```
+
+# Build Variables
+
+There are some variables in Dockerfile which allow overwriting the defaults if you build the container by yourself
+
+```console
+$ cd /src
+$ git clone https://github.com/gerbera/gerbera.git
+$ cd /src/gerbera
+$ docker build \
+    --build-arg IMAGE_USER=grbr1 \
+    --build-arg IMAGE_GROUP=grbr1 \
+    --build-arg IMAGE_UID=1969 \
+    --build-arg IMAGE_GID=1969 \
+    --build-arg IMAGE_PORT=50500 \
+    -t gerbera .
+```
+
+## BASE_IMAGE
+
+Use a different base image for container. Changing this may lead to build problems if the required packages are not available.
+
+- Default: alpine:3.20
+
+## IMAGE_USER, IMAGE_GROUP
+
+Set a different user/group name in the image to match user/group names on your host
+
+- Default: gerbera
+
+## IMAGE_UID, IMAGE_GID
+
+Set a different user/group id in the image to match user/group ids on your host
+
+- Default: 1042
+
+## IMAGE_PORT
+
+Change the port of gerbera in the image so you don't have to overwrite the port settings on startup.
+
+- Default: 49494

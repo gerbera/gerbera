@@ -4,6 +4,8 @@
 
 [![Current Release](https://img.shields.io/github/release/gerbera/gerbera.svg?style=for-the-badge)](https://github.com/gerbera/gerbera/releases/latest) [![Build Status](https://img.shields.io/github/actions/workflow/status/gerbera/gerbera/ci.yml?style=for-the-badge&branch=master)](https://github.com/gerbera/gerbera/actions?query=workflow%3A%22CI+validation%22+branch%3Amaster) [![Docker Version](https://img.shields.io/docker/v/gerbera/gerbera?color=teal&label=docker&logoColor=white&sort=semver&style=for-the-badge)](https://hub.docker.com/r/gerbera/gerbera/tags?name=2.) [![Documentation Status](https://img.shields.io/readthedocs/gerbera?style=for-the-badge)](http://docs.gerbera.io/en/stable/?badge=stable) [![IRC](https://img.shields.io/badge/IRC-on%20libera.chat-orange.svg?style=for-the-badge)](https://web.libera.chat/?channels=#gerbera)
 
+[![Packaging Status](https://repology.org/badge/tiny-repos/gerbera.svg?header=PACKAGES&style=for-the-badge)](https://repology.org/metapackage/gerbera/versions)
+
 Gerbera is a UPnP media server which allows you to stream your digital media through your home network and consume it on a variety of UPnP compatible devices.
 
 **Pull requests are very welcome and reporting issues is encouraged.**
@@ -54,7 +56,7 @@ sudo make install
 | sqlite3             | 3.7.0       | 3.35.5      | 3.36.0              | Required      | Database storage           |          |
 | zlib                |             |             |                     | Required      | Data compression           |          |
 | [fmtlib]            | 7.1.3       | 9.1.0       | 11.0.2              | Required      | Fast string formatting     |          |
-| [spdlog]            | 1.8.1       | 1.11.0      | 1.14.1              | Required      | Runtime logging            |          |
+| [spdlog]            | 1.8.1       | 1.11.0      | 1.15.0              | Required      | Runtime logging            |          |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0               | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |                     | Optional      | Alternate database storage | Disabled |
 | curl                |             |             |                     | Optional      | Enables web services       | Enabled  |

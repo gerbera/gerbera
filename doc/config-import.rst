@@ -500,6 +500,16 @@ Below are the available scripting options:
 
             .. code:: xml
 
+                upnp-shortcut="MUSIC_ARTISTS"
+
+            * Optional
+
+            Set the upnp shortcut label for this box. The last container created based on this
+            box will be added to the shortcuts feature field.
+            For more details see UPnP-av-ContentDirectory-v4-Service, page 357.
+
+            .. code:: xml
+
                 enabled="no"
 
             * Optional

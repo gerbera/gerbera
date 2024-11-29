@@ -37,7 +37,7 @@ TEST(AutoscanListTest, create)
 
     EXPECT_EQ(list.size(), 1);
 
-    EXPECT_EQ(list.get({"/path/to/thing"}), adir);
+    EXPECT_EQ(list.getKey({"/path/to/thing"}), adir);
 
-    EXPECT_EQ(list.get({"/path/to/other"}), nullptr);
+    EXPECT_EQ(list.getKey({"/path/to/other"}), nullptr);
 }

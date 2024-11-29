@@ -49,61 +49,6 @@ void AutoscanList::updateLMinDB(Database& database)
     }
 }
 
-int AutoscanList::add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index)
-{
-    AutoLock lock(mutex);
-    return _add(dir, index);
-}
-
-int AutoscanList::_add(const std::shared_ptr<AutoscanDirectory>& dir, std::size_t index)
-{
-    if (std::any_of(list.begin(), list.end(), [loc = dir->getLocation()](auto&& item) { return loc == item->getLocation(); })) {
-        throw_std_runtime_error("Attempted to add same autoscan path twice: {}", dir->getLocation().string());
-    }
-    if (index == std::numeric_limits<std::size_t>::max()) {
-        index = getEditSize();
-        origSize = list.size() + 1;
-        dir->setOrig(true);
-    } else {
-        dir->setPersistent(true);
-    }
-    dir->setScanID(index);
-    list.push_back(dir);
-    indexMap[dir->getScanID()] = dir;
-
-    return dir->getScanID();
-}
-
-std::size_t AutoscanList::getEditSize() const
-{
-    if (indexMap.empty()) {
-        return 0;
-    }
-    return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
-}
-
-std::vector<std::shared_ptr<AutoscanDirectory>> AutoscanList::getArrayCopy() const
-{
-    AutoLock lock(mutex);
-
-    return list;
-}
-
-std::shared_ptr<AutoscanDirectory> AutoscanList::get(std::size_t id, bool edit) const
-{
-    AutoLock lock(mutex);
-    if (!edit) {
-        if (id >= list.size())
-            return nullptr;
-
-        return list[id];
-    }
-    if (indexMap.find(id) != indexMap.end()) {
-        return indexMap.at(id);
-    }
-    return nullptr;
-}
-
 std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID) const
 {
     AutoLock lock(mutex);
@@ -112,43 +57,12 @@ std::shared_ptr<AutoscanDirectory> AutoscanList::getByObjectID(int objectID) con
     return it != list.end() ? *it : nullptr;
 }
 
-std::shared_ptr<AutoscanDirectory> AutoscanList::get(const fs::path& location) const
+std::shared_ptr<AutoscanDirectory> AutoscanList::getKey(const fs::path& location) const
 {
     AutoLock lock(mutex);
 
     auto it = std::find_if(list.begin(), list.end(), [=](auto&& item) { return location == item->getLocation(); });
     return it != list.end() ? *it : nullptr;
-}
-
-void AutoscanList::remove(std::size_t id, bool edit)
-{
-    AutoLock lock(mutex);
-
-    if (!edit) {
-        if (id >= list.size()) {
-            log_debug("No such ID {}!", id);
-            return;
-        }
-        auto dir = list[id];
-        dir->invalidate();
-
-        list.erase(list.begin() + id);
-        log_debug("ID {} removed!", id);
-    } else {
-        if (indexMap.find(id) == indexMap.end()) {
-            log_debug("No such index ID {}!", id);
-            return;
-        }
-        auto&& dir = indexMap[id];
-        auto entry = std::find_if(list.begin(), list.end(), [loc = dir->getScanID()](auto&& item) { return loc == item->getScanID(); });
-        dir->invalidate();
-        list.erase(entry);
-
-        if (id >= origSize) {
-            indexMap.erase(id);
-        }
-        log_debug("ID {} removed!", id);
-    }
 }
 
 std::shared_ptr<AutoscanList> AutoscanList::removeIfSubdir(const fs::path& parent, bool persistent)

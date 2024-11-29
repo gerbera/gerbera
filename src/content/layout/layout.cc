@@ -66,6 +66,9 @@ void Layout::processCdsObject(const std::shared_ptr<CdsObject>& obj,
     case ObjectType::Audio:
         resObjects = addAudio(clone, parent, rootpath, containerMap);
         break;
+    case ObjectType::Playlist:
+        log_debug("Playlist not handled in layout: {}", obj->getLocation().c_str());
+        return;
     default:
         log_warning("Unknown media type {}", obj->getClass());
         break;

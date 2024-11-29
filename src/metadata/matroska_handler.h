@@ -39,7 +39,8 @@
 #include <matroska/KaxAttachments.h>
 #endif
 
-// forward declaration
+// forward declarations
+class CdsItem;
 class MemIOHandler;
 
 /// \brief This class is responsible for reading webm or mkv tags metadata

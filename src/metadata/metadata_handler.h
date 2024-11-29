@@ -35,15 +35,21 @@
 #define __METADATA_HANDLER_H__
 
 #include "common.h"
-#include "config/config.h"
-#include "context.h"
-#include "util/grb_fs.h"
 
-// forward declaration
-class CdsItem;
+#include <map>
+#include <memory>
+#include <string>
+#include <vector>
+
+// forward declarations
 class CdsObject;
 class CdsResource;
+class Config;
+class Context;
+class ConverterManager;
 class IOHandler;
+class Mime;
+enum class ConfigVal;
 enum class ContentHandler;
 enum class MetadataFields;
 
@@ -52,14 +58,10 @@ class MetadataHandler {
 protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Mime> mime;
+    std::map<std::string, std::string> mimeContentTypeMappings;
 
 public:
-    explicit MetadataHandler(const std::shared_ptr<Context>& context)
-        : config(context->getConfig())
-        , mime(context->getMime())
-    {
-    }
-
+    explicit MetadataHandler(const std::shared_ptr<Context>& context);
     virtual ~MetadataHandler() = default;
 
     /// \brief read metadata from file and add to object
@@ -84,22 +86,8 @@ protected:
     std::shared_ptr<ConverterManager> converterManager;
 
 public:
-    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, ConfigVal enableOption)
-        : MetadataHandler(context)
-        , isEnabled(this->config->getBoolOption(enableOption))
-        , converterManager(context->getConverterManager())
-    {
-    }
-
-    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, ConfigVal enableOption, ConfigVal metaOption, ConfigVal auxOption)
-        : MetadataHandler(context)
-        , isEnabled(this->config->getBoolOption(enableOption))
-        , metaTags(this->config->getDictionaryOption(metaOption))
-        , auxTags(this->config->getArrayOption(auxOption))
-        , converterManager(context->getConverterManager())
-    {
-    }
-
+    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, ConfigVal enableOption);
+    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, ConfigVal enableOption, ConfigVal metaOption, ConfigVal auxOption);
     virtual ~MediaMetadataHandler() = default;
 };
 

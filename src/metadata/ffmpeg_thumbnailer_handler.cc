@@ -27,6 +27,7 @@ Gerbera - https://gerbera.io/
 #include "ffmpeg_thumbnailer_handler.h" // API
 
 #include "cds/cds_item.h"
+#include "config/config.h"
 #include "config/config_val.h"
 #include "iohandler/mem_io_handler.h"
 #include "resolution.h"
@@ -131,10 +132,7 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
         if (videoResolution.empty())
             return;
         auto resolution = Resolution(videoResolution);
-        auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-
-        auto it = mappings.find(CONTENT_TYPE_JPG);
-        std::string thumbMimetype = it != mappings.end() && !it->second.empty() ? it->second : "image/jpeg";
+        std::string thumbMimetype = getValueOrDefault(mimeContentTypeMappings, CONTENT_TYPE_JPG, "image/jpeg");
 
         auto thumbResource = std::make_shared<CdsResource>(ContentHandler::FFTH, ResourcePurpose::Thumbnail);
         thumbResource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(thumbMimetype));

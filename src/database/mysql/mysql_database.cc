@@ -42,10 +42,6 @@
 
 #include <netinet/in.h>
 
-//#define MYSQL_SET_NAMES "/*!40101 SET NAMES utf8 */"
-//#define MYSQL_SELECT_DEBUG
-//#define MYSQL_EXEC_DEBUG
-
 #define MYSQL_SET_VERSION "INSERT INTO `mt_internal_setting` VALUES ('db_version','{}')"
 static constexpr auto mysqlUpdateVersion = std::string_view("UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'");
 static constexpr auto mysqlAddResourceAttr = std::string_view("ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` varchar(255) default NULL");
@@ -189,6 +185,8 @@ void MySQLDatabase::init()
 
     upgradeDatabase(std::stoul(dbVersion), hashies, ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, mysqlUpdateVersion, mysqlAddResourceAttr);
 
+    initDynContainers();
+
     lock.unlock();
 
     log_debug("end");
@@ -217,11 +215,6 @@ std::string MySQLDatabase::quote(const std::string& value) const
 
 std::string MySQLDatabase::getError(MYSQL* db)
 {
-#ifdef MYSQL_SELECT_DEBUG
-    if (hasDebugging)
-        print_backtrace();
-#endif
-
     auto res = fmt::format("mysql_error ({}): \"{}\"", mysql_errno(db), mysql_error(db));
     log_debug("{}", res);
     return res;
@@ -269,9 +262,6 @@ void MySQLDatabaseWithTransactions::commit(std::string_view tName)
 std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const std::string& query)
 {
     log_debug("{}", query);
-#ifdef MYSQL_EXEC_DEBUG
-    print_backtrace();
-#endif
 
     checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
@@ -303,9 +293,6 @@ std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const std::stri
 std::shared_ptr<SQLResult> MySQLDatabase::select(const std::string& query)
 {
     log_debug("{}", query);
-#ifdef MYSQL_EXEC_DEBUG
-    print_backtrace();
-#endif
 
     checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
@@ -330,9 +317,6 @@ void MySQLDatabase::del(std::string_view tableName, const std::string& clause, c
         ? fmt::format("DELETE FROM {}", identifier(std::string(tableName))) //
         : fmt::format("DELETE FROM {} WHERE {}", identifier(std::string(tableName)), clause);
     log_debug("{}", query);
-#ifdef MYSQL_EXEC_DEBUG
-    print_backtrace();
-#endif
 
     checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
@@ -347,9 +331,6 @@ void MySQLDatabase::del(std::string_view tableName, const std::string& clause, c
 void MySQLDatabase::exec(std::string_view tableName, const std::string& query, int objId)
 {
     log_debug("{}", query);
-#ifdef MYSQL_EXEC_DEBUG
-    print_backtrace();
-#endif
 
     checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
@@ -364,9 +345,6 @@ void MySQLDatabase::exec(std::string_view tableName, const std::string& query, i
 int MySQLDatabase::exec(const std::string& query, bool getLastInsertId)
 {
     log_debug("{}", query);
-#ifdef MYSQL_EXEC_DEBUG
-    print_backtrace();
-#endif
 
     checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
@@ -385,9 +363,6 @@ int MySQLDatabase::exec(const std::string& query, bool getLastInsertId)
 void MySQLDatabase::execOnly(const std::string& query)
 {
     log_debug("{}", query);
-#ifdef MYSQL_EXEC_DEBUG
-    print_backtrace();
-#endif
 
     checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);

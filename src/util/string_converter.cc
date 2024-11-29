@@ -30,7 +30,7 @@
 */
 
 /// \file string_converter.cc
-#define GRB_LOG_FAC GrbLogFacility::content
+#define GRB_LOG_FAC GrbLogFacility::util
 #include "string_converter.h" // API
 
 #include "common.h"
@@ -125,7 +125,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     auto inputBytes = str.length();
     auto outputBytes = length;
 
-    // log_debug("iconv: BEFORE: input bytes left: {}  output bytes left: {}", inputBytes, outputBytes);
+    log_vdebug("iconv: BEFORE: input bytes left: {}  output bytes left: {}", inputBytes, outputBytes);
 #if defined(ICONV_CONST) || defined(SOLARIS)
     int ret = iconv(cd, inputPtr, &inputBytes,
         outputPtr, &outputBytes);
@@ -167,15 +167,15 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
         }
         *outputCopy = 0;
         log_error(err);
-        //        log_debug("iconv: input: {}", input);
-        //        log_debug("iconv: converted part:  {}", output);
+        log_vdebug("iconv: input: {}", input);
+        log_vdebug("iconv: converted part:  {}", output);
         dirty = true;
         delete[] output;
         throw_std_runtime_error(err);
     }
 
-    // log_debug("iconv: AFTER: input bytes left: {}  output bytes left: {}", inputBytes, outputBytes);
-    // log_debug("iconv: returned {}", ret);
+    log_vdebug("iconv: AFTER: input bytes left: {}  output bytes left: {}", inputBytes, outputBytes);
+    log_vdebug("iconv: returned {}", ret);
 
     auto retStr = std::string(output, outputCopy - output);
     delete[] output;
@@ -232,7 +232,7 @@ const std::shared_ptr<StringConverter> ConverterManager::m2i(ConfigVal option, c
         charset = config->getOption(ConfigVal::IMPORT_METADATA_CHARSET);
         charsets[option] = charset;
     }
-    auto tweak = config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST)->get(!location.empty() ? location : "/");
+    auto tweak = config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST)->getKey(!location.empty() ? location : "/");
     if (tweak && tweak->hasMetaCharset()) {
         charset = tweak->getMetaCharset();
         if (converters.find(charset) == converters.end()) {

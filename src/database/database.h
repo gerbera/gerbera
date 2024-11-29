@@ -44,6 +44,7 @@
 class AutoscanDirectory;
 class AutoscanList;
 enum class AutoscanScanMode;
+class BrowseParam;
 class CdsContainer;
 class CdsObject;
 struct ClientObservation;
@@ -52,6 +53,8 @@ class Config;
 class ConfigValue;
 class ConverterManager;
 class Mime;
+class SearchParam;
+class StatsParam;
 class Timer;
 
 #define BROWSE_DIRECT_CHILDREN 0x00000001
@@ -60,142 +63,6 @@ class Timer;
 #define BROWSE_EXACT_CHILDCOUNT 0x00000008
 #define BROWSE_TRACK_SORT 0x00000010
 #define BROWSE_HIDE_FS_ROOT 0x00000020
-
-class BrowseParam {
-protected:
-    unsigned int flags;
-    std::shared_ptr<CdsObject> object;
-
-    int startingIndex {};
-    int requestedCount {};
-    std::string sortCrit;
-    std::string group;
-    bool showDynamicContainers { true };
-
-    // output parameters
-    int totalMatches {};
-
-public:
-    BrowseParam(std::shared_ptr<CdsObject> object, unsigned int flags)
-        : flags(flags)
-        , object(std::move(object))
-    {
-    }
-
-    unsigned int getFlag(unsigned int mask) const { return flags & mask; }
-    void setFlag(unsigned int mask) { flags |= mask; }
-    void clearFlag(unsigned int mask) { flags &= ~mask; }
-
-    std::shared_ptr<CdsObject> getObject() const { return object; }
-
-    void setRange(int startingIndex, int requestedCount)
-    {
-        this->startingIndex = startingIndex;
-        this->requestedCount = requestedCount;
-    }
-    void setStartingIndex(int startingIndex)
-    {
-        this->startingIndex = startingIndex;
-    }
-
-    void setRequestedCount(int requestedCount)
-    {
-        this->requestedCount = requestedCount;
-    }
-
-    void setSortCriteria(const std::string& sortCrit)
-    {
-        this->sortCrit = sortCrit;
-    }
-
-    void setGroup(const std::string& group)
-    {
-        this->group = group;
-    }
-
-    void setDynamicContainers(bool showDynamicContainers)
-    {
-        this->showDynamicContainers = showDynamicContainers;
-    }
-
-    bool getDynamicContainers() const { return showDynamicContainers; }
-    int getStartingIndex() const { return startingIndex; }
-    int getRequestedCount() const { return requestedCount; }
-    int getTotalMatches() const { return totalMatches; }
-    const std::string& getSortCriteria() const { return sortCrit; }
-    const std::string& getGroup() const { return group; }
-
-    void setTotalMatches(int totalMatches)
-    {
-        this->totalMatches = totalMatches;
-    }
-};
-
-class SearchParam {
-protected:
-    std::string containerID;
-    std::string searchCrit;
-    std::string sortCrit;
-    int startingIndex;
-    int requestedCount;
-    bool searchableContainers;
-    std::string group;
-    bool searchContainers;
-    bool searchItems;
-
-public:
-    SearchParam(std::string containerID, std::string searchCriteria, std::string sortCriteria, int startingIndex,
-        int requestedCount, bool searchableContainers, std::string group,
-        bool searchContainers = true,
-        bool searchItems = true)
-        : containerID(std::move(containerID))
-        , searchCrit(std::move(searchCriteria))
-        , sortCrit(std::move(sortCriteria))
-        , startingIndex(startingIndex)
-        , requestedCount(requestedCount)
-        , searchableContainers(searchableContainers)
-        , group(std::move(group))
-        , searchContainers(searchContainers)
-        , searchItems(searchItems)
-    {
-    }
-    const std::string& getSearchCriteria() const { return searchCrit; }
-    const std::string& getContainerID() const { return containerID; }
-    bool getSearchableContainers() const { return searchableContainers; }
-    int getStartingIndex() const { return startingIndex; }
-    int getRequestedCount() const { return requestedCount; }
-    const std::string& getSortCriteria() const { return sortCrit; }
-    const std::string& getGroup() const { return group; }
-    bool getContainers() const { return searchContainers; }
-    bool getItems() const { return searchItems; }
-};
-
-class StatsParam {
-public:
-    enum class StatsMode {
-        Count,
-        Size,
-    };
-
-protected:
-    std::string mimeType;
-    std::string upnpClass;
-    StatsMode mode { StatsMode::Count };
-    bool isVirtual { false };
-
-public:
-    StatsParam(StatsMode mode, std::string mimeType, std::string upnpClass, bool isVirtual)
-        : mimeType(std::move(mimeType))
-        , upnpClass(std::move(upnpClass))
-        , mode(mode)
-        , isVirtual(isVirtual)
-    {
-    }
-    const std::string& getMimeType() const { return mimeType; }
-    const std::string& getUpnpClass() const { return upnpClass; }
-    StatsMode getMode() const { return mode; }
-    bool getVirtual() const { return isVirtual; }
-};
 
 enum class DbFileType {
     Auto,
@@ -239,20 +106,32 @@ public:
 
     virtual void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) = 0;
 
+    /// \brief Perform upnp browse on the database
+    /// \param param browse parameters as received via request
+    /// \return list of CdsObject matching the browse criteria
     virtual std::vector<std::shared_ptr<CdsObject>> browse(BrowseParam& param) = 0;
-    virtual std::vector<std::shared_ptr<CdsObject>> search(const SearchParam& param, int* numMatches) = 0;
-    virtual std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass) = 0;
+
+    /// \brief Perform upnp search on the database
+    /// \param param search parameters as received via request
+    /// \return list of CdsObject matching the search criteria
+    virtual std::vector<std::shared_ptr<CdsObject>> search(SearchParam& param) = 0;
+
+    /// \brief find container matching the content class
+    /// \param contentClass to search for
+    /// \param group user group name
+    /// \return list of CdsObject matching the content class
+    virtual std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass, const std::string& group) = 0;
 
     virtual std::vector<std::string> getMimeTypes() = 0;
-
-    // virtual std::vector<std::shared_ptr<CdsObject>> selectObjects(const std::unique_ptr<SelectParam>& param) = 0;
+    virtual std::map<std::string, std::shared_ptr<CdsContainer>> getShortcuts() = 0;
 
     /// \brief Loads a given (pc directory) object, identified by the given path
     /// from the database
     /// \param path the path of the object; object is interpreted as directory
+    /// \param group user group name
     /// \param fileType type of the database entry to search
     /// \return the CdsObject
-    virtual std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, DbFileType fileType = DbFileType::Auto) = 0;
+    virtual std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, const std::string& group, DbFileType fileType = DbFileType::Auto) = 0;
 
     /// \brief checks for a given (pc directory) object, identified by the given path
     /// from the database
@@ -307,7 +186,7 @@ public:
     virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) = 0;
 
     /// \brief Loads an object given by the online service ID.
-    virtual std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID) = 0;
+    virtual std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID, const std::string& group) = 0;
 
     /// \brief Return an array of object ID's for a particular service.
     ///

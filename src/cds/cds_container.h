@@ -88,10 +88,9 @@ public:
     ///
     /// See description for CdsObject::equals() for details.
     bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) const override;
-    /*
-        /// \brief Checks if the minimum required parameters for the object have been set and are valid.
-        void validate() const override;
-    */
+
+    void setUpnpShortcut(const std::string& upnpShortcut) { addMetaData(MetadataFields::M_UPNP_SHORTCUT, upnpShortcut); }
+    std::string getUpnpShortcut() const { return getMetaData(MetadataFields::M_UPNP_SHORTCUT); }
 };
 
 #endif // __CDS_CONTAINER_H__

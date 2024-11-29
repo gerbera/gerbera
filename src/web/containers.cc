@@ -38,6 +38,7 @@
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "database/database.h"
+#include "database/db_param.h"
 #include "exceptions.h"
 #include "upnp/xml_builder.h"
 #include "util/xml_to_json.h"
@@ -63,7 +64,7 @@ void Web::Containers::process()
         containers.append_attribute("select_it") = param("select_it").c_str();
 
     log_debug("{} {}", action, parentID);
-    auto browseParam = BrowseParam(database->loadObject(DEFAULT_CLIENT_GROUP, parentID), BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
+    auto browseParam = BrowseParam(database->loadObject(getGroup(), parentID), BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
     auto arr = database->browse(browseParam);
     for (auto&& obj : arr) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
@@ -93,6 +94,7 @@ void Web::Containers::process()
         ce.append_attribute("autoscan_mode") = autoscanMode.c_str();
         ce.append_attribute("title") = cont->getTitle().c_str();
         ce.append_attribute("location") = cont->getLocation().c_str();
+        ce.append_attribute("upnp_shortcut") = cont->getUpnpShortcut().c_str();
         ce.append_attribute("upnp_class") = cont->getClass().c_str();
     }
     log_debug("end process()");

@@ -215,10 +215,7 @@ describe('Gerbera Updates', function () {
     });
   });
   describe('errorCheck()', () => {
-    let uiDisabledResponse;
-    let sessionExpiredResponse;
     let event;
-    let xhr;
     let toastMsg;
 
     beforeEach(() => {
@@ -228,22 +225,22 @@ describe('Gerbera Updates', function () {
 
     it('shows a toast message when AJAX error returns failure', () => {
       event = {};
-      xhr = {
+      const errorResponse = {
         responseJSON: invalidResponse
       };
 
-      Updates.errorCheck(event, xhr);
+      Updates.errorCheck(event, errorResponse);
 
       expect(toastMsg.text()).toEqual('General Error');
     });
 
     it('ignores when response does not exist', () => {
       event = {};
-      xhr = {
+      const emptyResponse = {
         responseJSON: {}
       };
 
-      Updates.errorCheck(event, xhr);
+      Updates.errorCheck(event, emptyResponse);
 
       expect(toastMsg.text()).toEqual('');
     });
@@ -251,11 +248,11 @@ describe('Gerbera Updates', function () {
     it('disables application when server returns 900 error code, albeit successful', () => {
       spyOn(GerberaApp, 'disable');
       event = {};
-      xhr = {
+      const uiDisabledResponse = {
         responseJSON: uiDisabled
       };
 
-      Updates.errorCheck(event, xhr);
+      Updates.errorCheck(event, uiDisabledResponse);
 
       expect(toastMsg.text()).toEqual('The UI is disabled in the configuration file. See README.');
       expect(GerberaApp.disable).toHaveBeenCalled();
@@ -264,11 +261,11 @@ describe('Gerbera Updates', function () {
     it('clears session cookie and redirects to home when server returns 400 error code session invalid.', () => {
       spyOn(Auth, 'handleLogout');
       event = {};
-      xhr = {
+      const sessionExpiredResponse = {
         responseJSON: sessionExpired
       };
 
-      Updates.errorCheck(event, xhr);
+      Updates.errorCheck(event, sessionExpiredResponse);
 
       expect(Auth.handleLogout).toHaveBeenCalled();
     });

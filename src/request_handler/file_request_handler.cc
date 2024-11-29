@@ -76,7 +76,7 @@ bool FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     auto resourceId = parseResourceInfo(params);
 
     if (!obj->isItem() && obj->getResourceCount() == 0) {
-        throw_std_runtime_error("Requested object {} is not an item and has no resources", filename);
+        throw_std_runtime_error("Requested object {} is not an item or has no resources", filename);
     }
 
     // for transcoded resources res_id will always be negative
@@ -86,7 +86,7 @@ bool FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     }
     auto resource = trProfile.empty() ? obj->getResource(resourceId) : std::make_shared<CdsResource>(ContentHandler::TRANSCODE, ResourcePurpose::Transcode);
 
-    fs::path path = obj->getLocation();
+    auto path = (obj->isItem() || !obj->isVirtual()) ? obj->getLocation() : "";
 
     // Check if the resource is actually another external file, and if it exists
     bool isResourceFile = false;
@@ -99,20 +99,29 @@ bool FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     }
 
     // Check the path (if its real) is accessible
-    struct stat statbuf {
-    };
-    int ret = stat(path.c_str(), &statbuf);
-    if (ret != 0) {
-        if (isResourceFile) {
-            throw ResourceNotFoundException(fmt::format("{} file {} is not available.", EnumMapper::getPurposeDisplay(resource->getPurpose()), path.c_str()));
+    if (!path.empty()) {
+        struct stat statbuf {
+        };
+        int ret = stat(path.c_str(), &statbuf);
+        if (ret != 0) {
+            if (isResourceFile) {
+                throw ResourceNotFoundException(fmt::format("{} file {} is not available.", EnumMapper::getPurposeDisplay(resource->getPurpose()), path.c_str()));
+            }
+            throw_fmt_system_error("Failed to open {}", path.c_str());
         }
-        throw_fmt_system_error("Failed to open {}", path.c_str());
-    }
 
-    // If we get to here we can read the thing
-    UpnpFileInfo_set_IsReadable(info, true);
-    UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
-    UpnpFileInfo_set_IsDirectory(info, (resource->getHandlerType() == ContentHandler::DEFAULT && S_ISDIR(statbuf.st_mode)));
+        // If we get to here we can read the thing
+        UpnpFileInfo_set_IsReadable(info, true);
+        UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
+        bool isDir = (resource->getHandlerType() == ContentHandler::DEFAULT && S_ISDIR(statbuf.st_mode));
+        UpnpFileInfo_set_IsDirectory(info, isDir);
+        if (!isDir)
+            UpnpFileInfo_set_FileLength(info, statbuf.st_size);
+    } else {
+        UpnpFileInfo_set_IsReadable(info, false);
+        UpnpFileInfo_set_LastModified(info, obj->getMTime().count());
+        UpnpFileInfo_set_IsDirectory(info, true);
+    }
 
     auto headers = Headers();
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
@@ -138,6 +147,8 @@ bool FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             off_t size = ioHandler->tell();
             ioHandler->close();
             UpnpFileInfo_set_FileLength(info, size);
+        } else {
+            UpnpFileInfo_set_FileLength(info, 0);
         }
 
     } else if (!isResourceFile && !trProfile.empty()) {
@@ -163,13 +174,8 @@ bool FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             mimeType = fmt::format("{}", fmt::join(propList, ";"));
         }
 
-#ifdef UPNP_USING_CHUNKED
         UpnpFileInfo_set_FileLength(info, UPNP_USING_CHUNKED);
-#else
-        UpnpFileInfo_set_FileLength(info, -1);
-#endif
     } else if (item) {
-        UpnpFileInfo_set_FileLength(info, statbuf.st_size);
         quirks->addCaptionInfo(item, headers);
         resource = item->getResource(resourceId);
 
@@ -247,7 +253,11 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(const char* filename, const 
         return metadataHandler->serveContent(obj, resource);
     }
 
-    auto path = obj->getLocation();
+    auto path = (obj->isItem() || !obj->isVirtual()) ? obj->getLocation() : "";
+
+    if (path.empty()) {
+        throw_std_runtime_error("Object location for {} not set", filename);
+    }
 
     auto it = params.find(CLIENT_GROUP_TAG);
     std::string group = DEFAULT_CLIENT_GROUP;

@@ -37,9 +37,9 @@ Gerbera - https://gerbera.io/
 #ifndef _GNU_SOURCE
 #define _GNU_SOURCE
 #endif
+
 #include <grp.h>
 #include <pwd.h>
-
 #include <spdlog/sinks/basic_file_sink.h>
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/sinks/syslog_sink.h>
@@ -191,7 +191,7 @@ bool GerberaRuntime::setRotatelog(const std::string& arg)
     if (!fs::directory_entry(logfile->parent_path()).exists()) {
         log_warning("Log dir {} missing", logfile->parent_path().c_str());
     }
-    auto rotateLogger = spdlog::rotating_logger_st("rotate_logger", *logfile, max_size, max_files);
+    auto rotateLogger = spdlog::rotating_logger_mt("rotate_logger", *logfile, max_size, max_files);
     if (!defaultLogger)
         defaultLogger = spdlog::default_logger();
     spdlog::set_default_logger(rotateLogger);
@@ -207,7 +207,7 @@ bool GerberaRuntime::setSyslog(const std::string& arg)
     if (logLevel == 0) {
         log_warning("Unknown Log facility {}, using USER", logLevelStr.value_or(""));
     }
-    auto sysLogger = spdlog::syslog_logger_st("syslog_logger", ProgramName, LOG_PID, logLevel, true);
+    auto sysLogger = spdlog::syslog_logger_mt("syslog_logger", ProgramName, LOG_PID, logLevel, true);
     if (!defaultLogger)
         defaultLogger = spdlog::default_logger();
     spdlog::set_default_logger(sysLogger);
@@ -531,12 +531,6 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
     return true;
 }
 
-bool GerberaRuntime::createExampleConfig(const std::string& arg)
-{
-    exampleConfigSet = true;
-    return true;
-}
-
 bool GerberaRuntime::printCopyright(const std::string& arg)
 {
     fmt::print("\nGerbera UPnP Server {}\n"
@@ -548,9 +542,21 @@ bool GerberaRuntime::printCopyright(const std::string& arg)
     return true;
 }
 
+bool GerberaRuntime::createExampleConfig(const std::string& arg)
+{
+    exampleConfigSet = true;
+    std::optional<std::string> sectionString = (*results)[arg].as<std::string>();
+
+    sections = ConfigGenerator::makeSections(sectionString.value_or("All"));
+    return true;
+}
+
 bool GerberaRuntime::createConfig(const std::string& arg)
 {
     createConfigSet = true;
+    std::optional<std::string> sectionString = (*results)[arg].as<std::string>();
+
+    sections = ConfigGenerator::makeSections(sectionString.value_or("All"));
     return true;
 }
 
@@ -597,7 +603,7 @@ bool GerberaRuntime::checkDirs()
 
 bool GerberaRuntime::printConfig()
 {
-    ConfigGenerator configGenerator(exampleConfigSet);
+    ConfigGenerator configGenerator(exampleConfigSet, sections);
     if (!configDirSet) {
         confDir = "";
     }
@@ -716,7 +722,7 @@ void GerberaRuntime::handleServerOptions(const std::shared_ptr<Server>& server)
 
     this->server = server;
 
-    auto finalHandlers = executeOptions(argumentOptionCallbacks);
+    auto finalHandlers = executeOptions(argumentServerCallbacks);
     finalizeOptions(finalHandlers);
 }
 

@@ -29,6 +29,7 @@
 #include "config/config_setup.h"
 
 class ClientConfig;
+class ClientGroupConfig;
 
 class ConfigClientSetup : public ConfigSetup {
     using ConfigSetup::ConfigSetup;
@@ -41,9 +42,20 @@ protected:
     /// \param result contents of config.
     static bool createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<ClientConfigList>& result);
 
-    bool updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<ClientConfig>& entry, std::string& optValue, const std::string& status = "") const;
-
 public:
+    bool updateItem(const std::vector<std::size_t>& indexList,
+        const std::string& optItem,
+        const std::shared_ptr<Config>& config,
+        std::shared_ptr<ClientConfig>& entry,
+        std::string& optValue,
+        const std::string& status = "") const;
+    bool updateItem(const std::vector<std::size_t>& indexList,
+        const std::string& optItem,
+        const std::shared_ptr<Config>& config,
+        std::shared_ptr<ClientGroupConfig>& entry,
+        std::string& optValue,
+        const std::string& status = "") const;
+
     std::string getTypeString() const override { return "List"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;

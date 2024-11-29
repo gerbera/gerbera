@@ -35,6 +35,9 @@
     <container location="/LastModified" title="Recently Modified" sort="-last_modified">
       <filter>upnp:class derivedfrom "object.item" and last_modified &gt; "@last7"</filter>
     </container>
+    <container location="/LastPlayed" title="Music Recently Played" sort="-upnp:lastPlaybackTime" upnp-shortcut="MUSIC_LAST_PLAYED">
+      <filter>upnp:class derivedfrom "object.item.audioItem" and upnp:lastPlaybackTime &gt; "@last7"</filter>
+    </container>
   </containers>
   <extended-runtime-options>
     <ffmpegthumbnailer enabled="yes">

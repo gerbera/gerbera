@@ -1,6 +1,28 @@
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    gerbera.items.spec.js - this file is part of Gerbera.
+
+    Copyright (C) 2016-2024 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
 import { GerberaApp } from "../../../web/js/gerbera-app.module";
 import { Items, BrowseItemView, SearchItemView, FileItemView } from '../../../web/js/gerbera-items.module';
-import { Trail} from "../../../web/js/gerbera-trail.module";
+import { Trail } from "../../../web/js/gerbera-trail.module";
 import { Updates } from "../../../web/js/gerbera-updates.module";
 import { Auth } from "../../../web/js/gerbera-auth.module";
 
@@ -28,11 +50,11 @@ describe('Gerbera Items', () => {
       }
     };
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
-        return;
+      return;
     });
   });
   afterEach((done) => {
-    $("body").on('transitionend', function(event){
+    $("body").on('transitionend', function (event) {
       $('#editModal').remove();
       $('.modal-backdrop').remove();
     });
@@ -40,19 +62,19 @@ describe('Gerbera Items', () => {
     done();
   });
   beforeAll(() => {
-    spyOn(GerberaApp, 'writeLocalStorage').and.callFake(() => {});
+    spyOn(GerberaApp, 'writeLocalStorage').and.callFake(() => { });
   });
 
   describe('initialize()', () => {
-   beforeEach(() => {
-     GerberaApp.serverConfig = mockConfig.config;
-   });
+    beforeEach(() => {
+      GerberaApp.serverConfig = mockConfig.config;
+    });
 
-   it('clears the datagrid', async () => {
-     await Items.initialize();
-     expect($('#datagrid').text()).toBe('');
-   });
- });
+    it('clears the datagrid', async () => {
+      await Items.initialize();
+      expect($('#datagrid').text()).toBe('');
+    });
+  });
   describe('treeItemSelected()', () => {
     let ajaxSpy;
 
@@ -68,8 +90,7 @@ describe('Gerbera Items', () => {
 
     it('updates the breadcrumb based on the selected item', async () => {
       spyOn(GerberaApp, 'getType').and.returnValue('db');
-      GerberaApp.serverConfig = {};
-      GerberaApp.pageInfo.viewItems = 25;
+      GerberaApp.serverConfig = mockConfig.config;
 
       await Items.initialize();
       Items.treeItemSelected(viewFactoryData);
@@ -79,14 +100,12 @@ describe('Gerbera Items', () => {
       expect(ajaxSpy.calls.mostRecent().args[0].data.req_type).toBe('items');
       expect(ajaxSpy.calls.mostRecent().args[0].data.parent_id).toBe(1235);
       expect(ajaxSpy.calls.mostRecent().args[0].data.start).toBe(0);
-      expect(ajaxSpy.calls.mostRecent().args[0].data.count).toBe(25);
+      expect(ajaxSpy.calls.mostRecent().args[0].data.count).toBe(50);
     });
   });
   describe('transformItems()', () => {
-    let widgetList;
-
     beforeEach(() => {
-      GerberaApp.serverConfig = {};
+      GerberaApp.serverConfig = mockConfig.config;
     });
 
     it('converts a gerbera list of items to the widget accepted list', () => {
@@ -96,7 +115,7 @@ describe('Gerbera Items', () => {
   });
   describe('loadItems()', () => {
     beforeEach(() => {
-      GerberaApp.serverConfig = {};
+      GerberaApp.serverConfig = mockConfig.config;
       spyOn(GerberaApp, 'getType').and.returnValue('db');
       spyOn(GerberaApp, 'gridMode').and.returnValue(0);
       Items.viewFactory(viewFactoryData);
@@ -152,10 +171,8 @@ describe('Gerbera Items', () => {
     });
   });
   describe('loadItems() for files', () => {
-    let response;
-
     beforeEach(() => {
-      GerberaApp.serverConfig = {};
+      GerberaApp.serverConfig = mockConfig.config;
       spyOn(GerberaApp, 'getType').and.returnValue('fs');
       Items.viewFactory(viewFactoryData);
       $('#tree').tree({
@@ -564,7 +581,7 @@ describe('Gerbera Items', () => {
       spyOn(Updates, 'updateTreeByIds');
       spyOn(Updates, 'showMessage');
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
-        return Promise.resolve({success: true});
+        return Promise.resolve({ success: true });
       });
       item = {
         id: 9999
@@ -577,7 +594,7 @@ describe('Gerbera Items', () => {
     });
 
     it('calls the server with the item details to add', async () => {
-      editModal.editmodal('addNewItem', {type: 'item', item: item});
+      editModal.editmodal('addNewItem', { type: 'item', item: item });
 
       await Items.addObject();
       var data = {
@@ -601,7 +618,7 @@ describe('Gerbera Items', () => {
       const parentId = {
         id: 0
       };
-      editModal.editmodal('addNewItem', {type: 'container', item: parentId});
+      editModal.editmodal('addNewItem', { type: 'container', item: parentId });
 
       await Items.addObject();
       var data = {
@@ -620,7 +637,7 @@ describe('Gerbera Items', () => {
     });
 
     it('calls the server with the `container` details', async () => {
-      editModal.editmodal('addNewItem', {type: 'container', item: item});
+      editModal.editmodal('addNewItem', { type: 'container', item: item });
 
       await Items.addObject();
       var data = {
@@ -639,7 +656,7 @@ describe('Gerbera Items', () => {
     });
 
     it('calls the server with the `external_url` details', async () => {
-      editModal.editmodal('addNewItem', {type: 'external_url', item: item});
+      editModal.editmodal('addNewItem', { type: 'external_url', item: item });
 
       await Items.addObject();
       var data = {
@@ -662,7 +679,7 @@ describe('Gerbera Items', () => {
     });
 
     it('when successful adds a GERBERA.Updates UI timer to check for updates later', async () => {
-      editModal.editmodal('addNewItem', {type: 'item', item: item});
+      editModal.editmodal('addNewItem', { type: 'item', item: item });
       GerberaApp.currentTreeItem = {};
       await Items.addObject();
 
@@ -681,7 +698,7 @@ describe('Gerbera Items', () => {
 
     afterEach(() => {
       ajaxSpy.and.callThrough();
-      GerberaApp.serverConfig = {};
+      GerberaApp.serverConfig = mockConfig.config;
     });
 
     it('calls the server for items given correct parameters', async () => {
@@ -689,14 +706,14 @@ describe('Gerbera Items', () => {
 
       const view = new BrowseItemView(0);
       view.start = 0;
-      view.count = 25;
+      // view.count = 25;
       await view.retrieveGerberaItems(0);
       var data = {
         req_type: 'items',
         action: 'browse',
         parent_id: 0,
         start: 0,
-        count: 25,
+        count: 50,
         select_it: 0,
         updates: 'check'
       };
@@ -709,7 +726,7 @@ describe('Gerbera Items', () => {
       spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
       const view = new SearchItemView(0);
       view.start = 0;
-      view.count = 25;
+      view.count = 50;
       view.searchCriteria = 'dc:title contains "music"';
       view.sortCriteria = '-dc:title';
       await view.retrieveGerberaItems(0);
@@ -718,7 +735,7 @@ describe('Gerbera Items', () => {
         action: 'search',
         parent_id: 0,
         start: 0,
-        count: 25,
+        count: 50,
         select_it: 0,
         searchCriteria: 'dc:title contains "music"',
         sortCriteria: '-dc:title',
@@ -733,14 +750,13 @@ describe('Gerbera Items', () => {
       spyOn(Auth, 'getSessionId').and.returnValue('SESSION_ID');
       const view = new FileItemView(0);
       view.start = 0;
-      view.count = 25;
       await view.retrieveGerberaItems(0);
       var data = {
         req_type: 'files',
         action: 'files',
         parent_id: 0,
         start: 0,
-        count: 25,
+        count: 50,
         select_it: 0
       };
       data[Auth.SID] = 'SESSION_ID';
@@ -753,7 +769,6 @@ describe('Gerbera Items', () => {
 
     beforeEach(async () => {
       GerberaApp.serverConfig = mockConfig.config;
-      GerberaApp.serverConfig = {};
 
       await Items.initialize();
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
@@ -766,12 +781,12 @@ describe('Gerbera Items', () => {
     });
 
 
-    it('sends the page number, items per page, and total items to retreive items', async () => {
+    it('sends the page number, items per page, and total items to retrieve items', async () => {
       const event = {
         data: {
           gridMode: 0,
           pageNumber: 1,
-          itemsPerPage: 25,
+          itemsPerPage: 50,
           parentId: 1235
         }
       };
@@ -785,7 +800,7 @@ describe('Gerbera Items', () => {
         action: 'browse',
         parent_id: 1235,
         start: 0,
-        count: 25,
+        count: 50,
         select_it: 0,
         updates: 'check'
       };
@@ -800,7 +815,7 @@ describe('Gerbera Items', () => {
         data: {
           gridMode: 0,
           pageNumber: 5,
-          itemsPerPage: 25,
+          itemsPerPage: 50,
           parentId: 1235
         }
       };
@@ -814,8 +829,8 @@ describe('Gerbera Items', () => {
         req_type: 'items',
         action: 'browse',
         parent_id: 1235,
-        start: 100,
-        count: 25,
+        start: 200,
+        count: 50,
         select_it: 0,
         updates: 'check'
       };
@@ -844,7 +859,7 @@ describe('Gerbera Items', () => {
       const event = {
         data: {
           gridMode: 0,
-          itemsPerPage: 25,
+          itemsPerPage: 50,
           totalMatches: 100,
           parentId: 1235
         }
@@ -859,8 +874,8 @@ describe('Gerbera Items', () => {
         req_type: 'items',
         action: 'browse',
         parent_id: 1235,
-        start: 25,
-        count: 25,
+        start: 50,
+        count: 50,
         select_it: 0,
         updates: 'check'
       };
@@ -890,7 +905,7 @@ describe('Gerbera Items', () => {
       const event = {
         data: {
           gridMode: 0,
-          itemsPerPage: 25,
+          itemsPerPage: 50,
           totalMatches: 100,
           parentId: 1235
         }
@@ -906,7 +921,7 @@ describe('Gerbera Items', () => {
         action: 'browse',
         parent_id: 1235,
         start: 0,
-        count: 25,
+        count: 50,
         select_it: 0,
         updates: 'check'
       };

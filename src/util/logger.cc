@@ -122,6 +122,8 @@ std::map<GrbLogFacility, std::string_view> GrbLogger::facilities = {
     { GrbLogFacility::metadata, "Metadata" },
     { GrbLogFacility::matroska, "Matroska" },
     { GrbLogFacility::curl, "Curl" },
+    { GrbLogFacility::util, "Util" },
+    { GrbLogFacility::verbose, "VERBOSE" },
     // doc-debug-modes-end
 
     { GrbLogFacility::log_MAX, "All" },

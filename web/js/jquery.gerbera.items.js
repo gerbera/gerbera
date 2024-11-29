@@ -88,6 +88,9 @@ $.widget('grb.dataitems', {
         if (item.part) {
           itemText = item.part + ' ' + itemText;
         }
+        if (item.index) {
+          itemText = item.index + ' ' + itemText;
+        }
 
         if (item.url) {
           text = $('<a></a>');
@@ -244,7 +247,7 @@ $.widget('grb.dataitems', {
       const list = $('<ul class="pagination"></ul>');
       const ippSelect = $('<select ' + (pager.gridMode === 3 ? 'hidden ' : '') + 'name="ippSelect" id="ippSelect" style="margin-right: 10px" class="page-link page-select"></select>');
 
-      const ippOptions = pager.ippOptions;
+      const ippOptions = pager.ippOptions.option;
       const pageParams = {
         itemsPerPage: pager.itemsPerPage,
         gridMode: pager.gridMode,
@@ -252,7 +255,8 @@ $.widget('grb.dataitems', {
         parentId: pager.parentId
       };
       for (let ipp in ippOptions) {
-        const ippOption = $('<option' + (pager.itemsPerPage === ippOptions[ipp] ? ' selected="selected" ' : ' ') + 'value="' + ippOptions[ipp] + '">' + ippOptions[ipp] + '</option>');
+        const ippOption = $('<option' + (pager.itemsPerPage === ippOptions[ipp] ? ' selected="selected" ' : ' ') + 'value="' + ippOptions[ipp] + '">'
+            + ippOptions[ipp] + ((pager.ippOptions.default === ippOptions[ipp]) ? ' *' : '') + '</option>');
         ippOption.appendTo(ippSelect);
       }
       $('<option' + (pager.itemsPerPage === 0 ? ' selected="selected" ' : ' ') + 'value="0">All</option>').appendTo(ippSelect);

@@ -32,6 +32,7 @@
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "content_manager.h"
+#include "context.h"
 #include "database/database.h"
 #include "exceptions.h"
 #include "layout/builtin_layout.h"
@@ -114,7 +115,7 @@ void UpnpMap::initMap(std::vector<UpnpMap>& target, const std::map<std::string, 
                 filters.emplace_back(match[1], match[2], match[3]);
             }
         }
-        log_debug("UpnpMap: {} -> {}", mt, cls);
+        log_vdebug("UpnpMap: {} -> {}", mt, cls);
         target.emplace_back(mt, cls, filters);
     }
 }
@@ -269,7 +270,7 @@ void ImportService::doImport(const fs::path& location, AutoScanSetting& settings
         auto rootDirEntry = fs::directory_entry(rootPath);
         cacheState(rootPath, rootDirEntry, ImportState::New, toSeconds(rootDirEntry.last_write_time(ec)));
     }
-    auto rootEntry = fs::directory_entry(location);
+    auto rootEntry = fs::directory_entry(location, ec);
     if (ec) {
         log_error("Failed to start {}, {}", location.c_str(), ec.message());
         return;
@@ -426,6 +427,7 @@ bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, co
         || (!settings.followSymlinks && dirEntry.is_symlink())
         || config->getConfigFilename() == entryPath) {
         cacheState(entryPath, dirEntry, ImportState::ToDelete);
+        log_vdebug("hidden {}", entryPath.string());
         return true;
     }
     if (!noMediaName.empty()) {
@@ -462,14 +464,14 @@ void ImportService::createContainers(int parentContainerId, AutoScanSetting& set
                 for (auto&& [childPath, childEntry] : contentStateCache) {
                     // find direct folder entry with old name and rely on iteration to rename hierarchy
                     if (childEntry && childPath.parent_path() == contPath) {
-                        auto childObj = database->findObjectByPath(oldLocation / childPath.filename(), DbFileType::Any);
+                        auto childObj = database->findObjectByPath(oldLocation / childPath.filename(), UNUSED_CLIENT_GROUP, DbFileType::Any);
                         if (childObj)
                             childEntry->setObject(ImportState::New, childObj);
                     }
                 }
             }
             if (!cdsObj)
-                cdsObj = database->findObjectByPath(contPath, DbFileType::Directory);
+                cdsObj = database->findObjectByPath(contPath, UNUSED_CLIENT_GROUP, DbFileType::Directory);
 
             if (cdsObj) {
                 try {
@@ -552,7 +554,7 @@ void ImportService::createItems(AutoScanSetting& settings)
             if (!cdsObj) {
                 // Search item in database
                 log_debug("Searching Item {} in database", itemPath.string());
-                cdsObj = database->findObjectByPath(itemPath, DbFileType::File);
+                cdsObj = database->findObjectByPath(itemPath, UNUSED_CLIENT_GROUP, DbFileType::File);
             }
             if (cdsObj && cdsObj->isItem()) {
                 auto isChanged = stateEntry->getMTime() != cdsObj->getMTime() || cdsObj->getLocation().string() != dirEntry.path().string();
@@ -700,7 +702,10 @@ void ImportService::fillLayout(const std::shared_ptr<GenericTask>& task)
 }
 
 /// \param object used to make code compatible with legacy scan
-void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state, std::shared_ptr<CdsObject> object, const std::shared_ptr<CdsContainer>& parent, const std::shared_ptr<GenericTask>& task)
+void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
+    std::shared_ptr<CdsObject> object,
+    const std::shared_ptr<CdsContainer>& parent,
+    const std::shared_ptr<GenericTask>& task)
 {
     std::shared_ptr<CdsObject> cdsObject = state ? state->getObject() : std::move(object);
     log_debug("cds {}, layout {}, autoscanDir {}", !!cdsObject, !!layout, !!autoscanDir);
@@ -709,8 +714,20 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
         try {
             std::string mimetype = std::static_pointer_cast<CdsItem>(cdsObject)->getMimeType();
             std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
+            log_vdebug("mimetype {}, contentype {}, autoscanDir {}", mimetype, contentType, (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())));
 
-            if (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())) {
+            if (contentType == CONTENT_TYPE_PLAYLIST) {
+#ifdef HAVE_JS
+                try {
+                    if (playlistParserScript)
+                        playlistParserScript->processPlaylistObject(cdsObject, task, rootPath);
+                } catch (const std::runtime_error& e) {
+                    log_error("{}", e.what());
+                }
+#else
+                log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", cdsObject->getLocation().c_str());
+#endif // HAVE_JS
+            } else if (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())) {
                 // only lock mutex while processing item layout
                 LayoutAutoLock lock(layoutMutex);
                 // get ref'd objects with last mod time
@@ -720,20 +737,9 @@ void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
                     containerTypeMap,
                     refObjects);
             } else {
-                log_debug("file ignored: {} autoscanDir={}, class={}, hasContent={}, mediaType={}", cdsObject->getLocation().string(), !!autoscanDir, cdsObject->getClass(), autoscanDir ? autoscanDir->hasContent(cdsObject->getClass()) : false, autoscanDir ? autoscanDir->getMediaType() : -2);
+                log_debug("File ignored: {} autoscanDir={}, class={}, hasContent={}, mediaType={}", cdsObject->getLocation().string(), !!autoscanDir, cdsObject->getClass(), autoscanDir ? autoscanDir->hasContent(cdsObject->getClass()) : false, autoscanDir ? autoscanDir->getMediaType() : -2);
             }
 
-#ifdef HAVE_JS
-            try {
-                if (playlistParserScript && contentType == CONTENT_TYPE_PLAYLIST)
-                    playlistParserScript->processPlaylistObject(cdsObject, task, rootPath);
-            } catch (const std::runtime_error& e) {
-                log_error("{}", e.what());
-            }
-#else
-            if (contentType == CONTENT_TYPE_PLAYLIST)
-                log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", cdsObject->getLocation().c_str());
-#endif // HAVE_JS
         } catch (const std::runtime_error& ex) {
             log_error("{}", ex.what());
         }
@@ -952,7 +958,7 @@ std::pair<int, bool> ImportService::addContainerTree(
                     auto keyValue = item->getMetaData(field.replace(field.end() - 2, field.end(), ""));
                     if (!keyValue.empty())
                         dirKeyValues.push_back(keyValue);
-                } else {
+                } else if (!field.empty()) {
                     auto keyValueGroup = item->getMetaGroup(field);
                     if (!keyValueGroup.empty())
                         for (auto&& keyValue : keyValueGroup)
@@ -968,7 +974,7 @@ std::pair<int, bool> ImportService::addContainerTree(
                 subTree = toLower(subTree);
             }
             if (containerMap.find(subTree) == containerMap.end() || !containerMap.at(subTree)) {
-                auto cont = database->findObjectByPath(subTree, DbFileType::Virtual);
+                auto cont = database->findObjectByPath(subTree, UNUSED_CLIENT_GROUP, DbFileType::Virtual);
                 if (cont && cont->isContainer())
                     containerMap[subTree] = std::dynamic_pointer_cast<CdsContainer>(cont);
                 else
@@ -994,6 +1000,10 @@ std::pair<int, bool> ImportService::addContainerTree(
                 createdIds.push_back(result); // ensure update
             }
             isNew = true;
+            if (item->isContainer()) {
+                std::shared_ptr<CdsContainer> itemContainer = std::dynamic_pointer_cast<CdsContainer>(item);
+                container->setUpnpShortcut(itemContainer->getUpnpShortcut());
+            }
         } else {
             result = containerMap.at(subTree)->getID();
             if (item->getMTime() > containerMap.at(subTree)->getMTime()) {

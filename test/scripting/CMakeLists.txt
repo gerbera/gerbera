@@ -1,3 +1,25 @@
+#*GRB*
+#
+#  Gerbera - https://gerbera.io/
+#
+#  CMakeLists.txt - this file is part of Gerbera.
+#
+#  Copyright (C) 2016-2024 Gerbera Contributors
+#
+#  Gerbera is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2
+#  as published by the Free Software Foundation.
+#
+#  Gerbera is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  $Id$
+
 add_executable(testscripting
     main.cc
     mock/duk_helper.h
@@ -30,13 +52,18 @@ else()
     )
 endif()
 
-add_custom_command(TARGET testscripting POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/fixtures
-    DEPENDS fixtures/*
-    COMMENT "Copying Scripting Fixtures"
-)
 target_compile_definitions(testscripting PRIVATE SCRIPTS_DIR="${CMAKE_SOURCE_DIR}/scripts")
+add_dependencies(testscripting libgerbera gerbera)
 
 include(GoogleTest)
-gtest_discover_tests(testscripting DISCOVERY_TIMEOUT 60)
+gtest_discover_tests(testscripting DISCOVERY_TIMEOUT 60 TEST_LIST GRB_SCRIPTING_TESTS)
 
+add_test(NAME scriptingFixtures
+    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/fixtures
+    # DEPENDS fixtures/*
+)
+set_tests_properties(scriptingFixtures PROPERTIES FIXTURES_SETUP GrbScripting)
+
+set_property(DIRECTORY APPEND PROPERTY
+    TEST_INCLUDE_FILES ${CMAKE_CURRENT_LIST_DIR}/CTestManip.cmake
+)

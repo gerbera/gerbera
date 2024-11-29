@@ -33,6 +33,7 @@
 #include "config_setup_bool.h"
 #include "config_setup_int.h"
 #include "config_setup_string.h"
+#include "setup_util.h"
 #include "util/logger.h"
 
 #include <algorithm>
@@ -53,6 +54,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
         auto key = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->getXmlContent(child);
         auto title = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->getXmlContent(child);
         auto objClass = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->getXmlContent(child);
+        auto upnpShortcut = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->getXmlContent(child);
         auto size = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
         auto enabled = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
 
@@ -61,7 +63,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
             enabled = true;
         }
 
-        auto box = std::make_shared<BoxLayout>(key, title, objClass, enabled, size);
+        auto box = std::make_shared<BoxLayout>(key, title, objClass, upnpShortcut, enabled, size);
         try {
             result->add(box);
             allKeys.push_back(key);
@@ -72,7 +74,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
     }
     for (auto&& defEntry : defaultEntries) {
         if (std::find(allKeys.begin(), allKeys.end(), defEntry.getKey()) == allKeys.end()) {
-            auto box = std::make_shared<BoxLayout>(defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
+            auto box = std::make_shared<BoxLayout>(defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getUpnpShortcut(), defEntry.getEnabled(), defEntry.getSize());
             log_info("Created default BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
             result->add(box);
             allKeys.push_back(defEntry.getKey());
@@ -105,7 +107,12 @@ void ConfigBoxLayoutSetup::makeOption(const pugi::xml_node& root, const std::sha
     setOption(config);
 }
 
-bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<BoxLayout>& entry, std::string& optValue, const std::string& status) const
+bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
+    const std::string& optItem,
+    const std::shared_ptr<Config>& config,
+    std::shared_ptr<BoxLayout>& entry,
+    std::string& optValue,
+    const std::string& status) const
 {
     if (optItem == getItemPath(indexList, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
@@ -141,6 +148,16 @@ bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
             return true;
         }
     }
+    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT });
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getUpnpShortcut());
+        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->checkValue(optValue)) {
+            entry->setUpnpShortcut(optValue);
+            log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getUpnpShortcut());
+            return true;
+        }
+    }
     index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_SIZE });
     if (optItem == index) {
         if (entry->getOrig())
@@ -160,43 +177,19 @@ bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
     return false;
 }
 
-bool ConfigBoxLayoutSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+bool ConfigBoxLayoutSetup::updateDetail(const std::string& optItem,
+    std::string& optValue,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     if (startswith(optItem, xpath) && optionValue) {
         log_debug("Updating BoxLayout Detail {} {} {}", xpath, optItem, optValue);
         auto value = std::dynamic_pointer_cast<BoxLayoutListOption>(optionValue);
         auto list = value->getBoxLayoutListOption();
         auto indexList = extractIndexList(optItem);
-
-        if (indexList.size() > 0) {
-            auto index = indexList.at(0);
-            auto entry = list->get(index, true);
-            std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
-
-            if (!entry && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
-                entry = std::make_shared<BoxLayout>();
-                list->add(entry, index);
-            }
-            if (entry && (status == STATUS_REMOVED || status == STATUS_KILLED)) {
-                list->remove(index, true);
-                return true;
-            }
-            if (entry && status == STATUS_RESET) {
-                list->add(entry, index);
-            }
-            if (entry && updateItem(indexList, optItem, config, entry, optValue, status)) {
-                return true;
-            }
-        } else {
-            indexList.push_back(0);
-        }
-        for (std::size_t box = 0; box < list->size(); box++) {
-            auto entry = value->getBoxLayoutListOption()->get(box);
-            indexList[0] = box;
-            if (updateItem(indexList, optItem, config, entry, optValue)) {
-                return true;
-            }
-        }
+        std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
+        if (updateConfig<EditHelperBoxLayout, ConfigBoxLayoutSetup, BoxLayoutListOption, BoxLayout>(list, config, this, value, optItem, optValue, indexList, status))
+            return true;
     }
     return false;
 }

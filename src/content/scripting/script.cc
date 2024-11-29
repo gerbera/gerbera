@@ -78,13 +78,13 @@ static constexpr std::array jsGlobalFunctions {
 void Script::setProperty(const std::string& name, const std::string& value)
 {
     duk_push_string(ctx, value.c_str());
-    duk_put_prop_string(ctx, -2, name.c_str());
+    duk_put_prop_string(ctx, -2, camelCaseString(name).c_str());
 }
 
 void Script::setIntProperty(const std::string& name, int value)
 {
     duk_push_int(ctx, value);
-    duk_put_prop_string(ctx, -2, name.c_str());
+    duk_put_prop_string(ctx, -2, camelCaseString(name).c_str());
 }
 
 /* **************** */
@@ -202,12 +202,13 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
         duk_put_prop_string(ctx, -2, acs->getItemPathRoot().c_str());
     }
 
-    duk_push_object(ctx); // autoscan
-    std::string autoscanItemPath;
     for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
+        duk_push_object(ctx); // autoscan
         auto autoscan = ascs->getValue()->getAutoscanListOption();
+
         for (const auto& adir : content->getAutoscanDirectories()) {
             duk_push_object(ctx);
+
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
             setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
@@ -220,13 +221,13 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
 
             duk_put_prop_string(ctx, -2, fmt::to_string(adir->getScanID()).c_str());
         }
-        autoscanItemPath = ascs->getItemPathRoot(true); // prefix
+        std::string autoscanItemPath = ascs->getItemPathRoot(true); // prefix
+        duk_put_prop_string(ctx, -2, autoscanItemPath.c_str()); // autoscan
+        log_debug("Adding config[{}] {}", autoscanItemPath, content->getAutoscanDirectories().size());
     }
-    duk_put_prop_string(ctx, -2, autoscanItemPath.c_str()); // autoscan
 
     for (auto&& bcs : ConfigDefinition::getConfigSetupList<ConfigBoxLayoutSetup>()) {
         duk_push_object(ctx); // box-layout
-        std::string boxLayoutItemPath;
         auto boxLayoutList = bcs->getValue()->getBoxLayoutListOption();
         for (std::size_t i = 0; i < boxLayoutList->size(); i++) {
             duk_push_object(ctx);
@@ -236,10 +237,12 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_ENABLED), boxLayout->getEnabled());
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_TITLE), boxLayout->getTitle());
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_CLASS), boxLayout->getClass());
+            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT), boxLayout->getUpnpShortcut());
             duk_put_prop_string(ctx, -2, boxLayout->getKey().c_str());
         }
-        boxLayoutItemPath = bcs->getItemPathRoot(true); // prefix
+        std::string boxLayoutItemPath = bcs->getItemPathRoot(true); // prefix
         duk_put_prop_string(ctx, -2, boxLayoutItemPath.c_str()); // box-layout
+        log_debug("Adding config[{}] {}", boxLayoutItemPath, boxLayoutList->size());
     }
 
     duk_put_global_string(ctx, "config");
@@ -584,10 +587,12 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
         if (flags >= 0)
             obj->setFlags(flags);
 
+        // get resources
         ScriptNamedProperty(ctx, "res").getObject([&]() {
             auto keys = ScriptProperty(ctx).getPropertyNames();
 
             int resCount = 0;
+            // read resources
             for (auto&& sym : keys) {
                 if (sym.find("handlerType") != std::string::npos) {
                     int ht = ScriptNamedProperty(ctx, sym).getIntValue(-1);
@@ -601,6 +606,7 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
                     resCount++;
                 }
             }
+            // update resource attributes
             for (auto&& res : obj->getResources()) {
                 resCount = res->getResId();
                 // only attributes enumerated in res_names are allowed
@@ -630,6 +636,7 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
             }
         });
 
+        // update aux data
         ScriptNamedProperty(ctx, "aux").getObject([&]() {
             auto keys = ScriptProperty(ctx).getPropertyNames();
             for (auto&& sym : keys) {
@@ -656,6 +663,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         obj->setMTime(std::chrono::seconds(mtime));
     }
 
+    // update title
     {
         auto val = ScriptNamedProperty(ctx, "title").getStringValue();
         if (!val.empty()) {
@@ -666,6 +674,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         }
     }
 
+    // update upnpclass
     {
         auto val = ScriptNamedProperty(ctx, "upnpclass").getStringValue();
         if (!val.empty()) {
@@ -676,10 +685,12 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         }
     }
 
+    // update restricted
     int restricted = ScriptNamedProperty(ctx, "restricted").getBoolValue();
     if (restricted >= 0)
         obj->setRestricted(restricted);
 
+    // update metaData
     ScriptNamedProperty(ctx, "metaData").getObject([&]() {
         auto item = std::static_pointer_cast<CdsItem>(obj);
         auto keys = ScriptProperty(ctx).getPropertyNames();
@@ -699,6 +710,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         obj->setLocation(location);
     }
 
+    // update description
     auto description = ScriptNamedProperty(ctx, "description").getStringValue();
     if (!description.empty()) {
         description = sc->convert(description);
@@ -714,6 +726,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         if (pcd)
             pcdItem = std::static_pointer_cast<CdsItem>(pcd);
 
+        // update mimetype
         auto mimetype = ScriptNamedProperty(ctx, "mimetype").getStringValue();
         if (!mimetype.empty()) {
             mimetype = sc->convert(mimetype);
@@ -722,12 +735,14 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             item->setMimeType(pcdItem->getMimeType());
         }
 
+        // update serviceID for onlineservice
         auto serviceID = ScriptNamedProperty(ctx, "serviceID").getStringValue();
         if (!serviceID.empty()) {
             serviceID = sc->convert(serviceID);
             item->setServiceID(serviceID);
         }
 
+        // update description if not set in script
         {
             auto val = ScriptNamedProperty(ctx, "description").getStringValue();
             if (!val.empty()) {
@@ -739,15 +754,18 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             }
         }
 
+        // update location if not set in script
         if (location.empty() && pcd) {
             obj->setLocation(pcd->getLocation());
         }
 
+        // CdsExternalItem (like links)
         if (obj->isExternalItem()) {
             std::string protocolInfo;
 
             obj->setRestricted(true);
 
+            // update protocol
             auto protocol = ScriptNamedProperty(ctx, "protocol").getStringValue();
             if (!protocol.empty()) {
                 protocol = sc->convert(protocol);
@@ -756,6 +774,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 protocolInfo = renderProtocolInfo(item->getMimeType(), PROTOCOL);
             }
 
+            // add resources
             std::shared_ptr<CdsResource> resource;
             if (item->getResourceCount() == 0) {
                 resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
@@ -780,10 +799,18 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         if (id >= CDS_ID_ROOT)
             cont->setUpdateID(id);
 
+        // update searchable
         int searchable = ScriptNamedProperty(ctx, "searchable").getBoolValue();
         log_debug("{} searchable {}", cont->getTitle(), searchable);
         if (searchable >= 0)
             cont->setSearchable(searchable);
+
+        // update upnpShortcut
+        auto upnpShortcut = ScriptNamedProperty(ctx, "upnpShortcut").getStringValue();
+        if (!upnpShortcut.empty()) {
+            upnpShortcut = sc->convert(upnpShortcut);
+            cont->setUpnpShortcut(upnpShortcut);
+        }
 
         handleObject2cdsContainer(ctx, pcd, cont);
     }

@@ -36,6 +36,16 @@
 #include <iterator>
 #include <numeric>
 
+std::shared_ptr<ClientGroupConfig> ClientConfigList::getGroup(const std::string& name) const
+{
+    EditHelperClientGroupConfig::AutoLock lock(EditHelperClientGroupConfig::mutex);
+    auto entry = std::find_if(EditHelperClientGroupConfig::list.begin(), EditHelperClientGroupConfig::list.end(), [=](auto&& c) { return c->getGroupName() == name; });
+    if (entry != EditHelperClientGroupConfig::list.end() && *entry) {
+        return *entry;
+    }
+    return {};
+}
+
 ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent,
     const std::map<ClientMatchType, std::string>& matchValues,
     int captionInfoCount, int stringLimit, bool multiValue, bool isAllowed)
@@ -57,6 +67,7 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
     clientProfile.mimeMappings = DictionaryOption({});
     clientProfile.headers = DictionaryOption({});
     clientProfile.group = group;
+    clientProfile.groupConfig = {};
     clientProfile.flags = flags;
     clientProfile.captionInfoCount = captionInfoCount;
     clientProfile.stringLimit = stringLimit;
@@ -75,79 +86,6 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
         clientProfile.supportedResources.erase(res);
     }
     clientProfile.name = fmt::format("{} Setup for {} {}", mapClientType(clientProfile.type), mapMatchType(clientProfile.matchType), clientProfile.match);
-}
-
-void ClientConfigList::add(const std::shared_ptr<ClientConfig>& client, std::size_t index)
-{
-    AutoLock lock(mutex);
-    _add(client, index);
-}
-
-void ClientConfigList::_add(const std::shared_ptr<ClientConfig>& client, std::size_t index)
-{
-    if (index == std::numeric_limits<std::size_t>::max()) {
-        index = getEditSize();
-        origSize = list.size() + 1;
-        client->setOrig(true);
-    }
-    list.push_back(client);
-    indexMap[index] = client;
-}
-
-std::size_t ClientConfigList::getEditSize() const
-{
-    if (indexMap.empty()) {
-        return 0;
-    }
-    return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
-}
-
-std::vector<std::shared_ptr<ClientConfig>> ClientConfigList::getArrayCopy() const
-{
-    AutoLock lock(mutex);
-    return list;
-}
-
-std::shared_ptr<ClientConfig> ClientConfigList::get(std::size_t id, bool edit) const
-{
-    AutoLock lock(mutex);
-    if (!edit) {
-        if (id >= list.size())
-            return nullptr;
-
-        return list[id];
-    }
-    if (indexMap.find(id) != indexMap.end()) {
-        return indexMap.at(id);
-    }
-    return nullptr;
-}
-
-void ClientConfigList::remove(std::size_t id, bool edit)
-{
-    AutoLock lock(mutex);
-
-    if (!edit) {
-        if (id >= list.size()) {
-            log_debug("No such ID {}!", id);
-            return;
-        }
-
-        list.erase(list.begin() + id);
-        log_debug("ID {} removed!", id);
-    } else {
-        if (indexMap.find(id) == indexMap.end()) {
-            log_debug("No such index ID {}!", id);
-            return;
-        }
-        auto&& client = indexMap[id];
-        auto entry = std::find_if(list.begin(), list.end(), [ip = client->getIp(), user = client->getUserAgent()](auto&& item) { return ip == item->getIp() && user == item->getUserAgent(); });
-        list.erase(entry);
-        if (id >= origSize) {
-            indexMap.erase(id);
-        }
-        log_debug("ID {} removed!", id);
-    }
 }
 
 void ClientConfig::setMimeMappingsFrom(std::size_t j, const std::string& from)
@@ -245,6 +183,7 @@ static constexpr std::array quirkFlags {
     std::pair("HIDE_TRANSCODE_RESOURCE", QUIRK_FLAG_HIDE_RES_TRANSCODE),
     std::pair("SIMPLE_DATE", QUIRK_FLAG_SIMPLE_DATE),
     std::pair("DCM10", QUIRK_FLAG_DCM10),
+    std::pair("HIDE_CONTAINER_SHORTCUTS", QUIRK_FLAG_HIDE_CONTAINER_SHORTCUTS),
     std::pair("TRANSCODING1", QUIRK_FLAG_TRANSCODING1),
     std::pair("TRANSCODING2", QUIRK_FLAG_TRANSCODING2),
     std::pair("TRANSCODING3", QUIRK_FLAG_TRANSCODING3),

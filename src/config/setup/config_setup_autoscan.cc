@@ -76,7 +76,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
 
         fs::path location;
         try {
-            location = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION)->getXmlContent(child);
+            location = ConfigDefinition::findConfigSetup<ConfigPathSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION)->getXmlContent(child, true);
         } catch (const std::runtime_error&) {
             log_warning("Found an Autoscan directory with invalid location!");
             continue;

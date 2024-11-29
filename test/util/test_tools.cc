@@ -181,6 +181,15 @@ TEST(ToolsTest, trimStringTest)
     EXPECT_EQ(trimString("  AB  "), "AB");
 }
 
+TEST(ToolsTest, camelCaseStringTest)
+{
+    EXPECT_EQ(camelCaseString(""), "");
+    EXPECT_EQ(camelCaseString("AB"), "AB");
+    EXPECT_EQ(camelCaseString("upnp-test"), "upnpTest");
+    EXPECT_EQ(camelCaseString("upnptest-"), "upnptest");
+    EXPECT_EQ(camelCaseString("-upnptest"), "Upnptest");
+}
+
 TEST(ToolsTest, startswithTest)
 {
     EXPECT_EQ(startswith("AB", "AB"), true);

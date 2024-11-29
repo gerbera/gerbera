@@ -76,6 +76,31 @@ std::vector<std::string> splitString(std::string_view str, char sep, bool empty)
     return ret;
 }
 
+std::string camelCaseString(const std::string_view& str)
+{
+    std::string ret;
+
+    std::size_t pos = 0;
+    std::size_t end = 0;
+    while (end < str.size()) {
+        if (str.at(end) == '-') {
+            if (pos < end) {
+                ret.append(str.substr(pos, end - pos));
+            }
+            ++end;
+            if (end < str.size())
+                ret.push_back(::toupper(str.at(end)));
+            pos = end + 1;
+        }
+        ++end;
+    }
+
+    if (pos < end)
+        ret.append(str.substr(pos, end));
+
+    return ret;
+}
+
 void trimStringInPlace(std::string& str)
 {
     str.erase(str.begin(), std::find_if_not(str.begin(), str.end(), ::isspace));

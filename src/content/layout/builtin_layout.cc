@@ -62,6 +62,8 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
     for (auto&& bl : blOption->getArrayCopy()) {
         // We could copy only the enabled containers, but to avoid checking dependencies here, we copy all of them!
         container[bl->getKey()] = std::make_shared<CdsContainer>(bl->getTitle());
+        if (!bl->getUpnpShortcut().empty())
+            container[bl->getKey()]->setUpnpShortcut(bl->getUpnpShortcut());
     }
 
     containerAt(BoxKeys::videoRoot)->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_VIDEO_ITEM);
@@ -76,7 +78,7 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
 
     containerAt(BoxKeys::audioRoot)->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_AUDIO_ITEM);
     chain["/Audio/All Audio"] = this->content->addContainerTree({ containerAt(BoxKeys::audioRoot), containerAt(BoxKeys::audioAll) }, nullptr);
-    if (blOption->get(BoxKeys::audioAllTracks)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::audioAllTracks)->getEnabled()) {
         chain["/Audio/All - full name"] = this->content->addContainerTree({ containerAt(BoxKeys::audioRoot), containerAt(BoxKeys::audioAllTracks) }, nullptr);
     }
 
@@ -157,7 +159,7 @@ std::vector<int> BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, 
                 month.resize(m);
         }
 
-        if (blOption->get(BoxKeys::videoAllYears)->getEnabled()) {
+        if (blOption->getKey(BoxKeys::videoAllYears)->getEnabled()) {
             if ((y > 0) && (m > 0)) {
                 std::vector<std::shared_ptr<CdsObject>> ct;
                 ct.reserve(4);
@@ -170,7 +172,7 @@ std::vector<int> BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, 
             }
         }
 
-        if (blOption->get(BoxKeys::videoAllDates)->getEnabled()) {
+        if (blOption->getKey(BoxKeys::videoAllDates)->getEnabled()) {
             auto t = date.find('T');
             if (t != std::string::npos) {
                 date.resize(t);
@@ -184,7 +186,7 @@ std::vector<int> BuiltinLayout::addVideo(const std::shared_ptr<CdsObject>& obj, 
         }
     }
 
-    if (blOption->get(BoxKeys::videoAllDirectories)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::videoAllDirectories)->getEnabled()) {
         result.push_back(getDir(obj, rootpath, BoxKeys::videoRoot, BoxKeys::videoAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Video, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video))));
     }
     return result;
@@ -222,7 +224,7 @@ std::vector<int> BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, 
                 month.resize(m);
         }
 
-        if (blOption->get(BoxKeys::imageAllYears)->getEnabled()) {
+        if (blOption->getKey(BoxKeys::imageAllYears)->getEnabled()) {
             if ((y > 0) && (m > 0)) {
                 std::vector<std::shared_ptr<CdsObject>> ct;
                 ct.push_back(containerAt(BoxKeys::imageRoot));
@@ -234,7 +236,7 @@ std::vector<int> BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, 
             }
         }
 
-        if (blOption->get(BoxKeys::imageAllDates)->getEnabled()) {
+        if (blOption->getKey(BoxKeys::imageAllDates)->getEnabled()) {
             auto t = date.find('T');
             if (t != std::string::npos) {
                 date.resize(t);
@@ -248,7 +250,7 @@ std::vector<int> BuiltinLayout::addImage(const std::shared_ptr<CdsObject>& obj, 
         }
     }
 
-    if (blOption->get(BoxKeys::imageAllDirectories)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::imageAllDirectories)->getEnabled()) {
         result.push_back(getDir(obj, rootpath, BoxKeys::imageRoot, BoxKeys::imageAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Image, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image))));
     }
     return result;
@@ -340,7 +342,7 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
     }
 
     auto artistContainer = std::make_shared<CdsContainer>(artist, UPNP_CLASS_MUSIC_ARTIST);
-    if (blOption->get(BoxKeys::audioAllSongs)->getEnabled() && blOption->get(BoxKeys::audioAllArtists)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::audioAllSongs)->getEnabled() && blOption->getKey(BoxKeys::audioAllArtists)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> arc;
         arc.push_back(containerAt(BoxKeys::audioRoot));
         arc.push_back(containerAt(BoxKeys::audioAllArtists));
@@ -365,7 +367,7 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
     albumContainer->setRefID(obj->getID());
     artistContainer->setSearchable(true);
 
-    if (blOption->get(BoxKeys::audioAllArtists)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::audioAllArtists)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> alc;
         alc.push_back(containerAt(BoxKeys::audioRoot));
         alc.push_back(containerAt(BoxKeys::audioAllArtists));
@@ -376,7 +378,7 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
     }
 
     albumContainer->setSearchable(true);
-    if (blOption->get(BoxKeys::audioAllAlbums)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::audioAllAlbums)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> allc;
         allc.push_back(containerAt(BoxKeys::audioRoot));
         allc.push_back(containerAt(BoxKeys::audioAllAlbums));
@@ -385,7 +387,7 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
         result.push_back(add(obj, id));
     }
 
-    if (blOption->get(BoxKeys::audioAllGenres)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::audioAllGenres)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> ct;
         ct.push_back(containerAt(BoxKeys::audioRoot));
         ct.push_back(containerAt(BoxKeys::audioAllGenres));
@@ -394,7 +396,7 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
         result.push_back(add(obj, id));
     }
 
-    if (blOption->get(BoxKeys::audioAllComposers)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::audioAllComposers)->getEnabled()) {
         auto composerContainer = std::make_shared<CdsContainer>(composer, UPNP_CLASS_MUSIC_COMPOSER);
         composerContainer->setSearchable(true);
         std::vector<std::shared_ptr<CdsObject>> cc;
@@ -405,7 +407,7 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
         result.push_back(add(obj, id));
     }
 
-    if (blOption->get(BoxKeys::audioAllYears)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::audioAllYears)->getEnabled()) {
         auto yearContainer = std::make_shared<CdsContainer>(date);
         yearContainer->setSearchable(true);
         std::vector<std::shared_ptr<CdsObject>> yt;
@@ -416,11 +418,11 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
         result.push_back(add(obj, id));
     }
 
-    if (blOption->get(BoxKeys::audioAllDirectories)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::audioAllDirectories)->getEnabled()) {
         result.push_back(getDir(obj, rootpath, BoxKeys::audioRoot, BoxKeys::audioAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio))));
     }
 
-    if (blOption->get(BoxKeys::audioArtistChronology)->getEnabled() && blOption->get(BoxKeys::audioAllArtists)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::audioArtistChronology)->getEnabled() && blOption->getKey(BoxKeys::audioAllArtists)->getEnabled()) {
         artistContainer->setSearchable(false);
         std::vector<std::shared_ptr<CdsObject>> chronology;
         chronology.push_back(containerAt(BoxKeys::audioRoot));
@@ -433,12 +435,12 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
     }
 
     // Keep this last, since it's modifying the object title
-    if (blOption->get(BoxKeys::audioAllTracks)->getEnabled()) {
+    if (blOption->getKey(BoxKeys::audioAllTracks)->getEnabled()) {
         artistContainer->setSearchable(true);
         obj->setTitle(fmt::format("{}{}", prefixTitle, title));
         result.push_back(add(obj, chain["/Audio/All - full name"]));
 
-        if (blOption->get(BoxKeys::audioAllArtists)->getEnabled()) {
+        if (blOption->getKey(BoxKeys::audioAllArtists)->getEnabled()) {
             std::vector<std::shared_ptr<CdsObject>> all;
             all.push_back(containerAt(BoxKeys::audioRoot));
             all.push_back(containerAt(BoxKeys::audioAllArtists));

@@ -193,3 +193,34 @@ This section defines the client behaviour for one client.
 
     Map DLNA profile for client. Some clients do not support basic dlna profiles.
     It overwrites general settings from ``contenttype-dlnaprofile`` with the same format, see :ref:`contenttype-dlnaprofile`.
+
+``group``
+~~~~~~~~~
+
+.. code-block:: xml
+
+    <group> ... </group>
+
+* Optional
+
+This section defines the behaviour for a group of clients.
+
+**Attributes:**
+
+    .. code:: xml
+
+        name=...
+
+    * Required
+
+    Name of the group. Should correspond to one of the group names in client settings or ``default``
+
+**Child Entries:**
+
+    .. code:: xml
+
+        <hide location="/path/not/visible"/>
+
+    * required
+
+    Define a location of files that have to be hidden from the output for the group.

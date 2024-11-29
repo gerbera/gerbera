@@ -24,6 +24,8 @@
 /// \file test_sql_generators.cc
 #include "database/sql_database.h"
 
+#include "sqlite_config_fake.h"
+
 #include <fmt/core.h>
 #include <gtest/gtest.h>
 
@@ -95,6 +97,7 @@ class DatabaseTest : public ::testing::Test {
 public:
     void SetUp() override
     {
+        config = std::make_shared<SqliteConfigFake>();
         database = std::make_shared<TestDatabase>(config, mime, converterManager);
     }
 

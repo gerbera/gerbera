@@ -44,8 +44,8 @@ export class App {
       search: '',
       sort: '',
       currentPage: 0,
-      viewItems: 25,
-      viewItemsOld: 25,
+      viewItems: -1,
+      viewItemsOld: -1,
       gridMode: 0,
       currentItem: {
         'home': [],
@@ -129,7 +129,7 @@ export class App {
       if (this.pageInfo.viewItemsOld)
         this.pageInfo.viewItems = this.pageInfo.viewItemsOld;
       else
-        this.pageInfo.viewItems = 25;
+        this.pageInfo.viewItems = this.serverConfig['items-per-page'] ? this.serverConfig['items-per-page'].default : -1;
     }
 
     this.pageInfo.gridMode = newValue;
@@ -179,7 +179,7 @@ export class App {
       dbType: 'home',
       configMode: 'minimal',
       currentPage: 0,
-      viewItems: 25,
+      viewItems: -1,
       gridMode: 0,
       currentItem: {
         'home': [],
@@ -210,23 +210,21 @@ export class App {
       .then(() => {
         if (localStorage.getItem('pageInfo')) {
           this.pageInfo = JSON.parse(localStorage.getItem('pageInfo'));
-          if (!('configMode' in this.pageInfo)) {
-            this.pageInfo.configMode = 'minimal';
+        }
+        if (!('configMode' in this.pageInfo)) {
+          this.pageInfo.configMode = 'minimal';
+        }
+        if (!('gridMode' in this.pageInfo)) {
+          this.pageInfo.gridMode = 0;
+        }
+        if (!('viewItems' in this.pageInfo)) {
+          const itemsPerPage = this.serverConfig['items-per-page'];
+          if (itemsPerPage && itemsPerPage.default) {
+            this.pageInfo.viewItems = itemsPerPage.default;
           }
-          if (!('gridMode' in this.pageInfo)) {
-            this.pageInfo.gridMode = 0;
-          }
-          if (!('viewItems' in this.pageInfo)) {
-            const itemsPerPage = this.serverConfig['items-per-page'];
-            if (itemsPerPage && itemsPerPage.default) {
-              this.pageInfo.viewItems = itemsPerPage.default;
-            } else {
-              this.pageInfo.viewItems = 25;
-            }
-          }
-          if (this.pageInfo.dbType && this.pageInfo.dbType in this.navLinks) {
-            $(this.navLinks[this.pageInfo.dbType]).click();
-          }
+        }
+        if (this.pageInfo.dbType && this.pageInfo.dbType in this.navLinks) {
+          $(this.navLinks[this.pageInfo.dbType]).click();
         }
         this.initDone = true;
       })
@@ -343,7 +341,7 @@ export class App {
   }
 
   viewItems() {
-    return this.pageInfo.viewItems;
+    return this.pageInfo.viewItems >= 0 ? this.pageInfo.viewItems : (this.serverConfig['items-per-page'] ? this.serverConfig['items-per-page'].default : 25);
   }
 
   gridMode() {
@@ -351,9 +349,9 @@ export class App {
   }
 
   itemsPerPage() {
-    if (this.serverConfig['items-per-page'] && this.serverConfig['items-per-page'].option)
-      return this.serverConfig['items-per-page'].option;
-    return [10, 25, 50, 100];
+    if (this.serverConfig['items-per-page'] && this.serverConfig['items-per-page'].option && this.serverConfig['items-per-page'].default)
+      return this.serverConfig['items-per-page'];
+    return {option: [10, 25, 50, 100], default: 25};
   }
 
   displayLogin(loggedIn) {

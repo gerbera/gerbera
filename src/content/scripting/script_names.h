@@ -76,6 +76,7 @@ const static auto mt_names = std::map<MetadataFields, std::string_view> {
     std::pair(MetadataFields::M_CONDUCTOR, "M_CONDUCTOR"),
     std::pair(MetadataFields::M_ORCHESTRA, "M_ORCHESTRA"),
     std::pair(MetadataFields::M_CONTENT_CLASS, "M_CONTENT_CLASS"),
+    std::pair(MetadataFields::M_UPNP_SHORTCUT, "M_UPNP_SHORTCUT"),
 };
 
 const static auto ot_names = std::map<int, std::string_view> {

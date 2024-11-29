@@ -26,6 +26,8 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
+#include "util/grb_fs.h"
+
 #include <cinttypes>
 #include <map>
 #include <memory>
@@ -49,6 +51,7 @@ using QuirkFlags = std::uint32_t;
 #define QUIRK_FLAG_HIDE_RES_TRANSCODE 0x00000800
 #define QUIRK_FLAG_SIMPLE_DATE 0x00001000
 #define QUIRK_FLAG_DCM10 0x00002000
+#define QUIRK_FLAG_HIDE_CONTAINER_SHORTCUTS 0x00004000
 #define QUIRK_FLAG_TRANSCODING1 0x00010000
 #define QUIRK_FLAG_TRANSCODING2 0x00020000
 #define QUIRK_FLAG_TRANSCODING3 0x00040000
@@ -95,6 +98,15 @@ public:
      *
      */
     void saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& database, ActionRequest& request) const;
+
+    /** \brief get UPnP shortcut List
+     *
+     * \param database DB interface
+     * \param features pugi::xml_node item in response
+     * \return void
+     *
+     */
+    void getShortCutList(const std::shared_ptr<Database>& database, pugi::xml_node& features) const;
 
     /** \brief get Samsung Feature List
      *
@@ -222,6 +234,8 @@ public:
     bool isAllowed() const;
 
     bool hasFlag(QuirkFlags flag) const;
+    std::vector<std::string> getForbiddenDirectories() const;
+
     const struct ClientProfile* getProfile() const { return pClientProfile; }
     const struct ClientObservation* getClient() const { return pClient; }
 

@@ -37,17 +37,20 @@ function importPlaylist(obj, cont, rootPath, autoscanId, containerType) {
         objRoot: {
             id: boxSetup[BK_playlistRoot].id,
             title: boxSetup[BK_playlistRoot].title,
+            upnpShortcut: boxSetup[BK_playlistRoot].upnpShortcut,
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: UPNP_CLASS_CONTAINER,
             metaData: [] },
         allPlaylists: {
             id: boxSetup[BK_playlistAll].id,
             title: boxSetup[BK_playlistAll].title,
+            upnpShortcut: boxSetup[BK_playlistAll].upnpShortcut,
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: UPNP_CLASS_CONTAINER },
         allDirectories: {
             id: boxSetup[BK_playlistAllDirectories].id,
             title: boxSetup[BK_playlistAllDirectories].title,
+            upnpShortcut: boxSetup[BK_playlistAllDirectories].upnpShortcut,
             objectType: OBJECT_TYPE_CONTAINER,
             upnpclass: UPNP_CLASS_CONTAINER },
 

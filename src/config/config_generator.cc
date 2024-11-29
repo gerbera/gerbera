@@ -26,6 +26,7 @@
 
 #include "config_generator.h"
 
+#include <numeric>
 #include <sstream>
 
 #include "config/config_definition.h"
@@ -43,6 +44,8 @@
 #define XML_XMLNS_XSI "http://www.w3.org/2001/XMLSchema-instance"
 #define XML_XMLNS "http://mediatomb.cc/config/"
 
+using GeneratorSectionsIterator = EnumIterator<GeneratorSections, GeneratorSections::Server, GeneratorSections::All>;
+
 std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
 {
     if (generated.find("") == generated.end()) {
@@ -50,6 +53,67 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
         generated[""] = std::make_shared<pugi::xml_node>(config);
     }
     return generated[""];
+}
+
+std::string ConfigGenerator::printSections(int section)
+{
+    std::vector<std::string> myFlags;
+
+    for (auto [bit, label] : sections) {
+        if (section & (1 << to_underlying(bit))) {
+            myFlags.emplace_back(label.data());
+            section &= ~(1 << to_underlying(bit));
+        }
+    }
+
+    if (section) {
+        myFlags.push_back(fmt::format("{:#04x}", section));
+    }
+
+    return fmt::format("{}", fmt::join(myFlags, " | "));
+}
+
+int ConfigGenerator::makeSections(const std::string& optValue)
+{
+    std::vector<std::string> flagsVector = splitString(optValue, '|', false);
+    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ConfigGenerator::remapGeneratorSections(trimString(i)); });
+}
+
+std::map<GeneratorSections, std::string_view> ConfigGenerator::sections = {
+    { GeneratorSections::Server, "Server" },
+    { GeneratorSections::Ui, "Ui" },
+    { GeneratorSections::ExtendedRuntime, "ExtendedRuntime" },
+    { GeneratorSections::DynamicContainer, "DynamicContainer" },
+    { GeneratorSections::Database, "Database" },
+    { GeneratorSections::Import, "Import" },
+    { GeneratorSections::Mappings, "Mappings" },
+    { GeneratorSections::Boxlayout, "Boxlayout" },
+    { GeneratorSections::Transcoding, "Transcoding" },
+    { GeneratorSections::OnlineContent, "OnlineContent" },
+
+    { GeneratorSections::All, "All" },
+};
+
+int ConfigGenerator::remapGeneratorSections(const std::string& arg)
+{
+    for (auto&& bit : GeneratorSectionsIterator()) {
+        if (toLower(ConfigGenerator::sections[bit].data()) == toLower(arg)) {
+            return 1 << to_underlying(bit);
+        }
+    }
+
+    if (toLower(ConfigGenerator::sections[GeneratorSections::All].data()) == toLower(arg)) {
+        int result = 0;
+        for (auto&& bit : GeneratorSectionsIterator())
+            result |= 1 << to_underlying(bit);
+        return result;
+    }
+    return stoiString(arg, 0, 0);
+}
+
+bool ConfigGenerator::isGenerated(GeneratorSections section)
+{
+    return this->generateSections == 0 || (this->generateSections & (1 << to_underlying(section)));
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::getNode(const std::string& tag) const
@@ -211,10 +275,10 @@ void ConfigGenerator::generateOptions(const std::vector<std::pair<ConfigVal, boo
     }
 }
 
-void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir)
+void ConfigGenerator::generateServerOptions(std::shared_ptr<pugi::xml_node>& server, const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir)
 {
-    auto server = setValue("/server/");
-    generateUi();
+    if (!isGenerated(GeneratorSections::Server))
+        return;
 
     auto options = std::vector<std::pair<ConfigVal, bool>> {
         { ConfigVal::SERVER_NAME, true },
@@ -287,7 +351,13 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
         ALIVE_INTERVAL_MIN)
                             .c_str());
     setValue(ConfigVal::SERVER_ALIVE_INTERVAL);
+}
 
+void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir)
+{
+    auto server = setValue("/server/");
+    generateUi();
+    generateServerOptions(server, userHome, configDir, dataDir);
     generateDatabase(dataDir);
     generateDynamics();
     generateExtendedRuntime();
@@ -295,6 +365,9 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
 
 void ConfigGenerator::generateUi()
 {
+    if (!isGenerated(GeneratorSections::Ui))
+        return;
+
     auto options = std::vector<std::pair<ConfigVal, bool>> {
         { ConfigVal::SERVER_UI_ENABLED, true },
         { ConfigVal::SERVER_UI_SHOW_TOOLTIPS, true },
@@ -315,6 +388,9 @@ void ConfigGenerator::generateUi()
 
 void ConfigGenerator::generateDynamics()
 {
+    if (!isGenerated(GeneratorSections::DynamicContainer))
+        return;
+
     auto options = std::vector<std::pair<ConfigVal, bool>> {
         { ConfigVal::SERVER_DYNAMIC_CONTENT_LIST_ENABLED, true },
     };
@@ -336,10 +412,20 @@ void ConfigGenerator::generateDynamics()
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Recently Modified");
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-last_modified");
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_modified > "@last7")");
+
+    container = setValue(fmt::format("{}/{}/", containersTag, containerTag), "", true);
+    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastPlayed");
+    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Music Recently Played");
+    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-upnp:lastPlaybackTime");
+    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT, "MUSIC_LAST_PLAYED");
+    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item.audioItem" and upnp:lastPlaybackTime > "@last7")");
 }
 
 void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
 {
+    if (!isGenerated(GeneratorSections::Database))
+        return;
+
     auto options = std::vector<std::pair<ConfigVal, bool>> {
         { ConfigVal::SERVER_STORAGE_SQLITE_ENABLED, true },
         { ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE, true },
@@ -386,6 +472,9 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
 
 void ConfigGenerator::generateExtendedRuntime()
 {
+    if (!isGenerated(GeneratorSections::ExtendedRuntime))
+        return;
+
     auto options = std::vector<std::pair<ConfigVal, bool>> {
 #ifdef HAVE_FFMPEGTHUMBNAILER
         { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED, true }, // clang does require additional indentation
@@ -413,8 +502,11 @@ void ConfigGenerator::generateExtendedRuntime()
     setValue(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST, ConfigVal::A_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT, DEFAULT_MARK_PLAYED_CONTENT_VIDEO);
 }
 
-void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile)
+void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile)
 {
+    if (!isGenerated(GeneratorSections::Import))
+        return;
+
     // Simple Import options
     auto options = std::vector<std::pair<ConfigVal, bool>> {
 #ifdef HAVE_MAGIC
@@ -564,7 +656,11 @@ void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& 
 #endif
     }
     generateOptions(options);
+}
 
+void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile)
+{
+    generateImportOptions(prefixDir, configDir, magicFile);
     generateMappings();
     generateBoxlayout(ConfigVal::BOXLAYOUT_BOX);
 #ifdef ONLINE_SERVICES
@@ -574,6 +670,9 @@ void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& 
 
 void ConfigGenerator::generateMappings()
 {
+    if (!isGenerated(GeneratorSections::Mappings))
+        return;
+
     auto ext2mt = setValue(ConfigVal::IMPORT_MAPPINGS_IGNORE_UNKNOWN_EXTENSIONS);
     setDictionary(ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST);
 
@@ -597,6 +696,9 @@ void ConfigGenerator::generateMappings()
 
 void ConfigGenerator::generateBoxlayout(ConfigVal option)
 {
+    if (!isGenerated(GeneratorSections::Boxlayout))
+        return;
+
     auto cs = ConfigDefinition::findConfigSetup<ConfigBoxLayoutSetup>(option);
 
     const auto boxTag = ConfigDefinition::mapConfigOption(option);
@@ -606,6 +708,8 @@ void ConfigGenerator::generateBoxlayout(ConfigVal option)
         setValue(box, ConfigVal::A_BOXLAYOUT_BOX_KEY, bl.getKey());
         setValue(box, ConfigVal::A_BOXLAYOUT_BOX_TITLE, bl.getTitle());
         setValue(box, ConfigVal::A_BOXLAYOUT_BOX_CLASS, bl.getClass());
+        if (!bl.getUpnpShortcut().empty())
+            setValue(box, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT, bl.getUpnpShortcut());
         if (bl.getSize() != 1)
             setValue(box, ConfigVal::A_BOXLAYOUT_BOX_SIZE, fmt::to_string(bl.getSize()));
         if (!bl.getEnabled())
@@ -615,6 +719,9 @@ void ConfigGenerator::generateBoxlayout(ConfigVal option)
 
 void ConfigGenerator::generateOnlineContent()
 {
+    if (!isGenerated(GeneratorSections::OnlineContent))
+        return;
+
     auto options = std::vector<std::pair<ConfigVal, bool>> {};
     generateOptions(options);
 
@@ -625,6 +732,9 @@ void ConfigGenerator::generateOnlineContent()
 
 void ConfigGenerator::generateTranscoding()
 {
+    if (!isGenerated(GeneratorSections::Transcoding))
+        return;
+
     auto options = std::vector<std::pair<ConfigVal, bool>> {
         { ConfigVal::TRANSCODING_TRANSCODING_ENABLED, true },
         { ConfigVal::TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED, false },

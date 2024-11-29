@@ -36,6 +36,7 @@
 #define __AUTOSCAN_H__
 
 #include "common.h"
+#include "config/result/edit_helper.h"
 #include "upnp/upnp_common.h"
 #include "util/timer.h"
 
@@ -65,7 +66,7 @@ enum class AutoscanMediaMode {
 };
 
 /// \brief Provides information about one autoscan directory.
-class AutoscanDirectory {
+class AutoscanDirectory : public Editable {
 public:
     enum class MediaType {
         Any = -1,
@@ -108,6 +109,9 @@ public:
     AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent,
         unsigned int interval = 0, bool hidden = false, bool followSymlinks = false, int mediaType = -1,
         const std::map<AutoscanMediaMode, std::string>& containerMap = ContainerTypesDefaults);
+    virtual ~AutoscanDirectory() = default;
+
+    bool equals(const std::shared_ptr<AutoscanDirectory>& other) { return this->getScanID() == other->getScanID(); }
 
     void setDatabaseID(int databaseID) { this->databaseID = databaseID; }
     int getDatabaseID() const { return databaseID; }
@@ -124,9 +128,6 @@ public:
 
     void setRetryCount(unsigned int retryCount) { this->retryCount = retryCount; }
     unsigned int getRetryCount() const { return retryCount; }
-
-    void setOrig(bool orig) { this->isOrig = orig; }
-    bool getOrig() const { return isOrig; }
 
     void setHidden(bool hidden) { this->hidden = hidden; }
     bool getHidden() const { return hidden; }
@@ -216,8 +217,14 @@ public:
     static const char* mapScanmode(AutoscanScanMode scanmode);
     static AutoscanScanMode remapScanmode(const std::string& scanmode);
 
-    /* Do do need these? */
-    void invalidate()
+    void validate(bool newEntry, std::size_t index) override
+    {
+        if (!newEntry) {
+            setPersistent(true);
+        }
+        setScanID(index);
+    }
+    void invalidate() override
     {
         scanID = INVALID_SCAN_ID;
     }
@@ -229,7 +236,6 @@ public:
 protected:
     fs::path location;
     AutoscanScanMode mode {};
-    bool isOrig {};
     bool recursive {};
     bool hidden {};
     bool dirTypes { true };

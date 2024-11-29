@@ -41,6 +41,7 @@
 #include "config/result/autoscan.h"
 #include "config/result/dynamic_content.h"
 #include "content/autoscan_list.h"
+#include "db_param.h"
 #include "exceptions.h"
 #include "metadata/metadata_enums.h"
 #include "search_handler.h"
@@ -350,6 +351,8 @@ SQLDatabase::SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<
     : Database(config)
     , mime(std::move(mime))
     , converterManager(std::move(converterManager))
+    , dynamicContentList(this->config->getDynamicContentListOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST))
+    , dynamicContentEnabled(this->config->getBoolOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST_ENABLED))
 {
 }
 
@@ -625,7 +628,7 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
     // It means that something doesn't set the refID correctly
     log_warning("Failed to loadObject with refid: {}", refID);
 
-    return findObjectByPath(location);
+    return findObjectByPath(location, UNUSED_CLIENT_GROUP);
 }
 
 std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer)
@@ -639,6 +642,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
         if (obj->getRefID() <= 0)
             throw DatabaseException(fmt::format("PLAYLIST_REF flag set for '{}' but refId is <=0", obj->getLocation().c_str()), LINE_MESSAGE);
         refObj = loadObject(obj->getRefID());
+        log_vdebug("Setting Playlist {} ref to {}", obj->getLocation().c_str(), refObj->getLocation().c_str());
         if (!refObj)
             throw DatabaseException("PLAYLIST_REF flag set but refId doesn't point to an existing object", LINE_MESSAGE);
     } else if (obj->isVirtual() && obj->isPureItem()) {
@@ -782,6 +786,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
     }
 
     if (!hasReference || (!useResourceRef && !refObj->resourcesEqual(obj))) {
+        log_debug("Updating Resources {}", obj->getLocation().string());
         generateResourceDBOperations(obj, op, returnVal);
     }
 
@@ -867,7 +872,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
     if (res) {
         auto row = res->nextRow();
         if (row) {
-            auto result = createObjectFromRow("", row);
+            auto result = createObjectFromRow(UNUSED_CLIENT_GROUP, row);
             commit("loadObject");
             return result;
         }
@@ -899,7 +904,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(const std::string& group, int
     throw ObjectNotFoundException(fmt::format("Object not found: {}", objectID));
 }
 
-std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string& serviceID)
+std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string& serviceID, const std::string& group)
 {
     auto loadSql = fmt::format("SELECT {} FROM {} WHERE {} = {}", sql_browse_columns, sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::ServiceId), quote(serviceID));
     beginTransaction("loadObjectByServiceID");
@@ -908,7 +913,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
         auto row = res->nextRow();
         if (row) {
             commit("loadObjectByServiceID");
-            return createObjectFromRow(DEFAULT_CLIENT_GROUP, row);
+            return createObjectFromRow(group, row);
         }
     }
     commit("loadObjectByServiceID");
@@ -916,15 +921,14 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
     return {};
 }
 
-std::vector<std::shared_ptr<CdsObject>> SQLDatabase::findObjectByContentClass(const std::string& contentClass)
+std::vector<std::shared_ptr<CdsObject>> SQLDatabase::findObjectByContentClass(const std::string& contentClass, const std::string& group)
 {
     auto srcParam = SearchParam(fmt::to_string(CDS_ID_ROOT),
         fmt::format("{}=\"{}\"", MetaEnumMapper::getMetaFieldName(MetadataFields::M_CONTENT_CLASS), contentClass),
-        "", 0, 1, false, DEFAULT_CLIENT_GROUP);
-    int numMatches = 0;
+        "", 0, 1, false, group);
     log_debug("Running content class search for '{}'", contentClass);
-    auto result = this->search(srcParam, &numMatches);
-    log_debug("Content class search {} returned {}", contentClass, numMatches);
+    auto result = this->search(srcParam);
+    log_debug("Content class search {} returned {}", contentClass, srcParam.getTotalMatches());
     return result;
 }
 
@@ -955,18 +959,20 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     const auto parent = param.getObject();
     bool getContainers = param.getFlag(BROWSE_CONTAINERS);
     bool getItems = param.getFlag(BROWSE_ITEMS);
+    const auto forbiddenDirectories = param.getForbiddenDirectories();
+    log_vdebug("browse forbiddenDirectories {}", fmt::join(forbiddenDirectories, ","));
 
     if (param.getDynamicContainers() && dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
-        auto dynConfig = config->getDynamicContentListOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST)->get(parent->getLocation());
+        auto dynConfig = dynamicContentList->getKey(parent->getLocation());
         if (dynConfig) {
             auto reqCount = (param.getRequestedCount() <= 0 || param.getRequestedCount() > dynConfig->getMaxCount()) ? dynConfig->getMaxCount() : param.getRequestedCount();
             auto srcParam = SearchParam(fmt::to_string(parent->getParentID()), dynConfig->getFilter(), dynConfig->getSort(), // get params from config
                 param.getStartingIndex(), reqCount, false, param.getGroup(),
                 getContainers, getItems); // get params from browse
-            int numMatches = 0;
+            srcParam.setForbiddenDirectories(forbiddenDirectories);
             log_debug("Running Dynamic search {} in {} '{}'", parent->getID(), parent->getParentID(), dynConfig->getFilter());
-            auto result = this->search(srcParam, &numMatches);
-            numMatches = numMatches > dynConfig->getMaxCount() ? dynConfig->getMaxCount() : numMatches;
+            auto result = this->search(srcParam);
+            auto numMatches = srcParam.getTotalMatches() > dynConfig->getMaxCount() ? dynConfig->getMaxCount() : srcParam.getTotalMatches();
             log_debug("Dynamic search {} returned {}", parent->getID(), numMatches);
             param.setTotalMatches(numMatches);
             return result;
@@ -990,19 +996,20 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     std::string addJoin;
 
     if (param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
-        auto count = param.getRequestedCount();
-        bool doLimit = true;
-        if (!count) {
-            if (param.getStartingIndex())
-                count = std::numeric_limits<int>::max();
-            else
-                doLimit = false;
-        }
 
         where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::ParentId), parent->getID()));
 
         if (parent->getID() == CDS_ID_ROOT && hideFsRoot)
             where.push_back(fmt::format("{} != {:d}", browseColumnMapper->mapQuoted(BrowseCol::Id), CDS_ID_FS_ROOT));
+
+        if (getItems && !forbiddenDirectories.empty()) {
+            std::vector<std::string> forbiddenList;
+            for (auto&& forbDir : forbiddenDirectories) {
+                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseCol::RefLocation), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
+                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseCol::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
+            }
+            where.push_back(fmt::format("(NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
+        }
 
         // order by code..
         auto orderByCode = [&]() {
@@ -1017,6 +1024,17 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
                 orderQb = browseColumnMapper->mapQuoted(BrowseCol::DcTitle);
             }
             return orderQb;
+        };
+
+        auto limitCode = [](int startingIndex, int requestedCount) {
+            if (startingIndex > 0 && requestedCount > 0) {
+                return fmt::format(" LIMIT {} OFFSET {}", requestedCount, startingIndex);
+            } else if (startingIndex > 0) {
+                return fmt::format(" LIMIT ~0 OFFSET {}", startingIndex);
+            } else if (requestedCount > 0) {
+                return fmt::format(" LIMIT {}", requestedCount);
+            }
+            return std::string();
         };
 
         if (!getContainers && !getItems) {
@@ -1037,8 +1055,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}, {}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_CONTAINER,
                 browseColumnMapper->mapQuoted(BrowseCol::UpnpClass), orderByCode());
         }
-        if (doLimit)
-            limit = fmt::format(" LIMIT {} OFFSET {}", count, param.getStartingIndex());
+
+        limit = limitCode(param.getStartingIndex(), param.getRequestedCount());
     } else { // metadata
         where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::Id), parent->getID()));
         limit = " LIMIT 1";
@@ -1078,46 +1096,14 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         }
     }
 
-    if (param.getDynamicContainers() && config->getBoolOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST_ENABLED) && getContainers && param.getStartingIndex() == 0 && param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
-        auto dynContent = config->getDynamicContentListOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST);
-        if (dynamicContainers.size() < dynContent->size()) {
-            for (std::size_t count = 0; count < dynContent->size(); count++) {
-                auto dynConfig = dynContent->get(count);
-                if (parent->getLocation() == dynConfig->getLocation().parent_path() || (parent->getLocation().empty() && dynConfig->getLocation().parent_path() == "/")) {
-                    auto dynId = static_cast<std::int32_t>(static_cast<std::int64_t>(-(parent->getID() + 1)) * 10000 - count);
-                    // create runtime container
-                    if (dynamicContainers.find(dynId) == dynamicContainers.end()) {
-                        auto dynFolder = std::make_shared<CdsContainer>();
-                        dynFolder->setTitle(dynConfig->getTitle());
-                        dynFolder->setID(dynId);
-                        dynFolder->setParentID(parent->getID());
-                        dynFolder->setLocation(dynConfig->getLocation());
-                        dynFolder->setClass(UPNP_CLASS_DYNAMIC_CONTAINER);
-
-                        auto image = dynConfig->getImage();
-                        std::error_code ec;
-                        if (!image.empty() && isRegularFile(image, ec)) {
-                            auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
-                            std::string type = image.extension().string().substr(1);
-                            auto [skip, mimeType] = mime->getMimeType(image, fmt::format("image/{}", type));
-                            if (!mimeType.empty()) {
-                                resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-                                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, image);
-                            }
-                            dynFolder->addResource(resource);
-                        }
-                        dynamicContainers.emplace(dynId, std::move(dynFolder));
-                    }
-                    result.push_back(dynamicContainers[dynId]);
-                    childCount++;
-                }
-            }
-        } else {
-            for (auto&& [dynId, dynFolder] : dynamicContainers) {
-                if (dynFolder->getParentID() == parent->getID()) {
-                    result.push_back(dynFolder);
-                    childCount++;
-                }
+    if (param.getDynamicContainers() && dynamicContentEnabled && getContainers && param.getStartingIndex() == 0 && param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+        if (dynamicContainers.size() < dynamicContentList->size()) {
+            initDynContainers(parent);
+        }
+        for (auto&& [dynId, dynFolder] : dynamicContainers) {
+            if (dynFolder->getParentID() == parent->getID()) {
+                result.push_back(dynFolder);
+                childCount++;
             }
         }
         param.setTotalMatches(childCount);
@@ -1125,13 +1111,63 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     return result;
 }
 
-std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& param, int* numMatches)
+void SQLDatabase::initDynContainers(const std::shared_ptr<CdsObject>& sParent)
+{
+    if (dynamicContentEnabled && dynamicContentList && dynamicContainers.size() < dynamicContentList->size()) {
+        bool hasCaseSensitiveNames = config->getBoolOption(ConfigVal::IMPORT_CASE_SENSITIVE_TAGS);
+        for (std::size_t count = 0; count < dynamicContentList->size(); count++) {
+            auto dynConfig = dynamicContentList->get(count);
+            auto location = dynConfig->getLocation().parent_path();
+            if (!hasCaseSensitiveNames) {
+                location = toLower(location);
+            }
+            auto parent = location != "/" ? findObjectByPath(location, UNUSED_CLIENT_GROUP, DbFileType::Virtual) : loadObject(CDS_ID_ROOT);
+            if (sParent && (sParent->getLocation() == location || (sParent->getLocation().empty() && location == "/"))) {
+                parent = sParent;
+            }
+            if (!parent)
+                parent = findObjectByPath(location, UNUSED_CLIENT_GROUP, DbFileType::Directory);
+            auto dynId = parent ? static_cast<std::int32_t>(static_cast<std::int64_t>(-(parent->getID() + 1)) * 10000 - count) : INVALID_OBJECT_ID;
+            // create runtime container
+            if (parent && dynamicContainers.find(dynId) == dynamicContainers.end()) {
+                auto dynFolder = std::make_shared<CdsContainer>();
+                dynFolder->setTitle(dynConfig->getTitle());
+                dynFolder->setID(dynId);
+                dynFolder->setParentID(parent->getID());
+                location = dynConfig->getLocation();
+                if (!hasCaseSensitiveNames) {
+                    location = toLower(location);
+                }
+                dynFolder->setLocation(location);
+                dynFolder->setClass(UPNP_CLASS_DYNAMIC_CONTAINER);
+                dynFolder->setUpnpShortcut(dynConfig->getUpnpShortcut());
+
+                auto image = dynConfig->getImage();
+                std::error_code ec;
+                if (!image.empty() && isRegularFile(image, ec)) {
+                    auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
+                    std::string type = image.extension().string().substr(1);
+                    auto mimeType = mime->getMimeType(image, fmt::format("image/{}", type));
+                    if (!mimeType.second.empty()) {
+                        resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType.second));
+                        resource->addAttribute(ResourceAttribute::RESOURCE_FILE, image);
+                    }
+                    dynFolder->addResource(resource);
+                }
+                dynamicContainers.emplace(dynId, std::move(dynFolder));
+            }
+        }
+    }
+}
+
+std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
 {
     auto searchParser = SearchParser(*sqlEmitter, param.getSearchCriteria());
     std::shared_ptr<ASTNode> rootNode = searchParser.parse();
     std::string searchSQL(rootNode->emitSQL());
     if (searchSQL.empty())
         throw DatabaseException("failed to generate SQL for search", LINE_MESSAGE);
+
     bool getContainers = param.getContainers();
     bool getItems = param.getItems();
     if (getContainers && !getItems) {
@@ -1143,7 +1179,17 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         searchSQL.append(fmt::format(" AND ({0} & {1} = {1} OR {2} != {3})",
             searchColumnMapper->mapQuoted(SearchCol::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER));
     }
-    log_debug("Search resolves to SQL [{}]", searchSQL);
+
+    const auto forbiddenDirectories = param.getForbiddenDirectories();
+    log_vdebug("search forbiddenDirectories {}", fmt::join(forbiddenDirectories, ","));
+    if (getItems && !forbiddenDirectories.empty()) {
+        std::vector<std::string> forbiddenList;
+        for (auto&& forbDir : forbiddenDirectories) {
+            forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", searchColumnMapper->mapQuoted(SearchCol::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
+        }
+        searchSQL.append(fmt::format("AND (NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
+    }
+    log_debug("Search query resolves to SQL [\n{}\n]", searchSQL);
 
     bool rootContainer = param.getContainerID().empty() || param.getContainerID() == "0";
 
@@ -1158,14 +1204,14 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         countSQL += fmt::format(" WHERE {}", searchSQL);
     }
 
-    log_debug("Search count resolves to SQL [{}]", countSQL);
+    log_debug("Search count resolves to SQL [\n{}\n]", countSQL);
     beginTransaction("search");
     auto sqlResult = select(countSQL);
     commit("search");
 
     auto countRow = sqlResult->nextRow();
     if (countRow) {
-        *numMatches = countRow->col_int(0, 0);
+        param.setTotalMatches(countRow->col_int(0, 0));
     }
 
     std::string addColumns;
@@ -1181,13 +1227,22 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
     };
 
     auto orderBy = fmt::format(" ORDER BY {}", orderByCode());
-    std::string limit;
 
     auto startingIndex = param.getStartingIndex();
-    std::size_t requestedCount = param.getRequestedCount();
-    if (startingIndex > 0 || requestedCount > 0) {
-        limit = fmt::format(" LIMIT {} OFFSET {}", (requestedCount == 0 ? std::numeric_limits<int>::max() : requestedCount), startingIndex);
-    }
+    auto requestedCount = param.getRequestedCount();
+    auto limitCode = [&]() {
+        if (startingIndex > 0 && requestedCount > 0) {
+            return fmt::format(" LIMIT {} OFFSET {}", requestedCount, startingIndex);
+        } else if (startingIndex > 0) {
+            return fmt::format(" LIMIT ~0 OFFSET {}", startingIndex);
+        } else if (requestedCount > 0) {
+            return fmt::format(" LIMIT {}", requestedCount);
+        }
+        return std::string();
+    };
+
+    std::string limit = limitCode();
+    log_vdebug("limitCode {}", limit);
 
     std::string retrievalSQL;
     if (rootContainer) {
@@ -1200,7 +1255,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         retrievalSQL += fmt::format(" {} WHERE {}{}{}", addJoin, searchSQL, orderBy, limit);
     }
 
-    log_debug("Search resolves to SQL [{}]", retrievalSQL);
+    log_debug("Search statement resolves to SQL [\n{}\n]", retrievalSQL);
     beginTransaction("search 2");
     sqlResult = select(retrievalSQL);
     commit("search 2");
@@ -1212,8 +1267,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(const SearchParam& p
         result.push_back(createObjectFromSearchRow(param.getGroup(), row));
     }
 
-    if (result.size() < requestedCount) {
-        *numMatches = startingIndex + result.size(); // make sure we do not report too many hits
+    if (static_cast<long long>(result.size()) < requestedCount) {
+        param.setTotalMatches(startingIndex + result.size()); // make sure we do not report too many hits
     }
 
     return result;
@@ -1302,7 +1357,32 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
     return arr;
 }
 
-std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpath, DbFileType fileType)
+std::map<std::string, std::shared_ptr<CdsContainer>> SQLDatabase::getShortcuts()
+{
+    auto srcParam = SearchParam(fmt::to_string(CDS_ID_ROOT),
+        fmt::format("{} != \"\"", MetaEnumMapper::getMetaFieldName(MetadataFields::M_UPNP_SHORTCUT)),
+        "", 0, 0, false, UNUSED_CLIENT_GROUP, true, false);
+    std::map<std::string, std::shared_ptr<CdsContainer>> result;
+
+    auto searchResult = this->search(srcParam);
+    log_debug("Shortcut search returned {}", srcParam.getTotalMatches());
+    for (auto&& obj : searchResult) {
+        if (obj->isContainer()) {
+            auto cont = std::static_pointer_cast<CdsContainer>(obj);
+            result[cont->getUpnpShortcut()] = cont;
+        }
+    }
+    for (auto&& dynFolder : dynamicContainers) {
+        auto shortcut = dynFolder.second->getUpnpShortcut();
+        if (!shortcut.empty()) {
+            result[shortcut] = dynFolder.second;
+        }
+    }
+
+    return result;
+}
+
+std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpath, const std::string& group, DbFileType fileType)
 {
     auto fileTypeList = fileType == DbFileType::Any ? std::vector<DbFileType> { DbFileType::File, DbFileType::Directory, DbFileType::Virtual } : std::vector<DbFileType> { fileType };
     for (auto&& ft : fileTypeList) {
@@ -1331,7 +1411,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
         }
         auto row = res->nextRow();
         if (row) {
-            auto result = createObjectFromRow(DEFAULT_CLIENT_GROUP, row);
+            auto result = createObjectFromRow(group, row);
             commit("findObjectByPath");
             return result;
         }
@@ -1343,7 +1423,7 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
 
 int SQLDatabase::findObjectIDByPath(const fs::path& fullpath, DbFileType fileType)
 {
-    auto obj = findObjectByPath(fullpath, fileType);
+    auto obj = findObjectByPath(fullpath, UNUSED_CLIENT_GROUP, fileType);
     if (!obj)
         return INVALID_OBJECT_ID;
     return obj->getID();
@@ -1357,7 +1437,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     if (path == std::string(1, DIR_SEPARATOR))
         return CDS_ID_FS_ROOT;
 
-    auto obj = findObjectByPath(path, DbFileType::Directory);
+    auto obj = findObjectByPath(path, UNUSED_CLIENT_GROUP, DbFileType::Directory);
     if (obj)
         return obj->getID();
 
@@ -1543,7 +1623,10 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     std::string dbLocation = addLocationPrefix(cont->isVirtual() ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX, virtualPath);
 
     beginTransaction("addContainer");
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} = {} LIMIT 1", identifier("id"), identifier(CDS_OBJECT_TABLE), identifier("location_hash"), quote(stringHash(dbLocation)), identifier("location"), quote(dbLocation)));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} = {} LIMIT 1",
+        identifier("id"), identifier(CDS_OBJECT_TABLE),
+        identifier("location_hash"), quote(stringHash(dbLocation)),
+        identifier("location"), quote(dbLocation)));
     if (res) {
         auto row = res->nextRow();
         if (row) {
@@ -1564,9 +1647,9 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     return true;
 }
 
-std::string SQLDatabase::addLocationPrefix(char prefix, const fs::path& path)
+std::string SQLDatabase::addLocationPrefix(char prefix, const fs::path& path, const std::string_view& suffix)
 {
-    return fmt::format("{}{}", prefix, path.string());
+    return fmt::format("{}{}{}", prefix, path.string(), suffix);
 }
 
 std::pair<fs::path, char> SQLDatabase::stripLocationPrefix(std::string_view dbLocation)
@@ -1619,9 +1702,9 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
         }
     }
 
-    obj->setVirtual((obj->getRefID() && obj->isPureItem()) || (obj->isItem() && !obj->isPureItem())); // gets set to true for virtual containers below
+    obj->setVirtual((obj->getRefID() != CDS_ID_ROOT && obj->isPureItem()) || (obj->isItem() && !obj->isPureItem())); // gets set to true for virtual containers below
 
-    int matchedTypes = 0;
+    bool matchedType = false;
 
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
@@ -1639,10 +1722,8 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
                 cont->setAutoscanType(OBJECT_AUTOSCAN_UI);
         } else
             cont->setAutoscanType(OBJECT_AUTOSCAN_NONE);
-        matchedTypes++;
-    }
-
-    if (obj->isItem()) {
+        matchedType = true;
+    } else if (obj->isItem()) {
         if (!resourceZeroOk)
             throw DatabaseException("tried to create object without at least one resource", LINE_MESSAGE);
 
@@ -1653,8 +1734,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
                 item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::Location)).first);
             else
                 item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::RefLocation)).first);
-        } else // URLs
-        {
+        } else { // URLs
             item->setLocation(fallbackString(getCol(row, BrowseCol::Location), getCol(row, BrowseCol::RefLocation)));
         }
 
@@ -1671,10 +1751,10 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
             if (playStatus)
                 item->setPlayStatus(playStatus);
         }
-        matchedTypes++;
+        matchedType = true;
     }
 
-    if (!matchedTypes) {
+    if (!matchedType) {
         throw DatabaseException(fmt::format("Unknown object type: {}", objectType), LINE_MESSAGE);
     }
 
@@ -1730,7 +1810,10 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::str
         auto playStatus = getPlayStatus(group, obj->getID());
         if (playStatus)
             item->setPlayStatus(playStatus);
-    } else if (!obj->isContainer()) {
+    } else if (obj->isContainer()) {
+        auto cont = std::static_pointer_cast<CdsItem>(obj);
+        cont->setLocation(stripLocationPrefix(getCol(row, SearchCol::Location)).first);
+    } else {
         throw DatabaseException(fmt::format("Unknown object type: {}", objectType), LINE_MESSAGE);
     }
 
@@ -1978,7 +2061,7 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
             const int colId = row->col_int(0, INVALID_OBJECT_ID); // AutoscanCol::id
             bool persistent = remapBool(row->col_int(1, 0));
             if (persistent) {
-                auto [location, prefix] = stripLocationPrefix(row->col(2));
+                auto location = std::get<0>(stripLocationPrefix(row->col(2)));
                 auto values = std::vector {
                     ColumnUpdate(identifier("obj_id"), SQL_NULL),
                     ColumnUpdate(identifier("location"), quote(location.string())),
@@ -2014,6 +2097,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
 
     const int objectType = row->col_int(0, 0);
     bool isContainer = IS_CDS_CONTAINER(objectType);
+    log_vdebug("Removing {} from {}", row->col(2), row->col(3));
     if (all && !isContainer) {
         if (!row->isNullOrEmpty(1)) {
             const int refId = row->col_int(1, INVALID_OBJECT_ID);
@@ -2221,7 +2305,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             }
         }
 
-        // log_debug("selecting: {}; removing: {}", selectSql, fmt::join(del, ","));
+        log_vdebug("selecting: {}; removing: {}", selectSql, fmt::join(del, ","));
         if (!del.empty()) {
             _removeObjects(del);
             del.clear();
@@ -2241,9 +2325,9 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     if (!selUpnp.empty()) {
         std::copy(selUpnp.begin(), selUpnp.end(), std::back_inserter(changedUpnp));
     }
-    // log_debug("end; changedContainers (upnp): {}", fmt::join(changedUpnp, ","));
-    // log_debug("end; changedContainers (ui): {}", fmt::join(changedUi, ","));
+    log_vdebug("end; changedContainers (upnp): {}", fmt::join(changedUpnp, ","));
     log_debug("end; changedContainers (upnp): {}", changedUpnp.size());
+    log_vdebug("end; changedContainers (ui): {}", fmt::join(changedUi, ","));
     log_debug("end; changedContainers (ui): {}", changedUi.size());
 
     return changedContainers;

@@ -343,6 +343,7 @@
             <xs:attribute name="title" type="xs:string"/>
             <xs:attribute name="image" type="xs:string"/>
             <xs:attribute name="sort" type="xs:string"/>
+            <xs:attribute name="upnp-shortcut" type="xs:string"/>
             <xs:attribute name="max-count" type="xs:positiveInteger" default="500"/>
         </xs:complexType>
     </xs:element>
@@ -534,6 +535,7 @@
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="client" minOccurs="0"/>
+                <xs:element ref="group" minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="enabled" type="boolean" default="no"/>
             <xs:attribute name="cache-threshold" type="xs:positiveInteger" default="6"/>
@@ -573,6 +575,21 @@
         <xs:complexType>
             <xs:attribute name="from" type="xs:string" use="required"/>
             <xs:attribute name="to" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="group">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="hide" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="name" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="hide">
+        <xs:complexType>
+            <xs:attribute name="location" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 
@@ -786,6 +803,7 @@
             <xs:attribute name="key" type="xs:string"/>
             <xs:attribute name="title" type="xs:string"/>
             <xs:attribute name="class" type="xs:string"/>
+            <xs:attribute name="upnp-shortcut" type="xs:string"/>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="size" type="xs:positiveInteger" default="1"/>
         </xs:complexType>

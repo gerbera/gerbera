@@ -293,7 +293,10 @@ std::string ConfigTranscodingSetup::getItemPathRoot(bool prefix) const
     return xpath;
 }
 
-bool ConfigTranscodingSetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
+    std::string& optValue,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     if (startswith(optItem, xpath) && optionValue) {
         auto value = std::dynamic_pointer_cast<TranscodingProfileListOption>(optionValue);

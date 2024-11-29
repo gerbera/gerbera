@@ -27,7 +27,9 @@
 #include "quirks.h" // API
 
 #include "action_request.h"
+#include "cds/cds_container.h"
 #include "cds/cds_item.h"
+#include "config/result/client_config.h"
 #include "database/database.h"
 #include "upnp/client_manager.h"
 #include "upnp/clients.h"
@@ -126,6 +128,86 @@ void Quirks::getSamsungFeatureList(ActionRequest& request) const
     request.setResponse(std::move(response));
 }
 
+void Quirks::getShortCutList(const std::shared_ptr<Database>& database,
+    pugi::xml_node& features) const
+{
+    if (hasFlag(QUIRK_FLAG_HIDE_CONTAINER_SHORTCUTS)) {
+        log_debug("ShortCutList called, but it is not enabled for this client");
+        return;
+    }
+
+    log_debug("Call for extension: ShortCutList");
+    auto feature = features.append_child("Feature");
+    feature.append_attribute("name") = "CONTAINER_SHORTCUTS";
+    feature.append_attribute("version") = "1";
+    auto scl = feature.append_child("shortcutlist");
+
+    /* <Features
+     *  xmlns="urn:schemas-upnp-org:av:avs"
+     *  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     *  xsi:schemaLocation="urn:schemas-upnp-org:av:avs http://www.upnp.org/schemas/av/avs.xsd">
+     *    <Feature name="CONTAINER_SHORTCUTS" version="1">
+     *      <shortcutlist>
+     *        <shortcut> <name>MUSIC</name> <objectID>Music</objectID> </shortcut>
+     *        <shortcut> <name>MUSIC_ALBUMS</name> <objectID>Music/Album</objectID> </shortcut>
+     *        <shortcut> <name>MUSIC_ARTISTS</name> <objectID>Music/Artist</objectID> </shortcut>
+     *        <shortcut> <name>MUSIC_GENRES</name> <objectID>Music/Genre</objectID> </shortcut>
+     *        <shortcut> <name>MUSIC_ALL</name> <objectID>Music/Track</objectID> </shortcut>
+     *        <shortcut> <name>VIDEOS</name> <objectID>Videos</objectID> </shortcut>
+     *        <shortcut> <name>VIDEOS_GENRES</name> <objectID>Videos/Genre</objectID> </shortcut>
+     *        <shortcut> <name>VIDEOS_RECORDINGS</name> <objectID>Recordings</objectID> </shortcut>
+     *        <shortcut> <name>VIDEOS_ALL</name> <objectID>Videos/Video</objectID> </shortcut>
+     *      </shortcutlist>
+     *    </Feature>
+     *  </Features>
+     */
+
+    /*
+     * MUSIC,
+     * MUSIC_ALBUMS,
+     * MUSIC_ARTISTS,
+     * MUSIC_GENRES,
+     * MUSIC_PLAYLISTS,
+     * MUSIC_RECENTLY_ADDED,
+     * MUSIC_LAST_PLAYED,
+     * MUSIC_AUDIOBOOKS,
+     * MUSIC_STATIONS,
+     * MUSIC_ALL,
+     * MUSIC_FOLDER_STRUCTURE,
+
+     * IMAGES,
+     * IMAGES_YEARS,
+     * IMAGES_YEARS_MONTH,
+     * IMAGES_ALBUM,
+     * IMAGES_SLIDESHOWS,
+     * IMAGES_RECENTLY_ADDED,
+     * IMAGES_LAST_WATCHED,
+     * IMAGES_ALL,
+     * IMAGES_FOLDER_STRUCTURE,
+
+     * VIDEOS,
+     * VIDEOS_GENRES,
+     * VIDEOS_YEARS,
+     * VIDEOS_YEARS_MONTH,
+     * VIDEOS_ALBUM,
+     * VIDEOS_RECENTLY_ADDED,
+     * VIDEOS_LAST_PLAYED,
+     * VIDEOS_RECORDINGS,
+     * VIDEOS_ALL,
+     * VIDEOS_FOLDER_STRUCTURE,
+     */
+    auto shortcuts = database->getShortcuts();
+
+    for (auto&& [shortcut, cont] : shortcuts) {
+        if (!shortcut.empty()) {
+            log_debug("shortcut {}={}", shortcut, cont->getID());
+            auto container = scl.append_child("shortcut");
+            container.append_attribute("name") = shortcut.c_str();
+            container.append_attribute("objectID") = cont->getID();
+        }
+    }
+}
+
 std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std::shared_ptr<Database>& database, const std::string& objId) const
 {
     if (!hasFlag(QUIRK_FLAG_SAMSUNG_FEATURES)) {
@@ -142,7 +224,7 @@ std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std:
         // { "T", "object.item.textItem" },
     };
     if (containers.find(objId) != containers.end()) {
-        return database->findObjectByContentClass(containers.at(objId));
+        return database->findObjectByContentClass(containers.at(objId), getGroup());
     }
 
     return {};
@@ -310,6 +392,12 @@ bool Quirks::isAllowed() const
 {
     return !pClientProfile || pClientProfile->isAllowed;
 };
+
+std::vector<std::string> Quirks::getForbiddenDirectories() const
+{
+    static auto empty = std::vector<std::string>();
+    return (pClientProfile && pClientProfile->groupConfig) ? pClientProfile->groupConfig->getForbiddenDirectories() : empty;
+}
 
 void Quirks::updateHeaders(Headers& headers) const
 {

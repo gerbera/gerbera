@@ -30,7 +30,7 @@
 */
 
 /// \file timer.cc
-#define GRB_LOG_FAC GrbLogFacility::content
+#define GRB_LOG_FAC GrbLogFacility::util
 #include "timer.h" // API
 
 #include "exceptions.h"
@@ -133,6 +133,7 @@ void Timer::triggerWait()
         }
         notify();
     }
+    log_vdebug("triggerWait end - {} subscriber(s)", subscribers.size());
 }
 
 void Timer::notify()
@@ -183,7 +184,9 @@ std::chrono::milliseconds Timer::getNextNotifyTime() const
 
 void Timer::shutdown()
 {
+    log_debug("start");
     shutdownFlag = true;
     threadRunner->notifyAll();
     threadRunner->join();
+    log_debug("end");
 }

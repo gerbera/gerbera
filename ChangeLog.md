@@ -2,19 +2,29 @@
 
 ### HEAD
 
+- Access permissions for files by client
+- Add variables to docker images
 - Bump cookie, express and socket.io in /gerbera-web
+- Config: Unify path handling
 - Config: UI handler mimetypes and CSP
+- Drop Build Support for Ubuntu 23.04
 - Fix access to cache option if thumbnailer disabled
 - Fix autoscan issue with empty filename
 - Fix build without ffmpeg
+- Fix CodeQL messages
 - Fix creating containers in web ui
+- Fix Handling command line options
 - Fix handling of checkbox values on web ui
 - Improve handling multivalue tags in virtual paths
 - Increase size of pupnp threadpool
 - Resource directory configuration and cleanup collection
+- Test: Fix CMake commands
 - Update Build Environment
+- Update js vendor files
 - UPnP: Add support for filters
+- UPnP Shortcuts feature
 - Web UI: Add Search page
+- Web UI: Cleanup display of item number
 - Web UI: Fix detail display
 
 ### v2.3.0

@@ -28,6 +28,7 @@
 #define __BOXLAYOUT_H_
 
 #include "common.h"
+#include "edit_helper.h"
 
 #include <map>
 #include <memory>
@@ -37,6 +38,7 @@
 
 // forward declaration
 class BoxLayout;
+using EditHelperBoxLayout = EditHelper<BoxLayout>;
 
 class BoxKeys {
 public:
@@ -92,57 +94,36 @@ public:
     static constexpr std::string_view playlistRoot = "Playlist/playlistRoot";
 };
 
-class BoxLayoutList {
+class BoxLayoutList : public EditHelperBoxLayout {
 public:
-    /// \brief Adds a new BoxLayout to the list.
-    void add(const std::shared_ptr<BoxLayout>& layout, std::size_t index = std::numeric_limits<std::size_t>::max());
-
-    std::shared_ptr<BoxLayout> get(std::size_t id, bool edit = false) const;
-
-    std::shared_ptr<BoxLayout> get(const std::string_view& key) const;
-
-    std::size_t getEditSize() const;
-
-    std::size_t size() const { return list.size(); }
-
-    /// \brief removes the BoxLayout given by its ID
-    void remove(std::size_t id, bool edit = false);
-
-    /// \brief returns a copy of the config list in the form of an array
-    std::vector<std::shared_ptr<BoxLayout>> getArrayCopy() const;
-
-protected:
-    std::size_t origSize {};
-    std::map<std::size_t, std::shared_ptr<BoxLayout>> indexMap;
-
-    mutable std::recursive_mutex mutex;
-    using AutoLock = std::scoped_lock<std::recursive_mutex>;
-
-    std::vector<std::shared_ptr<BoxLayout>> list;
-    void _add(const std::shared_ptr<BoxLayout>& layout, std::size_t index);
+    std::shared_ptr<BoxLayout> getKey(const std::string_view& key) const;
 };
 
 /// \brief Define properties of a tree entry in virtual layout
-class BoxLayout {
+class BoxLayout : public Editable {
 public:
     BoxLayout() = default;
-    explicit BoxLayout(const std::string_view& key, std::string title, std::string objClass, bool enabled = true, int size = 1)
+    virtual ~BoxLayout() = default;
+    explicit BoxLayout(const std::string_view& key, std::string title, std::string objClass, std::string upnpShortcut = "", bool enabled = true, int size = 1)
         : key(key)
         , title(std::move(title))
         , objClass(std::move(objClass))
+        , upnpShortcut(std::move(upnpShortcut))
         , enabled(enabled)
         , size(size)
     {
     }
 
+    bool equals(const std::shared_ptr<BoxLayout>& other) { return this->key == other->key; }
+
     void setKey(std::string key) { this->key = std::move(key); }
     std::string getKey() const { return key; }
 
-    void setOrig(bool orig) { this->isOrig = orig; }
-    bool getOrig() const { return isOrig; }
-
     void setTitle(std::string title) { this->title = std::move(title); }
     std::string getTitle() const { return title; }
+
+    void setUpnpShortcut(std::string upnpShortcut) { this->upnpShortcut = std::move(upnpShortcut); }
+    std::string getUpnpShortcut() const { return upnpShortcut; }
 
     void setClass(std::string objClass) { this->objClass = std::move(objClass); }
     std::string getClass() const { return objClass; }
@@ -157,12 +138,19 @@ public:
     int getId() const { return id; }
 
 protected:
-    bool isOrig {};
+    /// \brief key for the box to be referenced in layouts
     std::string key;
+    /// \brief title string for the box
     std::string title;
+    /// \brief object class to be used for new containers
     std::string objClass;
+    /// \brief shortcut name for upnp shortcuts list
+    std::string upnpShortcut;
+    /// \brief allow to disable boxes
     bool enabled { true };
+    /// \brief size value for the box, esp. in structured layout
     int size { 1 };
+    /// \brief objectId of the box when existing
     int id { INVALID_OBJECT_ID };
 };
 

@@ -1,3 +1,25 @@
+#*GRB*
+#
+#  Gerbera - https://gerbera.io/
+#
+#  CMakeLists.txt - this file is part of Gerbera.
+#
+#  Copyright (C) 2016-2024 Gerbera Contributors
+#
+#  Gerbera is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License version 2
+#  as published by the Free Software Foundation.
+#
+#  Gerbera is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+#
+#  $Id$
+
 cmake_minimum_required(VERSION 3.19 FATAL_ERROR)
 cmake_policy(VERSION 3.13)
 
@@ -101,6 +123,7 @@ add_library(libgerbera STATIC
         src/config/result/directory_tweak.h
         src/config/result/dynamic_content.cc
         src/config/result/dynamic_content.h
+        src/config/result/edit_helper.h
         src/config/result/transcoding.cc
         src/config/result/transcoding.h
         src/config/setup/config_setup_array.cc
@@ -131,6 +154,7 @@ add_library(libgerbera STATIC
         src/config/setup/config_setup_tweak.h
         src/config/setup/config_setup_vector.cc
         src/config/setup/config_setup_vector.h
+        src/config/setup/setup_util.h
         src/content/autoscan_list.cc
         src/content/autoscan_list.h
         src/content/autoscan_setting.cc
@@ -193,6 +217,7 @@ add_library(libgerbera STATIC
         src/contrib/md5.h
         src/database/database.cc
         src/database/database.h
+        src/database/db_param.h
         src/database/mysql/mysql_database.cc
         src/database/mysql/mysql_database.h
         src/database/search_handler.cc
@@ -238,6 +263,7 @@ add_library(libgerbera STATIC
         src/metadata/metacontent_handler.h
         src/metadata/metadata_enums.cc
         src/metadata/metadata_enums.h
+        src/metadata/metadata_handler.cc
         src/metadata/metadata_handler.h
         src/metadata/metadata_service.cc
         src/metadata/metadata_service.h

@@ -28,6 +28,10 @@ After upgrading you should run this as well to check for any new or changed opti
 You can also ``gerbera --create-example-config`` to get almost all options written to the output. You have to validate all generated settings and
 adjust them to your preferences. There are several empty options you have to fill in or remove before your configuration will work.
 
+You can also run `gerbera --create-config=sections` to export only a relevant section. The output can be used to compare with the existing settings
+but not as a full configuration. The following sections are supported: `Server`, `Ui`, `ExtendedRuntime`, `DynamicContainer`, `Database`, `Import`,
+`Mappings`, `Boxlayout`, `Transcoding`. The pseudo section `All` is equivalent to stating no section at all.
+
 You can use ``gerbera --check-config -c <file>`` to verify your settings before starting the service.
 
 * Run command to create configuration, storing in the ``/etc/gerbera`` directory.
