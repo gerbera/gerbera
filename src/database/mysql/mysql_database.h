@@ -55,6 +55,8 @@ public:
 protected:
     void _exec(const std::string& query) override;
     void checkMysqlThreadInit() const;
+    void connect();
+    std::string prepareDatabase();
 
     static std::string getError(MYSQL* db);
 

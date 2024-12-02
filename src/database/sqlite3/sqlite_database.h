@@ -59,6 +59,7 @@ public:
 
 protected:
     void _exec(const std::string& query) override;
+    std::string prepareDatabase(const fs::path& dbFilePath, GrbFile& dbFile);
 
 private:
     void prepare();
