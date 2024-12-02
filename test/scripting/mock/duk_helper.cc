@@ -24,6 +24,8 @@
 
 #include "duk_helper.h"
 
+#include "content/scripting/duk_compat.h"
+
 #include <duktape.h>
 #include <fmt/format.h>
 #if FMT_VERSION >= 100202
@@ -193,10 +195,6 @@ void DukTestHelper::createObject(duk_context* ctx, const std::map<std::string, s
 
 void DukTestHelper::printError(duk_context* ctx, const std::string& message, const std::string& item)
 {
-#if DUK_VERSION > 20399
     std::cerr << message << item << ": " << duk_safe_to_stacktrace(ctx, -1) << std::endl;
-#else
-    std::cerr << message << item << ": " << duk_safe_to_string(ctx, -1) << std::endl;
-#endif
 }
 #endif //HAVE_JS
