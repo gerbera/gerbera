@@ -68,8 +68,8 @@ MySQLDatabase::~MySQLDatabase()
         mysql_close(&db);
         mysql_connection = false;
     }
-    log_debug("calling mysql_server_end...");
-    mysql_server_end();
+    log_debug("calling mysql_library_end ...");
+    mysql_library_end();
     log_debug("...ok");
 }
 
@@ -92,57 +92,58 @@ void MySQLDatabase::threadCleanup()
     }
 }
 
-void MySQLDatabase::init()
+void MySQLDatabase::connect()
 {
-    log_debug("start");
-    SQLDatabase::init();
-
-    std::unique_lock<decltype(sqlMutex)> lock(sqlMutex);
-
     if (!mysql_thread_safe()) {
         throw_std_runtime_error("mysql library is not thread safe");
     }
 
-    /// \todo write destructor function
-    int ret = pthread_key_create(&mysql_init_key, nullptr);
-    if (ret) {
+    // Desctructor function not necessary because no memory is allocated
+    if (pthread_key_create(&mysql_init_key, nullptr)) {
         throw_std_runtime_error("could not create pthread_key");
     }
-    mysql_server_init(0, nullptr, nullptr);
+    mysql_library_init(0, nullptr, nullptr);
     pthread_setspecific(mysql_init_key, &mysql_init_val);
 
-    MYSQL* resMysql = mysql_init(&db);
-    if (!resMysql) {
-        throw_std_runtime_error("mysql_init() failed");
+    {
+        MYSQL* resMysql = mysql_init(&db);
+        if (!resMysql) {
+            throw_std_runtime_error("mysql_init() failed");
+        }
+
+        mysql_options(&db, MYSQL_SET_CHARSET_NAME, "utf8mb4");
+
+        bool myBoolVar = true;
+        mysql_options(&db, MYSQL_OPT_RECONNECT, &myBoolVar);
     }
 
-    mysql_options(&db, MYSQL_SET_CHARSET_NAME, "utf8mb4");
+    {
+        std::string dbHost = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_HOST);
+        std::string dbName = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_DATABASE);
+        std::string dbUser = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_USERNAME);
+        auto dbPort = in_port_t(config->getIntOption(ConfigVal::SERVER_STORAGE_MYSQL_PORT));
+        std::string dbPass = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_PASSWORD);
+        std::string dbSock = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_SOCKET);
 
-    bool myBoolVar = true;
-    mysql_options(&db, MYSQL_OPT_RECONNECT, &myBoolVar);
-
-    std::string dbHost = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_HOST);
-    std::string dbName = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_DATABASE);
-    std::string dbUser = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_USERNAME);
-    auto dbPort = in_port_t(config->getIntOption(ConfigVal::SERVER_STORAGE_MYSQL_PORT));
-    std::string dbPass = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_PASSWORD);
-    std::string dbSock = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_SOCKET);
-
-    resMysql = mysql_real_connect(&db,
-        dbHost.c_str(),
-        dbUser.c_str(),
-        (dbPass.empty() ? nullptr : dbPass.c_str()),
-        dbName.c_str(),
-        dbPort, // port
-        (dbSock.empty() ? nullptr : dbSock.c_str()), // socket
-        0 // flags
-    );
-    if (!resMysql) {
-        throw_std_runtime_error("Connecting to database {}:{}/{} failed: {}", dbHost, dbPort, dbName, getError(&db));
+        MYSQL* resMysql = mysql_real_connect(&db,
+            dbHost.c_str(),
+            dbUser.c_str(),
+            (dbPass.empty() ? nullptr : dbPass.c_str()),
+            dbName.c_str(),
+            dbPort, // port
+            (dbSock.empty() ? nullptr : dbSock.c_str()), // socket
+            0 // flags
+        );
+        if (!resMysql) {
+            throw_std_runtime_error("Connecting to database {}:{}/{} failed: {}", dbHost, dbPort, dbName, getError(&db));
+        }
     }
 
     mysql_connection = true;
+}
 
+std::string MySQLDatabase::prepareDatabase()
+{
     std::string dbVersion;
     try {
         dbVersion = getInternalSetting("db_version");
@@ -164,7 +165,7 @@ void MySQLDatabase::init()
                     continue;
                 }
                 log_debug("executing statement: '{}'", statement);
-                ret = mysql_real_query(&db, statement.c_str(), statement.size());
+                int ret = mysql_real_query(&db, statement.c_str(), statement.size());
                 if (ret) {
                     std::string myError = getError(&db);
                     throw DatabaseException(myError, fmt::format("Mysql: error while creating db: {}", myError));
@@ -182,9 +183,19 @@ void MySQLDatabase::init()
         }
         log_info("Database created successfully!");
     }
+    return dbVersion;
+}
 
+void MySQLDatabase::init()
+{
+    log_debug("start");
+    SQLDatabase::init();
+
+    std::unique_lock<decltype(sqlMutex)> lock(sqlMutex);
+
+    connect();
+    auto dbVersion = prepareDatabase();
     upgradeDatabase(std::stoul(dbVersion), hashies, ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, mysqlUpdateVersion, mysqlAddResourceAttr);
-
     initDynContainers();
 
     lock.unlock();

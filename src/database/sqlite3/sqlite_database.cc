@@ -67,42 +67,8 @@ void Sqlite3Database::prepare()
     exec(fmt::format("PRAGMA synchronous = {}", config->getIntOption(ConfigVal::SERVER_STORAGE_SQLITE_SYNCHRONOUS)));
 }
 
-void Sqlite3Database::init()
+std::string Sqlite3Database::prepareDatabase(const fs::path& dbFilePath, GrbFile& dbFile)
 {
-    dbInitDone = false;
-    SQLDatabase::init();
-
-    fs::path dbFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
-    auto dbFile = GrbFile(dbFilePath);
-    log_debug("SQLite path: {}", dbFilePath.c_str());
-
-    // check for db-file
-    if (!dbFile.isWritable())
-        throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath.c_str(), std::strerror(errno)));
-
-    taskQueueOpen = true;
-    threadRunner = std::make_unique<StdThreadRunner>(
-        "SQLiteThread", [](void* arg) {
-            auto inst = static_cast<Sqlite3Database*>(arg);
-            inst->threadProc(); }, this);
-
-    if (!threadRunner->isAlive()) {
-        throw DatabaseException("", fmt::format("Could not start sqlite thread: {}", std::strerror(errno)));
-    }
-
-    // wait for sqlite3 thread to become ready
-    threadRunner->waitForReady();
-    if (!startupError.empty())
-        throw DatabaseException("", startupError);
-
-    // try to detect already active database client and terminate before doing any harm
-    try {
-        prepare();
-    } catch (const std::runtime_error&) {
-        shutdown();
-        throw_std_runtime_error("Sqlite3Database.init: could not open '{}' exclusively", dbFilePath.c_str());
-    }
-
     std::string dbVersion;
     fs::path dbFilePathbackup = fmt::format(SQLITE3_BACKUP_FORMAT, dbFilePath.c_str());
     auto dbBackupFile = GrbFile(dbFilePathbackup);
@@ -153,6 +119,47 @@ void Sqlite3Database::init()
         shutdown();
         throw_std_runtime_error("sqlite3 database seems to be corrupt and restoring from backup failed");
     }
+
+    return dbVersion;
+}
+
+void Sqlite3Database::init()
+{
+    dbInitDone = false;
+    SQLDatabase::init();
+
+    fs::path dbFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    auto dbFile = GrbFile(dbFilePath);
+    log_debug("SQLite path: {}", dbFilePath.c_str());
+
+    // check for db-file
+    if (!dbFile.isWritable())
+        throw DatabaseException("", fmt::format("Error while accessing sqlite database file ({}): {}", dbFilePath.c_str(), std::strerror(errno)));
+
+    taskQueueOpen = true;
+    threadRunner = std::make_unique<StdThreadRunner>(
+        "SQLiteThread", [](void* arg) {
+            auto inst = static_cast<Sqlite3Database*>(arg);
+            inst->threadProc(); }, this);
+
+    if (!threadRunner->isAlive()) {
+        throw DatabaseException("", fmt::format("Could not start sqlite thread: {}", std::strerror(errno)));
+    }
+
+    // wait for sqlite3 thread to become ready
+    threadRunner->waitForReady();
+    if (!startupError.empty())
+        throw DatabaseException("", startupError);
+
+    // try to detect already active database client and terminate before doing any harm
+    try {
+        prepare();
+    } catch (const std::runtime_error&) {
+        shutdown();
+        throw_std_runtime_error("Sqlite3Database.init: could not open '{}' exclusively", dbFilePath.c_str());
+    }
+
+    std::string dbVersion = prepareDatabase(dbFilePath, dbFile);
 
     try {
         upgradeDatabase(std::stoul(dbVersion), hashies, ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE, sqlite3UpdateVersion, sqlite3AddResourceAttr);
