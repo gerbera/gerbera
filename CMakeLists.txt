@@ -193,6 +193,7 @@ add_library(libgerbera STATIC
         src/content/onlineservice/online_service_helper.h
         src/content/onlineservice/task_processor.cc
         src/content/onlineservice/task_processor.h
+        src/content/scripting/duk_compat.h
         src/content/scripting/import_script.cc
         src/content/scripting/import_script.h
         src/content/scripting/js_functions.cc

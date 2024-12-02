@@ -21,6 +21,7 @@
 - Improve handling multivalue tags in virtual paths
 - Increase size of pupnp threadpool
 - Resource directory configuration and cleanup collection
+- Scripting: Clean up property handling
 - Test: Fix CMake commands
 - Update and refactor MySQL code
 - Update Build Environment

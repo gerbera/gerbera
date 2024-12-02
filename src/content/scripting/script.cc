@@ -48,6 +48,7 @@
 #include "content/content.h"
 #include "context.h"
 #include "database/database.h"
+#include "duk_compat.h"
 #include "js_functions.h"
 #include "script_names.h"
 #include "script_property.h"
@@ -75,15 +76,31 @@ static constexpr std::array jsGlobalFunctions {
     duk_function_list_entry { nullptr, nullptr, 0 },
 };
 
-void Script::setProperty(const std::string& name, const std::string& value)
+void Script::setProperty(const std::string& name, const std::string& value, bool doEmpty)
 {
-    duk_push_string(ctx, value.c_str());
-    duk_put_prop_string(ctx, -2, camelCaseString(name).c_str());
+    if (doEmpty || !value.empty()) {
+        duk_push_string(ctx, value.c_str());
+        duk_put_prop_string(ctx, -2, camelCaseString(name).c_str());
+    }
 }
 
 void Script::setIntProperty(const std::string& name, int value)
 {
     duk_push_int(ctx, value);
+    duk_put_prop_string(ctx, -2, camelCaseString(name).c_str());
+}
+
+void Script::setIntProperty(const std::string& name, int value, int checkValue)
+{
+    if (value != checkValue) {
+        duk_push_int(ctx, value);
+        duk_put_prop_string(ctx, -2, camelCaseString(name).c_str());
+    }
+}
+
+void Script::setBoolProperty(const std::string& name, bool value)
+{
+    duk_push_int(ctx, value ? 1 : 0);
     duk_put_prop_string(ctx, -2, camelCaseString(name).c_str());
 }
 
@@ -176,10 +193,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
         auto scs = ConfigDefinition::findConfigSetup(i, true);
         if (!scs)
             continue;
-        auto value = scs->getCurrentValue();
-        if (!value.empty()) {
-            setProperty(scs->getItemPathRoot(), value);
-        }
+        setProperty(scs->getItemPathRoot(), scs->getCurrentValue(), false);
     }
 
     for (auto&& dcs : ConfigDefinition::getConfigSetupList<ConfigDictionarySetup>()) {
@@ -212,9 +226,9 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
             setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
-            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
+            setBoolProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
             setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE), adir->getMediaType());
-            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
+            setBoolProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
             setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
             setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
@@ -234,7 +248,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             auto boxLayout = boxLayoutList->get(i);
             setIntProperty("id", boxLayout->getId());
             setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_SIZE), boxLayout->getSize());
-            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_ENABLED), boxLayout->getEnabled());
+            setBoolProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_ENABLED), boxLayout->getEnabled());
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_TITLE), boxLayout->getTitle());
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_CLASS), boxLayout->getClass());
             setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT), boxLayout->getUpnpShortcut());
@@ -325,11 +339,7 @@ void Script::_load(const fs::path& scriptPath)
 
     duk_push_string(ctx, scriptPath.c_str());
     if (duk_pcompile_lstring_filename(ctx, 0, scriptText.c_str(), scriptText.length()) != 0) {
-#if DUK_VERSION > 20399
         log_error("Failed to load script {}: {}", scriptPath.c_str(), duk_safe_to_stacktrace(ctx, -1));
-#else
-        log_error("Failed to load script {}: {}", scriptPath.c_str(), duk_safe_to_string(ctx, -1));
-#endif
         throw_std_runtime_error("Scripting: failed to compile {}", scriptPath.c_str());
     }
 }
@@ -347,11 +357,7 @@ void Script::load(const fs::path& scriptPath)
 void Script::_execute()
 {
     if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
-#if DUK_VERSION > 20399
         log_error("Failed to execute script {}: {}", scriptPath.c_str(), duk_safe_to_stacktrace(ctx, -1));
-#else
-        log_error("Failed to execute script {}: {}", scriptPath.c_str(), duk_safe_to_string(ctx, -1));
-#endif
         throw_std_runtime_error("Script: failed to execute script");
     }
     duk_pop(ctx);
@@ -455,7 +461,11 @@ std::vector<int> Script::execute(const std::shared_ptr<CdsObject>& obj, const st
     return result;
 }
 
-std::vector<int> Script::call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& functionName, const fs::path& rootPath, const std::string& containerType)
+std::vector<int> Script::call(const std::shared_ptr<CdsObject>& obj,
+    const std::shared_ptr<CdsContainer>& cont,
+    const std::string& functionName,
+    const fs::path& rootPath,
+    const std::string& containerType)
 {
     // write global object used in callback functionss
     cdsObject2dukObject(obj);
@@ -503,11 +513,7 @@ std::vector<int> Script::call(const std::shared_ptr<CdsObject>& obj, const std::
     if (duk_pcall(ctx, static_cast<duk_idx_t>(narg)) != DUK_EXEC_SUCCESS) {
         // Note: The invoked function will be blamed for execution errors, not the actual offending line of code
         // https://github.com/svaarala/duktape/blob/master/doc/error-objects.rst
-#if DUK_VERSION > 20399
         log_error("javascript {} runtime error: {}() - {}\n", contextName, functionName, duk_safe_to_stacktrace(ctx, -1));
-#else
-        log_error("javascript {} runtime error: {}() - {}\n", contextName, functionName, duk_safe_to_string(ctx, -1));
-#endif
         duk_pop(ctx);
         throw_std_runtime_error("javascript runtime error");
     }
@@ -830,47 +836,24 @@ bool Script::isHiddenFile(const std::shared_ptr<CdsObject>& cdsObj, const std::s
 
 void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
 {
-    std::string val;
-
     duk_push_object(ctx);
 
     // CdsObject
     setIntProperty("objectType", obj->getObjectType());
+    setIntProperty("id", obj->getID(), INVALID_OBJECT_ID);
+    setIntProperty("parentID", obj->getParentID(), INVALID_OBJECT_ID);
 
-    int id = obj->getID();
-
-    if (id != INVALID_OBJECT_ID)
-        setIntProperty("id", id);
-
-    id = obj->getParentID();
-    if (id != INVALID_OBJECT_ID)
-        setIntProperty("parentID", id);
-
-    val = obj->getTitle();
-    if (!val.empty())
-        setProperty("title", val);
-
-    val = obj->getClass();
-    if (!val.empty())
-        setProperty("upnpclass", val);
-
-    val = obj->getLocation();
-    if (!val.empty())
-        setProperty("location", val);
+    setProperty("title", obj->getTitle(), false);
+    setProperty("upnpclass", obj->getClass(), false);
+    setProperty("location", obj->getLocation(), false);
 
     setIntProperty("mtime", static_cast<int>(obj->getMTime().count()));
     setIntProperty("utime", static_cast<int>(obj->getUTime().count()));
     setIntProperty("sizeOnDisk", static_cast<int>(obj->getSizeOnDisk()));
     setIntProperty("flags", obj->getFlags());
 
-    // TODO: boolean type
-    int restricted = obj->isRestricted();
-    setIntProperty("restricted", restricted);
-
-    if (obj->getFlag(OBJECT_FLAG_OGG_THEORA))
-        setIntProperty("theora", 1);
-    else
-        setIntProperty("theora", 0);
+    setBoolProperty("restricted", obj->isRestricted());
+    setBoolProperty("theora", obj->getFlag(OBJECT_FLAG_OGG_THEORA));
 
 #ifdef ONLINE_SERVICES
     if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
@@ -972,23 +955,15 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     if (obj->isItem() && item) {
         setIntProperty("trackNumber", item->getTrackNumber());
         setIntProperty("partNumber", item->getPartNumber());
-        val = item->getMimeType();
-        if (!val.empty())
-            setProperty("mimetype", val);
-
-        val = item->getServiceID();
-        if (!val.empty())
-            setProperty("serviceID", val);
+        setProperty("mimetype", item->getMimeType(), false);
+        setProperty("serviceID", item->getServiceID(), false);
     }
 
     // CdsDirectory
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        // TODO: boolean type, hide updateID
         setIntProperty("updateID", cont->getUpdateID());
-
-        int searchable = cont->isSearchable();
-        setIntProperty("searchable", searchable);
+        setBoolProperty("searchable", cont->isSearchable());
     }
 }
 

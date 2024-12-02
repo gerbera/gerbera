@@ -71,8 +71,24 @@ public:
     Script(const Script&) = delete;
     Script& operator=(const Script&) = delete;
 
-    void setProperty(const std::string& name, const std::string& value);
+    /// \brief Write property with string value to object
+    /// \param name of property
+    /// \param value of property
+    /// \param doEmpty write if property value is empty
+    void setProperty(const std::string& name, const std::string& value, bool doEmpty = true);
+    /// \brief Write property with number value to object
+    /// \param name of property
+    /// \param value of property
     void setIntProperty(const std::string& name, int value);
+    /// \brief Write property with string value to object
+    /// \param name of property
+    /// \param value of property
+    /// \param checkValue write if property value is not equal checkValue
+    void setIntProperty(const std::string& name, int value, int checkValue);
+    /// \brief Write property with boolean value to object
+    /// \param name of property
+    /// \param value of property: write 1 if true 0 else
+    void setBoolProperty(const std::string& name, bool value);
 
     void defineFunction(const std::string& name, duk_c_function function, std::uint32_t numParams);
     void defineFunctions(const duk_function_list_entry* functions);
