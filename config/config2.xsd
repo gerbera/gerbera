@@ -446,11 +446,14 @@
         <xs:complexType>
             <xs:all>
                 <xs:element ref="search-item-result" minOccurs="0"/>
-                <xs:element ref="album-properties" minOccurs="0"/>
-                <xs:element ref="artist-properties" minOccurs="0"/>
-                <xs:element ref="genre-properties" minOccurs="0"/>
-                <xs:element ref="playlist-properties" minOccurs="0"/>
-                <xs:element ref="title-properties" minOccurs="0"/>
+                <xs:element name="album-properties" type="upnp-properties" minOccurs="0"/>
+                <xs:element name="artist-properties" type="upnp-properties" minOccurs="0"/>
+                <xs:element name="genre-properties" type="upnp-properties" minOccurs="0"/>
+                <xs:element name="playlist-properties" type="upnp-properties" minOccurs="0"/>
+                <xs:element name="title-properties" type="upnp-properties" minOccurs="0"/>
+                <xs:element name="resource-defaults" type="upnp-defaults" minOccurs="0"/>
+                <xs:element name="object-defaults" type="upnp-defaults" minOccurs="0"/>
+                <xs:element name="container-defaults" type="upnp-defaults" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="multi-value" type="boolean" default="yes"/>
             <xs:attribute name="dynamic-descriptions" type="boolean" default="yes"/>
@@ -470,7 +473,7 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="album-properties">
+    <xs:element name="upnp-properties">
         <xs:complexType>
             <xs:sequence>
                 <xs:element ref="upnp-namespace" minOccurs="0"/>
@@ -479,38 +482,10 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="artist-properties">
+    <xs:element name="upnp-defaults">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="upnp-namespace" minOccurs="0"/>
-                <xs:element ref="upnp-property" minOccurs="0"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="genre-properties">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="upnp-namespace" minOccurs="0"/>
-                <xs:element ref="upnp-property" minOccurs="0"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="playlist-properties">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="upnp-namespace" minOccurs="0"/>
-                <xs:element ref="upnp-property" minOccurs="0"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="title-properties">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="upnp-namespace" minOccurs="0"/>
-                <xs:element ref="upnp-property" minOccurs="0"/>
+                <xs:element ref="property-default" minOccurs="0"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
@@ -526,6 +501,13 @@
         <xs:complexType>
             <xs:attribute name="FIXMExmlns" type="xs:string" use="required"/>
             <xs:attribute name="uri" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="property-default">
+        <xs:complexType>
+            <xs:attribute name="tag" type="xs:string" use="required"/>
+            <xs:attribute name="value" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 

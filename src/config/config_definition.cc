@@ -375,6 +375,75 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
 #endif
 };
 
+/// \brief default values for ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS
+static const std::map<std::string, std::string> upnpResourceDefaultPropDefaults {
+    { "@allowedUse", "UNKNOWN" },
+    { "@bitrate", "0" },
+    { "@bitsPerSample", "0" },
+    { "@colorDepth", "1" },
+    { "@contentInfoURI", "" },
+    { "@daylightSaving", "UNKNOWN" },
+    { "@duration", "0" },
+    { "@framerate", "30p" },
+    { "@importUri", "" },
+    { "@nrAudioChannels", "0" },
+    { "@protection", "UNKNOWN" },
+    { "@recordQuality", "" },
+    { "@reliability", "100" },
+    { "@remainingTime", "" },
+    { "@resolution", "1x1" },
+    { "@rightsInfoURI", "" },
+    { "@sampleFrequency", "0" },
+    { "@size", "0" },
+    { "@tspec", "UNKNOWN" },
+    { "@usageInfo", "This file is hosted by Gerbera" },
+    { "@validityEnd", "1900-01-01T00:00:00" },
+    { "@validityStart", "1900-01-01T00:00:00" },
+};
+
+/// \brief default values for ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS
+static const std::map<std::string, std::string> upnpObjectDefaultPropDefaults {
+    { "@id", "0" },
+    { "@parentID", "0" },
+    { "dc:creator", "UNKNOWN" },
+    { "dc:date", "1900-01-01T00:00:00" },
+    { "upnp:actor", "UNKNOWN" },
+    { "upnp:album", "UNKNOWN" },
+    { "upnp:artist", "UNKNOWN" },
+    { "upnp:artistDiscographyURI", "" },
+    { "upnp:author", "UNKNOWN" },
+    { "upnp:contributor", "UNKNOWN" },
+    { "upnp:director", "UNKNOWN" },
+    { "upnp:genre", "UNKNOWN" },
+    { "upnp:language", "en-US" },
+    { "upnp:lastPlaybackPosition", "0" },
+    { "upnp:lastPlaybackTime", "1900-01-01T00:00:00" },
+    { "upnp:lyricsURI", "" },
+    { "upnp:originalTrackNumber", "0" },
+    { "upnp:playbackCount", "0" },
+    { "upnp:playlist", "UNKNOWN" },
+    { "upnp:producer", "UNKNOWN" },
+    { "upnp:publisher", "UNKNOWN" },
+    { "upnp:rating", "0" },
+    { "upnp:recordable", "1" },
+    { "upnp:relation", "UNKNOWN" },
+    { "upnp:storageFree", "0" },
+    { "upnp:storageMaxPartition", "0" },
+    { "upnp:storageMedium", "UNKNOWN" },
+    { "upnp:storageTotal", "0" },
+    { "upnp:storageUsed", "0" },
+};
+
+/// \brief default values for ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS
+static const std::map<std::string, std::string> upnpContainerDefaultPropDefaults {
+    { "@childContainerCount", "0" },
+    { "@childCount", "0" },
+    { "@id", "0" },
+    { "@parentID", "0" },
+    { "@restricted", "1" },
+    { "@searchable", "1" },
+};
+
 /// \brief configure all known options
 const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions = {
     std::make_shared<ConfigUIntSetup>(ConfigVal::SERVER_PORT,
@@ -1383,10 +1452,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "/server/upnp/title-properties", "config-server.html#upnp",
         ConfigVal::A_UPNP_PROPERTIES_PROPERTY, ConfigVal::A_UPNP_PROPERTIES_UPNPTAG, ConfigVal::A_UPNP_PROPERTIES_METADATA,
         false, false, false),
-    std::make_shared<ConfigStringSetup>(ConfigVal::A_UPNP_PROPERTIES_UPNPTAG,
-        "attribute::upnp-tag", "config-server.html#upnp"),
-    std::make_shared<ConfigStringSetup>(ConfigVal::A_UPNP_PROPERTIES_METADATA,
-        "attribute::meta-data", "config-server.html#upnp"),
+    std::make_shared<ConfigSetup>(ConfigVal::A_UPNP_PROPERTIES_PROPERTY,
+        "upnp-property", ""),
+    std::make_shared<ConfigSetup>(ConfigVal::A_UPNP_NAMESPACE_PROPERTY,
+        "upnp-namespace", ""),
 
     std::make_shared<ConfigDictionarySetup>(ConfigVal::UPNP_ALBUM_NAMESPACES,
         "/server/upnp/album-properties", "config-server.html#upnp",
@@ -1412,6 +1481,30 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "attribute::xmlns", "config-server.html#upnp"),
     std::make_shared<ConfigStringSetup>(ConfigVal::A_UPNP_NAMESPACE_URI,
         "attribute::uri", "config-server.html#upnp"),
+
+    std::make_shared<ConfigStringSetup>(ConfigVal::A_UPNP_PROPERTIES_UPNPTAG,
+        "attribute::upnp-tag", "config-server.html#upnp"),
+    std::make_shared<ConfigStringSetup>(ConfigVal::A_UPNP_PROPERTIES_METADATA,
+        "attribute::meta-data", "config-server.html#upnp"),
+
+    std::make_shared<ConfigDictionarySetup>(ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS,
+        "/server/upnp/resource-defaults", "config-server.html#upnp",
+        ConfigVal::A_UPNP_DEFAULT_PROPERTY_PROPERTY, ConfigVal::A_UPNP_DEFAULT_PROPERTY_TAG, ConfigVal::A_UPNP_DEFAULT_PROPERTY_VALUE,
+        false, false, false, upnpResourceDefaultPropDefaults),
+    std::make_shared<ConfigDictionarySetup>(ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS,
+        "/server/upnp/object-defaults", "config-server.html#upnp",
+        ConfigVal::A_UPNP_DEFAULT_PROPERTY_PROPERTY, ConfigVal::A_UPNP_DEFAULT_PROPERTY_TAG, ConfigVal::A_UPNP_DEFAULT_PROPERTY_VALUE,
+        false, false, false, upnpObjectDefaultPropDefaults),
+    std::make_shared<ConfigDictionarySetup>(ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS,
+        "/server/upnp/container-defaults", "config-server.html#upnp",
+        ConfigVal::A_UPNP_DEFAULT_PROPERTY_PROPERTY, ConfigVal::A_UPNP_DEFAULT_PROPERTY_TAG, ConfigVal::A_UPNP_DEFAULT_PROPERTY_VALUE,
+        false, false, false, upnpContainerDefaultPropDefaults),
+    std::make_shared<ConfigSetup>(ConfigVal::A_UPNP_DEFAULT_PROPERTY_PROPERTY,
+        "property-default", ""),
+    std::make_shared<ConfigStringSetup>(ConfigVal::A_UPNP_DEFAULT_PROPERTY_TAG,
+        "attribute::tag", "config-server.html#upnp"),
+    std::make_shared<ConfigStringSetup>(ConfigVal::A_UPNP_DEFAULT_PROPERTY_VALUE,
+        "attribute::value", "config-server.html#upnp"),
 
     std::make_shared<ConfigDynamicContentSetup>(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST,
         "/server/containers", "config-server.html#containers"),
@@ -1514,11 +1607,6 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "attribute::key", "config-import.html#headers", ""),
     std::make_shared<ConfigStringSetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE,
         "attribute::value", "config-import.html#headers", ""),
-
-    std::make_shared<ConfigSetup>(ConfigVal::A_UPNP_PROPERTIES_PROPERTY,
-        "upnp-property", ""),
-    std::make_shared<ConfigSetup>(ConfigVal::A_UPNP_NAMESPACE_PROPERTY,
-        "upnp-namespace", ""),
 };
 
 /// \brief define parent options for path search
@@ -1528,9 +1616,16 @@ const std::map<ConfigVal, std::vector<ConfigVal>> ConfigDefinition::parentOption
     { ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL, { ConfigVal::TRANSCODING_PROFILE_LIST } },
     { ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE, { ConfigVal::TRANSCODING_PROFILE_LIST } },
 
+    { ConfigVal::A_CLIENTS_UPNP_FILTER_FULL, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::CLIENTS_LIST } },
+    { ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::CLIENTS_LIST } },
+
     { ConfigVal::A_UPNP_PROPERTIES_PROPERTY, { ConfigVal::UPNP_ALBUM_PROPERTIES, ConfigVal::UPNP_GENRE_PROPERTIES, ConfigVal::UPNP_ARTIST_PROPERTIES, ConfigVal::UPNP_TITLE_PROPERTIES, ConfigVal::UPNP_PLAYLIST_PROPERTIES } },
     { ConfigVal::A_UPNP_PROPERTIES_UPNPTAG, { ConfigVal::UPNP_ALBUM_PROPERTIES, ConfigVal::UPNP_GENRE_PROPERTIES, ConfigVal::UPNP_ARTIST_PROPERTIES, ConfigVal::UPNP_TITLE_PROPERTIES, ConfigVal::UPNP_PLAYLIST_PROPERTIES } },
     { ConfigVal::A_UPNP_PROPERTIES_METADATA, { ConfigVal::UPNP_ALBUM_PROPERTIES, ConfigVal::UPNP_GENRE_PROPERTIES, ConfigVal::UPNP_ARTIST_PROPERTIES, ConfigVal::UPNP_TITLE_PROPERTIES, ConfigVal::UPNP_PLAYLIST_PROPERTIES } },
+
+    { ConfigVal::A_UPNP_DEFAULT_PROPERTY_PROPERTY, { ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS, ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS, ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS } },
+    { ConfigVal::A_UPNP_DEFAULT_PROPERTY_TAG, { ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS, ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS, ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS } },
+    { ConfigVal::A_UPNP_DEFAULT_PROPERTY_VALUE, { ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS, ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS, ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS } },
 
     { ConfigVal::A_UPNP_NAMESPACE_PROPERTY, { ConfigVal::UPNP_ALBUM_NAMESPACES, ConfigVal::UPNP_GENRE_NAMESPACES, ConfigVal::UPNP_ARTIST_NAMESPACES, ConfigVal::UPNP_TITLE_NAMESPACES, ConfigVal::UPNP_PLAYLIST_NAMESPACES } },
     { ConfigVal::A_UPNP_NAMESPACE_KEY, { ConfigVal::UPNP_ALBUM_NAMESPACES, ConfigVal::UPNP_GENRE_NAMESPACES, ConfigVal::UPNP_ARTIST_NAMESPACES, ConfigVal::UPNP_TITLE_NAMESPACES, ConfigVal::UPNP_PLAYLIST_NAMESPACES } },

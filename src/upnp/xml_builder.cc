@@ -129,6 +129,9 @@ UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
         { ConfigVal::UPNP_GENRE_NAMESPACES, config->getDictionaryOption(ConfigVal::UPNP_GENRE_NAMESPACES) },
         { ConfigVal::UPNP_PLAYLIST_NAMESPACES, config->getDictionaryOption(ConfigVal::UPNP_PLAYLIST_NAMESPACES) },
     };
+    resourcePropertyDefaults = config->getDictionaryOption(ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS);
+    objectPropertyDefaults = config->getDictionaryOption(ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS);
+    containerPropertyDefaults = config->getDictionaryOption(ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS);
 }
 
 std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType) const
@@ -280,6 +283,24 @@ bool UpnpXMLBuilder::checkFilterNamespace(const std::string& f, ConfigVal nsProp
     return true;
 }
 
+void UpnpXMLBuilder::addDefaultProperty(
+    pugi::xml_node& result,
+    const std::vector<std::string>& propNames,
+    const std::vector<std::string>& filter,
+    const std::map<std::string, std::string>& defaults)
+{
+    for (auto&& tag : filter) {
+        if (std::find(propNames.begin(), propNames.end(), tag) == propNames.end()) {
+            std::string attributeTag = fmt::format("@{}", tag);
+            if (defaults.find(tag) != defaults.end()) {
+                result.append_child(tag.c_str()).append_child(pugi::node_pcdata).set_value(defaults.at(tag).c_str());
+            } else if (defaults.find(attributeTag) != defaults.end()) {
+                result.append_attribute(tag.c_str()) = defaults.at(attributeTag).c_str();
+            }
+        }
+    }
+}
+
 void UpnpXMLBuilder::renderObject(
     const std::shared_ptr<CdsObject>& obj,
     const std::vector<std::string>& filter,
@@ -304,32 +325,53 @@ void UpnpXMLBuilder::renderObject(
         nsProp = ConfigVal::UPNP_PLAYLIST_NAMESPACES;
     }
 
-    std::vector<std::string> contFilter;
+    std::vector<std::string> cntFilter;
     std::vector<std::string> objFilter;
     std::vector<std::string> resFilter;
+    bool allObjProps = false;
+    bool allCntProps = false;
+    bool allResProps = false;
     for (auto&& f : filter) {
         if (f == "*") {
-            objFilter.push_back(f);
-            resFilter.push_back(f);
+            allObjProps = true;
+            allResProps = true;
         } else if (f == "res") {
             // we always send resources
         } else if (f == "res#") {
-            resFilter.push_back("*");
+            allResProps = true;
+        } else if (f == "container#") {
+            allCntProps = true;
         } else if (startswith(f, "res@")) {
-            std::string resFlt = f;
-            replaceAllString(resFlt, "res@", "");
+            std::string resFlt = f.substr(4); // 4 == sizeof(res@)
             if (checkFilterNamespace(resFlt, nsProp))
                 resFilter.push_back(resFlt);
         } else if (startswith(f, "container@")) {
-            std::string contFlt = f;
-            replaceAllString(contFlt, "container@", "");
+            std::string contFlt = f.substr(10); // 10 == sizeof(container@)
             if (checkFilterNamespace(contFlt, nsProp))
-                contFilter.push_back(contFlt);
+                cntFilter.push_back(contFlt);
+        } else if (startswith(f, "@")) {
+            std::string objFlt = f.substr(1);
+            if (checkFilterNamespace(objFlt, nsProp))
+                cntFilter.push_back(objFlt);
         } else {
             if (checkFilterNamespace(f, nsProp))
                 objFilter.push_back(f);
         }
     }
+    if (allObjProps || objFilter.empty()) {
+        objFilter = { "*" };
+    }
+    if (allCntProps || cntFilter.empty()) {
+        cntFilter = { "*" };
+    }
+    if (allResProps || resFilter.empty()) {
+        resFilter = { "*" };
+    } else {
+        resFilter.push_back("protocolInfo");
+    }
+    log_debug("Object Filters {}", fmt::join(objFilter, ", "));
+    log_debug("Container Filters {}", fmt::join(cntFilter, ", "));
+    log_debug("Resource Filters {}", fmt::join(resFilter, ", "));
     auto result = parent.append_child("");
 
     result.append_attribute("id") = obj->getID();
@@ -435,6 +477,7 @@ void UpnpXMLBuilder::renderObject(
                 result.append_child(MetaEnumMapper::getMetaFieldName(MetadataFields::M_ALBUMARTURI).data()).append_child(pugi::node_pcdata).set_value(url.value().c_str());
             }
         }
+        addResources(cont, result, resFilter, quirks);
     }
 
     // make sure a date is set
@@ -444,20 +487,14 @@ void UpnpXMLBuilder::renderObject(
         result.append_child(DC_DATE).append_child(pugi::node_pcdata).set_value(fDate.c_str());
         propNames.emplace_back(DC_DATE);
     }
-    propNames.emplace_back(DC_TITLE);
-    propNames.emplace_back(UPNP_SEARCH_CLASS);
-    auto filterActive = !(objFilter.size() == 1 && objFilter[0] == "*");
-    if (filterActive && quirks && quirks->getFullFilter()) {
-        if (obj->isItem()) {
-            for (auto&& f : objFilter) {
-                if (std::find(propNames.begin(), propNames.end(), f) == propNames.end())
-                    result.append_child(f.c_str()).append_child(pugi::node_pcdata).set_value("");
-            }
-        } else if (obj->isContainer()) {
-            for (auto&& f : contFilter) {
-                if (std::find(propNames.begin(), propNames.end(), f) == propNames.end())
-                    result.append_attribute(f.c_str()) = "";
-            }
+    for (auto&& fixTag : { "id", "parentID", "restricted", DC_TITLE, UPNP_SEARCH_CLASS })
+        propNames.emplace_back(fixTag);
+
+    if (quirks && quirks->getFullFilter()) {
+        if (obj->isItem() && !(objFilter.size() == 1 && objFilter[0] == "*")) {
+            addDefaultProperty(result, propNames, objFilter, objectPropertyDefaults);
+        } else if (obj->isContainer() && !(cntFilter.size() == 1 && cntFilter[0] == "*")) {
+            addDefaultProperty(result, propNames, cntFilter, containerPropertyDefaults);
         }
     }
     log_debug("Rendered DIDL: {}", printXml(result, "  "));
@@ -501,33 +538,32 @@ void UpnpXMLBuilder::renderResource(const CdsObject& object,
 {
     auto res = parent.append_child("res");
 
+    res.append_attribute("id") = fmt::format("{}.{}", object.getID(), resource.getResId()).c_str();
+
     auto url = renderResourceURL(object, resource, mimeMappings, clientGroup);
 
     res.append_child(pugi::node_pcdata).set_value(url.c_str());
 
     auto filterActive = !(filter.size() == 1 && filter[0] == "*");
-    std::vector<std::string> propNames;
+    std::vector<std::string> propNames = { "id" };
     for (auto&& [attr, val] : resource.getAttributes()) {
         if (isPrivateAttribute(attr)) {
             continue;
         }
-        if (filterActive && std::find(filter.begin(), filter.end(), EnumMapper::getAttributeName(attr)) != filter.end())
+        if (filterActive && std::find(filter.begin(), filter.end(), EnumMapper::getAttributeName(attr)) == filter.end())
             continue;
         res.append_attribute(EnumMapper::getAttributeName(attr).c_str()) = val.c_str();
         propNames.push_back(EnumMapper::getAttributeName(attr));
     }
 
     for (auto&& [k, v] : clientSpecificAttrs) {
-        if (filterActive && std::find(filter.begin(), filter.end(), k) != filter.end())
+        if (filterActive && std::find(filter.begin(), filter.end(), k) == filter.end())
             continue;
         res.append_attribute(k.c_str()) = v.c_str();
         propNames.push_back(k);
     }
     if (filterActive && quirks && quirks->getFullFilter()) {
-        for (auto&& f : filter) {
-            if (std::find(propNames.begin(), propNames.end(), f) == propNames.end())
-                res.append_attribute(f.c_str()) = "";
-        }
+        addDefaultProperty(res, propNames, filter, resourcePropertyDefaults);
     }
 }
 
@@ -1039,6 +1075,7 @@ void UpnpXMLBuilder::addResources(
 
     auto [hideOriginalResource, originalResource] = insertTempTranscodingResource(item, quirks, orderedResources, isExternalURL);
 
+    auto clientGroup = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
     for (auto&& res : orderedResources) {
         auto purpose = res->getPurpose();
         if (quirks && !quirks->supportsResource(purpose)) {
@@ -1051,13 +1088,30 @@ void UpnpXMLBuilder::addResources(
             clientSpecficAttrs["pv:subtitleFileUri"] = captionInfo[""];
         }
 
-        bool transcoded = purpose == ResourcePurpose::Transcode;
-        auto clientGroup = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
-
         buildProtocolInfo(*res, mimeMappings, quirks);
 
-        if (!hideOriginalResource || transcoded || originalResource != res->getResId())
+        if (!hideOriginalResource || purpose == ResourcePurpose::Transcode || originalResource != res->getResId())
             renderResource(*item, *res, parent, filter, quirks, clientSpecficAttrs, clientGroup, mimeMappings);
+    }
+}
+
+void UpnpXMLBuilder::addResources(
+    const std::shared_ptr<CdsContainer>& cont,
+    pugi::xml_node& parent,
+    const std::vector<std::string>& filter,
+    const std::shared_ptr<Quirks>& quirks) const
+{
+    auto orderedResources = getOrderedResources(*cont);
+    auto mimeMappings = quirks ? quirks->getMimeMappings() : std::map<std::string, std::string>();
+    auto clientGroup = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
+
+    for (auto&& res : orderedResources) {
+        auto purpose = res->getPurpose();
+        if (quirks && !quirks->supportsResource(purpose)) {
+            continue;
+        }
+        buildProtocolInfo(*res, mimeMappings, quirks);
+        renderResource(*cont, *res, parent, filter, quirks, {}, clientGroup, mimeMappings);
     }
 }
 
