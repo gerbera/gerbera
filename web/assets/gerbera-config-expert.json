@@ -2039,6 +2039,7 @@
             {
               "item": "/clients/client/attribute::full-filter",
               "caption": "Full UPnP Filter creation",
+              "type": "Boolean",
               "editable": true
             },
             {
@@ -2357,6 +2358,60 @@
             {
               "item": "/server/upnp/title-properties/upnp-namespace/attribute::uri",
               "caption": "uri",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/server/upnp/resource-defaults/property-default",
+          "caption": "Resource Defaults",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/server/upnp/resource-defaults/property-default/attribute::tag",
+              "caption": "Tag",
+              "editable": true
+            },
+            {
+              "item": "/server/upnp/resource-defaults/property-default/attribute::value",
+              "caption": "Value",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/server/upnp/object-defaults/property-default",
+          "caption": "Object Defaults",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/server/upnp/object-defaults/property-default/attribute::tag",
+              "caption": "Tag",
+              "editable": true
+            },
+            {
+              "item": "/server/upnp/object-defaults/property-default/attribute::value",
+              "caption": "Value",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/server/upnp/container-defaults/property-default",
+          "caption": "Container Defaults",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/server/upnp/container-defaults/property-default/attribute::tag",
+              "caption": "Tag",
+              "editable": true
+            },
+            {
+              "item": "/server/upnp/container-defaults/property-default/attribute::value",
+              "caption": "Value",
               "editable": true
             }
           ]

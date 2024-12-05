@@ -1178,6 +1178,45 @@ This section defines the properties which are send to UPnP clients as part of th
     | ``upnp:lastPlaybackPosition``     | ``upnp:lastPlaybackPosition`` |
     +-----------------------------------+-------------------------------+
 
+    .. code-block:: xml
+
+        <resource-defaults>...</resource-defaults>
+        <object-defaults>...</object-properties>
+        <container-defaults>...</container-defaults>
+
+    * Optional
+
+    Defines the default values of upnp properties if these properties are required by the UPnP request filter .
+    If there is no defined default value, the required filter is not exported.
+
+    It contains the following entries.
+
+    .. code-block:: xml
+
+        <property-default tag="duration" value="0"/>
+
+    * Optional
+
+    Defines an UPnP property and the default value of the property.
+
+    The attributes specify the property:
+
+        ::
+
+            tag="..."
+
+        * Required
+
+        UPnP property to define the default. Tags starting with a ``@`` will be generated as an attribute.
+
+        ::
+
+            value="..."
+
+        * Required
+
+        Default value for the property.
+
 
 ``containers``
 ~~~~~~~~~~~~~~

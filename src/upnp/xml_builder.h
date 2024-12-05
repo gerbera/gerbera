@@ -153,6 +153,9 @@ protected:
     std::map<std::string, std::string> ctMappings;
     std::vector<std::vector<std::pair<std::string, std::string>>> profMappings;
     std::map<std::string, std::string> transferMappings;
+    std::map<std::string, std::string> resourcePropertyDefaults;
+    std::map<std::string, std::string> objectPropertyDefaults;
+    std::map<std::string, std::string> containerPropertyDefaults;
     std::map<ConfigVal, std::map<std::string, std::string>> objectNamespaces;
 
     std::deque<std::shared_ptr<CdsResource>> getOrderedResources(const CdsObject& object) const;
@@ -163,7 +166,11 @@ protected:
         bool skipURL) const;
 
     bool checkFilterNamespace(const std::string& f, ConfigVal nsProp) const;
-
+    void addResources(
+        const std::shared_ptr<CdsContainer>& cont,
+        pugi::xml_node& parent,
+        const std::vector<std::string>& filter,
+        const std::shared_ptr<Quirks>& quirks) const;
     std::string renderExtension(
         const std::string& contentType,
         const fs::path& location,
@@ -198,5 +205,10 @@ protected:
     std::string getMimeType(
         const CdsResource& resource,
         const std::map<std::string, std::string>& mimeMappings) const;
+    static void addDefaultProperty(
+        pugi::xml_node& result,
+        const std::vector<std::string>& propNames,
+        const std::vector<std::string>& filter,
+        const std::map<std::string, std::string>& defaults);
 };
 #endif // __UPNP_XML_H__

@@ -116,6 +116,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     expectedXml << "<upnp:date>2001-01-01</upnp:date>\n";
     expectedXml << "<upnp:orchestra>Orchestra</upnp:orchestra>\n";
     expectedXml << "<upnp:albumArtURI>http://server/media/object_id/1/res_id/0/ext/file.jpg</upnp:albumArtURI>\n";
+    expectedXml << "<res id=\"1.0\" protocolInfo=\"http-get:*:jpg:DLNA.ORG_OP=01;DLNA.ORG_CI=0\">http://server/media/object_id/1/res_id/0/ext/file.jpg</res>\n";
     expectedXml << "</container>\n";
     expectedXml << "</DIDL-Lite>\n";
 
@@ -320,10 +321,10 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResources)
     expectedXml << "<upnp:originalTrackNumber>7</upnp:originalTrackNumber>\n";
     expectedXml << "<upnp:albumArtURI xmlns:dlna=\"urn:schemas-dlna-org:metadata-1-0\" dlna:profileID=\"JPEG_TN\">http://server/media/object_id/42/res_id/3/ext/file.jpg</upnp:albumArtURI>\n";
     expectedXml << "<sec:CaptionInfoEx protocolInfo=\"http-get:*:text/srt:*\" sec:type=\"srt\">http://server/media/object_id/42/res_id/1/type/srt/ext/file.srt</sec:CaptionInfoEx>\n";
-    expectedXml << "<res size=\"4711\" duration=\"123456\" bitrate=\"16044\" nrAudioChannels=\"2\" protocolInfo=\"http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000\">http://server/media/object_id/42/res_id/0/group/default/ext/file.mp3</res>\n";
-    expectedXml << "<res protocolInfo=\"http-get:*:text/srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\">http://server/media/object_id/42/res_id/1/type/srt/ext/file.srt</res>\n";
-    expectedXml << "<res protocolInfo=\"http-get:*:text/srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\" dc:language=\"fr\">http://server/media/object_id/42/res_id/2/type/srt/ext/file.fr.srt</res>\n";
-    expectedXml << "<res resolution=\"200x200\" protocolInfo=\"http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_TN;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00800000000000000000000000000000\">http://server/media/object_id/42/res_id/3/ext/file.jpg</res>\n";
+    expectedXml << "<res id=\"42.0\" size=\"4711\" duration=\"123456\" bitrate=\"16044\" nrAudioChannels=\"2\" protocolInfo=\"http-get:*:audio/mpeg:DLNA.ORG_PN=MP3;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=01700000000000000000000000000000\">http://server/media/object_id/42/res_id/0/group/default/ext/file.mp3</res>\n";
+    expectedXml << "<res id=\"42.1\" protocolInfo=\"http-get:*:text/srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\">http://server/media/object_id/42/res_id/1/type/srt/ext/file.srt</res>\n";
+    expectedXml << "<res id=\"42.2\" protocolInfo=\"http-get:*:text/srt:DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00d00000000000000000000000000000\" dc:language=\"fr\">http://server/media/object_id/42/res_id/2/type/srt/ext/file.fr.srt</res>\n";
+    expectedXml << "<res id=\"42.3\" resolution=\"200x200\" protocolInfo=\"http-get:*:image/jpeg:DLNA.ORG_PN=JPEG_TN;DLNA.ORG_OP=01;DLNA.ORG_CI=0;DLNA.ORG_FLAGS=00800000000000000000000000000000\">http://server/media/object_id/42/res_id/3/ext/file.jpg</res>\n";
     expectedXml << "</item>\n";
     expectedXml << "</DIDL-Lite>\n";
 

@@ -27,6 +27,7 @@
 - Update Build Environment
 - Update js vendor files
 - UPnP: Add support for filters
+- UPnP filters: provide defaults for filter properties
 - UPnP Shortcuts feature
 - Web UI: Add Search page
 - Web UI: Cleanup display of item number
