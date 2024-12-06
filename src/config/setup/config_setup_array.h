@@ -54,7 +54,13 @@ protected:
     /// This function will create an array like that: ["data", "otherdata"]
     bool createOptionFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const;
 
-    bool updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status = "") const;
+    bool updateItem(
+        const std::vector<std::size_t>& indexList,
+        const std::string& optItem,
+        const std::shared_ptr<Config>& config,
+        const std::shared_ptr<ArrayOption>& value,
+        const std::string& optValue,
+        const std::string& status = "") const;
 
 public:
     ConfigVal nodeOption;
@@ -95,7 +101,12 @@ public:
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    bool createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const override;
+    bool updateDetail(
+        const std::string& optItem,
+        std::string& optValue,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
     std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText = "") const override;
     std::string getItemPathRoot(bool prefix = false) const override;

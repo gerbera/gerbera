@@ -6,8 +6,9 @@
 - actions: clang-format 18
 - Add variables to docker images
 - Bump cookie, express and socket.io in /gerbera-web
-- Config: Unify path handling
 - Config: UI handler mimetypes and CSP
+- Config: Unify path handling
+- ConfigGenerator: Export defaults for more entries
 - deps: Fix build with ffmpeg 6.1
 - Drop Build Support for Ubuntu 23.04
 - Fix access to cache option if thumbnailer disabled
@@ -26,9 +27,9 @@
 - Update and refactor MySQL code
 - Update Build Environment
 - Update js vendor files
-- UPnP: Add support for filters
 - UPnP filters: provide defaults for filter properties
 - UPnP Shortcuts feature
+- UPnP: Add support for filters
 - Web UI: Add Search page
 - Web UI: Cleanup display of item number
 - Web UI: Fix detail display

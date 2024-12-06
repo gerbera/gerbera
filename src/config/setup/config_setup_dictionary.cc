@@ -72,7 +72,24 @@ void ConfigDictionarySetup::makeOption(const pugi::xml_node& root, const std::sh
     setOption(config);
 }
 
-bool ConfigDictionarySetup::updateItem(const std::vector<std::size_t>& indexList,
+bool ConfigDictionarySetup::createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const
+{
+    if (defaultEntries.empty())
+        return false;
+
+    auto section = ConfigDefinition::mapConfigOption(nodeOption);
+    auto keyAttr = ConfigDefinition::removeAttribute(keyOption);
+    auto valAttr = ConfigDefinition::removeAttribute(valOption);
+    for (auto&& [key, val] : defaultEntries) {
+        auto entry = result->append_child(section);
+        entry.append_attribute(keyAttr.c_str()) = key.c_str();
+        entry.append_attribute(valAttr.c_str()) = val.c_str();
+    }
+    return true;
+}
+
+bool ConfigDictionarySetup::updateItem(
+    const std::vector<std::size_t>& indexList,
     const std::string& optItem,
     const std::shared_ptr<Config>& config,
     const std::shared_ptr<DictionaryOption>& value,

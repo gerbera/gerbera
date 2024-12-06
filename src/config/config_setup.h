@@ -129,6 +129,10 @@ public:
     {
         return this->defaultValue;
     }
+
+    /// \brief Create the xml representation of the defaultEntries
+    virtual bool createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const { return false; }
+
     bool isDefaultValueUsed() const
     {
         return this->useDefault;

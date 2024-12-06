@@ -388,6 +388,7 @@ static const std::map<std::string, std::string> upnpResourceDefaultPropDefaults 
     { "@importUri", "" },
     { "@nrAudioChannels", "0" },
     { "@protection", "UNKNOWN" },
+    { "@protocolInfo", "http:*:*:*" },
     { "@recordQuality", "" },
     { "@reliability", "100" },
     { "@remainingTime", "" },
@@ -427,11 +428,6 @@ static const std::map<std::string, std::string> upnpObjectDefaultPropDefaults {
     { "upnp:rating", "0" },
     { "upnp:recordable", "1" },
     { "upnp:relation", "UNKNOWN" },
-    { "upnp:storageFree", "0" },
-    { "upnp:storageMaxPartition", "0" },
-    { "upnp:storageMedium", "UNKNOWN" },
-    { "upnp:storageTotal", "0" },
-    { "upnp:storageUsed", "0" },
 };
 
 /// \brief default values for ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS
@@ -442,6 +438,11 @@ static const std::map<std::string, std::string> upnpContainerDefaultPropDefaults
     { "@parentID", "0" },
     { "@restricted", "1" },
     { "@searchable", "1" },
+    { "upnp:storageFree", "0" },
+    { "upnp:storageMaxPartition", "0" },
+    { "upnp:storageMedium", "UNKNOWN" },
+    { "upnp:storageTotal", "0" },
+    { "upnp:storageUsed", "0" },
 };
 
 /// \brief configure all known options
