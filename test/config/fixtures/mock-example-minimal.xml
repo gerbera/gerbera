@@ -9,7 +9,12 @@
       <accounts enabled="no" session-timeout="30">
         <account user="gerbera" password="gerbera" />
       </accounts>
-      <items-per-page default="25"></items-per-page>
+      <items-per-page default="25">
+        <option>10</option>
+        <option>25</option>
+        <option>50</option>
+        <option>100</option>
+      </items-per-page>
     </ui>
     <name>Gerbera</name>
     <udn/>
@@ -33,12 +38,95 @@
     <virtualURL></virtualURL>
     <externalURL></externalURL>
     <upnp literal-host-redirection="no" multi-value="yes" search-result-separator=" - " search-filename="no" searchable-container-flag="no" caption-info-count="1">
-      <search-item-result></search-item-result>
-      <album-properties></album-properties>
-      <artist-properties></artist-properties>
-      <genre-properties></genre-properties>
-      <playlist-properties></playlist-properties>
+      <search-item-result>
+        <add-data tag="M_ARTIST" />
+        <add-data tag="M_TITLE" />
+      </search-item-result>
+      <album-properties>
+        <upnp-property upnp-tag="dc:creator" meta-data="M_ALBUMARTIST" />
+        <upnp-property upnp-tag="dc:date" meta-data="M_UPNP_DATE" />
+        <upnp-property upnp-tag="dc:publisher" meta-data="M_PUBLISHER" />
+        <upnp-property upnp-tag="upnp:albumArtist" meta-data="M_ALBUMARTIST" />
+        <upnp-property upnp-tag="upnp:artist" meta-data="M_ALBUMARTIST" />
+        <upnp-property upnp-tag="upnp:composer" meta-data="M_COMPOSER" />
+        <upnp-property upnp-tag="upnp:conductor" meta-data="M_CONDUCTOR" />
+        <upnp-property upnp-tag="upnp:date" meta-data="M_UPNP_DATE" />
+        <upnp-property upnp-tag="upnp:genre" meta-data="M_GENRE" />
+        <upnp-property upnp-tag="upnp:orchestra" meta-data="M_ORCHESTRA" />
+        <upnp-property upnp-tag="upnp:producer" meta-data="M_PRODUCER" /></album-properties>
+      <artist-properties>
+        <upnp-property upnp-tag="upnp:albumArtist" meta-data="M_ALBUMARTIST" />
+        <upnp-property upnp-tag="upnp:artist" meta-data="M_ALBUMARTIST" />
+        <upnp-property upnp-tag="upnp:genre" meta-data="M_GENRE" /></artist-properties>
+      <genre-properties>
+        <upnp-property upnp-tag="upnp:genre" meta-data="M_GENRE" /></genre-properties>
+      <playlist-properties>
+        <upnp-property upnp-tag="dc:date" meta-data="M_UPNP_DATE" /></playlist-properties>
       <title-properties></title-properties>
+      <resource-defaults>
+        <property-default tag="@allowedUse" value="UNKNOWN" />
+        <property-default tag="@bitrate" value="0" />
+        <property-default tag="@bitsPerSample" value="0" />
+        <property-default tag="@colorDepth" value="1" />
+        <property-default tag="@contentInfoURI" value="" />
+        <property-default tag="@daylightSaving" value="UNKNOWN" />
+        <property-default tag="@duration" value="0" />
+        <property-default tag="@framerate" value="30p" />
+        <property-default tag="@importUri" value="" />
+        <property-default tag="@nrAudioChannels" value="0" />
+        <property-default tag="@protection" value="UNKNOWN" />
+        <property-default tag="@protocolInfo" value="http:*:*:*" />
+        <property-default tag="@recordQuality" value="" />
+        <property-default tag="@reliability" value="100" />
+        <property-default tag="@remainingTime" value="" />
+        <property-default tag="@resolution" value="1x1" />
+        <property-default tag="@rightsInfoURI" value="" />
+        <property-default tag="@sampleFrequency" value="0" />
+        <property-default tag="@size" value="0" />
+        <property-default tag="@tspec" value="UNKNOWN" />
+        <property-default tag="@usageInfo" value="This file is hosted by Gerbera" />
+        <property-default tag="@validityEnd" value="1900-01-01T00:00:00" />
+        <property-default tag="@validityStart" value="1900-01-01T00:00:00" />
+      </resource-defaults>
+      <object-defaults>
+        <property-default tag="@id" value="0" />
+        <property-default tag="@parentID" value="0" />
+        <property-default tag="dc:creator" value="UNKNOWN" />
+        <property-default tag="dc:date" value="1900-01-01T00:00:00" />
+        <property-default tag="upnp:actor" value="UNKNOWN" />
+        <property-default tag="upnp:album" value="UNKNOWN" />
+        <property-default tag="upnp:artist" value="UNKNOWN" />
+        <property-default tag="upnp:artistDiscographyURI" value="" />
+        <property-default tag="upnp:author" value="UNKNOWN" />
+        <property-default tag="upnp:contributor" value="UNKNOWN" />
+        <property-default tag="upnp:director" value="UNKNOWN" />
+        <property-default tag="upnp:genre" value="UNKNOWN" />
+        <property-default tag="upnp:language" value="en-US" />
+        <property-default tag="upnp:lastPlaybackPosition" value="0" />
+        <property-default tag="upnp:lastPlaybackTime" value="1900-01-01T00:00:00" />
+        <property-default tag="upnp:lyricsURI" value="" />
+        <property-default tag="upnp:originalTrackNumber" value="0" />
+        <property-default tag="upnp:playbackCount" value="0" />
+        <property-default tag="upnp:playlist" value="UNKNOWN" />
+        <property-default tag="upnp:producer" value="UNKNOWN" />
+        <property-default tag="upnp:publisher" value="UNKNOWN" />
+        <property-default tag="upnp:rating" value="0" />
+        <property-default tag="upnp:recordable" value="1" />
+        <property-default tag="upnp:relation" value="UNKNOWN" />
+      </object-defaults>
+      <container-defaults>
+        <property-default tag="@childContainerCount" value="0" />
+        <property-default tag="@childCount" value="0" />
+        <property-default tag="@id" value="0" />
+        <property-default tag="@parentID" value="0" />
+        <property-default tag="@restricted" value="1" />
+        <property-default tag="@searchable" value="1" />
+        <property-default tag="upnp:storageFree" value="0" />
+        <property-default tag="upnp:storageMaxPartition" value="0" />
+        <property-default tag="upnp:storageMedium" value="UNKNOWN" />
+        <property-default tag="upnp:storageTotal" value="0" />
+        <property-default tag="upnp:storageUsed" value="0" />
+      </container-defaults>
     </upnp>
     <!--
         How frequently (in seconds) to send ssdp:alive advertisements.
@@ -84,7 +172,10 @@
     <autoscan use-inotify="auto">
       <directory location="/media" mode="inotify" recursive="yes" hidden-files="yes" media-type="Any" />
     </autoscan>
-    <virtual-directories></virtual-directories>
+    <virtual-directories>
+      <key metadata="M_ALBUMARTIST" class="object.container.album.musicAlbum" />
+      <key metadata="M_UPNP_DATE" class="object.container.album.musicAlbum" />
+    </virtual-directories>
     <filesystem-charset>UTF-8</filesystem-charset>
     <metadata-charset>UTF-8</metadata-charset>
     <playlist-charset>UTF-8</playlist-charset>
@@ -128,7 +219,23 @@
         </boxlayout>
       </virtual-layout>
     </scripting>
-    <system-directories></system-directories>
+    <system-directories>
+      <add-path name="/bin" />
+      <add-path name="/boot" />
+      <add-path name="/dev" />
+      <add-path name="/etc" />
+      <add-path name="/lib" />
+      <add-path name="/lib32" />
+      <add-path name="/lib64" />
+      <add-path name="/libx32" />
+      <add-path name="/proc" />
+      <add-path name="/run" />
+      <add-path name="/sbin" />
+      <add-path name="/sys" />
+      <add-path name="/tmp" />
+      <add-path name="/usr" />
+      <add-path name="/var" />
+    </system-directories>
     <visible-directories></visible-directories>
     <resources case-sensitive="yes">
       <order></order>
@@ -235,7 +342,10 @@
         <map from="png" to="PNG_LRG" />
         <map from="wma" to="WMAFULL" />
       </contenttype-dlnaprofile>
-      <ignore-extensions></ignore-extensions>
+      <ignore-extensions>
+        <add-file name="part" />
+        <add-file name="tmp" />
+      </ignore-extensions>
     </mappings>
   </import>
   <transcoding enabled="no">

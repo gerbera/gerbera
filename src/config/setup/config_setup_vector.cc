@@ -81,6 +81,20 @@ void ConfigVectorSetup::makeOption(const pugi::xml_node& root, const std::shared
     setOption(config);
 }
 
+bool ConfigVectorSetup::createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const
+{
+    if (defaultEntries.empty())
+        return false;
+    auto section = ConfigDefinition::mapConfigOption(nodeOption);
+    for (auto&& defEntry : defaultEntries) {
+        auto entry = result->append_child(section);
+        for (auto&& [key, val] : defEntry) {
+            entry.append_attribute(key.c_str()) = val.c_str();
+        }
+    }
+    return true;
+}
+
 bool ConfigVectorSetup::updateItem(const std::vector<std::size_t>& indexList,
     const std::string& optItem,
     const std::shared_ptr<Config>& config,

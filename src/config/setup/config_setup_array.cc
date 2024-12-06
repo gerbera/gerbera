@@ -60,7 +60,13 @@ void ConfigArraySetup::makeOption(const pugi::xml_node& root, const std::shared_
     setOption(config);
 }
 
-bool ConfigArraySetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<ArrayOption>& value, const std::string& optValue, const std::string& status) const
+bool ConfigArraySetup::updateItem(
+    const std::vector<std::size_t>& indexList,
+    const std::string& optItem,
+    const std::shared_ptr<Config>& config,
+    const std::shared_ptr<ArrayOption>& value,
+    const std::string& optValue,
+    const std::string& status) const
 {
     auto index = getItemPath(indexList, {});
     if (optItem == index || !status.empty()) {
@@ -82,7 +88,27 @@ bool ConfigArraySetup::updateItem(const std::vector<std::size_t>& indexList, con
     return false;
 }
 
-bool ConfigArraySetup::updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+bool ConfigArraySetup::createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const
+{
+    if (defaultEntries.empty())
+        return false;
+    auto section = ConfigDefinition::mapConfigOption(nodeOption);
+    auto attrAttr = ConfigDefinition::removeAttribute(attrOption);
+    for (auto&& val : defaultEntries) {
+        auto entry = result->append_child(section);
+        if (attrOption != ConfigVal::MAX)
+            entry.append_attribute(attrAttr.c_str()) = val.c_str();
+        else
+            entry.append_child(pugi::node_pcdata).set_value(val.c_str());
+    }
+    return true;
+}
+
+bool ConfigArraySetup::updateDetail(
+    const std::string& optItem,
+    std::string& optValue,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     if (startswith(optItem, xpath) && optionValue) {
         auto value = std::dynamic_pointer_cast<ArrayOption>(optionValue);

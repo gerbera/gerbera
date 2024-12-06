@@ -122,7 +122,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::getNode(const std::string& tag)
     return generated.at(tag);
 }
 
-std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag, const std::string& value, bool makeLastChild)
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag, const std::shared_ptr<ConfigSetup>& cs, const std::string& value, bool makeLastChild)
 {
     auto split = splitString(tag, '/');
     std::shared_ptr<pugi::xml_node> result;
@@ -153,13 +153,15 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
                 parent = nodeKey;
             }
         }
-        if (tag.back() != '/') { // create entries without content
-            if (attribute.empty()) {
-                log_debug("setting value '{}' to {}", value, nodeKey);
-                generated[nodeKey]->append_child(pugi::node_pcdata).set_value(value.c_str());
-            } else {
-                log_debug("setting value '{}' to {}:{}", value, parent, attribute);
-                generated[parent]->append_attribute(attribute.c_str()) = value.c_str();
+        if (!cs || !cs->createNodeFromDefaults(generated[parent])) {
+            if (tag.back() != '/') { // create entries without content
+                if (attribute.empty()) {
+                    log_debug("setting value '{}' to {}", value, nodeKey);
+                    generated[nodeKey]->append_child(pugi::node_pcdata).set_value(value.c_str());
+                } else {
+                    log_debug("setting value '{}' to {}:{}", value, parent, attribute);
+                    generated[parent]->append_attribute(attribute.c_str()) = value.c_str();
+                }
             }
         }
     }
@@ -169,7 +171,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, const std::string& value)
 {
     auto cs = ConfigDefinition::findConfigSetup(option);
-    return setValue(cs->xpath, value.empty() ? cs->getDefaultValue() : value);
+    return setValue(cs->xpath, cs, value.empty() ? cs->getDefaultValue() : value);
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::shared_ptr<pugi::xml_node>& parent, ConfigVal option, const std::string& value)
@@ -187,7 +189,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::shared_ptr<
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, ConfigVal attr, const std::string& value)
 {
     auto cs = ConfigDefinition::findConfigSetup(option);
-    return setValue(fmt::format("{}/{}", cs->xpath, ConfigDefinition::mapConfigOption(attr)), value);
+    return setValue(fmt::format("{}/{}", cs->xpath, ConfigDefinition::mapConfigOption(attr)), {}, value);
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, const std::string& key, const std::string& value)
@@ -197,9 +199,9 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, cons
         return nullptr;
 
     auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
-    setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), "", true);
-    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->keyOption)), key);
-    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->valOption)), value);
+    setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), {}, "", true);
+    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->keyOption)), {}, key);
+    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->valOption)), {}, value);
     return generated[cs->xpath];
 }
 
@@ -211,9 +213,9 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setDictionary(ConfigVal option)
 
     auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
     for (auto&& [key, value] : cs->getXmlContent({})) {
-        setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), "", true);
-        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->keyOption)), key);
-        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->valOption)), value);
+        setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), {}, "", true);
+        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->keyOption)), {}, key);
+        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->valOption)), {}, value);
     }
     return generated[cs->xpath];
 }
@@ -226,9 +228,9 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setVector(ConfigVal option)
 
     auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
     for (auto&& value : cs->getXmlContent({})) {
-        setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), "", true);
+        setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), {}, "", true);
         for (auto&& [key, val] : value)
-            setValue(fmt::format("{}/{}/attribute::{}", cs->xpath, nodeKey, key), val);
+            setValue(fmt::format("{}/{}/attribute::{}", cs->xpath, nodeKey, key), {}, val);
     }
     return generated[cs->xpath];
 }
@@ -236,7 +238,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setVector(ConfigVal option)
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, ConfigVal dict, ConfigVal attr, const std::string& value)
 {
     auto cs = ConfigDefinition::findConfigSetup(option);
-    return setValue(fmt::format("{}/{}/{}", cs->xpath, ConfigDefinition::mapConfigOption(dict), ConfigDefinition::ensureAttribute(attr)), value);
+    return setValue(fmt::format("{}/{}/{}", cs->xpath, ConfigDefinition::mapConfigOption(dict), ConfigDefinition::ensureAttribute(attr)), {}, value);
 }
 
 std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir, const fs::path& magicFile)
@@ -320,6 +322,9 @@ void ConfigGenerator::generateServerOptions(std::shared_ptr<pugi::xml_node>& ser
         { ConfigVal::UPNP_GENRE_NAMESPACES, false },
         { ConfigVal::UPNP_PLAYLIST_NAMESPACES, false },
         { ConfigVal::UPNP_TITLE_NAMESPACES, false },
+        { ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS, false },
+        { ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS, false },
+        { ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS, false },
         { ConfigVal::UPNP_CAPTION_COUNT, false },
 #ifdef GRBDEBUG
         { ConfigVal::SERVER_LOG_DEBUG_MODE, false },
@@ -401,19 +406,19 @@ void ConfigGenerator::generateDynamics()
     auto&& containersTag = ConfigDefinition::mapConfigOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST);
     auto&& containerTag = ConfigDefinition::mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER);
 
-    auto container = setValue(fmt::format("{}/{}/", containersTag, containerTag), "", true);
+    auto container = setValue(fmt::format("{}/{}/", containersTag, containerTag), {}, "", true);
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastAdded");
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Recently Added");
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-last_updated");
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_updated > "@last7")");
 
-    container = setValue(fmt::format("{}/{}/", containersTag, containerTag), "", true);
+    container = setValue(fmt::format("{}/{}/", containersTag, containerTag), {}, "", true);
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastModified");
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Recently Modified");
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-last_modified");
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_modified > "@last7")");
 
-    container = setValue(fmt::format("{}/{}/", containersTag, containerTag), "", true);
+    container = setValue(fmt::format("{}/{}/", containersTag, containerTag), {}, "", true);
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastPlayed");
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Music Recently Played");
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-upnp:lastPlaybackTime");
@@ -614,12 +619,12 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
         auto&& directoryTag = ConfigDefinition::mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY);
 #ifdef HAVE_INOTIFY
         auto&& autoscanTag = ConfigDefinition::mapConfigOption(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST);
-        auto as = setValue(fmt::format("{}/{}/", autoscanTag, directoryTag), "", true);
+        auto as = setValue(fmt::format("{}/{}/", autoscanTag, directoryTag), {}, "", true);
         setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, "/media");
         setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, "inotify");
 #else
         auto&& autoscanTag = ConfigDefinition::mapConfigOption(ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST);
-        auto as = setValue(fmt::format("{}/{}/", autoscanTag, directoryTag), "", true);
+        auto as = setValue(fmt::format("{}/{}/", autoscanTag, directoryTag), {}, "", true);
         setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, "/media");
         setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, "timed");
         setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL, "1000");
@@ -704,7 +709,7 @@ void ConfigGenerator::generateBoxlayout(ConfigVal option)
     const auto boxTag = ConfigDefinition::mapConfigOption(option);
 
     for (auto&& bl : cs->getDefault()) {
-        auto box = setValue(fmt::format("{}/", boxTag), "", true);
+        auto box = setValue(fmt::format("{}/", boxTag), {}, "", true);
         setValue(box, ConfigVal::A_BOXLAYOUT_BOX_KEY, bl.getKey());
         setValue(box, ConfigVal::A_BOXLAYOUT_BOX_TITLE, bl.getTitle());
         setValue(box, ConfigVal::A_BOXLAYOUT_BOX_CLASS, bl.getClass());
@@ -749,7 +754,7 @@ void ConfigGenerator::generateTranscoding()
 
     const auto profileTag = ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE);
 
-    auto oggmp3 = setValue(fmt::format("{}/", profileTag), "", true);
+    auto oggmp3 = setValue(fmt::format("{}/", profileTag), {}, "", true);
     setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME, "ogg2mp3");
     setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);
     setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE, "external");
@@ -758,16 +763,16 @@ void ConfigGenerator::generateTranscoding()
     setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
     setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG, NO);
 
-    auto agent = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)), "", true);
+    auto agent = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)), {}, "", true);
     setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "ffmpeg");
     setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-y -i %in -f mp3 %out");
 
-    auto buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
+    auto buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)), {}, "", true);
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_AUDIO_FILL_SIZE));
 
-    auto vlcmpeg = setValue(fmt::format("{}/", profileTag), "", true);
+    auto vlcmpeg = setValue(fmt::format("{}/", profileTag), {}, "", true);
     setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME, "vlcmpeg");
     setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);
     setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE, "external");
@@ -776,11 +781,11 @@ void ConfigGenerator::generateTranscoding()
     setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
     setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG, YES);
 
-    agent = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)), "", true);
+    agent = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)), {}, "", true);
     setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "vlc");
     setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc://quit");
 
-    buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)), "", true);
+    buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)), {}, "", true);
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_VIDEO_FILL_SIZE));

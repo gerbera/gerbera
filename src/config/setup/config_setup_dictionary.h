@@ -53,7 +53,15 @@ protected:
     /// key:value pairs: "1":"2", "3":"4"
     bool createOptionFromNode(const pugi::xml_node& element, std::map<std::string, std::string>& result) const;
 
-    bool updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<DictionaryOption>& value, const std::string& optKey, const std::string& optValue, const std::string& status = "") const;
+    /// \brief Extracts the new value from the xpath key
+    bool updateItem(
+        const std::vector<std::size_t>& indexList,
+        const std::string& optItem,
+        const std::shared_ptr<Config>& config,
+        const std::shared_ptr<DictionaryOption>& value,
+        const std::string& optKey,
+        const std::string& optValue,
+        const std::string& status = "") const;
 
 public:
     /// \brief name of each node in the set
@@ -87,6 +95,8 @@ public:
     }
 
     std::string getTypeString() const override { return "List"; }
+    /// \brief Create the xml representation of the defaultEntries
+    bool createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const override;
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 

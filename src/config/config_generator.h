@@ -30,6 +30,9 @@
 
 #include "config/config.h"
 
+// forward declarations
+class ConfigSetup;
+
 enum class GeneratorSections {
     Server,
     Ui,
@@ -80,10 +83,10 @@ protected:
     std::map<std::string, std::shared_ptr<pugi::xml_node>> generated;
     pugi::xml_document doc;
     void generateOptions(const std::vector<std::pair<ConfigVal, bool>>& options);
-    std::shared_ptr<pugi::xml_node> setValue(const std::string& tag, const std::string& value = "", bool makeLastChild = false);
     void generateServerOptions(std::shared_ptr<pugi::xml_node>& server, const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir);
     void generateImportOptions(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile);
 
+    std::shared_ptr<pugi::xml_node> setValue(const std::string& tag, const std::shared_ptr<ConfigSetup>& cs = {}, const std::string& value = "", bool makeLastChild = false);
     std::shared_ptr<pugi::xml_node> setDictionary(ConfigVal option);
     std::shared_ptr<pugi::xml_node> setVector(ConfigVal option);
     std::shared_ptr<pugi::xml_node> setValue(ConfigVal option, const std::string& value = "");
