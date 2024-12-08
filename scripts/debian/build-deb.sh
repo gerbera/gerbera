@@ -161,7 +161,7 @@ if [[ ! -d build-deb ]]; then
   sudo apt-get update
   sudo apt-get install -y \
       dpkg-dev \
-      systemd systemd-dev \
+      systemd \
       build-essential shtool \
       wget autoconf libtool pkg-config \
       bsdmainutils \
@@ -230,6 +230,11 @@ set +e
 set -x
 SYSTEMD_BROKEN=$(pkg-config --variable=systemdsystemunitdir systemd)
 WITH_SYSTEMD="ON"
+if [[ -z "${SYSTEMD_BROKEN}" ]]; then
+  sudo apt-get install -y \
+      systemd-dev
+fi
+SYSTEMD_BROKEN=$(pkg-config --variable=systemdsystemunitdir systemd)
 if [[ -z "${SYSTEMD_BROKEN}" ]]; then
   WITH_SYSTEMD="OFF"
 fi
