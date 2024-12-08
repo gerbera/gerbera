@@ -161,7 +161,7 @@ if [[ ! -d build-deb ]]; then
   sudo apt-get update
   sudo apt-get install -y \
       dpkg-dev \
-      systemd \
+      systemd systemd-dev \
       build-essential shtool \
       wget autoconf libtool pkg-config \
       bsdmainutils \
