@@ -227,12 +227,14 @@ fi
 
 deb_name="gerbera_${deb_version}_${deb_arch}.deb"
 set +e
+set -x
 SYSTEMD_BROKEN=$(pkg-config --variable=systemdsystemunitdir systemd)
 WITH_SYSTEMD="ON"
 if [[ -z "${SYSTEMD_BROKEN}" ]]; then
   WITH_SYSTEMD="OFF"
 fi
 set -e
+set +x
 
 if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   cmake_preset="${my_sys}-${my_upnp}"
