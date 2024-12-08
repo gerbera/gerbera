@@ -227,19 +227,20 @@ fi
 
 deb_name="gerbera_${deb_version}_${deb_arch}.deb"
 set +e
-set -x
-SYSTEMD_BROKEN=$(pkg-config --variable=systemdsystemunitdir systemd)
+SYSTEMD_PATH=$(pkg-config --variable=systemdsystemunitdir systemd)
 WITH_SYSTEMD="ON"
-if [[ -z "${SYSTEMD_BROKEN}" ]]; then
+if [[ -z "${SYSTEMD_PATH}" ]]; then
   sudo apt-get install -y \
       systemd-dev
 fi
-SYSTEMD_BROKEN=$(pkg-config --variable=systemdsystemunitdir systemd)
-if [[ -z "${SYSTEMD_BROKEN}" ]]; then
+SYSTEMD_PATH=$(pkg-config --variable=systemdsystemunitdir systemd)
+if [[ -z "${SYSTEMD_PATH}" ]]; then
   WITH_SYSTEMD="OFF"
+  echo "SystemD build support not available"
+else
+  echo "SystemD build support enabled: ${SYSTEMD_PATH}"
 fi
 set -e
-set +x
 
 if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   cmake_preset="${my_sys}-${my_upnp}"
