@@ -226,6 +226,8 @@ if [[ ${GH_EVENT:-} == "pull_request" ]]; then
 fi
 
 deb_name="gerbera_${deb_version}_${deb_arch}.deb"
+
+echo "::group::SystemD build support"
 set +e
 SYSTEMD_PATH=$(pkg-config --variable=systemdsystemunitdir systemd)
 WITH_SYSTEMD="ON"
@@ -241,6 +243,7 @@ else
   echo "SystemD build support enabled: ${SYSTEMD_PATH}"
 fi
 set -e
+echo "::endgroup::"
 
 if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   cmake_preset="${my_sys}-${my_upnp}"
