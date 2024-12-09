@@ -151,8 +151,10 @@ fi
 
 echo "::endgroup::"
 
-if [[ ! -d build-deb ]]; then
-  mkdir build-deb
+BUILD_DIR="build-deb"
+
+if [[ ! -d "${BUILD_DIR}" ]]; then
+  mkdir "${BUILD_DIR}"
 
   install-gcc
   install-cmake
@@ -209,7 +211,7 @@ if [[ ! -d build-deb ]]; then
   fi
 fi
 
-cd build-deb
+cd "${BUILD_DIR}"
 
 commit_date=$(git log -1 --date=format:"%Y%m%d%H%M%S" --format="%ad")
 git_ver=$(git describe --tags | sed 's/\(.*\)-.*/\1/' | sed s/-/+/ | sed s/v//)
@@ -234,8 +236,8 @@ WITH_SYSTEMD="ON"
 if [[ -z "${SYSTEMD_PATH}" ]]; then
   sudo apt-get install -y \
       systemd-dev
+  SYSTEMD_PATH=$(pkg-config --variable=systemdsystemunitdir systemd)
 fi
-SYSTEMD_PATH=$(pkg-config --variable=systemdsystemunitdir systemd)
 if [[ -z "${SYSTEMD_PATH}" ]]; then
   WITH_SYSTEMD="OFF"
   echo "SystemD build support not available"
@@ -258,6 +260,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   echo "::group::Building gerbera"
   cmake "${ROOT_DIR}" --preset="${cmake_preset}" \
     -DWITH_SYSTEMD=${WITH_SYSTEMD} \
+    -DBUILD_CHANGELOG=ON \
     -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"
 
@@ -265,7 +268,8 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
     if [[ "${my_sys}" != "HEAD" ]]; then
       cpack -G DEB \
             -D CPACK_DEBIAN_PACKAGE_VERSION="${deb_version}" \
-            -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="${deb_arch}"
+            -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="${deb_arch}" \
+            -D CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA="${ROOT_DIR}/${BUILD_DIR}/changelog.gz"
     fi
   fi
   echo "::endgroup::"

@@ -9,6 +9,7 @@
 - Config: UI handler mimetypes and CSP
 - Config: Unify path handling
 - ConfigGenerator: Export defaults for more entries
+- Debian: create changelog file
 - deps: Fix build with ffmpeg 6.1
 - Drop Build Support for Ubuntu 23.04
 - Fix access to cache option if thumbnailer disabled
@@ -18,6 +19,7 @@
 - Fix creating containers in web ui
 - Fix Handling command line options
 - Fix handling of checkbox values on web ui
+- Fix systemd detection
 - Improve compile info contents
 - Improve handling multivalue tags in virtual paths
 - Increase size of pupnp threadpool
