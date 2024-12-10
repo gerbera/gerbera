@@ -48,6 +48,19 @@ void Web::Clients::process()
     checkRequest();
     auto root = xmlDoc->document_element();
 
+    // Delete client
+    std::string action = param("action");
+    if (action == "delete") {
+        std::string clientIp = param("client_id");
+        if (!clientIp.empty()) {
+            log_debug("Deleting client with {} IP address", clientIp);
+            content->getContext()->getClients()->removeClient(clientIp);
+        } else {
+            log_warning("Cannot delete client without IP address");
+        }
+    }
+
+    // Return current list of clients
     auto clients = root.append_child("clients");
     xml2Json->setArrayName(clients, "client");
 
@@ -71,6 +84,7 @@ void Web::Clients::process()
         item.append_attribute("clientType") = ClientConfig::mapClientType(obj.pInfo->type).data();
     }
 
+    // Return current list of groups
     auto groups = root.append_child("groups");
     xml2Json->setArrayName(groups, "group");
     auto&& groupArr = content->getContext()->getDatabase()->getClientGroupStats();

@@ -156,7 +156,8 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1280, Jimp.AUTO).write(fileName);
+      image.resize(1280, Jimp.AUTO);
+      image.write(fileName);
     });
 
     it('for [search view]', async () => {
@@ -166,11 +167,15 @@ suite(() => {
       await loginPage.submitLogin();
       await homePage.clickMenu('nav-search');
       await homePage.clickTree('Photos');
+      await homePage.setTextValue('searchQuery', 'upnp:class derivedfrom "object.item.audioItem.musicTack" and dc:title contains "wallaby"');
+      await homePage.setTextValue('searchSort', 'upnp:date');
 
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1280, Jimp.AUTO).write(fileName);
+      image.resize(1280, Jimp.AUTO);
+      image.crop(0, 0, 1280, 500);
+      image.write(fileName);
     });
 
     it('for [filesystem view]', async () => {

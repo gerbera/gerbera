@@ -29,10 +29,10 @@ describe('Clients Suite', () => {
       await homePage.clickMenu('nav-clients');
       const result = await homePage.clients();
       const values = [
-        { col: 'ip', head: 'IP Address', index: 1, entry: '192.168.1.12'},
-        { col: 'ip', head: 'IP Address', index: 2, entry: '192.168.1.60'},
-        { col: 'name', head: 'Profile', index: 1, entry: 'Manual Setup for IP 192.168.1.12'},
-        { col: 'name', head: 'Profile', index: 2, entry: 'Standard UPnP'},
+        { col: 'ip', head: 'IP Address\nHost Name\nGroup', index: 1, entry: '192.168.1.12\nMyPC\ndefault'},
+        { col: 'ip', head: 'IP Address\nHost Name\nGroup', index: 2, entry: '192.168.1.60\nBluRay\ndefault'},
+        { col: 'name', head: 'Profile\nMatch Type\nMatch Pattern', index: 1, entry: 'Manual Setup for IP 192.168.1.12\nIP\n192.168.1.12'},
+        { col: 'name', head: 'Profile\nMatch Type\nMatch Pattern', index: 2, entry: 'Standard UPnP\nUserAgent\nUPnP/1.0'},
         { col: 'userAgent', head: 'User Agent', index: 1, entry: 'UPnP/1.0 DLNADOC/1.50 Platinum/1.0.4.2-bb / foobar2000'},
         { col: 'userAgent', head: 'User Agent', index: 2, entry: 'UPnP/1.0 DLNADOC/1.50'},
       ];

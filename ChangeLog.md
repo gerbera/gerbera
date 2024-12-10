@@ -6,6 +6,7 @@
 - actions: clang-format 18
 - Add variables to docker images
 - Bump cookie, express and socket.io in /gerbera-web
+- Clients: Support deleting entries
 - Config: UI handler mimetypes and CSP
 - Config: Unify path handling
 - ConfigGenerator: Export defaults for more entries

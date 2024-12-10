@@ -20,8 +20,8 @@
 
     $Id$
 */
-import {GerberaApp} from './gerbera-app.module.js';
-import {Auth} from './gerbera-auth.module.js';
+import { GerberaApp } from './gerbera-app.module.js';
+import { Auth } from './gerbera-auth.module.js';
 
 const destroy = () => {
   const datagrid = $('#clientgrid');
@@ -43,9 +43,31 @@ const menuSelected = () => {
     .catch((err) => GerberaApp.error(err));
 };
 
+const deleteClicked = (client) => {
+  console.log(client);
+  deleteClient('clients', client)
+    .then((response) => loadItems(response))
+    .catch((err) => GerberaApp.error(err));
+};
+
 const retrieveGerberaItems = (type) => {
   var requestData = {
-    req_type: type
+    req_type: type,
+    action: 'load'
+  };
+  requestData[Auth.SID] = Auth.getSessionId();
+  return $.ajax({
+    url: GerberaApp.clientConfig.api,
+    type: 'get',
+    data: requestData
+  });
+};
+
+const deleteClient = (type, client) => {
+  var requestData = {
+    req_type: type,
+    action: 'delete',
+    client_id: client.ip
   };
   requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({
@@ -72,30 +94,31 @@ const loadItems = (response) => {
     datagrid.clients({
       data: items,
       groups: groups,
-      itemType: 'clients'
+      itemType: 'clients',
+      onDelete: Clients.deleteClicked,
     });
   }
 };
 
 const iptoi = (addr) => {
   var parts = addr.split('.').map((str) => { return parseInt(str); });
-  
+
   if (parts.length === 1) { // IPv6
     parts = addr.split(':').map((str) => { return parseInt(str); });
   }
-  
+
   if (parts.length >= 6) {
-     return (parts[0] ? parts[0] * (2 ** 40) : 0) +
-         (parts[1] ? parts[1] * (2 ** 32) : 0) +
-         (parts[2] ? parts[2] << 24 : 0) +
-         (parts[3] ? parts[3] << 16 : 0) +
-         (parts[4] ? parts[4] << 8  : 0) +
-          parts[5];
+    return (parts[0] ? parts[0] * (2 ** 40) : 0) +
+      (parts[1] ? parts[1] * (2 ** 32) : 0) +
+      (parts[2] ? parts[2] << 24 : 0) +
+      (parts[3] ? parts[3] << 16 : 0) +
+      (parts[4] ? parts[4] << 8 : 0) +
+      parts[5];
   } else if (parts.length >= 4) {
-     return (parts[0] ? parts[0] << 24 : 0) +
-         (parts[1] ? parts[1] << 16 : 0) +
-         (parts[2] ? parts[2] << 8  : 0) +
-          parts[3];
+    return (parts[0] ? parts[0] << 24 : 0) +
+      (parts[1] ? parts[1] << 16 : 0) +
+      (parts[2] ? parts[2] << 8 : 0) +
+      parts[3];
   }
   return 0;
 };
@@ -108,13 +131,13 @@ const transformItems = (items) => {
     const gItem = items[i];
     gItem.ip = gItem.ip.replace(ipFilter, '');
     if (!widgetItems.some((item) => {
-        return item.ip === gItem.ip && item.userAgent === gItem.userAgent;
+      return item.ip === gItem.ip && item.userAgent === gItem.userAgent;
     })) {
-        widgetItems.push(gItem);
+      widgetItems.push(gItem);
     }
   }
 
-  return widgetItems.sort( (a,b) => { return iptoi(a.ip) - iptoi(b.ip) });
+  return widgetItems.sort((a, b) => { return iptoi(a.ip) - iptoi(b.ip) });
 };
 
 export const Clients = {
@@ -123,4 +146,5 @@ export const Clients = {
   initialize,
   transformItems,
   menuSelected,
+  deleteClicked,
 };

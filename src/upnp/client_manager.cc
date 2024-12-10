@@ -317,6 +317,16 @@ const ClientObservation* ClientManager::getInfoByCache(const std::shared_ptr<Grb
     return nullptr;
 }
 
+void ClientManager::removeClient(const std::string& clientIp)
+{
+    AutoLock lock(mutex);
+    cache.erase(std::remove_if(cache.begin(), cache.end(),
+                    [this, clientIp](auto&& entry) { return entry.addr && entry.addr->equals(clientIp); }),
+        cache.end());
+    if (this->database)
+        this->database->saveClients(cache);
+}
+
 const ClientObservation* ClientManager::updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientProfile* pInfo) const
 {
     AutoLock lock(mutex);

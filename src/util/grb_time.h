@@ -28,6 +28,12 @@ Gerbera - https://gerbera.io/
 #include <string>
 #include <string_view>
 
+enum class GrbTimeType {
+    Seconds,
+    Minutes,
+    Hours,
+};
+
 template <typename TP>
 std::chrono::seconds toSeconds(TP tp)
 {
@@ -50,7 +56,7 @@ std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms);
 std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second);
 
 bool parseSimpleDate(const std::string& s, std::chrono::seconds& date);
-bool parseTime(int& value, std::string& timeValue, bool seconds = true);
+bool parseTime(int& value, std::string& timeValue, GrbTimeType type = GrbTimeType::Seconds);
 std::string makeSimpleDate(std::string& s);
 
 #endif // __GRB_TIME_H__

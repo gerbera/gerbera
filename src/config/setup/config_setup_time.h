@@ -28,19 +28,16 @@
 
 #include "config/config_setup.h"
 
-enum class ConfigTimeType {
-    Seconds,
-    Minutes,
-};
+#include "util/grb_time.h"
 
 class ConfigTimeSetup : public ConfigSetup {
 protected:
-    ConfigTimeType type = ConfigTimeType::Seconds;
+    GrbTimeType type = GrbTimeType::Seconds;
     int minValue = -1;
     int maxValue = -1;
 
 public:
-    ConfigTimeSetup(ConfigVal option, const char* xpath, const char* help, ConfigTimeType type, int defaultValue = 0, int minValue = -1, int maxValue = -1)
+    ConfigTimeSetup(ConfigVal option, const char* xpath, const char* help, GrbTimeType type, int defaultValue = 0, int minValue = -1, int maxValue = -1)
         : ConfigSetup(option, xpath, help, false)
         , type(type)
         , minValue(minValue)
