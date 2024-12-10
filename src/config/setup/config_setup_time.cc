@@ -33,7 +33,7 @@ int ConfigTimeSetup::getXmlContent(const pugi::xml_node& root)
 {
     auto optValue = ConfigSetup::getXmlContent(root, true);
     int result;
-    if (!parseTime(result, optValue, type == ConfigTimeType::Seconds)) {
+    if (!parseTime(result, optValue, type)) {
         throw_std_runtime_error("Invalid {} time format '{}'", xpath, optValue);
     }
     return result;
@@ -56,7 +56,7 @@ std::shared_ptr<ConfigOption> ConfigTimeSetup::newOption(std::string& optValue)
 {
     auto pathValue = optValue;
     int result;
-    if (!parseTime(result, optValue, type == ConfigTimeType::Seconds)) {
+    if (!parseTime(result, optValue, type)) {
         throw_std_runtime_error("Invalid {} time format '{}'", xpath, optValue);
     }
     if (minValue > -1 && result < minValue) {
@@ -72,7 +72,7 @@ std::shared_ptr<ConfigOption> ConfigTimeSetup::newOption(std::string& optValue)
 int ConfigTimeSetup::checkTimeValue(std::string& optValue)
 {
     int result;
-    if (!parseTime(result, optValue, type == ConfigTimeType::Seconds)) {
+    if (!parseTime(result, optValue, type)) {
         throw_std_runtime_error("Invalid {} time format '{}'", xpath, optValue);
     }
     if (minValue > -1 && result < minValue) {

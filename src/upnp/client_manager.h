@@ -52,6 +52,8 @@ public:
 
     void addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const std::string& descLocation);
     const std::vector<ClientObservation>& getClientList() const { return cache; }
+    /// \brief Remove single client from cache and database
+    void removeClient(const std::string& clientIp);
 
 private:
     const ClientProfile* getInfoByAddr(const std::shared_ptr<GrbNet>& addr) const;

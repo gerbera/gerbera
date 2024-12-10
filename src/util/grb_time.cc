@@ -99,8 +99,11 @@ long long HMSFToMilliseconds(std::string_view time)
     return 0;
 }
 
-static const auto secondsFactors = std::vector { 1, 60, 3600, 24 * 3600 };
-static const auto minutesFactors = std::vector { 1, 60, 24 * 60 };
+static const auto timeFactors = std::map<GrbTimeType, std::vector<int>> {
+    { GrbTimeType::Seconds, { 1, 60, 3600, 24 * 3600 } },
+    { GrbTimeType::Minutes, { 1, 60, 24 * 60 } },
+    { GrbTimeType::Hours, { 1, 24 } },
+};
 
 std::string makeSimpleDate(std::string& s)
 {
@@ -142,15 +145,18 @@ bool parseSimpleDate(const std::string& s, std::chrono::seconds& date)
     return false;
 }
 
-bool parseTime(int& value, std::string& timeValue, bool seconds)
+bool parseTime(int& value, std::string& timeValue, GrbTimeType type)
 {
     static auto re = std::regex("^([-0-9:]+)$");
-    auto factors = seconds ? secondsFactors : minutesFactors;
     value = 0;
+
     if (!std::regex_search(timeValue, re))
         return false;
+
     auto list = splitString(timeValue, ':');
     std::reverse(list.begin(), list.end());
+
+    auto factors = timeFactors.at(type);
     if (list.size() > factors.size())
         return false;
     int index = 0;

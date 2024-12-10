@@ -348,6 +348,15 @@ module.exports = function (driver) {
     await driver.sleep(500); // wait a bit
   };
 
+  this.setTextValue = async (key, value) => {
+    var field = await driver.findElement(By.id(key));
+    if (value && field) {
+      await field.clear();
+      await field.sendKeys(value);
+    }
+    return field;
+  };
+
   this.clients = async () => {
     await driver.wait(until.elementLocated(By.id('clientgrid')), 1000);
     return await driver.findElements(By.className('grb-client'));
