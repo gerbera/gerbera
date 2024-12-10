@@ -68,6 +68,7 @@ option(WITH_DEBUG_OPTIONS     "Enables dedicated debug messages" ON)
 option(WITH_TESTS             "Build unit tests" OFF)
 
 option(BUILD_DOC              "Add 'doc' target to generate documentation" OFF)
+option(BUILD_CHANGELOG        "Build 'changelog.gz' file for Debian packages" OFF)
 
 # For building packages without depending on the old system libupnp
 option(STATIC_LIBUPNP         "Link to libupnp statically" OFF)
@@ -748,6 +749,26 @@ if(WITH_TESTS)
     message(STATUS "Configuring unit tests")
     enable_testing()
     add_subdirectory(test)
+endif()
+
+include(GNUInstallDirs)
+
+if(BUILD_CHANGELOG)
+  add_custom_command(
+      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
+      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/debian/gitlog2changelog.sh Gerbera > "${CMAKE_CURRENT_BINARY_DIR}/changelog"
+      COMMAND gzip -cn9 "${CMAKE_CURRENT_BINARY_DIR}/changelog" > "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
+      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+      DEPENDS ChangeLog.md
+      COMMENT "Building changelog"
+  )
+  set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
+
+  add_custom_target(changelog ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
+
+  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
+      DESTINATION "${CMAKE_INSTALL_DOCDIR}"
+  )
 endif()
 
 INSTALL(TARGETS gerbera DESTINATION ${CMAKE_INSTALL_BINDIR})
