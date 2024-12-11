@@ -8,7 +8,7 @@ RUN apk add --no-cache  \
     bash \
     cmake zlib-dev \
     curl-dev \
-    ffmpeg4-dev \
+    ffmpeg-dev \
     file-dev \
     g++ \
     gcc \
@@ -127,13 +127,12 @@ RUN apk add --no-cache \
     bash \
     shadow \
     curl \
-    ffmpeg4-libavutil \
-    ffmpeg4-libavformat \
-    ffmpeg4-libavcodec \
-    ffmpeg4-libavfilter \
+    ffmpeg-libavutil \
+    ffmpeg-libavformat \
+    ffmpeg-libavcodec \
+    ffmpeg-libavfilter \
     libjpeg \
     file \
-    libexif \
     expat brotli inih inih-inireader \
     mariadb-connector-c \
     sqlite \
@@ -144,8 +143,7 @@ RUN apk add --no-cache \
     util-linux \
     zlib \
     # libexecinfo \
-    # Transcoding #
-    ffmpeg4 \
+    # Transcoding \
     ffmpeg \
     libheif-tools \
     vlc \

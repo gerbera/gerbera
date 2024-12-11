@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=alpine:3.20
+ARG BASE_IMAGE=alpine:3.21
 
 FROM ${BASE_IMAGE} AS builder
 
@@ -8,7 +8,7 @@ RUN apk add --no-cache  \
     cmake zlib-dev \
     curl-dev \
     duktape-dev \
-    ffmpeg4-dev \
+    ffmpeg-dev \
     file-dev \
     fmt-dev \
     g++ \
@@ -76,10 +76,10 @@ RUN apk add --no-cache \
     shadow \
     curl \
     duktape \
-    ffmpeg4-libavutil \
-    ffmpeg4-libavformat \
-    ffmpeg4-libavcodec \
-    ffmpeg4-libavfilter \
+    ffmpeg-libavutil \
+    ffmpeg-libavformat \
+    ffmpeg-libavcodec \
+    ffmpeg-libavfilter \
     libjpeg \
     file \
     fmt \
@@ -145,7 +145,6 @@ CMD ["gerbera", "--port", "${IMAGE_PORT}", "--config", "/var/run/gerbera/config.
 
 FROM gerbera AS with_transcoding
 RUN apk add --no-cache \
-    ffmpeg4 \
     ffmpeg \
     libheif-tools \
     vlc
