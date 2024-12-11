@@ -18,6 +18,7 @@ There are some noteworthy new features in this release:
 - Search page in web UI
 - command line option `--create-config` and `--create-example-config` support arguments
 - Provide packages for Ubuntu-24.10
+- Allow deleting of client entries immediately
 
 ### FIXES
 
