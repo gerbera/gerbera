@@ -86,12 +86,18 @@ public:
 
     bool checkEnumValue(const std::string& value, En& result) const
     {
-        if (parsingFunction) {
-            result = parsingFunction(value);
-            return true;
-        } else if (valueMap.find(value) != valueMap.end()) {
-            result = valueMap.at(value);
-            return true;
+        try {
+            if (parsingFunction) {
+                result = parsingFunction(value);
+                return true;
+            } else if (valueMap.find(value) != valueMap.end()) {
+                result = valueMap.at(value);
+                return true;
+            }
+        } catch (const std::out_of_range& ex) {
+            log_error("Could not map '{}' for {}", value, xpath, ex.what());
+        } catch (const std::runtime_error& ex) {
+            log_error("Could not map '{}' for {}", value, xpath, ex.what());
         }
         return false;
     }
