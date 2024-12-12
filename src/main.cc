@@ -102,7 +102,7 @@ static void signalHandler(int signum)
         runtime.exit(EXIT_FAILURE);
     }
 
-    if ((signum == SIGINT) || (signum == SIGTERM)) {
+    if (signum == SIGINT || signum == SIGTERM) {
         _ctx.shutdownFlag++;
         if (_ctx.shutdownFlag == 1) {
             log_info("Gerbera shutting down. Please wait...");
@@ -226,11 +226,14 @@ int main(int argc, char** argv, char** envp)
                 runtime.exit(EXIT_SUCCESS);
             }
             portnum = configManager->getUIntOption(ConfigVal::SERVER_PORT);
-        } catch (const ConfigParseException& ce) {
-            log_error("Error parsing config file '{}': {}", runtime.getConfigFile().c_str(), ce.what());
+        } catch (const ConfigParseException& ex) {
+            log_error("Error parsing config file '{}': {}", runtime.getConfigFile().c_str(), ex.what());
             runtime.exit(EXIT_FAILURE);
-        } catch (const std::runtime_error& e) {
-            log_error("{}", e.what());
+        } catch (const std::runtime_error& ex) {
+            log_error("Runtime error parsing config file '{}': {}", runtime.getConfigFile().c_str(), ex.what());
+            runtime.exit(EXIT_FAILURE);
+        } catch (const std::logic_error& ex) {
+            log_error("Logic error parsing config file '{}': {}", runtime.getConfigFile().c_str(), ex.what());
             runtime.exit(EXIT_FAILURE);
         }
 
@@ -272,13 +275,16 @@ int main(int argc, char** argv, char** envp)
                 server.reset();
                 configManager.reset();
                 runtime.shutdown();
-            } catch (const std::runtime_error& e) {
-                log_error("{}", e.what());
+            } catch (const std::runtime_error& ex) {
+                log_error("Shutdown: {}", ex.what());
             }
 
             runtime.exit(EXIT_FAILURE);
-        } catch (const std::runtime_error& e) {
-            log_error("{}", e.what());
+        } catch (const std::runtime_error& ex) {
+            log_error("Run: runtime error {}", ex.what());
+            runtime.exit(EXIT_FAILURE);
+        } catch (const std::logic_error& ex) {
+            log_error("Run: logic error {}", ex.what());
             runtime.exit(EXIT_FAILURE);
         }
 
@@ -313,14 +319,17 @@ int main(int argc, char** argv, char** envp)
                         GrbLogger::Logger.init(configManager->getIntOption(ConfigVal::SERVER_LOG_DEBUG_MODE));
 #endif
                         portnum = configManager->getUIntOption(ConfigVal::SERVER_PORT);
-                    } catch (const ConfigParseException& ce) {
-                        log_error("Error parsing config file '{}': {}", runtimeChild.getConfigFile().c_str(), ce.what());
+                    } catch (const ConfigParseException& ex) {
+                        log_error("Error parsing config file '{}': {}", runtimeChild.getConfigFile().c_str(), ex.what());
                         log_error("Could not restart Gerbera");
                         // at this point upnp shutdown has already been called
                         // therefore it is safe to exit
                         runtime.exit(EXIT_FAILURE);
-                    } catch (const std::runtime_error& e) {
-                        log_error("Error reloading configuration: {}", e.what());
+                    } catch (const std::runtime_error& ex) {
+                        log_error("Runtime error reloading configuration: {}", ex.what());
+                        runtime.exit(EXIT_FAILURE);
+                    } catch (const std::logic_error& ex) {
+                        log_error("Logic error reloading configuration: {}", ex.what());
                         runtime.exit(EXIT_FAILURE);
                     }
 
@@ -331,13 +340,20 @@ int main(int argc, char** argv, char** envp)
                     server->run();
 
                     _ctx.restartFlag = 0;
-                } catch (const std::runtime_error& e) {
+                } catch (const std::runtime_error& ex) {
                     _ctx.restartFlag = 0;
                     _ctx.shutdownFlag = 1;
 
                     if (pthread_sigmask(SIG_SETMASK, &emptyMaskSet, nullptr))
                         log_error("Error clearing masked signals {}", std::strerror(errno));
-                    log_error("Could not restart Gerbera {}", e.what());
+                    log_error("Could not restart Gerbera {}", ex.what());
+                } catch (const std::logic_error& ex) {
+                    _ctx.restartFlag = 0;
+                    _ctx.shutdownFlag = 1;
+
+                    if (pthread_sigmask(SIG_SETMASK, &emptyMaskSet, nullptr))
+                        log_error("Error clearing masked signals {}", std::strerror(errno));
+                    log_error("Restart: logic error {}", ex.what());
                 }
             }
         }
@@ -349,10 +365,13 @@ int main(int argc, char** argv, char** envp)
             server.reset();
             configManager.reset();
         } catch (const UpnpException& upnpE) {
-            log_error("main: upnp error {}", upnpE.getErrorCode());
+            log_error("Shutdown: upnp error {}", upnpE.getErrorCode());
             ret = EXIT_FAILURE;
-        } catch (const std::runtime_error& e) {
-            log_error("main: error {}", e.what());
+        } catch (const std::runtime_error& ex) {
+            log_error("Shutdown: runtime error {}", ex.what());
+            ret = EXIT_FAILURE;
+        } catch (const std::logic_error& ex) {
+            log_error("Shutdown: logic error {}", ex.what());
             ret = EXIT_FAILURE;
         }
 

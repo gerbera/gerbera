@@ -20,6 +20,7 @@
 - Fix creating containers in web ui
 - Fix Handling command line options
 - Fix handling of checkbox values on web ui
+- Fix parsing enum config values
 - Fix systemd detection
 - Improve compile info contents
 - Improve handling multivalue tags in virtual paths
