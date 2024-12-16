@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# dep-taglib.sh - this file is part of Gerbera.
+# debian/deps/pupnp.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,5 +19,5 @@
 #
 # $Id$
 
-sudo zypper install --no-confirm \
-       utfcpp-devel
+sudo apt-get install -y \
+    libcurl4-openssl-dev

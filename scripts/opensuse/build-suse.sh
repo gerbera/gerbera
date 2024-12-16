@@ -31,10 +31,15 @@ else
   echo "No script library found at ${ROOT_DIR}scripts/gerbera-shell.sh"
 fi
 
+GRB_C_COMPILER=gcc
+GRB_CXX_COMPILER=g++
+
 function install-gcc {
-  echo "::group::Installing GCC"
+  echo "::group::Installing GCC 13"
   sudo zypper install --no-confirm \
-    gcc9-c++
+    gcc13-c++
+  GRB_C_COMPILER=gcc-13
+  GRB_CXX_COMPILER=g++-13
   echo "::endgroup::"
 }
 
@@ -79,6 +84,7 @@ if [[ "${GH_ACTIONS}" == "y" ]]; then
 fi
 
 lsb_codename=$(lsb_release -c --short)
+lsb_rel=$(lsb_release -r --short)
 if [[ "${lsb_codename}" == "n/a" ]]; then
   lsb_codename="unstable"
 fi
@@ -95,6 +101,11 @@ fi
 
 echo "Running $0 ${my_sys} ${my_upnp}"
 
+libmagic="file-devel"
+libffmpeg="ffmpeg-7-libavformat-devel"
+libwavpack="wavpack-devel"
+libmysqlclient="libmariadb-devel"
+
 if [[ "${my_sys}" == "HEAD" ]]; then
   libexif=""
   libexiv2=""
@@ -107,33 +118,44 @@ else
   libexiv2="libexiv2-devel"
   libpugixml="pugixml-devel"
   libmatroska="libebml-devel libmatroska-devel"
-  ffmpegthumbnailer="libffmpegthumbnailer-dev"
+  ffmpegthumbnailer="libffmpegthumbnailer-devel"
 
-  libduktape="libduktape207"
-  libduktape="duktape-dev ${libduktape}"
+  libduktape="duktape"
+  libduktape="duktape-devel ${libduktape}"
 
-  echo "Selecting $libduktape for $lsb_distro $lsb_codename"
+  echo "Selecting $libduktape for $lsb_distro $lsb_rel"
 fi
 
-libmysqlclient="libmariadb-devel"
+BUILD_DIR=build-suse
 
-if [[ ! -d build-deb ]]; then
-  mkdir build-deb
+if [[ -f ${SCRIPT_DIR}releases/${lsb_distro}-${lsb_rel}.sh ]]; then
+  . ${SCRIPT_DIR}releases/${lsb_distro}-${lsb_rel}.sh
+fi
+if [[ -f ${SCRIPT_DIR}releases/leap${lsb_rel}.sh ]]; then
+  . ${SCRIPT_DIR}releases/leap${lsb_rel}.sh
+fi
+if [[ -f ${SCRIPT_DIR}releases/${lsb_distro}.sh ]]; then
+  . ${SCRIPT_DIR}releases/${lsb_distro}.sh
+fi
+
+
+if [[ ! -d ${BUILD_DIR} ]]; then
+  mkdir ${BUILD_DIR}
 
   install-gcc
   install-cmake
 
   echo "::group::Installing dependencies"
-sudo zypper install --no-confirm \
+  sudo zypper install --no-confirm \
       wget autoconf libtool pkg-config \
-      ffmpeg-4-libavformat-devel \
+      ${libffmpeg} \
       ${libduktape} \
       ${libmatroska} \
       ${libexiv2} \
       ${libexif} \
       ${ffmpegthumbnailer} \
-      wavpack-devel \
-      file-devel \
+      ${libwavpack} \
+      ${libmagic} \
       ${libmysqlclient} \
       ${libpugixml} \
       sqlite3-devel \
@@ -161,7 +183,7 @@ sudo zypper install --no-confirm \
   fi
 fi
 
-cd build-deb
+cd ${BUILD_DIR}
 
 commit_date=$(git log -1 --date=format:"%Y%m%d%H%M%S" --format="%ad")
 git_ver=$(git describe --tags | sed 's/\(.*\)-.*/\1/' | sed s/-/+/ | sed s/v//)
@@ -175,7 +197,7 @@ if [[ $git_ver == *"+"* ]]; then
 fi
 
 suse_arch=$(uname --hardware-platform)
-suse_name="gerbera_${suse_version}_${suse_arch}.deb"
+suse_name="gerbera_${suse_version}_${suse_arch}.rpm"
 
 if [[ (! -f ${suse_name}) || "${my_sys}" == "HEAD" ]]; then
   cmake_preset="${my_sys}-${my_upnp}"
@@ -188,6 +210,7 @@ if [[ (! -f ${suse_name}) || "${my_sys}" == "HEAD" ]]; then
   set -euEo pipefail
 
   cmake "${ROOT_DIR}" --preset="${cmake_preset}" \
+    -DCMAKE_CXX_COMPILER=${GRB_CXX_COMPILER} -DCMAKE_C_COMPILER=${GRB_C_COMPILER} \
     -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"
 

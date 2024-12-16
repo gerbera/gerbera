@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# include-focal.sh - this file is part of Gerbera.
+# debian/releases/focal.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #

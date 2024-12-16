@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# include-jammy.sh - this file is part of Gerbera.
+# debian/deps/taglib.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,9 +19,5 @@
 #
 # $Id$
 
-echo "Loading functions for ${lsb_codename}"
-
-function set-libraries-rel() {
-  libmysqlclient="libmysql++-dev"
-}
-
+sudo apt-get install -y \
+      libutfcpp-dev

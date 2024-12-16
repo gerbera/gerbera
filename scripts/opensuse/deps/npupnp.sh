@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# dep-taglib.sh - this file is part of Gerbera.
+# opensuse/deps/npupnp.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,5 +19,6 @@
 #
 # $Id$
 
-sudo apk add --no-cache \
-      utfcpp
+sudo zypper install --no-confirm \
+       meson ninja \
+       libmicrohttpd-devel libexpat-devel libcurl-devel

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# dep-ffmpegthumbnailer.sh - this file is part of Gerbera.
+# alpine/deps/exiv2.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,14 +19,5 @@
 #
 # $Id$
 
-if [[ "$lsb_codename" == "focal" ]]; then
-  sudo apt-get install -y \
-    ffmpeg libavfilter-dev libavcodec-dev libavutil-dev \
-    libjpeg-dev libpng-dev \
-    libavdevice-dev libavresample-dev
-else
-  sudo apt-get install -y \
-    ffmpeg libavfilter-dev libavcodec-dev libavutil-dev \
-    libjpeg-dev libpng-dev \
-    libavdevice-dev libswresample-dev
-fi
+sudo apk add --no-cache \
+    expat-dev brotli-dev inih-dev inih-inireader-dev

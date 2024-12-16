@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# include-impish.sh - this file is part of Gerbera.
+# debian/releases/jammy.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -22,6 +22,6 @@
 echo "Loading functions for ${lsb_codename}"
 
 function set-libraries-rel() {
-    libmysqlclient="libmysql++-dev"
+  libmysqlclient="libmysql++-dev"
 }
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# dep-npupnp.sh - this file is part of Gerbera.
+# debian/releases/buster.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,6 +19,20 @@
 #
 # $Id$
 
-sudo zypper install --no-confirm \
-       meson ninja \
-       libmicrohttpd-devel libexpat-devel libcurl-devel
+echo "Loading functions for ${lsb_codename}"
+
+function install-cmake() {
+  echo "::group::Installing CMake"
+  sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
+  curl https://apt.kitware.com/keys/kitware-archive-latest.asc \
+    | gpg --dearmor - \
+    | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
+  sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ ${lsb_codename} main"
+  sudo apt-get update -y
+  sudo apt-get install cmake -y
+  echo "::endgroup::"
+}
+
+function set-libraries-rel() {
+  libduktape="duktape-dev libduktape203"
+}

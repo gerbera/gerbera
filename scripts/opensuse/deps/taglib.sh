@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# dep-exiv2.sh - this file is part of Gerbera.
+# opensuse/deps/taglib.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,5 +19,5 @@
 #
 # $Id$
 
-sudo apk add --no-cache \
-    expat-dev brotli-dev inih-dev inih-inireader-dev
+sudo zypper install --no-confirm \
+       utfcpp-devel

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# dep-ffmpegthumbnailer.sh - this file is part of Gerbera.
+# opensuse/deps/pupnp.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,6 +19,5 @@
 #
 # $Id$
 
-sudo apk add --no-cache \
-    jpeg-dev \
-    libpng-dev
+sudo zypper install --no-confirm \
+       libcurl-devel
