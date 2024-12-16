@@ -38,25 +38,25 @@ RUN apk add --no-cache  \
 # Build ffmpegthumbnailer
 WORKDIR /ffmpegthumbnailer_build
 COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh ./
-COPY scripts/alpine/* ./alpine/
+COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-ffmpegthumbnailer.sh
 
 # Build libupnp
 WORKDIR /libupnp_build
 COPY scripts/install-pupnp.sh scripts/versions.sh ./
-COPY scripts/alpine/* ./alpine/
+COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-pupnp.sh
 
 # Build libexiv2
 WORKDIR /libexiv2_build
 COPY scripts/install-libexiv2.sh scripts/versions.sh ./
-COPY scripts/alpine/* ./alpine/
+COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-libexiv2.sh
 
 # Build libexif
 WORKDIR /libexif_build
 COPY scripts/install-libexif.sh scripts/versions.sh ./
-COPY scripts/alpine/* ./alpine/
+COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-libexif.sh
 
 # Build Gerbera
@@ -122,23 +122,28 @@ ARG IMAGE_UID=1042
 ARG IMAGE_GID=1042
 ARG IMAGE_PORT=49494
 
-RUN addgroup -S ${IMAGE_GROUP} --gid=${IMAGE_GID} 2>/dev/null && \
-    adduser -S -D -H -h /var/run/gerbera -s /sbin/nologin -G ${IMAGE_GROUP} -g ${IMAGE_GROUP} --uid=${IMAGE_UID} ${IMAGE_USER} 2>/dev/null && \
-    addgroup ${IMAGE_USER} video && \
-    mkdir /var/run/gerbera/ && chmod 2775 /var/run/gerbera/ && \
-    mkdir /content && chmod 777 /content && ln -s /content /mnt/content && \
-    mkdir -p /mnt/customization/js && mkdir -p /mnt/customization/shell && \
-    chmod -R 777 /mnt/customization
+RUN addgroup -S ${IMAGE_GROUP} --gid=${IMAGE_GID} 2>/dev/null \
+    && adduser -S -D -H -h /var/run/gerbera -s /sbin/nologin -G ${IMAGE_GROUP} -g ${IMAGE_GROUP} --uid=${IMAGE_UID} ${IMAGE_USER} 2>/dev/null \
+    && addgroup ${IMAGE_USER} video \
+    && mkdir /var/run/gerbera/ \
+    && chmod 2775 /var/run/gerbera/ \
+    && mkdir /content \
+    && chmod 777 /content \
+    && ln -s /content /mnt/content \
+    && mkdir -p /mnt/customization/js \
+    && mkdir -p /mnt/customization/shell \
+    && chmod -R 777 /mnt/customization
 
 # Update entrypoint
 RUN chmod 0755 /usr/local/bin/docker-entrypoint.sh \
- && sed "s/\$IMAGE_UID/$IMAGE_UID/g" -i /usr/local/bin/docker-entrypoint.sh \
- && sed "s/\$IMAGE_GID/$IMAGE_GID/g" -i /usr/local/bin/docker-entrypoint.sh \
- && sed "s/\$IMAGE_USER/$IMAGE_USER/g" -i /usr/local/bin/docker-entrypoint.sh \
- && sed "s/\$IMAGE_GROUP/$IMAGE_GROUP/g" -i /usr/local/bin/docker-entrypoint.sh
+    && sed "s/\$IMAGE_UID/$IMAGE_UID/g" -i /usr/local/bin/docker-entrypoint.sh \
+    && sed "s/\$IMAGE_GID/$IMAGE_GID/g" -i /usr/local/bin/docker-entrypoint.sh \
+    && sed "s/\$IMAGE_USER/$IMAGE_USER/g" -i /usr/local/bin/docker-entrypoint.sh \
+    && sed "s/\$IMAGE_GROUP/$IMAGE_GROUP/g" -i /usr/local/bin/docker-entrypoint.sh
 
 EXPOSE ${IMAGE_PORT}
 EXPOSE 1900/udp
+ENV IMAGE_PORT=${IMAGE_PORT:-49494}
 
 ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
 CMD ["gerbera", "--port", "${IMAGE_PORT}", "--config", "/var/run/gerbera/config.xml"]

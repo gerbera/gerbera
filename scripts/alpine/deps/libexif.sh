@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# dep-exiv2.sh - this file is part of Gerbera.
+# alpine/deps/exif.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,5 +19,6 @@
 #
 # $Id$
 
-sudo zypper install --no-confirm \
-       libexpat-devel libbrotli-devel libinih-devel libinih0
+sudo apk add --no-cache \
+    gettext-dev
+

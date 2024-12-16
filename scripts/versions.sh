@@ -88,11 +88,14 @@ if [ -x "$(command -v lsb_release)" ]; then
         lsb_codename="unstable"
     fi
     lsb_distro=$(lsb_release -i --short)
+    lsb_rel=$(lsb_release -r --short)
     lsb_codename=${lsb_codename,,}
     lsb_distro=${lsb_distro,,}
+    lsb_rel=${lsb_rel,,}
 else
     lsb_codename="unknown"
     lsb_distro="unknown"
+    lsb_rel="unknown"
 fi
 
 function downloadSource()
@@ -143,7 +146,7 @@ function installDeps()
     elif [[ "${lsb_distro}" == "suse" ]]; then
         distr="opensuse"
     fi
-    dep_file="${root_dir}/${distr}/dep-${package}.sh"
+    dep_file="${root_dir}/${distr}/deps/${package}.sh"
     if [[ -f "${dep_file}" ]]; then
         . ${dep_file}
     else

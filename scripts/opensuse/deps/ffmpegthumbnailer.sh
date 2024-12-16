@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# dep-exif.sh - this file is part of Gerbera.
+# opensuse/deps/ffmpegthumbnailer.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,5 +19,18 @@
 #
 # $Id$
 
-sudo apt-get install -y \
-    autopoint
+if [[ "${lsb_rel}" == "15.4" ]]; then
+
+    sudo zypper install --no-confirm \
+            ffmpeg-4 ffmpeg-4-libavfilter-devel ffmpeg-4-libavcodec-devel ffmpeg-4-libavutil-devel \
+            libjpeg-devel libpng-devel \
+            ffmpeg-4-libavdevice-devel ffmpeg-4-libswresample-devel ffmpeg-4-libavresample-devel
+
+else
+
+    sudo zypper install --no-confirm \
+            ffmpeg-7-libavfilter-devel ffmpeg-7-libavcodec-devel ffmpeg-7-libavutil-devel \
+            ffmpeg-7-libavdevice-devel ffmpeg-7-libavformat-devel \
+            libjpeg8-devel libpng16-devel
+
+fi

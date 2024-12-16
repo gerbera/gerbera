@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# include-Raspbian.sh - this file is part of Gerbera.
+# debian/deps/exif.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,22 +19,5 @@
 #
 # $Id$
 
-echo "Loading functions for ${lsb_distro}"
-
-function install-cmake() {
-  echo "::group::Installing CMake"
-  sudo apt-get install snapd -y
-  sudo snap install core
-  sudo snap install cmake --classic
-  echo "::endgroup::"
-}
-
-function upload_to_repo() {
-  #echo "::group::Uploading package"
-  echo "No Repo for Raspbian yet"
-  #echo "::endgroup::"
-}
-
-function set-libraries-dist() {
-  libmysqlclient="libmariadb-dev-compat"
-}
+sudo apt-get install -y \
+    autopoint

@@ -52,6 +52,7 @@ function set-libraries-rel() {
 }
 
 function set-libraries() {
+  libffmpeg="libavformat-dev"
   libexif="libexif-dev"
   libexiv2="libexiv2-dev"
   libpugixml="libpugixml-dev"
@@ -59,6 +60,8 @@ function set-libraries() {
   ffmpegthumbnailer="libffmpegthumbnailer-dev"
   libduktape="duktape-dev libduktape207"
   libmysqlclient="libmysqlclient-dev"
+  libmagic="libmagic-dev"
+  libwavpack="libwavpack1 libwavpack-dev"
 }
 
 function install-deb-s3() {
@@ -111,14 +114,14 @@ fi
 lsb_distro=$(lsb_release -i --short)
 deb_arch=$(dpkg --print-architecture)
 
-if [[ -f ${SCRIPT_DIR}include-${lsb_distro}-${lsb_codename}.sh ]]; then
-  . ${SCRIPT_DIR}include-${lsb_distro}-${lsb_codename}.sh
+if [[ -f ${SCRIPT_DIR}releases/${lsb_distro}-${lsb_codename}.sh ]]; then
+  . ${SCRIPT_DIR}releases/${lsb_distro}-${lsb_codename}.sh
 fi
-if [[ -f ${SCRIPT_DIR}include-${lsb_codename}.sh ]]; then
-  . ${SCRIPT_DIR}include-${lsb_codename}.sh
+if [[ -f ${SCRIPT_DIR}releases/${lsb_codename}.sh ]]; then
+  . ${SCRIPT_DIR}releases/${lsb_codename}.sh
 fi
-if [[ -f ${SCRIPT_DIR}include-${lsb_distro}.sh ]]; then
-  . ${SCRIPT_DIR}include-${lsb_distro}.sh
+if [[ -f ${SCRIPT_DIR}releases/${lsb_distro}.sh ]]; then
+  . ${SCRIPT_DIR}releases/${lsb_distro}.sh
 fi
 
 my_sys=${lsb_codename}
@@ -167,14 +170,14 @@ if [[ ! -d "${BUILD_DIR}" ]]; then
       build-essential shtool \
       wget autoconf libtool pkg-config \
       bsdmainutils \
-      libavformat-dev \
+      ${libffmpeg} \
       ${libduktape} \
       ${libmatroska} \
       ${libexiv2} \
       ${libexif} \
       ${ffmpegthumbnailer} \
-      libwavpack1 libwavpack-dev \
-      libmagic-dev \
+      ${libwavpack} \
+      ${libmagic} \
       ${libmysqlclient} \
       ${libpugixml} \
       libsqlite3-dev \

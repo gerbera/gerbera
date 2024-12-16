@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# dep-ffmpegthumbnailer.sh - this file is part of Gerbera.
+# debian/deps/exiv2.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,7 +19,5 @@
 #
 # $Id$
 
-sudo zypper install --no-confirm \
-       ffmpeg-4 ffmpeg-4-libavfilter-devel ffmpeg-4-libavcodec-devel ffmpeg-4-libavutil-devel \
-       libjpeg-devel libpng-devel \
-       ffmpeg-4-libavdevice-devel ffmpeg-4-libswresample-devel ffmpeg-4-libavresample-devel
+sudo apt-get install -y \
+    libexpat1-dev libbrotli-dev libinih-dev libinireader0

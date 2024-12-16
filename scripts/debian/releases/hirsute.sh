@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# dep-npupnp.sh - this file is part of Gerbera.
+# debian/releases/hirsute.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,6 +19,9 @@
 #
 # $Id$
 
-sudo apt-get install -y \
-      meson ninja-build \
-      libmicrohttpd-dev libexpat1-dev libcurl4-gnutls-dev
+echo "Loading functions for ${lsb_codename}"
+
+function set-libraries-rel() {
+  libmysqlclient="libmysql++-dev"
+}
+

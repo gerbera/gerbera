@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# include-bullseye.sh - this file is part of Gerbera.
+# alpine/deps/taglib.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2024 Gerbera Contributors
 #
@@ -19,17 +19,5 @@
 #
 # $Id$
 
-echo "Loading functions for ${lsb_codename}"
-
-function install-cmake() {
-  echo "::group::Installing CMake"
-  sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
-  sudo apt-add-repository "deb http://deb.debian.org/debian ${lsb_codename}-backports main"
-  sudo apt-get update -y
-  sudo apt-get install cmake-data=3.25.\* cmake=3.25.\* -yf
-  echo "::endgroup::"
-}
-
-function set-libraries-rel() {
-  libduktape="duktape-dev libduktape205"
-}
+sudo apk add --no-cache \
+      utfcpp

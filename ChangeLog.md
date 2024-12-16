@@ -30,6 +30,7 @@
 - Test: Fix CMake commands
 - Update and refactor MySQL code
 - Update Build Environment
+- Update build for openSuSE
 - Update docker settings
 - Update js vendor files
 - UPnP filters: provide defaults for filter properties
