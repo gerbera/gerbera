@@ -1,4 +1,8 @@
-<img style="background: rgb(248, 248, 248); @media (prefers-color-scheme: dark) {  background: rgb(7, 7, 7);}" src="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true" />
+<picture>
+ <source media="(prefers-color-scheme: dark)" style="background: rgb(7, 7, 7)" srcset="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true">
+ <source media="(prefers-color-scheme: light)" srcset="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true">
+ <img alt="GERBERA" style="background: rgb(248, 248, 248)" src="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true" />
+</picture>
 
 # Gerbera - UPnP Media Server
 
