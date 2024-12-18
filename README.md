@@ -1,15 +1,4 @@
-<style>
-.banner {
-  background: rgb(248, 248, 248);
-}
-@media (prefers-color-scheme: dark) {
-  .banner {
-    background: rgb(7, 7, 7);
-  }
-}
-
-</style>
-<img class="banner" src="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true" />
+<img style="background: rgb(248, 248, 248); @media (prefers-color-scheme: dark) {  background: rgb(7, 7, 7);}" src="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true" />
 
 # Gerbera - UPnP Media Server
 
