@@ -147,7 +147,7 @@
                 </h4>
                 <span>View, update and remove files from Gerbera.</span>
               </a>
-              <a id="searchlink" href="javascript:;" onclick="$('#nav-search').click();" >
+              <a id="searchlink" href="javascript:;" onclick="$('#nav-search').click();">
                 <div>
                   <h4>
                     <i class="fa fa-search"></i>
@@ -170,6 +170,45 @@
                 </h4>
                 <span>Change settings for Gerbera</span>
               </a>
+              <div class="sublink d-flex card-style-bottom px-3 py-3">
+                <i class="fa fa-fw fa-cog fa-3x text-center grb-icon"></i>
+                <div class="form-check form-check-inline">
+                  <label class="form-check-label" for="displayMode_default">
+                    Default
+                    <input
+                      type="radio"
+                      name="displayMode"
+                      class="form-check-input"
+                      value="default"
+                      id="displayMode_default"
+                    />
+                  </label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <label class="form-check-label" for="displayMode_light">
+                    Light
+                    <input
+                      type="radio"
+                      name="displayMode"
+                      class="form-check-input"
+                      value="light"
+                      id="displayMode_light"
+                    />
+                  </label>
+                </div>
+                <div class="form-check form-check-inline">
+                  <label class="form-check-label" for="displayMode_dark">
+                    Dark
+                    <input
+                      type="radio"
+                      name="displayMode"
+                      class="form-check-input"
+                      value="dark"
+                      id="displayMode_dark"
+                    />
+                  </label>
+                </div>
+              </div>
             </div>
           </div>
           <div id="server-status" class="col md-3">
@@ -394,14 +433,23 @@
         <span class="small text-muted">Please use UPnP syntax for Query and Sort</span>
         <ul>
           <li>
-            <label class="searchLabel">Query: <span class="small text-muted">upnp:class derivedfrom "object.item" and dc:title contains "music"</span></label>
-            <br/><textarea id="searchQuery" cols="50" rows="2"></textarea>
-            <br/><span class="small text-muted" id="searchCaps"></span>
+            <label class="searchLabel"
+              >Query:
+              <span class="small text-muted"
+                >upnp:class derivedfrom "object.item" and dc:title contains "music"</span
+              ></label
+            >
+            <br /><textarea id="searchQuery" cols="50" rows="2"></textarea> <br /><span
+              class="small text-muted"
+              id="searchCaps"
+            ></span>
           </li>
           <li>
             <label class="searchLabel">Sort: <span class="small text-muted">-dc:title</span></label>
-            <br/><textarea id="searchSort" cols="50" rows="1"></textarea>
-            <br/><span class="small text-muted" id="sortCaps"></span>
+            <br /><textarea id="searchSort" cols="50" rows="1"></textarea> <br /><span
+              class="small text-muted"
+              id="sortCaps"
+            ></span>
           </li>
         </ul>
         <button id="searchButton" class="btn btn-primary">Execute</button>

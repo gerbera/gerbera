@@ -47,6 +47,7 @@ export class App {
       viewItems: -1,
       viewItemsOld: -1,
       gridMode: 0,
+      displayMode: 'default',
       currentItem: {
         'home': [],
         'db': [],
@@ -217,6 +218,11 @@ export class App {
         if (!('gridMode' in this.pageInfo)) {
           this.pageInfo.gridMode = 0;
         }
+        if (!('displayMode' in this.pageInfo)) {
+          this.pageInfo.displayMode = 'light dark';
+        }
+        this.loadDisplayMode(this.pageInfo.displayMode);
+
         if (!('viewItems' in this.pageInfo)) {
           const itemsPerPage = this.serverConfig['items-per-page'];
           if (itemsPerPage && itemsPerPage.default) {
@@ -340,6 +346,22 @@ export class App {
     });
   }
 
+  loadDisplayMode(mode) {
+    document.documentElement.style.setProperty('color-scheme', mode);
+    if (mode == 'light dark')
+      mode = 'default';
+    document.getElementById('displayMode_' + mode).checked = true;
+  }
+
+  setDisplayMode(event) {
+    let mode = event.target.value;
+    if (mode == 'default')
+      mode = 'light dark';
+    document.documentElement.style.setProperty('color-scheme', mode);
+    this.pageInfo.displayMode = mode;
+    this.writeLocalStorage();
+  }
+
   viewItems() {
     return this.pageInfo.viewItems >= 0 ? this.pageInfo.viewItems : (this.serverConfig['items-per-page'] ? this.serverConfig['items-per-page'].default : 25);
   }
@@ -351,7 +373,7 @@ export class App {
   itemsPerPage() {
     if (this.serverConfig['items-per-page'] && this.serverConfig['items-per-page'].option && this.serverConfig['items-per-page'].default)
       return this.serverConfig['items-per-page'];
-    return {option: [10, 25, 50, 100], default: 25};
+    return { option: [10, 25, 50, 100], default: 25 };
   }
 
   displayLogin(loggedIn) {

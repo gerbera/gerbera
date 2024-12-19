@@ -1,7 +1,7 @@
 <picture>
  <source media="(prefers-color-scheme: dark)" srcset="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz-white.png?raw=true">
  <source media="(prefers-color-scheme: light)" srcset="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true">
- <img alt="GERBERA" style="background: rgb(248, 248, 248)" src="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true" />
+ <img alt="GERBERA" src="https://github.com/gerbera/gerbera/blob/master/artwork/logo-horiz.png?raw=true" />
 </picture>
 
 # Gerbera - UPnP Media Server
