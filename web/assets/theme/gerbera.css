@@ -410,6 +410,7 @@ body,
 
 #login-form {
   border: 1px solid #e9ecef;
+  background-color: light-dark(white, black);
 }
 
 .flowers {
