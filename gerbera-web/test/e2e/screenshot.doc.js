@@ -11,19 +11,23 @@ const HomePage = require('./page/home.page');
 const LoginPage = require('./page/login.page');
 
 suite(() => {
-  let loginPage, homePage;
+  let loginPage, homePage, suffix;
   const DEFAULT_FOLDER_STORE = process.cwd() + argv.folderPath;
   console.log('Save path --> ' + DEFAULT_FOLDER_STORE);
-
+  const test = argv.scheme;
   before(async () => {
     const chromeOptions = new chrome.Options();
+    suffix = '.png';
     chromeOptions.addArguments(['--window-size=1440,1080', '--incognito']);
+    if (test == 'dark') {
+        chromeOptions.addArguments(['--force-dark-mode']);
+        suffix = '_dark.png';
+    }
     driver = new Builder()
       .forBrowser('chrome')
       .setChromeOptions(chromeOptions)
       .build();
     await driver.get(mockWebServer + '/reset?testName=default.json');
-
     loginPage = new LoginPage(driver);
     homePage = new HomePage(driver);
   });
@@ -40,7 +44,7 @@ suite(() => {
     after(() => driver && driver.quit());
 
     it('for [main view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'main-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'main-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -50,11 +54,12 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1280, Jimp.AUTO)
-      image.crop(0, 0, 1280, 680).write(fileName);
+      image.crop(0, 0, 1280, 680);
+      image.write(fileName);
     });
 
     it('for [main view] with empty database', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'main-view-empty.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'main-view-empty' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -69,7 +74,7 @@ suite(() => {
     });
 
     it('for [login] field entry', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'login-field-entry.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'login-field-entry' + suffix;
       await loginPage.username('gerbera');
       await loginPage.takeScreenshot(fileName);
 
@@ -80,7 +85,7 @@ suite(() => {
     });
 
     it('for [menu bar]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'menubar.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'menubar' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -89,11 +94,12 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(0, 0, 1430, 80).write(fileName);
+      image.crop(0, 0, 1430, 80);
+      image.write(fileName);
     });
 
     it('for [database view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'database-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'database-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -109,7 +115,7 @@ suite(() => {
     });
 
     it('for [database small grid view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'database-smallgrid-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'database-smallgrid-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -127,7 +133,7 @@ suite(() => {
     });
 
     it('for [database large grid view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'database-largegrid-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'database-largegrid-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -145,7 +151,7 @@ suite(() => {
     });
 
     it('for [database single view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'database-single-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'database-single-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -161,7 +167,7 @@ suite(() => {
     });
 
     it('for [search view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'search-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'search-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -179,7 +185,7 @@ suite(() => {
     });
 
     it('for [filesystem view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'filesystem-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'filesystem-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -189,11 +195,12 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1280, Jimp.AUTO).write(fileName);
+      image.resize(1280, Jimp.AUTO);
+      image.write(fileName);
     });
 
     it('for [clients view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'clients-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'clients-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -203,11 +210,12 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1280, Jimp.AUTO);
-      image.crop(0, 0, 1280, 500).write(fileName);
+      image.crop(0, 0, 1280, 500);
+      image.write(fileName);
     });
 
     it('for [config view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'config-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'config-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -219,11 +227,12 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1280, Jimp.AUTO);
-      image.crop(0, 0, 1280, 750).write(fileName);
+      image.crop(0, 0, 1280, 750);
+      image.write(fileName);
     });
 
     it('for [items view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'items-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'items-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -237,7 +246,7 @@ suite(() => {
     });
 
     it('for [edit item] from item list', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'edit-item.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-item' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -249,11 +258,12 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.crop(600, 140, 530, 950).write(fileName);
+      image.crop(600, 140, 530, 950);
+      image.write(fileName);
     });
 
     it('for [edit item] from item list with details', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'edit-item-details.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-item-details' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -266,11 +276,12 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.crop(280, 50, 1160, 1150).write(fileName);
+      image.crop(280, 50, 1160, 1150);
+      image.write(fileName);
     });
 
     it('for [trail operations]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'trail-operations.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'trail-operations' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -281,11 +292,12 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(860, 0, 570, 140).write(fileName);
+      image.crop(860, 0, 570, 140);
+      image.write(fileName);
     });
 
     it('for [trail filesystem operations]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'trail-fs-operations.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'trail-fs-operations' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -296,11 +308,12 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(860, 0, 570, 140).write(fileName);
+      image.crop(860, 0, 570, 140);
+      image.write(fileName);
     });
 
     it('for [edit autoscan] from filesystem list', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -313,11 +326,12 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(370, 255, 700, 530).write(fileName);
+      image.crop(370, 255, 700, 530);
+      image.write(fileName);
     });
 
     it('for [edit autoscan] from filesystem list with details', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan-details.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan-details' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -335,7 +349,7 @@ suite(() => {
     });
 
     it('for [edit tweak] from filesystem list', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'edit-tweak-details.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-tweak-details' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -352,7 +366,7 @@ suite(() => {
     });
 
     it('for [trail config operations]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'trail-config-operations.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'trail-config-operations' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -362,11 +376,12 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(860, 0, 570, 140).write(fileName);
+      image.crop(860, 0, 570, 140);
+      image.write(fileName);
     });
 
     it('for [item edit operations]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'item-operations.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'item-operations' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -378,11 +393,12 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(325, 125, 1115, 125).write(fileName);
+      image.crop(325, 125, 1115, 125);
+      image.write(fileName);
     });
 
     it('for [toast message]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'toast-message.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'toast-message' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -394,11 +410,13 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1280, Jimp.AUTO).write(fileName);
+      image.resize(1440, Jimp.AUTO);
+      image.crop(0, 990, 1440, 74);
+      image.write(fileName);
     });
 
     it('for [task message]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'task-message.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'task-message' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -410,8 +428,9 @@ suite(() => {
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
-      image.resize(1280, Jimp.AUTO).write(fileName);
+      image.resize(1440, Jimp.AUTO);
+      image.crop(0, 990, 1440, 74);
+      image.write(fileName);
     });
   });
 });
-
