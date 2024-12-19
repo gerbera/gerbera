@@ -13,6 +13,7 @@
 - Debian: create changelog file
 - deps: Fix build with ffmpeg 6.1
 - Drop Build Support for Ubuntu 23.04
+- Dynamic banner colour in Readme
 - Fix access to cache option if thumbnailer disabled
 - Fix autoscan issue with empty filename
 - Fix build without ffmpeg
@@ -36,6 +37,7 @@
 - UPnP filters: provide defaults for filter properties
 - UPnP Shortcuts feature
 - UPnP: Add support for filters
+- Web UI: Add dark mode
 - Web UI: Add Search page
 - Web UI: Cleanup display of item number
 - Web UI: Fix detail display
