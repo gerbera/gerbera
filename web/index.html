@@ -178,55 +178,94 @@
                 <div class="card-style mt-3">
                   <a id="addlink" href="javascript:;" onclick="$('#nav-fs').click();">
                     <div class="sublink d-flex card-style-bottom p-3">
-                      <i class="fa fa-fw fa-plus-square-o fa-3x text-center" style="width: 2em"></i>
-                      <div class="ml-2" style="width: 80%">
+                      <i class="fa fa-fw fa-plus-square-o fa-3x text-center grb-icon"></i>
+                      <div class="ml-2 grb-caption" style="width: 80%">
                         <h4>Add some files</h4>
-                        <span>Browse and import your multimedia files into Gerbera.</span>
+                        <span class="text-muted">Browse and import your multimedia files into Gerbera.</span>
                       </div>
                     </div>
                   </a>
                   <a id="viewlink" href="javascript:;" onclick="$('#nav-db').click();">
                     <div class="sublink d-flex card-style-bottom px-3 py-3">
-                      <i class="fa fa-fw fa-files-o fa-3x text-center" style="width: 2em"></i>
-                      <div class="ml-2" style="width: 80%">
+                      <i class="fa fa-fw fa-files-o fa-3x text-center grb-icon"></i>
+                      <div class="ml-2 grb-caption" style="width: 80%">
                         <h4>Browse indexed files</h4>
-                        <span>View, update and remove files from Gerbera.</span>
+                        <span class="text-muted">View, update and remove files from Gerbera.</span>
                       </div>
                     </div>
                   </a>
                   <a id="searchlink" href="javascript:;" onclick="$('#nav-search').click();">
                     <div class="sublink d-flex card-style-bottom px-3 py-3">
-                      <i class="fa fa-fw fa-search fa-3x text-center" style="width: 2em"></i>
-                      <div class="ml-2" style="width: 80%">
+                      <i class="fa fa-fw fa-search fa-3x text-center grb-icon"></i>
+                      <div class="ml-2 grb-caption" style="width: 80%">
                         <h4>Search indexed entries</h4>
-                        <span>Find files managed by Gerbera.</span>
+                        <span class="text-muted">Find files managed by Gerbera.</span>
                       </div>
                     </div>
                   </a>
                   <a id="clientlink" href="javascript:;" onclick="$('#nav-clients').click();">
                     <div class="sublink d-flex card-style-bottom px-3 py-3">
-                      <i class="fa fa-fw fa-desktop fa-3x text-center" style="width: 2em"></i>
-                      <div class="ml-2" style="width: 80%">
+                      <i class="fa fa-fw fa-desktop fa-3x text-center grb-icon"></i>
+                      <div class="ml-2 grb-caption" style="width: 80%">
                         <h4>Show connected clients</h4>
-                        <span>View clients detected by Gerbera and their profile details.</span>
+                        <span class="text-muted">View clients detected by Gerbera and their profile details.</span>
                       </div>
                     </div>
                   </a>
                   <a id="configlink" href="javascript:;" onclick="$('#nav-config').click();">
                     <div class="sublink d-flex card-style-bottom px-3 py-3">
-                      <i class="fa fa-fw fa-sliders fa-3x text-center" style="width: 2em"></i>
-                      <div class="ml-2" style="width: 80%">
+                      <i class="fa fa-fw fa-sliders fa-3x text-center grb-icon"></i>
+                      <div class="ml-2 grb-caption" style="width: 80%">
                         <h4>Edit Configuration</h4>
-                        <span>Change settings for Gerbera.</span>
+                        <span class="text-muted">Change settings for Gerbera.</span>
                       </div>
                     </div>
                   </a>
+                  <div class="sublink d-flex card-style-bottom px-3 py-3">
+                    <i class="fa fa-fw fa-cog fa-3x text-center grb-icon"></i>
+                    <div class="form-check form-check-inline">
+                      <label class="form-check-label" for="displayMode_default">
+                        Default
+                        <input
+                          type="radio"
+                          name="displayMode"
+                          class="form-check-input"
+                          value="default"
+                          id="displayMode_default"
+                        />
+                      </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <label class="form-check-label" for="displayMode_light">
+                        Light
+                        <input
+                          type="radio"
+                          name="displayMode"
+                          class="form-check-input"
+                          value="light"
+                          id="displayMode_light"
+                        />
+                      </label>
+                    </div>
+                    <div class="form-check form-check-inline">
+                      <label class="form-check-label" for="displayMode_dark">
+                        Dark
+                        <input
+                          type="radio"
+                          name="displayMode"
+                          class="form-check-input"
+                          value="dark"
+                          id="displayMode_dark"
+                        />
+                      </label>
+                    </div>
+                  </div>
                 </div>
               </div>
               <div id="server-status" class="col-md-6 col-12">
                 <div class="card-style p-3 mt-3">
                   <h4>
-                    <i class="fa fa-server"></i>
+                    <i class="fa fa-server text-center grb-icon"></i>
                     Server Statistics
                   </h4>
                   <table class="table">
@@ -252,8 +291,8 @@
                     </tr>
                     <tr id="status-audio" class="status-line">
                       <td>
-                        <i class="fa fa-fw fa-music"></i>
-                        &nbsp;&nbsp;Audio
+                        <i class="fa fa-fw fa-music text-left grb-icon"></i>
+                        Audio
                       </td>
                       <td>
                         <div class="stat-value" id="status-audio-count"></div>
@@ -297,8 +336,8 @@
                     </tr>
                     <tr id="status-video" class="status-line">
                       <td>
-                        <i class="fa fa-film"></i>
-                        &nbsp;&nbsp;Videos
+                        <i class="fa fa-film text-left grb-icon"></i>
+                        Videos
                       </td>
                       <td>
                         <div class="stat-value" id="status-video-count"></div>
@@ -342,8 +381,8 @@
                     </tr>
                     <tr id="status-image" class="status-line">
                       <td>
-                        <i class="fa fa-fw fa-camera"></i>
-                        &nbsp;&nbsp;Images
+                        <i class="fa fa-fw fa-camera text-left grb-icon"></i>
+                        Images
                       </td>
                       <td>
                         <div class="stat-value" id="status-image-count"></div>
@@ -365,7 +404,7 @@
                     </tr>
                     <tr id="status-text" class="status-line">
                       <td>
-                        <i class="fa fa-fw fa-file-text"></i>
+                        <i class="fa fa-fw fa-file-text grb-icon"></i>
                         &nbsp;&nbsp;Text
                       </td>
                       <td>
@@ -377,8 +416,8 @@
                     </tr>
                     <tr id="status-total" class="status-line">
                       <td>
-                        <i class="fa fa-list"></i>
-                        &nbsp;&nbsp;Total Media Files
+                        <i class="fa fa-list text-left grb-icon"></i>
+                        Total Media Files
                       </td>
                       <td>
                         <div class="stat-value" id="status-total-count"></div>
@@ -1166,7 +1205,13 @@
 
       $(document).ready(function () {
         GerberaApp.initialize();
+        displayMode_default.addEventListener("click", setDisplayMode);
+        displayMode_light.addEventListener("click", setDisplayMode);
+        displayMode_dark.addEventListener("click", setDisplayMode);
       });
+      function setDisplayMode(event) {
+        GerberaApp.setDisplayMode(event);
+      }
     </script>
 
     <script type="text/javascript">

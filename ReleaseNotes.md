@@ -6,6 +6,7 @@ Rerun `gerbera --create-config="Boxlayout|DynamicContainer"` and merge changes t
 
 There are some noteworthy new features in this release:
 - the search page: Query your database with UPnP search statements in Web UI,
+- the dark mode for the Web UI,
 - access permissions for files: Restrict access to directories via client groups,
 - support for UPnP filters in requests,
 - support for UPnP CONTAINER_SHORTCUTS feature.
