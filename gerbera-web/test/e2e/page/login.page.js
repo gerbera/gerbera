@@ -52,6 +52,10 @@ module.exports = function (driver) {
     return await driver.wait(until.elementLocated(By.id('logout')), 5000);
   };
 
+  this.setDisplayMode = async (mode) => {
+    await driver.executeScript("document.documentElement.style.setProperty('color-scheme', "+ mode + ")");
+  };
+
   this.getToastMessage = async () => {
     let toastMsg = await driver.findElement(By.id('grb-toast-msg'));
     await driver.wait(until.elementIsVisible(toastMsg), 5000);

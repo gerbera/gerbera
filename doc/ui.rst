@@ -34,7 +34,7 @@ When the Gerbera server starts successfully it reports the location of the web b
     2018-01-28 17:05:28    INFO: The Web UI can be reached by following this link: http://127.0.0.1:49152/
 
 .. image:: _static/main-view-empty.png
-   :alt: Gerbera Home Page
+   :alt: Gerbera Home Page with empty database
    :target: _static/main-view-empty.png
 
 
@@ -65,6 +65,10 @@ The main view offers the same links to the sub pages as the menu. It also displa
 .. image:: _static/main-view.png
    :alt: Gerbera Home Page
    :target: _static/main-view.png
+
+.. image:: _static/main-view_dark.png
+   :alt: Gerbera Home Page in dark mode
+   :target: _static/main-view_dark.png
 
 * Home (Gerbera logo or server name)
     *Returns to the start page*
@@ -214,12 +218,25 @@ operations
 - Editing the item updates the UPNP meta-data for the item.
 
 .. image:: _static/edit-item.png
+   :width: 300
    :alt: Edit Item dialog
    :target: _static/edit-item.png
 
+.. image:: _static/edit-item_dark.png
+   :width: 300
+   :alt: Edit Item dialog in dark mode
+   :target: _static/edit-item_dark.png
+
+
 .. image:: _static/edit-item-details.png
+   :width: 500
    :alt: Edit Item dialog with details
    :target: _static/edit-item-details.png
+
+.. image:: _static/edit-item-details_dark.png
+   :width: 500
+   :alt: Edit Item dialog with details in dark mode
+   :target: _static/edit-item-details_dark.png
 
 Item operations act upon existing database items.  You can create new custom items using the Gerbera Trail.
 

@@ -11,19 +11,23 @@ const HomePage = require('./page/home.page');
 const LoginPage = require('./page/login.page');
 
 suite(() => {
-  let loginPage, homePage;
+  let loginPage, homePage, suffix;
   const DEFAULT_FOLDER_STORE = process.cwd() + argv.folderPath;
   console.log('Save path --> ' + DEFAULT_FOLDER_STORE);
-
+  const test = argv.scheme;
   before(async () => {
     const chromeOptions = new chrome.Options();
+    suffix = '.png';
     chromeOptions.addArguments(['--window-size=1440,1080', '--incognito']);
+    if (test == 'dark') {
+        chromeOptions.addArguments(['--force-dark-mode']);
+        suffix = '_dark.png';
+    }
     driver = new Builder()
       .forBrowser('chrome')
       .setChromeOptions(chromeOptions)
       .build();
     await driver.get(mockWebServer + '/reset?testName=default.json');
-
     loginPage = new LoginPage(driver);
     homePage = new HomePage(driver);
   });
@@ -40,7 +44,7 @@ suite(() => {
     after(() => driver && driver.quit());
 
     it('for [main view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'main-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'main-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -54,7 +58,7 @@ suite(() => {
     });
 
     it('for [main view] with empty database', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'main-view-empty.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'main-view-empty' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -69,7 +73,7 @@ suite(() => {
     });
 
     it('for [login] field entry', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'login-field-entry.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'login-field-entry' + suffix;
       await loginPage.username('gerbera');
       await loginPage.takeScreenshot(fileName);
 
@@ -80,7 +84,7 @@ suite(() => {
     });
 
     it('for [menu bar]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'menubar.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'menubar' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -93,7 +97,7 @@ suite(() => {
     });
 
     it('for [database view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'database-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'database-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -109,7 +113,7 @@ suite(() => {
     });
 
     it('for [database small grid view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'database-smallgrid-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'database-smallgrid-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -127,7 +131,7 @@ suite(() => {
     });
 
     it('for [database large grid view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'database-largegrid-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'database-largegrid-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -145,7 +149,7 @@ suite(() => {
     });
 
     it('for [database single view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'database-single-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'database-single-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -161,7 +165,7 @@ suite(() => {
     });
 
     it('for [search view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'search-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'search-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -179,7 +183,7 @@ suite(() => {
     });
 
     it('for [filesystem view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'filesystem-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'filesystem-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -193,7 +197,7 @@ suite(() => {
     });
 
     it('for [clients view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'clients-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'clients-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -207,7 +211,7 @@ suite(() => {
     });
 
     it('for [config view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'config-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'config-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -223,7 +227,7 @@ suite(() => {
     });
 
     it('for [items view]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'items-view.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'items-view' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -237,7 +241,7 @@ suite(() => {
     });
 
     it('for [edit item] from item list', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'edit-item.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-item' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -253,7 +257,7 @@ suite(() => {
     });
 
     it('for [edit item] from item list with details', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'edit-item-details.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-item-details' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -270,7 +274,7 @@ suite(() => {
     });
 
     it('for [trail operations]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'trail-operations.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'trail-operations' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -285,7 +289,7 @@ suite(() => {
     });
 
     it('for [trail filesystem operations]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'trail-fs-operations.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'trail-fs-operations' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -300,7 +304,7 @@ suite(() => {
     });
 
     it('for [edit autoscan] from filesystem list', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -317,7 +321,7 @@ suite(() => {
     });
 
     it('for [edit autoscan] from filesystem list with details', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan-details.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-autoscan-details' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -335,7 +339,7 @@ suite(() => {
     });
 
     it('for [edit tweak] from filesystem list', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'edit-tweak-details.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'edit-tweak-details' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -352,7 +356,7 @@ suite(() => {
     });
 
     it('for [trail config operations]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'trail-config-operations.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'trail-config-operations' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -366,7 +370,7 @@ suite(() => {
     });
 
     it('for [item edit operations]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'item-operations.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'item-operations' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -382,7 +386,7 @@ suite(() => {
     });
 
     it('for [toast message]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'toast-message.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'toast-message' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -398,7 +402,7 @@ suite(() => {
     });
 
     it('for [task message]', async () => {
-      const fileName = DEFAULT_FOLDER_STORE + 'task-message.png';
+      const fileName = DEFAULT_FOLDER_STORE + 'task-message' + suffix;
       await loginPage.username('user');
       await loginPage.password('pwd');
       await loginPage.submitLogin();
@@ -414,4 +418,3 @@ suite(() => {
     });
   });
 });
-
