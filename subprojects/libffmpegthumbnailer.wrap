@@ -1,0 +1,13 @@
+[wrap-file]
+directory = ffmpegthumbnailer-2.2.2
+source_url = https://github.com/dirkvdb/ffmpegthumbnailer/releases/download/2.2.2/ffmpegthumbnailer-2.2.2.tar.bz2
+source_filename = ffmpegthumbnailer-2.2.2.tar.bz2
+source_hash = 1cb24059c38223f657b300c84dd80491b7040d4b69471c4fea69be862bc99b5b
+patch_filename = libffmpegthumbnailer_2.2.2-3_patch.zip
+patch_url = https://wrapdb.mesonbuild.com/v2/libffmpegthumbnailer_2.2.2-3/get_patch
+patch_hash = 97222f57a1b7dc2b8b04e8b3bd613df2b1e7cc18272e329e6c7ddcd0ae514ae3
+source_fallback_url = https://github.com/mesonbuild/wrapdb/releases/download/libffmpegthumbnailer_2.2.2-3/ffmpegthumbnailer-2.2.2.tar.bz2
+wrapdb_version = 2.2.2-3
+
+[provide]
+libffmpegthumbnailer = libffmpegthumbnailer_dep
