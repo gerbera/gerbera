@@ -34,6 +34,7 @@
 #ifdef HAVE_JS
 #define GRB_LOG_FAC GrbLogFacility::script
 #include "script.h" // API
+#include "gerbera_directory_iterator.h"
 
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
@@ -372,7 +373,7 @@ void Script::loadFolder(const fs::path& scriptFolder)
         log_error("Script folder not found: {}", scriptFolder.c_str());
         return;
     }
-    auto dirIterator = fs::directory_iterator(scriptFolder, ec);
+    auto dirIterator = gerbera_directory_iterator(scriptFolder, ec);
     if (ec) {
         log_error("Failed to iterate {}, {}", scriptFolder.c_str(), ec.message());
         return;

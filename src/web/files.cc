@@ -33,6 +33,7 @@
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
+#include "gerbera_directory_iterator.h"
 
 #include "common.h"
 #include "config/config_val.h"
@@ -69,10 +70,14 @@ void Web::Files::process()
     bool excludeConfigFiles = true;
 
     std::error_code ec;
-    std::map<std::string, fs::path> filesMap;
+
+    struct container_item { std::string id; fs::path path; };
+
+    std::vector<container_item> filesContainer;
+
     auto&& includesFullpath = config->getArrayOption(ConfigVal::IMPORT_VISIBLE_DIRECTORIES);
 
-    for (auto&& it : fs::directory_iterator(path, ec)) {
+    for (auto&& it : gerbera_directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
 
         if (!isRegularFile(it, ec))
@@ -85,13 +90,13 @@ void Web::Files::process()
             continue; // skip unwanted file
 
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
-        filesMap.try_emplace(id, filepath.filename());
+        filesContainer.push_back({ id, filepath.filename() });
     }
 
     auto f2i = converterManager->f2i();
-    for (auto&& [key, val] : filesMap) {
+    for (const container_item &item : filesContainer) {
         auto fe = files.append_child("file");
-        fe.append_attribute("id") = key.c_str();
-        fe.append_attribute("filename") = f2i->convert(val).c_str();
+        fe.append_attribute("id") = item.id.c_str();
+        fe.append_attribute("filename") = f2i->convert(item.path).c_str();
     }
 }

@@ -33,6 +33,7 @@
 #define GRB_LOG_FAC GrbLogFacility::content
 
 #include "content_manager.h" // API
+#include "gerbera_directory_iterator.h"
 
 #include "autoscan_list.h"
 #include "cds/cds_container.h"
@@ -611,10 +612,10 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
     std::error_code ec;
     auto rootDir = fs::directory_entry(location, ec);
-    std::unique_ptr<fs::directory_iterator> dIter;
+    std::unique_ptr<gerbera_directory_iterator> dIter;
 
     if (!ec && rootDir.exists(ec) && rootDir.is_directory(ec)) {
-        dIter = std::make_unique<fs::directory_iterator>(location, ec);
+        dIter = std::make_unique<gerbera_directory_iterator>(location, ec);
         if (ec) {
             log_error("_rescanDirectory: Failed to iterate {}, {}", location.c_str(), ec.message());
         }
@@ -878,7 +879,7 @@ void ContentManager::addRecursive(
     if (!adir) {
         adir = findAutoscanDirectory(subDir);
     }
-    auto dIter = fs::directory_iterator(subDir, ec);
+    auto dIter = gerbera_directory_iterator(subDir, ec);
     if (ec) {
         log_error("addRecursive: Failed to iterate {}, {}", subDir.path().c_str(), ec.message());
         return;

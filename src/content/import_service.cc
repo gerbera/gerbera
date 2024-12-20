@@ -25,6 +25,7 @@
 #define GRB_LOG_FAC GrbLogFacility::content
 
 #include "import_service.h" // API
+#include "gerbera_directory_iterator.h"
 
 #include "autoscan_setting.h"
 #include "cds/cds_container.h"
@@ -326,7 +327,7 @@ std::shared_ptr<CdsObject> ImportService::getObject(const fs::path& location) co
 void ImportService::readDir(const fs::path& location, AutoScanSetting settings)
 {
     log_debug("start {}", location.string());
-    auto dirIterator = fs::directory_iterator(location, ec);
+    auto dirIterator = gerbera_directory_iterator(location, ec);
     if (ec) {
         log_error("Failed to iterate {}, {}", location.c_str(), ec.message());
         return;

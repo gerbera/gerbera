@@ -88,6 +88,8 @@ endif(CYGWIN)
 add_library(libgerbera STATIC
         src/action_request.cc
         src/action_request.h
+        src/gerbera_directory_iterator.cc
+        src/gerbera_directory_iterator.h
         src/cds/cds_container.cc
         src/cds/cds_container.h
         src/cds/cds_enums.cc

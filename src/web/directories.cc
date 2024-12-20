@@ -33,6 +33,7 @@
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
+#include "gerbera_directory_iterator.h"
 
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
@@ -85,10 +86,12 @@ void Web::Directories::process()
     bool excludeConfigDirs = true;
 
     std::error_code ec;
-    std::map<std::string, dirInfo> filesMap;
+    struct container_item { std::string id; dirInfo info; };
+
+    std::vector<container_item> filesContainer;
     auto autoscanDirs = content->getAutoscanDirectories();
 
-    for (auto&& it : fs::directory_iterator(path, ec)) {
+    for (auto&& it : gerbera_directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
 
         if (!it.is_directory(ec))
@@ -104,20 +107,20 @@ void Web::Directories::process()
                 || (excludeConfigDirs && startswith(filepath.filename().string(), ".")))
                 continue; // skip dir with leading .
         }
-        auto dir = fs::directory_iterator(filepath, ec);
+        auto dir = gerbera_directory_iterator(filepath, ec);
         bool hasContent = std::any_of(begin(dir), end(dir), [&](auto&& sub) { return sub.is_directory(ec) || isRegularFile(sub, ec); });
 
         /// \todo replace hexEncode with base64_encode?
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
-        filesMap.emplace(id, std::pair(filepath, hasContent));
+        filesContainer.push_back({ id, { filepath, hasContent } });
     }
 
     auto f2i = converterManager->f2i();
-    for (auto&& [key, val] : filesMap) {
-        auto file = val.first;
-        auto&& has = val.second;
+    for (const container_item &item : filesContainer) {
+        auto file = item.info.first;
+        auto&& has = item.info.second;
         auto ce = containers.append_child("container");
-        ce.append_attribute("id") = key.c_str();
+        ce.append_attribute("id") = item.id.c_str();
         ce.append_attribute("child_count") = has;
         auto aDir = std::find_if(autoscanDirs.begin(), autoscanDirs.end(), [&](auto& a) { return file == a->getLocation(); });
         if (aDir != autoscanDirs.end()) {
