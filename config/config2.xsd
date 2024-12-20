@@ -473,22 +473,18 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="upnp-properties">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="upnp-namespace" minOccurs="0"/>
-                <xs:element ref="upnp-property" minOccurs="0"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
+    <xs:complexType name="upnp-properties">
+        <xs:sequence>
+            <xs:element ref="upnp-namespace" minOccurs="0"/>
+            <xs:element ref="upnp-property" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
 
-    <xs:element name="upnp-defaults">
-        <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="property-default" minOccurs="0"/>
-            </xs:sequence>
-        </xs:complexType>
-    </xs:element>
+    <xs:complexType name="upnp-defaults">
+        <xs:sequence>
+            <xs:element ref="property-default" minOccurs="0"/>
+        </xs:sequence>
+    </xs:complexType>
 
     <xs:element name="upnp-property">
         <xs:complexType>
