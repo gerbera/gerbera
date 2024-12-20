@@ -5,6 +5,8 @@
 #include <string>
 #include <filesystem>
 
+/// Custom iterator for human-oriented sorting (right order for numbers without leading zeros)
+///  if option HAVE_HUMAN_SORTING is disabled, using dictionary sort
 class gerbera_directory_iterator
 {
 public:

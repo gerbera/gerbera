@@ -1,14 +1,15 @@
 #include "gerbera_directory_iterator.h"
 #include <regex>
 
+
 std::vector<std::filesystem::directory_entry>::iterator begin(gerbera_directory_iterator &it)
-{ 
-    return it.begin(); 
+{
+    return it.begin();
 }
 
 std::vector<std::filesystem::directory_entry>::iterator end(gerbera_directory_iterator &it)
 {
-    return it.end();    
+    return it.end();
 }
 
 gerbera_directory_iterator::gerbera_directory_iterator(const std::filesystem::directory_entry &de, std::error_code &ec)
@@ -44,14 +45,23 @@ void gerbera_directory_iterator::process_sort()
     if(sortedContents.empty())
         return;
 
+    namespace fs = std::filesystem;
+    typedef fs::directory_entry DirEntry;
+
+    // standard sorting
+    std::sort(sortedContents.begin(), sortedContents.end(), [](const DirEntry &lhs, const DirEntry &rhs) {
+            return fs::path(lhs.path()).filename() < fs::path(rhs.path()).filename();
+        });
+
+#ifdef HAVE_HUMAN_SORTING
+    // custom sorting
+
     std::regex stemRe("^([0-9]*)[^0-9]*([0-9]*)$");
 
-    typedef std::vector<std::filesystem::directory_entry> DirVec;
-    typedef std::filesystem::directory_entry DirEntry;
+    typedef std::vector<fs::directory_entry> DirVec;
+    DirVec sortedFolders, sortedFiles;
 
-    DirVec sortedFolders;
-    DirVec sortedFiles;
-
+    // folders must be first in order
     for(const DirEntry &item : sortedContents)
     {
         if(item.is_directory())
@@ -61,6 +71,7 @@ void gerbera_directory_iterator::process_sort()
     }
     sortedContents.clear();
 
+    // sorting both folders and files
     for(DirVec *vec : std::vector<DirVec *>{ &sortedFolders, &sortedFiles })
     {
         if(vec->empty())
@@ -72,7 +83,7 @@ void gerbera_directory_iterator::process_sort()
         for(size_t i = 0; i < vec->size();)
         {
             std::smatch stemMatch;
-            std::filesystem::path filePath = vec->at(i).path();
+            fs::path filePath = vec->at(i).path();
             std::string fileStem = filePath.stem();
 
             if(std::regex_match(fileStem, stemMatch, stemRe))
@@ -89,32 +100,29 @@ void gerbera_directory_iterator::process_sort()
 
             i++;
 
+            // in current version, if some of entries don't match regex, falling back to standard sort
             if(frontMap.size() < i && backMap.size() < i)
                 break;
         }
 
-        if(frontMap.size() == vec->size())
+        if(frontMap.size() == vec->size()) // all entries have integer prefix
         {
             for(auto it = frontMap.cbegin(); it != frontMap.cend(); ++it)
                 sortedContents.push_back(it->second);
         }
         else
         {
-            if(backMap.size() == vec->size())
+            if(backMap.size() == vec->size()) // all entries have integer suffix
             {
                 for(auto it = backMap.cbegin(); it != backMap.cend(); ++it)
                     sortedContents.push_back(it->second);
             }
             else
             {
-                std::sort(vec->begin(), vec->end(), [](const DirEntry &lhs, const DirEntry &rhs)
-                    {
-                        return lhs.path() < rhs.path();
-                    });
-
-                for(const DirEntry &item : *vec)
+                for(const DirEntry &item : *vec)  // falling back to standard sort
                     sortedContents.push_back(item);
             }
         }
     }
+#endif
 }

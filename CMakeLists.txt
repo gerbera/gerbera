@@ -67,6 +67,8 @@ option(WITH_DEBUG             "Enables debug logging" ON)
 option(WITH_DEBUG_OPTIONS     "Enables dedicated debug messages" ON)
 option(WITH_TESTS             "Build unit tests" OFF)
 
+option(WITH_HUMAN_SORTING     "Enables human-oriented filesystem sorting, instead of stdlib iterator" OFF)
+
 option(BUILD_DOC              "Add 'doc' target to generate documentation" OFF)
 option(BUILD_CHANGELOG        "Build 'changelog.gz' file for Debian packages" OFF)
 
@@ -717,6 +719,10 @@ if(WITH_LASTFM)
     target_include_directories(libgerbera PUBLIC ${LASTFMLIB_INCLUDE_DIRS})
     target_link_libraries(libgerbera PUBLIC ${LASTFMLIB_LIBRARIES})
     target_compile_definitions(libgerbera PUBLIC HAVE_LASTFMLIB)
+endif()
+
+if(WITH_HUMAN_SORTING)
+    target_compile_definitions(libgerbera PUBLIC HAVE_HUMAN_SORTING)
 endif()
 
 find_package (ZLIB REQUIRED)
