@@ -32,8 +32,8 @@
 /// \file web/files.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
-#include "pages.h" // API
 #include "gerbera_directory_iterator.h"
+#include "pages.h" // API
 
 #include "common.h"
 #include "config/config_val.h"
@@ -71,7 +71,10 @@ void Web::Files::process()
 
     std::error_code ec;
 
-    struct container_item { std::string id; fs::path path; };
+    struct container_item {
+        std::string id;
+        fs::path path;
+    };
 
     std::vector<container_item> filesContainer;
 
@@ -94,7 +97,7 @@ void Web::Files::process()
     }
 
     auto f2i = converterManager->f2i();
-    for (const container_item &item : filesContainer) {
+    for (const container_item& item : filesContainer) {
         auto fe = files.append_child("file");
         fe.append_attribute("id") = item.id.c_str();
         fe.append_attribute("filename") = f2i->convert(item.path).c_str();

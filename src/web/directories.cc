@@ -32,8 +32,8 @@
 /// \file web/directories.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
-#include "pages.h" // API
 #include "gerbera_directory_iterator.h"
+#include "pages.h" // API
 
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
@@ -86,7 +86,10 @@ void Web::Directories::process()
     bool excludeConfigDirs = true;
 
     std::error_code ec;
-    struct container_item { std::string id; dirInfo info; };
+    struct container_item {
+        std::string id;
+        dirInfo info;
+    };
 
     std::vector<container_item> filesContainer;
     auto autoscanDirs = content->getAutoscanDirectories();
@@ -116,7 +119,7 @@ void Web::Directories::process()
     }
 
     auto f2i = converterManager->f2i();
-    for (const container_item &item : filesContainer) {
+    for (const container_item& item : filesContainer) {
         auto file = item.info.first;
         auto&& has = item.info.second;
         auto ce = containers.append_child("container");
