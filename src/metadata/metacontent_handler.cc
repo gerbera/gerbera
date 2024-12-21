@@ -25,6 +25,7 @@
 #define GRB_LOG_FAC GrbLogFacility::metadata
 
 #include "metacontent_handler.h" // API
+#include "gerbera_directory_iterator.h"
 
 #include "cds/cds_objects.h"
 #include "config/config.h"
@@ -85,7 +86,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
             std::map<std::string, fs::path> fileNames;
             std::error_code ec;
             // get all files in lowercase
-            for (auto&& p : fs::directory_iterator(folder, ec))
+            for (auto&& p : gerbera_directory_iterator(folder, ec))
                 if (isRegularFile(p, ec) && p.path() != objLocation)
                     fileNames[toLower(p.path().filename().string())] = p;
 
@@ -136,7 +137,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                     continue;
                 }
                 // Check files using patterns
-                for (auto&& contentFile : fs::directory_iterator(contentPath, ec)) {
+                for (auto&& contentFile : gerbera_directory_iterator(contentPath, ec)) {
                     if (isRegularFile(contentFile, ec)
                         && (ext.empty() || (isCaseSensitive && contentFile.path().extension() == extn) || (!isCaseSensitive && toLower(contentFile.path().extension().string()) == extn))
                         && contentFile.path() != objLocation) {
