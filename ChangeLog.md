@@ -18,14 +18,17 @@
 - Fix autoscan issue with empty filename
 - Fix build without ffmpeg
 - Fix CodeQL messages
+- Fix config2.xsd: The QName value upnp-properties does not resolve to ...
 - Fix creating containers in web ui
 - Fix Handling command line options
 - Fix handling of checkbox values on web ui
 - Fix parsing enum config values
+- Fix SIMPLE\_DATE
 - Fix systemd detection
 - Improve compile info contents
 - Improve handling multivalue tags in virtual paths
 - Increase size of pupnp threadpool
+- Mention systemd as optional package
 - Resource directory configuration and cleanup collection
 - Scripting: Clean up property handling
 - Test: Fix CMake commands
