@@ -753,6 +753,8 @@ endif()
 
 include(GNUInstallDirs)
 
+set(DEBIAN_EXTRA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/scripts/debian/postinst)
+
 if(BUILD_CHANGELOG)
   add_custom_command(
       OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
@@ -762,7 +764,7 @@ if(BUILD_CHANGELOG)
       DEPENDS ChangeLog.md
       COMMENT "Building changelog"
   )
-  set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
+  set(DEBIAN_EXTRA_FILES "${DEBIAN_EXTRA_FILES}" "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
 
   add_custom_target(changelog ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
 
@@ -771,9 +773,12 @@ if(BUILD_CHANGELOG)
   )
 endif()
 
+set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${DEBIAN_EXTRA_FILES})
+
 INSTALL(TARGETS gerbera DESTINATION ${CMAKE_INSTALL_BINDIR})
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js DESTINATION ${CMAKE_INSTALL_DATADIR})
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web DESTINATION ${CMAKE_INSTALL_DATADIR})
+
 INSTALL(FILES
         src/database/mysql/mysql.sql
         src/database/mysql/mysql-upgrade.xml
