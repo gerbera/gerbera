@@ -272,7 +272,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
       cpack -G DEB \
             -D CPACK_DEBIAN_PACKAGE_VERSION="${deb_version}" \
             -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="${deb_arch}" \
-            -D CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA="${ROOT_DIR}/${BUILD_DIR}/changelog.gz"
+            -D CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA="${ROOT_DIR}/scripts/debian/postinst;${ROOT_DIR}/${BUILD_DIR}/changelog.gz"
     fi
   fi
   echo "::endgroup::"
