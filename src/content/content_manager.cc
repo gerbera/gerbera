@@ -567,7 +567,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
             if (!obj || !obj->isContainer()) {
                 throw_std_runtime_error("Item {} is not a container", containerID);
             }
-            location = (containerID == CDS_ID_FS_ROOT) ? FS_ROOT_DIRECTORY : obj->getLocation();
+            location = (containerID == CDS_ID_FS_ROOT) ? FS_ROOT_DIRECTORY : fs::path(obj->getLocation());
             parentContainer = std::dynamic_pointer_cast<CdsContainer>(obj);
         } catch (const std::runtime_error&) {
             if (adir->persistent()) {

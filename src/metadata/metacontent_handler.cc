@@ -67,7 +67,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
 
     if (!files.empty()) {
         if (folder.empty()) {
-            folder = (obj->isContainer()) ? objLocation : objLocation.parent_path();
+            folder = fs::path((obj->isContainer()) ? objLocation : objLocation.parent_path());
         }
         log_debug("Folder name: {}", folder.c_str());
 

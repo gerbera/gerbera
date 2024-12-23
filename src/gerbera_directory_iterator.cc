@@ -135,4 +135,16 @@ void gerbera_directory_iterator::process_sort()
         }
     }
 #endif
+
+    for (size_t id = 0; id < sortedContents.size(); ++id)
+        sortedContentsMap.insert({ sortedContents.at(id), id });
+}
+
+size_t gerbera_directory_iterator::distance(const std::filesystem::directory_entry& path) const
+{
+    const auto it = sortedContentsMap.find(path);
+    if (it != sortedContentsMap.cend())
+        return it->second;
+
+    return 0;
 }

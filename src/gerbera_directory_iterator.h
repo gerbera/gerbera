@@ -27,6 +27,7 @@
 #define GERBERA_DIRECTORY_ITERATOR_H
 
 #include <filesystem>
+#include <map>
 #include <string>
 #include <vector>
 
@@ -40,10 +41,13 @@ public:
     std::vector<std::filesystem::directory_entry>::iterator begin() { return sortedContents.begin(); }
     std::vector<std::filesystem::directory_entry>::iterator end() { return sortedContents.end(); }
 
+    size_t distance(const std::filesystem::directory_entry& path) const;
+
 private:
     void process_sort();
 
     std::vector<std::filesystem::directory_entry> sortedContents;
+    std::map<std::filesystem::directory_entry, size_t> sortedContentsMap;
 };
 
 std::vector<std::filesystem::directory_entry>::iterator begin(gerbera_directory_iterator& it);

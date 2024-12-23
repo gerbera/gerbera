@@ -297,7 +297,7 @@ void Web::ConfigLoad::writeShortcuts(pugi::xml_node& values)
             setValue(item, cont->getID());
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, fmt::format("/status/shortcut[{}]/attribute::location", idx), ConfigVal::MAX, ConfigVal::MAX);
-            setValue(item, cont->getLocation());
+            setValue(item, cont->getLocation().string());
             idx++;
         }
     }

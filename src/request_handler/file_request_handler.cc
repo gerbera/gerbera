@@ -92,7 +92,7 @@ bool FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     bool isResourceFile = false;
 
     auto resPath = resource->getAttribute(ResourceAttribute::RESOURCE_FILE);
-    isResourceFile = !resPath.empty() && resPath != obj->getLocation();
+    isResourceFile = !resPath.empty() && resPath != obj->getLocation().string();
     if (isResourceFile) {
         log_debug("Resource is file: {}", path.string());
         path = resPath;
