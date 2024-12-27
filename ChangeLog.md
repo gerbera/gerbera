@@ -11,6 +11,7 @@
 - Config: Unify path handling
 - ConfigGenerator: Export defaults for more entries
 - Debian: create changelog file
+- Debian: pack postinst file
 - deps: Fix build with ffmpeg 6.1
 - Drop Build Support for Ubuntu 23.04
 - Dynamic banner colour in Readme
@@ -25,6 +26,7 @@
 - Fix parsing enum config values
 - Fix SIMPLE\_DATE
 - Fix systemd detection
+- Handle int parse error in config
 - Improve compile info contents
 - Improve handling multivalue tags in virtual paths
 - Increase size of pupnp threadpool

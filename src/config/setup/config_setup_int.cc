@@ -40,18 +40,22 @@ void ConfigIntegerSetup<T, OptionClass>::makeOption(const pugi::xml_node& root, 
 template <typename T, class OptionClass>
 void ConfigIntegerSetup<T, OptionClass>::makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {
-    if (rawCheck) {
-        if (!rawCheck(optValue)) {
-            throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
+    try {
+        if (rawCheck) {
+            if (!rawCheck(optValue)) {
+                throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
+            }
+        } else if (valueCheck) {
+            if (!valueCheck(converter(optValue, 0, 10))) {
+                throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
+            }
+        } else if (minCheck) {
+            if (!minCheck(converter(optValue, 0, 10), minValue)) {
+                throw_std_runtime_error("Invalid {} value '{}', must be at least {}", xpath, optValue, minValue);
+            }
         }
-    } else if (valueCheck) {
-        if (!valueCheck(converter(optValue, 0, 10))) {
-            throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
-        }
-    } else if (minCheck) {
-        if (!minCheck(converter(optValue, 0, 10), minValue)) {
-            throw_std_runtime_error("Invalid {} value '{}', must be at least {}", xpath, optValue, minValue);
-        }
+    } catch (const std::logic_error& e) {
+        throw_std_runtime_error("Invalid {} value '{}' unreadable", xpath, optValue);
     }
     try {
         auto intValue = (parseValue) ? parseValue(optValue) : std::stoi(optValue);
@@ -59,6 +63,8 @@ void ConfigIntegerSetup<T, OptionClass>::makeOption(std::string optValue, const 
         setOption(config);
     } catch (const std::runtime_error& e) {
         throw_std_runtime_error("Error in config file: {} unsupported int value '{}'", xpath, optValue);
+    } catch (const std::logic_error& e) {
+        throw_std_runtime_error("Error in config file: {} unreadable int value '{}'", xpath, optValue);
     }
 }
 
@@ -85,6 +91,8 @@ T ConfigIntegerSetup<T, OptionClass>::checkIntValue(std::string& sVal, const std
         return std::stol(sVal);
     } catch (const std::runtime_error& e) {
         throw_std_runtime_error("Error in config file: {}/{} unsupported int value '{}'", pathName, xpath, sVal);
+    } catch (const std::logic_error& e) {
+        throw_std_runtime_error("Error in config file: {}/{} unreadable int value '{}'", pathName, xpath, sVal);
     }
 }
 
@@ -120,9 +128,14 @@ bool CheckProfileNumberValue(std::string& value)
     else if (value == "off" || value == fmt::to_string(OFF))
         tempInt = OFF;
     else {
-        tempInt = std::stoi(value);
-        if (tempInt <= 0)
+        try {
+            tempInt = std::stoi(value);
+            if (tempInt <= 0)
+                return false;
+        } catch (const std::logic_error& ex) {
+            log_error("CheckProfileNumberValue failed: {}", ex.what());
             return false;
+        }
     }
     value.assign(fmt::to_string(tempInt));
     return true;
