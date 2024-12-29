@@ -335,6 +335,7 @@ void UpnpXMLBuilder::renderObject(
         if (f == "*") {
             allObjProps = true;
             allResProps = true;
+            allCntProps = true;
         } else if (f == "res") {
             // we always send resources
         } else if (f == "res#") {
@@ -473,7 +474,7 @@ void UpnpXMLBuilder::renderObject(
         // add metadata
         log_debug("container is class: {}", upnpClass.c_str());
         auto&& meta = obj->getMetaData();
-        propNames = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, itemProps, nsProp);
+        propNames = addPropertyList(strictXml, stringLimit, result, cntFilter, meta, auxData, itemProps, nsProp);
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST) || startswith(upnpClass, UPNP_CLASS_CONTAINER) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
             auto url = renderContainerImageURL(cont);
             if (url) {

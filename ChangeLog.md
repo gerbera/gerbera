@@ -20,6 +20,7 @@
 - Fix build without ffmpeg
 - Fix CodeQL messages
 - Fix config2.xsd: The QName value upnp-properties does not resolve to ...
+- Fix container filters
 - Fix creating containers in web ui
 - Fix Handling command line options
 - Fix handling of checkbox values on web ui
