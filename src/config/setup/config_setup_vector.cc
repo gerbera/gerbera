@@ -28,14 +28,18 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "config/config_val.h"
+#include "config_setup_bool.h"
 #include "util/logger.h"
 
 #include <numeric>
 
 /// \brief Creates a vector from an XML nodeset.
-bool ConfigVectorSetup::createOptionFromNode(const pugi::xml_node& element, std::vector<std::vector<std::pair<std::string, std::string>>>& result) const
+bool ConfigVectorSetup::createOptionFromNode(
+    const pugi::xml_node& element,
+    std::vector<std::vector<std::pair<std::string, std::string>>>& result)
 {
     if (element) {
+        doExtend = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element);
         const auto dictNodes = element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption));
         std::vector<std::string> attrList;
         attrList.reserve(optionList.size());
@@ -200,6 +204,9 @@ std::vector<std::vector<std::pair<std::string, std::string>>> ConfigVectorSetup:
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
         useDefault = true;
         result = defaultEntries;
+    } else if (doExtend) {
+        log_debug("{} extending by {} default values", xpath, defaultEntries.size());
+        result.insert(result.end(), defaultEntries.begin(), defaultEntries.end());
     }
     if (notEmpty && result.empty()) {
         throw_std_runtime_error("Invalid vector {} empty '{}'", xpath, optValue.name());

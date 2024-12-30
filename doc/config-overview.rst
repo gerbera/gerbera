@@ -10,13 +10,19 @@ If the configuration file is not found in the default location and no configurat
 Gerbera will generate a default config.xml file in the ``~/.config/gerbera`` directory. The file is in the XML format and can
 be edited by a simple text editor, here is the list of all available options:
 
+.. _extend:
+
 -  **Required** means that the server will not start if the tag is missing in the configuration.
 
 -  **Optional**  means that the tag can be left out of the configuration file.
 
+-  **Default**  contains the value or values if the section, entry or attribute is omitted. Sections with complex default values are completely overwriitwn by config file content.
+
+-  **Extensible Default**  means that the additional attribute ``extend="true"`` can be used to keep the list of default values and the config entries are added. The default values can be found in the output of ``gerbera --create-example-config``.
+
 The root tag of Gerbera configuration is:
 
-::
+.. code-block:: xml
 
     <?xml version="1.0" encoding="UTF-8"?>
     <config version="2"

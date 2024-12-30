@@ -113,7 +113,6 @@ The import settings define various options on how to aggregate the content.
 
 .. code:: xml
 
-
     <import hidden-files="no" follow-symlinks="no">
 
 * Optional
@@ -257,9 +256,9 @@ Below are the available scripting options:
             <custom>/home/dev/Source/gerbera/scripts/js</custom>
         </script-folder>
 
-    Defines the locations of the script folders. If set, first all Javascript files from `common` are loaded and then all Javascript files from `custom`.
+    Defines the locations of the script folders. If set, first all Javascript files from ``common`` are loaded and then all Javascript files from ``custom``.
     If a function is defined in a common and a custom file the custom defintion overwrites the common defintion. No function should be duplicate in
-    the same folder. Setting `script-folder` is the replacement for setting the various script files `common-script`.
+    the same folder. Setting ``script-folder`` is the replacement for setting the various script files ``common-script``.
 
 .. _import-function:
 
@@ -277,7 +276,7 @@ Below are the available scripting options:
         </import-function>
 
     Set the entry points for the virtual layout functions and file parsing functions. Selecting the entry point is the replacement for setting
-    the layout type in `virtual-layout`. The entry points are directly called for Gerbera code and must have a defined synopsis.
+    the layout type in ``virtual-layout``. The entry points are directly called for Gerbera code and must have a defined synopsis.
     For further details see :ref:`Scripting <scripting>`.
 
 .. _virtual-layout:
@@ -318,8 +317,8 @@ Below are the available scripting options:
 
         Specifies the virtual layout to be created:
 
-        -  **Default**: `addAudio` is used to create the virtual layout
-        -  **Structured**: `addAudioStructured` is used to create the virtual layout (only in combination with javascript)
+        -  **Default**: ``addAudio`` is used to create the virtual layout
+        -  **Structured**: ``addAudioStructured`` is used to create the virtual layout (only in combination with javascript)
 
         The virtual layout can be adjusted using an import script which is defined as follows:
 
@@ -348,7 +347,7 @@ Below are the available scripting options:
         * Optional
 
         Contains options to pass into scripts. All values are available in scripts as e.g.
-        `config['/import/scripting/virtual-layout/script-options/script-option'].test`.
+        ``config['/import/scripting/virtual-layout/script-options/script-option'].test``.
         For more details see :ref:`scripting <scripting>`
 
 
@@ -363,7 +362,7 @@ Below are the available scripting options:
 
             * Optional
 
-            Set option `value` for option `name`
+            Set option ``value`` for option ``name``
 
                 .. code:: xml
 
@@ -404,7 +403,7 @@ Below are the available scripting options:
 
             * Optional
 
-            Replace genre `from` by genre `to`.
+            Replace genre ``from`` by genre ``to``.
 
                 .. code:: xml
 
@@ -459,7 +458,10 @@ Below are the available scripting options:
 
         .. code:: xml
 
-            <boxlayout></boxlayout>
+            <boxlayout extend="true"></boxlayout>
+
+        * Optional
+        * Extensible Default: Without ``extend="true"`` all missing entries are reported
 
         **Child tags:**
 
@@ -472,7 +474,7 @@ Below are the available scripting options:
 
             * Optional
 
-            Configure Box `key`.
+            Configure Box ``key``.
 
             .. code:: xml
 
@@ -812,6 +814,7 @@ the removed directory if it becomes available/gets created again.
     <system-directories>
 
 * Optional
+* Extensible Default
 
 Specifies a list of system directories hidden in filesystem web ui.
 
@@ -990,6 +993,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         <resource>...</resource>
 
     * Optional
+    * Extensible Default
 
     Define file patterns to search for fanart, subtitle and resources respectivly.
 
@@ -1174,7 +1178,7 @@ Note:
     This improves the import speed, because files are ignored completely.
 
 Note:
-    The extension is case sensitive, if `case-sensitive` in the element `extension-mimetype` is set to `yes`
+    The extension is case sensitive, if ``case-sensitive`` in the element ``extension-mimetype`` is set to ``yes``
 
 
 .. _extension-mimetype:
@@ -1187,6 +1191,7 @@ Note:
     <extension-mimetype ignore-unknown="no" case-sensitive="no">
 
 * Optional
+* Extensible Default
 
 This section holds the file name extension to mime type mappings.
 
@@ -1228,7 +1233,7 @@ Note:
     omitted for files with extensions listed here.
 
 Note:
-    The extension is case sensitive, if `case-sensitive` is set to `yes`.
+    The extension is case sensitive, if ``case-sensitive`` is set to ``yes``.
 
 
 ``mimetype-upnpclass``
@@ -1239,6 +1244,7 @@ Note:
     <mimetype-upnpclass>
 
 * Optional
+* Extensible Default
 
 This section holds the mime type to upnp:class mappings.
 
@@ -1284,6 +1290,7 @@ expanded to `if genre contains Book`.
     <mimetype-dlnatransfermode>
 
 * Optional
+* Extensible Default
 
 This section holds the mime type to dlna transfer mode mappings. It is added to the http-header ``transferMode.dlna.org``` of the file request.
 
@@ -1314,6 +1321,7 @@ attributes are case sensitive.
   <mimetype-contenttype>
 
 * Optional
+* Extensible Default
 
 This section makes sure that the server knows about remapped mimetypes and still extracts the metadata correctly.
 If the user remaps mp3 files to a different mimetype, we must know about it so we can still pass this item to taglib
@@ -1387,6 +1395,7 @@ The ``as`` attribute can have following values:
     <contenttype-dlnaprofile>
 
 * Optional
+* Extensible Default
 
 This section holds the content type to dlnaprofile mappings.
 
@@ -1439,7 +1448,7 @@ If you want to make your DLNA device play specific media the following list of p
 This section holds the additional identifiers for virtual directories to make sure, e.g. albums with the same title
 are distiguished by their artist even if the displayed text is identical.
 
-* Default
+* Extensible Default
 
 .. code:: xml
 

@@ -1608,6 +1608,10 @@ const std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::complexOptions
         "attribute::key", "config-import.html#headers", ""),
     std::make_shared<ConfigStringSetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS_VALUE,
         "attribute::value", "config-import.html#headers", ""),
+
+    std::make_shared<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND,
+        "attribute::extend", "config-overview.html#extend",
+        NO),
 };
 
 /// \brief define parent options for path search

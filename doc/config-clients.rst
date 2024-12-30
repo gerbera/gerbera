@@ -104,7 +104,7 @@ This section defines the client behaviour for one client.
     If you set another group here all actions are recorded for this group.
 
     .. code:: xml
-    
+
         flags=...
 
     * Optional

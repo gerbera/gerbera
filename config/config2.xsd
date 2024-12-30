@@ -187,7 +187,11 @@
 
     <xs:element name="cache-dir">
         <xs:complexType>
-            <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="enabled" type="boolean" default="yes"/>
+                </xs:extension>
+            </xs:simpleContent>
         </xs:complexType>
     </xs:element>
     <xs:element name="thumbnail-size" type="xs:positiveInteger" default="128"/>
@@ -468,22 +472,24 @@
     <xs:element name="search-item-result">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="add-data" minOccurs="0"/>
+                <xs:element ref="add-data" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
         </xs:complexType>
     </xs:element>
 
     <xs:complexType name="upnp-properties">
         <xs:sequence>
-            <xs:element ref="upnp-namespace" minOccurs="0"/>
-            <xs:element ref="upnp-property" minOccurs="0"/>
+            <xs:element ref="upnp-namespace" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="upnp-property" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
+        <xs:attribute name="extend" type="boolean" default="no"/>
     </xs:complexType>
 
     <xs:complexType name="upnp-defaults">
         <xs:sequence>
-            <xs:element ref="property-default" minOccurs="0"/>
+            <xs:element ref="property-default" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
+        <xs:attribute name="extend" type="boolean" default="no"/>
     </xs:complexType>
 
     <xs:element name="upnp-property">
@@ -512,8 +518,8 @@
     <xs:element name="clients">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="client" minOccurs="0"/>
-                <xs:element ref="group" minOccurs="0"/>
+                <xs:element ref="client" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="group" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
             <xs:attribute name="enabled" type="boolean" default="no"/>
             <xs:attribute name="cache-threshold" type="xs:positiveInteger" default="6"/>
@@ -533,7 +539,8 @@
             <xs:attribute name="friendlyName" type="xs:string"/>
             <xs:attribute name="modelName" type="xs:string"/>
             <xs:attribute name="manufacturer" type="xs:string"/>
-            <xs:attribute name="flags" type="xs:string" use="required"/>
+            <xs:attribute name="group" type="xs:string"/>
+            <xs:attribute name="flags" type="xs:string"/>
             <xs:attribute name="caption-info-count" type="xs:positiveInteger" default="1"/>
             <xs:attribute name="upnp-string-limit" default="-1"/>
             <xs:attribute name="multi-value" type="boolean" default="yes"/>
@@ -706,6 +713,7 @@
             <xs:sequence>
                 <xs:element ref="add-path" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -714,6 +722,7 @@
             <xs:sequence>
                 <xs:element ref="add-path" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -728,6 +737,7 @@
             <xs:sequence>
                 <xs:element ref="key" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -743,6 +753,7 @@
             <xs:sequence>
                 <xs:element ref="script-option" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -758,6 +769,7 @@
             <xs:sequence>
                 <xs:element ref="genre" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -773,6 +785,7 @@
             <xs:sequence>
                 <xs:element ref="box" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -874,6 +887,7 @@
             <xs:sequence>
                 <xs:element ref="path" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
             <xs:attribute name="parent-path" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
@@ -903,6 +917,7 @@
             <xs:sequence>
                 <xs:element ref="add-file" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -911,6 +926,7 @@
             <xs:sequence>
                 <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
             <xs:attribute name="default" type="xs:string"/>
             <xs:attribute name="ignore-unknown" type="boolean" default="no"/>
             <xs:attribute name="case-sensitive" type="boolean" default="no"/>
@@ -922,6 +938,7 @@
             <xs:sequence>
                 <xs:element ref="treat" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
             <xs:attribute name="ignore-unknown" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
@@ -938,6 +955,7 @@
             <xs:sequence>
                 <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -946,6 +964,7 @@
             <xs:sequence>
                 <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -961,6 +980,7 @@
             <xs:sequence>
                 <xs:element ref="map" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -981,16 +1001,18 @@
     <xs:element name="order">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="handler" minOccurs="0"/>
+                <xs:element ref="handler" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
     <xs:complexType name="resContainer">
         <xs:sequence>
-            <xs:element ref="add-file" minOccurs="0"/>
-            <xs:element ref="add-dir" minOccurs="0"/>
+            <xs:element ref="add-file" minOccurs="0" maxOccurs="unbounded"/>
+            <xs:element ref="add-dir" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
+        <xs:attribute name="extend" type="boolean" default="no"/>
         <xs:attribute name="location"/>
         <xs:attribute name="parentCount" default="2"/>
         <xs:attribute name="minDepth" default="2"/>
@@ -999,36 +1021,40 @@
     <xs:element name="fanart">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="add-file" minOccurs="0"/>
-                <xs:element ref="add-dir" minOccurs="0"/>
+                <xs:element ref="add-file" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="add-dir" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="subtitle">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="add-file" minOccurs="0"/>
-                <xs:element ref="add-dir" minOccurs="0"/>
+                <xs:element ref="add-file" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="add-dir" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="metafile">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="add-file" minOccurs="0"/>
-                <xs:element ref="add-dir" minOccurs="0"/>
+                <xs:element ref="add-file" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="add-dir" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
     <xs:element name="resource">
         <xs:complexType>
             <xs:sequence>
-                <xs:element ref="add-file" minOccurs="0"/>
-                <xs:element ref="add-dir" minOccurs="0"/>
+                <xs:element ref="add-file" minOccurs="0" maxOccurs="unbounded"/>
+                <xs:element ref="add-dir" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -1129,6 +1155,7 @@
             <xs:sequence>
                 <xs:element ref="add-data" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -1137,6 +1164,7 @@
             <xs:sequence>
                 <xs:element ref="add-data" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 

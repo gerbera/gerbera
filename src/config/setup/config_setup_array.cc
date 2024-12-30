@@ -29,15 +29,19 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "config/config_val.h"
+#include "config_setup_bool.h"
 #include "config_setup_int.h"
 #include "util/logger.h"
 
 #include <numeric>
 
 /// \brief Creates an array of strings from an XML nodeset.
-bool ConfigArraySetup::createOptionFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const
+bool ConfigArraySetup::createOptionFromNode(
+    const pugi::xml_node& element,
+    std::vector<std::string>& result)
 {
     if (element) {
+        doExtend = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element);
         for (auto&& it : element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption))) {
             const pugi::xml_node& child = it.node();
             std::string attrValue = attrOption != ConfigVal::MAX ? child.attribute(ConfigDefinition::removeAttribute(attrOption).c_str()).as_string() : child.text().as_string();
@@ -178,6 +182,9 @@ std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& o
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
         useDefault = true;
         result = defaultEntries;
+    } else if (doExtend) {
+        log_debug("{} extending by {} default values", xpath, defaultEntries.size());
+        result.insert(result.end(), defaultEntries.begin(), defaultEntries.end());
     }
     if (notEmpty && result.empty()) {
         throw_std_runtime_error("Invalid array {} empty '{}'", xpath, optValue.name());
