@@ -48,6 +48,8 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
 
     std::vector<std::string> allKeys;
     auto&& ccs = ConfigDefinition::findConfigSetup<ConfigSetup>(option);
+    auto doExtend = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element.parent());
+    log_debug("is {} extensible {}", element.parent().path(), doExtend);
     for (auto&& it : ccs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
@@ -75,7 +77,10 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
     for (auto&& defEntry : defaultEntries) {
         if (std::find(allKeys.begin(), allKeys.end(), defEntry.getKey()) == allKeys.end()) {
             auto box = std::make_shared<BoxLayout>(defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getUpnpShortcut(), defEntry.getEnabled(), defEntry.getSize());
-            log_info("Created default BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
+            if (doExtend)
+                log_debug("Created default BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
+            else
+                log_info("Created default BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
             result->add(box);
             allKeys.push_back(defEntry.getKey());
         }

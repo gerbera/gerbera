@@ -426,6 +426,8 @@ enum class ConfigVal {
     A_DYNAMIC_CONTAINER_UPNP_SHORTCUT,
     A_DYNAMIC_CONTAINER_SORT,
     A_DYNAMIC_CONTAINER_MAXCOUNT,
+
+    A_LIST_EXTEND,
 };
 
 enum class UrlAppendMode {

@@ -36,6 +36,7 @@ protected:
     bool itemNotEmpty = false;
     DictionaryInitFunction initDict = nullptr;
     bool tolower = false;
+    bool doExtend = false;
     std::map<std::string, std::string> defaultEntries;
 
     /// \brief Creates a dictionary from an XML nodeset.
@@ -51,7 +52,9 @@ protected:
     ///
     /// This function will create a dictionary with the following
     /// key:value pairs: "1":"2", "3":"4"
-    bool createOptionFromNode(const pugi::xml_node& element, std::map<std::string, std::string>& result) const;
+    bool createOptionFromNode(
+        const pugi::xml_node& element,
+        std::map<std::string, std::string>& result);
 
     /// \brief Extracts the new value from the xpath key
     bool updateItem(

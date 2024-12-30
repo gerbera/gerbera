@@ -39,6 +39,7 @@ protected:
     ArrayInitFunction initArray = nullptr;
     ArrayItemCheckFunction itemCheck = nullptr;
     std::vector<std::string> defaultEntries;
+    bool doExtend = false;
 
     /// \brief Creates an array of strings from an XML nodeset.
     /// \param element starting element of the nodeset.
@@ -52,7 +53,9 @@ protected:
     /// \</some-section\>
     ///
     /// This function will create an array like that: ["data", "otherdata"]
-    bool createOptionFromNode(const pugi::xml_node& element, std::vector<std::string>& result) const;
+    bool createOptionFromNode(
+        const pugi::xml_node& element,
+        std::vector<std::string>& result);
 
     bool updateItem(
         const std::vector<std::size_t>& indexList,

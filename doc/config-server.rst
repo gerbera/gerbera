@@ -576,7 +576,7 @@ Note:
        </extension-mimetype>
 
     * Optional
-    * Default: see above
+    * Extensible Default: see above
 
     For description see :ref:`Import Extension Mimetype Mapping <extension-mimetype>`.
 
@@ -654,7 +654,7 @@ Note:
         <option>50</option>
         <option>100</option>
 
-    **Default: 10, 25, 50, 100**
+    * Extensible Default: **10, 25, 50, 100**
 
     Note:
         this list must contain the default value, i.e. if you define a default value of 25, then one of the
@@ -998,6 +998,7 @@ This section defines the properties which are send to UPnP clients as part of th
         </search-item-result>
 
     * Optional
+    * Extensible Default
 
     Set the meta-data search tags to use in search result for title. The default settings as shown above produces ``artist - title`` in the result list.
 
@@ -1063,7 +1064,7 @@ This section defines the properties which are send to UPnP clients as part of th
 
         Instead of metadata, you may also use auxdata entries as defined in ``library-options``.
 
-    **Defaults:**
+    * Extensible Default:
 
 .. _upnp-tags:
 
@@ -1229,6 +1230,7 @@ This section defines the properties which are send to UPnP clients as part of th
     <containers enabled="yes">
 
 * Optional
+* Extensible Default
 
 Add dynamic containers to virtual layout.
 

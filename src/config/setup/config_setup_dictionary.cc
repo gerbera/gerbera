@@ -28,14 +28,18 @@
 #include "config/config_definition.h"
 #include "config/config_options.h"
 #include "config/config_val.h"
+#include "config_setup_bool.h"
 #include "util/logger.h"
 
 #include <numeric>
 
 /// \brief Creates a dictionary from an XML nodeset.
-bool ConfigDictionarySetup::createOptionFromNode(const pugi::xml_node& element, std::map<std::string, std::string>& result) const
+bool ConfigDictionarySetup::createOptionFromNode(
+    const pugi::xml_node& element,
+    std::map<std::string, std::string>& result)
 {
     if (element) {
+        doExtend = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element);
         const auto dictNodes = element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption));
         auto keyAttr = ConfigDefinition::removeAttribute(keyOption);
         auto valAttr = ConfigDefinition::removeAttribute(valOption);
@@ -214,6 +218,9 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pu
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
         useDefault = true;
         result = defaultEntries;
+    } else if (doExtend) {
+        log_debug("{} extending by {} default values", xpath, defaultEntries.size());
+        result.merge(defaultEntries);
     }
     if (notEmpty && result.empty()) {
         throw_std_runtime_error("Invalid dictionary {} empty '{}'", xpath, optValue.name());
