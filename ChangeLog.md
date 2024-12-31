@@ -27,6 +27,7 @@
 - Fix parsing enum config values
 - Fix SIMPLE\_DATE
 - Fix systemd detection
+- Gerbera welcomes 2025
 - Handle int parse error in config
 - Improve compile info contents
 - Improve handling multivalue tags in virtual paths

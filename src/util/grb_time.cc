@@ -3,7 +3,7 @@ Gerbera - https://gerbera.io/
 
     grb_time.cc - this file is part of Gerbera.
 
-    Copyright (C) 2022-2024 Gerbera Contributors
+    Copyright (C) 2022-2025 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2

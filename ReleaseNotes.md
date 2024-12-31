@@ -9,7 +9,7 @@ There are some noteworthy new features in this release:
 - the dark mode for the Web UI,
 - access permissions for files: Restrict access to directories via client groups,
 - support for UPnP filters in requests,
-- support for UPnP CONTAINER_SHORTCUTS feature.
+- support for UPnP CONTAINER\_SHORTCUTS feature.
 
 ### NEW Features
 
@@ -23,6 +23,7 @@ There are some noteworthy new features in this release:
 
 ### FIXES
 
+- Logic exceptions are reported
 - Handling of logging command line options
 - Handling of checkbox values on web ui
 - Access to cache option if thumbnailer is disabled
