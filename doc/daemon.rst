@@ -25,13 +25,13 @@ exposing root access.
 
 Here is a way to create a system user in linux command line
 
-::
+.. code-block:: console
 
   $ sudo useradd --system gerbera
 
 Verify that the ``gerbera`` user was created
 
-::
+.. code-block:: console
 
   $ id -u gerbera
   | Returns the user id of the user
@@ -43,7 +43,7 @@ Set Gerbera Permissions
 The **gerbera** user must have access to ``config.xml`` file and
 to the directory referenced as the gerbera home.  For example ``/etc/gerbera``
 
-::
+.. code-block:: console
 
   $ sudo mkdir /etc/gerbera
   $ sudo chown -Rv gerbera:gerbera /etc/gerbera
@@ -59,13 +59,13 @@ Note:
 
 1. Notify ``systemd`` that a new gerbera.service file exists by executing the following command:
 
-     ::
+    .. code-block:: console
 
         $ sudo systemctl daemon-reload
 
 2. Start up the daemon
 
-    ::
+    .. code-block:: console
 
       $ sudo systemctl start gerbera
 
@@ -75,7 +75,7 @@ Success
 
 Check the status of gerbera.  You should see success similar to below
 
-::
+.. code-block:: console
 
   $ sudo systemctl status gerbera
 
@@ -94,20 +94,20 @@ Troubleshooting
 If for some reason the service fails to start.  You can troubleshoot the behaviour
 by starting gerbera from the shell.
 
-::
+.. code-block:: console
 
   $ su gerbera
   Password:
-  bash$  /usr/local/bin/gerbera -c /etc/gerbera/config.xml
+  $  /usr/local/bin/gerbera -c /etc/gerbera/config.xml
 
-  2023-09-20 19:54:47    INFO: Gerbera UPnP Server version 2.0.0 - https://gerbera.io/
-  2023-09-20 19:54:47    INFO: ===============================================================================
-  2023-09-20 19:54:47    INFO: Gerbera is free software, covered by the GNU General Public License version 2
-  2023-09-20 19:54:47    INFO: Copyright 2016-2024 Gerbera Contributors.
-  2023-09-20 19:54:47    INFO: Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.
-  2023-09-20 19:54:47    INFO: ===============================================================================
-  2023-09-20 19:54:47    INFO: Loading configuration from: /etc/gerbera/config.xml
-  2023-09-20 19:54:47    INFO: Checking configuration...
+  2025-01-01 19:54:47    INFO: Gerbera UPnP Server version 2.4.0 - https://gerbera.io/
+  2025-01-01 19:54:47    INFO: ===============================================================================
+  2025-01-01 19:54:47    INFO: Gerbera is free software, covered by the GNU General Public License version 2
+  2025-01-01 19:54:47    INFO: Copyright 2016-2025 Gerbera Contributors.
+  2025-01-01 19:54:47    INFO: Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.
+  2025-01-01 19:54:47    INFO: ===============================================================================
+  2025-01-01 19:54:47    INFO: Loading configuration from: /etc/gerbera/config.xml
+  2025-01-01 19:54:47    INFO: Checking configuration...
 
 .. index:: Commandline options
 
@@ -152,7 +152,7 @@ Save to user's launch agent path --> ``~/Library/LaunchAgents/gerbera.io.plist``
 Load the Launch Agent
 ---------------------
 
-::
+.. code-block:: console
 
   $ launchctl load ~/Library/LaunchAgents/gerbera.io.plist
 
@@ -160,7 +160,7 @@ Load the Launch Agent
 Start the Launch Agent
 ----------------------
 
-::
+.. code-block:: console
 
   $ launchctl start gerbera.io
 
@@ -168,6 +168,6 @@ Start the Launch Agent
 Stop the Launch Agent
 ---------------------
 
-::
+.. code-block:: console
 
   $ launchctl stop gerbera.io

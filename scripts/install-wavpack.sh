@@ -3,7 +3,7 @@
 #
 # install-wavpack.sh - this file is part of Gerbera.
 #
-# Copyright (C) 2021-2024 Gerbera Contributors
+# Copyright (C) 2021-2025 Gerbera Contributors
 #
 # Gerbera is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License version 2
@@ -42,6 +42,7 @@ downloadSource https://github.com/dbry/WavPack/releases/download/${VERSION}/wavp
 #    https://github.com/dbry/WavPack/releases/download/${VERSION}/wavpack-${VERSION}.tar.xz
 
 cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED}
+
 ../configure \
     --disable-asm \
     --enable-man \

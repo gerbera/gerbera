@@ -32,7 +32,8 @@
         "WITH_DEBUG_OPTIONS": "ON",
         "WITH_ONLINE_SERVICES": "ON",
         "WITH_TESTS": "ON",
-        "BUILD_DOC": "ON"
+        "BUILD_DOC": "ON",
+        "BUILD_CHANGELOG": "ON"
       }
     },
     {

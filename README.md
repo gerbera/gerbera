@@ -96,7 +96,7 @@ sudo make install
        Sergey Bostandzhyan <jin at mediatomb dot cc>
        Leonhard Wimmer <leo at mediatomb dot cc>
 
-    Copyright (C) 2016-2024
+    Copyright (C) 2016-2025
         Gerbera Contributors
 
 [Docker Hub]: https://hub.docker.com/r/gerbera/gerbera

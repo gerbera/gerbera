@@ -4,7 +4,7 @@
 
     web/config_load.cc - this file is part of Gerbera.
 
-    Copyright (C) 2020-2024 Gerbera Contributors
+    Copyright (C) 2020-2025 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -721,7 +721,7 @@ void Web::ConfigLoad::writeTranscoding(pugi::xml_node& values)
 
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING, cs);
-        setValue(item, fmt::join(filter->getNoTranscodingMimeTypes(), ","));
+        setValue(item, fmt::to_string(fmt::join(filter->getNoTranscodingMimeTypes(), ",")));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS, cs);
@@ -852,7 +852,7 @@ void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
             // scan mode (timed|inotify)
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE);
-            setValue(item, AutoscanDirectory::mapScanmode(adir->getScanMode()));
+            setValue(item, fmt::to_string(AutoscanDirectory::mapScanmode(adir->getScanMode())));
 
             // interval for timed
             item = values.append_child(CONFIG_LOAD_ITEM);
