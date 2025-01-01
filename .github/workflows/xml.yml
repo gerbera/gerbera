@@ -1,0 +1,38 @@
+name: CI validation for XSD Schema
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  xml:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        xsd-schema:
+          - "config2.xsd"
+        xml-config:
+          - "mock-config-all-os.xml"
+          - "mock-config-all.xml"
+          - "mock-example-exiv2-all-os.xml"
+          - "mock-example-exiv2-all.xml"
+          - "mock-example-all-os.xml"
+          - "mock-example-all.xml"
+    name: Validate XSD with ${{ matrix.xml-config }}
+    steps:
+      - name: Checkout Gerbera code
+        uses: actions/checkout@v4
+      - name: Enable Annotations for Validation Errors and Warnings
+        uses: korelstar/xmllint-problem-matcher@v1
+      - name: Validate ${{ matrix.xml-config }} Using Schema ${{ matrix.xsd-schema }}
+        uses: ChristophWurst/xmllint-action@v1
+        with:
+          xml-file: ./test/config/fixtures/${{ matrix.xml-config }}
+          xml-schema-file: ./config/${{ matrix.xsd-schema }}
+          # xmllint --noout --schema ./config/config2.xsd ./test/config/fixtures/mock-example-all-os.xml

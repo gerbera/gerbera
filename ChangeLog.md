@@ -44,6 +44,7 @@
 - UPnP filters: provide defaults for filter properties
 - UPnP Shortcuts feature
 - UPnP: Add support for filters
+- Validate XSD CI workflow
 - Web UI: Add dark mode
 - Web UI: Add Search page
 - Web UI: Cleanup display of item number
