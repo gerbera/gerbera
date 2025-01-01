@@ -24,6 +24,7 @@ jobs:
           - "mock-example-exiv2-all.xml"
           - "mock-example-all-os.xml"
           - "mock-example-all.xml"
+          - "full-example-for-xsd.xml"
     name: Validate XSD with ${{ matrix.xml-config }}
     steps:
       - name: Checkout Gerbera code

@@ -15,6 +15,7 @@
 - deps: Fix build with ffmpeg 6.1
 - Drop Build Support for Ubuntu 23.04
 - Dynamic banner colour in Readme
+- Enhance xsd
 - Fix access to cache option if thumbnailer disabled
 - Fix autoscan issue with empty filename
 - Fix build without ffmpeg

@@ -28,6 +28,9 @@ Implement Configuration Options
 |                                      | In this case do not forget to updated the fixtures                       |
 |                                      | under ``test/config/fixtures``.                                          |
 +--------------------------------------+--------------------------------------------------------------------------+
+| ``test/config/fixtures/*.xml``       | Configuration files and snippets for tests.                              |
+|                                      | Checked against xsd. Add example values to ``full-example-for-xsd.xml``. |
++--------------------------------------+--------------------------------------------------------------------------+
 | ``web/assets/gerbera-config-*.json`` | Add entries for display and editing in web ui.                           |
 +--------------------------------------+--------------------------------------------------------------------------+
 | ``doc/config*.rst``                  | Supply some useful documentation.                                        |
