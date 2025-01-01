@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<config version="2" xmlns="http://mediatomb.cc/config/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://mediatomb.cc/config/2 http://mediatomb.cc/config/2.xsd">
+    <!--
+     See https://gerbera.io or read the docs for more
+     information on creating and using config.xml configuration files.
+    -->
+    <server debug-mode="content|xml">
+        <logging rotate-file-size="1000000" rotate-file-count="5"/>
+        <ui enabled="yes" show-tooltips="yes" poll-interval="2" poll-when-idle="no" show-numbering="yes" show-thumbnail="yes" show-video="no">
+            <content-security-policy>
+                font-src %HOSTS% https://fonts.gstatic.com/
+                style-src %HOSTS% https://fonts.googleapis.com 'unsafe-inline'
+                img-src *
+                media-src *
+                child-src 'none'
+                default-src %HOSTS% 'unsafe-eval' 'unsafe-inline'
+            </content-security-policy>
+            <accounts enabled="no" session-timeout="30">
+                <account user="gerbera" password="gerbera"/>
+            </accounts>
+            <items-per-page default="25">
+                <option>10</option>
+                <option>25</option>
+                <option>50</option>
+                <option>100</option>
+            </items-per-page>
+            <extension-mimetype default="application/octet-stream">
+                <map from="html" to="text/html"/>
+                <map from="js" to="application/javascript"/>
+                <map from="json" to="application/json"/>
+                <map from="css" to="text/css"/>
+            </extension-mimetype>
+            <source-docs-link>./dev/index.html</source-docs-link>
+            <user-docs-link>./doc/</user-docs-link>
+        </ui>
+        <name>Gerbera</name>
+		<udn>uuid:fcc3b17d-01ab-41d6-99cb-068598464a3d</udn>
+        <home override="no">/tmp/.config/gerbera</home>
+        <webroot>/usr/local/share/gerbera/web</webroot>
+        <port>50600</port>
+        <ip>192.168.10.7</ip>
+        <interface>eth0</interface>
+        <manufacturer>Gerbera Contributors</manufacturer>
+        <manufacturerURL>https://gerbera.io/</manufacturerURL>
+        <modelName>Gerbera</modelName>
+        <modelDescription>Free UPnP AV MediaServer, GNU GPL</modelDescription>
+        <modelNumber>42</modelNumber>
+        <modelURL>https://gerbera.io</modelURL>
+        <serialNumber>20400</serialNumber>
+        <presentationURL append-to="none"/>
+        <tmpdir>/tmp/</tmpdir>
+        <pc-directory upnp-hide="no"/>
+        <bookmark>gerbera.html</bookmark>
+        <upnp-string-limit>-1</upnp-string-limit>
+        <virtualURL>https://gerbera.io:50600</virtualURL>
+        <externalURL>https://gerbera.io</externalURL>
+        <upnp literal-host-redirection="no" multi-value="yes" search-result-separator=" - " search-filename="no" searchable-container-flag="no" caption-info-count="1">
+            <search-item-result>
+                <add-data tag="M_ARTIST"/>
+                <add-data tag="M_TITLE"/>
+            </search-item-result>
+			<album-properties extend="true">
+				<upnp-property upnp-tag="upnp:icon" meta-data="M_ALBUMARTURI"/>
+			</album-properties>
+            <artist-properties>
+                <upnp-property upnp-tag="upnp:albumArtist" meta-data="M_ALBUMARTIST"/>
+                <upnp-property upnp-tag="upnp:artist" meta-data="M_ALBUMARTIST"/>
+                <upnp-property upnp-tag="upnp:genre" meta-data="M_GENRE"/>
+            </artist-properties>
+            <genre-properties>
+                <upnp-property upnp-tag="upnp:genre" meta-data="M_GENRE"/>
+            </genre-properties>
+            <playlist-properties>
+                <upnp-property upnp-tag="dc:date" meta-data="M_UPNP_DATE"/>
+            </playlist-properties>
+            <title-properties/>
+            <resource-defaults>
+                <property-default tag="@allowedUse" value="UNKNOWN"/>
+                <property-default tag="@bitrate" value="0"/>
+                <property-default tag="@bitsPerSample" value="0"/>
+                <property-default tag="@colorDepth" value="1"/>
+                <property-default tag="@contentInfoURI" value=""/>
+                <property-default tag="@daylightSaving" value="UNKNOWN"/>
+                <property-default tag="@duration" value="0"/>
+                <property-default tag="@framerate" value="30p"/>
+                <property-default tag="@importUri" value=""/>
+                <property-default tag="@nrAudioChannels" value="0"/>
+                <property-default tag="@protection" value="UNKNOWN"/>
+                <property-default tag="@protocolInfo" value="http:*:*:*"/>
+                <property-default tag="@recordQuality" value=""/>
+                <property-default tag="@reliability" value="100"/>
+                <property-default tag="@remainingTime" value=""/>
+                <property-default tag="@resolution" value="1x1"/>
+                <property-default tag="@rightsInfoURI" value=""/>
+                <property-default tag="@sampleFrequency" value="0"/>
+                <property-default tag="@size" value="0"/>
+                <property-default tag="@tspec" value="UNKNOWN"/>
+                <property-default tag="@usageInfo" value="This file is hosted by Gerbera"/>
+                <property-default tag="@validityEnd" value="1900-01-01T00:00:00"/>
+                <property-default tag="@validityStart" value="1900-01-01T00:00:00"/>
+            </resource-defaults>
+            <object-defaults>
+                <property-default tag="@id" value="0"/>
+                <property-default tag="@parentID" value="0"/>
+                <property-default tag="dc:creator" value="UNKNOWN"/>
+                <property-default tag="dc:date" value="1900-01-01T00:00:00"/>
+                <property-default tag="upnp:actor" value="UNKNOWN"/>
+                <property-default tag="upnp:album" value="UNKNOWN"/>
+                <property-default tag="upnp:artist" value="UNKNOWN"/>
+                <property-default tag="upnp:artistDiscographyURI" value=""/>
+                <property-default tag="upnp:author" value="UNKNOWN"/>
+                <property-default tag="upnp:contributor" value="UNKNOWN"/>
+                <property-default tag="upnp:director" value="UNKNOWN"/>
+                <property-default tag="upnp:genre" value="UNKNOWN"/>
+                <property-default tag="upnp:language" value="en-US"/>
+                <property-default tag="upnp:lastPlaybackPosition" value="0"/>
+                <property-default tag="upnp:lastPlaybackTime" value="1900-01-01T00:00:00"/>
+                <property-default tag="upnp:lyricsURI" value=""/>
+                <property-default tag="upnp:originalTrackNumber" value="0"/>
+                <property-default tag="upnp:playbackCount" value="0"/>
+                <property-default tag="upnp:playlist" value="UNKNOWN"/>
+                <property-default tag="upnp:producer" value="UNKNOWN"/>
+                <property-default tag="upnp:publisher" value="UNKNOWN"/>
+                <property-default tag="upnp:rating" value="0"/>
+                <property-default tag="upnp:recordable" value="1"/>
+                <property-default tag="upnp:relation" value="UNKNOWN"/>
+            </object-defaults>
+            <container-defaults>
+                <property-default tag="@childContainerCount" value="0"/>
+                <property-default tag="@childCount" value="0"/>
+                <property-default tag="@id" value="0"/>
+                <property-default tag="@parentID" value="0"/>
+                <property-default tag="@restricted" value="1"/>
+                <property-default tag="@searchable" value="1"/>
+                <property-default tag="upnp:storageFree" value="0"/>
+                <property-default tag="upnp:storageMaxPartition" value="0"/>
+                <property-default tag="upnp:storageMedium" value="UNKNOWN"/>
+                <property-default tag="upnp:storageTotal" value="0"/>
+                <property-default tag="upnp:storageUsed" value="0"/>
+            </container-defaults>
+        </upnp>
+        <!--
+        How frequently (in seconds) to send ssdp:alive advertisements.
+        Minimum alive value accepted is: 62
+
+        The advertisement will be sent every (A/2)-30 seconds,
+        and will have a cache-control max-age of A where A is
+        the value configured here. Ex: A value of 62 will result
+        in an SSDP advertisement being sent every second.
+    -->
+        <alive>180</alive>
+        <storage use-transactions="no">
+            <sqlite3 enabled="yes">
+                <database-file>gerbera.db</database-file>
+                <synchronous>off</synchronous>
+                <journal-mode>WAL</journal-mode>
+                <on-error>restore</on-error>
+                <init-sql-file>/usr/local/share/gerbera/sqlite3.sql</init-sql-file>
+                <upgrade-file>/usr/local/share/gerbera/sqlite3-upgrade.xml</upgrade-file>
+            </sqlite3>
+            <mysql enabled="no">
+                <host>localhost</host>
+                <username>gerbera</username>
+                <database>gerbera</database>
+                <port>0</port>
+                <socket/>
+                <password/>
+                <init-sql-file>/usr/local/share/gerbera/mysql.sql</init-sql-file>
+                <upgrade-file>/usr/local/share/gerbera/mysql-upgrade.xml</upgrade-file>
+            </mysql>
+        </storage>
+        <containers enabled="yes">
+            <container location="/LastAdded" title="Recently Added" sort="-last_updated">
+                <filter>upnp:class derivedfrom "object.item" and last_updated &gt; "@last7"</filter>
+            </container>
+            <container location="/LastModified" title="Recently Modified" sort="-last_modified">
+                <filter>upnp:class derivedfrom "object.item" and last_modified &gt; "@last7"</filter>
+            </container>
+            <container location="/LastPlayed" title="Music Recently Played" sort="-upnp:lastPlaybackTime" upnp-shortcut="MUSIC_LAST_PLAYED">
+                <filter>upnp:class derivedfrom "object.item.audioItem" and upnp:lastPlaybackTime &gt; "@last7"</filter>
+            </container>
+        </containers>
+        <extended-runtime-options>
+            <ffmpegthumbnailer enabled="yes" video-enabled="yes" image-enabled="yes">
+                <thumbnail-size>160</thumbnail-size>
+                <seek-percentage>5</seek-percentage>
+                <filmstrip-overlay>no</filmstrip-overlay>
+                <image-quality>8</image-quality>
+                <cache-dir enabled="yes"/>
+            </ffmpegthumbnailer>
+            <mark-played-items enabled="no" suppress-cds-updates="yes">
+                <string mode="prepend">*</string>
+                <mark>
+                    <content>audio</content>
+                    <content>video</content>
+                </mark>
+            </mark-played-items>
+            <lastfm enabled="no">
+                <username>lastfmuser</username>
+                <password>lastfmpass</password>
+            </lastfm>
+        </extended-runtime-options>
+    </server>
+    <import hidden-files="no" follow-symlinks="yes" default-date="yes" import-mode="mt" nomedia-file=".nomedia" readable-names="yes">
+        <autoscan use-inotify="auto">
+            <directory location="/media" mode="inotify" recursive="yes" hidden-files="yes"  media-type="Music|AudioBook|Video">
+				<container-type-audio>object.container.album.musicAlbum</container-type-audio>
+				<container-type-image>object.container.album.musicAlbum</container-type-image>
+				<container-type-video>object.container.album.musicAlbum</container-type-video>
+			</directory>
+			<directory location="/mnt/Video" mode="inotify" recursive="yes" follow-symlinks="yes" hidden-files="yes"/>
+        </autoscan>
+        <magic-file>magic.file</magic-file>
+        <virtual-directories>
+            <key metadata="M_ALBUMARTIST" class="object.container.album.musicAlbum"/>
+            <key metadata="M_UPNP_DATE" class="object.container.album.musicAlbum"/>
+        </virtual-directories>
+        <filesystem-charset>UTF-8</filesystem-charset>
+        <metadata-charset>UTF-8</metadata-charset>
+        <playlist-charset>UTF-8</playlist-charset>
+        <scripting script-charset="UTF-8">
+            <script-folder>
+                <common>/usr/local/share/gerbera/js</common>
+                <custom>/tmp/.config/gerbera/js</custom>
+            </script-folder>
+            <import-function>
+                <playlist create-link="yes">importPlaylist</playlist>
+                <meta-file>importMetadata</meta-file>
+                <audio-file>importAudio</audio-file>
+                <video-file>importVideo</video-file>
+                <image-file>importImage</image-file>
+            </import-function>
+            <virtual-layout type="builtin">
+                <structured-layout skip-chars="" div-char=""/>
+				<script-options>
+					<script-option name="album-mode" value="unique"/>
+				</script-options>
+				<genre-map>
+					<genre from="Christian|Gospel|Gesprochen" to="Worship"/>
+					<genre from="Rock|Alternative|Punk" to="Rock"/>
+					<genre from="Children|H.*rspiel" to="Children's"/>
+					<genre from="Dance|Rap|Hip|Progressive Electronic|Urban Crossover" to="Dance"/>
+					<genre from="Audio Book|H.*rspiel|Stories" to="Audio Book"/>
+					<genre from="Metal|Trance|Hard Rock|Quirk" to="Metal"/>
+					<genre from="Comedy" to="Comedy"/>
+					<genre from="Classical" to="Classical"/>
+					<genre from="Blues|R.B" to="Blues"/>
+					<genre from="Soundtrack|Film|Movie" to="Soundtrack"/>
+					<genre from="German|Deutsch|General Punk" to="Deutsch"/>
+					<genre from="Musical" to="Musical"/>
+					<genre from="Pop|A Capella|Folk|Sports|Data|Disco|Diva|Electronica|World|Glam|New Age|Romantic|Vocals|European|Classic Prog|Urban AC" to="Pop"/>
+				</genre-map>
+                <boxlayout>
+                    <box key="Audio/allAlbums" title="Albums" class="object.container" upnp-shortcut="MUSIC_ALBUMS"/>
+                    <box key="Audio/allArtists" title="Artists" class="object.container" upnp-shortcut="MUSIC_ARTISTS"/>
+                    <box key="Audio/allAudio" title="All Audio" class="object.container"/>
+                    <box key="Audio/allComposers" title="Composers" class="object.container"/>
+                    <box key="Audio/allDirectories" title="Directories" class="object.container" upnp-shortcut="MUSIC_FOLDER_STRUCTURE"/>
+                    <box key="Audio/allGenres" title="Genres" class="object.container" upnp-shortcut="MUSIC_GENRES"/>
+                    <box key="Audio/allSongs" title="All Songs" class="object.container"/>
+                    <box key="Audio/allTracks" title="All - full name" class="object.container" upnp-shortcut="MUSIC_ALL"/>
+                    <box key="Audio/allYears" title="Year" class="object.container"/>
+                    <box key="Audio/audioRoot" title="Audio" class="object.container"/>
+                    <box key="Audio/artistChronology" title="Album Chronology" class="object.container"/>
+                    <box key="AudioInitial/abc" title="ABC" class="object.container"/>
+                    <box key="AudioInitial/allArtistTracks" title="000 All" class="object.container"/>
+                    <box key="AudioInitial/allBooks" title="Books" class="object.container"/>
+                    <box key="AudioInitial/audioBookRoot" title="AudioBooks" class="object.container" upnp-shortcut="MUSIC_AUDIOBOOKS"/>
+                    <box key="AudioStructured/allAlbums" title="-Album-" class="object.container" upnp-shortcut="MUSIC_ALBUMS" size="6"/>
+                    <box key="AudioStructured/allArtistTracks" title="all" class="object.container"/>
+                    <box key="AudioStructured/allArtists" title="-Artist-" class="object.container" upnp-shortcut="MUSIC_ARTISTS" size="9"/>
+                    <box key="AudioStructured/allGenres" title="-Genre-" class="object.container" upnp-shortcut="MUSIC_GENRES" size="6"/>
+                    <box key="AudioStructured/allTracks" title="-Track-" class="object.container" upnp-shortcut="MUSIC_ALL" size="6"/>
+                    <box key="AudioStructured/allYears" title="-Year-" class="object.container"/>
+                    <box key="Video/allDates" title="Date" class="object.container" upnp-shortcut="VIDEOS_YEARS_MONTH"/>
+                    <box key="Video/allDirectories" title="Directories" class="object.container" upnp-shortcut="VIDEOS_FOLDER_STRUCTURE"/>
+                    <box key="Video/allVideo" title="All Video" class="object.container" upnp-shortcut="VIDEOS_ALL"/>
+                    <box key="Video/allYears" title="Year" class="object.container" upnp-shortcut="VIDEOS_YEARS"/>
+                    <box key="Video/unknown" title="Unknown" class="object.container"/>
+                    <box key="Video/videoRoot" title="Video" class="object.container" upnp-shortcut="VIDEOS"/>
+                    <box key="Image/allDates" title="Date" class="object.container" upnp-shortcut="IMAGES_YEARS_MONTH"/>
+                    <box key="Image/allDirectories" title="Directories" class="object.container" upnp-shortcut="IMAGES_FOLDER_STRUCTURE"/>
+                    <box key="Image/allImages" title="All Photos" class="object.container" upnp-shortcut="IMAGES_ALL"/>
+                    <box key="Image/allYears" title="Year" class="object.container" upnp-shortcut="IMAGES_YEARS"/>
+                    <box key="Image/imageRoot" title="Photos" class="object.container" upnp-shortcut="IMAGES"/>
+                    <box key="Image/unknown" title="Unknown" class="object.container"/>
+                    <box key="Trailer/trailerRoot" title="Online Services" class="object.container"/>
+                    <box key="Trailer/allTrailers" title="All Trailers" class="object.container"/>
+                    <box key="Trailer/allGenres" title="Genres" class="object.container"/>
+                    <box key="Trailer/relDate" title="Release Date" class="object.container"/>
+                    <box key="Trailer/postDate" title="Post Date" class="object.container"/>
+                    <box key="Trailer/unknown" title="Unknown" class="object.container"/>
+                    <box key="Playlist/playlistRoot" title="Playlists" class="object.container"/>
+                    <box key="Playlist/allPlaylists" title="All Playlists" class="object.container"/>
+                    <box key="Playlist/allDirectories" title="Directories" class="object.container" upnp-shortcut="MUSIC_PLAYLISTS"/>
+                </boxlayout>
+            </virtual-layout>
+        </scripting>
+        <library-options multi-value-separator="; " legacy-value-separator="">
+            <libexif charset="UTF-8">
+				<auxdata>
+					<add-data tag="EXIF_TAG_IMAGE_DESCRIPTION"/>
+					<add-data tag="EXIF_TAG_USER_COMMENT"/>
+					<add-data tag="EXIF_TAG_MODEL"/>
+					<add-data tag="EXIF_TAG_DATE_TIME"/>
+					<add-data tag="EXIF_TAG_DATE_TIME_ORIGINAL"/>
+					<add-data tag="EXIF_TAG_ARTIST"/>
+				</auxdata>
+                <metadata/>
+            </libexif>
+            <exiv2 charset="UTF-8">
+				<auxdata>
+					<add-data tag="Exif.CanonTi.DaylightSavings"/>
+					<add-data tag="Exif.CanonTi.TimeZone"/>
+					<add-data tag="Exif.GPSInfo.GPSDateStamp"/>
+					<add-data tag="Exif.GPSInfo.GPSTimeStamp"/>
+					<add-data tag="Exif.Image.Artist"/>
+					<add-data tag="Exif.Image.DateTime"/>
+					<add-data tag="Exif.Image.ImageDescription"/>
+					<add-data tag="Exif.Image.Model"/>
+					<add-data tag="Exif.Photo.DateTimeOriginal"/>
+					<add-data tag="Exif.Photo.UserComment"/>
+					<add-data tag="Xmp.dc.subject"/>
+					<add-data tag="Xmp.photoshop.Headline"/>
+				</auxdata>
+                <metadata/>
+            </exiv2>
+            <id3 charset="UTF-8">
+				<auxdata>
+					<add-data tag="DISCNUMBER"/>
+					<add-data tag="TPE2"/>
+					<add-data tag="TPOS"/>
+					<add-data tag="TCOM"/>
+					<add-data tag="COMPOSER"/>
+					<add-data tag="ENCODEDBY"/>
+					<add-data tag="PERFORMER"/>
+					<add-data tag="WORK"/>
+					<add-data tag="WRITER"/>
+					<add-data tag="LABEL"/>
+					<add-data tag="RELEASETYPE"/>
+					<add-data tag="TXXX:MusicBrainz Album Type"/>
+				</auxdata>
+                <metadata>
+                    <add-data tag="PERFORMER" key="upnp:artist@role[Performer]"/>
+                </metadata>
+            </id3>
+            <ffmpeg charset="UTF-8">
+                <auxdata/>
+                <metadata>
+                    <add-data tag="performer" key="upnp:artist@role[Performer]"/>
+                </metadata>
+            </ffmpeg>
+        </library-options>
+        <system-directories>
+            <add-path name="/bin"/>
+            <add-path name="/boot"/>
+            <add-path name="/dev"/>
+            <add-path name="/etc"/>
+            <add-path name="/lib"/>
+            <add-path name="/lib32"/>
+            <add-path name="/lib64"/>
+            <add-path name="/libx32"/>
+            <add-path name="/proc"/>
+            <add-path name="/run"/>
+            <add-path name="/sbin"/>
+            <add-path name="/sys"/>
+            <add-path name="/tmp"/>
+            <add-path name="/usr"/>
+            <add-path name="/var"/>
+        </system-directories>
+        <visible-directories/>
+        <resources case-sensitive="false">
+			<order>
+				<handler name="Default"/>
+				<handler name="TagLib"/>
+				<handler name="Fanart"/>
+				<handler name="FFmpegThumbnailer"/>
+			</order>
+			<container location="image" parentCount="2" minDepth="2">
+				<add-file name="%album%.jpg"/>
+				<add-file name="%filename%.jpg"/>
+				<add-file name="%title%.jpg"/>
+				<add-file name="Folder.jpg"/>
+				<add-file name="cover.jpg"/>
+			</container>
+			<fanart>
+				<add-file name="%album%.jpg"/>
+				<add-file name="%filename%-poster.jpg"/>
+				<add-file name="%filename%-landscape.jpg"/>
+				<add-file name="%filename%-fanart.jpg"/>
+				<add-file name="cover.png"/>
+				<add-file name="cover.jpg"/>
+				<add-file name="album.jpg"/>
+				<add-file name="front.jpg"/>
+			</fanart>
+			<subtitle>
+				<add-file name="%filename%.srt"/>
+				<add-file name="%filename%.Deutsch.srt"/>
+				<add-dir name="%filename%" ext="srt"/>
+				<add-dir name="." pattern="%filename%*" ext="srt"/>
+			</subtitle>
+			<metafile>
+				<add-file name="%filename%.nfo"/>
+			</metafile>
+			<resource>
+				<add-file name="%filename%.srt"/>
+			</resource>
+        </resources>
+        <layout parent-path="no"/>
+        <directories/>
+        <mappings>
+            <extension-mimetype ignore-unknown="no" case-sensitive="no">
+                <map from="asf" to="video/x-ms-asf"/>
+                <map from="asx" to="video/x-ms-asx"/>
+                <map from="dff" to="audio/x-dff"/>
+                <map from="dsd" to="audio/x-dsd"/>
+                <map from="dsf" to="audio/x-dsf"/>
+                <map from="flv" to="video/x-flv"/>
+                <map from="m2ts" to="video/mp2t"/>
+                <map from="m3u" to="audio/x-mpegurl"/>
+                <map from="m3u8" to="audio/x-mpegurl"/>
+                <map from="m4a" to="audio/mp4"/>
+                <map from="mka" to="audio/x-matroska"/>
+                <map from="mkv" to="video/x-matroska"/>
+                <map from="mp3" to="audio/mpeg"/>
+                <map from="mts" to="video/mp2t"/>
+                <map from="oga" to="audio/ogg"/>
+                <map from="ogg" to="audio/ogg"/>
+                <map from="ogm" to="video/ogg"/>
+                <map from="ogv" to="video/ogg"/>
+                <map from="ogx" to="application/ogg"/>
+                <map from="pls" to="audio/x-scpls"/>
+                <map from="ts" to="video/mp2t"/>
+                <map from="tsa" to="audio/mp2t"/>
+                <map from="tsv" to="video/mp2t"/>
+                <map from="wax" to="audio/x-ms-wax"/>
+                <map from="wm" to="video/x-ms-wm"/>
+                <map from="wma" to="audio/x-ms-wma"/>
+                <map from="wmv" to="video/x-ms-wmv"/>
+                <map from="wmx" to="video/x-ms-wmx"/>
+                <map from="wv" to="audio/x-wavpack"/>
+                <map from="wvx" to="video/x-ms-wvx"/>
+                <!-- Uncomment the line below for PS3 divx support -->
+                <!-- <map from="avi" to="video/divx" /> -->
+                <!-- Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 -->
+                <!-- <map from="avi" to="video/avi" /> -->
+            </extension-mimetype>
+            <mimetype-upnpclass>
+                <map from="application/ogg" to="object.item.audioItem.musicTrack"/>
+                <map from="audio/*" to="object.item.audioItem.musicTrack"/>
+                <map from="image/*" to="object.item.imageItem"/>
+                <map from="video/*" to="object.item.videoItem"/>
+            </mimetype-upnpclass>
+            <mimetype-contenttype>
+                <treat mimetype="application/ogg" as="ogg"/>
+                <treat mimetype="audio/L16" as="pcm"/>
+                <treat mimetype="audio/flac" as="flac"/>
+                <treat mimetype="audio/mp4" as="mp4"/>
+                <treat mimetype="audio/mpeg" as="mp3"/>
+                <treat mimetype="audio/ogg" as="ogg"/>
+                <treat mimetype="audio/x-dsd" as="dsd"/>
+                <treat mimetype="audio/x-flac" as="flac"/>
+                <treat mimetype="audio/x-matroska" as="mka"/>
+                <treat mimetype="audio/x-mpegurl" as="playlist"/>
+                <treat mimetype="audio/x-ms-wma" as="wma"/>
+                <treat mimetype="audio/x-scpls" as="playlist"/>
+                <treat mimetype="audio/x-wav" as="pcm"/>
+                <treat mimetype="audio/x-wavpack" as="wv"/>
+                <treat mimetype="image/jpeg" as="jpg"/>
+                <treat mimetype="image/png" as="png"/>
+                <treat mimetype="video/mkv" as="mkv"/>
+                <treat mimetype="video/mp4" as="mp4"/>
+                <treat mimetype="video/mpeg" as="mpeg"/>
+                <treat mimetype="video/x-matroska" as="mkv"/>
+                <treat mimetype="video/x-mkv" as="mkv"/>
+                <treat mimetype="video/x-ms-asf" as="asf"/>
+                <treat mimetype="video/x-ms-asx" as="playlist"/>
+                <treat mimetype="video/x-msvideo" as="avi"/>
+            </mimetype-contenttype>
+            <mimetype-dlnatransfermode>
+                <map from="application/ogg" to="Streaming"/>
+                <map from="application/x-srt" to="Background"/>
+                <map from="audio/*" to="Streaming"/>
+                <map from="image/*" to="Interactive"/>
+                <map from="srt" to="Background"/>
+                <map from="text/*" to="Background"/>
+                <map from="video/*" to="Streaming"/>
+            </mimetype-dlnatransfermode>
+            <contenttype-dlnaprofile>
+                <map from="asf" to="VC_ASF_AP_L2_WMA"/>
+                <map from="avi" to="AVI"/>
+                <map from="dsd" to="DSF"/>
+                <map from="flac" to="FLAC"/>
+                <map from="jpg" to="JPEG_LRG"/>
+                <map from="mka" to="MKV"/>
+                <map from="mkv" to="MKV"/>
+                <map from="mp3" to="MP3"/>
+                <map from="mp4" to="AVC_MP4_EU"/>
+                <map from="mpeg" to="MPEG_PS_PAL"/>
+                <map from="ogg" to="OGG"/>
+                <map from="pcm" to="LPCM"/>
+                <map from="png" to="PNG_LRG"/>
+                <map from="wma" to="WMAFULL"/>
+            </contenttype-dlnaprofile>
+            <ignore-extensions>
+                <add-file name="part"/>
+                <add-file name="tmp"/>
+            </ignore-extensions>
+        </mappings>
+        <online-content/>
+    </import>
+    <transcoding enabled="no" fetch-buffer-size="262144" fetch-buffer-fill-size="0">
+        <mimetype-profile-mappings allow-unused="no">
+            <transcode mimetype="application/ogg" using="vlcmpeg"/>
+            <transcode mimetype="audio/ogg" using="ogg2mp3"/>
+			<transcode mimetype="video/x-flv" source-profile="AVC_MKV_HP_HD_AC3" client-flags="0x10" using="vlcmpeg"/>
+			<transcode mimetype="application/ogg" using="oggflac2raw"/>
+        </mimetype-profile-mappings>
+        <profiles allow-unused="no">
+            <profile name="ogg2mp3" enabled="no" type="external">
+                <mimetype>audio/mpeg</mimetype>
+                <accept-url>no</accept-url>
+                <first-resource>yes</first-resource>
+                <accept-ogg-theora>no</accept-ogg-theora>
+                <agent command="ffmpeg" arguments="-y -i %in -f mp3 %out"/>
+                <buffer size="1048576" chunk-size="131072" fill-size="262144"/>
+            </profile>
+            <profile name="vlcmpeg" enabled="no" type="external">
+                <mimetype>video/mpeg</mimetype>
+                <accept-url>yes</accept-url>
+                <first-resource>yes</first-resource>
+                <accept-ogg-theora>yes</accept-ogg-theora>
+				<avi-fourcc-list mode="ignore">
+					<fourcc>XVID</fourcc>
+					<fourcc>DX50</fourcc>
+				</avi-fourcc-list>
+                <agent command="vlc" arguments="-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc://quit"/>
+                <buffer size="14400000" chunk-size="512000" fill-size="120000"/>
+            </profile>
+			<profile name="oggflac2raw" enabled="yes" type="external">
+				<mimetype value="audio/L16">
+					<mime-property key="rate" resource="R_SAMPLEFREQUENCY"/>
+					<mime-property key="channels" resource="nrAudioChannels"/>
+					<mime-property key="date" metadata="M_DATE"/>
+				</mimetype>
+				<accept-url>no</accept-url>
+				<first-resource>yes</first-resource>
+				<accept-ogg-theora>no</accept-ogg-theora>
+				<agent command="ogg123" arguments="-d raw -o byteorder:big -f %out %in"/>
+				<buffer size="1048576" chunk-size="131072" fill-size="262144"/>
+			</profile>
+        </profiles>
+    </transcoding>
+</config>

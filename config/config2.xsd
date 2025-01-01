@@ -34,6 +34,8 @@
 
     <xs:simpleType name="boolean">
         <xs:restriction base="xs:string">
+            <xs:enumeration value="true"/>
+            <xs:enumeration value="false"/>
             <xs:enumeration value="yes"/>
             <xs:enumeration value="no"/>
         </xs:restriction>
@@ -156,6 +158,7 @@
             <xs:all>
                 <xs:element ref="ffmpegthumbnailer" minOccurs="0"/>
                 <xs:element ref="mark-played-items" minOccurs="0"/>
+                <xs:element ref="lastfm" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
@@ -236,9 +239,9 @@
 
     <xs:element name="mark">
         <xs:complexType>
-            <xs:all>
-                <xs:element ref="content" minOccurs="1"/>
-            </xs:all>
+            <xs:sequence>
+                <xs:element ref="content" minOccurs="1" maxOccurs="unbounded"/>
+            </xs:sequence>
         </xs:complexType>
     </xs:element>
 
@@ -250,6 +253,16 @@
                 <xs:enumeration value="video"/>
             </xs:restriction>
         </xs:simpleType>
+    </xs:element>
+
+    <xs:element name="lastfm">
+        <xs:complexType>
+            <xs:all>
+                <xs:element name="username" type="xs:string" minOccurs="0"/>
+                <xs:element name="password" type="xs:string" minOccurs="0"/>
+            </xs:all>
+            <xs:attribute name="enabled" type="boolean" default="no"/>
+        </xs:complexType>
     </xs:element>
 
     <xs:element name="add">
@@ -418,7 +431,8 @@
     <xs:element name="backup">
         <xs:complexType>
             <xs:attribute name="enabled" type="boolean" default="no"/>
-            <xs:attribute name="interval" type="xs:positiveInteger" default="600"/>
+            <xs:attribute name="interval" type="xs:string" default="600"/>
+            <!-- <xs:attribute name="interval" type="xs:time" default="10:00"/> -->
         </xs:complexType>
     </xs:element>
 
@@ -439,9 +453,9 @@
     </xs:element>
 
     <xs:element name="host" type="xs:string" default="localhost"/>
-    <xs:element name="username" type="xs:string" default="mediatomb"/>
+    <xs:element name="username" type="xs:string" default="gerbera"/>
     <xs:element name="password" type="xs:string"/>
-    <xs:element name="database" type="xs:string" default="localhost"/>
+    <xs:element name="database" type="xs:string" default="gerbera"/>
     <xs:element name="init-sql-file" type="xs:string"/>
     <xs:element name="socket" type="xs:string"/>
     <xs:element name="upgrade-file" type="xs:string"/>
@@ -835,6 +849,11 @@
 
     <xs:element name="directory">
         <xs:complexType>
+            <xs:all>
+                <xs:element name="container-type-audio" minOccurs="0" type="xs:string"/>
+                <xs:element name="container-type-video" minOccurs="0" type="xs:string"/>
+                <xs:element name="container-type-image" minOccurs="0" type="xs:string"/>
+            </xs:all>
             <xs:attribute name="location" type="xs:string" use="required"/>
 
             <!-- required only for "timed" mode -->
@@ -873,7 +892,7 @@
             <xs:attribute name="location" type="xs:string" use="required"/>
 
             <xs:attribute name="inherit" type="boolean" use="required"/>
-            <xs:attribute name="hidden-files"/>
+            <xs:attribute name="hidden-files" type="boolean"/>
             <xs:attribute name="recursive" type="boolean"/>
             <xs:attribute name="case-sensitive" type="boolean"/>
             <xs:attribute name="fanart-file" type="xs:string"/>
@@ -972,6 +991,8 @@
         <xs:complexType>
             <xs:attribute name="from" type="xs:string" use="required"/>
             <xs:attribute name="to" type="xs:string" use="required"/>
+            <xs:attribute name="audioCodec" type="xs:string"/>
+            <xs:attribute name="videoCodec" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -1013,9 +1034,9 @@
             <xs:element ref="add-dir" minOccurs="0" maxOccurs="unbounded"/>
         </xs:sequence>
         <xs:attribute name="extend" type="boolean" default="no"/>
-        <xs:attribute name="location"/>
-        <xs:attribute name="parentCount" default="2"/>
-        <xs:attribute name="minDepth" default="2"/>
+        <xs:attribute name="location" type="xs:string"/>
+        <xs:attribute name="parentCount" type="xs:integer" default="2"/>
+        <xs:attribute name="minDepth" type="xs:integer" default="2"/>
     </xs:complexType>
 
     <xs:element name="fanart">
@@ -1074,6 +1095,7 @@
         <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="ext" type="xs:string" use="required"/>
+            <xs:attribute name="pattern" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -1229,9 +1251,10 @@
                 <xs:element ref="agent"/>
                 <xs:element ref="buffer"/>
                 <xs:element ref="sample-frequency" minOccurs="0"/>
-                <xs:element name="audio-channels" minOccurs="0"/>
+                <xs:element ref="audio-channels" minOccurs="0"/>
                 <xs:element ref="resolution" minOccurs="0"/>
                 <xs:element ref="thumbnail" minOccurs="0"/>
+                <xs:element ref="avi-fourcc-list" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="name" type="xs:string" use="required"/>
             <xs:attribute name="client-flags" type="xs:string"/>
@@ -1287,9 +1310,18 @@
     </xs:element>
 
     <xs:element name="sample-frequency" type="xs:string"/>
+    <xs:element name="audio-channels" type="xs:string"/>
 
     <xs:element name="resolution" type="xs:string"/>
     <xs:element name="thumbnail" type="boolean"/>
+    <xs:element name="avi-fourcc-list">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="fourcc" type="xs:string" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="mode" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
 
     <xs:element name="environ">
         <xs:complexType>
