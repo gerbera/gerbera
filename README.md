@@ -43,38 +43,38 @@ Visit our docs for instructions to [Compile Gerbera](https://docs.gerbera.io/en/
 git clone https://github.com/gerbera/gerbera.git
 mkdir build
 cd build
-cmake ../gerbera -DWITH_DEBUG=YES
+cmake ../gerbera --preset=release-pupnp
 make -j4
 sudo make install
 ```
 
 ## Dependencies
 
-| Library             | Min Version | Recommended | Latest tested       | Required?     | Note                       | Default  |
-|---------------------|-------------|-------------|---------------------|---------------|----------------------------|----------|
-| libupnp             | 1.14.6      | 1.14.20     | 1.14.20             | XOR libnpupnp | [pupnp]                    |          |
-| libnpupnp           | 4.2.1       | 5.1.2       | 6.2.0               | XOR libupnp   | [npupnp]                   | Disabled |
-| libuuid             |             |             |                     | Depends on OS | Not required on \*BSD      |          |
-| [pugixml]           |             | 1.10        | 1.14                | Required      | XML file and data support  |          |
-| libiconv            |             |             |                     | Required      | Charset conversion         |          |
-| sqlite3             | 3.7.0       | 3.35.5      | 3.36.0              | Required      | Database storage           |          |
-| zlib                |             |             |                     | Required      | Data compression           |          |
-| [fmtlib]            | 7.1.3       | 9.1.0       | 11.0.2              | Required      | Fast string formatting     |          |
-| [spdlog]            | 1.8.1       | 1.11.0      | 1.15.0              | Required      | Runtime logging            |          |
-| [duktape]           | 2.1.0       | 2.6.0       | 2.7.0               | Optional      | Scripting Support          | Enabled  |
-| mysql               |             |             |                     | Optional      | Alternate database storage | Disabled |
-| curl                |             |             |                     | Optional      | Enables web services       | Enabled  |
-| [taglib]            | 1.12        | 1.12        | 2.0.2               | Optional      | Audio tag support          | Enabled  |
-| libmagic            |             |             |                     | Optional      | File type detection        | Enabled  |
-| [wavpack]           | 5.1.0       | 5.4.0       | 5.7.0               | Optional      | WavPack metadata support   | Disabled |
-| [libmatroska]       |             | 1.6.3       | 1.7.1               | Optional      | MKV metadata               | Enabled  |
-| [libebml]           |             | 1.4.2       | 1.4.5               | Optional      | requird by [libmatroska]   | Enabled  |
-| ffmpeg/libav        |             |             |                     | Optional      | File metadata              | Disabled |
-| [libexif]           |             | v0.6.24     | v0.6.24-90-g2ed252d | Optional      | JPEG Exif metadata         | Enabled  |
-| [libexiv2]          | v0.26       | v0.27.7     | v0.28.3             | Optional      | Exif, IPTC, XMP metadata   | Disabled |
-| [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0               | Optional      | Enables scrobbling         | Disabled |
-| [ffmpegthumbnailer] |             | 2.2.2       | 2.2.3               | Optional      | Generate video thumbnails  | Disabled |
-| inotify             |             |             |                     | Optional      | Efficient file monitoring  | Enabled  |
+| Library             | Min Version | Recommended | Latest tested        | Required?     | Note                       | Default  |
+|---------------------|-------------|-------------|----------------------|---------------|----------------------------|----------|
+| libupnp             | 1.14.6      | 1.14.20     | 1.14.20              | XOR libnpupnp | [pupnp]                    |          |
+| libnpupnp           | 4.2.1       | 5.1.2       | 6.2.0                | XOR libupnp   | [npupnp]                   | Disabled |
+| libuuid             |             |             |                      | Depends on OS | Not required on \*BSD      |          |
+| [pugixml]           |             | 1.10        | 1.14                 | Required      | XML file and data support  |          |
+| libiconv            |             |             |                      | Required      | Charset conversion         |          |
+| sqlite3             | 3.7.0       | 3.35.5      | 3.36.0               | Required      | Database storage           |          |
+| zlib                |             |             |                      | Required      | Data compression           |          |
+| [fmtlib]            | 7.1.3       | 9.1.0       | 11.0.2               | Required      | Fast string formatting     |          |
+| [spdlog]            | 1.8.1       | 1.11.0      | 1.15.0               | Required      | Runtime logging            |          |
+| [duktape]           | 2.1.0       | 2.6.0       | 2.7.0                | Optional      | Scripting Support          | Enabled  |
+| mysql               |             |             |                      | Optional      | Alternate database storage | Disabled |
+| curl                |             |             |                      | Optional      | Enables web services       | Enabled  |
+| [taglib]            | 1.12        | 1.12        | 2.0.2                | Optional      | Audio tag support          | Enabled  |
+| libmagic            |             |             |                      | Optional      | File type detection        | Enabled  |
+| [wavpack]           | 5.1.0       | 5.4.0       | 5.7.0                | Optional      | WavPack metadata support   | Disabled |
+| [libmatroska]       |             | 1.6.3       | 1.7.1                | Optional      | MKV metadata               | Enabled  |
+| [libebml]           |             | 1.4.2       | 1.4.5                | Optional      | requird by [libmatroska]   | Enabled  |
+| ffmpeg/libav        |             |             | 7.1                  | Optional      | File metadata              | Disabled |
+| [libexif]           |             | v0.6.24     | v0.6.24-134-g180c120 | Optional      | JPEG Exif metadata         | Enabled  |
+| [libexiv2]          | v0.26       | v0.27.7     | v0.28.3              | Optional      | Exif, IPTC, XMP metadata   | Disabled |
+| [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0                | Optional      | Enables scrobbling         | Disabled |
+| [ffmpegthumbnailer] |             | 2.2.2       | 2.2.3                | Optional      | Generate video thumbnails  | Disabled |
+| inotify             |             |             |                      | Optional      | Efficient file monitoring  | Enabled  |
 
 ## Development Dependencies
 
