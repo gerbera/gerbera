@@ -61,8 +61,6 @@ Optional Packages
 +=====================+============================+=========================+==========+==============================+
 | curl                | Enables web services       | WITH\_CURL              | Enabled  |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
-| doxygen_            | Source documentation       | BUILD\_DOC              | Disabled |                              |
-+---------------------+----------------------------+-------------------------+----------+------------------------------+
 | duktape_            | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh           |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | ffmpeg/libav        | File metadata.             | WITH\_AVCODEC           | Disabled |                              |
@@ -87,8 +85,6 @@ Optional Packages
 | libmatroska_        | MKV metadata               | WITH\_MATROSKA          | Enabled  | install-matroska.sh          |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | mysql               | Alternate database storage | WITH\_MYSQL             | Disabled |                              |
-+---------------------+----------------------------+-------------------------+----------+------------------------------+
-| systemd             | Init script                | WITH\_SYSTEMD           | Enabled  |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | taglib_             | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh            |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
@@ -119,6 +115,31 @@ In order to build the whole package there are ``scripts/debian/build-deb.sh`` an
 different requirements of distribution versions into account.
 
 Make sure no conflicting versions of the development packages are installed.
+
+Additional cmake Options
+------------------------
+
++------------------------+-----------------------------------------------------+----------+
+| Option                 | Note                                                | Default  |
++========================+=====================================================+==========+
+| WITH\_SYSTEMD          | Install Systemd unit file                           | Enabled  |
++------------------------+-----------------------------------------------------+----------+
+| WITH\_ONLINE_\SERVICES | Enable support for Online Services.                 | Disabled |
+|                        | Currently there is no online service left           |          |
++------------------------+-----------------------------------------------------+----------+
+| WITH\_DEBUG            | Enables debug logging                               | Enabled  |
++------------------------+-----------------------------------------------------+----------+
+| WITH\_DEBUG\_OPTIONS   | Enables dedicated debug messages                    | Enabled  |
++------------------------+-----------------------------------------------------+----------+
+| STATIC\_LIBUPNP        | Link to libupnp statically                          | Disabled |
++------------------------+-----------------------------------------------------+----------+
+| BUILD\_DOC             | Add ``doc`` target to generate source documentation | Disabled |
+|                        | Requires doxygen_ to be installed                   |          |
++------------------------+-----------------------------------------------------+----------+
+| BUILD\_CHANGELOG       | Build ``changelog.gz`` file for Debian packages     | Disabled |
++------------------------+-----------------------------------------------------+----------+
+| INSTALL\_DOC           | Install generated documentation into target         | Disabled |
++------------------------+-----------------------------------------------------+----------+
 
 
 .. index:: Quick Start Build

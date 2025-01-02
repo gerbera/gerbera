@@ -43,7 +43,10 @@ macro(generate_documentation DOX_CONFIG_FILE)
     configure_file(${DOX_CONFIG_FILE} ${CMAKE_CURRENT_BINARY_DIR}/doxy.config @ONLY)
 
     set(DOXY_CONFIG "${CMAKE_CURRENT_BINARY_DIR}/doxy.config")
-    add_custom_target(doc ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG})
+    add_custom_target(doc
+	    COMMAND ${DOXYGEN_EXECUTABLE} ${DOXY_CONFIG}
+	    OUTPUT ${PROJECT_SOURCE_DIR}/doc/_build/html
+    )
 
     set_property(DIRECTORY APPEND PROPERTY ADDITIONAL_MAKE_CLEAN_FILES doc)
 endmacro()
