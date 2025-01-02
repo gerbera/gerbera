@@ -1,6 +1,6 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v2.4.0
 
 - Access permissions for files by client
 - actions: clang-format 18
@@ -17,6 +17,7 @@
 - Dynamic banner colour in Readme
 - Enhance xsd
 - Fix access to cache option if thumbnailer disabled
+- Fix Artist Image in Virtual Layout
 - Fix autoscan issue with empty filename
 - Fix build without ffmpeg
 - Fix CodeQL messages
@@ -36,6 +37,7 @@
 - Mention systemd as optional package
 - Resource directory configuration and cleanup collection
 - Scripting: Clean up property handling
+- Set correct image size for xx-large pictures
 - Test: Fix CMake commands
 - Update and refactor MySQL code
 - Update Build Environment

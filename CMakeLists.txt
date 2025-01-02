@@ -25,7 +25,7 @@ cmake_policy(VERSION 3.13)
 
 # Only set for release tags
 # You should only see version "git" when built from a git snapshot tarball
-set(GERBERA_VERSION "git")
+set(GERBERA_VERSION "2.4.0")
 
 project(Gerbera
         DESCRIPTION "UPnP Media Server"
@@ -67,7 +67,8 @@ option(WITH_DEBUG             "Enables debug logging" ON)
 option(WITH_DEBUG_OPTIONS     "Enables dedicated debug messages" ON)
 option(WITH_TESTS             "Build unit tests" OFF)
 
-option(BUILD_DOC              "Add 'doc' target to generate documentation" OFF)
+option(INSTALL_DOC            "Install generated documentation into target" OFF)
+option(BUILD_DOC              "Add 'doc' target to generate source documentation" OFF)
 option(BUILD_CHANGELOG        "Build 'changelog.gz' file for Debian packages" OFF)
 
 # For building packages without depending on the old system libupnp
@@ -741,8 +742,8 @@ if(WITH_SYSTEMD AND (${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
 endif()
 
 if(BUILD_DOC)
-  include(cmake/generateDoc.cmake REQUIRED)
-  generate_documentation("${PROJECT_SOURCE_DIR}/doc/Doxyfile.in")
+    include(cmake/generateDoc.cmake REQUIRED)
+    generate_documentation("${PROJECT_SOURCE_DIR}/doc/Doxyfile.in")
 endif()
 
 if(WITH_TESTS)
@@ -756,28 +757,32 @@ include(GNUInstallDirs)
 set(DEBIAN_EXTRA_FILES ${CMAKE_CURRENT_SOURCE_DIR}/scripts/debian/postinst)
 
 if(BUILD_CHANGELOG)
-  add_custom_command(
-      OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
-      COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/debian/gitlog2changelog.sh Gerbera > "${CMAKE_CURRENT_BINARY_DIR}/changelog"
-      COMMAND gzip -cn9 "${CMAKE_CURRENT_BINARY_DIR}/changelog" > "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
-      WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
-      DEPENDS ChangeLog.md
-      COMMENT "Building changelog"
-  )
-  set(DEBIAN_EXTRA_FILES "${DEBIAN_EXTRA_FILES}" "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
+    add_custom_command(
+        OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
+        COMMAND ${CMAKE_CURRENT_SOURCE_DIR}/scripts/debian/gitlog2changelog.sh Gerbera > "${CMAKE_CURRENT_BINARY_DIR}/changelog"
+        COMMAND gzip -cn9 "${CMAKE_CURRENT_BINARY_DIR}/changelog" > "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
+        WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
+        DEPENDS ChangeLog.md
+        COMMENT "Building changelog"
+    )
+    set(DEBIAN_EXTRA_FILES "${DEBIAN_EXTRA_FILES}" "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
 
-  add_custom_target(changelog ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
+    add_custom_target(changelog ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
 
-  install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
-      DESTINATION "${CMAKE_INSTALL_DOCDIR}"
-  )
+    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
+            DESTINATION "${CMAKE_INSTALL_DOCDIR}"
+    )
 endif()
 
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${DEBIAN_EXTRA_FILES})
 
 INSTALL(TARGETS gerbera DESTINATION ${CMAKE_INSTALL_BINDIR})
 INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js DESTINATION ${CMAKE_INSTALL_DATADIR})
-INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web DESTINATION ${CMAKE_INSTALL_DATADIR})
+INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web
+        DESTINATION ${CMAKE_INSTALL_DATADIR}
+        PATTERN web/dev EXCLUDE
+        PATTERN web/doc EXCLUDE
+)
 
 INSTALL(FILES
         src/database/mysql/mysql.sql
@@ -786,5 +791,36 @@ INSTALL(FILES
         src/database/sqlite3/sqlite3-upgrade.xml
         DESTINATION ${CMAKE_INSTALL_DATADIR})
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/gerbera.1 DESTINATION ${CMAKE_INSTALL_MANDIR})
+
+macro(makeLink root src dest)
+    INSTALL(CODE
+            "MESSAGE(\"adding link in ${root} to ${src} from ${dest}\")"
+            "EXECUTE_PROCESS(COMMAND ln -snf ${root}/${src} ${root}/${dest})"
+    )
+endmacro()
+
+if(INSTALL_DOC)
+    INSTALL(CODE
+            "MESSAGE(\"${PROJECT_SOURCE_DIR}/doc/do_sphinx.sh\")"
+    )
+    INSTALL(CODE
+            "EXECUTE_PROCESS(COMMAND ${PROJECT_SOURCE_DIR}/doc/do_sphinx.sh)"
+    )
+    INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/_build/dist/
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/dist)
+    makeLink(${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR} doc/dist web/doc)
+
+    if(BUILD_DOC)
+        INSTALL(CODE
+                "MESSAGE(\"${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} -t doc\")"
+        )
+        INSTALL(CODE
+                "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} -t doc)"
+        )
+        INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/_build/html/
+                DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/dev)
+        makeLink(${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR} doc/dev web/dev)
+    endif()
+endif()
 
 include(packaging)
