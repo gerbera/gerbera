@@ -750,7 +750,7 @@ static const std::map<std::string_view, std::map<std::string_view, std::string_v
                             { RESOURCE_IMAGE_STEP_SD, UPNP_DLNA_PROFILE_JPEG_SM },
                             { RESOURCE_IMAGE_STEP_HD, UPNP_DLNA_PROFILE_JPEG_MED },
                             { RESOURCE_IMAGE_STEP_UHD, UPNP_DLNA_PROFILE_JPEG_LRG },
-                            { RESOURCE_IMAGE_STEP_XHD, UPNP_DLNA_PROFILE_JPEG_LRG }
+                            { RESOURCE_IMAGE_STEP_XHD, UPNP_DLNA_PROFILE_JPEG_LRG },
                             { RESOURCE_IMAGE_STEP_DEF, UPNP_DLNA_PROFILE_JPEG_TN },
                         } },
     { CONTENT_TYPE_PNG, {
