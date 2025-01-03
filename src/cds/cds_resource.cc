@@ -173,7 +173,7 @@ std::string CdsResource::getAttributeValue(ResourceAttribute attr) const
                     return val.data();
                 }
             }
-            return RESOURCE_IMAGE_STEP_UHD; // Image is larger with no step defined
+            return RESOURCE_IMAGE_STEP_XHD; // Image is larger with no step defined
         } catch (const std::runtime_error& e) {
             log_warning("Resource attribute for resolution {} is invalid", result);
             return fmt::format("???", result);
