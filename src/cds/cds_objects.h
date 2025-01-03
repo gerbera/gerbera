@@ -36,6 +36,7 @@
 
 #include "cds_resource.h"
 #include "common.h"
+#include "gerbera_fs_path.h"
 #include "metadata/metadata_enums.h"
 #include "util/grb_fs.h"
 
@@ -63,7 +64,7 @@ protected:
     std::string upnpClass;
 
     /// \brief Physical location of the media.
-    fs::path location;
+    gerbera_fs_path location;
 
     /// \brief Last modification time in the file system.
     /// In seconds since UNIX epoch.
@@ -145,9 +146,9 @@ public:
     ObjectType getMediaType(const std::string& contentType = "") const;
 
     /// \brief Set the physical location of the media (usually an absolute path)
-    void setLocation(const fs::path& location) { this->location = location; }
+    void setLocation(const gerbera_fs_path& location) { this->location = location; }
     /// \brief Retrieve media location.
-    const fs::path& getLocation() const { return location; }
+    const gerbera_fs_path& getLocation() const { return location; }
 
     /// \brief Set modification time of the media file.
     void setMTime(std::chrono::seconds mtime) { this->mtime = mtime; }

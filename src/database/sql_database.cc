@@ -1079,6 +1079,19 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         result.push_back(std::move(obj));
     }
 
+    // if(orderBy.empty())
+    /// @todo TODO: make a BROWSE_PARAM flag
+    {
+        typedef std::shared_ptr<CdsObject> pObj;
+
+        std::sort(result.begin(), result.end(), [&parent](const pObj& lhs, const pObj& rhs) {
+            return parent->getLocation().distance(lhs->getLocation()) < parent->getLocation().distance(rhs->getLocation());
+        });
+        std::sort(containers.begin(), containers.end(), [&parent](const pObj& lhs, const pObj& rhs) {
+            return parent->getLocation().distance(lhs->getLocation()) < parent->getLocation().distance(rhs->getLocation());
+        });
+    }
+
     // update childCount fields of containers (query all containers in one batch)
     if (!containers.empty()) {
         std::vector<int> contIds;
