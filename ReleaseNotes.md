@@ -1,6 +1,6 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v2.4.0
 
 Rerun `gerbera --create-config="Boxlayout|DynamicContainer"` and merge changes to the `boxlayout` and `containers` the get support for upnp shortcut list feature.
 
@@ -17,7 +17,7 @@ There are some noteworthy new features in this release:
 - Support for UPnP filters
 - Support for UPnP shortcuts
 - Search page in web UI
-- command line option `--create-config` and `--create-example-config` support arguments
+- Command line options `--create-config` and `--create-example-config` support arguments
 - Provide packages for Ubuntu-24.10
 - Allow deleting of client entries immediately
 
@@ -28,7 +28,7 @@ There are some noteworthy new features in this release:
 - Handling of checkbox values on web ui
 - Access to cache option if thumbnailer is disabled
 - Container creation in web ui
-- Handling of multivalued tag in virtual paths
+- Handling of multi-valued tags in virtual paths
 - Increase of pupnp threadpool size
 - Drop Build Support for Ubuntu 23.04 and 23.10
 

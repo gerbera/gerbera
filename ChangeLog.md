@@ -1,6 +1,6 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v2.4.0
 
 - Access permissions for files by client
 - actions: clang-format 18
@@ -36,6 +36,7 @@
 - Mention systemd as optional package
 - Resource directory configuration and cleanup collection
 - Scripting: Clean up property handling
+- Set correct image size for xx-large pictures
 - Test: Fix CMake commands
 - Update and refactor MySQL code
 - Update Build Environment

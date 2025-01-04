@@ -292,7 +292,7 @@
                     <box key="Trailer/unknown" title="Unknown" class="object.container"/>
                     <box key="Playlist/playlistRoot" title="Playlists" class="object.container"/>
                     <box key="Playlist/allPlaylists" title="All Playlists" class="object.container"/>
-                    <box key="Playlist/allDirectories" title="Directories" class="object.container" upnp-shortcut="MUSIC_PLAYLISTS"/>
+                    <box key="Playlist/allDirectories" title="Directories" class="object.container" upnp-shortcut="MUSIC_PLAYLISTS" size="-2"/>
                 </boxlayout>
             </virtual-layout>
         </scripting>
