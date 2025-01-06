@@ -784,12 +784,23 @@ void ImportService::finishScan(const fs::path& location, const std::shared_ptr<C
                 count = std::distance(objectLocation.begin(), objectLocation.end()) - std::distance(location.begin(), location.end());
             }
             database->updateObject(parent, nullptr);
-            assignFanArt(parent, firstObject, AutoscanMediaMode::Mixed, false, count);
+            assignFanArt(parent,
+                firstObject,
+                AutoscanMediaMode::Mixed,
+                false /* isDir */,
+                count,
+                false /* isNew */);
         }
     }
 }
 
-void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, AutoscanMediaMode mediaMode, bool isDir, int count)
+void ImportService::assignFanArt(
+    const std::shared_ptr<CdsContainer>& container,
+    const std::shared_ptr<CdsObject>& refObj,
+    AutoscanMediaMode mediaMode,
+    bool isDir,
+    int count,
+    bool isNew)
 {
     if (!container)
         return;
@@ -807,7 +818,7 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
     }
 
     if (containersWithFanArt.find(container->getID()) != containersWithFanArt.end()) {
-        log_debug("Already assigned fanart {}", container->getID());
+        log_debug("Already {} assigned fanart {}", container->getLocation().string(), container->getID());
         if (doUpdate)
             database->updateObject(container, nullptr);
         return;
@@ -819,15 +830,17 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
         auto fanartObjId = stoiString(fanart->getAttribute(ResourceAttribute::FANART_OBJ_ID));
         try {
             if (fanartObjId > CDS_ID_ROOT) {
+                log_debug("Object {} assigned fanart {}", container->getLocation().string(), container->getID());
                 database->loadObject(fanartObjId);
             }
         } catch (const ObjectNotFoundException&) {
+            log_warning("Object fanart {} broken {}", container->getLocation().string(), fanartObjId);
             container->removeResource(fanart->getHandlerType());
             doUpdate = true;
             fanart = nullptr;
         }
     }
-    if (!fanart || fanart->getHandlerType() != ContentHandler::CONTAINERART) {
+    if (!fanart || isNew || fanart->getHandlerType() != ContentHandler::CONTAINERART) {
         if (fanart) {
             container->clearResources();
             doUpdate = true;
@@ -836,8 +849,10 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
         auto containerart = container->getResource(ResourcePurpose::Thumbnail);
         if (containerart) {
             fanart = containerart;
+        } else if (fanart) {
+            container->addResource(fanart); // restore if no image matches
         }
-        log_debug("fanart from dir {}", containerart != nullptr);
+        log_debug("fanart {} from dir {}", container->getLocation().string(), containerart != nullptr);
     }
 
     if (refObj && !fanart) {
@@ -869,7 +884,7 @@ void ImportService::assignFanArt(const std::shared_ptr<CdsContainer>& container,
                 } else {
                     fanart = refFanArt;
                 }
-                log_debug("fanart from ref {}", fanart != nullptr);
+                log_debug("fanart {} from ref {}", location.string(), fanart != nullptr);
             }
         }
     }
@@ -892,7 +907,10 @@ std::shared_ptr<CdsContainer> ImportService::getContainer(const std::string& loc
     return containerMap.at(location);
 }
 
-std::shared_ptr<CdsContainer> ImportService::createSingleContainer(int parentContainerId, const fs::directory_entry& dirEntry, const std::string& upnpClass)
+std::shared_ptr<CdsContainer> ImportService::createSingleContainer(
+    int parentContainerId,
+    const fs::directory_entry& dirEntry,
+    const std::string& upnpClass)
 {
     std::vector<std::shared_ptr<CdsObject>> cVec;
     auto location = dirEntry.path();
@@ -1012,7 +1030,12 @@ std::pair<int, bool> ImportService::addContainerTree(
         }
         count++;
         if (isVirtual) // && chain.size() - count < containerImageParentCount
-            assignFanArt(containerMap.at(subTree), refItem && count > containerImageMinDepth ? refItem : item, AutoscanMediaMode::Mixed, false, chain.size() - count);
+            assignFanArt(containerMap.at(subTree),
+                refItem && count > containerImageMinDepth ? refItem : item,
+                AutoscanMediaMode::Mixed,
+                false /* isDir */,
+                chain.size() - count,
+                isNew);
     }
     log_debug("end '{}' {} {}", tree, result, isNew);
     return { result, isNew };
@@ -1024,6 +1047,11 @@ void ImportService::updateFanArt(bool isDir)
         if (!stateEntry || !stateEntry->getObject() || !stateEntry->getObject()->isContainer())
             continue;
         std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(stateEntry->getObject());
-        assignFanArt(container, stateEntry->getFirstObject(), stateEntry->getMediaMode(), isDir, 1);
+        assignFanArt(container,
+            stateEntry->getFirstObject(),
+            stateEntry->getMediaMode(),
+            isDir,
+            1,
+            false /* isNew */);
     }
 }

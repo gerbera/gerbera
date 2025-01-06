@@ -203,7 +203,20 @@ private:
     void updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
     void fillLayout(const std::shared_ptr<GenericTask>& task);
     void updateFanArt(bool isDir);
-    void assignFanArt(const std::shared_ptr<CdsContainer>& container, const std::shared_ptr<CdsObject>& refObj, AutoscanMediaMode mediaMode, bool isDir, int count);
+    /// @brief try to assign fanart to container
+    /// @param container target object
+    /// @param refObj object to point to for fanart
+    /// @param mediaMode media mode for physical folders
+    /// @param isDir target is physical folder
+    /// @param count current depth of folder path
+    /// @param isNew new virtual target
+    void assignFanArt(
+        const std::shared_ptr<CdsContainer>& container,
+        const std::shared_ptr<CdsObject>& refObj,
+        AutoscanMediaMode mediaMode,
+        bool isDir,
+        int count,
+        bool isNew);
     void removeHidden(const AutoScanSetting& settings);
 
     void cacheState(
