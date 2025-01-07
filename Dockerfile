@@ -146,7 +146,7 @@ EXPOSE 1900/udp
 ENV IMAGE_PORT=${IMAGE_PORT:-49494}
 
 ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
-CMD ["gerbera", "--port", "${IMAGE_PORT}", "--config", "/var/run/gerbera/config.xml"]
+CMD ["/bin/sh", "-c", "gerbera --port ${IMAGE_PORT} --config /var/run/gerbera/config.xml"]
 
 FROM gerbera AS with_transcoding
 RUN apk add --no-cache \

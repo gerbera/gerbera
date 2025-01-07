@@ -1,5 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### v2.4.1
+
+- Fix Dockerfile
+
 ### v2.4.0
 
 - Access permissions for files by client

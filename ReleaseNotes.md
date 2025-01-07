@@ -1,5 +1,11 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## 2.4.1
+
+### FIXES
+
+- Fix Dockerfile
+
 ## v2.4.0
 
 Rerun `gerbera --create-config="Boxlayout|DynamicContainer"` and merge changes to the `boxlayout` and `containers` the get support for upnp shortcut list feature.
