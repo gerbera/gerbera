@@ -56,10 +56,15 @@
 #include <langinfo.h>
 #endif
 
-ConfigManager::ConfigManager(fs::path filename,
-    const fs::path& userHome, const fs::path& configDir,
-    fs::path dataDir, bool debug)
-    : filename(std::move(filename))
+ConfigManager::ConfigManager(
+    std::shared_ptr<ConfigDefinition> definition,
+    fs::path filename,
+    const fs::path& userHome,
+    const fs::path& configDir,
+    fs::path dataDir,
+    bool debug)
+    : definition(std::move(definition))
+    , filename(std::move(filename))
     , dataDir(std::move(dataDir))
 {
     options = std::vector<std::shared_ptr<ConfigOption>>(to_underlying(ConfigVal::MAX));
@@ -91,7 +96,7 @@ std::shared_ptr<Config> ConfigManager::getSelf()
 
 std::shared_ptr<ConfigOption> ConfigManager::setOption(const pugi::xml_node& root, ConfigVal option, const std::map<std::string, std::string>* arguments)
 {
-    auto co = ConfigDefinition::findConfigSetup(option);
+    auto co = definition->findConfigSetup(option);
     auto self = getSelf();
     co->makeOption(root, self, arguments);
     log_debug("Config: option set: '{}' = '{}'", co->xpath, co->getCurrentValue());
@@ -132,7 +137,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // now go through the mandatory parameters,
     // if something is missing we will not start the server
-    auto co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_HOME);
+    auto co = definition->findConfigSetup(ConfigVal::SERVER_HOME);
     // respect command line if available; ignore xml value
     {
         std::string activeHome = userHome.string();
@@ -152,16 +157,16 @@ void ConfigManager::load(const fs::path& userHome)
     [[maybe_unused]] bool mysqlEn = false;
     bool sqlite3En = false;
 
-    co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE);
+    co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE);
     co->getXmlElement(root); // fails if missing
     setOption(root, ConfigVal::SERVER_STORAGE_USE_TRANSACTIONS);
 
-    co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL);
+    co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL);
     if (co->hasXmlElement(root)) {
         mysqlEn = setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED)->getBoolOption();
     }
 
-    co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE);
+    co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE);
     if (co->hasXmlElement(root)) {
         sqlite3En = setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_ENABLED)->getBoolOption();
     }
@@ -178,10 +183,10 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_SOCKET);
         setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_PASSWORD);
 
-        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
         co->setDefaultValue(dataDir / "mysql.sql");
         co->makeOption(root, self);
-        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE);
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE);
         co->setDefaultValue(dataDir / "mysql-upgrade.xml");
         co->makeOption(root, self);
         dbDriver = "mysql";
@@ -197,20 +202,20 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
         setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
 
-        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
         co->setDefaultValue(dataDir / "sqlite3.sql");
         co->makeOption(root, self);
-        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE);
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE);
         co->setDefaultValue(dataDir / "sqlite3-upgrade.xml");
         co->makeOption(root, self);
         dbDriver = "sqlite3";
     }
 
-    co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_DRIVER);
+    co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_DRIVER);
     co->makeOption(dbDriver, self);
 
     bool multiValue = setOption(root, ConfigVal::UPNP_MULTI_VALUES_ENABLED)->getBoolOption();
-    co = ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE);
+    co = definition->findConfigSetup(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE);
     co->setDefaultValue(multiValue ? YES : NO);
 
     bool clEn = setOption(root, ConfigVal::CLIENTS_LIST_ENABLED)->getBoolOption();
@@ -233,7 +238,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
 #endif
     // check if the one we take as default is actually available
-    co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_FILESYSTEM_CHARSET);
+    co = definition->findConfigSetup(ConfigVal::IMPORT_FILESYSTEM_CHARSET);
     try {
         auto conv = std::make_unique<StringConverter>(defaultCharSet, DEFAULT_INTERNAL_CHARSET);
     } catch (const std::runtime_error&) {
@@ -241,23 +246,23 @@ void ConfigManager::load(const fs::path& userHome)
     }
     co->setDefaultValue(defaultCharSet);
 
-    co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_METADATA_CHARSET);
+    co = definition->findConfigSetup(ConfigVal::IMPORT_METADATA_CHARSET);
     co->setDefaultValue(defaultCharSet);
 
-    co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_PLAYLIST_CHARSET);
+    co = definition->findConfigSetup(ConfigVal::IMPORT_PLAYLIST_CHARSET);
     co->setDefaultValue(defaultCharSet);
 
-    co = ConfigDefinition::findConfigSetup(ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET);
+    co = definition->findConfigSetup(ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET);
     co->setDefaultValue(defaultCharSet);
 
 #ifdef HAVE_JS
     // read javascript options
-    co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER);
+    co = definition->findConfigSetup(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER);
     co->setDefaultValue(dataDir / DEFAULT_JS_DIR);
     co->makeOption(root, self);
 
     // read more javascript options
-    co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_SCRIPTING_CHARSET);
+    co = definition->findConfigSetup(ConfigVal::IMPORT_SCRIPTING_CHARSET);
     co->setDefaultValue(defaultCharSet);
 #endif
 
@@ -318,7 +323,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // read options that do not have special requirement and that are not yet loaded
     for (auto&& optionKey : ConfigOptionIterator()) {
-        if (!options.at(to_underlying(optionKey)) && !ConfigDefinition::isDependent(optionKey)) {
+        if (!options.at(to_underlying(optionKey)) && !definition->isDependent(optionKey)) {
             setOption(root, optionKey);
         }
     }
@@ -406,7 +411,7 @@ bool ConfigManager::validate()
                                 "however you specified \"js\" to be used for the "
                                 "virtual-layout.");
 #endif
-    auto co = ConfigDefinition::findConfigSetup<ConfigBoxLayoutSetup>(ConfigVal::BOXLAYOUT_BOX);
+    auto co = definition->findConfigSetup<ConfigBoxLayoutSetup>(ConfigVal::BOXLAYOUT_BOX);
     if (!co->validate(getSelf(), getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX)))
         throw_std_runtime_error("Validation of {} failed", co->xpath);
 
@@ -423,7 +428,7 @@ void ConfigManager::updateConfigFromDatabase(const std::shared_ptr<Database>& da
 
     for (auto&& cfgValue : values) {
         try {
-            auto cs = ConfigDefinition::findConfigSetupByPath(cfgValue.key, true);
+            auto cs = definition->findConfigSetupByPath(cfgValue.key, true);
 
             if (cs) {
                 if (cfgValue.item == cs->xpath) {
@@ -448,6 +453,18 @@ void ConfigManager::updateConfigFromDatabase(const std::shared_ptr<Database>& da
             log_error("error setting option {}. Exception {}", cfgValue.key, e.what());
         }
     }
+}
+
+std::string ConfigManager::generateUDN(const std::shared_ptr<Database>& database)
+{
+    auto serverUDN = fmt::format("uuid:{}", generateRandomId());
+    auto self = getSelf();
+    auto cs = definition->findConfigSetup(ConfigVal::SERVER_UDN);
+    cs->makeOption(serverUDN, self);
+    database->updateConfigValue(cs->getUniquePath(), cs->getItemPath({}, {}), serverUDN, "added");
+    log_info("Generated UDN '{}' and saved in database", serverUDN);
+
+    return serverUDN;
 }
 
 void ConfigManager::setOrigValue(const std::string& item, const std::string& value)
@@ -483,7 +500,7 @@ std::string ConfigManager::getOption(ConfigVal option) const
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("string option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getOption();
@@ -493,7 +510,7 @@ IntOptionType ConfigManager::getIntOption(ConfigVal option) const
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("int option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getIntOption();
@@ -503,7 +520,7 @@ UIntOptionType ConfigManager::getUIntOption(ConfigVal option) const
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("uint option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getUIntOption();
@@ -513,7 +530,7 @@ LongOptionType ConfigManager::getLongOption(ConfigVal option) const
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("long option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getLongOption();
@@ -523,7 +540,7 @@ std::shared_ptr<ConfigOption> ConfigManager::getConfigOption(ConfigVal option) c
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("option {}='{}'not set", option, cs->getItemPathRoot());
     }
     return optionValue;
@@ -533,7 +550,7 @@ bool ConfigManager::getBoolOption(ConfigVal option) const
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("bool option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getBoolOption();
@@ -543,7 +560,7 @@ std::map<std::string, std::string> ConfigManager::getDictionaryOption(ConfigVal 
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("dictionary option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getDictionaryOption();
@@ -553,7 +570,7 @@ std::vector<std::vector<std::pair<std::string, std::string>>> ConfigManager::get
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("vector option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getVectorOption();
@@ -563,7 +580,7 @@ std::vector<std::string> ConfigManager::getArrayOption(ConfigVal option) const
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("array option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getArrayOption();
@@ -573,7 +590,7 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ConfigManager::getAutoscanListOp
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("autoscan option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getAutoscanListOption();
@@ -583,7 +600,7 @@ std::shared_ptr<BoxLayoutList> ConfigManager::getBoxLayoutListOption(ConfigVal o
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("box layout option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getBoxLayoutListOption();
@@ -593,7 +610,7 @@ std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(Confi
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("client config option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getClientConfigListOption();
@@ -603,7 +620,7 @@ std::shared_ptr<DirectoryConfigList> ConfigManager::getDirectoryTweakOption(Conf
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("directory tweak option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getDirectoryTweakOption();
@@ -613,7 +630,7 @@ std::shared_ptr<DynamicContentList> ConfigManager::getDynamicContentListOption(C
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("dynamic folder option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getDynamicContentListOption();
@@ -623,7 +640,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileList
 {
     auto optionValue = options.at(to_underlying(option));
     if (!optionValue) {
-        auto cs = ConfigDefinition::findConfigSetup(option);
+        auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("transcoding option {}='{}' not set", option, cs->getItemPathRoot());
     }
     return optionValue->getTranscodingProfileListOption();

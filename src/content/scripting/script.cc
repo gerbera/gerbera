@@ -111,6 +111,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , converterManager(content->getContext()->getConverterManager())
+    , definition(content->getContext()->getDefinition())
     , content(content)
     , runtime(content->getScriptingRuntime())
     , sc(std::move(sc))
@@ -190,13 +191,13 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
 
     duk_push_object(ctx); // config
     for (auto&& i : ConfigOptionIterator()) {
-        auto scs = ConfigDefinition::findConfigSetup(i, true);
+        auto scs = definition->findConfigSetup(i, true);
         if (!scs)
             continue;
         setProperty(scs->getItemPathRoot(), scs->getCurrentValue(), false);
     }
 
-    for (auto&& dcs : ConfigDefinition::getConfigSetupList<ConfigDictionarySetup>()) {
+    for (auto&& dcs : definition->getConfigSetupList<ConfigDictionarySetup>()) {
         duk_push_object(ctx);
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
         for (auto&& [key, val] : dictionary) {
@@ -205,7 +206,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
         duk_put_prop_string(ctx, -2, dcs->getItemPathRoot().c_str());
     }
 
-    for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
+    for (auto&& acs : definition->getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         auto dukArray = duk_push_array(ctx);
         for (duk_uarridx_t i = 0; i < array.size(); i++) {
@@ -216,22 +217,22 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
         duk_put_prop_string(ctx, -2, acs->getItemPathRoot().c_str());
     }
 
-    for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
+    for (auto&& ascs : definition->getConfigSetupList<ConfigAutoscanSetup>()) {
         duk_push_object(ctx); // autoscan
         auto autoscan = ascs->getValue()->getAutoscanListOption();
 
         for (const auto& adir : content->getAutoscanDirectories()) {
             duk_push_object(ctx);
 
-            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
-            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
-            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
-            setBoolProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
-            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE), adir->getMediaType());
-            setBoolProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
-            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
-            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
-            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
+            setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
+            setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
+            setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
+            setBoolProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
+            setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE), adir->getMediaType());
+            setBoolProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
+            setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
+            setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
+            setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
 
             duk_put_prop_string(ctx, -2, fmt::to_string(adir->getScanID()).c_str());
         }
@@ -240,18 +241,18 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
         log_debug("Adding config[{}] {}", autoscanItemPath, content->getAutoscanDirectories().size());
     }
 
-    for (auto&& bcs : ConfigDefinition::getConfigSetupList<ConfigBoxLayoutSetup>()) {
+    for (auto&& bcs : definition->getConfigSetupList<ConfigBoxLayoutSetup>()) {
         duk_push_object(ctx); // box-layout
         auto boxLayoutList = bcs->getValue()->getBoxLayoutListOption();
         for (std::size_t i = 0; i < boxLayoutList->size(); i++) {
             duk_push_object(ctx);
             auto boxLayout = boxLayoutList->get(i);
             setIntProperty("id", boxLayout->getId());
-            setIntProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_SIZE), boxLayout->getSize());
-            setBoolProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_ENABLED), boxLayout->getEnabled());
-            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_TITLE), boxLayout->getTitle());
-            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_CLASS), boxLayout->getClass());
-            setProperty(ConfigDefinition::removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT), boxLayout->getUpnpShortcut());
+            setIntProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_SIZE), boxLayout->getSize());
+            setBoolProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_ENABLED), boxLayout->getEnabled());
+            setProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_TITLE), boxLayout->getTitle());
+            setProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_CLASS), boxLayout->getClass());
+            setProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT), boxLayout->getUpnpShortcut());
             duk_put_prop_string(ctx, -2, boxLayout->getKey().c_str());
         }
         std::string boxLayoutItemPath = bcs->getItemPathRoot(true); // prefix

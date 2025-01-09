@@ -21,7 +21,9 @@
     $Id$
 */
 
+#include "config/config_definition.h"
 #include "config/config_generator.h"
+
 #include <fstream>
 #include <regex>
 
@@ -38,7 +40,9 @@ public:
 
     void SetUp() override
     {
-        subject = new ConfigGenerator(false);
+        std::shared_ptr<ConfigDefinition> definition = std::make_shared<ConfigDefinition>();
+        definition->init(definition);
+        subject = new ConfigGenerator(definition, false);
         subject->init();
         homePath = "/tmp";
         configDir = ".config/gerbera";
@@ -333,7 +337,9 @@ public:
 
     void SetUp() override
     {
-        subject = new ConfigGenerator(true);
+        std::shared_ptr<ConfigDefinition> definition = std::make_shared<ConfigDefinition>();
+        definition->init(definition);
+        subject = new ConfigGenerator(definition, true);
         subject->init();
         homePath = "/tmp";
         configDir = ".config/gerbera";

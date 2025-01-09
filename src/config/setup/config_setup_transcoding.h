@@ -38,7 +38,7 @@ protected:
     /// \brief Creates an array of TranscodingProfile objects from an XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param result contents of config.
-    static bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result);
+    bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result) const;
 
 public:
     std::string getTypeString() const override { return "List"; }

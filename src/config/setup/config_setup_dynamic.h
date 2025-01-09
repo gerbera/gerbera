@@ -39,7 +39,7 @@ protected:
     /// \brief Creates an array of DynamicContent objects from a XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param result contents of config.
-    static bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result);
+    bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result) const;
 
 public:
     bool updateItem(const std::vector<std::size_t>& indexList,

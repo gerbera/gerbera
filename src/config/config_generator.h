@@ -26,11 +26,12 @@
 #ifndef GERBERA_CONFIG_GENERATOR_H
 #define GERBERA_CONFIG_GENERATOR_H
 
-#include <pugixml.hpp>
-
 #include "config/config.h"
 
+#include <pugixml.hpp>
+
 // forward declarations
+class ConfigDefinition;
 class ConfigSetup;
 
 enum class GeneratorSections {
@@ -49,8 +50,12 @@ enum class GeneratorSections {
 
 class ConfigGenerator {
 public:
-    ConfigGenerator(bool example, int sections = 0)
-        : example(example)
+    ConfigGenerator(
+        std::shared_ptr<ConfigDefinition> definition,
+        bool example,
+        int sections = 0)
+        : definition(std::move(definition))
+        , example(example)
         , generateSections(sections)
     {
     }
@@ -78,10 +83,12 @@ public:
     bool isGenerated(GeneratorSections section);
 
 protected:
+    std::shared_ptr<ConfigDefinition> definition;
     bool example { false };
     int generateSections { 0 };
     std::map<std::string, std::shared_ptr<pugi::xml_node>> generated;
     pugi::xml_document doc;
+
     void generateOptions(const std::vector<std::pair<ConfigVal, bool>>& options);
     void generateServerOptions(std::shared_ptr<pugi::xml_node>& server, const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir);
     void generateImportOptions(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile);
@@ -94,7 +101,7 @@ protected:
     std::shared_ptr<pugi::xml_node> setValue(ConfigVal option, const std::string& key, const std::string& value);
     std::shared_ptr<pugi::xml_node> setValue(ConfigVal option, ConfigVal dict, ConfigVal attr, const std::string& value);
 
-    static std::shared_ptr<pugi::xml_node> setValue(const std::shared_ptr<pugi::xml_node>& parent, ConfigVal option, const std::string& value);
+    std::shared_ptr<pugi::xml_node> setValue(const std::shared_ptr<pugi::xml_node>& parent, ConfigVal option, const std::string& value);
     static std::map<GeneratorSections, std::string_view> sections;
 };
 

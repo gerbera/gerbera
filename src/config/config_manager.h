@@ -47,6 +47,7 @@ class AutoscanDirectory;
 class BoxLayoutList;
 class ClientConfig;
 class ClientConfigList;
+class ConfigDefinition;
 class ConfigOption;
 class ConfigSetup;
 class Database;
@@ -57,16 +58,25 @@ enum class ClientType;
 
 class ConfigManager : public Config, public std::enable_shared_from_this<Config> {
 public:
-    ConfigManager(fs::path filename,
-        const fs::path& userHome, const fs::path& configDir,
-        fs::path dataDir, bool debug);
+    ConfigManager(
+        std::shared_ptr<ConfigDefinition> definition,
+        fs::path filename,
+        const fs::path& userHome,
+        const fs::path& configDir,
+        fs::path dataDir,
+        bool debug);
 
     /// \brief Returns the name of the config file that was used to launch the server.
     fs::path getConfigFilename() const override { return filename; }
 
+    /// \brief load configuration file and initialise values
     void load(const fs::path& userHome);
+    /// \brief validate configuration
     bool validate();
+    /// \brief load all changed values from database
     void updateConfigFromDatabase(const std::shared_ptr<Database>& database) override;
+    /// \brief generate UDN for server and store in database
+    std::string generateUDN(const std::shared_ptr<Database>& database) override;
 
     /// \brief add a config option
     /// \param option option type to add.
@@ -144,13 +154,12 @@ public:
     void setOrigValue(const std::string& item, LongOptionType value) override;
 
 protected:
+    std::shared_ptr<ConfigDefinition> definition;
     fs::path filename;
     fs::path dataDir;
     fs::path magicFile;
     std::map<std::string, std::string> origValues;
-
     std::unique_ptr<pugi::xml_document> xmlDoc { std::make_unique<pugi::xml_document>() };
-
     std::vector<std::shared_ptr<ConfigOption>> options;
 
     std::shared_ptr<ConfigOption> setOption(const pugi::xml_node& root, ConfigVal option, const std::map<std::string, std::string>* arguments = nullptr);

@@ -57,6 +57,7 @@ public:
     {
         return option == ConfigVal::SERVER_STORAGE_SQLITE_RESTORE;
     }
+    std::string generateUDN(const std::shared_ptr<Database>& database) override { return "uuid:12345678-1234-1234-1234-123456789abc"; };
     std::map<std::string, std::string> getDictionaryOption(ConfigVal option) const override { return {}; }
     std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(ConfigVal option) const override { return {}; }
     std::vector<std::string> getArrayOption(ConfigVal option) const override { return {}; }

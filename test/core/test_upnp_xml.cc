@@ -26,6 +26,7 @@
 #include "common.h"
 #include "config/result/client_config.h"
 #include "config/result/transcoding.h"
+#include "config/config_definition.h"
 #include "config/config_setup.h"
 #include "context.h"
 #include "metadata/metadata_handler.h"
@@ -59,7 +60,10 @@ public:
 
         database = std::make_shared<DatabaseMock>(config);
         converterManager = std::make_shared<ConverterManager>(config);
-        context = std::make_shared<Context>(config, nullptr, nullptr, database, nullptr, converterManager);
+
+        std::shared_ptr<ConfigDefinition> definition = std::make_shared<ConfigDefinition>();
+        definition->init(definition);
+        context = std::make_shared<Context>(definition, config, nullptr, nullptr, database, nullptr, converterManager);
 
         std::string virtualDir = "http://server";
         std::string presentationURl = "http://someurl/";

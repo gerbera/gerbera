@@ -44,6 +44,7 @@
 class ActionRequest;
 class ClientManager;
 class Config;
+class ConfigDefinition;
 class Content;
 class ConverterManager;
 class Context;
@@ -70,7 +71,7 @@ public:
     ///
     /// This function reads information from the config and initializes
     /// various variables (like server UDN and so forth).
-    void init(bool offln);
+    void init(const std::shared_ptr<ConfigDefinition>& definition, bool offln);
 
     /// \brief Cleanup routine to shutdown the server.
     ///

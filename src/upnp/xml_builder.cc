@@ -108,15 +108,18 @@
 #define UPNP_DLNA_PROFILE_PNG_SM_ICO "PNG_TN" // "PNG_SM_ICO"
 #define UPNP_DLNA_PROFILE_PNG_LRG_ICO "JPEG_TN" // "PNG_LRG_ICO"
 
-UpnpXMLBuilder::UpnpXMLBuilder(const std::shared_ptr<Context>& context,
+UpnpXMLBuilder::UpnpXMLBuilder(
+    const std::shared_ptr<Context>& context,
     std::string virtualUrl)
     : config(context->getConfig())
     , database(context->getDatabase())
+    , definition(context->getDefinition())
     , virtualURL(std::move(virtualUrl))
 {
     for (auto&& entry : this->config->getArrayOption(ConfigVal::IMPORT_RESOURCES_ORDER)) {
         orderedHandler.push_back(EnumMapper::remapContentHandler(entry));
     }
+
     entrySeparator = config->getOption(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP);
     multiValue = config->getBoolOption(ConfigVal::UPNP_MULTI_VALUES_ENABLED);
     ctMappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
@@ -797,8 +800,8 @@ std::string UpnpXMLBuilder::findDlnaProfile(
     const std::shared_ptr<Quirks>& quirks) const
 {
     std::string dlnaProfile;
-    static auto fromKey = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM);
-    static auto toKey = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO);
+    static auto fromKey = definition->removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM);
+    static auto toKey = definition->removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO);
     auto legacyKey = fmt::format("{}-{}-{}", contentType, res.getAttribute(ResourceAttribute::VIDEOCODEC), res.getAttribute(ResourceAttribute::AUDIOCODEC));
     std::size_t matchLength = 0;
     auto clientMappings = quirks ? quirks->getDlnaMappings() : std::vector<std::vector<std::pair<std::string, std::string>>>();

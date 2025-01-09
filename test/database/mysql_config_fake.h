@@ -32,7 +32,7 @@ public:
     std::string getOption(ConfigVal option) const override
     {
         if (option == ConfigVal::SERVER_STORAGE_MYSQL_HOST) {
-            return "hydra.home";
+            return "wombat.home";
         }
         if (option == ConfigVal::SERVER_STORAGE_MYSQL_USERNAME) {
             return "root";
@@ -51,6 +51,7 @@ public:
         //        }
         return {};
     }
+    std::string generateUDN(const std::shared_ptr<Database>& database) override { return "uuid:12345678-1234-1234-1234-123456789abc"; };
     void addOption(ConfigVal option, const std::shared_ptr<ConfigOption>& optionValue) override { }
     std::int32_t getIntOption(ConfigVal option) const override { return 0; }
     std::uint32_t getUIntOption(ConfigVal option) const override { return 0; }

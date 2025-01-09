@@ -41,7 +41,7 @@ protected:
     /// \brief Creates an array of ClientConfig objects from a XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param result contents of config.
-    static bool createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<ClientConfigList>& result);
+    bool createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<ClientConfigList>& result) const;
 
 public:
     bool updateItem(const std::vector<std::size_t>& indexList,

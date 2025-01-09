@@ -42,10 +42,10 @@ bool ConfigArraySetup::createOptionFromNode(
     std::vector<std::string>& result)
 {
     if (element) {
-        doExtend = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element);
-        for (auto&& it : element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption))) {
+        doExtend = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element);
+        for (auto&& it : element.select_nodes(definition->mapConfigOption(nodeOption))) {
             const pugi::xml_node& child = it.node();
-            std::string attrValue = attrOption != ConfigVal::MAX ? child.attribute(ConfigDefinition::removeAttribute(attrOption).c_str()).as_string() : child.text().as_string();
+            std::string attrValue = attrOption != ConfigVal::MAX ? child.attribute(definition->removeAttribute(attrOption).c_str()).as_string() : child.text().as_string();
             if (itemCheck) {
                 if (!itemCheck(attrValue))
                     throw_std_runtime_error("Invalid array {} value {} empty '{}'", element.path(), xpath, attrValue);
@@ -97,8 +97,8 @@ bool ConfigArraySetup::createNodeFromDefaults(const std::shared_ptr<pugi::xml_no
 {
     if (defaultEntries.empty())
         return false;
-    auto section = ConfigDefinition::mapConfigOption(nodeOption);
-    auto attrAttr = ConfigDefinition::removeAttribute(attrOption);
+    auto section = definition->mapConfigOption(nodeOption);
+    auto attrAttr = definition->removeAttribute(attrOption);
     for (auto&& val : defaultEntries) {
         auto entry = result->append_child(section);
         if (attrOption != ConfigVal::MAX)
@@ -154,24 +154,24 @@ std::string ConfigArraySetup::getItemPath(const std::vector<std::size_t>& indexL
 {
     if (attrOption != ConfigVal::MAX) {
         if (indexList.size() == 0)
-            return fmt::format("{}/{}[_]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), ConfigDefinition::ensureAttribute(attrOption));
-        return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList[0], ConfigDefinition::ensureAttribute(attrOption));
+            return fmt::format("{}/{}[_]/{}", xpath, definition->mapConfigOption(nodeOption), definition->ensureAttribute(attrOption));
+        return fmt::format("{}/{}[{}]/{}", xpath, definition->mapConfigOption(nodeOption), indexList[0], definition->ensureAttribute(attrOption));
     }
     if (indexList.size() == 0)
-        return fmt::format("{}/{}[_]", xpath, ConfigDefinition::mapConfigOption(nodeOption));
-    return fmt::format("{}/{}[{}]", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList[0]);
+        return fmt::format("{}/{}[_]", xpath, definition->mapConfigOption(nodeOption));
+    return fmt::format("{}/{}[{}]", xpath, definition->mapConfigOption(nodeOption), indexList[0]);
 }
 
 std::string ConfigArraySetup::getItemPathRoot(bool prefix) const
 {
-    return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
+    return fmt::format("{}/{}", xpath, definition->mapConfigOption(nodeOption));
 }
 
 std::vector<std::string> ConfigArraySetup::getXmlContent(const pugi::xml_node& optValue)
 {
     std::vector<std::string> result;
     if (initArray) {
-        if (!initArray(optValue, result, ConfigDefinition::mapConfigOption(nodeOption))) {
+        if (!initArray(optValue, result, definition->mapConfigOption(nodeOption))) {
             throw_std_runtime_error("Invalid {} array value '{}'", xpath, optValue.name());
         }
     } else {

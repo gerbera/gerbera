@@ -47,6 +47,7 @@ class CdsContainer;
 class CdsItem;
 class CdsObject;
 class Config;
+class ConfigDefinition;
 class Content;
 class Database;
 class ScriptingRuntime;
@@ -138,6 +139,7 @@ protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
     std::shared_ptr<ConverterManager> converterManager;
+    std::shared_ptr<ConfigDefinition> definition;
     std::shared_ptr<Content> content;
     std::shared_ptr<ScriptingRuntime> runtime;
     std::shared_ptr<StringConverter> sc;

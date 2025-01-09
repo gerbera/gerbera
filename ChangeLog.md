@@ -1,5 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### HEAD
+
+- Refactor static code from ConfigDefinition
+
 ### v2.4.1
 
 - Fix Dockerfile

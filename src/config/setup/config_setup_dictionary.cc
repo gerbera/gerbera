@@ -40,10 +40,10 @@ bool ConfigDictionarySetup::createOptionFromNode(
     std::map<std::string, std::string>& result)
 {
     if (element) {
-        doExtend = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element);
-        const auto dictNodes = element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption));
-        auto keyAttr = ConfigDefinition::removeAttribute(keyOption);
-        auto valAttr = ConfigDefinition::removeAttribute(valOption);
+        doExtend = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element);
+        const auto dictNodes = element.select_nodes(definition->mapConfigOption(nodeOption));
+        auto keyAttr = definition->removeAttribute(keyOption);
+        auto valAttr = definition->removeAttribute(valOption);
 
         for (auto&& it : dictNodes) {
             const pugi::xml_node child = it.node();
@@ -82,9 +82,9 @@ bool ConfigDictionarySetup::createNodeFromDefaults(const std::shared_ptr<pugi::x
     if (defaultEntries.empty())
         return false;
 
-    auto section = ConfigDefinition::mapConfigOption(nodeOption);
-    auto keyAttr = ConfigDefinition::removeAttribute(keyOption);
-    auto valAttr = ConfigDefinition::removeAttribute(valOption);
+    auto section = definition->mapConfigOption(nodeOption);
+    auto keyAttr = definition->removeAttribute(keyOption);
+    auto valAttr = definition->removeAttribute(valOption);
     for (auto&& [key, val] : defaultEntries) {
         auto entry = result->append_child(section);
         entry.append_attribute(keyAttr.c_str()) = key.c_str();
@@ -181,26 +181,26 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem,
 
 std::string ConfigDictionarySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
-    auto opt = propOptions.size() > 0 ? ConfigDefinition::ensureAttribute(propOptions[0]) : "";
+    auto opt = propOptions.size() > 0 ? definition->ensureAttribute(propOptions[0]) : "";
     if (indexList.size() == 0) {
-        return fmt::format("{}/{}[_]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), opt);
+        return fmt::format("{}/{}[_]/{}", xpath, definition->mapConfigOption(nodeOption), opt);
     }
 
-    return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList[0], opt);
+    return fmt::format("{}/{}[{}]/{}", xpath, definition->mapConfigOption(nodeOption), indexList[0], opt);
 }
 
 std::string ConfigDictionarySetup::getItemPathRoot(bool prefix) const
 {
     if (prefix)
         return xpath;
-    return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
+    return fmt::format("{}/{}", xpath, definition->mapConfigOption(nodeOption));
 }
 
 std::string ConfigDictionarySetup::getUniquePath() const
 {
     if (!xpath)
-        return fmt::format("{}", ConfigDefinition::mapConfigOption(nodeOption));
-    return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
+        return fmt::format("{}", definition->mapConfigOption(nodeOption));
+    return fmt::format("{}/{}", xpath, definition->mapConfigOption(nodeOption));
 }
 
 std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(const pugi::xml_node& optValue)
