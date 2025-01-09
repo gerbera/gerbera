@@ -28,8 +28,9 @@
 
 #include <memory>
 
-// forward declaration
+// forward declarations
 class Config;
+class ConfigDefinition;
 class ClientManager;
 class Database;
 class Mime;
@@ -42,12 +43,19 @@ class SessionManager;
 
 class Context {
 public:
-    Context(std::shared_ptr<Config> config,
+    Context(
+        std::shared_ptr<ConfigDefinition> definition,
+        std::shared_ptr<Config> config,
         std::shared_ptr<ClientManager> clients,
         std::shared_ptr<Mime> mime,
         std::shared_ptr<Database> database,
         std::shared_ptr<Web::SessionManager> sessionManager,
         std::shared_ptr<ConverterManager> converterManager);
+
+    std::shared_ptr<ConfigDefinition> getDefinition() const
+    {
+        return definition;
+    }
 
     std::shared_ptr<Config> getConfig() const
     {
@@ -80,6 +88,7 @@ public:
     }
 
 private:
+    std::shared_ptr<ConfigDefinition> definition;
     std::shared_ptr<Config> config;
     std::shared_ptr<ClientManager> clients;
     std::shared_ptr<Mime> mime;

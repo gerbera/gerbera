@@ -81,7 +81,7 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
         return optValue;
     }
 
-    auto xAttr = ConfigDefinition::removeAttribute(option);
+    auto xAttr = definition->removeAttribute(option);
 
     if (root.attribute(xAttr.c_str())) {
         std::string optValue = trim ? trimString(root.attribute(xAttr.c_str()).as_string()) : root.attribute(xAttr.c_str()).as_string();

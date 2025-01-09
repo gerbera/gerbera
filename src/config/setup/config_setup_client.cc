@@ -46,39 +46,39 @@
 
 /// \brief Creates an array of ClientConfig objects from a XML nodeset.
 /// \param element starting element of the nodeset.
-bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<ClientConfigList>& result)
+bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<ClientConfigList>& result) const
 {
     if (!element)
         return true;
 
-    auto&& gcs = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_CLIENTS_GROUP);
+    auto&& gcs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_CLIENTS_GROUP);
     std::map<std::string, std::shared_ptr<ClientGroupConfig>> groupCache;
     for (auto&& it : gcs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
-        auto name = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_GROUP_NAME)->getXmlContent(child);
+        auto name = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_GROUP_NAME)->getXmlContent(child);
         auto group = std::make_shared<ClientGroupConfig>(name);
-        auto forbiddenDirectories = ConfigDefinition::findConfigSetup<ConfigArraySetup>(ConfigVal::A_CLIENTS_GROUP_HIDDEN_LIST)->getXmlContent(child);
+        auto forbiddenDirectories = definition->findConfigSetup<ConfigArraySetup>(ConfigVal::A_CLIENTS_GROUP_HIDDEN_LIST)->getXmlContent(child);
         group->setForbiddenDirectories(forbiddenDirectories);
         EDIT_CAST(EditHelperClientGroupConfig, result)->add(group);
         groupCache[name] = group;
     }
 
-    auto&& ccs = ConfigDefinition::findConfigSetup<ConfigSetup>(ConfigVal::A_CLIENTS_CLIENT);
+    auto&& ccs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_CLIENTS_CLIENT);
     for (auto&& it : ccs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
-        auto flags = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
-        auto group = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->getXmlContent(child);
-        auto ip = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->getXmlContent(child);
-        auto userAgent = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
-        auto captionInfoCount = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
-        auto stringLimit = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->getXmlContent(child);
-        auto multiValue = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->getXmlContent(child);
-        auto fullFilter = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL)->getXmlContent(child);
-        auto isAllowed = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->getXmlContent(child);
-        auto mappings = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child);
-        auto headers = ConfigDefinition::findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS)->getXmlContent(child);
-        auto profiles = ConfigDefinition::findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE)->getXmlContent(child);
+        auto flags = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
+        auto group = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->getXmlContent(child);
+        auto ip = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->getXmlContent(child);
+        auto userAgent = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
+        auto captionInfoCount = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
+        auto stringLimit = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->getXmlContent(child);
+        auto multiValue = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->getXmlContent(child);
+        auto fullFilter = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL)->getXmlContent(child);
+        auto isAllowed = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->getXmlContent(child);
+        auto mappings = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child);
+        auto headers = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS)->getXmlContent(child);
+        auto profiles = definition->findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE)->getXmlContent(child);
         auto matchValues = std::map<ClientMatchType, std::string>();
         for (auto&& attr : child.attributes()) {
             auto matchType = ClientConfig::remapMatchType(attr.name());
@@ -134,7 +134,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
-            entry->setFlags(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->checkIntValue(optValue));
+            entry->setFlags(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->checkIntValue(optValue));
             log_debug("New Client Flags {} {}", index, ClientConfig::mapFlags(EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getFlags()));
             return true;
         }
@@ -143,7 +143,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, entry->getIp());
-            if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
+            if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
                 entry->setIp(optValue);
                 log_debug("New Client IP {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getIp());
                 return true;
@@ -154,7 +154,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, entry->getGroup());
-            if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->checkValue(optValue)) {
+            if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->checkValue(optValue)) {
                 entry->setGroup(optValue);
                 log_debug("New Client Group {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getGroup());
                 return true;
@@ -165,7 +165,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, entry->getAllowed());
-            entry->setAllowed(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->checkValue(optValue));
+            entry->setAllowed(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->checkValue(optValue));
             log_debug("New Client Allow {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getAllowed());
             return true;
         }
@@ -174,7 +174,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, entry->getUserAgent());
-            if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
+            if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
                 entry->setUserAgent(optValue);
                 log_debug("New Client UserAgent {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getUserAgent());
                 return true;
@@ -185,7 +185,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, entry->getCaptionInfoCount());
-            entry->setCaptionInfoCount(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->checkIntValue(optValue));
+            entry->setCaptionInfoCount(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->checkIntValue(optValue));
             log_debug("New Client CaptionInfoCount {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getCaptionInfoCount());
             return true;
         }
@@ -194,7 +194,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, entry->getStringLimit());
-            entry->setStringLimit(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->checkIntValue(optValue));
+            entry->setStringLimit(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->checkIntValue(optValue));
             log_debug("New Client StringLimit {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getStringLimit());
             return true;
         }
@@ -203,7 +203,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, entry->getMultiValue());
-            entry->setMultiValue(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->checkValue(optValue));
+            entry->setMultiValue(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->checkValue(optValue));
             log_debug("New Client MultiValue {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getMultiValue());
             return true;
         }
@@ -212,7 +212,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, entry->getFullFilter());
-            entry->setFullFilter(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL)->checkValue(optValue));
+            entry->setFullFilter(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL)->checkValue(optValue));
             log_debug("New Client FullFilter {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getFullFilter());
             return true;
         }
@@ -294,7 +294,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == keyIndex) {
             auto profiles = entry->getDlnaMappings(true).at(j);
             std::size_t k = 0;
-            auto tag = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM);
+            auto tag = definition->removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM);
             for (auto&& [key, val] : profiles) {
                 if (key == tag)
                     break;
@@ -314,7 +314,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == valIndex) {
             auto profiles = entry->getDlnaMappings(true).at(j);
             std::size_t k = 0;
-            auto tag = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO);
+            auto tag = definition->removeAttribute(ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO);
             for (auto&& [key, val] : profiles) {
                 if (key == tag)
                     break;
@@ -385,7 +385,7 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
         if (optItem == keyIndex) {
             auto j = indexList.at(1);
             auto profiles = entry->getForbiddenDirectories(true).at(j);
-            auto location = ConfigDefinition::removeAttribute(ConfigVal::A_CLIENTS_GROUP_LOCATION);
+            auto location = definition->removeAttribute(ConfigVal::A_CLIENTS_GROUP_LOCATION);
             if (status == STATUS_RESET && !optValue.empty()) {
                 entry->setForbiddenDirectory(j, config->getOrigValue(keyIndex));
                 log_debug("Reset location value {} {}", keyIndex, entry->getForbiddenDirectories(true).at(j));
@@ -442,58 +442,58 @@ std::string ConfigClientSetup::getItemPath(const std::vector<std::size_t>& index
     if (indexList.size() == 0) {
         if (!propText.empty() && propOptions.size() > 1) {
             return fmt::format("{}[_]/{}[_]/{}{}",
-                ConfigDefinition::mapConfigOption(propOptions.at(0)),
-                ConfigDefinition::mapConfigOption(propOptions.at(1)),
+                definition->mapConfigOption(propOptions.at(0)),
+                definition->mapConfigOption(propOptions.at(1)),
                 ConfigDefinition::ATTRIBUTE,
                 propText);
         }
         if (propOptions.size() > 2) {
             return fmt::format("{}[_]/{}[_]/{}",
-                ConfigDefinition::mapConfigOption(propOptions.at(0)),
-                ConfigDefinition::mapConfigOption(propOptions.at(1)),
-                ConfigDefinition::ensureAttribute(propOptions.at(2)));
+                definition->mapConfigOption(propOptions.at(0)),
+                definition->mapConfigOption(propOptions.at(1)),
+                definition->ensureAttribute(propOptions.at(2)));
         }
         if (propOptions.size() > 1) {
             return fmt::format("{}[_]/{}",
-                ConfigDefinition::mapConfigOption(propOptions.at(0)),
-                ConfigDefinition::ensureAttribute(propOptions.at(1)));
+                definition->mapConfigOption(propOptions.at(0)),
+                definition->ensureAttribute(propOptions.at(1)));
         }
-        return fmt::format("{}[_]", ConfigDefinition::mapConfigOption(propOptions.at(0)));
+        return fmt::format("{}[_]", definition->mapConfigOption(propOptions.at(0)));
     }
     if (propOptions.size() > 1) {
         if (!propText.empty() && indexList.size() > 1) {
             return fmt::format("{}[{}]/{}[{}]/{}{}",
-                ConfigDefinition::mapConfigOption(propOptions.at(0)),
+                definition->mapConfigOption(propOptions.at(0)),
                 indexList.at(0),
-                ConfigDefinition::mapConfigOption(propOptions.at(1)),
+                definition->mapConfigOption(propOptions.at(1)),
                 indexList.at(1),
                 ConfigDefinition::ATTRIBUTE,
                 propText);
         }
         if (propOptions.size() > 2 && indexList.size() > 1) {
             return fmt::format("{}[{}]/{}[{}]/{}",
-                ConfigDefinition::mapConfigOption(propOptions.at(0)),
+                definition->mapConfigOption(propOptions.at(0)),
                 indexList.at(0),
-                ConfigDefinition::mapConfigOption(propOptions.at(1)),
+                definition->mapConfigOption(propOptions.at(1)),
                 indexList.at(1),
-                ConfigDefinition::ensureAttribute(propOptions.at(2)));
+                definition->ensureAttribute(propOptions.at(2)));
         }
         return fmt::format("{}[{}]/{}",
-            ConfigDefinition::mapConfigOption(propOptions.at(0)),
+            definition->mapConfigOption(propOptions.at(0)),
             indexList.at(0),
-            ConfigDefinition::ensureAttribute(propOptions.at(1)));
+            definition->ensureAttribute(propOptions.at(1)));
     }
     if (propOptions.size() > 0) {
         return fmt::format("{}[{}]",
-            ConfigDefinition::mapConfigOption(propOptions.at(0)),
+            definition->mapConfigOption(propOptions.at(0)),
             indexList.at(0));
     }
     return fmt::format("{}[{}]",
-        ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT),
+        definition->mapConfigOption(ConfigVal::A_CLIENTS_CLIENT),
         indexList.at(0));
 }
 
 std::string ConfigClientSetup::getItemPathRoot(bool prefix) const
 {
-    return ConfigDefinition::mapConfigOption(ConfigVal::A_CLIENTS_CLIENT);
+    return definition->mapConfigOption(ConfigVal::A_CLIENTS_CLIENT);
 }

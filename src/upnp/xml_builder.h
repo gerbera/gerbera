@@ -51,6 +51,7 @@ class CdsItem;
 class CdsObject;
 class CdsResource;
 class Config;
+class ConfigDefinition;
 class Context;
 class Database;
 enum class ContentHandler;
@@ -144,6 +145,7 @@ public:
 protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
+    std::shared_ptr<ConfigDefinition> definition;
 
     std::vector<ContentHandler> orderedHandler;
 

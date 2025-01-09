@@ -56,6 +56,7 @@ public:
             return false;
         }
     }
+    std::string generateUDN(const std::shared_ptr<Database>& database) override { return "uuid:12345678-1234-1234-1234-123456789abc"; };
     std::map<std::string, std::string> getDictionaryOption(ConfigVal option) const override
     {
         switch (option) {

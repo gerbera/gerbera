@@ -21,6 +21,7 @@
     $Id$
 */
 
+#include "config/config_definition.h"
 #include "config/config_val.h"
 #include "context.h"
 #include "metadata/ffmpeg_thumbnailer_handler.h"
@@ -45,7 +46,9 @@ public:
 
 TEST(Thumbnailer_Cache, BaseDirFromConfig)
 {
-    auto ctx = std::make_shared<Context>(std::make_shared<ConfigMock>(), nullptr, nullptr, nullptr, nullptr, nullptr);
+    std::shared_ptr<ConfigDefinition> definition = std::make_shared<ConfigDefinition>();
+    definition->init(definition);
+    auto ctx = std::make_shared<Context>(definition, std::make_shared<ConfigMock>(), nullptr, nullptr, nullptr, nullptr, nullptr);
     auto cfg = std::static_pointer_cast<ConfigMock>(ctx->getConfig());
     EXPECT_CALL(*cfg, getOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR))
         .WillOnce(Return("/var/lib/cache"));
@@ -54,7 +57,9 @@ TEST(Thumbnailer_Cache, BaseDirFromConfig)
 
 TEST(Thumbnailer_Cache, BaseDirDefaultFromUserHome)
 {
-    auto ctx = std::make_shared<Context>(std::make_shared<ConfigMock>(), nullptr, nullptr, nullptr, nullptr, nullptr);
+    std::shared_ptr<ConfigDefinition> definition = std::make_shared<ConfigDefinition>();
+    definition->init(definition);
+    auto ctx = std::make_shared<Context>(definition, std::make_shared<ConfigMock>(), nullptr, nullptr, nullptr, nullptr, nullptr);
     auto cfg = std::static_pointer_cast<ConfigMock>(ctx->getConfig());
     EXPECT_CALL(*cfg, getOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR))
         .WillOnce(Return(""));

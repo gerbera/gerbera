@@ -24,10 +24,7 @@
 /// \file config_generator.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
-#include "config_generator.h"
-
-#include <numeric>
-#include <sstream>
+#include "config_generator.h" // API
 
 #include "config/config_definition.h"
 #include "config/config_options.h"
@@ -40,6 +37,9 @@
 #include "config_val.h"
 #include "util/grb_time.h"
 #include "util/tools.h"
+
+#include <numeric>
+#include <sstream>
 
 #define XML_XMLNS_XSI "http://www.w3.org/2001/XMLSchema-instance"
 #define XML_XMLNS "http://mediatomb.cc/config/"
@@ -170,15 +170,15 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, const std::string& value)
 {
-    auto cs = ConfigDefinition::findConfigSetup(option);
+    auto cs = definition->findConfigSetup(option);
     return setValue(cs->xpath, cs, value.empty() ? cs->getDefaultValue() : value);
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::shared_ptr<pugi::xml_node>& parent, ConfigVal option, const std::string& value)
 {
-    auto cs = std::string(ConfigDefinition::mapConfigOption(option));
+    auto cs = std::string(definition->mapConfigOption(option));
     if (startswith(cs, ConfigDefinition::ATTRIBUTE)) {
-        cs = ConfigDefinition::removeAttribute(option);
+        cs = definition->removeAttribute(option);
         parent->append_attribute(cs.c_str()) = value.c_str();
     } else {
         parent->append_child(cs.c_str()).append_child(pugi::node_pcdata).set_value(value.c_str());
@@ -188,45 +188,45 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::shared_ptr<
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, ConfigVal attr, const std::string& value)
 {
-    auto cs = ConfigDefinition::findConfigSetup(option);
-    return setValue(fmt::format("{}/{}", cs->xpath, ConfigDefinition::mapConfigOption(attr)), {}, value);
+    auto cs = definition->findConfigSetup(option);
+    return setValue(fmt::format("{}/{}", cs->xpath, definition->mapConfigOption(attr)), {}, value);
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, const std::string& key, const std::string& value)
 {
-    auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(ConfigDefinition::findConfigSetup(option));
+    auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(definition->findConfigSetup(option));
     if (!cs)
         return nullptr;
 
-    auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
+    auto nodeKey = definition->mapConfigOption(cs->nodeOption);
     setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), {}, "", true);
-    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->keyOption)), {}, key);
-    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->valOption)), {}, value);
+    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, definition->ensureAttribute(cs->keyOption)), {}, key);
+    setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, definition->ensureAttribute(cs->valOption)), {}, value);
     return generated[cs->xpath];
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setDictionary(ConfigVal option)
 {
-    auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(ConfigDefinition::findConfigSetup(option));
+    auto cs = std::dynamic_pointer_cast<ConfigDictionarySetup>(definition->findConfigSetup(option));
     if (!cs)
         return nullptr;
 
-    auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
+    auto nodeKey = definition->mapConfigOption(cs->nodeOption);
     for (auto&& [key, value] : cs->getXmlContent({})) {
         setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), {}, "", true);
-        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->keyOption)), {}, key);
-        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, ConfigDefinition::ensureAttribute(cs->valOption)), {}, value);
+        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, definition->ensureAttribute(cs->keyOption)), {}, key);
+        setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, definition->ensureAttribute(cs->valOption)), {}, value);
     }
     return generated[cs->xpath];
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setVector(ConfigVal option)
 {
-    auto cs = std::dynamic_pointer_cast<ConfigVectorSetup>(ConfigDefinition::findConfigSetup(option));
+    auto cs = std::dynamic_pointer_cast<ConfigVectorSetup>(definition->findConfigSetup(option));
     if (!cs)
         return nullptr;
 
-    auto nodeKey = ConfigDefinition::mapConfigOption(cs->nodeOption);
+    auto nodeKey = definition->mapConfigOption(cs->nodeOption);
     for (auto&& value : cs->getXmlContent({})) {
         setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), {}, "", true);
         for (auto&& [key, val] : value)
@@ -237,8 +237,8 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setVector(ConfigVal option)
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, ConfigVal dict, ConfigVal attr, const std::string& value)
 {
-    auto cs = ConfigDefinition::findConfigSetup(option);
-    return setValue(fmt::format("{}/{}/{}", cs->xpath, ConfigDefinition::mapConfigOption(dict), ConfigDefinition::ensureAttribute(attr)), {}, value);
+    auto cs = definition->findConfigSetup(option);
+    return setValue(fmt::format("{}/{}/{}", cs->xpath, definition->mapConfigOption(dict), definition->ensureAttribute(attr)), {}, value);
 }
 
 std::string ConfigGenerator::generate(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir, const fs::path& magicFile)
@@ -334,11 +334,11 @@ void ConfigGenerator::generateServerOptions(std::shared_ptr<pugi::xml_node>& ser
     generateUdn(false);
 
     {
-        auto co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_HOME);
+        auto co = definition->findConfigSetup(ConfigVal::SERVER_HOME);
         co->setDefaultValue(userHome / configDir);
-        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_WEBROOT);
+        co = definition->findConfigSetup(ConfigVal::SERVER_WEBROOT);
         co->setDefaultValue(dataDir / DEFAULT_WEB_DIR);
-        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_MODEL_NUMBER);
+        co = definition->findConfigSetup(ConfigVal::SERVER_MODEL_NUMBER);
         co->setDefaultValue("42");
     }
     generateOptions(options);
@@ -403,8 +403,8 @@ void ConfigGenerator::generateDynamics()
 
     setDictionary(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST);
 
-    auto&& containersTag = ConfigDefinition::mapConfigOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST);
-    auto&& containerTag = ConfigDefinition::mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER);
+    auto&& containersTag = definition->mapConfigOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST);
+    auto&& containerTag = definition->mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER);
 
     auto container = setValue(fmt::format("{}/{}/", containersTag, containerTag), {}, "", true);
     setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastAdded");
@@ -457,17 +457,17 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
 #endif
     };
     {
-        auto co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
+        auto co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
         co->setDefaultValue(prefixDir / "sqlite3.sql");
-        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE);
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE);
         co->setDefaultValue(prefixDir / "sqlite3-upgrade.xml");
     }
 
 #ifdef HAVE_MYSQL
     {
-        auto co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
+        auto co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
         co->setDefaultValue(prefixDir / "mysql.sql");
-        co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE);
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE);
         co->setDefaultValue(prefixDir / "mysql-upgrade.xml");
     }
 #endif
@@ -597,33 +597,33 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
     {
         std::string scriptDir;
         scriptDir = prefixDir / DEFAULT_JS_DIR;
-        auto co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER);
+        auto co = definition->findConfigSetup(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER);
         co->setDefaultValue(scriptDir);
     }
     {
         std::string scriptDir;
         scriptDir = configDir / DEFAULT_JS_DIR;
-        auto co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER);
+        auto co = definition->findConfigSetup(ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER);
         co->setDefaultValue(scriptDir);
     }
 #endif
 
 #ifdef HAVE_MAGIC
     if (!magicFile.empty()) {
-        auto co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_MAGIC_FILE);
+        auto co = definition->findConfigSetup(ConfigVal::IMPORT_MAGIC_FILE);
         co->setDefaultValue(magicFile);
     }
 #endif
     if (example) {
         // Generate Autoscan Example
-        auto&& directoryTag = ConfigDefinition::mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY);
+        auto&& directoryTag = definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY);
 #ifdef HAVE_INOTIFY
-        auto&& autoscanTag = ConfigDefinition::mapConfigOption(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST);
+        auto&& autoscanTag = definition->mapConfigOption(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST);
         auto as = setValue(fmt::format("{}/{}/", autoscanTag, directoryTag), {}, "", true);
         setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, "/media");
         setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, "inotify");
 #else
-        auto&& autoscanTag = ConfigDefinition::mapConfigOption(ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST);
+        auto&& autoscanTag = definition->mapConfigOption(ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST);
         auto as = setValue(fmt::format("{}/{}/", autoscanTag, directoryTag), {}, "", true);
         setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, "/media");
         setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, "timed");
@@ -635,28 +635,28 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
     }
     {
         // Generate Charsets
-        auto co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_FILESYSTEM_CHARSET);
+        auto co = definition->findConfigSetup(ConfigVal::IMPORT_FILESYSTEM_CHARSET);
         co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
 
-        co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_METADATA_CHARSET);
+        co = definition->findConfigSetup(ConfigVal::IMPORT_METADATA_CHARSET);
         co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
 
-        co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_PLAYLIST_CHARSET);
+        co = definition->findConfigSetup(ConfigVal::IMPORT_PLAYLIST_CHARSET);
         co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
 #ifdef HAVE_LIBEXIF
-        co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_LIBOPTS_EXIF_CHARSET);
+        co = definition->findConfigSetup(ConfigVal::IMPORT_LIBOPTS_EXIF_CHARSET);
         co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
 #endif
 #ifdef HAVE_EXIV2
-        co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET);
+        co = definition->findConfigSetup(ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET);
         co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
 #endif
 #ifdef HAVE_TAGLIB
-        co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_LIBOPTS_ID3_CHARSET);
+        co = definition->findConfigSetup(ConfigVal::IMPORT_LIBOPTS_ID3_CHARSET);
         co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
 #endif
 #ifdef HAVE_FFMPEG
-        co = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET);
+        co = definition->findConfigSetup(ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET);
         co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
 #endif
     }
@@ -704,9 +704,9 @@ void ConfigGenerator::generateBoxlayout(ConfigVal option)
     if (!isGenerated(GeneratorSections::Boxlayout))
         return;
 
-    auto cs = ConfigDefinition::findConfigSetup<ConfigBoxLayoutSetup>(option);
+    auto cs = definition->findConfigSetup<ConfigBoxLayoutSetup>(option);
 
-    const auto boxTag = ConfigDefinition::mapConfigOption(option);
+    const auto boxTag = definition->mapConfigOption(option);
 
     for (auto&& bl : cs->getDefault()) {
         auto box = setValue(fmt::format("{}/", boxTag), {}, "", true);
@@ -752,7 +752,7 @@ void ConfigGenerator::generateTranscoding()
     generateOptions(options);
     setDictionary(ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP);
 
-    const auto profileTag = ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE);
+    const auto profileTag = definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE);
 
     auto oggmp3 = setValue(fmt::format("{}/", profileTag), {}, "", true);
     setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME, "ogg2mp3");
@@ -763,11 +763,11 @@ void ConfigGenerator::generateTranscoding()
     setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
     setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG, NO);
 
-    auto agent = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)), {}, "", true);
+    auto agent = setValue(fmt::format("{}/{}/", profileTag, definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)), {}, "", true);
     setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "ffmpeg");
     setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-y -i %in -f mp3 %out");
 
-    auto buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)), {}, "", true);
+    auto buffer = setValue(fmt::format("{}/{}/", profileTag, definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)), {}, "", true);
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_AUDIO_FILL_SIZE));
@@ -781,11 +781,11 @@ void ConfigGenerator::generateTranscoding()
     setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
     setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG, YES);
 
-    agent = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)), {}, "", true);
+    agent = setValue(fmt::format("{}/{}/", profileTag, definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)), {}, "", true);
     setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "vlc");
     setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc://quit");
 
-    buffer = setValue(fmt::format("{}/{}/", profileTag, ConfigDefinition::mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)), {}, "", true);
+    buffer = setValue(fmt::format("{}/{}/", profileTag, definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)), {}, "", true);
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
     setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_VIDEO_FILL_SIZE));
@@ -793,7 +793,7 @@ void ConfigGenerator::generateTranscoding()
 
 void ConfigGenerator::generateUdn(bool doExport)
 {
-    auto co = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_UDN);
+    auto co = definition->findConfigSetup(ConfigVal::SERVER_UDN);
     co->setDefaultValue(fmt::format("uuid:{}", generateRandomId()));
     if (doExport)
         setValue(ConfigVal::SERVER_UDN);

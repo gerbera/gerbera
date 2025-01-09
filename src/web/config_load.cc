@@ -43,6 +43,7 @@
 #include "config/setup/config_setup_enum.h"
 #include "config/setup/config_setup_vector.h"
 #include "content/content.h"
+#include "context.h"
 #include "database/database.h"
 #include "database/db_param.h"
 #include "util/xml_to_json.h"
@@ -72,6 +73,7 @@ Web::ConfigLoad::ConfigLoad(const std::shared_ptr<Content>& content,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
     const std::shared_ptr<Quirks>& quirks)
     : WebRequestHandler(content, server, xmlBuilder, quirks)
+    , definition(content->getContext()->getDefinition())
 {
     try {
         if (this->database) {
@@ -163,7 +165,7 @@ void Web::ConfigLoad::process()
     // generate meta info for ui
     auto meta = root.append_child("types");
     xml2Json->setArrayName(meta, CONFIG_LOAD_ITEM);
-    for (auto&& cs : ConfigDefinition::getOptionList()) {
+    for (auto&& cs : definition->getOptionList()) {
         addTypeMeta(meta, cs);
     }
 
@@ -308,7 +310,7 @@ void Web::ConfigLoad::writeSimpleProperties(pugi::xml_node& values)
 {
     for (auto&& option : ConfigOptionIterator()) {
         try {
-            auto scs = ConfigDefinition::findConfigSetup(option);
+            auto scs = definition->findConfigSetup(option);
             auto item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, scs->getItemPathRoot(), option, option, scs);
 
@@ -323,7 +325,7 @@ void Web::ConfigLoad::writeSimpleProperties(pugi::xml_node& values)
 /// \brief: write client configuration
 void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
 {
-    auto cs = ConfigDefinition::findConfigSetup(ConfigVal::CLIENTS_LIST);
+    auto cs = definition->findConfigSetup(ConfigVal::CLIENTS_LIST);
     auto clientConfig = cs->getValue()->getClientConfigListOption();
     for (std::size_t i = 0; i < EDIT_CAST(EditHelperClientConfig, clientConfig)->size(); i++) {
         auto client = EDIT_CAST(EditHelperClientConfig, clientConfig)->get(i);
@@ -388,12 +390,12 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
         {
             // Sub Dictionary ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE
             std::size_t j = 0;
-            auto vcs = ConfigDefinition::findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE);
+            auto vcs = definition->findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE);
             for (auto&& map : client->getDlnaMappings(true)) {
                 std::vector<std::string> attrList;
                 attrList.reserve(vcs->optionList.size());
                 for (const auto& opt : vcs->optionList) {
-                    attrList.push_back(ConfigDefinition::removeAttribute(opt));
+                    attrList.push_back(definition->removeAttribute(opt));
                 }
                 for (auto&& [key, val] : map) {
                     item = values.append_child(CONFIG_LOAD_ITEM);
@@ -411,25 +413,25 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
     // Allow creation of entry in blank config
     {
         auto item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_FLAGS }), cs->option, ConfigVal::A_CLIENTS_CLIENT_FLAGS, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_FLAGS));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_FLAGS }), cs->option, ConfigVal::A_CLIENTS_CLIENT_FLAGS, definition->findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_FLAGS));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_IP }), cs->option, ConfigVal::A_CLIENTS_CLIENT_IP, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_IP));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_IP }), cs->option, ConfigVal::A_CLIENTS_CLIENT_IP, definition->findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_IP));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_USERAGENT }), cs->option, ConfigVal::A_CLIENTS_CLIENT_USERAGENT, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_USERAGENT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_USERAGENT }), cs->option, ConfigVal::A_CLIENTS_CLIENT_USERAGENT, definition->findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_USERAGENT));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_GROUP }), cs->option, ConfigVal::A_CLIENTS_CLIENT_GROUP, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_GROUP));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_GROUP }), cs->option, ConfigVal::A_CLIENTS_CLIENT_GROUP, definition->findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_GROUP));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT }), cs->option, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT }), cs->option, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT, definition->findConfigSetup(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT }), cs->option, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT }), cs->option, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT, definition->findConfigSetup(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE }), cs->option, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE }), cs->option, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE, definition->findConfigSetup(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_MAP, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM }), cs->option, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_FROM, cs);
@@ -449,11 +451,11 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
         item = values.append_child(CONFIG_LOAD_ITEM);
         createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE_PROFILE, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO }), cs->option, ConfigVal::A_IMPORT_MAPPINGS_MIMETYPE_TO, cs);
         // special treatment for vector
-        auto vcs = ConfigDefinition::findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE);
+        auto vcs = definition->findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE);
         std::vector<std::string> attrList;
         attrList.reserve(vcs->optionList.size());
         for (const auto& opt : vcs->optionList) {
-            attrList.push_back(ConfigDefinition::removeAttribute(opt));
+            attrList.push_back(definition->removeAttribute(opt));
         }
         for (auto&& key : { "audioCodec", "videoCodec" }) {
             item = values.append_child(CONFIG_LOAD_ITEM);
@@ -483,17 +485,17 @@ void Web::ConfigLoad::writeClientConfig(pugi::xml_node& values)
     // Allow creation of entry in blank config
     {
         auto item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_GROUP, ConfigVal::A_CLIENTS_GROUP_NAME }), cs->option, ConfigVal::A_CLIENTS_GROUP_NAME, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_GROUP_NAME));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_GROUP, ConfigVal::A_CLIENTS_GROUP_NAME }), cs->option, ConfigVal::A_CLIENTS_GROUP_NAME, definition->findConfigSetup(ConfigVal::A_CLIENTS_GROUP_NAME));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_GROUP, ConfigVal::A_CLIENTS_GROUP_LOCATION }), cs->option, ConfigVal::A_CLIENTS_GROUP_LOCATION, ConfigDefinition::findConfigSetup(ConfigVal::A_CLIENTS_GROUP_LOCATION));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_GROUP, ConfigVal::A_CLIENTS_GROUP_LOCATION }), cs->option, ConfigVal::A_CLIENTS_GROUP_LOCATION, definition->findConfigSetup(ConfigVal::A_CLIENTS_GROUP_LOCATION));
     }
 }
 
 /// \brief: write import tweaks
 void Web::ConfigLoad::writeImportTweaks(pugi::xml_node& values)
 {
-    auto cs = ConfigDefinition::findConfigSetup(ConfigVal::IMPORT_DIRECTORIES_LIST);
+    auto cs = definition->findConfigSetup(ConfigVal::IMPORT_DIRECTORIES_LIST);
     auto directoryConfig = cs->getValue()->getDirectoryTweakOption();
     for (std::size_t i = 0; i < directoryConfig->size(); i++) {
         auto dir = directoryConfig->get(i);
@@ -583,7 +585,7 @@ void Web::ConfigLoad::writeImportTweaks(pugi::xml_node& values)
 /// \brief: write dynamic content
 void Web::ConfigLoad::writeDynamicContent(pugi::xml_node& values)
 {
-    auto cs = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST);
+    auto cs = definition->findConfigSetup(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST);
     auto dynContent = cs->getValue()->getDynamicContentListOption();
     for (std::size_t i = 0; i < dynContent->size(); i++) {
         auto cont = dynContent->get(i);
@@ -620,32 +622,32 @@ void Web::ConfigLoad::writeDynamicContent(pugi::xml_node& values)
     // Allow creation of entry in blank config
     {
         auto item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_LOCATION }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_LOCATION));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_LOCATION }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, definition->findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_LOCATION));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_IMAGE }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_IMAGE, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_IMAGE));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_IMAGE }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_IMAGE, definition->findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_IMAGE));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_TITLE }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_TITLE));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_TITLE }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, definition->findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_TITLE));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_FILTER }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_FILTER));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_FILTER }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, definition->findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_FILTER));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_SORT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_SORT, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_SORT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_SORT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_SORT, definition->findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_SORT));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT, definition->findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT, ConfigDefinition::findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT }), cs->option, ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT, definition->findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT));
     }
 }
 
 /// \brief: write box layout
 void Web::ConfigLoad::writeBoxLayout(pugi::xml_node& values)
 {
-    auto cs = ConfigDefinition::findConfigSetup(ConfigVal::BOXLAYOUT_BOX);
+    auto cs = definition->findConfigSetup(ConfigVal::BOXLAYOUT_BOX);
     auto boxlayoutContent = cs->getValue()->getBoxLayoutListOption();
     for (std::size_t i = 0; i < boxlayoutContent->size(); i++) {
         auto cont = boxlayoutContent->get(i);
@@ -678,29 +680,29 @@ void Web::ConfigLoad::writeBoxLayout(pugi::xml_node& values)
     // Allow creation of entry in blank config
     {
         auto item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_KEY }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_KEY, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_KEY));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_KEY }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_KEY, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_KEY));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_TITLE }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_TITLE, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_TITLE));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_TITLE }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_TITLE, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_TITLE));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_CLASS }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_CLASS, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_CLASS));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_CLASS }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_CLASS, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_CLASS));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_SIZE }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_SIZE, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_SIZE));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_SIZE }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_SIZE, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_SIZE));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_ENABLED));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_ENABLED));
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT, ConfigDefinition::findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT));
+        createItem(item, cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT }), cs->option, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT));
     }
 }
 
 /// \brief: write transconding configuration
 void Web::ConfigLoad::writeTranscoding(pugi::xml_node& values)
 {
-    auto cs = ConfigDefinition::findConfigSetup(ConfigVal::TRANSCODING_PROFILE_LIST);
+    auto cs = definition->findConfigSetup(ConfigVal::TRANSCODING_PROFILE_LIST);
     auto transcoding = cs->getValue()->getTranscodingProfileListOption();
     std::size_t pr = 0;
     std::map<std::string, std::shared_ptr<TranscodingProfile>> profiles;
@@ -751,7 +753,7 @@ void Web::ConfigLoad::writeTranscoding(pugi::xml_node& values)
         setValue(item, entry->isEnabled());
 
         item = values.append_child(CONFIG_LOAD_ITEM);
-        auto ttEnumSetup = ConfigDefinition::findConfigSetup<ConfigEnumSetup<TranscodingType>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE);
+        auto ttEnumSetup = definition->findConfigSetup<ConfigEnumSetup<TranscodingType>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE);
         createItem(item, cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE);
         setValue(item, ttEnumSetup->mapEnumValue(entry->getType()));
 
@@ -819,7 +821,7 @@ void Web::ConfigLoad::writeTranscoding(pugi::xml_node& values)
         if (fourCCMode != AviFourccListmode::None) {
             item = values.append_child(CONFIG_LOAD_ITEM);
             createItem(item, cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE }), cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
-            auto fccEnumSetup = ConfigDefinition::findConfigSetup<ConfigEnumSetup<AviFourccListmode>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
+            auto fccEnumSetup = definition->findConfigSetup<ConfigEnumSetup<AviFourccListmode>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE);
             setValue(item, fccEnumSetup->mapEnumValue(fourCCMode));
 
             const auto& fourCCList = entry->getAVIFourCCList();
@@ -836,7 +838,7 @@ void Web::ConfigLoad::writeTranscoding(pugi::xml_node& values)
 /// \brief: write autoscan configuration
 void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
 {
-    for (auto&& ascs : ConfigDefinition::getConfigSetupList<ConfigAutoscanSetup>()) {
+    for (auto&& ascs : definition->getConfigSetupList<ConfigAutoscanSetup>()) {
         auto autoscan = ascs->getValue()->getAutoscanListOption();
         // create separate entries for timed and inotify
         for (std::size_t i = 0; i < autoscan.size(); i++) {
@@ -923,15 +925,15 @@ void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
         {
             // path
             auto item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION));
 
             // scan mode (timed|inotify)
             item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE));
 
             // interval for timed
             item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL));
 
             // counter for retries
             item = values.append_child(CONFIG_LOAD_ITEM);
@@ -939,7 +941,7 @@ void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
 
             // recursively import files
             item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE));
 
             // directory types
             item = values.append_child(CONFIG_LOAD_ITEM);
@@ -947,11 +949,11 @@ void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
 
             // media types imported from directory
             item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE));
 
             // import hidden files
             item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES));
 
             // follow symbolic links
             item = values.append_child(CONFIG_LOAD_ITEM);
@@ -959,27 +961,27 @@ void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
 
             // container type for audio
             item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO));
 
             // container type for images
             item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE));
 
             // container type for videos
             item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO }), ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO));
 
             // active scan count
             item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT));
 
             // active task count
             item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT));
 
             // Last modified
             item = values.append_child(CONFIG_LOAD_ITEM);
-            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_LMT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT, ConfigDefinition::findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT));
+            createItem(item, ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_LMT }), ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT));
         }
     }
 }
@@ -987,7 +989,7 @@ void Web::ConfigLoad::writeAutoscan(pugi::xml_node& values)
 /// \brief: write content of all dictionaries
 void Web::ConfigLoad::writeDictionaries(pugi::xml_node& values)
 {
-    for (auto&& dcs : ConfigDefinition::getConfigSetupList<ConfigDictionarySetup>()) {
+    for (auto&& dcs : definition->getConfigSetupList<ConfigDictionarySetup>()) {
         std::size_t i = 0;
         auto dictionary = dcs->getValue()->getDictionaryOption(true);
         for (auto&& [key, val] : dictionary) {
@@ -1014,13 +1016,13 @@ void Web::ConfigLoad::writeDictionaries(pugi::xml_node& values)
 /// \brief: write content of all vectors
 void Web::ConfigLoad::writeVectors(pugi::xml_node& values)
 {
-    for (auto&& vcs : ConfigDefinition::getConfigSetupList<ConfigVectorSetup>()) {
+    for (auto&& vcs : definition->getConfigSetupList<ConfigVectorSetup>()) {
         std::size_t i = 0;
         auto vectorOption = vcs->getValue()->getVectorOption(true);
         std::vector<std::string> attrList;
         attrList.reserve(vcs->optionList.size());
         for (const auto& opt : vcs->optionList) {
-            attrList.push_back(ConfigDefinition::removeAttribute(opt));
+            attrList.push_back(definition->removeAttribute(opt));
         }
         for (auto&& vector : vectorOption) {
             for (auto&& [key, val] : vector) {
@@ -1040,7 +1042,7 @@ void Web::ConfigLoad::writeVectors(pugi::xml_node& values)
 /// \brief: write content of all arrays
 void Web::ConfigLoad::writeArrays(pugi::xml_node& values)
 {
-    for (auto&& acs : ConfigDefinition::getConfigSetupList<ConfigArraySetup>()) {
+    for (auto&& acs : definition->getConfigSetupList<ConfigArraySetup>()) {
         auto array = acs->getValue()->getArrayOption(true);
         for (std::size_t i = 0; i < array.size(); i++) {
             auto&& entry = array[i];
@@ -1065,8 +1067,8 @@ void Web::ConfigLoad::updateEntriesFromDatabase(pugi::xml_node& root, pugi::xml_
             item.attribute(CONFIG_LOAD_SOURCE) = CONFIG_LOAD_SOURCE_DATABASE;
             item.attribute(CONFIG_LOAD_STATUS) = entry.status.c_str();
         } else {
-            auto cs = ConfigDefinition::findConfigSetupByPath(entry.item, true);
-            auto acs = ConfigDefinition::findConfigSetupByPath(entry.item, true, cs);
+            auto cs = definition->findConfigSetupByPath(entry.item, true);
+            auto acs = definition->findConfigSetupByPath(entry.item, true, cs);
             if (cs) {
                 auto item = values.append_child(CONFIG_LOAD_ITEM);
                 createItem(item, entry.item, cs->option, acs ? acs->option : ConfigVal::MAX);

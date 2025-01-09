@@ -76,15 +76,22 @@ static int remapSyslogFlag(const std::string& flag)
     return stoiString(flag, 0, 0);
 }
 
-GerberaRuntime::GerberaRuntime(const cxxopts::Options* options)
+GerberaRuntime::GerberaRuntime(
+    std::shared_ptr<ConfigDefinition> definition,
+    const cxxopts::Options* options)
     : options(options)
     , confDir(DEFAULT_CONFIG_HOME)
+    , definition(std::move(definition))
 {
-    init(options);
+    init(nullptr, options);
 }
 
-void GerberaRuntime::init(const cxxopts::Options* options)
+void GerberaRuntime::init(
+    const std::shared_ptr<ConfigDefinition>& definition,
+    const cxxopts::Options* options)
 {
+    if (definition)
+        this->definition = definition;
     this->options = options;
 
     argumentCallbacks = std::vector<ArgumentHandler> {
@@ -134,7 +141,7 @@ bool GerberaRuntime::handleOptionArgs(const std::string& arg)
     for (auto&& valueString : setValueList) {
         auto valueList = splitString(valueString, '=');
         auto option = static_cast<ConfigVal>(stoiString(valueList[0]));
-        auto setup = ConfigDefinition::findConfigSetup(option);
+        auto setup = definition->findConfigSetup(option);
         if (!setup)
             continue;
         if (setup->getTypeString() == "Boolean" && valueList.empty()) {
@@ -150,7 +157,7 @@ bool GerberaRuntime::handleOptionArgs(const std::string& arg)
 
 bool GerberaRuntime::printOptions(const std::string& arg)
 {
-    auto setupList = ConfigDefinition::getOptionList();
+    auto setupList = definition->getOptionList();
     auto resultMap = std::map<ConfigVal, std::string>();
     fmt::print("Active Options\n");
     for (auto&& setup : setupList) {
@@ -480,7 +487,7 @@ bool GerberaRuntime::checkDirs()
 
 bool GerberaRuntime::printConfig()
 {
-    ConfigGenerator configGenerator(exampleConfigSet, sections);
+    ConfigGenerator configGenerator(definition, exampleConfigSet, sections);
     if (!configDirSet) {
         confDir = "";
     }
@@ -608,7 +615,7 @@ void GerberaRuntime::handleAdditionalArgs(const std::vector<ConfigOptionArgs>& a
     for (auto&& addArg : additionalArgs) {
         if (results->count(addArg.optLong) > 0) {
             auto valueList = (*results)[addArg.optLong].as<std::vector<std::string>>();
-            auto setup = ConfigDefinition::findConfigSetup(addArg.option);
+            auto setup = definition->findConfigSetup(addArg.option);
             if (!setup)
                 continue;
             if (setup->getTypeString() == "Boolean" && valueList.empty()) {
@@ -618,7 +625,7 @@ void GerberaRuntime::handleAdditionalArgs(const std::vector<ConfigOptionArgs>& a
             }
             log_debug("addArg {} [{}] = {}", addArg.option, setup->getUniquePath(), !setup->getCurrentValue().empty() ? setup->getCurrentValue() : setup->getDefaultValue());
         } else if (addArg.defaultValue) {
-            auto setup = ConfigDefinition::findConfigSetup(addArg.option);
+            auto setup = definition->findConfigSetup(addArg.option);
             setup->makeOption(addArg.defaultValue.value(), configManager);
             auto value = !setup->getCurrentValue().empty() ? setup->getCurrentValue() : setup->getDefaultValue();
             log_debug("addArg {} [{}] = {}", addArg.option, setup->getUniquePath(), !setup->getCurrentValue().empty() ? setup->getCurrentValue() : setup->getDefaultValue());

@@ -59,6 +59,9 @@ public:
     /// \brief Returns the path of the config file that was used to launch the server.
     virtual fs::path getConfigFilename() const = 0;
 
+    /// \brief generate UDN for server and store in database
+    virtual std::string generateUDN(const std::shared_ptr<Database>& database) = 0;
+
     /// \brief add a config option
     /// \param option option type to add.
     /// \param optionValue option to add.

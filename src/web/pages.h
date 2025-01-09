@@ -45,6 +45,7 @@ class AutoscanDirectory;
 class CdsItemExternalURL;
 class CdsItem;
 class Config;
+class ConfigDefinition;
 class ConfigSetup;
 class ConfigValue;
 class ConverterManager;
@@ -239,6 +240,8 @@ class ConfigLoad : public WebRequestHandler {
 protected:
     std::vector<ConfigValue> dbEntries;
     std::map<std::string, std::string> allItems;
+    std::shared_ptr<ConfigDefinition> definition;
+
     void createItem(pugi::xml_node& item, const std::string& name, ConfigVal id, ConfigVal aid, const std::shared_ptr<ConfigSetup>& cs = nullptr);
 
     void writeDatabaseStatus(pugi::xml_node& values);
@@ -272,6 +275,7 @@ public:
 class ConfigSave : public WebRequestHandler {
 protected:
     std::shared_ptr<Context> context;
+    std::shared_ptr<ConfigDefinition> definition;
 
 public:
     explicit ConfigSave(std::shared_ptr<Context> context,

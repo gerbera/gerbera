@@ -65,21 +65,29 @@ class ConfigSetup;
 
 class ConfigDefinition {
 public:
-    static constexpr auto ATTRIBUTE = std::string_view("attribute::");
-
-    static std::vector<std::shared_ptr<ConfigSetup>> getOptionList()
+    /// \brief get list of all definied config options
+    std::vector<std::shared_ptr<ConfigSetup>> getOptionList() const
     {
         return complexOptions;
     }
 
-    static const char* mapConfigOption(ConfigVal option);
-    /// \brief check whether option is only available when other option is set
-    static bool isDependent(ConfigVal option);
+    /// \brief get path name of config option
+    const char* mapConfigOption(ConfigVal option) const;
 
-    static std::shared_ptr<ConfigSetup> findConfigSetup(ConfigVal option, bool save = false);
-    static std::shared_ptr<ConfigSetup> findConfigSetupByPath(const std::string& key, bool save = false, const std::shared_ptr<ConfigSetup>& parent = nullptr);
+    /// \brief check whether option is only available when other option is set
+    bool isDependent(ConfigVal option) const;
+
+    /// \brief find setup for config option
+    std::shared_ptr<ConfigSetup> findConfigSetup(ConfigVal option, bool save = false) const;
+    /// \brief find setup by xml path
+    std::shared_ptr<ConfigSetup> findConfigSetupByPath(
+        const std::string& key,
+        bool save = false,
+        const std::shared_ptr<ConfigSetup>& parent = nullptr) const;
+
+    /// \brief get list of all config setup with respective type
     template <class CS>
-    static std::vector<std::shared_ptr<CS>> getConfigSetupList()
+    std::vector<std::shared_ptr<CS>> getConfigSetupList() const
     {
         std::vector<std::shared_ptr<CS>> result;
         for (auto&& co : complexOptions) {
@@ -91,8 +99,9 @@ public:
         return result;
     }
 
+    /// \brief find setup for config option and convert to proper type
     template <class CS>
-    static std::shared_ptr<CS> findConfigSetup(ConfigVal option, bool save = false)
+    std::shared_ptr<CS> findConfigSetup(ConfigVal option, bool save = false) const
     {
         auto base = findConfigSetup(option, save);
         if (!base && save)
@@ -105,14 +114,17 @@ public:
         return result;
     }
 
-    static std::string ensureAttribute(ConfigVal option, bool check = true)
+    /// \brief Make sure that attribute string is prepended with "attribute::"
+    std::string ensureAttribute(ConfigVal option, bool check = true) const
     {
         auto attr = std::string(mapConfigOption(option));
         if (!startswith(attr, ATTRIBUTE) && check)
             return fmt::format("{}{}", ATTRIBUTE, attr);
         return attr;
     }
-    static std::string removeAttribute(ConfigVal option)
+
+    /// \brief Make sure that attribute string is not prepended with "attribute::"
+    std::string removeAttribute(ConfigVal option) const
     {
         auto attr = std::string(mapConfigOption(option));
         if (attr.size() > ATTRIBUTE.size() && startswith(attr, ATTRIBUTE))
@@ -120,13 +132,36 @@ public:
         return attr;
     }
 
+    /// \brief initialise definition object with all ConfigSetup instances
+    void init(const std::shared_ptr<ConfigDefinition>& self)
+    {
+        initOptions(self);
+        initHierarchy();
+        initDependencies();
+    }
+
+    static constexpr auto ATTRIBUTE = std::string_view("attribute::");
+
 private:
+    /// \brief configure all known options
+    void initOptions(const std::shared_ptr<ConfigDefinition>& self);
+    std::vector<std::shared_ptr<ConfigSetup>> getServerOptions() const;
+    std::vector<std::shared_ptr<ConfigSetup>> getClientOptions() const;
+    std::vector<std::shared_ptr<ConfigSetup>> getImportOptions() const;
+    std::vector<std::shared_ptr<ConfigSetup>> getLibraryOptions() const;
+    std::vector<std::shared_ptr<ConfigSetup>> getTranscodingOptions() const;
+    std::vector<std::shared_ptr<ConfigSetup>> getSimpleOptions() const;
+    /// \brief define option dependencies for automatic loading
+    void initDependencies();
+    /// \brief define parent options for path search
+    void initHierarchy();
+
     /// \brief all known options
-    static const std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
+    std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
     /// \brief parent options for path search
-    static const std::map<ConfigVal, std::vector<ConfigVal>> parentOptions;
+    std::map<ConfigVal, std::vector<ConfigVal>> parentOptions;
     /// \brief option dependencies for automatic loading
-    static const std::map<ConfigVal, ConfigVal> dependencyMap;
+    std::map<ConfigVal, ConfigVal> dependencyMap;
 };
 
 #endif // __CONFIG_DEFINITION_H__

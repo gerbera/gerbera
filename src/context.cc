@@ -25,13 +25,16 @@
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "context.h" // API
 
-Context::Context(std::shared_ptr<Config> config,
+Context::Context(
+    std::shared_ptr<ConfigDefinition> definition,
+    std::shared_ptr<Config> config,
     std::shared_ptr<ClientManager> clients,
     std::shared_ptr<Mime> mime,
     std::shared_ptr<Database> database,
     std::shared_ptr<Web::SessionManager> sessionManager,
     std::shared_ptr<ConverterManager> converterManager)
-    : config(std::move(config))
+    : definition(std::move(definition))
+    , config(std::move(config))
     , clients(std::move(clients))
     , mime(std::move(mime))
     , database(std::move(database))

@@ -100,7 +100,7 @@ Server::Server(std::shared_ptr<Config> config)
 {
 }
 
-void Server::init(bool offln)
+void Server::init(const std::shared_ptr<ConfigDefinition>& definition, bool offln)
 {
     offline = offln;
 
@@ -120,16 +120,13 @@ void Server::init(bool offln)
 
     serverUDN = config->getOption(ConfigVal::SERVER_UDN);
     if (serverUDN == GRB_UDN_AUTO) {
-        serverUDN = fmt::format("uuid:{}", generateRandomId());
-        auto cs = ConfigDefinition::findConfigSetup(ConfigVal::SERVER_UDN);
-        database->updateConfigValue(cs->getUniquePath(), cs->getItemPath({}, {}), serverUDN, "added");
-        log_info("Generated UDN '{}' and saved in database", serverUDN);
+        serverUDN = config->generateUDN(database);
     }
     aliveAdvertisementInterval = config->getIntOption(ConfigVal::SERVER_ALIVE_INTERVAL);
 
     clientManager = std::make_shared<ClientManager>(config, database);
     sessionManager = std::make_shared<Web::SessionManager>(config, timer);
-    context = std::make_shared<Context>(config, clientManager, mime, database, sessionManager, converterManager);
+    context = std::make_shared<Context>(definition, config, clientManager, mime, database, sessionManager, converterManager);
 
     content = std::make_shared<ContentManager>(context, self, timer);
     metadataService = std::make_shared<MetadataService>(context, content);

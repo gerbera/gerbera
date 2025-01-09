@@ -40,6 +40,7 @@
 
 using StringCheckFunction = std::function<bool(std::string& value)>;
 
+class ConfigDefinition;
 enum class ConfigVal;
 
 class ConfigValue {
@@ -68,6 +69,7 @@ protected:
     /// \brief defaultValue default value if option not found
     std::string defaultValue;
     const char* help;
+    std::shared_ptr<ConfigDefinition> definition;
 
     static std::vector<std::size_t> extractIndexList(const std::string& item);
     std::string getDocs();
@@ -130,8 +132,16 @@ public:
         return this->defaultValue;
     }
 
+    /// \brief inject definition object
+    void setDefinition(const std::shared_ptr<ConfigDefinition>& definition)
+    {
+        this->definition = definition;
+    }
     /// \brief Create the xml representation of the defaultEntries
-    virtual bool createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const { return false; }
+    virtual bool createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const
+    {
+        return false;
+    }
 
     bool isDefaultValueUsed() const
     {
@@ -153,18 +163,37 @@ public:
     /// \brief Returns a config option with the given xpath, if option does not exist a default value is returned.
     std::string getXmlContent(const pugi::xml_node& root, bool trim = true);
 
-    virtual void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr);
+    virtual void makeOption(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr);
 
-    virtual void makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr);
+    virtual void makeOption(
+        std::string optValue,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr);
 
-    virtual bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) { return false; }
+    virtual bool updateDetail(
+        const std::string& optItem,
+        std::string& optValue,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr)
+    {
+        return false;
+    }
 
     /// \brief calculate xpath for entry
     /// \param indexList indexed for arrays
     /// \param propOptions options to get section or attribute from
     /// \param propText text option (mostly for dynamic vectors)
     /// \return xpath of entry
-    virtual std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText = "") const { return xpath; }
+    virtual std::string getItemPath(
+        const std::vector<std::size_t>& indexList,
+        const std::vector<ConfigVal>& propOptions,
+        const std::string& propText = "") const
+    {
+        return xpath;
+    }
     virtual std::string getItemPathRoot(bool prefix = false) const { return xpath; }
 
     virtual std::string getUniquePath() const { return xpath; }

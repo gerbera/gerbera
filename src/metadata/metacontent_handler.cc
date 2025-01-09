@@ -42,12 +42,13 @@
 #include <regex>
 #include <sys/stat.h>
 
-ContentPathSetup::ContentPathSetup(std::shared_ptr<Config> config, ConfigVal fileListOption, ConfigVal dirListOption)
+ContentPathSetup::ContentPathSetup(std::shared_ptr<Config> config, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal fileListOption, ConfigVal dirListOption)
     : config(std::move(config))
     , names(this->config->getArrayOption(fileListOption))
     , patterns(this->config->getVectorOption(dirListOption))
     , allTweaks(this->config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST))
     , caseSensitive(this->config->getBoolOption(ConfigVal::IMPORT_RESOURCES_CASE_SENSITIVE))
+    , definition(definition)
 {
 }
 
@@ -58,9 +59,9 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
     auto files = !tweak || !tweak->hasSetting(setting) ? this->names : std::vector<std::string> { tweak->getSetting(setting) };
     auto isCaseSensitive = tweak && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : this->caseSensitive;
 
-    static auto nameOption = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_RESOURCES_NAME);
-    static auto extOption = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_RESOURCES_EXT);
-    static auto pttOption = ConfigDefinition::removeAttribute(ConfigVal::A_IMPORT_RESOURCES_PTT);
+    static auto nameOption = definition->removeAttribute(ConfigVal::A_IMPORT_RESOURCES_NAME);
+    static auto extOption = definition->removeAttribute(ConfigVal::A_IMPORT_RESOURCES_EXT);
+    static auto pttOption = definition->removeAttribute(ConfigVal::A_IMPORT_RESOURCES_PTT);
 
     std::vector<fs::path> result;
 
@@ -203,6 +204,7 @@ std::unique_ptr<ContentPathSetup> FanArtHandler::setup {};
 MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(context)
     , f2i(context->getConverterManager()->f2i())
+    , definition(context->getDefinition())
 {
 }
 
@@ -210,7 +212,7 @@ FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, definition, ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST);
     }
 }
 
@@ -259,7 +261,7 @@ ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, definition, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST);
     }
 }
 
@@ -313,7 +315,7 @@ SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, definition, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST);
     }
 }
 
@@ -378,7 +380,7 @@ MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context, std::s
     , content(std::move(content))
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, definition, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST);
     }
 }
 
@@ -410,7 +412,7 @@ ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, definition, ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST);
     }
 }
 

@@ -38,7 +38,7 @@ protected:
     /// \brief Creates an array of DirectoryTweak objects from a XML nodeset.
     /// \param element starting element of the nodeset.
     /// \param result contents of config.
-    static bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result);
+    bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result) const;
 
 public:
     bool updateItem(const std::vector<std::size_t>& indexList,

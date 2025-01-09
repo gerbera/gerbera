@@ -32,12 +32,13 @@
 #include "config/config.h"
 #include "metadata_handler.h"
 
+class ConfigDefinition;
 class Content;
 class StringConverter;
 
 class ContentPathSetup {
 public:
-    explicit ContentPathSetup(std::shared_ptr<Config> config, ConfigVal fileListOption, ConfigVal dirListOption);
+    explicit ContentPathSetup(std::shared_ptr<Config> config, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal fileListOption, ConfigVal dirListOption);
     std::vector<fs::path> getContentPath(const std::shared_ptr<CdsObject>& obj, const std::string& setting, fs::path folder = "") const;
 
 private:
@@ -47,6 +48,7 @@ private:
     std::shared_ptr<DirectoryConfigList> allTweaks;
     static std::string expandName(const std::string& name, const std::shared_ptr<CdsObject>& obj);
     bool caseSensitive;
+    std::shared_ptr<ConfigDefinition> definition;
 };
 
 /// \brief This class is responsible for populating filesystem based metadata
@@ -56,6 +58,7 @@ public:
 
 protected:
     const std::shared_ptr<StringConverter> f2i;
+    std::shared_ptr<ConfigDefinition> definition;
 };
 
 /// \brief This class is responsible for populating filesystem based album and fan art

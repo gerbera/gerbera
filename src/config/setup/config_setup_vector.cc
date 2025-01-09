@@ -40,12 +40,12 @@ bool ConfigVectorSetup::createOptionFromNode(
     std::vector<std::vector<std::pair<std::string, std::string>>>& result)
 {
     if (element) {
-        doExtend = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element);
-        const auto dictNodes = element.select_nodes(ConfigDefinition::mapConfigOption(nodeOption));
+        doExtend = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element);
+        const auto dictNodes = element.select_nodes(definition->mapConfigOption(nodeOption));
         std::vector<std::string> attrList;
         attrList.reserve(optionList.size());
         for (auto& opt : optionList) {
-            attrList.push_back(ConfigDefinition::removeAttribute(opt));
+            attrList.push_back(definition->removeAttribute(opt));
         }
 
         for (auto&& it : dictNodes) {
@@ -90,7 +90,7 @@ bool ConfigVectorSetup::createNodeFromDefaults(const std::shared_ptr<pugi::xml_n
 {
     if (defaultEntries.empty())
         return false;
-    auto section = ConfigDefinition::mapConfigOption(nodeOption);
+    auto section = definition->mapConfigOption(nodeOption);
     for (auto&& defEntry : defaultEntries) {
         auto entry = result->append_child(section);
         for (auto&& [key, val] : defEntry) {
@@ -178,21 +178,21 @@ std::string ConfigVectorSetup::getItemPath(const std::vector<std::size_t>& index
 {
     if (!propText.empty()) {
         if (indexList.size() == 0)
-            return fmt::format("{}/{}[_]/{}{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), ConfigDefinition::ATTRIBUTE, propText);
-        return fmt::format("{}/{}[{}]/{}{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList.at(0), ConfigDefinition::ATTRIBUTE, propText);
+            return fmt::format("{}/{}[_]/{}{}", xpath, definition->mapConfigOption(nodeOption), ConfigDefinition::ATTRIBUTE, propText);
+        return fmt::format("{}/{}[{}]/{}{}", xpath, definition->mapConfigOption(nodeOption), indexList.at(0), ConfigDefinition::ATTRIBUTE, propText);
     }
-    auto opt = ConfigDefinition::ensureAttribute(propOptions.size() > 0 ? propOptions.at(0) : ConfigVal::MAX);
+    auto opt = definition->ensureAttribute(propOptions.size() > 0 ? propOptions.at(0) : ConfigVal::MAX);
     if (indexList.size() == 0)
-        return fmt::format("{}/{}[_]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), opt);
+        return fmt::format("{}/{}[_]/{}", xpath, definition->mapConfigOption(nodeOption), opt);
 
-    return fmt::format("{}/{}[{}]/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption), indexList.at(0), opt);
+    return fmt::format("{}/{}[{}]/{}", xpath, definition->mapConfigOption(nodeOption), indexList.at(0), opt);
 }
 
 std::string ConfigVectorSetup::getItemPathRoot(bool prefix) const
 {
     if (prefix)
         return fmt::format("{}", xpath);
-    return fmt::format("{}/{}", xpath, ConfigDefinition::mapConfigOption(nodeOption));
+    return fmt::format("{}/{}", xpath, definition->mapConfigOption(nodeOption));
 }
 
 std::vector<std::vector<std::pair<std::string, std::string>>> ConfigVectorSetup::getXmlContent(const pugi::xml_node& optValue)

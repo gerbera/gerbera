@@ -43,6 +43,7 @@ Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context,
     const std::shared_ptr<Quirks>& quirks)
     : WebRequestHandler(content, server, xmlBuilder, quirks)
     , context(std::move(context))
+    , definition(this->content->getContext()->getDefinition())
 {
 }
 
@@ -75,9 +76,9 @@ void Web::ConfigSave::process()
             log_debug("save item {}='{}' {}", parItem, param(key), param(status));
             if (!param(key).empty() && param(key) != "-1") {
                 auto option = static_cast<ConfigVal>(std::stoi(param(key)));
-                cs = ConfigDefinition::findConfigSetup(option, true);
+                cs = definition->findConfigSetup(option, true);
             } else if (!parItem.empty()) {
-                cs = ConfigDefinition::findConfigSetupByPath(parItem, true);
+                cs = definition->findConfigSetupByPath(parItem, true);
             } else {
                 log_error("{} has empty value", item);
                 continue;

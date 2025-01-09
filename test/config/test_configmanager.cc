@@ -21,6 +21,7 @@
     $Id$
 */
 
+#include "config/config_definition.h"
 #include "config/config_generator.h"
 #include "config/config_manager.h"
 #include "config/config_val.h"
@@ -41,6 +42,8 @@ public:
 
     void SetUp() override
     {
+        definition = std::make_shared<ConfigDefinition>();
+        definition->init(definition);
         gerberaDir = createTempPath();
 
         fs::path grbWeb = gerberaDir / "web";
@@ -100,7 +103,7 @@ public:
 
     std::string createConfig() const
     {
-        ConfigGenerator configGenerator(false);
+        ConfigGenerator configGenerator(definition, false);
         return configGenerator.generate(home, confdir, prefix, magic);
     }
 
@@ -117,11 +120,12 @@ public:
     fs::path prefix;
     fs::path magic;
     ConfigManager* subject;
+    std::shared_ptr<ConfigDefinition> definition;
 };
 
 TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues)
 {
-    auto shared = std::make_shared<ConfigManager>(configFile, home, confdir, prefix, false);
+    auto shared = std::make_shared<ConfigManager>(definition, configFile, home, confdir, prefix, false);
     shared->load(home);
 
     ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_ENABLED));
@@ -145,7 +149,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
     configFile = "";
 
     try {
-        auto shared = std::make_shared<ConfigManager>(configFile, notExistsDir, confdir, prefix, false);
+        auto shared = std::make_shared<ConfigManager>(definition, configFile, notExistsDir, confdir, prefix, false);
         shared->load(notExistsDir);
     } catch (const std::runtime_error& err) {
         EXPECT_EQ(err.what(), expErrMsg.str());
@@ -155,7 +159,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
 TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified)
 {
     configFile = "";
-    auto shared = std::make_shared<ConfigManager>(configFile, home, confdir, prefix, false);
+    auto shared = std::make_shared<ConfigManager>(definition, configFile, home, confdir, prefix, false);
     shared->load(home);
 
     ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_ENABLED));

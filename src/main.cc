@@ -39,6 +39,7 @@
 
 #define GRB_LOG_FAC GrbLogFacility::server
 
+#include "config/config_definition.h"
 #include "config/config_manager.h"
 #include "config/config_val.h"
 #include "config/grb_runtime.h"
@@ -159,8 +160,11 @@ static void installSignalHandler()
 
 int main(int argc, char** argv, char** envp)
 {
+    std::shared_ptr<ConfigDefinition> definition = std::make_shared<ConfigDefinition>();
+    definition->init(definition);
+
     cxxopts::Options options(GerberaRuntime::ProgramName, "Gerbera UPnP Media Server - https://gerbera.io");
-    runtime.init(&options);
+    runtime.init(definition, &options);
     std::optional<std::string> magic = runtime.getMagic();
     const auto additionalArgs = std::vector<ConfigOptionArgs> {
         { ConfigVal::SERVER_PORT, "p", "port", "Port to bind with, must be >=49152", std::optional<std::string>(), "PORT" },
@@ -214,6 +218,7 @@ int main(int argc, char** argv, char** envp)
         int portnum = -1;
         try {
             configManager = std::make_shared<ConfigManager>(
+                definition,
                 runtime.getConfigFile(), runtime.getHome(), runtime.getConfDir(),
                 runtime.getDataDir(), runtime.getDebug());
             configManager->load(runtime.getHome());
@@ -244,7 +249,7 @@ int main(int argc, char** argv, char** envp)
         auto server = std::make_shared<Server>(configManager);
 
         try {
-            server->init(runtime.getOffline());
+            server->init(definition, runtime.getOffline());
             server->run();
         } catch (const UpnpException& ue) {
             log_error("{}", ue.what());
@@ -303,12 +308,16 @@ int main(int argc, char** argv, char** envp)
                     server->shutdown();
                     server.reset();
                     configManager.reset();
+                    definition.reset();
                     runtime.shutdown();
 
-                    GerberaRuntime runtimeChild(&options);
+                    definition = std::make_shared<ConfigDefinition>();
+                    definition->init(definition);
+                    GerberaRuntime runtimeChild(definition, &options);
                     try {
                         runtimeChild.handleOptions(&results, false);
                         configManager = std::make_shared<ConfigManager>(
+                            definition,
                             runtimeChild.getConfigFile(), runtimeChild.getHome(), runtimeChild.getConfDir(),
                             runtimeChild.getDataDir(), runtimeChild.getDebug());
                         configManager->load(runtimeChild.getHome());
@@ -336,7 +345,7 @@ int main(int argc, char** argv, char** envp)
                     installSignalHandler();
 
                     server = std::make_shared<Server>(configManager);
-                    server->init(runtimeChild.getOffline());
+                    server->init(definition, runtimeChild.getOffline());
                     server->run();
 
                     _ctx.restartFlag = 0;

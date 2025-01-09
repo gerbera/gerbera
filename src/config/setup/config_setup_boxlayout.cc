@@ -48,18 +48,18 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
         return true;
 
     std::vector<std::string> allKeys;
-    auto&& ccs = ConfigDefinition::findConfigSetup<ConfigSetup>(option);
-    auto doExtend = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element.parent());
+    auto&& ccs = definition->findConfigSetup<ConfigSetup>(option);
+    auto doExtend = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element.parent());
     log_debug("is {} extensible {}", element.parent().path(), doExtend);
     for (auto&& it : ccs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
-        auto key = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->getXmlContent(child);
-        auto title = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->getXmlContent(child);
-        auto objClass = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->getXmlContent(child);
-        auto upnpShortcut = ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->getXmlContent(child);
-        auto size = ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
-        auto enabled = ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
+        auto key = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->getXmlContent(child);
+        auto title = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->getXmlContent(child);
+        auto objClass = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->getXmlContent(child);
+        auto upnpShortcut = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->getXmlContent(child);
+        auto size = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
+        auto enabled = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
 
         if (!enabled && ((key == BoxKeys::audioRoot) || (key == BoxKeys::audioAll) || (key == BoxKeys::imageRoot) || (key == BoxKeys::imageAll) || (key == BoxKeys::videoRoot) || (key == BoxKeys::videoAll))) {
             log_warning("Box '{}' cannot be disabled", key);
@@ -128,7 +128,7 @@ bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getKey());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->checkValue(optValue)) {
+        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->checkValue(optValue)) {
             entry->setKey(optValue);
             log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getKey());
             return true;
@@ -138,7 +138,7 @@ bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getTitle());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->checkValue(optValue)) {
+        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->checkValue(optValue)) {
             entry->setTitle(optValue);
             log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getTitle());
             return true;
@@ -148,7 +148,7 @@ bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getClass());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->checkValue(optValue)) {
+        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->checkValue(optValue)) {
             entry->setClass(optValue);
             log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getClass());
             return true;
@@ -158,7 +158,7 @@ bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getUpnpShortcut());
-        if (ConfigDefinition::findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->checkValue(optValue)) {
+        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->checkValue(optValue)) {
             entry->setUpnpShortcut(optValue);
             log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getUpnpShortcut());
             return true;
@@ -168,7 +168,7 @@ bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getSize());
-        entry->setSize(ConfigDefinition::findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->checkIntValue(optValue));
+        entry->setSize(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->checkIntValue(optValue));
         log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getSize());
         return true;
     }
@@ -176,7 +176,7 @@ bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
     if (optItem == index) {
         if (entry->getOrig())
             config->setOrigValue(index, entry->getEnabled());
-        entry->setEnabled(ConfigDefinition::findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->checkValue(optValue));
+        entry->setEnabled(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->checkValue(optValue));
         log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getEnabled());
         return true;
     }
@@ -222,20 +222,20 @@ std::string ConfigBoxLayoutSetup::getItemPath(const std::vector<std::size_t>& in
 {
     if (indexList.size() == 0) {
         if (propOptions.size() > 0) {
-            return fmt::format("{}[_]/{}", ConfigDefinition::mapConfigOption(option), ConfigDefinition::ensureAttribute(propOptions[0]));
+            return fmt::format("{}[_]/{}", definition->mapConfigOption(option), definition->ensureAttribute(propOptions[0]));
         }
-        return fmt::format("{}[_]", ConfigDefinition::mapConfigOption(option));
+        return fmt::format("{}[_]", definition->mapConfigOption(option));
     }
     if (propOptions.size() > 0) {
-        return fmt::format("{}[{}]/{}", ConfigDefinition::mapConfigOption(option), indexList[0], ConfigDefinition::ensureAttribute(propOptions[0]));
+        return fmt::format("{}[{}]/{}", definition->mapConfigOption(option), indexList[0], definition->ensureAttribute(propOptions[0]));
     }
-    return fmt::format("{}[{}]", ConfigDefinition::mapConfigOption(option), indexList[0]);
+    return fmt::format("{}[{}]", definition->mapConfigOption(option), indexList[0]);
 }
 
 std::string ConfigBoxLayoutSetup::getItemPathRoot(bool prefix) const
 {
     if (prefix) {
-        return ConfigDefinition::mapConfigOption(option);
+        return definition->mapConfigOption(option);
     }
-    return ConfigDefinition::mapConfigOption(option);
+    return definition->mapConfigOption(option);
 }
