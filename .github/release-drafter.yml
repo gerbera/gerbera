@@ -15,4 +15,4 @@ template: |
   Please see our [Documentation](https://docs.gerbera.io/en/stable) for how to [install the latest Gerbera version](https://docs.gerbera.io/en/stable/install.html) on your system.
   
   ## Full Changelog
-  https://github.com/gerbera/gerbera/compare/$PREVIOUS_TAG...$NEXT_PATCH_VERSION
+  https://github.com/gerbera/gerbera/compare/$PREVIOUS_TAG...v$NEXT_PATCH_VERSION

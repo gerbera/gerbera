@@ -445,9 +445,10 @@ static const std::map<std::string, std::string> upnpContainerDefaultPropDefaults
     { "upnp:storageUsed", "0" },
 };
 
-std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions() const
+std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
 {
     return {
+        // Core Server options
         std::make_shared<ConfigUIntSetup>(ConfigVal::SERVER_PORT,
             "/server/port", "config-server.html#port",
             0, CheckPortValue),
@@ -518,6 +519,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions() c
             "/server/upnp-string-limit", "config-server.html#upnp-string-limit",
             DEFAULT_UPNP_STRING_LIMIT, CheckUpnpStringLimitValue),
 
+        // Database setup
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE,
             "/server/storage", "config-server.html#storage",
             true),
@@ -578,15 +580,14 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions() c
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_STORAGE_SQLITE_RESTORE,
             "/server/storage/sqlite3/on-error", "config-server.html#storage",
             "restore", StringCheckFunction(SqliteConfig::CheckSqlLiteRestoreValue)),
+        std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
+            "/server/storage/sqlite3/backup/attribute::enabled", "config-server.html#storage",
 #ifdef SQLITE_BACKUP_ENABLED
-        std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
-            "/server/storage/sqlite3/backup/attribute::enabled", "config-server.html#storage",
-            YES),
+            YES
 #else
-        std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
-            "/server/storage/sqlite3/backup/attribute::enabled", "config-server.html#storage",
-            NO),
+            NO
 #endif
+            ),
         std::make_shared<ConfigTimeSetup>(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL,
             "/server/storage/sqlite3/backup/attribute::interval", "config-server.html#storage",
             GrbTimeType::Seconds, 600, 1),
@@ -598,6 +599,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions() c
             "/server/storage/sqlite3/upgrade-file", "config-server.html#storage",
             "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
 
+        // Web User Interface
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_UI_ENABLED,
             "/server/ui/attribute::enabled", "config-server.html#ui",
             YES),
@@ -658,6 +660,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions() c
 #endif
             ),
 
+    // Logging and debugging
 #ifdef GRBDEBUG
         std::make_shared<ConfigIntSetup>(ConfigVal::SERVER_LOG_DEBUG_MODE,
             "/server/attribute::debug-mode", "config-server.html#debug-mode",
@@ -675,6 +678,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions() c
             500),
 #endif
 
+    // Thumbnails for images and videos
 #ifdef HAVE_FFMPEGTHUMBNAILER
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED,
             "/server/extended-runtime-options/ffmpegthumbnailer/attribute::enabled", "config-extended.html#ffmpegthumbnailer",
@@ -705,6 +709,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions() c
             ""),
 #endif
 
+        // Playmarks
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED,
             "/server/extended-runtime-options/mark-played-items/attribute::enabled", "config-extended.html#extended-runtime-options",
             NO),
@@ -740,6 +745,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions() c
             0, 0, ConfigIntSetup::CheckMinValue),
 #endif // HAVE_CURL
 
+        // UPNP control
         std::make_shared<ConfigBoolSetup>(ConfigVal::UPNP_LITERAL_HOST_REDIRECTION,
             "/server/upnp/attribute::literal-host-redirection", "config-server.html#upnp",
             NO),
@@ -839,6 +845,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions() c
         std::make_shared<ConfigStringSetup>(ConfigVal::A_UPNP_DEFAULT_PROPERTY_VALUE,
             "attribute::value", "config-server.html#upnp"),
 
+        // Dynamic (aka search) containers
         std::make_shared<ConfigDynamicContentSetup>(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST,
             "/server/containers", "config-server.html#containers"),
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST_ENABLED,
@@ -868,7 +875,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions() c
     };
 }
 
-std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getClientOptions() const
+std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getClientOptions()
 {
     return {
         std::make_shared<ConfigClientSetup>(ConfigVal::CLIENTS_LIST,
@@ -954,9 +961,10 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getClientOptions() c
     };
 }
 
-std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions() const
+std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
 {
     return {
+        // boxlayout provides modification options like translation of tree items
         std::make_shared<ConfigBoxLayoutSetup>(ConfigVal::BOXLAYOUT_BOX,
             "/import/scripting/virtual-layout/boxlayout/box", "config-import.html#boxlayout",
             boxLayoutDefaults),
@@ -979,6 +987,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions() c
             "attribute::enabled", "config-import.html#boxlayout",
             YES),
 
+        // default file settings, can be overwritten in autoscan
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_HIDDEN_FILES,
             "/import/attribute::hidden-files", "config-import.html#import",
             NO),
@@ -1008,6 +1017,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions() c
             "metadata", "config-import.html#virtual-directories",
             ""),
 
+        // mappings extension -> mimetype -> upnpclass / contenttype / transfermode -> dlnaprofile
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_READABLE_NAMES,
             "/import/attribute::readable-names", "config-import.html#import",
             YES),
@@ -1052,6 +1062,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions() c
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LAYOUT_PARENT_PATH,
             "/import/layout/attribute::parent-path", "config-import.html#layout",
             NO),
+
+    // Scripting
 #ifdef HAVE_JS
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_CHARSET,
             "/import/scripting/attribute::script-charset", "config-import.html#scripting",
@@ -1126,6 +1138,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions() c
             ""),
 #endif // HAVE_JS
 
+        // character conversion
         std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
             "/import/scripting/virtual-layout/genre-map", "config-import.html#layout",
             ConfigVal::A_IMPORT_LAYOUT_GENRE, ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO),
@@ -1140,15 +1153,14 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions() c
             DEFAULT_FILESYSTEM_CHARSET, ConfigStringSetup::CheckCharset),
         std::make_shared<ConfigEnumSetup<LayoutType>>(ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE,
             "/import/scripting/virtual-layout/attribute::type", "config-import.html#scripting",
+#ifdef HAVE_JS
+            LayoutType::Js,
+#else
             LayoutType::Builtin,
+#endif
             std::map<std::string, LayoutType>({ { "js", LayoutType::Js }, { "builtin", LayoutType::Builtin }, { "disabled", LayoutType::Disabled } })),
 
-        std::make_shared<ConfigBoolSetup>(ConfigVal::TRANSCODING_TRANSCODING_ENABLED,
-            "/transcoding/attribute::enabled", "config-transcode.html#transcoding",
-            NO),
-        std::make_shared<ConfigTranscodingSetup>(ConfigVal::TRANSCODING_PROFILE_LIST,
-            "/transcoding", "config-transcode.html#transcoding"),
-
+        // tweaks
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP,
             "/import/library-options/attribute::multi-value-separator", "config-import.html#library-options",
             DEFAULT_LIBOPTS_ENTRY_SEPARATOR),
@@ -1231,6 +1243,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions() c
             "/import/visible-directories", "config-import.html#visible-directories",
             ConfigVal::A_IMPORT_SYSTEM_DIR_ADD_PATH, ConfigVal::A_IMPORT_RESOURCES_NAME, false, false),
 
+    // Autoscan settings
 #ifdef HAVE_INOTIFY
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY,
             "/import/autoscan/attribute::use-inotify", "config-import.html#autoscan",
@@ -1280,6 +1293,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions() c
         std::make_shared<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT,
             "attribute::last-modified", "config-import.html#autoscan"),
 
+        // Directory Tweaks
         std::make_shared<ConfigDirectorySetup>(ConfigVal::IMPORT_DIRECTORIES_LIST,
             "/import/directories", "config-import.html#autoscan"),
         std::make_shared<ConfigSetup>(ConfigVal::A_DIRECTORIES_TWEAK,
@@ -1376,7 +1390,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions() c
     };
 }
 
-std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions() const
+std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
 {
     return {
 #ifdef HAVE_LIBEXIF
@@ -1463,9 +1477,15 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions() 
     };
 }
 
-std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOptions() const
+std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOptions()
 {
     return {
+        std::make_shared<ConfigBoolSetup>(ConfigVal::TRANSCODING_TRANSCODING_ENABLED,
+            "/transcoding/attribute::enabled", "config-transcode.html#transcoding",
+            NO),
+        std::make_shared<ConfigTranscodingSetup>(ConfigVal::TRANSCODING_PROFILE_LIST,
+            "/transcoding", "config-transcode.html#transcoding"),
+
 #ifdef HAVE_CURL
         std::make_shared<ConfigIntSetup>(ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE,
             "/transcoding/attribute::fetch-buffer-size", "config-transcode.html#transcoding",
@@ -1475,9 +1495,30 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             0, 0, ConfigIntSetup::CheckMinValue),
 #endif // HAVE_CURL
 
+        // mimetype identification and media filtering
         std::make_shared<ConfigBoolSetup>(ConfigVal::TRANSCODING_MIMETYPE_PROF_MAP_ALLOW_UNUSED,
             "/transcoding/mimetype-profile-mappings/attribute::allow-unused", "config-transcode.html#mimetype-profile-mappings",
             NO),
+        std::make_shared<ConfigDictionarySetup>(ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP,
+            "/transcoding/mimetype-profile-mappings", "config-transcode.html#mimetype-profile-mappings",
+            ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE,
+            ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE,
+            ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_USING,
+            false, false, false, trMtDefaults),
+        std::make_shared<ConfigSetup>(ConfigVal::A_TRANSCODING_MIMETYPE_FILTER,
+            "/transcoding/mimetype-profile-mappings/transcode", "config-transcode.html#mimetype-profile-mappings",
+            ""),
+        std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_USING,
+            "attribute::using", "config-transcode.html#mimetype-profile-mappings",
+            ""),
+        std::make_shared<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS,
+            "attribute::client-flags", "config-transcode.html#mimetype-profile-mappings",
+            0, ClientConfig::makeFlags),
+        std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SRCDLNA,
+            "attribute::source-profile", "config-transcode.html#mimetype-profile-mappings",
+            ""),
+
+        // Transcoding Profiles
         std::make_shared<ConfigBoolSetup>(ConfigVal::TRANSCODING_PROFILES_PROFILE_ALLOW_UNUSED,
             "/transcoding/profiles/attribute::allow-unused", "config-transcode.html#profiles",
             NO),
@@ -1487,23 +1528,14 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
         std::make_shared<ConfigEnumSetup<AviFourccListmode>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE,
             "mode", "config-transcode.html#profiles",
             std::map<std::string, AviFourccListmode>({ { "ignore", AviFourccListmode::Ignore }, { "process", AviFourccListmode::Process }, { "disabled", AviFourccListmode::None } })),
-        std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_USING,
-            "attribute::using", "config-transcode.html#profiles",
-            ""),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC,
             "fourcc", "config-transcode.html#profiles",
             ""),
-        std::make_shared<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS,
-            "attribute::client-flags", "config-transcode.html#profiles",
-            0, ClientConfig::makeFlags),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_DLNAPROF,
             "attribute::dlna-profile", "config-transcode.html#profiles",
             ""),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING,
             "attribute::no-transcoding", "config-transcode.html#profiles",
-            ""),
-        std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SRCDLNA,
-            "attribute::source-profile", "config-transcode.html#profiles",
             ""),
         std::make_shared<ConfigBoolSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED,
             "attribute::enabled", "config-transcode.html#profiles"),
@@ -1519,31 +1551,14 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             "accept-ogg-theora", "config-transcode.html#profiles"),
         std::make_shared<ConfigArraySetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC,
             "avi-fourcc-list", "config-transcode.html#profiles",
-            ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC, ConfigVal::MAX, true, true),
-        std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE,
-            "attribute::size", "config-transcode.html#profiles",
-            0, 0, ConfigIntSetup::CheckMinValue),
-        std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK,
-            "attribute::chunk-size", "config-transcode.html#profiles",
-            0, 0, ConfigIntSetup::CheckMinValue),
-        std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL,
-            "attribute::fill-size", "config-transcode.html#profiles",
-            0, 0, ConfigIntSetup::CheckMinValue),
+            ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC, ConfigVal::MAX,
+            true, true),
         std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SAMPFREQ,
             "sample-frequency", "config-transcode.html#profiles",
             "-1", CheckProfileNumberValue),
         std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NRCHAN,
             "audio-channels", "config-transcode.html#profiles",
             "-1", CheckProfileNumberValue),
-        std::make_shared<ConfigDictionarySetup>(ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP,
-            "/transcoding/mimetype-profile-mappings", "config-transcode.html#profiles",
-            ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE,
-            ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE,
-            ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_USING,
-            false, false, false, trMtDefaults),
-        std::make_shared<ConfigSetup>(ConfigVal::A_TRANSCODING_MIMETYPE_FILTER,
-            "/transcoding/mimetype-profile-mappings/transcode", "config-transcode.html#profiles",
-            ""),
         std::make_shared<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE,
             "/transcoding/profiles/profile", "config-transcode.html#profiles",
             ""),
@@ -1553,6 +1568,19 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE,
             "mimetype", "config-transcode.html#profiles",
             true, "", true),
+
+        // Buffer
+        std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE,
+            "attribute::size", "config-transcode.html#profiles",
+            0, 0, ConfigIntSetup::CheckMinValue),
+        std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK,
+            "attribute::chunk-size", "config-transcode.html#profiles",
+            0, 0, ConfigIntSetup::CheckMinValue),
+        std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL,
+            "attribute::fill-size", "config-transcode.html#profiles",
+            0, 0, ConfigIntSetup::CheckMinValue),
+
+        // Agent
         std::make_shared<ConfigPathSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND,
             "attribute::command", "config-transcode.html#profiles",
             "",
@@ -1595,12 +1623,10 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             "attribute::metadata", "config-transcode.html#profiles",
             MetadataFields::M_MAX,
             MetaEnumMapper::remapMetaDataField, MetaEnumMapper::getMetaFieldName),
-
     };
 }
 
-/// \brief: simpleOptions for group names with content
-std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getSimpleOptions() const
+std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getSimpleOptions()
 {
     return {
         std::make_shared<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON_KEY,

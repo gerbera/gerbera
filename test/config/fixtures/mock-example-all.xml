@@ -209,7 +209,7 @@
         <video-file>importVideo</video-file>
         <image-file>importImage</image-file>
       </import-function>
-      <virtual-layout type="builtin">
+      <virtual-layout type="js">
         <structured-layout skip-chars="" div-char="" />
         <genre-map></genre-map>
         <boxlayout>
