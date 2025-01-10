@@ -145,12 +145,14 @@ public:
 private:
     /// \brief configure all known options
     void initOptions(const std::shared_ptr<ConfigDefinition>& self);
-    std::vector<std::shared_ptr<ConfigSetup>> getServerOptions() const;
-    std::vector<std::shared_ptr<ConfigSetup>> getClientOptions() const;
-    std::vector<std::shared_ptr<ConfigSetup>> getImportOptions() const;
-    std::vector<std::shared_ptr<ConfigSetup>> getLibraryOptions() const;
-    std::vector<std::shared_ptr<ConfigSetup>> getTranscodingOptions() const;
-    std::vector<std::shared_ptr<ConfigSetup>> getSimpleOptions() const;
+    static std::vector<std::shared_ptr<ConfigSetup>> getServerOptions();
+    static std::vector<std::shared_ptr<ConfigSetup>> getClientOptions();
+    static std::vector<std::shared_ptr<ConfigSetup>> getImportOptions();
+    static std::vector<std::shared_ptr<ConfigSetup>> getLibraryOptions();
+    static std::vector<std::shared_ptr<ConfigSetup>> getTranscodingOptions();
+    /// \brief: simpleOptions for group names with content
+    static std::vector<std::shared_ptr<ConfigSetup>> getSimpleOptions();
+
     /// \brief define option dependencies for automatic loading
     void initDependencies();
     /// \brief define parent options for path search

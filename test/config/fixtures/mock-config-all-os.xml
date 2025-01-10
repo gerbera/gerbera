@@ -73,7 +73,7 @@
         <video-file>importVideo</video-file>
         <image-file>importImage</image-file>
       </import-function>
-      <virtual-layout type="builtin">
+      <virtual-layout type="js">
         <boxlayout>
           <box key="Audio/allAlbums" title="Albums" class="object.container" upnp-shortcut="MUSIC_ALBUMS" />
           <box key="Audio/allArtists" title="Artists" class="object.container" upnp-shortcut="MUSIC_ARTISTS" />

@@ -1,5 +1,17 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
+Changed default for layout to "js" if built with JavaScript support.
+
+### FIXES
+
+- Album art in builtin layout
+
+### Code Improvements
+
+- Removed static from ConfigDefinition
+
 ## 2.4.1
 
 ### FIXES
