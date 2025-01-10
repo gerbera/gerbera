@@ -363,7 +363,8 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
 
     auto albumContainer = std::make_shared<CdsContainer>(album, UPNP_CLASS_MUSIC_ALBUM);
     albumContainer->setMetaData(obj->getMetaData());
-    albumContainer->setResources(obj->getResources());
+    if (parent && parent->getResourceCount() > 0)
+        albumContainer->setResources(parent->getResources());
     albumContainer->setRefID(obj->getID());
     artistContainer->setSearchable(true);
 

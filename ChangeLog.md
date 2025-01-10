@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Fix album art in builtin layout
 - Refactor static code from ConfigDefinition
 
 ### v2.4.1
