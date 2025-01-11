@@ -825,6 +825,10 @@ void ImportService::assignFanArt(
     }
 
     auto fanart = container->getResource(ResourcePurpose::Thumbnail);
+    // Ignore if the fanart's FanArtObject is not set
+    if (fanart && stoiString(fanart->getAttribute(ResourceAttribute::FANART_OBJ_ID)) <= CDS_ID_ROOT)
+        fanart = nullptr;
+
     if (fanart && fanart->getHandlerType() != ContentHandler::CONTAINERART) {
         // remove stale references
         auto fanartObjId = stoiString(fanart->getAttribute(ResourceAttribute::FANART_OBJ_ID));
@@ -848,7 +852,11 @@ void ImportService::assignFanArt(
         metadataService->getHandler(ContentHandler::CONTAINERART)->fillMetadata(container);
         auto containerart = container->getResource(ResourcePurpose::Thumbnail);
         if (containerart) {
-            fanart = containerart;
+            // Ignore if the fanart's FanArtObject is not set
+            if (stoiString(containerart->getAttribute(ResourceAttribute::FANART_OBJ_ID)) > CDS_ID_ROOT)
+                fanart = containerart;
+            else
+                containerart = nullptr;
         } else if (fanart) {
             container->addResource(fanart); // restore if no image matches
         }
@@ -936,7 +944,7 @@ std::pair<int, bool> ImportService::addContainerTree(
     const std::shared_ptr<CdsObject>& refItem,
     std::vector<int>& createdIds)
 {
-    log_debug("start '{}' {}", rootPath.string(), parentContainerId);
+    log_debug("start '{}' {} - refItem {}", rootPath.string(), parentContainerId, refItem ? refItem->getID() : -1);
     std::string tree; // accumulate path to container here
     int result = parentContainerId;
     bool isNew = false;
