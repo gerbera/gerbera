@@ -62,7 +62,7 @@ else
     EXIF="v0.6.24"
     EXIF_commit="180c1201dc494a06335b3b42bce5d4e07e6ae38c"
     FFMPEGTHUMBNAILER="2.2.3"
-    FMT="11.0.2"
+    FMT="11.1.2"
     GOOGLETEST="1.15.2"
     LASTFM="0.4.0"
     MATROSKA="1.7.1"
