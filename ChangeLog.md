@@ -3,6 +3,7 @@
 ### HEAD
 
 - Fix album art in builtin layout
+- JS: Fix config autoscan object in scripts
 - Refactor static code from ConfigDefinition
 
 ### v2.4.1

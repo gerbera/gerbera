@@ -219,26 +219,30 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
 
     for (auto&& ascs : definition->getConfigSetupList<ConfigAutoscanSetup>()) {
         duk_push_object(ctx); // autoscan
-        auto autoscan = ascs->getValue()->getAutoscanListOption();
 
-        for (const auto& adir : content->getAutoscanDirectories()) {
-            duk_push_object(ctx);
-
-            setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
-            setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
-            setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
-            setBoolProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
-            setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE), adir->getMediaType());
-            setBoolProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
-            setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
-            setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
-            setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
-
-            duk_put_prop_string(ctx, -2, fmt::to_string(adir->getScanID()).c_str());
-        }
+        std::size_t idx = 0;
         std::string autoscanItemPath = ascs->getItemPathRoot(true); // prefix
+        for (const auto& adir : content->getAutoscanDirectories()) {
+            if (adir->getScanMode() == ascs->getScanMode()) {
+                duk_push_object(ctx);
+
+                setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION), adir->getLocation());
+                setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE), AutoscanDirectory::mapScanmode(adir->getScanMode()));
+                setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL), adir->getInterval().count());
+                setBoolProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
+                setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE), adir->getMediaType());
+                setBoolProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
+                setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
+                setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
+                setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
+
+                duk_put_prop_string(ctx, -2, fmt::to_string(adir->getScanID()).c_str());
+                log_debug("Adding config[{}][{}] {}", autoscanItemPath, adir->getScanID(), adir->getLocation().string());
+                idx++;
+            }
+        }
         duk_put_prop_string(ctx, -2, autoscanItemPath.c_str()); // autoscan
-        log_debug("Adding config[{}] {}", autoscanItemPath, content->getAutoscanDirectories().size());
+        log_debug("Adding config[{}] {}", autoscanItemPath, idx);
     }
 
     for (auto&& bcs : definition->getConfigSetupList<ConfigBoxLayoutSetup>()) {
@@ -470,6 +474,7 @@ std::vector<int> Script::call(const std::shared_ptr<CdsObject>& obj,
 {
     // write global object used in callback functionss
     cdsObject2dukObject(obj);
+    log_debug("wrote global object {} as {}", obj != nullptr, objectName);
     duk_put_global_string(ctx, objectName.c_str());
 
     // functionName(object, rootPath, autoScanId, containerType)
