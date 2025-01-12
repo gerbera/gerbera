@@ -55,6 +55,7 @@ public:
     }
 
     std::string getTypeString() const override { return "List"; }
+    AutoscanScanMode getScanMode() const { return scanMode; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
 
