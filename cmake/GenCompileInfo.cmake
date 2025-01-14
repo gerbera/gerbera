@@ -29,6 +29,7 @@
 function(generate_compile_info)
     set(COMPILE_INFO_LIST
             "WITH_NPUPNP=${WITH_NPUPNP}"
+            "STATIC_LIBUPNP=${STATIC_LIBUPNP}"
             "WITH_MAGIC=${WITH_MAGIC}"
             "WITH_MYSQL=${WITH_MYSQL}"
             "WITH_CURL=${WITH_CURL}"

@@ -20,9 +20,9 @@
 
     $Id$
 */
-import {GerberaApp} from './gerbera-app.module.js';
-import {Auth} from './gerbera-auth.module.js';
-import {Updates} from './gerbera-updates.module.js';
+import { GerberaApp } from './gerbera-app.module.js';
+import { Auth } from './gerbera-auth.module.js';
+import { Updates } from './gerbera-updates.module.js';
 
 const initialize = () => {
   $('#autoscanModal').autoscanmodal('reset');
@@ -37,6 +37,10 @@ const addAutoscan = (event) => {
       object_id: item.id,
       action: 'as_edit_load',
       audio: item.audio,
+      retryCount: item.retryCount,
+      interval: item.interval,
+      dirTypes: item.dirTypes,
+      forceRescan: item.forceRescan,
       audioMusic: item.audioMusic,
       audioBook: item.audioBook,
       audioBroadcast: item.audioBroadcast,
@@ -54,7 +58,7 @@ const addAutoscan = (event) => {
     requestData[Auth.SID] = Auth.getSessionId();
 
     if (GerberaApp.getType() === 'db') {
-      requestData = $.extend({}, requestData, {updates: 'check'});
+      requestData = $.extend({}, requestData, { updates: 'check' });
     }
 
     $.ajax({

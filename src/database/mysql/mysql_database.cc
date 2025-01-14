@@ -53,10 +53,10 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
     table_quote_end = '`';
 
     // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated
-    hashies = { 3813459699, // index 0 is used for create script mysql.sql = Version 1
+    hashies = { 684441550, // index 0 is used for create script mysql.sql = Version 1
         928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, // upgrade 2-11
         1512596496, 507706380, 3545156190, 31528140, 372163748, 4097073836, 751952276, 3893982139, 798767550, 3731206823, // upgrade 12-21
-        3643149536 };
+        3643149536, 4280737637 };
 }
 
 MySQLDatabase::~MySQLDatabase()

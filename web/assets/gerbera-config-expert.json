@@ -685,6 +685,11 @@
           "editable": true
         },
         {
+          "item": "/import/attribute::force-unknown-reread",
+          "caption": "Force Reread of Unknown Files",
+          "editable": true
+        },
+        {
           "item": "/import/attribute::follow-symlinks",
           "caption": "Follow Symlinks",
           "editable": true

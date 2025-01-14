@@ -315,6 +315,7 @@ public:
 enum class FieldType {
     String,
     Integer,
+    Bool,
     Date,
 };
 

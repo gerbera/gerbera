@@ -38,6 +38,9 @@
     const autoscanInterval = modal.find('#autoscanInterval');
     const autoscanSave = modal.find('#autoscanSave');
     const autoscanPersistentMsg = modal.find('#autoscan-persistent-msg');
+    const autoscanRetryCount = modal.find('#autoscanRetryCount');
+    const autoscanDirTypes = modal.find('#autoscanDirTypes');
+    const autoscanForceRescan = modal.find('#autoscanForceRescan');
 
     const autoscanAudio = modal.find('#autoscanAudio');
     const autoscanAudioMusic = modal.find('#autoscanAudioMusic');
@@ -85,6 +88,8 @@
       autoscanPersistent.prop('checked', item.persistent);
       autoscanRecursive.prop('checked', item.recursive);
       autoscanSymlinks.prop('checked', item.followSymlinks);
+      autoscanDirTypes.prop('checked', item.dirTypes);
+      autoscanForceRescan.prop('checked', item.forceRescan);
       autoscanHidden.prop('checked', item.hidden);
       autoscanAudio.prop('checked', item.audio);
       autoscanAudioMusic.prop('checked', item.audioMusic);
@@ -96,6 +101,7 @@
       autoscanVideoMovie.prop('checked', item.videoMovie);
       autoscanVideoTV.prop('checked', item.videoTV);
       autoscanVideoMusicVideo.prop('checked', item.videoMusicVideo);
+      autoscanRetryCount.val(item.retryCount);
       autoscanInterval.val(item.interval);
       autoscanCtAudio.val(item.ctAudio);
       autoscanCtImage.val(item.ctImage);
@@ -119,6 +125,9 @@
     const autoscanSymlinks = modal.find('#autoscanSymlinks');
     const autoscanInterval = modal.find('#autoscanInterval');
     const autoscanPersistent = modal.find('#autoscanPersistent');
+    const autoscanRetryCount = modal.find('#autoscanRetryCount');
+    const autoscanDirTypes = modal.find('#autoscanDirTypes');
+    const autoscanForceRescan = modal.find('#autoscanForceRescan');
 
     const autoscanAudio = modal.find('#autoscanAudio');
     const autoscanAudioMusic = modal.find('#autoscanAudioMusic');
@@ -144,6 +153,12 @@
         autoscanHidden.prop('disabled', false);
         autoscanSymlinks.closest('.form-group').removeClass('disabled').show();
         autoscanSymlinks.prop('disabled', false);
+        autoscanDirTypes.closest('.form-group').addClass('disabled').show();
+        autoscanDirTypes.prop('disabled', false);
+        autoscanForceRescan.closest('.form-group').addClass('disabled').show();
+        autoscanForceRescan.prop('disabled', false);
+        autoscanRetryCount.closest('.form-group').addClass('disabled').show();
+        autoscanRetryCount.prop('disabled', false);
         autoscanInterval.closest('.form-group').removeClass('disabled').show();
         autoscanInterval.prop('disabled', false);
         mediaTypeItems.forEach((m) => {
@@ -157,7 +172,7 @@
         autoscanCtVideo.closest('.form-group').removeClass('disabled').show();
         autoscanCtVideo.prop('disabled', false);
         if ($("#detailAutoscanCol").is(":hidden"))
-            modal.find('#detailAutoscanButton').show();
+          modal.find('#detailAutoscanButton').show();
         break;
       case 'inotify':
         autoscanRecursive.closest('.form-group').removeClass('disabled').show();
@@ -166,6 +181,12 @@
         autoscanHidden.prop('disabled', false);
         autoscanSymlinks.closest('.form-group').removeClass('disabled').show();
         autoscanSymlinks.prop('disabled', false);
+        autoscanDirTypes.closest('.form-group').addClass('disabled').show();
+        autoscanDirTypes.prop('disabled', false);
+        autoscanForceRescan.closest('.form-group').addClass('disabled').show();
+        autoscanForceRescan.prop('disabled', false);
+        autoscanRetryCount.closest('.form-group').addClass('disabled').show();
+        autoscanRetryCount.prop('disabled', false);
         autoscanInterval.closest('.form-group').hide();
         autoscanInterval.prop('disabled', true);
         mediaTypeItems.forEach((m) => {
@@ -188,6 +209,12 @@
         autoscanHidden.prop('disabled', true);
         autoscanSymlinks.closest('.form-group').addClass('disabled').hide();
         autoscanSymlinks.prop('disabled', true);
+        autoscanDirTypes.closest('.form-group').addClass('disabled').hide();
+        autoscanDirTypes.prop('disabled', true);
+        autoscanForceRescan.closest('.form-group').addClass('disabled').hide();
+        autoscanForceRescan.prop('disabled', true);
+        autoscanRetryCount.closest('.form-group').addClass('disabled').hide();
+        autoscanRetryCount.prop('disabled', true);
         autoscanInterval.closest('.form-group').addClass('disabled').hide();
         autoscanInterval.prop('disabled', true);
         mediaTypeItems.forEach((m) => {
@@ -222,6 +249,9 @@
     const autoscanHidden = modal.find('#autoscanHidden');
     const autoscanSymlinks = modal.find('#autoscanSymlinks');
     const autoscanInterval = modal.find('#autoscanInterval');
+    const autoscanRetryCount = modal.find('#autoscanRetryCount');
+    const autoscanDirTypes = modal.find('#autoscanDirTypes');
+    const autoscanForceRescan = modal.find('#autoscanForceRescan');
 
     const autoscanAudio = modal.find('#autoscanAudio');
     const autoscanAudioMusic = modal.find('#autoscanAudioMusic');
@@ -256,10 +286,13 @@
     autoscanRecursive.prop('checked', false);
     autoscanSymlinks.prop('checked', false);
     autoscanHidden.prop('checked', false);
+    autoscanDirTypes.prop('checked', false);
+    autoscanForceRescan.prop('checked', false);
     mediaTypeItems.forEach((m) => {
       m.prop('checked', false);
     });
     autoscanInterval.val('');
+    autoscanRetryCount.val('');
     autoscanCtAudio.val('object.container.album.musicAlbum');
     autoscanCtImage.val('object.container.album.photoAlbum');
     autoscanCtVideo.val('object.container');
@@ -281,7 +314,7 @@
     $("#detailAutoscanCol").hide();
   }
 
-  function saveItem (modal) {
+  function saveItem(modal) {
     const autoscanId = modal.find('#autoscanId');
     const fromFs = modal.find('#autoscanFromFs');
     const autoscanMode = modal.find('input:radio[name=autoscanMode]:checked');
@@ -289,6 +322,9 @@
     const autoscanHidden = modal.find('#autoscanHidden');
     const autoscanSymlinks = modal.find('#autoscanSymlinks');
     const autoscanInterval = modal.find('#autoscanInterval');
+    const autoscanRetryCount = modal.find('#autoscanRetryCount');
+    const autoscanDirTypes = modal.find('#autoscanDirTypes');
+    const autoscanForceRescan = modal.find('#autoscanForceRescan');
 
     const autoscanAudio = modal.find('#autoscanAudio');
     const autoscanAudioMusic = modal.find('#autoscanAudioMusic');
@@ -318,6 +354,9 @@
           hidden: autoscanHidden.is(':checked'),
           followSymlinks: autoscanSymlinks.is(':checked'),
           interval: autoscanInterval.val(),
+          retryCount: autoscanRetryCount.val(),
+          dirTypes: autoscanDirTypes.is(':checked'),
+          forceRescan: autoscanForceRescan.is(':checked'),
 
           audio: autoscanAudio.is(':checked'),
           audioMusic: autoscanAudioMusic.is(':checked'),
@@ -340,6 +379,9 @@
           recursive: autoscanRecursive.is(':checked'),
           hidden: autoscanHidden.is(':checked'),
           followSymlinks: autoscanSymlinks.is(':checked'),
+          retryCount: autoscanRetryCount.val(),
+          dirTypes: autoscanDirTypes.is(':checked'),
+          forceRescan: autoscanForceRescan.is(':checked'),
 
           audio: autoscanAudio.is(':checked'),
           audioMusic: autoscanAudioMusic.is(':checked'),

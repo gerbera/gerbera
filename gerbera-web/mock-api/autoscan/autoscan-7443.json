@@ -7,6 +7,8 @@
     "recursive": true,
     "hidden": true,
     "followSymlinks": false,
+    "dirTypes": true,
+    "forceRescan": true,
     "audio": true,
     "audioMusic": true,
     "audioBook": true,
@@ -21,6 +23,7 @@
     "ctImage": "object.container.album.photoAlbum",
     "ctVideo": "object.container",
     "interval": 1800,
+    "retryCount": 0,
     "persistent": false
   }
 }

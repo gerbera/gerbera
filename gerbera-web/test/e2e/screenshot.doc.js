@@ -326,7 +326,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(370, 255, 700, 530);
+      image.crop(380, 200, 675, 660);
       image.write(fileName);
     });
 
@@ -345,7 +345,8 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(230, 230, 980, 580).write(fileName);
+      image.crop(235, 160, 960, 735);
+      image.write(fileName);
     });
 
     it('for [edit tweak] from filesystem list', async () => {
@@ -362,7 +363,8 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(290, 0, 860, 600).write(fileName);
+      image.crop(290, 0, 860, 600);
+      image.write(fileName);
     });
 
     it('for [trail config operations]', async () => {

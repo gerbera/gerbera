@@ -6,6 +6,8 @@
     "scan_mode": "timed",
     "recursive": true,
     "hidden": true,
+    "dirTypes": true,
+    "forceRescan": true,
     "followSymlinks": false,
     "audio": true,
     "audioMusic": true,
@@ -21,6 +23,7 @@
     "ctImage": "object.container.album.photoAlbum",
     "ctVideo": "object.container",
     "interval": 1800,
+    "retryCount": 0,
     "persistent": false
   }
 }
