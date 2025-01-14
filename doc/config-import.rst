@@ -150,7 +150,8 @@ This tag defines the import section.
 
     * Default: **yes**
 
-    This attribute defines that each imported item will get a default media date set based on the modification time in order to ensure that sorting by "dc:date" works on upnp requests.
+    This attribute defines that each imported item will get a default media date set based on the modification
+    time in order to ensure that sorting by "dc:date" works on upnp requests.
 
     .. code:: xml
 
@@ -170,7 +171,8 @@ This tag defines the import section.
 
     * Default: **yes**
 
-    This attribute defines that filenames are made readable on import, i.e. underscores are replaced by space and extensions are removed. This changes the title of the entry if no metadata is available
+    This attribute defines that filenames are made readable on import, i.e. underscores are replaced by space and extensions are removed.
+    This changes the title of the entry if no metadata is available
 
     .. code:: xml
 
@@ -755,6 +757,19 @@ the removed directory if it becomes available/gets created again.
         before the directory or file is fully available, causing an access
         permission error and the import fails.
         This attribute is only available in config.xml at the moment.
+
+        .. code:: xml
+
+            force-reread-unknown="yes|no"
+
+        * Optional
+
+        * Default: **no**
+
+        This attribute forces that files without changes are reread (on startup) if their upnp class is unset or "object.item".
+        This can happen if the first scan (e.g. via inotify) did not get all details of the file correctly.
+        This is mostly the case if the media folder is exported on the network and files are written via network.
+        Be aware that the startup will take longer if there is a large number of non-media files in the folder
 
         .. code:: xml
 

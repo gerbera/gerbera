@@ -56,6 +56,7 @@ void UpnpService::processActionRequest(ActionRequest& request) const
     log_debug("start");
 
     if (actionMap.find(request.getActionName()) != actionMap.end()) {
+        log_debug("call {}", request.getActionName());
         actionMap.at(request.getActionName())(request);
     } else {
         // invalid or unsupported action

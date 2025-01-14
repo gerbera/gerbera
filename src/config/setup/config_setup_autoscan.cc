@@ -95,6 +95,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
         }
 
         bool recursive = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE)->getXmlContent(child);
+        bool forceRescan = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_FORCE_REREAD_UNKNOWN)->getXmlContent(child);
         bool dirtypes = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES)->getXmlContent(child);
         int mt = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE)->getXmlContent(child);
         log_debug("mt = {} -> {}", mt, AutoscanDirectory::mapMediaType(mt));
@@ -117,6 +118,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
             auto adir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true, interval, hidden, follow, mt, containerMap);
             adir->setRetryCount(retryCount);
             adir->setDirTypes(dirtypes);
+            adir->setForceRescan(forceRescan);
             result.push_back(adir);
         } catch (const std::runtime_error& e) {
             log_error("Could not add {}: {}", location.string(), e.what());

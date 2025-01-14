@@ -416,7 +416,11 @@ void ContentManager::parseMetafile(const std::shared_ptr<CdsObject>& obj, const 
     importService->parseMetafile(obj, path);
 }
 
-std::shared_ptr<CdsObject> ContentManager::_addFile(const fs::directory_entry& dirEnt, fs::path rootPath, AutoScanSetting& asSetting, const std::shared_ptr<CMAddFileTask>& task)
+std::shared_ptr<CdsObject> ContentManager::_addFile(
+    const fs::directory_entry& dirEnt,
+    fs::path rootPath,
+    AutoScanSetting& asSetting,
+    const std::shared_ptr<CMAddFileTask>& task)
 {
     if (!asSetting.hidden && dirEnt.path().is_relative()) {
         return nullptr;
@@ -1293,7 +1297,11 @@ void ContentManager::addTask(std::shared_ptr<GenericTask> task, bool lowPriority
     threadRunner->notify();
 }
 
-std::shared_ptr<CdsObject> ContentManager::addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting, bool lowPriority, bool cancellable)
+std::shared_ptr<CdsObject> ContentManager::addFile(
+    const fs::directory_entry& dirEnt,
+    AutoScanSetting& asSetting,
+    bool lowPriority,
+    bool cancellable)
 {
     fs::path rootpath;
     if (dirEnt.is_directory())
@@ -1301,13 +1309,23 @@ std::shared_ptr<CdsObject> ContentManager::addFile(const fs::directory_entry& di
     return addFileInternal(dirEnt, rootpath, asSetting, lowPriority, 0, cancellable);
 }
 
-std::shared_ptr<CdsObject> ContentManager::addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting, bool lowPriority, bool cancellable)
+std::shared_ptr<CdsObject> ContentManager::addFile(
+    const fs::directory_entry& dirEnt,
+    const fs::path& rootpath,
+    AutoScanSetting& asSetting,
+    bool lowPriority,
+    bool cancellable)
 {
     return addFileInternal(dirEnt, rootpath, asSetting, lowPriority, 0, cancellable);
 }
 
 std::shared_ptr<CdsObject> ContentManager::addFileInternal(
-    const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting, bool lowPriority, unsigned int parentTaskID, bool cancellable)
+    const fs::directory_entry& dirEnt,
+    const fs::path& rootpath,
+    AutoScanSetting& asSetting,
+    bool lowPriority,
+    unsigned int parentTaskID,
+    bool cancellable)
 {
     if (asSetting.async) {
         auto self = shared_from_this();
@@ -1407,7 +1425,13 @@ void ContentManager::invalidateTask(unsigned int taskID, TaskOwner taskOwner)
 #endif
 }
 
-std::vector<int> ContentManager::removeObject(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& path, bool rescanResource, bool async, bool all)
+std::vector<int> ContentManager::removeObject(
+    const std::shared_ptr<AutoscanDirectory>& adir,
+    const std::shared_ptr<CdsObject>& obj,
+    const fs::path& path,
+    bool rescanResource,
+    bool async,
+    bool all)
 {
     if (async) {
         auto self = shared_from_this();
@@ -1459,7 +1483,11 @@ void ContentManager::cleanupTasks(const fs::path& path)
     }
 }
 
-void ContentManager::rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath, bool cancellable)
+void ContentManager::rescanDirectory(
+    const std::shared_ptr<AutoscanDirectory>& adir,
+    int objectId,
+    fs::path descPath,
+    bool cancellable)
 {
     auto self = shared_from_this();
     auto task = std::make_shared<CMRescanDirectoryTask>(self, adir, objectId, cancellable);

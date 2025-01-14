@@ -227,7 +227,7 @@ void ImportService::destroyLayout()
 #endif
 }
 
-std::string ImportService::mimeTypeToUpnpClass(const std::string& mimeType)
+std::string ImportService::mimeTypeToUpnpClass(const std::string& mimeType) const
 {
     auto it = std::find_if(upnpMap.begin(), upnpMap.end(), [=](auto&& um) { return startswith(mimeType, um.mimeType); });
     if (it != upnpMap.end())
@@ -253,7 +253,11 @@ void ImportService::clearCache()
     containersWithFanArt.clear();
 }
 
-void ImportService::doImport(const fs::path& location, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task)
+void ImportService::doImport(
+    const fs::path& location,
+    AutoScanSetting& settings,
+    std::unordered_set<int>& currentContent,
+    const std::shared_ptr<GenericTask>& task)
 {
     log_debug("start {} root '{}' update {}", location.string(), rootPath.string(), !!settings.changedObject);
     if (activeScan.empty()) {
@@ -353,7 +357,12 @@ void ImportService::readDir(const fs::path& location, AutoScanSetting settings)
     log_debug("end {}", location.string());
 }
 
-void ImportService::cacheState(const fs::path& entryPath, const fs::directory_entry& dirEntry, ImportState state, std::chrono::seconds mtime, const std::shared_ptr<CdsObject>& cdsObject)
+void ImportService::cacheState(
+    const fs::path& entryPath,
+    const fs::directory_entry& dirEntry,
+    ImportState state,
+    std::chrono::seconds mtime,
+    const std::shared_ptr<CdsObject>& cdsObject)
 {
     auto cacheLock = CacheAutoLock(cacheMutex);
     log_debug("cache '{}' , '{}' ({})", entryPath.string(), dirEntry.path().string(), state);
@@ -505,6 +514,33 @@ void ImportService::createContainers(int parentContainerId, AutoScanSetting& set
     log_debug("end {}", rootPath.string());
 }
 
+std::tuple<bool, std::string, std::string> ImportService::getMimeForFile(const fs::path& objectPath) const
+{
+    /* retrieve information about item and decide if it should be included */
+    auto [skip, mimetype] = mime->getMimeType(objectPath, MIMETYPE_DEFAULT);
+    if (mimetype.empty()) {
+        if (skip)
+            log_debug("Mime set empty for file {}", objectPath.c_str());
+        else
+            log_error("Mime not found for file {}", objectPath.c_str());
+        return { skip, "", "" };
+    }
+    log_debug("Mime '{}' for file {}", mimetype, objectPath.c_str());
+
+    std::string upnpClass = mimeTypeToUpnpClass(mimetype);
+    if (upnpClass.empty()) {
+        std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
+        if (contentType == CONTENT_TYPE_OGG) {
+            upnpClass = isTheora(objectPath)
+                ? UPNP_CLASS_VIDEO_ITEM
+                : UPNP_CLASS_MUSIC_TRACK;
+        }
+    }
+    log_debug("UpnpClass '{}' for file {}", upnpClass, objectPath.c_str());
+
+    return { skip, mimetype, upnpClass };
+}
+
 ///\brief create items for all discovered files
 void ImportService::createItems(AutoScanSetting& settings)
 {
@@ -558,10 +594,22 @@ void ImportService::createItems(AutoScanSetting& settings)
             }
             if (cdsObj && cdsObj->isItem()) {
                 auto isChanged = stateEntry->getMTime() != cdsObj->getMTime() || cdsObj->getLocation().string() != dirEntry.path().string();
+                if (autoscanDir && autoscanDir->getForceRescan())
+                    isChanged = isChanged || cdsObj->getClass().empty() || cdsObj->getClass() == UPNP_CLASS_ITEM;
                 if (isChanged) {
                     // Update changed item in database
                     log_debug("Updating Item {} in database {}", itemPath.string(), cdsObj->getID());
                     auto item = std::dynamic_pointer_cast<CdsItem>(cdsObj);
+                    if (item->getMimeType().empty() || item->getClass().empty() || item->getClass() == UPNP_CLASS_ITEM) {
+                        auto [skip, mimetype, upnpClass] = getMimeForFile(itemPath);
+                        if (!mimetype.empty()) {
+                            item->setMimeType(mimetype);
+                        }
+                        if (!upnpClass.empty()) {
+                            item->setClass(upnpClass);
+                        }
+                        log_debug("Updating Item properties {} in database: skip {} mimeType {}, upnpClass {}", skip, itemPath.string(), mimetype, upnpClass);
+                    }
                     item->clearMetaData();
                     item->clearAuxData();
                     item->clearResources();
@@ -625,29 +673,10 @@ void ImportService::createItems(AutoScanSetting& settings)
 std::pair<bool, std::shared_ptr<CdsObject>> ImportService::createSingleItem(const fs::directory_entry& dirEntry) // ToDo: Use StateEntry here
 {
     const auto& objectPath = dirEntry.path();
-
-    /* retrieve information about item and decide if it should be included */
-    auto [skip, mimetype] = mime->getMimeType(objectPath, MIMETYPE_DEFAULT);
-    if (mimetype.empty()) {
-        if (skip)
-            log_debug("Mime set empty for file {}", objectPath.c_str());
-        else
-            log_error("Mime not found for file {}", objectPath.c_str());
+    auto [skip, mimetype, upnpClass] = getMimeForFile(objectPath);
+    if (mimetype.empty() && upnpClass.empty()) {
         return { skip, nullptr };
     }
-    log_debug("Mime '{}' for file {}", mimetype, objectPath.c_str());
-
-    std::string upnpClass = mimeTypeToUpnpClass(mimetype);
-    if (upnpClass.empty()) {
-        std::string contentType = getValueOrDefault(mimetypeContenttypeMap, mimetype);
-        if (contentType == CONTENT_TYPE_OGG) {
-            upnpClass = isTheora(objectPath)
-                ? UPNP_CLASS_VIDEO_ITEM
-                : UPNP_CLASS_MUSIC_TRACK;
-        }
-    }
-    log_debug("UpnpClass '{}' for file {}", upnpClass, objectPath.c_str());
-
     auto item = std::make_shared<CdsItem>();
     item->setLocation(objectPath);
 
@@ -664,7 +693,7 @@ std::pair<bool, std::shared_ptr<CdsObject>> ImportService::createSingleItem(cons
     return { skip, item };
 }
 
-std::string ImportService::makeTitle(const fs::path& objectPath, const std::string upnpClass)
+std::string ImportService::makeTitle(const fs::path& objectPath, const std::string upnpClass) const
 {
     auto f2i = converterManager->f2i();
     std::string title = objectPath.filename().string();
@@ -772,7 +801,11 @@ void ImportService::updateItemData(const std::shared_ptr<CdsItem>& item, const s
     }
 }
 
-void ImportService::finishScan(const fs::path& location, const std::shared_ptr<CdsContainer>& parent, std::chrono::seconds lmt, const std::shared_ptr<CdsObject>& firstObject)
+void ImportService::finishScan(
+    const fs::path& location,
+    const std::shared_ptr<CdsContainer>& parent,
+    std::chrono::seconds lmt,
+    const std::shared_ptr<CdsObject>& firstObject)
 {
     if (autoscanDir) {
         autoscanDir->setCurrentLMT(location, lmt > std::chrono::seconds::zero() ? lmt : std::chrono::seconds(1));

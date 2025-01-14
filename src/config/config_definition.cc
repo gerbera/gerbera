@@ -1292,6 +1292,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             0),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT,
             "attribute::last-modified", "config-import.html#autoscan"),
+        std::make_shared<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_FORCE_REREAD_UNKNOWN,
+            "attribute::force-reread-unknown", "config-import.html#autoscan",
+            NO),
 
         // Directory Tweaks
         std::make_shared<ConfigDirectorySetup>(ConfigVal::IMPORT_DIRECTORIES_LIST,

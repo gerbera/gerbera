@@ -174,6 +174,10 @@ public:
     void setPersistent(bool persistentFlag) { this->persistentFlag = persistentFlag; }
     bool persistent() const { return persistentFlag; }
 
+    /// @brief Enable rescanning unknown files
+    void setForceRescan(bool forceRescan) { this->forceRescan = forceRescan; }
+    bool getForceRescan() const { return forceRescan; }
+
     /// \brief Sets the last modification time of the current ongoing scan.
     ///
     /// When doing a FullScan we look at modification times of the files.
@@ -238,6 +242,7 @@ protected:
     AutoscanScanMode mode {};
     bool recursive {};
     bool hidden {};
+    bool forceRescan {};
     bool dirTypes { true };
     bool followSymlinks {};
     bool persistentFlag {};

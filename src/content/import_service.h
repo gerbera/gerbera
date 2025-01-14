@@ -30,6 +30,7 @@
 
 #include <map>
 #include <mutex>
+#include <tuple>
 #include <unordered_set>
 
 // forward declarations
@@ -70,6 +71,7 @@ enum class ImportState {
     Broken = 99,
 };
 
+/// @brief State container class for imported files
 class ContentState {
 private:
     ImportState state;
@@ -123,6 +125,7 @@ public:
     AutoscanMediaMode getMediaMode() const;
 };
 
+/// @brief Mapping logic to generate upnpClass from file (meta) data
 class UpnpMap {
 private:
     std::vector<std::tuple<std::string, std::string, std::string>> filters;
@@ -145,6 +148,7 @@ public:
     static void initMap(std::vector<UpnpMap>& target, const std::map<std::string, std::string>& source);
 };
 
+/// @brief Implementation of import functionality
 class ImportService {
 private:
     std::shared_ptr<Context> context;
@@ -191,10 +195,14 @@ private:
     std::error_code ec;
     fs::path activeScan {};
 
-    std::string mimeTypeToUpnpClass(const std::string& mimeType);
-    std::string makeTitle(const fs::path& objectPath, const std::string upnpClass);
+    /// @brief build upnp class based on mime type
+    std::string mimeTypeToUpnpClass(const std::string& mimeType) const;
+    /// @brief build object titles based on location and upnpClass
+    std::string makeTitle(const fs::path& objectPath, const std::string upnpClass) const;
 
+    /// @brief read files from one folder depnending on settings
     void readDir(const fs::path& location, AutoScanSetting settings);
+    /// @brief read single file (triggered by autoscan)
     void readFile(const fs::path& location);
     /// \brief create containers for all discovered folders
     void createContainers(int parentContainerId, AutoScanSetting& settings);
@@ -225,6 +233,11 @@ private:
         ImportState state,
         std::chrono::seconds mtime = std::chrono::seconds::zero(),
         const std::shared_ptr<CdsObject>& cdsObject = nullptr);
+
+    /// @brief Extract mime type and corresponding upnp class from file
+    /// @param objectPath location of the file on the disk
+    /// @return pair containing mimetype and upnpclass
+    std::tuple<bool, std::string, std::string> getMimeForFile(const fs::path& objectPath) const;
 
 public:
     ImportService(std::shared_ptr<Context> context, std::shared_ptr<ConverterManager> converterManager);
