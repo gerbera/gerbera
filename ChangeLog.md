@@ -4,6 +4,7 @@
 
 - Fix album art in builtin layout
 - JS: Fix config autoscan object in scripts
+- Force Reread of unknown files
 - Refactor static code from ConfigDefinition
 
 ### v2.4.1
