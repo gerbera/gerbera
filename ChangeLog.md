@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Autoscan: Add missing properties to web UI and database
 - Fix album art in builtin layout
 - JS: Fix config autoscan object in scripts
 - Force Reread of unknown files

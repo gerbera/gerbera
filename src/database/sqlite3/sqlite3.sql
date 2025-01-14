@@ -50,6 +50,9 @@ CREATE TABLE "mt_autoscan" (
   "location" text default NULL,
   "path_ids" text default NULL,
   "touched" tinyint unsigned NOT NULL default '1',
+  "retry_count" integer unsigned NOT NULL default '0',
+  "dir_types" tinyint unsigned NOT NULL default '0',
+  "force_rescan" tinyint unsigned NOT NULL default '0',
   CONSTRAINT "mt_autoscan_id" FOREIGN KEY ("obj_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 CREATE TABLE "mt_metadata" (

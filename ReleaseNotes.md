@@ -4,9 +4,15 @@
 
 Changed default for layout to "js" if built with JavaScript support.
 
+### NEW Features
+
+- All configuration options for autoscan directories are available in the web UI now, including scripts and storage in the database.
+- New configuration option for autoscan directories to rescan files that ended up as plain object in the first run.
+
 ### FIXES
 
 - Album art in builtin layout
+- Autoscan objects in scripts
 
 ### Code Improvements
 

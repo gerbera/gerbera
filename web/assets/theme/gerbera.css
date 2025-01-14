@@ -940,6 +940,7 @@ body,
 
 #autoscan-persistent-msg {
   background-color: #e9ecef;
+  background-color: light-dark(#e9ecef, #151a1e);
   padding: 10px;
   margin-right: 0.15em;
 }

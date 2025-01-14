@@ -66,6 +66,9 @@ CREATE TABLE `mt_autoscan` (
   `location` blob,
   `path_ids` blob,
   `touched` tinyint(4) unsigned NOT NULL default '1',
+  `retry_count` int(11) unsigned NOT NULL default '0',
+  `dir_types` tinyint(4) unsigned NOT NULL default '0',
+  `force_rescan` tinyint(4) unsigned NOT NULL default '0',
   PRIMARY KEY `id` (`id`),
   UNIQUE KEY `mt_autoscan_obj_id` (`obj_id`),
   CONSTRAINT `mt_autoscan_ibfk_1` FOREIGN KEY (`obj_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE

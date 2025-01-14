@@ -359,4 +359,9 @@
     <version number="22" remark="add autoscan follow_symlinks">
         <script>ALTER TABLE "mt_autoscan" ADD "follow_symlinks" tinyint unsigned NOT NULL default (1)</script>
     </version>
+    <version number="23" remark="update autoscan table">
+        <script>ALTER TABLE "mt_autoscan" ADD "retry_count" integer unsigned NOT NULL default (0)</script>
+        <script>ALTER TABLE "mt_autoscan" ADD "dir_types" tinyint unsigned NOT NULL default (0)</script>
+        <script>ALTER TABLE "mt_autoscan" ADD "force_rescan" tinyint unsigned NOT NULL default (0)</script>
+    </version>
 </upgrade>

@@ -88,6 +88,9 @@ void Web::Autoscan::process()
             bool recursive = boolParam("recursive");
             bool hidden = boolParam("hidden");
             bool followSymlinks = boolParam("followSymlinks");
+            int retryCount = intParam("retryCount");
+            bool dirTypes = boolParam("dirTypes");
+            bool forceRescan = boolParam("forceRescan");
 
             std::vector<std::string> mediaType;
             if (boolParam("audio"))
@@ -141,6 +144,9 @@ void Web::Autoscan::process()
                 followSymlinks,
                 mt);
             autoscan->setObjectID(objectID);
+            autoscan->setRetryCount(retryCount);
+            autoscan->setDirTypes(dirTypes);
+            autoscan->setForceRescan(forceRescan);
             content->setAutoscanDirectory(autoscan);
         }
     } else if (action == "list") {
@@ -150,7 +156,7 @@ void Web::Autoscan::process()
 
         std::sort(autoscanList.begin(), autoscanList.end(), [](auto&& a1, auto&& a2) { return a1->getLocation() < a2->getLocation(); });
 
-        // ---
+        // --- create list
 
         auto autoscansEl = root.append_child("autoscans");
         xml2Json->setArrayName(autoscansEl, "autoscan");
@@ -176,6 +182,9 @@ void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element.append_child("interval").append_child(pugi::node_pcdata).set_value("1800");
         element.append_child("persistent").append_child(pugi::node_pcdata).set_value("0");
         element.append_child("mediaType").append_child(pugi::node_pcdata).set_value("-1");
+        element.append_child("retryCount").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("dirTypes").append_child(pugi::node_pcdata).set_value("0");
+        element.append_child("forceRescan").append_child(pugi::node_pcdata).set_value("0");
         element.append_child("audio").append_child(pugi::node_pcdata).set_value("1");
         element.append_child("audioMusic").append_child(pugi::node_pcdata).set_value("0");
         element.append_child("audioBook").append_child(pugi::node_pcdata).set_value("0");
@@ -198,6 +207,9 @@ void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element.append_child("interval").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getInterval().count()).c_str());
         element.append_child("persistent").append_child(pugi::node_pcdata).set_value(adir->persistent() ? "1" : "0");
         element.append_child("mediaType").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getMediaType()).c_str());
+        element.append_child("retryCount").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getRetryCount()).c_str());
+        element.append_child("dirTypes").append_child(pugi::node_pcdata).set_value(adir->hasDirTypes() ? "1" : "0");
+        element.append_child("forceRescan").append_child(pugi::node_pcdata).set_value(adir->getForceRescan() ? "1" : "0");
         element.append_child("audio").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_AUDIO_ITEM) ? "1" : "0");
         element.append_child("audioMusic").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_MUSIC_TRACK) ? "1" : "0");
         element.append_child("audioBook").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_AUDIO_BOOK) ? "1" : "0");

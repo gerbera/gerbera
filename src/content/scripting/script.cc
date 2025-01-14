@@ -232,8 +232,11 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
                 setBoolProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE), adir->getRecursive());
                 setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE), adir->getMediaType());
                 setBoolProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES), adir->getHidden());
+                setBoolProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES), adir->hasDirTypes());
+                setBoolProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_FORCE_REREAD_UNKNOWN), adir->getForceRescan());
                 setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
                 setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
+                setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_RETRYCOUNT), adir->getRetryCount());
                 setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
 
                 duk_put_prop_string(ctx, -2, fmt::to_string(adir->getScanID()).c_str());
