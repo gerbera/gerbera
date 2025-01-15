@@ -241,9 +241,11 @@ void Server::run()
         throw UpnpException(ret, fmt::format("run: UpnpSendAdvertisement {} failed", aliveAdvertisementInterval));
     }
 
-    if (config->getBoolOption(ConfigVal::UPNP_LITERAL_HOST_REDIRECTION))
+    if (config->getBoolOption(ConfigVal::UPNP_LITERAL_HOST_REDIRECTION)) {
         UpnpSetAllowLiteralHostRedirection(1);
+    }
 
+    std::string ipv6 = UpnpGetServerIp6Address();
     {
         std::string url = getVirtualUrl();
         writeBookmark(url);
@@ -251,9 +253,11 @@ void Server::run()
 
         validHosts = std::vector<std::string> {
             std::string(UpnpGetServerIpAddress()),
-            std::string(UpnpGetServerIp6Address()),
-            std::string(UpnpGetServerUlaGuaIp6Address()),
         };
+        if (!ipv6.empty()) {
+            validHosts.push_back(ipv6);
+            validHosts.push_back(UpnpGetServerUlaGuaIp6Address());
+        }
         if (!url.empty()) {
             validHosts.push_back(url);
         }
@@ -267,9 +271,11 @@ void Server::run()
         corsHosts = {
             "'self'",
             fmt::format("http://{}", UpnpGetServerIpAddress()),
-            fmt::format("http://[{}]", UpnpGetServerIp6Address()),
-            fmt::format("http://[{}]", UpnpGetServerUlaGuaIp6Address()),
         };
+        if (!ipv6.empty()) {
+            corsHosts.push_back(fmt::format("http://[{}]", ipv6));
+            corsHosts.push_back(fmt::format("http://[{}]", UpnpGetServerUlaGuaIp6Address()));
+        }
         std::string url = getVirtualUrl();
         if (!url.empty()) {
             corsHosts.push_back(url);
