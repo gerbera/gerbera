@@ -100,6 +100,7 @@ tL4ndQavEi51mI38AjEAi/V3bNTIZargCyzuFJ0nN6T5U6VR5CmD1/iQMVtCnwr1\
   fi
 
   sudo gem install aws-sdk-core -v 3.215.0
+  sudo gem install aws-sdk-kms -v 1.96.0
   sudo gem install aws-sdk-s3 -v 1.177.0
   sudo gem install deb-s3
 }
