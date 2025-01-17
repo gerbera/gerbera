@@ -66,6 +66,8 @@ function set-libraries() {
 
 function install-deb-s3() {
   sudo apt-get install -y ruby gpg
+  sudo gem install aws-sdk-core -v 3.215.0
+  sudo gem install aws-sdk-s3 -v 1.177.0
   sudo gem install deb-s3
 }
 
