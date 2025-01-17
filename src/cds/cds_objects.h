@@ -218,7 +218,7 @@ public:
         auto it = std::find_if(metaData.begin(), metaData.end(), [=](auto&& md) { return md.first == field; });
         return it != metaData.end() ? it->second : std::string();
     }
-     /// \brief Query multivalue metadata.
+    /// \brief Query multivalue metadata.
     std::vector<std::string> getMetaGroup(const MetadataFields& key) const
     {
         auto field = MetaEnumMapper::getMetaFieldName(key);

@@ -1006,12 +1006,12 @@ std::pair<int, bool> ImportService::addContainerTree(
                         item->setLocation("");
                     }
                 } else if (endswith(field, "_1")) {
-                    auto metaField = MetaEnumMapper::remapMetaDataField(field.replace(field.end() - 2, field.end(), "")); 
-                    auto keyValue = item->getMetaData(metaField); 
+                    auto metaField = MetaEnumMapper::remapMetaDataField(field.replace(field.end() - 2, field.end(), ""));
+                    auto keyValue = item->getMetaData(metaField);
                     if (!keyValue.empty())
                         dirKeyValues.push_back(keyValue);
                 } else if (!field.empty()) {
-                    auto metaField = MetaEnumMapper::remapMetaDataField(field); 
+                    auto metaField = MetaEnumMapper::remapMetaDataField(field);
                     auto keyValueGroup = item->getMetaGroup(metaField);
                     if (!keyValueGroup.empty())
                         for (auto&& keyValue : keyValueGroup)
