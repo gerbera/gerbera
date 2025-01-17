@@ -17,6 +17,7 @@ Changed default for layout to "js" if built with JavaScript support.
 ### Code Improvements
 
 - Removed static from ConfigDefinition
+- Update versions of pugixml (1.15.20), libexif (v0.6.25)
 
 ## 2.4.1
 

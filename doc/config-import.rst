@@ -1307,7 +1307,7 @@ expanded to `if genre contains Book`.
 * Optional
 * Extensible Default
 
-This section holds the mime type to dlna transfer mode mappings. It is added to the http-header ``transferMode.dlna.org``` of the file request.
+This section holds the mime type to dlna transfer mode mappings. It is added to the http-header ``transferMode.dlna.org`` of the file request.
 
 
 **Child tags:**
@@ -1319,7 +1319,7 @@ This section holds the mime type to dlna transfer mode mappings. It is added to 
 
      <map from="audio/*" to="Streaming"/>
      <map from="video/*" to="Streaming"/>
-     <map from="image/*" to="Interative"/>
+     <map from="image/*" to="Interactive"/>
      <map from="text/*" to="Background"/>
 
 * Optional
