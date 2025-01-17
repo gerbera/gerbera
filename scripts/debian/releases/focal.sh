@@ -98,5 +98,8 @@ tL4ndQavEi51mI38AjEAi/V3bNTIZargCyzuFJ0nN6T5U6VR5CmD1/iQMVtCnwr1\
     echo -e "---\n :ssl_verify_mode: 0\n :backtrace: false\n :bulk_threshold: 1000\n :sources: ["http://rubygems.org"]\n :update_sources: true\n :verbose: true\n" > ~/.gemrc
     sudo gem update --system 3.4.22
   fi
+
+  sudo gem install aws-sdk-core -v 3.215.0
+  sudo gem install aws-sdk-s3 -v 1.177.0
   sudo gem install deb-s3
 }
