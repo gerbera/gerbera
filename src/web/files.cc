@@ -35,8 +35,10 @@
 #include "pages.h" // API
 
 #include "common.h"
+#include "config/config.h"
 #include "config/config_val.h"
 #include "exceptions.h"
+#include "util/logger.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 #include "util/xml_to_json.h"
@@ -92,6 +94,10 @@ void Web::Files::process()
     for (auto&& [key, val] : filesMap) {
         auto fe = files.append_child("file");
         fe.append_attribute("id") = key.c_str();
-        fe.append_attribute("filename") = f2i->convert(val).c_str();
+        auto [mval, err] = f2i->convert(val);
+        if (!err.empty()) {
+            log_warning("{}: {}", val.string(), err);
+        }
+        fe.append_attribute("filename") = mval.c_str();
     }
 }

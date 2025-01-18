@@ -110,7 +110,11 @@ int BuiltinLayout::getDir(const std::shared_ptr<CdsObject>& obj, const fs::path&
         dir = getLastPath(objPath);
 
     auto f2i = converterManager->f2i();
-    dir = f2i->convert(dir);
+    auto [mval, err] = f2i->convert(dir);
+    if (!err.empty()) {
+        log_warning("{}: {}", dir.string(), err);
+    }
+    dir = mval;
 
     if (!dir.empty()) {
         std::vector<std::shared_ptr<CdsObject>> dirVect;

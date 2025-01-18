@@ -149,8 +149,11 @@ std::shared_ptr<CdsObject> MetafileParserScript::createObject(const std::shared_
         for (auto&& sym : keys) {
             auto val = ScriptNamedProperty(ctx, sym).getStringValue();
             if (!val.empty()) {
-                val = sc->convert(val);
-                pcd->setAuxData(sym, val);
+                auto [mval, err] = sc->convert(val);
+                if (!err.empty()) {
+                    log_warning("{}: {}", sym, err);
+                }
+                pcd->setAuxData(sym, mval);
             }
         }
     });

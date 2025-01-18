@@ -34,13 +34,20 @@
 #include "string_converter.h" // API
 
 #include "common.h"
+#include "config/config.h"
 #include "config/config_val.h"
 #include "config/result/directory_tweak.h"
 #include "exceptions.h"
 #include "util/logger.h"
 
+#include <vector>
+#if FMT_VERSION >= 100202
+#include <fmt/ranges.h>
+#endif
+
 StringConverter::StringConverter(const std::string& from, const std::string& to)
     : cd(iconv_open(to.c_str(), from.c_str()))
+    , to(to)
 {
     if (!cd) {
         cd = {};
@@ -54,16 +61,20 @@ StringConverter::~StringConverter()
         iconv_close(cd);
 }
 
-std::string StringConverter::convert(std::string str, bool validate)
+std::pair<std::string, std::string> StringConverter::convert(std::string str, bool validate)
 {
-    std::size_t stoppedAt = 0;
     std::string ret;
+    std::vector<std::string> errors;
 
     if (str.empty())
-        return str;
+        return { str, "" };
 
     do {
-        ret = ret + _convert(str, validate, &stoppedAt);
+        std::size_t stoppedAt = 0;
+        auto res = _convert(str, validate, &stoppedAt);
+        ret = ret + res.first;
+        if (!res.second.empty())
+            errors.push_back(res.second);
         if ((ret.length() > 0) && (stoppedAt == 0))
             break;
 
@@ -72,11 +83,9 @@ std::string StringConverter::convert(std::string str, bool validate)
             str = str.substr(stoppedAt + 1);
         else
             break;
-
-        stoppedAt = 0;
     } while (true);
 
-    return ret;
+    return { ret, fmt::format("{}", fmt::join(errors, "\n")) };
 }
 
 bool StringConverter::validate(const std::string& str)
@@ -89,7 +98,9 @@ bool StringConverter::validate(const std::string& str)
     }
 }
 
-std::string StringConverter::_convert(const std::string& str, bool validate,
+std::pair<std::string, std::string> StringConverter::_convert(
+    const std::string& str,
+    bool validate,
     std::size_t* stoppedAt)
 {
     // reset to initial state
@@ -127,23 +138,20 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
 
     log_vdebug("iconv: BEFORE: input bytes left: {}  output bytes left: {}", inputBytes, outputBytes);
 #if defined(ICONV_CONST) || defined(SOLARIS)
-    int ret = iconv(cd, inputPtr, &inputBytes,
-        outputPtr, &outputBytes);
+    int ret = iconv(cd, inputPtr, &inputBytes, outputPtr, &outputBytes);
 #else
-    int ret = iconv(cd, const_cast<char**>(inputPtr), &inputBytes,
-        outputPtr, &outputBytes);
+    int ret = iconv(cd, const_cast<char**>(inputPtr), &inputBytes, outputPtr, &outputBytes);
 #endif
 
     if (ret == -1) {
-        log_error("iconv: {}", std::strerror(errno));
-        std::string err;
+        std::string err = fmt::format("iconv: {}", std::strerror(errno));
         switch (errno) {
         case EILSEQ:
         case EINVAL: {
             if (errno == EILSEQ) {
-                log_error("iconv: {} could not be converted to new encoding: invalid character sequence!", str.c_str());
+                err += fmt::format(" [{} could not be converted to {}: invalid character sequence!]", str.c_str(), to);
             } else {
-                log_error("iconv: Incomplete multibyte sequence");
+                err += " [Incomplete multibyte sequence]";
             }
             if (validate) {
                 throw_std_runtime_error(err);
@@ -151,26 +159,28 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
 
             if (stoppedAt)
                 *stoppedAt = str.length() - inputBytes;
+
             auto retStr = std::string(output, outputCopy - output);
             dirty = true;
             *outputCopy = 0;
             delete[] output;
-            return retStr;
+
+            return { retStr, err };
         }
         case E2BIG:
             /// \todo should encode the whole string anyway
-            err = "iconv: Insufficient space in output buffer";
+            err += " [Insufficient space in output buffer]";
             break;
         default:
-            err = fmt::format("iconv: {}", std::strerror(errno));
             break;
         }
         *outputCopy = 0;
-        log_error(err);
+
         log_vdebug("iconv: input: {}", input);
         log_vdebug("iconv: converted part:  {}", output);
         dirty = true;
         delete[] output;
+
         throw_std_runtime_error(err);
     }
 
@@ -181,7 +191,7 @@ std::string StringConverter::_convert(const std::string& str, bool validate,
     delete[] output;
     if (stoppedAt)
         *stoppedAt = 0; // no error
-    return retStr;
+    return { retStr, "" };
 }
 
 ConverterManager::ConverterManager(const std::shared_ptr<Config>& cm)

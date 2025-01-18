@@ -23,7 +23,6 @@
 #ifdef HAVE_JS
 
 #include "cds/cds_objects.h"
-#include "util/string_converter.h"
 
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"

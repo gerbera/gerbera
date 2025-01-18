@@ -155,8 +155,12 @@ void FfmpegHandler::addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item,
         if (!desiredTag.empty()) {
             auto tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), nullptr, AV_DICT_IGNORE_SUFFIX);
             if (tag && tag->value && tag->value[0]) {
-                log_debug("Added {}: {}", desiredTag.c_str(), tag->value);
-                item->setAuxData(desiredTag, sc->convert(tag->value));
+                auto [val, err] = sc->convert(tag->value);
+                if (!err.empty()) {
+                    log_warning("{}: {}", item->getLocation().string(), err);
+                }
+                log_debug("Added {}: {}", desiredTag.c_str(), val);
+                item->setAuxData(desiredTag, val);
             }
         }
     }
@@ -184,8 +188,12 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
         log_debug("FFMpeg tag: {}: {}", key, value);
         auto it = metaTags.find(e->key);
         if (it != metaTags.end() && emptySpecProperties[it->second]) {
-            log_debug("Identified special metadata '{}' as '{}': '{}'", it->first, it->second, value);
-            item->addMetaData(it->second, sc->convert(trimString(value)));
+            auto [val, err] = sc->convert(trimString(value));
+            if (!err.empty()) {
+                log_warning("{}: {}", item->getLocation().string(), err);
+            }
+            log_debug("Identified special metadata '{}' as '{}': '{}'", it->first, it->second, val);
+            item->addMetaData(it->second, val);
             continue; // iterate while loop
         }
         auto pIt = std::find_if(propertyMap.begin(), propertyMap.end(),
@@ -215,8 +223,13 @@ void FfmpegHandler::addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item
                         continue;
                     auto mDate = fmt::format("{:%Y-%m-%d}", tmWork);
                     item->addMetaData(field, mDate);
-                } else
-                    item->addMetaData(field, sc->convert(trimString(value)));
+                } else {
+                    auto [val, err] = sc->convert(trimString(value));
+                    if (!err.empty()) {
+                        log_warning("{}: {}", item->getLocation().string(), err);
+                    }
+                    item->addMetaData(field, val);
+                }
             }
             if (field == MetadataFields::M_TRACKNUMBER) {
                 item->setTrackNumber(stoiString(value));

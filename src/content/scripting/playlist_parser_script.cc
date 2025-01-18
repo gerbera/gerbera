@@ -131,12 +131,15 @@ void PlaylistParserScript::handleObject2cdsItem(duk_context* ctx, const std::sha
         for (auto&& sym : keys) {
             auto val = ScriptNamedProperty(ctx, sym).getStringValue();
             if (!val.empty()) {
-                val = sc->convert(val);
-                item->addMetaData(sym, val);
+                auto [mval, err] = sc->convert(val);
+                if (!err.empty()) {
+                    log_warning("{}: {}", sym, err);
+                }
+                item->addMetaData(sym, mval);
 
                 if (writeThrough > 0 && pcd) {
                     pcd->removeMetaData(sym);
-                    setMetaData(pcd, std::static_pointer_cast<CdsItem>(pcd), sym, val);
+                    setMetaData(pcd, std::static_pointer_cast<CdsItem>(pcd), sym, mval);
                 }
             }
         }

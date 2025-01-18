@@ -8,6 +8,7 @@
 - Focal: Freeze more aws-sdk versions
 - Focal: freeze ruby aws-sdk versions used for package upload
 - Force Reread of unknown files
+- Improve logging of string conversion
 - JS: Fix config autoscan object in scripts
 - Refactor static code from ConfigDefinition
 - Remap metadata fields when parsing virtual-directories keys

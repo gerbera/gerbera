@@ -57,7 +57,7 @@ class ConverterManager;
 // perform garbage collection after script has been run for x times
 #define JS_CALL_GC_AFTER_NUM (1000)
 
-enum charset_convert_t {
+enum class CharsetConversion {
     M2I,
     F2I,
     J2I,
@@ -107,7 +107,7 @@ public:
     /// \brief get hidden file setting from content manager
     bool isHiddenFile(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
 
-    std::string convertToCharset(const std::string& str, charset_convert_t chr);
+    std::string convertToCharset(const std::string& str, CharsetConversion chr);
     virtual std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) = 0;
     virtual bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) = 0;
     static Script* getContextScript(duk_context* ctx);

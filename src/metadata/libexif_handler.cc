@@ -203,10 +203,13 @@ LibExifHandler::~LibExifHandler()
     exif_log_free(log);
 }
 
-void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_ptr<CdsItem>& item,
+void LibExifHandler::process_ifd(
+    const ExifContent* content,
+    const std::shared_ptr<CdsItem>& item,
     const std::shared_ptr<StringConverter>& sc,
     std::string& imageX, std::string& imageY,
-    const std::vector<std::string>& auxtags, const std::map<std::string, std::string>& metatags)
+    const std::vector<std::string>& auxtags,
+    const std::map<std::string, std::string>& metatags)
 {
     constexpr auto BUFLEN = 4096;
     std::array<char, BUFLEN> exif_entry_buffer;
@@ -220,13 +223,16 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
             auto value = trimString(exif_egv(entry));
             log_debug("Found exif date: {}", value);
             if (!value.empty()) {
-                value = sc->convert(value);
+                auto [val, err] = sc->convert(value);
+                if (!err.empty()) {
+                    log_warning("{}: {}", item->getLocation().string(), err);
+                }
                 // convert date to ISO 8601 as required in the UPnP spec
                 // from YYYY:MM:DD to YYYY-MM-DD
-                if (value.length() >= 19) {
-                    item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-{}-{}T{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2), value.substr(11, 8)));
-                } else if (value.length() >= 11) {
-                    item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2)));
+                if (val.length() >= 19) {
+                    item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-{}-{}T{}", val.substr(0, 4), val.substr(5, 2), val.substr(8, 2), val.substr(11, 8)));
+                } else if (val.length() >= 11) {
+                    item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-{}-{}", val.substr(0, 4), val.substr(5, 2), val.substr(8, 2)));
                 }
             }
             break;
@@ -235,7 +241,11 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
             auto value = trimString(exif_egv(entry));
             log_debug("Found exif comment: {}", value);
             if (!value.empty()) {
-                item->addMetaData(MetadataFields::M_DESCRIPTION, sc->convert(value));
+                auto [val, err] = sc->convert(value);
+                if (!err.empty()) {
+                    log_warning("{}: {}", item->getLocation().string(), err);
+                }
+                item->addMetaData(MetadataFields::M_DESCRIPTION, val);
             }
             break;
         }
@@ -243,7 +253,11 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
             auto value = trimString(exif_egv(entry));
             log_debug("Found exif X dimension: {}", value);
             if (!value.empty()) {
-                imageX = sc->convert(value);
+                auto [val, err] = sc->convert(value);
+                if (!err.empty()) {
+                    log_warning("{}: {}", item->getLocation().string(), err);
+                }
+                imageX = val;
             }
             break;
         }
@@ -251,7 +265,11 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
             auto value = trimString(exif_egv(entry));
             log_debug("Found exif Y dimension: {}", value);
             if (!value.empty()) {
-                imageY = sc->convert(value);
+                auto [val, err] = sc->convert(value);
+                if (!err.empty()) {
+                    log_warning("{}: {}", item->getLocation().string(), err);
+                }
+                imageY = val;
             }
             break;
         }
@@ -273,8 +291,12 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
 
             auto value = trimString(exif_egv(entry));
             if (!value.empty()) {
-                item->addMetaData(key, sc->convert(value));
-                log_debug("Adding tag '{}' as '{}' with value '{}'", tag, key, value);
+                auto [val, err] = sc->convert(value);
+                if (!err.empty()) {
+                    log_warning("{}: {}", item->getLocation().string(), err);
+                }
+                item->addMetaData(key, val);
+                log_debug("Adding tag '{}' as '{}' with value '{}'", tag, key, val);
             }
         }
         // if there are any auxilary tags that the user wants - add them
@@ -284,8 +306,12 @@ void LibExifHandler::process_ifd(const ExifContent* content, const std::shared_p
 
             auto value = trimString(exif_egv(entry));
             if (!value.empty()) {
-                item->setAuxData(aux, sc->convert(value));
-                log_debug("Adding aux: {} with value {}", aux, value);
+                auto [val, err] = sc->convert(value);
+                if (!err.empty()) {
+                    log_warning("{}: {}", item->getLocation().string(), err);
+                }
+                item->setAuxData(aux, val);
+                log_debug("Adding aux: {} with value {}", aux, val);
             }
         }
     }

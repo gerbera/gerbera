@@ -277,7 +277,11 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             }
             auto title = std::string(UTFstring(*titleEl).GetUTF8());
             log_debug("KaxTitle = {}", title);
-            item->addMetaData(MetadataFields::M_TITLE, sc->convert(title));
+            auto [val, err] = sc->convert(title);
+            if (!err.empty()) {
+                log_warning("{}: {}", item->getLocation().string(), err);
+            }
+            item->addMetaData(MetadataFields::M_TITLE, val);
             activeFlag &= ~GRB_MATROSKA_TITLE;
         } else if (EbmlId(*el) == EBML_ID(KaxDateUTC)) {
             auto dateEl = dynamic_cast<KaxDateUTC*>(el);
@@ -288,8 +292,12 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             auto fDate = fmt::format("{:%FT%T%z}", fmt::gmtime(dateEl->GetEpochDate()));
             if (!fDate.empty()) {
                 log_debug("KaxDateUTC = {}", fDate);
-                item->addMetaData(MetadataFields::M_DATE, sc->convert(fDate));
-                item->addMetaData(MetadataFields::M_CREATION_DATE, sc->convert(fDate));
+                auto [val, err] = sc->convert(fDate);
+                if (!err.empty()) {
+                    log_warning("{}: {}", item->getLocation().string(), err);
+                }
+                item->addMetaData(MetadataFields::M_DATE, val);
+                item->addMetaData(MetadataFields::M_CREATION_DATE, val);
                 activeFlag &= ~GRB_MATROSKA_DATE;
             }
         } else if (EbmlId(*el) == EBML_ID(KaxDuration)) {
@@ -301,7 +309,11 @@ void MatroskaHandler::parseInfo(const std::shared_ptr<CdsItem>& item, EbmlStream
             auto fDuration = millisecondsToHMSF(static_cast<double>(*static_cast<EbmlFloat*>(durationEl)));
             log_debug("KaxDuration = {}", fDuration);
             if (item->getResourceCount() > 0) {
-                item->getResource(ContentHandler::DEFAULT)->addAttribute(ResourceAttribute::DURATION, sc->convert(fDuration));
+                auto [val, err] = sc->convert(fDuration);
+                if (!err.empty()) {
+                    log_warning("{}: {}", item->getLocation().string(), err);
+                }
+                item->getResource(ContentHandler::DEFAULT)->addAttribute(ResourceAttribute::DURATION, val);
             }
             activeFlag &= ~GRB_MATROSKA_DURATION;
         }

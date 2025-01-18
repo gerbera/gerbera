@@ -62,7 +62,6 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         return;
 
     try {
-        std::string value;
         const auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET, item->getLocation());
 
         const auto image = Exiv2::ImageFactory::open(item->getLocation());
@@ -92,9 +91,12 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         // get date/time
         auto md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.DateTimeOriginal"));
         if (md != exifData.end()) {
-            value = sc->convert(md->toString());
+            auto [value, err] = sc->convert(md->toString());
+            if (!err.empty()) {
+                log_warning("{}: {}", item->getLocation().string(), err);
+            }
 
-            /// \todo convert date to ISO 8601 as required in the UPnP spec
+            // convert date to ISO 8601 as required in the UPnP spec
             // from YYYY:MM:DD to YYYY-MM-DD
             if (value.length() >= 19) {
                 value = fmt::format("{}-{}-{}T{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2), value.substr(11, 8));
@@ -108,7 +110,11 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         }
         auto orientation = exifData.findKey(Exiv2::ExifKey("Exif.Image.Orientation"));
         if (orientation != exifData.end()) {
-            item->getResource(ContentHandler::DEFAULT)->addAttribute(ResourceAttribute::ORIENTATION, sc->convert(orientation->toString()));
+            auto [value, err] = sc->convert(orientation->toString());
+            if (!err.empty()) {
+                log_warning("{}: {}", item->getLocation().string(), err);
+            }
+            item->getResource(ContentHandler::DEFAULT)->addAttribute(ResourceAttribute::ORIENTATION, value);
         }
 
         // if there was no jpeg comment, look if there is an exiv2 comment
@@ -166,7 +172,11 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 #endif
 
         if (!comment.empty()) {
-            item->addMetaData(MetadataFields::M_DESCRIPTION, sc->convert(comment));
+            auto [value, err] = sc->convert(comment);
+            if (!err.empty()) {
+                log_warning("{}: {}", item->getLocation().string(), err);
+            }
+            item->addMetaData(MetadataFields::M_DESCRIPTION, value);
         }
 
         // if there are any metadata tags that the user wants - add them
@@ -187,9 +197,12 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
                     continue;
                 }
                 if (!metaval.empty()) {
-                    metaval = sc->convert(metaval);
-                    item->addMetaData(metakey, metaval);
-                    log_debug("Adding meta tag '{}' as '{}' with value '{}'", metatag, metakey, metaval);
+                    auto [value, err] = sc->convert(metaval);
+                    if (!err.empty()) {
+                        log_warning("{}: {}", item->getLocation().string(), err);
+                    }
+                    item->addMetaData(metakey, value);
+                    log_debug("Adding meta tag '{}' as '{}' with value '{}'", metatag, metakey, value);
                 }
             }
         } else {
@@ -214,9 +227,12 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
                     continue;
                 }
                 if (!auxval.empty()) {
-                    auxval = sc->convert(auxval);
-                    item->setAuxData(auxtag, auxval);
-                    log_debug("Adding aux tag: {} with value {}", auxtag.c_str(), auxval.c_str());
+                    auto [value, err] = sc->convert(auxval);
+                    if (!err.empty()) {
+                        log_warning("{}: {}", item->getLocation().string(), err);
+                    }
+                    item->setAuxData(auxtag, value);
+                    log_debug("Adding aux tag: {} with value {}", auxtag.c_str(), value);
                 }
             }
 
