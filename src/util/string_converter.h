@@ -34,34 +34,46 @@
 #ifndef __STRING_CONVERTER_H__
 #define __STRING_CONVERTER_H__
 
-#include "config/config.h"
+#include "util/grb_fs.h"
 
 #include <iconv.h>
 #include <map>
 #include <memory>
+#include <string>
+
+class Config;
+enum class ConfigVal;
 
 class StringConverter {
 public:
+    /// \brief create a new converter
+    /// \param from source character set
+    /// \param to target character set
     StringConverter(const std::string& from, const std::string& to);
     virtual ~StringConverter();
 
     StringConverter(const StringConverter&) = delete;
     StringConverter& operator=(const StringConverter&) = delete;
-    /// \brief Converts uses the from and to values that were passed
+    /// \brief Uses the from and to values that were passed
     /// to the constructor to convert the string str to a specific character
     /// set.
     /// \param str String to be converted.
     /// \param validate if this parameter is true then an exception will be
     /// thrown if illegal input is encountered. If false, illegal characters
     /// will be padded with '?' and the function will return the string.
-    std::string convert(std::string str, bool validate = false);
+    std::pair<std::string, std::string> convert(
+        std::string str,
+        bool validate = false);
     bool validate(const std::string& str);
 
 protected:
     iconv_t cd;
     bool dirty {};
+    std::string to;
 
-    std::string _convert(const std::string& str, bool validate,
+    std::pair<std::string, std::string> _convert(
+        const std::string& str,
+        bool validate,
         std::size_t* stoppedAt = nullptr);
 };
 
@@ -70,7 +82,9 @@ public:
     ConverterManager(const std::shared_ptr<Config>& cm);
     virtual ~ConverterManager() = default;
 
+    /// \brief metadata to internal
     const std::shared_ptr<StringConverter> m2i(ConfigVal option, const fs::path& location);
+    /// \brief filesystem to internal
     const std::shared_ptr<StringConverter> f2i() const;
 #if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(HAVE_MATROSKA)
     /// \brief safeguard - internal to internal - needed to catch some

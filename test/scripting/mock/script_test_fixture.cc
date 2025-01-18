@@ -32,7 +32,6 @@
 #include "content/scripting/script_names.h"
 #include "metadata/metadata_enums.h"
 #include "util/grb_fs.h"
-#include "util/string_converter.h"
 #include "util/tools.h"
 
 #include "common_script_mock.h"

@@ -22,6 +22,7 @@
 */
 #ifdef HAVE_JS
 
+#include "util/grb_fs.h"
 #include "util/tools.h"
 
 #include "mock/duk_helper.h"

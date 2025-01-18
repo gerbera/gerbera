@@ -702,7 +702,11 @@ std::string ImportService::makeTitle(const fs::path& objectPath, const std::stri
         if (title.length() > 1)
             std::replace(title.begin() + 1, title.end() - 1, '_', ' ');
     }
-    return f2i->convert(title);
+    auto [mval, err] = f2i->convert(title);
+    if (!err.empty()) {
+        log_warning("{}: {}", title, err);
+    }
+    return mval;
 }
 
 void ImportService::updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype)

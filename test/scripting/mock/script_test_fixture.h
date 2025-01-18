@@ -24,8 +24,6 @@
 #ifndef GERBERA_SCRIPTTESTFIXTURE_H
 #define GERBERA_SCRIPTTESTFIXTURE_H
 
-#include "util/string_converter.h"
-
 #include "common_script_mock.h"
 
 #include <duktape.h>

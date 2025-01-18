@@ -96,7 +96,11 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
 
     log_debug("GOT BUFFER {}", buffer);
     auto doc = std::make_unique<pugi::xml_document>();
-    pugi::xml_parse_result result = doc->load_string(sc->convert(buffer).c_str());
+    auto [mval, err] = sc->convert(buffer);
+    if (!err.empty()) {
+        log_warning("{}: {}", service_url, err);
+    }
+    pugi::xml_parse_result result = doc->load_string(mval.c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
         log_error("Error parsing {} XML: {}", serviceName, result.description());
         return nullptr;

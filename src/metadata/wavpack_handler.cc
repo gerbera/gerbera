@@ -239,19 +239,26 @@ void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsI
             auto meta = metaTags.find(tag);
             if (meta == metaTags.end()) {
                 if (std::string_view(tag) == "Year") {
-                    auto dateValue = sc->convert(value);
+                    auto [dateValue, err] = sc->convert(value);
+                    if (!err.empty()) {
+                        log_warning("{}: {}", item->getLocation().string(), err);
+                    }
                     if (dateValue.length() == 4 && std::all_of(dateValue.begin(), dateValue.end(), ::isdigit) && std::stoi(dateValue) > 0) {
                         log_debug("Identified metadata '{}': {}", tag, value);
-                        item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-01-01", sc->convert(value)));
-                        item->addMetaData(MetadataFields::M_UPNP_DATE, fmt::format("{}-01-01", sc->convert(value)));
+                        item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-01-01", dateValue));
+                        item->addMetaData(MetadataFields::M_UPNP_DATE, fmt::format("{}-01-01", dateValue));
                     }
                 } else {
                     log_warning("file {}: wavpack tag {} unknown", item->getLocation().c_str(), tag);
                 }
             } else {
-                log_debug("Identified metadata '{}': {}", tag, value);
+                auto [val, err] = sc->convert(value);
+                if (!err.empty()) {
+                    log_warning("{}: {}", item->getLocation().string(), err);
+                }
+                log_debug("Identified metadata '{}': {}", tag, val);
                 item->removeMetaData(metaTags.at(tag)); // wavpack tags overwrite existing values
-                item->addMetaData(metaTags.at(tag), sc->convert(value));
+                item->addMetaData(metaTags.at(tag), val);
             }
         }
     }

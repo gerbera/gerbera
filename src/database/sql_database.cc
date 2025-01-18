@@ -1459,7 +1459,11 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     itemMetadata.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE), fmt::format("{:%FT%T%z}", fmt::localtime(toSeconds(fs::last_write_time(path)).count())));
 
     auto f2i = converterManager->f2i();
-    return createContainer(parentID, f2i->convert(path.filename()), path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, itemMetadata);
+    auto [mval, err] = f2i->convert(path.filename());
+    if (!err.empty()) {
+        log_warning("{}: {}", path.filename().string(), err);
+    }
+    return createContainer(parentID, mval, path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, itemMetadata);
 }
 
 int SQLDatabase::createContainer(int parentID, const std::string& name, const std::string& virtualPath, int flags, bool isVirtual, const std::string& upnpClass, int refID, const std::vector<std::pair<std::string, std::string>>& itemMetadata, const std::vector<std::shared_ptr<CdsResource>>& itemResources)

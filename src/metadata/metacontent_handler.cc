@@ -283,7 +283,11 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             auto mimeType = std::get<1>(mime->getMimeType(path, fmt::format("image/{}", type)));
             if (!mimeType.empty()) {
                 resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, f2i->convert(path.string()));
+                auto [val, err] = f2i->convert(path.string());
+                if (!err.empty()) {
+                    log_warning("{}: {}", path.string(), err);
+                }
+                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, val);
             }
             obj->addResource(resource);
         }
@@ -340,7 +344,11 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             }
 
             resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, f2i->convert(path.string()));
+            auto [mval, err] = f2i->convert(path.string());
+            if (!err.empty()) {
+                log_warning("{}: {}", path.string(), err);
+            }
+            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, mval);
             resource->addAttribute(ResourceAttribute::TYPE, type);
             auto lang = path.stem().string();
             if (startswith(lang, objFilename)) {
@@ -428,7 +436,11 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             log_debug("Running resource handler check on {} -> {}", obj->getLocation().string(), path.string());
             auto resource = std::make_shared<CdsResource>(ContentHandler::RESOURCE, ResourcePurpose::Thumbnail);
             resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("res"));
-            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, f2i->convert(path.string()));
+            auto [mval, err] = f2i->convert(path.string());
+            if (!err.empty()) {
+                log_warning("{}: {}", path.string(), err);
+            }
+            resource->addAttribute(ResourceAttribute::RESOURCE_FILE, mval);
             obj->addResource(resource);
         }
     }

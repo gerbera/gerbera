@@ -130,8 +130,20 @@ void Web::Directories::process()
                 ce.append_attribute("autoscan_mode") = AutoscanDirectory::mapScanmode((*aDir)->getScanMode());
             }
         }
-        ce.append_attribute("title") = f2i->convert(file.filename()).c_str();
-        ce.append_attribute("location") = f2i->convert(file).c_str();
+        {
+            auto [mval, err] = f2i->convert(file.filename());
+            if (!err.empty()) {
+                log_warning("{}: {}", file.filename().string(), err);
+            }
+            ce.append_attribute("title") = mval.c_str();
+        }
+        {
+            auto [mval, err] = f2i->convert(file);
+            if (!err.empty()) {
+                log_warning("{}: {}", file.string(), err);
+            }
+            ce.append_attribute("location") = mval.c_str();
+        }
         ce.append_attribute("upnp_class") = "folder";
     }
 }
