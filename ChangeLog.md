@@ -12,6 +12,7 @@
 - JS: Fix config autoscan object in scripts
 - Refactor static code from ConfigDefinition
 - Remap metadata fields when parsing virtual-directories keys
+- Set more metadata in builtin layout
 - Update Library Versions
 
 ### v2.4.1

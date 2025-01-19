@@ -346,6 +346,9 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
     }
 
     auto artistContainer = std::make_shared<CdsContainer>(artist, UPNP_CLASS_MUSIC_ARTIST);
+    artistContainer->addMetaData(MetadataFields::M_ARTIST, artist);
+    artistContainer->addMetaData(MetadataFields::M_ALBUMARTIST, artist);
+    artistContainer->addMetaData(MetadataFields::M_GENRE, genre);
     if (blOption->getKey(BoxKeys::audioAllSongs)->getEnabled() && blOption->getKey(BoxKeys::audioAllArtists)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> arc;
         arc.push_back(containerAt(BoxKeys::audioRoot));
@@ -393,16 +396,19 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
     }
 
     if (blOption->getKey(BoxKeys::audioAllGenres)->getEnabled()) {
+        auto genreContainer = std::make_shared<CdsContainer>(genre, UPNP_CLASS_MUSIC_GENRE);
+        genreContainer->addMetaData(MetadataFields::M_GENRE, genre);
         std::vector<std::shared_ptr<CdsObject>> ct;
         ct.push_back(containerAt(BoxKeys::audioRoot));
         ct.push_back(containerAt(BoxKeys::audioAllGenres));
-        ct.push_back(std::make_shared<CdsContainer>(genre, UPNP_CLASS_MUSIC_GENRE));
+        ct.push_back(std::move(genreContainer));
         id = content->addContainerTree(ct, obj);
         result.push_back(add(obj, id));
     }
 
     if (blOption->getKey(BoxKeys::audioAllComposers)->getEnabled()) {
         auto composerContainer = std::make_shared<CdsContainer>(composer, UPNP_CLASS_MUSIC_COMPOSER);
+        composerContainer->addMetaData(MetadataFields::M_COMPOSER, composer);
         composerContainer->setSearchable(true);
         std::vector<std::shared_ptr<CdsObject>> cc;
         cc.push_back(containerAt(BoxKeys::audioRoot));
@@ -414,6 +420,8 @@ std::vector<int> BuiltinLayout::addAudio(const std::shared_ptr<CdsObject>& obj, 
 
     if (blOption->getKey(BoxKeys::audioAllYears)->getEnabled()) {
         auto yearContainer = std::make_shared<CdsContainer>(date);
+        yearContainer->addMetaData(MetadataFields::M_DATE, date);
+        yearContainer->addMetaData(MetadataFields::M_UPNP_DATE, date);
         yearContainer->setSearchable(true);
         std::vector<std::shared_ptr<CdsObject>> yt;
         yt.push_back(containerAt(BoxKeys::audioRoot));
