@@ -660,6 +660,18 @@ They can be used by the import and by the playlist script.
             return genre;
         }
 
+.. js:function:: getAudioDetails(obj)
+
+    Assign required metadata entries to result properties
+
+    :param object obj: Source object
+    :returns: audio object with respective properties
+
+    .. literalinclude:: ../scripts/js/common.js
+        :start-after: // doc-map-audio-details-begin
+        :end-before: // doc-map-audio-details-end
+        :language: js
+
 .. js:function:: mapInitial(firstChar)
 
     Map character to uppercase latin version

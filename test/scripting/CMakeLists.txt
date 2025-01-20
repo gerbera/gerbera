@@ -32,6 +32,7 @@ add_executable(testscripting
     test_external_pls_playlist.cc
     test_external_asx_playlist.cc
     test_import_script.cc
+    test_import_initials_script.cc
     test_import_struct_script.cc
     test_internal_m3u_playlist.cc
     test_internal_m3u8_playlist.cc
