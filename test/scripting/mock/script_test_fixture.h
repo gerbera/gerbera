@@ -144,6 +144,12 @@ public:
     // Translates the Duktape value stack to c++
     static addCdsObjectParams addCdsObject(duk_context* ctx, const std::vector<std::string>& objectKeys);
 
+    // Proxy the Duktape script with `mapGenre` global function.
+    // Translates the Duktape value stack to c++
+    static std::string mapGenre(
+        duk_context* ctx,
+        std::map<std::string, std::string> genMap);
+
     // Proxy the Duktape script with `addContainerTree` C function.
     // Translates the Duktape value stack to c++
     static std::vector<std::string> addContainerTree(duk_context* ctx, std::map<std::string, std::string> resMap);

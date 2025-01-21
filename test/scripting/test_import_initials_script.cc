@@ -56,14 +56,27 @@ static duk_ret_t addContainerTree(duk_context* ctx)
         { "/Audio/Albums/000 All/Album", "49" },
         { "/Audio/ABC/A/Artist/Album", "50" },
         { "/Audio/ABC/A/Artist/000 All", "51" },
-        { "/Audio/Genres/Other", "491" },
-        { "/Audio/Genres/000 All/Genre", "492" },
+        { "/Audio/Genres/Map/000 All", "491" },
+        { "/Audio/Genres/Map/Artist/Album", "492" },
+        { "/Audio/Genres/Map2/000 All", "493" },
+        { "/Audio/Genres/Map2/Artist/Album", "494" },
+        { "/Audio/Genres/000 All/Genre", "496" },
         { "/Audio/Year/2018", "530" },
         { "/Audio/Composers/Composer", "540" },
         { "/Audio/Artists/Artist/Album Chronology/2018 - Album", "550" },
     };
     std::vector<std::string> tree = ScriptTestFixture::addContainerTree(ctx, map);
     return ImportInitialsScriptTest::commonScriptMock->addContainerTree(tree);
+}
+
+static duk_ret_t mapGenre(duk_context* ctx)
+{
+    std::map<std::string, std::string> map = {
+        { "Genre", "Map" },
+        { "Genre2", "Map2" },
+    };
+    auto result = ScriptTestFixture::mapGenre(ctx, map);
+    return ImportInitialsScriptTest::commonScriptMock->mapGenre(result);
 }
 
 static duk_ret_t addCdsObject(duk_context* ctx)
@@ -104,6 +117,7 @@ static duk_function_list_entry js_global_functions[] = {
     { "getPlaylistType", CommonScriptTestFixture::js_getPlaylistType, 1 },
     { "createContainerChain", CommonScriptTestFixture::js_createContainerChain, 1 },
     { "getLastPath", CommonScriptTestFixture::js_getLastPath, 1 },
+    { "mapGenre", mapGenre, 1 },
     { "addCdsObject", addCdsObject, 3 },
     { "getYear", getYear, 1 },
     { "getRootPath", getRootPath, 2 },
@@ -208,6 +222,8 @@ TEST_F(ImportInitialsScriptTest, AddsAudioItemWithInitialFormat)
     // Expecting the common script calls
     // and will proxy through the mock objects
     // for verification.
+    EXPECT_CALL(*commonScriptMock, mapGenre(Eq("Map"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, mapGenre(Eq("Map2"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getYear(Eq("2018-01-01"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getRootPath(Eq(UNDEFINED), Eq(location))).WillRepeatedly(Return(1));
 
@@ -243,11 +259,21 @@ TEST_F(ImportInitialsScriptTest, AddsAudioItemWithInitialFormat)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioTrackArtistTitle), "51", UNDEFINED)).WillOnce(Return(0));
 
     // GENRE //
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Other"))).WillOnce(Return(1));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Map", "000 All"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "491", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "000 All", "Genre"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Map", "Artist", "Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "492", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Map2", "000 All"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "493", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Map2", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "494", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "000 All", "Genre"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "496", UNDEFINED)).WillOnce(Return(0));
 
     // MISC //
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));

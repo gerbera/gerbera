@@ -347,20 +347,17 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
   chain.album.title = audio.album;
 
   if (boxSetup[BK_audioAllGenres].enabled) {
-    const genreConfig = config['/import/scripting/virtual-layout/genre-map/genre'];
-    const genreNames = (genreConfig) ? Object.getOwnPropertyNames(genreConfig) : [];
-
-    var gMatch = 0;
-    for (var idx = 0; idx < genreNames.length; idx++) {
-      var re = new RegExp('(' + genreNames[idx] + ')', 'i');
-      var match = re.exec(audio.genre);
-      if (match) {
+    const genCnt = audio.genres.length;
+    for (var j = 0; j < genCnt; j++) {
+      var mapResult = mapGenre(audio.genres[j]);
+      var gMatch = 0;
+      if (mapResult.mapped) {
         obj.title = temp + audio.track + audio.title;
         gMatch = 1;
-        chain.genre.title = genreConfig[genreNames[idx]];
+        chain.genre.title = mapResult.value;
         chain.all000.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_GENRE;
-        chain.all000.metaData[M_GENRE] = [genreConfig[genreNames[idx]]];
-        chain.genre.metaData[M_GENRE] = [genreConfig[genreNames[idx]]];
+        chain.all000.metaData[M_GENRE] = [ mapResult.value ];
+        chain.genre.metaData[M_GENRE] = [ mapResult.value ];
 
         if (!isAudioBook) {
           container = addContainerTree([chain.audio, chain.allGenres, chain.genre, chain.all000]);
@@ -386,7 +383,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
     }
 
     chain.genre.title = audio.genre;
-    chain.genre.metaData[M_GENRE] = [audio.genre];
+    chain.genre.metaData[M_GENRE] = [ audio.genre ];
     chain.all000.upnpclass = UPNP_CLASS_CONTAINER;
     chain.all000.metaData[M_GENRE] = [];
     chain.genre.searchable = true;
