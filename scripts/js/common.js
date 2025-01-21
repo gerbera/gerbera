@@ -279,6 +279,7 @@ function mapInitial(firstChar) {
 
 function mapGenre(genre) {
   const genreConfig = config['/import/scripting/virtual-layout/genre-map/genre'];
+  var mapped = false;
   if (genreConfig) {
     const genreNames = Object.getOwnPropertyNames(genreConfig);
     for (var idx = 0; idx < genreNames.length; idx++) {
@@ -286,11 +287,12 @@ function mapGenre(genre) {
       var match = re.exec(genre);
       if (match) {
         genre = genreConfig[genreNames[idx]];
+        mapped = true;
         break;
       }
     }
   }
-  return genre;
+  return { value: genre, mapped: mapped };
 }
 
 // doc-map-audio-details-begin
@@ -468,7 +470,7 @@ function addAudio(obj, cont, rootPath, containerType) {
   audio.track = '';
   // remove this if you want to have channel numbers in front of the title
   audio.channels = '';
-  audio.genre = mapGenre(audio.genre);
+  audio.genre = mapGenre(audio.genre).value;
 
   // The UPnP class argument to addCdsObject() is optional, if it is
   // not supplied the default UPnP class will be used. However, it
@@ -811,7 +813,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
   audio.track = '';
   // remove this if you want to have channel numbers in front of the title
   audio.channels = '';
-  audio.genre = mapGenre(audio.genre);
+  audio.genre = mapGenre(audio.genre).value;
 
   const boxConfig = {
     divChar: stringFromConfig('/import/scripting/virtual-layout/structured-layout/attribute::div-char', '-'),

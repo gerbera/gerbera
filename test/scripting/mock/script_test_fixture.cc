@@ -565,6 +565,23 @@ std::string ScriptTestFixture::getYear(duk_context* ctx)
     return date;
 }
 
+std::string ScriptTestFixture::mapGenre(
+    duk_context* ctx,
+    std::map<std::string, std::string> genMap)
+{
+    std::string genre = duk_to_string(ctx, 0);
+    int mapped = genMap.find(genre) != genMap.end() ? 1 : 0;
+    auto result = mapped == 1 ? genMap[genre] : genre;
+    duk_push_object(ctx);
+
+    duk_push_int(ctx, mapped);
+    duk_put_prop_string(ctx, -2, "mapped");
+    duk_push_string(ctx, result.c_str());
+    duk_put_prop_string(ctx, -2, "value");
+
+    return result;
+}
+
 std::vector<std::string> ScriptTestFixture::addContainerTree(duk_context* ctx, std::map<std::string, std::string> resMap)
 {
     DukTestHelper dukHelper;
