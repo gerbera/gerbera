@@ -5,6 +5,7 @@
 - Autoscan: Add missing properties to web UI and database
 - Fix album art in builtin layout
 - Fix cors host without ipv6 address
+- Fix UpnpMap logic
 - Focal: Freeze more aws-sdk versions
 - Focal: freeze ruby aws-sdk versions used for package upload
 - Force Reread of unknown files

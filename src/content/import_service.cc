@@ -56,24 +56,28 @@
 
 bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const std::string& actual) const
 {
-    if (op == "=" && actual.find(expect) != std::string::npos)
-        return true;
-    if (op == "!=" && actual.find(expect) == std::string::npos)
-        return true;
-    if (op == "<" && actual < expect)
-        return true;
-    return (op == ">" && actual > expect);
+    if (op == "=" || op == "==")
+        return actual.find(expect) != std::string::npos;
+    if (op == "!=")
+        return actual.find(expect) == std::string::npos;
+    if (op == "<")
+        return actual < expect;
+    if (op == ">")
+        return actual > expect;
+    return false;
 }
 
 bool UpnpMap::checkValue(const std::string& op, int expect, int actual) const
 {
-    if (op == "=" && actual != expect)
-        return true;
-    if (op == "!=" && actual == expect)
-        return true;
-    if (op == "<" && actual < expect)
-        return true;
-    return (op == ">" && actual > expect);
+    if (op == "=" || op == "==")
+        return actual == expect;
+    if (op == "!=")
+        return actual != expect;
+    if (op == "<")
+        return actual < expect;
+    if (op == ">")
+        return actual > expect;
+    return false;
 }
 
 bool UpnpMap::isMatch(const std::shared_ptr<CdsItem>& item, const std::string& mt) const
@@ -97,7 +101,7 @@ bool UpnpMap::isMatch(const std::shared_ptr<CdsItem>& item, const std::string& m
 
 void UpnpMap::initMap(std::vector<UpnpMap>& target, const std::map<std::string, std::string>& source)
 {
-    auto re = std::regex("^([A-Za-z0-9_:]+)(<|>|=|!=)([A-Za-z0-9_]+)$");
+    auto re = std::regex("^([A-Za-z0-9_:]+)(<|>|=|==|!=)([A-Za-z0-9_]+)$");
     for (auto&& [key, cls] : source) {
         auto filterList = splitString(key, ';');
         auto filters = std::vector<std::tuple<std::string, std::string, std::string>>();

@@ -34,7 +34,7 @@
             <user-docs-link>./doc/</user-docs-link>
         </ui>
         <name>Gerbera</name>
-		<udn>uuid:fcc3b17d-01ab-41d6-99cb-068598464a3d</udn>
+        <udn>uuid:fcc3b17d-01ab-41d6-99cb-068598464a3d</udn>
         <home override="no">/tmp/.config/gerbera</home>
         <webroot>/usr/local/share/gerbera/web</webroot>
         <port>50600</port>
@@ -59,9 +59,9 @@
                 <add-data tag="M_ARTIST"/>
                 <add-data tag="M_TITLE"/>
             </search-item-result>
-			<album-properties extend="true">
-				<upnp-property upnp-tag="upnp:icon" meta-data="M_ALBUMARTURI"/>
-			</album-properties>
+            <album-properties extend="true">
+                <upnp-property upnp-tag="upnp:icon" meta-data="M_ALBUMARTURI"/>
+            </album-properties>
             <artist-properties>
                 <upnp-property upnp-tag="upnp:albumArtist" meta-data="M_ALBUMARTIST"/>
                 <upnp-property upnp-tag="upnp:artist" meta-data="M_ALBUMARTIST"/>
@@ -204,11 +204,11 @@
     <import hidden-files="no" follow-symlinks="yes" default-date="yes" import-mode="mt" nomedia-file=".nomedia" readable-names="yes">
         <autoscan use-inotify="auto">
             <directory location="/media" mode="inotify" recursive="yes" hidden-files="yes"  media-type="Music|AudioBook|Video">
-				<container-type-audio>object.container.album.musicAlbum</container-type-audio>
-				<container-type-image>object.container.album.musicAlbum</container-type-image>
-				<container-type-video>object.container.album.musicAlbum</container-type-video>
-			</directory>
-			<directory location="/mnt/Video" mode="inotify" recursive="yes" follow-symlinks="yes" hidden-files="yes"/>
+                <container-type-audio>object.container.album.musicAlbum</container-type-audio>
+                <container-type-image>object.container.album.musicAlbum</container-type-image>
+                <container-type-video>object.container.album.musicAlbum</container-type-video>
+            </directory>
+            <directory location="/mnt/Video" mode="inotify" recursive="yes" follow-symlinks="yes" hidden-files="yes"/>
         </autoscan>
         <magic-file>magic.file</magic-file>
         <virtual-directories>
@@ -232,24 +232,24 @@
             </import-function>
             <virtual-layout type="builtin">
                 <structured-layout skip-chars="" div-char=""/>
-				<script-options>
-					<script-option name="album-mode" value="unique"/>
-				</script-options>
-				<genre-map>
-					<genre from="Christian|Gospel|Gesprochen" to="Worship"/>
-					<genre from="Rock|Alternative|Punk" to="Rock"/>
-					<genre from="Children|H.*rspiel" to="Children's"/>
-					<genre from="Dance|Rap|Hip|Progressive Electronic|Urban Crossover" to="Dance"/>
-					<genre from="Audio Book|H.*rspiel|Stories" to="Audio Book"/>
-					<genre from="Metal|Trance|Hard Rock|Quirk" to="Metal"/>
-					<genre from="Comedy" to="Comedy"/>
-					<genre from="Classical" to="Classical"/>
-					<genre from="Blues|R.B" to="Blues"/>
-					<genre from="Soundtrack|Film|Movie" to="Soundtrack"/>
-					<genre from="German|Deutsch|General Punk" to="Deutsch"/>
-					<genre from="Musical" to="Musical"/>
-					<genre from="Pop|A Capella|Folk|Sports|Data|Disco|Diva|Electronica|World|Glam|New Age|Romantic|Vocals|European|Classic Prog|Urban AC" to="Pop"/>
-				</genre-map>
+                <script-options>
+                    <script-option name="album-mode" value="unique"/>
+                </script-options>
+                <genre-map>
+                    <genre from="Christian|Gospel|Gesprochen" to="Worship"/>
+                    <genre from="Rock|Alternative|Punk" to="Rock"/>
+                    <genre from="Children|H.*rspiel" to="Children's"/>
+                    <genre from="Dance|Rap|Hip|Progressive Electronic|Urban Crossover" to="Dance"/>
+                    <genre from="Audio Book|H.*rspiel|Stories" to="Audio Book"/>
+                    <genre from="Metal|Trance|Hard Rock|Quirk" to="Metal"/>
+                    <genre from="Comedy" to="Comedy"/>
+                    <genre from="Classical" to="Classical"/>
+                    <genre from="Blues|R.B" to="Blues"/>
+                    <genre from="Soundtrack|Film|Movie" to="Soundtrack"/>
+                    <genre from="German|Deutsch|General Punk" to="Deutsch"/>
+                    <genre from="Musical" to="Musical"/>
+                    <genre from="Pop|A Capella|Folk|Sports|Data|Disco|Diva|Electronica|World|Glam|New Age|Romantic|Vocals|European|Classic Prog|Urban AC" to="Pop"/>
+                </genre-map>
                 <boxlayout>
                     <box key="Audio/allAlbums" title="Albums" class="object.container" upnp-shortcut="MUSIC_ALBUMS"/>
                     <box key="Audio/allArtists" title="Artists" class="object.container" upnp-shortcut="MUSIC_ARTISTS"/>
@@ -298,48 +298,48 @@
         </scripting>
         <library-options multi-value-separator="; " legacy-value-separator="">
             <libexif charset="UTF-8">
-				<auxdata>
-					<add-data tag="EXIF_TAG_IMAGE_DESCRIPTION"/>
-					<add-data tag="EXIF_TAG_USER_COMMENT"/>
-					<add-data tag="EXIF_TAG_MODEL"/>
-					<add-data tag="EXIF_TAG_DATE_TIME"/>
-					<add-data tag="EXIF_TAG_DATE_TIME_ORIGINAL"/>
-					<add-data tag="EXIF_TAG_ARTIST"/>
-				</auxdata>
+                <auxdata>
+                    <add-data tag="EXIF_TAG_IMAGE_DESCRIPTION"/>
+                    <add-data tag="EXIF_TAG_USER_COMMENT"/>
+                    <add-data tag="EXIF_TAG_MODEL"/>
+                    <add-data tag="EXIF_TAG_DATE_TIME"/>
+                    <add-data tag="EXIF_TAG_DATE_TIME_ORIGINAL"/>
+                    <add-data tag="EXIF_TAG_ARTIST"/>
+                </auxdata>
                 <metadata/>
             </libexif>
             <exiv2 charset="UTF-8">
-				<auxdata>
-					<add-data tag="Exif.CanonTi.DaylightSavings"/>
-					<add-data tag="Exif.CanonTi.TimeZone"/>
-					<add-data tag="Exif.GPSInfo.GPSDateStamp"/>
-					<add-data tag="Exif.GPSInfo.GPSTimeStamp"/>
-					<add-data tag="Exif.Image.Artist"/>
-					<add-data tag="Exif.Image.DateTime"/>
-					<add-data tag="Exif.Image.ImageDescription"/>
-					<add-data tag="Exif.Image.Model"/>
-					<add-data tag="Exif.Photo.DateTimeOriginal"/>
-					<add-data tag="Exif.Photo.UserComment"/>
-					<add-data tag="Xmp.dc.subject"/>
-					<add-data tag="Xmp.photoshop.Headline"/>
-				</auxdata>
+                <auxdata>
+                    <add-data tag="Exif.CanonTi.DaylightSavings"/>
+                    <add-data tag="Exif.CanonTi.TimeZone"/>
+                    <add-data tag="Exif.GPSInfo.GPSDateStamp"/>
+                    <add-data tag="Exif.GPSInfo.GPSTimeStamp"/>
+                    <add-data tag="Exif.Image.Artist"/>
+                    <add-data tag="Exif.Image.DateTime"/>
+                    <add-data tag="Exif.Image.ImageDescription"/>
+                    <add-data tag="Exif.Image.Model"/>
+                    <add-data tag="Exif.Photo.DateTimeOriginal"/>
+                    <add-data tag="Exif.Photo.UserComment"/>
+                    <add-data tag="Xmp.dc.subject"/>
+                    <add-data tag="Xmp.photoshop.Headline"/>
+                </auxdata>
                 <metadata/>
             </exiv2>
             <id3 charset="UTF-8">
-				<auxdata>
-					<add-data tag="DISCNUMBER"/>
-					<add-data tag="TPE2"/>
-					<add-data tag="TPOS"/>
-					<add-data tag="TCOM"/>
-					<add-data tag="COMPOSER"/>
-					<add-data tag="ENCODEDBY"/>
-					<add-data tag="PERFORMER"/>
-					<add-data tag="WORK"/>
-					<add-data tag="WRITER"/>
-					<add-data tag="LABEL"/>
-					<add-data tag="RELEASETYPE"/>
-					<add-data tag="TXXX:MusicBrainz Album Type"/>
-				</auxdata>
+                <auxdata>
+                    <add-data tag="DISCNUMBER"/>
+                    <add-data tag="TPE2"/>
+                    <add-data tag="TPOS"/>
+                    <add-data tag="TCOM"/>
+                    <add-data tag="COMPOSER"/>
+                    <add-data tag="ENCODEDBY"/>
+                    <add-data tag="PERFORMER"/>
+                    <add-data tag="WORK"/>
+                    <add-data tag="WRITER"/>
+                    <add-data tag="LABEL"/>
+                    <add-data tag="RELEASETYPE"/>
+                    <add-data tag="TXXX:MusicBrainz Album Type"/>
+                </auxdata>
                 <metadata>
                     <add-data tag="PERFORMER" key="upnp:artist@role[Performer]"/>
                 </metadata>
@@ -370,41 +370,41 @@
         </system-directories>
         <visible-directories/>
         <resources case-sensitive="false">
-			<order>
-				<handler name="Default"/>
-				<handler name="TagLib"/>
-				<handler name="Fanart"/>
-				<handler name="FFmpegThumbnailer"/>
-			</order>
-			<container location="image" parentCount="2" minDepth="2">
-				<add-file name="%album%.jpg"/>
-				<add-file name="%filename%.jpg"/>
-				<add-file name="%title%.jpg"/>
-				<add-file name="Folder.jpg"/>
-				<add-file name="cover.jpg"/>
-			</container>
-			<fanart>
-				<add-file name="%album%.jpg"/>
-				<add-file name="%filename%-poster.jpg"/>
-				<add-file name="%filename%-landscape.jpg"/>
-				<add-file name="%filename%-fanart.jpg"/>
-				<add-file name="cover.png"/>
-				<add-file name="cover.jpg"/>
-				<add-file name="album.jpg"/>
-				<add-file name="front.jpg"/>
-			</fanart>
-			<subtitle>
-				<add-file name="%filename%.srt"/>
-				<add-file name="%filename%.Deutsch.srt"/>
-				<add-dir name="%filename%" ext="srt"/>
-				<add-dir name="." pattern="%filename%*" ext="srt"/>
-			</subtitle>
-			<metafile>
-				<add-file name="%filename%.nfo"/>
-			</metafile>
-			<resource>
-				<add-file name="%filename%.srt"/>
-			</resource>
+            <order>
+                <handler name="Default"/>
+                <handler name="TagLib"/>
+                <handler name="Fanart"/>
+                <handler name="FFmpegThumbnailer"/>
+            </order>
+            <container location="image" parentCount="2" minDepth="2">
+                <add-file name="%album%.jpg"/>
+                <add-file name="%filename%.jpg"/>
+                <add-file name="%title%.jpg"/>
+                <add-file name="Folder.jpg"/>
+                <add-file name="cover.jpg"/>
+            </container>
+            <fanart>
+                <add-file name="%album%.jpg"/>
+                <add-file name="%filename%-poster.jpg"/>
+                <add-file name="%filename%-landscape.jpg"/>
+                <add-file name="%filename%-fanart.jpg"/>
+                <add-file name="cover.png"/>
+                <add-file name="cover.jpg"/>
+                <add-file name="album.jpg"/>
+                <add-file name="front.jpg"/>
+            </fanart>
+            <subtitle>
+                <add-file name="%filename%.srt"/>
+                <add-file name="%filename%.Deutsch.srt"/>
+                <add-dir name="%filename%" ext="srt"/>
+                <add-dir name="." pattern="%filename%*" ext="srt"/>
+            </subtitle>
+            <metafile>
+                <add-file name="%filename%.nfo"/>
+            </metafile>
+            <resource>
+                <add-file name="%filename%.srt"/>
+            </resource>
         </resources>
         <layout parent-path="no"/>
         <directories/>
@@ -513,8 +513,8 @@
         <mimetype-profile-mappings allow-unused="no">
             <transcode mimetype="application/ogg" using="vlcmpeg"/>
             <transcode mimetype="audio/ogg" using="ogg2mp3"/>
-			<transcode mimetype="video/x-flv" source-profile="AVC_MKV_HP_HD_AC3" client-flags="0x10" using="vlcmpeg"/>
-			<transcode mimetype="application/ogg" using="oggflac2raw"/>
+            <transcode mimetype="video/x-flv" source-profile="AVC_MKV_HP_HD_AC3" client-flags="0x10" using="vlcmpeg"/>
+            <transcode mimetype="application/ogg" using="oggflac2raw"/>
         </mimetype-profile-mappings>
         <profiles allow-unused="no">
             <profile name="ogg2mp3" enabled="no" type="external">
@@ -530,25 +530,25 @@
                 <accept-url>yes</accept-url>
                 <first-resource>yes</first-resource>
                 <accept-ogg-theora>yes</accept-ogg-theora>
-				<avi-fourcc-list mode="ignore">
-					<fourcc>XVID</fourcc>
-					<fourcc>DX50</fourcc>
-				</avi-fourcc-list>
+                <avi-fourcc-list mode="ignore">
+                    <fourcc>XVID</fourcc>
+                    <fourcc>DX50</fourcc>
+                </avi-fourcc-list>
                 <agent command="vlc" arguments="-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc://quit"/>
                 <buffer size="14400000" chunk-size="512000" fill-size="120000"/>
             </profile>
-			<profile name="oggflac2raw" enabled="yes" type="external">
-				<mimetype value="audio/L16">
-					<mime-property key="rate" resource="R_SAMPLEFREQUENCY"/>
-					<mime-property key="channels" resource="nrAudioChannels"/>
-					<mime-property key="date" metadata="M_DATE"/>
-				</mimetype>
-				<accept-url>no</accept-url>
-				<first-resource>yes</first-resource>
-				<accept-ogg-theora>no</accept-ogg-theora>
-				<agent command="ogg123" arguments="-d raw -o byteorder:big -f %out %in"/>
-				<buffer size="1048576" chunk-size="131072" fill-size="262144"/>
-			</profile>
+            <profile name="oggflac2raw" enabled="yes" type="external">
+                <mimetype value="audio/L16">
+                    <mime-property key="rate" resource="R_SAMPLEFREQUENCY"/>
+                    <mime-property key="channels" resource="nrAudioChannels"/>
+                    <mime-property key="date" metadata="M_DATE"/>
+                </mimetype>
+                <accept-url>no</accept-url>
+                <first-resource>yes</first-resource>
+                <accept-ogg-theora>no</accept-ogg-theora>
+                <agent command="ogg123" arguments="-d raw -o byteorder:big -f %out %in"/>
+                <buffer size="1048576" chunk-size="131072" fill-size="262144"/>
+            </profile>
         </profiles>
     </transcoding>
 </config>
