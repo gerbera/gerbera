@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    test_import_struct_script.cc - this file is part of Gerbera.
+    test_import_initials_script.cc - this file is part of Gerbera.
 
     Copyright (C) 2025 Gerbera Contributors
 
