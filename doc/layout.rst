@@ -100,7 +100,10 @@ by the import script. Changing ``size`` for boxlayout ``Playlist/allDirectories`
 Layout Configuration
 ~~~~~~~~~~~~~~~~~~~~
 
-In order to avoid changing scripts or code, layout configuration allow, e.g., setting the captions of entries in the virtual layout tree.
+Boxlayout
+---------
+
+In order to avoid changing scripts or code, layout configuration allows, e.g., setting the captions of entries in the virtual layout tree.
 Each box allows to disable it by setting the attribute ``enabled="false"``. If a parent box is disabled all child boxes will disappear from the layout.
 Boxes in ``AudioStructured`` support setting the size which means the number of initials in that box.
 
@@ -196,3 +199,20 @@ The codes in *js layout* column refer to the *Code* column above.
 +---------------------------------+------------------+-----------+----------------+
 
 The complete list of configuration options can be found in :ref:`Boxlayout Configuration <boxlayout>`.
+
+Script Options
+--------------
+
+Furthermore there are some script options that allow tweaking the layout. The script options and their interpretation
+depend on the layout function. The options can be set in the config.xml section :ref:`script-options <script-options>`
+
++---------------------------------+------------------+----------------------------------------------------------------------+
+| Option                          | Layout Function  | Description                                                          |
++=================================+==================+======================================================================+
+| trackNumbers                    | da, sa, ia       | Use 'show' or 'hide' to add track number in front of the track title |
+|                                 |                  | the default behaviour depends on the function.                       |
++---------------------------------+------------------+----------------------------------------------------------------------+
+| specialGenre                    | ia               | Add disk number to tracks matching this genre                        |
++---------------------------------+------------------+----------------------------------------------------------------------+
+| spokenGenre                     | ia               | Do add tracks to 'All' section                                       |
++---------------------------------+------------------+----------------------------------------------------------------------+

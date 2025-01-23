@@ -82,32 +82,66 @@ public:
     void TearDown() override;
 
     // Creates a mock item(orig) global object in Duktape context
-    static duk_ret_t dukMockItem(duk_context* ctx, const std::string& mimetype, const std::string& id, int theora, const std::string& title,
-        const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res,
+    static duk_ret_t dukMockItem(
+        duk_context* ctx,
+        const std::string& mimetype,
+        const std::string& upnpClass,
+        const std::string& id,
+        int theora,
+        const std::string& title,
+        const std::vector<std::pair<std::string, std::string>>& meta,
+        const std::map<std::string, std::string>& aux,
+        const std::map<std::string, std::string>& res,
         const std::string& location, int onlineService);
-    static void dukMockItem(duk_context* ctx, const std::map<std::string, std::string>& props,
-        const std::vector<std::pair<std::string, std::string>>& meta, const std::map<std::string, std::string>& aux, const std::map<std::string, std::string>& res);
+    static void dukMockItem(
+        duk_context* ctx,
+        const std::map<std::string, std::string>& props,
+        const std::vector<std::pair<std::string, std::string>>& meta,
+        const std::map<std::string, std::string>& aux,
+        const std::map<std::string, std::string>& res);
 
     // Load playlist file from fixtures
     static void mockPlaylistFile(const std::string& mockFile);
 
     // Creates a mock metafile global object in Duktape context
-    duk_ret_t dukMockMetafile(duk_context* ctx, const std::string& location, const std::string& fileName);
-    static void dukMockMetafile(duk_context* ctx, const std::map<std::string, std::string>& props);
+    duk_ret_t dukMockMetafile(
+        duk_context* ctx,
+        const std::string& location,
+        const std::string& fileName);
+    static void dukMockMetafile(
+        duk_context* ctx,
+        const std::map<std::string, std::string>& props);
 
     // Creates a mock playlist global object in Duktape context
-    duk_ret_t dukMockPlaylist(duk_context* ctx, const std::string& title, const std::string& location, const std::string& mimetype);
+    duk_ret_t dukMockPlaylist(
+        duk_context* ctx,
+        const std::string& title,
+        const std::string& location,
+        const std::string& mimetype);
     static void dukMockPlaylist(duk_context* ctx, const std::map<std::string, std::string>& props);
 
     // Add global Duktape methods to proxy into c++ layer
-    void addGlobalFunctions(duk_context* ctx, const duk_function_list_entry* funcs, const std::map<std::string_view, std::string_view>& config = {}, const std::vector<boxConfig>& boxDefaults = {});
+    void addGlobalFunctions(
+        duk_context* ctx,
+        const duk_function_list_entry* funcs,
+        const std::map<std::string_view, std::string_view>& config = {},
+        const std::vector<boxConfig>& boxDefaults = {},
+        const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts = {});
 
     // Add config entries to global context
-    static void addConfig(duk_context* ctx, const std::map<std::string_view, std::string_view>& config, const std::vector<boxConfig>& boxDefaults = {});
+    static void addConfig(
+        duk_context* ctx,
+        const std::map<std::string_view, std::string_view>& configValues,
+        const std::vector<boxConfig>& boxDefaults = {},
+        const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts = {});
 
     // Access the global object(script) by name, and execute
     void executeScript(duk_context* ctx);
-    void callFunction(duk_context* ctx, void(dukMockFunction)(duk_context* ctx, const std::map<std::string, std::string>& props), const std::map<std::string, std::string>& props, const std::string& rootPath = "");
+    void callFunction(
+        duk_context* ctx,
+        void(dukMockFunction)(duk_context* ctx, const std::map<std::string, std::string>& props),
+        const std::map<std::string, std::string>& props,
+        const std::string& rootPath = "");
 
     // Proxy the common.js script with `createContainerChain`
     // Mimics the creation of a directory chain
@@ -142,7 +176,9 @@ public:
 
     // Proxy the Duktape script with `addCdsObject` global function.
     // Translates the Duktape value stack to c++
-    static addCdsObjectParams addCdsObject(duk_context* ctx, const std::vector<std::string>& objectKeys);
+    static addCdsObjectParams addCdsObject(
+        duk_context* ctx,
+        const std::vector<std::string>& objectKeys);
 
     // Proxy the Duktape script with `mapGenre` global function.
     // Translates the Duktape value stack to c++
@@ -152,7 +188,9 @@ public:
 
     // Proxy the Duktape script with `addContainerTree` C function.
     // Translates the Duktape value stack to c++
-    static std::vector<std::string> addContainerTree(duk_context* ctx, std::map<std::string, std::string> resMap);
+    static std::vector<std::string> addContainerTree(
+        duk_context* ctx,
+        std::map<std::string, std::string> resMap);
 
     // Proxy the Duktape script with `abcbox` common.js function
     static abcBoxParams abcBox(duk_context* ctx);
@@ -161,10 +199,16 @@ public:
     static getRootPathParams getRootPath(duk_context* ctx);
 
     // Proxy the Duktape script with `copyObject` global function
-    static copyObjectParams copyObject(duk_context* ctx, const std::map<std::string, std::string>& obj, const std::map<std::string, std::string>& meta);
+    static copyObjectParams copyObject(
+        duk_context* ctx,
+        const std::map<std::string, std::string>& obj,
+        const std::map<std::string, std::string>& meta);
 
     // Proxy the Duktape script with `copyObject` global function
-    static getCdsObjectParams getCdsObject(duk_context* ctx, const std::map<std::string, std::string>& obj, const std::map<std::string, std::string>& meta);
+    static getCdsObjectParams getCdsObject(
+        duk_context* ctx,
+        const std::map<std::string, std::string>& obj,
+        const std::map<std::string, std::string>& meta);
 
     // Script file name under test
     // System defaults to known project path `/scripts/js/<scriptName>`
