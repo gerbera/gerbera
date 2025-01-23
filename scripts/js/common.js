@@ -461,15 +461,19 @@ function getAudioDetails(obj) {
 // doc-add-audio-begin
 function addAudio(obj, cont, rootPath, containerType) {
   const audio = getAudioDetails(obj);
+  const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
 
   // We finally gathered all data that we need, so let's create a
   // nice layout for our audio files.
 
   obj.title = audio.title;
-  // remove the following line if you want to have track numbers in front of the title
-  audio.track = '';
-  // remove this if you want to have channel numbers in front of the title
-  audio.channels = '';
+
+  // set option in config if you want to have track numbers in front of the title
+  if (!scriptOptions || scriptOptions['trackNumbers'] !== 'show')
+    audio.track = '';
+  // set option in config if you want to have channel numbers in front of the title
+  if (!scriptOptions || scriptOptions['channelCount'] !== 'show')
+    audio.channels = '';
   audio.genre = mapGenre(audio.genre).value;
 
   // The UPnP class argument to addCdsObject() is optional, if it is
@@ -737,7 +741,7 @@ function addAudio(obj, cont, rootPath, containerType) {
     container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.artistChronology, chain.album]);
     result.push(addCdsObject(obj, container));
 
-    chain.album.title = album; // Restore the title;
+    chain.album.title = audio.album; // Restore the title;
   }
   return result;
 }
@@ -798,6 +802,7 @@ function boolFromConfig(entry, defValue) {
 function addAudioStructured(obj, cont, rootPath, containerType) {
   // first gather data
   const audio = getAudioDetails(obj);
+  const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
 
   // Extra code for correct display of albums with various artists (usually collections)
   var tracktitle = audio.track + audio.title;
@@ -809,10 +814,12 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
     }
   }
 
-  // remove the following line if you want to have track numbers in front of the title
-  audio.track = '';
-  // remove this if you want to have channel numbers in front of the title
-  audio.channels = '';
+  // set option in config if you want to have track numbers in front of the title
+  if (!scriptOptions || scriptOptions['trackNumbers'] !== 'show')
+    audio.track = '';
+  // set option in config if you want to have channel numbers in front of the title
+  if (!scriptOptions || scriptOptions['channelCount'] !== 'show')
+    audio.channels = '';
   audio.genre = mapGenre(audio.genre).value;
 
   const boxConfig = {

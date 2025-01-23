@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Add Options to Scripts
 - Autoscan: Add missing properties to web UI and database
 - Fix album art in builtin layout
 - Fix cors host without ipv6 address

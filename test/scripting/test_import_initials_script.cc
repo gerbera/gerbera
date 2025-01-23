@@ -24,6 +24,7 @@
 
 #include "content/onlineservice/online_service.h"
 #include "metadata/metadata_handler.h"
+#include "upnp/upnp_common.h"
 
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
@@ -61,9 +62,12 @@ static duk_ret_t addContainerTree(duk_context* ctx)
         { "/Audio/Genres/Map2/000 All", "493" },
         { "/Audio/Genres/Map2/Artist/Album", "494" },
         { "/Audio/Genres/000 All/Genre", "496" },
+        { "/Audio/Genres/000 All/Genre2", "497" },
         { "/Audio/Year/2018", "530" },
+        { "/Audio/Year/2025", "531" },
         { "/Audio/Composers/Composer", "540" },
         { "/Audio/Artists/Artist/Album Chronology/2018 - Album", "550" },
+        { "/Audio/Artists/Artist/Album Chronology/2025 - Album", "551" },
     };
     std::vector<std::string> tree = ScriptTestFixture::addContainerTree(ctx, map);
     return ImportInitialsScriptTest::commonScriptMock->addContainerTree(tree);
@@ -87,6 +91,7 @@ static duk_ret_t addCdsObject(duk_context* ctx)
         "metaData['upnp:artist']",
         "metaData['upnp:composer']",
         "metaData['upnp:album']",
+        "metaData['upnp:originalTrackNumber']",
         "metaData['dc:date']",
         "metaData['upnp:date']",
         "metaData['upnp:genre']",
@@ -173,6 +178,7 @@ TEST_F(ImportInitialsScriptTest, AddsAudioItemWithInitialFormat)
     std::string desc = "Description";
     std::string id = "2";
     std::string location = "/home/gerbera/audio.mp3";
+    std::string track = "2";
     int onlineService = 0;
     int theora = 0;
     std::map<std::string, std::string> aux;
@@ -183,6 +189,7 @@ TEST_F(ImportInitialsScriptTest, AddsAudioItemWithInitialFormat)
         { "upnp:artist", artist },
         { "upnp:composer", composer },
         { "upnp:album", album },
+        { "upnp:originalTrackNumber", track },
         { "dc:date", date },
         { "upnp:date", year },
         { "upnp:genre", genre },
@@ -196,11 +203,295 @@ TEST_F(ImportInitialsScriptTest, AddsAudioItemWithInitialFormat)
         { "metaData['dc:title']", title },
         { "metaData['upnp:artist']", artist },
         { "metaData['upnp:album']", album },
+        { "metaData['upnp:originalTrackNumber']", fmt::format("0{}", track) },
         { "metaData['upnp:composer']", composer },
         { "metaData['dc:date']", date },
         { "metaData['upnp:date']", year },
         { "metaData['upnp:genre']", fmt::format("{},{}", genre, genre2) },
         { "metaData['dc:description']", desc },
+    };
+
+    std::map<std::string, std::string> asAudioAllFullName;
+    asAudioAllFullName.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioAllFullName["title"] = "Artist - Album - Audio Title";
+
+    std::map<std::string, std::string> asAudioAllFullNameNumbered;
+    asAudioAllFullNameNumbered.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioAllFullNameNumbered["title"] = fmt::format("Artist - Album - 0{} Audio Title", track);
+
+    std::map<std::string, std::string> asAudioNumbered;
+    asAudioNumbered.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioNumbered["title"] = fmt::format("0{} {}", track, title);
+
+    std::map<std::string, std::string> asAudioAllArtistTitle;
+    asAudioAllArtistTitle.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioAllArtistTitle["title"] = fmt::format("Album - 0{} Audio Title", track);
+
+    std::map<std::string, std::string> asAudioAllAudioTitleArtist;
+    asAudioAllAudioTitleArtist.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioAllAudioTitleArtist["title"] = "Audio Title - Artist";
+
+    std::map<std::string, std::string> asAudioTrackArtistTitle;
+    asAudioTrackArtistTitle.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioTrackArtistTitle["title"] = fmt::format("2018 - Album - 0{} Audio Title", track);
+
+    // Expecting the common script calls
+    // and will proxy through the mock objects
+    // for verification.
+    EXPECT_CALL(*commonScriptMock, mapGenre(Eq("Map"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, mapGenre(Eq("Map2"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getYear(Eq("2018-01-01"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getRootPath(Eq(UNDEFINED), Eq(location))).WillRepeatedly(Return(1));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All Audio"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "42", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "All Songs"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "43", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All - full name"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "44", UNDEFINED)).WillOnce(Return(0));
+
+    // ARTIST //
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre( "Audio", "Artists", "Artist", "All - full name"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "45", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioNumbered), "46", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Albums", "Artist", "000 All"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllArtistTitle), "47", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Albums", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioNumbered), "48", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Albums", "000 All", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioNumbered), "49", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "ABC", "A", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioNumbered), "50", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "ABC", "A", "Artist", "000 All"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioTrackArtistTitle), "51", UNDEFINED)).WillOnce(Return(0));
+
+    // GENRE //
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Map", "000 All"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullNameNumbered), "491", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Map", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullNameNumbered), "492", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Map2", "000 All"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullNameNumbered), "493", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Map2", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullNameNumbered), "494", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "000 All", "Genre"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "496", UNDEFINED)).WillOnce(Return(0));
+
+    // MISC //
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "530", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "540", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "550", UNDEFINED)).WillOnce(Return(0));
+
+    addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, }, audioIniital);
+
+    dukMockItem(ctx, mimetype, UPNP_CLASS_AUDIO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
+    executeScript(ctx);
+}
+
+TEST_F(ImportInitialsScriptTest, AddsSpokenAudioItemWithInitialFormat)
+{
+    std::string title = "Audio Title";
+    std::string mimetype = "audio/mpeg";
+    std::string artist = "Artist";
+    std::string composer = "Composer";
+    std::string album = "Album";
+    std::string date = "2025-01-01";
+    std::string year = "2025";
+    std::string genre2 = "Genre2";
+    std::string desc = "Description";
+    std::string id = "2";
+    std::string location = "/home/gerbera/audio.mp3";
+    std::string track = "2";
+    std::string disk = "42";
+    int onlineService = 0;
+    int theora = 0;
+    std::map<std::string, std::string> res;
+
+    std::vector<std::pair<std::string, std::string>> meta {
+        { "dc:title", title },
+        { "upnp:artist", artist },
+        { "upnp:composer", composer },
+        { "upnp:album", album },
+        { "upnp:originalTrackNumber", track },
+        { "dc:date", date },
+        { "upnp:date", year },
+        { "upnp:genre", genre2 },
+        { "dc:description", desc },
+    };
+
+    std::map<std::string, std::string> aux {
+        { "DISCNUMBER", disk },
+    };
+
+    // Represents the values passed to `addCdsObject`, extracted from keys defined there.
+    std::map<std::string, std::string> asAudioAllAudio {
+        { "title", title },
+        { "metaData['dc:title']", title },
+        { "metaData['upnp:artist']", artist },
+        { "metaData['upnp:album']", album },
+        { "metaData['upnp:originalTrackNumber']", fmt::format("{}00{}", disk, track) },
+        { "metaData['upnp:composer']", composer },
+        { "metaData['dc:date']", date },
+        { "metaData['upnp:date']", year },
+        { "metaData['upnp:genre']", genre2 },
+        { "metaData['dc:description']", desc },
+    };
+
+    std::map<std::string_view, std::map<std::string_view, std::string_view>> configDicts {
+        { "/import/scripting/virtual-layout/script-options/script-option", { { "spokenGenre", "Audio Book|Genre2" } } },
+    };
+
+    std::map<std::string, std::string> asAudioAllFullName;
+    asAudioAllFullName.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioAllFullName["title"] = "Artist - Album - Audio Title";
+
+    std::map<std::string, std::string> asAudioAllFullNameNumbered;
+    asAudioAllFullNameNumbered.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioAllFullNameNumbered["title"] = fmt::format("Artist - Album - {} 00{} Audio Title", disk, track);
+
+    std::map<std::string, std::string> asAudioNumbered;
+    asAudioNumbered.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioNumbered["title"] = fmt::format("{} 00{} {}", disk, track, title);
+
+    std::map<std::string, std::string> asAudioAllArtistTitle;
+    asAudioAllArtistTitle.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioAllArtistTitle["title"] = fmt::format("Album - {} 00{} Audio Title", disk, track);
+
+    std::map<std::string, std::string> asAudioAllAudioTitleArtist;
+    asAudioAllAudioTitleArtist.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioAllAudioTitleArtist["title"] = "Audio Title - Artist";
+
+    std::map<std::string, std::string> asAudioTrackArtistTitle;
+    asAudioTrackArtistTitle.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioTrackArtistTitle["title"] = fmt::format("{} - Album - {} 00{} Audio Title", year, disk, track);
+
+    // Expecting the common script calls
+    // and will proxy through the mock objects
+    // for verification.
+    EXPECT_CALL(*commonScriptMock, mapGenre(Eq("Map2"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getYear(Eq("2025-01-01"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getRootPath(Eq(UNDEFINED), Eq(location))).WillRepeatedly(Return(1));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All Audio"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "42", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "All Songs"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "43", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All - full name"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "44", UNDEFINED)).WillOnce(Return(0));
+
+    // ARTIST //
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre( "Audio", "Artists", "Artist", "All - full name"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "45", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioNumbered), "46", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Albums", "Artist", "000 All"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllArtistTitle), "47", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Albums", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioNumbered), "48", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Albums", "000 All", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioNumbered), "49", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "ABC", "A", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioNumbered), "50", UNDEFINED)).WillOnce(Return(0));
+
+    // GENRE //
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Map2", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullNameNumbered), "494", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "000 All", "Genre2"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "497", UNDEFINED)).WillOnce(Return(0));
+
+    // MISC //
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Year", "2025"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "531", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "540", UNDEFINED)).WillOnce(Return(0));
+
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album Chronology", "2025 - Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "551", UNDEFINED)).WillOnce(Return(0));
+
+    addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, }, audioIniital, configDicts);
+
+    dukMockItem(ctx, mimetype, UPNP_CLASS_AUDIO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
+    executeScript(ctx);
+}
+
+TEST_F(ImportInitialsScriptTest, AddsUnnumberedAudioItemWithInitialFormat)
+{
+    std::string title = "Audio Title";
+    std::string mimetype = "audio/mpeg";
+    std::string artist = "Artist";
+    std::string composer = "Composer";
+    std::string album = "Album";
+    std::string date = "2018-01-01";
+    std::string year = "2018";
+    std::string genre = "Genre";
+    std::string genre2 = "Genre2";
+    std::string desc = "Description";
+    std::string id = "2";
+    std::string location = "/home/gerbera/audio.mp3";
+    std::string track = "2";
+    int onlineService = 0;
+    int theora = 0;
+    std::map<std::string, std::string> aux;
+    std::map<std::string, std::string> res;
+
+    std::vector<std::pair<std::string, std::string>> meta {
+        { "dc:title", title },
+        { "upnp:artist", artist },
+        { "upnp:composer", composer },
+        { "upnp:album", album },
+        { "upnp:originalTrackNumber", track },
+        { "dc:date", date },
+        { "upnp:date", year },
+        { "upnp:genre", genre },
+        { "upnp:genre", genre2 },
+        { "dc:description", desc },
+    };
+
+    // Represents the values passed to `addCdsObject`, extracted from keys defined there.
+    std::map<std::string, std::string> asAudioAllAudio {
+        { "title", title },
+        { "metaData['dc:title']", title },
+        { "metaData['upnp:artist']", artist },
+        { "metaData['upnp:album']", album },
+        { "metaData['upnp:originalTrackNumber']", fmt::format("0{}", track) },
+        { "metaData['upnp:composer']", composer },
+        { "metaData['dc:date']", date },
+        { "metaData['upnp:date']", year },
+        { "metaData['upnp:genre']", fmt::format("{},{}", genre, genre2) },
+        { "metaData['dc:description']", desc },
+    };
+
+    std::map<std::string_view, std::map<std::string_view, std::string_view>> configDicts {
+        { "/import/scripting/virtual-layout/script-options/script-option", { { "trackNumbers", "hide" } } },
     };
 
     std::map<std::string, std::string> asAudioAllFullName;
@@ -285,9 +576,9 @@ TEST_F(ImportInitialsScriptTest, AddsAudioItemWithInitialFormat)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "550", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, }, audioIniital);
+    addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, }, audioIniital, configDicts);
 
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
+    dukMockItem(ctx, mimetype, UPNP_CLASS_AUDIO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 

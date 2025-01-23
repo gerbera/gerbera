@@ -24,6 +24,7 @@
 
 #include "content/onlineservice/online_service.h"
 #include "metadata/metadata_handler.h"
+#include "upnp/upnp_common.h"
 
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
@@ -78,6 +79,7 @@ static duk_ret_t addCdsObject(duk_context* ctx)
         "metaData['dc:title']",
         "metaData['upnp:artist']",
         "metaData['upnp:album']",
+        "metaData['upnp:originalTrackNumber']",
         "metaData['dc:date']",
         "metaData['upnp:date']",
         "metaData['upnp:genre']",
@@ -192,6 +194,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     std::string id = "2";
     std::string location = "/home/gerbera/audio.mp3";
     std::string channels = "2";
+    std::string track = "2";
     int onlineService = 0;
     int theora = 0;
     std::map<std::string, std::string> aux;
@@ -201,6 +204,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
         { "dc:description", desc },
         { "dc:title", title },
         { "upnp:album", album },
+        { "upnp:originalTrackNumber", track },
         { "upnp:artist", artist },
         { "upnp:composer", composer },
         { "upnp:conductor", conductor },
@@ -220,6 +224,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
         { "metaData['dc:description']", desc },
         { "metaData['dc:title']", title },
         { "metaData['upnp:album']", album },
+        { "metaData['upnp:originalTrackNumber']", fmt::format("0{}", track) },
         { "metaData['upnp:artist']", artist },
         { "metaData['upnp:composer']", composer },
         { "metaData['upnp:conductor']", conductor },
@@ -228,10 +233,18 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
         { "metaData['upnp:orchestra']", orchestra },
         { "title", title },
     };
+    std::map<std::string_view, std::map<std::string_view, std::string_view>> configDicts {
+        { "/import/scripting/virtual-layout/script-options/script-option", { { "trackNumbers", "show" } } },
+    };
 
     std::map<std::string, std::string> asAudioAllFullName;
     asAudioAllFullName.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
     asAudioAllFullName["title"] = "Artist - Album - Audio Title";
+
+
+    std::map<std::string, std::string> asAudioTrackNumbered;
+    asAudioTrackNumbered.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
+    asAudioTrackNumbered["title"] = fmt::format("0{} {}", track, title);
 
     // Expecting the common script calls
     // and will proxy through the mock objects
@@ -253,10 +266,10 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "45", UNDEFINED)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "46", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioTrackNumbered), "46", UNDEFINED)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Albums", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "47", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioTrackNumbered), "47", UNDEFINED)).WillOnce(Return(0));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Genre2"))).WillOnce(Return(1));
@@ -272,8 +285,8 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", artist, "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions, {}, audioBox);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
+    addGlobalFunctions(ctx, js_global_functions, {}, audioBox, configDicts);
+    dukMockItem(ctx, mimetype, UPNP_CLASS_AUDIO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 
@@ -312,7 +325,7 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, videoBox);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
+    dukMockItem(ctx, mimetype, UPNP_CLASS_VIDEO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 
@@ -363,7 +376,7 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "73", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, imageBox);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
+    dukMockItem(ctx, mimetype, UPNP_CLASS_IMAGE_ITEM, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 
@@ -402,7 +415,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, videoBox);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
+    dukMockItem(ctx, mimetype, UPNP_CLASS_VIDEO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 
@@ -458,6 +471,10 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
         { "title", title },
     };
 
+    std::map<std::string_view, std::map<std::string_view, std::string_view>> configDicts {
+        { "/import/scripting/virtual-layout/script-options/script-option", { { "trackNumbers", "hide" } } },
+    };
+
     std::map<std::string, std::string> asAudioAllFullName;
     asAudioAllFullName.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
     asAudioAllFullName["title"] = "Artist - Album - Audio Title";
@@ -499,8 +516,8 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", artist, "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions, {}, audioBox);
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
+    addGlobalFunctions(ctx, js_global_functions, {}, audioBox, configDicts);
+    dukMockItem(ctx, mimetype, UPNP_CLASS_AUDIO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 

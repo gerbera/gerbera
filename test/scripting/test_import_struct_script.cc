@@ -24,6 +24,7 @@
 
 #include "content/onlineservice/online_service.h"
 #include "metadata/metadata_handler.h"
+#include "upnp/upnp_common.h"
 
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
@@ -262,7 +263,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
 
     addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, }, audioBox);
 
-    dukMockItem(ctx, mimetype, id, theora, title, meta, aux, res, location, onlineService);
+    dukMockItem(ctx, mimetype, UPNP_CLASS_AUDIO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
     executeScript(ctx);
 }
 

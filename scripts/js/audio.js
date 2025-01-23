@@ -31,8 +31,15 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
 function addAudioInitial(obj, cont, rootPath, containerType) {
 
   const audio = getAudioDetails(obj);
+  const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
 
   obj.title = audio.title;
+  // set option in config if you want to remove track numbers in front of the title
+  if (scriptOptions && scriptOptions['trackNumbers'] === 'hide')
+    audio.track = '';
+
+  const specialGenre = new RegExp(scriptOptions && scriptOptions['specialGenre'] ? scriptOptions['specialGenre'] : 'NotDefinedGenre');
+  const spokenGenre = new RegExp(scriptOptions && scriptOptions['spokenGenre'] ? scriptOptions['spokenGenre'] : 'Audio Book|H.*rspiel|Stories|Gesprochen|Comedy|Spoken');
 
   if (audio.desc) {
     obj.description = audio.desc;
@@ -302,9 +309,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
 
   var init = mapInitial(audio.albumArtist.charAt(0));
   if (audio.disknr != '') {
-    var re = new RegExp('Children', 'i');
-    var match = re.exec(audio.genre);
-    if (match) {
+    if (specialGenre.exec(audio.genre)) {
       if (disknr.length == 1) {
         chain.album.title = '0' + audio.disknr + ' - ' + audio.album;
       } else {
@@ -316,15 +321,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
     chain.init.title = init;
   }
 
-  var noAll = ['Audio Book', 'H.*rspiel', 'Stories', 'Gesprochen', 'Comedy'];
-  var spokenMatch = false;
-  for (var k = 0; k < noAll.length; k++) {
-    var re = new RegExp(noAll[k], 'i');
-    var match = re.exec(audio.genre);
-    if (match) {
-      spokenMatch = true;
-    }
-  }
+  var spokenMatch = spokenGenre.exec(audio.genre) ? true : false;
   obj.title = audio.track + audio.title;
   chain.artist.searchable = true;
   chain.album.searchable = true;
@@ -359,11 +356,11 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
         chain.all000.metaData[M_GENRE] = [ mapResult.value ];
         chain.genre.metaData[M_GENRE] = [ mapResult.value ];
 
-        if (!isAudioBook) {
+        if (spokenMatch === false && !isAudioBook) {
           container = addContainerTree([chain.audio, chain.allGenres, chain.genre, chain.all000]);
           result.push(addCdsObject(obj, container));
         }
-        if (chain.genre.title === 'Children\'s') {
+        if (specialGenre.exec(chain.genre.title)) {
           if (disknr.length === 1) {
             chain.album.title = '0' + audio.disknr + ' - ' + audio.album;
           } else {
