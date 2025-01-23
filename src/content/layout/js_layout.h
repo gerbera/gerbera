@@ -41,17 +41,34 @@
 class ImportScript;
 class ScriptingRuntime;
 
+/// \brief layout class implementation for flexible java script implemented virtual layout
 class JSLayout : public Layout {
 protected:
     std::shared_ptr<ScriptingRuntime> runtime;
     std::unique_ptr<ImportScript> import_script;
 
-    std::vector<int> addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
-    std::vector<int> addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
-    std::vector<int> addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    std::vector<int> addVideo(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& parent,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    std::vector<int> addImage(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& parent,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    std::vector<int> addAudio(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& parent,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 
 #ifdef ONLINE_SERVICES
-    std::vector<int> addOnlineItem(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    std::vector<int> addOnlineItem(
+        const std::shared_ptr<CdsObject>& obj,
+        OnlineServiceType serviceType,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 #endif
 
 public:
