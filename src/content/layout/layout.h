@@ -46,6 +46,7 @@ class CdsObject;
 class Content;
 enum class OnlineServiceType;
 
+/// \brief base class for virtual layout generation
 class Layout {
 public:
     explicit Layout(std::shared_ptr<Content> content)
@@ -55,6 +56,7 @@ public:
 
     virtual ~Layout() = default;
 
+    /// \brief create virtual layout
     virtual void processCdsObject(const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
         const fs::path& rootpath,
@@ -63,16 +65,19 @@ public:
         std::vector<int>& refObjects);
 
 protected:
+    /// \brief create virtual video layout
     virtual std::vector<int> addVideo(const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
         const fs::path& rootpath,
         const std::map<AutoscanMediaMode, std::string>& containerMap)
         = 0;
+    /// \brief execute virtual image layout
     virtual std::vector<int> addImage(const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
         const fs::path& rootpath,
         const std::map<AutoscanMediaMode, std::string>& containerMap)
         = 0;
+    /// \brief execute virtual audio layout
     virtual std::vector<int> addAudio(const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
         const fs::path& rootpath,
@@ -80,6 +85,7 @@ protected:
         = 0;
 
 #ifdef ONLINE_SERVICES
+    /// \brief execute virtual online item layout
     virtual std::vector<int> addOnlineItem(const std::shared_ptr<CdsObject>& obj,
         OnlineServiceType serviceType,
         const fs::path& rootpath,

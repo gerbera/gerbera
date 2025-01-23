@@ -338,6 +338,7 @@ Below are the available scripting options:
 
         Points to the script invoked upon media import. For more details read about :ref:`scripting <scripting>`.
 
+.. _script-options:
 
 ``script-options``
 ------------------
@@ -376,7 +377,7 @@ Below are the available scripting options:
 
                 .. code:: xml
 
-                    to="..."
+                    value="..."
 
                 * Required
 

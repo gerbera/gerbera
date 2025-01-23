@@ -12,7 +12,7 @@ Changed default for layout to "js" if built with JavaScript support.
 
 ### FIXES
 
-- Album art in builtin layout
+- Album art and structure in builtin layout
 - Autoscan objects in scripts
 - Metadata in builtin layout, album artist in default js layout
 

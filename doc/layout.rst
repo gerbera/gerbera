@@ -206,13 +206,14 @@ Script Options
 Furthermore there are some script options that allow tweaking the layout. The script options and their interpretation
 depend on the layout function. The options can be set in the config.xml section :ref:`script-options <script-options>`
 
-+---------------------------------+------------------+----------------------------------------------------------------------+
-| Option                          | Layout Function  | Description                                                          |
-+=================================+==================+======================================================================+
-| trackNumbers                    | da, sa, ia       | Use 'show' or 'hide' to add track number in front of the track title |
-|                                 |                  | the default behaviour depends on the function.                       |
-+---------------------------------+------------------+----------------------------------------------------------------------+
-| specialGenre                    | ia               | Add disk number to tracks matching this genre                        |
-+---------------------------------+------------------+----------------------------------------------------------------------+
-| spokenGenre                     | ia               | Do add tracks to 'All' section                                       |
-+---------------------------------+------------------+----------------------------------------------------------------------+
++---------------------------------+------------------+--------------------------------------------------------------------------+
+| Option                          | Layout Function  | Description                                                              |
++=================================+==================+==========================================================================+
+| trackNumbers                    | da, sa, ia       | Use 'show' or 'hide' to add track number in front of the track title     |
+|                                 |                  | the default behaviour depends on the function.                           |
++---------------------------------+------------------+--------------------------------------------------------------------------+
+| specialGenre                    | ia               | Add disk number to tracks matching this genre (regular expression)       |
++---------------------------------+------------------+--------------------------------------------------------------------------+
+| spokenGenre                     | ia               | Do not add tracks to 'All' section                                       |
+|                                 |                  | if the genre matches (regular expression)                                |
++---------------------------------+------------------+--------------------------------------------------------------------------+

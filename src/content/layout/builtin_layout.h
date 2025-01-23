@@ -44,6 +44,7 @@ class CdsContainer;
 class Config;
 class ConverterManager;
 
+/// \brief layout class implementation for simple virtual layout
 class BuiltinLayout : public Layout {
 public:
     explicit BuiltinLayout(std::shared_ptr<Content> content);
@@ -55,14 +56,38 @@ protected:
     std::map<std::string, std::pair<int, bool>> chain;
     std::map<std::string, std::shared_ptr<CdsContainer>> container;
 
-    int add(const std::shared_ptr<CdsObject>& obj, const std::pair<int, bool>& parentID, bool useRef = true);
-    int getDir(const std::shared_ptr<CdsObject>& obj, const fs::path& rootPath, const std::string_view& c1, const std::string_view& c2, const std::string& upnpClass);
-    std::vector<int> addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
-    std::vector<int> addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
-    std::vector<int> addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    int add(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::pair<int, bool>& parentID,
+        bool useRef = true);
+    int getDir(
+        const std::shared_ptr<CdsObject>& obj,
+        const fs::path& rootPath,
+        const std::string_view& c1,
+        const std::string_view& c2,
+        const std::string& upnpClass);
+    std::vector<int> addVideo(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& parent,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    std::vector<int> addImage(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& parent,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    std::vector<int> addAudio(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& parent,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 
 #ifdef ONLINE_SERVICES
-    std::vector<int> addOnlineItem(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap) override;
+    std::vector<int> addOnlineItem(
+        const std::shared_ptr<CdsObject>& obj,
+        OnlineServiceType serviceType,
+        const fs::path& rootpath,
+        const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 #endif
 
     std::string mapGenre(const std::string& genre);
