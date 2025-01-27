@@ -259,26 +259,45 @@
       </virtual-layout>
     </scripting>
     <library-options multi-value-separator="; " legacy-value-separator="">
-      <libexif charset="UTF-8">
+      <libexif charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata></metadata>
+        <comment enabled="no"></comment>
       </libexif>
-      <exiv2 charset="UTF-8">
+      <exiv2 charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata></metadata>
+        <comment enabled="yes">
+          <add-comment label="Flash setting" tag="Exif.Photo.Flash" />
+          <add-comment label="Focal length" tag="Exif.Photo.FocalLength" />
+          <add-comment label="Focal length 35 mm equivalent" tag="Exif.Photo.FocalLengthIn35mmFilm" />
+          <add-comment label="Taken with" tag="Exif.Image.Model" />
+        </comment>
       </exiv2>
-      <id3 charset="UTF-8">
+      <id3 charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata>
           <add-data tag="PERFORMER" key="upnp:artist@role[Performer]" />
         </metadata>
+        <comment enabled="no"></comment>
       </id3>
-      <ffmpeg charset="UTF-8">
+      <ffmpeg charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata>
           <add-data tag="performer" key="upnp:artist@role[Performer]" />
         </metadata>
+        <comment enabled="no"></comment>
       </ffmpeg>
+      <mkv charset="UTF-8" enabled="yes">
+        <auxdata></auxdata>
+        <metadata></metadata>
+        <comment enabled="no"></comment>
+      </mkv>
+      <wavpack charset="UTF-8" enabled="yes">
+        <auxdata></auxdata>
+        <metadata></metadata>
+        <comment enabled="no"></comment>
+      </wavpack>
     </library-options>
     <system-directories>
       <add-path name="/bin" />

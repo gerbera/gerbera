@@ -1482,188 +1482,436 @@
           "editable": true
         },
         {
-          "item": "/import/library-options/libexif/attribute::enabled",
-          "caption": "libexif enabled",
-          "editable": true
-        },
-        {
-          "item": "/import/library-options/libexif/attribute::charset",
-          "caption": "libexif charset",
-          "editable": true
-        },
-        {
-          "item": "/import/library-options/libexif/auxdata/add-data",
-          "caption": "libexif",
-          "type": "List",
+          "item": "/import/library-options/libexif",
+          "type": "Element",
+          "caption": "libexif Library Options",
           "editable": true,
           "children": [
             {
-              "item": "/import/library-options/libexif/auxdata/add-data/attribute::tag",
-              "caption": "Tag Name",
-              "editable": true
-            }
-          ]
-        },
-        {
-          "item": "/import/library-options/libexif/metadata/add-data",
-          "caption": "libexif metadata",
-          "type": "List",
-          "editable": true,
-          "children": [
-            {
-              "item": "/import/library-options/libexif/metadata/add-data/attribute::tag",
-              "caption": "Tag Name",
+              "item": "/import/library-options/libexif/attribute::enabled",
+              "caption": "enabled",
               "editable": true
             },
             {
-              "item": "/import/library-options/libexif/metadata/add-data/attribute::key",
-              "caption": "Upnp metadata entry",
-              "editable": true
-            }
-          ]
-        },
-        {
-          "item": "/import/library-options/id3/attribute::enabled",
-          "caption": "taglib enabled",
-          "editable": true
-        },
-        {
-          "item": "/import/library-options/id3/attribute::charset",
-          "caption": "taglib charset",
-          "editable": true
-        },
-        {
-          "item": "/import/library-options/id3/auxdata/add-data",
-          "caption": "taglib",
-          "type": "List",
-          "editable": true,
-          "children": [
-            {
-              "item": "/import/library-options/id3/auxdata/add-data/attribute::tag",
-              "caption": "Tag Name",
-              "editable": true
-            }
-          ]
-        },
-        {
-          "item": "/import/library-options/id3/metadata/add-data",
-          "caption": "taglib metadata",
-          "type": "List",
-          "editable": true,
-          "children": [
-            {
-              "item": "/import/library-options/id3/metadata/add-data/attribute::tag",
-              "caption": "Tag Name",
+              "item": "/import/library-options/libexif/attribute::charset",
+              "caption": "charset",
               "editable": true
             },
             {
-              "item": "/import/library-options/id3/metadata/add-data/attribute::key",
-              "caption": "Upnp metadata entry",
-              "editable": true
-            }
-          ]
-        },
-        {
-          "item": "/import/library-options/exiv2/attribute::enabled",
-          "caption": "exiv2 enabled",
-          "editable": true
-        },
-        {
-          "item": "/import/library-options/exiv2/attribute::charset",
-          "caption": "exiv2 charset",
-          "editable": true
-        },
-        {
-          "item": "/import/library-options/exiv2/auxdata/add-data",
-          "caption": "exiv2",
-          "type": "List",
-          "editable": true,
-          "children": [
+              "item": "/import/library-options/libexif/auxdata/add-data",
+              "caption": "auxdata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/libexif/auxdata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                }
+              ]
+            },
             {
-              "item": "/import/library-options/exiv2/auxdata/add-data/attribute::tag",
-              "caption": "Tag Name",
-              "editable": true
-            }
-          ]
-        },
-        {
-          "item": "/import/library-options/exiv2/metadata/add-data",
-          "caption": "exiv2 metadata",
-          "type": "List",
-          "editable": true,
-          "children": [
+              "item": "/import/library-options/libexif/metadata/add-data",
+              "caption": "metadata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/libexif/metadata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/libexif/metadata/add-data/attribute::key",
+                  "caption": "Upnp metadata entry",
+                  "editable": true
+                }
+              ]
+            },
             {
-              "item": "/import/library-options/exiv2/metadata/add-data/attribute::tag",
-              "caption": "Tag Name",
+              "item": "/import/library-options/libexif/comment/attribute::enabled",
+              "caption": "comment enabled",
               "editable": true
             },
             {
-              "item": "/import/library-options/exiv2/metadata/add-data/attribute::key",
-              "caption": "Upnp metadata entry",
-              "editable": true
+              "item": "/import/library-options/libexif/comment/add-comment",
+              "caption": "comment",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/libexif/comment/add-comment/attribute::label",
+                  "caption": "Comment label",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/libexif/comment/add-comment/attribute::tag",
+                  "caption": "Comment metadata",
+                  "editable": true
+                }
+              ]
             }
           ]
         },
         {
-          "item": "/import/library-options/ffmpeg/attribute::enabled",
-          "caption": "ffmpeg enabled",
-          "editable": true
-        },
-        {
-          "item": "/import/library-options/ffmpeg/attribute::charset",
-          "caption": "ffmpeg charset",
-          "editable": true
-        },
-        {
-          "item": "/import/library-options/ffmpeg/auxdata/add-data",
-          "caption": "ffmpeg",
-          "type": "List",
+          "item": "/import/library-options/id3",
+          "type": "Element",
+          "caption": "taglib Library Options",
           "editable": true,
           "children": [
             {
-              "item": "/import/library-options/ffmpeg/auxdata/add-data/attribute::tag",
-              "caption": "Tag Name",
-              "editable": true
-            }
-          ]
-        },
-        {
-          "item": "/import/library-options/ffmpeg/metadata/add-data",
-          "caption": "ffmpeg metadata",
-          "type": "List",
-          "editable": true,
-          "children": [
-            {
-              "item": "/import/library-options/ffmpeg/metadata/add-data/attribute::tag",
-              "caption": "Tag Name",
+              "item": "/import/library-options/id3/attribute::enabled",
+              "caption": "enabled",
               "editable": true
             },
             {
-              "item": "/import/library-options/ffmpeg/metadata/add-data/attribute::key",
-              "caption": "Upnp metadata entry",
+              "item": "/import/library-options/id3/attribute::charset",
+              "caption": "charset",
               "editable": true
+            },
+            {
+              "item": "/import/library-options/id3/auxdata/add-data",
+              "caption": "auxdata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/id3/auxdata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/id3/metadata/add-data",
+              "caption": "metadata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/id3/metadata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/id3/metadata/add-data/attribute::key",
+                  "caption": "Upnp metadata entry",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/id3/comment/attribute::enabled",
+              "caption": "comment enabled",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/id3/comment/add-comment",
+              "caption": "comment",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/id3/comment/add-comment/attribute::label",
+                  "caption": "Comment label",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/id3/comment/add-comment/attribute::tag",
+                  "caption": "Comment metadata",
+                  "editable": true
+                }
+              ]
             }
           ]
         },
         {
-          "item": "/import/library-options/wavpack/attribute::enabled",
-          "caption": "wavpack enabled",
-          "editable": true
+          "item": "/import/library-options/exiv2",
+          "type": "Element",
+          "caption": "exiv2 Library Options",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/library-options/exiv2/attribute::enabled",
+              "caption": "enabled",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/exiv2/attribute::charset",
+              "caption": "charset",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/exiv2/auxdata/add-data",
+              "caption": "auxdata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/exiv2/auxdata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/exiv2/metadata/add-data",
+              "caption": "metadata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/exiv2/metadata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/exiv2/metadata/add-data/attribute::key",
+                  "caption": "Upnp metadata entry",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/exiv2/comment/attribute::enabled",
+              "caption": "comment enabled",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/exiv2/comment/add-comment",
+              "caption": "comment",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/exiv2/comment/add-comment/attribute::label",
+                  "caption": "Comment label",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/exiv2/comment/add-comment/attribute::tag",
+                  "caption": "Comment metadata",
+                  "editable": true
+                }
+              ]
+            }
+          ]
         },
         {
-          "item": "/import/library-options/wavpack/attribute::charset",
-          "caption": "wavpack charset",
-          "editable": true
+          "item": "/import/library-options/ffmpeg",
+          "type": "Element",
+          "caption": "ffmpeg Library Options",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/library-options/ffmpeg/attribute::enabled",
+              "caption": "enabled",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/ffmpeg/attribute::charset",
+              "caption": "charset",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/ffmpeg/auxdata/add-data",
+              "caption": "auxdata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/ffmpeg/auxdata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/ffmpeg/metadata/add-data",
+              "caption": "metadata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/ffmpeg/metadata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/ffmpeg/metadata/add-data/attribute::key",
+                  "caption": "Upnp metadata entry",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/ffmpeg/comment/attribute::enabled",
+              "caption": "comment enabled",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/ffmpeg/comment/add-comment",
+              "caption": "comment",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/ffmpeg/comment/add-comment/attribute::label",
+                  "caption": "Comment label",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/ffmpeg/comment/add-comment/attribute::tag",
+                  "caption": "Comment metadata",
+                  "editable": true
+                }
+              ]
+            }
+          ]
         },
         {
-          "item": "/import/library-options/mkv/attribute::enabled",
-          "caption": "matroska enabled",
-          "editable": true
+          "item": "/import/library-options/ffmpeg",
+          "type": "Element",
+          "caption": "wavpack Library Options",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/library-options/wavpack/attribute::enabled",
+              "caption": "enabled",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/wavpack/attribute::charset",
+              "caption": "charset",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/wavpack/auxdata/add-data",
+              "caption": "auxdata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/wavpack/auxdata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/wavpack/metadata/add-data",
+              "caption": "metadata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/wavpack/metadata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/wavpack/metadata/add-data/attribute::key",
+                  "caption": "Upnp metadata entry",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/wavpack/comment/attribute::enabled",
+              "caption": "comment enabled",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/wavpack/comment/add-comment",
+              "caption": "comment",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/wavpack/comment/add-comment/attribute::label",
+                  "caption": "Comment label",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/wavpack/comment/add-comment/attribute::tag",
+                  "caption": "Comment metadata",
+                  "editable": true
+                }
+              ]
+            }
+          ]
         },
         {
-          "item": "/import/library-options/mkv/attribute::charset",
-          "caption": "matroska charset",
-          "editable": true
+          "item": "/import/library-options/mkv",
+          "type": "Element",
+          "caption": "matroska Library Options",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/library-options/mkv/attribute::enabled",
+              "caption": "enabled",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/mkv/attribute::charset",
+              "caption": "charset",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/mkv/auxdata/add-data",
+              "caption": "auxdata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/mkv/auxdata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/mkv/metadata/add-data",
+              "caption": "metadata",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/mkv/metadata/add-data/attribute::tag",
+                  "caption": "Tag Name",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/mkv/metadata/add-data/attribute::key",
+                  "caption": "Upnp metadata entry",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/mkv/comment/attribute::enabled",
+              "caption": "comment enabled",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/mkv/comment/add-comment",
+              "caption": "comment",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/mkv/comment/add-comment/attribute::label",
+                  "caption": "Comment label",
+                  "editable": true
+                },
+                {
+                  "item": "/import/library-options/mkv/comment/add-comment/attribute::tag",
+                  "caption": "Comment metadata",
+                  "editable": true
+                }
+              ]
+            }
+          ]
         }
       ]
     },
@@ -1851,7 +2099,7 @@
             },
             {
               "item": "/transcoding/mimetype-profile-mappings/transcode/attribute::client-flags",
-              "caption": "Client Flags",
+              "caption": "Client flags",
               "editable": true
             },
             {
@@ -1879,7 +2127,7 @@
             },
             {
               "item": "/transcoding/profiles/profile/attribute::client-flags",
-              "caption": "Client Flags",
+              "caption": "Client flags",
               "editable": true
             },
             {
@@ -2023,7 +2271,7 @@
             },
             {
               "item": "/clients/client/attribute::flags",
-              "caption": "Flags",
+              "caption": "flags",
               "editable": true
             },
             {

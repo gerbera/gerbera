@@ -42,8 +42,11 @@
 class Exiv2Handler : public MediaMetadataHandler {
 public:
     explicit Exiv2Handler(const std::shared_ptr<Context>& context);
+
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource) override;
 };
 
 #endif // HAVE_EXIV2

@@ -546,21 +546,49 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
         { ConfigVal::IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST, false },
         { ConfigVal::IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST, false },
         { ConfigVal::IMPORT_LIBOPTS_EXIF_CHARSET, false },
+        { ConfigVal::IMPORT_LIBOPTS_EXIF_ENABLED, false },
+        { ConfigVal::IMPORT_LIBOPTS_EXIF_COMMENT_LIST, false },
+        { ConfigVal::IMPORT_LIBOPTS_EXIF_COMMENT_ENABLED, false },
 #endif
 #ifdef HAVE_EXIV2
         { ConfigVal::IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST, false },
         { ConfigVal::IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST, false },
         { ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET, false },
+        { ConfigVal::IMPORT_LIBOPTS_EXIV2_ENABLED, false },
+        { ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_LIST, false },
+        { ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_ENABLED, false },
 #endif
 #ifdef HAVE_TAGLIB
         { ConfigVal::IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST, false },
         { ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST, false },
         { ConfigVal::IMPORT_LIBOPTS_ID3_CHARSET, false },
+        { ConfigVal::IMPORT_LIBOPTS_ID3_ENABLED, false },
+        { ConfigVal::IMPORT_LIBOPTS_ID3_COMMENT_LIST, false },
+        { ConfigVal::IMPORT_LIBOPTS_ID3_COMMENT_ENABLED, false },
 #endif
 #ifdef HAVE_FFMPEG
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST, false },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST, false },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET, false },
+        { ConfigVal::IMPORT_LIBOPTS_FFMPEG_ENABLED, false },
+        { ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_LIST, false },
+        { ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_ENABLED, false },
+#endif
+#ifdef HAVE_MATROSKA
+        { ConfigVal::IMPORT_LIBOPTS_MKV_AUXDATA_TAGS_LIST, false },
+        { ConfigVal::IMPORT_LIBOPTS_MKV_METADATA_TAGS_LIST, false },
+        { ConfigVal::IMPORT_LIBOPTS_MKV_CHARSET, false },
+        { ConfigVal::IMPORT_LIBOPTS_MKV_ENABLED, false },
+        { ConfigVal::IMPORT_LIBOPTS_MKV_COMMENT_ENABLED, false },
+        { ConfigVal::IMPORT_LIBOPTS_MKV_COMMENT_LIST, false },
+#endif
+#ifdef HAVE_WAVPACK
+        { ConfigVal::IMPORT_LIBOPTS_WAVPACK_AUXDATA_TAGS_LIST, false },
+        { ConfigVal::IMPORT_LIBOPTS_WAVPACK_METADATA_TAGS_LIST, false },
+        { ConfigVal::IMPORT_LIBOPTS_WAVPACK_CHARSET, false },
+        { ConfigVal::IMPORT_LIBOPTS_WAVPACK_ENABLED, false },
+        { ConfigVal::IMPORT_LIBOPTS_WAVPACK_COMMENT_ENABLED, false },
+        { ConfigVal::IMPORT_LIBOPTS_WAVPACK_COMMENT_LIST, false },
 #endif
         { ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE, true },
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP, false },
@@ -657,6 +685,14 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
 #endif
 #ifdef HAVE_FFMPEG
         co = definition->findConfigSetup(ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET);
+        co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
+#endif
+#ifdef HAVE_MATROSKA
+        co = definition->findConfigSetup(ConfigVal::IMPORT_LIBOPTS_MKV_CHARSET);
+        co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
+#endif
+#ifdef HAVE_WAVPACK
+        co = definition->findConfigSetup(ConfigVal::IMPORT_LIBOPTS_WAVPACK_CHARSET);
         co->setDefaultValue(DEFAULT_INTERNAL_CHARSET);
 #endif
     }

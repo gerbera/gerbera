@@ -48,6 +48,7 @@
 
 // forward declarations
 class CdsItem;
+class FfmpegObject;
 class IOHandler;
 struct AVFormatContext;
 class StringConverter;
@@ -56,14 +57,30 @@ class StringConverter;
 class FfmpegHandler : public MediaMetadataHandler {
 public:
     explicit FfmpegHandler(const std::shared_ptr<Context>& context);
+
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource) override;
     std::string getMimeType() const override;
 
 private:
-    void addFfmpegAuxdataFields(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const;
-    void addFfmpegMetadataFields(const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc, const AVFormatContext* pFormatCtx) const;
-    static void addFfmpegResourceFields(const std::shared_ptr<CdsItem>& item, const AVFormatContext* pFormatCtx);
+    /// \brief get all AUX values as configured
+    void addFfmpegAuxdataFields(
+        const std::shared_ptr<CdsItem>& item,
+        const FfmpegObject& ffmpegObject) const;
+    /// \brief get all metadata fields
+    void addFfmpegMetadataFields(
+        const std::shared_ptr<CdsItem>& item,
+        const FfmpegObject& ffmpegObject) const;
+    /// \brief get additional resource fields
+    static void addFfmpegResourceFields(
+        const std::shared_ptr<CdsItem>& item,
+        const FfmpegObject& ffmpegObject);
+    /// \brief fabricate comment from metadata
+    void addFfmpegComment(
+        const std::shared_ptr<CdsItem>& item,
+        const FfmpegObject& ffmpegObject) const;
 
     static constexpr std::array propertyMap {
         std::pair(MetadataFields::M_TITLE, "title"),

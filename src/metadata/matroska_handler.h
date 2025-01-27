@@ -39,6 +39,8 @@
 #include <matroska/KaxAttachments.h>
 #endif
 
+#include <map>
+
 // forward declarations
 class CdsItem;
 class MemIOHandler;
@@ -48,18 +50,53 @@ class MatroskaHandler : public MediaMetadataHandler {
 public:
     explicit MatroskaHandler(const std::shared_ptr<Context>& context);
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource) override;
 
 private:
     int activeFlag {};
+    std::map<std::string, std::string> mkvTags;
 
-    void parseMKV(const std::shared_ptr<CdsItem>& item, std::unique_ptr<MemIOHandler>* pIoHandler);
-    void parseLevel1Element(const std::shared_ptr<CdsItem>& item, libebml::IOCallback& ebmlFile, libebml::EbmlStream& ebmlStream, libebml::EbmlElement* elL1, std::unique_ptr<MemIOHandler>* pIoHandler);
-    void parseHead(const std::shared_ptr<CdsItem>& item, libebml::IOCallback& ebmlFile, libebml::EbmlStream& ebmlStream, libebml::EbmlMaster* info, std::unique_ptr<MemIOHandler>* pIoHandler);
-    void parseInfo(const std::shared_ptr<CdsItem>& item, libebml::EbmlStream& ebmlStream, libebml::EbmlMaster* info);
-    void parseAttachments(const std::shared_ptr<CdsItem>& item, libebml::EbmlStream& ebmlStream, libebml::EbmlMaster* attachments, std::unique_ptr<MemIOHandler>* pIoHandler);
+    /// \brief Parse Matroska file data
+    void parseMKV(
+        const std::shared_ptr<CdsItem>& item,
+        std::unique_ptr<MemIOHandler>* pIoHandler);
+    /// \brief Parse head of Matroska metadata
+    void parseHead(
+        const std::shared_ptr<CdsItem>& item,
+        libebml::IOCallback& ebmlFile,
+        libebml::EbmlStream& ebmlStream,
+        libebml::EbmlMaster* info,
+        std::unique_ptr<MemIOHandler>* pIoHandler);
+    /// \brief Parse info of Matroska metadata
+    void parseInfo(
+        const std::shared_ptr<CdsItem>& item,
+        libebml::EbmlStream& ebmlStream,
+        libebml::EbmlMaster* info);
+    /// \brief Parse tags of Matroska metadata
+    void parseTags(
+        const std::shared_ptr<CdsItem>& item,
+        libebml::EbmlStream& ebmlStream,
+        libebml::EbmlMaster* info);
+    /// \brief Parse level one of Matroska metadata (segment)
+    void parseSegmentContent(
+        const std::shared_ptr<CdsItem>& item,
+        libebml::IOCallback& ebmlFile,
+        libebml::EbmlStream& ebmlStream,
+        libebml::EbmlElement* elL1,
+        std::unique_ptr<MemIOHandler>* pIoHandler);
+    /// \brief Parse attachment of Matroska metadata
+    void parseAttachments(
+        const std::shared_ptr<CdsItem>& item,
+        libebml::EbmlStream& ebmlStream,
+        libebml::EbmlMaster* attachments,
+        std::unique_ptr<MemIOHandler>* pIoHandler);
     std::string getContentTypeFromByteVector(const libmatroska::KaxFileData& data) const;
-    static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& artMimetype);
+
+    static void addArtworkResource(
+        const std::shared_ptr<CdsItem>& item,
+        const std::string& artMimetype);
 };
 
 #endif

@@ -1120,6 +1120,7 @@
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="comment" minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="charset" type="xs:string"/>
@@ -1131,6 +1132,7 @@
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="comment" minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="charset" type="xs:string"/>
@@ -1142,21 +1144,8 @@
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="comment" minOccurs="0"/>
             </xs:sequence>
-            <xs:attribute name="enabled" type="boolean" default="yes"/>
-            <xs:attribute name="charset" type="xs:string"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="mkv">
-        <xs:complexType>
-            <xs:attribute name="enabled" type="boolean" default="yes"/>
-            <xs:attribute name="charset" type="xs:string"/>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="wavpack">
-        <xs:complexType>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>
@@ -1167,6 +1156,31 @@
             <xs:sequence>
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="comment" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:attribute name="charset" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="mkv">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="auxdata" minOccurs="0"/>
+                <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="comment" minOccurs="0"/>
+            </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:attribute name="charset" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="wavpack">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="auxdata" minOccurs="0"/>
+                <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="comment" minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="charset" type="xs:string"/>
@@ -1195,6 +1209,22 @@
         <xs:complexType>
             <xs:attribute name="tag" type="xs:string" use="required"/>
             <xs:attribute name="key" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="comment">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-comment" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="enabled" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="add-comment">
+        <xs:complexType>
+            <xs:attribute name="label" type="xs:string" use="required"/>
+            <xs:attribute name="tag" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 

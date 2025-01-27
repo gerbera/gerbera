@@ -297,7 +297,7 @@
             </virtual-layout>
         </scripting>
         <library-options multi-value-separator="; " legacy-value-separator="">
-            <libexif charset="UTF-8">
+            <libexif charset="UTF-8" enabled="yes">
                 <auxdata>
                     <add-data tag="EXIF_TAG_IMAGE_DESCRIPTION"/>
                     <add-data tag="EXIF_TAG_USER_COMMENT"/>
@@ -308,7 +308,7 @@
                 </auxdata>
                 <metadata/>
             </libexif>
-            <exiv2 charset="UTF-8">
+            <exiv2 charset="UTF-8" enabled="yes">
                 <auxdata>
                     <add-data tag="Exif.CanonTi.DaylightSavings"/>
                     <add-data tag="Exif.CanonTi.TimeZone"/>
@@ -323,9 +323,15 @@
                     <add-data tag="Xmp.dc.subject"/>
                     <add-data tag="Xmp.photoshop.Headline"/>
                 </auxdata>
-                <metadata/>
+                <metadata></metadata>
+                <comment enabled="yes">
+                    <add-comment label="Flash setting" tag="Exif.Photo.Flash" />
+                    <add-comment label="Focal length" tag="Exif.Photo.FocalLength" />
+                    <add-comment label="Focal length 35 mm equivalent" tag="Exif.Photo.FocalLengthIn35mmFilm" />
+                    <add-comment label="Taken with" tag="Exif.Image.Model" />
+                </comment>
             </exiv2>
-            <id3 charset="UTF-8">
+            <id3 charset="UTF-8" enabled="yes">
                 <auxdata>
                     <add-data tag="DISCNUMBER"/>
                     <add-data tag="TPE2"/>
@@ -344,12 +350,22 @@
                     <add-data tag="PERFORMER" key="upnp:artist@role[Performer]"/>
                 </metadata>
             </id3>
-            <ffmpeg charset="UTF-8">
+            <ffmpeg charset="UTF-8" enabled="yes">
                 <auxdata/>
                 <metadata>
                     <add-data tag="performer" key="upnp:artist@role[Performer]"/>
                 </metadata>
             </ffmpeg>
+            <mkv charset="UTF-8" enabled="yes">
+                <auxdata></auxdata>
+                <metadata></metadata>
+                <comment enabled="no"></comment>
+            </mkv>
+            <wavpack charset="UTF-8" enabled="yes">
+                <auxdata></auxdata>
+                <metadata></metadata>
+                <comment enabled="no"></comment>
+            </wavpack>
         </library-options>
         <system-directories>
             <add-path name="/bin"/>

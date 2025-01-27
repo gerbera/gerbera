@@ -61,19 +61,39 @@ public:
     /// \param obj Object to stream
     /// \param resource the resource
     /// \return iohandler to stream to client
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource) override;
 
 private:
     std::string entrySeparator;
     std::string legacyEntrySeparator;
 
-    void addField(MetadataFields field, const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
-    void addSpecialFields(const TagLib::File& file, const TagLib::Tag* tag, const std::shared_ptr<CdsItem>& item) const;
+    void addField(
+        MetadataFields field,
+        const TagLib::File& file,
+        const TagLib::Tag* tag,
+        const std::shared_ptr<CdsItem>& item) const;
+    void addSpecialFields(
+        const TagLib::File& file,
+        const TagLib::Tag* tag,
+        const std::shared_ptr<CdsItem>& item) const;
 
     static std::unique_ptr<TagLib::File> getOggFile(TagLib::IOStream& ioStream);
 
-    void populateGenericTags(const std::shared_ptr<CdsItem>& item, const TagLib::File& file) const;
-    void populateAuxTags(const std::shared_ptr<CdsItem>& item, const TagLib::PropertyMap& propertyMap, const std::shared_ptr<StringConverter>& sc) const;
+    void populateGenericTags(
+        const std::shared_ptr<CdsItem>& item,
+        const TagLib::File& file,
+        const TagLib::PropertyMap& propertyMap,
+        const std::shared_ptr<StringConverter>& sc) const;
+    void populateAuxTags(
+        const std::shared_ptr<CdsItem>& item,
+        const TagLib::PropertyMap& propertyMap,
+        const std::shared_ptr<StringConverter>& sc) const;
+    void makeComment(
+        const std::shared_ptr<CdsItem>& item,
+        const TagLib::PropertyMap& propertyMap,
+        const std::shared_ptr<StringConverter>& sc) const;
     static bool isValidArtworkContentType(std::string_view artMimetype);
     std::string getContentTypeFromByteVector(const TagLib::ByteVector& data) const;
     static void addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& artMimetype);
@@ -85,6 +105,9 @@ private:
     void extractWavPack(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const;
     void extractMP4(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const;
     void extractAiff(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const;
+
+    template <class Media>
+    void setBitsPerSample(const std::shared_ptr<CdsItem>& item, Media& media) const;
 };
 
 #endif

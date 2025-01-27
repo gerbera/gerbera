@@ -217,7 +217,7 @@ ConverterManager::ConverterManager(const std::shared_ptr<Config>& cm)
              ConfigVal::IMPORT_LIBOPTS_MKV_CHARSET,
 #endif
 #ifdef HAVE_WAVPACK
-             ConfigVal::IMPORT_LIBOPTS_WVC_CHARSET,
+             ConfigVal::IMPORT_LIBOPTS_WAVPACK_CHARSET,
 #endif
 #ifdef HAVE_JS
              ConfigVal::IMPORT_SCRIPTING_CHARSET,
