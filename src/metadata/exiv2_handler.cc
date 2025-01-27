@@ -49,11 +49,97 @@
 #endif
 
 Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
-    : MediaMetadataHandler(context, ConfigVal::IMPORT_LIBOPTS_EXIV2_ENABLED, ConfigVal::IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST, ConfigVal::IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST)
+    : MediaMetadataHandler(context,
+          ConfigVal::IMPORT_LIBOPTS_EXIV2_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST,
+          ConfigVal::IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
+          ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_LIST)
 {
     // silence exiv2 messages without debug
     Exiv2::LogMsg::setHandler([](auto, auto s) { log_debug("Exiv2: {}", s); });
 }
+
+/// \brief Wrapper class to interface with EXIV2
+class Exiv2Object {
+public:
+    std::string location;
+    std::shared_ptr<StringConverter> sc;
+#if EXIV2_TEST_VERSION(0, 28, 0)
+    Exiv2::Image::UniquePtr image;
+#else
+    Exiv2::Image::AutoPtr image;
+#endif
+    Exiv2::ExifData* exifData;
+    Exiv2::XmpData* xmpData;
+    std::string comment;
+
+    Exiv2Object(const std::shared_ptr<ConverterManager>& converterManager, const std::shared_ptr<CdsItem>& item)
+        : location(item->getLocation())
+        , sc(converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET, location))
+        , image(Exiv2::ImageFactory::open(location))
+    {
+#if EXIV2_TEST_VERSION(0, 28, 0)
+        if (!image) { // is unique_ptr now
+            log_warning("Exiv2::ImageFactory could not open {}", location);
+            return;
+        }
+#else
+        if (image.get() == nullptr) { // used to be auto_ptr
+            log_warning("Exiv2::ImageFactory could not open {}", location);
+            return;
+        }
+#endif
+        image->readMetadata();
+        exifData = &(image->exifData());
+        xmpData = &(image->xmpData());
+        // first retrieve jpeg comment
+        comment = image->comment();
+    }
+
+    /// \brief get date/time
+    std::string getDate() const
+    {
+        std::string value = getKey("Exif.Photo.DateTimeOriginal");
+        if (!value.empty()) {
+            // convert date to ISO 8601 as required in the UPnP spec
+            // from YYYY:MM:DD to YYYY-MM-DD
+            if (value.length() >= 19) {
+                value = fmt::format("{}-{}-{}T{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2), value.substr(11, 8));
+            } else if (value.length() >= 11) {
+                value = fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2));
+            }
+            log_debug("{} date: {}", location, value);
+        }
+        return value;
+    }
+
+    /// \brief get key value from image
+    std::string getKey(const std::string& key) const
+    {
+        log_debug("key: {} ", key);
+        std::string keyValue;
+        if (startswith(key, "Exif")) {
+            auto md = exifData->findKey(Exiv2::ExifKey(key));
+            if (md != exifData->end())
+                keyValue = md->toString();
+        } else if (startswith(key, "Xmp")) {
+            auto xmpMd = xmpData->findKey(Exiv2::XmpKey(key));
+            if (xmpMd != xmpData->end())
+                keyValue = xmpMd->toString();
+        } else {
+            log_warning("Invalid key {}", key);
+        }
+        if (!keyValue.empty()) {
+            auto [value, err] = sc->convert(keyValue);
+            if (!err.empty()) {
+                log_warning("{} {}: {}", key, location, err);
+            }
+            return trimString(value);
+        }
+        return "";
+    }
+};
 
 void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
@@ -62,193 +148,84 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         return;
 
     try {
-        const auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET, item->getLocation());
-
-        const auto image = Exiv2::ImageFactory::open(item->getLocation());
-#if EXIV2_TEST_VERSION(0, 28, 0)
-        if (!image) { // is unique_ptr now
-            log_warning("Exiv2::ImageFactory could not open {}", item->getLocation().c_str());
-            return;
-        }
-#else
-        if (image.get() == nullptr) { // used to be auto_ptr
-            log_warning("Exiv2::ImageFactory could not open {}", item->getLocation().c_str());
-            return;
-        }
-#endif
-        image->readMetadata();
-        Exiv2::ExifData& exifData = image->exifData();
-        Exiv2::XmpData& xmpData = image->xmpData();
-
-        // first retrieve jpeg comment
-        std::string comment = image->comment();
-
-        if (exifData.empty()) {
+        Exiv2Object exivObj(converterManager, item);
+        if (exivObj.exifData->empty()) {
             // no exiv2 record found in image
             return;
         }
 
-        // get date/time
-        auto md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.DateTimeOriginal"));
-        if (md != exifData.end()) {
-            auto [value, err] = sc->convert(md->toString());
-            if (!err.empty()) {
-                log_warning("{}: {}", item->getLocation().string(), err);
-            }
-
-            // convert date to ISO 8601 as required in the UPnP spec
-            // from YYYY:MM:DD to YYYY-MM-DD
-            if (value.length() >= 19) {
-                value = fmt::format("{}-{}-{}T{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2), value.substr(11, 8));
-                log_debug("date: {}", value);
-                item->addMetaData(MetadataFields::M_DATE, value);
-            } else if (value.length() >= 11) {
-                value = fmt::format("{}-{}-{}", value.substr(0, 4), value.substr(5, 2), value.substr(8, 2));
-                log_debug("date: {}", value);
-                item->addMetaData(MetadataFields::M_DATE, value);
-            }
+        auto date = exivObj.getDate();
+        if (!date.empty()) {
+            item->addMetaData(MetadataFields::M_DATE, date);
         }
-        auto orientation = exifData.findKey(Exiv2::ExifKey("Exif.Image.Orientation"));
-        if (orientation != exifData.end()) {
-            auto [value, err] = sc->convert(orientation->toString());
-            if (!err.empty()) {
-                log_warning("{}: {}", item->getLocation().string(), err);
-            }
-            item->getResource(ContentHandler::DEFAULT)->addAttribute(ResourceAttribute::ORIENTATION, value);
+
+        auto orientation = exivObj.getKey("Exif.Image.Orientation");
+        if (!orientation.empty()) {
+            item->getResource(ContentHandler::DEFAULT)->addAttribute(ResourceAttribute::ORIENTATION, orientation);
         }
 
         // if there was no jpeg comment, look if there is an exiv2 comment
         // should we override the normal jpeg comment, if there is an exiv2 one?
-        if (comment.empty()) {
-            md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.UserComment"));
-            if (md != exifData.end())
-                comment = md->toString();
-            log_debug("Comment: {}", comment);
+        if (exivObj.comment.empty()) {
+            exivObj.comment = exivObj.getKey("Exif.Photo.UserComment");
         }
 
         // if the image has no comment, compose something nice out of the exiv information
-        // Not convinced that this is useful - comment it out for now ...
-#if 0
-        if (comment.empty()) {
-            std::string cam_model;
-            std::string flash;
-            std::string focal_length;
-
-            md = exifData.findKey(Exiv2::ExifKey("Exif.Image.Model"));
-            if (md !=  exifData.end())
-                cam_model = (char *)md->toString().c_str();
-
-            md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.Flash"));
-            if (md !=  exifData.end())
-                flash = (char *)md->toString().c_str();
-
-            md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.FocalLength"));
-            if (md !=  exifData.end()) {
-                focal_length = (char *)md->toString().c_str();
-                md = exifData.findKey(Exiv2::ExifKey("Exif.Photo.FocalLengthIn35mmFilm"));
-                if (md !=  exifData.end()) {
-                    focal_length = focal_length + " (35 mm equivalent: " + (char *)md->toString().c_str() + ")";
+        if (exivObj.comment.empty() && isCommentEnabled) {
+            std::vector<std::string> snippets;
+            for (auto&& [label, tag] : commentMap) {
+                std::string value = exivObj.getKey(tag);
+                if (!value.empty()) {
+                    snippets.push_back(fmt::format("{}: {}", label, value));
                 }
             }
-
-            if (!cam_model.empty())
-                comment = "Taken with " + cam_model;
-
-            if (!flash.empty()) {
-                if (!comment.empty())
-                    comment = comment + ", Flash setting:" + flash;
-                else
-                    comment = "Flash setting: " + flash;
-            }
-
-            if (!focal_length.empty()) {
-                if (!comment.empty())
-                    comment = comment + ", Focal length: " + focal_length;
-                else
-                    comment = "Focal length: " + focal_length;
-            }
-            log_debug("Fabricated Comment: {}", comment.c_str());
+            exivObj.comment = fmt::format("{}", fmt::join(snippets, ", "));
+            log_debug("Fabricated Comment: {}", exivObj.comment);
         }
-#endif
 
-        if (!comment.empty()) {
-            auto [value, err] = sc->convert(comment);
-            if (!err.empty()) {
-                log_warning("{}: {}", item->getLocation().string(), err);
-            }
-            item->addMetaData(MetadataFields::M_DESCRIPTION, value);
+        if (!exivObj.comment.empty()) {
+            item->addMetaData(MetadataFields::M_DESCRIPTION, exivObj.comment);
         }
 
         // if there are any metadata tags that the user wants - add them
         if (!metaTags.empty()) {
             for (auto&& [metatag, metakey] : metaTags) {
-                std::string metaval;
-                log_debug("metatag: {} ", metatag.c_str());
-                if (startswith(metatag, "Exif")) {
-                    md = exifData.findKey(Exiv2::ExifKey(metatag));
-                    if (md != exifData.end())
-                        metaval = trimString(md->toString());
-                } else if (startswith(metatag, "Xmp")) {
-                    auto xmpMd = xmpData.findKey(Exiv2::XmpKey(metatag));
-                    if (xmpMd != xmpData.end())
-                        metaval = trimString(xmpMd->toString());
-                } else {
-                    log_warning("Invalid meta Tag {}", metatag.c_str());
-                    continue;
-                }
+                log_debug("metatag: {} ", metatag);
+                std::string metaval = exivObj.getKey(metatag);
                 if (!metaval.empty()) {
-                    auto [value, err] = sc->convert(metaval);
-                    if (!err.empty()) {
-                        log_warning("{}: {}", item->getLocation().string(), err);
-                    }
-                    item->addMetaData(metakey, value);
-                    log_debug("Adding meta tag '{}' as '{}' with value '{}'", metatag, metakey, value);
+                    item->addMetaData(metakey, metaval);
+                    log_debug("Adding meta tag '{}' as '{}' with value '{}'", metatag, metakey, metaval);
                 }
             }
         } else {
-            log_debug("No aux data requested");
+            log_debug("No metadata requested");
         }
 
         // if there are any auxilary tags that the user wants - add them
         if (!auxTags.empty()) {
             for (auto&& auxtag : auxTags) {
-                std::string auxval;
-                log_debug("auxtag: {} ", auxtag.c_str());
-                if (startswith(auxtag, "Exif")) {
-                    md = exifData.findKey(Exiv2::ExifKey(auxtag));
-                    if (md != exifData.end())
-                        auxval = trimString(md->toString());
-                } else if (startswith(auxtag, "Xmp")) {
-                    auto xmpMd = xmpData.findKey(Exiv2::XmpKey(auxtag));
-                    if (xmpMd != xmpData.end())
-                        auxval = trimString(xmpMd->toString());
-                } else {
-                    log_warning("Invalid Aux Tag {}", auxtag.c_str());
-                    continue;
-                }
+                log_debug("auxtag: {} ", auxtag);
+                std::string auxval = exivObj.getKey(auxtag);
                 if (!auxval.empty()) {
-                    auto [value, err] = sc->convert(auxval);
-                    if (!err.empty()) {
-                        log_warning("{}: {}", item->getLocation().string(), err);
-                    }
-                    item->setAuxData(auxtag, value);
-                    log_debug("Adding aux tag: {} with value {}", auxtag.c_str(), value);
+                    item->setAuxData(auxtag, auxval);
+                    log_debug("Adding aux tag: {} with value {}", auxtag, auxval);
                 }
             }
-
         } else {
             log_debug("No aux data requested");
         }
     } catch (const Exiv2::AnyError& ex) {
-        log_warning("Caught Exiv2 exception processing {}: '{}'", item->getLocation().c_str(), ex.what());
+        log_warning("Caught Exiv2 exception processing {}: '{}'", item->getLocation().string(), ex.what());
     } catch (const std::runtime_error& e) {
-        log_warning("Caught exception processing {}: '{}'", item->getLocation().c_str(), e.what());
+        log_warning("Caught exception processing {}: '{}'", item->getLocation().string(), e.what());
     }
 
     Exiv2::XmpProperties::unregisterNs();
 }
 
-std::unique_ptr<IOHandler> Exiv2Handler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
+std::unique_ptr<IOHandler> Exiv2Handler::serveContent(
+    const std::shared_ptr<CdsObject>& obj,
+    const std::shared_ptr<CdsResource>& resource)
 {
     return nullptr;
 }

@@ -42,7 +42,7 @@ static const auto fileFormats = std::map<int, std::string_view> {
     { WP_FORMAT_DSF, "DSD" },
 };
 
-static const auto metaTags = std::map<std::string_view, MetadataFields> {
+static const auto propertyMap = std::map<std::string_view, MetadataFields> {
     { "Title", MetadataFields::M_TITLE },
     { "Artist", MetadataFields::M_ARTIST },
     { "AlbumArtist", MetadataFields::M_ALBUMARTIST },
@@ -59,7 +59,13 @@ static const auto metaTags = std::map<std::string_view, MetadataFields> {
 #define ALBUMART_OPTION "albumArtTag"
 
 WavPackHandler::WavPackHandler(const std::shared_ptr<Context>& context)
-    : MediaMetadataHandler(context, ConfigVal::IMPORT_LIBOPTS_WVC_ENABLED)
+    : MediaMetadataHandler(
+          context,
+          ConfigVal::IMPORT_LIBOPTS_WAVPACK_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_WAVPACK_METADATA_TAGS_LIST,
+          ConfigVal::IMPORT_LIBOPTS_WAVPACK_AUXDATA_TAGS_LIST,
+          ConfigVal::IMPORT_LIBOPTS_WAVPACK_COMMENT_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_WAVPACK_COMMENT_LIST)
 {
 }
 
@@ -220,47 +226,134 @@ void WavPackHandler::getAttachments(WavpackContext* context, const std::shared_p
     }
 }
 
-void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item)
-{
-    auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_WVC_CHARSET, item->getLocation());
-    auto tagCount = WavpackGetNumTagItems(context);
-    char tag[MAX_WV_TEXT_SIZE];
-    char value[MAX_WV_TEXT_SIZE];
-    for (int index = 0; index < tagCount; index++) {
-        auto size = WavpackGetTagItemIndexed(context, index, tag, MAX_WV_TEXT_SIZE);
+/// \brief Wrapper class to interface with libwavpack
+class WavPackObject {
+private:
+    char value[MAX_WV_TEXT_SIZE] { '\0' };
+    std::string location;
+    std::shared_ptr<StringConverter> sc;
+    int size { 0 };
+
+public:
+    char tag[MAX_WV_TEXT_SIZE] { '\0' };
+
+    WavPackObject(WavpackContext* context, int index, const std::shared_ptr<StringConverter> sc, const std::shared_ptr<CdsItem>& item)
+        : location(item->getLocation())
+        , sc(sc)
+    {
+        size = WavpackGetTagItemIndexed(context, index, tag, MAX_WV_TEXT_SIZE);
+
         if (size > MAX_WV_TEXT_SIZE) {
-            log_warning("file {}: wavpack tag {} truncated (full size {})", item->getLocation().c_str(), tag, size);
+            log_warning("file {}: wavpack tag {} truncated (full size {})", location, tag, size);
+            size = 0;
         } else {
             size = WavpackGetTagItem(context, tag, value, MAX_WV_TEXT_SIZE);
             if (size > MAX_WV_TEXT_SIZE) {
-                log_warning("file {}: wavpack tag {} value {} truncated (full size {})", item->getLocation().c_str(), tag, value, size);
+                log_warning("file {}: wavpack tag {} value {} truncated (full size {})", location, tag, value, size);
                 size = MAX_WV_IMAGE_SIZE;
             }
-            auto meta = metaTags.find(tag);
-            if (meta == metaTags.end()) {
-                if (std::string_view(tag) == "Year") {
-                    auto [dateValue, err] = sc->convert(value);
-                    if (!err.empty()) {
-                        log_warning("{}: {}", item->getLocation().string(), err);
-                    }
-                    if (dateValue.length() == 4 && std::all_of(dateValue.begin(), dateValue.end(), ::isdigit) && std::stoi(dateValue) > 0) {
-                        log_debug("Identified metadata '{}': {}", tag, value);
+        }
+    }
+
+    /// \brief check if libexif information is available
+    operator bool() const
+    {
+        return size != 0;
+    }
+
+    /// \brief get date/time
+    std::string getDate()
+    {
+        auto [dateValue, err] = sc->convert(value);
+        if (!err.empty()) {
+            log_warning("{}: {}", location, err);
+        }
+        if (dateValue.length() == 4 && std::all_of(dateValue.begin(), dateValue.end(), ::isdigit) && std::stoi(dateValue) > 0) {
+            log_debug("Identified metadata '{}': {}", tag, value);
+            return dateValue;
+        }
+        return "";
+    }
+
+    /// \brief get key value from image
+    std::string getValue()
+    {
+        auto [val, err] = sc->convert(value);
+        if (!err.empty()) {
+            log_warning("{}: {}", location, err);
+            return val;
+        }
+        return "";
+    }
+};
+
+void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item)
+{
+    auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_WAVPACK_CHARSET, item->getLocation());
+    auto tagCount = WavpackGetNumTagItems(context);
+    std::vector<std::string> snippets;
+    for (int index = 0; index < tagCount; index++) {
+        WavPackObject wavpackObject(context, index, sc, item);
+        if (wavpackObject) {
+            auto property = propertyMap.find(wavpackObject.tag);
+            if (property == propertyMap.end()) {
+                if (std::string_view(wavpackObject.tag) == "Year") {
+                    auto dateValue = wavpackObject.getDate();
+                    if (!dateValue.empty()) {
+                        log_debug("Identified metadata '{}': {}", wavpackObject.tag, dateValue);
                         item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-01-01", dateValue));
                         item->addMetaData(MetadataFields::M_UPNP_DATE, fmt::format("{}-01-01", dateValue));
                     }
                 } else {
-                    log_warning("file {}: wavpack tag {} unknown", item->getLocation().c_str(), tag);
+                    log_warning("file {}: wavpack tag {} unknown", item->getLocation().string(), wavpackObject.tag);
                 }
             } else {
-                auto [val, err] = sc->convert(value);
-                if (!err.empty()) {
-                    log_warning("{}: {}", item->getLocation().string(), err);
+                auto val = wavpackObject.getValue();
+                if (!val.empty()) {
+                    log_debug("Identified metadata '{}': {}", wavpackObject.tag, val);
+                    item->removeMetaData(propertyMap.at(wavpackObject.tag)); // wavpack tags overwrite existing values
+                    item->addMetaData(propertyMap.at(wavpackObject.tag), val);
                 }
-                log_debug("Identified metadata '{}': {}", tag, val);
-                item->removeMetaData(metaTags.at(tag)); // wavpack tags overwrite existing values
-                item->addMetaData(metaTags.at(tag), val);
+            }
+            auto meta = metaTags.find(wavpackObject.tag);
+            if (meta != metaTags.end()) {
+                if (std::string_view(wavpackObject.tag) == "Year") {
+                    auto dateValue = wavpackObject.getDate();
+                    if (!dateValue.empty()) {
+                        log_debug("Identified metadata '{}': {}", wavpackObject.tag, dateValue);
+                        item->addMetaData(meta->first, fmt::format("{}-01-01", dateValue));
+                    }
+                } else {
+                    auto val = wavpackObject.getValue();
+                    if (!val.empty()) {
+                        log_debug("Identified metadata '{}': {}", wavpackObject.tag, val);
+                        item->removeMetaData(metaTags.at(wavpackObject.tag)); // wavpack tags overwrite existing values
+                        item->addMetaData(metaTags.at(wavpackObject.tag), val);
+                    }
+                }
+            }
+            auto aux = std::find(auxTags.begin(), auxTags.end(), wavpackObject.tag);
+            if (aux != auxTags.end()) {
+                auto val = wavpackObject.getValue();
+                if (!val.empty()) {
+                    log_debug("Identified auxdata '{}': {}", wavpackObject.tag, val);
+                    item->setAuxData(wavpackObject.tag, val);
+                }
+            }
+            auto comment = std::find_if(commentMap.begin(), commentMap.end(), [&](auto& c) { return c.second == wavpackObject.tag; });
+            if (comment != commentMap.end()) {
+                auto val = wavpackObject.getValue();
+                if (!val.empty()) {
+                    log_debug("Added comment {}: {}", comment->first, val);
+                    snippets.push_back(fmt::format("{}: {}", comment->first, val));
+                }
             }
         }
+    }
+    if (!snippets.empty() && item->getMetaData(MetadataFields::M_DESCRIPTION).empty() && isCommentEnabled) {
+        auto comment = fmt::format("{}", fmt::join(snippets, ", "));
+        log_debug("Fabricated Comment: {}", comment);
+        item->addMetaData(MetadataFields::M_DESCRIPTION, comment);
     }
 }
 

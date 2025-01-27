@@ -1634,12 +1634,36 @@ Metadata can be read by the import javascript as ``meta`` to gain more control o
 .. code-block:: xml
 
     <add-data tag="tag3" key="upnp:Key"/>
-    ...
 
 * Optional
 
 If the library was able to extract the data according to the given keyword, it will be added to metadata.
 The attribute ``key`` sets the UPnP meta property and is only accepted inside a ``metadata`` element.
+
+``comment``
+-----------
+
+.. code-block:: xml
+
+    <comment enabled="yes"> ... </comment>
+
+* Optional
+
+Fabricate a comment (description) from metadata. The comment will only be created if there is no description set and in the mechanism is ``enabled``.
+
+**Child tags:**
+
+``add-comment``
+^^^^^^^^^^^^^^^
+
+.. code-block:: xml
+
+    <add-comment label="My favourite Detail" tag="MEDIA_TAG"/>
+
+* Optional
+
+If the library was able to extract the data according to the given tag, it will be added to the comment.
+The attribute ``tag`` sets the media property and the ``label`` contains the text to add the the comment.
 
 
 **Library sections:**

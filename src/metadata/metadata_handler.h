@@ -81,13 +81,28 @@ public:
 class MediaMetadataHandler : public MetadataHandler {
 protected:
     bool isEnabled {};
+    bool isCommentEnabled {};
     std::map<std::string, std::string> metaTags;
     std::vector<std::string> auxTags;
+    std::map<std::string, std::string> commentMap;
     std::shared_ptr<ConverterManager> converterManager;
 
 public:
-    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, ConfigVal enableOption);
-    explicit MediaMetadataHandler(const std::shared_ptr<Context>& context, ConfigVal enableOption, ConfigVal metaOption, ConfigVal auxOption);
+    explicit MediaMetadataHandler(
+        const std::shared_ptr<Context>& context,
+        ConfigVal enableOption);
+    explicit MediaMetadataHandler(
+        const std::shared_ptr<Context>& context,
+        ConfigVal enableOption,
+        ConfigVal metaOption,
+        ConfigVal auxOption);
+    explicit MediaMetadataHandler(
+        const std::shared_ptr<Context>& context,
+        ConfigVal enableOption,
+        ConfigVal metaOption,
+        ConfigVal auxOption,
+        ConfigVal enableCommentOption,
+        ConfigVal commentOption);
     virtual ~MediaMetadataHandler() = default;
 };
 

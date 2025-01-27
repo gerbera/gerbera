@@ -41,8 +41,9 @@
 #include <libexif/exif-data.h>
 #include <vector>
 
-// forward declaration
+// forward declarations
 class CdsItem;
+class LibExifObject;
 class StringConverter;
 
 /// \brief This class is responsible for reading exif header metadata via the
@@ -51,15 +52,23 @@ class LibExifHandler : public MediaMetadataHandler {
 private:
     ExifLog* log = nullptr;
 
-    void process_ifd(const ExifContent* content, const std::shared_ptr<CdsItem>& item, const std::shared_ptr<StringConverter>& sc,
-        std::string& imageX, std::string& imageY,
-        const std::vector<std::string>& auxtags, const std::map<std::string, std::string>& metatags);
+    /// \brief read exif content values
+    void process_ifd(
+        const ExifContent* content,
+        const std::shared_ptr<CdsItem>& item,
+        LibExifObject& exifObject,
+        std::vector<std::string>& snippets,
+        std::string& imageX,
+        std::string& imageY);
 
 public:
     explicit LibExifHandler(const std::shared_ptr<Context>& context);
     ~LibExifHandler();
+
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource) override;
 };
 
 #endif

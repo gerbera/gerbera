@@ -59,14 +59,14 @@ sudo make install
 | libiconv            |             |             |                      | Required      | Charset conversion         |          |
 | sqlite3             | 3.7.0       | 3.35.5      | 3.36.0               | Required      | Database storage           |          |
 | zlib                |             |             |                      | Required      | Data compression           |          |
-| [fmtlib]            | 7.1.3       | 9.1.0       | 11.0.2               | Required      | Fast string formatting     |          |
-| [spdlog]            | 1.8.1       | 1.11.0      | 1.15.0               | Required      | Runtime logging            |          |
+| [fmtlib]            | 7.1.3       | 9.1.0       | 11.1.3               | Required      | Fast string formatting     |          |
+| [spdlog]            | 1.8.1       | 1.11.0      | 1.15.1               | Required      | Runtime logging            |          |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0                | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |                      | Optional      | Alternate database storage | Disabled |
 | curl                |             |             |                      | Optional      | Enables web services       | Enabled  |
 | [taglib]            | 1.12        | 1.12        | 2.0.2                | Optional      | Audio tag support          | Enabled  |
 | libmagic            |             |             |                      | Optional      | File type detection        | Enabled  |
-| [wavpack]           | 5.1.0       | 5.4.0       | 5.7.0                | Optional      | WavPack metadata support   | Disabled |
+| [wavpack]           | 5.1.0       | 5.4.0       | 5.8.1                | Optional      | WavPack metadata support   | Disabled |
 | [libmatroska]       |             | 1.6.3       | 1.7.1                | Optional      | MKV metadata               | Enabled  |
 | [libebml]           |             | 1.4.2       | 1.4.5                | Optional      | requird by [libmatroska]   | Enabled  |
 | ffmpeg/libav        |             |             | 7.1                  | Optional      | File metadata              | Disabled |

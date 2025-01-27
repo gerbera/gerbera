@@ -4,18 +4,25 @@
 
 - Add Options to Scripts
 - Autoscan: Add missing properties to web UI and database
+- Build correct Autoscan Type
+- Build with fmt 11.1.3
+- Cleanup tree and autoscan commands
+- Downgrade docker builder as well
 - Fix album art in builtin layout
 - Fix cors host without ipv6 address
 - Fix UpnpMap logic
 - Focal: Freeze more aws-sdk versions
 - Focal: freeze ruby aws-sdk versions used for package upload
 - Force Reread of unknown files
+- Generate Comment from Metadata During Scan
 - Improve logging of string conversion
 - JS: Fix config autoscan object in scripts
 - Refactor static code from ConfigDefinition
 - Remap metadata fields when parsing virtual-directories keys
 - Set more metadata in builtin layout
 - Update Library Versions
+- Update wavpack
+- work around build issue
 
 ### v2.4.1
 
