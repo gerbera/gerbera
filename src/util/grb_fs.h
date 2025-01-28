@@ -60,6 +60,10 @@ public:
 };
 
 std::string rtrimPath(std::string& s, unsigned char sep = '/');
+/// \brief Checks if the given path is a subdirectory of the other
+/// \param path directory to check
+/// \param parent potential parent directory
+/// \return true if path is subdirectory of parent
 bool isSubDir(const fs::path& path, const fs::path& parent);
 
 /// \brief Checks if the given file is a regular file (imitate same behaviour as std::filesystem::is_regular_file)

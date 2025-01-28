@@ -1730,11 +1730,11 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
         std::string autoscanPersistent = getCol(row, BrowseCol::AsPersistent);
         if (!autoscanPersistent.empty()) {
             if (remapBool(autoscanPersistent))
-                cont->setAutoscanType(OBJECT_AUTOSCAN_CFG);
+                cont->setAutoscanType(AutoscanType::Config);
             else
-                cont->setAutoscanType(OBJECT_AUTOSCAN_UI);
+                cont->setAutoscanType(AutoscanType::Ui);
         } else
-            cont->setAutoscanType(OBJECT_AUTOSCAN_NONE);
+            cont->setAutoscanType(AutoscanType::None);
         matchedType = true;
     } else if (obj->isItem()) {
         if (!resourceZeroOk)
