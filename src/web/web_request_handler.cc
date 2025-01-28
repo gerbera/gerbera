@@ -34,6 +34,7 @@
 
 #include "web_request_handler.h" // API
 
+#include "cds/cds_enums.h"
 #include "common.h"
 #include "config/config.h"
 #include "config/config_val.h"
@@ -254,12 +255,12 @@ void WebRequestHandler::appendTask(const std::shared_ptr<GenericTask>& task, pug
     taskEl.append_attribute("text") = task->getDescription().c_str();
 }
 
-std::string_view WebRequestHandler::mapAutoscanType(int type)
+std::string_view WebRequestHandler::mapAutoscanType(AutoscanType type)
 {
     switch (type) {
-    case 1:
+    case AutoscanType::Ui:
         return "ui";
-    case 2:
+    case AutoscanType::Config:
         return "persistent";
     default:
         return "none";

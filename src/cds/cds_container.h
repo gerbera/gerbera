@@ -43,7 +43,7 @@ protected:
     int childCount { -1 };
 
     /// \brief whether this container is an autoscan start point.
-    int autoscanType { OBJECT_AUTOSCAN_NONE };
+    AutoscanType autoscanType { AutoscanType::None };
 
 public:
     /// \brief Constructor, initializes default values for the flags and sets the object type.
@@ -75,10 +75,10 @@ public:
     int getChildCount() const { return childCount; }
 
     /// \brief returns whether this container is an autoscan start point.
-    int getAutoscanType() const { return autoscanType; }
+    AutoscanType getAutoscanType() const { return autoscanType; }
 
     /// \brief sets whether this container is an autoscan start point.
-    void setAutoscanType(int type) { autoscanType = type; }
+    void setAutoscanType(AutoscanType type) { autoscanType = type; }
 
     /// \brief Copies all object properties to another object.
     /// \param obj target object (clone)

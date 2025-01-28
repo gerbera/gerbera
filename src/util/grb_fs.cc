@@ -50,10 +50,11 @@ std::string rtrimPath(std::string& s, unsigned char sep)
 
 bool isSubDir(const fs::path& path, const fs::path& parent)
 {
-    auto pathStr = fmt::format("{}/", path.string());
-    auto chkStr = fmt::format("{}/", parent.string());
+    auto pathStr = path.string();
+    auto chkStr = parent.string();
     rtrimPath(pathStr);
     rtrimPath(chkStr);
+    chkStr += "/";
     return startswith(pathStr, chkStr);
 }
 

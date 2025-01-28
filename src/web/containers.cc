@@ -72,7 +72,7 @@ void Web::Containers::process()
         ce.append_attribute("id") = cont->getID();
         int childCount = cont->getChildCount();
         ce.append_attribute("child_count") = childCount;
-        int autoscanType = cont->getAutoscanType();
+        auto autoscanType = cont->getAutoscanType();
         ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
 
         auto url = xmlBuilder->renderContainerImageURL(cont);
@@ -81,7 +81,7 @@ void Web::Containers::process()
         }
 
         std::string autoscanMode = "none";
-        if (autoscanType > 0) {
+        if (autoscanType != AutoscanType::None) {
             autoscanMode = AUTOSCAN_TIMED;
 #ifdef HAVE_INOTIFY
             if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {

@@ -150,9 +150,9 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
 
     int containerId = container->getID();
     auto parentDir = database->getAutoscanDirectory(containerId);
-    int autoscanType = 0;
+    auto autoscanType = AutoscanType::None;
     if (parentDir) {
-        autoscanType = parentDir->persistent() ? 2 : 1;
+        autoscanType = parentDir->persistent() ? AutoscanType::Config : AutoscanType::Ui;
         autoscanMode = AUTOSCAN_TIMED;
     }
 
@@ -160,7 +160,7 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
     if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
         // check for inotify mode
         int startpointId = INVALID_OBJECT_ID;
-        if (autoscanType == 0) {
+        if (autoscanType == AutoscanType::None) {
             auto pathIDs = database->getPathIDs(containerId);
             for (int pathId : pathIDs) {
                 auto pathDir = database->getAutoscanDirectory(pathId);
@@ -177,7 +177,7 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
             auto startPtDir = database->getAutoscanDirectory(startpointId);
             if (startPtDir && startPtDir->getScanMode() == AutoscanScanMode::INotify) {
                 protectItems = true;
-                if (autoscanType == 0 || startPtDir->persistent())
+                if (autoscanType == AutoscanType::None || startPtDir->persistent())
                     protectContainer = true;
 
                 autoscanMode = AUTOSCAN_INOTIFY;
