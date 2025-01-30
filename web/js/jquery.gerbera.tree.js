@@ -79,10 +79,10 @@ $.widget('grb.tree', {
             aBadge.prop('title', 'Autoscan: ' + data[i].gerbera.autoScanType);
             badges.push(aBadge);
           } else if (badgeData === 'p') {
-            const aBadge = $('<a href="#"></a>').addClass('badge badge-secondary').html('<i class="fa fa-refresh"/>');
+            const aBadge = $('<a></a>').addClass('badge badge-secondary').html('<i class="fa fa-sitemap"/>');
             aBadge.addClass('pull-right');
             aBadge.addClass('autoscan-child');
-            aBadge.prop('title', 'Autoscan by ' + data[i].gerbera.autoScanType);
+            aBadge.prop('title', 'Recursively added by autoscan of ' + data[i].gerbera.autoScanType);
             badges.push(aBadge);
           } else if (!isNaN(badgeData)) {
             item.addClass("has-children");

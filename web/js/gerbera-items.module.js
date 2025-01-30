@@ -203,11 +203,11 @@ const viewFactory = function (data) {
 const treeItemSelected = function (data) {
   if (viewFactory(data))
     currentItemView.retrieveGerberaItems()
-      .then((response) => loadItems(response))
+      .then((response) => loadItems(response, data.gerbera))
       .catch((err) => GerberaApp.error(err));
 };
 
-const loadItems = (response) => {
+const loadItems = (response, item) => {
   if (response.success) {
     const dataItems = currentItemView.dataItems(response);
     const datagrid = $('#datagrid');
@@ -216,7 +216,7 @@ const loadItems = (response) => {
       datagrid.dataitems('destroy');
     }
     datagrid.dataitems(dataItems);
-    Trail.makeTrailFromItem(dataItems.parentItem);
+    Trail.makeTrailFromItem(dataItems.parentItem, item);
   }
 };
 

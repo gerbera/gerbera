@@ -2134,7 +2134,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
 }
 
 Database::ChangedContainers SQLDatabase::_recursiveRemove(
-    const std::vector<std::int32_t>& items, const std::vector<std::int32_t>& containers,
+    const std::vector<std::int32_t>& items,
+    const std::vector<std::int32_t>& containers,
     bool all)
 {
     log_debug("start");
@@ -2842,8 +2843,10 @@ void SQLDatabase::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirector
 
 void SQLDatabase::_removeAutoscanDirectory(int autoscanID)
 {
-    if (autoscanID == INVALID_OBJECT_ID)
+    if (autoscanID == INVALID_OBJECT_ID) {
+        log_warning("cannot delete autoscan with illegal ID");
         return;
+    }
     int objectID = _getAutoscanObjectID(autoscanID);
     deleteRow(AUTOSCAN_TABLE, "id", autoscanID);
     if (objectID != INVALID_OBJECT_ID)
@@ -2865,9 +2868,10 @@ int SQLDatabase::_getAutoscanObjectID(int autoscanID)
 
 void SQLDatabase::_autoscanChangePersistentFlag(int objectID, bool persistent)
 {
-    if (objectID == INVALID_OBJECT_ID)
+    if (objectID == INVALID_OBJECT_ID) {
+        log_warning("cannot change autoscan with illegal ID");
         return;
-
+    }
     exec(fmt::format("UPDATE {0}{2}{1} SET {0}flags{1} = ({0}flags{1} {3}{4}) WHERE {0}id{1} = {5}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER, objectID));
 }
 
@@ -2881,8 +2885,10 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
     if (!adir)
         throw DatabaseException("_checkOverlappingAutoscans called with adir==nullptr", LINE_MESSAGE);
     int checkObjectID = adir->getObjectID();
-    if (checkObjectID == INVALID_OBJECT_ID)
+    if (checkObjectID == INVALID_OBJECT_ID) {
+        log_warning("cannot check autoscan with illegal ID");
         return {};
+    }
     int databaseID = adir->getDatabaseID();
 
     std::unique_ptr<SQLRow> row;

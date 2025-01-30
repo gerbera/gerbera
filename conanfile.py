@@ -91,7 +91,7 @@ class GerberaConan(ConanFile):
             self.requires("exiv2/0.28.1")
 
         if self.options.mysql:
-            self.requires("mariadb-connector-c/[>=3.1.11]")
+            self.requires("mariadb-connector-c/[<3.4.3]") # That recipe is broken
 
         if self._needs_system_uuid:
             self.requires("libuuid/1.0.3")

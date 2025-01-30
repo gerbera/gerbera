@@ -273,29 +273,51 @@ Trail Operations
 
 The Gerbera Trail shows the current database/filesystem path and provides a number of operations.
 
-* Add New Item
-* Add Autoscan
-* Add Tweak
-* Edit Container
-* Delete Container
-* Delete All
+Filesystem View
+---------------
 
-.. image:: _static/trail-operations.png
-   :alt: Trail operations
-   :target: _static/trail-operations.png
+* Add Items
+    * Add folder and subfolders to database
+* Add Autoscan Directory/ Edit Autoscan Item
+    * Configure folder as autoscan item
+    * Triggers scan of the directory
+* Tweak Directory
+    * Set special import properties for folder
 
 .. image:: _static/trail-fs-operations.png
    :alt: Trail operations in Filesystem view
    :target: _static/trail-fs-operations.png
 
+Database View
+-------------
+
+* Add Item
+    * Create Container or Item in Virtual Layout
+* Edit Item
+    * Change Settings of Container
+* Delete Container
+    * Delete container and items of container
+* Delete with References
+    * Delete container, items and all references
+
+.. image:: _static/trail-operations.png
+   :alt: Trail operations
+   :target: _static/trail-operations.png
+
+Config View
+-----------
+
+* Rescan Library
+    * Trigger rescanning of all files
+* Save Config
+    * Save changed entries into database, a restart of gerbera may be necessary to activate the changes
+* Clear Saved Config
+    * Remove all config changes from the database
+
 .. image:: _static/trail-config-operations.png
    :alt: Trail operations in Config view
    :target: _static/trail-config-operations.png
 
-The Gerbera Trail supports adding virtual item types including containers, items, internal urls, external urls.
-Adding an `autoscan` triggers the scan of a complete directory.  Autoscan adds valid mime-type items to the Gerbera database.
-Edit and Delete of container removes the container.  The `Delete All` icon removes a container and all sub-items from the
-Gerbera database.
 
 Notifications
 ~~~~~~~~~~~~~

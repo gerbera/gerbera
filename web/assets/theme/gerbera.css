@@ -951,7 +951,12 @@ body,
 }
 
 .autoscan-child {
-  background-color: #e9ecef;
+  background-color: transparent;
+  color: light-dark(var(--light-text), var(--dark-text)) !important;
+}
+.autoscan-child:hover {
+  background-color: transparent !important;
+  color: light-dark(var(--light-text), var(--dark-text)) !important;
 }
 
 .badge {
