@@ -34,6 +34,7 @@
 
 #include "pages.h" // API
 
+#include "cds/cds_objects.h"
 #include "config/result/autoscan.h"
 #include "content/content.h"
 #include "database/database.h"
@@ -70,7 +71,8 @@ void Web::Autoscan::process()
         } else {
             autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("0");
             autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
-            auto adir = database->getAutoscanDirectory(intParam("object_id"));
+            auto object = database->loadObject(intParam("object_id"));
+            auto adir = object ? content->getAutoscanDirectory(object->getLocation()) : database->getAutoscanDirectory(intParam("object_id"));
             autoscan2XML(adir, autoscan);
         }
     } else if (action == "as_edit_save") {
@@ -81,6 +83,7 @@ void Web::Autoscan::process()
                 auto adir = fromFs ? content->getAutoscanDirectory(path) : content->getAutoscanDirectory(intParam("object_id"));
                 content->removeAutoscanDirectory(adir);
             } catch (const std::runtime_error&) {
+                log_warning("Remove Autoscan {} did not work", intParam("object_id"));
                 // didn't work, well we don't care in this case
             }
         } else {

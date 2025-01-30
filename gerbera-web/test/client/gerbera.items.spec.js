@@ -167,7 +167,7 @@ describe('Gerbera Items', () => {
 
       Items.loadItems(itemsResponse);
 
-      expect(Trail.makeTrailFromItem).toHaveBeenCalledWith(itemsResponse.items);
+      expect(Trail.makeTrailFromItem).toHaveBeenCalledWith(itemsResponse.items, undefined);
     });
   });
   describe('loadItems() for files', () => {

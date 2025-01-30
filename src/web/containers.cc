@@ -37,6 +37,7 @@
 #include "cds/cds_container.h"
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
+#include "content/content.h"
 #include "database/database.h"
 #include "database/db_param.h"
 #include "exceptions.h"
@@ -70,28 +71,33 @@ void Web::Containers::process()
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         auto ce = containers.append_child("container");
         ce.append_attribute("id") = cont->getID();
+        ce.append_attribute("ref_id") = cont->getRefID();
         int childCount = cont->getChildCount();
         ce.append_attribute("child_count") = childCount;
-        auto autoscanType = cont->getAutoscanType();
-        ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
 
         auto url = xmlBuilder->renderContainerImageURL(cont);
         if (url) {
             ce.append_attribute("image") = url.value().c_str();
         }
 
-        std::string autoscanMode = "none";
-        if (autoscanType != AutoscanType::None) {
+        auto autoscanType = cont->getAutoscanType();
+        std::string autoscanMode = (autoscanType != AutoscanType::None) ? AUTOSCAN_TIMED : "none";
+        auto adir = content->getAutoscanDirectory(cont->getLocation());
+        if (adir) {
+            autoscanType = autoscanType == AutoscanType::None ? AutoscanType::Config : autoscanType;
             autoscanMode = AUTOSCAN_TIMED;
-#ifdef HAVE_INOTIFY
-            if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
-                auto adir = database->getAutoscanDirectory(cont->getID());
-                if (adir && (adir->getScanMode() == AutoscanScanMode::INotify))
-                    autoscanMode = AUTOSCAN_INOTIFY;
-            }
-#endif
         }
+#ifdef HAVE_INOTIFY
+        if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
+            if (adir && (adir->getScanMode() == AutoscanScanMode::INotify)) {
+                autoscanMode = AUTOSCAN_INOTIFY;
+                autoscanType = autoscanType == AutoscanType::None ? AutoscanType::Config : autoscanType;
+            }
+        }
+#endif
+        ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
         ce.append_attribute("autoscan_mode") = autoscanMode.c_str();
+        ce.append_attribute("persistent") = cont->getFlags() & OBJECT_FLAG_PERSISTENT_CONTAINER ? "true" : "false";
         ce.append_attribute("title") = cont->getTitle().c_str();
         ce.append_attribute("location") = cont->getLocation().c_str();
         ce.append_attribute("upnp_shortcut") = cont->getUpnpShortcut().c_str();

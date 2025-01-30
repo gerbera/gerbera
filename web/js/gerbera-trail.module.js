@@ -20,13 +20,13 @@
 
     $Id$
 */
-import {Autoscan} from "./gerbera-autoscan.module.js";
-import {Config} from "./gerbera-config.module.js";
-import {GerberaApp} from "./gerbera-app.module.js";
-import {Items} from "./gerbera-items.module.js";
-import {Tree} from "./gerbera-tree.module.js";
-import {Tweaks} from "./gerbera-tweak.module.js";
-import {Updates} from "./gerbera-updates.module.js";
+import { Autoscan } from "./gerbera-autoscan.module.js";
+import { Config } from "./gerbera-config.module.js";
+import { GerberaApp } from "./gerbera-app.module.js";
+import { Items } from "./gerbera-items.module.js";
+import { Tree } from "./gerbera-tree.module.js";
+import { Tweaks } from "./gerbera-tweak.module.js";
+import { Updates } from "./gerbera-updates.module.js";
 
 const destroy = () => {
   const trail = $('#trail');
@@ -43,7 +43,7 @@ const initialize = () => {
 };
 
 const makeTrail = (selectedItem, config) => {
-  const items = (selectedItem !== null) ? gatherTrail(selectedItem) : [{text: "current configuration"}];
+  const items = (selectedItem !== null) ? gatherTrail(selectedItem) : [{ text: "current configuration" }];
   const configDefaults = {
     itemType: GerberaApp.getType()
   };
@@ -87,7 +87,7 @@ const createTrail = (items, config) => {
   });
 };
 
-const makeTrailFromItem = (items) => {
+const makeTrailFromItem = (items, parentItem) => {
   const itemType = GerberaApp.getType();
   const treeElement = (itemType !== 'config') ? Tree.getTreeElementById(items.parent_id) : null;
   let enableAdd = false;
@@ -129,7 +129,8 @@ const makeTrailFromItem = (items) => {
     }
   } else if (itemType === 'fs') {
     enableAddTweak = items.parent_id !== 0;
-    enableAddAutoscan = items.parent_id !== 0;
+    const allowsAutoscan = !parentItem || !('autoScanType' in parentItem) || !parentItem.autoScanType || parentItem.autoScanType === 'none';
+    enableAddAutoscan = items.parent_id !== 0 && allowsAutoscan;
     enableAdd = items.parent_id !== 0;
   } else if (itemType === 'config') {
     enableConfig = true;
@@ -144,10 +145,11 @@ const makeTrailFromItem = (items) => {
   onEditAutoscan = enableEditAutoscan ? addAutoscan : noOp;
   onAddTweak = enableAddTweak ? addTweak : noOp;
   onSave = enableConfig ? saveConfig : noOp;
-  onClear = enableClearConfig  ? clearConfig : noOp;
+  onClear = enableClearConfig ? clearConfig : noOp;
   onRescan = enableConfig ? reScanLibrary : noOp;
 
   const config = {
+    itemType: itemType,
     enableAdd: enableAdd,
     onAdd: onAdd,
     enableEdit: enableEdit,

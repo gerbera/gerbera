@@ -138,10 +138,11 @@ void ContentManager::run()
         }
         try {
             autoscanList->add(dir);
+        } catch (const std::logic_error& e) {
+            log_warning(e.what());
         } catch (const std::runtime_error& e) {
             // Work around existing config sourced autoscans that were stored to the DB for reasons
             log_warning(e.what());
-            continue;
         }
     }
 
@@ -149,20 +150,27 @@ void ContentManager::run()
     inotify = std::make_unique<AutoscanInotify>(self);
 
     if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        auto db = database->getAutoscanList(AutoscanScanMode::INotify);
-        for (std::size_t i = 0; i < db->size(); i++) {
-            auto dir = db->get(i);
-            auto path = dir->getLocation();
-            if (fs::is_directory(path)) {
-                dir->setObjectID(ensurePathExistence(path));
+        try {
+            auto db = database->getAutoscanList(AutoscanScanMode::INotify);
+            for (std::size_t i = 0; i < db->size(); i++) {
+                auto dir = db->get(i);
+                auto path = dir->getLocation();
+                if (fs::is_directory(path)) {
+                    dir->setObjectID(ensurePathExistence(path));
+                }
+                try {
+                    autoscanList->add(dir);
+                } catch (const std::logic_error& e) {
+                    log_warning(e.what());
+                } catch (const std::runtime_error& e) {
+                    // Work around existing config sourced autoscans that were stored to the DB for reasons
+                    log_warning(e.what());
+                }
             }
-            try {
-                autoscanList->add(dir);
-            } catch (const std::runtime_error& e) {
-                // Work around existing config sourced autoscans that were stored to the DB for reasons
-                log_warning(e.what());
-                continue;
-            }
+        } catch (const std::logic_error& e) {
+            log_warning(e.what());
+        } catch (const std::runtime_error& e) {
+            log_warning(e.what());
         }
         for (const auto& dir : config->getAutoscanListOption(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST)) {
             fs::path path = dir->getLocation();
@@ -171,10 +179,11 @@ void ContentManager::run()
             }
             try {
                 autoscanList->add(dir);
+            } catch (const std::logic_error& e) {
+                log_warning(e.what());
             } catch (const std::runtime_error& e) {
                 // Work around existing config sourced autoscans that were stored to the DB for reasons
                 log_warning(e.what());
-                continue;
             }
         }
     }
@@ -496,7 +505,12 @@ bool ContentManager::updateAttachedResources(const std::shared_ptr<AutoscanDirec
     return parentRemoved;
 }
 
-std::vector<int> ContentManager::_removeObject(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& path, bool rescanResource, bool all)
+std::vector<int> ContentManager::_removeObject(
+    const std::shared_ptr<AutoscanDirectory>& adir,
+    const std::shared_ptr<CdsObject>& obj,
+    const fs::path& path,
+    bool rescanResource,
+    bool all)
 {
     if (!obj || obj->getID() == INVALID_OBJECT_ID)
         return {};

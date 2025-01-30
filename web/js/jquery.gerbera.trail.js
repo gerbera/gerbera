@@ -68,13 +68,27 @@ $.widget('grb.trail', {
     buttons.addClass('grb-trail-buttons pull-right my-auto');
 
     if (config.enableAdd && config.onAdd) {
-      const addItemIcon = this.generateItemButton(item, {
-        title: 'Add Item',
-        class: 'grb-trail-add',
-        iconClass: 'fa-plus',
-        click: config.onAdd ? config.onAdd : noOp
-      });
-      addItemIcon.appendTo(buttons);
+      if (config.itemType === 'fs') {
+        // We're in filesystem view
+        const addItemIcon = this.generateItemButton(item, {
+          title: 'Add Items',
+          tooltip: 'Add folder and subfolders to database',
+          class: 'grb-trail-add',
+          iconClass: 'fa-plus',
+          click: config.onAdd ? config.onAdd : noOp
+        });
+        addItemIcon.appendTo(buttons);
+      } else {
+        // We're in database view
+        const addItemIcon = this.generateItemButton(item, {
+          title: 'Add Item',
+          tooltip: 'Add Container or Item to virtual layout',
+          class: 'grb-trail-add',
+          iconClass: 'fa-plus',
+          click: config.onAdd ? config.onAdd : noOp
+        });
+        addItemIcon.appendTo(buttons);
+      }
     }
 
     if (config.enableEdit && config.onEdit) {
@@ -90,7 +104,8 @@ $.widget('grb.trail', {
     let autoscanItemIcon;
     if (config.enableAddAutoscan && config.onAddAutoscan) {
       autoscanItemIcon = this.generateItemButton(item, {
-        title: 'Add Autoscan Item',
+        title: 'Add Autoscan Directory',
+        tooltip: 'Configure folder as autoscan item',
         class: 'grb-trail-add-autoscan',
         iconClass: 'fa-history',
         click: config.onAddAutoscan ? config.onAddAutoscan : noOp
@@ -108,7 +123,8 @@ $.widget('grb.trail', {
 
     if (config.enableDelete && config.onDelete) {
       const deleteItemIcon = this.generateItemButton(item, {
-        title: 'Delete Item',
+        title: 'Delete Container',
+        tooltip: 'Delete container and items of container',
         class: 'grb-trail-delete',
         iconClass: 'fa-trash-o',
         click: config.onDelete ? config.onDelete : noOp
@@ -118,7 +134,8 @@ $.widget('grb.trail', {
 
     if (config.enableDeleteAll && config.onDeleteAll) {
       const deleteAllIcon = this.generateItemButton(item, {
-        title: 'Delete All',
+        title: 'Delete with References',
+        tooltip: 'Delete container, items and all references',
         class: 'grb-trail-delete-all',
         iconClass: 'fa-remove',
         click: config.onDeleteAll ? config.onDeleteAll : noOp
@@ -157,6 +174,7 @@ $.widget('grb.trail', {
     if (config.enableAddTweak && config.onAddTweak) {
       const tweakIcon = this.generateItemButton(item, {
         title: 'Tweak Directory',
+        tooltip: 'Set special import properties for folder',
         class: 'grb-trail-tweak-dir',
         iconClass: 'fa-address-card-o',
         click: config.onAddTweak ? config.onAddTweak : noOp
@@ -173,8 +191,8 @@ $.widget('grb.trail', {
 
   generateItemButton: function (item, config) {
     const button = $('<li>');
-    const link = $('<a>', {"title": config.title, "class": "grb-trail-button " + config.class, "href": "javascript:;"});
-    const icon = $('<i></i>', {"class": "fa " + config.iconClass });
+    const link = $('<a>', { "title": config.tooltip ? config.tooltip : config.title, "class": "grb-trail-button " + config.class, "href": "javascript:;" });
+    const icon = $('<i></i>', { "class": "fa " + config.iconClass });
     link.append(icon);
     link.append('<span> ' + config.title + '</span>');
     button.append(link);

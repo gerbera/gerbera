@@ -95,14 +95,20 @@ void Web::Directories::process()
             continue;
         if (!includesFullpath.empty()
             && std::none_of(includesFullpath.begin(), includesFullpath.end(), //
-                [&](auto&& sub) { return startswith(filepath.string(), sub) || startswith(sub, filepath.string()); }))
+                [&](fs::path&& sub) { return isSubDir(filepath.string(), sub) || isSubDir(sub, filepath.string()) || sub == filepath; })) {
+            log_debug("skipping unwanted dir {}", filepath.string());
             continue; // skip unwanted dir
+        }
         if (includesFullpath.empty()) {
-            if (std::find(excludesFullpath.begin(), excludesFullpath.end(), filepath) != excludesFullpath.end())
+            if (std::find(excludesFullpath.begin(), excludesFullpath.end(), filepath) != excludesFullpath.end()) {
+                log_debug("skipping excluded dir {}", filepath.string());
                 continue; // skip excluded dir
+            }
             if (std::find(excludesDirname.begin(), excludesDirname.end(), filepath.filename()) != excludesDirname.end()
-                || (excludeConfigDirs && startswith(filepath.filename().string(), ".")))
+                || (excludeConfigDirs && startswith(filepath.filename().string(), "."))) {
+                log_debug("skipping special dir {}", filepath.string());
                 continue; // skip dir with leading .
+            }
         }
         auto dir = fs::directory_iterator(filepath, ec);
         bool hasContent = std::any_of(begin(dir), end(dir), [&](auto&& sub) { return sub.is_directory(ec) || isRegularFile(sub, ec); });
