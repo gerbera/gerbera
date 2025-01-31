@@ -46,7 +46,7 @@ jobs:
           #- os-ver: "ubuntu:20.04"
           #  arch: "linux/arm/v7"
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     name: Compile ${{ matrix.os-ver }} ${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v4
