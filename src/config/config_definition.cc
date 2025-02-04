@@ -606,6 +606,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         std::make_shared<ConfigPathSetup>(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE,
             "/server/storage/sqlite3/upgrade-file", "config-server.html#storage",
             "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
+        std::make_shared<ConfigIntSetup>(ConfigVal::SERVER_STORAGE_SQLITE_SHUTDOWN_ATTEMPTS,
+            "/server/storage/sqlite3/attribute::shutdown-attempts", "config-server.html#storage",
+            5, 2, ConfigIntSetup::CheckMinValue),
 
         // Web User Interface
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_UI_ENABLED,
@@ -1411,6 +1414,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
 {
     return {
 #ifdef HAVE_LIBEXIF
+        // options for libexif
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,
             "/import/library-options/libexif/auxdata", "config-import.html#libexif",
             ConfigVal::A_IMPORT_LIBOPTS_AUXDATA_DATA,
@@ -1439,6 +1443,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
             false, false, false),
 #endif
 #ifdef HAVE_EXIV2
+        // options for exiv2
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
             "/import/library-options/exiv2/auxdata", "config-import.html#exiv2",
             ConfigVal::A_IMPORT_LIBOPTS_AUXDATA_DATA,
@@ -1467,6 +1472,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
             false, false, false, exiv2CommentDefaults),
 #endif
 #ifdef HAVE_TAGLIB
+        // options for taglib (id3)
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST,
             "/import/library-options/id3/auxdata", "config-import.html#id3",
             ConfigVal::A_IMPORT_LIBOPTS_AUXDATA_DATA,
@@ -1495,6 +1501,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
             false, false, false),
 #endif
 #ifdef HAVE_FFMPEG
+        // options for ffmpeg (libav)
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
             "/import/library-options/ffmpeg/auxdata", "config-import.html#ffmpeg",
             ConfigVal::A_IMPORT_LIBOPTS_AUXDATA_DATA,
@@ -1523,6 +1530,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
             false, false, false),
 #endif
 #ifdef HAVE_MATROSKA
+        // options for matroska (mkv)
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_MKV_AUXDATA_TAGS_LIST,
             "/import/library-options/mkv/auxdata", "config-import.html#mkv",
             ConfigVal::A_IMPORT_LIBOPTS_AUXDATA_DATA,
@@ -1551,6 +1559,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
             false, false, false),
 #endif
 #ifdef HAVE_WAVPACK
+        // options for wavpack
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_WAVPACK_AUXDATA_TAGS_LIST,
             "/import/library-options/wavpack/auxdata", "config-import.html#wavpack",
             ConfigVal::A_IMPORT_LIBOPTS_AUXDATA_DATA,

@@ -411,6 +411,11 @@
               "editable": false
             },
             {
+              "item": "/server/storage/sqlite3/shutdown-attempts",
+              "caption": "Maximum shutdown attempts",
+              "editable": false
+            },
+            {
               "item": "/server/storage/sqlite3/database-file",
               "caption": "SQLite database-file",
               "editable": false

@@ -75,6 +75,9 @@ private:
     int exec(const std::string& query, bool getLastInsertId = false) override;
     void execOnly(const std::string& query) override;
 
+    /// \brief Implement common behaviour on exceptions while calling the database
+    void handleException(const std::runtime_error& exc, const std::string& lineMessage);
+
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 
     std::string startupError;
@@ -86,8 +89,8 @@ private:
 
     std::shared_ptr<Timer> timer;
 
-    /// \brief is set to true by shutdown() if the sqlite3 thread should terminate
-    bool shutdownFlag {};
+    /// \brief increased by shutdown attempt if the sqlite3 thread should terminate
+    int shutdownFlag { 0 };
 
     /// \brief the tasks to be done by the sqlite3 thread
     std::queue<std::shared_ptr<SLTask>> taskQueue;
@@ -106,6 +109,8 @@ private:
     bool dbInitDone {};
     bool hasBackupTimer {};
     int sqliteStatus {};
+    /// \brief maximum number of attempts to terminate gracefully
+    int shutdownAttempts { 5 };
 };
 
 /// \brief The Database class for using SQLite3 with transactions
