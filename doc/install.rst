@@ -36,8 +36,8 @@ To install the latest tagged release (>=2.1.0):
 
 .. code-block:: sh
 
-    wget -O - https://pkg.gerbera.io/public.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/gerbera-keyring.gpg >/dev/null
-    echo "deb [signed-by=/usr/share/keyrings/gerbera-keyring.gpg] https://pkg.gerbera.io/debian/ $(lsb_release -c --short) main" | sudo tee /etc/apt/sources.list.d/gerbera.list >/dev/null
+    wget -O - https://pkg.gerbera.io/public.asc 2> /dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/gerbera-keyring.gpg > /dev/null
+    echo "deb [signed-by=/usr/share/keyrings/gerbera-keyring.gpg] https://pkg.gerbera.io/debian/ $(lsb_release -c --short) main" | sudo tee /etc/apt/sources.list.d/gerbera.list > /dev/null
     sudo apt-get update
     sudo apt-get install gerbera
 
@@ -45,19 +45,13 @@ Or for the latest code install git builds:
 
 .. code-block:: sh
 
-    wget -O - https://pkg.gerbera.io/public.asc 2>/dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/gerbera-keyring.gpg >/dev/null
-    echo "deb [signed-by=/usr/share/keyrings/gerbera-keyring.gpg] https://pkg.gerbera.io/debian-git/ $(lsb_release -c --short) main" | sudo tee /etc/apt/sources.list.d/gerbera.list >/dev/null
+    wget -O - https://pkg.gerbera.io/public.asc 2> /dev/null | gpg --dearmor - | sudo tee /usr/share/keyrings/gerbera-keyring.gpg > /dev/null
+    echo "deb [signed-by=/usr/share/keyrings/gerbera-keyring.gpg] https://pkg.gerbera.io/debian-git/ $(lsb_release -c --short) main" | sudo tee /etc/apt/sources.list.d/gerbera.list > /dev/null
     sudo apt-get update
     sudo apt-get install gerbera
 
+If you want to use the package for Mint you have to set the codename manually, instead of ``$(lsb_release -c --short)``
 
-Or Stephen Czetty maintains a `Ubuntu PPA <https://launchpad.net/~stephenczetty/+archive/ubuntu/gerbera-updates>`__.
-
-.. code-block:: sh
-
-    sudo add-apt-repository ppa:stephenczetty/gerbera-updates
-    sudo apt-get update
-    sudo apt install gerbera
 
 Gentoo
 ~~~~~~~~~~~~~~~~~
