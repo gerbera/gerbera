@@ -137,7 +137,7 @@ void ContentManager::run()
             dir->setObjectID(ensurePathExistence(path));
         }
         try {
-            autoscanList->add(dir);
+            autoscanList->add(dir, dir->getScanID());
         } catch (const std::logic_error& e) {
             log_warning(e.what());
         } catch (const std::runtime_error& e) {
@@ -159,7 +159,7 @@ void ContentManager::run()
                     dir->setObjectID(ensurePathExistence(path));
                 }
                 try {
-                    autoscanList->add(dir);
+                    autoscanList->add(dir, dir->getScanID());
                 } catch (const std::logic_error& e) {
                     log_warning(e.what());
                 } catch (const std::runtime_error& e) {
@@ -1628,7 +1628,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     copy->setInterval(dir->getInterval());
     copy->setScanContent(dir->getScanContent());
 
-    autoscanList->remove(copy->getScanID());
+    autoscanList->remove(dir->getScanID()); // remove old version of dir
 
     copy->setScanMode(dir->getScanMode());
     scanDir(copy, original->getScanMode() != copy->getScanMode());
@@ -1637,7 +1637,7 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
 
 void ContentManager::scanDir(const std::shared_ptr<AutoscanDirectory>& dir, bool updateUI)
 {
-    autoscanList->add(dir);
+    autoscanList->add(dir, dir->getScanID());
 
     if (dir->getScanMode() == AutoscanScanMode::Timed)
         timerNotify(dir->getTimerParameter());

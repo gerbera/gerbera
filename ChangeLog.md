@@ -10,6 +10,7 @@
 - Downgrade docker builder as well
 - Fix album art in builtin layout
 - Fix cors host without ipv6 address
+- Fix management auf autoscans in list
 - Fix UpnpMap logic
 - Focal: Freeze more aws-sdk versions
 - Focal: freeze ruby aws-sdk versions used for package upload
