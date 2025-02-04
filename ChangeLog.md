@@ -21,6 +21,7 @@
 - Refactor static code from ConfigDefinition
 - Remap metadata fields when parsing virtual-directories keys
 - Set more metadata in builtin layout
+- Sqlite: Exit after multiple exceptions
 - Update Library Versions
 - Update wavpack
 - work around build issue

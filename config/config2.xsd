@@ -391,6 +391,7 @@
                 <xs:element ref="backup" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:attribute name="shutdown-attempts" type="xs:positiveInteger" default="5"/>
         </xs:complexType>
     </xs:element>
 

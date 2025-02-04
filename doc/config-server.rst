@@ -706,6 +706,15 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
         * Optional
         * Default: **yes**
 
+        ::
+
+            shutdown-attempts="10"
+
+        * Optional
+        * Default: **5**
+
+          Number of attempts to shutdown the sqlite adapter before forcing the application down.
+
         Below are the sqlite driver options:
 
         .. code-block:: xml
