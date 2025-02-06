@@ -20,6 +20,7 @@
 - JS: Fix config autoscan object in scripts
 - Refactor static code from ConfigDefinition
 - Remap metadata fields when parsing virtual-directories keys
+- Rework autoscan list handling
 - Set more metadata in builtin layout
 - Sqlite: Exit after multiple exceptions
 - Update Library Versions

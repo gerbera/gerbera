@@ -80,6 +80,7 @@ void Web::Autoscan::process()
         if (scanModeStr == "none") {
             // remove...
             try {
+                log_debug("Removing Autoscan {} ()", path.string(), intParam("object_id"));
                 auto adir = fromFs ? content->getAutoscanDirectory(path) : content->getAutoscanDirectory(intParam("object_id"));
                 content->removeAutoscanDirectory(adir);
             } catch (const std::runtime_error&) {
@@ -131,14 +132,15 @@ void Web::Autoscan::process()
             int objectID = fromFs ? content->ensurePathExistence(path) : intParam("object_id");
 
             log_debug("adding autoscan {}: location={}, recursive={}, mediaType={}, interval={}, hidden={}",
-                objectID, "", recursive, fmt::join(mediaType, "|"), interval, hidden);
+                objectID, path.string(), recursive, fmt::join(mediaType, "|"), interval, hidden);
 
             auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
             containerMap[AutoscanMediaMode::Audio] = param("ctAudio");
             containerMap[AutoscanMediaMode::Image] = param("ctImage");
             containerMap[AutoscanMediaMode::Video] = param("ctVideo");
+            auto adir = fromFs ? content->getAutoscanDirectory(path) : content->getAutoscanDirectory(intParam("object_id"));
             auto autoscan = std::make_shared<AutoscanDirectory>(
-                "", // location
+                path, // location
                 scanMode,
                 recursive,
                 false, // persistent
@@ -146,6 +148,9 @@ void Web::Autoscan::process()
                 hidden,
                 followSymlinks,
                 mt);
+            if (adir) {
+                autoscan->setScanID(adir->getScanID());
+            }
             autoscan->setObjectID(objectID);
             autoscan->setRetryCount(retryCount);
             autoscan->setDirTypes(dirTypes);

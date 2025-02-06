@@ -37,11 +37,14 @@
 
 #define EDIT_CAST(tt, obj) std::dynamic_pointer_cast<tt>((obj))
 
+/// \brief base class editable objects
 class Editable {
 public:
     virtual ~Editable() = default;
-    virtual void validate(bool newEntry, std::size_t index) { }
-    virtual void invalidate() { }
+    /// \brief make object valid
+    virtual void setValid(bool newEntry, std::size_t index) { }
+    /// \brief make object invalid
+    virtual void setInvalid() { }
 
     void setOrig(bool orig) { this->isOrig = orig; }
     bool getOrig() const { return isOrig; }
@@ -50,6 +53,7 @@ protected:
     bool isOrig {};
 };
 
+/// \brief base class for lists of editable objects
 template <class Editable>
 class EditHelper {
 public:
@@ -67,6 +71,7 @@ public:
 
     /// \brief removes the Editable given by its scan ID
     void remove(std::size_t id, bool edit = false);
+    void remove(const std::shared_ptr<Editable>& editable);
 
     /// \brief returns a copy of the Editable list in the form of an array
     std::vector<std::shared_ptr<Editable>> getArrayCopy() const;
@@ -115,6 +120,22 @@ std::vector<std::shared_ptr<Editable>> EditHelper<Editable>::getArrayCopy() cons
 }
 
 template <class Editable>
+void EditHelper<Editable>::remove(const std::shared_ptr<Editable>& editable)
+{
+    AutoLock lock(mutex);
+
+    auto entry = std::find_if(list.begin(), list.end(), [editable](auto&& item) { return item->equals(editable); });
+    if (entry == list.end()) {
+        log_debug("No such {} to remove!", typeid(Editable).name());
+        return;
+    }
+    editable->setInvalid();
+    auto index = entry - list.begin();
+    list.erase(entry);
+    log_debug("{} index {} removed!", typeid(Editable).name(), index);
+}
+
+template <class Editable>
 void EditHelper<Editable>::remove(std::size_t id, bool edit)
 {
     AutoLock lock(mutex);
@@ -126,7 +147,7 @@ void EditHelper<Editable>::remove(std::size_t id, bool edit)
         }
         auto&& editable = list.at(id);
 
-        editable->invalidate();
+        editable->setInvalid();
         list.erase(list.begin() + id);
 
         log_debug("{} ID {} removed!", typeid(Editable).name(), id);
@@ -138,7 +159,7 @@ void EditHelper<Editable>::remove(std::size_t id, bool edit)
         auto&& editable = indexMap.at(id);
         auto entry = std::find_if(list.begin(), list.end(), [editable](auto&& item) { return editable->equals(item); });
 
-        editable->invalidate();
+        editable->setInvalid();
         list.erase(entry);
 
         if (id >= origSize) {
@@ -159,16 +180,16 @@ template <class Editable>
 void EditHelper<Editable>::_add(const std::shared_ptr<Editable>& editable, std::size_t index)
 {
     if (std::any_of(list.begin(), list.end(), [editable](auto&& d) { return d->equals(editable); })) {
-        log_error("Duplicate {} entry[{}]", typeid(Editable).name(), index);
+        log_error("Duplicate {} entry [{}]", typeid(Editable).name(), index);
         return;
     }
     if (index == std::numeric_limits<std::size_t>::max()) {
         index = getEditSize();
         origSize = list.size() + 1;
         editable->setOrig(true);
-        editable->validate(true, index);
+        editable->setValid(true, index);
     } else
-        editable->validate(false, index);
+        editable->setValid(false, index);
 
     list.push_back(editable);
     indexMap[index] = editable;

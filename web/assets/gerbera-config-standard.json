@@ -328,7 +328,7 @@
         {
           "item": "/import/autoscan/attribute::use-inotify",
           "caption": "Use Inotify",
-          "editable": true
+          "editable": false
         },
         {
           "item": "/import/autoscan/timed/directory",
@@ -339,7 +339,7 @@
             {
               "item": "/import/autoscan/timed/directory/attribute::location",
               "caption": "Location",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::mode",
@@ -351,12 +351,12 @@
             {
               "item": "/import/autoscan/timed/directory/attribute::interval",
               "caption": "Scan Interval",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::recursive",
               "caption": "Recursive",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::media-type",
@@ -366,7 +366,7 @@
             {
               "item": "/import/autoscan/timed/directory/attribute::hidden-files",
               "caption": "Import Hidden Files",
-              "editable": true
+              "editable": false
             }
           ]
         },
@@ -379,7 +379,7 @@
             {
               "item": "/import/autoscan/inotify/directory/attribute::location",
               "caption": "Location",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::mode",
@@ -390,7 +390,7 @@
             {
               "item": "/import/autoscan/inotify/directory/attribute::recursive",
               "caption": "Recursive",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::media-type",
@@ -400,7 +400,7 @@
             {
               "item": "/import/autoscan/inotify/directory/attribute::hidden-files",
               "caption": "Import Hidden Files",
-              "editable": true
+              "editable": false
             }
           ]
         },

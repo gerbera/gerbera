@@ -2713,7 +2713,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
     bool hidden = remapBool(getCol(row, AutoscanColumn::Hidden));
     bool followSymlinks = remapBool(getCol(row, AutoscanColumn::FollowSymlinks));
     bool persistent = remapBool(getCol(row, AutoscanColumn::Persistent));
-    bool retryCount = remapBool(getCol(row, AutoscanColumn::RetryCount));
+    int retryCount = getColInt(row, AutoscanColumn::RetryCount, 0);
     bool dirTypes = remapBool(getCol(row, AutoscanColumn::DirTypes));
     bool forceRescan = remapBool(getCol(row, AutoscanColumn::ForceRescan));
     auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
