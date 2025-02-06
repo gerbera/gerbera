@@ -950,6 +950,11 @@ body,
   background-color: darkorange;
 }
 
+.itemDetailHead {
+  cursor: pointer;
+  background-color: light-dark(var(--light-bg-form), var(--dark-bg-form));
+}
+
 .autoscan-child {
   background-color: transparent;
   color: light-dark(var(--light-text), var(--dark-text)) !important;

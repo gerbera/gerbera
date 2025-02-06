@@ -23,6 +23,7 @@
 - Rework autoscan list handling
 - Set more metadata in builtin layout
 - Sqlite: Exit after multiple exceptions
+- UI: Make details collapsable in items editor detail view
 - Update Library Versions
 - Update wavpack
 - work around build issue
