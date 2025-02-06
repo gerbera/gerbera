@@ -137,7 +137,7 @@ void ContentManager::run()
             dir->setObjectID(ensurePathExistence(path));
         }
         try {
-            autoscanList->add(dir, dir->getScanID());
+            autoscanList->add(dir);
         } catch (const std::logic_error& e) {
             log_warning(e.what());
         } catch (const std::runtime_error& e) {
@@ -159,7 +159,8 @@ void ContentManager::run()
                     dir->setObjectID(ensurePathExistence(path));
                 }
                 try {
-                    autoscanList->add(dir, dir->getScanID());
+                    dir->setInvalid();
+                    autoscanList->add(dir);
                 } catch (const std::logic_error& e) {
                     log_warning(e.what());
                 } catch (const std::runtime_error& e) {
@@ -1542,7 +1543,7 @@ void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirec
         throw_std_runtime_error("can not remove autoscan directory - was not an autoscan");
 
     adir->setTaskCount(-1);
-    autoscanList->remove(adir->getScanID());
+    autoscanList->remove(adir);
     database->removeAutoscanDirectory(adir);
     session_manager->containerChangedUI(adir->getObjectID());
 
@@ -1627,17 +1628,22 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     copy->setRecursive(dir->getRecursive());
     copy->setInterval(dir->getInterval());
     copy->setScanContent(dir->getScanContent());
+    copy->setDirTypes(dir->hasDirTypes());
 
-    autoscanList->remove(dir->getScanID()); // remove old version of dir
+    if (dir->isValid())
+        autoscanList->remove(dir); // remove old version of dir
 
-    copy->setScanMode(dir->getScanMode());
     scanDir(copy, original->getScanMode() != copy->getScanMode());
+    copy->setScanMode(dir->getScanMode());
     database->updateAutoscanDirectory(copy);
 }
 
 void ContentManager::scanDir(const std::shared_ptr<AutoscanDirectory>& dir, bool updateUI)
 {
-    autoscanList->add(dir, dir->getScanID());
+    if (dir->isValid())
+        autoscanList->add(dir, dir->getScanID());
+    else
+        autoscanList->add(dir);
 
     if (dir->getScanMode() == AutoscanScanMode::Timed)
         timerNotify(dir->getTimerParameter());

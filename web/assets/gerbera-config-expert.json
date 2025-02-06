@@ -702,7 +702,7 @@
         {
           "item": "/import/autoscan/attribute::use-inotify",
           "caption": "Use Inotify",
-          "editable": true
+          "editable": false
         },
         {
           "item": "/import/autoscan/attribute::inotify-attrib",
@@ -713,12 +713,12 @@
           "item": "/import/autoscan/timed/directory",
           "caption": "Timed Autoscan Directories",
           "type": "List",
-          "editable": true,
+          "editable": false,
           "children": [
             {
               "item": "/import/autoscan/timed/directory/attribute::location",
               "caption": "Location",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::mode",
@@ -730,17 +730,17 @@
             {
               "item": "/import/autoscan/timed/directory/attribute::interval",
               "caption": "Scan Interval",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::recursive",
               "caption": "Recursive",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::dirtypes",
               "caption": "Types for physical containers",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::media-type",
@@ -750,27 +750,27 @@
             {
               "item": "/import/autoscan/timed/directory/attribute::hidden-files",
               "caption": "Import Hidden Files",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::follow-symlinks",
               "caption": "Follow Symlinks",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::container-type-audio",
               "caption": "Container Type for Audio",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::container-type-image",
               "caption": "Container Type for Image",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::container-type-video",
               "caption": "Container Type for Video",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::scan-count",
@@ -793,12 +793,12 @@
           "item": "/import/autoscan/inotify/directory",
           "caption": "INotify Autoscan Directories",
           "type": "List",
-          "editable": true,
+          "editable": false,
           "children": [
             {
               "item": "/import/autoscan/inotify/directory/attribute::location",
               "caption": "Location",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::mode",
@@ -810,12 +810,12 @@
             {
               "item": "/import/autoscan/inotify/directory/attribute::recursive",
               "caption": "Recursive",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::dirtypes",
               "caption": "Types for physical containers",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::retry-count",
@@ -830,27 +830,27 @@
             {
               "item": "/import/autoscan/inotify/directory/attribute::hidden-files",
               "caption": "Import Hidden Files",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::follow-symlinks",
               "caption": "Follow Symlinks",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::container-type-audio",
               "caption": "Container Type for Audio",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::container-type-image",
               "caption": "Container Type for Image",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::container-type-video",
               "caption": "Container Type for Video",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::scan-count",

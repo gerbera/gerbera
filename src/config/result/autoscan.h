@@ -103,11 +103,17 @@ public:
     /// \param interval rescan interval in seconds (only for timed scan mode)
     /// \param hidden include hidden files
     /// \param followSymlinks follow symbolic links
-    /// \param mediaType type of media to load from directory
+    /// \param mediaType type of media to load from directory zero means none.
     /// \param containerMap mapping of media types to container types
-    /// zero means none.
-    AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent,
-        unsigned int interval = 0, bool hidden = false, bool followSymlinks = false, int mediaType = -1,
+    AutoscanDirectory(
+        fs::path location,
+        AutoscanScanMode mode,
+        bool recursive,
+        bool persistent,
+        unsigned int interval = 0,
+        bool hidden = false,
+        bool followSymlinks = false,
+        int mediaType = -1,
         const std::map<AutoscanMediaMode, std::string>& containerMap = ContainerTypesDefaults);
     virtual ~AutoscanDirectory() = default;
 
@@ -217,18 +223,16 @@ public:
     void setImportService(std::shared_ptr<ImportService> is) { importService = std::move(is); }
     std::shared_ptr<ImportService> getImportService() const { return importService; }
 
-    /* helpers for autoscan stuff */
+    /* helpers for autoscan enum stuff */
     static const char* mapScanmode(AutoscanScanMode scanmode);
     static AutoscanScanMode remapScanmode(const std::string& scanmode);
 
-    void validate(bool newEntry, std::size_t index) override
+    /* overrides for Editable */
+    void setValid(bool newEntry, std::size_t index) override
     {
-        if (!newEntry) {
-            setPersistent(true);
-        }
         setScanID(index);
     }
-    void invalidate() override
+    void setInvalid() override
     {
         scanID = INVALID_SCAN_ID;
     }

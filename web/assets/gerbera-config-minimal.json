@@ -183,17 +183,17 @@
             {
               "item": "/import/autoscan/timed/directory/attribute::interval",
               "caption": "Scan Interval",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::recursive",
               "caption": "Recursive",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::hidden-files",
               "caption": "Import Hidden Files",
-              "editable": true
+              "editable": false
             }
           ]
         },
@@ -217,12 +217,12 @@
             {
               "item": "/import/autoscan/inotify/directory/attribute::recursive",
               "caption": "Recursive",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::hidden-files",
               "caption": "Import Hidden Files",
-              "editable": true
+              "editable": false
             }
           ]
         },

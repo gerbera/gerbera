@@ -48,7 +48,16 @@ const std::map<AutoscanMediaMode, std::string> AutoscanDirectory::ContainerTypes
     { AutoscanMediaMode::Mixed, UPNP_CLASS_CONTAINER },
 };
 
-AutoscanDirectory::AutoscanDirectory(fs::path location, AutoscanScanMode mode, bool recursive, bool persistent, unsigned int interval, bool hidden, bool followSymlinks, int mediaType, const std::map<AutoscanMediaMode, std::string>& containerMap)
+AutoscanDirectory::AutoscanDirectory(
+    fs::path location,
+    AutoscanScanMode mode,
+    bool recursive,
+    bool persistent,
+    unsigned int interval,
+    bool hidden,
+    bool followSymlinks,
+    int mediaType,
+    const std::map<AutoscanMediaMode, std::string>& containerMap)
     : location(std::move(location))
     , mode(mode)
     , recursive(recursive)
