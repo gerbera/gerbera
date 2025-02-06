@@ -256,7 +256,7 @@ $.widget('grb.dataitems', {
       };
       for (let ipp in ippOptions) {
         const ippOption = $('<option' + (pager.itemsPerPage === ippOptions[ipp] ? ' selected="selected" ' : ' ') + 'value="' + ippOptions[ipp] + '">'
-            + ippOptions[ipp] + ((pager.ippOptions.default === ippOptions[ipp]) ? ' *' : '') + '</option>');
+          + ippOptions[ipp] + ((pager.ippOptions.default === ippOptions[ipp]) ? ' *' : '') + '</option>');
         ippOption.appendTo(ippSelect);
       }
       $('<option' + (pager.itemsPerPage === 0 ? ' selected="selected" ' : ' ') + 'value="0">All</option>').appendTo(ippSelect);

@@ -435,7 +435,8 @@ const loadEditItem = (response) => {
       item: response.item,
       onSave: saveItem,
       onDetails: showDetails,
-      onHide: hideDetails
+      onHide: hideDetails,
+      onData: toggleData,
     });
 
     editModal.editmodal('show');
@@ -523,6 +524,10 @@ const saveItem = () => {
       .then((response) => saveItemComplete(response))
       .catch((err) => GerberaApp.error(err))
   }
+};
+
+const toggleData = (event) => {
+  $('#editModal').editmodal('toggleData', event);
 };
 
 const showDetails = () => {

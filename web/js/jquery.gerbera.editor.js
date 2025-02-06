@@ -21,14 +21,14 @@
     $Id$
 */
 (function ($) {
-  function hideFields (fields) {
+  function hideFields(fields) {
     for (let i = 0; i < fields.length; i++) {
       const field = fields[i];
       field.closest('.form-group').hide();
     }
   }
 
-  function showFields (fields) {
+  function showFields(fields) {
     for (let i = 0; i < fields.length; i++) {
       const field = fields[i];
       field.closest('.form-group').show();
@@ -36,15 +36,15 @@
   }
 
   const defaultClasses = {
-    container: {oclass: 'object.container', type: 'container'},
-    item: {oclass: 'object.item', type: 'item'},
-    external_url: {oclass: 'object.item', type: 'external_url', protocol: 'http-get'},
-    image: {oclass: 'object.item.imageItem', type: 'item'},
-    imagePhoto: {oclass: 'object.item.imageItem.photo', type: 'item'},
-    audio: {oclass: 'object.item.audioItem', type: 'item'},
-    audioBroadcast: {oclass: 'object.item.audioItem.audioBroadcast', type: 'external_url', protocol: 'http-get'},
-    video: {oclass: 'object.item.videoItem', type: 'item'},
-    videoBroadcast: {oclass: 'object.item.videoItem.videoBroadcast', type: 'external_url', protocol: 'http-get'},
+    container: { oclass: 'object.container', type: 'container' },
+    item: { oclass: 'object.item', type: 'item' },
+    external_url: { oclass: 'object.item', type: 'external_url', protocol: 'http-get' },
+    image: { oclass: 'object.item.imageItem', type: 'item' },
+    imagePhoto: { oclass: 'object.item.imageItem.photo', type: 'item' },
+    audio: { oclass: 'object.item.audioItem', type: 'item' },
+    audioBroadcast: { oclass: 'object.item.audioItem.audioBroadcast', type: 'external_url', protocol: 'http-get' },
+    video: { oclass: 'object.item.videoItem', type: 'item' },
+    videoBroadcast: { oclass: 'object.item.videoItem.videoBroadcast', type: 'external_url', protocol: 'http-get' },
   };
   const objectFlags = [
     "Restricted",
@@ -56,7 +56,7 @@
     "OnlineService",
     "OggTheora",
   ];
-  function addNewItem (modal, itemData) {
+  function addNewItem(modal, itemData) {
     const itemType = itemData.type;
     const item = itemData.item;
     const editObjectType = modal.find('#editObjectType');
@@ -79,7 +79,7 @@
 
     editObjectType.off('click').on('click', function () {
       const editObjectType = $(this);
-      addNewItem(modal, {type: editObjectType.val(), item: item, onSave: itemData.onSave})
+      addNewItem(modal, { type: editObjectType.val(), item: item, onSave: itemData.onSave })
     });
 
     modal.find('#objectIdGroup').hide();
@@ -111,11 +111,13 @@
       hideFields([editProtocol]);
     } else if (defaultClasses[itemType].type === 'external_url') {
       editProtocol.val(defaultClasses[itemType].protocol);
-      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editProtocol, editFlags, editFlagBox['ProxyUrl'], editFlagBox['OnlineService']]);
+      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editProtocol, editFlags,
+        editFlagBox['ProxyUrl'],
+        /* editFlagBox['OnlineService'] */]);
     }
   }
 
-  function reset (modal) {
+  function reset(modal) {
     modal.find('#editObjectType').val('item');
     modal.find('#objectId').val('');
     modal.find('#addParentId').val('');
@@ -166,7 +168,7 @@
       text.appendTo(content);
     }
     if (special) {
-        special.appendTo(content);
+      special.appendTo(content);
     }
     row.append(content);
 
@@ -197,14 +199,14 @@
     let result = [];
     objectFlags.forEach((flag) => {
       if (modal.find('#editFlag-' + flag).is(':checked')) {
-         result.push(flag);
+        result.push(flag);
       }
     });
 
     return result.join('|');
   }
 
-  function loadItem (modal, itemData) {
+  function loadItem(modal, itemData) {
     const item = itemData.item;
     if (item) {
       reset(modal);
@@ -229,19 +231,26 @@
       const metatable = modal.find('#metadata');
       const detailButton = modal.find('#detailbutton');
       let tbody;
-      if (item.flags && item.flags.value) {
-        $('<thead><tr><th colspan="3">Extras</th></tr></thead>').appendTo(metatable);
-        tbody = $('<tbody></tbody>');
-        appendMetaItem(tbody, "flags", item.flags.value);
-        metatable.append(tbody);
-      }
       if (item.metadata && item.metadata.metadata.length) {
         detailButton.show();
-        $('<thead><tr><th colspan="3">Metadata</th></tr></thead>').appendTo(metatable);
+        const thead = $('<thead><tr><th colspan="3">Metadata</th></tr></thead>');
+        thead.addClass('itemDetailHead');
+        thead.appendTo(metatable);
         tbody = $('<tbody></tbody>');
         for (let i = 0; i < item.metadata.metadata.length; i++) {
           appendMetaItem(tbody, item.metadata.metadata[i].metaname, item.metadata.metadata[i].metavalue);
         }
+        thead.click(tbody, itemData.onData);
+        metatable.append(tbody);
+      }
+      if (item.flags && item.flags.value) {
+        const thead = $('<thead><tr><th colspan="3">Extras</th></tr></thead>');
+        thead.addClass('itemDetailHead');
+        thead.appendTo(metatable);
+        tbody = $('<tbody></tbody>');
+        appendMetaItem(tbody, "flags", item.flags.value);
+        tbody.hide();
+        thead.click(tbody, itemData.onData);
         metatable.append(tbody);
       }
 
@@ -249,11 +258,15 @@
       if (item.auxdata && item.auxdata.auxdata.length) {
         detailButton.show();
         auxtable.show();
-        $('<thead><tr><th colspan="3">Aux Data</th></tr></thead>').appendTo(auxtable);
+        const thead = $('<thead><tr><th colspan="3">Aux Data</th></tr></thead>');
+        thead.addClass('itemDetailHead');
+        thead.appendTo(auxtable);
         tbody = $('<tbody></tbody>');
         for (let i = 0; i < item.auxdata.auxdata.length; i++) {
           appendMetaItem(tbody, item.auxdata.auxdata[i].auxname, item.auxdata.auxdata[i].auxvalue);
         }
+        tbody.hide();
+        thead.click(tbody, itemData.onData);
         auxtable.append(tbody);
       } else {
         auxtable.hide();
@@ -265,13 +278,18 @@
         restable.show();
         for (let i = 0; i < item.resources.resources.length; i++) {
           if (item.resources.resources[i].resname === '----RESOURCE----') {
-            $(`<thead><tr><th>Resource</th><th colspan="2">${item.resources.resources[i].resvalue}</th></tr></thead>`).appendTo(restable);
+            const thead = $(`<thead><tr><th>Resource</th><th colspan="2">#${item.resources.resources[i].resvalue}</th></tr></thead>`);
+            thead.addClass('itemDetailHead');
+            thead.appendTo(restable);
             tbody = $('<tbody></tbody>');
+            if (i > 0)
+              tbody.hide();
+            thead.click(tbody, itemData.onData);
             restable.append(tbody);
           } else if (item.resources.resources[i].resname === 'image') {
-            appendMetaItem(tbody, 'content', null, $('<img width="50px" class="resourceImage" src="' +  item.resources.resources[i].resvalue + '"/>'));
+            appendMetaItem(tbody, 'content', null, $('<img width="50px" class="resourceImage" src="' + item.resources.resources[i].resvalue + '"/>'));
           } else if (item.resources.resources[i].resname === 'link') {
-            appendMetaItem(tbody, 'content', null, $('<a href=' +  item.resources.resources[i].resvalue + '>Open</span>'));
+            appendMetaItem(tbody, 'content', null, $('<a href=' + item.resources.resources[i].resvalue + '>Open</span>'));
           } else {
             appendMetaItem(tbody, item.resources.resources[i].resname, item.resources.resources[i].resvalue, null, item.resources.resources[i].rawvalue);
           }
@@ -304,7 +322,14 @@
     }
   }
 
-  function loadCdsObject (modal, item) {
+  function toggleData(modal, target) {
+    if ($(target.data[0]).is(":hidden") === true)
+      $(target.data[0]).show();
+    else
+      $(target.data[0]).hide();
+  }
+
+  function loadCdsObject(modal, item) {
     modal.find('#editTitle')
       .val(item.title.value)
       .prop('disabled', !item.title.editable)
@@ -345,7 +370,7 @@
     }
   }
 
-  function loadSimpleItem (modal, item, obj_type) {
+  function loadSimpleItem(modal, item, obj_type) {
     modal.find('#editLocation')
       .val(item.location.value)
       .prop('disabled', !item.location.editable)
@@ -383,7 +408,7 @@
     hideFields(hiddenFields);
   }
 
-  function loadContainer (modal, item) {
+  function loadContainer(modal, item) {
     modal.find('#editFlags')
       .val(item.flags.value)
       .prop('disabled', true)
@@ -408,7 +433,7 @@
     ]);
   }
 
-  function loadExternalUrl (modal, item) {
+  function loadExternalUrl(modal, item) {
     modal.find('#editLocation')
       .val(item.location.value)
       .prop('disabled', !item.location.editable)
@@ -437,7 +462,7 @@
     showFields([
       modal.find('#editFlags'),
       modal.find('#editFlag-ProxyUrl'),
-      modal.find('#editFlag-OnlineService'),
+      // modal.find('#editFlag-OnlineService'),
     ]);
     hideFields([
       modal.find('#editFlag-Searchable'),
@@ -449,7 +474,7 @@
     ]);
   }
 
-  function saveItem (modal) {
+  function saveItem(modal) {
     let item;
     const objectId = modal.find('#objectId');
     const editObjectType = modal.find('#editObjectType');
@@ -493,7 +518,7 @@
     return item;
   }
 
-  function addObject (modal) {
+  function addObject(modal) {
     let item;
     const parentId = modal.find('#addParentId');
     const editObjectType = modal.find('#editObjectType');
@@ -578,6 +603,9 @@
     },
     saveItem: function () {
       return saveItem($(this._element));
+    },
+    toggleData: function (target) {
+      return toggleData($(this._element), target);
     }
   });
 
