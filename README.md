@@ -80,7 +80,7 @@ sudo make install
 
 | Library             | Min Version | Recommended | Latest tested | Required?     | Note                           | Default  |
 |---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
-| [googletest]        | 1.10.0      | 1.10.0      | 1.15.2        | Optional      | Running tests                  | Disabled |
+| [googletest]        | 1.10.0      | 1.10.0      | 1.16.0        | Optional      | Running tests                  | Disabled |
 | [doxygen]           |             | 1.8.14      | 1.8.14        | Optional      | Building source documentation  | Disabled |
 
 ## License

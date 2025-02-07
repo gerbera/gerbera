@@ -1,8 +1,9 @@
 # Gerbera - UPnP AV Mediaserver.
+-3380
 
 ## HEAD
 
-Changed default for layout to "js" if built with JavaScript support.
+Changed default for layout to `js` if built with JavaScript support.
 
 ### NEW Features
 
@@ -11,6 +12,7 @@ Changed default for layout to "js" if built with JavaScript support.
 - Several script options to control audio layout
 - Harmonisation of metadata handling for wavpack and matroska media handlers
 - Fabricated comment on import in media handlers (incl. configuration)
+- Resource attribute `pixelFormat` for videos.
 
 ### FIXES
 
@@ -23,7 +25,7 @@ Changed default for layout to "js" if built with JavaScript support.
 ### Code Improvements
 
 - Removed static from ConfigDefinition
-- Update versions of pugixml (1.15), libexif (v0.6.25), wavpack (5.8.1), fmt (11.1.3), spdlog (1.15.1), wavpack (1.8.1)
+- Update versions of pugixml (1.15), libexif (v0.6.25), wavpack (5.8.1), fmt (11.1.3), spdlog (1.15.1), wavpack (1.8.1), googletest (1.16.0)
 
 ## 2.4.1
 

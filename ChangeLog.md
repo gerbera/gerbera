@@ -25,6 +25,7 @@
 - Set more metadata in builtin layout
 - Sqlite: Exit after multiple exceptions
 - UI: Make details collapsable in items editor detail view
+- Update to googletest 1.16.0
 - Update Library Versions
 - Update wavpack
 - work around build issue
