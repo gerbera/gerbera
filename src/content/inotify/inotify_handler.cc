@@ -220,7 +220,7 @@ int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, co
             isDir = changedObject->isContainer();
         if ((!AUTOSCAN_IS_WRITTEN(mask) || importMode != ImportMode::Gerbera) && changedObject) {
             log_debug("deleting {}", path.c_str());
-            content->removeObject(adir, changedObject, path, !AUTOSCAN_IS_MOVED(mask));
+            content->removeObject(adir, changedObject, path, !AUTOSCAN_IS_MOVED(mask), false);
             changedObject = nullptr;
         }
     }
