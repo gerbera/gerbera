@@ -43,11 +43,14 @@ const static auto res_names = std::map<ResourceAttribute, std::string> {
     std::pair(ResourceAttribute::RESOURCE_FILE, "R_RESOURCE_FILE"),
     std::pair(ResourceAttribute::BITS_PER_SAMPLE, "R_BITS_PER_SAMPLE"),
     std::pair(ResourceAttribute::TYPE, "R_TYPE"),
+    std::pair(ResourceAttribute::FORMAT, "R_FORMAT"),
     std::pair(ResourceAttribute::FANART_OBJ_ID, "R_FANART_OBJ_ID"),
     std::pair(ResourceAttribute::FANART_RES_ID, "R_FANART_RES_ID"),
     std::pair(ResourceAttribute::LANGUAGE, "R_LANGUAGE"),
     std::pair(ResourceAttribute::AUDIOCODEC, "R_AUDIOCODEC"),
     std::pair(ResourceAttribute::VIDEOCODEC, "R_VIDEOCODEC"),
+    std::pair(ResourceAttribute::ORIENTATION, "R_ORIENTATION"),
+    std::pair(ResourceAttribute::PIXELFORMAT, "R_PIXELFORMAT"),
 };
 
 const static auto mt_names = std::map<MetadataFields, std::string_view> {

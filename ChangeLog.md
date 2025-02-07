@@ -8,6 +8,7 @@
 - Build with fmt 11.1.3
 - Cleanup tree and autoscan commands
 - Downgrade docker builder as well
+- Extract Pixelformat for videos
 - Fix album art in builtin layout
 - Fix cors host without ipv6 address
 - Fix management auf autoscans in list

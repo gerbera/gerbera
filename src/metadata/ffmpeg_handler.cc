@@ -63,6 +63,7 @@ extern "C" {
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
 #include <libavutil/display.h>
+#include <libavutil/pixdesc.h>
 
 } // extern "C"
 
@@ -440,6 +441,19 @@ void FfmpegHandler::addFfmpegResourceFields(
                 log_debug("Added resolution: {} pixel from stream {}", resolution, i);
                 resource2->addAttribute(ResourceAttribute::RESOLUTION, resolution);
                 videoSet = true;
+            }
+            // pixelformat
+            {
+                AVPixelFormat pix_fmt = static_cast<AVPixelFormat>(as_codecpar(st)->format);
+
+                // Get pixel format name
+                auto pix_fmt_name = av_get_pix_fmt_name(pix_fmt);
+                if (pix_fmt_name) {
+                    resource2->addAttribute(ResourceAttribute::PIXELFORMAT, pix_fmt_name);
+                    log_debug("Pixel Format: {}", pix_fmt_name);
+                } else {
+                    log_debug("Unknown Pixel Format");
+                }
             }
         }
         if (st && !audioSet && as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO) {
