@@ -1479,7 +1479,22 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
     var item = copyObject(cds);
 
     item.playlistOrder = (entry.order ? entry.order : playlistOrder);
-    item.title = entry.writeThrough <= 0 ? (item.metaData[M_TITLE] ? item.metaData[M_TITLE][0] : cds.title) : entry.title;
+
+    // Select the title for the playlist item.
+    if (entry.writeThrough > 0 && entry.title) {
+      // For ASX files, use the title in the playlist if present.
+      item.title = entry.title;
+    } else if (item.metaData[M_TITLE]) {
+      // Otherwise, prefer the metadata if set.
+      item.title = item.metaData[M_TITLE][0];
+    } else if (entry.title) {
+      // Otherwise, use the title in the playlist if set.
+      item.title = entry.title;
+    } else {
+      // Use title of the referenced item.
+      item.title = cds.title;
+    }
+
     item.metaData[M_CONTENT_CLASS] = [UPNP_CLASS_PLAYLIST_ITEM];
     item.description = entry.description ? entry.description : null;
 
