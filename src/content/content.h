@@ -135,7 +135,7 @@ public:
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
     /// \param parameters key value pairs of fields to be updated
-    virtual void updateObject(int objectID, const std::map<std::string, std::string>& parameters) = 0;
+    virtual std::shared_ptr<CdsObject> updateObject(int objectID, const std::map<std::string, std::string>& parameters) = 0;
     virtual std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj,
         const fs::path& path, bool rescanResource, bool async = true, bool all = false)
         = 0;

@@ -186,6 +186,7 @@ public:
     static ContentHandler remapContentHandler(const std::string& contHandler);
     static ContentHandler remapContentHandler(int ch);
 
+    static ResourcePurpose mapPurpose(const std::string& name);
     static ResourcePurpose remapPurpose(int ip) { return static_cast<ResourcePurpose>(ip); }
     static std::string getPurposeDisplay(ResourcePurpose purpose);
 

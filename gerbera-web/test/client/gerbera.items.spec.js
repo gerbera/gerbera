@@ -396,6 +396,7 @@ describe('Gerbera Items', () => {
         description: 'A%20description',
         updates: 'check',
         flags: 'Restricted',
+        resources: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -418,6 +419,7 @@ describe('Gerbera Items', () => {
         title: 'container%20title',
         updates: 'check',
         flags: 'Restricted',
+        resources: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -444,6 +446,7 @@ describe('Gerbera Items', () => {
         protocol: 'http-get',
         updates: 'check',
         flags: 'Restricted',
+        resources: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -607,6 +610,7 @@ describe('Gerbera Items', () => {
         description: '',
         updates: 'check',
         flags: '',
+        resources: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -629,6 +633,7 @@ describe('Gerbera Items', () => {
         title: '',
         updates: 'check',
         flags: '',
+        resources: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -648,6 +653,7 @@ describe('Gerbera Items', () => {
         title: '',
         updates: 'check',
         flags: '',
+        resources: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 
@@ -671,6 +677,7 @@ describe('Gerbera Items', () => {
         protocol: 'http-get',
         updates: 'check',
         flags: '',
+        resources: '',
       };
       data[Auth.SID] = 'SESSION_ID';
 

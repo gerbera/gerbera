@@ -973,7 +973,7 @@ void ContentManager::addRecursive(
 }
 
 template <typename T>
-void ContentManager::updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters)
+std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string upnpClass = getValueOrDefault(parameters, "class");
@@ -984,10 +984,11 @@ void ContentManager::updateCdsObject(const std::shared_ptr<T>& item, const std::
     std::string flags = getValueOrDefault(parameters, "flags");
 
     log_error("updateCdsObject: CdsObject {} not updated", title);
+    return nullptr;
 }
 
 template <>
-void ContentManager::updateCdsObject(const std::shared_ptr<CdsContainer>& item, const std::map<std::string, std::string>& parameters)
+std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr<CdsContainer>& item, const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string upnpClass = getValueOrDefault(parameters, "class");
@@ -1018,10 +1019,11 @@ void ContentManager::updateCdsObject(const std::shared_ptr<CdsContainer>& item, 
         update_manager->containerChanged(item->getParentID());
         session_manager->containerChangedUI(item->getParentID());
     }
+    return clone;
 }
 
 template <>
-void ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const std::map<std::string, std::string>& parameters)
+std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string upnpClass = getValueOrDefault(parameters, "class");
@@ -1089,20 +1091,21 @@ void ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const
         log_debug("updateObject: calling containerChanged on item {}", item->getTitle());
         update_manager->containerChanged(item->getParentID());
     }
+    return clone;
 }
 
-void ContentManager::updateObject(int objectID, const std::map<std::string, std::string>& parameters)
+std::shared_ptr<CdsObject> ContentManager::updateObject(int objectID, const std::map<std::string, std::string>& parameters)
 {
     auto obj = database->loadObject(objectID);
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (item) {
-        updateCdsObject(item, parameters);
+        return updateCdsObject(item, parameters);
     } else {
         auto cont = std::dynamic_pointer_cast<CdsContainer>(obj);
         if (cont) {
-            updateCdsObject(cont, parameters);
+            return updateCdsObject(cont, parameters);
         } else {
-            updateCdsObject(obj, parameters);
+            return updateCdsObject(obj, parameters);
         }
     }
 }

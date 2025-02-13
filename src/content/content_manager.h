@@ -118,7 +118,7 @@ public:
     /// \brief Updates an object in the database using the given parameters.
     /// \param objectID ID of the object to update
     /// \param parameters key value pairs of fields to be updated
-    void updateObject(int objectID, const std::map<std::string, std::string>& parameters) override;
+    std::shared_ptr<CdsObject> updateObject(int objectID, const std::map<std::string, std::string>& parameters) override;
 
     // returns nullptr if file does not exist or is ignored due to configuration
     std::shared_ptr<CdsObject> createObjectFromFile(const std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& dirEnt, bool followSymlinks, bool allowFifo = false) override;
@@ -310,7 +310,7 @@ protected:
     void destroyLayout();
 
     template <typename T>
-    void updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
+    std::shared_ptr<CdsObject> updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters);
 
 #ifdef ONLINE_SERVICES
     std::unique_ptr<OnlineServiceList> online_services;

@@ -97,6 +97,10 @@ protected:
     int intParam(const std::string& name, int invalid = 0) const;
     bool boolParam(const std::string& name) const;
 
+    /// \brief read resource information from web operation
+    /// \param object target object for the resources found
+    bool readResources(const std::shared_ptr<CdsObject>& object);
+
     /// \brief Checks if the incoming request is valid.
     ///
     /// Each request going to the ui must at least have a valid session id,

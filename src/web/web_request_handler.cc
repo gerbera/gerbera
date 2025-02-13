@@ -35,6 +35,8 @@
 #include "web_request_handler.h" // API
 
 #include "cds/cds_enums.h"
+#include "cds/cds_objects.h"
+#include "cds/cds_resource.h"
 #include "common.h"
 #include "config/config.h"
 #include "config/config_val.h"
@@ -265,6 +267,67 @@ std::string_view WebRequestHandler::mapAutoscanType(AutoscanType type)
     default:
         return "none";
     }
+}
+
+bool WebRequestHandler::readResources(const std::shared_ptr<CdsObject>& object)
+{
+    std::string resources = param("resources"); // contains list of changed resource properties separated by |
+    bool result = false;
+    if (!resources.empty()) {
+        auto resourceList = splitString(resources, '|');
+        std::map<int, std::map<std::string, std::string>> resMap;
+        for (auto&& resValue : resourceList) {
+            auto propList = splitString(resValue, '.'); // resource property is formatted : resource.<index>.<propertyName>
+            if (propList.size() >= 3) {
+                std::string prop = param(resValue);
+                auto resIndex = stoiString(propList[1]);
+                if (resMap.find(resIndex) == resMap.end()) {
+                    resMap[resIndex] = {};
+                }
+                resMap[resIndex][propList[2]] = prop;
+            }
+        }
+        for (auto&& [resIndex, resDef] : resMap) {
+            std::shared_ptr<CdsResource> resource = object->getResource(resIndex);
+            if (resDef.find("purpose") != resDef.end() || !resource) {
+                auto purpose = EnumMapper::mapPurpose(resDef.at("purpose"));
+                if (!resource) {
+                    resource = std::make_shared<CdsResource>(ContentHandler::EXTURL, purpose);
+                    object->addResource(resource);
+                } else {
+                    resource->setPurpose(purpose);
+                }
+                result = true;
+            }
+            if (resDef.find("protocolInfo") != resDef.end()) {
+                std::string protocolInfo = resDef.at("protocolInfo");
+                resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
+                result = true;
+            } else if (resDef.find("mime-type") != resDef.end() && resDef.find("protocol") != resDef.end()) {
+                std::string resMime = resDef.at("mime-type");
+                if (resMime.empty())
+                    resMime = MIMETYPE_DEFAULT;
+                std::string resProtocol = resDef.at("protocol");
+                std::string protocolInfo;
+                if (!resProtocol.empty())
+                    protocolInfo = renderProtocolInfo(resMime, resProtocol);
+                else
+                    protocolInfo = renderProtocolInfo(resMime);
+                resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
+                result = true;
+            }
+            if (resDef.find("location") != resDef.end()) {
+                std::string resLocation = resDef.at("location");
+                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, resLocation);
+                result = true;
+            } else if (resDef.find("resFile") != resDef.end()) {
+                std::string resLocation = resDef.at("resFile");
+                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, resLocation);
+                result = true;
+            }
+        }
+    }
+    return result;
 }
 
 } // namespace Web

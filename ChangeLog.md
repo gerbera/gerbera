@@ -12,6 +12,7 @@
 - Fix album art in builtin layout
 - Fix cors host without ipv6 address
 - Fix management auf autoscans in list
+- Fix update of playlists
 - Fix UpnpMap logic
 - Focal: Freeze more aws-sdk versions
 - Focal: freeze ruby aws-sdk versions used for package upload
@@ -19,14 +20,16 @@
 - Generate Comment from Metadata During Scan
 - Improve logging of string conversion
 - JS: Fix config autoscan object in scripts
+- Populate playlist item titles
 - Refactor static code from ConfigDefinition
 - Remap metadata fields when parsing virtual-directories keys
 - Rework autoscan list handling
 - Set more metadata in builtin layout
 - Sqlite: Exit after multiple exceptions
+- Support Resources for External Items
 - UI: Make details collapsable in items editor detail view
-- Update to googletest 1.16.0
 - Update Library Versions
+- Update to googletest 1.16.0
 - Update wavpack
 - work around build issue
 

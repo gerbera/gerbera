@@ -334,9 +334,10 @@ public:
     }
 
     /// \brief Query resource tag with the given index
-    std::shared_ptr<CdsResource> getResource(std::size_t index) const
+    std::shared_ptr<CdsResource> getResource(int index) const
     {
-        return resources.at(index);
+        auto res = std::find_if(resources.begin(), resources.end(), [index](auto&& r) { return r->getResId() == index; });
+        return res != resources.end() ? *res : nullptr;
     }
 
     /// \brief Query resource tag with the given handler id
