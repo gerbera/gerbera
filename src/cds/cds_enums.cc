@@ -32,6 +32,7 @@ Gerbera - https://gerbera.io/
 #include "content/scripting/script_names.h"
 #include "exceptions.h"
 #include "util/logger.h"
+#include "util/tools.h"
 
 #include <algorithm>
 #include <array>
@@ -97,6 +98,16 @@ std::string EnumMapper::mapContentHandler2String(ContentHandler ch)
 std::string EnumMapper::getPurposeDisplay(ResourcePurpose purpose)
 {
     return purposeToDisplay.at(purpose);
+}
+
+ResourcePurpose EnumMapper::mapPurpose(const std::string& name)
+{
+    auto purpose = toLower(name);
+    auto purpEntry = std::find_if(purposeToDisplay.begin(), purposeToDisplay.end(), [purpose](auto&& entry) { return purpose == toLower(entry.second); });
+    if (purpEntry != purposeToDisplay.end()) {
+        return purpEntry->first;
+    }
+    throw_std_runtime_error("Invalid purpose value {}", name);
 }
 
 std::string EnumMapper::getAttributeName(ResourceAttribute attr)

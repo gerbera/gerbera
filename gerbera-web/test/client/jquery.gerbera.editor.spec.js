@@ -240,6 +240,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         title: 'Test.mp4',
         description: 'A%20description',
         flags: 'Restricted',
+        resources: '',
       });
     });
 
@@ -253,6 +254,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         object_id: '1471',
         title: 'container%20title',
         flags: 'Restricted',
+        resources: '',
       });
     });
 
@@ -269,7 +271,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         description: 'description',
         'mime-type': 'video%2Fts',
         flags: 'Restricted',
-        protocol: 'http-get'
+        protocol: 'http-get',
+        resources: '',
       });
     });
   });
@@ -297,7 +300,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         location: '',
         title: '',
         flags: '',
-        description: ''
+        description: '',
+        resources: '',
       });
     });
 
@@ -312,6 +316,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         class: 'object.container',
         flags: '',
         title: '',
+        resources: '',
       });
     });
 
@@ -329,7 +334,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         description: '',
         'mime-type': '',
         flags: '',
-        protocol: 'http-get'
+        protocol: 'http-get',
+        resources: '',
       });
     });
   });

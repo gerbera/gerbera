@@ -955,6 +955,11 @@ body,
   background-color: light-dark(var(--light-bg-form), var(--dark-bg-form));
 }
 
+.itemDetailFoot {
+  font-weight: bold;
+  background-color: light-dark(var(--light-bg-form), var(--dark-bg-form));
+}
+
 .autoscan-child {
   background-color: transparent;
   color: light-dark(var(--light-text), var(--dark-text)) !important;

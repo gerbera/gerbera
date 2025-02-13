@@ -625,14 +625,16 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
         } else if (res.getPurpose() == ResourcePurpose::Transcode) {
             // Transcoded resources dont set a resId, uses pr_name from params instead.
             url = virtualURL + URLUtils::joinUrl({ CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, URL_VALUE_TRANSCODE_NO_RES_ID });
+        } else if (res.getPurpose() == ResourcePurpose::Thumbnail && res.getHandlerType() == ContentHandler::EXTURL && !item.getFlag(OBJECT_FLAG_PROXY_URL)) {
+            url = res.getAttribute(ResourceAttribute::RESOURCE_FILE);
+            if (url.empty())
+                throw_std_runtime_error("Missing attribute thumbnail URL");
+            if (!startswith(url, "http")) {
+                url = "";
+            } else {
+                return url;
+            }
         }
-    }
-
-    // Externally hosted thumnbnails?
-    if (res.getPurpose() == ResourcePurpose::Thumbnail && res.getHandlerType() == ContentHandler::EXTURL) {
-        url = res.getOption(RESOURCE_OPTION_URL);
-        if (url.empty())
-            throw_std_runtime_error("missing thumbnail URL");
     }
 
     // Standard Resource

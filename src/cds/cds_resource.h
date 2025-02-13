@@ -40,9 +40,6 @@
 #include <map>
 #include <memory>
 
-/// \brief name for external urls that can appear in object resources (i.e.
-/// a YouTube thumbnail)
-#define RESOURCE_OPTION_URL "url"
 #define RESOURCE_OPTION_FOURCC "4cc"
 
 #define RESOURCE_IMAGE_STEP_ICO "ICO"
@@ -64,8 +61,13 @@ public:
     /// \param purpose of the associated handler
     /// \param options options of resource
     /// \param parameters parameters of resource
-    explicit CdsResource(ContentHandler handlerType, ResourcePurpose purpose, std::string_view options = {}, std::string_view parameters = {});
-    CdsResource(ContentHandler handlerType, ResourcePurpose purpose,
+    explicit CdsResource(
+        ContentHandler handlerType,
+        ResourcePurpose purpose,
+        std::string_view options = {},
+        std::string_view parameters = {});
+    CdsResource(
+        ContentHandler handlerType, ResourcePurpose purpose,
         std::map<ResourceAttribute, std::string> attributes,
         std::map<std::string, std::string> parameters,
         std::map<std::string, std::string> options);

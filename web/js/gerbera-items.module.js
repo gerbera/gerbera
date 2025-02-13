@@ -389,7 +389,13 @@ const addVirtualItem = (event) => {
   const item = event.data;
   const editModal = $('#editModal');
   if (item) {
-    editModal.editmodal('addNewItem', { type: 'container', item: item, onSave: addObject });
+    editModal.editmodal('addNewItem',
+      {
+        type: 'container',
+        item: item,
+        onSave: addObject,
+        onData: toggleData,
+      });
     editModal.editmodal('show');
   }
 };

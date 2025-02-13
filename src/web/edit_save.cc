@@ -48,5 +48,7 @@ void Web::EditSave::process()
         throw_std_runtime_error("invalid object id");
 
     int objectID = std::stoi(objID);
-    content->updateObject(objectID, params);
+    auto object = content->updateObject(objectID, params);
+    if (readResources(object))
+        content->updateObject(object, true);
 }
