@@ -13,6 +13,7 @@ Changed default for layout to `js` if built with JavaScript support.
 - Harmonisation of metadata handling for wavpack and matroska media handlers
 - Fabricated comment on import in media handlers (incl. configuration)
 - Resource attribute `pixelFormat` for videos.
+- Additional Resources (thumbnail, subtitle) for External Urls
 
 ### FIXES
 
@@ -25,7 +26,7 @@ Changed default for layout to `js` if built with JavaScript support.
 ### Code Improvements
 
 - Removed static from ConfigDefinition
-- Update versions of pugixml (1.15), libexif (v0.6.25), wavpack (5.8.1), fmt (11.1.3), spdlog (1.15.1), wavpack (1.8.1), googletest (1.16.0)
+- Update versions of pugixml (1.15), libexif (v0.6.25), wavpack (5.8.1), fmt (11.1.3), spdlog (1.15.1), wavpack (1.8.1), googletest (1.16.0), libexiv2 (0.28.4)
 
 ## 2.4.1
 

@@ -30,6 +30,7 @@
 - UI: Make details collapsable in items editor detail view
 - Update Library Versions
 - Update to googletest 1.16.0
+- Update libexiv2 to 0.28.4
 - Update wavpack
 - work around build issue
 
