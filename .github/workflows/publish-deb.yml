@@ -33,7 +33,6 @@ jobs:
         arch:
           - "linux/amd64"
           - "linux/arm/v7"
-          - "linux/arm64/v8"
 
         isPR:
           - ${{github.event_name == 'pull_request'}}
@@ -41,11 +40,20 @@ jobs:
         exclude:
           - isPR: true
             arch: "linux/arm/v7"
+        include:
           - isPR: true
+            runner: "ubuntu-24.04"
             arch: "linux/arm64/v8"
-          # ubuntu:20.04 linux/arm/v7 has broken certificate handling
-          #- os-ver: "ubuntu:20.04"
-          #  arch: "linux/arm/v7"
+            os-ver:
+              - "ubuntu:18.04"
+              - "ubuntu:20.04"
+              - "ubuntu:22.04"
+              - "ubuntu:24.04"
+              - "ubuntu:24.10"
+              - "ubuntu:25.04"
+              - "debian:oldstable"
+              - "debian:stable"
+              - "debian:testing"
 
     runs-on: ubuntu-22.04
     name: Compile ${{ matrix.os-ver }} ${{ matrix.arch }}
