@@ -19,6 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        runner: ["ubuntu-latest"]
         os-ver:
           - "ubuntu:18.04"
           - "ubuntu:20.04"
@@ -42,20 +43,43 @@ jobs:
             arch: "linux/arm/v7"
         include:
           - isPR: true
+            runner: "ubuntu-22.04"
+            arch: "linux/arm64/v8"
+            os-ver: "ubuntu:18.04"
+          - isPR: true
+            runner: "ubuntu-22.04"
+            arch: "linux/arm64/v8"
+            os-ver: "ubuntu:20.04"
+          - isPR: true
             runner: "ubuntu-24.04"
             arch: "linux/arm64/v8"
-            os-ver:
-              - "ubuntu:18.04"
-              - "ubuntu:20.04"
-              - "ubuntu:22.04"
-              - "ubuntu:24.04"
-              - "ubuntu:24.10"
-              - "ubuntu:25.04"
-              - "debian:oldstable"
-              - "debian:stable"
-              - "debian:testing"
+            os-ver: "ubuntu:22.04"
+          - isPR: true
+            runner: "ubuntu-22.04"
+            arch: "linux/arm64/v8"
+            os-ver: "ubuntu:24.04"
+          - isPR: true
+            runner: "ubuntu-22.04"
+            arch: "linux/arm64/v8"
+            os-ver: "ubuntu:24.10"
+          - isPR: true
+            runner: "ubuntu-22.04"
+            arch: "linux/arm64/v8"
+            os-ver: "ubuntu:25.04"
+          - isPR: true
+            runner: "ubuntu-24.04"
+            arch: "linux/arm64/v8"
+            os-ver: "debian:oldstable"
+          - isPR: true
+            runner: "ubuntu-22.04"
+            arch: "linux/arm64/v8"
+            os-ver: "debian:stable"
+          - isPR: true
+            runner: "ubuntu-22.04"
+            arch: "linux/arm64/v8"
+            os-ver: "debian:testing"
 
-    runs-on: ubuntu-22.04
+    runs-on: ${{ matrix.runner }}
     name: Compile ${{ matrix.os-ver }} ${{ matrix.arch }}
     steps:
       - uses: actions/checkout@v4
