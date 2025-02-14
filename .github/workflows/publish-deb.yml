@@ -50,7 +50,7 @@ jobs:
             arch: "linux/arm/v7"
           - isPR: false
             arch: "linux/arm/v7"
-          - isPR: true
+          - isPR: false
             arch: "linux/arm64/v8"
 
     runs-on: ${{ matrix.runner }}
