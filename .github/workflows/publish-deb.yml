@@ -19,7 +19,9 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        runner: ["ubuntu-latest"]
+        runner:
+          - "ubuntu-latest"
+          - "ubuntu-24.04-arm"
         os-ver:
           - "ubuntu:18.04"
           - "ubuntu:20.04"
@@ -34,50 +36,22 @@ jobs:
         arch:
           - "linux/amd64"
           - "linux/arm/v7"
+          - "linux/arm64/v8"
 
         isPR:
           - ${{github.event_name == 'pull_request'}}
         # Run only the amd64 build in pull reqs:
         exclude:
-          - isPR: true
+          - runner: "ubuntu-24.04-arm"
+            arch: "linux/amd64"
+          - runner: "ubuntu-latest"
+            arch: "linux/arm64/v8"
+          - runner: "ubuntu-latest"
             arch: "linux/arm/v7"
-        include:
+          - isPR: false
+            arch: "linux/arm/v7"
           - isPR: true
-            runner: "ubuntu-24.04-arm"
             arch: "linux/arm64/v8"
-            os-ver: "ubuntu:18.04"
-          - isPR: true
-            runner: "ubuntu-24.04-arm"
-            arch: "linux/arm64/v8"
-            os-ver: "ubuntu:20.04"
-          - isPR: true
-            runner: "ubuntu-24.04-arm"
-            arch: "linux/arm64/v8"
-            os-ver: "ubuntu:22.04"
-          - isPR: true
-            runner: "ubuntu-24.04-arm"
-            arch: "linux/arm64/v8"
-            os-ver: "ubuntu:24.04"
-          - isPR: true
-            runner: "ubuntu-24.04-arm"
-            arch: "linux/arm64/v8"
-            os-ver: "ubuntu:24.10"
-          - isPR: true
-            runner: "ubuntu-24.04-arm"
-            arch: "linux/arm64/v8"
-            os-ver: "ubuntu:25.04"
-          - isPR: true
-            runner: "ubuntu-24.04-arm"
-            arch: "linux/arm64/v8"
-            os-ver: "debian:oldstable"
-          - isPR: true
-            runner: "ubuntu-24.04-arm"
-            arch: "linux/arm64/v8"
-            os-ver: "debian:stable"
-          - isPR: true
-            runner: "ubuntu-24.04-arm,"
-            arch: "linux/arm64/v8"
-            os-ver: "debian:testing"
 
     runs-on: ${{ matrix.runner }}
     name: Compile ${{ matrix.os-ver }} ${{ matrix.arch }}
