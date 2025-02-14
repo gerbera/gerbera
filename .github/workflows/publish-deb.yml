@@ -46,7 +46,7 @@ jobs:
             arch: "linux/amd64"
           - runner: "ubuntu-latest"
             arch: "linux/arm64/v8"
-          - runner: "ubuntu-latest"
+          - runner: "ubuntu-24.04-arm"
             arch: "linux/arm/v7"
           - isPR: false
             arch: "linux/arm/v7"
