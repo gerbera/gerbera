@@ -51,7 +51,7 @@ jobs:
             arch: "linux/arm64/v8"
             os-ver: "ubuntu:20.04"
           - isPR: true
-            runner: "ubuntu-24.04"
+            runner: "ubuntu-24.04-arm"
             arch: "linux/arm64/v8"
             os-ver: "ubuntu:22.04"
           - isPR: true
@@ -67,7 +67,7 @@ jobs:
             arch: "linux/arm64/v8"
             os-ver: "ubuntu:25.04"
           - isPR: true
-            runner: "ubuntu-24.04"
+            runner: "ubuntu-24.04-arm"
             arch: "linux/arm64/v8"
             os-ver: "debian:oldstable"
           - isPR: true
