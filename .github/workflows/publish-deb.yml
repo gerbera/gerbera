@@ -34,16 +34,22 @@ jobs:
           - "debian:unstable"
         arch:
           - "linux/amd64"
+          - "linux/arm/v7"
+          - "linux/arm64/v8"
 
         isPR:
           - ${{github.event_name == 'pull_request'}}
         # Run only the amd64 build in pull reqs:
-        include:
-          - isPR: false
-            runner: "ubuntu-latest"
+        exclude:
+          - runner: "ubuntu-24.04-arm"
+            arch: "linux/amd64"
+          - runner: "ubuntu-latest"
+            arch: "linux/arm64/v8"
+          - runner: "ubuntu-24.04-arm"
             arch: "linux/arm/v7"
           - isPR: true
-            runner: "ubuntu-24.04-arm"
+            arch: "linux/arm/v7"
+          - isPR: true
             arch: "linux/arm64/v8"
 
     runs-on: ${{ matrix.runner }}
