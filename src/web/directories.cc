@@ -46,28 +46,26 @@
 
 using dirInfo = std::pair<fs::path, bool>;
 
+const std::string Web::Directories::PAGE = "directories";
+
 Web::Directories::Directories(const std::shared_ptr<Content>& content,
     std::shared_ptr<ConverterManager> converterManager,
     const std::shared_ptr<Server>& server,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
     const std::shared_ptr<Quirks>& quirks)
-    : WebRequestHandler(content, server, xmlBuilder, quirks)
+    : PageRequest(content, server, xmlBuilder, quirks)
     , converterManager(std::move(converterManager))
 {
 }
 
-void Web::Directories::process()
+void Web::Directories::processPageAction(pugi::xml_node& element)
 {
     static auto RootId = fmt::format("{}", CDS_ID_ROOT);
-
-    checkRequest();
 
     std::string parentID = param("parent_id");
     auto path = fs::path(parentID.empty() || parentID == RootId ? FS_ROOT_DIRECTORY : hexDecodeString(parentID));
 
-    auto root = xmlDoc->document_element();
-
-    auto containers = root.append_child("containers");
+    auto containers = element.append_child("containers");
     xml2Json->setArrayName(containers, "container");
     xml2Json->setFieldType("title", FieldType::STRING);
     containers.append_attribute("parent_id") = parentID.c_str();

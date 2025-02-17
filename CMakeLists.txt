@@ -364,7 +364,8 @@ add_library(libgerbera STATIC
         src/web/edit_save.cc
         src/web/files.cc
         src/web/items.cc
-        src/web/pages.cc
+        src/web/page_request.cc
+        src/web/page_request.h
         src/web/pages.h
         src/web/remove.cc
         src/web/session_manager.cc

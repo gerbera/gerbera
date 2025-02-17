@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    web_update.cc - this file is part of MediaTomb.
+    web/web_update.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file web_update.cc
+/// \file web/web_update.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
@@ -37,7 +37,8 @@
 #include "content/content.h"
 #include "util/xml_to_json.h"
 
-void Web::VoidType::process()
+const std::string Web::VoidType::PAGE = "void";
+
+void Web::VoidType::processPageAction(pugi::xml_node& element)
 {
-    checkRequest();
 }

@@ -348,6 +348,11 @@ void FfmpegHandler::addFfmpegResourceFields(
     const std::shared_ptr<CdsItem>& item,
     const FfmpegObject& ffmpegObject)
 {
+    if (!ffmpegObject) {
+        log_debug("no metadata");
+        return;
+    }
+
     auto resource = item->getResource(ContentHandler::DEFAULT);
     bool isAudioFile = item->isSubClass(UPNP_CLASS_AUDIO_ITEM) && item->getResource(ResourcePurpose::Thumbnail);
     auto resource2 = isAudioFile ? item->getResource(ResourcePurpose::Thumbnail) : item->getResource(ContentHandler::DEFAULT);

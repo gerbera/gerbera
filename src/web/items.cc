@@ -45,12 +45,11 @@
 #include "upnp/xml_builder.h"
 #include "util/xml_to_json.h"
 
-/// \brief orocess request for item list in ui
-void Web::Items::process()
-{
-    log_debug("start process()");
-    checkRequest();
+const std::string Web::Items::PAGE = "items";
 
+/// \brief orocess request for item list in ui
+void Web::Items::processPageAction(pugi::xml_node& element)
+{
     int parentID = intParam("parent_id");
     int start = intParam("start");
     int count = intParam("count");
@@ -61,8 +60,7 @@ void Web::Items::process()
         throw_std_runtime_error("illegal count parameter");
 
     // set result options
-    auto root = xmlDoc->document_element();
-    auto items = root.append_child("items");
+    auto items = element.append_child("items");
     xml2Json->setArrayName(items, "item");
     xml2Json->setFieldType("title", FieldType::STRING);
     xml2Json->setFieldType("part", FieldType::STRING);
@@ -118,7 +116,6 @@ void Web::Items::process()
         }
         cnt++;
     }
-    log_debug("end process()");
 }
 
 std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(

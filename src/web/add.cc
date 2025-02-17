@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    add.cc - this file is part of MediaTomb.
+    web/add.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file add.cc
+/// \file web/add.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
@@ -42,12 +42,10 @@
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
-void Web::Add::process()
+const std::string Web::Add::PAGE = "add";
+
+void Web::Add::processPageAction(pugi::xml_node& element)
 {
-    log_debug("add: start");
-
-    checkRequest();
-
     std::string objID = param("object_id");
     auto path = fs::path((objID == "0") ? FS_ROOT_DIRECTORY : hexDecodeString(objID));
     if (path.empty())
@@ -66,5 +64,4 @@ void Web::Add::process()
     } else {
         log_error("Failed to read {}: {}", path.c_str(), ec.message());
     }
-    log_debug("add: returning");
 }

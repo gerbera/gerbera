@@ -35,24 +35,22 @@
 #include "web_request_handler.h" // API
 
 #include "cds/cds_enums.h"
-#include "cds/cds_objects.h"
-#include "cds/cds_resource.h"
 #include "common.h"
 #include "config/config.h"
+#include "config/config_setup.h"
 #include "config/config_val.h"
 #include "content/content.h"
 #include "context.h"
 #include "exceptions.h"
 #include "iohandler/mem_io_handler.h"
 #include "server.h"
-#include "session_manager.h"
 #include "upnp/compat.h"
 #include "upnp/headers.h"
 #include "upnp/quirks.h"
-#include "util/generic_task.h"
 #include "util/url_utils.h"
 #include "util/xml_to_json.h"
 #include "web/pages.h"
+#include "web/session_manager.h"
 
 namespace Web {
 
@@ -69,39 +67,6 @@ WebRequestHandler::WebRequestHandler(const std::shared_ptr<Content>& content,
 std::string WebRequestHandler::getGroup() const
 {
     return quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
-}
-
-int WebRequestHandler::intParam(const std::string& name, int invalid) const
-{
-    std::string value = param(name);
-    return !value.empty() ? std::stoi(value) : invalid;
-}
-
-bool WebRequestHandler::boolParam(const std::string& name) const
-{
-    std::string value = param(name);
-    return !value.empty() && (value == "1" || value == "true");
-}
-
-void WebRequestHandler::checkRequest(bool checkLogin)
-{
-    // we have a minimum set of parameters that are "must have"
-
-    // check if the session parameter was supplied and if we have
-    // a session with that id
-
-    checkRequestCalled = true;
-
-    std::string sid = param(SID);
-    if (sid.empty())
-        throw SessionException("no session id given");
-
-    if (!(session = sessionManager->getSession(sid)))
-        throw SessionException("invalid session id");
-
-    if (checkLogin && !session->isLoggedIn())
-        throw LoginException("not logged in");
-    session->access();
 }
 
 bool WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
@@ -158,6 +123,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, const s
 
     std::string error;
     int errorCode = 0;
+    log_debug("start");
 
     std::string output;
     // processing page, creating output
@@ -167,14 +133,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, const s
             error = "The UI is disabled in the configuration file. See README.";
             errorCode = 900;
         } else {
-            process();
-
-            if (checkRequestCalled) {
-                // add current task
-                appendTask(content->getCurrentTask(), root);
-
-                handleUpdateIDs();
-            }
+            process(root);
         }
     } catch (const LoginException& e) {
         error = e.what();
@@ -221,42 +180,6 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, const s
     return ioHandler;
 }
 
-void WebRequestHandler::handleUpdateIDs()
-{
-    // session will be filled by check_request
-    std::string updates = param("updates");
-    if (!updates.empty()) {
-        auto root = xmlDoc->document_element();
-        auto updateIDs = root.append_child("update_ids");
-
-        if (updates == "check") {
-            updateIDs.append_attribute("pending") = session->hasUIUpdateIDs();
-        } else if (updates == "get") {
-            addUpdateIDs(session, updateIDs);
-        }
-    }
-}
-
-void WebRequestHandler::addUpdateIDs(const std::shared_ptr<Session>& session, pugi::xml_node& updateIDsEl)
-{
-    std::string updateIDs = session->getUIUpdateIDs();
-    if (!updateIDs.empty()) {
-        log_debug("UI: sending update ids: {}", updateIDs);
-        updateIDsEl.append_attribute("ids") = updateIDs.c_str();
-        updateIDsEl.append_attribute("updates") = true;
-    }
-}
-
-void WebRequestHandler::appendTask(const std::shared_ptr<GenericTask>& task, pugi::xml_node& parent)
-{
-    if (!task || !parent)
-        return;
-    auto taskEl = parent.append_child("task");
-    taskEl.append_attribute("id") = task->getID();
-    taskEl.append_attribute("cancellable") = task->isCancellable();
-    taskEl.append_attribute("text") = task->getDescription().c_str();
-}
-
 std::string_view WebRequestHandler::mapAutoscanType(AutoscanType type)
 {
     switch (type) {
@@ -269,65 +192,50 @@ std::string_view WebRequestHandler::mapAutoscanType(AutoscanType type)
     }
 }
 
-bool WebRequestHandler::readResources(const std::shared_ptr<CdsObject>& object)
+std::unique_ptr<WebRequestHandler> createWebRequestHandler(
+    const std::shared_ptr<Context>& context,
+    const std::shared_ptr<Content>& content,
+    const std::shared_ptr<Server>& server,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+    const std::shared_ptr<Quirks>& quirks,
+    const std::string& page)
 {
-    std::string resources = param("resources"); // contains list of changed resource properties separated by |
-    bool result = false;
-    if (!resources.empty()) {
-        auto resourceList = splitString(resources, '|');
-        std::map<int, std::map<std::string, std::string>> resMap;
-        for (auto&& resValue : resourceList) {
-            auto propList = splitString(resValue, '.'); // resource property is formatted : resource.<index>.<propertyName>
-            if (propList.size() >= 3) {
-                std::string prop = param(resValue);
-                auto resIndex = stoiString(propList[1]);
-                if (resMap.find(resIndex) == resMap.end()) {
-                    resMap[resIndex] = {};
-                }
-                resMap[resIndex][propList[2]] = prop;
-            }
-        }
-        for (auto&& [resIndex, resDef] : resMap) {
-            std::shared_ptr<CdsResource> resource = object->getResource(resIndex);
-            if (resDef.find("purpose") != resDef.end() || !resource) {
-                auto purpose = EnumMapper::mapPurpose(resDef.at("purpose"));
-                if (!resource) {
-                    resource = std::make_shared<CdsResource>(ContentHandler::EXTURL, purpose);
-                    object->addResource(resource);
-                } else {
-                    resource->setPurpose(purpose);
-                }
-                result = true;
-            }
-            if (resDef.find("protocolInfo") != resDef.end()) {
-                std::string protocolInfo = resDef.at("protocolInfo");
-                resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
-                result = true;
-            } else if (resDef.find("mime-type") != resDef.end() && resDef.find("protocol") != resDef.end()) {
-                std::string resMime = resDef.at("mime-type");
-                if (resMime.empty())
-                    resMime = MIMETYPE_DEFAULT;
-                std::string resProtocol = resDef.at("protocol");
-                std::string protocolInfo;
-                if (!resProtocol.empty())
-                    protocolInfo = renderProtocolInfo(resMime, resProtocol);
-                else
-                    protocolInfo = renderProtocolInfo(resMime);
-                resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
-                result = true;
-            }
-            if (resDef.find("location") != resDef.end()) {
-                std::string resLocation = resDef.at("location");
-                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, resLocation);
-                result = true;
-            } else if (resDef.find("resFile") != resDef.end()) {
-                std::string resLocation = resDef.at("resFile");
-                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, resLocation);
-                result = true;
-            }
-        }
-    }
-    return result;
+    if (page == Web::Add::PAGE)
+        return std::make_unique<Web::Add>(content, server, xmlBuilder, quirks);
+    if (page == Web::Remove::PAGE)
+        return std::make_unique<Web::Remove>(content, server, xmlBuilder, quirks);
+    if (page == Web::AddObject::PAGE)
+        return std::make_unique<Web::AddObject>(content, server, xmlBuilder, quirks);
+    if (page == Web::Auth::PAGE)
+        return std::make_unique<Web::Auth>(content, server, xmlBuilder, quirks);
+    if (page == Web::Containers::PAGE)
+        return std::make_unique<Web::Containers>(content, server, xmlBuilder, quirks);
+    if (page == Web::Directories::PAGE)
+        return std::make_unique<Web::Directories>(content, context->getConverterManager(), server, xmlBuilder, quirks);
+    if (page == Web::Files::PAGE)
+        return std::make_unique<Web::Files>(content, context->getConverterManager(), server, xmlBuilder, quirks);
+    if (page == Web::Items::PAGE)
+        return std::make_unique<Web::Items>(content, server, xmlBuilder, quirks);
+    if (page == Web::EditLoad::PAGE)
+        return std::make_unique<Web::EditLoad>(content, server, xmlBuilder, quirks);
+    if (page == Web::EditSave::PAGE)
+        return std::make_unique<Web::EditSave>(content, server, xmlBuilder, quirks);
+    if (page == Web::Autoscan::PAGE)
+        return std::make_unique<Web::Autoscan>(content, server, xmlBuilder, quirks);
+    if (page == Web::VoidType::PAGE)
+        return std::make_unique<Web::VoidType>(content, server, xmlBuilder, quirks);
+    if (page == Web::Tasks::PAGE)
+        return std::make_unique<Web::Tasks>(content, server, xmlBuilder, quirks);
+    if (page == Web::Action::PAGE)
+        return std::make_unique<Web::Action>(content, server, xmlBuilder, quirks);
+    if (page == Web::Clients::PAGE)
+        return std::make_unique<Web::Clients>(content, server, xmlBuilder, quirks);
+    if (page == Web::ConfigLoad::PAGE)
+        return std::make_unique<Web::ConfigLoad>(content, server, xmlBuilder, quirks);
+    if (page == Web::ConfigSave::PAGE)
+        return std::make_unique<Web::ConfigSave>(context, content, server, xmlBuilder, quirks);
+
+    throw_std_runtime_error("Unknown page: {}", page);
 }
 
 } // namespace Web

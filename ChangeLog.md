@@ -7,6 +7,7 @@
 - Build correct Autoscan Type
 - Build with fmt 11.1.3
 - Cleanup tree and autoscan commands
+- Debian Build for arm64
 - Downgrade docker builder as well
 - Extract Pixelformat for videos
 - Fix album art in builtin layout
@@ -22,6 +23,7 @@
 - JS: Fix config autoscan object in scripts
 - Populate playlist item titles
 - Refactor static code from ConfigDefinition
+- Refactor WebRequests
 - Remap metadata fields when parsing virtual-directories keys
 - Rework autoscan list handling
 - Set more metadata in builtin layout

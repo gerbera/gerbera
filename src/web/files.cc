@@ -43,26 +43,24 @@
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
+const std::string Web::Files::PAGE = "files";
+
 Web::Files::Files(const std::shared_ptr<Content>& content,
     std::shared_ptr<ConverterManager> converterManager,
     const std::shared_ptr<Server>& server,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
     const std::shared_ptr<Quirks>& quirks)
-    : WebRequestHandler(content, server, xmlBuilder, quirks)
+    : PageRequest(content, server, xmlBuilder, quirks)
     , converterManager(std::move(converterManager))
 {
 }
 
-void Web::Files::process()
+void Web::Files::processPageAction(pugi::xml_node& element)
 {
-    checkRequest();
-
     std::string parentID = param("parent_id");
     std::string path = (parentID == "0") ? FS_ROOT_DIRECTORY : hexDecodeString(parentID);
 
-    auto root = xmlDoc->document_element();
-
-    auto files = root.append_child("files");
+    auto files = element.append_child("files");
     xml2Json->setArrayName(files, "file");
     xml2Json->setFieldType("filename", FieldType::STRING);
     files.append_attribute("parent_id") = parentID.c_str();

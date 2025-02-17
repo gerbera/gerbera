@@ -39,10 +39,13 @@
 
 #include <pugixml.hpp>
 
-enum class AutoscanType;
+class ConfigValue;
 class GenericTask;
 class Server;
+class UpnpXMLBuilder;
 class Xml2Json;
+enum class AutoscanType;
+enum class ConfigVal;
 
 namespace Web {
 
@@ -64,8 +67,6 @@ class WebRequestHandler : public RequestHandler {
 protected:
     std::shared_ptr<Web::SessionManager> sessionManager;
     std::shared_ptr<Server> server;
-
-    bool checkRequestCalled {};
 
     /// \brief Decoded URL parameters are stored as a dictionary.
     std::map<std::string, std::string> params;
@@ -92,46 +93,19 @@ protected:
     /// \return Value of the parameter with the given name or \c nullptr if not found.
     std::string param(const std::string& name) const { return getValueOrDefault(params, name); }
 
+    /// \brief Get name of user group on web frontend
     std::string getGroup() const;
 
-    int intParam(const std::string& name, int invalid = 0) const;
-    bool boolParam(const std::string& name) const;
+    /// \brief This method must be overridden by the subclasses that actually process the given request.
+    virtual void process(pugi::xml_node& root) = 0;
 
-    /// \brief read resource information from web operation
-    /// \param object target object for the resources found
-    bool readResources(const std::shared_ptr<CdsObject>& object);
-
-    /// \brief Checks if the incoming request is valid.
-    ///
-    /// Each request going to the ui must at least have a valid session id,
-    /// and a driver parameter. Also, there can only by a primary or a
-    /// a decondary driver.
-    void checkRequest(bool checkLogin = true);
-
-    /// \brief add the ui update ids from the given session as xml tags to the given root element
-    /// \param session the session from which the ui update ids should be taken
-    /// \param updateIDsEl the xml element to add the elements to
-    static void addUpdateIDs(
-        const std::shared_ptr<Session>& session,
-        pugi::xml_node& updateIDsEl);
-
-    /// \brief check if ui update ids should be added to the response and add
-    /// them in that case.
-    /// must only be called after checkRequest
-    void handleUpdateIDs();
-
-    /// \brief add the content manager task to the given xml element as xml elements
-    /// \param task the task to add to the given xml element
-    /// \param parent the xml element to add the elements to
-    static void appendTask(
-        const std::shared_ptr<GenericTask>& task,
-        pugi::xml_node& parent);
-
+    /// \brief Convert Autoscan type to string representation
     static std::string_view mapAutoscanType(AutoscanType type);
 
 public:
     /// \brief Constructor
-    explicit WebRequestHandler(const std::shared_ptr<Content>& content,
+    explicit WebRequestHandler(
+        const std::shared_ptr<Content>& content,
         std::shared_ptr<Server> server,
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks);
@@ -152,11 +126,27 @@ public:
     /// \param quirks allows modifying the content of the response based on the client
     /// \param mode either \c UPNP_READ or \c UPNP_WRITE
     /// \return the appropriate IOHandler for the request.
-    std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
-
-    /// \brief This method must be overridden by the subclasses that actually process the given request.
-    virtual void process() = 0;
+    std::unique_ptr<IOHandler> open(
+        const char* filename,
+        const std::shared_ptr<Quirks>& quirks,
+        enum UpnpOpenFileMode mode) override;
 };
+
+/// \brief Chooses and creates the appropriate handler for processing the request.
+/// \param context runtime context
+/// \param content content handler
+/// \param server server instance
+/// \param xmlBuilder builder for xml string
+/// \param quirks hook to client specific behaviour
+/// \param page identifies what type of the request we are dealing with.
+/// \return the appropriate request handler.
+std::unique_ptr<WebRequestHandler> createWebRequestHandler(
+    const std::shared_ptr<Context>& context,
+    const std::shared_ptr<Content>& content,
+    const std::shared_ptr<Server>& server,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+    const std::shared_ptr<Quirks>& quirks,
+    const std::string& page);
 
 } // namespace Web
 

@@ -39,12 +39,10 @@
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
-void Web::Remove::process()
+const std::string Web::Remove::PAGE = "remove";
+
+void Web::Remove::processPageAction(pugi::xml_node& element)
 {
-    log_debug("remove: start");
-
-    checkRequest();
-
     int objectID = intParam("object_id");
     bool all = intParam("all");
 
@@ -56,6 +54,4 @@ void Web::Remove::process()
         return;
     }
     content->removeObject(nullptr, obj, "", true, all);
-
-    log_debug("remove: returning");
 }
