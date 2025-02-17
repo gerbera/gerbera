@@ -257,6 +257,13 @@ virtual items referencing this item are deleted.
 After deleting an entry in the "PC Directory", Gerbera does not know about
 the file anymore. It can be re-added in the "File System" view.
 
+Autoscan configuration forces a reimport of these files after restarting the gerbera server.
+
+.. _autoscan-edit:
+
+Edit Autoscan
+-------------
+
 .. image:: _static/edit-autoscan.png
    :alt: Edit Autoscan dialog
    :target: _static/edit-autoscan.png
@@ -264,6 +271,11 @@ the file anymore. It can be re-added in the "File System" view.
 .. image:: _static/edit-autoscan-details.png
    :alt: Edit Autoscan dialog with details
    :target: _static/edit-autoscan-details.png
+
+.. _tweak-edit:
+
+Tweak Folder
+------------
 
 .. image:: _static/edit-tweak-details.png
    :alt: Edit Directory Tweaks dialog

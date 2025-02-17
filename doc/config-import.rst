@@ -626,6 +626,7 @@ The search pattern is set in resources section.
 
 Specifies an alternative file for filemagic, containing mime type information.
 
+.. _autoscan:
 
 ``autoscan``
 ~~~~~~~~~~~~

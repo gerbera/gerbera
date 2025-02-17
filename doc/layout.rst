@@ -1,8 +1,22 @@
 .. _layout:
+.. index:: Import
 .. index:: Layout
 
-Layout
-======
+Import and Layout
+=================
+
+Autoscan
+~~~~~~~~
+
+The typical way to get you files loaded into the library is by defining autoscan folder either via web UI (:ref:`Edit Dialog<autoscan-edit>`)
+or via (:ref:`Autoscan Configuration <autoscan>`). On startup each autoscan directory is fully scanned for new or changed files. Depending
+on the type the scan is repeated after the set interval (timed autoscan) or new files are imported as soon as they show up on the disk
+(inotify autoscan; only if compiled in and support by the operating system). In both cases the file is created in `PC Directory` and the
+virtual layout is created or updated.
+
+There also is the option to overwrite autoscan settings for subfolders (:ref:`Tweak Dialog<tweak-edit>`) to change the expected character
+encoding or other import flags. Tweaking only is effective for the next scan, i.e. you have to force a rescan of the folder by deleting the
+respective `PC Directory` entries.
 
 PC Directory
 ~~~~~~~~~~~~
