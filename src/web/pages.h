@@ -30,15 +30,16 @@
 */
 
 /// \file web/pages.h
-/// \brief Defines the various WebRequestHandler sub classes which process requests coming from WebUi.
+/// \brief Defines the various PageRequest sub classes which process requests coming from WebUi.
 #ifndef __WEB_PAGES_H__
 #define __WEB_PAGES_H__
 
-#include "web_request_handler.h"
+#include "page_request.h"
 
 #include "util/grb_fs.h"
 
 #include <chrono>
+#include <vector>
 
 // forward declarations
 class AutoscanDirectory;
@@ -55,73 +56,101 @@ enum class ConfigVal;
 
 namespace Web {
 
-// forward declaration
-class SessionManager;
-
 /// \brief Authentication handler (used over AJAX)
-class Auth : public WebRequestHandler {
+class Auth : public PageRequest {
 protected:
     std::chrono::seconds timeout = std::chrono::seconds::zero();
     bool accountsEnabled { false };
+
+    void process(pugi::xml_node& root) override;
+    void processPageAction(pugi::xml_node& element) override {};
+    /// \brief get server configuration parts for UI
+    void getConfig(pugi::xml_node& element);
+    /// \brief get current session id
+    void getSid(pugi::xml_node& element);
+    /// \brief get token for login
+    void getToken(pugi::xml_node& element);
+    /// \brief handle login action
+    void login();
+    /// \brief handle logout action
+    void logout();
 
 public:
     explicit Auth(const std::shared_ptr<Content>& content,
         const std::shared_ptr<Server>& server,
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks);
-    void process() override;
+
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
 };
 
 /// \brief Call from WebUi to create container tree in database view
-class Containers : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class Containers : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
+
+protected:
+    void processPageAction(pugi::xml_node& element) override;
 };
 
 /// \brief Call from WebUi to create directory tree in filesystem view
-class Directories : public WebRequestHandler {
+class Directories : public PageRequest {
 public:
     explicit Directories(const std::shared_ptr<Content>& content,
         std::shared_ptr<ConverterManager> converterManager,
         const std::shared_ptr<Server>& server,
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks);
-    void process() override;
+
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
 
 protected:
+    void processPageAction(pugi::xml_node& element) override;
+
     std::shared_ptr<ConverterManager> converterManager;
 };
 
 /// \brief Call from WebUi to list files in filesystem view
-class Files : public WebRequestHandler {
+class Files : public PageRequest {
 public:
     explicit Files(const std::shared_ptr<Content>& content,
         std::shared_ptr<ConverterManager> converterManager,
         const std::shared_ptr<Server>& server,
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks);
-    void process() override;
+
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
 
 protected:
+    void processPageAction(pugi::xml_node& element) override;
+
     std::shared_ptr<ConverterManager> converterManager;
 };
 
 /// \brief Call from WebUi to list items in database view
-class Items : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class Items : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
 
 protected:
+    void processPageAction(pugi::xml_node& element) override;
+    /// \brief run browse according to page request parameters
     std::vector<std::shared_ptr<CdsObject>> doBrowse(
         const std::shared_ptr<CdsObject>& container,
         int start,
         int count,
         pugi::xml_node& items,
         std::string& trackFmt);
+    /// \brief run search according to page request parameters
     std::vector<std::shared_ptr<CdsObject>> doSearch(
         const std::shared_ptr<CdsObject>& container,
         int start,
@@ -131,136 +160,234 @@ protected:
 };
 
 /// \brief Call from WebUi to add item from filesystem view
-class Add : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class Add : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
+
+protected:
+    void processPageAction(pugi::xml_node& element) override;
 };
 
 /// \brief Call from WebUi to Remove item in database view
-class Remove : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class Remove : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
+
+protected:
+    void processPageAction(pugi::xml_node& element) override;
 };
 
 /// \brief Call from WebUi to Edit Item in database view
-class EditLoad : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class EditLoad : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
+
+protected:
+    void processPageAction(pugi::xml_node& element) override;
+    /// \brief write object core info
+    pugi::xml_node writeCoreInfo(
+        const std::shared_ptr<CdsObject>& obj,
+        pugi::xml_node& element,
+        int objectID);
+    /// \brief write cdsitem info
+    void writeItemInfo(
+        const std::shared_ptr<CdsItem>& objItem,
+        int objectID,
+        pugi::xml_node& item,
+        pugi::xml_node& metaData);
+    /// \brief write cdscontainer info
+    void writeContainerInfo(
+        const std::shared_ptr<CdsObject>& obj,
+        pugi::xml_node& item);
+    /// \brief write resource info
+    void writeResourceInfo(
+        const std::shared_ptr<CdsObject>& obj,
+        pugi::xml_node& item);
+    /// \brief write metadata
+    pugi::xml_node writeMetadata(
+        const std::shared_ptr<CdsObject>& obj,
+        pugi::xml_node& item);
+    /// \brief write auxdata
+    void writeAuxData(
+        const std::shared_ptr<CdsObject>& obj,
+        pugi::xml_node& item);
 };
 
 /// \brief Call from WebUi to Save Item properties in database view
-class EditSave : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class EditSave : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
+
+protected:
+    void processPageAction(pugi::xml_node& element) override;
 };
 
 /// \brief Call from WebUi to Add Object in database view
-class AddObject : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class AddObject : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
 
 protected:
-    void addContainer(int parentID, const std::string& title, const std::string& upnp_class);
-    std::shared_ptr<CdsItem> addItem(int parentID, const std::string& title, const std::string& upnp_class, const fs::path& location);
-    std::shared_ptr<CdsItemExternalURL> addUrl(int parentID, const std::string& title, const std::string& upnp_class, bool addProtocol, const fs::path& location);
+    void processPageAction(pugi::xml_node& element) override;
+    /// \brief handle page request to add a container
+    void addContainer(
+        int parentID,
+        const std::string& title,
+        const std::string& upnp_class);
+    /// \brief handle page request to add a file item
+    std::shared_ptr<CdsItem> addItem(
+        int parentID,
+        const std::string& title,
+        const std::string& upnp_class,
+        const fs::path& location);
+    /// \brief handle page request to add an external url as item
+    std::shared_ptr<CdsItemExternalURL> addUrl(
+        int parentID,
+        const std::string& title,
+        const std::string& upnp_class,
+        bool addProtocol,
+        const fs::path& location);
+    /// \brief check if file is hidden according to settings
     bool isHiddenFile(const std::shared_ptr<CdsObject>& cdsObj);
 };
 
 /// \brief Call from WebUi to add or remove autoscan
-class Autoscan : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class Autoscan : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
 
 protected:
-    static void autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node& element);
+    void processPageAction(pugi::xml_node& element) override;
+    /// \brief Convert autoscan dir to xml for web response
+    static void autoscan2XML(
+        const std::shared_ptr<AutoscanDirectory>& adir,
+        pugi::xml_node& element);
+    /// \brief get details for autoscan editor
+    void editLoad(
+        bool fromFs,
+        pugi::xml_node& element,
+        const std::string& objID,
+        const fs::path& path);
+    /// \brief list all autoscan directories
+    void list(pugi::xml_node& element);
+    /// \brief Save new or changed autoscan
+    void editSave(bool fromFs, const fs::path& path);
 };
 
 /// \brief Call from WebUi to do nothing :)
-class VoidType : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class VoidType : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
+
+public:
+    void processPageAction(pugi::xml_node& element) override;
 };
 
 /// \brief task list and task cancel
-class Tasks : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class Tasks : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
+
+protected:
+    void processPageAction(pugi::xml_node& element) override;
 };
 
 /// \brief UI action button
-class Action : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class Action : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
+
+protected:
+    void processPageAction(pugi::xml_node& element) override;
 };
 
-/// \brief Chooses and creates the appropriate handler for processing the request.
-/// \param context runtime context
-/// \param content content handler
-/// \param server server instance
-/// \param xmlBuilder builder for xml string
-/// \param quirks hook to client specific behaviour
-/// \param page identifies what type of the request we are dealing with.
-/// \return the appropriate request handler.
-std::unique_ptr<WebRequestHandler> createWebRequestHandler(
-    const std::shared_ptr<Context>& context,
-    const std::shared_ptr<Content>& content,
-    const std::shared_ptr<Server>& server,
-    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
-    const std::shared_ptr<Quirks>& quirks,
-    const std::string& page);
-
 /// \brief Browse clients list
-class Clients : public WebRequestHandler {
-    using WebRequestHandler::WebRequestHandler;
+class Clients : public PageRequest {
+    using PageRequest::PageRequest;
 
 public:
-    void process() override;
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
+
+protected:
+    void processPageAction(pugi::xml_node& element) override;
 };
 
 /// \brief Call from WebUi to load configuration
-class ConfigLoad : public WebRequestHandler {
+class ConfigLoad : public PageRequest {
 protected:
     std::vector<ConfigValue> dbEntries;
     std::map<std::string, std::string> allItems;
     std::shared_ptr<ConfigDefinition> definition;
 
-    void createItem(pugi::xml_node& item, const std::string& name, ConfigVal id, ConfigVal aid, const std::shared_ptr<ConfigSetup>& cs = nullptr);
+    void processPageAction(pugi::xml_node& element) override;
+    /// \brief create config value entry
+    void createItem(
+        pugi::xml_node& item,
+        const std::string& name,
+        ConfigVal id,
+        ConfigVal aid,
+        const std::shared_ptr<ConfigSetup>& cs = nullptr);
 
+    /// \brief write values with counters and statitics
     void writeDatabaseStatus(pugi::xml_node& values);
+    /// \brief add shortcut configuration
     void writeShortcuts(pugi::xml_node& values);
+    /// \brief add boolean, integer and string properties
     void writeSimpleProperties(pugi::xml_node& values);
-    void writeClientConfig(pugi::xml_node& values);
-    void writeImportTweaks(pugi::xml_node& values);
-    void writeDynamicContent(pugi::xml_node& values);
-    void writeBoxLayout(pugi::xml_node& values);
-    void writeTranscoding(pugi::xml_node& values);
-    void writeAutoscan(pugi::xml_node& values);
+    /// \brief add all dictionary configuration options
     void writeDictionaries(pugi::xml_node& values);
+    /// \brief add all vector configuration options
     void writeVectors(pugi::xml_node& values);
+    /// \brief add all array configuration options
     void writeArrays(pugi::xml_node& values);
-    void updateEntriesFromDatabase(pugi::xml_node& root, pugi::xml_node& values);
+    /// \brief add client configuration
+    void writeClientConfig(pugi::xml_node& values);
+    /// \brief add directory tweaks
+    void writeImportTweaks(pugi::xml_node& values);
+    /// \brief add dynamic folder configuration
+    void writeDynamicContent(pugi::xml_node& values);
+    /// \brief add box layout
+    void writeBoxLayout(pugi::xml_node& values);
+    /// \brief add transcoding
+    void writeTranscoding(pugi::xml_node& values);
+    /// \brief add autoscan details
+    void writeAutoscan(pugi::xml_node& values);
+    /// \brief overwrite values from xml with database values
+    void updateEntriesFromDatabase(pugi::xml_node& element, pugi::xml_node& values);
 
+    /// \brief write value depending on type
     template <typename T>
     static void setValue(pugi::xml_node& item, const T& value);
 
+    /// \brief create meta information on config value
     static void addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs);
 
 public:
@@ -268,14 +395,18 @@ public:
         const std::shared_ptr<Server>& server,
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks);
-    void process() override;
+
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
 };
 
 /// \brief Call from WebUi to save configuration
-class ConfigSave : public WebRequestHandler {
+class ConfigSave : public PageRequest {
 protected:
     std::shared_ptr<Context> context;
     std::shared_ptr<ConfigDefinition> definition;
+
+    void processPageAction(pugi::xml_node& element) override;
 
 public:
     explicit ConfigSave(std::shared_ptr<Context> context,
@@ -283,7 +414,9 @@ public:
         const std::shared_ptr<Server>& server,
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks);
-    void process() override;
+
+    const static std::string PAGE;
+    std::string getPage() const override { return PAGE; }
 };
 
 } // namespace Web

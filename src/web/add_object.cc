@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    add_object.cc - this file is part of MediaTomb.
+    web/add_object.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file add_object.cc
+/// \file web/add_object.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
@@ -42,6 +42,8 @@
 #include "exceptions.h"
 #include "util/tools.h"
 #include "util/xml_to_json.h"
+
+const std::string Web::AddObject::PAGE = "add_object";
 
 void Web::AddObject::addContainer(
     int parentID,
@@ -153,10 +155,8 @@ bool Web::AddObject::isHiddenFile(const std::shared_ptr<CdsObject>& cdsObj)
     return content->isHiddenFile(fs::directory_entry(cdsObj->getLocation()), false, asSetting);
 }
 
-void Web::AddObject::process()
+void Web::AddObject::processPageAction(pugi::xml_node& element)
 {
-    checkRequest();
-
     auto title = std::string(param("title"));
     if (title.empty())
         throw_std_runtime_error("Empty 'title'");

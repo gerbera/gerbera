@@ -66,8 +66,8 @@
 #include "util/tools.h"
 #include "util/url_utils.h"
 #include "util/xml_to_json.h"
-#include "web/pages.h"
 #include "web/session_manager.h"
+#include "web/web_request_handler.h"
 
 #ifdef HAVE_CURL
 #include "request_handler/url_request_handler.h"

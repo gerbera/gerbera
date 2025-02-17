@@ -43,11 +43,10 @@ static std::string secondsToString(const std::chrono::seconds& t)
     return fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(t.count()));
 }
 
-void Web::Clients::process()
-{
-    checkRequest();
-    auto root = xmlDoc->document_element();
+const std::string Web::Clients::PAGE = "clients";
 
+void Web::Clients::processPageAction(pugi::xml_node& element)
+{
     // Delete client
     std::string action = param("action");
     if (action == "delete") {
@@ -61,7 +60,7 @@ void Web::Clients::process()
     }
 
     // Return current list of clients
-    auto clients = root.append_child("clients");
+    auto clients = element.append_child("clients");
     xml2Json->setArrayName(clients, "client");
 
     auto&& clientArr = content->getContext()->getClients()->getClientList();
@@ -85,7 +84,7 @@ void Web::Clients::process()
     }
 
     // Return current list of groups
-    auto groups = root.append_child("groups");
+    auto groups = element.append_child("groups");
     xml2Json->setArrayName(groups, "group");
     auto&& groupArr = content->getContext()->getDatabase()->getClientGroupStats();
     for (auto&& obj : groupArr) {

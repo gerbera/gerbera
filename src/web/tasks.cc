@@ -39,17 +39,16 @@
 #include "util/generic_task.h"
 #include "util/xml_to_json.h"
 
-void Web::Tasks::process()
+const std::string Web::Tasks::PAGE = "tasks";
+
+void Web::Tasks::processPageAction(pugi::xml_node& element)
 {
-    checkRequest();
     std::string action = param("action");
     if (action.empty())
         throw_std_runtime_error("called with illegal action");
 
-    auto root = xmlDoc->document_element();
-
     if (action == "list") {
-        auto tasksEl = root.append_child("tasks");
+        auto tasksEl = element.append_child("tasks");
         xml2Json->setArrayName(tasksEl, "tasks");
         auto taskList = content->getTasklist();
         for (auto&& task : taskList) {
@@ -59,5 +58,5 @@ void Web::Tasks::process()
         int taskID = intParam("task_id");
         content->invalidateTask(taskID, TaskOwner::ContentManagerTask);
     } else
-        throw_std_runtime_error("called with illegal action");
+        throw_std_runtime_error("tasks called with illegal action {}", action);
 }

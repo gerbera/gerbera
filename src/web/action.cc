@@ -2,7 +2,7 @@
 
     MediaTomb - http://www.mediatomb.cc/
 
-    action.cc - this file is part of MediaTomb.
+    web/action.cc - this file is part of MediaTomb.
 
     Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
                        Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file action.cc
+/// \file web/action.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
@@ -40,15 +40,12 @@
 #include "exceptions.h"
 #include "util/xml_to_json.h"
 
-void Web::Action::process()
-{
-    log_debug("action: start");
-    checkRequest();
+const std::string Web::Action::PAGE = "action";
 
+void Web::Action::processPageAction(pugi::xml_node& element)
+{
     std::string action = param("action");
     if (action.empty())
         throw_std_runtime_error("No action given");
     log_debug("action: {}", action);
-
-    log_debug("action: returning");
 }

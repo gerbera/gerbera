@@ -68,11 +68,13 @@
 
 static std::vector<std::size_t> ITEM_PATH_NEW = {};
 
+const std::string Web::ConfigLoad::PAGE = "config_load";
+
 Web::ConfigLoad::ConfigLoad(const std::shared_ptr<Content>& content,
     const std::shared_ptr<Server>& server,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
     const std::shared_ptr<Quirks>& quirks)
-    : WebRequestHandler(content, server, xmlBuilder, quirks)
+    : PageRequest(content, server, xmlBuilder, quirks)
     , definition(content->getContext()->getDefinition())
 {
     try {
@@ -139,11 +141,9 @@ void Web::ConfigLoad::setValue(pugi::xml_node& item, const fs::path& value)
 }
 
 /// \brief: process config_load request
-void Web::ConfigLoad::process()
+void Web::ConfigLoad::processPageAction(pugi::xml_node& element)
 {
-    checkRequest();
-    auto root = xmlDoc->document_element();
-    auto values = root.append_child("values");
+    auto values = element.append_child("values");
     std::string action = param("action");
 
     // set handling of json properties
@@ -163,7 +163,7 @@ void Web::ConfigLoad::process()
         return;
 
     // generate meta info for ui
-    auto meta = root.append_child("types");
+    auto meta = element.append_child("types");
     xml2Json->setArrayName(meta, CONFIG_LOAD_ITEM);
     for (auto&& cs : definition->getOptionList()) {
         addTypeMeta(meta, cs);
@@ -180,7 +180,7 @@ void Web::ConfigLoad::process()
     writeDictionaries(values);
     writeVectors(values);
     writeArrays(values);
-    updateEntriesFromDatabase(root, values);
+    updateEntriesFromDatabase(element, values);
 }
 
 /// \brief: write database status
@@ -1058,12 +1058,12 @@ void Web::ConfigLoad::writeArrays(pugi::xml_node& values)
 }
 
 /// \brief: update entries with datebase values
-void Web::ConfigLoad::updateEntriesFromDatabase(pugi::xml_node& root, pugi::xml_node& values)
+void Web::ConfigLoad::updateEntriesFromDatabase(pugi::xml_node& element, pugi::xml_node& values)
 {
     for (auto&& entry : dbEntries) {
         auto exItem = allItems.find(entry.item);
         if (exItem != allItems.end()) {
-            auto item = root.select_node(exItem->second.c_str()).node();
+            auto item = element.select_node(exItem->second.c_str()).node();
             item.attribute(CONFIG_LOAD_SOURCE) = CONFIG_LOAD_SOURCE_DATABASE;
             item.attribute(CONFIG_LOAD_STATUS) = entry.status.c_str();
         } else {

@@ -44,19 +44,16 @@
 #include "upnp/xml_builder.h"
 #include "util/xml_to_json.h"
 
-void Web::Containers::process()
-{
-    log_debug("start process()");
-    checkRequest();
+const std::string Web::Containers::PAGE = "containers";
 
+void Web::Containers::processPageAction(pugi::xml_node& element)
+{
     int parentID = intParam("parent_id", INVALID_OBJECT_ID);
     std::string action = param("action");
     if (parentID == INVALID_OBJECT_ID)
         throw_std_runtime_error("no parent_id given");
 
-    auto root = xmlDoc->document_element();
-
-    auto containers = root.append_child("containers");
+    auto containers = element.append_child("containers");
     xml2Json->setArrayName(containers, "container");
     xml2Json->setFieldType("title", FieldType::STRING);
     containers.append_attribute("parent_id") = parentID;
@@ -103,5 +100,4 @@ void Web::Containers::process()
         ce.append_attribute("upnp_shortcut") = cont->getUpnpShortcut().c_str();
         ce.append_attribute("upnp_class") = cont->getClass().c_str();
     }
-    log_debug("end process()");
 }

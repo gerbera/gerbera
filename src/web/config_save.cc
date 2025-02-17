@@ -36,23 +36,22 @@
 #include "upnp/client_manager.h"
 #include "util/xml_to_json.h"
 
+const std::string Web::ConfigSave::PAGE = "config_save";
+
 Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context,
     const std::shared_ptr<Content>& content,
     const std::shared_ptr<Server>& server,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
     const std::shared_ptr<Quirks>& quirks)
-    : WebRequestHandler(content, server, xmlBuilder, quirks)
+    : PageRequest(content, server, xmlBuilder, quirks)
     , context(std::move(context))
     , definition(this->content->getContext()->getDefinition())
 {
 }
 
 /// \brief: process config_save request
-void Web::ConfigSave::process()
+void Web::ConfigSave::processPageAction(pugi::xml_node& element)
 {
-    checkRequest();
-    auto root = xmlDoc->document_element();
-    log_debug("configSave");
     std::string action = param("action");
 
     int count = 0;
@@ -159,7 +158,7 @@ void Web::ConfigSave::process()
         }
     }
 
-    auto taskEl = root.append_child("task");
+    auto taskEl = element.append_child("task");
     if (action == "clear")
         taskEl.append_attribute("text") = "Removed all config values from database";
     else if (action != "rescan")

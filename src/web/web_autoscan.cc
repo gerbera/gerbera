@@ -41,10 +41,10 @@
 #include "exceptions.h"
 #include "util/xml_to_json.h"
 
-void Web::Autoscan::process()
-{
-    checkRequest();
+const std::string Web::Autoscan::PAGE = "autoscan";
 
+void Web::Autoscan::processPageAction(pugi::xml_node& element)
+{
     std::string action = param("action");
     if (action.empty())
         throw_std_runtime_error("web:autoscan called with illegal action");
@@ -60,127 +60,125 @@ void Web::Autoscan::process()
         return {};
     }();
 
-    auto root = xmlDoc->document_element();
     if (action == "as_edit_load") {
-        auto autoscan = root.append_child("autoscan");
-        if (fromFs) {
-            autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("1");
-            autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
-            auto adir = content->getAutoscanDirectory(path);
-            autoscan2XML(adir, autoscan);
-        } else {
-            autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("0");
-            autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
-            auto object = database->loadObject(intParam("object_id"));
-            auto adir = object ? content->getAutoscanDirectory(object->getLocation()) : database->getAutoscanDirectory(intParam("object_id"));
-            autoscan2XML(adir, autoscan);
-        }
+        editLoad(fromFs, element, objID, path);
     } else if (action == "as_edit_save") {
-        std::string scanModeStr = param("scan_mode");
-        if (scanModeStr == "none") {
-            // remove...
-            try {
-                log_debug("Removing Autoscan {} ()", path.string(), intParam("object_id"));
-                auto adir = fromFs ? content->getAutoscanDirectory(path) : content->getAutoscanDirectory(intParam("object_id"));
-                content->removeAutoscanDirectory(adir);
-            } catch (const std::runtime_error&) {
-                log_warning("Remove Autoscan {} did not work", intParam("object_id"));
-                // didn't work, well we don't care in this case
-            }
-        } else {
-            // add or update
-            bool recursive = boolParam("recursive");
-            bool hidden = boolParam("hidden");
-            bool followSymlinks = boolParam("followSymlinks");
-            int retryCount = intParam("retryCount");
-            bool dirTypes = boolParam("dirTypes");
-            bool forceRescan = boolParam("forceRescan");
-
-            std::vector<std::string> mediaType;
-            if (boolParam("audio"))
-                mediaType.emplace_back("Audio");
-            if (boolParam("audioMusic"))
-                mediaType.emplace_back("Music");
-            if (boolParam("audioBook"))
-                mediaType.emplace_back("AudioBook");
-            if (boolParam("audioBroadcast"))
-                mediaType.emplace_back("AudioBroadcast");
-            if (boolParam("image"))
-                mediaType.emplace_back("Image");
-            if (boolParam("imagePhoto"))
-                mediaType.emplace_back("Photo");
-            if (boolParam("video"))
-                mediaType.emplace_back("Video");
-            if (boolParam("videoMovie"))
-                mediaType.emplace_back("Movie");
-            if (boolParam("videoTV"))
-                mediaType.emplace_back("TV");
-            if (boolParam("videoMusicVideo"))
-                mediaType.emplace_back("MusicVideo");
-            int mt = AutoscanDirectory::makeMediaType(fmt::format("{}", fmt::join(mediaType, "|")));
-#if 0
-            bool persistent = boolParam("persistent");
-#endif
-
-            AutoscanScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
-            int interval;
-            auto intervalParam = param("interval");
-            parseTime(interval, intervalParam);
-            if (scanMode == AutoscanScanMode::Timed && interval <= 0)
-                throw_std_runtime_error("illegal interval given");
-
-            int objectID = fromFs ? content->ensurePathExistence(path) : intParam("object_id");
-
-            log_debug("adding autoscan {}: location={}, recursive={}, mediaType={}, interval={}, hidden={}",
-                objectID, path.string(), recursive, fmt::join(mediaType, "|"), interval, hidden);
-
-            auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
-            containerMap[AutoscanMediaMode::Audio] = param("ctAudio");
-            containerMap[AutoscanMediaMode::Image] = param("ctImage");
-            containerMap[AutoscanMediaMode::Video] = param("ctVideo");
-            auto adir = fromFs ? content->getAutoscanDirectory(path) : content->getAutoscanDirectory(intParam("object_id"));
-            auto autoscan = std::make_shared<AutoscanDirectory>(
-                path, // location
-                scanMode,
-                recursive,
-                false, // persistent
-                interval,
-                hidden,
-                followSymlinks,
-                mt);
-            if (adir) {
-                autoscan->setScanID(adir->getScanID());
-            }
-            autoscan->setObjectID(objectID);
-            autoscan->setRetryCount(retryCount);
-            autoscan->setDirTypes(dirTypes);
-            autoscan->setForceRescan(forceRescan);
-            content->setAutoscanDirectory(autoscan);
-        }
+        editSave(fromFs, path);
     } else if (action == "list") {
-        auto autoscanList = content->getAutoscanDirectories();
-
-        // --- sorting autoscans
-
-        std::sort(autoscanList.begin(), autoscanList.end(), [](auto&& a1, auto&& a2) { return a1->getLocation() < a2->getLocation(); });
-
-        // --- create list
-
-        auto autoscansEl = root.append_child("autoscans");
-        xml2Json->setArrayName(autoscansEl, "autoscan");
-        for (auto&& autoscanDir : autoscanList) {
-            auto autoscanEl = autoscansEl.append_child("autoscan");
-            autoscanEl.append_attribute("objectID") = autoscanDir->getObjectID();
-
-            autoscanEl.append_child("location").append_child(pugi::node_pcdata).set_value(autoscanDir->getLocation().c_str());
-            autoscanEl.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()));
-            autoscanEl.append_child("from_config").append_child(pugi::node_pcdata).set_value(autoscanDir->persistent() ? "1" : "0");
-        }
+        list(element);
     } else
-        throw_std_runtime_error("called with illegal action");
+        throw_std_runtime_error("autoscan called with illegal action {}", action);
 }
 
-void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir, pugi::xml_node& element)
+void Web::Autoscan::editLoad(
+    bool fromFs,
+    pugi::xml_node& element,
+    const std::string& objID,
+    const fs::path& path)
+{
+    auto autoscan = element.append_child("autoscan");
+    if (fromFs) {
+        autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("1");
+        autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
+        auto adir = content->getAutoscanDirectory(path);
+        autoscan2XML(adir, autoscan);
+    } else {
+        autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("0");
+        autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
+        auto object = database->loadObject(intParam("object_id"));
+        auto adir = object ? content->getAutoscanDirectory(object->getLocation()) : database->getAutoscanDirectory(intParam("object_id"));
+        autoscan2XML(adir, autoscan);
+    }
+}
+
+void Web::Autoscan::editSave(bool fromFs, const fs::path& path)
+{
+    std::string scanModeStr = param("scan_mode");
+    if (scanModeStr == "none") {
+        // remove...
+        try {
+            log_debug("Removing Autoscan {} ()", path.string(), intParam("object_id"));
+            auto adir = fromFs ? content->getAutoscanDirectory(path) : content->getAutoscanDirectory(intParam("object_id"));
+            content->removeAutoscanDirectory(adir);
+        } catch (const std::runtime_error&) {
+            log_warning("Remove Autoscan {} did not work", intParam("object_id"));
+            // didn't work, well we don't care in this case
+        }
+    } else {
+        // add or update
+        bool recursive = boolParam("recursive");
+        bool hidden = boolParam("hidden");
+        bool followSymlinks = boolParam("followSymlinks");
+        int retryCount = intParam("retryCount");
+        bool dirTypes = boolParam("dirTypes");
+        bool forceRescan = boolParam("forceRescan");
+
+        std::vector<std::string> mediaType;
+        if (boolParam("audio"))
+            mediaType.emplace_back("Audio");
+        if (boolParam("audioMusic"))
+            mediaType.emplace_back("Music");
+        if (boolParam("audioBook"))
+            mediaType.emplace_back("AudioBook");
+        if (boolParam("audioBroadcast"))
+            mediaType.emplace_back("AudioBroadcast");
+        if (boolParam("image"))
+            mediaType.emplace_back("Image");
+        if (boolParam("imagePhoto"))
+            mediaType.emplace_back("Photo");
+        if (boolParam("video"))
+            mediaType.emplace_back("Video");
+        if (boolParam("videoMovie"))
+            mediaType.emplace_back("Movie");
+        if (boolParam("videoTV"))
+            mediaType.emplace_back("TV");
+        if (boolParam("videoMusicVideo"))
+            mediaType.emplace_back("MusicVideo");
+        int mt = AutoscanDirectory::makeMediaType(fmt::format("{}", fmt::join(mediaType, "|")));
+#if 0
+        bool persistent = boolParam("persistent");
+#endif
+
+        AutoscanScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
+        int interval;
+        auto intervalParam = param("interval");
+        parseTime(interval, intervalParam);
+        if (scanMode == AutoscanScanMode::Timed && interval <= 0)
+            throw_std_runtime_error("illegal interval given");
+
+        int objectID = fromFs ? content->ensurePathExistence(path) : intParam("object_id");
+
+        log_debug("adding autoscan {}: location={}, recursive={}, mediaType={}, interval={}, hidden={}",
+            objectID, path.string(), recursive, fmt::join(mediaType, "|"), interval, hidden);
+
+        auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
+        containerMap[AutoscanMediaMode::Audio] = param("ctAudio");
+        containerMap[AutoscanMediaMode::Image] = param("ctImage");
+        containerMap[AutoscanMediaMode::Video] = param("ctVideo");
+        auto adir = fromFs ? content->getAutoscanDirectory(path) : content->getAutoscanDirectory(intParam("object_id"));
+        auto autoscan = std::make_shared<AutoscanDirectory>(
+            path, // location
+            scanMode,
+            recursive,
+            false, // persistent
+            interval,
+            hidden,
+            followSymlinks,
+            mt);
+        if (adir) {
+            autoscan->setScanID(adir->getScanID());
+        }
+        autoscan->setObjectID(objectID);
+        autoscan->setRetryCount(retryCount);
+        autoscan->setDirTypes(dirTypes);
+        autoscan->setForceRescan(forceRescan);
+        content->setAutoscanDirectory(autoscan);
+    }
+}
+
+void Web::Autoscan::autoscan2XML(
+    const std::shared_ptr<AutoscanDirectory>& adir,
+    pugi::xml_node& element)
 {
     if (!adir) {
         element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value("none");
@@ -232,5 +230,27 @@ void Web::Autoscan::autoscan2XML(const std::shared_ptr<AutoscanDirectory>& adir,
         element.append_child("ctAudio").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanMediaMode::Audio).c_str());
         element.append_child("ctImage").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanMediaMode::Image).c_str());
         element.append_child("ctVideo").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanMediaMode::Video).c_str());
+    }
+}
+
+void Web::Autoscan::list(pugi::xml_node& element)
+{
+    auto autoscanList = content->getAutoscanDirectories();
+
+    // --- sorting autoscans
+
+    std::sort(autoscanList.begin(), autoscanList.end(), [](auto&& a1, auto&& a2) { return a1->getLocation() < a2->getLocation(); });
+
+    // --- create list
+
+    auto autoscansEl = element.append_child("autoscans");
+    xml2Json->setArrayName(autoscansEl, "autoscan");
+    for (auto&& autoscanDir : autoscanList) {
+        auto autoscanEl = autoscansEl.append_child("autoscan");
+        autoscanEl.append_attribute("objectID") = autoscanDir->getObjectID();
+
+        autoscanEl.append_child("location").append_child(pugi::node_pcdata).set_value(autoscanDir->getLocation().c_str());
+        autoscanEl.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()));
+        autoscanEl.append_child("from_config").append_child(pugi::node_pcdata).set_value(autoscanDir->persistent() ? "1" : "0");
     }
 }
