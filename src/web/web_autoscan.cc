@@ -64,6 +64,8 @@ void Web::Autoscan::processPageAction(pugi::xml_node& element)
         editLoad(fromFs, element, objID, path);
     } else if (action == "as_edit_save") {
         editSave(fromFs, path);
+    } else if (action == "as_run") {
+        runScan(fromFs, path);
     } else if (action == "list") {
         list(element);
     } else
@@ -91,7 +93,23 @@ void Web::Autoscan::editLoad(
     }
 }
 
-void Web::Autoscan::editSave(bool fromFs, const fs::path& path)
+void Web::Autoscan::runScan(
+    bool fromFs,
+    const fs::path& path)
+{
+    std::shared_ptr<AutoscanDirectory> adir;
+    if (fromFs) {
+        adir = content->getAutoscanDirectory(path);
+    } else {
+        auto object = database->loadObject(intParam("object_id"));
+        adir = object ? content->getAutoscanDirectory(object->getLocation()) : database->getAutoscanDirectory(intParam("object_id"));
+    }
+    content->rescanDirectory(adir, adir->getObjectID(), path, true);
+}
+
+void Web::Autoscan::editSave(
+    bool fromFs,
+    const fs::path& path)
 {
     std::string scanModeStr = param("scan_mode");
     if (scanModeStr == "none") {

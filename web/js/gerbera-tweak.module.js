@@ -20,9 +20,9 @@
 
     $Id$
 */
-import {GerberaApp} from './gerbera-app.module.js';
-import {Auth} from './gerbera-auth.module.js';
-import {Updates} from './gerbera-updates.module.js';
+import { GerberaApp } from './gerbera-app.module.js';
+import { Auth } from './gerbera-auth.module.js';
+import { Updates } from './gerbera-updates.module.js';
 
 const initialize = () => {
   $('#dirTweakModal').dirtweakmodal('reset');
@@ -51,7 +51,7 @@ const addDirTweak = (event) => {
 const loadNewDirTweak = (response, path) => {
   const dirtweakModal = $('#dirTweakModal');
   if (response.success) {
-    dirtweakModal.dirtweakmodal('loadItem', {values: response.values, path: path, onSave: submitDirTweak, onDelete: deleteDirTweak});
+    dirtweakModal.dirtweakmodal('loadItem', { values: response.values, path: path, onSave: submitDirTweak, onDelete: deleteDirTweak });
     dirtweakModal.dirtweakmodal('show');
   }
 };
@@ -74,19 +74,21 @@ const submitDirTweak = () => {
     id: item.id,
     value: '',
     origValue: '',
-    status: item.status});
+    status: item.status
+  });
   Object.getOwnPropertyNames(item).sort().forEach((key) => {
-      if (key != "id" && key != "status" && key != "index") {
-        saveData.data.push({
-          item: `/import/directories/tweak[${item.index}]/attribute::${key}`,
-          id: item.id,
-          value: item[key].toString(),
-          origValue: '',
-          status: 'changed'});
-        if (key === 'location') {
-          saveData.target = item[key].toString();
-        }
+    if (key != "id" && key != "status" && key != "index") {
+      saveData.data.push({
+        item: `/import/directories/tweak[${item.index}]/attribute::${key}`,
+        id: item.id,
+        value: item[key].toString(),
+        origValue: '',
+        status: 'changed'
+      });
+      if (key === 'location') {
+        saveData.target = item[key].toString();
       }
+    }
   });
   saveData.changedCount = saveData.data.length;
 
@@ -121,19 +123,21 @@ const deleteDirTweak = () => {
     id: item.id,
     value: '',
     origValue: '',
-    status: item.status});
+    status: item.status
+  });
   Object.getOwnPropertyNames(item).sort().forEach((key) => {
-      if (key != "id" && key != "status" && key != "index") {
-        saveData.data.push({
-          item: `/import/directories/tweak[${item.index}]/attribute::${key}`,
-          id: item.id,
-          value: item[key].toString(),
-          origValue: '',
-          status: item.status});
-        if (key === 'location') {
-          saveData.target = item[key].toString();
-        }
+    if (key != "id" && key != "status" && key != "index") {
+      saveData.data.push({
+        item: `/import/directories/tweak[${item.index}]/attribute::${key}`,
+        id: item.id,
+        value: item[key].toString(),
+        origValue: '',
+        status: item.status
+      });
+      if (key === 'location') {
+        saveData.target = item[key].toString();
       }
+    }
   });
   saveData.changedCount = saveData.data.length;
 

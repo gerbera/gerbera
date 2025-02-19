@@ -53,7 +53,7 @@ const addAutoscan = (event) => {
       ctAudio: item.ctAudio,
       ctImage: item.ctImage,
       ctVideo: item.ctVideo,
-      from_fs: fromFs
+      from_fs: fromFs,
     };
     requestData[Auth.SID] = Auth.getSessionId();
 
@@ -110,6 +110,33 @@ const submitAutoscan = () => {
   }
 };
 
+const runScan = (event) => {
+  const item = event.data;
+  if (item) {
+    const fromFs = GerberaApp.getType() === 'fs';
+    let requestData = {
+      req_type: 'autoscan',
+      object_id: item.id,
+      action: 'as_run',
+      from_fs: fromFs,
+    }
+    requestData[Auth.SID] = Auth.getSessionId();
+    if (GerberaApp.getType() === 'db') {
+      requestData = $.extend({}, requestData, { updates: 'check' });
+    }
+
+    $.ajax({
+      url: GerberaApp.clientConfig.api,
+      type: 'get',
+      data: requestData
+    }).then((response) => {
+      submitComplete(response);
+    }).catch((err) => {
+      GerberaApp.error(err);
+    });
+  }
+};
+
 const showDetails = () => {
   $('#autoscanModal').editmodal('showDetails');
 };
@@ -135,6 +162,7 @@ const submitComplete = (response) => {
 
 export const Autoscan = {
   addAutoscan,
+  runScan,
   initialize,
   loadNewAutoscan,
   submitAutoscan,

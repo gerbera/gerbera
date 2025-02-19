@@ -295,6 +295,8 @@ Filesystem View
 * Add Autoscan Directory/ Edit Autoscan Item
     * Configure folder as autoscan item
     * Triggers scan of the directory
+* Scan Now
+    * Triggers immediate scan of the selected directory
 * Tweak Directory
     * Set special import properties for folder
 

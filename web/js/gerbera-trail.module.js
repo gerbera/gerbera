@@ -106,6 +106,7 @@ const makeTrailFromItem = (items, parentItem) => {
   let onClear;
   let onAddAutoscan;
   let onEditAutoscan;
+  let onRunScan;
   let onAddTweak;
   let onDeleteAll;
   let onRescan;
@@ -116,7 +117,6 @@ const makeTrailFromItem = (items, parentItem) => {
       enableAdd = true;
     } else if (items.parent_id === 1) {
       enableEdit = true;
-      enableAddAutoscan = true;
     } else {
       const isVirtual = ('virtual' in items) && items.virtual === true;
       const isNotProtected = ('protect_container' in items) && items.protect_container !== true;
@@ -130,8 +130,10 @@ const makeTrailFromItem = (items, parentItem) => {
   } else if (itemType === 'fs') {
     enableAddTweak = items.parent_id !== 0;
     const allowsAutoscan = !parentItem || !('autoScanType' in parentItem) || !parentItem.autoScanType || parentItem.autoScanType === 'none';
+    const allowsEditAutoscan = parentItem && ('autoScanType' in parentItem) && parentItem.autoScanType && parentItem.autoScanType !== 'none' && parentItem.autoScanType !== 'parent';
     enableAddAutoscan = items.parent_id !== 0 && allowsAutoscan;
-    enableAdd = items.parent_id !== 0;
+    enableEditAutoscan = items.parent_id !== 0 && allowsEditAutoscan;
+    enableAdd = items.parent_id !== 0 && !enableEditAutoscan;
   } else if (itemType === 'config') {
     enableConfig = true;
     enableClearConfig = GerberaApp.configMode() == 'expert';
@@ -143,6 +145,7 @@ const makeTrailFromItem = (items, parentItem) => {
   onDeleteAll = enableDeleteAll ? deleteAllItems : noOp;
   onAddAutoscan = enableAddAutoscan ? addAutoscan : noOp;
   onEditAutoscan = enableEditAutoscan ? addAutoscan : noOp;
+  onRunScan = enableEditAutoscan ? runScan : noOp;
   onAddTweak = enableAddTweak ? addTweak : noOp;
   onSave = enableConfig ? saveConfig : noOp;
   onClear = enableClearConfig ? clearConfig : noOp;
@@ -162,6 +165,8 @@ const makeTrailFromItem = (items, parentItem) => {
     onAddAutoscan: onAddAutoscan,
     enableEditAutoscan: enableEditAutoscan,
     onEditAutoscan: onEditAutoscan,
+    enableRunScan: enableEditAutoscan,
+    onRunScan: onRunScan,
     onAddTweak: onAddTweak,
     enableAddTweak: enableAddTweak,
     enableConfig: enableConfig,
@@ -189,6 +194,10 @@ const editItem = (event) => {
 
 const addAutoscan = (event) => {
   Autoscan.addAutoscan(event);
+};
+
+const runScan = (event) => {
+  Autoscan.runScan(event);
 };
 
 const addTweak = (event) => {
@@ -249,6 +258,7 @@ export const Trail = {
   destroy,
   addItem,
   addAutoscan,
+  runScan,
   addTweak,
   saveConfig,
   clearConfig,
