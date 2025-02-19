@@ -290,6 +290,8 @@ protected:
     void list(pugi::xml_node& element);
     /// \brief Save new or changed autoscan
     void editSave(bool fromFs, const fs::path& path);
+    /// \brief Run full scan immediately
+    void runScan(bool fromFs, const fs::path& path);
 };
 
 /// \brief Call from WebUi to do nothing :)

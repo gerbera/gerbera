@@ -3,6 +3,7 @@
 ### HEAD
 
 - Add Options to Scripts
+- Add Run Scan action in Web UI
 - Autoscan: Add missing properties to web UI and database
 - Build correct Autoscan Type
 - Build with fmt 11.1.3

@@ -101,9 +101,18 @@ $.widget('grb.trail', {
       editItemIcon.appendTo(buttons);
     }
 
-    let autoscanItemIcon;
+    if (config.enableRunScan && config.onRunScan) {
+      const autoscanItemIcon = this.generateItemButton(item, {
+        title: 'Scan Now',
+        tooltip: 'Run Autoscan Immediately',
+        class: 'grb-trail-run-autoscan',
+        iconClass: 'fa-spinner',
+        click: config.onRunScan ? config.onRunScan : noOp
+      });
+      autoscanItemIcon.appendTo(buttons);
+    }
     if (config.enableAddAutoscan && config.onAddAutoscan) {
-      autoscanItemIcon = this.generateItemButton(item, {
+      const autoscanItemIcon = this.generateItemButton(item, {
         title: 'Add Autoscan Directory',
         tooltip: 'Configure folder as autoscan item',
         class: 'grb-trail-add-autoscan',
@@ -112,7 +121,7 @@ $.widget('grb.trail', {
       });
       autoscanItemIcon.appendTo(buttons);
     } else if (config.enableEditAutoscan && config.onEditAutoscan) {
-      autoscanItemIcon = this.generateItemButton(item, {
+      const autoscanItemIcon = this.generateItemButton(item, {
         title: 'Edit Autoscan Item',
         class: 'grb-trail-edit-autoscan',
         iconClass: 'fa-history',

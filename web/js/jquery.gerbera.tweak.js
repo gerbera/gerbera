@@ -53,10 +53,10 @@
           if (result) {
             const myIndex = Number.parseInt(result[1]);
             const key = entry.replace(`[${myIndex}]/attribute::`, '');
-            
+
             if (!(myIndex in tweakList)) {
-              tweakList[myIndex] = {id: val.id, index: myIndex};
-                itemCount = itemCount>myIndex ? itemCount : myIndex;
+              tweakList[myIndex] = { id: val.id, index: myIndex };
+              itemCount = itemCount > myIndex ? itemCount : myIndex;
             }
             if (key != `[${myIndex}]`) {
               tweakList[myIndex][key] = val.value;
@@ -73,7 +73,7 @@
     reset(modal);
 
     dirTweakLocation.val(itemData.path);
-    
+
     if (itemData.path in tweakMap) {
       item = tweakList[tweakMap[itemData.path]];
       dirTweakDelete.prop('hidden', false);
@@ -146,7 +146,7 @@
     dirTweakSave.prop('disabled', true);
   };
 
-  function saveItem (modal) {
+  function saveItem(modal) {
     const dirTweakLocation = modal.find('#dirTweakLocation');
     const dirTweakId = modal.find('#dirTweakId');
     const dirTweakIndex = modal.find('#dirTweakIndex');
@@ -179,7 +179,7 @@
     return item;
   }
 
-  function deleteItem (modal) {
+  function deleteItem(modal) {
     const dirTweakLocation = modal.find('#dirTweakLocation');
     const dirTweakId = modal.find('#dirTweakId');
     const dirTweakIndex = modal.find('#dirTweakIndex');
