@@ -84,6 +84,13 @@ $.widget('grb.tree', {
             aBadge.addClass('autoscan-child');
             aBadge.prop('title', 'Recursively added by autoscan of ' + data[i].gerbera.autoScanType);
             badges.push(aBadge);
+          } else if (badgeData === 't') {
+            const aBadge = $('<a></a>').addClass('badge badge-secondary').html('<i class="fa fa-address-card"/>');
+            aBadge.addClass('pull-right');
+            aBadge.addClass('autoscan');
+            aBadge.click({ id: data[i].gerbera.id, fullPath: data[i].gerbera.path }, config.onTweakEdit);
+            aBadge.prop('title', 'Import of folder modified');
+            badges.push(aBadge);
           } else if (!isNaN(badgeData)) {
             item.addClass("has-children");
           }
@@ -91,7 +98,8 @@ $.widget('grb.tree', {
       }
       if (data[i].gerbera.upnpShortcut && data[i].gerbera.upnpShortcut !== '') {
         const aBadge = $('<a></a>').addClass('badge badge-secondary').html('<i class="fa fa-bookmark"/> Shortcut');
-        aBadge.addClass('pull-right autoscan');
+        aBadge.addClass('pull-right');
+        aBadge.addClass('autoscan-child');
         aBadge.prop('title', 'UPnP Shortcut ' + data[i].gerbera.upnpShortcut);
         badges.push(aBadge);
       }
