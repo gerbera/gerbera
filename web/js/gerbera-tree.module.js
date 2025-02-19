@@ -24,6 +24,7 @@ import { Autoscan } from "./gerbera-autoscan.module.js";
 import { Auth } from "./gerbera-auth.module.js";
 import { GerberaApp } from "./gerbera-app.module.js";
 import { Trail } from "./gerbera-trail.module.js";
+import { Tweaks } from "./gerbera-tweak.module.js";
 import { Items } from "./gerbera-items.module.js";
 import { Updates } from "./gerbera-updates.module.js";
 
@@ -180,6 +181,10 @@ const onAutoscanEdit = (event) => {
   Autoscan.addAutoscan(event);
 };
 
+const onTweakEdit = (event) => {
+  Tweaks.addDirTweak(event);
+};
+
 const selectTreeItem = (folderList) => {
   const tree = $('#tree');
   tree.tree('select', folderList);
@@ -190,7 +195,8 @@ const loadTree = (response, config) => {
   const treeViewEvents = {
     onSelection: onItemSelected,
     onExpand: onItemExpanded,
-    onAutoscanEdit: onAutoscanEdit
+    onAutoscanEdit: onAutoscanEdit,
+    onTweakEdit: onTweakEdit,
   };
 
   config = $.extend({}, treeViewCss, treeViewEvents, config);
@@ -316,7 +322,9 @@ const generateBadges = (item) => {
   } else if (item.autoscan_type === 'parent') {
     badges.push('p');
   }
-
+  if ('tweak' in item && (item.tweak || item.tweak === 'true')) {
+    badges.push('t');
+  }
   return badges;
 };
 
@@ -356,6 +364,7 @@ export const Tree = {
   getTreeElementById,
   initialize,
   loadTree,
+  onTweakEdit,
   onAutoscanEdit,
   reloadParentTreeItem,
   reloadTreeItem,

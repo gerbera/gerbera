@@ -36,6 +36,7 @@
 
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
+#include "config/result/directory_tweak.h"
 #include "content/content.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -84,7 +85,6 @@ void Web::Directories::processPageAction(pugi::xml_node& element)
 
     std::error_code ec;
     std::map<std::string, dirInfo> filesMap;
-    auto autoscanDirs = content->getAutoscanDirectories();
 
     for (auto&& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
@@ -116,6 +116,9 @@ void Web::Directories::processPageAction(pugi::xml_node& element)
         filesMap.emplace(id, std::pair(filepath, hasContent));
     }
 
+    auto autoscanDirs = content->getAutoscanDirectories();
+    auto allTweaks = config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST)->getArrayCopy();
+
     auto f2i = converterManager->f2i();
     for (auto&& [key, val] : filesMap) {
         auto file = val.first;
@@ -123,7 +126,9 @@ void Web::Directories::processPageAction(pugi::xml_node& element)
         auto ce = containers.append_child("container");
         ce.append_attribute("id") = key.c_str();
         ce.append_attribute("child_count") = has;
+        auto tweak = std::find_if(allTweaks.begin(), allTweaks.end(), [&](auto& d) { return file == d->getLocation(); });
         auto aDir = std::find_if(autoscanDirs.begin(), autoscanDirs.end(), [&](auto& a) { return file == a->getLocation(); });
+        ce.append_attribute("tweak") = tweak != allTweaks.end() ? "true" : "false";
         if (aDir != autoscanDirs.end()) {
             ce.append_attribute("autoscan_type") = (*aDir)->persistent() ? "persistent" : "ui";
             ce.append_attribute("autoscan_mode") = AutoscanDirectory::mapScanmode((*aDir)->getScanMode());

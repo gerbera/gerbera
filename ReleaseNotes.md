@@ -1,5 +1,4 @@
 # Gerbera - UPnP AV Mediaserver.
--3380
 
 ## HEAD
 
@@ -14,6 +13,7 @@ Changed default for layout to `js` if built with JavaScript support.
 - Fabricated comment on import in media handlers (incl. configuration)
 - Resource attribute `pixelFormat` for videos.
 - Additional Resources (thumbnail, subtitle) for External Urls
+- New UI command "Scan Now" and minor improvement
 
 ### FIXES
 
@@ -21,7 +21,7 @@ Changed default for layout to `js` if built with JavaScript support.
 - Autoscan objects in scripts
 - Metadata in builtin layout, album artist in default js layout
 - Commands in UI show descriptive tooltips
-- Child items autoscan folder in UI
+- Child items of autoscan folder in UI
 
 ### Code Improvements
 
