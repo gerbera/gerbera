@@ -43,17 +43,18 @@ bool updateConfig(std::shared_ptr<EditHelperConfig> list,
         auto statusList = splitString(status, ',');
         auto index = indexList.at(0);
         std::shared_ptr<Result> entry = list->get(index, true);
-
-        if (!entry && (statusList.front() == STATUS_ADDED || statusList.front() == STATUS_MANUAL)) {
-            entry = std::make_shared<Result>();
-            list->add(entry, index);
-        }
-        if (entry && (statusList.front() == STATUS_REMOVED || statusList.front() == STATUS_KILLED)) {
-            list->remove(index, true);
-            return true;
-        }
-        if (entry && statusList.front() == STATUS_RESET) {
-            list->add(entry, index);
+        if (!statusList.empty()) {
+            if (!entry && (statusList.front() == STATUS_ADDED || statusList.front() == STATUS_MANUAL)) {
+                entry = std::make_shared<Result>();
+                list->add(entry, index);
+            }
+            if (entry && (statusList.front() == STATUS_REMOVED || statusList.front() == STATUS_KILLED)) {
+                list->remove(index, true);
+                return true;
+            }
+            if (entry && statusList.front() == STATUS_RESET) {
+                list->add(entry, index);
+            }
         }
         if (entry && setup->updateItem(indexList, optItem, config, entry, optValue, status)) {
             return true;
