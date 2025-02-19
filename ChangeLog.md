@@ -11,6 +11,7 @@
 - Downgrade docker builder as well
 - Extract Pixelformat for videos
 - Fix album art in builtin layout
+- Fix config load from database
 - Fix cors host without ipv6 address
 - Fix management auf autoscans in list
 - Fix update of playlists
