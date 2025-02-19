@@ -44,7 +44,7 @@ bool updateConfig(std::shared_ptr<EditHelperConfig> list,
         auto index = indexList.at(0);
         std::shared_ptr<Result> entry = list->get(index, true);
         if (!statusList.empty()) {
-            if (!entry &&  && (statusList.front() == STATUS_ADDED || statusList.front() == STATUS_MANUAL)) {
+            if (!entry && (statusList.front() == STATUS_ADDED || statusList.front() == STATUS_MANUAL)) {
                 entry = std::make_shared<Result>();
                 list->add(entry, index);
             }
