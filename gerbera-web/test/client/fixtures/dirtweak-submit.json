@@ -3,7 +3,7 @@
 	"req_type": "config_save",
 	"action": "rescan",
 	"changedCount": 11,
-	"target": "/home/gerbera/Music",
+	"target": "%2Fhome%2Fgerbera%2FMusic",
 	"updates": "check",
 	"data": [
 		{
@@ -53,7 +53,7 @@
 			"id": "104",
 			"status": "changed",
 			"origValue": "",
-			"value": "/home/gerbera/Music"
+			"value": "%2Fhome%2Fgerbera%2FMusic"
 		},
 		{
 			"item": "/import/directories/tweak[0]/attribute::meta-charset",
