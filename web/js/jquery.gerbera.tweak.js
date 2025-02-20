@@ -162,7 +162,7 @@
     const dirTweakResource = modal.find('#dirTweakResource');
 
     let item = {
-      location: dirTweakLocation.val(),
+      location: encodeURIComponent(dirTweakLocation.val()),
       id: dirTweakId.val(),
       index: dirTweakIndex.val(),
       status: dirTweakStatus.val(),
@@ -171,10 +171,10 @@
       recursive: dirTweakRecursive.is(':checked'),
       'case-sensitive': dirTweakCaseSens.is(':checked'),
       'hidden-files': dirTweakHidden.is(':checked'),
-      'meta-charset': dirTweakMetaCharset.val(),
-      'fanart-file': dirTweakFanArt.val(),
-      'subtitle-file': dirTweakSubtitle.val(),
-      'resource-file': dirTweakResource.val(),
+      'meta-charset': encodeURIComponent(dirTweakMetaCharset.val()),
+      'fanart-file': encodeURIComponent(dirTweakFanArt.val()),
+      'subtitle-file': encodeURIComponent(dirTweakSubtitle.val()),
+      'resource-file': encodeURIComponent(dirTweakResource.val()),
     };
     return item;
   }

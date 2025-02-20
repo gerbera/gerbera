@@ -175,8 +175,8 @@ const saveConfig = () => {
         saveData.data.push({
           item: i.item,
           id: i.id,
-          value: i.value,
-          origValue: i.origValue,
+          value: encodeURIComponent(i.value),
+          origValue: encodeURIComponent(i.origValue),
           status: i.status
         });
       }

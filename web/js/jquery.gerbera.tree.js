@@ -89,7 +89,7 @@ $.widget('grb.tree', {
             aBadge.addClass('pull-right');
             aBadge.addClass('autoscan');
             aBadge.click({ id: data[i].gerbera.id, fullPath: data[i].gerbera.path }, config.onTweakEdit);
-            aBadge.prop('title', 'Import of folder modified');
+            aBadge.prop('title', 'Tweak: Import of folder modified');
             badges.push(aBadge);
           } else if (!isNaN(badgeData)) {
             item.addClass("has-children");

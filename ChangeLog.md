@@ -36,6 +36,7 @@
 - Update to googletest 1.16.0
 - Update libexiv2 to 0.28.4
 - Update wavpack
+- Web UI: properly encode arguments
 - work around build issue
 
 ### v2.4.1
