@@ -1,9 +1,9 @@
-import {Items} from "../../../web/js/gerbera-items.module";
-import {GerberaApp} from '../../../web/js/gerbera-app.module';
-import {Updates} from "../../../web/js/gerbera-updates.module";
-import {Menu} from '../../../web/js/gerbera-menu.module';
-import {Tree} from "../../../web/js/gerbera-tree.module";
-import {Trail} from "../../../web/js/gerbera-trail.module";
+import { Items } from "../../../web/js/gerbera-items.module";
+import { GerberaApp } from '../../../web/js/gerbera-app.module';
+import { Updates } from "../../../web/js/gerbera-updates.module";
+import { Menu } from '../../../web/js/gerbera-menu.module';
+import { Tree } from "../../../web/js/gerbera-tree.module";
+import { Trail } from "../../../web/js/gerbera-trail.module";
 import mockConfig from './fixtures/config';
 import treeMock from './fixtures/parent_id-0-select_it-0';
 
@@ -11,7 +11,7 @@ describe('Gerbera Menu', () => {
   let lsSpy;
   beforeEach(() => {
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
-        return;
+      return;
     });
   });
   describe('initialize()', () => {
@@ -93,10 +93,10 @@ describe('Gerbera Menu', () => {
       const menuItems = ['nav-home', 'nav-db', 'nav-fs'];
 
       $.each(menuItems, (index, value) => {
-        const link = $('#'+ value);
+        const link = $('#' + value);
         expect(link.hasClass('disabled')).toBeTruthy();
       });
-      expect( $('#report-issue').hasClass('disabled')).toBeFalsy();
+      expect($('#report-issue').hasClass('disabled')).toBeFalsy();
     });
   });
   describe('hideLogin()', () => {

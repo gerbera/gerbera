@@ -73,7 +73,7 @@ AutoscanDirectory::AutoscanDirectory(
 
 using MediaTypeIterator = EnumIterator<AutoscanDirectory::MediaType, AutoscanDirectory::MediaType::Audio, AutoscanDirectory::MediaType::MAX>;
 
-std::map<AutoscanDirectory::MediaType, std::string_view> mediaTypes = {
+static std::map<AutoscanDirectory::MediaType, std::string_view> mediaTypes = {
     { AutoscanDirectory::MediaType::Audio, "Audio" },
     { AutoscanDirectory::MediaType::Music, "Music" },
     { AutoscanDirectory::MediaType::AudioBook, "AudioBook" },
@@ -91,7 +91,7 @@ std::map<AutoscanDirectory::MediaType, std::string_view> mediaTypes = {
     { AutoscanDirectory::MediaType::MAX, "MAX" },
 };
 
-std::map<AutoscanDirectory::MediaType, std::string> upnpClasses = {
+static std::map<AutoscanDirectory::MediaType, std::string> upnpClasses = {
     { AutoscanDirectory::MediaType::Audio, UPNP_CLASS_AUDIO_ITEM },
     { AutoscanDirectory::MediaType::Music, UPNP_CLASS_MUSIC_TRACK },
     { AutoscanDirectory::MediaType::AudioBook, UPNP_CLASS_AUDIO_BOOK },
@@ -242,36 +242,45 @@ bool AutoscanDirectory::hasContent(const std::string& upnpClass) const
 
     for (auto&& [cls, active] : scanContent) {
         if (cls == upnpClass) {
+            log_debug("hasContent equal {} {} {}", cls, upnpClass, active);
             return active;
         }
         if (startswith(upnpClass, cls)) {
             result = active;
             if (result)
                 return true;
+            log_debug("hasContent base {} {} {}", cls, upnpClass, result);
         } else if (startswith(cls, upnpClass)) { // looking for base class with sub class
             result = false;
+            log_debug("hasContent base {} {} blocked", cls, upnpClass);
         }
     }
     return result;
 }
 
+static std::map<std::string_view, AutoscanScanMode> scanModeMap = {
+    { AUTOSCAN_TIMED, AutoscanScanMode::Timed },
+#ifdef HAVE_INOTIFY
+    { AUTOSCAN_INOTIFY, AutoscanScanMode::INotify },
+#endif
+    { AUTOSCAN_MANUAL, AutoscanScanMode::Manual },
+};
+
 const char* AutoscanDirectory::mapScanmode(AutoscanScanMode scanmode)
 {
-    switch (scanmode) {
-    case AutoscanScanMode::Timed:
-        return AUTOSCAN_TIMED;
-    case AutoscanScanMode::INotify:
-        return AUTOSCAN_INOTIFY;
-    }
+    auto it = std::find_if(scanModeMap.begin(), scanModeMap.end(),
+        [scanmode](auto&& m) { return m.second == scanmode; });
+    if (it != scanModeMap.end())
+        return it->first.data();
+
     throw_std_runtime_error("Illegal scanmode ({}) given to mapScanmode()", scanmode);
 }
 
 AutoscanScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
 {
-    if (scanmode == AUTOSCAN_TIMED)
-        return AutoscanScanMode::Timed;
-    if (scanmode == AUTOSCAN_INOTIFY)
-        return AutoscanScanMode::INotify;
+    auto it = scanModeMap.find(scanmode);
+    if (it != scanModeMap.end())
+        return it->second;
 
     throw_std_runtime_error("Illegal scanmode ({}) given to remapScanmode()", scanmode);
 }

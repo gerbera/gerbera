@@ -227,6 +227,35 @@
           ]
         },
         {
+          "item": "/import/autoscan/manual/directory",
+          "caption": "Manual Autoscan Directories",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/autoscan/manual/directory/attribute::location",
+              "caption": "Location",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::mode",
+              "caption": "Mode",
+              "value": "manual",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::recursive",
+              "caption": "Recursive",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::hidden-files",
+              "caption": "Import Hidden Files",
+              "editable": false
+            }
+          ]
+        },
+        {
           "item": "/import/directories/tweak",
           "caption": "Directory Tweaks",
           "type": "List",

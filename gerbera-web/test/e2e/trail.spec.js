@@ -1,4 +1,4 @@
-const {expect} = require('chai');
+const { expect } = require('chai');
 const TestUtils = require('./page/test-utils');
 let driver;
 
@@ -26,12 +26,12 @@ describe('Trail Suite', () => {
 
   describe('The gerbera trail', () => {
 
-    it('a gerbera tree item shows an add icon in the trail but not delete item', async () => {
+    it('a gerbera tree item shows no add icon in the trail and no delete item', async () => {
       await homePage.clickMenu('nav-fs');
       await homePage.clickTree('etc');
 
       let result = await homePage.hasTrailAddIcon();
-      expect(result).to.be.true;
+      expect(result).to.be.false;
 
       result = await homePage.hasTrailAddAutoscanIcon();
       expect(result).to.be.true;
@@ -40,7 +40,7 @@ describe('Trail Suite', () => {
       expect(result).to.be.false;
     });
 
-    it('a gerbera tree db item container shows delete icon and add icon in the trail', async () =>{
+    it('a gerbera tree db item container shows delete icon and add icon in the trail', async () => {
       await homePage.clickMenu('nav-db');
       await homePage.clickTree('Video');
 

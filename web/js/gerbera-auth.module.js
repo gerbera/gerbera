@@ -21,13 +21,13 @@
     $Id$
 */
 /* global md5 */
-import {GerberaApp} from './gerbera-app.module.js';
-import {Tree} from './gerbera-tree.module.js';
-import {Items} from './gerbera-items.module.js';
-import {Menu} from './gerbera-menu.module.js';
-import {Trail} from './gerbera-trail.module.js';
-import {Autoscan} from './gerbera-autoscan.module.js';
-import {Updates} from './gerbera-updates.module.js';
+import { GerberaApp } from './gerbera-app.module.js';
+import { Tree } from './gerbera-tree.module.js';
+import { Items } from './gerbera-items.module.js';
+import { Menu } from './gerbera-menu.module.js';
+import { Trail } from './gerbera-trail.module.js';
+import { Autoscan } from './gerbera-autoscan.module.js';
+import { Updates } from './gerbera-updates.module.js';
 
 const SID = 'GerberaSID';
 
@@ -150,7 +150,7 @@ const handleLogout = () => {
   const now = new Date();
   const expire = new Date();
   expire.setTime(now.getTime() - 3600000 * 24 * 360);
-  Cookies.set(SID, null, {expires: expire, SameSite: 'Lax'});
+  Cookies.set(SID, null, { expires: expire, SameSite: 'Lax' });
   GerberaApp.reload('/index.html');
 };
 
@@ -158,7 +158,7 @@ const loadSession = (response) => {
   return new Promise((resolve) => {
     if ((!response.sid_was_valid || !getSessionId()) && response[SID] && response[SID] !== null) {
       console.log(response);
-      Cookies.set(SID, response[SID], {SameSite: 'Lax'});
+      Cookies.set(SID, response[SID], { SameSite: 'Lax' });
     }
     // TODO: reject what?
     resolve(response.logged_in);

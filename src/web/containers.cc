@@ -82,7 +82,7 @@ void Web::Containers::processPageAction(pugi::xml_node& element)
         auto adir = content->getAutoscanDirectory(cont->getLocation());
         if (adir) {
             autoscanType = autoscanType == AutoscanType::None ? AutoscanType::Config : autoscanType;
-            autoscanMode = AUTOSCAN_TIMED;
+            autoscanMode = (adir->getScanMode() == AutoscanScanMode::Timed) ? AUTOSCAN_TIMED : AUTOSCAN_MANUAL;
         }
 #ifdef HAVE_INOTIFY
         if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {

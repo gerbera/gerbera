@@ -318,7 +318,6 @@ describe('Gerbera Autoscan', () => {
         scan_mode: 'timed',
         recursive: true,
         hidden: false,
-        retryCount: '',
         dirTypes: false,
         forceRescan: false,
         followSymlinks: false,

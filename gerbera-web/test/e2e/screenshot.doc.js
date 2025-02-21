@@ -20,8 +20,8 @@ suite(() => {
     suffix = '.png';
     chromeOptions.addArguments(['--window-size=1440,1080', '--incognito']);
     if (test == 'dark') {
-        chromeOptions.addArguments(['--force-dark-mode']);
-        suffix = '_dark.png';
+      chromeOptions.addArguments(['--force-dark-mode']);
+      suffix = '_dark.png';
     }
     driver = new Builder()
       .forBrowser('chrome')
@@ -319,14 +319,14 @@ suite(() => {
       await loginPage.submitLogin();
       await homePage.clickMenu('nav-fs');
       await homePage.clickTree('etc');
-      await homePage.clickTrail(1);
+      await homePage.clickTrail(0);
       await driver.sleep(1000);
 
       await homePage.takeScreenshot(fileName);
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(380, 200, 675, 660);
+      image.crop(380, 200, 680, 660);
       image.write(fileName);
     });
 
@@ -337,7 +337,7 @@ suite(() => {
       await loginPage.submitLogin();
       await homePage.clickMenu('nav-fs');
       await homePage.clickTree('etc');
-      await homePage.clickTrail(1);
+      await homePage.clickTrail(0);
       await driver.sleep(1000);
       await homePage.showAutoscanDetails();
 
@@ -345,7 +345,7 @@ suite(() => {
 
       const image = await Jimp.read(fileName);
       image.resize(1440, Jimp.AUTO);
-      image.crop(235, 160, 960, 735);
+      image.crop(235, 160, 965, 740);
       image.write(fileName);
     });
 
@@ -356,7 +356,7 @@ suite(() => {
       await loginPage.submitLogin();
       await homePage.clickMenu('nav-fs');
       await homePage.clickTree('etc');
-      await homePage.clickTrail(2);
+      await homePage.clickTrail(1);
       await driver.sleep(1000);
 
       await homePage.takeScreenshot(fileName);

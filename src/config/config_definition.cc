@@ -629,6 +629,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_UI_ENABLE_VIDEO,
             "/server/ui/attribute::show-video", "config-server.html#ui",
             NO),
+        std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_UI_FS_SUPPORT_ADD_ITEM,
+            "/server/ui/attribute::fs-add-item", "config-server.html#ui",
+            NO),
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_UI_ACCOUNTS_ENABLED,
             "/server/ui/accounts/attribute::enabled", "config-server.html#ui",
             NO),
@@ -1272,12 +1275,22 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigAutoscanSetup>(ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
             "/import/autoscan", "config-import.html#autoscan",
             AutoscanScanMode::Timed),
+        std::make_shared<ConfigAutoscanSetup>(ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
+            "/import/autoscan", "config-import.html#autoscan",
+            AutoscanScanMode::Manual),
         std::make_shared<ConfigPathSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION,
             "attribute::location", "config-import.html#autoscan",
             "", ConfigPathArguments::notEmpty | ConfigPathArguments::resolveEmpty),
         std::make_shared<ConfigEnumSetup<AutoscanScanMode>>(ConfigVal::A_AUTOSCAN_DIRECTORY_MODE,
             "attribute::mode", "config-import.html#autoscan",
-            std::map<std::string, AutoscanScanMode>({ { AUTOSCAN_TIMED, AutoscanScanMode::Timed }, { AUTOSCAN_INOTIFY, AutoscanScanMode::INotify } })),
+            std::map<std::string, AutoscanScanMode>(
+                {
+                    { AUTOSCAN_TIMED, AutoscanScanMode::Timed },
+#ifdef HAVE_INOTIFY
+                    { AUTOSCAN_INOTIFY, AutoscanScanMode::INotify },
+#endif
+                    { AUTOSCAN_MANUAL, AutoscanScanMode::Manual },
+                })),
         std::make_shared<ConfigTimeSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL,
             "attribute::interval", "config-import.html#autoscan",
             GrbTimeType::Seconds, -1, 0),
@@ -1840,47 +1853,47 @@ void ConfigDefinition::initHierarchy()
         { ConfigVal::A_UPNP_NAMESPACE_KEY, { ConfigVal::UPNP_ALBUM_NAMESPACES, ConfigVal::UPNP_GENRE_NAMESPACES, ConfigVal::UPNP_ARTIST_NAMESPACES, ConfigVal::UPNP_TITLE_NAMESPACES, ConfigVal::UPNP_PLAYLIST_NAMESPACES } },
         { ConfigVal::A_UPNP_NAMESPACE_URI, { ConfigVal::UPNP_ALBUM_NAMESPACES, ConfigVal::UPNP_GENRE_NAMESPACES, ConfigVal::UPNP_ARTIST_NAMESPACES, ConfigVal::UPNP_TITLE_NAMESPACES, ConfigVal::UPNP_PLAYLIST_NAMESPACES } },
 
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
                                                         ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif
                                                     } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
                                                     ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif
                                                 } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
                                                          ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif
                                                      } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
                                                          ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif
                                                      } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
                                                            ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif
                                                        } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
                                                               ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif
                                                           } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
                                                          ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif
                                                      } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_RETRYCOUNT, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_RETRYCOUNT, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
                                                           ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif
                                                       } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_LMT, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_LMT, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
                                                    ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
 #endif

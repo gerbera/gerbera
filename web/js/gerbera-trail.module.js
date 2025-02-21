@@ -133,7 +133,7 @@ const makeTrailFromItem = (items, parentItem) => {
     const allowsEditAutoscan = parentItem && ('autoScanType' in parentItem) && parentItem.autoScanType && parentItem.autoScanType !== 'none' && parentItem.autoScanType !== 'parent';
     enableAddAutoscan = items.parent_id !== 0 && allowsAutoscan;
     enableEditAutoscan = items.parent_id !== 0 && allowsEditAutoscan;
-    enableAdd = items.parent_id !== 0 && !enableEditAutoscan;
+    enableAdd = GerberaApp.serverConfig.fsAddItem && items.parent_id !== 0 && !enableEditAutoscan;
   } else if (itemType === 'config') {
     enableConfig = true;
     enableClearConfig = GerberaApp.configMode() == 'expert';

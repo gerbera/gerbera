@@ -498,150 +498,240 @@ void ConfigManager::setOrigValue(const std::string& item, LongOptionType value)
 // The validate function ensures that the array is completely filled!
 std::string ConfigManager::getOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("string option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("string option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset string option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getOption();
 }
 
 IntOptionType ConfigManager::getIntOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("int option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getIntOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("int option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset int option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getIntOption();
 }
 
 UIntOptionType ConfigManager::getUIntOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("uint option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getUIntOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("uint option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset uint option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getUIntOption();
 }
 
 LongOptionType ConfigManager::getLongOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("long option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getLongOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("long option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset long option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getLongOption();
 }
 
 std::shared_ptr<ConfigOption> ConfigManager::getConfigOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("option {}='{}'not set", option, cs->getItemPathRoot());
+        }
+        return optionValue;
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("option {}='{}'not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset option option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue;
 }
 
 bool ConfigManager::getBoolOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("bool option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getBoolOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("bool option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset bool option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getBoolOption();
 }
 
 std::map<std::string, std::string> ConfigManager::getDictionaryOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("dictionary option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getDictionaryOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("dictionary option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset dictionary option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getDictionaryOption();
 }
 
 std::vector<std::vector<std::pair<std::string, std::string>>> ConfigManager::getVectorOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("vector option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getVectorOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("vector option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset vector option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getVectorOption();
 }
 
 std::vector<std::string> ConfigManager::getArrayOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("array option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getArrayOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("array option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset array option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getArrayOption();
 }
 
 std::vector<std::shared_ptr<AutoscanDirectory>> ConfigManager::getAutoscanListOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("autoscan option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getAutoscanListOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("autoscan option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset autoscan option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getAutoscanListOption();
 }
 
 std::shared_ptr<BoxLayoutList> ConfigManager::getBoxLayoutListOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("box layout option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getBoxLayoutListOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("box layout option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset box layout option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getBoxLayoutListOption();
 }
 
 std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("client config option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getClientConfigListOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("client config option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset client config option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getClientConfigListOption();
 }
 
 std::shared_ptr<DirectoryConfigList> ConfigManager::getDirectoryTweakOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("directory tweak option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getDirectoryTweakOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("directory tweak option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset directory tweak option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getDirectoryTweakOption();
 }
 
 std::shared_ptr<DynamicContentList> ConfigManager::getDynamicContentListOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("dynamic folder option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getDynamicContentListOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("dynamic folder option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset dynamic folder option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getDynamicContentListOption();
 }
 
 std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileListOption(ConfigVal option) const
 {
-    auto optionValue = options.at(to_underlying(option));
-    if (!optionValue) {
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("transcoding option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getTranscodingProfileListOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);
-        throw_std_runtime_error("transcoding option {}='{}' not set", option, cs->getItemPathRoot());
+        throw_std_runtime_error("unset transcoding option {}='{}'", option, cs->getItemPathRoot());
     }
-    return optionValue->getTranscodingProfileListOption();
 }

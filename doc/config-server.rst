@@ -491,6 +491,15 @@ Note:
 
     ::
 
+        fs-add-item=...
+
+    * Optional
+    * Default: **no**
+
+    Show the (deprecated) option to add items without autoscan functionality.
+
+    ::
+
         poll-when-idle=...
 
     * Optional

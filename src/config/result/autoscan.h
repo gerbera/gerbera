@@ -50,11 +50,13 @@ class ImportService;
 
 #define AUTOSCAN_INOTIFY "inotify"
 #define AUTOSCAN_TIMED "timed"
+#define AUTOSCAN_MANUAL "manual"
 
 ///\brief Scan mode - type of scan (timed, inotify, etc.)
-enum class AutoscanScanMode {
+enum class AutoscanScanMode : int {
     Timed,
-    INotify
+    INotify,
+    Manual,
 };
 
 ///\brief Media mode - media handling mode (timed, inotify, etc.)
@@ -68,7 +70,7 @@ enum class AutoscanMediaMode {
 /// \brief Provides information about one autoscan directory.
 class AutoscanDirectory : public Editable {
 public:
-    enum class MediaType {
+    enum class MediaType : int {
         Any = -1,
 
         Audio,

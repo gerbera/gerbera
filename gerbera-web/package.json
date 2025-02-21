@@ -31,7 +31,7 @@
     "bootstrap": "^4.6.2",
     "braces": "^3.0.3",
     "chai": "^4.5.0",
-    "chromedriver": "131.0",
+    "chromedriver": "133.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",

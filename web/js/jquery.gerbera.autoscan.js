@@ -24,6 +24,7 @@
 (function ($) {
   const loadItem = function (modal, itemData) {
     const item = itemData.item;
+    const inotify = itemData.inotify;
     const autoscanId = modal.find('#autoscanId');
     const autoscanIdTxt = modal.find('#autoscanIdTxt');
     const autoscanFromFs = modal.find('#autoscanFromFs');
@@ -31,6 +32,7 @@
     const autoscanModeNone = modal.find('#autoscanModeNone');
     const autoscanModeInotify = modal.find('#autoscanModeInotify');
     const autoscanModeTimed = modal.find('#autoscanModeTimed');
+    const autoscanModeManual = modal.find('#autoscanModeManual');
     const autoscanPersistent = modal.find('#autoscanPersistent');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
@@ -65,19 +67,30 @@
         });
         autoscanSave.prop('disabled', true).off('click');
         autoscanModeNone.closest('.form-check').hide();
-        if (item.scan_mode === 'inotify') {
+        if (item.scan_mode === 'inotify' && inotify) {
           autoscanModeTimed.closest('.form-check').hide();
           autoscanModeInotify.closest('.form-check').show();
-        } else {
+          autoscanModeManual.closest('.form-check').hide();
+        } else if (item.scan_mode === 'timed') {
           autoscanModeTimed.closest('.form-check').show();
           autoscanModeInotify.closest('.form-check').hide();
+          autoscanModeManual.closest('.form-check').hide();
+        } else if (item.scan_mode === 'manual') {
+          autoscanModeTimed.closest('.form-check').hide();
+          autoscanModeInotify.closest('.form-check').hide();
+          autoscanModeManual.closest('.form-check').show();
+        } else {
+          autoscanModeTimed.closest('.form-check').hide();
+          autoscanModeInotify.closest('.form-check').hide();
+          autoscanModeManual.closest('.form-check').hide();
         }
         autoscanPersistentMsg.show();
       } else {
         autoscanSave.off('click').on('click', itemData.onSave);
         autoscanModeNone.closest('.form-check').show();
         autoscanModeTimed.closest('.form-check').show();
-        autoscanModeInotify.closest('.form-check').show();
+        if (!inotify)
+          autoscanModeInotify.closest('.form-check').hide();
       }
 
       autoscanId.val(item.object_id);
@@ -157,8 +170,8 @@
         autoscanDirTypes.prop('disabled', false);
         autoscanForceRescan.closest('.form-group').addClass('disabled').show();
         autoscanForceRescan.prop('disabled', false);
-        autoscanRetryCount.closest('.form-group').addClass('disabled').show();
-        autoscanRetryCount.prop('disabled', false);
+        autoscanRetryCount.closest('.form-group').addClass('disabled').hide();
+        autoscanRetryCount.prop('disabled', true);
         autoscanInterval.closest('.form-group').removeClass('disabled').show();
         autoscanInterval.prop('disabled', false);
         mediaTypeItems.forEach((m) => {
@@ -187,6 +200,34 @@
         autoscanForceRescan.prop('disabled', false);
         autoscanRetryCount.closest('.form-group').addClass('disabled').show();
         autoscanRetryCount.prop('disabled', false);
+        autoscanInterval.closest('.form-group').hide();
+        autoscanInterval.prop('disabled', true);
+        mediaTypeItems.forEach((m) => {
+          m.closest('.form-group').removeClass('disabled').show();
+          m.prop('disabled', false);
+        });
+        autoscanCtAudio.closest('.form-group').removeClass('disabled').show();
+        autoscanCtAudio.prop('disabled', false);
+        autoscanCtImage.closest('.form-group').removeClass('disabled').show();
+        autoscanCtImage.prop('disabled', false);
+        autoscanCtVideo.closest('.form-group').removeClass('disabled').show();
+        autoscanCtVideo.prop('disabled', false);
+        if ($("#detailAutoscanCol").is(":hidden"))
+          modal.find('#detailAutoscanButton').show();
+        break;
+      case 'manual':
+        autoscanRecursive.closest('.form-group').removeClass('disabled').show();
+        autoscanRecursive.prop('disabled', false);
+        autoscanHidden.closest('.form-group').removeClass('disabled').show();
+        autoscanHidden.prop('disabled', false);
+        autoscanSymlinks.closest('.form-group').removeClass('disabled').show();
+        autoscanSymlinks.prop('disabled', false);
+        autoscanDirTypes.closest('.form-group').addClass('disabled').show();
+        autoscanDirTypes.prop('disabled', false);
+        autoscanForceRescan.closest('.form-group').addClass('disabled').show();
+        autoscanForceRescan.prop('disabled', false);
+        autoscanRetryCount.closest('.form-group').addClass('disabled').hide();
+        autoscanRetryCount.prop('disabled', true);
         autoscanInterval.closest('.form-group').hide();
         autoscanInterval.prop('disabled', true);
         mediaTypeItems.forEach((m) => {
@@ -354,7 +395,6 @@
           hidden: autoscanHidden.is(':checked'),
           followSymlinks: autoscanSymlinks.is(':checked'),
           interval: autoscanInterval.val(),
-          retryCount: autoscanRetryCount.val(),
           dirTypes: autoscanDirTypes.is(':checked'),
           forceRescan: autoscanForceRescan.is(':checked'),
 
@@ -380,6 +420,30 @@
           hidden: autoscanHidden.is(':checked'),
           followSymlinks: autoscanSymlinks.is(':checked'),
           retryCount: autoscanRetryCount.val(),
+          dirTypes: autoscanDirTypes.is(':checked'),
+          forceRescan: autoscanForceRescan.is(':checked'),
+
+          audio: autoscanAudio.is(':checked'),
+          audioMusic: autoscanAudioMusic.is(':checked'),
+          audioBook: autoscanAudioBook.is(':checked'),
+          audioBroadcast: autoscanAudioBroadcast.is(':checked'),
+          image: autoscanImage.is(':checked'),
+          imagePhoto: autoscanImagePhoto.is(':checked'),
+          video: autoscanVideo.is(':checked'),
+          videoMovie: autoscanVideoMovie.is(':checked'),
+          videoTV: autoscanVideoTV.is(':checked'),
+          videoMusicVideo: autoscanVideoMusicVideo.is(':checked'),
+
+          ctAudio: autoscanCtAudio.val(),
+          ctImage: autoscanCtImage.val(),
+          ctVideo: autoscanCtVideo.val()
+        });
+        break;
+      case 'manual':
+        item = $.extend({}, item, {
+          recursive: autoscanRecursive.is(':checked'),
+          hidden: autoscanHidden.is(':checked'),
+          followSymlinks: autoscanSymlinks.is(':checked'),
           dirTypes: autoscanDirTypes.is(':checked'),
           forceRescan: autoscanForceRescan.is(':checked'),
 

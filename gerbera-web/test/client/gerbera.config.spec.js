@@ -1,5 +1,5 @@
-import {GerberaApp} from "../../../web/js/gerbera-app.module";
-import {Config} from '../../../web/js/gerbera-config.module';
+import { GerberaApp } from "../../../web/js/gerbera-app.module";
+import { Config } from '../../../web/js/gerbera-config.module';
 import mockConfig from './fixtures/config';
 import configMetaJson from './fixtures/config_meta';
 import configValueJson from './fixtures/config_values';
@@ -10,7 +10,7 @@ describe('Gerbera Config', () => {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
-        return;
+      return;
     });
   });
   afterEach((done) => {
@@ -19,14 +19,14 @@ describe('Gerbera Config', () => {
   });
 
   describe('initialize()', () => {
-   beforeEach(() => {
-     GerberaApp.serverConfig = mockConfig.config;
-   });
+    beforeEach(() => {
+      GerberaApp.serverConfig = mockConfig.config;
+    });
 
-   it('clears the datagrid', async () => {
-     await Config.initialize();
-     expect($('#configgrid').text()).toBe('');
-   });
+    it('clears the datagrid', async () => {
+      await Config.initialize();
+      expect($('#configgrid').text()).toBe('');
+    });
   });
 
   describe('loadItems()', () => {

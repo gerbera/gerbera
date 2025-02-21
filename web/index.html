@@ -763,6 +763,20 @@
                           Re-scans the directory at set intervals. Resource intensive if run too often.
                         </small>
                       </div>
+                      <div class="form-check">
+                        <input
+                          type="radio"
+                          name="autoscanMode"
+                          id="autoscanModeManual"
+                          class="form-check-input"
+                          value="manual"
+                          aria-describedby="autoscanModeManualHelp"
+                        />
+                        <label for="autoscanModeManual" class="form-check-label">Manual</label>
+                        <small id="autoscanModeManualHelp" class="form-text text-muted">
+                          Scans have to be started manually
+                        </small>
+                      </div>
                     </div>
                   </div>
                   <div class="form-group row no-gutters">
@@ -1078,7 +1092,7 @@
             <button id="hideAutoscanButton" type="button" class="btn btn-default">Hide Details</button>
             <button id="detailAutoscanButton" type="button" class="btn btn-default">Show Details</button>
             <button id="autoscanCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-            <button id="autoscanSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Autoscan</button>
+            <button id="autoscanSave" type="submit" class="btn btn-primary" title="Save and Run" data-dismiss="modal">Save Autoscan</button>
           </div>
         </div>
         <!-- /.modal-content -->

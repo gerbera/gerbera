@@ -1,4 +1,4 @@
-const {expect} = require('chai');
+const { expect } = require('chai');
 const TestUtils = require('./page/test-utils');
 let driver;
 
@@ -32,7 +32,7 @@ describe('Config Suite', () => {
       await homePage.showConfig('Server');
 
       let result = await homePage.editOverlayFieldValue('grb_value__server_modelNumber');
-      expect(result).to.equal('2.4.0');
+      expect(result).to.equal('2.5.0');
 
       await homePage.setEditorOverlayField('grb_value__server_modelNumber', '43');
 
