@@ -9,9 +9,15 @@ Autoscan
 ~~~~~~~~
 
 The typical way to get you files loaded into the library is by defining autoscan folder either via web UI (:ref:`Edit Dialog<autoscan-edit>`)
-or via (:ref:`Autoscan Configuration <autoscan>`). On startup each autoscan directory is fully scanned for new or changed files. Depending
-on the type the scan is repeated after the set interval (timed autoscan) or new files are imported as soon as they show up on the disk
-(inotify autoscan; only if compiled in and support by the operating system). In both cases the file is created in `PC Directory` and the
+or via (:ref:`Autoscan Configuration <autoscan>`). On startup each autoscan directory is fully scanned for new or changed files (not *manual*).
+
+- For *manual* autoscans `Scan Now` has to be used whenever the filesystem should be scanned again.
+
+- For *timed* scans the scan is repeated after the set interval.
+
+- For *inotify* new files are imported as soon as they show up on the disk (only if compiled in and support by the operating system).
+
+In all cases the file is created in `PC Directory` and the
 virtual layout is created or updated.
 
 There also is the option to overwrite autoscan settings for subfolders (:ref:`Tweak Dialog<tweak-edit>`) to change the expected character

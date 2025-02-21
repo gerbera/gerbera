@@ -171,7 +171,7 @@ export class FileItemView extends ItemView {
       onEdit: Items.editItem,
       onDelete: Items.deleteItemFromList,
       onDownload: Items.downloadItem,
-      onAdd: Items.addFileItem,
+      onAdd: GerberaApp.serverConfig.fsAddItem ? Items.addFileItem : undefined,
       itemType: GerberaApp.getType(),
       parentItem: response.files
     }

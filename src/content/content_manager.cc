@@ -130,28 +130,38 @@ void ContentManager::run()
         throw_std_runtime_error("Could not start ContentTaskThread thread");
     }
 
+    log_debug("updateAutoscanList {} ui", AutoscanScanMode::Timed);
     autoscanList = database->getAutoscanList(AutoscanScanMode::Timed);
-    for (auto& dir : config->getAutoscanListOption(ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST)) {
-        fs::path path = dir->getLocation();
-        if (fs::is_directory(path)) {
-            dir->setObjectID(ensurePathExistence(path));
-        }
-        try {
-            autoscanList->add(dir);
-        } catch (const std::logic_error& e) {
-            log_warning(e.what());
-        } catch (const std::runtime_error& e) {
-            // Work around existing config sourced autoscans that were stored to the DB for reasons
-            log_warning(e.what());
-        }
-    }
+    auto dbScans = std::vector<AutoscanScanMode> { AutoscanScanMode::Manual };
+    auto cfScans = std::vector<ConfigVal> { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST };
 
 #ifdef HAVE_INOTIFY
     inotify = std::make_unique<AutoscanInotify>(self);
-
     if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
+        dbScans.push_back(AutoscanScanMode::INotify);
+        cfScans.push_back(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST);
+    }
+#endif
+    for (auto cfMode : cfScans) {
+        log_debug("updateAutoscanList {} config", cfMode);
+        for (auto& dir : config->getAutoscanListOption(cfMode)) {
+            fs::path path = dir->getLocation();
+            if (fs::is_directory(path)) {
+                dir->setObjectID(ensurePathExistence(path));
+            }
+            try {
+                autoscanList->add(dir);
+            } catch (const std::logic_error& e) {
+                log_warning(e.what());
+            } catch (const std::runtime_error& e) {
+                log_warning(e.what());
+            }
+        }
+    }
+    for (auto dbMode : dbScans) {
+        log_debug("updateAutoscanList {} ui", dbMode);
         try {
-            auto db = database->getAutoscanList(AutoscanScanMode::INotify);
+            auto db = database->getAutoscanList(dbMode);
             for (std::size_t i = 0; i < db->size(); i++) {
                 auto dir = db->get(i);
                 auto path = dir->getLocation();
@@ -173,22 +183,8 @@ void ContentManager::run()
         } catch (const std::runtime_error& e) {
             log_warning(e.what());
         }
-        for (const auto& dir : config->getAutoscanListOption(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST)) {
-            fs::path path = dir->getLocation();
-            if (fs::is_directory(path)) {
-                dir->setObjectID(ensurePathExistence(path));
-            }
-            try {
-                autoscanList->add(dir);
-            } catch (const std::logic_error& e) {
-                log_warning(e.what());
-            } catch (const std::runtime_error& e) {
-                // Work around existing config sourced autoscans that were stored to the DB for reasons
-                log_warning(e.what());
-            }
-        }
     }
-
+#ifdef HAVE_INOTIFY
     // Start INotify thread
     inotify->run();
 #endif

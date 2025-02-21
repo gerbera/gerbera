@@ -304,6 +304,7 @@
             <xs:attribute name="show-numbering" type="boolean" default="yes"/>
             <xs:attribute name="show-thumbnail" type="boolean" default="yes"/>
             <xs:attribute name="show-video" type="boolean" default="no"/>
+            <xs:attribute name="fs-add-item" type="boolean" default="no"/>
         </xs:complexType>
     </xs:element>
 
@@ -875,6 +876,7 @@
                     <xs:restriction base="xs:string">
                         <xs:enumeration value="timed"/>
                         <xs:enumeration value="inotify"/>
+                        <xs:enumeration value="manual"/>
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>

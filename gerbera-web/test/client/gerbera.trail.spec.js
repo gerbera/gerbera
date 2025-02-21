@@ -1,16 +1,16 @@
-import {Autoscan} from "../../../web/js/gerbera-autoscan.module";
-import {GerberaApp} from "../../../web/js/gerbera-app.module";
-import {Items} from "../../../web/js/gerbera-items.module";
-import {Trail} from "../../../web/js/gerbera-trail.module";
-import {Tree} from "../../../web/js/gerbera-tree.module";
-import {Updates} from "../../../web/js/gerbera-updates.module";
+import { Autoscan } from "../../../web/js/gerbera-autoscan.module";
+import { GerberaApp } from "../../../web/js/gerbera-app.module";
+import { Items } from "../../../web/js/gerbera-items.module";
+import { Trail } from "../../../web/js/gerbera-trail.module";
+import { Tree } from "../../../web/js/gerbera-tree.module";
+import { Updates } from "../../../web/js/gerbera-updates.module";
 import treeResponse from './fixtures/parent_id-0-select_it-0';
 
 describe('Gerbera Trail', () => {
   let lsSpy;
   beforeEach(() => {
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
-        return;
+      return;
     });
   });
 
@@ -110,7 +110,7 @@ describe('Gerbera Trail', () => {
       fixture.load('trail.html');
       Tree.viewFactory('db', 0);
       deleteResponse = { success: true };
-      event = {data: { id: 8 }};
+      event = { data: { id: 8 } };
 
     });
     afterEach(() => {
@@ -155,8 +155,8 @@ describe('Gerbera Trail', () => {
       fixture.setBase('test/client/fixtures');
       fixture.load('trail.html');
       Tree.viewFactory('db', 0);
-      deleteResponse = {success: true};
-      event = {data: {id: 8}};
+      deleteResponse = { success: true };
+      event = { data: { id: 8 } };
       appErrorSpy = spyOn(GerberaApp, 'error');
     });
     afterEach(() => {
@@ -272,7 +272,7 @@ describe('Gerbera Trail', () => {
       spyOn(GerberaApp, 'getType').and.returnValue('db');
       spyOn(Tree, 'reloadParentTreeItem');
       spyOn(Items, 'deleteGerberaItem').and.callFake(() => {
-        return Promise.resolve({success: true});
+        return Promise.resolve({ success: true });
       });
 
       Trail.makeTrailFromItem(items);
@@ -285,7 +285,7 @@ describe('Gerbera Trail', () => {
       spyOn(GerberaApp, 'getType').and.returnValue('db');
       spyOn(Tree, 'reloadParentTreeItem');
       spyOn(Items, 'deleteGerberaItem').and.callFake(() => {
-        return Promise.resolve({success: true});
+        return Promise.resolve({ success: true });
       });
 
       Trail.makeTrailFromItem(items);
@@ -295,6 +295,7 @@ describe('Gerbera Trail', () => {
     });
 
     it('when click add for fs type calls Gerbera Item add', () => {
+      GerberaApp.serverConfig.fsAddItem = true;
       spyOn(GerberaApp, 'getType').and.returnValue('fs');
       spyOn(Items, 'addFileItem');
       items = {
@@ -339,7 +340,7 @@ describe('Gerbera Trail', () => {
     it('when click edit calls Gerbera Item edit', () => {
       spyOn(GerberaApp, 'getType').and.returnValue('db');
       spyOn(Items, 'editItem').and.callFake(() => {
-        return $.Deferred().resolve({success: true}).promise();
+        return $.Deferred().resolve({ success: true }).promise();
       });
 
       Trail.makeTrailFromItem(items);

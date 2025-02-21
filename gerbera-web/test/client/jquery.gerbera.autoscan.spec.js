@@ -61,7 +61,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
 
   describe('loadItem()', () => {
     it('loads the autoscan item into the fields', () => {
-      autoScanModal.autoscanmodal('loadItem', {item: item});
+      autoScanModal.autoscanmodal('loadItem', { item: item });
 
       autoscanMode = $('input[name=autoscanMode][value=timed]');
       expect(autoscanId.val()).toBe('2f6d');
@@ -89,7 +89,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
 
     it('marks fields read-only if autoscan is peristent', () => {
       item.persistent = true;
-      autoScanModal.autoscanmodal('loadItem', {item: item});
+      autoScanModal.autoscanmodal('loadItem', { item: item });
 
       autoscanMode = $(':radio[value=' + item.scan_mode + ']');
       expect(autoscanMode.is(':disabled')).toBeTruthy();
@@ -115,7 +115,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
 
     it('binds the onSave method to the save button', () => {
       const saveSpy = jasmine.createSpy('save');
-      autoScanModal.autoscanmodal('loadItem', {item: item, onSave: saveSpy});
+      autoScanModal.autoscanmodal('loadItem', { item: item, onSave: saveSpy });
 
       $('#autoscanSave').click();
 
@@ -125,7 +125,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
     it('shows proper fields for TIMED scan type', () => {
       const previousMode = item.scan_mode;
       item.scan_mode = 'timed';
-      autoScanModal.autoscanmodal('loadItem', {item: item});
+      autoScanModal.autoscanmodal('loadItem', { item: item });
 
       expect(autoscanMode.is(':disabled')).toBeFalsy();
       expect(autoscanRecursive.is(':disabled')).toBeFalsy();
@@ -149,7 +149,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
     it('disables proper fields for NONE scan type', () => {
       const previousMode = item.scan_mode;
       item.scan_mode = 'none';
-      autoScanModal.autoscanmodal('loadItem', {item: item});
+      autoScanModal.autoscanmodal('loadItem', { item: item });
 
       expect(autoscanMode.is(':disabled')).toBeFalsy();
       expect(autoscanRecursive.is(':disabled')).toBeTruthy();
@@ -173,7 +173,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
     it('hides inapplicable fields for INOTIFY type and shows proper labels', () => {
       const previousMode = item.scan_mode;
       item.scan_mode = 'inotify';
-      autoScanModal.autoscanmodal('loadItem', {item: item});
+      autoScanModal.autoscanmodal('loadItem', { item: item });
 
       expect(autoscanMode.is(':disabled')).toBeFalsy();
       expect(autoscanRecursive.is(':disabled')).toBeFalsy();
@@ -193,11 +193,36 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       expect(autoscanVideoMusicVideo.is(':disabled')).toBeFalsy();
       item.scan_mode = previousMode;
     });
+
+    it('shows proper fields for MANUAL scan type', () => {
+      const previousMode = item.scan_mode;
+      item.scan_mode = 'manual';
+      autoScanModal.autoscanmodal('loadItem', { item: item });
+
+      expect(autoscanMode.is(':disabled')).toBeFalsy();
+      expect(autoscanRecursive.is(':disabled')).toBeFalsy();
+      expect(autoscanHidden.is(':disabled')).toBeFalsy();
+      expect(autoscanFollowSymlinks.is(':checked')).toBeFalsy();
+      expect(autoscanInterval.is(':disabled')).toBeTrue();
+
+      expect(autoscanAudio.is(':disabled')).toBeFalsy();
+      expect(autoscanAudioMusic.is(':disabled')).toBeFalsy();
+      expect(autoscanAudioBook.is(':disabled')).toBeFalsy();
+      expect(autoscanAudioBroadcast.is(':disabled')).toBeFalsy();
+      expect(autoscanImage.is(':disabled')).toBeFalsy();
+      expect(autoscanImagePhoto.is(':disabled')).toBeFalsy();
+      expect(autoscanVideo.is(':disabled')).toBeFalsy();
+      expect(autoscanVideoMovie.is(':disabled')).toBeFalsy();
+      expect(autoscanVideoTV.is(':disabled')).toBeFalsy();
+      expect(autoscanVideoMusicVideo.is(':disabled')).toBeFalsy();
+      item.scan_mode = previousMode;
+    });
+
   });
 
   describe('reset()', () => {
     it('resets all fields to empty', () => {
-      autoScanModal.autoscanmodal('loadItem', {item: item});
+      autoScanModal.autoscanmodal('loadItem', { item: item });
       autoscanMode = $(':radio[id=autoscanModeNone]');
 
       autoScanModal.autoscanmodal('reset');
@@ -230,7 +255,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
     it('gives proper data for `TIMED` scan mode to save', () => {
       const previousMode = item.scan_mode;
       item.scan_mode = 'timed';
-      autoScanModal.autoscanmodal('loadItem', {item: item});
+      autoScanModal.autoscanmodal('loadItem', { item: item });
 
       const result = autoScanModal.autoscanmodal('saveItem');
 
@@ -241,7 +266,6 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
         recursive: true,
         hidden: true,
         followSymlinks: false,
-        retryCount: '',
         dirTypes: false,
         forceRescan: false,
         audio: true,
@@ -265,7 +289,7 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
     it('gives proper data for `INOTIFY` scan mode to save', () => {
       const previousMode = item.scan_mode;
       item.scan_mode = 'inotify';
-      autoScanModal.autoscanmodal('loadItem', {item: item});
+      autoScanModal.autoscanmodal('loadItem', { item: item });
 
       const result = autoScanModal.autoscanmodal('saveItem');
 
@@ -297,10 +321,43 @@ describe('The jQuery Gerbera Autoscan Overlay', () => {
       item.scan_mode = previousMode;
     });
 
+    it('gives proper data for `MANUAL` scan mode to save', () => {
+      const previousMode = item.scan_mode;
+      item.scan_mode = 'manual';
+      autoScanModal.autoscanmodal('loadItem', { item: item });
+
+      const result = autoScanModal.autoscanmodal('saveItem');
+
+      expect(result).toEqual({
+        object_id: '2f6d',
+        from_fs: true,
+        scan_mode: 'manual',
+        recursive: true,
+        hidden: true,
+        followSymlinks: false,
+        dirTypes: false,
+        forceRescan: false,
+        audio: true,
+        audioMusic: true,
+        audioBook: true,
+        audioBroadcast: true,
+        image: true,
+        imagePhoto: true,
+        video: true,
+        videoMovie: true,
+        videoTV: true,
+        videoMusicVideo: true,
+        ctAudio: '',
+        ctImage: '',
+        ctVideo: '',
+      });
+      item.scan_mode = previousMode;
+    });
+
     it('gives proper data for `NONE` scan mode to save', () => {
       const previousMode = item.scan_mode;
       item.scan_mode = 'none';
-      autoScanModal.autoscanmodal('loadItem', {item: item});
+      autoScanModal.autoscanmodal('loadItem', { item: item });
 
       const result = autoScanModal.autoscanmodal('saveItem');
 

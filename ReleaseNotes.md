@@ -4,6 +4,8 @@
 
 Changed default for layout to `js` if built with JavaScript support.
 
+The action to add individual folders is replaced by a manual autoscan option.
+
 ### NEW Features
 
 - All configuration options for autoscan directories are available in the web UI now, including scripts and storage in the database.
@@ -14,6 +16,7 @@ Changed default for layout to `js` if built with JavaScript support.
 - Resource attribute `pixelFormat` for videos.
 - Additional Resources (thumbnail, subtitle) for External Urls
 - New UI command "Scan Now" and minor improvement
+- Manual autoscan to replace `Add Items` in filesystem view
 
 ### FIXES
 

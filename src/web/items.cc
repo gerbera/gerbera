@@ -38,6 +38,7 @@
 #include "cds/cds_item.h"
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
+#include "content/content.h"
 #include "database/database.h"
 #include "database/db_param.h"
 #include "exceptions.h"
@@ -145,43 +146,29 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
     bool protectItems = container->isSubClass(UPNP_CLASS_DYNAMIC_CONTAINER);
     std::string autoscanMode = "none";
 
-    int containerId = container->getID();
-    auto parentDir = database->getAutoscanDirectory(containerId);
+    auto parentDir = content->getAutoscanDirectory(container->getLocation());
     auto autoscanType = AutoscanType::None;
     if (parentDir) {
         autoscanType = parentDir->persistent() ? AutoscanType::Config : AutoscanType::Ui;
-        autoscanMode = AUTOSCAN_TIMED;
+        autoscanMode = AutoscanDirectory::mapScanmode(parentDir->getScanMode());
+        protectItems = true;
+        if (!parentDir->persistent())
+            protectContainer = true;
     }
 
-#ifdef HAVE_INOTIFY
-    if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
-        // check for inotify mode
-        int startpointId = INVALID_OBJECT_ID;
-        if (autoscanType == AutoscanType::None) {
-            auto pathIDs = database->getPathIDs(containerId);
-            for (int pathId : pathIDs) {
-                auto pathDir = database->getAutoscanDirectory(pathId);
-                if (pathDir && pathDir->getRecursive()) {
-                    startpointId = pathId;
-                    break;
-                }
-            }
-        } else {
-            startpointId = containerId;
-        }
-
-        if (startpointId != INVALID_OBJECT_ID) {
-            auto startPtDir = database->getAutoscanDirectory(startpointId);
-            if (startPtDir && startPtDir->getScanMode() == AutoscanScanMode::INotify) {
+    // check path for autoscans
+    if (autoscanType == AutoscanType::None) {
+        for (fs::path path = container->getLocation(); path != "/"; path = path.parent_path()) {
+            auto startPtDir = content->getAutoscanDirectory(path);
+            if (startPtDir && startPtDir->getRecursive()) {
                 protectItems = true;
-                if (autoscanType == AutoscanType::None || startPtDir->persistent())
+                if (!startPtDir->persistent())
                     protectContainer = true;
-
-                autoscanMode = AUTOSCAN_INOTIFY;
+                autoscanMode = AutoscanDirectory::mapScanmode(startPtDir->getScanMode());
+                break;
             }
         }
     }
-#endif
     items.append_attribute("autoscan_mode") = autoscanMode.c_str();
     items.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
     items.append_attribute("protect_container") = protectContainer;

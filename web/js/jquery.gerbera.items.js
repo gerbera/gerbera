@@ -200,11 +200,11 @@ $.widget('grb.dataitems', {
         } else if (itemType === 'fs') {
           buttons.addClass('grb-item-buttons pull-right');
 
-          const addIcon = $('<span></span>');
-          addIcon.prop('title', 'Add item');
-          addIcon.addClass('grb-item-add fa fa-plus');
-          addIcon.appendTo(buttons);
           if (onAdd) {
+            const addIcon = $('<span></span>');
+            addIcon.prop('title', 'Add item');
+            addIcon.addClass('grb-item-add fa fa-plus');
+            addIcon.appendTo(buttons);
             addIcon.click(item, onAdd);
           }
         }

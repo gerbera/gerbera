@@ -109,6 +109,7 @@ void Web::Auth::getConfig(pugi::xml_node& element)
     cfg.append_attribute("show-tooltips") = config->getBoolOption(ConfigVal::SERVER_UI_SHOW_TOOLTIPS);
     cfg.append_attribute("poll-when-idle") = config->getBoolOption(ConfigVal::SERVER_UI_POLL_WHEN_IDLE);
     cfg.append_attribute("poll-interval") = config->getIntOption(ConfigVal::SERVER_UI_POLL_INTERVAL);
+    cfg.append_attribute("fsAddItem") = config->getBoolOption(ConfigVal::SERVER_UI_FS_SUPPORT_ADD_ITEM);
     cfg.append_child("sourceDocs").append_child(pugi::node_pcdata).set_value(config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_SOURCE).c_str());
     cfg.append_child("userDocs").append_child(pugi::node_pcdata).set_value(config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_USER).c_str());
     cfg.append_child("searchCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSearchCapabilities().c_str());

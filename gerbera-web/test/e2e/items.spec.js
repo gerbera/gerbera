@@ -79,12 +79,12 @@ describe('Items Suite', () => {
       expect(result).to.be.false;
     });
 
-    it('a gerbera file item contains an add icon', async () => {
+    it('a gerbera file item contains no add icon', async () => {
       await homePage.clickMenu('nav-fs');
       await homePage.clickTree('etc');
       const item = await homePage.getItem(1);
       const result = await homePage.hasAddIcon(item);
-      expect(result).to.be.true;
+      expect(result).to.be.false;
     });
 
     it('the gerbera items contains a pager that retrieves pages of items', async () => {

@@ -675,6 +675,8 @@ the removed directory if it becomes available/gets created again.
           recursive="no" hidden-files="no"/>
         <directory location="/audio" mode="inotify"
           recursive="yes" hidden-files="no"/>
+        <directory location="/video" mode="manual"
+          recursive="yes" hidden-files="no"/>
 
     * Optional
 
@@ -692,12 +694,12 @@ the removed directory if it becomes available/gets created again.
 
         .. code:: xml
 
-            mode="inotify|timed"
+            mode="inotify|timed|manual"
 
         * Required
 
-        Scan mode, currently ``inotify`` and ``timed`` are supported. Timed mode rescans the given directory in specified
-        intervals, inotify mode uses the kernel inotify mechanism to watch for filesystem events.
+        Scan mode, currently ``inotify``, ``timed`` and ``manual`` are supported. Timed mode rescans the given directory in specified
+        intervals, inotify mode uses the kernel inotify mechanism to watch for filesystem events. Manual requires user interaction on web ui.
 
         .. code:: xml
 

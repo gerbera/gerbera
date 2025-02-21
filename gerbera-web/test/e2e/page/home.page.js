@@ -190,6 +190,7 @@ module.exports = function (driver) {
 
   this.hasAddIcon = async (grbItem) => {
     try {
+      await driver.wait(until.elementLocated(By.css('.grb-trail-add')), 500);
       return grbItem.findElement(By.css('.grb-item-add')).isDisplayed();
     } catch (e) {
       return false;
@@ -197,7 +198,12 @@ module.exports = function (driver) {
   };
 
   this.hasTrailAddIcon = async () => {
-    return await driver.findElement(By.css('.grb-trail-add')).isDisplayed();
+    try {
+      await driver.wait(until.elementLocated(By.css('.grb-trail-add')), 500);
+      return await driver.findElement(By.css('.grb-trail-add')).isDisplayed();
+    } catch (e) {
+      return false;
+    }
   };
 
   this.hasTrailAddAutoscanIcon = async () => {

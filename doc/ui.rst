@@ -290,10 +290,9 @@ The Gerbera Trail shows the current database/filesystem path and provides a numb
 Filesystem View
 ---------------
 
-* Add Items
-    * Add folder and subfolders to database
 * Add Autoscan Directory/ Edit Autoscan Item
     * Configure folder as autoscan item
+    * Add folder and subfolders to database
     * Triggers scan of the directory
 * Scan Now
     * Triggers immediate scan of the selected directory

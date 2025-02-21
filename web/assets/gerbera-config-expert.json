@@ -870,6 +870,81 @@
           ]
         },
         {
+          "item": "/import/autoscan/manual/directory",
+          "caption": "Manual Autoscan Directories",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/autoscan/manual/directory/attribute::location",
+              "caption": "Location",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::mode",
+              "caption": "Mode",
+              "type": "String",
+              "value": "manual",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::recursive",
+              "caption": "Recursive",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::dirtypes",
+              "caption": "Types for physical containers",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::media-type",
+              "caption": "Mediatype",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::hidden-files",
+              "caption": "Import Hidden Files",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::follow-symlinks",
+              "caption": "Follow Symlinks",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::container-type-audio",
+              "caption": "Container Type for Audio",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::container-type-image",
+              "caption": "Container Type for Image",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::container-type-video",
+              "caption": "Container Type for Video",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::scan-count",
+              "caption": "Active Scan Count",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::task-count",
+              "caption": "Active Task Count",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::last-modified",
+              "caption": "Last Modified",
+              "editable": false
+            }
+          ]
+        },
+        {
           "item": "/import/system-directories/add-path",
           "caption": "System Directories",
           "type": "List",

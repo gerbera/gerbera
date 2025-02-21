@@ -77,6 +77,7 @@ const loadNewAutoscan = (response) => {
   const autoscanModal = $('#autoscanModal');
   if (response.success) {
     autoscanModal.autoscanmodal('loadItem', {
+      inotify: GerberaApp.serverConfig['have-inotify'],
       item: response.autoscan,
       onSave: submitAutoscan,
       onDetails: showDetails,
@@ -104,6 +105,9 @@ const submitAutoscan = () => {
       data: requestData
     }).then((response) => {
       submitComplete(response);
+      if (item.scan_mode === 'manual') {
+          runScan({ data: item });
+      }
     }).catch((err) => {
       GerberaApp.error(err);
     });

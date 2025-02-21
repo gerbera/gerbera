@@ -2939,7 +2939,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
     {
         auto pathIDs = getPathIDs(checkObjectID);
         if (pathIDs.empty())
-            throw DatabaseException("getPathIDs returned nullptr", LINE_MESSAGE);
+            throw DatabaseException("getPathIDs returned empty", LINE_MESSAGE);
 
         auto where = std::vector {
             fmt::format("{} IN ({})", identifier("obj_id"), fmt::join(pathIDs, ",")),
