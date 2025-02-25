@@ -6,6 +6,7 @@
 - Add Options to Scripts
 - Add Run Scan action in Web UI
 - Autoscan: Add missing properties to web UI and database
+- Autoscan fixes
 - Build correct Autoscan Type
 - Build with fmt 11.1.3
 - Cleanup tree and autoscan commands
