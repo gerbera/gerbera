@@ -2808,7 +2808,8 @@ void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     int objectID = adir->getObjectID();
     int objectIDold = _getAutoscanObjectID(adir->getDatabaseID());
     if (objectIDold != objectID) {
-        _autoscanChangePersistentFlag(objectIDold, false);
+        if (objectIDold != INVALID_OBJECT_ID)
+            _autoscanChangePersistentFlag(objectIDold, false);
         _autoscanChangePersistentFlag(objectID, true);
     }
     auto fields = std::vector {
@@ -2869,10 +2870,10 @@ int SQLDatabase::_getAutoscanObjectID(int autoscanID)
 void SQLDatabase::_autoscanChangePersistentFlag(int objectID, bool persistent)
 {
     if (objectID == INVALID_OBJECT_ID) {
-        log_warning("cannot change autoscan with illegal ID");
+        log_warning("cannot change autoscan to persistent {} with illegal ID", persistent);
         return;
     }
-    exec(fmt::format("UPDATE {0}{2}{1} SET {0}flags{1} = ({0}flags{1} {3}{4}) WHERE {0}id{1} = {5}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER, objectID));
+    exec(fmt::format("UPDATE {0}{2}{1} SET {0}flags{1} = ({0}flags{1} {3}{4}) WHERE {0}obj_id{1} = {5}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER, objectID));
 }
 
 void SQLDatabase::checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)

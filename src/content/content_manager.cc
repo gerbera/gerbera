@@ -142,22 +142,6 @@ void ContentManager::run()
         cfScans.push_back(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST);
     }
 #endif
-    for (auto cfMode : cfScans) {
-        log_debug("updateAutoscanList {} config", cfMode);
-        for (auto& dir : config->getAutoscanListOption(cfMode)) {
-            fs::path path = dir->getLocation();
-            if (fs::is_directory(path)) {
-                dir->setObjectID(ensurePathExistence(path));
-            }
-            try {
-                autoscanList->add(dir);
-            } catch (const std::logic_error& e) {
-                log_warning(e.what());
-            } catch (const std::runtime_error& e) {
-                log_warning(e.what());
-            }
-        }
-    }
     for (auto dbMode : dbScans) {
         log_debug("updateAutoscanList {} ui", dbMode);
         try {
@@ -182,6 +166,22 @@ void ContentManager::run()
             log_warning(e.what());
         } catch (const std::runtime_error& e) {
             log_warning(e.what());
+        }
+    }
+    for (auto cfMode : cfScans) {
+        log_debug("updateAutoscanList {} config", cfMode);
+        for (auto& dir : config->getAutoscanListOption(cfMode)) {
+            fs::path path = dir->getLocation();
+            if (fs::is_directory(path)) {
+                dir->setObjectID(ensurePathExistence(path));
+            }
+            try {
+                autoscanList->add(dir);
+            } catch (const std::logic_error& e) {
+                log_warning(e.what());
+            } catch (const std::runtime_error& e) {
+                log_warning(e.what());
+            }
         }
     }
 #ifdef HAVE_INOTIFY
