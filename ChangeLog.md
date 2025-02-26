@@ -9,6 +9,7 @@
 - Autoscan fixes
 - Build correct Autoscan Type
 - Build with fmt 11.1.3
+- Build with fmt 11.1.4
 - Cleanup tree and autoscan commands
 - Debian Build for arm64
 - Downgrade docker builder as well
