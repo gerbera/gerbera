@@ -29,7 +29,7 @@ The action to add individual folders is replaced by a manual autoscan option.
 ### Code Improvements
 
 - Removed static from ConfigDefinition
-- Update versions of pugixml (1.15), libexif (v0.6.25), wavpack (5.8.1), fmt (11.1.3), spdlog (1.15.1), wavpack (1.8.1), googletest (1.16.0), libexiv2 (0.28.5)
+- Update versions of pugixml (1.15), libexif (v0.6.25), wavpack (5.8.1), fmt (11.1.4), spdlog (1.15.1), wavpack (1.8.1), googletest (1.16.0), libexiv2 (0.28.5)
 
 ## 2.4.1
 
