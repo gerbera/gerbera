@@ -45,7 +45,6 @@
 #include <algorithm>
 #include <array>
 
-
 const std::string_view Web::Directories::PAGE = "directories";
 
 Web::Directories::Directories(const std::shared_ptr<Content>& content,
