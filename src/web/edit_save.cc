@@ -39,9 +39,9 @@
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
-const std::string Web::EditSave::PAGE = "edit_save";
+const std::string_view Web::EditSave::PAGE = "edit_save";
 
-void Web::EditSave::processPageAction(pugi::xml_node& element)
+bool Web::EditSave::processPageAction(pugi::xml_node& element, const std::string& action)
 {
     std::string objID = param("object_id");
     if (objID.empty())
@@ -51,4 +51,6 @@ void Web::EditSave::processPageAction(pugi::xml_node& element)
     auto object = content->updateObject(objectID, params);
     if (readResources(object))
         content->updateObject(object, true);
+
+    return true;
 }

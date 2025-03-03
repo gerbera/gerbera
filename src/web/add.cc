@@ -42,9 +42,9 @@
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
-const std::string Web::Add::PAGE = "add";
+const std::string_view Web::Add::PAGE = "add";
 
-void Web::Add::processPageAction(pugi::xml_node& element)
+bool Web::Add::processPageAction(pugi::xml_node& element, const std::string& action)
 {
     std::string objID = param("object_id");
     auto path = fs::path((objID == "0") ? FS_ROOT_DIRECTORY : hexDecodeString(objID));
@@ -64,4 +64,6 @@ void Web::Add::processPageAction(pugi::xml_node& element)
     } else {
         log_error("Failed to read {}: {}", path.c_str(), ec.message());
     }
+
+    return true;
 }

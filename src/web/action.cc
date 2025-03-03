@@ -40,12 +40,12 @@
 #include "exceptions.h"
 #include "util/xml_to_json.h"
 
-const std::string Web::Action::PAGE = "action";
+const std::string_view Web::Action::PAGE = "action";
 
-void Web::Action::processPageAction(pugi::xml_node& element)
+bool Web::Action::processPageAction(pugi::xml_node& element, const std::string& action)
 {
-    std::string action = param("action");
     if (action.empty())
         throw_std_runtime_error("No action given");
-    log_debug("action: {}", action);
+
+    return true;
 }

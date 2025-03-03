@@ -43,12 +43,11 @@ static std::string secondsToString(const std::chrono::seconds& t)
     return fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(t.count()));
 }
 
-const std::string Web::Clients::PAGE = "clients";
+const std::string_view Web::Clients::PAGE = "clients";
 
-void Web::Clients::processPageAction(pugi::xml_node& element)
+bool Web::Clients::processPageAction(pugi::xml_node& element, const std::string& action)
 {
     // Delete client
-    std::string action = param("action");
     if (action == "delete") {
         std::string clientIp = param("client_id");
         if (!clientIp.empty()) {
@@ -95,4 +94,6 @@ void Web::Clients::processPageAction(pugi::xml_node& element)
         item.append_attribute("bookmarks") = obj.at("bookmarks").c_str();
         item.append_attribute("last") = obj.at("last").c_str();
     }
+
+    return true;
 }

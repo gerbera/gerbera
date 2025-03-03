@@ -39,9 +39,9 @@
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
-const std::string Web::Remove::PAGE = "remove";
+const std::string_view Web::Remove::PAGE = "remove";
 
-void Web::Remove::processPageAction(pugi::xml_node& element)
+bool Web::Remove::processPageAction(pugi::xml_node& element, const std::string& action)
 {
     int objectID = intParam("object_id");
     bool all = intParam("all");
@@ -51,7 +51,8 @@ void Web::Remove::processPageAction(pugi::xml_node& element)
         obj = database->loadObject(objectID);
     } catch (const std::runtime_error&) {
         log_error("Trying to remove an object ID which is no longer in the database! {}", objectID);
-        return;
+        return true;
     }
     content->removeObject(nullptr, obj, "", true, all);
+    return true;
 }

@@ -102,7 +102,10 @@ bool WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     return quirks && quirks->getClient();
 }
 
-std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> WebRequestHandler::open(
+    const char* filename,
+    const std::shared_ptr<Quirks>& quirks,
+    enum UpnpOpenFileMode mode)
 {
     this->filename = filename;
     auto&& parameters = URLUtils::getQuery(this->filename);
@@ -150,13 +153,13 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, const s
     } catch (const std::runtime_error& e) {
         error = fmt::format("Error: {}", e.what());
         errorCode = 800;
+    } catch (const std::exception& e) {
+        error = fmt::format("Exception: {}", e.what());
+        errorCode = 800;
     }
 
-    if (error.empty()) {
-        root.append_attribute("success") = true;
-    } else {
-        root.append_attribute("success") = false;
-
+    root.append_attribute("success") = error.empty();
+    if (!error.empty()) {
         auto errorEl = root.append_child("error");
         errorEl.append_attribute("text") = error.c_str();
 
@@ -171,6 +174,8 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, const s
         output = xml2Json->getJson(root);
     } catch (const std::runtime_error& e) {
         log_error("Web marshalling error: {}", e.what());
+    } catch (const std::exception& e) {
+        log_error("Web marshalling exception: {}", e.what());
     }
 
     log_debug("output-----------------------{}", output);
@@ -180,16 +185,16 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(const char* filename, const s
     return ioHandler;
 }
 
+
+static std::map<AutoscanType, std::string_view> asTypeMap = {
+    { AutoscanType::Ui, "ui" },
+    { AutoscanType::Config, "persistent" },
+    { AutoscanType::None, "none" },
+};
+
 std::string_view WebRequestHandler::mapAutoscanType(AutoscanType type)
 {
-    switch (type) {
-    case AutoscanType::Ui:
-        return "ui";
-    case AutoscanType::Config:
-        return "persistent";
-    default:
-        return "none";
-    }
+    return asTypeMap.at(type);
 }
 
 std::unique_ptr<WebRequestHandler> createWebRequestHandler(

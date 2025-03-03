@@ -44,18 +44,19 @@
 #include "upnp/xml_builder.h"
 #include "util/xml_to_json.h"
 
-const std::string Web::Containers::PAGE = "containers";
+const std::string_view Web::Containers::PAGE = "containers";
 
-void Web::Containers::processPageAction(pugi::xml_node& element)
+bool Web::Containers::processPageAction(pugi::xml_node& element, const std::string& action)
 {
     int parentID = intParam("parent_id", INVALID_OBJECT_ID);
-    std::string action = param("action");
     if (parentID == INVALID_OBJECT_ID)
         throw_std_runtime_error("no parent_id given");
 
     auto containers = element.append_child("containers");
     xml2Json->setArrayName(containers, "container");
     xml2Json->setFieldType("title", FieldType::STRING);
+    xml2Json->setFieldType("autoscan_mode", FieldType::STRING);
+    xml2Json->setFieldType("autoscan_type", FieldType::STRING);
     containers.append_attribute("parent_id") = parentID;
     containers.append_attribute("type") = action == "browse" ? "database" : "search";
     if (!param("select_it").empty())
@@ -94,10 +95,12 @@ void Web::Containers::processPageAction(pugi::xml_node& element)
 #endif
         ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
         ce.append_attribute("autoscan_mode") = autoscanMode.c_str();
-        ce.append_attribute("persistent") = cont->getFlags() & OBJECT_FLAG_PERSISTENT_CONTAINER ? "true" : "false";
+        ce.append_attribute("persistent") = cont->getFlags() & OBJECT_FLAG_PERSISTENT_CONTAINER ? true : false;
         ce.append_attribute("title") = cont->getTitle().c_str();
         ce.append_attribute("location") = cont->getLocation().c_str();
         ce.append_attribute("upnp_shortcut") = cont->getUpnpShortcut().c_str();
         ce.append_attribute("upnp_class") = cont->getClass().c_str();
     }
+
+    return true;
 }

@@ -18,6 +18,7 @@
 - Fix config load from database
 - Fix cors host without ipv6 address
 - Fix management auf autoscans in list
+- Fix shutdown issue
 - Fix update of playlists
 - Fix UpnpMap logic
 - Focal: Freeze more aws-sdk versions

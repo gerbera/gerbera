@@ -39,11 +39,10 @@
 #include "util/generic_task.h"
 #include "util/xml_to_json.h"
 
-const std::string Web::Tasks::PAGE = "tasks";
+const std::string_view Web::Tasks::PAGE = "tasks";
 
-void Web::Tasks::processPageAction(pugi::xml_node& element)
+bool Web::Tasks::processPageAction(pugi::xml_node& element, const std::string& action)
 {
-    std::string action = param("action");
     if (action.empty())
         throw_std_runtime_error("called with illegal action");
 
@@ -59,4 +58,6 @@ void Web::Tasks::processPageAction(pugi::xml_node& element)
         content->invalidateTask(taskID, TaskOwner::ContentManagerTask);
     } else
         throw_std_runtime_error("tasks called with illegal action {}", action);
+
+    return true;
 }

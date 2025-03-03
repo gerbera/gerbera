@@ -77,7 +77,7 @@ grb_read_t MemIOHandler::read(std::byte* buf, std::size_t length)
 
     std::memcpy(buf, buffer + pos, length);
     pos = pos + length;
-    ret = static_cast<int>(length);
+    ret = length;
 
     if (pos >= this->length) {
         pos = -1;

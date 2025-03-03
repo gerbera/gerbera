@@ -62,18 +62,17 @@ protected:
     std::chrono::seconds timeout = std::chrono::seconds::zero();
     bool accountsEnabled { false };
 
-    void process(pugi::xml_node& root) override;
-    void processPageAction(pugi::xml_node& element) override {};
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
     /// \brief get server configuration parts for UI
-    void getConfig(pugi::xml_node& element);
+    bool getConfig(pugi::xml_node& element);
     /// \brief get current session id
-    void getSid(pugi::xml_node& element);
+    bool getSid(pugi::xml_node& element);
     /// \brief get token for login
-    void getToken(pugi::xml_node& element);
+    bool getToken(pugi::xml_node& element);
     /// \brief handle login action
-    void login();
+    bool login();
     /// \brief handle logout action
-    void logout();
+    bool logout();
 
 public:
     explicit Auth(const std::shared_ptr<Content>& content,
@@ -81,8 +80,8 @@ public:
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks);
 
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 };
 
 /// \brief Call from WebUi to create container tree in database view
@@ -90,11 +89,11 @@ class Containers : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
 };
 
 /// \brief Call from WebUi to create directory tree in filesystem view
@@ -106,11 +105,17 @@ public:
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks);
 
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    using DirInfo = std::pair<fs::path, bool>;
+    /// \brief get all files in path
+    std::map<std::string, DirInfo> listFiles(const fs::path& path);
+    /// \brief generate xml output for files
+    void outputFiles(pugi::xml_node& containers, const std::map<std::string, DirInfo>& filesMap);
+
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
 
     std::shared_ptr<ConverterManager> converterManager;
 };
@@ -124,11 +129,11 @@ public:
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks);
 
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
 
     std::shared_ptr<ConverterManager> converterManager;
 };
@@ -138,11 +143,11 @@ class Items : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
     /// \brief run browse according to page request parameters
     std::vector<std::shared_ptr<CdsObject>> doBrowse(
         const std::shared_ptr<CdsObject>& container,
@@ -164,11 +169,11 @@ class Add : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
 };
 
 /// \brief Call from WebUi to Remove item in database view
@@ -176,11 +181,11 @@ class Remove : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
 };
 
 /// \brief Call from WebUi to Edit Item in database view
@@ -188,11 +193,11 @@ class EditLoad : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
     /// \brief write object core info
     pugi::xml_node writeCoreInfo(
         const std::shared_ptr<CdsObject>& obj,
@@ -227,11 +232,11 @@ class EditSave : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
 };
 
 /// \brief Call from WebUi to Add Object in database view
@@ -239,11 +244,11 @@ class AddObject : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
     /// \brief handle page request to add a container
     void addContainer(
         int parentID,
@@ -271,11 +276,11 @@ class Autoscan : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
     /// \brief Convert autoscan dir to xml for web response
     static void autoscan2XML(
         const std::shared_ptr<AutoscanDirectory>& adir,
@@ -299,11 +304,11 @@ class VoidType : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 public:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
 };
 
 /// \brief task list and task cancel
@@ -311,11 +316,11 @@ class Tasks : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
 };
 
 /// \brief UI action button
@@ -323,11 +328,11 @@ class Action : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
 };
 
 /// \brief Browse clients list
@@ -335,11 +340,11 @@ class Clients : public PageRequest {
     using PageRequest::PageRequest;
 
 public:
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 
 protected:
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
 };
 
 /// \brief Call from WebUi to load configuration
@@ -349,7 +354,7 @@ protected:
     std::map<std::string, std::string> allItems;
     std::shared_ptr<ConfigDefinition> definition;
 
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
     /// \brief create config value entry
     void createItem(
         pugi::xml_node& item,
@@ -398,8 +403,8 @@ public:
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks);
 
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 };
 
 /// \brief Call from WebUi to save configuration
@@ -408,7 +413,7 @@ protected:
     std::shared_ptr<Context> context;
     std::shared_ptr<ConfigDefinition> definition;
 
-    void processPageAction(pugi::xml_node& element) override;
+    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
 
 public:
     explicit ConfigSave(std::shared_ptr<Context> context,
@@ -417,8 +422,8 @@ public:
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks);
 
-    const static std::string PAGE;
-    std::string getPage() const override { return PAGE; }
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
 };
 
 } // namespace Web

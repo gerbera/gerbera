@@ -43,6 +43,7 @@
 #include "util/xml_to_json.h"
 
 static constexpr auto loginTimeout = std::chrono::seconds(10);
+const std::string_view Web::Auth::PAGE = "auth";
 
 static std::string generateToken()
 {
@@ -63,8 +64,6 @@ static bool checkToken(const std::string& token, const std::string& password, co
     return (checksum == encPassword);
 }
 
-const std::string Web::Auth::PAGE = "auth";
-
 Web::Auth::Auth(const std::shared_ptr<Content>& content,
     const std::shared_ptr<Server>& server,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
@@ -73,33 +72,34 @@ Web::Auth::Auth(const std::shared_ptr<Content>& content,
     , timeout(std::chrono::minutes(config->getIntOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT)))
     , accountsEnabled(config->getBoolOption(ConfigVal::SERVER_UI_ACCOUNTS_ENABLED))
 {
+    doCheck = false;
 }
 
-void Web::Auth::process(pugi::xml_node& root)
+bool Web::Auth::processPageAction(pugi::xml_node& element, const std::string& action)
 {
-    std::string action = param("action");
-    auto element = xmlDoc->document_element();
-
     if (action.empty()) {
         element.append_child("error").append_child(pugi::node_pcdata).set_value("req_type auth: no action given");
-        return;
+        return doCheck;
     }
 
     if (action == "get_config") {
-        getConfig(element);
+        return getConfig(element);
     } else if (action == "get_sid") {
-        getSid(element);
+        return getSid(element);
     } else if (action == "logout") {
-        logout();
+        return logout();
     } else if (action == "get_token") {
-        getToken(element);
+        return getToken(element);
     } else if (action == "login") {
-        login();
-    } else
+        return login();
+    } else {
         throw_std_runtime_error("illegal action {} given to req_type auth", action);
+    }
+
+    return doCheck;
 }
 
-void Web::Auth::getConfig(pugi::xml_node& element)
+bool Web::Auth::getConfig(pugi::xml_node& element)
 {
     auto cfg = element.append_child("config");
     cfg.append_attribute("accounts") = accountsEnabled;
@@ -139,9 +139,11 @@ void Web::Auth::getConfig(pugi::xml_node& element)
 
     auto gerberaVersion = cfg.append_child("version").append_child(pugi::node_pcdata);
     gerberaVersion.set_value(GERBERA_VERSION);
+
+    return false;
 }
 
-void Web::Auth::getSid(pugi::xml_node& element)
+bool Web::Auth::getSid(pugi::xml_node& element)
 {
     log_debug("checking/getting sid...");
     std::shared_ptr<Session> session;
@@ -160,9 +162,11 @@ void Web::Auth::getSid(pugi::xml_node& element)
         session->logIn();
     }
     element.append_attribute("logged_in") = session->isLoggedIn();
+
+    return false;
 }
 
-void Web::Auth::getToken(pugi::xml_node& element)
+bool Web::Auth::getToken(pugi::xml_node& element)
 {
     checkRequest(false);
 
@@ -170,9 +174,11 @@ void Web::Auth::getToken(pugi::xml_node& element)
     std::string token = generateToken();
     session->put("token", token);
     element.append_child("token").append_child(pugi::node_pcdata).set_value(token.c_str());
+
+    return true;
 }
 
-void Web::Auth::login()
+bool Web::Auth::login()
 {
     checkRequest(false);
 
@@ -194,14 +200,19 @@ void Web::Auth::login()
         throw LoginException("Invalid username or password");
 
     session->logIn();
+
+    return true;
 }
 
-void Web::Auth::logout()
+bool Web::Auth::logout()
 {
     checkRequest();
+
     std::string sid = param(SID);
     auto session = sessionManager->getSession(sid);
     if (!session)
         throw_std_runtime_error("illegal session id");
     sessionManager->removeSession(sid);
+
+    return true;
 }

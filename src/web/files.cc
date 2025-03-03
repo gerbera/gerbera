@@ -43,7 +43,7 @@
 #include "util/tools.h"
 #include "util/xml_to_json.h"
 
-const std::string Web::Files::PAGE = "files";
+const std::string_view Web::Files::PAGE = "files";
 
 Web::Files::Files(const std::shared_ptr<Content>& content,
     std::shared_ptr<ConverterManager> converterManager,
@@ -55,7 +55,7 @@ Web::Files::Files(const std::shared_ptr<Content>& content,
 {
 }
 
-void Web::Files::processPageAction(pugi::xml_node& element)
+bool Web::Files::processPageAction(pugi::xml_node& element, const std::string& action)
 {
     std::string parentID = param("parent_id");
     std::string path = (parentID == "0") ? FS_ROOT_DIRECTORY : hexDecodeString(parentID);
@@ -98,4 +98,6 @@ void Web::Files::processPageAction(pugi::xml_node& element)
         }
         fe.append_attribute("filename") = mval.c_str();
     }
+
+    return true;
 }
