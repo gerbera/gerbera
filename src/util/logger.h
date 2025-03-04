@@ -52,7 +52,7 @@
 #define log_warning SPDLOG_WARN
 #define log_error SPDLOG_ERROR
 
-enum class GrbLogFacility {
+enum class GrbLogFacility : int {
     thread,
     sqlite3,
     cds,
@@ -105,7 +105,7 @@ class GrbLogger {
 public:
     static GrbLogger Logger;
 
-    void init(int debugMode);
+    void init(long long debugMode);
     bool isDebugging(GrbLogFacility facility)
     {
         return GrbLogger::Logger.hasDebugging[to_underlying(facility)];
@@ -118,9 +118,9 @@ public:
     {
         return GrbLogger::facilities[facility];
     }
-    static std::string printFacility(int facility);
-    static int remapFacility(const std::string& flag);
-    static int makeFacility(const std::string& optValue);
+    static std::string printFacility(long long facility);
+    static long long remapFacility(const std::string& flag);
+    static long long makeFacility(const std::string& optValue);
 
     bool isDebugLogging() { return debug; }
     void setDebugLogging(bool deb) { debug = deb; }

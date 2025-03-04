@@ -45,9 +45,7 @@
 #include <algorithm>
 #include <array>
 
-using dirInfo = std::pair<fs::path, bool>;
-
-const std::string Web::Directories::PAGE = "directories";
+const std::string_view Web::Directories::PAGE = "directories";
 
 Web::Directories::Directories(const std::shared_ptr<Content>& content,
     std::shared_ptr<ConverterManager> converterManager,
@@ -59,7 +57,7 @@ Web::Directories::Directories(const std::shared_ptr<Content>& content,
 {
 }
 
-void Web::Directories::processPageAction(pugi::xml_node& element)
+bool Web::Directories::processPageAction(pugi::xml_node& element, const std::string& action)
 {
     static auto RootId = fmt::format("{}", CDS_ID_ROOT);
 
@@ -74,6 +72,16 @@ void Web::Directories::processPageAction(pugi::xml_node& element)
         containers.append_attribute("select_it") = param("select_it").c_str();
     containers.append_attribute("type") = "filesystem";
 
+    auto filesMap = listFiles(path);
+    outputFiles(containers, filesMap);
+
+    return true;
+}
+
+std::map<std::string, Web::Directories::DirInfo> Web::Directories::listFiles(const fs::path& path)
+{
+    std::error_code ec;
+    std::map<std::string, Web::Directories::DirInfo> filesMap;
     // don't bother users with system directorties
     auto&& excludesFullpath = config->getArrayOption(ConfigVal::IMPORT_SYSTEM_DIRECTORIES);
     auto&& includesFullpath = config->getArrayOption(ConfigVal::IMPORT_VISIBLE_DIRECTORIES);
@@ -82,9 +90,6 @@ void Web::Directories::processPageAction(pugi::xml_node& element)
         "lost+found",
     };
     bool excludeConfigDirs = true;
-
-    std::error_code ec;
-    std::map<std::string, dirInfo> filesMap;
 
     for (auto&& it : fs::directory_iterator(path, ec)) {
         const fs::path& filepath = it.path();
@@ -115,7 +120,13 @@ void Web::Directories::processPageAction(pugi::xml_node& element)
         std::string id = hexEncode(filepath.c_str(), filepath.string().length());
         filesMap.emplace(id, std::pair(filepath, hasContent));
     }
+    return filesMap;
+}
 
+void Web::Directories::outputFiles(
+    pugi::xml_node& containers,
+    const std::map<std::string, Web::Directories::DirInfo>& filesMap)
+{
     auto autoscanDirs = content->getAutoscanDirectories();
     auto allTweaks = config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST)->getArrayCopy();
 

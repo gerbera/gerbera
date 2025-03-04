@@ -41,11 +41,10 @@
 #include "exceptions.h"
 #include "util/xml_to_json.h"
 
-const std::string Web::Autoscan::PAGE = "autoscan";
+const std::string_view Web::Autoscan::PAGE = "autoscan";
 
-void Web::Autoscan::processPageAction(pugi::xml_node& element)
+bool Web::Autoscan::processPageAction(pugi::xml_node& element, const std::string& action)
 {
-    std::string action = param("action");
     if (action.empty())
         throw_std_runtime_error("web:autoscan called with illegal action");
 
@@ -70,6 +69,7 @@ void Web::Autoscan::processPageAction(pugi::xml_node& element)
         list(element);
     } else
         throw_std_runtime_error("autoscan called with illegal action {}", action);
+    return true;
 }
 
 void Web::Autoscan::editLoad(

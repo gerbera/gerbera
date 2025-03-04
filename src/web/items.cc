@@ -46,19 +46,19 @@
 #include "upnp/xml_builder.h"
 #include "util/xml_to_json.h"
 
-const std::string Web::Items::PAGE = "items";
+const std::string_view Web::Items::PAGE = "items";
 
 /// \brief orocess request for item list in ui
-void Web::Items::processPageAction(pugi::xml_node& element)
+bool Web::Items::processPageAction(pugi::xml_node& element, const std::string& action)
 {
     int parentID = intParam("parent_id");
     int start = intParam("start");
-    int count = intParam("count");
-    std::string action = param("action");
     if (start < 0)
-        throw_std_runtime_error("illegal start parameter");
+        throw_std_runtime_error("illegal start {} parameter", start);
+
+    int count = intParam("count");
     if (count < 0)
-        throw_std_runtime_error("illegal count parameter");
+        throw_std_runtime_error("illegal count {} parameter", count);
 
     // set result options
     auto items = element.append_child("items");
@@ -67,6 +67,8 @@ void Web::Items::processPageAction(pugi::xml_node& element)
     xml2Json->setFieldType("part", FieldType::STRING);
     xml2Json->setFieldType("track", FieldType::STRING);
     xml2Json->setFieldType("index", FieldType::STRING);
+    xml2Json->setFieldType("autoscan_mode", FieldType::STRING);
+    xml2Json->setFieldType("autoscan_type", FieldType::STRING);
     items.append_attribute("parent_id") = parentID;
 
     auto container = database->loadObject(getGroup(), parentID);
@@ -117,6 +119,8 @@ void Web::Items::processPageAction(pugi::xml_node& element)
         }
         cnt++;
     }
+
+    return true;
 }
 
 std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
@@ -157,8 +161,8 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
     }
 
     // check path for autoscans
-    if (autoscanType == AutoscanType::None) {
-        for (fs::path path = container->getLocation(); path != "/"; path = path.parent_path()) {
+    if (autoscanType == AutoscanType::None && container->getLocation() != "") {
+        for (fs::path path = container->getLocation(); path != "/" && path != ""; path = path.parent_path()) {
             auto startPtDir = content->getAutoscanDirectory(path);
             if (startPtDir && startPtDir->getRecursive()) {
                 protectItems = true;

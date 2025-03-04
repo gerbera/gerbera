@@ -693,6 +693,9 @@ UpnpWebFileHandle Server::OpenCallback(const char* filename, enum UpnpOpenFileMo
 {
     try {
         log_debug("open({})", filename);
+        auto server = static_cast<const Server*>(cookie);
+        if (server->getShutdownStatus())
+            return nullptr;
         auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
         auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
         if (quirks && !quirks->isAllowed()) {
@@ -700,7 +703,7 @@ UpnpWebFileHandle Server::OpenCallback(const char* filename, enum UpnpOpenFileMo
             log_debug("Client blocked {}", ip);
             return nullptr;
         }
-        auto reqHandler = static_cast<const Server*>(cookie)->createRequestHandler(filename, quirks);
+        auto reqHandler = server->createRequestHandler(filename, quirks);
         std::string link = URLUtils::urlUnescape(filename);
         auto ioHandler = reqHandler->open(startswith(link, fmt::format("/{}", CONTENT_UI_HANDLER)) ? filename : link.c_str(), quirks, mode);
         if (ioHandler) {

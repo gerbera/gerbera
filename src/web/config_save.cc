@@ -36,7 +36,7 @@
 #include "upnp/client_manager.h"
 #include "util/xml_to_json.h"
 
-const std::string Web::ConfigSave::PAGE = "config_save";
+const std::string_view Web::ConfigSave::PAGE = "config_save";
 
 Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context,
     const std::shared_ptr<Content>& content,
@@ -50,10 +50,8 @@ Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context,
 }
 
 /// \brief: process config_save request
-void Web::ConfigSave::processPageAction(pugi::xml_node& element)
+bool Web::ConfigSave::processPageAction(pugi::xml_node& element, const std::string& action)
 {
-    std::string action = param("action");
-
     int count = 0;
     try {
         count = std::stoi(param("changedCount"));
@@ -192,4 +190,6 @@ void Web::ConfigSave::processPageAction(pugi::xml_node& element)
     }
 
     context->getClients()->refresh();
+
+    return true;
 }

@@ -68,7 +68,7 @@
 
 static std::vector<std::size_t> ITEM_PATH_NEW = {};
 
-const std::string Web::ConfigLoad::PAGE = "config_load";
+const std::string_view Web::ConfigLoad::PAGE = "config_load";
 
 Web::ConfigLoad::ConfigLoad(const std::shared_ptr<Content>& content,
     const std::shared_ptr<Server>& server,
@@ -141,10 +141,9 @@ void Web::ConfigLoad::setValue(pugi::xml_node& item, const fs::path& value)
 }
 
 /// \brief: process config_load request
-void Web::ConfigLoad::processPageAction(pugi::xml_node& element)
+bool Web::ConfigLoad::processPageAction(pugi::xml_node& element, const std::string& action)
 {
     auto values = element.append_child("values");
-    std::string action = param("action");
 
     // set handling of json properties
     xml2Json->setArrayName(values, CONFIG_LOAD_ITEM);
@@ -160,7 +159,7 @@ void Web::ConfigLoad::processPageAction(pugi::xml_node& element)
     writeDatabaseStatus(values);
 
     if (action == "status")
-        return;
+        return true;
 
     // generate meta info for ui
     auto meta = element.append_child("types");
@@ -181,6 +180,8 @@ void Web::ConfigLoad::processPageAction(pugi::xml_node& element)
     writeVectors(values);
     writeArrays(values);
     updateEntriesFromDatabase(element, values);
+
+    return true;
 }
 
 /// \brief: write database status

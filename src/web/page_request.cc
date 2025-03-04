@@ -38,12 +38,16 @@
 void Web::PageRequest::process(pugi::xml_node& root)
 {
     log_debug("start {}", getPage());
-    checkRequest();
+    if (doCheck)
+        checkRequest();
     auto element = xmlDoc->document_element();
-    processPageAction(element);
-    // add current task
-    appendTask(content->getCurrentTask(), root);
-    handleUpdateIDs(element);
+    std::string action = param("action");
+    log_debug("action: {}", action);
+    if (processPageAction(element, action)) {
+        // add current task
+        appendTask(content->getCurrentTask(), root);
+        handleUpdateIDs(element);
+    }
     log_debug("end {}", getPage());
 }
 

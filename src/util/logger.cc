@@ -27,20 +27,20 @@
 
 #ifdef GRBDEBUG
 
-#include <numeric>
-
 #include "util/enum_iterator.h"
 #include "util/tools.h"
 
+#include <numeric>
+
 using LogFacilityIterator = EnumIterator<GrbLogFacility, GrbLogFacility::thread, GrbLogFacility::log_MAX>;
 
-void GrbLogger::init(int debugMode)
+void GrbLogger::init(long long debugMode)
 {
     if (debugMode > 0) {
         for (auto&& bit : LogFacilityIterator()) {
-            GrbLogger::Logger.hasDebugging[to_underlying(bit)] = debugMode & (1 << to_underlying(bit));
-            if (GrbLogger::Logger.hasDebugging[to_underlying(bit)])
-                log_info("Enable Logging for {}", facilities[bit]);
+            GrbLogger::Logger.hasDebugging[to_underlying(bit)] = debugMode & (1ll << to_underlying(bit));
+            if (GrbLogger::Logger.hasDebugging.at(to_underlying(bit)))
+                log_info("Enable Logging for {}", facilities.at(bit));
         }
         if (spdlog::get_level() > spdlog::level::trace)
             spdlog::set_level(spdlog::level::debug);
@@ -48,7 +48,7 @@ void GrbLogger::init(int debugMode)
     }
 }
 
-int GrbLogger::remapFacility(const std::string& flag)
+long long GrbLogger::remapFacility(const std::string& flag)
 {
     for (auto&& bit : LogFacilityIterator()) {
         if (toLower(GrbLogger::facilities[bit].data()) == toLower(flag)) {
@@ -57,15 +57,15 @@ int GrbLogger::remapFacility(const std::string& flag)
     }
 
     if (toLower(GrbLogger::facilities[GrbLogFacility::log_MAX].data()) == toLower(flag)) {
-        int result = 0;
+        long long result = 0;
         for (auto&& bit : LogFacilityIterator())
             result |= 1 << to_underlying(bit);
         return result;
     }
-    return stoiString(flag, 0, 0);
+    return stolString(flag, 0, 0);
 }
 
-std::string GrbLogger::printFacility(int facility)
+std::string GrbLogger::printFacility(long long facility)
 {
     std::vector<std::string> myFlags;
 
@@ -83,7 +83,7 @@ std::string GrbLogger::printFacility(int facility)
     return fmt::format("{}", fmt::join(myFlags, " | "));
 }
 
-int GrbLogger::makeFacility(const std::string& optValue)
+long long GrbLogger::makeFacility(const std::string& optValue)
 {
     std::vector<std::string> flagsVector = splitString(optValue, '|', false);
     return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | GrbLogger::remapFacility(trimString(i)); });

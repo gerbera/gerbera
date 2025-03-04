@@ -45,10 +45,10 @@
 
 #include <fmt/chrono.h>
 
-const std::string Web::EditLoad::PAGE = "edit_load";
+const std::string_view Web::EditLoad::PAGE = "edit_load";
 
 /// \brief: process request 'edit_load' to list contents of a folder
-void Web::EditLoad::processPageAction(pugi::xml_node& element)
+bool Web::EditLoad::processPageAction(pugi::xml_node& element, const std::string& action)
 {
     std::string objID = param("object_id");
     if (objID.empty())
@@ -76,9 +76,14 @@ void Web::EditLoad::processPageAction(pugi::xml_node& element)
     if (obj->isContainer()) {
         writeContainerInfo(obj, item);
     }
+
+    return true;
 }
 
-pugi::xml_node Web::EditLoad::writeCoreInfo(const std::shared_ptr<CdsObject>& obj, pugi::xml_node& element, int objectID)
+pugi::xml_node Web::EditLoad::writeCoreInfo(
+    const std::shared_ptr<CdsObject>& obj,
+    pugi::xml_node& element,
+    int objectID)
 {
     auto item = element.append_child("item");
     item.append_attribute("object_id") = objectID;

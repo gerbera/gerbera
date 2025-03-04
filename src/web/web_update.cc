@@ -37,8 +37,9 @@
 #include "content/content.h"
 #include "util/xml_to_json.h"
 
-const std::string Web::VoidType::PAGE = "void";
+const std::string_view Web::VoidType::PAGE = "void";
 
-void Web::VoidType::processPageAction(pugi::xml_node& element)
+bool Web::VoidType::processPageAction(pugi::xml_node& element, const std::string& action)
 {
+    return true;
 }
