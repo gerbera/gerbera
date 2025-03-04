@@ -57,7 +57,7 @@ sudo make install
 | libuuid             |             |             |                      | Depends on OS | Not required on \*BSD      |          |
 | [pugixml]           |             | 1.10        | 1.15                 | Required      | XML file and data support  |          |
 | libiconv            |             |             |                      | Required      | Charset conversion         |          |
-| sqlite3             | 3.7.0       | 3.35.5      | 3.36.0               | Required      | Database storage           |          |
+| sqlite3             | 3.7.0       | 3.35.5      | 3.44.0               | Required      | Database storage           |          |
 | zlib                |             |             |                      | Required      | Data compression           |          |
 | [fmtlib]            | 7.1.3       | 9.1.0       | 11.1.4               | Required      | Fast string formatting     |          |
 | [spdlog]            | 1.8.1       | 1.11.0      | 1.15.1               | Required      | Runtime logging            |          |

@@ -1,10 +1,10 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v2.5.0
 
 Changed default for layout to `js` if built with JavaScript support.
 
-The action to add individual folders is replaced by a manual autoscan option.
+The new autoscan mode `manual` in conjunction with the action `Scan Now` replaces the action to add individual folders.
 
 ### NEW Features
 
@@ -15,7 +15,7 @@ The action to add individual folders is replaced by a manual autoscan option.
 - Fabricated comment on import in media handlers (incl. configuration)
 - Resource attribute `pixelFormat` for videos.
 - Additional Resources (thumbnail, subtitle) for External Urls
-- New UI command "Scan Now" and minor improvement
+- New UI command `Scan Now` and minor improvement
 - Manual autoscan to replace `Add Items` in filesystem view
 
 ### FIXES
@@ -31,7 +31,7 @@ The action to add individual folders is replaced by a manual autoscan option.
 - Removed static from ConfigDefinition
 - Update versions of pugixml (1.15), libexif (v0.6.25), wavpack (5.8.1), fmt (11.1.4), spdlog (1.15.1), wavpack (1.8.1), googletest (1.16.0), libexiv2 (0.28.5)
 
-## 2.4.1
+## v2.4.1
 
 ### FIXES
 
