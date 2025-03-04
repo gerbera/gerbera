@@ -161,8 +161,8 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
     }
 
     // check path for autoscans
-    if (autoscanType == AutoscanType::None && container->getLocation() != "") {
-        for (fs::path path = container->getLocation(); path != "/" && path != ""; path = path.parent_path()) {
+    if (autoscanType == AutoscanType::None && !container->getLocation().empty()) {
+        for (fs::path path = container->getLocation(); path != "/" && !path.empty(); path = path.parent_path()) {
             auto startPtDir = content->getAutoscanDirectory(path);
             if (startPtDir && startPtDir->getRecursive()) {
                 protectItems = true;

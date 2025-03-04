@@ -1,12 +1,12 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v2.5.0
 
 - Add manual autoscan option
 - Add Options to Scripts
 - Add Run Scan action in Web UI
-- Autoscan: Add missing properties to web UI and database
 - Autoscan fixes
+- Autoscan: Add missing properties to web UI and database
 - Build correct Autoscan Type
 - Build with fmt 11.1.3
 - Build with fmt 11.1.4
@@ -36,10 +36,10 @@
 - Sqlite: Exit after multiple exceptions
 - Support Resources for External Items
 - UI: Make details collapsable in items editor detail view
-- Update Library Versions
-- Update to googletest 1.16.0
 - Update libexiv2 to 0.28.4
 - Update libexiv2 to 0.28.5
+- Update Library Versions
+- Update to googletest 1.16.0
 - Update wavpack
 - Web UI: properly encode arguments
 - work around build issue
