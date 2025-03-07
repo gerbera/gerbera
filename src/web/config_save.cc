@@ -34,7 +34,6 @@
 #include "context.h"
 #include "database/database.h"
 #include "upnp/client_manager.h"
-#include "util/xml_to_json.h"
 
 const std::string_view Web::ConfigSave::PAGE = "config_save";
 
@@ -50,7 +49,7 @@ Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context,
 }
 
 /// \brief: process config_save request
-bool Web::ConfigSave::processPageAction(pugi::xml_node& element, const std::string& action)
+bool Web::ConfigSave::processPageAction(Json::Value& element, const std::string& action)
 {
     int count = 0;
     try {
@@ -156,11 +155,13 @@ bool Web::ConfigSave::processPageAction(pugi::xml_node& element, const std::stri
         }
     }
 
-    auto taskEl = element.append_child("task");
+    Json::Value taskEl;
     if (action == "clear")
-        taskEl.append_attribute("text") = "Removed all config values from database";
+        taskEl["text"] = "Removed all config values from database";
     else if (action != "rescan")
-        taskEl.append_attribute("text") = fmt::format("Successfully updated {} items", count).c_str();
+        taskEl["text"] = fmt::format("Successfully updated {} items", count);
+    else
+        taskEl["text"] = "Rescan";
 
     // trigger rescan of database after update
     std::string target = param("target");
@@ -175,7 +176,7 @@ bool Web::ConfigSave::processPageAction(pugi::xml_node& element, const std::stri
             int objectID = database->findObjectIDByPath(target);
             if (objectID > 0 && autoscan) {
                 content->rescanDirectory(autoscan, objectID, target);
-                taskEl.append_attribute("text") = fmt::format("Rescanning directory {}", target).c_str();
+                taskEl["text"] = fmt::format("Rescanning directory {}", target);
                 log_info("Rescanning directory {}", target);
             } else {
                 log_error("No such autoscan or dir: {} ({})", target, objectID);
@@ -188,6 +189,7 @@ bool Web::ConfigSave::processPageAction(pugi::xml_node& element, const std::stri
             }
         }
     }
+    element["task"] = taskEl;
 
     context->getClients()->refresh();
 

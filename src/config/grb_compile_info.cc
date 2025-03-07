@@ -29,6 +29,7 @@ Gerbera - https://gerbera.io/
 #if FMT_VERSION >= 100202
 #include <fmt/ranges.h>
 #endif
+#include <json/version.h>
 #include <pugixml.hpp>
 #include <spdlog/version.h>
 #include <sqlite3.h>
@@ -96,6 +97,7 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
         { "SQLITE_BACKUP_ENABLED", "" },
 #endif
         { "PUGIXML", fmt::to_string(PUGIXML_VERSION) },
+        { "JSONCPP", JSONCPP_VERSION_STRING },
 #ifdef PACKAGE_DATADIR
         { "PACKAGE_DATADIR", PACKAGE_DATADIR },
 #endif

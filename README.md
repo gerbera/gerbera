@@ -56,6 +56,7 @@ sudo make install
 | libnpupnp           | 4.2.1       | 5.1.2       | 6.2.0                | XOR libupnp   | [npupnp]                   | Disabled |
 | libuuid             |             |             |                      | Depends on OS | Not required on \*BSD      |          |
 | [pugixml]           |             | 1.10        | 1.15                 | Required      | XML file and data support  |          |
+| [jsoncpp]           | 1.7.4       | 1.9.6       | 1.9.6                | Required      | JSON data support          |          |
 | libiconv            |             |             |                      | Required      | Charset conversion         |          |
 | sqlite3             | 3.7.0       | 3.35.5      | 3.44.0               | Required      | Database storage           |          |
 | zlib                |             |             |                      | Required      | Data compression           |          |
@@ -105,6 +106,7 @@ sudo make install
 [ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
 [fmtlib]: https://github.com/fmtlib/fmt
 [googletest]: https://github.com/google/googletest
+[jsoncpp]: https://github.com/open-source-parsers/jsoncpp
 [lastfmlib]: https://github.com/dirkvdb/lastfmlib
 [libebml]: https://github.com/Matroska-Org/libebml
 [libexif]: https://github.com/libexif/libexif

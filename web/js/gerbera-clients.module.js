@@ -82,8 +82,8 @@ const loadItems = (response) => {
     let items;
     let groups;
 
-    items = 'clients' in response ? transformItems(response.clients.client) : [];
-    groups = 'groups' in response ? response.groups.group : [];
+    items = 'clients' in response ? transformItems(response.clients) : [];
+    groups = 'groups' in response ? response.groups : [];
 
     const datagrid = $('#clientgrid');
 

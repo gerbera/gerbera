@@ -1,5 +1,15 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
+### NEW Features
+
+### FIXES
+
+### Code Improvements
+
+- Use JsonCpp to generate responses in web request handlers
+
 ## v2.5.0
 
 Changed default for layout to `js` if built with JavaScript support.

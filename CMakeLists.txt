@@ -349,8 +349,6 @@ add_library(libgerbera STATIC
         src/util/url.h
         src/util/url_utils.cc
         src/util/url_utils.h
-        src/util/xml_to_json.cc
-        src/util/xml_to_json.h
         src/web/action.cc
         src/web/add.cc
         src/web/add_object.cc
@@ -556,6 +554,9 @@ target_link_libraries(libgerbera PUBLIC fmt::fmt)
 
 find_package(spdlog 1.8.1 REQUIRED)
 target_link_libraries(libgerbera PUBLIC spdlog::spdlog)
+
+find_package(jsoncpp REQUIRED)
+target_link_libraries(libgerbera PUBLIC jsoncpp::jsoncpp)
 
 find_package(pugixml REQUIRED)
 target_link_libraries(libgerbera PUBLIC pugixml::pugixml)

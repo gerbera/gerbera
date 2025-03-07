@@ -41,7 +41,6 @@
 #include "content/content.h"
 #include "exceptions.h"
 #include "util/tools.h"
-#include "util/xml_to_json.h"
 
 const std::string_view Web::AddObject::PAGE = "add_object";
 
@@ -155,7 +154,7 @@ bool Web::AddObject::isHiddenFile(const std::shared_ptr<CdsObject>& cdsObj)
     return content->isHiddenFile(fs::directory_entry(cdsObj->getLocation()), false, asSetting);
 }
 
-bool Web::AddObject::processPageAction(pugi::xml_node& element, const std::string& action)
+bool Web::AddObject::processPageAction(Json::Value& element, const std::string& action)
 {
     auto title = std::string(param("title"));
     if (title.empty())

@@ -41,7 +41,6 @@
 #include "util/logger.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
-#include "util/xml_to_json.h"
 
 const std::string_view Web::Files::PAGE = "files";
 
@@ -55,16 +54,14 @@ Web::Files::Files(const std::shared_ptr<Content>& content,
 {
 }
 
-bool Web::Files::processPageAction(pugi::xml_node& element, const std::string& action)
+bool Web::Files::processPageAction(Json::Value& element, const std::string& action)
 {
     std::string parentID = param("parent_id");
     std::string path = (parentID == "0") ? FS_ROOT_DIRECTORY : hexDecodeString(parentID);
 
-    auto files = element.append_child("files");
-    xml2Json->setArrayName(files, "file");
-    xml2Json->setFieldType("filename", FieldType::STRING);
-    files.append_attribute("parent_id") = parentID.c_str();
-    files.append_attribute("location") = path.c_str();
+    Json::Value files;
+    files["parent_id"] = parentID;
+    files["location"] = path;
 
     bool excludeConfigFiles = true;
 
@@ -88,16 +85,19 @@ bool Web::Files::processPageAction(pugi::xml_node& element, const std::string& a
         filesMap.try_emplace(id, filepath.filename());
     }
 
+    Json::Value fileArray(Json::arrayValue);
     auto f2i = converterManager->f2i();
     for (auto&& [key, val] : filesMap) {
-        auto fe = files.append_child("file");
-        fe.append_attribute("id") = key.c_str();
+        Json::Value fe;
+        fe["id"] = key;
         auto [mval, err] = f2i->convert(val);
         if (!err.empty()) {
             log_warning("{}: {}", val.string(), err);
         }
-        fe.append_attribute("filename") = mval.c_str();
+        fe["filename"] = mval.c_str();
+        fileArray.append(fe);
     }
-
+    files["file"] = fileArray;
+    element["files"] = files;
     return true;
 }
