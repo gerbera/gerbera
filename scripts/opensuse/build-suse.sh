@@ -101,6 +101,7 @@ fi
 
 echo "Running $0 ${my_sys} ${my_upnp}"
 
+jsoncpp="jsoncpp-devel"
 libmagic="file-devel"
 libffmpeg="ffmpeg-7-libavformat-devel"
 libwavpack="wavpack-devel"
@@ -158,6 +159,7 @@ if [[ ! -d ${BUILD_DIR} ]]; then
       ${libmagic} \
       ${libmysqlclient} \
       ${libpugixml} \
+      ${jsoncpp} \
       sqlite3-devel \
       libuuid-devel
   echo "::endgroup::"

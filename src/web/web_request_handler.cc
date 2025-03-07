@@ -48,7 +48,6 @@
 #include "upnp/headers.h"
 #include "upnp/quirks.h"
 #include "util/url_utils.h"
-#include "util/xml_to_json.h"
 #include "web/pages.h"
 #include "web/session_manager.h"
 
@@ -116,14 +115,6 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(
         params.merge(decodedParams);
     }
 
-    xmlDoc = std::make_unique<pugi::xml_document>();
-    auto decl = xmlDoc->prepend_child(pugi::node_declaration);
-    decl.append_attribute("version") = "1.0";
-    decl.append_attribute("encoding") = "UTF-8";
-    auto root = xmlDoc->append_child("root");
-
-    xml2Json = std::make_unique<Xml2Json>();
-
     std::string error;
     int errorCode = 0;
     log_debug("start");
@@ -136,7 +127,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(
             error = "The UI is disabled in the configuration file. See README.";
             errorCode = 900;
         } else {
-            process(root);
+            process();
         }
     } catch (const LoginException& e) {
         error = e.what();
@@ -158,20 +149,23 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(
         errorCode = 800;
     }
 
-    root.append_attribute("success") = error.empty();
+    jsonDoc["success"] = error.empty();
     if (!error.empty()) {
-        auto errorEl = root.append_child("error");
-        errorEl.append_attribute("text") = error.c_str();
-
         if (errorCode == 0)
             errorCode = 899;
-        errorEl.append_attribute("code") = errorCode;
+
+        Json::Value errorJson;
+        errorJson["text"] = error;
+        errorJson["code"] = errorCode;
+        jsonDoc["error"] = errorJson;
 
         log_warning("Web Error: {} {}", errorCode, error);
     }
 
     try {
-        output = xml2Json->getJson(root);
+        Json::StreamWriterBuilder builder;
+        builder["indentation"] = "  ";
+        output = Json::writeString(builder, jsonDoc);
     } catch (const std::runtime_error& e) {
         log_error("Web marshalling error: {}", e.what());
     } catch (const std::exception& e) {

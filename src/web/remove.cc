@@ -37,11 +37,10 @@
 #include "content/content.h"
 #include "database/database.h"
 #include "util/tools.h"
-#include "util/xml_to_json.h"
 
 const std::string_view Web::Remove::PAGE = "remove";
 
-bool Web::Remove::processPageAction(pugi::xml_node& element, const std::string& action)
+bool Web::Remove::processPageAction(Json::Value& element, const std::string& action)
 {
     int objectID = intParam("object_id");
     bool all = intParam("all");

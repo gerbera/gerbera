@@ -40,7 +40,6 @@
 #include "exceptions.h"
 #include "session_manager.h"
 #include "util/tools.h"
-#include "util/xml_to_json.h"
 
 static constexpr auto loginTimeout = std::chrono::seconds(10);
 const std::string_view Web::Auth::PAGE = "auth";
@@ -75,10 +74,10 @@ Web::Auth::Auth(const std::shared_ptr<Content>& content,
     doCheck = false;
 }
 
-bool Web::Auth::processPageAction(pugi::xml_node& element, const std::string& action)
+bool Web::Auth::processPageAction(Json::Value& element, const std::string& action)
 {
     if (action.empty()) {
-        element.append_child("error").append_child(pugi::node_pcdata).set_value("req_type auth: no action given");
+        element["error"] = "req_type auth: no action given";
         return doCheck;
     }
 
@@ -99,51 +98,48 @@ bool Web::Auth::processPageAction(pugi::xml_node& element, const std::string& ac
     return doCheck;
 }
 
-bool Web::Auth::getConfig(pugi::xml_node& element)
+bool Web::Auth::getConfig(Json::Value& element)
 {
-    auto cfg = element.append_child("config");
-    cfg.append_attribute("accounts") = accountsEnabled;
-    cfg.append_attribute("enableNumbering") = config->getBoolOption(ConfigVal::SERVER_UI_ENABLE_NUMBERING);
-    cfg.append_attribute("enableThumbnail") = config->getBoolOption(ConfigVal::SERVER_UI_ENABLE_THUMBNAIL);
-    cfg.append_attribute("enableVideo") = config->getBoolOption(ConfigVal::SERVER_UI_ENABLE_VIDEO);
-    cfg.append_attribute("show-tooltips") = config->getBoolOption(ConfigVal::SERVER_UI_SHOW_TOOLTIPS);
-    cfg.append_attribute("poll-when-idle") = config->getBoolOption(ConfigVal::SERVER_UI_POLL_WHEN_IDLE);
-    cfg.append_attribute("poll-interval") = config->getIntOption(ConfigVal::SERVER_UI_POLL_INTERVAL);
-    cfg.append_attribute("fsAddItem") = config->getBoolOption(ConfigVal::SERVER_UI_FS_SUPPORT_ADD_ITEM);
-    cfg.append_child("sourceDocs").append_child(pugi::node_pcdata).set_value(config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_SOURCE).c_str());
-    cfg.append_child("userDocs").append_child(pugi::node_pcdata).set_value(config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_USER).c_str());
-    cfg.append_child("searchCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSearchCapabilities().c_str());
-    cfg.append_child("sortCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSortCapabilities().c_str());
+    Json::Value cfg;
+    cfg["accounts"] = accountsEnabled;
+    cfg["enableNumbering"] = config->getBoolOption(ConfigVal::SERVER_UI_ENABLE_NUMBERING);
+    cfg["enableThumbnail"] = config->getBoolOption(ConfigVal::SERVER_UI_ENABLE_THUMBNAIL);
+    cfg["enableVideo"] = config->getBoolOption(ConfigVal::SERVER_UI_ENABLE_VIDEO);
+    cfg["show-tooltips"] = config->getBoolOption(ConfigVal::SERVER_UI_SHOW_TOOLTIPS);
+    cfg["poll-when-idle"] = config->getBoolOption(ConfigVal::SERVER_UI_POLL_WHEN_IDLE);
+    cfg["poll-interval"] = config->getIntOption(ConfigVal::SERVER_UI_POLL_INTERVAL);
+    cfg["fsAddItem"] = config->getBoolOption(ConfigVal::SERVER_UI_FS_SUPPORT_ADD_ITEM);
+    cfg["sourceDocs"] = config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_SOURCE);
+    cfg["userDocs"] = config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_USER);
+    cfg["searchCaps"] = SQLDatabase::getSearchCapabilities();
+    cfg["sortCaps"] = SQLDatabase::getSortCapabilities();
 
-    /// CREATE XML FRAGMENT FOR ITEMS PER PAGE
-    auto ipp = cfg.append_child("items-per-page");
-    xml2Json->setArrayName(ipp, "option");
-    ipp.append_attribute("default") = config->getIntOption(ConfigVal::SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
+    Json::Value ipp;
+    ipp["default"] = config->getIntOption(ConfigVal::SERVER_UI_DEFAULT_ITEMS_PER_PAGE);
 
+    Json::Value opt(Json::arrayValue);
     auto menuOpts = config->getArrayOption(ConfigVal::SERVER_UI_ITEMS_PER_PAGE_DROPDOWN);
     for (auto&& menuOpt : menuOpts) {
-        ipp.append_child("option").append_child(pugi::node_pcdata).set_value(menuOpt.c_str());
+        opt.append(stoiString(menuOpt));
     }
+    ipp["option"] = opt;
+    cfg["items-per-page"] = ipp;
 
 #ifdef HAVE_INOTIFY
-    cfg.append_attribute("have-inotify") = config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY);
+    cfg["have-inotify"] = config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY);
 #else
-    cfg.append_attribute("have-inotify") = false;
+    cfg["have-inotify"] = false;
 #endif
 
-    auto actions = cfg.append_child("actions");
-    xml2Json->setArrayName(actions, "action");
-
-    auto friendlyName = cfg.append_child("friendlyName").append_child(pugi::node_pcdata);
-    friendlyName.set_value(config->getOption(ConfigVal::SERVER_NAME).c_str());
-
-    auto gerberaVersion = cfg.append_child("version").append_child(pugi::node_pcdata);
-    gerberaVersion.set_value(GERBERA_VERSION);
-
+    Json::Value action(Json::arrayValue);
+    element["actions"]["action"] = action;
+    cfg["friendlyName"] = config->getOption(ConfigVal::SERVER_NAME);
+    cfg["version"] = GERBERA_VERSION;
+    element["config"] = cfg;
     return false;
 }
 
-bool Web::Auth::getSid(pugi::xml_node& element)
+bool Web::Auth::getSid(Json::Value& element)
 {
     log_debug("checking/getting sid...");
     std::shared_ptr<Session> session;
@@ -151,29 +147,29 @@ bool Web::Auth::getSid(pugi::xml_node& element)
 
     if (sid.empty() || !(session = sessionManager->getSession(sid))) {
         session = sessionManager->createSession(timeout);
-        element.append_attribute("sid_was_valid") = false;
+        element["sid_was_valid"] = false;
     } else {
         session->clearUpdateIDs();
-        element.append_attribute("sid_was_valid") = true;
+        element["sid_was_valid"] = true;
     }
-    element.append_attribute(SID) = session->getID().c_str();
+    element[SID] = session->getID().c_str();
 
     if (!session->isLoggedIn() && !accountsEnabled) {
         session->logIn();
     }
-    element.append_attribute("logged_in") = session->isLoggedIn();
+    element["logged_in"] = session->isLoggedIn();
 
     return false;
 }
 
-bool Web::Auth::getToken(pugi::xml_node& element)
+bool Web::Auth::getToken(Json::Value& element)
 {
     checkRequest(false);
 
     // sending token
     std::string token = generateToken();
     session->put("token", token);
-    element.append_child("token").append_child(pugi::node_pcdata).set_value(token.c_str());
+    element["token"] = token;
 
     return true;
 }

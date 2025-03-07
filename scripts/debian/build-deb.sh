@@ -54,6 +54,7 @@ function set-libraries-rel() {
 function set-libraries() {
   libffmpeg="libavformat-dev"
   libexif="libexif-dev"
+  jsoncpp="libjsoncpp-dev"
   libexiv2="libexiv2-dev"
   libpugixml="libpugixml-dev"
   libmatroska="libebml-dev libmatroska-dev"
@@ -182,6 +183,7 @@ if [[ ! -d "${BUILD_DIR}" ]]; then
       ${libmagic} \
       ${libmysqlclient} \
       ${libpugixml} \
+      ${jsoncpp} \
       libsqlite3-dev \
       uuid-dev
   sudo apt-get clean

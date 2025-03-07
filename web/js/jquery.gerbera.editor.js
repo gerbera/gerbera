@@ -353,11 +353,11 @@
 
       const metatable = modal.find('#metadata');
       const detailButton = modal.find('#detailbutton');
-      if (item.metadata && item.metadata.metadata.length) {
+      if (item.metadata && item.metadata.length) {
         detailButton.show();
         const tbody = makeDetailsHead(metatable, 'Metadata', '', itemData.onData);
-        for (let i = 0; i < item.metadata.metadata.length; i++) {
-          appendMetaItem(tbody, item.metadata.metadata[i].metaname, item.metadata.metadata[i].metavalue);
+        for (let i = 0; i < item.metadata.length; i++) {
+          appendMetaItem(tbody, item.metadata[i].metaname, item.metadata[i].metavalue);
         }
       }
       if (item.flags && item.flags.value) {
@@ -368,12 +368,12 @@
       }
 
       const auxtable = modal.find('#auxdata');
-      if (item.auxdata && item.auxdata.auxdata.length) {
+      if (item.auxdata && item.auxdata.length) {
         detailButton.show();
         auxtable.show();
         const tbody = makeDetailsHead(auxtable, 'Aux Data', '', itemData.onData);
-        for (let i = 0; i < item.auxdata.auxdata.length; i++) {
-          appendMetaItem(tbody, item.auxdata.auxdata[i].auxname, item.auxdata.auxdata[i].auxvalue);
+        for (let i = 0; i < item.auxdata.length; i++) {
+          appendMetaItem(tbody, item.auxdata[i].auxname, item.auxdata[i].auxvalue);
         }
         tbody.hide();
       } else {
@@ -381,17 +381,17 @@
       }
 
       const restable = modal.find('#resdata');
-      if (item.resources && item.resources.resources.length) {
+      if (item.resources && item.resources.length > 0) {
         detailButton.show();
         restable.show();
         let currentResource = { index: '???', properties: [] };
-        for (let i = 0; i < item.resources.resources.length; i++) {
-          if (item.resources.resources[i].resname === '----RESOURCE----') {
-            currentResource = { index: item.resources.resources[i].resvalue, properties: [] };
+        for (let i = 0; i < item.resources.length; i++) {
+          if (item.resources[i].resname === '----RESOURCE----') {
+            currentResource = { index: item.resources[i].resvalue, properties: [] };
             resources.push(currentResource);
           } else {
-            currentResource.properties.push(item.resources.resources[i].resname);
-            currentResource[item.resources.resources[i].resname] = [item.resources.resources[i].resvalue, item.resources.resources[i].rawvalue];
+            currentResource.properties.push(item.resources[i].resname);
+            currentResource[item.resources[i].resname] = [item.resources[i].resvalue, item.resources[i].rawvalue];
           }
         }
         resources.forEach((res, i) => {
