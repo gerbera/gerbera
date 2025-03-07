@@ -1,5 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### HEAD
+
+- Use JsonCpp for web JSON output
+
 ### v2.5.0
 
 - Add manual autoscan option

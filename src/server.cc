@@ -65,7 +65,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 #include "util/url_utils.h"
-#include "util/xml_to_json.h"
 #include "web/session_manager.h"
 #include "web/web_request_handler.h"
 

@@ -27,6 +27,7 @@ RUN apk add --no-cache  \
     spdlog-dev \
     sqlite-dev \
     taglib-dev \
+    jsoncpp-dev \
     tini \
     util-linux-dev \
     autoconf \

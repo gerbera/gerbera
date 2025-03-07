@@ -42,40 +42,35 @@
 #include "database/db_param.h"
 #include "exceptions.h"
 #include "upnp/xml_builder.h"
-#include "util/xml_to_json.h"
 
 const std::string_view Web::Containers::PAGE = "containers";
 
-bool Web::Containers::processPageAction(pugi::xml_node& element, const std::string& action)
+bool Web::Containers::processPageAction(Json::Value& element, const std::string& action)
 {
     int parentID = intParam("parent_id", INVALID_OBJECT_ID);
     if (parentID == INVALID_OBJECT_ID)
         throw_std_runtime_error("no parent_id given");
 
-    auto containers = element.append_child("containers");
-    xml2Json->setArrayName(containers, "container");
-    xml2Json->setFieldType("title", FieldType::STRING);
-    xml2Json->setFieldType("autoscan_mode", FieldType::STRING);
-    xml2Json->setFieldType("autoscan_type", FieldType::STRING);
-    containers.append_attribute("parent_id") = parentID;
-    containers.append_attribute("type") = action == "browse" ? "database" : "search";
+    Json::Value containers;
+    Json::Value containerArray(Json::arrayValue);
+    containers["parent_id"] = parentID;
+    containers["type"] = action == "browse" ? "database" : "search";
     if (!param("select_it").empty())
-        containers.append_attribute("select_it") = param("select_it").c_str();
+        containers["select_it"] = param("select_it").c_str();
 
     log_debug("{} {}", action, parentID);
     auto browseParam = BrowseParam(database->loadObject(getGroup(), parentID), BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS);
     auto arr = database->browse(browseParam);
     for (auto&& obj : arr) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        auto ce = containers.append_child("container");
-        ce.append_attribute("id") = cont->getID();
-        ce.append_attribute("ref_id") = cont->getRefID();
-        int childCount = cont->getChildCount();
-        ce.append_attribute("child_count") = childCount;
+        Json::Value ce;
+        ce["id"] = cont->getID();
+        ce["ref_id"] = cont->getRefID();
+        ce["child_count"] = cont->getChildCount();
 
         auto url = xmlBuilder->renderContainerImageURL(cont);
         if (url) {
-            ce.append_attribute("image") = url.value().c_str();
+            ce["image"] = url.value();
         }
 
         auto autoscanType = cont->getAutoscanType();
@@ -93,14 +88,17 @@ bool Web::Containers::processPageAction(pugi::xml_node& element, const std::stri
             }
         }
 #endif
-        ce.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
-        ce.append_attribute("autoscan_mode") = autoscanMode.c_str();
-        ce.append_attribute("persistent") = cont->getFlags() & OBJECT_FLAG_PERSISTENT_CONTAINER ? true : false;
-        ce.append_attribute("title") = cont->getTitle().c_str();
-        ce.append_attribute("location") = cont->getLocation().c_str();
-        ce.append_attribute("upnp_shortcut") = cont->getUpnpShortcut().c_str();
-        ce.append_attribute("upnp_class") = cont->getClass().c_str();
+        ce["autoscan_type"] = mapAutoscanType(autoscanType).data();
+        ce["autoscan_mode"] = autoscanMode;
+        ce["persistent"] = cont->getFlags() & OBJECT_FLAG_PERSISTENT_CONTAINER ? true : false;
+        ce["title"] = cont->getTitle();
+        ce["location"] = cont->getLocation().string();
+        ce["upnp_shortcut"] = cont->getUpnpShortcut();
+        ce["upnp_class"] = cont->getClass();
+        containerArray.append(ce);
     }
+    containers["container"] = containerArray;
+    element["containers"] = containers;
 
     return true;
 }
