@@ -39,11 +39,10 @@
 #include "content/content.h"
 #include "database/database.h"
 #include "exceptions.h"
-#include "util/xml_to_json.h"
 
 const std::string_view Web::Autoscan::PAGE = "autoscan";
 
-bool Web::Autoscan::processPageAction(pugi::xml_node& element, const std::string& action)
+bool Web::Autoscan::processPageAction(Json::Value& element, const std::string& action)
 {
     if (action.empty())
         throw_std_runtime_error("web:autoscan called with illegal action");
@@ -74,23 +73,23 @@ bool Web::Autoscan::processPageAction(pugi::xml_node& element, const std::string
 
 void Web::Autoscan::editLoad(
     bool fromFs,
-    pugi::xml_node& element,
+    Json::Value& element,
     const std::string& objID,
     const fs::path& path)
 {
-    auto autoscan = element.append_child("autoscan");
+    Json::Value autoscan;
+    autoscan["object_id"] = objID;
+    std::shared_ptr<AutoscanDirectory> adir;
     if (fromFs) {
-        autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("1");
-        autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
-        auto adir = content->getAutoscanDirectory(path);
-        autoscan2XML(adir, autoscan);
+        autoscan["from_fs"] = 1;
+        adir = content->getAutoscanDirectory(path);
     } else {
-        autoscan.append_child("from_fs").append_child(pugi::node_pcdata).set_value("0");
-        autoscan.append_child("object_id").append_child(pugi::node_pcdata).set_value(objID.c_str());
+        autoscan["from_fs"] = 0;
         auto object = database->loadObject(intParam("object_id"));
-        auto adir = object ? content->getAutoscanDirectory(object->getLocation()) : database->getAutoscanDirectory(intParam("object_id"));
-        autoscan2XML(adir, autoscan);
+        adir = object ? content->getAutoscanDirectory(object->getLocation()) : database->getAutoscanDirectory(intParam("object_id"));
     }
+    autoscan2XML(adir, autoscan);
+    element["autoscan"] = autoscan;
 }
 
 void Web::Autoscan::runScan(
@@ -196,62 +195,62 @@ void Web::Autoscan::editSave(
 
 void Web::Autoscan::autoscan2XML(
     const std::shared_ptr<AutoscanDirectory>& adir,
-    pugi::xml_node& element)
+    Json::Value& element)
 {
     if (!adir) {
-        element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value("none");
-        element.append_child("recursive").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("hidden").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("followSymlinks").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("interval").append_child(pugi::node_pcdata).set_value("1800");
-        element.append_child("persistent").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("mediaType").append_child(pugi::node_pcdata).set_value("-1");
-        element.append_child("retryCount").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("dirTypes").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("forceRescan").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("audio").append_child(pugi::node_pcdata).set_value("1");
-        element.append_child("audioMusic").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("audioBook").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("audioBroadcast").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("image").append_child(pugi::node_pcdata).set_value("1");
-        element.append_child("imagePhoto").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("video").append_child(pugi::node_pcdata).set_value("1");
-        element.append_child("videoMovie").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("videoTV").append_child(pugi::node_pcdata).set_value("0");
-        element.append_child("videoMusicVideo").append_child(pugi::node_pcdata).set_value("0");
+        element["scan_mode"] = "none";
+        element["recursive"] = 0;
+        element["hidden"] = 0;
+        element["followSymlinks"] = 0;
+        element["interval"] = 1800;
+        element["persistent"] = 0;
+        element["mediaType"] = -1;
+        element["retryCount"] = 0;
+        element["dirTypes"] = 0;
+        element["forceRescan"] = 0;
+        element["audio"] = 1;
+        element["audioMusic"] = 0;
+        element["audioBook"] = 0;
+        element["audioBroadcast"] = 0;
+        element["image"] = 1;
+        element["imagePhoto"] = 0;
+        element["video"] = 1;
+        element["videoMovie"] = 0;
+        element["videoTV"] = 0;
+        element["videoMusicVideo"] = 0;
 
-        element.append_child("ctAudio").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio).c_str());
-        element.append_child("ctImage").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image).c_str());
-        element.append_child("ctVideo").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video).c_str());
+        element["ctAudio"] = AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio);
+        element["ctImage"] = AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image);
+        element["ctVideo"] = AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video);
     } else {
-        element.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(adir->getScanMode()));
-        element.append_child("recursive").append_child(pugi::node_pcdata).set_value(adir->getRecursive() ? "1" : "0");
-        element.append_child("hidden").append_child(pugi::node_pcdata).set_value(adir->getHidden() ? "1" : "0");
-        element.append_child("followSymlinks").append_child(pugi::node_pcdata).set_value(adir->getFollowSymlinks() ? "1" : "0");
-        element.append_child("interval").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getInterval().count()).c_str());
-        element.append_child("persistent").append_child(pugi::node_pcdata).set_value(adir->persistent() ? "1" : "0");
-        element.append_child("mediaType").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getMediaType()).c_str());
-        element.append_child("retryCount").append_child(pugi::node_pcdata).set_value(fmt::to_string(adir->getRetryCount()).c_str());
-        element.append_child("dirTypes").append_child(pugi::node_pcdata).set_value(adir->hasDirTypes() ? "1" : "0");
-        element.append_child("forceRescan").append_child(pugi::node_pcdata).set_value(adir->getForceRescan() ? "1" : "0");
-        element.append_child("audio").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_AUDIO_ITEM) ? "1" : "0");
-        element.append_child("audioMusic").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_MUSIC_TRACK) ? "1" : "0");
-        element.append_child("audioBook").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_AUDIO_BOOK) ? "1" : "0");
-        element.append_child("audioBroadcast").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_AUDIO_BROADCAST) ? "1" : "0");
-        element.append_child("image").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_IMAGE_ITEM) ? "1" : "0");
-        element.append_child("imagePhoto").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_IMAGE_PHOTO) ? "1" : "0");
-        element.append_child("video").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_ITEM) ? "1" : "0");
-        element.append_child("videoMovie").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_MOVIE) ? "1" : "0");
-        element.append_child("videoTV").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_BROADCAST) ? "1" : "0");
-        element.append_child("videoMusicVideo").append_child(pugi::node_pcdata).set_value(adir->hasContent(UPNP_CLASS_VIDEO_MUSICVIDEOCLIP) ? "1" : "0");
+        element["scan_mode"] = AutoscanDirectory::mapScanmode(adir->getScanMode());
+        element["recursive"] = adir->getRecursive() ? 1 : 0;
+        element["hidden"] = adir->getHidden() ? 1 : 0;
+        element["followSymlinks"] = adir->getFollowSymlinks() ? 1 : 0;
+        element["interval"] = fmt::to_string(adir->getInterval().count());
+        element["persistent"] = adir->persistent() ? 1 : 0;
+        element["mediaType"] = fmt::to_string(adir->getMediaType());
+        element["retryCount"] = fmt::to_string(adir->getRetryCount());
+        element["dirTypes"] = adir->hasDirTypes() ? 1 : 0;
+        element["forceRescan"] = adir->getForceRescan() ? 1 : 0;
+        element["audio"] = adir->hasContent(UPNP_CLASS_AUDIO_ITEM) ? 1 : 0;
+        element["audioMusic"] = adir->hasContent(UPNP_CLASS_MUSIC_TRACK) ? 1 : 0;
+        element["audioBook"] = adir->hasContent(UPNP_CLASS_AUDIO_BOOK) ? 1 : 0;
+        element["audioBroadcast"] = adir->hasContent(UPNP_CLASS_AUDIO_BROADCAST) ? 1 : 0;
+        element["image"] = adir->hasContent(UPNP_CLASS_IMAGE_ITEM) ? 1 : 0;
+        element["imagePhoto"] = adir->hasContent(UPNP_CLASS_IMAGE_PHOTO) ? 1 : 0;
+        element["video"] = adir->hasContent(UPNP_CLASS_VIDEO_ITEM) ? 1 : 0;
+        element["videoMovie"] = adir->hasContent(UPNP_CLASS_VIDEO_MOVIE) ? 1 : 0;
+        element["videoTV"] = adir->hasContent(UPNP_CLASS_VIDEO_BROADCAST) ? 1 : 0;
+        element["videoMusicVideo"] = adir->hasContent(UPNP_CLASS_VIDEO_MUSICVIDEOCLIP) ? 1 : 0;
 
-        element.append_child("ctAudio").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanMediaMode::Audio).c_str());
-        element.append_child("ctImage").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanMediaMode::Image).c_str());
-        element.append_child("ctVideo").append_child(pugi::node_pcdata).set_value(adir->getContainerTypes().at(AutoscanMediaMode::Video).c_str());
+        element["ctAudio"] = adir->getContainerTypes().at(AutoscanMediaMode::Audio);
+        element["ctImage"] = adir->getContainerTypes().at(AutoscanMediaMode::Image);
+        element["ctVideo"] = adir->getContainerTypes().at(AutoscanMediaMode::Video);
     }
 }
 
-void Web::Autoscan::list(pugi::xml_node& element)
+void Web::Autoscan::list(Json::Value& element)
 {
     auto autoscanList = content->getAutoscanDirectories();
 
@@ -261,14 +260,14 @@ void Web::Autoscan::list(pugi::xml_node& element)
 
     // --- create list
 
-    auto autoscansEl = element.append_child("autoscans");
-    xml2Json->setArrayName(autoscansEl, "autoscan");
+    Json::Value autoscanArray(Json::arrayValue);
     for (auto&& autoscanDir : autoscanList) {
-        auto autoscanEl = autoscansEl.append_child("autoscan");
-        autoscanEl.append_attribute("objectID") = autoscanDir->getObjectID();
-
-        autoscanEl.append_child("location").append_child(pugi::node_pcdata).set_value(autoscanDir->getLocation().c_str());
-        autoscanEl.append_child("scan_mode").append_child(pugi::node_pcdata).set_value(AutoscanDirectory::mapScanmode(autoscanDir->getScanMode()));
-        autoscanEl.append_child("from_config").append_child(pugi::node_pcdata).set_value(autoscanDir->persistent() ? "1" : "0");
+        Json::Value autoscanEl;
+        autoscanEl["objectID"] = autoscanDir->getObjectID();
+        autoscanEl["location"] = autoscanDir->getLocation().string();
+        autoscanEl["scan_mode"] = AutoscanDirectory::mapScanmode(autoscanDir->getScanMode());
+        autoscanEl["from_config"] = autoscanDir->persistent() ? 1 : 0;
+        autoscanArray.append(autoscanEl);
     }
+    element["autoscans"] = autoscanArray;
 }

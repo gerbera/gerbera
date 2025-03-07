@@ -37,6 +37,7 @@ jobs:
             ninja
             pkgconf
             pugixml-dev
+            jsoncpp-dev
             spdlog-dev
             sqlite-dev
             util-linux-dev

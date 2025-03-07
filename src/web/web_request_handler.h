@@ -37,13 +37,12 @@
 #include "request_handler/request_handler.h"
 #include "util/tools.h"
 
-#include <pugixml.hpp>
+#include <json/json.h>
 
 class ConfigValue;
 class GenericTask;
 class Server;
 class UpnpXMLBuilder;
-class Xml2Json;
 enum class AutoscanType;
 enum class ConfigVal;
 
@@ -77,11 +76,8 @@ protected:
     /// \brief We can also always see what mode was requested.
     enum UpnpOpenFileMode mode {};
 
-    /// \brief This is the xml document, the root node to be populated by \c process() method.
-    std::unique_ptr<pugi::xml_document> xmlDoc;
-
-    /// \brief Hints for \c Xml2Json, such that we know when to create an array
-    std::unique_ptr<Xml2Json> xml2Json;
+    /// \brief This is the json document, the root node to be populated by \c process() method.
+    Json::Value jsonDoc;
 
     /// \brief The current session, used for this request; will be filled by
     /// \c checkRequest()
@@ -97,7 +93,7 @@ protected:
     std::string getGroup() const;
 
     /// \brief This method must be overridden by the subclasses that actually process the given request.
-    virtual void process(pugi::xml_node& root) = 0;
+    virtual void process() = 0;
 
     /// \brief Convert Autoscan type to string representation
     static std::string_view mapAutoscanType(AutoscanType type);

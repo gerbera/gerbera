@@ -33,6 +33,7 @@ RUN zypper install --no-confirm \
     pkgconf \
     sqlite3-devel \
     libuuid-devel \
+    jsoncpp-devel \
     # libexecinfo-devel \
     # libexecinfo \
     autoconf \

@@ -53,9 +53,9 @@ class PageRequest : public WebRequestHandler {
     using WebRequestHandler::WebRequestHandler;
 
 protected:
-    void process(pugi::xml_node& root) override;
+    void process() override;
     /// \brief This method must be overridden by the subclasses that actually process the given request.
-    virtual bool processPageAction(pugi::xml_node& element, const std::string& action) = 0;
+    virtual bool processPageAction(Json::Value& element, const std::string& action) = 0;
     /// \brief get key for page
     virtual std::string_view getPage() const = 0;
 
@@ -78,21 +78,21 @@ protected:
     /// \brief check if ui update ids should be added to the response and add
     /// them in that case.
     /// must only be called after checkRequest
-    void handleUpdateIDs(pugi::xml_node& element);
+    void handleUpdateIDs(Json::Value& element);
 
-    /// \brief add the content manager task to the given xml element as xml elements
-    /// \param task the task to add to the given xml element
-    /// \param parent the xml element to add the elements to
+    /// \brief add the content manager task to the given element as properties
+    /// \param task the task to add to the given element
+    /// \param taskEl the element to add the elements to
     static void appendTask(
         const std::shared_ptr<GenericTask>& task,
-        pugi::xml_node& parent);
+        Json::Value& taskEl);
 
-    /// \brief add the ui update ids from the given session as xml tags to the given root element
+    /// \brief add the ui update ids from the given session as tags to the given root element
     /// \param session the session from which the ui update ids should be taken
-    /// \param updateIDsEl the xml element to add the elements to
+    /// \param updateIDsEl the element to add the elements to
     static void addUpdateIDs(
         const std::shared_ptr<Session>& session,
-        pugi::xml_node& updateIDsEl);
+        Json::Value& updateIDsEl);
 
     bool doCheck { true };
 };

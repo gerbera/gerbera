@@ -1,11 +1,11 @@
-import {Auth} from '../../../web/js/gerbera-auth.module';
-import {Autoscan} from '../../../web/js/gerbera-autoscan.module';
-import {GerberaApp} from '../../../web/js/gerbera-app.module';
-import {Items} from '../../../web/js/gerbera-items.module';
-import {Menu} from '../../../web/js/gerbera-menu.module';
-import {Trail} from '../../../web/js/gerbera-trail.module';
-import {Tree} from '../../../web/js/gerbera-tree.module';
-import {Updates} from '../../../web/js/gerbera-updates.module';
+import { Auth } from '../../../web/js/gerbera-auth.module';
+import { Autoscan } from '../../../web/js/gerbera-autoscan.module';
+import { GerberaApp } from '../../../web/js/gerbera-app.module';
+import { Items } from '../../../web/js/gerbera-items.module';
+import { Menu } from '../../../web/js/gerbera-menu.module';
+import { Trail } from '../../../web/js/gerbera-trail.module';
+import { Tree } from '../../../web/js/gerbera-tree.module';
+import { Updates } from '../../../web/js/gerbera-updates.module';
 
 import convertedConfig from './fixtures/converted-config';
 import mockConfig from './fixtures/config';
@@ -15,11 +15,11 @@ describe('Gerbera UI App', () => {
   let lsSpy;
   beforeEach(() => {
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
-        return;
+      return;
     });
   });
   beforeAll(() => {
-    spyOn(GerberaApp, 'writeLocalStorage').and.callFake(() => {});
+    spyOn(GerberaApp, 'writeLocalStorage').and.callFake(() => { });
   });
 
   describe('initialize()', () => {
@@ -62,6 +62,8 @@ describe('Gerbera UI App', () => {
         return $.Deferred().resolve(mockConfig).promise();
       });
 
+      if (GerberaApp.serverConfig)
+        GerberaApp.serverConfig.fsAddItem = false;
       await GerberaApp.initialize();
       var data = {
         req_type: 'auth',
@@ -83,8 +85,8 @@ describe('Gerbera UI App', () => {
       spyOn(Updates, 'showMessage');
 
       ajaxSpy.and.callFake(() => {
-        return Promise.reject({responseText: 'Internal Server Error'});
-        });
+        return Promise.reject({ responseText: 'Internal Server Error' });
+      });
 
       await GerberaApp.initialize();
       expect(Updates.showMessage).toHaveBeenCalledWith('Internal Server Error', undefined, 'info', 'fa-exclamation-triangle');
@@ -185,7 +187,7 @@ describe('Gerbera UI App', () => {
     });
     it('shows the event as error message when event has responseText', () => {
       spyOn(Updates, 'showMessage');
-      const event = {responseText : 'Response Text Error'};
+      const event = { responseText: 'Response Text Error' };
       GerberaApp.error(event);
 
       expect(Updates.showMessage).toHaveBeenCalledWith('Response Text Error', undefined, 'info', 'fa-exclamation-triangle');
@@ -247,8 +249,8 @@ describe('Gerbera UI App', () => {
       expect(result).toBeUndefined();
     });
     it('allows to be set with object data', () => {
-      GerberaApp.currentTreeItem = {test: 'test'};
-      expect(GerberaApp.currentTreeItem).toEqual({test: 'test'});
+      GerberaApp.currentTreeItem = { test: 'test' };
+      expect(GerberaApp.currentTreeItem).toEqual({ test: 'test' });
     });
   });
 
