@@ -62,6 +62,8 @@ describe('Gerbera UI App', () => {
         return $.Deferred().resolve(mockConfig).promise();
       });
 
+      if (GerberaApp.serverConfig)
+        GerberaApp.serverConfig.fsAddItem = false;
       await GerberaApp.initialize();
       var data = {
         req_type: 'auth',

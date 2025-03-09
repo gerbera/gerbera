@@ -32,21 +32,22 @@
 #include "exceptions.h"
 #include "util/generic_task.h"
 #include "util/logger.h"
-#include "util/xml_to_json.h"
 #include "web/session_manager.h"
 
-void Web::PageRequest::process(pugi::xml_node& root)
+void Web::PageRequest::process()
 {
     log_debug("start {}", getPage());
     if (doCheck)
         checkRequest();
-    auto element = xmlDoc->document_element();
     std::string action = param("action");
     log_debug("action: {}", action);
-    if (processPageAction(element, action)) {
+    if (processPageAction(jsonDoc, action)) {
         // add current task
-        appendTask(content->getCurrentTask(), root);
-        handleUpdateIDs(element);
+        auto task = content->getCurrentTask();
+        Json::Value taskEl;
+        appendTask(task, taskEl);
+        jsonDoc["task"] = taskEl;
+        handleUpdateIDs(jsonDoc);
     }
     log_debug("end {}", getPage());
 }
@@ -73,41 +74,41 @@ void Web::PageRequest::checkRequest(bool checkLogin)
 
 void Web::PageRequest::addUpdateIDs(
     const std::shared_ptr<Session>& session,
-    pugi::xml_node& updateIDsEl)
+    Json::Value& updateIDsEl)
 {
     std::string updateIDs = session->getUIUpdateIDs();
     if (!updateIDs.empty()) {
         log_debug("UI: sending update ids: {}", updateIDs);
-        updateIDsEl.append_attribute("ids") = updateIDs.c_str();
-        updateIDsEl.append_attribute("updates") = true;
+        updateIDsEl["ids"] = updateIDs;
+        updateIDsEl["updates"] = true;
     }
 }
 
-void Web::PageRequest::handleUpdateIDs(pugi::xml_node& element)
+void Web::PageRequest::handleUpdateIDs(Json::Value& element)
 {
     // session will be filled by check_request
     std::string updates = param("updates");
     if (!updates.empty()) {
-        auto updateIDs = element.append_child("update_ids");
+        Json::Value updateIDs;
 
         if (updates == "check") {
-            updateIDs.append_attribute("pending") = session->hasUIUpdateIDs();
+            updateIDs["pending"] = session->hasUIUpdateIDs();
         } else if (updates == "get") {
             addUpdateIDs(session, updateIDs);
         }
+        element["update_ids"] = updateIDs;
     }
 }
 
 void Web::PageRequest::appendTask(
     const std::shared_ptr<GenericTask>& task,
-    pugi::xml_node& parent)
+    Json::Value& taskEl)
 {
-    if (!task || !parent)
-        return;
-    auto taskEl = parent.append_child("task");
-    taskEl.append_attribute("id") = task->getID();
-    taskEl.append_attribute("cancellable") = task->isCancellable();
-    taskEl.append_attribute("text") = task->getDescription().c_str();
+    if (task) {
+        taskEl["id"] = task->getID();
+        taskEl["cancellable"] = task->isCancellable();
+        taskEl["text"] = task->getDescription();
+    }
 }
 
 int Web::PageRequest::intParam(const std::string& name, int invalid) const
