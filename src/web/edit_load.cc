@@ -41,14 +41,13 @@
 #include "upnp/clients.h"
 #include "upnp/xml_builder.h"
 #include "util/tools.h"
-#include "util/xml_to_json.h"
 
 #include <fmt/chrono.h>
 
 const std::string_view Web::EditLoad::PAGE = "edit_load";
 
 /// \brief: process request 'edit_load' to list contents of a folder
-bool Web::EditLoad::processPageAction(pugi::xml_node& element, const std::string& action)
+bool Web::EditLoad::processPageAction(Json::Value& element, const std::string& action)
 {
     std::string objID = param("object_id");
     if (objID.empty())
@@ -57,14 +56,14 @@ bool Web::EditLoad::processPageAction(pugi::xml_node& element, const std::string
     auto objectID = std::stoi(objID);
     auto obj = database->loadObject(getGroup(), objectID);
 
-    // set handling of json properties
-    xml2Json->setFieldType("value", FieldType::STRING);
-    xml2Json->setFieldType("title", FieldType::STRING);
-
-    auto item = writeCoreInfo(obj, element, objectID);
-    auto metaData = writeMetadata(obj, item);
-    writeAuxData(obj, item);
-    writeResourceInfo(obj, item);
+    Json::Value item;
+    writeCoreInfo(obj, item, objectID);
+    Json::Value metaData(Json::arrayValue);
+    writeMetadata(obj, metaData);
+    Json::Value auxData(Json::arrayValue);
+    writeAuxData(obj, auxData);
+    Json::Value resources(Json::arrayValue);
+    writeResourceInfo(obj, resources);
 
     // write item meta info
     if (obj->isItem()) {
@@ -76,214 +75,241 @@ bool Web::EditLoad::processPageAction(pugi::xml_node& element, const std::string
     if (obj->isContainer()) {
         writeContainerInfo(obj, item);
     }
-
+    item["metadata"] = metaData;
+    item["auxdata"] = auxData;
+    item["resources"] = resources;
+    element["item"] = item;
     return true;
 }
 
-pugi::xml_node Web::EditLoad::writeCoreInfo(
+void Web::EditLoad::writeCoreInfo(
     const std::shared_ptr<CdsObject>& obj,
-    pugi::xml_node& element,
+    Json::Value& item,
     int objectID)
 {
-    auto item = element.append_child("item");
-    item.append_attribute("object_id") = objectID;
+    item["object_id"] = objectID;
 
-    auto title = item.append_child("title");
-    title.append_attribute("value") = obj->getTitle().c_str();
-    title.append_attribute("editable") = obj->isVirtual() || objectID == CDS_ID_FS_ROOT;
+    Json::Value title;
+    title["value"] = obj->getTitle();
+    title["editable"] = obj->isVirtual() || objectID == CDS_ID_FS_ROOT;
+    item["title"] = title;
 
-    auto classEl = item.append_child("class");
-    classEl.append_attribute("value") = obj->getClass().c_str();
-    classEl.append_attribute("editable") = true;
+    Json::Value classEl;
+    classEl["value"] = obj->getClass();
+    classEl["editable"] = true;
+    item["class"] = classEl;
 
-    auto flagsEl = item.append_child("flags");
-    flagsEl.append_attribute("value") = CdsObject::mapFlags(obj->getFlags()).c_str();
-    flagsEl.append_attribute("editable") = false;
+    Json::Value flagsEl;
+    flagsEl["value"] = CdsObject::mapFlags(obj->getFlags());
+    flagsEl["editable"] = false;
+    item["flags"] = flagsEl;
 
+    Json::Value lmtEl;
     if (obj->getMTime() > std::chrono::seconds::zero()) {
-        auto lmtEl = item.append_child("last_modified");
-        lmtEl.append_attribute("value") = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getMTime().count())).c_str();
-        lmtEl.append_attribute("editable") = false;
+        lmtEl["value"] = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getMTime().count()));
     } else {
-        auto lmtEl = item.append_child("last_modified");
-        lmtEl.append_attribute("value") = "";
-        lmtEl.append_attribute("editable") = false;
+        lmtEl["value"] = "";
     }
+    lmtEl["editable"] = false;
+    item["last_modified"] = lmtEl;
 
+    Json::Value lutEl;
     if (obj->getUTime() > std::chrono::seconds::zero()) {
-        auto lmtEl = item.append_child("last_updated");
-        lmtEl.append_attribute("value") = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getUTime().count())).c_str();
-        lmtEl.append_attribute("editable") = false;
+        lutEl["value"] = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getUTime().count()));
     } else {
-        auto lmtEl = item.append_child("last_updated");
-        lmtEl.append_attribute("value") = "";
-        lmtEl.append_attribute("editable") = false;
+        lutEl["value"] = "";
     }
+    lutEl["editable"] = false;
+    item["last_updated"] = lutEl;
 
-    item.append_child("obj_type").append_child(pugi::node_pcdata).set_value(CdsObject::mapObjectType(obj->getObjectType()).data());
-    return item;
+    item["obj_type"] = CdsObject::mapObjectType(obj->getObjectType()).data();
 }
 
-pugi::xml_node Web::EditLoad::writeMetadata(const std::shared_ptr<CdsObject>& obj, pugi::xml_node& item)
+void Web::EditLoad::writeMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    Json::Value& metadataArray)
 {
-    auto metaData = item.append_child("metadata");
-    xml2Json->setArrayName(metaData, "metadata");
-    xml2Json->setFieldType("metavalue", FieldType::STRING);
-
     for (auto&& [key, val] : obj->getMetaData()) {
-        auto metaEntry = metaData.append_child("metadata");
-        metaEntry.append_attribute("metaname") = key.c_str();
-        metaEntry.append_attribute("metavalue") = val.c_str();
-        metaEntry.append_attribute("editable") = false;
+        Json::Value metaEntry;
+        metaEntry["metaname"] = key;
+        metaEntry["metavalue"] = val;
+        metaEntry["editable"] = false;
+        metadataArray.append(metaEntry);
     }
-    return metaData;
 }
 
-void Web::EditLoad::writeAuxData(const std::shared_ptr<CdsObject>& obj, pugi::xml_node& item)
+void Web::EditLoad::writeAuxData(
+    const std::shared_ptr<CdsObject>& obj,
+    Json::Value& auxdataArray)
 {
-    auto auxData = item.append_child("auxdata");
-    xml2Json->setArrayName(auxData, "auxdata");
-    xml2Json->setFieldType("auxvalue", FieldType::STRING);
-
     for (auto&& [key, val] : obj->getAuxData()) {
-        auto auxEntry = auxData.append_child("auxdata");
-        auxEntry.append_attribute("auxname") = key.c_str();
-        auxEntry.append_attribute("auxvalue") = val.c_str();
-        auxEntry.append_attribute("editable") = false;
+        Json::Value auxEntry;
+        auxEntry["auxname"] = key;
+        auxEntry["auxvalue"] = val;
+        auxEntry["editable"] = false;
+        auxdataArray.append(auxEntry);
     }
 }
 
-void Web::EditLoad::writeResourceInfo(const std::shared_ptr<CdsObject>& obj, pugi::xml_node& item)
+void Web::EditLoad::writeResourceInfo(
+    const std::shared_ptr<CdsObject>& obj,
+    Json::Value& resourceArray)
 {
-    auto resources = item.append_child("resources");
-    xml2Json->setArrayName(resources, "resources");
-    xml2Json->setFieldType("resvalue", FieldType::ENCSTRING);
-    xml2Json->setFieldType("rawvalue", FieldType::STRING);
     auto objItem = std::dynamic_pointer_cast<CdsItem>(obj);
 
     for (auto&& resItem : obj->getResources()) {
-        auto resEntry = resources.append_child("resources");
-        resEntry.append_attribute("resname") = "----RESOURCE----";
-        resEntry.append_attribute("resvalue") = fmt::to_string(resItem->getResId()).c_str();
-        resEntry.append_attribute("editable") = false;
+        {
+            Json::Value resEntry;
+            resEntry["resname"] = "----RESOURCE----";
+            resEntry["resvalue"] = fmt::to_string(resItem->getResId());
+            resEntry["editable"] = false;
+            resourceArray.append(resEntry);
+        }
 
-        resEntry = resources.append_child("resources");
-        resEntry.append_attribute("resname") = "handlerType";
-        resEntry.append_attribute("resvalue") = EnumMapper::mapContentHandler2String(resItem->getHandlerType()).c_str();
-        resEntry.append_attribute("editable") = false;
+        {
+            Json::Value resEntry;
+            resEntry["resname"] = "handlerType";
+            resEntry["resvalue"] = EnumMapper::mapContentHandler2String(resItem->getHandlerType());
+            resEntry["editable"] = false;
+            resourceArray.append(resEntry);
+        }
 
-        resEntry = resources.append_child("resources");
-        resEntry.append_attribute("resname") = "purpose";
-        resEntry.append_attribute("resvalue") = EnumMapper::getPurposeDisplay(resItem->getPurpose()).c_str();
-        resEntry.append_attribute("editable") = false;
+        {
+            Json::Value resEntry;
+            resEntry["resname"] = "purpose";
+            resEntry["resvalue"] = EnumMapper::getPurposeDisplay(resItem->getPurpose());
+            resEntry["editable"] = false;
+            resourceArray.append(resEntry);
+        }
 
         // write resource content
         if (objItem) {
             std::string url = xmlBuilder->renderResourceURL(*objItem, *resItem, {});
+            Json::Value resEntry;
+            resEntry["resvalue"] = url;
+            resEntry["editable"] = false;
             if (resItem->getPurpose() == ResourcePurpose::Thumbnail) {
-                auto image = resources.append_child("resources");
-                image.append_attribute("resname") = "image";
-                image.append_attribute("resvalue") = url.c_str();
-                image.append_attribute("editable") = false;
+                resEntry["resname"] = "image";
             } else {
-                resEntry = resources.append_child("resources");
-                resEntry.append_attribute("resname") = "link";
-                resEntry.append_attribute("resvalue") = url.c_str();
-                resEntry.append_attribute("editable") = false;
+                resEntry["resname"] = "link";
             }
+            resourceArray.append(resEntry);
         }
 
         // write resource parameters
         for (auto&& [key, val] : resItem->getParameters()) {
-            auto resEntry = resources.append_child("resources");
-            resEntry.append_attribute("resname") = fmt::format(".{}", key).c_str();
-            resEntry.append_attribute("resvalue") = val.c_str();
-            resEntry.append_attribute("editable") = false;
+            Json::Value resEntry;
+            resEntry["resname"] = fmt::format(".{}", key);
+            resEntry["resvalue"] = val;
+            resEntry["editable"] = false;
+            resourceArray.append(resEntry);
         }
         // write resource attributes
         for (auto&& attr : ResourceAttributeIterator()) {
             auto val = resItem->getAttribute(attr);
             if (!val.empty()) {
-                auto resEntry = resources.append_child("resources");
-                resEntry.append_attribute("resname") = EnumMapper::getAttributeDisplay(attr).c_str();
+                Json::Value resEntry;
+                resEntry["resname"] = EnumMapper::getAttributeDisplay(attr);
                 auto aVal = resItem->getAttributeValue(attr);
                 if (aVal != val)
-                    resEntry.append_attribute("rawvalue") = val.c_str();
-                resEntry.append_attribute("resvalue") = aVal.c_str();
-                resEntry.append_attribute("editable") = false;
+                    resEntry["rawvalue"] = val;
+                resEntry["resvalue"] = aVal;
+                resEntry["editable"] = false;
+                resourceArray.append(resEntry);
             }
         }
         // write resource options
         for (auto&& [key, val] : resItem->getOptions()) {
-            auto resEntry = resources.append_child("resources");
-            resEntry.append_attribute("resname") = fmt::format("-{}", key).c_str();
-            resEntry.append_attribute("resvalue") = val.c_str();
-            resEntry.append_attribute("editable") = false;
+            Json::Value resEntry;
+            resEntry["resname"] = fmt::format("-{}", key);
+            resEntry["resvalue"] = val;
+            resEntry["editable"] = false;
+            resourceArray.append(resEntry);
         }
     }
 }
 
-void Web::EditLoad::writeItemInfo(const std::shared_ptr<CdsItem>& objItem, int objectID, pugi::xml_node& item, pugi::xml_node& metaData)
+void Web::EditLoad::writeItemInfo(
+    const std::shared_ptr<CdsItem>& objItem,
+    int objectID,
+    Json::Value& item,
+    Json::Value& metadataArray)
 {
-    auto description = item.append_child("description");
-    description.append_attribute("value") = objItem->getMetaData(MetadataFields::M_DESCRIPTION).c_str();
-    description.append_attribute("editable") = true;
+    Json::Value description;
+    description["value"] = objItem->getMetaData(MetadataFields::M_DESCRIPTION);
+    description["editable"] = true;
+    item["description"] = description;
 
-    auto location = item.append_child("location");
-    location.append_attribute("value") = objItem->getLocation().c_str();
-    location.append_attribute("editable") = !objItem->isPureItem() && objItem->isVirtual();
+    Json::Value location;
+    location["value"] = objItem->getLocation().string();
+    location["editable"] = !objItem->isPureItem() && objItem->isVirtual();
+    item["location"] = location;
 
-    auto mimeType = item.append_child("mime-type");
-    mimeType.append_attribute("value") = objItem->getMimeType().c_str();
-    mimeType.append_attribute("editable") = true;
+    Json::Value mimeType;
+    mimeType["value"] = objItem->getMimeType();
+    mimeType["editable"] = true;
+    item["mime-type"] = mimeType;
 
     auto url = xmlBuilder->renderItemImageURL(objItem);
     if (url) {
-        auto image = item.append_child("image");
-        image.append_attribute("value") = url.value().c_str();
-        image.append_attribute("editable") = false;
+        Json::Value image;
+        image["value"] = url.value();
+        image["editable"] = false;
+        item["image"] = image;
     }
 
     for (auto&& playStatus : database->getPlayStatusList(objectID)) {
-        auto metaEntry = metaData.append_child("metadata");
-        metaEntry.append_attribute("metaname") = fmt::format("upnp:playbackCount@group[{}]", playStatus->getGroup()).c_str();
-        metaEntry.append_attribute("metavalue") = fmt::format("{}", playStatus->getPlayCount()).c_str();
-        metaEntry.append_attribute("editable") = false;
+        {
+            Json::Value metaEntry;
+            metaEntry["metaname"] = fmt::format("upnp:playbackCount@group[{}]", playStatus->getGroup());
+            metaEntry["metavalue"] = fmt::format("{}", playStatus->getPlayCount());
+            metaEntry["editable"] = false;
+            metadataArray.append(metaEntry);
+        }
 
-        metaEntry = metaData.append_child("metadata");
-        metaEntry.append_attribute("metaname") = fmt::format("upnp:lastPlaybackTime@group[{}]", playStatus->getGroup()).c_str();
-        metaEntry.append_attribute("metavalue") = fmt::format("{:%Y-%m-%d T %H:%M:%S}", fmt::localtime(playStatus->getLastPlayed().count())).c_str();
-        metaEntry.append_attribute("editable") = false;
+        {
+            Json::Value metaEntry;
+            metaEntry["metaname"] = fmt::format("upnp:lastPlaybackTime@group[{}]", playStatus->getGroup());
+            metaEntry["metavalue"] = fmt::format("{:%Y-%m-%d T %H:%M:%S}", fmt::localtime(playStatus->getLastPlayed().count()));
+            metaEntry["editable"] = false;
+            metadataArray.append(metaEntry);
+        }
 
         if (playStatus->getLastPlayedPosition() > std::chrono::seconds::zero()) {
-            metaEntry = metaData.append_child("metadata");
-            metaEntry.append_attribute("metaname") = fmt::format("upnp:lastPlaybackPosition@group[{}]", playStatus->getGroup()).c_str();
-            metaEntry.append_attribute("metavalue") = fmt::format("{}", millisecondsToHMSF(playStatus->getLastPlayedPosition().count())).c_str();
-            metaEntry.append_attribute("editable") = false;
+            Json::Value metaEntry;
+            metaEntry["metaname"] = fmt::format("upnp:lastPlaybackPosition@group[{}]", playStatus->getGroup());
+            metaEntry["metavalue"] = fmt::format("{}", millisecondsToHMSF(playStatus->getLastPlayedPosition().count()));
+            metaEntry["editable"] = false;
+            metadataArray.append(metaEntry);
         }
 
         if (playStatus->getBookMarkPosition() > std::chrono::seconds::zero()) {
-            metaEntry = metaData.append_child("metadata");
-            metaEntry.append_attribute("metaname") = fmt::format("samsung:bookmarkpos@group[{}]", playStatus->getGroup()).c_str();
-            metaEntry.append_attribute("metavalue") = fmt::format("{}", millisecondsToHMSF(playStatus->getBookMarkPosition().count())).c_str();
-            metaEntry.append_attribute("editable") = false;
+            Json::Value metaEntry;
+            metaEntry["metaname"] = fmt::format("samsung:bookmarkpos@group[{}]", playStatus->getGroup());
+            metaEntry["metavalue"] = fmt::format("{}", millisecondsToHMSF(playStatus->getBookMarkPosition().count()));
+            metaEntry["editable"] = false;
+            metadataArray.append(metaEntry);
         }
     }
 
     if (objItem->isExternalItem()) {
-        auto protocol = item.append_child("protocol");
-        protocol.append_attribute("value") = getProtocol(objItem->getResource(ContentHandler::DEFAULT)->getAttribute(ResourceAttribute::PROTOCOLINFO)).data();
-        protocol.append_attribute("editable") = true;
+        Json::Value protocol;
+        protocol["value"] = getProtocol(objItem->getResource(ContentHandler::DEFAULT)->getAttribute(ResourceAttribute::PROTOCOLINFO)).data();
+        protocol["editable"] = true;
+        item["protocol"] = protocol;
     }
 }
 
-void Web::EditLoad::writeContainerInfo(const std::shared_ptr<CdsObject>& obj, pugi::xml_node& item)
+void Web::EditLoad::writeContainerInfo(
+    const std::shared_ptr<CdsObject>& obj,
+    Json::Value& item)
 {
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     auto url = xmlBuilder->renderContainerImageURL(cont);
     if (url) {
-        auto image = item.append_child("image");
-        image.append_attribute("value") = url.value().c_str();
-        image.append_attribute("editable") = false;
+        Json::Value image;
+        image["value"] = url.value();
+        image["editable"] = false;
+        item["image"] = image;
     }
 }

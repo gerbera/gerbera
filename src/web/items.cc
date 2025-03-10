@@ -44,12 +44,11 @@
 #include "exceptions.h"
 #include "upnp/quirks.h"
 #include "upnp/xml_builder.h"
-#include "util/xml_to_json.h"
 
 const std::string_view Web::Items::PAGE = "items";
 
 /// \brief orocess request for item list in ui
-bool Web::Items::processPageAction(pugi::xml_node& element, const std::string& action)
+bool Web::Items::processPageAction(Json::Value& element, const std::string& action)
 {
     int parentID = intParam("parent_id");
     int start = intParam("start");
@@ -61,15 +60,8 @@ bool Web::Items::processPageAction(pugi::xml_node& element, const std::string& a
         throw_std_runtime_error("illegal count {} parameter", count);
 
     // set result options
-    auto items = element.append_child("items");
-    xml2Json->setArrayName(items, "item");
-    xml2Json->setFieldType("title", FieldType::STRING);
-    xml2Json->setFieldType("part", FieldType::STRING);
-    xml2Json->setFieldType("track", FieldType::STRING);
-    xml2Json->setFieldType("index", FieldType::STRING);
-    xml2Json->setFieldType("autoscan_mode", FieldType::STRING);
-    xml2Json->setFieldType("autoscan_type", FieldType::STRING);
-    items.append_attribute("parent_id") = parentID;
+    Json::Value items;
+    items["parent_id"] = parentID;
 
     auto container = database->loadObject(getGroup(), parentID);
     std::string trackFmt = "{:02}";
@@ -79,47 +71,50 @@ bool Web::Items::processPageAction(pugi::xml_node& element, const std::string& a
 
     // ouput objects of container
     int cnt = start + 1;
+    Json::Value itemArray(Json::arrayValue);
     for (auto&& cdsObj : result) {
-        auto item = items.append_child("item");
-        item.append_attribute("id") = cdsObj->getID();
-        item.append_child("title").append_child(pugi::node_pcdata).set_value(cdsObj->getTitle().c_str());
-        item.append_child("upnp_class").append_child(pugi::node_pcdata).set_value(cdsObj->getClass().c_str());
-
-        item.append_child("index").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cnt).c_str());
+        Json::Value item;
+        item["id"] = cdsObj->getID();
+        item["title"] = cdsObj->getTitle();
+        item["upnp_class"] = cdsObj->getClass();
+        item["index"] = fmt::format(trackFmt, cnt);
         if (cdsObj->isItem()) {
             auto cdsItem = std::static_pointer_cast<CdsItem>(cdsObj);
             if (cdsItem->getPartNumber() > 0 && container->isSubClass(UPNP_CLASS_MUSIC_ALBUM))
-                item.append_child("part").append_child(pugi::node_pcdata).set_value(fmt::format("{:02}", cdsItem->getPartNumber()).c_str());
+                item["part"] = fmt::format("{:02}", cdsItem->getPartNumber());
             if (cdsItem->getTrackNumber() > 0 && !container->isSubClass(UPNP_CLASS_CONTAINER))
-                item.append_child("track").append_child(pugi::node_pcdata).set_value(fmt::format(trackFmt, cdsItem->getTrackNumber()).c_str());
-            item.append_child("mtype").append_child(pugi::node_pcdata).set_value(cdsItem->getMimeType().c_str());
+                item["track"] = fmt::format(trackFmt, cdsItem->getTrackNumber());
+            item["mtype"] = cdsItem->getMimeType();
             auto contRes = cdsObj->getResource(ResourcePurpose::Content);
             if (contRes) {
-                item.append_child("size").append_child(pugi::node_pcdata).set_value(contRes->getAttributeValue(ResourceAttribute::SIZE).c_str());
+                item["size"] = contRes->getAttributeValue(ResourceAttribute::SIZE);
                 if (!cdsItem->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
-                    item.append_child("resolution").append_child(pugi::node_pcdata).set_value(contRes->getAttribute(ResourceAttribute::RESOLUTION).c_str());
+                    item["resolution"] = contRes->getAttribute(ResourceAttribute::RESOLUTION);
                 }
                 if (!cdsItem->isSubClass(UPNP_CLASS_IMAGE_ITEM)) {
-                    item.append_child("duration").append_child(pugi::node_pcdata).set_value(contRes->getAttributeValue(ResourceAttribute::DURATION).c_str());
+                    item["duration"] = contRes->getAttributeValue(ResourceAttribute::DURATION);
                 }
             }
             std::string resPath = xmlBuilder->getFirstResourcePath(cdsItem);
             if (!resPath.empty())
-                item.append_child("res").append_child(pugi::node_pcdata).set_value(resPath.c_str());
+                item["res"] = resPath;
             auto url = xmlBuilder->renderItemImageURL(cdsItem);
             if (url) {
-                item.append_child("image").append_child(pugi::node_pcdata).set_value(url.value().c_str());
+                item["image"] = url.value();
             }
         } else {
             auto cdsCont = std::static_pointer_cast<CdsContainer>(cdsObj);
             auto url = xmlBuilder->renderContainerImageURL(cdsCont);
             if (url) {
-                item.append_child("image").append_child(pugi::node_pcdata).set_value(url.value().c_str());
+                item["image"] = url.value();
             }
         }
+        itemArray.append(item);
         cnt++;
     }
 
+    items["item"] = itemArray;
+    element["items"] = items;
     return true;
 }
 
@@ -127,7 +122,7 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
     const std::shared_ptr<CdsObject>& container,
     int start,
     int count,
-    pugi::xml_node& items,
+    Json::Value& items,
     std::string& trackFmt)
 {
     log_debug("start");
@@ -141,10 +136,10 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
 
     // get contents of request
     auto result = database->browse(browseParam);
-    items.append_attribute("virtual") = container->isVirtual();
-    items.append_attribute("start") = start;
-    items.append_attribute("result_size") = result.size();
-    items.append_attribute("total_matches") = browseParam.getTotalMatches();
+    items["virtual"] = container->isVirtual();
+    items["start"] = start;
+    items["result_size"] = Json::Value(static_cast<Json::UInt64>(result.size()));
+    items["total_matches"] = browseParam.getTotalMatches();
 
     bool protectContainer = container->isSubClass(UPNP_CLASS_DYNAMIC_CONTAINER);
     bool protectItems = container->isSubClass(UPNP_CLASS_DYNAMIC_CONTAINER);
@@ -173,10 +168,10 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
             }
         }
     }
-    items.append_attribute("autoscan_mode") = autoscanMode.c_str();
-    items.append_attribute("autoscan_type") = mapAutoscanType(autoscanType).data();
-    items.append_attribute("protect_container") = protectContainer;
-    items.append_attribute("protect_items") = protectItems;
+    items["autoscan_mode"] = autoscanMode;
+    items["autoscan_type"] = mapAutoscanType(autoscanType).data();
+    items["protect_container"] = protectContainer;
+    items["protect_items"] = protectItems;
 
     if (browseParam.getTotalMatches() >= 100)
         trackFmt = "{:03}";
@@ -188,7 +183,7 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doSearch(
     const std::shared_ptr<CdsObject>& container,
     int start,
     int count,
-    pugi::xml_node& items,
+    Json::Value& items,
     std::string& trackFmt)
 {
     log_debug("start");
@@ -224,10 +219,10 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doSearch(
         log_warning(e.what());
         throw UpnpException(UPNP_E_BAD_REQUEST, UpnpXMLBuilder::encodeEscapes(e.what()));
     }
-    items.append_attribute("virtual") = container->isVirtual();
-    items.append_attribute("start") = start;
-    items.append_attribute("result_size") = result.size();
-    items.append_attribute("total_matches") = searchParam.getTotalMatches();
+    items["virtual"] = container->isVirtual();
+    items["start"] = start;
+    items["result_size"] = Json::Value(static_cast<Json::UInt64>(result.size()));
+    items["total_matches"] = searchParam.getTotalMatches();
 
     if (searchParam.getTotalMatches() >= 100)
         trackFmt = "{:03}";

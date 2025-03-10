@@ -62,13 +62,13 @@ protected:
     std::chrono::seconds timeout = std::chrono::seconds::zero();
     bool accountsEnabled { false };
 
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
     /// \brief get server configuration parts for UI
-    bool getConfig(pugi::xml_node& element);
+    bool getConfig(Json::Value& element);
     /// \brief get current session id
-    bool getSid(pugi::xml_node& element);
+    bool getSid(Json::Value& element);
     /// \brief get token for login
-    bool getToken(pugi::xml_node& element);
+    bool getToken(Json::Value& element);
     /// \brief handle login action
     bool login();
     /// \brief handle logout action
@@ -93,7 +93,7 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
 };
 
 /// \brief Call from WebUi to create directory tree in filesystem view
@@ -113,9 +113,9 @@ protected:
     /// \brief get all files in path
     std::map<std::string, DirInfo> listFiles(const fs::path& path);
     /// \brief generate xml output for files
-    void outputFiles(pugi::xml_node& containers, const std::map<std::string, DirInfo>& filesMap);
+    void outputFiles(Json::Value& containers, const std::map<std::string, DirInfo>& filesMap);
 
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
 
     std::shared_ptr<ConverterManager> converterManager;
 };
@@ -133,7 +133,7 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
 
     std::shared_ptr<ConverterManager> converterManager;
 };
@@ -147,20 +147,20 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
     /// \brief run browse according to page request parameters
     std::vector<std::shared_ptr<CdsObject>> doBrowse(
         const std::shared_ptr<CdsObject>& container,
         int start,
         int count,
-        pugi::xml_node& items,
+        Json::Value& items,
         std::string& trackFmt);
     /// \brief run search according to page request parameters
     std::vector<std::shared_ptr<CdsObject>> doSearch(
         const std::shared_ptr<CdsObject>& container,
         int start,
         int count,
-        pugi::xml_node& items,
+        Json::Value& items,
         std::string& trackFmt);
 };
 
@@ -173,7 +173,7 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
 };
 
 /// \brief Call from WebUi to Remove item in database view
@@ -185,7 +185,7 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
 };
 
 /// \brief Call from WebUi to Edit Item in database view
@@ -197,34 +197,34 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
     /// \brief write object core info
-    pugi::xml_node writeCoreInfo(
+    void writeCoreInfo(
         const std::shared_ptr<CdsObject>& obj,
-        pugi::xml_node& element,
+        Json::Value& item,
         int objectID);
     /// \brief write cdsitem info
     void writeItemInfo(
         const std::shared_ptr<CdsItem>& objItem,
         int objectID,
-        pugi::xml_node& item,
-        pugi::xml_node& metaData);
+        Json::Value& item,
+        Json::Value& metaData);
     /// \brief write cdscontainer info
     void writeContainerInfo(
         const std::shared_ptr<CdsObject>& obj,
-        pugi::xml_node& item);
+        Json::Value& item);
     /// \brief write resource info
     void writeResourceInfo(
         const std::shared_ptr<CdsObject>& obj,
-        pugi::xml_node& item);
+        Json::Value& item);
     /// \brief write metadata
-    pugi::xml_node writeMetadata(
+    void writeMetadata(
         const std::shared_ptr<CdsObject>& obj,
-        pugi::xml_node& item);
+        Json::Value& metadataArray);
     /// \brief write auxdata
     void writeAuxData(
         const std::shared_ptr<CdsObject>& obj,
-        pugi::xml_node& item);
+        Json::Value& auxdataArray);
 };
 
 /// \brief Call from WebUi to Save Item properties in database view
@@ -236,7 +236,7 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
 };
 
 /// \brief Call from WebUi to Add Object in database view
@@ -248,7 +248,7 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
     /// \brief handle page request to add a container
     void addContainer(
         int parentID,
@@ -280,19 +280,19 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
     /// \brief Convert autoscan dir to xml for web response
     static void autoscan2XML(
         const std::shared_ptr<AutoscanDirectory>& adir,
-        pugi::xml_node& element);
+        Json::Value& element);
     /// \brief get details for autoscan editor
     void editLoad(
         bool fromFs,
-        pugi::xml_node& element,
+        Json::Value& element,
         const std::string& objID,
         const fs::path& path);
     /// \brief list all autoscan directories
-    void list(pugi::xml_node& element);
+    void list(Json::Value& element);
     /// \brief Save new or changed autoscan
     void editSave(bool fromFs, const fs::path& path);
     /// \brief Run full scan immediately
@@ -308,7 +308,7 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 public:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
 };
 
 /// \brief task list and task cancel
@@ -320,7 +320,7 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
 };
 
 /// \brief UI action button
@@ -332,7 +332,7 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
 };
 
 /// \brief Browse clients list
@@ -344,58 +344,74 @@ public:
     std::string_view getPage() const override { return PAGE; }
 
 protected:
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
 };
 
 /// \brief Call from WebUi to load configuration
 class ConfigLoad : public PageRequest {
 protected:
     std::vector<ConfigValue> dbEntries;
-    std::map<std::string, std::string> allItems;
+    std::map<std::string, Json::ArrayIndex> allItems;
     std::shared_ptr<ConfigDefinition> definition;
 
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
     /// \brief create config value entry
     void createItem(
-        pugi::xml_node& item,
+        Json::Value& item,
+        const std::string& name,
+        ConfigVal id,
+        ConfigVal aid,
+        const std::shared_ptr<ConfigSetup>& cs = nullptr);
+    /// \brief add value to display in UI
+    template <typename T>
+    void addValue(
+        Json::Value& parent,
+        const std::string& name,
+        ConfigVal id,
+        ConfigVal aid,
+        const T& value,
+        const std::shared_ptr<ConfigSetup>& cs = nullptr);
+    /// \brief add value to allow creation of entry in blank config
+    void addNewValue(
+        Json::Value& parent,
         const std::string& name,
         ConfigVal id,
         ConfigVal aid,
         const std::shared_ptr<ConfigSetup>& cs = nullptr);
 
     /// \brief write values with counters and statitics
-    void writeDatabaseStatus(pugi::xml_node& values);
+    void writeDatabaseStatus(Json::Value& values);
     /// \brief add shortcut configuration
-    void writeShortcuts(pugi::xml_node& values);
+    void writeShortcuts(Json::Value& values);
     /// \brief add boolean, integer and string properties
-    void writeSimpleProperties(pugi::xml_node& values);
+    void writeSimpleProperties(Json::Value& values);
     /// \brief add all dictionary configuration options
-    void writeDictionaries(pugi::xml_node& values);
+    void writeDictionaries(Json::Value& values);
     /// \brief add all vector configuration options
-    void writeVectors(pugi::xml_node& values);
+    void writeVectors(Json::Value& values);
     /// \brief add all array configuration options
-    void writeArrays(pugi::xml_node& values);
+    void writeArrays(Json::Value& values);
     /// \brief add client configuration
-    void writeClientConfig(pugi::xml_node& values);
+    void writeClientConfig(Json::Value& values);
     /// \brief add directory tweaks
-    void writeImportTweaks(pugi::xml_node& values);
+    void writeImportTweaks(Json::Value& values);
     /// \brief add dynamic folder configuration
-    void writeDynamicContent(pugi::xml_node& values);
+    void writeDynamicContent(Json::Value& values);
     /// \brief add box layout
-    void writeBoxLayout(pugi::xml_node& values);
+    void writeBoxLayout(Json::Value& values);
     /// \brief add transcoding
-    void writeTranscoding(pugi::xml_node& values);
+    void writeTranscoding(Json::Value& values);
     /// \brief add autoscan details
-    void writeAutoscan(pugi::xml_node& values);
+    void writeAutoscan(Json::Value& values);
     /// \brief overwrite values from xml with database values
-    void updateEntriesFromDatabase(pugi::xml_node& element, pugi::xml_node& values);
+    void updateEntriesFromDatabase(Json::Value& element, Json::Value& values);
 
     /// \brief write value depending on type
     template <typename T>
-    static void setValue(pugi::xml_node& item, const T& value);
+    static void setValue(Json::Value& item, const T& value);
 
     /// \brief create meta information on config value
-    static void addTypeMeta(pugi::xml_node& meta, const std::shared_ptr<ConfigSetup>& cs);
+    static void addTypeMeta(Json::Value& meta, const std::shared_ptr<ConfigSetup>& cs);
 
 public:
     explicit ConfigLoad(const std::shared_ptr<Content>& content,
@@ -413,7 +429,7 @@ protected:
     std::shared_ptr<Context> context;
     std::shared_ptr<ConfigDefinition> definition;
 
-    bool processPageAction(pugi::xml_node& element, const std::string& action) override;
+    bool processPageAction(Json::Value& element, const std::string& action) override;
 
 public:
     explicit ConfigSave(std::shared_ptr<Context> context,

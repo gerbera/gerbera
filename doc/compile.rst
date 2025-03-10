@@ -42,6 +42,8 @@ Required Packages
 +------------+------------------------------+---------------------+--------------------+
 | pugixml_   | XML file and data support    |                     | install-pugixml.sh |
 +------------+------------------------------+---------------------+--------------------+
+| jsoncpp_   | JSON data support            |                     | install-jsoncpp.sh |
++------------+------------------------------+---------------------+--------------------+
 | libiconv   | Charset conversion           |                     |                    |
 +------------+------------------------------+---------------------+--------------------+
 | sqlite3    | Database storage             |                     |                    |
@@ -96,6 +98,7 @@ Optional Packages
 .. _ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
 .. _fmtlib: https://github.com/fmtlib/fmt
 .. _googletest: https://github.com/google/googletest
+.. _jsoncpp: https://github.com/open-source-parsers/jsoncpp
 .. _lastfmlib: https://github.com/dirkvdb/lastfmlib
 .. _libebml: https://github.com/Matroska-Org/libebml
 .. _libexif: https://github.com/libexif/libexif

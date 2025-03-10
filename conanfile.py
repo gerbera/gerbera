@@ -48,9 +48,10 @@ class GerberaConan(ConanFile):
     scm = {"type": "git", "url": "auto", "revision": "auto"}
 
     requires = [
-        "fmt/10.2.1", # spdlog/1.14.1 set this version
-        "spdlog/1.14.1",
+        "fmt/11.1.3", # spdlog/1.15.1 set this version
+        "spdlog/1.15.1",
         "pugixml/1.14",
+        "jsoncpp/[>=1.9.6]",
         "libiconv/[>=1.16]",
         "sqlite3/[>=3.35.5]",
         "zlib/1.3.1",

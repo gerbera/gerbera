@@ -37,22 +37,23 @@
 #include "content/content.h"
 #include "exceptions.h"
 #include "util/generic_task.h"
-#include "util/xml_to_json.h"
 
 const std::string_view Web::Tasks::PAGE = "tasks";
 
-bool Web::Tasks::processPageAction(pugi::xml_node& element, const std::string& action)
+bool Web::Tasks::processPageAction(Json::Value& element, const std::string& action)
 {
     if (action.empty())
         throw_std_runtime_error("called with illegal action");
 
     if (action == "list") {
-        auto tasksEl = element.append_child("tasks");
-        xml2Json->setArrayName(tasksEl, "tasks");
+        Json::Value taskArr(Json::arrayValue);
         auto taskList = content->getTasklist();
         for (auto&& task : taskList) {
-            appendTask(task, tasksEl);
+            Json::Value taskEl;
+            appendTask(task, taskEl);
+            taskArr.append(taskEl);
         }
+        element["tasks"] = taskArr;
     } else if (action == "cancel") {
         int taskID = intParam("task_id");
         content->invalidateTask(taskID, TaskOwner::ContentManagerTask);

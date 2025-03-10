@@ -40,7 +40,6 @@
 #include "content/content.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
-#include "util/xml_to_json.h"
 
 #include <algorithm>
 #include <array>
@@ -57,23 +56,24 @@ Web::Directories::Directories(const std::shared_ptr<Content>& content,
 {
 }
 
-bool Web::Directories::processPageAction(pugi::xml_node& element, const std::string& action)
+bool Web::Directories::processPageAction(Json::Value& element, const std::string& action)
 {
     static auto RootId = fmt::format("{}", CDS_ID_ROOT);
-
     std::string parentID = param("parent_id");
     auto path = fs::path(parentID.empty() || parentID == RootId ? FS_ROOT_DIRECTORY : hexDecodeString(parentID));
 
-    auto containers = element.append_child("containers");
-    xml2Json->setArrayName(containers, "container");
-    xml2Json->setFieldType("title", FieldType::STRING);
-    containers.append_attribute("parent_id") = parentID.c_str();
+    Json::Value containers;
+    Json::Value containerArray(Json::arrayValue);
+    containers["parent_id"] = parentID;
+    containers["type"] = "filesystem";
     if (!param("select_it").empty())
-        containers.append_attribute("select_it") = param("select_it").c_str();
-    containers.append_attribute("type") = "filesystem";
+        containers["select_it"] = param("select_it");
 
     auto filesMap = listFiles(path);
-    outputFiles(containers, filesMap);
+    outputFiles(containerArray, filesMap);
+
+    containers["container"] = containerArray;
+    element["containers"] = containers;
 
     return true;
 }
@@ -124,7 +124,7 @@ std::map<std::string, Web::Directories::DirInfo> Web::Directories::listFiles(con
 }
 
 void Web::Directories::outputFiles(
-    pugi::xml_node& containers,
+    Json::Value& containerArray,
     const std::map<std::string, Web::Directories::DirInfo>& filesMap)
 {
     auto autoscanDirs = content->getAutoscanDirectories();
@@ -134,20 +134,20 @@ void Web::Directories::outputFiles(
     for (auto&& [key, val] : filesMap) {
         auto file = val.first;
         auto&& has = val.second;
-        auto ce = containers.append_child("container");
-        ce.append_attribute("id") = key.c_str();
-        ce.append_attribute("child_count") = has;
+        Json::Value ce;
+        ce["id"] = key;
+        ce["child_count"] = has;
         auto tweak = std::find_if(allTweaks.begin(), allTweaks.end(), [&](auto& d) { return file == d->getLocation(); });
         auto aDir = std::find_if(autoscanDirs.begin(), autoscanDirs.end(), [&](auto& a) { return file == a->getLocation(); });
-        ce.append_attribute("tweak") = tweak != allTweaks.end() ? "true" : "false";
+        ce["tweak"] = tweak != allTweaks.end();
         if (aDir != autoscanDirs.end()) {
-            ce.append_attribute("autoscan_type") = (*aDir)->persistent() ? "persistent" : "ui";
-            ce.append_attribute("autoscan_mode") = AutoscanDirectory::mapScanmode((*aDir)->getScanMode());
+            ce["autoscan_type"] = (*aDir)->persistent() ? "persistent" : "ui";
+            ce["autoscan_mode"] = AutoscanDirectory::mapScanmode((*aDir)->getScanMode());
         } else {
             aDir = std::find_if(autoscanDirs.begin(), autoscanDirs.end(), [&](auto& a) { return a->getRecursive() && isSubDir(file, a->getLocation()); });
             if (aDir != autoscanDirs.end()) {
-                ce.append_attribute("autoscan_type") = "parent";
-                ce.append_attribute("autoscan_mode") = AutoscanDirectory::mapScanmode((*aDir)->getScanMode());
+                ce["autoscan_type"] = "parent";
+                ce["autoscan_mode"] = AutoscanDirectory::mapScanmode((*aDir)->getScanMode());
             }
         }
         {
@@ -155,15 +155,16 @@ void Web::Directories::outputFiles(
             if (!err.empty()) {
                 log_warning("{}: {}", file.filename().string(), err);
             }
-            ce.append_attribute("title") = mval.c_str();
+            ce["title"] = mval;
         }
         {
             auto [mval, err] = f2i->convert(file);
             if (!err.empty()) {
                 log_warning("{}: {}", file.string(), err);
             }
-            ce.append_attribute("location") = mval.c_str();
+            ce["location"] = mval;
         }
-        ce.append_attribute("upnp_class") = "folder";
+        ce["upnp_class"] = "folder";
+        containerArray.append(ce);
     }
 }
