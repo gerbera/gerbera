@@ -9,6 +9,7 @@
 ### Code Improvements
 
 - Use JsonCpp to generate responses in web request handlers
+- Update versions of npupnp (6.2.1)
 
 ## v2.5.0
 

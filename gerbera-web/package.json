@@ -1,6 +1,6 @@
 {
   "name": "gerbera-web",
-  "version": "2.3.1",
+  "version": "2.5.1",
   "repository": "https://github.com/gerbera/gerbera",
   "license": "GPLv2",
   "scripts": {
@@ -22,24 +22,24 @@
     }
   },
   "devDependencies": {
-    "@babel/core": "^7.26.0",
+    "@babel/core": "^7.26.10",
     "@babel/polyfill": "^7.12.1",
-    "@babel/preset-env": "^7.26.0",
+    "@babel/preset-env": "^7.26.9",
     "@babel/register": "^7.25.9",
     "@popperjs/core": "^2.11.8",
     "babel-loader": "^9.2.1",
     "bootstrap": "^4.6.2",
     "braces": "^3.0.3",
     "chai": "^4.5.0",
-    "chromedriver": "133.0",
+    "chromedriver": "134.0",
     "concurrently": "^8.2.2",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.31.0",
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.6.0",
-    "express": "^4.21.1",
-    "jasmine-core": "^5.4.0",
+    "express": "^4.21.2",
+    "jasmine-core": "^5.6.0",
     "jimp": "^0.22.12",
     "jquery": "^3.7.1",
     "jquery-ui": "^1.14.1",
@@ -59,8 +59,8 @@
     "mkdirp": "^0.5.6",
     "mocha": "^10.8.2",
     "rimraf": "^6.0.1",
-    "selenium-webdriver": "^4.26.0",
-    "webpack": "^5.96.1",
+    "selenium-webdriver": "^4.29.0",
+    "webpack": "^5.98.0",
     "yargs": "^17.7.2"
   }
 }

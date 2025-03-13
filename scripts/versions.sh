@@ -67,7 +67,7 @@ else
     GOOGLETEST="1.16.0"
     LASTFM="0.4.0"
     MATROSKA="1.7.1"
-    NPUPNP="6.2.0"
+    NPUPNP="6.2.1"
     PUGIXML="1.15"
     PUPNP="1.14.20"
     SPDLOG="1.15.1"
