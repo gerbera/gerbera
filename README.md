@@ -53,7 +53,7 @@ sudo make install
 | Library             | Min Version | Recommended | Latest tested        | Required?     | Note                       | Default  |
 |---------------------|-------------|-------------|----------------------|---------------|----------------------------|----------|
 | libupnp             | 1.14.6      | 1.14.20     | 1.14.20              | XOR libnpupnp | [pupnp]                    |          |
-| libnpupnp           | 4.2.1       | 5.1.2       | 6.2.0                | XOR libupnp   | [npupnp]                   | Disabled |
+| libnpupnp           | 4.2.1       | 5.1.2       | 6.2.1                | XOR libupnp   | [npupnp]                   | Disabled |
 | libuuid             |             |             |                      | Depends on OS | Not required on \*BSD      |          |
 | [pugixml]           |             | 1.10        | 1.15                 | Required      | XML file and data support  |          |
 | [jsoncpp]           | 1.7.4       | 1.9.6       | 1.9.6                | Required      | JSON data support          |          |

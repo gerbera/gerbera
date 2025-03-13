@@ -2,6 +2,8 @@
 
 ### HEAD
 
+- Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
+- Update NPUPnP
 - Use JsonCpp for web JSON output
 
 ### v2.5.0
