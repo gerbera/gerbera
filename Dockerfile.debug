@@ -34,79 +34,79 @@ RUN apk add --no-cache  \
 
 # Build googletest
 WORKDIR /gtest_build
-COPY scripts/install-googletest.sh scripts/versions.sh ./
+COPY scripts/install-googletest.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-googletest.sh
 
 # Build fmt
 WORKDIR /fmt_build
-COPY scripts/install-fmt.sh scripts/versions.sh ./
+COPY scripts/install-fmt.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-fmt.sh
 
 # Build spdlog
 WORKDIR /spdlog_build
-COPY scripts/install-spdlog.sh scripts/versions.sh ./
+COPY scripts/install-spdlog.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-spdlog.sh
 
 # Build pugixml
 WORKDIR /pugixml_build
-COPY scripts/install-pugixml.sh scripts/versions.sh ./
+COPY scripts/install-pugixml.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-pugixml.sh
 
 # Build taglib
 WORKDIR /taglib_build
-COPY scripts/install-taglib.sh scripts/versions.sh ./
+COPY scripts/install-taglib.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-taglib.sh
 
 # Build wavpack
 WORKDIR /wavpack_build
-COPY scripts/install-wavpack.sh scripts/versions.sh ./
+COPY scripts/install-wavpack.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-wavpack.sh
 
 # Build ebml
 WORKDIR /ebml_build
-COPY scripts/install-ebml.sh scripts/versions.sh ./
+COPY scripts/install-ebml.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-ebml.sh
 
 # Build matroska
 WORKDIR /mastroska_build
-COPY scripts/install-matroska.sh scripts/versions.sh ./
+COPY scripts/install-matroska.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-matroska.sh
 
 # Build duktape
 WORKDIR /duktape_build
-COPY scripts/install-duktape.sh scripts/versions.sh ./
+COPY scripts/install-duktape.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-duktape.sh
 
 # Build ffmpegthumbnailer
 WORKDIR /ffmpegthumbnailer_build
-COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh ./
+COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-ffmpegthumbnailer.sh
 
 # Build libupnp
 WORKDIR /libupnp_build
-COPY scripts/install-pupnp.sh scripts/versions.sh ./
+COPY scripts/install-pupnp.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-pupnp.sh
 
 # Build libexiv2
 WORKDIR /libexiv2_build
-COPY scripts/install-libexiv2.sh scripts/versions.sh ./
+COPY scripts/install-libexiv2.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-libexiv2.sh
 
 # Build libexif
 WORKDIR /libexif_build
-COPY scripts/install-libexif.sh scripts/versions.sh ./
+COPY scripts/install-libexif.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-libexif.sh
 

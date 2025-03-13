@@ -22,6 +22,7 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${MATROSKA-1.6.3}"
@@ -29,6 +30,7 @@ VERSION="${MATROSKA-1.6.3}"
 script_dir=`pwd -P`
 src_dir="${script_dir}/libmatroska-${VERSION}"
 tgz_file="${script_dir}/libmatroska-${VERSION}.tar.gz"
+source_files+=("https://github.com/Matroska-Org/libmatroska/archive/refs/tags/release-${VERSION}.tar.gz")
 
 BUILD_SHARED=YES
 
@@ -38,7 +40,7 @@ if [ $# -gt 0 ]; then
     fi
 fi
 
-downloadSource https://github.com/Matroska-Org/libmatroska/archive/refs/tags/release-${VERSION}.tar.gz
+downloadSource
 
 cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED}
 

@@ -22,6 +22,7 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${NPUPNP-6.1.0}"
@@ -29,8 +30,9 @@ VERSION="${NPUPNP-6.1.0}"
 script_dir=`pwd -P`
 src_dir="${script_dir}/npupnp-${VERSION}"
 tgz_file="${script_dir}/npupnp-${VERSION}.tgz"
+source_files+=("https://framagit.org/medoc92/npupnp/-/archive/libnpupnp-v${VERSION}/npupnp-libnpupnp-v${VERSION}.tar.gz")
 
-downloadSource https://framagit.org/medoc92/npupnp/-/archive/libnpupnp-v${VERSION}/npupnp-libnpupnp-v${VERSION}.tar.gz
+downloadSource
 
 MODE="6"
 if [[ -f ./autogen.sh ]]; then

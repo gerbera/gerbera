@@ -22,6 +22,7 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${WAVPACK-5.4.0}"
@@ -29,6 +30,7 @@ VERSION="${WAVPACK-5.4.0}"
 script_dir=`pwd -P`
 src_dir="${script_dir}/wavpack-${VERSION}"
 tgz_file="${script_dir}/wavpack-${VERSION}.tar.xz"
+source_files+=("https://github.com/dbry/WavPack/releases/download/${VERSION}/wavpack-${VERSION}.tar.xz")
 
 BUILD_SHARED=YES
 
@@ -38,10 +40,13 @@ if [ $# -gt 0 ]; then
     fi
 fi
 
-downloadSource https://github.com/dbry/WavPack/releases/download/${VERSION}/wavpack-${VERSION}.tar.xz
-#    https://github.com/dbry/WavPack/releases/download/${VERSION}/wavpack-${VERSION}.tar.xz
+downloadSource
 
 cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED}
+
+if [[ -f ../autogen.sh ]]; then
+    ../autogen.sh
+fi
 
 ../configure \
     --disable-asm \

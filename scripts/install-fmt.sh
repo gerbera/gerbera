@@ -22,6 +22,7 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${FMT-8.0.1}"
@@ -29,6 +30,7 @@ VERSION="${FMT-8.0.1}"
 script_dir=`pwd -P`
 src_dir="${script_dir}/fmt-${VERSION}"
 tgz_file="${script_dir}/fmt-${VERSION}.tgz"
+source_files+=("https://github.com/fmtlib/fmt/archive/refs/tags/${VERSION}.tar.gz")
 
 BUILD_SHARED=YES
 if [ $# -gt 0 ]; then
@@ -37,7 +39,7 @@ if [ $# -gt 0 ]; then
     fi
 fi
 
-downloadSource https://github.com/fmtlib/fmt/archive/refs/tags/${VERSION}.tar.gz
+downloadSource
 
 cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED} -DFMT_TEST=NO
 

@@ -22,16 +22,25 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
-COMMIT="${FFMPEGTHUMBNAILER_commit-0}"
 VERSION="${FFMPEGTHUMBNAILER-2.2.2}"
+COMMIT="${FFMPEGTHUMBNAILER_commit:-}"
 
 script_dir=`pwd -P`
+src_file="https://github.com/dirkvdb/ffmpegthumbnailer/archive/refs/tags/${VERSION}.tar.gz"
+
+if [ -n "${COMMIT}" ]; then
+    source_files+=("https://github.com/dirkvdb/ffmpegthumbnailer/archive/${COMMIT}.tar.gz")
+    VERSION+="-"
+    VERSION+=`echo $COMMIT | cut -c 1-6`
+fi
 src_dir="${script_dir}/ffmpegthumbnailer-${VERSION}"
 tgz_file="${script_dir}/ffmpegthumbnailer-${VERSION}.tgz"
+source_files+=("${src_file}")
 
-downloadSource https://github.com/dirkvdb/ffmpegthumbnailer/archive/${COMMIT}.tar.gz https://github.com/dirkvdb/ffmpegthumbnailer/archive/refs/tags/${VERSION}.tar.gz
+downloadSource
 
 installDeps ${main_dir} ffmpegthumbnailer
 

@@ -22,6 +22,7 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${GOOGLETEST-1.11.0}"
@@ -29,9 +30,11 @@ VERSION="${GOOGLETEST-1.11.0}"
 script_dir=`pwd -P`
 src_dir="${script_dir}/gtest-${VERSION}"
 tgz_file="${script_dir}/gtest-${VERSION}.tgz"
+source_files+=("https://github.com/google/googletest/archive/refs/tags/v${VERSION}.tar.gz")
+source_files+=("https://github.com/google/googletest/archive/refs/tags/release-${VERSION}.tar.gz")
 
 ## Download GoogleTest from GitHub
-downloadSource https://github.com/google/googletest/archive/refs/tags/release-${VERSION}.tar.gz https://github.com/google/googletest/archive/refs/tags/v${VERSION}.tar.gz
+downloadSource
 
 cmake -DCMAKE_CXX_FLAGS="${CMAKE_CXX_FLAGS:-} -std=c++17" -DBUILD_GMOCK=1 ..
 

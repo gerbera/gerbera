@@ -47,91 +47,91 @@ ENV CC=gcc-13
 
 # Build googletest
 WORKDIR /gtest_build
-COPY scripts/install-googletest.sh scripts/versions.sh ./
+COPY scripts/install-googletest.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-googletest.sh
 
 # Build fmt
 WORKDIR /fmt_build
-COPY scripts/install-fmt.sh scripts/versions.sh ./
+COPY scripts/install-fmt.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-fmt.sh
 
 # Build spdlog
 WORKDIR /spdlog_build
-COPY scripts/install-spdlog.sh scripts/versions.sh ./
+COPY scripts/install-spdlog.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-spdlog.sh
 
 # Build pugixml
 WORKDIR /pugixml_build
-COPY scripts/install-pugixml.sh scripts/versions.sh ./
+COPY scripts/install-pugixml.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-pugixml.sh
 
 # Build taglib
 WORKDIR /taglib_build
-COPY scripts/install-taglib.sh scripts/versions.sh ./
+COPY scripts/install-taglib.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-taglib.sh
 
 # Build wavpack
 WORKDIR /wavpack_build
-COPY scripts/install-wavpack.sh scripts/versions.sh ./
+COPY scripts/install-wavpack.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-wavpack.sh
 
 # Build ebml
 WORKDIR /ebml_build
-COPY scripts/install-ebml.sh scripts/versions.sh ./
+COPY scripts/install-ebml.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-ebml.sh
 
 # Build matroska
 WORKDIR /mastroska_build
-COPY scripts/install-matroska.sh scripts/versions.sh ./
+COPY scripts/install-matroska.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-matroska.sh
 
 # Build duktape
 WORKDIR /duktape_build
-COPY scripts/install-duktape.sh scripts/versions.sh ./
+COPY scripts/install-duktape.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-duktape.sh
 
 # Build ffmpegthumbnailer
 WORKDIR /ffmpegthumbnailer_build
-COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh ./
+COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-ffmpegthumbnailer.sh
 
 # Build libupnp
 WORKDIR /libupnp_build
-COPY scripts/install-pupnp.sh scripts/versions.sh ./
+COPY scripts/install-pupnp.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-pupnp.sh
 
 # Build libexiv2
 WORKDIR /libexiv2_build
-COPY scripts/install-libexiv2.sh scripts/versions.sh ./
+COPY scripts/install-libexiv2.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-libexiv2.sh
 
 # Build libexif
 WORKDIR /libexif_build
-COPY scripts/install-libexif.sh scripts/versions.sh ./
+COPY scripts/install-libexif.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-libexif.sh

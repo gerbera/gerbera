@@ -22,9 +22,11 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${SPDLOG-1.9.2}"
+COMMIT="${SPDLOG_commit:-}"
 
 BUILD_SHARED=YES
 
@@ -35,10 +37,18 @@ if [ $# -gt 0 ]; then
 fi
 
 script_dir=`pwd -P`
+src_file="https://github.com/gabime/spdlog/archive/v${VERSION}.tar.gz"
+
+if [ -n "${COMMIT}" ]; then
+    source_files+=("https://github.com/gabime/spdlog/archive/${COMMIT}.tar.gz")
+    VERSION+="-"
+    VERSION+=`echo $COMMIT | cut -c 1-6`
+fi
 src_dir="${script_dir}/spdlog-${VERSION}"
 tgz_file="${script_dir}/spdlog-${VERSION}.tgz"
+source_files+=("${src_file}")
 
-downloadSource https://github.com/gabime/spdlog/archive/v$VERSION.tar.gz
+downloadSource
 
 cmake .. -DSPDLOG_FMT_EXTERNAL=ON \
          -DBUILD_SHARED_LIBS=${BUILD_SHARED} \
