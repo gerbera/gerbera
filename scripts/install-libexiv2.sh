@@ -22,6 +22,7 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${EXIV2-v0.27.7}"
@@ -29,6 +30,7 @@ VERSION="${EXIV2-v0.27.7}"
 script_dir=`pwd -P`
 src_dir="${script_dir}/libexiv2-${VERSION}"
 tgz_file="${script_dir}/libexiv2-${VERSION}.tar.gz"
+source_files+=("https://github.com/Exiv2/exiv2/archive/refs/tags/${VERSION}.tar.gz")
 
 BUILD_SHARED=YES
 BUILD_XMP=YES
@@ -46,7 +48,7 @@ if [ $# -gt 0 ]; then
     fi
 fi
 
-downloadSource https://github.com/Exiv2/exiv2/archive/refs/tags/${VERSION}.tar.gz
+downloadSource
 
 installDeps ${main_dir} exiv2
 
@@ -62,4 +64,3 @@ makeInstall
 ldConfig
 
 exit 0
-

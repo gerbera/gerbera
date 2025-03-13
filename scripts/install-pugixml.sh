@@ -22,6 +22,7 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${PUGIXML-1.11.4}"
@@ -29,8 +30,9 @@ VERSION="${PUGIXML-1.11.4}"
 script_dir=`pwd -P`
 src_dir="${script_dir}/pugixml-${VERSION}"
 tgz_file="${script_dir}/pugixml-${VERSION}.tgz"
+source_files+=("https://github.com/zeux/pugixml/releases/download/v${VERSION}/pugixml-${VERSION}.tar.gz")
 
-downloadSource https://github.com/zeux/pugixml/releases/download/v${VERSION}/pugixml-${VERSION}.tar.gz
+downloadSource
 
 cmake .. -DPUGIXML_BUILD_TESTS=OFF
 

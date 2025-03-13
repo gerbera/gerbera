@@ -22,6 +22,7 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${EBML-1.4.2}"
@@ -29,6 +30,7 @@ VERSION="${EBML-1.4.2}"
 script_dir=`pwd -P`
 src_dir="${script_dir}/libebml-${VERSION}"
 tgz_file="${script_dir}/libebml-${VERSION}.tar.gz"
+source_files+=("https://github.com/Matroska-Org/libebml/archive/refs/tags/release-${VERSION}.tar.gz")
 
 BUILD_SHARED=YES
 
@@ -38,7 +40,7 @@ if [ $# -gt 0 ]; then
     fi
 fi
 
-downloadSource https://github.com/Matroska-Org/libebml/archive/refs/tags/release-${VERSION}.tar.gz
+downloadSource
 
 cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED}
 

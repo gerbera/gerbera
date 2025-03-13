@@ -22,6 +22,7 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${TAGLIB-1.12}"
@@ -30,8 +31,9 @@ script_dir=`pwd -P`
 src_dir="${script_dir}/taglib-${VERSION}"
 tgz_file="${script_dir}/taglib-${VERSION}.tgz"
 patch_file="${main_dir}/${lsb_distro}/taglib.patch"
+source_files+=("https://github.com/taglib/taglib/archive/v${VERSION}.tar.gz")
 
-downloadSource https://github.com/taglib/taglib/archive/v${VERSION}.tar.gz "-" "${patch_file}"
+downloadSource
 
 installDeps ${main_dir} taglib
 

@@ -22,22 +22,35 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${DUKTAPE-2.6.0}"
+COMMIT="${DUKTAPE_commit:-}"
 
 script_dir=`pwd -P`
+src_file="https://github.com/svaarala/duktape/releases/download/v${VERSION}/duktape-${VERSION}.tar.xz"
+
+if [ -n "${COMMIT}" ]; then
+    source_files+=("https://github.com/svaarala/duktape/archive/${COMMIT}.tar.xz")
+    VERSION+="-"
+    VERSION+=`echo $COMMIT | cut -c 1-6`
+fi
+
 src_dir="${script_dir}/duktape-${VERSION}"
 tgz_file="${script_dir}/duktape-${VERSION}.tar.xz"
+source_files+=("${src_file}")
 
-downloadSource https://github.com/svaarala/duktape/releases/download/v${VERSION}/duktape-${VERSION}.tar.xz
+downloadSource
 
 cd "${src_dir}"
+
+MAKEFILE="Makefile.sharedlibrary"
 
 if [ "${UNAME}" = 'Darwin' ]; then
     # Patch Makefile to install on macOS
     # macOS does not support -soname, replace with -install_name
-    sed -i -e 's/-soname/-install_name/g' Makefile.sharedlibrary
+    sed -i -e 's/-soname/-install_name/g' ${MAKEFILE}
 fi
 
 makeCMD="make"
@@ -48,7 +61,7 @@ if command -v nproc >/dev/null 2>&1; then
     makeCMD="${makeCMD} -j$(nproc)"
 fi
 
-$makeCMD -f Makefile.sharedlibrary && $makeCMD -f Makefile.sharedlibrary install || exit 1
+$makeCMD -f ${MAKEFILE} && $makeCMD -f ${MAKEFILE} install || exit 1
 
 ldConfig
 

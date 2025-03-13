@@ -22,16 +22,26 @@ set -Eeuo pipefail
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
+. ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
 VERSION="${EXIF-v0.6.24}"
-COMMIT="${EXIF_commit-0}"
+COMMIT="${EXIF_commit:-}"
 
 script_dir=`pwd -P`
+src_file="https://github.com/libexif/libexif/archive/refs/tags/${VERSION}.tar.gz"
+
+if [[ -n "$COMMIT" ]]; then
+    source_files+=("https://github.com/libexif/libexif/archive/${COMMIT}.tar.gz")
+    VERSION+="-"
+    VERSION+=`echo $COMMIT | cut -c 1-6`
+fi
+
 src_dir="${script_dir}/libexif-${VERSION}"
 tgz_file="${script_dir}/libexif-${VERSION}.tar.gz"
+source_files+=("${src_file}")
 
-downloadSource https://github.com/libexif/libexif/archive/${COMMIT}.tar.gz https://github.com/libexif/libexif/archive/refs/tags/${VERSION}.tar.gz
+downloadSource
 
 installDeps ${main_dir} libexif
 
@@ -46,4 +56,3 @@ makeInstall
 ldConfig
 
 exit 0
-
