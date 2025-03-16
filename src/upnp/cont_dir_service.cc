@@ -95,9 +95,9 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     // prepare browse parameters
     std::string objID = reqRoot.child("ObjectID").text().as_string();
     std::string browseFlag = reqRoot.child("BrowseFlag").text().as_string();
-    std::string startingIndex = reqRoot.child("StartingIndex").text().as_string();
+    int startingIndex = stoiString(reqRoot.child("StartingIndex").text().as_string());
     std::string filter = reqRoot.child("Filter").text().as_string();
-    std::string requestedCount = reqRoot.child("RequestedCount").text().as_string();
+    int requestedCount = stoiString(reqRoot.child("RequestedCount").text().as_string());
     std::string sortCriteria = reqRoot.child("SortCriteria").text().as_string();
 
     log_debug("Browse received parameters: ObjectID [{}] BrowseFlag [{}] StartingIndex [{}] Filter [{}] RequestedCount [{}] SortCriteria [{}]",
@@ -107,16 +107,17 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
 
     auto&& quirks = request.getQuirks();
-    auto arr = quirks->getSamsungFeatureRoot(database, objID);
     int objectID = stoiString(objID);
+    auto arr = quirks && objectID == 0 && objID != "0"
+        ? quirks->getSamsungFeatureRoot(database, startingIndex, requestedCount, objID)
+        : std::vector<std::shared_ptr<CdsObject>>();
 
     unsigned int flag = BROWSE_ITEMS | BROWSE_CONTAINERS | BROWSE_EXACT_CHILDCOUNT;
 
     if (browseFlag == "BrowseDirectChildren")
         flag |= BROWSE_DIRECT_CHILDREN;
     else if (browseFlag != "BrowseMetadata")
-        throw UpnpException(UPNP_SOAP_E_INVALID_ARGS,
-            "Invalid browse flag: " + browseFlag);
+        throw UpnpException(UPNP_SOAP_E_INVALID_ARGS, "Invalid browse flag: " + browseFlag);
 
     auto parent = database->loadObject(quirks->getGroup(), objectID);
     auto upnpClass = parent->getClass();
@@ -130,8 +131,8 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     auto param = BrowseParam(parent, flag);
 
     param.setDynamicContainers(!quirks || !quirks->checkFlags(QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC));
-    param.setStartingIndex(stoiString(startingIndex));
-    param.setRequestedCount(stoiString(requestedCount));
+    param.setStartingIndex(startingIndex);
+    param.setRequestedCount(requestedCount);
     param.setSortCriteria(trimString(sortCriteria));
     param.setGroup(quirks->getGroup());
     if (quirks)
@@ -208,9 +209,9 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     // prepare search parameters
     std::string containerID = reqRoot.child("ContainerID").text().as_string();
     std::string searchCriteria = reqRoot.child("SearchCriteria").text().as_string();
-    std::string startingIndex = reqRoot.child("StartingIndex").text().as_string();
+    int startingIndex = stoiString(reqRoot.child("StartingIndex").text().as_string());
     std::string filter = reqRoot.child("Filter").text().as_string();
-    std::string requestedCount = reqRoot.child("RequestedCount").text().as_string();
+    int requestedCount = stoiString(reqRoot.child("RequestedCount").text().as_string());
     std::string sortCriteria = reqRoot.child("SortCriteria").text().as_string();
 
     log_debug("Search received parameters: ContainerID [{}] SearchCriteria [{}] SortCriteria [{}] StartingIndex [{}] Filter [{}] RequestedCount [{}]",
@@ -236,7 +237,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     if (filter.empty())
         filter = "*";
     auto searchParam = SearchParam(containerID, searchCriteria, sortCriteria,
-        stoiString(startingIndex), stoiString(requestedCount), searchableContainers, quirks->getGroup());
+        startingIndex, requestedCount, searchableContainers, quirks->getGroup());
     if (quirks)
         searchParam.setForbiddenDirectories(quirks->getForbiddenDirectories());
 

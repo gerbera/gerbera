@@ -930,11 +930,15 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string&
     return {};
 }
 
-std::vector<std::shared_ptr<CdsObject>> SQLDatabase::findObjectByContentClass(const std::string& contentClass, const std::string& group)
+std::vector<std::shared_ptr<CdsObject>> SQLDatabase::findObjectByContentClass(
+    const std::string& contentClass,
+    int startIndex,
+    int count,
+    const std::string& group)
 {
     auto srcParam = SearchParam(fmt::to_string(CDS_ID_ROOT),
-        fmt::format("{}=\"{}\"", MetaEnumMapper::getMetaFieldName(MetadataFields::M_CONTENT_CLASS), contentClass),
-        "", 0, 1, false, group);
+        fmt::format("{} derivedfrom \"{}\"", MetaEnumMapper::getMetaFieldName(MetadataFields::M_CONTENT_CLASS), contentClass),
+        "", startIndex, count, false, group, true, true);
     log_debug("Running content class search for '{}'", contentClass);
     auto result = this->search(srcParam);
     log_debug("Content class search {} returned {}", contentClass, srcParam.getTotalMatches());

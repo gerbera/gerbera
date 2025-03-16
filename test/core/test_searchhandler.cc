@@ -205,6 +205,16 @@ TEST(SearchLexer, MultipleTokens)
     };
     EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
+    input = R"(upnp:contentClass derivedfrom "object.item.audioItem")";
+    expectedTokens = {
+        { "upnp:contentClass", TokenType::PROPERTY },
+        { "derivedfrom", TokenType::STRINGOP },
+        { "\"", TokenType::DQUOTE },
+        { "object.item.audioItem", TokenType::ESCAPEDSTRING },
+        { "\"", TokenType::DQUOTE },
+    };
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
+
     input = R"(upnp:class derivedfrom "object.item.audioItem" and upnp:artist="King Krule")";
     expectedTokens = {
         { "upnp:class", TokenType::PROPERTY },
