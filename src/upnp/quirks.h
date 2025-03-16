@@ -115,7 +115,17 @@ public:
      *
      */
     void getSamsungFeatureList(ActionRequest& request) const;
-    std::vector<std::shared_ptr<CdsObject>> getSamsungFeatureRoot(const std::shared_ptr<Database>& database, const std::string& objId) const;
+    /// \brief find container matching the objId
+    /// \param database to search in
+    /// \param startIndex of search results
+    /// \param count number of search results
+    /// \param objId to search root container for
+    /// \return list of CdsObject matching the content class
+    std::vector<std::shared_ptr<CdsObject>> getSamsungFeatureRoot(
+        const std::shared_ptr<Database>& database,
+        int startIndex,
+        int count,
+        const std::string& objId) const;
 
     /** \brief get Samsung ObjectID from Index
      *

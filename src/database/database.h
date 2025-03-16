@@ -118,9 +118,16 @@ public:
 
     /// \brief find container matching the content class
     /// \param contentClass to search for
+    /// \param startIndex of search results
+    /// \param count number of search results
     /// \param group user group name
     /// \return list of CdsObject matching the content class
-    virtual std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass, const std::string& group) = 0;
+    virtual std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(
+        const std::string& contentClass,
+        int startIndex,
+        int count,
+        const std::string& group)
+        = 0;
 
     virtual std::vector<std::string> getMimeTypes() = 0;
     virtual std::map<std::string, std::shared_ptr<CdsContainer>> getShortcuts() = 0;
@@ -131,7 +138,11 @@ public:
     /// \param group user group name
     /// \param fileType type of the database entry to search
     /// \return the CdsObject
-    virtual std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, const std::string& group, DbFileType fileType = DbFileType::Auto) = 0;
+    virtual std::shared_ptr<CdsObject> findObjectByPath(
+        const fs::path& path,
+        const std::string& group,
+        DbFileType fileType = DbFileType::Auto)
+        = 0;
 
     /// \brief checks for a given (pc directory) object, identified by the given path
     /// from the database

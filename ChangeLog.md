@@ -3,6 +3,8 @@
 ### HEAD
 
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
+- Reorganise installation scripts
+- Tweak for old Samsung TV
 - Update NPUPnP
 - Use JsonCpp for web JSON output
 

@@ -115,7 +115,9 @@ void Quirks::getSamsungFeatureList(ActionRequest& request) const
         std::pair(UPNP_CLASS_VIDEO_ITEM, "V"),
         std::pair(UPNP_CLASS_IMAGE_ITEM, "I"),
         std::pair(UPNP_CLASS_PLAYLIST_ITEM, "P"),
-        // std::pair("object.item.textItem", "T"),
+#ifdef GRB_DLNA_SAMSUNG_TEXT
+        std::pair(UPNP_CLASS_TEXT_ITEM, "T"),
+#endif
     };
 
     for (auto&& [type, id] : containers) {
@@ -208,25 +210,40 @@ void Quirks::getShortCutList(const std::shared_ptr<Database>& database,
     }
 }
 
-std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(const std::shared_ptr<Database>& database, const std::string& objId) const
+std::vector<std::shared_ptr<CdsObject>> Quirks::getSamsungFeatureRoot(
+    const std::shared_ptr<Database>& database,
+    int startIndex,
+    int count,
+    const std::string& objId) const
 {
     if (!hasFlag(QUIRK_FLAG_SAMSUNG_FEATURES)) {
         log_debug("getSamsungFeatureRoot called, but it is not enabled for this client");
         return {};
     }
-    log_debug("getSamsungFeatureRoot objId [{}]", objId);
 
     static const auto containers = std::map<std::string, std::string> {
         { "A", UPNP_CLASS_AUDIO_ITEM },
+        { "A_D", UPNP_CLASS_AUDIO_ITEM },
+        { "A_T", UPNP_CLASS_AUDIO_ITEM }, // seen with "Linux/9.0 UPnP/1.0 PROTOTYPE/1.0"
         { "V", UPNP_CLASS_VIDEO_ITEM },
+        { "V_D", UPNP_CLASS_VIDEO_ITEM }, // seen with "Linux/9.0 UPnP/1.0 PROTOTYPE/1.0"
+        { "V_T", UPNP_CLASS_VIDEO_ITEM },
         { "I", UPNP_CLASS_IMAGE_ITEM },
+        { "I_D", UPNP_CLASS_IMAGE_ITEM },
+        { "I_T", UPNP_CLASS_IMAGE_ITEM }, // seen with "Linux/9.0 UPnP/1.0 PROTOTYPE/1.0"
         { "P", UPNP_CLASS_PLAYLIST_ITEM },
-        // { "T", "object.item.textItem" },
+        { "P_D", UPNP_CLASS_PLAYLIST_ITEM },
+        { "P_T", UPNP_CLASS_PLAYLIST_ITEM },
+#ifdef GRB_DLNA_SAMSUNG_TEXT
+        { "T", UPNP_CLASS_TEXT_ITEM },
+#endif
     };
     if (containers.find(objId) != containers.end()) {
-        return database->findObjectByContentClass(containers.at(objId), getGroup());
+        log_debug("objId [{}] = {}", objId, containers.at(objId));
+        return database->findObjectByContentClass(containers.at(objId), startIndex, count, getGroup());
     }
 
+    log_warning("getSamsungFeatureRoot unknown objId [{}]", objId);
     return {};
 }
 

@@ -222,6 +222,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
   };
 
   const isAudioBook = obj.upnpclass === UPNP_CLASS_AUDIO_BOOK;
+  chain.audio.metaData[M_CONTENT_CLASS] = [UPNP_CLASS_AUDIO_ITEM];
   chain.album.metaData[M_ARTIST] = [audio.albumArtist];
   chain.album.metaData[M_ALBUMARTIST] = [audio.albumArtist];
   chain.album.metaData[M_GENRE] = [audio.genre];

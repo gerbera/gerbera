@@ -158,7 +158,11 @@ public:
     std::vector<std::string> getMimeTypes() override;
     std::map<std::string, std::shared_ptr<CdsContainer>> getShortcuts() override;
 
-    std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(const std::string& contentClass, const std::string& group) override;
+    std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(
+        const std::string& contentClass,
+        int startIndex,
+        int count,
+        const std::string& group) override;
     std::shared_ptr<CdsObject> findObjectByPath(const fs::path& fullpath, const std::string& group, DbFileType fileType = DbFileType::Auto) override;
     int findObjectIDByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) override;
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override;
