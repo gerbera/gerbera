@@ -67,6 +67,10 @@ extern "C" {
 #include <exiv2/exv_conf.h>
 #endif
 
+#ifdef HAVE_WAVPACK
+#include <wavpack/wavpack.h>
+#endif
+
 #ifdef HAVE_MATROSKA
 #include <ebml/EbmlVersion.h>
 #include <matroska/KaxVersion.h>
@@ -107,7 +111,7 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
         { "PUPNP  ", fmt::to_string(UPNP_VERSION) },
 #endif
 #ifdef UPNP_HAVE_TOOLS
-        { "UPNP_HAVE_TOOLS", "" },
+        { "", "UPNP_HAVE_TOOLS" },
 #endif
 #ifdef HAVE_NL_LANGINFO
         { "HAVE_NL_LANGINFO", "" },
@@ -134,7 +138,7 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
         { "HAVE_TAGLIB", fmt::format("{}.{}.{}", TAGLIB_MAJOR_VERSION, TAGLIB_MINOR_VERSION, TAGLIB_PATCH_VERSION) },
 #endif
 #ifdef HAVE_WAVPACK
-        { "HAVE_WAVPACK", "" },
+        { "HAVE_WAVPACK", WavpackGetLibraryVersionString() },
 #endif
 #ifdef HAVE_MAGIC
         { "HAVE_MAGIC", fmt::to_string(MAGIC_VERSION) },
@@ -143,13 +147,13 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
         { "HAVE_FFMPEG", LIBAVUTIL_IDENT ", " LIBAVFORMAT_IDENT },
 #endif
 #ifdef HAVE_AVSTREAM_CODECPAR
-        { "HAVE_AVSTREAM_CODECPAR", "" },
+        { "", "HAVE_AVSTREAM_CODECPAR" },
 #endif
 #ifdef HAVE_FFMPEGTHUMBNAILER
-        { "HAVE_FFMPEGTHUMBNAILER", "" },
+        { "HAVE_FFMPEGTHUMBNAILER", FFMPEGTHUMBNAILER_VERSION },
 #endif
 #ifdef HAVE_LIBEXIF
-        { "HAVE_LIBEXIF", "" },
+        { "HAVE_LIBEXIF", EXIF_VERSION },
 #endif
 #ifdef HAVE_EXIV2
         { "HAVE_EXIV2", EXV_PACKAGE_VERSION },
@@ -186,11 +190,16 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
     fmt::print(
         "Build info:\n"
         "-----------\n");
+    std::size_t len = 0;
+    for (auto&& opt : buildOptions) {
+        if (opt.first.size() > len)
+            len = opt.first.size();
+    }
     for (auto&& [lib, vers] : buildOptions) {
         if (vers.empty())
             fmt::print("{}\n", lib);
         else
-            fmt::print("{}  \t{}\n", lib, vers);
+            fmt::print("{1:{0}}  {2}\n", len, lib, vers);
     }
     fmt::print("\n\n");
 
