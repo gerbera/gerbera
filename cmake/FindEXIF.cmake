@@ -60,7 +60,7 @@ find_file(_exif_pkg_config_file
     NAMES "libexif.pc"
     HINTS ${EXIF_ROOT_DIR}
     PATHS ENV EXIF_ROOT_DIR
-    PATH_SUFFIXES "lib/pkgconfig" "pkgconfig")
+    PATH_SUFFIXES "lib64/pkgconfig" "lib/pkgconfig" "pkgconfig")
 
 if(EXISTS ${_exif_pkg_config_file})
     file(STRINGS "${_exif_pkg_config_file}" _exif_version REGEX "^Version: .*$")
@@ -95,6 +95,7 @@ endif(EXIF_USE_STATIC_LIB)
 mark_as_advanced(
     EXIF_LIBRARY
     EXIF_INCLUDE_DIR
+    EXIF_VERSION_STRING
     _exif_pkg_config_file
     _exif_shared_lib
     _exif_static_lib)
@@ -109,4 +110,5 @@ find_package_handle_standard_args(EXIF
 if(EXIF_FOUND)
     set(EXIF_INCLUDE_DIRS ${EXIF_INCLUDE_DIR} "${EXIF_INCLUDE_DIR}/libexif")
     set(EXIF_LIBRARIES ${EXIF_LIBRARY})
+    set(EXIF_VERSION ${EXIF_VERSION_STRING})
 endif(EXIF_FOUND)
