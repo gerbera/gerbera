@@ -2877,7 +2877,7 @@ void SQLDatabase::_autoscanChangePersistentFlag(int objectID, bool persistent)
         log_warning("cannot change autoscan to persistent {} with illegal ID", persistent);
         return;
     }
-    exec(fmt::format("UPDATE {0}{2}{1} SET {0}flags{1} = ({0}flags{1} {3}{4}) WHERE {0}obj_id{1} = {5}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER, objectID));
+    exec(fmt::format("UPDATE {0}{2}{1} SET {0}flags{1} = ({0}flags{1} {3}{4}) WHERE {0}id{1} = {5}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER, objectID));
 }
 
 void SQLDatabase::checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
