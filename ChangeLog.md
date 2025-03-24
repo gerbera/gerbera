@@ -1,11 +1,12 @@
 ## Gerbera - UPnP AV Mediaserver.
--3421
 
 ### HEAD
 
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
+- Fix SQL for changing persistent object flag in database
 - Improve compile info output
 - Reorganise installation scripts
+- Support "natural" file sorting
 - Tweak for old Samsung TV
 - Update NPUPnP
 - Use JsonCpp for web JSON output

@@ -97,12 +97,15 @@ std::int64_t stolString(const std::string& str, std::int64_t def = 0, std::int64
 /// \brief convert string to unsigned long
 unsigned long stoulString(const std::string& str, unsigned long def = 0, unsigned long base = 10);
 
-/// \brief  Used to replace potential multiple following //../ with single /
+/// \brief Used to replace potential multiple following //../ with single /
 void reduceString(std::string& str, char ch);
 
-/// \brief  Used to replace parts of string with other value
+/// \brief Used to replace parts of string with other value
 void replaceString(std::string& str, std::string_view from, std::string_view to);
 void replaceAllString(std::string& str, std::string_view from, std::string_view to);
+
+/// \brief Used to expand number to fixed length for filesystem "natural" sorting
+std::string expandNumbersString(std::string str, std::size_t size = 16);
 
 /// \brief Render HTML that is doing a redirect to the given ip, port and html page.
 /// \param addr IP address as string.

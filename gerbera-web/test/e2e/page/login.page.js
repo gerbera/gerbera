@@ -40,11 +40,18 @@ module.exports = function (driver) {
   };
 
   this.logout = async () => {
-    const logoutBtn = driver.findElement(By.id('logout'));
-    await driver.wait(until.elementIsVisible(logoutBtn), 5000);
-    await logoutBtn.click();
-    const loginBtn = driver.findElement(By.id('login-submit'));
-    return await driver.wait(until.elementIsVisible(loginBtn), 5000);
+    let result;
+    try {
+      const logoutBtn = driver.findElement(By.id('logout'));
+      await driver.wait(until.elementIsVisible(logoutBtn), 5000);
+      await logoutBtn.click();
+      const loginBtn = driver.findElement(By.id('login-submit'));
+      result = await driver.wait(until.elementIsVisible(loginBtn), 5000);
+    } catch(err) {
+      console.log(err);
+      result = null;
+    }
+    return Promise.resolve(result);
   };
 
   this.submitLogin = async () => {

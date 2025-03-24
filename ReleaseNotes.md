@@ -4,6 +4,8 @@
 
 ### NEW Features
 
+- Support "natural" file sorting for numbers in file names
+
 ### FIXES
 
 ### Code Improvements

@@ -8,9 +8,9 @@
     "test": "karma start karma.conf.js",
     "test:debug": "karma start karma.conf.js --log-level debug",
     "test:e2e": "concurrently --success first --kill-others \"npm start\" \"npm run e2e\"",
-    "e2e": "SELENIUM_BROWSER=chrome mocha --timeout 15000 \"test/e2e/**.spec.js\"",
-    "screenshot": "rimraf _build && mkdirp _build/doc && SELENIUM_BROWSER=chrome RUNFILES_DIR=node_modules/@bazel/runfiles/ mocha --timeout 15000 \"test/e2e/screenshot.doc.js\" --folderPath=/_build/doc/ --scheme=light",
-    "screenshot-dark": "rimraf _build && mkdirp _build/doc && SELENIUM_BROWSER=chrome RUNFILES_DIR=node_modules/@bazel/runfiles/ mocha --timeout 15000 \"test/e2e/screenshot.doc.js\" --folderPath=/_build/doc/ --scheme=dark",
+    "e2e": "SELENIUM_BROWSER=chrome mocha --config test/.mocharc.yml \"test/e2e/**.spec.js\"",
+    "screenshot": "rimraf _build && mkdirp _build/doc && SELENIUM_BROWSER=chrome RUNFILES_DIR=node_modules/@bazel/runfiles/ mocha --config test/.mocharc.yml \"test/e2e/screenshot.doc.js\" --folderPath=/_build/doc/ --scheme=light",
+    "screenshot-dark": "rimraf _build && mkdirp _build/doc && SELENIUM_BROWSER=chrome RUNFILES_DIR=node_modules/@bazel/runfiles/ mocha --config test/.mocharc.yml \"test/e2e/screenshot.doc.js\" --folderPath=/_build/doc/ --scheme=dark",
     "doc:screenshot": "concurrently --success first --kill-others \"npm start\" \"npm run screenshot\"",
     "doc:screenshot-dark": "concurrently --success first --kill-others \"npm start\" \"npm run screenshot-dark\"",
     "lint": "eslint -c .eslintrc ../web/js/*gerbera*.js"

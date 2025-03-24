@@ -472,6 +472,10 @@ void ImportService::createContainers(int parentContainerId, AutoScanSetting& set
                 cdsObj->setLocation(contPath);
                 log_debug("Container renamed {} {}", cdsObj->getTitle(), contPath.filename().string());
                 cdsObj->setTitle(contPath.filename().string());
+                auto sortKey = expandNumbersString(contPath.filename().stem().string());
+                if (!sortKey.empty()) {
+                    cdsObj->setSortKey(sortKey);
+                }
                 doUpdate = true;
                 log_debug("Container moved {} {}", oldLocation.string(), contPath.string());
                 for (auto&& [childPath, childEntry] : contentStateCache) {
@@ -620,6 +624,10 @@ void ImportService::createItems(AutoScanSetting& settings)
                     log_debug("Changing location {} to {}", item->getLocation().string(), itemPath.string());
                     item->setLocation(itemPath);
                     item->setTitle(makeTitle(itemPath, item->getClass()));
+                    auto sortKey = expandNumbersString(itemPath.filename().stem().string());
+                    if (!sortKey.empty()) {
+                        item->setSortKey(sortKey);
+                    }
                     updateSingleItem(dirEntry, item, item->getMimeType());
                     if (lastModifiedNewMax < cdsObj->getMTime())
                         lastModifiedNewMax = cdsObj->getMTime();
@@ -692,6 +700,10 @@ std::pair<bool, std::shared_ptr<CdsObject>> ImportService::createSingleItem(cons
     }
 
     item->setTitle(makeTitle(objectPath, upnpClass));
+    auto sortKey = expandNumbersString(objectPath.filename().stem().string());
+    if (!sortKey.empty()) {
+        item->setSortKey(sortKey);
+    }
     updateSingleItem(dirEntry, item, mimetype);
 
     return { skip, item };

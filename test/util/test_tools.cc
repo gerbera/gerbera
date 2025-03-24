@@ -198,6 +198,18 @@ TEST(ToolsTest, camelCaseStringTest)
     EXPECT_EQ(camelCaseString("-upnptest"), "Upnptest");
 }
 
+TEST(ToolsTest, expandNumbersStringTest)
+{
+    EXPECT_EQ(expandNumbersString("1"), "0000000000000001");
+    EXPECT_EQ(expandNumbersString("1", 3), "001");
+    EXPECT_EQ(expandNumbersString("1!", 3), "001!");
+    EXPECT_EQ(expandNumbersString("A1", 3), "A001");
+    EXPECT_EQ(expandNumbersString("A1b2c", 3), "A001b002c");
+    EXPECT_EQ(expandNumbersString("A0001b00002c", 3), "A0001b00002c");
+    EXPECT_EQ(expandNumbersString("A1b2", 3), "A001b002");
+    EXPECT_EQ(expandNumbersString("1b2c", 3), "001b002c");
+}
+
 TEST(ToolsTest, startswithTest)
 {
     EXPECT_EQ(startswith("AB", "AB"), true);

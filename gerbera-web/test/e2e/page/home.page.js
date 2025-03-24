@@ -50,7 +50,12 @@ module.exports = function (driver) {
     }
   };
   this.isDisabled = async (id) => {
-    await driver.wait(until.elementLocated(By.css('#' + id + '.disabled')), 5000);
+    try {
+      await driver.wait(until.elementLocated(By.css('#' + id + '.disabled')), 5000);
+    } catch (e) {
+      console.log(e);
+      return false;
+    }
     return true;
   };
   this.treeItems = async () => {

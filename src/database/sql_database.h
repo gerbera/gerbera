@@ -50,7 +50,7 @@ class CdsResource;
 class SQLResult;
 class SQLEmitter;
 
-#define DBVERSION 23
+#define DBVERSION 24
 
 #define CDS_OBJECT_TABLE "mt_cds_object"
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
@@ -264,7 +264,10 @@ private:
 
     /// \brief Configuration content for dynamic folders
     std::shared_ptr<DynamicContentList> dynamicContentList;
+    /// \brief Are dynamic search folders enabled in config
     bool dynamicContentEnabled;
+    /// \brief Is sorting by sort_key enabled in config
+    bool sortKeyEnabled;
 
     std::shared_ptr<CdsObject> createObjectFromRow(const std::string& group, const std::unique_ptr<SQLRow>& row);
     std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::string& group, const std::unique_ptr<SQLRow>& row);

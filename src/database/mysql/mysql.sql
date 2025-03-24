@@ -13,6 +13,7 @@ CREATE TABLE `mt_cds_object` (
   `object_type` tinyint(4) unsigned NOT NULL,
   `upnp_class` varchar(80) default NULL,
   `dc_title` varchar(255) default NULL COLLATE utf8_general_ci,
+  `sort_key` varchar(255) default NULL COLLATE utf8_general_ci,
   `location` blob,
   `location_hash` int(11) unsigned default NULL,
   `auxdata` blob,
@@ -31,6 +32,8 @@ CREATE TABLE `mt_cds_object` (
   KEY `location_parent` (`location_hash`,`parent_id`),
   KEY `cds_object_track_number` (`part_number`,`track_number`),
   KEY `cds_object_service_id` (`service_id`),
+  KEY `cds_object_title` (`dc_title`),
+  KEY `cds_object_sort_key` (`sort_key`),
   CONSTRAINT `mt_cds_object_ibfk_1` FOREIGN KEY (`ref_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `mt_cds_object_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
@@ -38,12 +41,12 @@ INSERT INTO `mt_cds_object` (
     `id`, `parent_id`, `object_type`, `flags`
 ) VALUES (-1,-1,0,9);
 INSERT INTO `mt_cds_object` (
-    `id`, `parent_id`, `object_type`, `upnp_class`, `dc_title`, `flags`
-) VALUES (0,-1,1,'object.container','Root',9);
+    `id`, `parent_id`, `object_type`, `upnp_class`, `dc_title`, `flags`, `sort_key`
+) VALUES (0,-1,1,'object.container','Root',9,'000');
 UPDATE `mt_cds_object` SET `id`='0' WHERE `id`='1';
 INSERT INTO `mt_cds_object` (
-    `id`,  `parent_id`, `object_type`, `upnp_class`, `dc_title`, `flags`
-) VALUES (1,0,1,'object.container','PC Directory',9);
+    `id`,  `parent_id`, `object_type`, `upnp_class`, `dc_title`, `flags`, `sort_key`
+) VALUES (1,0,1,'object.container','PC Directory',9,'000');
 CREATE TABLE `mt_internal_setting` (
   `key` varchar(40) NOT NULL,
   `value` varchar(255) NOT NULL,
