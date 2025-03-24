@@ -87,6 +87,7 @@ enum class BrowseCol {
     ObjectType,
     UpnpClass,
     DcTitle,
+    SortKey,
     Location,
     LocationHash,
     Auxdata,
@@ -114,6 +115,7 @@ enum class SearchCol {
     ObjectType,
     UpnpClass,
     DcTitle,
+    SortKey,
     MimeType,
     Flags,
     PartNumber,
@@ -187,6 +189,7 @@ static const std::map<BrowseCol, SearchProperty> browseColMap {
     { BrowseCol::ObjectType, { ITM_ALIAS, "object_type" } },
     { BrowseCol::UpnpClass, { ITM_ALIAS, "upnp_class" } },
     { BrowseCol::DcTitle, { ITM_ALIAS, "dc_title" } },
+    { BrowseCol::SortKey, { ITM_ALIAS, "sort_key" } },
     { BrowseCol::Location, { ITM_ALIAS, "location" } },
     { BrowseCol::LocationHash, { ITM_ALIAS, "location_hash" } },
     { BrowseCol::Auxdata, { ITM_ALIAS, "auxdata" } },
@@ -215,6 +218,7 @@ static const std::map<SearchCol, SearchProperty> searchColMap {
     { SearchCol::ObjectType, { SRC_ALIAS, "object_type" } },
     { SearchCol::UpnpClass, { SRC_ALIAS, "upnp_class" } },
     { SearchCol::DcTitle, { SRC_ALIAS, "dc_title" } },
+    { SearchCol::SortKey, { SRC_ALIAS, "sort_key" } },
     { SearchCol::MimeType, { SRC_ALIAS, "mime_type" } },
     { SearchCol::Flags, { SRC_ALIAS, "flags", FieldType::Integer } },
     { SearchCol::PartNumber, { SRC_ALIAS, "part_number", FieldType::Integer } },
@@ -356,12 +360,16 @@ static std::shared_ptr<EnumColumnMapper<AutoscanColumn>> autoscanColumnMapper;
 static std::shared_ptr<EnumColumnMapper<int>> resourceColumnMapper;
 static std::shared_ptr<EnumColumnMapper<PlaystatusCol>> playstatusColumnMapper;
 
-SQLDatabase::SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, std::shared_ptr<ConverterManager> converterManager)
+SQLDatabase::SQLDatabase(
+    const std::shared_ptr<Config>& config,
+    std::shared_ptr<Mime> mime,
+    std::shared_ptr<ConverterManager> converterManager)
     : Database(config)
     , mime(std::move(mime))
     , converterManager(std::move(converterManager))
     , dynamicContentList(this->config->getDynamicContentListOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST))
     , dynamicContentEnabled(this->config->getBoolOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST_ENABLED))
+    , sortKeyEnabled(this->config->getBoolOption(ConfigVal::SERVER_STORAGE_SORT_KEY_ENABLED))
 {
 }
 
@@ -375,6 +383,7 @@ void SQLDatabase::init()
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), BrowseCol::PartNumber },
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), BrowseCol::TrackNumber },
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), BrowseCol::DcTitle },
+        { UPNP_SORT_KEY, BrowseCol::SortKey },
         { UPNP_SEARCH_CLASS, BrowseCol::UpnpClass },
         { UPNP_SEARCH_PATH, BrowseCol::Location },
         { UPNP_SEARCH_REFID, BrowseCol::RefId },
@@ -386,6 +395,7 @@ void SQLDatabase::init()
     searchSortMap = {
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchCol::PartNumber },
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchCol::TrackNumber },
+        { UPNP_SORT_KEY, SearchCol::SortKey },
         { UPNP_SEARCH_CLASS, SearchCol::UpnpClass },
         { UPNP_SEARCH_PATH, SearchCol::Location },
         { UPNP_SEARCH_REFID, SearchCol::RefId },
@@ -415,7 +425,7 @@ void SQLDatabase::init()
     /// \brief List of column names to be used in insert and update to ensure correct order of columns
     // only columns listed here are added to the insert and update statements
     tableColumnOrder = {
-        { CDS_OBJECT_TABLE, { "ref_id", "parent_id", "object_type", "upnp_class", "dc_title", "location", "location_hash", "auxdata", "update_id", "mime_type", "flags", "part_number", "track_number", "service_id", "last_modified", "last_updated" } },
+        { CDS_OBJECT_TABLE, { "ref_id", "parent_id", "object_type", "upnp_class", "dc_title", "sort_key", "location", "location_hash", "auxdata", "update_id", "mime_type", "flags", "part_number", "track_number", "service_id", "last_modified", "last_updated" } },
         { METADATA_TABLE, { "item_id", "property_name", "property_value" } },
         { RESOURCE_TABLE, { "item_id", "res_id", "handlerType", "purpose", "options", "parameters" } },
     };
@@ -429,7 +439,10 @@ void SQLDatabase::init()
     browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
     auto searchTagMap = searchSortMap;
     if (config->getBoolOption(ConfigVal::UPNP_SEARCH_FILENAME)) {
-        searchTagMap.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), SearchCol::DcTitle);
+        if (sortKeyEnabled)
+            searchTagMap.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), SearchCol::SortKey);
+        else
+            searchTagMap.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), SearchCol::DcTitle);
     }
     searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchTagMap, searchColMap);
     metaColumnMapper = std::make_shared<EnumColumnMapper<MetadataCol>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
@@ -502,7 +515,12 @@ void SQLDatabase::init()
     sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper, playstatusColumnMapper);
 }
 
-void SQLDatabase::upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, ConfigVal upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd)
+void SQLDatabase::upgradeDatabase(
+    unsigned int dbVersion,
+    const std::array<unsigned int, DBVERSION>& hashies,
+    ConfigVal upgradeOption,
+    std::string_view updateVersionCommand,
+    std::string_view addResourceColumnCmd)
 {
     /* --- load database upgrades from config file --- */
     const fs::path& upgradeFile = config->getOption(upgradeOption);
@@ -689,6 +707,7 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
     cdsObjectSql.emplace("dc_title", quote(obj->getTitle()));
     // else if (isUpdate)
     //     cdsObjectSql.emplace("dc_title", SQL_NULL);
+    cdsObjectSql.emplace("sort_key", quote(obj->getSortKey()));
 
     if (op == Operation::Update)
         cdsObjectSql.emplace("auxdata", SQL_NULL);
@@ -1034,7 +1053,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
                 orderQb = sortParser.parse(addColumns, addJoin);
             }
             if (orderQb.empty()) {
-                orderQb = browseColumnMapper->mapQuoted(BrowseCol::DcTitle);
+                if (sortKeyEnabled)
+                    orderQb = browseColumnMapper->mapQuoted(BrowseCol::SortKey);
+                else
+                    orderQb = browseColumnMapper->mapQuoted(BrowseCol::DcTitle);
             }
             return orderQb;
         };
@@ -1234,7 +1256,10 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
         SortParser sortParser(searchColumnMapper, playstatusColumnMapper, metaColumnMapper, param.getSortCriteria());
         auto orderQb = sortParser.parse(addColumns, addJoin);
         if (orderQb.empty()) {
-            orderQb = searchColumnMapper->mapQuoted(SearchCol::DcTitle);
+            if (sortKeyEnabled)
+                orderQb = searchColumnMapper->mapQuoted(SearchCol::SortKey);
+            else
+                orderQb = searchColumnMapper->mapQuoted(SearchCol::DcTitle);
         }
         return orderQb;
     };
@@ -1487,6 +1512,7 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
         identifier("flags"),
         identifier("upnp_class"),
         identifier("dc_title"),
+        identifier("sort_key"),
         identifier("location"),
         identifier("location_hash"),
         identifier("ref_id"),
@@ -1496,6 +1522,7 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
         fmt::to_string(OBJECT_TYPE_CONTAINER),
         fmt::to_string(flags),
         !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER),
+        quote(name),
         quote(name),
         quote(dbLocation),
         quote(stringHash(dbLocation)),
@@ -1688,6 +1715,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
 
     obj->setParentID(std::stoi(getCol(row, BrowseCol::ParentId)));
     obj->setTitle(getCol(row, BrowseCol::DcTitle));
+    obj->setSortKey(getCol(row, BrowseCol::SortKey));
     obj->setClass(fallbackString(getCol(row, BrowseCol::UpnpClass), getCol(row, BrowseCol::RefUpnpClass)));
     obj->setFlags(std::stoi(getCol(row, BrowseCol::Flags)));
     obj->setMTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::LastModified))));
@@ -1789,6 +1817,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::str
 
     obj->setParentID(std::stoi(getCol(row, SearchCol::ParentId)));
     obj->setTitle(getCol(row, SearchCol::DcTitle));
+    obj->setSortKey(getCol(row, SearchCol::SortKey));
     obj->setClass(getCol(row, SearchCol::UpnpClass));
     obj->setFlags(std::stoi(getCol(row, SearchCol::Flags)));
 

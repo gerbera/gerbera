@@ -85,8 +85,8 @@ protected:
     /// \brief field which can hold various flags for the object
     unsigned int objectFlags { OBJECT_FLAG_RESTRICTED };
 
-    /// \brief flag that allows to sort objects within a container
-    int sortPriority {};
+    /// \brief property that allows to sort objects within a container
+    std::string sortKey;
 
     std::vector<std::pair<std::string, std::string>> metaData;
     std::map<std::string, std::string> auxdata;
@@ -133,9 +133,19 @@ public:
     bool isRestricted() const { return getFlag(OBJECT_FLAG_RESTRICTED); }
 
     /// \brief Set the object title (dc:title)
-    void setTitle(const std::string& title) { this->title = title; }
+    void setTitle(const std::string& title)
+    {
+        this->title = title;
+        if (this->sortKey.empty())
+            this->sortKey = title;
+    }
     /// \brief Retrieve the title.
     std::string getTitle() const { return title; }
+
+    // \brief Set the object sortKey
+    void setSortKey(const std::string& sortKey) { this->sortKey = sortKey; }
+    /// \brief Retrieve the sortKey.
+    std::string getSortKey() const { return sortKey; }
 
     /// \brief set the upnp:class
     void setClass(const std::string& upnpClass) { this->upnpClass = upnpClass; }
@@ -175,12 +185,6 @@ public:
     virtual bool isPureItem() const { return false; }
     virtual bool isExternalItem() const { return false; }
     virtual bool isContainer() const { return false; }
-
-    /// \brief Retrieve sort priority setting.
-    int getSortPriority() const { return sortPriority; }
-
-    /// \brief Set the sort priority of an object.
-    void setSortPriority(int sortPriority) { this->sortPriority = sortPriority; }
 
     /// \brief Get flags of an object.
     unsigned int getFlags() const { return objectFlags; }

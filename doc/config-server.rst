@@ -700,6 +700,17 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
     The feature caused some issues and set to **no**. If you want to support testing, turn it to **yes** and report
     if you can reproduce the issue.
 
+    ::
+
+        enable-sort-key="no"
+
+    * Optional
+
+    * Default: **yes**
+
+    Switches default sorting by property of ``dc_title`` to ``sort_key``. The sort key is derived from the filename by
+    expanding all numbers to fixed digits.
+
     **SQLite**
 
     .. code-block:: xml

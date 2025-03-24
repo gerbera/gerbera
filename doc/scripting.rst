@@ -123,6 +123,13 @@ object.
     This is the title of the original object, since the object represents an entry in the PC-Directory, the title will be
     set to it's file name. This field corresponds to ``dc:title`` in the DIDL-Lite XML.
 
+.. js:attribute:: orig.sortKey
+
+    **RW**
+
+    This is the sortKey of the original object, use it's value to define the order of container entries
+    for non-album containers.
+
 .. js:attribute:: orig.id
 
     **RO**
@@ -139,7 +146,7 @@ object.
 
     **RW**
 
-    If set to true for a container it can be found by a UPnP search if config option /server/upnp/searchable-container-flag is set to yes.
+    If set to true for a container it can be found by a UPnP search if config option /server/upnp/searchable-container-flag is set to ``yes``.
 
 .. js:attribute:: orig.upnpclass
 

@@ -6,6 +6,7 @@ CREATE TABLE "mt_cds_object" (
   "object_type" tinyint unsigned NOT NULL,
   "upnp_class" varchar(80) default NULL,
   "dc_title" varchar(255) default NULL COLLATE NOCASE,
+  "sort_key" varchar(255) default NULL COLLATE NOCASE,
   "location" text default NULL,
   "location_hash" integer unsigned default NULL,
   "auxdata" text default NULL,
@@ -21,14 +22,14 @@ CREATE TABLE "mt_cds_object" (
   CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
 INSERT INTO "mt_cds_object" (
-    id, ref_id, parent_id, object_type, upnp_class, dc_title, flags
-) VALUES (-1, NULL, -1, 0, NULL, NULL, 9);
+    id, ref_id, parent_id, object_type, upnp_class, dc_title, flags, sort_key
+) VALUES (-1, NULL, -1, 0, NULL, NULL, 9, NULL);
 INSERT INTO "mt_cds_object" (
-    id, ref_id, parent_id, object_type, upnp_class, dc_title, flags
-) VALUES (0, NULL, -1, 1, 'object.container', 'Root', 9);
+    id, ref_id, parent_id, object_type, upnp_class, dc_title, flags, sort_key
+) VALUES (0, NULL, -1, 1, 'object.container', 'Root', 9, '000');
 INSERT INTO "mt_cds_object" (
-    id, ref_id, parent_id, object_type, upnp_class, dc_title, flags
-) VALUES (1, NULL, 0, 1, 'object.container', 'PC Directory', 9);
+    id, ref_id, parent_id, object_type, upnp_class, dc_title, flags, sort_key
+) VALUES (1, NULL, 0, 1, 'object.container', 'PC Directory', 9, '000');
 CREATE TABLE "mt_internal_setting" (
   "key" varchar(40) primary key NOT NULL,
   "value" varchar(255) NOT NULL
@@ -110,4 +111,6 @@ CREATE INDEX "mt_internal_setting_key" ON mt_internal_setting(key);
 CREATE UNIQUE INDEX "mt_autoscan_obj_id" ON mt_autoscan(obj_id);
 CREATE INDEX "mt_cds_object_service_id" ON mt_cds_object(service_id);
 CREATE INDEX "mt_metadata_item_id" ON mt_metadata(item_id);
+CREATE INDEX "mt_cds_object_title" ON mt_cds_object(dc_title);
+CREATE INDEX "mt_cds_object_sort_key" ON mt_cds_object(sort_key);
 COMMIT;

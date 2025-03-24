@@ -40,6 +40,7 @@
 #include <algorithm>
 #include <numeric>
 #include <queue>
+#include <regex>
 #include <sstream>
 
 #ifdef __HAIKU__
@@ -198,6 +199,24 @@ void replaceAllString(std::string& str, std::string_view from, std::string_view 
         str.replace(startPos, from.length(), to);
         startPos = str.find(from, startPos + to.length());
     }
+}
+
+std::string expandNumbersString(std::string str, std::size_t size)
+{
+    static const std::regex strRe("([0-9]+)");
+    std::smatch strMatch;
+    std::string result;
+    while (std::regex_search(str, strMatch, strRe)) {
+        std::string matchStr = strMatch[1].str();
+
+        if (!matchStr.empty()) {
+            auto matchInt = std::stoul(matchStr);
+            result += fmt::format("{0}{1:0{2}}", strMatch.prefix().str(), matchInt, matchStr.size() < size ? size : matchStr.size());
+            str = strMatch.suffix();
+        }
+    }
+    result += str; // append trailing chars
+    return result;
 }
 
 std::string httpRedirectTo(std::string_view addr, std::string_view page)

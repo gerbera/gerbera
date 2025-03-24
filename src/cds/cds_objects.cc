@@ -60,7 +60,7 @@ void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
     obj->setMetaData(metaData);
     obj->setAuxData(auxdata);
     obj->setFlags(objectFlags);
-    obj->setSortPriority(sortPriority);
+    obj->setSortKey(sortKey);
     for (auto&& resource : resources)
         obj->addResource(resource->clone());
 }
@@ -72,7 +72,7 @@ bool CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) cons
         || isRestricted() != obj->isRestricted()
         || title != obj->getTitle()
         || upnpClass != obj->getClass()
-        || sortPriority != obj->getSortPriority())
+        || sortKey != obj->getSortKey())
         return false;
 
     if (!resourcesEqual(obj))

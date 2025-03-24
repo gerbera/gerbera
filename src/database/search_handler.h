@@ -46,6 +46,7 @@
 #define UPNP_SEARCH_LAST_MODIFIED "last_modified"
 #define UPNP_SEARCH_PLAY_GROUP "play_group"
 #define UPNP_SEARCH_PATH "path"
+#define UPNP_SORT_KEY "sort_key"
 #define META_NAME "name"
 #define META_VALUE "value"
 

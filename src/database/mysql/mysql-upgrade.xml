@@ -145,4 +145,12 @@
         <script>ALTER TABLE `mt_autoscan` ADD `dir_types` tinyint(4) unsigned NOT NULL default '0'</script>
         <script>ALTER TABLE `mt_autoscan` ADD `force_rescan` tinyint(4) unsigned NOT NULL default '0'</script>
     </version>
+    <version number="24" remark="sort_key">
+        <script>ALTER TABLE `mt_cds_object` ADD `sort_key` varchar(255) default NULL COLLATE utf8_general_ci</script>
+        <script>
+            UPDATE `mt_cds_object` SET `sort_key`=`dc_title`;
+            ALTER TABLE `mt_cds_object` ADD KEY `mt_cds_object_title` (`dc_title`);
+            ALTER TABLE `mt_cds_object` ADD KEY `mt_cds_object_sort_key` (`sort_key`);
+        </script>
+    </version>
 </upgrade>

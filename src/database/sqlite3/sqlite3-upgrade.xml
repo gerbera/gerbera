@@ -364,4 +364,12 @@
         <script>ALTER TABLE "mt_autoscan" ADD "dir_types" tinyint unsigned NOT NULL default (0)</script>
         <script>ALTER TABLE "mt_autoscan" ADD "force_rescan" tinyint unsigned NOT NULL default (0)</script>
     </version>
+    <version number="24" remark="sort_key">
+        <script>ALTER TABLE "mt_cds_object" ADD "sort_key" varchar(255) default NULL COLLATE NOCASE</script>
+        <script>
+            UPDATE "mt_cds_object" SET "sort_key"="dc_title";
+            CREATE INDEX "mt_cds_object_title" ON mt_cds_object(dc_title);
+            CREATE INDEX "mt_cds_object_sort_key" ON mt_cds_object(sort_key);
+        </script>
+    </version>
 </upgrade>

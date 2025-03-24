@@ -706,6 +706,19 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             obj->setTitle(pcd->getTitle());
         }
     }
+    // update sortKey
+    {
+        auto val = ScriptNamedProperty(ctx, "sortKey").getStringValue();
+        if (!val.empty()) {
+            auto [mval, err] = sc->convert(val);
+            if (!err.empty()) {
+                log_warning("{}: {}", obj->getLocation().string(), err);
+            }
+            obj->setSortKey(mval);
+        } else if (pcd) {
+            obj->setSortKey(pcd->getSortKey());
+        }
+    }
 
     // update upnpclass
     {
@@ -892,6 +905,7 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     setIntProperty("parentID", obj->getParentID(), INVALID_OBJECT_ID);
 
     setProperty("title", obj->getTitle(), false);
+    setProperty("sortKey", obj->getSortKey(), false);
     setProperty("upnpclass", obj->getClass(), false);
     setProperty("location", obj->getLocation(), false);
 
