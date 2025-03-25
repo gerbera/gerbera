@@ -440,10 +440,8 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
         { ConfigVal::SERVER_STORAGE_SQLITE_RESTORE, false },
         { ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE, false },
         { ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE, false },
-#ifdef SQLITE_BACKUP_ENABLED
         { ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED, true },
         { ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL, true },
-#endif
 #ifdef HAVE_MYSQL
         { ConfigVal::SERVER_STORAGE_MYSQL_ENABLED, true },
         { ConfigVal::SERVER_STORAGE_MYSQL_HOST, true },
