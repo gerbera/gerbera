@@ -97,9 +97,6 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
         { "", "SPDLOG_FMT_EXTERNAL" },
 #endif
         { "SQLITE ", fmt::to_string(SQLITE_VERSION) },
-#ifdef SQLITE_BACKUP_ENABLED
-        { "", "SQLITE_BACKUP_ENABLED" },
-#endif
         { "PUGIXML", fmt::to_string(PUGIXML_VERSION) },
         { "JSONCPP", JSONCPP_VERSION_STRING },
 #ifdef PACKAGE_DATADIR

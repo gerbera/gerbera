@@ -593,12 +593,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
             "restore", StringCheckFunction(SqliteConfig::CheckSqlLiteRestoreValue)),
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED,
             "/server/storage/sqlite3/backup/attribute::enabled", "config-server.html#storage",
-#ifdef SQLITE_BACKUP_ENABLED
-            YES
-#else
-            NO
-#endif
-            ),
+            YES),
         std::make_shared<ConfigTimeSetup>(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL,
             "/server/storage/sqlite3/backup/attribute::interval", "config-server.html#storage",
             GrbTimeType::Seconds, 600, 1),

@@ -27,6 +27,7 @@
     <storage>
       <sqlite3 enabled="yes">
         <database-file>gerbera.db</database-file>
+        <backup enabled="yes" interval="600" />
       </sqlite3>
     </storage>
     <containers enabled="yes">

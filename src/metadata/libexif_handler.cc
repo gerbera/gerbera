@@ -191,6 +191,7 @@ static void logfunc(ExifLog* log, ExifLogCode code, const char* domain, const ch
     std::vsnprintf(buf.data(), len + 1, format, args);
     std::string message = buf.data();
     log_debug("Exif: {}-{}, domain {}: {}", exif_log_code_get_title(code), exif_log_code_get_message(code), domain, message);
+    va_end(args_copy);
 }
 
 LibExifHandler::LibExifHandler(const std::shared_ptr<Context>& context)

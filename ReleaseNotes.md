@@ -2,6 +2,8 @@
 
 ## HEAD
 
+Sqlite backup is now enabled by default.
+
 ### NEW Features
 
 - Support "natural" file sorting for numbers in file names
