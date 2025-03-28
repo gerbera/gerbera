@@ -33,7 +33,6 @@ RUN zypper install --no-confirm \
     pkgconf \
     sqlite3-devel \
     libuuid-devel \
-    jsoncpp-devel \
     # libexecinfo-devel \
     # libexecinfo \
     autoconf \
@@ -136,6 +135,13 @@ COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-libexif.sh
 
+# Build jsoncpp
+WORKDIR /jsoncpp_build
+COPY scripts/install-jsoncpp.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
+COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
+RUN ./install-jsoncpp.sh
+
 # Build Gerbera
 WORKDIR /gerbera_build
 COPY . .
@@ -198,6 +204,9 @@ COPY --from=builder /usr/local/lib64/libspdlog.so* /usr/lib64/
 # Copy duktape
 COPY --from=builder /usr/local/lib/libduktape.so* /usr/lib64/
 COPY --from=builder /usr/local/lib64/libduktape.so* /usr/lib64/
+# Copy jsoncpp
+COPY --from=builder /usr/local/lib/libjsoncpp.so* /usr/lib64/
+COPY --from=builder /usr/local/lib64/libjsoncpp.so* /usr/lib64/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
