@@ -94,6 +94,7 @@ RUN apk add --no-cache \
     spdlog \
     sqlite \
     sqlite-libs \
+    jsoncpp \
     su-exec \
     taglib \
     tini \

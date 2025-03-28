@@ -138,6 +138,7 @@ RUN apk add --no-cache \
     mariadb-connector-c \
     sqlite \
     sqlite-libs \
+    jsoncpp \
     su-exec \
     tini \
     tzdata \

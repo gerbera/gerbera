@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Add missing jsoncpp to `Dockerfile`s
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
 - Fix SQL for changing persistent object flag in database
 - Improve compile info output
