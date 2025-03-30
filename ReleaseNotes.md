@@ -13,7 +13,7 @@ Sqlite backup is now enabled by default.
 ### Code Improvements
 
 - Use JsonCpp to generate responses in web request handlers
-- Update versions of npupnp (6.2.1)
+- Update versions of npupnp (6.2.1), spdlog (1.15.2)
 
 ## v2.5.0
 

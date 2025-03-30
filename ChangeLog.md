@@ -11,6 +11,7 @@
 - Support "natural" file sorting
 - Tweak for old Samsung TV
 - Update NPUPnP
+- Update spdlog to 1.15.2
 - Use JsonCpp for web JSON output
 
 ### v2.5.0
