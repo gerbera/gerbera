@@ -168,21 +168,24 @@ static std::string limitString(std::size_t stringLimit, const std::string& s)
     return fmt::format("{}{}", s.substr(0, cutPosition), ellipse);
 }
 
-static std::string formatXmlString(bool strictXml, std::size_t stringLimit, const std::string& input)
+std::string UpnpXMLBuilder::formatXmlString(
+    const UpnpXMLBuilder::XmlStringFormat& xmlFormat,
+    const std::string& input)
 {
     std::string s = input;
     // Do nothing if disabled
-    if (strictXml)
+    if (xmlFormat.strictXml)
         s = UpnpXMLBuilder::encodeEscapes(s);
+    if (xmlFormat.asciiXml)
+        s = transliterate(s);
     // Do nothing if disabled
-    if (stringLimit != std::string::npos)
-        s = limitString(stringLimit, s);
+    if (xmlFormat.stringLimit != std::string::npos)
+        s = limitString(xmlFormat.stringLimit, s);
     return s;
 }
 
 std::vector<std::string> UpnpXMLBuilder::addPropertyList(
-    bool strictXml,
-    std::size_t stringLimit,
+    const UpnpXMLBuilder::XmlStringFormat& xmlFormat,
     pugi::xml_node& result,
     const std::vector<std::string>& filter,
     const std::vector<std::pair<std::string, std::string>>& meta,
@@ -201,14 +204,14 @@ std::vector<std::string> UpnpXMLBuilder::addPropertyList(
         bool wasMeta = false;
         for (auto&& [mkey, mvalue] : meta) {
             if ((metaField != MetadataFields::M_MAX && mkey == MetaEnumMapper::getMetaFieldName(metaField)) || mkey == field) {
-                propNames.push_back(addField(result, filter, tag, formatXmlString(strictXml, stringLimit, mvalue)));
+                propNames.push_back(addField(result, filter, tag, formatXmlString(xmlFormat, mvalue)));
                 wasMeta = true;
             }
         }
         if (!wasMeta) {
             auto avalue = getValueOrDefault(auxData, field);
             if (!avalue.empty()) {
-                propNames.push_back(addField(result, filter, tag, formatXmlString(strictXml, stringLimit, avalue)));
+                propNames.push_back(addField(result, filter, tag, formatXmlString(xmlFormat, avalue)));
             }
         }
     }
@@ -385,10 +388,14 @@ void UpnpXMLBuilder::renderObject(
     result.append_attribute("parentID") = obj->getParentID();
     result.append_attribute("restricted") = obj->isRestricted() ? "1" : "0";
 
-    auto strictXml = quirks && quirks->needsStrictXml();
+    UpnpXMLBuilder::XmlStringFormat xmlFormat = {
+        quirks && quirks->needsStrictXml(),
+        quirks && quirks->needsAsciiXml(),
+        stringLimit,
+    };
     const std::string title = obj->getTitle();
 
-    result.append_child(DC_TITLE).append_child(pugi::node_pcdata).set_value(formatXmlString(strictXml, stringLimit, title).c_str());
+    result.append_child(DC_TITLE).append_child(pugi::node_pcdata).set_value(formatXmlString(xmlFormat, title).c_str());
     result.append_child(UPNP_SEARCH_CLASS).append_child(pugi::node_pcdata).set_value(upnpClass.c_str());
 
     auto auxData = obj->getAuxData();
@@ -413,7 +420,7 @@ void UpnpXMLBuilder::renderObject(
             if (mvMeta) {
                 for (auto&& val : group) {
                     // Trim metadata value as needed
-                    auto str = formatXmlString(strictXml, stringLimit, val);
+                    auto str = formatXmlString(xmlFormat, val);
                     if (key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_DESCRIPTION)) {
                         result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                         propNames.push_back(key);
@@ -428,7 +435,7 @@ void UpnpXMLBuilder::renderObject(
                 }
             } else {
                 // Trim metadata value as needed
-                auto str = formatXmlString(strictXml, stringLimit, fmt::format("{}", fmt::join(group, entrySeparator)));
+                auto str = formatXmlString(xmlFormat, fmt::format("{}", fmt::join(group, entrySeparator)));
                 if (key == MetaEnumMapper::getMetaFieldName(MetadataFields::M_DESCRIPTION)) {
                     result.append_child(key.c_str()).append_child(pugi::node_pcdata).set_value(str.c_str());
                     propNames.push_back(key);
@@ -461,7 +468,7 @@ void UpnpXMLBuilder::renderObject(
             propNames.push_back(addField(result, objFilter, "upnp:lastPlaybackPosition", auxData["upnp:lastPlaybackPosition"]));
         }
 
-        auto propNamesMeta = addPropertyList(strictXml, stringLimit, result, objFilter, meta, auxData, itemProps, nsProp);
+        auto propNamesMeta = addPropertyList(xmlFormat, result, objFilter, meta, auxData, itemProps, nsProp);
         propNames.insert(propNames.end(), propNamesMeta.begin(), propNamesMeta.end());
         addResources(item, result, resFilter, quirks);
 
@@ -477,7 +484,7 @@ void UpnpXMLBuilder::renderObject(
         // add metadata
         log_debug("container is class: {}", upnpClass.c_str());
         auto&& meta = obj->getMetaData();
-        propNames = addPropertyList(strictXml, stringLimit, result, cntFilter, meta, auxData, itemProps, nsProp);
+        propNames = addPropertyList(xmlFormat, result, cntFilter, meta, auxData, itemProps, nsProp);
         if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_MUSIC_ARTIST) || startswith(upnpClass, UPNP_CLASS_CONTAINER) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)) {
             auto url = renderContainerImageURL(cont);
             if (url) {

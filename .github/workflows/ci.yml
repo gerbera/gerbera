@@ -21,18 +21,22 @@ jobs:
           - name: gcc
             cc: gcc-9
             cxx: g++-9
+            icu: "False"
             system: ubuntu-20.04
           - name: clang
             cc: clang-11
             cxx: clang++-11
+            icu: "True"
             system: ubuntu-20.04
           - name: gcc-13
             cc: gcc-13
             cxx: g++-13
+            icu: "False"
             system: ubuntu-24.04
           - name: clang-18
             cc: clang-18
             cxx: clang++-18
+            icu: "True"
             system: ubuntu-24.04
     runs-on: ${{ matrix.compiler.system }}
     name: Compile ${{ matrix.compiler.name }}
@@ -67,7 +71,7 @@ jobs:
           # Remove existing package if it comes from the cache, otherwise
           # Conan will skip building it (due to --build=missing policy)
           conan remove 'gerbera/*' -c
-          conan create -pr ./conan/dev --build=missing --version dev .
+          conan create -pr ./conan/dev -o 'gerbera/*:icu=${{ matrix.compiler.icu }}' --build=missing --version dev .
       - name: cleanup
         # Remove build directories before creating a cache.
         run: |

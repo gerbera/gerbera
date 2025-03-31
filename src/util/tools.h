@@ -206,7 +206,11 @@ std::vector<std::string> populateCommandLine(const std::string& line,
     const std::string& title = "");
 
 /// \brief Calculates a position where it is safe to cut an UTF-8 string.
-/// \return Caclulated position or -1 in case of an error.
+/// \return Calculated position or -1 in case of an error.
 ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos);
+
+/// \brief transliterate a string to ascii for display on restricted devices
+/// \return transliterated string
+std::string transliterate(const std::string& input);
 
 #endif // __TOOLS_H__

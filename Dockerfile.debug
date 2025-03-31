@@ -22,6 +22,7 @@ RUN apk add --no-cache  \
     pkgconf \
     sqlite-dev \
     jsoncpp-dev \
+    icu-dev \
     tini \
     util-linux-dev \
     # libexecinfo-dev \
@@ -139,6 +140,7 @@ RUN apk add --no-cache \
     sqlite \
     sqlite-libs \
     jsoncpp \
+    icu \
     su-exec \
     tini \
     tzdata \

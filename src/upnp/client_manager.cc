@@ -193,6 +193,16 @@ void ClientManager::refresh()
             ClientMatchType::UserAgent,
             "Allegro-Software-WebClient",
         },
+
+        // User-Agent(actionReq): KnOS/3.2 UPnP/1.0 DMP/3.5
+        {
+            "Yamaha RX",
+            DEFAULT_CLIENT_GROUP,
+            ClientType::YamahaRX,
+            QUIRK_FLAG_ASCIIXML,
+            ClientMatchType::UserAgent,
+            "KnOS/3.2",
+        },
     };
 
     auto configList = config->getClientConfigListOption(ConfigVal::CLIENTS_LIST);

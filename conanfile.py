@@ -27,6 +27,7 @@ class GerberaConan(ConanFile):
         "matroska": [True, False],
         "mysql": [True, False],
         "ffmpeg": [True, False],
+        "icu": [True, False],
         "ffmpegthumbnailer": [True, False],
     }
     default_options = {
@@ -42,6 +43,7 @@ class GerberaConan(ConanFile):
         "matroska": True,
         "mysql": True,
         "ffmpeg": True,
+        "icu": True,
         "ffmpegthumbnailer": True,
     }
 
@@ -97,6 +99,9 @@ class GerberaConan(ConanFile):
         if self._needs_system_uuid:
             self.requires("libuuid/1.0.3")
 
+        if self.options.icu:
+            self.requires("icu/76.1")
+
     def system_requirements(self):
         if cross_building(self):
             self.output.info("Cross-compiling, not installing system packages")
@@ -150,6 +155,7 @@ class GerberaConan(ConanFile):
         tc.cache_variables["WITH_EXIV2"] = self.options.exiv2
         tc.cache_variables["WITH_MATROSKA"] = self.options.matroska
         tc.cache_variables["WITH_MYSQL"] = self.options.mysql
+        tc.cache_variables["WITH_ICU"] = self.options.icu
         tc.cache_variables["WITH_AVCODEC"] = self.options.ffmpeg
         tc.cache_variables["WITH_FFMPEGTHUMBNAILER"] = self.options.ffmpegthumbnailer
 

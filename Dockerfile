@@ -28,6 +28,7 @@ RUN apk add --no-cache  \
     sqlite-dev \
     taglib-dev \
     jsoncpp-dev \
+    icu-dev \
     tini \
     util-linux-dev \
     autoconf \
@@ -95,6 +96,7 @@ RUN apk add --no-cache \
     sqlite \
     sqlite-libs \
     jsoncpp \
+    icu \
     su-exec \
     taglib \
     tini \
