@@ -353,3 +353,16 @@ TEST(ToolsTest, parseTimeTest)
     EXPECT_EQ(result, 0);
     EXPECT_EQ(value, "1x:1x");
 }
+
+#ifdef HAVE_ICU
+TEST(ToolsTest, transliterate)
+{
+    std::string orig = "Привет Мир";
+    std::string result = transliterate(orig);
+    EXPECT_STREQ(result.c_str(), "Privet Mir");
+
+    orig = "große grüne Äpfel";
+    result = transliterate(orig);
+    EXPECT_STREQ(result.c_str(), "große grune Apfel");
+}
+#endif

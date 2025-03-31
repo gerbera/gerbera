@@ -52,6 +52,7 @@ using QuirkFlags = std::uint32_t;
 #define QUIRK_FLAG_SIMPLE_DATE 0x00001000
 #define QUIRK_FLAG_DCM10 0x00002000
 #define QUIRK_FLAG_HIDE_CONTAINER_SHORTCUTS 0x00004000
+#define QUIRK_FLAG_ASCIIXML 0x00008000
 #define QUIRK_FLAG_TRANSCODING1 0x00010000
 #define QUIRK_FLAG_TRANSCODING2 0x00020000
 #define QUIRK_FLAG_TRANSCODING3 0x00040000
@@ -192,6 +193,13 @@ public:
      *
      */
     bool needsStrictXml() const;
+
+    /** \brief UPnP client supports only ascii characters
+     *
+     * \return bool
+     *
+     */
+    bool needsAsciiXml() const;
 
     /** \brief UPnP client needs simple dates
      *

@@ -184,6 +184,7 @@ if [[ ! -d "${BUILD_DIR}" ]]; then
       ${libmysqlclient} \
       ${libpugixml} \
       ${jsoncpp} \
+      libicu-dev \
       libsqlite3-dev \
       uuid-dev
   sudo apt-get clean

@@ -380,6 +380,11 @@ bool Quirks::needsStrictXml() const
     return hasFlag(QUIRK_FLAG_STRICTXML);
 }
 
+bool Quirks::needsAsciiXml() const
+{
+    return hasFlag(QUIRK_FLAG_ASCIIXML);
+}
+
 bool Quirks::needsSimpleDate() const
 {
     return hasFlag(QUIRK_FLAG_SIMPLE_DATE);

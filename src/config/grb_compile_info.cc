@@ -46,6 +46,10 @@ Gerbera - https://gerbera.io/
 #include <magic.h>
 #endif
 
+#ifdef HAVE_ICU
+#include <unicode/uvernum.h>
+#endif
+
 #ifdef HAVE_MYSQL
 #include <mysql.h>
 #endif
@@ -121,6 +125,9 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
 #endif
 #ifdef HAVE_INOTIFY
         { "HAVE_INOTIFY", "" },
+#endif
+#ifdef HAVE_ICU
+        { "HAVE_ICU", U_ICU_VERSION },
 #endif
 #ifdef HAVE_JS
         { "HAVE_JS", fmt::to_string(DUK_VERSION) },

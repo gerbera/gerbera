@@ -37,6 +37,7 @@ jobs:
             ninja \
             pugixml \
             jsoncpp \
+            icu4c \
             spdlog \
             taglib
 

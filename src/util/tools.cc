@@ -53,6 +53,11 @@
 #include <uuid/uuid.h>
 #endif
 
+#ifdef HAVE_ICU
+#include <unicode/translit.h>
+#include <unicode/ustream.h>
+#endif
+
 static constexpr auto hexChars = "0123456789abcdef";
 
 std::vector<std::string> splitString(std::string_view str, char sep, bool empty)
@@ -463,4 +468,43 @@ ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
         pos = cutpos;
 
     return pos;
+}
+
+std::string transliterate(const std::string& input)
+{
+#ifdef HAVE_ICU
+    // Thanks to https://github.com/sangohan/vimix/blob/8a36a94e732df0bab0dd69891c93dd3d8e9db6ec/BaseToolkit.cpp#L82-L113
+    // and https://unicode-org.github.io/icu/userguide/transforms/general/#icu-transliterators
+    // icu::Transliterator is slow, we keep a cache of already
+    // transliterated texts to be faster during repeated calls
+    static std::map<std::string, std::string> translitCache;
+    auto existingentry = translitCache.find(input);
+
+    if (existingentry == translitCache.end()) {
+
+        auto unicodeString = icu::UnicodeString::fromUTF8(input);
+
+        UErrorCode status = U_ZERO_ERROR;
+        for (auto&& translit : {
+                 "any-NFKD ; [:Nonspacing Mark:] Remove; NFKC; Latin",
+                 "any-NFKD ; [:Nonspacing Mark:] Remove; [@!#$*%~] Remove; NFKC",
+             }) {
+            icu::Transliterator* trans = icu::Transliterator::createInstance(
+                translit, UTRANS_FORWARD, status);
+            trans->transliterate(unicodeString);
+            delete trans;
+        }
+
+        std::ostringstream result;
+        result << unicodeString;
+
+        // remember for future
+        translitCache[input] = result.str();
+    }
+
+    // return remembered transliterated text
+    return translitCache.at(input);
+#else
+    return input;
+#endif
 }

@@ -62,6 +62,7 @@ option(WITH_EXIV2             "Use libexiv2 to extract image metadata" ON)
 option(WITH_MATROSKA          "Use libmatroska to extract video/mkv metadata" ON)
 option(WITH_SYSTEMD           "Install Systemd unit file" ON)
 option(WITH_LASTFM            "Enable scrobbling to LastFM" OFF)
+option(WITH_ICU               "Enable Support for transliteration" ON)
 option(WITH_ONLINE_SERVICES   "Enable support for Online Services" OFF) # currently there is no online service left, this enables compiling the empty shell
 option(WITH_DEBUG             "Enables debug logging" ON)
 option(WITH_DEBUG_OPTIONS     "Enables dedicated debug messages" ON)
@@ -720,6 +721,19 @@ if(WITH_LASTFM)
     target_include_directories(libgerbera PUBLIC ${LASTFMLIB_INCLUDE_DIRS})
     target_link_libraries(libgerbera PUBLIC ${LASTFMLIB_LIBRARIES})
     target_compile_definitions(libgerbera PUBLIC HAVE_LASTFMLIB)
+endif()
+
+#
+# ICU for C/C++
+#
+if(WITH_ICU)
+    if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+         set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/opt/icu4c/lib/pkgconfig")
+    endif()
+    find_package(ICU REQUIRED COMPONENTS i18n io uc)
+    # pkg_check_modules(ICU REQUIRED icu-i18n icu-uc icu-io)
+    target_link_libraries(libgerbera PUBLIC ${ICU_LIBRARIES})
+    target_compile_definitions(libgerbera PUBLIC HAVE_ICU)
 endif()
 
 find_package (ZLIB REQUIRED)

@@ -53,6 +53,7 @@ enum class ClientType {
     FSL,
     PanasonicTV,
     BoseSoundtouch,
+    YamahaRX,
     StandardUPnP,
     Custom
 };

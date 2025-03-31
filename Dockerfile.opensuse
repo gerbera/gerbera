@@ -33,6 +33,7 @@ RUN zypper install --no-confirm \
     pkgconf \
     sqlite3-devel \
     libuuid-devel \
+    libicu-devel \
     # libexecinfo-devel \
     # libexecinfo \
     autoconf \
@@ -165,6 +166,7 @@ RUN zypper install --no-confirm \
     libmariadb3 \
     sqlite3 \
     timezone \
+    icu \
     # libexecinfo \
     # Transcoding \
     ffmpeg-7 \

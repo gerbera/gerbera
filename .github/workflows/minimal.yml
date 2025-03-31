@@ -40,6 +40,7 @@ jobs:
             jsoncpp-dev
             spdlog-dev
             sqlite-dev
+            icu-dev
             util-linux-dev
             zlib-dev
 

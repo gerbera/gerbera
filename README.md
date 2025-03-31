@@ -62,6 +62,7 @@ sudo make install
 | zlib                |             |             |                      | Required      | Data compression           |          |
 | [fmtlib]            | 7.1.3       | 9.1.0       | 11.1.4               | Required      | Fast string formatting     |          |
 | [spdlog]            | 1.8.1       | 1.11.0      | 1.15.2               | Required      | Runtime logging            |          |
+| [icu4c]             | 65.1        | 65.1        | 65.1                 | Required      | Transliteration            | Enabled  |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0                | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |                      | Optional      | Alternate database storage | Disabled |
 | curl                |             |             |                      | Optional      | Enables web services       | Enabled  |
@@ -106,6 +107,7 @@ sudo make install
 [ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
 [fmtlib]: https://github.com/fmtlib/fmt
 [googletest]: https://github.com/google/googletest
+[icu4c]: https://github.com/unicode-org/icu
 [jsoncpp]: https://github.com/open-source-parsers/jsoncpp
 [lastfmlib]: https://github.com/dirkvdb/lastfmlib
 [libebml]: https://github.com/Matroska-Org/libebml

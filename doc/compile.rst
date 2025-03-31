@@ -74,6 +74,8 @@ Optional Packages
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | inotify             | Efficient file monitoring  | WITH\_INOTIFY           | Enabled  |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
+| icu4c_              | Transliteration            | WITH\_ICU               | Enabled  |                              |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
 | lastfmlib_          | Enables scrobbling         | WITH\_LASTFM            | Disabled | install-lastfm.sh            |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | libebml_            | Required for MKV           | WITH\_MATROSKA          | Enabled  | install-ebml.sh              |
@@ -98,6 +100,7 @@ Optional Packages
 .. _ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
 .. _fmtlib: https://github.com/fmtlib/fmt
 .. _googletest: https://github.com/google/googletest
+.. _icu4c: https://github.com/unicode-org/icu
 .. _jsoncpp: https://github.com/open-source-parsers/jsoncpp
 .. _lastfmlib: https://github.com/dirkvdb/lastfmlib
 .. _libebml: https://github.com/Matroska-Org/libebml
