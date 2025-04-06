@@ -209,6 +209,9 @@ std::vector<std::string> populateCommandLine(const std::string& line,
 /// \return Calculated position or -1 in case of an error.
 ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos);
 
+/// \brief reduce size of string at length
+std::string limitString(std::size_t stringLimit, const std::string& s);
+
 /// \brief transliterate a string to ascii for display on restricted devices
 /// \return transliterated string
 std::string transliterate(const std::string& input);

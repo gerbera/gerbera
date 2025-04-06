@@ -45,18 +45,17 @@
 #include <utility>
 
 // forward declarations
+class AddUpdateTable;
 class CdsContainer;
 class CdsResource;
 class SQLResult;
 class SQLEmitter;
+enum class Operation;
 
 #define DBVERSION 24
 
-#define CDS_OBJECT_TABLE "mt_cds_object"
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
 #define AUTOSCAN_TABLE "mt_autoscan"
-#define METADATA_TABLE "mt_metadata"
-#define RESOURCE_TABLE "grb_cds_resource"
 #define CONFIG_VALUE_TABLE "grb_config_value"
 #define CLIENTS_TABLE "grb_client"
 #define PLAYSTATUS_TABLE "grb_playstatus"
@@ -107,9 +106,10 @@ public:
 class SQLDatabase : public Database {
 public:
     /* methods to override in subclasses */
-    virtual std::string quote(const std::string& str) const = 0;
-    // required to handle #defines
-    std::string quote(const char* str) const { return quote(std::string(str)); }
+    virtual std::string quote(const std::string& value) const = 0;
+    std::string quote(const std::string& value, std::size_t len) const;
+    /// \brief ensure correct string quoting for SQL statement
+    std::string quote(const char* str, std::size_t len = 0) const { return quote(std::string(str), len); }
     /* wrapper functions for different types */
     std::string quote(char val) const { return quote(fmt::to_string(val)); }
     static std::string quote(int val) { return fmt::to_string(val); }
@@ -118,6 +118,9 @@ public:
     static std::string quote(unsigned long val) { return fmt::to_string(val); }
     static std::string quote(bool val) { return val ? "1" : "0"; }
     static std::string quote(long long val) { return fmt::to_string(val); }
+
+    /// \brief returns a fmt-printable identifier name
+    SQLIdentifier identifier(const std::string& name) const { return { name, table_quote_begin, table_quote_end }; }
 
     // hooks for transactions
     virtual void beginTransaction(std::string_view tName) { }
@@ -231,9 +234,6 @@ protected:
     bool doResourceMigration();
     void migrateResources(int objectId, const std::string& resourcesStr);
 
-    /// \brief returns a fmt-printable identifier name
-    SQLIdentifier identifier(const std::string& name) const { return { name, table_quote_begin, table_quote_end }; }
-
     std::shared_ptr<Mime> mime;
     std::shared_ptr<ConverterManager> converterManager;
 
@@ -258,9 +258,6 @@ private:
     std::string sql_autoscan_query;
     std::string sql_resource_query;
     std::string addResourceColumnCmd;
-    /// \brief List of column names to be used in insert and update to ensure correct order of columns
-    // only columns listed here are added to the insert and update statements
-    std::map<std::string, std::vector<std::string>> tableColumnOrder;
 
     /// \brief Configuration content for dynamic folders
     std::shared_ptr<DynamicContentList> dynamicContentList;
@@ -274,39 +271,19 @@ private:
     std::vector<std::pair<std::string, std::string>> retrieveMetaDataForObject(int objectId);
     std::vector<std::shared_ptr<CdsResource>> retrieveResourcesForObject(int objectId);
 
-    enum class Operation {
-        Insert,
-        Update,
-        Delete
-    };
+    std::vector<std::shared_ptr<AddUpdateTable>> _addUpdateObject(
+        const std::shared_ptr<CdsObject>& obj,
+        Operation op,
+        int* changedContainer);
 
-    /* helper class and helper function for addObject and updateObject */
-    class AddUpdateTable {
-    public:
-        AddUpdateTable(std::string&& tableName, std::map<std::string, std::string>&& dict, Operation operation) noexcept
-            : tableName(std::move(tableName))
-            , dict(std::move(dict))
-            , operation(operation)
-        {
-        }
-        ~AddUpdateTable() = default;
-        [[nodiscard]] const std::string& getTableName() const noexcept { return tableName; }
-        [[nodiscard]] const std::map<std::string, std::string>& getDict() const noexcept { return dict; }
-        [[nodiscard]] Operation getOperation() const noexcept { return operation; }
-
-    protected:
-        std::string tableName;
-        std::map<std::string, std::string> dict;
-        Operation operation;
-    };
-    std::vector<AddUpdateTable> _addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer);
-
-    void generateMetaDataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations) const;
-    void generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations);
-
-    std::string sqlForInsert(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const;
-    std::string sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const;
-    std::string sqlForDelete(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const;
+    void generateMetaDataDBOperations(
+        const std::shared_ptr<CdsObject>& obj,
+        Operation op,
+        std::vector<std::shared_ptr<AddUpdateTable>>& operations) const;
+    void generateResourceDBOperations(
+        const std::shared_ptr<CdsObject>& obj,
+        Operation op,
+        std::vector<std::shared_ptr<AddUpdateTable>>& operations);
 
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<std::int32_t>& objectIDs);

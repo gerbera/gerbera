@@ -446,12 +446,10 @@ ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
     if ((len == 0) || (cutpos > static_cast<ssize_t>(len)))
         return pos;
 
-#if 0
-    printf("Character at cut position: %0x\n", char(str.at(cutpos)));
-    printf("Character at cut-1 position: %0x\n", char(str.at(cutpos - 1)));
-    printf("Character at cut-2 position: %0x\n", char(str.at(cutpos - 2)));
-    printf("Character at cut-3 position: %0x\n", char(str.at(cutpos - 3)));
-#endif
+    log_vdebug("Character at cut position: {:0x}", char(str.at(cutpos)));
+    log_vdebug("Character at cut-1 position: {:0x}", char(str.at(cutpos - 1)));
+    log_vdebug("Character at cut-2 position: {:0x}", char(str.at(cutpos - 2)));
+    log_vdebug("Character at cut-3 position: {:0x}", char(str.at(cutpos - 3)));
 
     // > 0x7f, we are dealing with a non-ascii character
     if (str.at(cutpos) & 0x80) {
@@ -468,6 +466,18 @@ ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
         pos = cutpos;
 
     return pos;
+}
+
+static constexpr std::string_view ellipse("...");
+
+std::string limitString(std::size_t stringLimit, const std::string& s)
+{
+    // Do nothing if string is already short enough
+    if (s.length() <= stringLimit)
+        return s;
+
+    ssize_t cutPosition = getValidUTF8CutPosition(s, stringLimit - ellipse.size());
+    return fmt::format("{}{}", s.substr(0, cutPosition), ellipse);
 }
 
 std::string transliterate(const std::string& input)
