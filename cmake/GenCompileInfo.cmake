@@ -43,6 +43,7 @@ function(generate_compile_info)
             "WITH_MATROSKA=${WITH_MATROSKA}"
             "WITH_WAVPACK=${WITH_WAVPACK}"
             "WITH_SYSTEMD=${WITH_SYSTEMD}"
+            "WITH_ICU=${WITH_ICU}"
             "WITH_LASTFM=${WITH_LASTFM}"
             "WITH_DEBUG=${WITH_DEBUG}"
             "WITH_DEBUG_OPTIONS=${WITH_DEBUG_OPTIONS}"
