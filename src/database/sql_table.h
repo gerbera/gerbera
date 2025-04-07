@@ -39,16 +39,25 @@
 #include <vector>
 
 // forward declarations
+class AutoscanDirectory;
 class CdsObject;
+class ClientObservation;
+class ConfigValue;
 enum class ResourceAttribute;
 
+#define AUTOSCAN_TABLE "mt_autoscan"
+#define CLIENTS_TABLE "grb_client"
 #define CDS_OBJECT_TABLE "mt_cds_object"
+#define CONFIG_VALUE_TABLE "grb_config_value"
 #define METADATA_TABLE "mt_metadata"
 #define RESOURCE_TABLE "grb_cds_resource"
+
+#define SQL_NULL "NULL"
 
 /// \brief type of database operation
 enum class Operation {
     Insert,
+    InsertMulti,
     Update,
     Delete,
 };
@@ -100,7 +109,50 @@ enum class BrowseCol {
     AsPersistent
 };
 
+/// \brief autoscan column ids
+enum class AutoscanColumn {
+    Id = 0,
+    ObjId,
+    ScanMode,
+    Recursive,
+    MediaType,
+    CtAudio,
+    CtImage,
+    CtVideo,
+    Hidden,
+    FollowSymlinks,
+    Interval,
+    LastModified,
+    Persistent,
+    Location,
+    RetryCount,
+    DirTypes,
+    ForceRescan,
+    ObjLocation,
+    PathIds,
+    Touched,
+};
+
+/// \brief configvalue column ids
+enum class ConfigColumn {
+    Key,
+    Item,
+    ItemValue,
+    Status,
+};
+
+/// \brief client column ids
+enum class ClientColumn {
+    Addr,
+    Port,
+    AddrFamily,
+    UserAgent,
+    Last,
+    Age,
+};
+
 /// \brief base helper class for insert, update and delete operations
+template <class Item>
 class AddUpdateTable {
 public:
     AddUpdateTable(
@@ -119,15 +171,19 @@ public:
     [[nodiscard]] Operation getOperation() const noexcept { return operation; }
     /// \brief Generate INSERT statement from row data and object
     virtual std::string sqlForInsert(
-        const std::shared_ptr<CdsObject>& obj) const
+        const std::shared_ptr<Item>& obj) const
+        = 0;
+    /// \brief Generate INSERT statement from row data and object
+    virtual std::string sqlForMultiInsert(
+        const std::shared_ptr<Item>& obj) const
         = 0;
     /// \brief Generate UPDATE statement from row data and object
     virtual std::string sqlForUpdate(
-        const std::shared_ptr<CdsObject>& obj) const
+        const std::shared_ptr<Item>& obj) const
         = 0;
     /// \brief Generate DELETE statement from row data and object
     virtual std::string sqlForDelete(
-        const std::shared_ptr<CdsObject>& obj) const
+        const std::shared_ptr<Item>& obj) const
         = 0;
 
 protected:
@@ -136,28 +192,43 @@ protected:
 };
 
 /// \brief base template class for insert, update and delete operations
-template <class Tab>
-class TableAdaptor : public AddUpdateTable {
+template <class Tab, class Item>
+class TableAdaptor : public AddUpdateTable<Item> {
 public:
     TableAdaptor(
         std::string&& tableName,
         std::map<Tab, std::string>&& dict,
         Operation operation,
         std::shared_ptr<EnumColumnMapper<Tab>> columnMapper) noexcept
-        : AddUpdateTable(std::move(tableName), operation)
+        : AddUpdateTable<Item>(std::move(tableName), operation)
         , rowData(std::move(dict))
         , columnMapper(std::move(columnMapper))
     {
     }
+    TableAdaptor(
+        std::string&& tableName,
+        std::vector<std::map<Tab, std::string>>&& dict,
+        std::shared_ptr<EnumColumnMapper<Tab>> columnMapper) noexcept
+        : AddUpdateTable<Item>(std::move(tableName), Operation::InsertMulti)
+        , rowMultiData(std::move(dict))
+        , columnMapper(std::move(columnMapper))
+    {
+    }
     std::string sqlForInsert(
-        const std::shared_ptr<CdsObject>& obj) const override;
+        const std::shared_ptr<Item>& obj) const override;
+    std::string sqlForMultiInsert(
+        const std::shared_ptr<Item>& obj) const override;
     std::string sqlForUpdate(
-        const std::shared_ptr<CdsObject>& obj) const override;
+        const std::shared_ptr<Item>& obj) const override;
     std::string sqlForDelete(
-        const std::shared_ptr<CdsObject>& obj) const override;
+        const std::shared_ptr<Item>& obj) const override;
 
 protected:
+    /// \brief content to store in request
     std::map<Tab, std::string> rowData;
+    /// \brief content to store in request
+    std::vector<std::map<Tab, std::string>> rowMultiData;
+    /// \brief mapper to convert enum member to column name
     std::shared_ptr<EnumColumnMapper<Tab>> columnMapper;
 
     /// \brief check whether row data is valid for insert and update operations
@@ -168,12 +239,12 @@ protected:
     virtual const std::vector<Tab>& getTableColumnOrder() const = 0;
     /// \brief Generate WHERE clause for statements from row data and object
     virtual std::vector<std::string> getWhere(
-        const std::shared_ptr<CdsObject>& obj) const
+        const std::shared_ptr<Item>& obj) const
         = 0;
 };
 
 /// \brief Adaptor for operations on mt_cds_objects Table
-class Object2Table : public TableAdaptor<BrowseCol> {
+class Object2Table : public TableAdaptor<BrowseCol, CdsObject> {
 public:
     Object2Table(
         std::map<BrowseCol, std::string>&& dict,
@@ -197,13 +268,19 @@ private:
 };
 
 /// \brief Adaptor for operations on mt_metadata Table
-class Metadata2Table : public TableAdaptor<MetadataCol> {
+class Metadata2Table : public TableAdaptor<MetadataCol, CdsObject> {
 public:
     Metadata2Table(
         std::map<MetadataCol, std::string>&& dict,
         Operation operation,
         std::shared_ptr<EnumColumnMapper<MetadataCol>> columnMapper) noexcept
         : TableAdaptor(METADATA_TABLE, std::move(dict), operation, std::move(columnMapper))
+    {
+    }
+    Metadata2Table(
+        std::vector<std::map<MetadataCol, std::string>>&& dict,
+        std::shared_ptr<EnumColumnMapper<MetadataCol>> columnMapper) noexcept
+        : TableAdaptor(METADATA_TABLE, std::move(dict), std::move(columnMapper))
     {
     }
 
@@ -221,7 +298,7 @@ private:
 };
 
 /// \brief Adaptor for operations on grb_cds_resource Table
-class Resource2Table : public TableAdaptor<ResourceCol> {
+class Resource2Table : public TableAdaptor<ResourceCol, CdsObject> {
 public:
     Resource2Table(
         std::map<ResourceCol, std::string>&& dict,
@@ -250,9 +327,84 @@ private:
     std::map<ResourceAttribute, std::string> resDict;
 };
 
-template <class Tab>
-std::string TableAdaptor<Tab>::sqlForInsert(
-    const std::shared_ptr<CdsObject>& obj) const
+/// \brief Adaptor for operations on mt_autoscan Table
+class Autoscan2Table : public TableAdaptor<AutoscanColumn, AutoscanDirectory> {
+public:
+    Autoscan2Table(
+        std::map<AutoscanColumn, std::string>& dict,
+        Operation operation,
+        std::shared_ptr<EnumColumnMapper<AutoscanColumn>> columnMapper) noexcept
+        : TableAdaptor(AUTOSCAN_TABLE, std::move(dict), operation, std::move(columnMapper))
+    {
+    }
+
+protected:
+    const std::vector<AutoscanColumn>& getTableColumnOrder() const override
+    {
+        return tableColumnOrder;
+    }
+    std::vector<std::string> getWhere(
+        const std::shared_ptr<AutoscanDirectory>& obj) const override;
+
+private:
+    static const std::vector<AutoscanColumn> tableColumnOrder;
+};
+
+/// \brief Adaptor for operations on grb_config_value Table
+class Config2Table : public TableAdaptor<ConfigColumn, ConfigValue> {
+public:
+    Config2Table(
+        std::map<ConfigColumn, std::string>&& dict,
+        Operation operation,
+        std::shared_ptr<EnumColumnMapper<ConfigColumn>> columnMapper) noexcept
+        : TableAdaptor(CONFIG_VALUE_TABLE, std::move(dict), operation, std::move(columnMapper))
+    {
+    }
+
+protected:
+    const std::vector<ConfigColumn>& getTableColumnOrder() const override
+    {
+        return tableColumnOrder;
+    }
+    std::vector<std::string> getWhere(
+        const std::shared_ptr<ConfigValue>& obj) const override;
+
+private:
+    static const std::vector<ConfigColumn> tableColumnOrder;
+};
+
+/// \brief Adaptor for operations on grb_client Table
+class Client2Table : public TableAdaptor<ClientColumn, ClientObservation> {
+public:
+    Client2Table(
+        std::map<ClientColumn, std::string>&& dict,
+        Operation operation,
+        std::shared_ptr<EnumColumnMapper<ClientColumn>> columnMapper) noexcept
+        : TableAdaptor(CLIENTS_TABLE, std::move(dict), operation, std::move(columnMapper))
+    {
+    }
+    Client2Table(
+        std::vector<std::map<ClientColumn, std::string>>&& dict,
+        std::shared_ptr<EnumColumnMapper<ClientColumn>> columnMapper) noexcept
+        : TableAdaptor(CLIENTS_TABLE, std::move(dict), std::move(columnMapper))
+    {
+    }
+
+protected:
+    const std::vector<ClientColumn>& getTableColumnOrder() const override
+    {
+        return tableColumnOrder;
+    }
+    std::vector<std::string> getWhere(
+        const std::shared_ptr<ClientObservation>& obj) const override;
+
+private:
+    static const std::vector<ClientColumn> tableColumnOrder;
+};
+
+template <class Tab, class Item>
+std::string TableAdaptor<Tab, Item>::sqlForInsert(
+    const std::shared_ptr<Item>& obj) const
 {
     std::vector<std::string> fields;
     std::vector<std::string> values;
@@ -266,12 +418,53 @@ std::string TableAdaptor<Tab>::sqlForInsert(
         }
     }
 
-    return fmt::format("INSERT INTO {} ({}) VALUES ({})", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(values, ", "));
+    return this->operation == Operation::Insert //
+        ? fmt::format("INSERT INTO {} ({}) VALUES ({})", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(values, ", "))
+        : "";
 }
 
-template <class Tab>
-std::string TableAdaptor<Tab>::sqlForUpdate(
-    const std::shared_ptr<CdsObject>& obj) const
+template <class Tab, class Item>
+std::string TableAdaptor<Tab, Item>::sqlForMultiInsert(
+    const std::shared_ptr<Item>& obj) const
+{
+    std::vector<std::string> fields;
+    std::vector<Tab> activeFields;
+    std::vector<std::string> tuples;
+    fields.reserve(getTableColumnOrder().size());
+    tuples.reserve(rowMultiData.size());
+
+    // get columns in right order
+    for (auto&& field : getTableColumnOrder()) {
+        for (auto&& row : rowMultiData) {
+            if (row.find(field) != row.end()) {
+                fields.push_back(columnMapper->mapQuoted(field, true));
+                activeFields.push_back(field);
+            }
+        }
+    }
+    // get values for columns
+    for (auto&& row : rowMultiData) {
+        std::vector<std::string> values(activeFields.size());
+        std::size_t index = 0;
+        for (auto&& field : activeFields) {
+            if (row.find(field) != row.end()) {
+                values[index] = row.at(field);
+            } else {
+                values[index] = SQL_NULL;
+            }
+            index++;
+        }
+        tuples.push_back(fmt::format("({})", fmt::join(values, ",")));
+    }
+
+    return this->operation == Operation::InsertMulti //
+        ? fmt::format("INSERT INTO {} ({}) VALUES {}", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(tuples, ", "))
+        : "";
+}
+
+template <class Tab, class Item>
+std::string TableAdaptor<Tab, Item>::sqlForUpdate(
+    const std::shared_ptr<Item>& obj) const
 {
     if (!isValid())
         throw DatabaseException("sqlForUpdate called with invalid arguments", LINE_MESSAGE);
@@ -287,9 +480,9 @@ std::string TableAdaptor<Tab>::sqlForUpdate(
     return fmt::format("UPDATE {} SET {} WHERE {}", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(getWhere(obj), " AND "));
 }
 
-template <class Tab>
-std::string TableAdaptor<Tab>::sqlForDelete(
-    const std::shared_ptr<CdsObject>& obj) const
+template <class Tab, class Item>
+std::string TableAdaptor<Tab, Item>::sqlForDelete(
+    const std::shared_ptr<Item>& obj) const
 {
     if (!isValid())
         throw DatabaseException("sqlForDelete called with invalid arguments", LINE_MESSAGE);
