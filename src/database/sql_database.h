@@ -45,6 +45,7 @@
 #include <utility>
 
 // forward declarations
+template <class Item>
 class AddUpdateTable;
 class CdsContainer;
 class CdsResource;
@@ -55,9 +56,6 @@ enum class Operation;
 #define DBVERSION 24
 
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
-#define AUTOSCAN_TABLE "mt_autoscan"
-#define CONFIG_VALUE_TABLE "grb_config_value"
-#define CLIENTS_TABLE "grb_client"
 #define PLAYSTATUS_TABLE "grb_playstatus"
 
 class SQLRow {
@@ -210,7 +208,7 @@ public:
     unsigned int getHash(std::size_t index) const { return index < DBVERSION ? hashies.at(index) : 0; }
 
     int insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false, bool warnOnly = false);
-    void insertMultipleRows(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets);
+
     template <typename T>
     void updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view key, const T& value);
     void deleteAll(std::string_view tableName);
@@ -271,7 +269,7 @@ private:
     std::vector<std::pair<std::string, std::string>> retrieveMetaDataForObject(int objectId);
     std::vector<std::shared_ptr<CdsResource>> retrieveResourcesForObject(int objectId);
 
-    std::vector<std::shared_ptr<AddUpdateTable>> _addUpdateObject(
+    std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> _addUpdateObject(
         const std::shared_ptr<CdsObject>& obj,
         Operation op,
         int* changedContainer);
@@ -279,11 +277,11 @@ private:
     void generateMetaDataDBOperations(
         const std::shared_ptr<CdsObject>& obj,
         Operation op,
-        std::vector<std::shared_ptr<AddUpdateTable>>& operations) const;
+        std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>>& operations) const;
     void generateResourceDBOperations(
         const std::shared_ptr<CdsObject>& obj,
         Operation op,
-        std::vector<std::shared_ptr<AddUpdateTable>>& operations);
+        std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>>& operations);
 
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<std::int32_t>& objectIDs);
