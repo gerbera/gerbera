@@ -56,7 +56,6 @@ enum class Operation;
 #define DBVERSION 24
 
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
-#define PLAYSTATUS_TABLE "grb_playstatus"
 
 class SQLRow {
 public:
@@ -207,10 +206,6 @@ public:
 
     unsigned int getHash(std::size_t index) const { return index < DBVERSION ? hashies.at(index) : 0; }
 
-    int insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false, bool warnOnly = false);
-
-    template <typename T>
-    void updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view key, const T& value);
     void deleteAll(std::string_view tableName);
     template <typename T>
     void deleteRow(const std::string& tableName, const std::string& key, const T& value);
@@ -315,12 +310,6 @@ private:
 
     using AutoLock = std::scoped_lock<std::mutex>;
 };
-
-template <typename T>
-void SQLDatabase::updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view key, const T& value)
-{
-    exec(fmt::format("UPDATE {} SET {} WHERE {} = {}", identifier(std::string(tableName)), fmt::join(values, ", "), identifier(std::string(key)), quote(value)));
-}
 
 template <typename T>
 void SQLDatabase::deleteRow(const std::string& tableName, const std::string& key, const T& value)

@@ -106,12 +106,21 @@ const std::vector<ClientColumn> Client2Table::tableColumnOrder = {
     ClientColumn::Age,
 };
 
+const std::vector<PlaystatusCol> Playstatus2Table::tableColumnOrder = {
+    PlaystatusCol::Group,
+    PlaystatusCol::ItemId,
+    PlaystatusCol::PlayCount,
+    PlaystatusCol::LastPlayed,
+    PlaystatusCol::LastPlayedPosition,
+    PlaystatusCol::BookMarkPosition,
+};
+
 /// \brief Generate INSERT statement from row data and object for object tables
 template <>
 std::string TableAdaptor<BrowseCol, CdsObject>::sqlForInsert(
     const std::shared_ptr<CdsObject>& obj) const
 {
-    if (obj->getID() != INVALID_OBJECT_ID) {
+    if (obj && obj->getID() != INVALID_OBJECT_ID) {
         throw DatabaseException("Attempted to insert new object with ID!", LINE_MESSAGE);
     }
 
@@ -126,7 +135,10 @@ std::string TableAdaptor<BrowseCol, CdsObject>::sqlForInsert(
         }
     }
 
-    return fmt::format("INSERT INTO {} ({}) VALUES ({})", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(values, ", "));
+    return fmt::format("INSERT INTO {} ({}) VALUES ({})",
+        columnMapper->getTableName(),
+        fmt::join(fields, ", "),
+        fmt::join(values, ", "));
 }
 
 /// \brief Generate INSERT statement from row data and object for metadata tables
@@ -150,7 +162,10 @@ std::string TableAdaptor<MetadataCol, CdsObject>::sqlForInsert(
         }
     }
 
-    return fmt::format("INSERT INTO {} ({}) VALUES ({})", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(values, ", "));
+    return fmt::format("INSERT INTO {} ({}) VALUES ({})",
+        columnMapper->getTableName(),
+        fmt::join(fields, ", "),
+        fmt::join(values, ", "));
 }
 
 std::string Resource2Table::sqlForInsert(
@@ -176,7 +191,10 @@ std::string Resource2Table::sqlForInsert(
         values.push_back(val);
     }
 
-    return fmt::format("INSERT INTO {} ({}) VALUES ({})", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(values, ", "));
+    return fmt::format("INSERT INTO {} ({}) VALUES ({})",
+        columnMapper->getTableName(),
+        fmt::join(fields, ", "),
+        fmt::join(values, ", "));
 }
 
 std::string Resource2Table::sqlForUpdate(
@@ -196,7 +214,10 @@ std::string Resource2Table::sqlForUpdate(
         fields.push_back(fmt::format("{} = {}", columnMapper->quote(EnumMapper::getAttributeName(key)), val));
     }
 
-    return fmt::format("UPDATE {} SET {} WHERE {}", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(getWhere(obj), " AND "));
+    return fmt::format("UPDATE {} SET {} WHERE {}",
+        columnMapper->getTableName(),
+        fmt::join(fields, ", "),
+        fmt::join(getWhere(obj), " AND "));
 }
 
 std::vector<std::string> Object2Table::getWhere(
@@ -230,7 +251,9 @@ std::vector<std::string> Autoscan2Table::getWhere(
     const std::shared_ptr<AutoscanDirectory>& obj) const
 {
     return {
-        fmt::format("{} = {}", columnMapper->mapQuoted(AutoscanColumn::Id, true), obj->getDatabaseID()),
+        fmt::format("{} = {}",
+            columnMapper->mapQuoted(AutoscanColumn::Id, true),
+            obj ? fmt::to_string(obj->getDatabaseID()) : rowData.at(AutoscanColumn::Id)),
     };
 }
 
@@ -248,5 +271,14 @@ std::vector<std::string> Client2Table::getWhere(
     return {
         fmt::format("{} = {}", columnMapper->mapQuoted(ClientColumn::Addr, true), obj && obj->addr ? obj->addr->getNameInfo(false) : rowData.at(ClientColumn::Addr)),
         fmt::format("{} = {}", columnMapper->mapQuoted(ClientColumn::Port, true), obj && obj->addr ? fmt::to_string(obj->addr->getPort()) : rowData.at(ClientColumn::Port)),
+    };
+}
+
+std::vector<std::string> Playstatus2Table::getWhere(
+    const std::shared_ptr<ClientStatusDetail>& obj) const
+{
+    return {
+        fmt::format("{} = {}", columnMapper->mapQuoted(PlaystatusCol::Group, true), obj ? obj->getGroup() : rowData.at(PlaystatusCol::Group)),
+        fmt::format("{} = {}", columnMapper->mapQuoted(PlaystatusCol::ItemId, true), obj ? fmt::to_string(obj->getItemId()) : rowData.at(PlaystatusCol::ItemId)),
     };
 }

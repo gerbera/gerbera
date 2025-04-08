@@ -42,6 +42,7 @@
 class AutoscanDirectory;
 class CdsObject;
 class ClientObservation;
+class ClientStatusDetail;
 class ConfigValue;
 enum class ResourceAttribute;
 
@@ -50,6 +51,7 @@ enum class ResourceAttribute;
 #define CDS_OBJECT_TABLE "mt_cds_object"
 #define CONFIG_VALUE_TABLE "grb_config_value"
 #define METADATA_TABLE "mt_metadata"
+#define PLAYSTATUS_TABLE "grb_playstatus"
 #define RESOURCE_TABLE "grb_cds_resource"
 
 #define SQL_NULL "NULL"
@@ -149,6 +151,16 @@ enum class ClientColumn {
     UserAgent,
     Last,
     Age,
+};
+
+/// \brief playstatus column ids
+enum class PlaystatusCol {
+    Group = 0,
+    ItemId,
+    PlayCount,
+    LastPlayed,
+    LastPlayedPosition,
+    BookMarkPosition,
 };
 
 /// \brief base helper class for insert, update and delete operations
@@ -400,6 +412,29 @@ protected:
 
 private:
     static const std::vector<ClientColumn> tableColumnOrder;
+};
+
+/// \brief Adaptor for operations on grb_playstatus Table
+class Playstatus2Table : public TableAdaptor<PlaystatusCol, ClientStatusDetail> {
+public:
+    Playstatus2Table(
+        std::map<PlaystatusCol, std::string>&& dict,
+        Operation operation,
+        std::shared_ptr<EnumColumnMapper<PlaystatusCol>> columnMapper) noexcept
+        : TableAdaptor(PLAYSTATUS_TABLE, std::move(dict), operation, std::move(columnMapper))
+    {
+    }
+
+protected:
+    const std::vector<PlaystatusCol>& getTableColumnOrder() const override
+    {
+        return tableColumnOrder;
+    }
+    std::vector<std::string> getWhere(
+        const std::shared_ptr<ClientStatusDetail>& obj) const override;
+
+private:
+    static const std::vector<PlaystatusCol> tableColumnOrder;
 };
 
 template <class Tab, class Item>

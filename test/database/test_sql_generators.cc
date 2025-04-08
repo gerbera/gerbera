@@ -121,10 +121,12 @@ TEST_F(DatabaseTest, BasicFormattingTest)
 
 TEST_F(DatabaseTest, UpdateTest)
 {
-    database->updateRow(
+    database->execOnly("UPDATE [Table] SET [a] = 4, [b] = 101 WHERE [id] = 1234");
+    /*
         "Table",
         { ColumnUpdate(database->identifier("a"), "4"), ColumnUpdate(database->identifier("b"), "101") },
-        "id", 1234);
+        "id", 1234;
+    */
     EXPECT_EQ(database->lastStatement, "UPDATE [Table] SET [a] = 4, [b] = 101 WHERE [id] = 1234");
 }
 

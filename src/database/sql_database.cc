@@ -63,15 +63,15 @@
 
 #define RESOURCE_SEP '|'
 
-#define ITM_ALIAS "f"
-#define REF_ALIAS "rf"
 #define AUS_ALIAS "as"
-#define SRC_ALIAS "c"
 #define CFG_ALIAS "co"
 #define CLT_ALIAS "cl"
+#define ITM_ALIAS "f"
 #define MTA_ALIAS "m"
-#define RES_ALIAS "re"
 #define PLY_ALIAS "pl"
+#define REF_ALIAS "rf"
+#define RES_ALIAS "re"
+#define SRC_ALIAS "c"
 
 // database
 #define LOC_DIR_PREFIX 'D'
@@ -102,14 +102,6 @@ enum class AutoscanCol {
     Id = 0,
     ObjId,
     Persistent,
-};
-
-/// \brief playstatus column ids
-enum class PlaystatusCol {
-    Group = 0,
-    ItemId,
-    PlayCount,
-    LastPlayed,
 };
 
 /// \brief Map browse column ids to column names
@@ -275,6 +267,8 @@ static const std::map<PlaystatusCol, SearchProperty> playstatusColMap {
     { PlaystatusCol::ItemId, { PLY_ALIAS, "item_id" } },
     { PlaystatusCol::PlayCount, { PLY_ALIAS, "playCount", FieldType::Integer } },
     { PlaystatusCol::LastPlayed, { PLY_ALIAS, "lastPlayed", FieldType::Date } },
+    { PlaystatusCol::LastPlayedPosition, { PLY_ALIAS, "lastPlayedPosition", FieldType::Integer } },
+    { PlaystatusCol::BookMarkPosition, { PLY_ALIAS, "bookMarkPos", FieldType::Integer } },
 };
 
 /// \brief Playstatus search keys to column ids
@@ -285,6 +279,8 @@ static const std::vector<std::pair<std::string, PlaystatusCol>> playstatusTagMap
     { UPNP_SEARCH_ID, PlaystatusCol::ItemId },
     { UPNP_SEARCH_PLAY_COUNT, PlaystatusCol::PlayCount },
     { UPNP_SEARCH_LAST_PLAYED, PlaystatusCol::LastPlayed },
+    { "lastPlayedPosition", PlaystatusCol::LastPlayedPosition },
+    { "bookMarkPos", PlaystatusCol::BookMarkPosition },
 };
 
 /// \brief Map config column ids to column names
@@ -699,10 +695,6 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
     else if (op == Operation::Update)
         cdsObjectSql.emplace(BrowseCol::UpnpClass, SQL_NULL);
 
-    // if (!hasReference || refObj->getTitle() != obj->getTitle())
-    //     cdsObjectSql.emplace(BrowseCol::DcTitle, quote(obj->getTitle(), browseColMap.at(BrowseCol::DcTitle).length));
-    // else if (isUpdate)
-    //     cdsObjectSql.emplace(BrowseCol::DcTitle, SQL_NULL);
     setCol(cdsObjectSql, BrowseCol::DcTitle, obj->getTitle(), browseColMap);
     setCol(cdsObjectSql, BrowseCol::SortKey, obj->getSortKey(), browseColMap);
 
@@ -1581,18 +1573,6 @@ int SQLDatabase::createContainer(
     return newId;
 }
 
-int SQLDatabase::insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId, bool warnOnly)
-{
-    assert(fields.size() == values.size());
-    auto sql = fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(std::string(tableName)), fmt::join(fields, ","), fmt::join(values, ","));
-    if (warnOnly) {
-        execOnly(sql);
-        return -1;
-    }
-
-    return exec(sql, getLastInsertId);
-}
-
 void SQLDatabase::deleteAll(std::string_view tableName)
 {
     del(tableName, "", {});
@@ -2084,11 +2064,13 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
             bool persistent = remapBool(row->col_int(1, 0));
             if (persistent) {
                 auto location = std::get<0>(stripLocationPrefix(row->col(2)));
-                auto values = std::vector {
-                    ColumnUpdate(identifier("obj_id"), SQL_NULL),
-                    ColumnUpdate(identifier("location"), quote(location.string())),
+                auto fields = std::map<AutoscanColumn, std::string> {
+                    { AutoscanColumn::Id, quote(colId) },
+                    { AutoscanColumn::ObjId, SQL_NULL },
+                    { AutoscanColumn::Location, quote(location.string()) },
                 };
-                updateRow(AUTOSCAN_TABLE, values, "id", colId);
+                Autoscan2Table at(fields, Operation::Update, autoscanColumnMapper);
+                exec(AUTOSCAN_TABLE, at.sqlForUpdate(nullptr), colId);
             } else {
                 deleteAs.push_back(colId);
             }
@@ -2160,11 +2142,11 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
     auto removeIds = std::vector(containers);
 
     // select statements
-    auto parentSql = fmt::format("SELECT DISTINCT {0}parent_id{1} FROM {0}{2}{1} WHERE {0}id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
-    auto itemSql = fmt::format("SELECT DISTINCT {0}id{1}, {0}parent_id{1} FROM {0}{2}{1} WHERE {0}ref_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
+    auto parentSql = fmt::format("SELECT DISTINCT {} FROM {} WHERE {} IN", identifier("parent_id"), identifier(CDS_OBJECT_TABLE), identifier("id"));
+    auto itemSql = fmt::format("SELECT DISTINCT {}, {} FROM {} WHERE {} IN", identifier("id"), identifier("parent_id"), identifier(CDS_OBJECT_TABLE), identifier("ref_id"));
     auto containersSql = all //
-        ? fmt::format("SELECT DISTINCT {0}id{1}, {0}object_type{1}, {0}ref_id{1} FROM {0}{2}{1} WHERE {0}parent_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE) //
-        : fmt::format("SELECT DISTINCT {0}id{1}, {0}object_type{1} FROM {0}{2}{1} WHERE {0}parent_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
+        ? fmt::format("SELECT DISTINCT {}, {}, {} FROM {} WHERE {} IN", identifier("id"), identifier("object_type"), identifier("ref_id"), identifier(CDS_OBJECT_TABLE), identifier("parent_id")) //
+        : fmt::format("SELECT DISTINCT {}, {} FROM {} WHERE {} IN", identifier("id"), identifier("object_type"), identifier(CDS_OBJECT_TABLE), identifier("parent_id"));
 
     // collect container for update signals
     if (!containers.empty()) {
@@ -2486,24 +2468,32 @@ void SQLDatabase::saveClients(const std::vector<ClientObservation>& cache)
 
 std::shared_ptr<ClientStatusDetail> SQLDatabase::getPlayStatus(const std::string& group, int objectId)
 {
-    auto fields = std::vector {
-        identifier("group"),
-        identifier("item_id"),
-        identifier("playCount"),
-        identifier("lastPlayed"),
-        identifier("lastPlayedPosition"),
-        identifier("bookMarkPos"),
+    std::vector<std::string> fields;
+    fields.reserve(playstatusColMap.size());
+    for (auto&& [key, col] : playstatusColMap) {
+        fields.push_back(fmt::format("{}", identifier(col.field)));
+    }
+    std::vector<std::string> where {
+        fmt::format("{} = {}", playstatusColumnMapper->mapQuoted(PlaystatusCol::Group, true), quote(group)),
+        fmt::format("{} = {}", playstatusColumnMapper->mapQuoted(PlaystatusCol::ItemId, true), quote(objectId)),
     };
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} = {}",
-        fmt::join(fields, ", "), identifier(PLAYSTATUS_TABLE),
-        identifier("group"), quote(group), identifier("item_id"), quote(objectId)));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {}",
+        fmt::join(fields, ", "),
+        identifier(PLAYSTATUS_TABLE),
+        fmt::join(where, " AND ")));
     if (!res)
         return {};
 
     std::unique_ptr<SQLRow> row;
     if ((row = res->nextRow())) {
         log_debug("Loaded {},{} items from {}", group, objectId, PLAYSTATUS_TABLE);
-        return std::make_shared<ClientStatusDetail>(row->col(0), row->col_int(1, objectId), row->col_int(2, 0), row->col_int(3, 0), row->col_int(4, 0), row->col_int(5, 0));
+        return std::make_shared<ClientStatusDetail>(
+            getCol(row, PlaystatusCol::Group),
+            getColInt(row, PlaystatusCol::ItemId, objectId),
+            getColInt(row, PlaystatusCol::PlayCount, 0),
+            getColInt(row, PlaystatusCol::LastPlayed, 0),
+            getColInt(row, PlaystatusCol::LastPlayedPosition, 0),
+            getColInt(row, PlaystatusCol::BookMarkPosition, 0));
     }
 
     return {};
@@ -2511,17 +2501,18 @@ std::shared_ptr<ClientStatusDetail> SQLDatabase::getPlayStatus(const std::string
 
 std::vector<std::shared_ptr<ClientStatusDetail>> SQLDatabase::getPlayStatusList(int objectId)
 {
-    auto fields = std::vector {
-        identifier("group"),
-        identifier("item_id"),
-        identifier("playCount"),
-        identifier("lastPlayed"),
-        identifier("lastPlayedPosition"),
-        identifier("bookMarkPos"),
+    std::vector<std::string> fields;
+    fields.reserve(playstatusColMap.size());
+    for (auto&& [key, col] : playstatusColMap) {
+        fields.push_back(fmt::format("{}", identifier(col.field)));
+    }
+    std::vector<std::string> where {
+        fmt::format("{} = {}", playstatusColumnMapper->mapQuoted(PlaystatusCol::ItemId, true), quote(objectId)),
     };
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {}",
-        fmt::join(fields, ", "), identifier(PLAYSTATUS_TABLE),
-        identifier("item_id"), quote(objectId)));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {}",
+        fmt::join(fields, ", "),
+        identifier(PLAYSTATUS_TABLE),
+        fmt::join(where, " AND ")));
     if (!res)
         return {};
 
@@ -2529,7 +2520,13 @@ std::vector<std::shared_ptr<ClientStatusDetail>> SQLDatabase::getPlayStatusList(
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         log_debug("Loaded {},{} items from {}", row->col(0), objectId, PLAYSTATUS_TABLE);
-        auto status = std::make_shared<ClientStatusDetail>(row->col(0), row->col_int(1, objectId), row->col_int(2, 0), row->col_int(3, 0), row->col_int(4, 0), row->col_int(5, 0));
+        auto status = std::make_shared<ClientStatusDetail>(
+            getCol(row, PlaystatusCol::Group),
+            getColInt(row, PlaystatusCol::ItemId, objectId),
+            getColInt(row, PlaystatusCol::PlayCount, 0),
+            getColInt(row, PlaystatusCol::LastPlayed, 0),
+            getColInt(row, PlaystatusCol::LastPlayedPosition, 0),
+            getColInt(row, PlaystatusCol::BookMarkPosition, 0));
         result.push_back(std::move(status));
     }
 
@@ -2541,8 +2538,8 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
     beginTransaction("savePlayStatus");
 
     std::vector<std::string> where {
-        fmt::format("{} = {}", identifier("group"), quote(detail->getGroup())),
-        fmt::format("{} = {}", identifier("item_id"), quote(detail->getItemId())),
+        fmt::format("{} = {}", playstatusColumnMapper->mapQuoted(PlaystatusCol::Group, true), quote(detail->getGroup())),
+        fmt::format("{} = {}", playstatusColumnMapper->mapQuoted(PlaystatusCol::ItemId, true), quote(detail->getItemId())),
     };
     auto res = select(fmt::format("SELECT 1 FROM {} WHERE {} LIMIT 1",
         identifier(PLAYSTATUS_TABLE),
@@ -2550,35 +2547,25 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
     auto doUpdate = res && res->getNumRows() > 0;
 
     if (doUpdate) {
-        std::vector<std::string> fields {
-            fmt::format("{} = {}", identifier("playCount"), quote(detail->getPlayCount())),
-            fmt::format("{} = {}", identifier("lastPlayed"), quote(detail->getLastPlayed().count())),
-            fmt::format("{} = {}", identifier("lastPlayedPosition"), quote(detail->getLastPlayedPosition().count())),
-            fmt::format("{} = {}", identifier("bookMarkPos"), quote(detail->getBookMarkPosition().count())),
+        auto dict = std::map<PlaystatusCol, std::string> {
+            { PlaystatusCol::PlayCount, quote(detail->getPlayCount()) },
+            { PlaystatusCol::LastPlayed, quote(detail->getLastPlayed().count()) },
+            { PlaystatusCol::LastPlayedPosition, quote(detail->getLastPlayedPosition().count()) },
+            { PlaystatusCol::BookMarkPosition, quote(detail->getBookMarkPosition().count()) },
         };
-
-        exec(fmt::format("UPDATE {} SET {} WHERE {}",
-            identifier(PLAYSTATUS_TABLE),
-            fmt::join(fields, ", "),
-            fmt::join(where, " AND ")));
+        Playstatus2Table pt(std::move(dict), Operation::Update, playstatusColumnMapper);
+        execOnly(pt.sqlForUpdate(detail));
     } else {
-        auto fields = std::vector {
-            identifier("group"),
-            identifier("item_id"),
-            identifier("playCount"),
-            identifier("lastPlayed"),
-            identifier("lastPlayedPosition"),
-            identifier("bookMarkPos"),
+        auto dict = std::map<PlaystatusCol, std::string> {
+            { PlaystatusCol::Group, quote(detail->getGroup()) },
+            { PlaystatusCol::ItemId, quote(detail->getItemId()) },
+            { PlaystatusCol::PlayCount, quote(detail->getPlayCount()) },
+            { PlaystatusCol::LastPlayed, quote(detail->getLastPlayed().count()) },
+            { PlaystatusCol::LastPlayedPosition, quote(detail->getLastPlayedPosition().count()) },
+            { PlaystatusCol::BookMarkPosition, quote(detail->getBookMarkPosition().count()) },
         };
-        auto values = std::vector {
-            quote(detail->getGroup()),
-            quote(detail->getItemId()),
-            quote(detail->getPlayCount()),
-            quote(detail->getLastPlayed().count()),
-            quote(detail->getLastPlayedPosition().count()),
-            quote(detail->getBookMarkPosition().count()),
-        };
-        insert(PLAYSTATUS_TABLE, fields, values, false, true);
+        Playstatus2Table pt(std::move(dict), Operation::Insert, playstatusColumnMapper);
+        execOnly(pt.sqlForInsert(detail));
     }
 
     commit("savePlayStatus");
@@ -2587,7 +2574,12 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
 std::vector<std::map<std::string, std::string>> SQLDatabase::getClientGroupStats()
 {
     auto res = select(fmt::format("SELECT {}, COUNT(*), SUM({}), MAX({}), COUNT(NULLIF({},0)) FROM {} GROUP BY {}",
-        identifier("group"), identifier("playCount"), identifier("lastPlayed"), identifier("bookMarkPos"), identifier(PLAYSTATUS_TABLE), identifier("group")));
+        playstatusColumnMapper->mapQuoted(PlaystatusCol::Group, true),
+        playstatusColumnMapper->mapQuoted(PlaystatusCol::PlayCount, true),
+        playstatusColumnMapper->mapQuoted(PlaystatusCol::LastPlayed, true),
+        playstatusColumnMapper->mapQuoted(PlaystatusCol::BookMarkPosition, true),
+        identifier(PLAYSTATUS_TABLE),
+        playstatusColumnMapper->mapQuoted(PlaystatusCol::Group, true)));
     if (!res)
         return {};
 
@@ -2634,7 +2626,9 @@ void SQLDatabase::updateAutoscanList(AutoscanScanMode scanmode, const std::share
 
         int objectID = findObjectIDByPath(location);
         log_debug("objectID = {}", objectID);
-        auto where = (objectID == INVALID_OBJECT_ID) ? fmt::format("{} = {}", identifier("location"), quote(location)) : fmt::format("{} = {}", identifier("obj_id"), objectID);
+        auto where = (objectID == INVALID_OBJECT_ID)
+            ? fmt::format("{} = {}", identifier("location"), quote(location))
+            : fmt::format("{} = {}", identifier("obj_id"), objectID);
 
         beginTransaction("updateAutoscanList x");
         auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} LIMIT 1", identifier("id"), identifier(AUTOSCAN_TABLE), where));
