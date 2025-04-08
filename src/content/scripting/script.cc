@@ -715,8 +715,8 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
                 log_warning("{}: {}", obj->getLocation().string(), err);
             }
             obj->setSortKey(mval);
-        } else if (pcd) {
-            obj->setSortKey(pcd->getSortKey());
+        } else {
+            obj->setSortKey(obj->getTitle());
         }
     }
 

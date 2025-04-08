@@ -63,15 +63,15 @@
 
 #define RESOURCE_SEP '|'
 
-#define ITM_ALIAS "f"
-#define REF_ALIAS "rf"
 #define AUS_ALIAS "as"
-#define SRC_ALIAS "c"
 #define CFG_ALIAS "co"
 #define CLT_ALIAS "cl"
+#define ITM_ALIAS "f"
 #define MTA_ALIAS "m"
-#define RES_ALIAS "re"
 #define PLY_ALIAS "pl"
+#define REF_ALIAS "rf"
+#define RES_ALIAS "re"
+#define SRC_ALIAS "c"
 
 // database
 #define LOC_DIR_PREFIX 'D'
@@ -80,7 +80,7 @@
 #define LOC_ILLEGAL_PREFIX 'X'
 
 /// \brief search column ids
-enum class SearchCol {
+enum class SearchColumn {
     Id = 0,
     RefId,
     ParentId,
@@ -98,101 +98,93 @@ enum class SearchCol {
 };
 
 /// \brief autoscan column ids
-enum class AutoscanCol {
+enum class ASColumn {
     Id = 0,
     ObjId,
     Persistent,
 };
 
-/// \brief playstatus column ids
-enum class PlaystatusCol {
-    Group = 0,
-    ItemId,
-    PlayCount,
-    LastPlayed,
-};
-
 /// \brief Map browse column ids to column names
 // map ensures entries are in correct order, each value of BrowseCol must be present
-static const std::map<BrowseCol, SearchProperty> browseColMap {
-    { BrowseCol::Id, { ITM_ALIAS, "id" } },
-    { BrowseCol::RefId, { ITM_ALIAS, "ref_id" } },
-    { BrowseCol::ParentId, { ITM_ALIAS, "parent_id" } },
-    { BrowseCol::ObjectType, { ITM_ALIAS, "object_type" } },
-    { BrowseCol::UpnpClass, { ITM_ALIAS, "upnp_class" } },
-    { BrowseCol::DcTitle, { ITM_ALIAS, "dc_title", FieldType::String, 255 } },
-    { BrowseCol::SortKey, { ITM_ALIAS, "sort_key", FieldType::String, 255 } },
-    { BrowseCol::Location, { ITM_ALIAS, "location" } },
-    { BrowseCol::LocationHash, { ITM_ALIAS, "location_hash" } },
-    { BrowseCol::Auxdata, { ITM_ALIAS, "auxdata" } },
-    { BrowseCol::UpdateId, { ITM_ALIAS, "update_id" } },
-    { BrowseCol::MimeType, { ITM_ALIAS, "mime_type", FieldType::String, 40 } },
-    { BrowseCol::Flags, { ITM_ALIAS, "flags" } },
-    { BrowseCol::PartNumber, { ITM_ALIAS, "part_number", FieldType::Integer } },
-    { BrowseCol::TrackNumber, { ITM_ALIAS, "track_number", FieldType::Integer } },
-    { BrowseCol::ServiceId, { ITM_ALIAS, "service_id" } },
-    { BrowseCol::LastModified, { ITM_ALIAS, "last_modified", FieldType::Date } },
-    { BrowseCol::LastUpdated, { ITM_ALIAS, "last_updated", FieldType::Date } },
-    { BrowseCol::RefUpnpClass, { REF_ALIAS, "upnp_class" } },
-    { BrowseCol::RefLocation, { REF_ALIAS, "location" } },
-    { BrowseCol::RefAuxdata, { REF_ALIAS, "auxdata" } },
-    { BrowseCol::RefMimeType, { REF_ALIAS, "mime_type" } },
-    { BrowseCol::RefServiceId, { REF_ALIAS, "service_id" } },
-    { BrowseCol::AsPersistent, { AUS_ALIAS, "persistent", FieldType::Bool } },
+static const std::map<BrowseColumn, SearchProperty> browseColMap {
+    { BrowseColumn::Id, { ITM_ALIAS, "id" } },
+    { BrowseColumn::RefId, { ITM_ALIAS, "ref_id" } },
+    { BrowseColumn::ParentId, { ITM_ALIAS, "parent_id" } },
+    { BrowseColumn::ObjectType, { ITM_ALIAS, "object_type" } },
+    { BrowseColumn::UpnpClass, { ITM_ALIAS, "upnp_class" } },
+    { BrowseColumn::DcTitle, { ITM_ALIAS, "dc_title", FieldType::String, 255 } },
+    { BrowseColumn::SortKey, { ITM_ALIAS, "sort_key", FieldType::String, 255 } },
+    { BrowseColumn::Location, { ITM_ALIAS, "location" } },
+    { BrowseColumn::LocationHash, { ITM_ALIAS, "location_hash" } },
+    { BrowseColumn::Auxdata, { ITM_ALIAS, "auxdata" } },
+    { BrowseColumn::UpdateId, { ITM_ALIAS, "update_id" } },
+    { BrowseColumn::MimeType, { ITM_ALIAS, "mime_type", FieldType::String, 40 } },
+    { BrowseColumn::Flags, { ITM_ALIAS, "flags" } },
+    { BrowseColumn::PartNumber, { ITM_ALIAS, "part_number", FieldType::Integer } },
+    { BrowseColumn::TrackNumber, { ITM_ALIAS, "track_number", FieldType::Integer } },
+    { BrowseColumn::ServiceId, { ITM_ALIAS, "service_id" } },
+    { BrowseColumn::LastModified, { ITM_ALIAS, "last_modified", FieldType::Date } },
+    { BrowseColumn::LastUpdated, { ITM_ALIAS, "last_updated", FieldType::Date } },
+    { BrowseColumn::RefUpnpClass, { REF_ALIAS, "upnp_class" } },
+    { BrowseColumn::RefLocation, { REF_ALIAS, "location" } },
+    { BrowseColumn::RefAuxdata, { REF_ALIAS, "auxdata" } },
+    { BrowseColumn::RefMimeType, { REF_ALIAS, "mime_type" } },
+    { BrowseColumn::RefServiceId, { REF_ALIAS, "service_id" } },
+    { BrowseColumn::AsPersistent, { AUS_ALIAS, "persistent", FieldType::Bool } },
 };
 
 /// \brief Map search column ids to column names
 // map ensures entries are in correct order, each value of SearchCol must be present
-static const std::map<SearchCol, SearchProperty> searchColMap {
-    { SearchCol::Id, { SRC_ALIAS, "id" } },
-    { SearchCol::RefId, { SRC_ALIAS, "ref_id" } },
-    { SearchCol::ParentId, { SRC_ALIAS, "parent_id" } },
-    { SearchCol::ObjectType, { SRC_ALIAS, "object_type" } },
-    { SearchCol::UpnpClass, { SRC_ALIAS, "upnp_class" } },
-    { SearchCol::DcTitle, { SRC_ALIAS, "dc_title", FieldType::String, 255 } },
-    { SearchCol::SortKey, { SRC_ALIAS, "sort_key", FieldType::String, 255 } },
-    { SearchCol::MimeType, { SRC_ALIAS, "mime_type", FieldType::String, 40 } },
-    { SearchCol::Flags, { SRC_ALIAS, "flags", FieldType::Integer } },
-    { SearchCol::PartNumber, { SRC_ALIAS, "part_number", FieldType::Integer } },
-    { SearchCol::TrackNumber, { SRC_ALIAS, "track_number", FieldType::Integer } },
-    { SearchCol::Location, { SRC_ALIAS, "location" } },
-    { SearchCol::LastModified, { SRC_ALIAS, "last_modified", FieldType::Date } },
-    { SearchCol::LastUpdated, { SRC_ALIAS, "last_updated", FieldType::Date } },
+static const std::map<SearchColumn, SearchProperty> searchColMap {
+    { SearchColumn::Id, { SRC_ALIAS, "id" } },
+    { SearchColumn::RefId, { SRC_ALIAS, "ref_id" } },
+    { SearchColumn::ParentId, { SRC_ALIAS, "parent_id" } },
+    { SearchColumn::ObjectType, { SRC_ALIAS, "object_type" } },
+    { SearchColumn::UpnpClass, { SRC_ALIAS, "upnp_class" } },
+    { SearchColumn::DcTitle, { SRC_ALIAS, "dc_title", FieldType::String, 255 } },
+    { SearchColumn::SortKey, { SRC_ALIAS, "sort_key", FieldType::String, 255 } },
+    { SearchColumn::MimeType, { SRC_ALIAS, "mime_type", FieldType::String, 40 } },
+    { SearchColumn::Flags, { SRC_ALIAS, "flags", FieldType::Integer } },
+    { SearchColumn::PartNumber, { SRC_ALIAS, "part_number", FieldType::Integer } },
+    { SearchColumn::TrackNumber, { SRC_ALIAS, "track_number", FieldType::Integer } },
+    { SearchColumn::Location, { SRC_ALIAS, "location" } },
+    { SearchColumn::LastModified, { SRC_ALIAS, "last_modified", FieldType::Date } },
+    { SearchColumn::LastUpdated, { SRC_ALIAS, "last_updated", FieldType::Date } },
 };
 
 /// \brief Map meta column ids to column names
 // map ensures entries are in correct order, each value of MetadataCol must be present
-static const std::map<MetadataCol, SearchProperty> metaColMap {
-    { MetadataCol::ItemId, { MTA_ALIAS, "item_id" } },
-    { MetadataCol::PropertyName, { MTA_ALIAS, "property_name" } },
-    { MetadataCol::PropertyValue, { MTA_ALIAS, "property_value", FieldType::String, 255 } },
+static const std::map<MetadataColumn, SearchProperty> metaColMap {
+    { MetadataColumn::ItemId, { MTA_ALIAS, "item_id" } },
+    { MetadataColumn::PropertyName, { MTA_ALIAS, "property_name" } },
+    { MetadataColumn::PropertyValue, { MTA_ALIAS, "property_value", FieldType::String, 255 } },
 };
 
 /// \brief Map autoscan column ids to column names
 // map ensures entries are in correct order, each value of AutoscanCol must be present
-static const std::map<AutoscanCol, SearchProperty> asColMap {
-    { AutoscanCol::Id, { AUS_ALIAS, "id" } },
-    { AutoscanCol::ObjId, { AUS_ALIAS, "obj_id" } },
-    { AutoscanCol::Persistent, { AUS_ALIAS, "persistent", FieldType::Integer } },
+static const std::map<ASColumn, SearchProperty> asColMap {
+    { ASColumn::Id, { AUS_ALIAS, "id" } },
+    { ASColumn::ObjId, { AUS_ALIAS, "obj_id" } },
+    { ASColumn::Persistent, { AUS_ALIAS, "persistent", FieldType::Integer } },
 };
 
 /// \brief Map resource column ids to column names
 // map ensures entries are in correct order, each value of ResourceCol must be present
-static const std::map<ResourceCol, SearchProperty> resColMap {
-    { ResourceCol::ItemId, { RES_ALIAS, "item_id" } },
-    { ResourceCol::ResId, { RES_ALIAS, "res_id" } },
-    { ResourceCol::HandlerType, { RES_ALIAS, "handlerType" } },
-    { ResourceCol::Purpose, { RES_ALIAS, "purpose" } },
-    { ResourceCol::Options, { RES_ALIAS, "options" } },
-    { ResourceCol::Parameters, { RES_ALIAS, "parameters" } },
+static const std::map<ResourceColumn, SearchProperty> resColMap {
+    { ResourceColumn::ItemId, { RES_ALIAS, "item_id" } },
+    { ResourceColumn::ResId, { RES_ALIAS, "res_id" } },
+    { ResourceColumn::HandlerType, { RES_ALIAS, "handlerType" } },
+    { ResourceColumn::Purpose, { RES_ALIAS, "purpose" } },
+    { ResourceColumn::Options, { RES_ALIAS, "options" } },
+    { ResourceColumn::Parameters, { RES_ALIAS, "parameters" } },
 };
 
 /// \brief Map resource search keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static const std::vector<std::pair<std::string, ResourceCol>> resTagMap {
-    { UPNP_SEARCH_ID, ResourceCol::ItemId },
-    { "res@id", ResourceCol::ResId },
+static const std::vector<std::pair<std::string, ResourceColumn>> resTagMap {
+    { UPNP_SEARCH_ID, ResourceColumn::ItemId },
+    { "res@id", ResourceColumn::ResId },
 };
 
 /// \brief Map autoscan column ids to column names
@@ -218,34 +210,35 @@ static const std::map<AutoscanColumn, SearchProperty> autoscanColMap {
     { AutoscanColumn::PathIds, { AUS_ALIAS, "path_ids", FieldType::String } },
     { AutoscanColumn::Touched, { AUS_ALIAS, "touched", FieldType::Bool } },
     { AutoscanColumn::ObjLocation, { ITM_ALIAS, "location" } },
+    { AutoscanColumn::ItemId, { ITM_ALIAS, "id" } },
 };
 
 /// \brief Map browse sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static std::vector<std::pair<std::string, BrowseCol>> browseSortMap;
+static std::vector<std::pair<std::string, BrowseColumn>> browseSortMap;
 
 /// \brief Map search sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static std::vector<std::pair<std::string, SearchCol>> searchSortMap;
+static std::vector<std::pair<std::string, SearchColumn>> searchSortMap;
 
 /// \brief Map meta search keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static const std::vector<std::pair<std::string, MetadataCol>> metaTagMap {
-    { UPNP_SEARCH_ID, MetadataCol::ItemId },
-    { META_NAME, MetadataCol::PropertyName },
-    { META_VALUE, MetadataCol::PropertyValue },
+static const std::vector<std::pair<std::string, MetadataColumn>> metaTagMap {
+    { UPNP_SEARCH_ID, MetadataColumn::ItemId },
+    { META_NAME, MetadataColumn::PropertyName },
+    { META_VALUE, MetadataColumn::PropertyValue },
 };
 
 /// \brief Map meta search keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static const std::vector<std::pair<std::string, AutoscanCol>> asTagMap {
-    { "id", AutoscanCol::Id },
-    { "obj_id", AutoscanCol::ObjId },
-    { "persistent", AutoscanCol::Persistent },
+static const std::vector<std::pair<std::string, ASColumn>> asTagMap {
+    { "id", ASColumn::Id },
+    { "obj_id", ASColumn::ObjId },
+    { "persistent", ASColumn::Persistent },
 };
 
 /// \brief Autoscan search keys to column ids
@@ -270,21 +263,25 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
 
 /// \brief Map playstatus column ids to column names
 // map ensures entries are in correct order, each value of PlaystatusCol must be present
-static const std::map<PlaystatusCol, SearchProperty> playstatusColMap {
-    { PlaystatusCol::Group, { PLY_ALIAS, "group" } },
-    { PlaystatusCol::ItemId, { PLY_ALIAS, "item_id" } },
-    { PlaystatusCol::PlayCount, { PLY_ALIAS, "playCount", FieldType::Integer } },
-    { PlaystatusCol::LastPlayed, { PLY_ALIAS, "lastPlayed", FieldType::Date } },
+static const std::map<PlaystatusColumn, SearchProperty> playstatusColMap {
+    { PlaystatusColumn::Group, { PLY_ALIAS, "group" } },
+    { PlaystatusColumn::ItemId, { PLY_ALIAS, "item_id" } },
+    { PlaystatusColumn::PlayCount, { PLY_ALIAS, "playCount", FieldType::Integer } },
+    { PlaystatusColumn::LastPlayed, { PLY_ALIAS, "lastPlayed", FieldType::Date } },
+    { PlaystatusColumn::LastPlayedPosition, { PLY_ALIAS, "lastPlayedPosition", FieldType::Integer } },
+    { PlaystatusColumn::BookMarkPosition, { PLY_ALIAS, "bookMarkPos", FieldType::Integer } },
 };
 
 /// \brief Playstatus search keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
-static const std::vector<std::pair<std::string, PlaystatusCol>> playstatusTagMap {
-    { UPNP_SEARCH_PLAY_GROUP, PlaystatusCol::Group },
-    { UPNP_SEARCH_ID, PlaystatusCol::ItemId },
-    { UPNP_SEARCH_PLAY_COUNT, PlaystatusCol::PlayCount },
-    { UPNP_SEARCH_LAST_PLAYED, PlaystatusCol::LastPlayed },
+static const std::vector<std::pair<std::string, PlaystatusColumn>> playstatusTagMap {
+    { UPNP_SEARCH_PLAY_GROUP, PlaystatusColumn::Group },
+    { UPNP_SEARCH_ID, PlaystatusColumn::ItemId },
+    { UPNP_SEARCH_PLAY_COUNT, PlaystatusColumn::PlayCount },
+    { UPNP_SEARCH_LAST_PLAYED, PlaystatusColumn::LastPlayed },
+    { "lastPlayedPosition", PlaystatusColumn::LastPlayedPosition },
+    { "bookMarkPos", PlaystatusColumn::BookMarkPosition },
 };
 
 /// \brief Map config column ids to column names
@@ -342,14 +339,14 @@ SELECT {{}} FROM items AS {3})";
 #define getColInt(rw, idx, def) (rw)->col_int(to_underlying((idx)), (def))
 #define setCol(dict, key, val, map) (dict).emplace((key), quote((val), (map).at((key)).length))
 
-static std::shared_ptr<EnumColumnMapper<BrowseCol>> browseColumnMapper;
-static std::shared_ptr<EnumColumnMapper<SearchCol>> searchColumnMapper;
-static std::shared_ptr<EnumColumnMapper<MetadataCol>> metaColumnMapper;
-static std::shared_ptr<EnumColumnMapper<AutoscanCol>> asColumnMapper;
+static std::shared_ptr<EnumColumnMapper<BrowseColumn>> browseColumnMapper;
+static std::shared_ptr<EnumColumnMapper<SearchColumn>> searchColumnMapper;
+static std::shared_ptr<EnumColumnMapper<MetadataColumn>> metaColumnMapper;
+static std::shared_ptr<EnumColumnMapper<ASColumn>> asColumnMapper;
 static std::shared_ptr<EnumColumnMapper<AutoscanColumn>> autoscanColumnMapper;
 static std::shared_ptr<EnumColumnMapper<int>> resourceColumnMapper;
-static std::shared_ptr<EnumColumnMapper<ResourceCol>> resColumnMapper;
-static std::shared_ptr<EnumColumnMapper<PlaystatusCol>> playstatusColumnMapper;
+static std::shared_ptr<EnumColumnMapper<ResourceColumn>> resColumnMapper;
+static std::shared_ptr<EnumColumnMapper<PlaystatusColumn>> playstatusColumnMapper;
 static std::shared_ptr<EnumColumnMapper<ConfigColumn>> configColumnMapper;
 static std::shared_ptr<EnumColumnMapper<ClientColumn>> clientColumnMapper;
 
@@ -372,30 +369,30 @@ void SQLDatabase::init()
         throw DatabaseException("quote vars need to be overridden", LINE_MESSAGE);
 
     browseSortMap = {
-        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_PARTNUMBER), BrowseCol::PartNumber },
-        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), BrowseCol::PartNumber },
-        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), BrowseCol::TrackNumber },
-        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), BrowseCol::DcTitle },
-        { UPNP_SORT_KEY, BrowseCol::SortKey },
-        { UPNP_SEARCH_CLASS, BrowseCol::UpnpClass },
-        { UPNP_SEARCH_PATH, BrowseCol::Location },
-        { UPNP_SEARCH_REFID, BrowseCol::RefId },
-        { UPNP_SEARCH_PARENTID, BrowseCol::ParentId },
-        { UPNP_SEARCH_ID, BrowseCol::Id },
-        { UPNP_SEARCH_LAST_UPDATED, BrowseCol::LastUpdated },
-        { UPNP_SEARCH_LAST_MODIFIED, BrowseCol::LastModified },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_PARTNUMBER), BrowseColumn::PartNumber },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), BrowseColumn::PartNumber },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), BrowseColumn::TrackNumber },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), BrowseColumn::DcTitle },
+        { UPNP_SORT_KEY, BrowseColumn::SortKey },
+        { UPNP_SEARCH_CLASS, BrowseColumn::UpnpClass },
+        { UPNP_SEARCH_PATH, BrowseColumn::Location },
+        { UPNP_SEARCH_REFID, BrowseColumn::RefId },
+        { UPNP_SEARCH_PARENTID, BrowseColumn::ParentId },
+        { UPNP_SEARCH_ID, BrowseColumn::Id },
+        { UPNP_SEARCH_LAST_UPDATED, BrowseColumn::LastUpdated },
+        { UPNP_SEARCH_LAST_MODIFIED, BrowseColumn::LastModified },
     };
     searchSortMap = {
-        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchCol::PartNumber },
-        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchCol::TrackNumber },
-        { UPNP_SORT_KEY, SearchCol::SortKey },
-        { UPNP_SEARCH_CLASS, SearchCol::UpnpClass },
-        { UPNP_SEARCH_PATH, SearchCol::Location },
-        { UPNP_SEARCH_REFID, SearchCol::RefId },
-        { UPNP_SEARCH_PARENTID, SearchCol::ParentId },
-        { UPNP_SEARCH_ID, SearchCol::Id },
-        { UPNP_SEARCH_LAST_UPDATED, SearchCol::LastUpdated },
-        { UPNP_SEARCH_LAST_MODIFIED, SearchCol::LastModified },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchColumn::PartNumber },
+        { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchColumn::TrackNumber },
+        { UPNP_SORT_KEY, SearchColumn::SortKey },
+        { UPNP_SEARCH_CLASS, SearchColumn::UpnpClass },
+        { UPNP_SEARCH_PATH, SearchColumn::Location },
+        { UPNP_SEARCH_REFID, SearchColumn::RefId },
+        { UPNP_SEARCH_PARENTID, SearchColumn::ParentId },
+        { UPNP_SEARCH_ID, SearchColumn::Id },
+        { UPNP_SEARCH_LAST_UPDATED, SearchColumn::LastUpdated },
+        { UPNP_SEARCH_LAST_MODIFIED, SearchColumn::LastModified },
     };
     /// \brief Map resource search keys to column ids
     // entries are handled sequentially,
@@ -414,24 +411,24 @@ void SQLDatabase::init()
 
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto attrName = EnumMapper::getAttributeName(resAttrId);
-        resourceTagMap.emplace_back(fmt::format("res@{}", attrName), to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId));
-        resourceColMap.emplace(to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId), SearchProperty { RES_ALIAS, attrName });
+        resourceTagMap.emplace_back(fmt::format("res@{}", attrName), to_underlying(ResourceColumn::Attributes) + to_underlying(resAttrId));
+        resourceColMap.emplace(to_underlying(ResourceColumn::Attributes) + to_underlying(resAttrId), SearchProperty { RES_ALIAS, attrName });
     }
 
-    browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
+    browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseColumn>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
     auto searchTagMap = searchSortMap;
     if (config->getBoolOption(ConfigVal::UPNP_SEARCH_FILENAME)) {
         if (sortKeyEnabled)
-            searchTagMap.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), SearchCol::SortKey);
+            searchTagMap.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), SearchColumn::SortKey);
         else
-            searchTagMap.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), SearchCol::DcTitle);
+            searchTagMap.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), SearchColumn::DcTitle);
     }
-    searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchTagMap, searchColMap);
-    metaColumnMapper = std::make_shared<EnumColumnMapper<MetadataCol>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
+    searchColumnMapper = std::make_shared<EnumColumnMapper<SearchColumn>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchTagMap, searchColMap);
+    metaColumnMapper = std::make_shared<EnumColumnMapper<MetadataColumn>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
     resourceColumnMapper = std::make_shared<EnumColumnMapper<int>>(table_quote_begin, table_quote_end, RES_ALIAS, RESOURCE_TABLE, resourceTagMap, resourceColMap);
-    resColumnMapper = std::make_shared<EnumColumnMapper<ResourceCol>>(table_quote_begin, table_quote_end, RES_ALIAS, RESOURCE_TABLE, resTagMap, resColMap);
-    playstatusColumnMapper = std::make_shared<EnumColumnMapper<PlaystatusCol>>(table_quote_begin, table_quote_end, PLY_ALIAS, PLAYSTATUS_TABLE, playstatusTagMap, playstatusColMap);
-    asColumnMapper = std::make_shared<EnumColumnMapper<AutoscanCol>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, asTagMap, asColMap);
+    resColumnMapper = std::make_shared<EnumColumnMapper<ResourceColumn>>(table_quote_begin, table_quote_end, RES_ALIAS, RESOURCE_TABLE, resTagMap, resColMap);
+    playstatusColumnMapper = std::make_shared<EnumColumnMapper<PlaystatusColumn>>(table_quote_begin, table_quote_end, PLY_ALIAS, PLAYSTATUS_TABLE, playstatusTagMap, playstatusColMap);
+    asColumnMapper = std::make_shared<EnumColumnMapper<ASColumn>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, asTagMap, asColMap);
     autoscanColumnMapper = std::make_shared<EnumColumnMapper<AutoscanColumn>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, autoscanTagMap, autoscanColMap);
     configColumnMapper = std::make_shared<EnumColumnMapper<ConfigColumn>>(table_quote_begin, table_quote_end, CFG_ALIAS, CONFIG_VALUE_TABLE, configTagMap, configColumnMap);
     clientColumnMapper = std::make_shared<EnumColumnMapper<ClientColumn>>(table_quote_begin, table_quote_end, CFG_ALIAS, CLIENTS_TABLE, clientTagMap, clientColumnMap);
@@ -444,9 +441,15 @@ void SQLDatabase::init()
             buf.push_back(fmt::format("{}.{}", identifier(col.alias), identifier(col.field)));
         }
         auto join1 = fmt::format("LEFT JOIN {0} {1} ON {2} = {1}.{3}",
-            identifier(CDS_OBJECT_TABLE), identifier(REF_ALIAS), browseColumnMapper->mapQuoted(BrowseCol::RefId), identifier(browseColMap.at(BrowseCol::Id).field));
-        auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", asColumnMapper->tableQuoted(), asColumnMapper->mapQuoted(AutoscanCol::ObjId), browseColumnMapper->mapQuoted(BrowseCol::Id));
-        auto join3 = fmt::format("LEFT JOIN {} ON {} = {}", playstatusColumnMapper->tableQuoted(), playstatusColumnMapper->mapQuoted(PlaystatusCol::ItemId), browseColumnMapper->mapQuoted(BrowseCol::Id));
+            browseColumnMapper->getTableName(), identifier(REF_ALIAS),
+            browseColumnMapper->mapQuoted(BrowseColumn::RefId),
+            identifier(browseColMap.at(BrowseColumn::Id).field));
+        auto join2 = fmt::format("LEFT JOIN {} ON {} = {}",
+            asColumnMapper->tableQuoted(),
+            asColumnMapper->mapQuoted(ASColumn::ObjId), browseColumnMapper->mapQuoted(BrowseColumn::Id));
+        auto join3 = fmt::format("LEFT JOIN {} ON {} = {}",
+            playstatusColumnMapper->tableQuoted(),
+            playstatusColumnMapper->mapQuoted(PlaystatusColumn::ItemId), browseColumnMapper->mapQuoted(BrowseColumn::Id));
         this->sql_browse_columns = fmt::format("{}", fmt::join(buf, ", "));
         this->sql_browse_query = fmt::format("{} {} {} ", browseColumnMapper->tableQuoted(), join1, join2);
     }
@@ -459,13 +462,25 @@ void SQLDatabase::init()
         }
         this->sql_search_columns = fmt::format("{}", fmt::join(colBuf, ", "));
 
-        auto join1 = fmt::format("LEFT JOIN {} ON {} = {}", metaColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        auto join2 = fmt::format("LEFT JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        auto join3 = fmt::format("LEFT JOIN {} ON {} = {}", playstatusColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), playstatusColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        auto join1 = fmt::format("LEFT JOIN {} ON {} = {}",
+            metaColumnMapper->tableQuoted(),
+            searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        auto join2 = fmt::format("LEFT JOIN {} ON {} = {}",
+            resourceColumnMapper->tableQuoted(),
+            searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
+        auto join3 = fmt::format("LEFT JOIN {} ON {} = {}",
+            playstatusColumnMapper->tableQuoted(),
+            searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), playstatusColumnMapper->mapQuoted(UPNP_SEARCH_ID));
         this->sql_search_query = fmt::format("{} {} {} {}", searchColumnMapper->tableQuoted(), join1, join2, join3);
 
         // Build container query format string
-        auto sql_container_query = fmt::format(sql_search_container_query_raw, identifier("containers"), identifier("cont"), searchColumnMapper->tableQuoted(), searchColumnMapper->getAlias(), searchColumnMapper->mapQuoted(UPNP_SEARCH_PARENTID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID, true), searchColumnMapper->mapQuoted(UPNP_SEARCH_REFID, true));
+        auto sql_container_query = fmt::format(sql_search_container_query_raw,
+            identifier("containers"), // defines an alias in in query_raw
+            identifier("cont"), // defines an alias in in query_raw
+            searchColumnMapper->tableQuoted(), searchColumnMapper->getAlias(),
+            searchColumnMapper->mapQuoted(UPNP_SEARCH_PARENTID, true),
+            searchColumnMapper->mapQuoted(UPNP_SEARCH_ID, true),
+            searchColumnMapper->mapQuoted(UPNP_SEARCH_REFID, true));
         this->sql_search_container_query_format = fmt::format("{} {} {} {}", sql_container_query, join1, join2, join3);
     }
     // Statement for metadata
@@ -484,7 +499,7 @@ void SQLDatabase::init()
         for (auto&& [key, col] : autoscanColMap) {
             buf.push_back(fmt::format("{}.{}", identifier(col.alias), identifier(col.field)));
         }
-        auto join = fmt::format("LEFT JOIN {} ON {} = {}", browseColumnMapper->tableQuoted(), autoscanColumnMapper->mapQuoted(AutoscanColumn::ObjId), browseColumnMapper->mapQuoted(BrowseCol::Id));
+        auto join = fmt::format("LEFT JOIN {} ON {} = {}", browseColumnMapper->tableQuoted(), autoscanColumnMapper->mapQuoted(AutoscanColumn::ObjId), browseColumnMapper->mapQuoted(BrowseColumn::Id));
         this->sql_autoscan_query = fmt::format("SELECT {} FROM {} {}", fmt::join(buf, ", "), autoscanColumnMapper->tableQuoted(), join);
     }
     // Statement for resource
@@ -686,50 +701,46 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
             throw DatabaseException("refId set, but it makes no sense", LINE_MESSAGE);
     }
 
-    std::map<BrowseCol, std::string> cdsObjectSql;
-    cdsObjectSql.emplace(BrowseCol::ObjectType, quote(obj->getObjectType()));
+    std::map<BrowseColumn, std::string> cdsObjectSql;
+    cdsObjectSql.emplace(BrowseColumn::ObjectType, quote(obj->getObjectType()));
 
     if (hasReference || playlistRef)
-        cdsObjectSql.emplace(BrowseCol::RefId, quote(refObj->getID()));
+        cdsObjectSql.emplace(BrowseColumn::RefId, quote(refObj->getID()));
     else if (op == Operation::Update)
-        cdsObjectSql.emplace(BrowseCol::RefId, SQL_NULL);
+        cdsObjectSql.emplace(BrowseColumn::RefId, SQL_NULL);
 
     if (!hasReference || refObj->getClass() != obj->getClass())
-        cdsObjectSql.emplace(BrowseCol::UpnpClass, quote(obj->getClass()));
+        cdsObjectSql.emplace(BrowseColumn::UpnpClass, quote(obj->getClass()));
     else if (op == Operation::Update)
-        cdsObjectSql.emplace(BrowseCol::UpnpClass, SQL_NULL);
+        cdsObjectSql.emplace(BrowseColumn::UpnpClass, SQL_NULL);
 
-    // if (!hasReference || refObj->getTitle() != obj->getTitle())
-    //     cdsObjectSql.emplace(BrowseCol::DcTitle, quote(obj->getTitle(), browseColMap.at(BrowseCol::DcTitle).length));
-    // else if (isUpdate)
-    //     cdsObjectSql.emplace(BrowseCol::DcTitle, SQL_NULL);
-    setCol(cdsObjectSql, BrowseCol::DcTitle, obj->getTitle(), browseColMap);
-    setCol(cdsObjectSql, BrowseCol::SortKey, obj->getSortKey(), browseColMap);
+    setCol(cdsObjectSql, BrowseColumn::DcTitle, obj->getTitle(), browseColMap);
+    setCol(cdsObjectSql, BrowseColumn::SortKey, obj->getSortKey(), browseColMap);
 
     if (op == Operation::Update)
-        cdsObjectSql.emplace(BrowseCol::Auxdata, SQL_NULL);
+        cdsObjectSql.emplace(BrowseColumn::Auxdata, SQL_NULL);
 
     auto&& auxData = obj->getAuxData();
     if (!auxData.empty() && (!hasReference || auxData != refObj->getAuxData())) {
-        cdsObjectSql.insert_or_assign(BrowseCol::Auxdata, quote(URLUtils::dictEncode(auxData)));
+        cdsObjectSql.insert_or_assign(BrowseColumn::Auxdata, quote(URLUtils::dictEncode(auxData)));
     }
 
     const bool useResourceRef = obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF);
     obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-    cdsObjectSql.emplace(BrowseCol::Flags, quote(obj->getFlags()));
+    cdsObjectSql.emplace(BrowseColumn::Flags, quote(obj->getFlags()));
 
     if (obj->getMTime() > std::chrono::seconds::zero()) {
-        cdsObjectSql.emplace(BrowseCol::LastModified, quote(obj->getMTime().count()));
+        cdsObjectSql.emplace(BrowseColumn::LastModified, quote(obj->getMTime().count()));
     } else {
-        cdsObjectSql.emplace(BrowseCol::LastModified, SQL_NULL);
+        cdsObjectSql.emplace(BrowseColumn::LastModified, SQL_NULL);
     }
-    cdsObjectSql.emplace(BrowseCol::LastUpdated, quote(currentTime().count()));
+    cdsObjectSql.emplace(BrowseColumn::LastUpdated, quote(currentTime().count()));
 
     int parentID = obj->getParentID();
     if (obj->isContainer() && op == Operation::Update) {
         fs::path dbLocation = addLocationPrefix(obj->isVirtual() ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX, obj->getLocation());
-        setCol(cdsObjectSql, BrowseCol::Location, dbLocation, browseColMap);
-        cdsObjectSql.emplace(BrowseCol::LocationHash, quote(stringHash(dbLocation.string())));
+        setCol(cdsObjectSql, BrowseColumn::Location, dbLocation, browseColMap);
+        cdsObjectSql.emplace(BrowseColumn::LocationHash, quote(stringHash(dbLocation.string())));
     } else if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
@@ -743,58 +754,60 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
                     obj->setParentID(parentID);
                 }
                 fs::path dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
-                setCol(cdsObjectSql, BrowseCol::Location, dbLocation, browseColMap);
-                cdsObjectSql.emplace(BrowseCol::LocationHash, quote(stringHash(dbLocation.string())));
+                setCol(cdsObjectSql, BrowseColumn::Location, dbLocation, browseColMap);
+                cdsObjectSql.emplace(BrowseColumn::LocationHash, quote(stringHash(dbLocation.string())));
             } else {
                 // URLs
-                setCol(cdsObjectSql, BrowseCol::Location, loc, browseColMap);
-                cdsObjectSql.emplace(BrowseCol::LocationHash, SQL_NULL);
+                setCol(cdsObjectSql, BrowseColumn::Location, loc, browseColMap);
+                cdsObjectSql.emplace(BrowseColumn::LocationHash, SQL_NULL);
             }
         } else if (op == Operation::Update) {
-            cdsObjectSql.emplace(BrowseCol::Location, SQL_NULL);
-            cdsObjectSql.emplace(BrowseCol::LocationHash, SQL_NULL);
+            cdsObjectSql.emplace(BrowseColumn::Location, SQL_NULL);
+            cdsObjectSql.emplace(BrowseColumn::LocationHash, SQL_NULL);
         }
 
         if (item->getTrackNumber() > 0) {
-            cdsObjectSql.emplace(BrowseCol::TrackNumber, quote(item->getTrackNumber()));
+            cdsObjectSql.emplace(BrowseColumn::TrackNumber, quote(item->getTrackNumber()));
         } else if (op == Operation::Update) {
-            cdsObjectSql.emplace(BrowseCol::TrackNumber, SQL_NULL);
+            cdsObjectSql.emplace(BrowseColumn::TrackNumber, SQL_NULL);
         }
 
         if (item->getPartNumber() > 0) {
-            cdsObjectSql.emplace(BrowseCol::PartNumber, quote(item->getPartNumber()));
+            cdsObjectSql.emplace(BrowseColumn::PartNumber, quote(item->getPartNumber()));
         } else if (op == Operation::Update) {
-            cdsObjectSql.emplace(BrowseCol::PartNumber, SQL_NULL);
+            cdsObjectSql.emplace(BrowseColumn::PartNumber, SQL_NULL);
         }
 
         if (!item->getServiceID().empty()) {
             if (!hasReference || std::static_pointer_cast<CdsItem>(refObj)->getServiceID() != item->getServiceID())
-                cdsObjectSql.emplace(BrowseCol::ServiceId, quote(item->getServiceID()));
+                cdsObjectSql.emplace(BrowseColumn::ServiceId, quote(item->getServiceID()));
             else
-                cdsObjectSql.emplace(BrowseCol::ServiceId, SQL_NULL);
+                cdsObjectSql.emplace(BrowseColumn::ServiceId, SQL_NULL);
         } else if (op == Operation::Update) {
-            cdsObjectSql.emplace(BrowseCol::ServiceId, SQL_NULL);
+            cdsObjectSql.emplace(BrowseColumn::ServiceId, SQL_NULL);
         }
 
-        setCol(cdsObjectSql, BrowseCol::MimeType, item->getMimeType(), browseColMap);
+        setCol(cdsObjectSql, BrowseColumn::MimeType, item->getMimeType(), browseColMap);
     }
 
     if (obj->getParentID() == INVALID_OBJECT_ID) {
         throw DatabaseException(fmt::format("Tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID()), LINE_MESSAGE);
     }
 
-    cdsObjectSql.emplace(BrowseCol::ParentId, quote(parentID));
+    cdsObjectSql.emplace(BrowseColumn::ParentId, quote(parentID));
 
     std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> returnVal;
     // check for a duplicate (virtual) object
     if (hasReference && op != Operation::Update) {
         auto where = std::vector {
-            fmt::format("{}={:d}", identifier("parent_id"), obj->getParentID()),
-            fmt::format("{}={:d}", identifier("ref_id"), refObj->getID()),
-            fmt::format("{}={}", identifier("dc_title"), quote(obj->getTitle())),
+            browseColumnMapper->getClause(BrowseColumn::ParentId, fmt::format("{:d}", obj->getParentID()), true),
+            browseColumnMapper->getClause(BrowseColumn::RefId, fmt::format("{:d}", refObj->getID()), true),
+            browseColumnMapper->getClause(BrowseColumn::DcTitle, quote(obj->getTitle()), true),
         };
         auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
-            identifier("id"), identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
+            browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+            browseColumnMapper->getTableName(),
+            fmt::join(where, " AND ")));
         // if duplicate items is found - ignore
         if (res && res->getNumRows() > 0) {
             op = Operation::Update;
@@ -844,10 +857,10 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
 {
     std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> data;
     if (obj->getID() == CDS_ID_FS_ROOT) {
-        std::map<BrowseCol, std::string> cdsObjectSql;
+        std::map<BrowseColumn, std::string> cdsObjectSql;
 
-        cdsObjectSql[BrowseCol::DcTitle] = quote(obj->getTitle(), browseColMap.at(BrowseCol::DcTitle).length);
-        cdsObjectSql[BrowseCol::UpnpClass] = quote(obj->getClass());
+        cdsObjectSql[BrowseColumn::DcTitle] = quote(obj->getTitle(), browseColMap.at(BrowseColumn::DcTitle).length);
+        cdsObjectSql[BrowseColumn::UpnpClass] = quote(obj->getClass());
 
         auto ot = std::make_shared<Object2Table>(std::move(cdsObjectSql), Operation::Update, browseColumnMapper);
         data.push_back(std::move(ot));
@@ -896,7 +909,10 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
     }
 
     beginTransaction("loadObject");
-    auto loadSql = fmt::format("SELECT {} FROM {} WHERE {} = {}", sql_browse_columns, sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::Id), objectID);
+    auto loadSql = fmt::format("SELECT {} FROM {} WHERE {}",
+        sql_browse_columns,
+        sql_browse_query,
+        browseColumnMapper->getClause(BrowseColumn::Id, quote(objectID)));
     auto res = select(loadSql);
     if (res) {
         auto row = res->nextRow();
@@ -918,7 +934,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(const std::string& group, int
     }
 
     beginTransaction("loadObject");
-    auto loadSql = fmt::format("SELECT {} FROM {} WHERE {} = {}", sql_browse_columns, sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::Id), objectID);
+    auto loadSql = fmt::format("SELECT {} FROM {} WHERE {} = {}", sql_browse_columns, sql_browse_query, browseColumnMapper->mapQuoted(BrowseColumn::Id), objectID);
     auto res = select(loadSql);
     if (res) {
         auto row = res->nextRow();
@@ -935,7 +951,7 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(const std::string& group, int
 
 std::shared_ptr<CdsObject> SQLDatabase::loadObjectByServiceID(const std::string& serviceID, const std::string& group)
 {
-    auto loadSql = fmt::format("SELECT {} FROM {} WHERE {} = {}", sql_browse_columns, sql_browse_query, browseColumnMapper->mapQuoted(BrowseCol::ServiceId), quote(serviceID));
+    auto loadSql = fmt::format("SELECT {} FROM {} WHERE {} = {}", sql_browse_columns, sql_browse_query, browseColumnMapper->mapQuoted(BrowseColumn::ServiceId), quote(serviceID));
     beginTransaction("loadObjectByServiceID");
     auto res = select(loadSql);
     if (res) {
@@ -968,8 +984,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::findObjectByContentClass(
 std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
 {
     auto getSql = fmt::format("SELECT {} FROM {} WHERE {} LIKE {}",
-        identifier("id"), identifier(CDS_OBJECT_TABLE),
-        identifier("service_id"), quote(std::string(1, servicePrefix) + '%'));
+        browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+        browseColumnMapper->getTableName(),
+        browseColumnMapper->mapQuoted(BrowseColumn::ServiceId, true), quote(std::string(1, servicePrefix) + '%'));
 
     beginTransaction("getServiceObjectIDs");
     auto res = select(getSql);
@@ -1030,34 +1047,34 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
 
     if (param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
 
-        where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::ParentId), parent->getID()));
+        where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseColumn::ParentId), parent->getID()));
 
         if (parent->getID() == CDS_ID_ROOT && hideFsRoot)
-            where.push_back(fmt::format("{} != {:d}", browseColumnMapper->mapQuoted(BrowseCol::Id), CDS_ID_FS_ROOT));
+            where.push_back(fmt::format("{} != {:d}", browseColumnMapper->mapQuoted(BrowseColumn::Id), CDS_ID_FS_ROOT));
 
         if (getItems && !forbiddenDirectories.empty()) {
             std::vector<std::string> forbiddenList;
             for (auto&& forbDir : forbiddenDirectories) {
-                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseCol::RefLocation), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
-                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseCol::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
+                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseColumn::RefLocation), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
+                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseColumn::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
             }
-            where.push_back(fmt::format("(NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
+            where.push_back(fmt::format("(NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
         }
 
         // order by code..
         auto orderByCode = [&]() {
             std::string orderQb;
             if (param.getFlag(BROWSE_TRACK_SORT)) {
-                orderQb = fmt::format("{},{}", browseColumnMapper->mapQuoted(BrowseCol::PartNumber), browseColumnMapper->mapQuoted(BrowseCol::TrackNumber));
+                orderQb = fmt::format("{},{}", browseColumnMapper->mapQuoted(BrowseColumn::PartNumber), browseColumnMapper->mapQuoted(BrowseColumn::TrackNumber));
             } else {
                 SortParser sortParser(browseColumnMapper, playstatusColumnMapper, metaColumnMapper, param.getSortCriteria());
                 orderQb = sortParser.parse(addColumns, addJoin);
             }
             if (orderQb.empty()) {
                 if (sortKeyEnabled)
-                    orderQb = browseColumnMapper->mapQuoted(BrowseCol::SortKey);
+                    orderQb = browseColumnMapper->mapQuoted(BrowseColumn::SortKey);
                 else
-                    orderQb = browseColumnMapper->mapQuoted(BrowseCol::DcTitle);
+                    orderQb = browseColumnMapper->mapQuoted(BrowseColumn::DcTitle);
             }
             return orderQb;
         };
@@ -1077,24 +1094,24 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             auto zero = std::string("0 = 1");
             where.push_back(std::move(zero));
         } else if (getContainers && !getItems) {
-            where.push_back(fmt::format("{} = {:d}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_CONTAINER));
+            where.push_back(fmt::format("{} = {:d}", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType), OBJECT_TYPE_CONTAINER));
             // Sorting by UpnpClass will avoid mixing different types of containers
             // "Special" containers like "All Songs" (which are of upnp_class 'object.container') will be displayed before
             // albums (which are of upnp_class 'object.container.album.musicAlbum')
-            orderBy = fmt::format(" ORDER BY {}, {}", browseColumnMapper->mapQuoted(BrowseCol::UpnpClass), orderByCode());
+            orderBy = fmt::format(" ORDER BY {}, {}", browseColumnMapper->mapQuoted(BrowseColumn::UpnpClass), orderByCode());
         } else if (!getContainers && getItems) {
-            where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_ITEM));
+            where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType), OBJECT_TYPE_ITEM));
             orderBy = fmt::format(" ORDER BY {}", orderByCode());
         } else {
             // ORDER BY (object_type = OBJECT_TYPE_CONTAINER) ensures that containers are returned before items
             // Sorting by UpnpClass will avoid mixing different types of containers
-            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}, {}", browseColumnMapper->mapQuoted(BrowseCol::ObjectType), OBJECT_TYPE_CONTAINER,
-                browseColumnMapper->mapQuoted(BrowseCol::UpnpClass), orderByCode());
+            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}, {}", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType), OBJECT_TYPE_CONTAINER,
+                browseColumnMapper->mapQuoted(BrowseColumn::UpnpClass), orderByCode());
         }
 
         limit = limitCode(param.getStartingIndex(), param.getRequestedCount());
     } else { // metadata
-        where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::Id), parent->getID()));
+        where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseColumn::Id), parent->getID()));
         limit = " LIMIT 1";
     }
     auto qb = fmt::format("SELECT {} {} FROM {} {} WHERE {}{}{}", sql_browse_columns, addColumns, sql_browse_query, addJoin, fmt::join(where, " AND "), orderBy, limit);
@@ -1207,13 +1224,13 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
     bool getContainers = param.getContainers();
     bool getItems = param.getItems();
     if (getContainers && !getItems) {
-        searchSQL.append(fmt::format(" AND ({} = {:d})", searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER));
+        searchSQL.append(fmt::format(" AND ({} = {:d})", searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_CONTAINER));
     } else if (!getContainers && getItems) {
-        searchSQL.append(fmt::format(" AND (({0} & {1}) = {1})", searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_ITEM));
+        searchSQL.append(fmt::format(" AND (({0} & {1}) = {1})", searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_ITEM));
     }
     if (param.getSearchableContainers()) {
         searchSQL.append(fmt::format(" AND ({0} & {1} = {1} OR {2} != {3})",
-            searchColumnMapper->mapQuoted(SearchCol::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER));
+            searchColumnMapper->mapQuoted(SearchColumn::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_CONTAINER));
     }
 
     const auto forbiddenDirectories = param.getForbiddenDirectories();
@@ -1221,9 +1238,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
     if (getItems && !forbiddenDirectories.empty()) {
         std::vector<std::string> forbiddenList;
         for (auto&& forbDir : forbiddenDirectories) {
-            forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", searchColumnMapper->mapQuoted(SearchCol::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
+            forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
         }
-        searchSQL.append(fmt::format("AND (NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
+        searchSQL.append(fmt::format("AND (NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
     }
     log_debug("Search query resolves to SQL [\n{}\n]", searchSQL);
 
@@ -1258,9 +1275,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
         auto orderQb = sortParser.parse(addColumns, addJoin);
         if (orderQb.empty()) {
             if (sortKeyEnabled)
-                orderQb = searchColumnMapper->mapQuoted(SearchCol::SortKey);
+                orderQb = searchColumnMapper->mapQuoted(SearchColumn::SortKey);
             else
-                orderQb = searchColumnMapper->mapQuoted(SearchCol::DcTitle);
+                orderQb = searchColumnMapper->mapQuoted(SearchColumn::DcTitle);
         }
         return orderQb;
     };
@@ -1319,18 +1336,18 @@ int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hid
         return 0;
 
     auto where = std::vector {
-        fmt::format("{} = {}", identifier("parent_id"), contId)
+        browseColumnMapper->getClause(BrowseColumn::ParentId, contId, true)
     };
     if (containers && !items)
-        where.push_back(fmt::format("{} = {}", identifier("object_type"), OBJECT_TYPE_CONTAINER));
+        where.push_back(browseColumnMapper->getClause(BrowseColumn::ObjectType, OBJECT_TYPE_CONTAINER, true));
     else if (items && !containers)
-        where.push_back(fmt::format("({0} & {1}) = {1}", identifier("object_type"), OBJECT_TYPE_ITEM));
+        where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType, true), OBJECT_TYPE_ITEM));
     if (contId == CDS_ID_ROOT && hideFsRoot) {
-        where.push_back(fmt::format("{} != {:d}", identifier("id"), CDS_ID_FS_ROOT));
+        where.push_back(fmt::format("{} != {:d}", browseColumnMapper->mapQuoted(BrowseColumn::Id, true), CDS_ID_FS_ROOT));
     }
 
     beginTransaction("getChildCount");
-    auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {}", identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
+    auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {}", browseColumnMapper->getTableName(), fmt::join(where, " AND ")));
     commit("getChildCount");
 
     if (res) {
@@ -1352,19 +1369,21 @@ std::map<int, int> SQLDatabase::getChildCounts(const std::vector<int>& contId, b
         return result;
 
     auto where = std::vector {
-        fmt::format("{} IN ({})", identifier("parent_id"), fmt::join(contId, ","))
+        fmt::format("{} IN ({})", browseColumnMapper->mapQuoted(BrowseColumn::ParentId, true), fmt::join(contId, ","))
     };
     if (containers && !items)
-        where.push_back(fmt::format("{} = {}", identifier("object_type"), OBJECT_TYPE_CONTAINER));
+        where.push_back(browseColumnMapper->getClause(BrowseColumn::ObjectType, OBJECT_TYPE_CONTAINER, true));
     else if (items && !containers)
-        where.push_back(fmt::format("({0} & {1}) = {1}", identifier("object_type"), OBJECT_TYPE_ITEM));
+        where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType, true), OBJECT_TYPE_ITEM));
     if (hideFsRoot && std::find(contId.begin(), contId.end(), CDS_ID_ROOT) != contId.end()) {
-        where.push_back(fmt::format("{} != {:d}", identifier("id"), CDS_ID_FS_ROOT));
+        where.push_back(fmt::format("{} != {:d}", browseColumnMapper->mapQuoted(BrowseColumn::Id, true), CDS_ID_FS_ROOT));
     }
 
     beginTransaction("getChildCounts");
     auto res = select(fmt::format("SELECT {0}, COUNT(*) FROM {1} WHERE {2} GROUP BY {0} ORDER BY {0}",
-        identifier("parent_id"), identifier(CDS_OBJECT_TABLE), fmt::join(where, " AND ")));
+        browseColumnMapper->mapQuoted(BrowseColumn::ParentId, true),
+        browseColumnMapper->getTableName(),
+        fmt::join(where, " AND ")));
     commit("getChildCounts");
 
     if (res) {
@@ -1380,7 +1399,8 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
 {
     beginTransaction("getMimeTypes");
     auto res = select(fmt::format("SELECT DISTINCT {0} FROM {1} WHERE {0} IS NOT NULL ORDER BY {0}",
-        identifier("mime_type"), identifier(CDS_OBJECT_TABLE)));
+        browseColumnMapper->mapQuoted(BrowseColumn::MimeType, true),
+        browseColumnMapper->getTableName()));
     commit("getMimeTypes");
 
     if (!res)
@@ -1421,7 +1441,10 @@ std::map<std::string, std::shared_ptr<CdsContainer>> SQLDatabase::getShortcuts()
     return result;
 }
 
-std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpath, const std::string& group, DbFileType fileType)
+std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(
+    const fs::path& fullpath,
+    const std::string& group,
+    DbFileType fileType)
 {
     auto fileTypeList = fileType == DbFileType::Any ? std::vector<DbFileType> { DbFileType::File, DbFileType::Directory, DbFileType::Virtual } : std::vector<DbFileType> { fileType };
     for (auto&& ft : fileTypeList) {
@@ -1435,9 +1458,9 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(const fs::path& fullpat
         }();
 
         auto where = std::vector {
-            fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::LocationHash), quote(stringHash(dbLocation))),
-            fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseCol::Location), quote(dbLocation)),
-            fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseCol::RefId)),
+            browseColumnMapper->getClause(BrowseColumn::LocationHash, quote(stringHash(dbLocation))),
+            browseColumnMapper->getClause(BrowseColumn::Location, quote(dbLocation)),
+            fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseColumn::RefId)),
         };
         auto findSql = fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", sql_browse_columns, sql_browse_query, fmt::join(where, " AND "));
 
@@ -1516,16 +1539,16 @@ int SQLDatabase::createContainer(
     }
     std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
 
-    auto dict = std::map<BrowseCol, std::string> {
-        { BrowseCol::ParentId, fmt::to_string(parentID) },
-        { BrowseCol::ObjectType, fmt::to_string(OBJECT_TYPE_CONTAINER) },
-        { BrowseCol::Flags, fmt::to_string(flags) },
-        { BrowseCol::UpnpClass, !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER) },
-        { BrowseCol::DcTitle, quote(name) },
-        { BrowseCol::SortKey, quote(name) },
-        { BrowseCol::Location, quote(dbLocation) },
-        { BrowseCol::LocationHash, quote(stringHash(dbLocation)) },
-        { BrowseCol::RefId, (refID > 0) ? quote(refID) : SQL_NULL },
+    auto dict = std::map<BrowseColumn, std::string> {
+        { BrowseColumn::ParentId, fmt::to_string(parentID) },
+        { BrowseColumn::ObjectType, fmt::to_string(OBJECT_TYPE_CONTAINER) },
+        { BrowseColumn::Flags, fmt::to_string(flags) },
+        { BrowseColumn::UpnpClass, !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER) },
+        { BrowseColumn::DcTitle, quote(name) },
+        { BrowseColumn::SortKey, quote(name) },
+        { BrowseColumn::Location, quote(dbLocation) },
+        { BrowseColumn::LocationHash, quote(stringHash(dbLocation)) },
+        { BrowseColumn::RefId, (refID > 0) ? quote(refID) : SQL_NULL },
     };
     beginTransaction("createContainer");
     Object2Table ot(std::move(dict), Operation::Insert, browseColumnMapper);
@@ -1534,13 +1557,13 @@ int SQLDatabase::createContainer(
 
     const std::string newIdStr = quote(newId);
     if (!itemMetadata.empty()) {
-        std::vector<std::map<MetadataCol, std::string>> multiDict;
+        std::vector<std::map<MetadataColumn, std::string>> multiDict;
         multiDict.reserve(itemMetadata.size());
         for (auto&& [key, val] : itemMetadata) {
-            auto mDict = std::map<MetadataCol, std::string> {
-                { MetadataCol::ItemId, newIdStr },
-                { MetadataCol::PropertyName, quote(key) },
-                { MetadataCol::PropertyValue, quote(val) },
+            auto mDict = std::map<MetadataColumn, std::string> {
+                { MetadataColumn::ItemId, newIdStr },
+                { MetadataColumn::PropertyName, quote(key) },
+                { MetadataColumn::PropertyValue, quote(val) },
             };
             multiDict.push_back(std::move(mDict));
         }
@@ -1552,19 +1575,19 @@ int SQLDatabase::createContainer(
     if (!itemResources.empty()) {
         int resId = 0;
         for (auto&& resource : itemResources) {
-            auto rDict = std::map<ResourceCol, std::string> {
-                { ResourceCol::ItemId, quote(newId) },
-                { ResourceCol::ResId, quote(resId) },
-                { ResourceCol::HandlerType, quote(to_underlying(resource->getHandlerType())) },
-                { ResourceCol::Purpose, quote(to_underlying(resource->getPurpose())) },
+            auto rDict = std::map<ResourceColumn, std::string> {
+                { ResourceColumn::ItemId, quote(newId) },
+                { ResourceColumn::ResId, quote(resId) },
+                { ResourceColumn::HandlerType, quote(to_underlying(resource->getHandlerType())) },
+                { ResourceColumn::Purpose, quote(to_underlying(resource->getPurpose())) },
             };
             auto&& options = resource->getOptions();
             if (!options.empty()) {
-                rDict[ResourceCol::Options] = quote(URLUtils::dictEncode(options));
+                rDict[ResourceColumn::Options] = quote(URLUtils::dictEncode(options));
             }
             auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
-                rDict[ResourceCol::Parameters] = quote(URLUtils::dictEncode(parameters));
+                rDict[ResourceColumn::Parameters] = quote(URLUtils::dictEncode(parameters));
             }
             std::map<ResourceAttribute, std::string> rAttr;
             for (auto&& [key, val] : resource->getAttributes()) {
@@ -1579,18 +1602,6 @@ int SQLDatabase::createContainer(
     commit("createContainer");
 
     return newId;
-}
-
-int SQLDatabase::insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId, bool warnOnly)
-{
-    assert(fields.size() == values.size());
-    auto sql = fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(std::string(tableName)), fmt::join(fields, ","), fmt::join(values, ","));
-    if (warnOnly) {
-        execOnly(sql);
-        return -1;
-    }
-
-    return exec(sql, getLastInsertId);
 }
 
 void SQLDatabase::deleteAll(std::string_view tableName)
@@ -1609,8 +1620,10 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
         return title;
 
     beginTransaction("buildContainerPath");
-    auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} = {3} LIMIT 1",
-        identifier("location"), identifier(CDS_OBJECT_TABLE), identifier("id"), parentID));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
+        browseColumnMapper->mapQuoted(BrowseColumn::Location, true),
+        browseColumnMapper->getTableName(),
+        browseColumnMapper->getClause(BrowseColumn::Id, parentID, true)));
     commit("buildContainerPath");
     if (!res)
         return {};
@@ -1643,10 +1656,11 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     std::string dbLocation = addLocationPrefix(cont->isVirtual() ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX, virtualPath);
 
     beginTransaction("addContainer");
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} = {} LIMIT 1",
-        identifier("id"), identifier(CDS_OBJECT_TABLE),
-        identifier("location_hash"), quote(stringHash(dbLocation)),
-        identifier("location"), quote(dbLocation)));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} AND {} LIMIT 1",
+        browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+        browseColumnMapper->getTableName(),
+        browseColumnMapper->getClause(BrowseColumn::LocationHash, quote(stringHash(dbLocation)), true),
+        browseColumnMapper->getClause(BrowseColumn::Location, quote(dbLocation), true)));
     if (res) {
         auto row = res->nextRow();
         if (row) {
@@ -1682,20 +1696,20 @@ std::pair<fs::path, char> SQLDatabase::stripLocationPrefix(std::string_view dbLo
 
 std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& group, const std::unique_ptr<SQLRow>& row)
 {
-    int objectType = std::stoi(getCol(row, BrowseCol::ObjectType));
+    int objectType = std::stoi(getCol(row, BrowseColumn::ObjectType));
     auto obj = CdsObject::createObject(objectType);
 
     /* set common properties */
-    obj->setID(std::stoi(getCol(row, BrowseCol::Id)));
-    obj->setRefID(stoiString(getCol(row, BrowseCol::RefId)));
+    obj->setID(std::stoi(getCol(row, BrowseColumn::Id)));
+    obj->setRefID(stoiString(getCol(row, BrowseColumn::RefId)));
 
-    obj->setParentID(std::stoi(getCol(row, BrowseCol::ParentId)));
-    obj->setTitle(getCol(row, BrowseCol::DcTitle));
-    obj->setSortKey(getCol(row, BrowseCol::SortKey));
-    obj->setClass(fallbackString(getCol(row, BrowseCol::UpnpClass), getCol(row, BrowseCol::RefUpnpClass)));
-    obj->setFlags(std::stoi(getCol(row, BrowseCol::Flags)));
-    obj->setMTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::LastModified))));
-    obj->setUTime(std::chrono::seconds(stoulString(getCol(row, BrowseCol::LastUpdated))));
+    obj->setParentID(std::stoi(getCol(row, BrowseColumn::ParentId)));
+    obj->setTitle(getCol(row, BrowseColumn::DcTitle));
+    obj->setSortKey(getCol(row, BrowseColumn::SortKey));
+    obj->setClass(fallbackString(getCol(row, BrowseColumn::UpnpClass), getCol(row, BrowseColumn::RefUpnpClass)));
+    obj->setFlags(std::stoi(getCol(row, BrowseColumn::Flags)));
+    obj->setMTime(std::chrono::seconds(stoulString(getCol(row, BrowseColumn::LastModified))));
+    obj->setUTime(std::chrono::seconds(stoulString(getCol(row, BrowseColumn::LastUpdated))));
 
     auto metaData = retrieveMetaDataForObject(obj->getID());
     if (!metaData.empty()) {
@@ -1706,7 +1720,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
             obj->setMetaData(std::move(metaData));
     }
 
-    std::string auxdataStr = fallbackString(getCol(row, BrowseCol::Auxdata), getCol(row, BrowseCol::RefAuxdata));
+    std::string auxdataStr = fallbackString(getCol(row, BrowseColumn::Auxdata), getCol(row, BrowseColumn::RefAuxdata));
     std::map<std::string, std::string> aux = URLUtils::dictDecode(auxdataStr);
     obj->setAuxData(aux);
 
@@ -1729,13 +1743,13 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
 
     if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
-        cont->setUpdateID(std::stoi(getCol(row, BrowseCol::UpdateId)));
-        auto [location, locationPrefix] = stripLocationPrefix(getCol(row, BrowseCol::Location));
+        cont->setUpdateID(std::stoi(getCol(row, BrowseColumn::UpdateId)));
+        auto [location, locationPrefix] = stripLocationPrefix(getCol(row, BrowseColumn::Location));
         cont->setLocation(location);
         if (locationPrefix == LOC_VIRT_PREFIX)
             cont->setVirtual(true);
 
-        std::string autoscanPersistent = getCol(row, BrowseCol::AsPersistent);
+        std::string autoscanPersistent = getCol(row, BrowseColumn::AsPersistent);
         if (!autoscanPersistent.empty()) {
             if (remapBool(autoscanPersistent))
                 cont->setAutoscanType(AutoscanType::Config);
@@ -1749,23 +1763,23 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
             throw DatabaseException("tried to create object without at least one resource", LINE_MESSAGE);
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        item->setMimeType(fallbackString(getCol(row, BrowseCol::MimeType), getCol(row, BrowseCol::RefMimeType)));
+        item->setMimeType(fallbackString(getCol(row, BrowseColumn::MimeType), getCol(row, BrowseColumn::RefMimeType)));
         if (obj->isPureItem()) {
             if (!obj->isVirtual())
-                item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::Location)).first);
+                item->setLocation(stripLocationPrefix(getCol(row, BrowseColumn::Location)).first);
             else
-                item->setLocation(stripLocationPrefix(getCol(row, BrowseCol::RefLocation)).first);
+                item->setLocation(stripLocationPrefix(getCol(row, BrowseColumn::RefLocation)).first);
         } else { // URLs
-            item->setLocation(fallbackString(getCol(row, BrowseCol::Location), getCol(row, BrowseCol::RefLocation)));
+            item->setLocation(fallbackString(getCol(row, BrowseColumn::Location), getCol(row, BrowseColumn::RefLocation)));
         }
 
-        item->setTrackNumber(stoiString(getCol(row, BrowseCol::TrackNumber)));
-        item->setPartNumber(stoiString(getCol(row, BrowseCol::PartNumber)));
+        item->setTrackNumber(stoiString(getCol(row, BrowseColumn::TrackNumber)));
+        item->setPartNumber(stoiString(getCol(row, BrowseColumn::PartNumber)));
 
-        if (!getCol(row, BrowseCol::RefServiceId).empty())
-            item->setServiceID(getCol(row, BrowseCol::RefServiceId));
+        if (!getCol(row, BrowseColumn::RefServiceId).empty())
+            item->setServiceID(getCol(row, BrowseColumn::RefServiceId));
         else
-            item->setServiceID(getCol(row, BrowseCol::ServiceId));
+            item->setServiceID(getCol(row, BrowseColumn::ServiceId));
 
         if (!group.empty()) {
             auto playStatus = getPlayStatus(group, obj->getID());
@@ -1784,18 +1798,18 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
 
 std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::string& group, const std::unique_ptr<SQLRow>& row)
 {
-    int objectType = std::stoi(getCol(row, SearchCol::ObjectType));
+    int objectType = std::stoi(getCol(row, SearchColumn::ObjectType));
     auto obj = CdsObject::createObject(objectType);
 
     /* set common properties */
-    obj->setID(std::stoi(getCol(row, SearchCol::Id)));
-    obj->setRefID(stoiString(getCol(row, SearchCol::RefId)));
+    obj->setID(std::stoi(getCol(row, SearchColumn::Id)));
+    obj->setRefID(stoiString(getCol(row, SearchColumn::RefId)));
 
-    obj->setParentID(std::stoi(getCol(row, SearchCol::ParentId)));
-    obj->setTitle(getCol(row, SearchCol::DcTitle));
-    obj->setSortKey(getCol(row, SearchCol::SortKey));
-    obj->setClass(getCol(row, SearchCol::UpnpClass));
-    obj->setFlags(std::stoi(getCol(row, SearchCol::Flags)));
+    obj->setParentID(std::stoi(getCol(row, SearchColumn::ParentId)));
+    obj->setTitle(getCol(row, SearchColumn::DcTitle));
+    obj->setSortKey(getCol(row, SearchColumn::SortKey));
+    obj->setClass(getCol(row, SearchColumn::UpnpClass));
+    obj->setFlags(std::stoi(getCol(row, SearchColumn::Flags)));
 
     auto metaData = retrieveMetaDataForObject(obj->getID());
     if (!metaData.empty())
@@ -1819,22 +1833,22 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::str
             throw DatabaseException("tried to create object without at least one resource", LINE_MESSAGE);
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
-        item->setMimeType(getCol(row, SearchCol::MimeType));
+        item->setMimeType(getCol(row, SearchColumn::MimeType));
         if (obj->isPureItem()) {
-            item->setLocation(stripLocationPrefix(getCol(row, SearchCol::Location)).first);
+            item->setLocation(stripLocationPrefix(getCol(row, SearchColumn::Location)).first);
         } else { // URLs
-            item->setLocation(getCol(row, SearchCol::Location));
+            item->setLocation(getCol(row, SearchColumn::Location));
         }
 
-        item->setPartNumber(stoiString(getCol(row, SearchCol::PartNumber)));
-        item->setTrackNumber(stoiString(getCol(row, SearchCol::TrackNumber)));
+        item->setPartNumber(stoiString(getCol(row, SearchColumn::PartNumber)));
+        item->setTrackNumber(stoiString(getCol(row, SearchColumn::TrackNumber)));
 
         auto playStatus = getPlayStatus(group, obj->getID());
         if (playStatus)
             item->setPlayStatus(playStatus);
     } else if (obj->isContainer()) {
         auto cont = std::static_pointer_cast<CdsItem>(obj);
-        cont->setLocation(stripLocationPrefix(getCol(row, SearchCol::Location)).first);
+        cont->setLocation(stripLocationPrefix(getCol(row, SearchColumn::Location)).first);
     } else {
         throw DatabaseException(fmt::format("Unknown object type: {}", objectType), LINE_MESSAGE);
     }
@@ -1844,8 +1858,10 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::str
 
 std::vector<std::pair<std::string, std::string>> SQLDatabase::retrieveMetaDataForObject(int objectId)
 {
-    auto query = fmt::format("{} FROM {} WHERE {} = {}",
-        sql_meta_query, identifier(METADATA_TABLE), identifier("item_id"), objectId);
+    auto query = fmt::format("{} FROM {} WHERE {}",
+        sql_meta_query,
+        metaColumnMapper->getTableName(),
+        metaColumnMapper->getClause(MetadataColumn::ItemId, quote(objectId), true));
     auto res = select(query);
     if (!res)
         return {};
@@ -1855,7 +1871,7 @@ std::vector<std::pair<std::string, std::string>> SQLDatabase::retrieveMetaDataFo
 
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        metaData.emplace_back(getCol(row, MetadataCol::PropertyName), getCol(row, MetadataCol::PropertyValue));
+        metaData.emplace_back(getCol(row, MetadataColumn::PropertyName), getCol(row, MetadataColumn::PropertyValue));
     }
     return metaData;
 }
@@ -1863,15 +1879,15 @@ std::vector<std::pair<std::string, std::string>> SQLDatabase::retrieveMetaDataFo
 long long SQLDatabase::getFileStats(const StatsParam& stats)
 {
     auto where = std::vector {
-        fmt::format("{} != {:d}", searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER),
+        fmt::format("{} != {:d}", searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_CONTAINER),
     };
     if (!stats.getMimeType().empty()) {
-        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::MimeType), quote(fmt::format("{}%", stats.getMimeType()))));
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::MimeType), quote(fmt::format("{}%", stats.getMimeType()))));
     }
     if (!stats.getUpnpClass().empty()) {
-        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::UpnpClass), quote(fmt::format("{}%", stats.getUpnpClass()))));
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::UpnpClass), quote(fmt::format("{}%", stats.getUpnpClass()))));
     }
-    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::Location), quote(fmt::format("{}%", stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
+    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(fmt::format("{}%", stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
 
     std::string mode;
     std::string join;
@@ -1881,7 +1897,7 @@ long long SQLDatabase::getFileStats(const StatsParam& stats)
         break;
     case StatsParam::StatsMode::Size: {
         join = fmt::format("LEFT JOIN {} ON {} = {}", resourceColumnMapper->tableQuoted(), searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        mode = fmt::format("SUM({}.{})", resourceColumnMapper->getAlias(), identifier("size"));
+        mode = fmt::format("SUM({}.{})", resourceColumnMapper->getAlias(), identifier("size")); // size is a ResourceAttribute converted to a column
         break;
     }
     }
@@ -1897,15 +1913,15 @@ long long SQLDatabase::getFileStats(const StatsParam& stats)
 std::map<std::string, long long> SQLDatabase::getGroupStats(const StatsParam& stats)
 {
     auto where = std::vector {
-        fmt::format("{} != {:d}", searchColumnMapper->mapQuoted(SearchCol::ObjectType), OBJECT_TYPE_CONTAINER),
+        fmt::format("{} != {:d}", searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_CONTAINER),
     };
     if (!stats.getMimeType().empty()) {
-        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::MimeType), quote(fmt::format("{}%", stats.getMimeType()))));
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::MimeType), quote(fmt::format("{}%", stats.getMimeType()))));
     }
     if (!stats.getUpnpClass().empty()) {
-        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::UpnpClass), quote(fmt::format("{}%", stats.getUpnpClass()))));
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::UpnpClass), quote(fmt::format("{}%", stats.getUpnpClass()))));
     }
-    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchCol::Location), quote(fmt::format("{}%", stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
+    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(fmt::format("{}%", stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
 
     std::string mode;
     std::string join;
@@ -1919,7 +1935,7 @@ std::map<std::string, long long> SQLDatabase::getGroupStats(const StatsParam& st
         break;
     }
     }
-    auto query = fmt::format("SELECT {}, {} FROM {}{} WHERE {} GROUP BY {}", searchColumnMapper->mapQuoted(SearchCol::UpnpClass), mode, searchColumnMapper->tableQuoted(), join, fmt::join(where, " AND "), searchColumnMapper->mapQuoted(SearchCol::UpnpClass));
+    auto query = fmt::format("SELECT {}, {} FROM {}{} WHERE {} GROUP BY {}", searchColumnMapper->mapQuoted(SearchColumn::UpnpClass), mode, searchColumnMapper->tableQuoted(), join, fmt::join(where, " AND "), searchColumnMapper->mapQuoted(SearchColumn::UpnpClass));
     auto res = select(query);
     std::unique_ptr<SQLRow> row;
     std::map<std::string, long long> result;
@@ -1939,10 +1955,15 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
     beginTransaction("incrementUpdateIDs");
 
     exec(fmt::format("UPDATE {0} SET {1} = {1} + 1 WHERE {2} IN ({3})",
-        identifier(CDS_OBJECT_TABLE), identifier("update_id"), identifier("id"), fmt::join(ids, ",")));
+        browseColumnMapper->getTableName(),
+        browseColumnMapper->mapQuoted(BrowseColumn::UpdateId, true),
+        browseColumnMapper->mapQuoted(BrowseColumn::Id, true), fmt::join(ids, ",")));
 
     auto res = select(fmt::format("SELECT {0}, {1} FROM {2} WHERE {0} IN ({3})",
-        identifier("id"), identifier("update_id"), identifier(CDS_OBJECT_TABLE), fmt::join(ids, ",")));
+        browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+        browseColumnMapper->mapQuoted(BrowseColumn::UpdateId, true),
+        browseColumnMapper->getTableName(),
+        fmt::join(ids, ",")));
     if (!res) {
         rollback("incrementUpdateIDs 2");
         throw DatabaseException("Error while fetching update ids", LINE_MESSAGE);
@@ -1964,15 +1985,14 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
 
 std::size_t SQLDatabase::getObjects(int parentID, bool withoutContainer, std::unordered_set<int>& ret, bool full)
 {
-    auto colId = identifier("id");
-    auto table = identifier(CDS_OBJECT_TABLE);
-    auto colParentId = identifier("parent_id");
-    auto colObjType = identifier("object_type");
-
-    auto getSql = fmt::format("SELECT {}, {} FROM {} WHERE {} = {}", colId, colObjType, table, colParentId, parentID);
+    auto getSql = fmt::format("SELECT {}, {} FROM {} WHERE {}",
+        browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+        browseColumnMapper->mapQuoted(BrowseColumn::ObjectType, true),
+        browseColumnMapper->getTableName(),
+        browseColumnMapper->getClause(BrowseColumn::ParentId, parentID, true));
     auto res = select(getSql);
     if (!res)
-        throw DatabaseException(fmt::format("error selecting form {}", table), LINE_MESSAGE);
+        throw DatabaseException(fmt::format("error selecting form {}", browseColumnMapper->getTableName()), LINE_MESSAGE);
 
     if (res->getNumRows() == 0)
         return 0;
@@ -1989,16 +2009,16 @@ std::size_t SQLDatabase::getObjects(int parentID, bool withoutContainer, std::un
 
 std::vector<int> SQLDatabase::getRefObjects(int objectId)
 {
-    auto colId = identifier("id");
-    auto colRefId = identifier("ref_id");
-    auto table = identifier(CDS_OBJECT_TABLE);
-    auto colUpdated = identifier("last_updated");
-
-    auto getSql = fmt::format("SELECT {}, {} FROM {} WHERE {} = {} AND {} != {}", colId, colUpdated, table, colRefId, objectId, identifier("object_type"), OBJECT_TYPE_CONTAINER);
+    auto getSql = fmt::format("SELECT {}, {} FROM {} WHERE {} AND {} != {}",
+        browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+        browseColumnMapper->mapQuoted(BrowseColumn::LastUpdated, true),
+        browseColumnMapper->getTableName(),
+        browseColumnMapper->getClause(BrowseColumn::RefId, objectId, true),
+        browseColumnMapper->mapQuoted(BrowseColumn::ObjectType, true), OBJECT_TYPE_CONTAINER);
 
     auto res = select(getSql);
     if (!res)
-        throw DatabaseException(fmt::format("error selecting form {}", table), LINE_MESSAGE);
+        throw DatabaseException(fmt::format("error selecting form {}", browseColumnMapper->getTableName()), LINE_MESSAGE);
 
     std::vector<int> result;
     if (res->getNumRows() == 0)
@@ -2013,9 +2033,9 @@ std::vector<int> SQLDatabase::getRefObjects(int objectId)
 
 std::unordered_set<int> SQLDatabase::getUnreferencedObjects()
 {
-    auto colId = identifier("id");
-    auto table = identifier(CDS_OBJECT_TABLE);
-    auto colRefId = identifier("ref_id");
+    auto colId = browseColumnMapper->mapQuoted(BrowseColumn::Id, true);
+    auto table = browseColumnMapper->getTableName();
+    auto colRefId = browseColumnMapper->mapQuoted(BrowseColumn::RefId, true);
 
     auto getSql = fmt::format("SELECT {} FROM {} WHERE {} IS NOT NULL AND {} NOT IN (SELECT {} FROM {})", colId, table, colRefId, colRefId, colId, table);
     auto res = select(getSql);
@@ -2045,7 +2065,10 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     }
 
     auto res = select(fmt::format("SELECT {0}, {1} FROM {2} WHERE {0} IN ({3})",
-        identifier("id"), identifier("object_type"), identifier(CDS_OBJECT_TABLE), fmt::join(list, ",")));
+        browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+        browseColumnMapper->mapQuoted(BrowseColumn::ObjectType, true),
+        browseColumnMapper->getTableName(),
+        fmt::join(list, ",")));
     if (!res)
         throw DatabaseException(fmt::format("error selecting form {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
 
@@ -2068,9 +2091,15 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
 void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
 {
     auto sel = fmt::format("SELECT {}, {}, {} FROM {} JOIN {} ON {} = {} WHERE {} IN ({})",
-        asColumnMapper->mapQuoted(AutoscanCol::Id), asColumnMapper->mapQuoted(AutoscanCol::Persistent), browseColumnMapper->mapQuoted(BrowseCol::Location),
-        asColumnMapper->tableQuoted(), browseColumnMapper->tableQuoted(),
-        browseColumnMapper->mapQuoted(BrowseCol::Id), asColumnMapper->mapQuoted(AutoscanCol::ObjId), browseColumnMapper->mapQuoted(BrowseCol::Id), fmt::join(objectIDs, ","));
+        asColumnMapper->mapQuoted(ASColumn::Id),
+        asColumnMapper->mapQuoted(ASColumn::Persistent),
+        browseColumnMapper->mapQuoted(BrowseColumn::Location),
+        asColumnMapper->tableQuoted(),
+        browseColumnMapper->tableQuoted(),
+        browseColumnMapper->mapQuoted(BrowseColumn::Id),
+        asColumnMapper->mapQuoted(ASColumn::ObjId),
+        browseColumnMapper->mapQuoted(BrowseColumn::Id),
+        fmt::join(objectIDs, ","));
     log_debug("{}", sel);
 
     beginTransaction("_removeObjects");
@@ -2080,15 +2109,17 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
         std::vector<int> deleteAs;
         std::unique_ptr<SQLRow> row;
         while ((row = res->nextRow())) {
-            const int colId = row->col_int(0, INVALID_OBJECT_ID); // AutoscanCol::id
+            const int colId = row->col_int(0, INVALID_OBJECT_ID); // ASColumn::id
             bool persistent = remapBool(row->col_int(1, 0));
             if (persistent) {
                 auto location = std::get<0>(stripLocationPrefix(row->col(2)));
-                auto values = std::vector {
-                    ColumnUpdate(identifier("obj_id"), SQL_NULL),
-                    ColumnUpdate(identifier("location"), quote(location.string())),
+                auto fields = std::map<AutoscanColumn, std::string> {
+                    { AutoscanColumn::Id, quote(colId) },
+                    { AutoscanColumn::ObjId, SQL_NULL },
+                    { AutoscanColumn::Location, quote(location.string()) },
                 };
-                updateRow(AUTOSCAN_TABLE, values, "id", colId);
+                Autoscan2Table at(fields, Operation::Update, autoscanColumnMapper);
+                exec(AUTOSCAN_TABLE, at.sqlForUpdate(nullptr), colId);
             } else {
                 deleteAs.push_back(colId);
             }
@@ -2108,8 +2139,11 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
 
 std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objectID, const fs::path& path, bool all)
 {
-    auto res = select(fmt::format("SELECT {}, {} FROM {} WHERE {} = {} LIMIT 1",
-        identifier("object_type"), identifier("ref_id"), identifier(CDS_OBJECT_TABLE), identifier("id"), objectID));
+    auto res = select(fmt::format("SELECT {}, {} FROM {} WHERE {} LIMIT 1",
+        browseColumnMapper->mapQuoted(BrowseColumn::ObjectType, true),
+        browseColumnMapper->mapQuoted(BrowseColumn::RefId, true),
+        browseColumnMapper->getTableName(),
+        browseColumnMapper->getClause(BrowseColumn::Id, objectID, true)));
     if (!res)
         return nullptr;
 
@@ -2160,11 +2194,27 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
     auto removeIds = std::vector(containers);
 
     // select statements
-    auto parentSql = fmt::format("SELECT DISTINCT {0}parent_id{1} FROM {0}{2}{1} WHERE {0}id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
-    auto itemSql = fmt::format("SELECT DISTINCT {0}id{1}, {0}parent_id{1} FROM {0}{2}{1} WHERE {0}ref_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
+    auto parentSql = fmt::format("SELECT DISTINCT {} FROM {} WHERE {} IN",
+        browseColumnMapper->mapQuoted(BrowseColumn::ParentId, true),
+        browseColumnMapper->getTableName(),
+        browseColumnMapper->mapQuoted(BrowseColumn::Id, true));
+    auto itemSql = fmt::format("SELECT DISTINCT {}, {} FROM {} WHERE {} IN",
+        browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+        browseColumnMapper->mapQuoted(BrowseColumn::ParentId, true),
+        browseColumnMapper->getTableName(),
+        browseColumnMapper->mapQuoted(BrowseColumn::RefId, true));
     auto containersSql = all //
-        ? fmt::format("SELECT DISTINCT {0}id{1}, {0}object_type{1}, {0}ref_id{1} FROM {0}{2}{1} WHERE {0}parent_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE) //
-        : fmt::format("SELECT DISTINCT {0}id{1}, {0}object_type{1} FROM {0}{2}{1} WHERE {0}parent_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
+        ? fmt::format("SELECT DISTINCT {}, {}, {} FROM {} WHERE {} IN",
+              browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+              browseColumnMapper->mapQuoted(BrowseColumn::ObjectType, true),
+              browseColumnMapper->mapQuoted(BrowseColumn::RefId, true),
+              browseColumnMapper->getTableName(),
+              browseColumnMapper->mapQuoted(BrowseColumn::ParentId, true)) //
+        : fmt::format("SELECT DISTINCT {}, {} FROM {} WHERE {} IN",
+              browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+              browseColumnMapper->mapQuoted(BrowseColumn::ObjectType, true),
+              browseColumnMapper->getTableName(),
+              browseColumnMapper->mapQuoted(BrowseColumn::ParentId, true));
 
     // collect container for update signals
     if (!containers.empty()) {
@@ -2263,17 +2313,31 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     if (maybeEmpty.upnp.empty() && maybeEmpty.ui.empty())
         return changedContainers;
 
-    auto tabAlias = identifier("fol");
-    auto childAlias = identifier("cld");
-    auto colId = identifier("id");
-    auto fields = std::vector {
-        fmt::format("{}.{}", tabAlias, colId),
-        fmt::format("COUNT({}.{})", childAlias, identifier("parent_id")),
-        fmt::format("{}.{}", tabAlias, identifier("parent_id")),
-        fmt::format("{}.{}", tabAlias, identifier("flags")),
+    constexpr const char* folAlias = "fol";
+    constexpr const char* cldAlias = "cld";
+    static const std::map<BrowseColumn, SearchProperty> purgeColMap {
+        { BrowseColumn::Id, { folAlias, browseColMap.at(BrowseColumn::Id).field } },
+        { BrowseColumn::ParentId, { folAlias, browseColMap.at(BrowseColumn::ParentId).field } },
+        { BrowseColumn::ObjectType, { folAlias, browseColMap.at(BrowseColumn::ObjectType).field } },
+        { BrowseColumn::Flags, { folAlias, browseColMap.at(BrowseColumn::Flags).field } },
+        { BrowseColumn::RefId, { cldAlias, browseColMap.at(BrowseColumn::ParentId).field } }, // use RefId to store cld.parent_id
     };
-    std::string selectSql = fmt::format("SELECT {2} FROM {5} {3} LEFT JOIN {5} {4} ON {3}.{0}id{1} = {4}.{0}parent_id{1} WHERE {3}.{0}object_type{1} = {6} AND {3}.{0}id{1}",
-        table_quote_begin, table_quote_end, fmt::join(fields, ","), tabAlias, childAlias, identifier(CDS_OBJECT_TABLE), OBJECT_TYPE_CONTAINER);
+    static const std::vector<std::pair<std::string, BrowseColumn>> purgeSortMap {};
+    auto pcm = EnumColumnMapper<BrowseColumn>(table_quote_begin, table_quote_end, folAlias, CDS_OBJECT_TABLE, purgeSortMap, purgeColMap);
+
+    auto fields = std::vector {
+        pcm.mapQuoted(BrowseColumn::Id),
+        fmt::format("COUNT({})", pcm.mapQuoted(BrowseColumn::RefId)),
+        pcm.mapQuoted(BrowseColumn::ParentId),
+        pcm.mapQuoted(BrowseColumn::Flags),
+    };
+    std::string selectSql = fmt::format("SELECT {0} FROM {1} {2} LEFT JOIN {1} {3} ON {4} = {5} WHERE {6} AND {4}",
+        fmt::join(fields, ","),
+        pcm.getTableName(),
+        folAlias,
+        cldAlias,
+        pcm.mapQuoted(BrowseColumn::Id), pcm.mapQuoted(BrowseColumn::RefId),
+        pcm.getClause(BrowseColumn::ObjectType, quote(OBJECT_TYPE_CONTAINER)));
 
     std::vector<std::int32_t> del;
 
@@ -2288,7 +2352,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         again = false;
 
         if (!selUpnp.empty()) {
-            auto sql = fmt::format("{} IN ({}) GROUP BY {}.{}", selectSql, fmt::join(selUpnp, ","), tabAlias, colId);
+            auto sql = fmt::format("{} IN ({}) GROUP BY {}", selectSql, fmt::join(selUpnp, ","), pcm.mapQuoted(BrowseColumn::Id));
             log_debug("upnp-sql: {}", sql);
             std::shared_ptr<SQLResult> res = select(sql);
             selUpnp.clear();
@@ -2308,7 +2372,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         }
 
         if (!selUi.empty()) {
-            auto sql = fmt::format("{} IN ({}) GROUP BY {}.{}", selectSql, fmt::join(selUi, ","), tabAlias, colId);
+            auto sql = fmt::format("{} IN ({}) GROUP BY {}", selectSql, fmt::join(selUi, ","), pcm.mapQuoted(BrowseColumn::Id));
             log_debug("ui-sql: {}", sql);
             std::shared_ptr<SQLResult> res = select(sql);
             selUi.clear();
@@ -2412,8 +2476,9 @@ void SQLDatabase::updateConfigValue(
     const std::string& value,
     const std::string& status)
 {
-    auto res = select(fmt::format("SELECT 1 FROM {} WHERE {} = {} LIMIT 1",
-        identifier(CONFIG_VALUE_TABLE), identifier("item"), quote(item)));
+    auto res = select(fmt::format("SELECT 1 FROM {} WHERE {} LIMIT 1",
+        configColumnMapper->getTableName(),
+        configColumnMapper->getClause(ConfigColumn::Item, quote(item), true)));
     if (!res || res->getNumRows() == 0) {
         auto dict = std::map<ConfigColumn, std::string> {
             { ConfigColumn::Key, quote(key) },
@@ -2445,7 +2510,7 @@ std::vector<ClientObservation> SQLDatabase::getClients()
     }
 
     std::vector<ClientObservation> result;
-    auto res = select(fmt::format("SELECT {} FROM {}", fmt::join(fields, ", "), identifier(CLIENTS_TABLE)));
+    auto res = select(fmt::format("SELECT {} FROM {}", fmt::join(fields, ", "), clientColumnMapper->getTableName()));
     if (!res)
         return result;
 
@@ -2455,7 +2520,7 @@ std::vector<ClientObservation> SQLDatabase::getClients()
         auto net = std::make_shared<GrbNet>(getCol(row, ClientColumn::Addr), getColInt(row, ClientColumn::AddrFamily, AF_INET));
         net->setPort(getColInt(row, ClientColumn::Port, 0));
         result.emplace_back(net,
-            getCol(row, ClientColumn::AddrFamily),
+            getCol(row, ClientColumn::UserAgent),
             std::chrono::seconds(getColInt(row, ClientColumn::Last, 0)),
             std::chrono::seconds(getColInt(row, ClientColumn::Age, 0)),
             nullptr);
@@ -2486,24 +2551,32 @@ void SQLDatabase::saveClients(const std::vector<ClientObservation>& cache)
 
 std::shared_ptr<ClientStatusDetail> SQLDatabase::getPlayStatus(const std::string& group, int objectId)
 {
-    auto fields = std::vector {
-        identifier("group"),
-        identifier("item_id"),
-        identifier("playCount"),
-        identifier("lastPlayed"),
-        identifier("lastPlayedPosition"),
-        identifier("bookMarkPos"),
+    std::vector<std::string> fields;
+    fields.reserve(playstatusColMap.size());
+    for (auto&& [key, col] : playstatusColMap) {
+        fields.push_back(fmt::format("{}", playstatusColumnMapper->mapQuoted(key)));
+    }
+    std::vector<std::string> where {
+        playstatusColumnMapper->getClause(PlaystatusColumn::Group, quote(group)),
+        playstatusColumnMapper->getClause(PlaystatusColumn::ItemId, quote(objectId)),
     };
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} = {}",
-        fmt::join(fields, ", "), identifier(PLAYSTATUS_TABLE),
-        identifier("group"), quote(group), identifier("item_id"), quote(objectId)));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {}",
+        fmt::join(fields, ", "),
+        playstatusColumnMapper->tableQuoted(),
+        fmt::join(where, " AND ")));
     if (!res)
         return {};
 
     std::unique_ptr<SQLRow> row;
     if ((row = res->nextRow())) {
         log_debug("Loaded {},{} items from {}", group, objectId, PLAYSTATUS_TABLE);
-        return std::make_shared<ClientStatusDetail>(row->col(0), row->col_int(1, objectId), row->col_int(2, 0), row->col_int(3, 0), row->col_int(4, 0), row->col_int(5, 0));
+        return std::make_shared<ClientStatusDetail>(
+            getCol(row, PlaystatusColumn::Group),
+            getColInt(row, PlaystatusColumn::ItemId, objectId),
+            getColInt(row, PlaystatusColumn::PlayCount, 0),
+            getColInt(row, PlaystatusColumn::LastPlayed, 0),
+            getColInt(row, PlaystatusColumn::LastPlayedPosition, 0),
+            getColInt(row, PlaystatusColumn::BookMarkPosition, 0));
     }
 
     return {};
@@ -2511,17 +2584,18 @@ std::shared_ptr<ClientStatusDetail> SQLDatabase::getPlayStatus(const std::string
 
 std::vector<std::shared_ptr<ClientStatusDetail>> SQLDatabase::getPlayStatusList(int objectId)
 {
-    auto fields = std::vector {
-        identifier("group"),
-        identifier("item_id"),
-        identifier("playCount"),
-        identifier("lastPlayed"),
-        identifier("lastPlayedPosition"),
-        identifier("bookMarkPos"),
+    std::vector<std::string> fields;
+    fields.reserve(playstatusColMap.size());
+    for (auto&& [key, col] : playstatusColMap) {
+        fields.push_back(fmt::format("{}", playstatusColumnMapper->mapQuoted(key)));
+    }
+    std::vector<std::string> where {
+        playstatusColumnMapper->getClause(PlaystatusColumn::ItemId, quote(objectId)),
     };
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {}",
-        fmt::join(fields, ", "), identifier(PLAYSTATUS_TABLE),
-        identifier("item_id"), quote(objectId)));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {}",
+        fmt::join(fields, ", "),
+        playstatusColumnMapper->tableQuoted(),
+        fmt::join(where, " AND ")));
     if (!res)
         return {};
 
@@ -2529,7 +2603,13 @@ std::vector<std::shared_ptr<ClientStatusDetail>> SQLDatabase::getPlayStatusList(
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         log_debug("Loaded {},{} items from {}", row->col(0), objectId, PLAYSTATUS_TABLE);
-        auto status = std::make_shared<ClientStatusDetail>(row->col(0), row->col_int(1, objectId), row->col_int(2, 0), row->col_int(3, 0), row->col_int(4, 0), row->col_int(5, 0));
+        auto status = std::make_shared<ClientStatusDetail>(
+            getCol(row, PlaystatusColumn::Group),
+            getColInt(row, PlaystatusColumn::ItemId, objectId),
+            getColInt(row, PlaystatusColumn::PlayCount, 0),
+            getColInt(row, PlaystatusColumn::LastPlayed, 0),
+            getColInt(row, PlaystatusColumn::LastPlayedPosition, 0),
+            getColInt(row, PlaystatusColumn::BookMarkPosition, 0));
         result.push_back(std::move(status));
     }
 
@@ -2541,44 +2621,34 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
     beginTransaction("savePlayStatus");
 
     std::vector<std::string> where {
-        fmt::format("{} = {}", identifier("group"), quote(detail->getGroup())),
-        fmt::format("{} = {}", identifier("item_id"), quote(detail->getItemId())),
+        playstatusColumnMapper->getClause(PlaystatusColumn::Group, quote(detail->getGroup()), true),
+        playstatusColumnMapper->getClause(PlaystatusColumn::ItemId, quote(detail->getItemId()), true),
     };
     auto res = select(fmt::format("SELECT 1 FROM {} WHERE {} LIMIT 1",
-        identifier(PLAYSTATUS_TABLE),
+        playstatusColumnMapper->getTableName(),
         fmt::join(where, " AND ")));
     auto doUpdate = res && res->getNumRows() > 0;
 
     if (doUpdate) {
-        std::vector<std::string> fields {
-            fmt::format("{} = {}", identifier("playCount"), quote(detail->getPlayCount())),
-            fmt::format("{} = {}", identifier("lastPlayed"), quote(detail->getLastPlayed().count())),
-            fmt::format("{} = {}", identifier("lastPlayedPosition"), quote(detail->getLastPlayedPosition().count())),
-            fmt::format("{} = {}", identifier("bookMarkPos"), quote(detail->getBookMarkPosition().count())),
+        auto dict = std::map<PlaystatusColumn, std::string> {
+            { PlaystatusColumn::PlayCount, quote(detail->getPlayCount()) },
+            { PlaystatusColumn::LastPlayed, quote(detail->getLastPlayed().count()) },
+            { PlaystatusColumn::LastPlayedPosition, quote(detail->getLastPlayedPosition().count()) },
+            { PlaystatusColumn::BookMarkPosition, quote(detail->getBookMarkPosition().count()) },
         };
-
-        exec(fmt::format("UPDATE {} SET {} WHERE {}",
-            identifier(PLAYSTATUS_TABLE),
-            fmt::join(fields, ", "),
-            fmt::join(where, " AND ")));
+        Playstatus2Table pt(std::move(dict), Operation::Update, playstatusColumnMapper);
+        execOnly(pt.sqlForUpdate(detail));
     } else {
-        auto fields = std::vector {
-            identifier("group"),
-            identifier("item_id"),
-            identifier("playCount"),
-            identifier("lastPlayed"),
-            identifier("lastPlayedPosition"),
-            identifier("bookMarkPos"),
+        auto dict = std::map<PlaystatusColumn, std::string> {
+            { PlaystatusColumn::Group, quote(detail->getGroup()) },
+            { PlaystatusColumn::ItemId, quote(detail->getItemId()) },
+            { PlaystatusColumn::PlayCount, quote(detail->getPlayCount()) },
+            { PlaystatusColumn::LastPlayed, quote(detail->getLastPlayed().count()) },
+            { PlaystatusColumn::LastPlayedPosition, quote(detail->getLastPlayedPosition().count()) },
+            { PlaystatusColumn::BookMarkPosition, quote(detail->getBookMarkPosition().count()) },
         };
-        auto values = std::vector {
-            quote(detail->getGroup()),
-            quote(detail->getItemId()),
-            quote(detail->getPlayCount()),
-            quote(detail->getLastPlayed().count()),
-            quote(detail->getLastPlayedPosition().count()),
-            quote(detail->getBookMarkPosition().count()),
-        };
-        insert(PLAYSTATUS_TABLE, fields, values, false, true);
+        Playstatus2Table pt(std::move(dict), Operation::Insert, playstatusColumnMapper);
+        execOnly(pt.sqlForInsert(detail));
     }
 
     commit("savePlayStatus");
@@ -2587,7 +2657,12 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
 std::vector<std::map<std::string, std::string>> SQLDatabase::getClientGroupStats()
 {
     auto res = select(fmt::format("SELECT {}, COUNT(*), SUM({}), MAX({}), COUNT(NULLIF({},0)) FROM {} GROUP BY {}",
-        identifier("group"), identifier("playCount"), identifier("lastPlayed"), identifier("bookMarkPos"), identifier(PLAYSTATUS_TABLE), identifier("group")));
+        playstatusColumnMapper->mapQuoted(PlaystatusColumn::Group),
+        playstatusColumnMapper->mapQuoted(PlaystatusColumn::PlayCount),
+        playstatusColumnMapper->mapQuoted(PlaystatusColumn::LastPlayed),
+        playstatusColumnMapper->mapQuoted(PlaystatusColumn::BookMarkPosition),
+        playstatusColumnMapper->tableQuoted(),
+        playstatusColumnMapper->mapQuoted(PlaystatusColumn::Group)));
     if (!res)
         return {};
 
@@ -2611,8 +2686,15 @@ void SQLDatabase::updateAutoscanList(AutoscanScanMode scanmode, const std::share
     log_debug("Setting persistent autoscans untouched - scanmode: {};", AutoscanDirectory::mapScanmode(scanmode));
 
     beginTransaction("updateAutoscanList");
-    exec(fmt::format("UPDATE {0} SET {1} = {2} WHERE {3} = {4} AND {5} = {6}",
-        identifier(AUTOSCAN_TABLE), identifier("touched"), quote(false), identifier("persistent"), quote(true), identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(scanmode))));
+    auto dict = std::map<AutoscanColumn, std::string> {
+        { AutoscanColumn::Touched, quote(false) },
+    };
+    auto whereDict = std::map<AutoscanColumn, std::string> {
+        { AutoscanColumn::Persistent, quote(true) },
+        { AutoscanColumn::ScanMode, quote(AutoscanDirectory::mapScanmode(scanmode)) },
+    };
+    Autoscan2Table at(dict, Operation::Update, autoscanColumnMapper);
+    exec(at.sqlForUpdateAll(whereDict));
     commit("updateAutoscanList");
 
     std::size_t listSize = list->size();
@@ -2634,10 +2716,13 @@ void SQLDatabase::updateAutoscanList(AutoscanScanMode scanmode, const std::share
 
         int objectID = findObjectIDByPath(location);
         log_debug("objectID = {}", objectID);
-        auto where = (objectID == INVALID_OBJECT_ID) ? fmt::format("{} = {}", identifier("location"), quote(location)) : fmt::format("{} = {}", identifier("obj_id"), objectID);
+        auto where = (objectID == INVALID_OBJECT_ID)
+            ? autoscanColumnMapper->getClause(AutoscanColumn::Location, quote(location))
+            : autoscanColumnMapper->getClause(AutoscanColumn::ObjId, quote(objectID));
 
         beginTransaction("updateAutoscanList x");
-        auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} LIMIT 1", identifier("id"), identifier(AUTOSCAN_TABLE), where));
+        auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} LIMIT 1",
+            autoscanColumnMapper->mapQuoted(AutoscanColumn::Id), autoscanColumnMapper->tableQuoted(), where));
         if (!res) {
             rollback("updateAutoscanList x");
             throw DatabaseException("query error while selecting from autoscan list", LINE_MESSAGE);
@@ -2653,13 +2738,21 @@ void SQLDatabase::updateAutoscanList(AutoscanScanMode scanmode, const std::share
     }
 
     beginTransaction("updateAutoscanList delete");
-    del(AUTOSCAN_TABLE, fmt::format("{} = {} AND {} = {}", identifier("touched"), quote(false), identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(scanmode))), {});
+    whereDict = std::map<AutoscanColumn, std::string> {
+        { AutoscanColumn::Touched, quote(false) },
+        { AutoscanColumn::ScanMode, quote(AutoscanDirectory::mapScanmode(scanmode)) },
+    };
+    dict = {};
+    at = Autoscan2Table(dict, Operation::Delete, autoscanColumnMapper);
+    del(AUTOSCAN_TABLE, at.sqlForDeleteAll(whereDict), {});
     commit("updateAutoscanList delete");
 }
 
 std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(AutoscanScanMode scanmode)
 {
-    std::string selectSql = fmt::format("{2} WHERE {0}{3}{1}.{0}scan_mode{1} = {4}", table_quote_begin, table_quote_end, sql_autoscan_query, AUS_ALIAS, quote(AutoscanDirectory::mapScanmode(scanmode)));
+    std::string selectSql = fmt::format("{} WHERE {}",
+        sql_autoscan_query,
+        autoscanColumnMapper->getClause(AutoscanColumn::ScanMode, quote(AutoscanDirectory::mapScanmode(scanmode))));
 
     auto res = select(selectSql);
     if (!res)
@@ -2679,7 +2772,7 @@ std::shared_ptr<AutoscanList> SQLDatabase::getAutoscanList(AutoscanScanMode scan
 
 std::shared_ptr<AutoscanDirectory> SQLDatabase::getAutoscanDirectory(int objectID)
 {
-    std::string selectSql = fmt::format("{} WHERE {}.{} = {}", sql_autoscan_query, identifier(ITM_ALIAS), identifier("id"), objectID);
+    std::string selectSql = fmt::format("{} WHERE {}", sql_autoscan_query, autoscanColumnMapper->getClause(AutoscanColumn::ItemId, quote(objectID)));
 
     auto res = select(selectSql);
     if (!res)
@@ -2845,8 +2938,10 @@ void SQLDatabase::_removeAutoscanDirectory(int autoscanID)
 
 int SQLDatabase::_getAutoscanObjectID(int autoscanID)
 {
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} LIMIT 1",
-        identifier("obj_id"), identifier(AUTOSCAN_TABLE), identifier("id"), autoscanID));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
+        autoscanColumnMapper->mapQuoted(AutoscanColumn::ObjId, true),
+        autoscanColumnMapper->getTableName(),
+        autoscanColumnMapper->getClause(AutoscanColumn::Id, autoscanID, true)));
     if (!res)
         throw DatabaseException("error while doing select on autoscan", LINE_MESSAGE);
     auto row = res->nextRow();
@@ -2862,10 +2957,12 @@ void SQLDatabase::_autoscanChangePersistentFlag(int objectID, bool persistent)
         log_warning("cannot change autoscan to persistent {} with illegal ID", persistent);
         return;
     }
-    exec(fmt::format("UPDATE {0} SET {1} = ({1} {2}{3}) WHERE {4} = {5}",
-        identifier(CDS_OBJECT_TABLE),
-        identifier("flags"), (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER,
-        identifier("id"), quote(objectID)));
+    auto dict = std::map<BrowseColumn, std::string> {
+        { BrowseColumn::Id, quote(objectID) },
+        { BrowseColumn::Flags, fmt::format("({} {}{})", browseColumnMapper->mapQuoted(BrowseColumn::Flags, true), (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER) }
+    };
+    auto ot = Object2Table(std::move(dict), Operation::Update, browseColumnMapper);
+    exec(ot.sqlForUpdate(nullptr));
 }
 
 void SQLDatabase::checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
@@ -2887,12 +2984,15 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
     std::unique_ptr<SQLRow> row;
     {
         auto where = std::vector {
-            fmt::format("{} = {}", identifier("obj_id"), checkObjectID),
+            autoscanColumnMapper->getClause(AutoscanColumn::ObjId, checkObjectID, true),
         };
         if (databaseID >= 0)
-            where.push_back(fmt::format("{} != {}", identifier("id"), databaseID));
+            where.push_back(fmt::format("{} != {}", autoscanColumnMapper->mapQuoted(AutoscanColumn::Id, true), databaseID));
 
-        auto res = select(fmt::format("SELECT {} FROM {} WHERE {}", identifier("id"), identifier(AUTOSCAN_TABLE), fmt::join(where, " AND ")));
+        auto res = select(fmt::format("SELECT {} FROM {} WHERE {}",
+            autoscanColumnMapper->mapQuoted(AutoscanColumn::Id, true),
+            autoscanColumnMapper->getTableName(),
+            fmt::join(where, " AND ")));
         if (!res)
             throw DatabaseException(fmt::format("error selecting form {}", AUTOSCAN_TABLE), LINE_MESSAGE);
 
@@ -2908,11 +3008,14 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
 
     if (adir->getRecursive()) {
         auto where = std::vector {
-            fmt::format("{} LIKE {}", identifier("path_ids"), quote(fmt::format("%,{},%", checkObjectID))),
+            fmt::format("{} LIKE {}", autoscanColumnMapper->mapQuoted(AutoscanColumn::PathIds, true), quote(fmt::format("%,{},%", checkObjectID))),
         };
         if (databaseID >= 0)
-            where.push_back(fmt::format("{} != {}", identifier("id"), databaseID));
-        auto qRec = fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", identifier("obj_id"), identifier(AUTOSCAN_TABLE), fmt::join(where, " AND "));
+            where.push_back(fmt::format("{} != {}", autoscanColumnMapper->mapQuoted(AutoscanColumn::Id, true), databaseID));
+        auto qRec = fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
+            autoscanColumnMapper->mapQuoted(AutoscanColumn::ObjId, true),
+            autoscanColumnMapper->getTableName(),
+            fmt::join(where, " AND "));
         log_debug("------------ {}", qRec);
         auto res = select(qRec);
         if (!res)
@@ -2935,12 +3038,15 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
             throw DatabaseException("getPathIDs returned empty", LINE_MESSAGE);
 
         auto where = std::vector {
-            fmt::format("{} IN ({})", identifier("obj_id"), fmt::join(pathIDs, ",")),
-            fmt::format("{} = {}", identifier("recursive"), quote(true)),
+            fmt::format("{} IN ({})", autoscanColumnMapper->mapQuoted(AutoscanColumn::ObjId, true), fmt::join(pathIDs, ",")),
+            autoscanColumnMapper->getClause(AutoscanColumn::Recursive, quote(true), true),
         };
         if (databaseID >= 0)
-            where.push_back(fmt::format("{} != {}", identifier("id"), databaseID));
-        auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", identifier("obj_id"), identifier(AUTOSCAN_TABLE), fmt::join(where, " AND ")));
+            where.push_back(fmt::format("{} != {}", autoscanColumnMapper->mapQuoted(AutoscanColumn::Id, true), databaseID));
+        auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
+            autoscanColumnMapper->mapQuoted(AutoscanColumn::ObjId, true),
+            autoscanColumnMapper->getTableName(),
+            fmt::join(where, " AND ")));
         if (!res)
             throw DatabaseException(fmt::format("error selecting form {}", AUTOSCAN_TABLE), LINE_MESSAGE);
         if (!(row = res->nextRow()))
@@ -2962,11 +3068,13 @@ std::vector<int> SQLDatabase::getPathIDs(int objectID)
     if (objectID == INVALID_OBJECT_ID)
         return pathIDs;
 
-    auto sel = fmt::format("SELECT {} FROM {} WHERE {} = ", identifier("parent_id"), identifier(CDS_OBJECT_TABLE), identifier("id"));
+    auto sel = fmt::format("SELECT {} FROM {} ",
+        browseColumnMapper->mapQuoted(BrowseColumn::ParentId, true),
+        browseColumnMapper->getTableName());
 
     while (objectID != CDS_ID_ROOT) {
         pathIDs.push_back(objectID);
-        auto res = select(fmt::format("{} {} LIMIT 1", sel, objectID));
+        auto res = select(fmt::format("{} WHERE {} LIMIT 1", sel, browseColumnMapper->getClause(BrowseColumn::Id, objectID, true)));
         if (!res)
             break;
         auto row = res->nextRow();
@@ -2987,22 +3095,22 @@ void SQLDatabase::generateMetaDataDBOperations(
     if (op == Operation::Insert) {
         for (auto&& [key, val] : dict) {
             auto mt = std::make_shared<Metadata2Table>(
-                std::map<MetadataCol, std::string> {
-                    { MetadataCol::PropertyName, quote(key) },
-                    { MetadataCol::PropertyValue, quote(val, metaColMap.at(MetadataCol::PropertyValue).length) } },
+                std::map<MetadataColumn, std::string> {
+                    { MetadataColumn::PropertyName, quote(key) },
+                    { MetadataColumn::PropertyValue, quote(val, metaColMap.at(MetadataColumn::PropertyValue).length) } },
                 Operation::Insert, metaColumnMapper);
             operations.push_back(std::move(mt));
         }
     } else {
         // delete current metadata from DB
-        auto mt = std::make_shared<Metadata2Table>(std::map<MetadataCol, std::string>(), Operation::Delete, metaColumnMapper);
+        auto mt = std::make_shared<Metadata2Table>(std::map<MetadataColumn, std::string>(), Operation::Delete, metaColumnMapper);
         operations.push_back(std::move(mt));
         if (op != Operation::Delete) {
             for (auto&& [key, val] : dict) {
                 auto mtk = std::make_shared<Metadata2Table>(
-                    std::map<MetadataCol, std::string> {
-                        { MetadataCol::PropertyName, quote(key) },
-                        { MetadataCol::PropertyValue, quote(val, metaColMap.at(MetadataCol::PropertyValue).length) } },
+                    std::map<MetadataColumn, std::string> {
+                        { MetadataColumn::PropertyName, quote(key) },
+                        { MetadataColumn::PropertyValue, quote(val, metaColMap.at(MetadataColumn::PropertyValue).length) } },
                     Operation::Insert, metaColumnMapper);
                 operations.push_back(std::move(mtk));
             }
@@ -3012,8 +3120,11 @@ void SQLDatabase::generateMetaDataDBOperations(
 
 std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObject(int objectId)
 {
-    auto rsql = fmt::format("{} FROM {} WHERE {} = {} ORDER BY {}",
-        sql_resource_query, identifier(RESOURCE_TABLE), identifier("item_id"), objectId, identifier("res_id"));
+    auto rsql = fmt::format("{} FROM {} WHERE {} ORDER BY {}",
+        sql_resource_query,
+        resColumnMapper->getTableName(),
+        resColumnMapper->getClause(ResourceColumn::ItemId, objectId, true),
+        resColumnMapper->mapQuoted(ResourceColumn::ResId, true));
     log_debug("SQLDatabase::retrieveResourcesForObject {}", rsql);
     auto&& res = select(rsql);
 
@@ -3025,13 +3136,13 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         auto resource = std::make_shared<CdsResource>(
-            EnumMapper::remapContentHandler(std::stoi(getCol(row, ResourceCol::HandlerType))),
-            EnumMapper::remapPurpose(std::stoi(getCol(row, ResourceCol::Purpose))),
-            getCol(row, ResourceCol::Options),
-            getCol(row, ResourceCol::Parameters));
+            EnumMapper::remapContentHandler(std::stoi(getCol(row, ResourceColumn::HandlerType))),
+            EnumMapper::remapPurpose(std::stoi(getCol(row, ResourceColumn::Purpose))),
+            getCol(row, ResourceColumn::Options),
+            getCol(row, ResourceColumn::Parameters));
         resource->setResId(resources.size());
         for (auto&& resAttrId : ResourceAttributeIterator()) {
-            auto index = to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId);
+            auto index = to_underlying(ResourceColumn::Attributes) + to_underlying(resAttrId);
             auto value = row->col_c_str(index);
             if (value) {
                 resource->addAttribute(resAttrId, value);
@@ -3053,17 +3164,17 @@ void SQLDatabase::generateResourceDBOperations(
     if (op == Operation::Insert) {
         std::size_t resId = 0;
         for (auto&& resource : resources) {
-            std::map<ResourceCol, std::string> resourceSql;
-            resourceSql[ResourceCol::ResId] = quote(resId);
-            resourceSql[ResourceCol::HandlerType] = quote(to_underlying(resource->getHandlerType()));
-            resourceSql[ResourceCol::Purpose] = quote(to_underlying(resource->getPurpose()));
+            std::map<ResourceColumn, std::string> resourceSql;
+            resourceSql[ResourceColumn::ResId] = quote(resId);
+            resourceSql[ResourceColumn::HandlerType] = quote(to_underlying(resource->getHandlerType()));
+            resourceSql[ResourceColumn::Purpose] = quote(to_underlying(resource->getPurpose()));
             auto&& options = resource->getOptions();
             if (!options.empty()) {
-                resourceSql[ResourceCol::Options] = quote(URLUtils::dictEncode(options));
+                resourceSql[ResourceColumn::Options] = quote(URLUtils::dictEncode(options));
             }
             auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
-                resourceSql[ResourceCol::Parameters] = quote(URLUtils::dictEncode(parameters));
+                resourceSql[ResourceColumn::Parameters] = quote(URLUtils::dictEncode(parameters));
             }
             std::map<ResourceAttribute, std::string> resourceAttrs;
             for (auto&& [key, val] : resource->getAttributes()) {
@@ -3079,17 +3190,17 @@ void SQLDatabase::generateResourceDBOperations(
         std::size_t resId = 0;
         for (auto&& resource : resources) {
             Operation operation = resId < dbResources.size() ? Operation::Update : Operation::Insert;
-            std::map<ResourceCol, std::string> resourceSql;
-            resourceSql[ResourceCol::ResId] = quote(resId);
-            resourceSql[ResourceCol::HandlerType] = quote(to_underlying(resource->getHandlerType()));
-            resourceSql[ResourceCol::Purpose] = quote(to_underlying(resource->getPurpose()));
+            std::map<ResourceColumn, std::string> resourceSql;
+            resourceSql[ResourceColumn::ResId] = quote(resId);
+            resourceSql[ResourceColumn::HandlerType] = quote(to_underlying(resource->getHandlerType()));
+            resourceSql[ResourceColumn::Purpose] = quote(to_underlying(resource->getPurpose()));
             auto&& options = resource->getOptions();
             if (!options.empty()) {
-                resourceSql[ResourceCol::Options] = quote(URLUtils::dictEncode(options));
+                resourceSql[ResourceColumn::Options] = quote(URLUtils::dictEncode(options));
             }
             auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
-                resourceSql[ResourceCol::Parameters] = quote(URLUtils::dictEncode(parameters));
+                resourceSql[ResourceColumn::Parameters] = quote(URLUtils::dictEncode(parameters));
             }
             std::map<ResourceAttribute, std::string> resourceAttrs;
             for (auto&& [key, val] : resource->getAttributes()) {
@@ -3102,9 +3213,9 @@ void SQLDatabase::generateResourceDBOperations(
         // res_id in db resources but not obj resources, so needs a delete
         while (resId < dbResources.size()) {
             if (dbResources.at(resId)) {
-                std::map<ResourceCol, std::string> resourceSql;
+                std::map<ResourceColumn, std::string> resourceSql;
                 std::map<ResourceAttribute, std::string> resourceAttrs;
-                resourceSql[ResourceCol::ResId] = quote(resId);
+                resourceSql[ResourceColumn::ResId] = quote(resId);
                 auto rt = std::make_shared<Resource2Table>(std::move(resourceSql), std::move(resourceAttrs), Operation::Delete, resColumnMapper);
                 operations.push_back(std::move(rt));
             }
@@ -3117,11 +3228,13 @@ void SQLDatabase::generateResourceDBOperations(
 bool SQLDatabase::doMetadataMigration()
 {
     log_debug("Checking if metadata migration is required");
-    auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {} IS NOT NULL", identifier(CDS_OBJECT_TABLE), identifier("metadata")));
+    auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {} IS NOT NULL",
+        browseColumnMapper->getTableName(),
+        identifier("metadata"))); // metadata column is removed!
     int expectedConversionCount = res->nextRow()->col_int(0, 0);
     log_debug("mt_cds_object rows having metadata: {}", expectedConversionCount);
 
-    res = select(fmt::format("SELECT COUNT(*) FROM {}", identifier(METADATA_TABLE)));
+    res = select(fmt::format("SELECT COUNT(*) FROM {}", metaColumnMapper->getTableName()));
     int metadataRowCount = res->nextRow()->col_int(0, 0);
     log_debug("mt_metadata rows having metadata: {}", metadataRowCount);
 
@@ -3133,7 +3246,9 @@ bool SQLDatabase::doMetadataMigration()
     log_info("About to migrate metadata from mt_cds_object to mt_metadata");
 
     auto resIds = select(fmt::format("SELECT {0}, {1} FROM {2} WHERE {1} IS NOT NULL",
-        identifier("id"), identifier("metadata"), identifier(CDS_OBJECT_TABLE)));
+        browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+        identifier("metadata"),
+        browseColumnMapper->getTableName()));
     std::unique_ptr<SQLRow> row;
 
     int objectsUpdated = 0;
@@ -3151,13 +3266,13 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
 
     if (!itemMetadata.empty()) {
         log_debug("Migrating metadata for cds object {}", objectId);
-        std::vector<std::map<MetadataCol, std::string>> multiDict;
+        std::vector<std::map<MetadataColumn, std::string>> multiDict;
         multiDict.reserve(itemMetadata.size());
         for (auto&& [key, val] : itemMetadata) {
-            auto mDict = std::map<MetadataCol, std::string> {
-                { MetadataCol::ItemId, quote(objectId) },
-                { MetadataCol::PropertyName, quote(key) },
-                { MetadataCol::PropertyValue, quote(val) },
+            auto mDict = std::map<MetadataColumn, std::string> {
+                { MetadataColumn::ItemId, quote(objectId) },
+                { MetadataColumn::PropertyName, quote(key) },
+                { MetadataColumn::PropertyValue, quote(val) },
             };
             multiDict.push_back(std::move(mDict));
         }
@@ -3194,12 +3309,13 @@ bool SQLDatabase::doResourceMigration()
     log_debug("Checking if resources migration is required");
     auto res = select(
         fmt::format("SELECT COUNT(*) FROM {} WHERE {} IS NOT NULL",
-            identifier(CDS_OBJECT_TABLE), identifier("resources")));
+            browseColumnMapper->getTableName(),
+            identifier("resources"))); // resources column is removed!
     int expectedConversionCount = res->nextRow()->col_int(0, 0);
     log_debug("{} rows having resources: {}", CDS_OBJECT_TABLE, expectedConversionCount);
 
     res = select(
-        fmt::format("SELECT COUNT(*) FROM {}", identifier(RESOURCE_TABLE)));
+        fmt::format("SELECT COUNT(*) FROM {}", resColumnMapper->getTableName()));
     int resourceRowCount = res->nextRow()->col_int(0, 0);
     log_debug("{} rows having entries: {}", RESOURCE_TABLE, resourceRowCount);
 
@@ -3212,7 +3328,9 @@ bool SQLDatabase::doResourceMigration()
 
     auto resIds = select(
         fmt::format("SELECT {0}, {1} FROM {2} WHERE {1} IS NOT NULL",
-            identifier("id"), identifier("resources"), identifier(CDS_OBJECT_TABLE)));
+            browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+            identifier("resources"),
+            browseColumnMapper->getTableName()));
     std::unique_ptr<SQLRow> row;
 
     int objectsUpdated = 0;
@@ -3236,19 +3354,19 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
             for (auto&& [key, val] : resource->getAttributes()) {
                 resourceVals[key] = quote(val);
             }
-            auto dict = std::map<ResourceCol, std::string> {
-                { ResourceCol::ItemId, quote(objectId) },
-                { ResourceCol::ResId, quote(resId) },
-                { ResourceCol::HandlerType, quote(to_underlying(resource->getHandlerType())) },
-                { ResourceCol::Purpose, quote(to_underlying(resource->getPurpose())) },
+            auto dict = std::map<ResourceColumn, std::string> {
+                { ResourceColumn::ItemId, quote(objectId) },
+                { ResourceColumn::ResId, quote(resId) },
+                { ResourceColumn::HandlerType, quote(to_underlying(resource->getHandlerType())) },
+                { ResourceColumn::Purpose, quote(to_underlying(resource->getPurpose())) },
             };
             auto&& options = resource->getOptions();
             if (!options.empty()) {
-                dict[ResourceCol::Options] = quote(URLUtils::dictEncode(options));
+                dict[ResourceColumn::Options] = quote(URLUtils::dictEncode(options));
             }
             auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
-                dict[ResourceCol::Parameters] = quote(URLUtils::dictEncode(parameters));
+                dict[ResourceColumn::Parameters] = quote(URLUtils::dictEncode(parameters));
             }
             Resource2Table rt(std::move(dict), std::move(resourceVals), Operation::Insert, resColumnMapper);
             exec(RESOURCE_TABLE, rt.sqlForInsert(nullptr), objectId);

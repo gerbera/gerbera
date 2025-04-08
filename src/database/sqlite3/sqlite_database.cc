@@ -113,7 +113,7 @@ std::string Sqlite3Database::prepareDatabase(const fs::path& dbFilePath, GrbFile
             shutdown();
             throw_std_runtime_error("Error while creating database: {}", e.what());
         }
-        log_info("database created successfully.");
+        log_info("Database {} created successfully.", dbFilePath.c_str());
     }
 
     if (dbVersion.empty()) {
@@ -177,12 +177,18 @@ void Sqlite3Database::init()
         }
         dbInitDone = true;
     } catch (const std::runtime_error& e) {
-        log_error("prematurely shutting down.");
+        log_error("Prematurely shutting down.");
         shutdown();
         throw_std_runtime_error(e.what());
     }
 
-    initDynContainers();
+    try {
+        initDynContainers();
+    } catch (const std::runtime_error& e) {
+        log_error("Prematurely shutting down because of initDynContainers.");
+        shutdown();
+        throw_std_runtime_error(e.what());
+    }
 }
 
 std::shared_ptr<Database> Sqlite3Database::getSelf()

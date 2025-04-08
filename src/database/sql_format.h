@@ -42,16 +42,6 @@ struct SQLIdentifier {
     char quote_end;
 };
 
-struct ColumnUpdate {
-    ColumnUpdate(SQLIdentifier column, std::string value)
-        : column(std::move(column))
-        , value(std::move(value))
-    {
-    }
-    SQLIdentifier column;
-    std::string value;
-};
-
 namespace fmt {
 
 template <>
@@ -62,16 +52,6 @@ struct formatter<SQLIdentifier> : formatter<std::string> {
         return format_to(ctx.out(), "{}{}{}", tn.quote_begin, tn.name, tn.quote_end);
     }
 };
-
-template <>
-struct formatter<ColumnUpdate> : formatter<std::string> {
-    template <typename FormatContext>
-    auto format(const ColumnUpdate& a, FormatContext& ctx) const -> decltype(ctx.out())
-    {
-        return format_to(ctx.out(), "{} = {}", a.column, a.value);
-    }
-};
-
 };
 
 #endif
