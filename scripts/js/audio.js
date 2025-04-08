@@ -34,6 +34,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
   const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
 
   obj.title = audio.title;
+  obj.sortKey = '';
   // set option in config if you want to remove track numbers in front of the title
   if (scriptOptions && scriptOptions['trackNumbers'] === 'hide')
     audio.track = '';

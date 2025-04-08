@@ -31,40 +31,40 @@
 #include "upnp/clients.h"
 #include "util/grb_net.h"
 
-const std::vector<BrowseCol> Object2Table::tableColumnOrder = {
-    BrowseCol::RefId,
-    BrowseCol::ParentId,
-    BrowseCol::ObjectType,
-    BrowseCol::UpnpClass,
-    BrowseCol::DcTitle,
-    BrowseCol::SortKey,
-    BrowseCol::Location,
-    BrowseCol::LocationHash,
-    BrowseCol::Auxdata,
-    BrowseCol::UpdateId,
-    BrowseCol::MimeType,
-    BrowseCol::Flags,
-    BrowseCol::PartNumber,
-    BrowseCol::TrackNumber,
-    BrowseCol::ServiceId,
-    BrowseCol::LastModified,
-    BrowseCol::LastUpdated,
+const std::vector<BrowseColumn> Object2Table::tableColumnOrder = {
+    BrowseColumn::RefId,
+    BrowseColumn::ParentId,
+    BrowseColumn::ObjectType,
+    BrowseColumn::UpnpClass,
+    BrowseColumn::DcTitle,
+    BrowseColumn::SortKey,
+    BrowseColumn::Location,
+    BrowseColumn::LocationHash,
+    BrowseColumn::Auxdata,
+    BrowseColumn::UpdateId,
+    BrowseColumn::MimeType,
+    BrowseColumn::Flags,
+    BrowseColumn::PartNumber,
+    BrowseColumn::TrackNumber,
+    BrowseColumn::ServiceId,
+    BrowseColumn::LastModified,
+    BrowseColumn::LastUpdated,
 };
 
-const std::vector<MetadataCol> Metadata2Table::tableColumnOrder = {
-    MetadataCol::ItemId,
-    MetadataCol::PropertyName,
-    MetadataCol::PropertyValue,
+const std::vector<MetadataColumn> Metadata2Table::tableColumnOrder = {
+    MetadataColumn::ItemId,
+    MetadataColumn::PropertyName,
+    MetadataColumn::PropertyValue,
 };
 
-const std::vector<ResourceCol> Resource2Table::tableColumnOrder = {
-    ResourceCol::ItemId,
-    ResourceCol::ResId,
-    ResourceCol::ResId,
-    ResourceCol::HandlerType,
-    ResourceCol::Purpose,
-    ResourceCol::Options,
-    ResourceCol::Parameters,
+const std::vector<ResourceColumn> Resource2Table::tableColumnOrder = {
+    ResourceColumn::ItemId,
+    ResourceColumn::ResId,
+    ResourceColumn::ResId,
+    ResourceColumn::HandlerType,
+    ResourceColumn::Purpose,
+    ResourceColumn::Options,
+    ResourceColumn::Parameters,
 };
 
 const std::vector<AutoscanColumn> Autoscan2Table::tableColumnOrder = {
@@ -106,12 +106,21 @@ const std::vector<ClientColumn> Client2Table::tableColumnOrder = {
     ClientColumn::Age,
 };
 
+const std::vector<PlaystatusColumn> Playstatus2Table::tableColumnOrder = {
+    PlaystatusColumn::Group,
+    PlaystatusColumn::ItemId,
+    PlaystatusColumn::PlayCount,
+    PlaystatusColumn::LastPlayed,
+    PlaystatusColumn::LastPlayedPosition,
+    PlaystatusColumn::BookMarkPosition,
+};
+
 /// \brief Generate INSERT statement from row data and object for object tables
 template <>
-std::string TableAdaptor<BrowseCol, CdsObject>::sqlForInsert(
+std::string TableAdaptor<BrowseColumn, CdsObject>::sqlForInsert(
     const std::shared_ptr<CdsObject>& obj) const
 {
-    if (obj->getID() != INVALID_OBJECT_ID) {
+    if (obj && obj->getID() != INVALID_OBJECT_ID) {
         throw DatabaseException("Attempted to insert new object with ID!", LINE_MESSAGE);
     }
 
@@ -126,12 +135,15 @@ std::string TableAdaptor<BrowseCol, CdsObject>::sqlForInsert(
         }
     }
 
-    return fmt::format("INSERT INTO {} ({}) VALUES ({})", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(values, ", "));
+    return fmt::format("INSERT INTO {} ({}) VALUES ({})",
+        columnMapper->getTableName(),
+        fmt::join(fields, ", "),
+        fmt::join(values, ", "));
 }
 
 /// \brief Generate INSERT statement from row data and object for metadata tables
 template <>
-std::string TableAdaptor<MetadataCol, CdsObject>::sqlForInsert(
+std::string TableAdaptor<MetadataColumn, CdsObject>::sqlForInsert(
     const std::shared_ptr<CdsObject>& obj) const
 {
     std::vector<std::string> fields;
@@ -140,7 +152,7 @@ std::string TableAdaptor<MetadataCol, CdsObject>::sqlForInsert(
     values.reserve(rowData.size() + (obj ? 1 : 0));
 
     if (obj) {
-        fields.push_back(columnMapper->mapQuoted(MetadataCol::ItemId, true));
+        fields.push_back(columnMapper->mapQuoted(MetadataColumn::ItemId, true));
         values.push_back(fmt::to_string(obj->getID()));
     }
     for (auto&& field : getTableColumnOrder()) {
@@ -150,7 +162,10 @@ std::string TableAdaptor<MetadataCol, CdsObject>::sqlForInsert(
         }
     }
 
-    return fmt::format("INSERT INTO {} ({}) VALUES ({})", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(values, ", "));
+    return fmt::format("INSERT INTO {} ({}) VALUES ({})",
+        columnMapper->getTableName(),
+        fmt::join(fields, ", "),
+        fmt::join(values, ", "));
 }
 
 std::string Resource2Table::sqlForInsert(
@@ -162,7 +177,7 @@ std::string Resource2Table::sqlForInsert(
     values.reserve(rowData.size() + resDict.size() + (obj ? 1 : 0));
 
     if (obj) {
-        fields.push_back(columnMapper->mapQuoted(ResourceCol::ItemId, true));
+        fields.push_back(columnMapper->mapQuoted(ResourceColumn::ItemId, true));
         values.push_back(fmt::to_string(obj->getID()));
     }
     for (auto&& field : getTableColumnOrder()) {
@@ -176,7 +191,10 @@ std::string Resource2Table::sqlForInsert(
         values.push_back(val);
     }
 
-    return fmt::format("INSERT INTO {} ({}) VALUES ({})", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(values, ", "));
+    return fmt::format("INSERT INTO {} ({}) VALUES ({})",
+        columnMapper->getTableName(),
+        fmt::join(fields, ", "),
+        fmt::join(values, ", "));
 }
 
 std::string Resource2Table::sqlForUpdate(
@@ -196,13 +214,18 @@ std::string Resource2Table::sqlForUpdate(
         fields.push_back(fmt::format("{} = {}", columnMapper->quote(EnumMapper::getAttributeName(key)), val));
     }
 
-    return fmt::format("UPDATE {} SET {} WHERE {}", columnMapper->getTableName(), fmt::join(fields, ", "), fmt::join(getWhere(obj), " AND "));
+    return fmt::format("UPDATE {} SET {} WHERE {}",
+        columnMapper->getTableName(),
+        fmt::join(fields, ", "),
+        fmt::join(getWhere(obj), " AND "));
 }
 
 std::vector<std::string> Object2Table::getWhere(
     const std::shared_ptr<CdsObject>& obj) const
 {
-    return { fmt::format("{} = {}", columnMapper->mapQuoted(BrowseCol::Id, true), obj->getID()) };
+    return obj
+        ? std::vector<std::string> { columnMapper->getClause(BrowseColumn::Id, obj->getID(), true) }
+        : std::vector<std::string> { columnMapper->getClause(BrowseColumn::Id, rowData.at(BrowseColumn::Id), true) };
 }
 
 std::vector<std::string> Metadata2Table::getWhere(
@@ -210,19 +233,19 @@ std::vector<std::string> Metadata2Table::getWhere(
 {
     if (!rowData.empty()) {
         return {
-            fmt::format("{} = {}", columnMapper->mapQuoted(MetadataCol::ItemId, true), obj->getID()),
-            fmt::format("{} = {}", columnMapper->mapQuoted(MetadataCol::PropertyName, true), rowData.begin()->second),
+            columnMapper->getClause(MetadataColumn::ItemId, obj->getID(), true),
+            columnMapper->getClause(MetadataColumn::PropertyName, rowData.begin()->second, true),
         };
     }
-    return { fmt::format("{} = {}", columnMapper->mapQuoted(MetadataCol::ItemId, true), obj->getID()) };
+    return { columnMapper->getClause(MetadataColumn::ItemId, obj->getID(), true) };
 }
 
 std::vector<std::string> Resource2Table::getWhere(
     const std::shared_ptr<CdsObject>& obj) const
 {
     return {
-        fmt::format("{} = {}", columnMapper->mapQuoted(ResourceCol::ItemId, true), obj ? fmt::to_string(obj->getID()) : rowData.at(ResourceCol::ItemId)),
-        fmt::format("{} = {}", columnMapper->mapQuoted(ResourceCol::ResId, true), rowData.at(ResourceCol::ResId)),
+        columnMapper->getClause(ResourceColumn::ItemId, obj ? fmt::to_string(obj->getID()) : rowData.at(ResourceColumn::ItemId), true),
+        columnMapper->getClause(ResourceColumn::ResId, rowData.at(ResourceColumn::ResId), true),
     };
 }
 
@@ -230,7 +253,8 @@ std::vector<std::string> Autoscan2Table::getWhere(
     const std::shared_ptr<AutoscanDirectory>& obj) const
 {
     return {
-        fmt::format("{} = {}", columnMapper->mapQuoted(AutoscanColumn::Id, true), obj->getDatabaseID()),
+        columnMapper->getClause(AutoscanColumn::Id,
+            obj ? fmt::to_string(obj->getDatabaseID()) : rowData.at(AutoscanColumn::Id), true),
     };
 }
 
@@ -238,7 +262,7 @@ std::vector<std::string> Config2Table::getWhere(
     const std::shared_ptr<ConfigValue>& obj) const
 {
     return {
-        fmt::format("{} = {}", columnMapper->mapQuoted(ConfigColumn::Item, true), obj ? obj->item : rowData.at(ConfigColumn::Item)),
+        columnMapper->getClause(ConfigColumn::Item, obj ? obj->item : rowData.at(ConfigColumn::Item), true),
     };
 }
 
@@ -246,7 +270,16 @@ std::vector<std::string> Client2Table::getWhere(
     const std::shared_ptr<ClientObservation>& obj) const
 {
     return {
-        fmt::format("{} = {}", columnMapper->mapQuoted(ClientColumn::Addr, true), obj && obj->addr ? obj->addr->getNameInfo(false) : rowData.at(ClientColumn::Addr)),
-        fmt::format("{} = {}", columnMapper->mapQuoted(ClientColumn::Port, true), obj && obj->addr ? fmt::to_string(obj->addr->getPort()) : rowData.at(ClientColumn::Port)),
+        columnMapper->getClause(ClientColumn::Addr, obj && obj->addr ? obj->addr->getNameInfo(false) : rowData.at(ClientColumn::Addr), true),
+        columnMapper->getClause(ClientColumn::Port, obj && obj->addr ? fmt::to_string(obj->addr->getPort()) : rowData.at(ClientColumn::Port), true),
+    };
+}
+
+std::vector<std::string> Playstatus2Table::getWhere(
+    const std::shared_ptr<ClientStatusDetail>& obj) const
+{
+    return {
+        columnMapper->getClause(PlaystatusColumn::Group, obj ? obj->getGroup() : rowData.at(PlaystatusColumn::Group), true),
+        columnMapper->getClause(PlaystatusColumn::ItemId, obj ? fmt::to_string(obj->getItemId()) : rowData.at(PlaystatusColumn::ItemId), true),
     };
 }

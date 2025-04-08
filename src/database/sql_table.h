@@ -42,6 +42,7 @@
 class AutoscanDirectory;
 class CdsObject;
 class ClientObservation;
+class ClientStatusDetail;
 class ConfigValue;
 enum class ResourceAttribute;
 
@@ -50,6 +51,7 @@ enum class ResourceAttribute;
 #define CDS_OBJECT_TABLE "mt_cds_object"
 #define CONFIG_VALUE_TABLE "grb_config_value"
 #define METADATA_TABLE "mt_metadata"
+#define PLAYSTATUS_TABLE "grb_playstatus"
 #define RESOURCE_TABLE "grb_cds_resource"
 
 #define SQL_NULL "NULL"
@@ -63,14 +65,14 @@ enum class Operation {
 };
 
 /// \brief metadata column ids
-enum class MetadataCol {
+enum class MetadataColumn {
     ItemId = 0,
     PropertyName,
     PropertyValue,
 };
 
 /// \brief resource column ids
-enum class ResourceCol {
+enum class ResourceColumn {
     ItemId = 0,
     ResId,
     HandlerType,
@@ -82,7 +84,7 @@ enum class ResourceCol {
 
 /// \brief browse column ids
 /// enum for createObjectFromRow's mode parameter
-enum class BrowseCol {
+enum class BrowseColumn {
     Id = 0,
     RefId,
     ParentId,
@@ -131,6 +133,7 @@ enum class AutoscanColumn {
     ObjLocation,
     PathIds,
     Touched,
+    ItemId,
 };
 
 /// \brief configvalue column ids
@@ -149,6 +152,16 @@ enum class ClientColumn {
     UserAgent,
     Last,
     Age,
+};
+
+/// \brief playstatus column ids
+enum class PlaystatusColumn {
+    Group = 0,
+    ItemId,
+    PlayCount,
+    LastPlayed,
+    LastPlayedPosition,
+    BookMarkPosition,
 };
 
 /// \brief base helper class for insert, update and delete operations
@@ -222,6 +235,8 @@ public:
         const std::shared_ptr<Item>& obj) const override;
     std::string sqlForDelete(
         const std::shared_ptr<Item>& obj) const override;
+    virtual std::string sqlForUpdateAll(const std::map<Tab, std::string>& whereDict) const;
+    virtual std::string sqlForDeleteAll(const std::map<Tab, std::string>& whereDict) const;
 
 protected:
     /// \brief content to store in request
@@ -244,19 +259,19 @@ protected:
 };
 
 /// \brief Adaptor for operations on mt_cds_objects Table
-class Object2Table : public TableAdaptor<BrowseCol, CdsObject> {
+class Object2Table : public TableAdaptor<BrowseColumn, CdsObject> {
 public:
     Object2Table(
-        std::map<BrowseCol, std::string>&& dict,
+        std::map<BrowseColumn, std::string>&& dict,
         Operation operation,
-        std::shared_ptr<EnumColumnMapper<BrowseCol>> columnMapper) noexcept
+        std::shared_ptr<EnumColumnMapper<BrowseColumn>> columnMapper) noexcept
         : TableAdaptor(CDS_OBJECT_TABLE, std::move(dict), operation, std::move(columnMapper))
     {
     }
     bool hasInsertResult() override { return true; }
 
 protected:
-    const std::vector<BrowseCol>& getTableColumnOrder() const override
+    const std::vector<BrowseColumn>& getTableColumnOrder() const override
     {
         return tableColumnOrder;
     }
@@ -264,29 +279,29 @@ protected:
         const std::shared_ptr<CdsObject>& obj) const override;
 
 private:
-    static const std::vector<BrowseCol> tableColumnOrder;
+    static const std::vector<BrowseColumn> tableColumnOrder;
 };
 
 /// \brief Adaptor for operations on mt_metadata Table
-class Metadata2Table : public TableAdaptor<MetadataCol, CdsObject> {
+class Metadata2Table : public TableAdaptor<MetadataColumn, CdsObject> {
 public:
     Metadata2Table(
-        std::map<MetadataCol, std::string>&& dict,
+        std::map<MetadataColumn, std::string>&& dict,
         Operation operation,
-        std::shared_ptr<EnumColumnMapper<MetadataCol>> columnMapper) noexcept
+        std::shared_ptr<EnumColumnMapper<MetadataColumn>> columnMapper) noexcept
         : TableAdaptor(METADATA_TABLE, std::move(dict), operation, std::move(columnMapper))
     {
     }
     Metadata2Table(
-        std::vector<std::map<MetadataCol, std::string>>&& dict,
-        std::shared_ptr<EnumColumnMapper<MetadataCol>> columnMapper) noexcept
+        std::vector<std::map<MetadataColumn, std::string>>&& dict,
+        std::shared_ptr<EnumColumnMapper<MetadataColumn>> columnMapper) noexcept
         : TableAdaptor(METADATA_TABLE, std::move(dict), std::move(columnMapper))
     {
     }
 
 protected:
     bool isValid() const override { return rowData.size() == 2 || (operation == Operation::Delete && rowData.empty()); }
-    const std::vector<MetadataCol>& getTableColumnOrder() const override
+    const std::vector<MetadataColumn>& getTableColumnOrder() const override
     {
         return tableColumnOrder;
     }
@@ -294,17 +309,17 @@ protected:
         const std::shared_ptr<CdsObject>& obj) const override;
 
 private:
-    static const std::vector<MetadataCol> tableColumnOrder;
+    static const std::vector<MetadataColumn> tableColumnOrder;
 };
 
 /// \brief Adaptor for operations on grb_cds_resource Table
-class Resource2Table : public TableAdaptor<ResourceCol, CdsObject> {
+class Resource2Table : public TableAdaptor<ResourceColumn, CdsObject> {
 public:
     Resource2Table(
-        std::map<ResourceCol, std::string>&& dict,
+        std::map<ResourceColumn, std::string>&& dict,
         std::map<ResourceAttribute, std::string>&& resDict,
         Operation operation,
-        std::shared_ptr<EnumColumnMapper<ResourceCol>> columnMapper) noexcept
+        std::shared_ptr<EnumColumnMapper<ResourceColumn>> columnMapper) noexcept
         : TableAdaptor(RESOURCE_TABLE, std::move(dict), operation, std::move(columnMapper))
         , resDict(std::move(resDict))
     {
@@ -315,7 +330,7 @@ public:
         const std::shared_ptr<CdsObject>& obj) const override;
 
 protected:
-    const std::vector<ResourceCol>& getTableColumnOrder() const override
+    const std::vector<ResourceColumn>& getTableColumnOrder() const override
     {
         return tableColumnOrder;
     }
@@ -323,7 +338,7 @@ protected:
         const std::shared_ptr<CdsObject>& obj) const override;
 
 private:
-    static const std::vector<ResourceCol> tableColumnOrder;
+    static const std::vector<ResourceColumn> tableColumnOrder;
     std::map<ResourceAttribute, std::string> resDict;
 };
 
@@ -400,6 +415,29 @@ protected:
 
 private:
     static const std::vector<ClientColumn> tableColumnOrder;
+};
+
+/// \brief Adaptor for operations on grb_playstatus Table
+class Playstatus2Table : public TableAdaptor<PlaystatusColumn, ClientStatusDetail> {
+public:
+    Playstatus2Table(
+        std::map<PlaystatusColumn, std::string>&& dict,
+        Operation operation,
+        std::shared_ptr<EnumColumnMapper<PlaystatusColumn>> columnMapper) noexcept
+        : TableAdaptor(PLAYSTATUS_TABLE, std::move(dict), operation, std::move(columnMapper))
+    {
+    }
+
+protected:
+    const std::vector<PlaystatusColumn>& getTableColumnOrder() const override
+    {
+        return tableColumnOrder;
+    }
+    std::vector<std::string> getWhere(
+        const std::shared_ptr<ClientStatusDetail>& obj) const override;
+
+private:
+    static const std::vector<PlaystatusColumn> tableColumnOrder;
 };
 
 template <class Tab, class Item>
@@ -488,5 +526,50 @@ std::string TableAdaptor<Tab, Item>::sqlForDelete(
         throw DatabaseException("sqlForDelete called with invalid arguments", LINE_MESSAGE);
 
     return fmt::format("{}", fmt::join(getWhere(obj), " AND "));
+}
+
+template <class Tab, class Item>
+std::string TableAdaptor<Tab, Item>::sqlForUpdateAll(const std::map<Tab, std::string>& whereDict) const
+{
+    if (!isValid())
+        throw DatabaseException("sqlForUpdate called with invalid arguments", LINE_MESSAGE);
+
+    std::vector<std::string> fields;
+    fields.reserve(rowData.size());
+    for (auto&& field : getTableColumnOrder()) {
+        if (rowData.find(field) != rowData.end()) {
+            fields.push_back(fmt::format("{} = {}", columnMapper->mapQuoted(field, true), rowData.at(field)));
+        }
+    }
+
+    std::vector<std::string> where;
+    where.reserve(whereDict.size());
+    for (auto&& field : getTableColumnOrder()) {
+        if (whereDict.find(field) != whereDict.end()) {
+            where.push_back(columnMapper->getClause(field, whereDict.at(field)));
+        }
+    }
+
+    return fmt::format("UPDATE {} SET {} WHERE {}",
+        columnMapper->getTableName(),
+        fmt::join(fields, ", "),
+        fmt::join(where, " AND "));
+}
+
+template <class Tab, class Item>
+std::string TableAdaptor<Tab, Item>::sqlForDeleteAll(const std::map<Tab, std::string>& whereDict) const
+{
+    if (!isValid())
+        throw DatabaseException("sqlForDelete called with invalid arguments", LINE_MESSAGE);
+
+    std::vector<std::string> where;
+    where.reserve(whereDict.size());
+    for (auto&& field : getTableColumnOrder()) {
+        if (whereDict.find(field) != whereDict.end()) {
+            where.push_back(columnMapper->getClause(field, whereDict.at(field)));
+        }
+    }
+
+    return fmt::format("{}", fmt::join(where, " AND "));
 }
 #endif

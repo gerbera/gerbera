@@ -525,6 +525,8 @@ static bool isPrivateAttribute(ResourceAttribute attribute)
     case ResourceAttribute::FANART_RES_ID:
     case ResourceAttribute::TYPE:
     case ResourceAttribute::FORMAT:
+    case ResourceAttribute::ORIENTATION:
+    case ResourceAttribute::PIXELFORMAT:
         return true;
     default:
         return false;
@@ -1042,7 +1044,9 @@ void UpnpXMLBuilder::addResources(
             aa.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_METADATA_NAMESPACE;
             auto mimeType = getMimeType(*res, mimeMappings);
             auto contentType = getValueOrDefault(ctMappings, mimeType);
-            aa.append_attribute("dlna:profileID") = dlnaProfileString(*res, contentType, quirks, false).c_str();
+            auto dlnaProfile = dlnaProfileString(*res, contentType, quirks, false);
+            if (!dlnaProfile.empty())
+                aa.append_attribute("dlna:profileID") = dlnaProfile.c_str();
             continue;
         }
 

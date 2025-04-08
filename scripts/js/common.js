@@ -461,6 +461,7 @@ function getAudioDetails(obj) {
 // doc-add-audio-begin
 function addAudio(obj, cont, rootPath, containerType) {
   const audio = getAudioDetails(obj);
+  obj.sortKey = '';
   const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
 
   // We finally gathered all data that we need, so let's create a
@@ -802,6 +803,7 @@ function boolFromConfig(entry, defValue) {
 function addAudioStructured(obj, cont, rootPath, containerType) {
   // first gather data
   const audio = getAudioDetails(obj);
+  obj.sortKey = '';
   const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
 
   // Extra code for correct display of albums with various artists (usually collections)
@@ -1066,6 +1068,7 @@ function addAudioStructured(obj, cont, rootPath, containerType) {
 // doc-add-video-begin
 function addVideo(obj, cont, rootPath, containerType) {
   const dir = getRootPath(rootPath, obj.location);
+  obj.sortKey = '';
   const parentCount = intFromConfig('/import/resources/container/attribute::parentCount', 1);
   const containerResource = parentCount > 1 ? cont.res : undefined;
   const containerRefID = cont.res.count > 0 ? cont.id : obj.id;
@@ -1191,6 +1194,7 @@ function addImage(obj, cont, rootPath, containerType) {
   const containerResource = parentCount > 1 ? cont.res : undefined;
   const containerRefID = cont.res.count > 0 ? cont.id : obj.id;
   const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
+  obj.sortKey = '';
 
   const chain = {
     imageRoot: {
@@ -1307,6 +1311,7 @@ function addImage(obj, cont, rootPath, containerType) {
 // doc-add-trailer-begin
 function addTrailer(obj) {
   const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
+  obj.sortKey = '';
   const chain = {
     trailerRoot: {
       id: boxSetup[BK_trailerRoot].id,

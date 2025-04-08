@@ -501,6 +501,14 @@ public:
         }
         return FieldType::String;
     }
+    std::string getClause(En field, std::string value, bool noAlias = false)
+    {
+        return fmt::format("{} = {}", this->mapQuoted(field, noAlias), value);
+    }
+    std::string getClause(En field, long long value, bool noAlias = false)
+    {
+        return fmt::format("{} = {}", this->mapQuoted(field, noAlias), value);
+    }
 
 private:
     const char table_quote_begin;
