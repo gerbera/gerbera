@@ -19,15 +19,15 @@ jobs:
       matrix:
         compiler:
           - name: gcc
-            cc: gcc-9
-            cxx: g++-9
+            cc: gcc-10
+            cxx: g++-10
             icu: "False"
-            system: ubuntu-20.04
+            system: ubuntu-22.04
           - name: clang
-            cc: clang-11
-            cxx: clang++-11
+            cc: clang-13
+            cxx: clang++-13
             icu: "True"
-            system: ubuntu-20.04
+            system: ubuntu-22.04
           - name: gcc-13
             cc: gcc-13
             cxx: g++-13

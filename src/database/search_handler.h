@@ -320,23 +320,34 @@ enum class FieldType {
     Date,
 };
 
+/// \brief base interface for templated column mapping and quoting operations
 class ColumnMapper {
 public:
     virtual ~ColumnMapper() = default;
+    /// \brief check whether tag is valid colum
     virtual bool hasEntry(const std::string& tag) const = 0;
+    /// \brief get the table name
     virtual std::string getTableName() const = 0;
+    /// \brief get the table name quoted
     virtual std::string tableQuoted() const = 0;
+    /// \brief quote column for statement
+    /// \param tag column name
+    /// \param noAlias generate no alias
     virtual std::string mapQuoted(const std::string& tag, bool noAlias = false) const = 0;
     virtual bool mapQuotedList(std::vector<std::string>& sort, const std::string& tag, const std::string& desc) const = 0;
+    /// \brief quote column for statement with lowercase
     virtual std::string mapQuotedLower(const std::string& tag) const = 0;
+    /// \brief get type of column from tagMap
     virtual FieldType getFieldType(const std::string& tag) const = 0;
+    /// \brief quote tag for statement
     virtual std::string quote(const std::string& tag) const = 0;
 };
 
 struct SearchProperty {
     std::string alias;
     std::string field;
-    FieldType type;
+    FieldType type { FieldType::String };
+    std::size_t length { 0 };
 
     std::string print(char table_quote_begin, char table_quote_end, bool noAlias) const
     {
@@ -427,11 +438,11 @@ public:
         return fmt::format("{}{}{}", table_quote_begin, tableAlias, table_quote_end);
     }
 
-    std::string mapQuoted(En tag) const
+    std::string mapQuoted(En tag, bool noAlias = false) const
     {
         auto it = std::find_if(colMap.begin(), colMap.end(), [=](auto&& map) { return map.first == tag; });
         if (it != colMap.end()) {
-            return colMap.at(tag).print(table_quote_begin, table_quote_end, false);
+            return colMap.at(tag).print(table_quote_begin, table_quote_end, noAlias);
         }
         return {};
     }

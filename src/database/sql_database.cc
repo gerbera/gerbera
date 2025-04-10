@@ -45,6 +45,7 @@
 #include "exceptions.h"
 #include "metadata/metadata_enums.h"
 #include "search_handler.h"
+#include "sql_table.h"
 #include "upnp/clients.h"
 #include "upnp/xml_builder.h"
 #include "util/grb_net.h"
@@ -60,52 +61,23 @@
 #define MAX_REMOVE_SIZE 1000
 #define MAX_REMOVE_RECURSION 500
 
-#define SQL_NULL "NULL"
-
 #define RESOURCE_SEP '|'
 
-#define ITM_ALIAS "f"
-#define REF_ALIAS "rf"
 #define AUS_ALIAS "as"
-#define SRC_ALIAS "c"
+#define CFG_ALIAS "co"
+#define CLT_ALIAS "cl"
+#define ITM_ALIAS "f"
 #define MTA_ALIAS "m"
-#define RES_ALIAS "re"
 #define PLY_ALIAS "pl"
+#define REF_ALIAS "rf"
+#define RES_ALIAS "re"
+#define SRC_ALIAS "c"
 
 // database
 #define LOC_DIR_PREFIX 'D'
 #define LOC_FILE_PREFIX 'F'
 #define LOC_VIRT_PREFIX 'V'
 #define LOC_ILLEGAL_PREFIX 'X'
-
-/// \brief browse column ids
-/// enum for createObjectFromRow's mode parameter
-enum class BrowseCol {
-    Id = 0,
-    RefId,
-    ParentId,
-    ObjectType,
-    UpnpClass,
-    DcTitle,
-    SortKey,
-    Location,
-    LocationHash,
-    Auxdata,
-    UpdateId,
-    MimeType,
-    Flags,
-    PartNumber,
-    TrackNumber,
-    ServiceId,
-    LastModified,
-    LastUpdated,
-    RefUpnpClass,
-    RefLocation,
-    RefAuxdata,
-    RefMimeType,
-    RefServiceId,
-    AsPersistent
-};
 
 /// \brief search column ids
 enum class SearchCol {
@@ -125,59 +97,11 @@ enum class SearchCol {
     LastUpdated,
 };
 
-/// \brief meta column ids
-enum class MetadataCol {
-    ItemId = 0,
-    PropertyName,
-    PropertyValue
-};
-
-/// \brief resource column ids
-enum class ResourceCol {
-    ItemId = 0,
-    ResId,
-    HandlerType,
-    Purpose,
-    Options,
-    Parameters,
-    Attributes, // index of first attribute
-};
-
 /// \brief autoscan column ids
 enum class AutoscanCol {
     Id = 0,
     ObjId,
     Persistent,
-};
-
-/// \brief autoscan column ids
-enum class AutoscanColumn {
-    Id = 0,
-    ObjId,
-    ScanMode,
-    Recursive,
-    MediaType,
-    CtAudio,
-    CtImage,
-    CtVideo,
-    Hidden,
-    FollowSymlinks,
-    Interval,
-    LastModified,
-    Persistent,
-    Location,
-    RetryCount,
-    DirTypes,
-    ForceRescan,
-    ObjLocation,
-};
-
-/// \brief playstatus column ids
-enum class PlaystatusCol {
-    Group = 0,
-    ItemId,
-    PlayCount,
-    LastPlayed,
 };
 
 /// \brief Map browse column ids to column names
@@ -188,13 +112,13 @@ static const std::map<BrowseCol, SearchProperty> browseColMap {
     { BrowseCol::ParentId, { ITM_ALIAS, "parent_id" } },
     { BrowseCol::ObjectType, { ITM_ALIAS, "object_type" } },
     { BrowseCol::UpnpClass, { ITM_ALIAS, "upnp_class" } },
-    { BrowseCol::DcTitle, { ITM_ALIAS, "dc_title" } },
-    { BrowseCol::SortKey, { ITM_ALIAS, "sort_key" } },
+    { BrowseCol::DcTitle, { ITM_ALIAS, "dc_title", FieldType::String, 255 } },
+    { BrowseCol::SortKey, { ITM_ALIAS, "sort_key", FieldType::String, 255 } },
     { BrowseCol::Location, { ITM_ALIAS, "location" } },
     { BrowseCol::LocationHash, { ITM_ALIAS, "location_hash" } },
     { BrowseCol::Auxdata, { ITM_ALIAS, "auxdata" } },
     { BrowseCol::UpdateId, { ITM_ALIAS, "update_id" } },
-    { BrowseCol::MimeType, { ITM_ALIAS, "mime_type" } },
+    { BrowseCol::MimeType, { ITM_ALIAS, "mime_type", FieldType::String, 40 } },
     { BrowseCol::Flags, { ITM_ALIAS, "flags" } },
     { BrowseCol::PartNumber, { ITM_ALIAS, "part_number", FieldType::Integer } },
     { BrowseCol::TrackNumber, { ITM_ALIAS, "track_number", FieldType::Integer } },
@@ -217,9 +141,9 @@ static const std::map<SearchCol, SearchProperty> searchColMap {
     { SearchCol::ParentId, { SRC_ALIAS, "parent_id" } },
     { SearchCol::ObjectType, { SRC_ALIAS, "object_type" } },
     { SearchCol::UpnpClass, { SRC_ALIAS, "upnp_class" } },
-    { SearchCol::DcTitle, { SRC_ALIAS, "dc_title" } },
-    { SearchCol::SortKey, { SRC_ALIAS, "sort_key" } },
-    { SearchCol::MimeType, { SRC_ALIAS, "mime_type" } },
+    { SearchCol::DcTitle, { SRC_ALIAS, "dc_title", FieldType::String, 255 } },
+    { SearchCol::SortKey, { SRC_ALIAS, "sort_key", FieldType::String, 255 } },
+    { SearchCol::MimeType, { SRC_ALIAS, "mime_type", FieldType::String, 40 } },
     { SearchCol::Flags, { SRC_ALIAS, "flags", FieldType::Integer } },
     { SearchCol::PartNumber, { SRC_ALIAS, "part_number", FieldType::Integer } },
     { SearchCol::TrackNumber, { SRC_ALIAS, "track_number", FieldType::Integer } },
@@ -233,7 +157,7 @@ static const std::map<SearchCol, SearchProperty> searchColMap {
 static const std::map<MetadataCol, SearchProperty> metaColMap {
     { MetadataCol::ItemId, { MTA_ALIAS, "item_id" } },
     { MetadataCol::PropertyName, { MTA_ALIAS, "property_name" } },
-    { MetadataCol::PropertyValue, { MTA_ALIAS, "property_value" } },
+    { MetadataCol::PropertyValue, { MTA_ALIAS, "property_value", FieldType::String, 255 } },
 };
 
 /// \brief Map autoscan column ids to column names
@@ -242,6 +166,25 @@ static const std::map<AutoscanCol, SearchProperty> asColMap {
     { AutoscanCol::Id, { AUS_ALIAS, "id" } },
     { AutoscanCol::ObjId, { AUS_ALIAS, "obj_id" } },
     { AutoscanCol::Persistent, { AUS_ALIAS, "persistent", FieldType::Integer } },
+};
+
+/// \brief Map resource column ids to column names
+// map ensures entries are in correct order, each value of ResourceCol must be present
+static const std::map<ResourceCol, SearchProperty> resColMap {
+    { ResourceCol::ItemId, { RES_ALIAS, "item_id" } },
+    { ResourceCol::ResId, { RES_ALIAS, "res_id" } },
+    { ResourceCol::HandlerType, { RES_ALIAS, "handlerType" } },
+    { ResourceCol::Purpose, { RES_ALIAS, "purpose" } },
+    { ResourceCol::Options, { RES_ALIAS, "options" } },
+    { ResourceCol::Parameters, { RES_ALIAS, "parameters" } },
+};
+
+/// \brief Map resource search keys to column ids
+// entries are handled sequentially,
+// duplicate entries are added to statement in same order if key is present in SortCriteria
+static const std::vector<std::pair<std::string, ResourceCol>> resTagMap {
+    { UPNP_SEARCH_ID, ResourceCol::ItemId },
+    { "res@id", ResourceCol::ResId },
 };
 
 /// \brief Map autoscan column ids to column names
@@ -264,6 +207,8 @@ static const std::map<AutoscanColumn, SearchProperty> autoscanColMap {
     { AutoscanColumn::RetryCount, { AUS_ALIAS, "retry_count", FieldType::Integer } },
     { AutoscanColumn::DirTypes, { AUS_ALIAS, "dir_types", FieldType::Bool } },
     { AutoscanColumn::ForceRescan, { AUS_ALIAS, "force_rescan", FieldType::Bool } },
+    { AutoscanColumn::PathIds, { AUS_ALIAS, "path_ids", FieldType::String } },
+    { AutoscanColumn::Touched, { AUS_ALIAS, "touched", FieldType::Bool } },
     { AutoscanColumn::ObjLocation, { ITM_ALIAS, "location" } },
 };
 
@@ -317,11 +262,13 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
 
 /// \brief Map playstatus column ids to column names
 // map ensures entries are in correct order, each value of PlaystatusCol must be present
-static std::map<PlaystatusCol, SearchProperty> playstatusColMap {
+static const std::map<PlaystatusCol, SearchProperty> playstatusColMap {
     { PlaystatusCol::Group, { PLY_ALIAS, "group" } },
     { PlaystatusCol::ItemId, { PLY_ALIAS, "item_id" } },
     { PlaystatusCol::PlayCount, { PLY_ALIAS, "playCount", FieldType::Integer } },
     { PlaystatusCol::LastPlayed, { PLY_ALIAS, "lastPlayed", FieldType::Date } },
+    { PlaystatusCol::LastPlayedPosition, { PLY_ALIAS, "lastPlayedPosition", FieldType::Integer } },
+    { PlaystatusCol::BookMarkPosition, { PLY_ALIAS, "bookMarkPos", FieldType::Integer } },
 };
 
 /// \brief Playstatus search keys to column ids
@@ -332,6 +279,44 @@ static const std::vector<std::pair<std::string, PlaystatusCol>> playstatusTagMap
     { UPNP_SEARCH_ID, PlaystatusCol::ItemId },
     { UPNP_SEARCH_PLAY_COUNT, PlaystatusCol::PlayCount },
     { UPNP_SEARCH_LAST_PLAYED, PlaystatusCol::LastPlayed },
+    { "lastPlayedPosition", PlaystatusCol::LastPlayedPosition },
+    { "bookMarkPos", PlaystatusCol::BookMarkPosition },
+};
+
+/// \brief Map config column ids to column names
+static const std::map<ConfigColumn, SearchProperty> configColumnMap {
+    { ConfigColumn::Item, { CFG_ALIAS, "item" } },
+    { ConfigColumn::Key, { CFG_ALIAS, "key" } },
+    { ConfigColumn::ItemValue, { CFG_ALIAS, "item_value" } },
+    { ConfigColumn::Status, { CFG_ALIAS, "status" } },
+};
+
+/// \brief Config search keys to column ids
+static const std::vector<std::pair<std::string, ConfigColumn>> configTagMap {
+    { "item", ConfigColumn::Item },
+    { "key", ConfigColumn::Key },
+    { "item_value", ConfigColumn::ItemValue },
+    { "status", ConfigColumn::Status },
+};
+
+/// \brief Map client column ids to column names
+static const std::map<ClientColumn, SearchProperty> clientColumnMap {
+    { ClientColumn::Addr, { CLT_ALIAS, "addr" } },
+    { ClientColumn::Port, { CLT_ALIAS, "port" } },
+    { ClientColumn::AddrFamily, { CLT_ALIAS, "addrFamily" } },
+    { ClientColumn::UserAgent, { CLT_ALIAS, "userAgent" } },
+    { ClientColumn::Last, { CLT_ALIAS, "last" } },
+    { ClientColumn::Age, { CLT_ALIAS, "age" } },
+};
+
+/// \brief Config search keys to column ids
+static const std::vector<std::pair<std::string, ClientColumn>> clientTagMap {
+    { "addr", ClientColumn::Addr },
+    { "port", ClientColumn::Port },
+    { "addrFamily", ClientColumn::AddrFamily },
+    { "userAgent", ClientColumn::UserAgent },
+    { "last", ClientColumn::Last },
+    { "age", ClientColumn::Age },
 };
 
 // Format string for a recursive query of a parent container
@@ -351,6 +336,7 @@ SELECT {{}} FROM items AS {3})";
 
 #define getCol(rw, idx) (rw)->col(to_underlying((idx)))
 #define getColInt(rw, idx, def) (rw)->col_int(to_underlying((idx)), (def))
+#define setCol(dict, key, val, map) (dict).emplace((key), quote((val), (map).at((key)).length))
 
 static std::shared_ptr<EnumColumnMapper<BrowseCol>> browseColumnMapper;
 static std::shared_ptr<EnumColumnMapper<SearchCol>> searchColumnMapper;
@@ -358,7 +344,10 @@ static std::shared_ptr<EnumColumnMapper<MetadataCol>> metaColumnMapper;
 static std::shared_ptr<EnumColumnMapper<AutoscanCol>> asColumnMapper;
 static std::shared_ptr<EnumColumnMapper<AutoscanColumn>> autoscanColumnMapper;
 static std::shared_ptr<EnumColumnMapper<int>> resourceColumnMapper;
+static std::shared_ptr<EnumColumnMapper<ResourceCol>> resColumnMapper;
 static std::shared_ptr<EnumColumnMapper<PlaystatusCol>> playstatusColumnMapper;
+static std::shared_ptr<EnumColumnMapper<ConfigColumn>> configColumnMapper;
+static std::shared_ptr<EnumColumnMapper<ClientColumn>> clientColumnMapper;
 
 SQLDatabase::SQLDatabase(
     const std::shared_ptr<Config>& config,
@@ -407,33 +396,22 @@ void SQLDatabase::init()
     /// \brief Map resource search keys to column ids
     // entries are handled sequentially,
     // duplicate entries are added to statement in same order if key is present in SortCriteria
-    std::vector<std::pair<std::string, int>> resourceTagMap {
-        { UPNP_SEARCH_ID, to_underlying(ResourceCol::ItemId) },
-        { "res@id", to_underlying(ResourceCol::ResId) },
-    };
+    std::vector<std::pair<std::string, int>> resourceTagMap;
+    for (auto&& [key, val] : resTagMap) {
+        resourceTagMap.emplace_back(key, to_underlying(val));
+    }
+
     /// \brief Map resource column ids to column names
     // map ensures entries are in correct order, each value of ResourceCol must be present
-    std::map<int, SearchProperty> resourceColMap {
-        { to_underlying(ResourceCol::ItemId), { RES_ALIAS, "item_id" } },
-        { to_underlying(ResourceCol::ResId), { RES_ALIAS, "res_id" } },
-        { to_underlying(ResourceCol::HandlerType), { RES_ALIAS, "handlerType" } },
-        { to_underlying(ResourceCol::Purpose), { RES_ALIAS, "purpose" } },
-        { to_underlying(ResourceCol::Options), { RES_ALIAS, "options" } },
-        { to_underlying(ResourceCol::Parameters), { RES_ALIAS, "parameters" } },
-    };
+    std::map<int, SearchProperty> resourceColMap;
+    for (auto&& [key, val] : resColMap) {
+        resourceColMap[to_underlying(key)] = val;
+    }
 
-    /// \brief List of column names to be used in insert and update to ensure correct order of columns
-    // only columns listed here are added to the insert and update statements
-    tableColumnOrder = {
-        { CDS_OBJECT_TABLE, { "ref_id", "parent_id", "object_type", "upnp_class", "dc_title", "sort_key", "location", "location_hash", "auxdata", "update_id", "mime_type", "flags", "part_number", "track_number", "service_id", "last_modified", "last_updated" } },
-        { METADATA_TABLE, { "item_id", "property_name", "property_value" } },
-        { RESOURCE_TABLE, { "item_id", "res_id", "handlerType", "purpose", "options", "parameters" } },
-    };
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto attrName = EnumMapper::getAttributeName(resAttrId);
         resourceTagMap.emplace_back(fmt::format("res@{}", attrName), to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId));
         resourceColMap.emplace(to_underlying(ResourceCol::Attributes) + to_underlying(resAttrId), SearchProperty { RES_ALIAS, attrName });
-        tableColumnOrder[RESOURCE_TABLE].push_back(std::move(attrName));
     }
 
     browseColumnMapper = std::make_shared<EnumColumnMapper<BrowseCol>>(table_quote_begin, table_quote_end, ITM_ALIAS, CDS_OBJECT_TABLE, browseSortMap, browseColMap);
@@ -447,9 +425,12 @@ void SQLDatabase::init()
     searchColumnMapper = std::make_shared<EnumColumnMapper<SearchCol>>(table_quote_begin, table_quote_end, SRC_ALIAS, CDS_OBJECT_TABLE, searchTagMap, searchColMap);
     metaColumnMapper = std::make_shared<EnumColumnMapper<MetadataCol>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
     resourceColumnMapper = std::make_shared<EnumColumnMapper<int>>(table_quote_begin, table_quote_end, RES_ALIAS, RESOURCE_TABLE, resourceTagMap, resourceColMap);
+    resColumnMapper = std::make_shared<EnumColumnMapper<ResourceCol>>(table_quote_begin, table_quote_end, RES_ALIAS, RESOURCE_TABLE, resTagMap, resColMap);
     playstatusColumnMapper = std::make_shared<EnumColumnMapper<PlaystatusCol>>(table_quote_begin, table_quote_end, PLY_ALIAS, PLAYSTATUS_TABLE, playstatusTagMap, playstatusColMap);
     asColumnMapper = std::make_shared<EnumColumnMapper<AutoscanCol>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, asTagMap, asColMap);
     autoscanColumnMapper = std::make_shared<EnumColumnMapper<AutoscanColumn>>(table_quote_begin, table_quote_end, AUS_ALIAS, AUTOSCAN_TABLE, autoscanTagMap, autoscanColMap);
+    configColumnMapper = std::make_shared<EnumColumnMapper<ConfigColumn>>(table_quote_begin, table_quote_end, CFG_ALIAS, CONFIG_VALUE_TABLE, configTagMap, configColumnMap);
+    clientColumnMapper = std::make_shared<EnumColumnMapper<ClientColumn>>(table_quote_begin, table_quote_end, CFG_ALIAS, CLIENTS_TABLE, clientTagMap, clientColumnMap);
 
     // Statement for UPnP browse
     {
@@ -610,6 +591,14 @@ std::string SQLDatabase::getSortCapabilities()
     return fmt::format("{}", fmt::join(sortKeys, ","));
 }
 
+std::string SQLDatabase::quote(const std::string& value, std::size_t len) const
+{
+    if (len > 0 && value.length() > len) {
+        return quote(limitString(len, value));
+    }
+    return quote(value);
+}
+
 std::string SQLDatabase::getSearchCapabilities()
 {
     auto searchKeys = std::vector {
@@ -658,7 +647,10 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
     return findObjectByPath(location, UNUSED_CLIENT_GROUP);
 }
 
-std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer)
+std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateObject(
+    const std::shared_ptr<CdsObject>& obj,
+    Operation op,
+    int* changedContainer)
 {
     std::shared_ptr<CdsObject> refObj;
     bool hasReference = false;
@@ -690,49 +682,46 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
             throw DatabaseException("refId set, but it makes no sense", LINE_MESSAGE);
     }
 
-    std::map<std::string, std::string> cdsObjectSql;
-    cdsObjectSql.emplace("object_type", quote(obj->getObjectType()));
+    std::map<BrowseCol, std::string> cdsObjectSql;
+    cdsObjectSql.emplace(BrowseCol::ObjectType, quote(obj->getObjectType()));
 
     if (hasReference || playlistRef)
-        cdsObjectSql.emplace("ref_id", quote(refObj->getID()));
+        cdsObjectSql.emplace(BrowseCol::RefId, quote(refObj->getID()));
     else if (op == Operation::Update)
-        cdsObjectSql.emplace("ref_id", SQL_NULL);
+        cdsObjectSql.emplace(BrowseCol::RefId, SQL_NULL);
 
     if (!hasReference || refObj->getClass() != obj->getClass())
-        cdsObjectSql.emplace("upnp_class", quote(obj->getClass()));
+        cdsObjectSql.emplace(BrowseCol::UpnpClass, quote(obj->getClass()));
     else if (op == Operation::Update)
-        cdsObjectSql.emplace("upnp_class", SQL_NULL);
+        cdsObjectSql.emplace(BrowseCol::UpnpClass, SQL_NULL);
 
-    // if (!hasReference || refObj->getTitle() != obj->getTitle())
-    cdsObjectSql.emplace("dc_title", quote(obj->getTitle()));
-    // else if (isUpdate)
-    //     cdsObjectSql.emplace("dc_title", SQL_NULL);
-    cdsObjectSql.emplace("sort_key", quote(obj->getSortKey()));
+    setCol(cdsObjectSql, BrowseCol::DcTitle, obj->getTitle(), browseColMap);
+    setCol(cdsObjectSql, BrowseCol::SortKey, obj->getSortKey(), browseColMap);
 
     if (op == Operation::Update)
-        cdsObjectSql.emplace("auxdata", SQL_NULL);
+        cdsObjectSql.emplace(BrowseCol::Auxdata, SQL_NULL);
 
     auto&& auxData = obj->getAuxData();
     if (!auxData.empty() && (!hasReference || auxData != refObj->getAuxData())) {
-        cdsObjectSql.insert_or_assign("auxdata", quote(URLUtils::dictEncode(auxData)));
+        cdsObjectSql.insert_or_assign(BrowseCol::Auxdata, quote(URLUtils::dictEncode(auxData)));
     }
 
     const bool useResourceRef = obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF);
     obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-    cdsObjectSql.emplace("flags", quote(obj->getFlags()));
+    cdsObjectSql.emplace(BrowseCol::Flags, quote(obj->getFlags()));
 
     if (obj->getMTime() > std::chrono::seconds::zero()) {
-        cdsObjectSql.emplace("last_modified", quote(obj->getMTime().count()));
+        cdsObjectSql.emplace(BrowseCol::LastModified, quote(obj->getMTime().count()));
     } else {
-        cdsObjectSql.emplace("last_modified", SQL_NULL);
+        cdsObjectSql.emplace(BrowseCol::LastModified, SQL_NULL);
     }
-    cdsObjectSql.emplace("last_updated", quote(currentTime().count()));
+    cdsObjectSql.emplace(BrowseCol::LastUpdated, quote(currentTime().count()));
 
     int parentID = obj->getParentID();
     if (obj->isContainer() && op == Operation::Update) {
         fs::path dbLocation = addLocationPrefix(obj->isVirtual() ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX, obj->getLocation());
-        cdsObjectSql.emplace("location", quote(dbLocation));
-        cdsObjectSql.emplace("location_hash", quote(stringHash(dbLocation.string())));
+        setCol(cdsObjectSql, BrowseCol::Location, dbLocation, browseColMap);
+        cdsObjectSql.emplace(BrowseCol::LocationHash, quote(stringHash(dbLocation.string())));
     } else if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
@@ -746,49 +735,49 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
                     obj->setParentID(parentID);
                 }
                 fs::path dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
-                cdsObjectSql.emplace("location", quote(dbLocation));
-                cdsObjectSql.emplace("location_hash", quote(stringHash(dbLocation.string())));
+                setCol(cdsObjectSql, BrowseCol::Location, dbLocation, browseColMap);
+                cdsObjectSql.emplace(BrowseCol::LocationHash, quote(stringHash(dbLocation.string())));
             } else {
                 // URLs
-                cdsObjectSql.emplace("location", quote(loc));
-                cdsObjectSql.emplace("location_hash", SQL_NULL);
+                setCol(cdsObjectSql, BrowseCol::Location, loc, browseColMap);
+                cdsObjectSql.emplace(BrowseCol::LocationHash, SQL_NULL);
             }
         } else if (op == Operation::Update) {
-            cdsObjectSql.emplace("location", SQL_NULL);
-            cdsObjectSql.emplace("location_hash", SQL_NULL);
+            cdsObjectSql.emplace(BrowseCol::Location, SQL_NULL);
+            cdsObjectSql.emplace(BrowseCol::LocationHash, SQL_NULL);
         }
 
         if (item->getTrackNumber() > 0) {
-            cdsObjectSql.emplace("track_number", quote(item->getTrackNumber()));
+            cdsObjectSql.emplace(BrowseCol::TrackNumber, quote(item->getTrackNumber()));
         } else if (op == Operation::Update) {
-            cdsObjectSql.emplace("track_number", SQL_NULL);
+            cdsObjectSql.emplace(BrowseCol::TrackNumber, SQL_NULL);
         }
 
         if (item->getPartNumber() > 0) {
-            cdsObjectSql.emplace("part_number", quote(item->getPartNumber()));
+            cdsObjectSql.emplace(BrowseCol::PartNumber, quote(item->getPartNumber()));
         } else if (op == Operation::Update) {
-            cdsObjectSql.emplace("part_number", SQL_NULL);
+            cdsObjectSql.emplace(BrowseCol::PartNumber, SQL_NULL);
         }
 
         if (!item->getServiceID().empty()) {
             if (!hasReference || std::static_pointer_cast<CdsItem>(refObj)->getServiceID() != item->getServiceID())
-                cdsObjectSql.emplace("service_id", quote(item->getServiceID()));
+                cdsObjectSql.emplace(BrowseCol::ServiceId, quote(item->getServiceID()));
             else
-                cdsObjectSql.emplace("service_id", SQL_NULL);
+                cdsObjectSql.emplace(BrowseCol::ServiceId, SQL_NULL);
         } else if (op == Operation::Update) {
-            cdsObjectSql.emplace("service_id", SQL_NULL);
+            cdsObjectSql.emplace(BrowseCol::ServiceId, SQL_NULL);
         }
 
-        cdsObjectSql.emplace("mime_type", quote(item->getMimeType().substr(0, 40)));
+        setCol(cdsObjectSql, BrowseCol::MimeType, item->getMimeType(), browseColMap);
     }
 
     if (obj->getParentID() == INVALID_OBJECT_ID) {
         throw DatabaseException(fmt::format("Tried to create or update an object {} with an illegal parent id {}", obj->getLocation().c_str(), obj->getParentID()), LINE_MESSAGE);
     }
 
-    cdsObjectSql.emplace("parent_id", quote(parentID));
+    cdsObjectSql.emplace(BrowseCol::ParentId, quote(parentID));
 
-    std::vector<AddUpdateTable> returnVal;
+    std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> returnVal;
     // check for a duplicate (virtual) object
     if (hasReference && op != Operation::Update) {
         auto where = std::vector {
@@ -806,8 +795,8 @@ std::vector<SQLDatabase::AddUpdateTable> SQLDatabase::_addUpdateObject(const std
             return returnVal;
         }
     }
-
-    returnVal.emplace_back(CDS_OBJECT_TABLE, std::move(cdsObjectSql), op);
+    auto ot = std::make_shared<Object2Table>(std::move(cdsObjectSql), op, browseColumnMapper);
+    returnVal.push_back(std::move(ot));
 
     if (!hasReference || obj->getMetaData() != refObj->getMetaData()) {
         generateMetaDataDBOperations(obj, op, returnVal);
@@ -830,10 +819,10 @@ void SQLDatabase::addObject(const std::shared_ptr<CdsObject>& obj, int* changedC
 
     beginTransaction("addObject");
     for (auto&& addUpdateTable : tables) {
-        auto qb = sqlForInsert(obj, addUpdateTable);
+        auto qb = addUpdateTable->sqlForInsert(obj);
         log_debug("Generated insert: {}", qb);
 
-        if (addUpdateTable.getTableName() == CDS_OBJECT_TABLE) {
+        if (addUpdateTable->hasInsertResult()) {
             int newId = exec(qb, true);
             obj->setID(newId);
         } else {
@@ -845,14 +834,15 @@ void SQLDatabase::addObject(const std::shared_ptr<CdsObject>& obj, int* changedC
 
 void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer)
 {
-    std::vector<AddUpdateTable> data;
+    std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> data;
     if (obj->getID() == CDS_ID_FS_ROOT) {
-        std::map<std::string, std::string> cdsObjectSql;
+        std::map<BrowseCol, std::string> cdsObjectSql;
 
-        cdsObjectSql["dc_title"] = quote(obj->getTitle());
-        cdsObjectSql["upnp_class"] = quote(obj->getClass());
+        cdsObjectSql[BrowseCol::DcTitle] = quote(obj->getTitle(), browseColMap.at(BrowseCol::DcTitle).length);
+        cdsObjectSql[BrowseCol::UpnpClass] = quote(obj->getClass());
 
-        data.emplace_back(CDS_OBJECT_TABLE, std::move(cdsObjectSql), Operation::Update);
+        auto ot = std::make_shared<Object2Table>(std::move(cdsObjectSql), Operation::Update, browseColumnMapper);
+        data.push_back(std::move(ot));
     } else {
         if (IS_FORBIDDEN_CDS_ID(obj->getID()))
             throw DatabaseException(fmt::format("Tried to update an object with a forbidden ID ({})", obj->getID()), LINE_MESSAGE);
@@ -861,15 +851,17 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
 
     beginTransaction("updateObject");
     for (auto&& addUpdateTable : data) {
-        Operation op = addUpdateTable.getOperation();
+        Operation op = addUpdateTable->getOperation();
         auto qb = [this, &obj, op, &addUpdateTable]() {
             switch (op) {
             case Operation::Insert:
-                return sqlForInsert(obj, addUpdateTable);
+                return addUpdateTable->sqlForInsert(obj);
+            case Operation::InsertMulti:
+                return addUpdateTable->sqlForMultiInsert(obj);
             case Operation::Update:
-                return sqlForUpdate(obj, addUpdateTable);
+                return addUpdateTable->sqlForUpdate(obj);
             case Operation::Delete:
-                return sqlForDelete(obj, addUpdateTable);
+                return addUpdateTable->sqlForDelete(obj);
             }
             return std::string();
         }();
@@ -877,11 +869,12 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
         log_debug("upd_query: {}", qb);
         switch (op) {
         case Operation::Insert:
+        case Operation::InsertMulti:
         case Operation::Update:
             exec(CDS_OBJECT_TABLE, qb, obj->getID());
             break;
         case Operation::Delete:
-            del(addUpdateTable.getTableName(), qb, { obj->getID() });
+            del(addUpdateTable->getTableName(), qb, { obj->getID() });
             break;
         }
     }
@@ -1495,7 +1488,16 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     return createContainer(parentID, mval, path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, itemMetadata);
 }
 
-int SQLDatabase::createContainer(int parentID, const std::string& name, const std::string& virtualPath, int flags, bool isVirtual, const std::string& upnpClass, int refID, const std::vector<std::pair<std::string, std::string>>& itemMetadata, const std::vector<std::shared_ptr<CdsResource>>& itemResources)
+int SQLDatabase::createContainer(
+    int parentID,
+    const std::string& name,
+    const std::string& virtualPath,
+    int flags,
+    bool isVirtual,
+    const std::string& upnpClass,
+    int refID,
+    const std::vector<std::pair<std::string, std::string>>& itemMetadata,
+    const std::vector<std::shared_ptr<CdsResource>>& itemResources)
 {
     log_debug("Creating Container: parent: {}, name: '{}', path '{}', flags: {}, isVirt: {}, upnpClass: '{}', refId: {}",
         parentID, name, virtualPath, flags, isVirtual, upnpClass, refID);
@@ -1506,80 +1508,62 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
     }
     std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
 
-    auto fields = std::vector {
-        identifier("parent_id"),
-        identifier("object_type"),
-        identifier("flags"),
-        identifier("upnp_class"),
-        identifier("dc_title"),
-        identifier("sort_key"),
-        identifier("location"),
-        identifier("location_hash"),
-        identifier("ref_id"),
+    auto dict = std::map<BrowseCol, std::string> {
+        { BrowseCol::ParentId, fmt::to_string(parentID) },
+        { BrowseCol::ObjectType, fmt::to_string(OBJECT_TYPE_CONTAINER) },
+        { BrowseCol::Flags, fmt::to_string(flags) },
+        { BrowseCol::UpnpClass, !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER) },
+        { BrowseCol::DcTitle, quote(name) },
+        { BrowseCol::SortKey, quote(name) },
+        { BrowseCol::Location, quote(dbLocation) },
+        { BrowseCol::LocationHash, quote(stringHash(dbLocation)) },
+        { BrowseCol::RefId, (refID > 0) ? quote(refID) : SQL_NULL },
     };
-    auto values = std::vector {
-        fmt::to_string(parentID),
-        fmt::to_string(OBJECT_TYPE_CONTAINER),
-        fmt::to_string(flags),
-        !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER),
-        quote(name),
-        quote(name),
-        quote(dbLocation),
-        quote(stringHash(dbLocation)),
-        (refID > 0) ? fmt::to_string(refID) : fmt::to_string(SQL_NULL),
-    };
-
     beginTransaction("createContainer");
-    int newId = insert(CDS_OBJECT_TABLE, fields, values, true); // true = get last id#
+    Object2Table ot(std::move(dict), Operation::Insert, browseColumnMapper);
+    int newId = exec(ot.sqlForInsert(nullptr), true); // true = get last id#
     log_debug("Created object row, id: {}", newId);
 
+    const std::string newIdStr = quote(newId);
     if (!itemMetadata.empty()) {
-        auto mfields = std::vector {
-            identifier("item_id"),
-            identifier("property_name"),
-            identifier("property_value"),
-        };
-        std::vector<std::vector<std::string>> valuesets;
-        valuesets.reserve(itemMetadata.size());
-        const std::string newIdStr = fmt::to_string(newId);
+        std::vector<std::map<MetadataCol, std::string>> multiDict;
+        multiDict.reserve(itemMetadata.size());
         for (auto&& [key, val] : itemMetadata) {
-            valuesets.push_back({ newIdStr, quote(key), quote(val) });
+            auto mDict = std::map<MetadataCol, std::string> {
+                { MetadataCol::ItemId, newIdStr },
+                { MetadataCol::PropertyName, quote(key) },
+                { MetadataCol::PropertyValue, quote(val) },
+            };
+            multiDict.push_back(std::move(mDict));
         }
-        insertMultipleRows(METADATA_TABLE, mfields, valuesets);
+        Metadata2Table mt(std::move(multiDict), metaColumnMapper);
+        exec(METADATA_TABLE, mt.sqlForMultiInsert(nullptr), newId);
         log_debug("Wrote metadata for cds_object {}", newId);
     }
 
     if (!itemResources.empty()) {
-        const std::string newIdStr = fmt::to_string(newId);
         int resId = 0;
         for (auto&& resource : itemResources) {
-            auto rfields = std::vector {
-                identifier("item_id"),
-                identifier("res_id"),
-                identifier("handlerType"),
-                identifier("purpose"),
-            };
-            auto values = std::vector {
-                quote(newId),
-                quote(resId),
-                quote(to_underlying(resource->getHandlerType())),
-                quote(to_underlying(resource->getPurpose()))
+            auto rDict = std::map<ResourceCol, std::string> {
+                { ResourceCol::ItemId, quote(newId) },
+                { ResourceCol::ResId, quote(resId) },
+                { ResourceCol::HandlerType, quote(to_underlying(resource->getHandlerType())) },
+                { ResourceCol::Purpose, quote(to_underlying(resource->getPurpose())) },
             };
             auto&& options = resource->getOptions();
             if (!options.empty()) {
-                rfields.push_back(identifier("options"));
-                values.push_back(quote(URLUtils::dictEncode(options)));
+                rDict[ResourceCol::Options] = quote(URLUtils::dictEncode(options));
             }
             auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
-                rfields.push_back(identifier("parameters"));
-                values.push_back(quote(URLUtils::dictEncode(parameters)));
+                rDict[ResourceCol::Parameters] = quote(URLUtils::dictEncode(parameters));
             }
+            std::map<ResourceAttribute, std::string> rAttr;
             for (auto&& [key, val] : resource->getAttributes()) {
-                rfields.push_back(identifier(EnumMapper::getAttributeName(key)));
-                values.push_back(quote(val));
+                rAttr[key] = quote(val);
             }
-            insert(RESOURCE_TABLE, rfields, values);
+            Resource2Table rt(std::move(rDict), std::move(rAttr), Operation::Insert, resColumnMapper);
+            exec(RESOURCE_TABLE, rt.sqlForInsert(nullptr), newId);
             resId++;
         }
         log_debug("Wrote resources for cds_object {}", newId);
@@ -1587,34 +1571,6 @@ int SQLDatabase::createContainer(int parentID, const std::string& name, const st
     commit("createContainer");
 
     return newId;
-}
-
-int SQLDatabase::insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId, bool warnOnly)
-{
-    assert(fields.size() == values.size());
-    auto sql = fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(std::string(tableName)), fmt::join(fields, ","), fmt::join(values, ","));
-    if (warnOnly) {
-        execOnly(sql);
-        return -1;
-    }
-
-    return exec(sql, getLastInsertId);
-}
-
-void SQLDatabase::insertMultipleRows(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets)
-{
-    if (valuesets.size() == 1) {
-        insert(tableName, fields, valuesets.front());
-    } else if (!valuesets.empty()) {
-        std::vector<std::string> tuples;
-        tuples.reserve(valuesets.size());
-        for (const auto& values : valuesets) {
-            assert(fields.size() == values.size());
-            tuples.push_back(fmt::format("({})", fmt::join(values, ",")));
-        }
-        auto sql = fmt::format("INSERT INTO {} ({}) VALUES {}", identifier(std::string(tableName)), fmt::join(fields, ","), fmt::join(tuples, ","));
-        exec(tableName, sql, -1);
-    }
 }
 
 void SQLDatabase::deleteAll(std::string_view tableName)
@@ -2108,11 +2064,13 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
             bool persistent = remapBool(row->col_int(1, 0));
             if (persistent) {
                 auto location = std::get<0>(stripLocationPrefix(row->col(2)));
-                auto values = std::vector {
-                    ColumnUpdate(identifier("obj_id"), SQL_NULL),
-                    ColumnUpdate(identifier("location"), quote(location.string())),
+                auto fields = std::map<AutoscanColumn, std::string> {
+                    { AutoscanColumn::Id, quote(colId) },
+                    { AutoscanColumn::ObjId, SQL_NULL },
+                    { AutoscanColumn::Location, quote(location.string()) },
                 };
-                updateRow(AUTOSCAN_TABLE, values, "id", colId);
+                Autoscan2Table at(fields, Operation::Update, autoscanColumnMapper);
+                exec(AUTOSCAN_TABLE, at.sqlForUpdate(nullptr), colId);
             } else {
                 deleteAs.push_back(colId);
             }
@@ -2184,11 +2142,11 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
     auto removeIds = std::vector(containers);
 
     // select statements
-    auto parentSql = fmt::format("SELECT DISTINCT {0}parent_id{1} FROM {0}{2}{1} WHERE {0}id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
-    auto itemSql = fmt::format("SELECT DISTINCT {0}id{1}, {0}parent_id{1} FROM {0}{2}{1} WHERE {0}ref_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
+    auto parentSql = fmt::format("SELECT DISTINCT {} FROM {} WHERE {} IN", identifier("parent_id"), identifier(CDS_OBJECT_TABLE), identifier("id"));
+    auto itemSql = fmt::format("SELECT DISTINCT {}, {} FROM {} WHERE {} IN", identifier("id"), identifier("parent_id"), identifier(CDS_OBJECT_TABLE), identifier("ref_id"));
     auto containersSql = all //
-        ? fmt::format("SELECT DISTINCT {0}id{1}, {0}object_type{1}, {0}ref_id{1} FROM {0}{2}{1} WHERE {0}parent_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE) //
-        : fmt::format("SELECT DISTINCT {0}id{1}, {0}object_type{1} FROM {0}{2}{1} WHERE {0}parent_id{1} IN", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
+        ? fmt::format("SELECT DISTINCT {}, {}, {} FROM {} WHERE {} IN", identifier("id"), identifier("object_type"), identifier("ref_id"), identifier(CDS_OBJECT_TABLE), identifier("parent_id")) //
+        : fmt::format("SELECT DISTINCT {}, {} FROM {} WHERE {} IN", identifier("id"), identifier("object_type"), identifier(CDS_OBJECT_TABLE), identifier("parent_id"));
 
     // collect container for update signals
     if (!containers.empty()) {
@@ -2396,24 +2354,24 @@ std::string SQLDatabase::getInternalSetting(const std::string& key)
 /* config methods */
 std::vector<ConfigValue> SQLDatabase::getConfigValues()
 {
-    auto fields = std::vector {
-        identifier("item"),
-        identifier("key"),
-        identifier("item_value"),
-        identifier("status"),
-    };
+    std::vector<std::string> fields;
+    fields.reserve(configColumnMap.size());
+    for (auto&& [key, col] : configColumnMap) {
+        fields.push_back(fmt::format("{}.{}", identifier(col.alias), identifier(col.field)));
+    }
     std::vector<ConfigValue> result;
-    auto res = select(fmt::format("SELECT {} FROM {}", fmt::join(fields, ", "), identifier(CONFIG_VALUE_TABLE)));
+    auto res = select(fmt::format("SELECT {} FROM {}", fmt::join(fields, ", "), configColumnMapper->tableQuoted()));
     if (!res)
         return result;
 
     result.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        result.push_back({ row->col(1),
-            row->col(0),
-            row->col(2),
-            row->col(3) });
+        result.push_back({ //
+            getCol(row, ConfigColumn::Key),
+            getCol(row, ConfigColumn::Item),
+            getCol(row, ConfigColumn::ItemValue),
+            getCol(row, ConfigColumn::Status) });
     }
 
     log_debug("loaded {} items from {}", result.size(), CONFIG_VALUE_TABLE);
@@ -2430,30 +2388,31 @@ void SQLDatabase::removeConfigValue(const std::string& item)
     }
 }
 
-void SQLDatabase::updateConfigValue(const std::string& key, const std::string& item, const std::string& value, const std::string& status)
+void SQLDatabase::updateConfigValue(
+    const std::string& key,
+    const std::string& item,
+    const std::string& value,
+    const std::string& status)
 {
     auto res = select(fmt::format("SELECT 1 FROM {} WHERE {} = {} LIMIT 1",
         identifier(CONFIG_VALUE_TABLE), identifier("item"), quote(item)));
     if (!res || res->getNumRows() == 0) {
-        auto fields = std::vector {
-            identifier("item"),
-            identifier("key"),
-            identifier("item_value"),
-            identifier("status"),
+        auto dict = std::map<ConfigColumn, std::string> {
+            { ConfigColumn::Key, quote(key) },
+            { ConfigColumn::Item, quote(item) },
+            { ConfigColumn::ItemValue, quote(value) },
+            { ConfigColumn::Status, quote(status) },
         };
-        auto values = std::vector {
-            quote(item),
-            quote(key),
-            quote(value),
-            quote(status),
-        };
-        insert(CONFIG_VALUE_TABLE, fields, values, false, true);
+        Config2Table ct(std::move(dict), Operation::Insert, configColumnMapper);
+        execOnly(ct.sqlForInsert(nullptr));
         log_debug("inserted for {} as {} = {}", key, item, value);
     } else {
-        auto updates = std::vector {
-            ColumnUpdate(identifier("item_value"), quote(value))
+        auto dict = std::map<ConfigColumn, std::string> {
+            { ConfigColumn::Item, quote(item) },
+            { ConfigColumn::ItemValue, quote(value) },
         };
-        updateRow(CONFIG_VALUE_TABLE, updates, "item", item);
+        Config2Table ct(std::move(dict), Operation::Update, configColumnMapper);
+        execOnly(ct.sqlForUpdate(nullptr));
         log_debug("updated for {} as {} = {}", key, item, value);
     }
 }
@@ -2461,14 +2420,12 @@ void SQLDatabase::updateConfigValue(const std::string& key, const std::string& i
 /* clients methods */
 std::vector<ClientObservation> SQLDatabase::getClients()
 {
-    auto fields = std::vector {
-        identifier("addr"),
-        identifier("port"),
-        identifier("addrFamily"),
-        identifier("userAgent"),
-        identifier("last"),
-        identifier("age"),
-    };
+    std::vector<std::string> fields;
+    fields.reserve(clientColumnMap.size());
+    for (auto&& [key, col] : clientColumnMap) {
+        fields.push_back(fmt::format("{}", identifier(col.field)));
+    }
+
     std::vector<ClientObservation> result;
     auto res = select(fmt::format("SELECT {} FROM {}", fmt::join(fields, ", "), identifier(CLIENTS_TABLE)));
     if (!res)
@@ -2477,12 +2434,12 @@ std::vector<ClientObservation> SQLDatabase::getClients()
     result.reserve(res->getNumRows());
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
-        auto net = std::make_shared<GrbNet>(row->col(0), row->col_int(2, AF_INET));
-        net->setPort(row->col_int(1, 0));
+        auto net = std::make_shared<GrbNet>(getCol(row, ClientColumn::Addr), getColInt(row, ClientColumn::AddrFamily, AF_INET));
+        net->setPort(getColInt(row, ClientColumn::Port, 0));
         result.emplace_back(net,
-            row->col(3),
-            std::chrono::seconds(row->col_int(4, 0)),
-            std::chrono::seconds(row->col_int(5, 0)),
+            getCol(row, ClientColumn::AddrFamily),
+            std::chrono::seconds(getColInt(row, ClientColumn::Last, 0)),
+            std::chrono::seconds(getColInt(row, ClientColumn::Age, 0)),
             nullptr);
     }
 
@@ -2493,47 +2450,50 @@ std::vector<ClientObservation> SQLDatabase::getClients()
 void SQLDatabase::saveClients(const std::vector<ClientObservation>& cache)
 {
     deleteAll(CLIENTS_TABLE);
-    auto fields = std::vector {
-        identifier("addr"),
-        identifier("port"),
-        identifier("addrFamily"),
-        identifier("userAgent"),
-        identifier("last"),
-        identifier("age"),
-    };
+    auto multiDict = std::vector<std::map<ClientColumn, std::string>>();
     for (auto& client : cache) {
-        auto values = std::vector {
-            quote(client.addr->getNameInfo(false)),
-            quote(client.addr->getPort()),
-            quote(client.addr->getAdressFamily()),
-            quote(client.userAgent),
-            quote(client.last.count()),
-            quote(client.age.count()),
+        auto dict = std::map<ClientColumn, std::string> {
+            { ClientColumn::Addr, quote(client.addr->getNameInfo(false)) },
+            { ClientColumn::Port, quote(client.addr->getPort()) },
+            { ClientColumn::AddrFamily, quote(client.addr->getAdressFamily()) },
+            { ClientColumn::UserAgent, quote(client.userAgent) },
+            { ClientColumn::Last, quote(client.last.count()) },
+            { ClientColumn::Age, quote(client.age.count()) },
         };
-        insert(CLIENTS_TABLE, fields, values, false, true);
+        multiDict.push_back(std::move(dict));
     }
+    Client2Table ct(std::move(multiDict), clientColumnMapper);
+    execOnly(ct.sqlForMultiInsert(nullptr));
 }
 
 std::shared_ptr<ClientStatusDetail> SQLDatabase::getPlayStatus(const std::string& group, int objectId)
 {
-    auto fields = std::vector {
-        identifier("group"),
-        identifier("item_id"),
-        identifier("playCount"),
-        identifier("lastPlayed"),
-        identifier("lastPlayedPosition"),
-        identifier("bookMarkPos"),
+    std::vector<std::string> fields;
+    fields.reserve(playstatusColMap.size());
+    for (auto&& [key, col] : playstatusColMap) {
+        fields.push_back(fmt::format("{}", identifier(col.field)));
+    }
+    std::vector<std::string> where {
+        fmt::format("{} = {}", playstatusColumnMapper->mapQuoted(PlaystatusCol::Group, true), quote(group)),
+        fmt::format("{} = {}", playstatusColumnMapper->mapQuoted(PlaystatusCol::ItemId, true), quote(objectId)),
     };
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {} AND {} = {}",
-        fmt::join(fields, ", "), identifier(PLAYSTATUS_TABLE),
-        identifier("group"), quote(group), identifier("item_id"), quote(objectId)));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {}",
+        fmt::join(fields, ", "),
+        identifier(PLAYSTATUS_TABLE),
+        fmt::join(where, " AND ")));
     if (!res)
         return {};
 
     std::unique_ptr<SQLRow> row;
     if ((row = res->nextRow())) {
         log_debug("Loaded {},{} items from {}", group, objectId, PLAYSTATUS_TABLE);
-        return std::make_shared<ClientStatusDetail>(row->col(0), row->col_int(1, objectId), row->col_int(2, 0), row->col_int(3, 0), row->col_int(4, 0), row->col_int(5, 0));
+        return std::make_shared<ClientStatusDetail>(
+            getCol(row, PlaystatusCol::Group),
+            getColInt(row, PlaystatusCol::ItemId, objectId),
+            getColInt(row, PlaystatusCol::PlayCount, 0),
+            getColInt(row, PlaystatusCol::LastPlayed, 0),
+            getColInt(row, PlaystatusCol::LastPlayedPosition, 0),
+            getColInt(row, PlaystatusCol::BookMarkPosition, 0));
     }
 
     return {};
@@ -2541,17 +2501,18 @@ std::shared_ptr<ClientStatusDetail> SQLDatabase::getPlayStatus(const std::string
 
 std::vector<std::shared_ptr<ClientStatusDetail>> SQLDatabase::getPlayStatusList(int objectId)
 {
-    auto fields = std::vector {
-        identifier("group"),
-        identifier("item_id"),
-        identifier("playCount"),
-        identifier("lastPlayed"),
-        identifier("lastPlayedPosition"),
-        identifier("bookMarkPos"),
+    std::vector<std::string> fields;
+    fields.reserve(playstatusColMap.size());
+    for (auto&& [key, col] : playstatusColMap) {
+        fields.push_back(fmt::format("{}", identifier(col.field)));
+    }
+    std::vector<std::string> where {
+        fmt::format("{} = {}", playstatusColumnMapper->mapQuoted(PlaystatusCol::ItemId, true), quote(objectId)),
     };
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} = {}",
-        fmt::join(fields, ", "), identifier(PLAYSTATUS_TABLE),
-        identifier("item_id"), quote(objectId)));
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {}",
+        fmt::join(fields, ", "),
+        identifier(PLAYSTATUS_TABLE),
+        fmt::join(where, " AND ")));
     if (!res)
         return {};
 
@@ -2559,7 +2520,13 @@ std::vector<std::shared_ptr<ClientStatusDetail>> SQLDatabase::getPlayStatusList(
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
         log_debug("Loaded {},{} items from {}", row->col(0), objectId, PLAYSTATUS_TABLE);
-        auto status = std::make_shared<ClientStatusDetail>(row->col(0), row->col_int(1, objectId), row->col_int(2, 0), row->col_int(3, 0), row->col_int(4, 0), row->col_int(5, 0));
+        auto status = std::make_shared<ClientStatusDetail>(
+            getCol(row, PlaystatusCol::Group),
+            getColInt(row, PlaystatusCol::ItemId, objectId),
+            getColInt(row, PlaystatusCol::PlayCount, 0),
+            getColInt(row, PlaystatusCol::LastPlayed, 0),
+            getColInt(row, PlaystatusCol::LastPlayedPosition, 0),
+            getColInt(row, PlaystatusCol::BookMarkPosition, 0));
         result.push_back(std::move(status));
     }
 
@@ -2571,8 +2538,8 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
     beginTransaction("savePlayStatus");
 
     std::vector<std::string> where {
-        fmt::format("{} = {}", identifier("group"), quote(detail->getGroup())),
-        fmt::format("{} = {}", identifier("item_id"), quote(detail->getItemId())),
+        fmt::format("{} = {}", playstatusColumnMapper->mapQuoted(PlaystatusCol::Group, true), quote(detail->getGroup())),
+        fmt::format("{} = {}", playstatusColumnMapper->mapQuoted(PlaystatusCol::ItemId, true), quote(detail->getItemId())),
     };
     auto res = select(fmt::format("SELECT 1 FROM {} WHERE {} LIMIT 1",
         identifier(PLAYSTATUS_TABLE),
@@ -2580,35 +2547,25 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
     auto doUpdate = res && res->getNumRows() > 0;
 
     if (doUpdate) {
-        std::vector<std::string> fields {
-            fmt::format("{} = {}", identifier("playCount"), quote(detail->getPlayCount())),
-            fmt::format("{} = {}", identifier("lastPlayed"), quote(detail->getLastPlayed().count())),
-            fmt::format("{} = {}", identifier("lastPlayedPosition"), quote(detail->getLastPlayedPosition().count())),
-            fmt::format("{} = {}", identifier("bookMarkPos"), quote(detail->getBookMarkPosition().count())),
+        auto dict = std::map<PlaystatusCol, std::string> {
+            { PlaystatusCol::PlayCount, quote(detail->getPlayCount()) },
+            { PlaystatusCol::LastPlayed, quote(detail->getLastPlayed().count()) },
+            { PlaystatusCol::LastPlayedPosition, quote(detail->getLastPlayedPosition().count()) },
+            { PlaystatusCol::BookMarkPosition, quote(detail->getBookMarkPosition().count()) },
         };
-
-        exec(fmt::format("UPDATE {} SET {} WHERE {}",
-            identifier(PLAYSTATUS_TABLE),
-            fmt::join(fields, ", "),
-            fmt::join(where, " AND ")));
+        Playstatus2Table pt(std::move(dict), Operation::Update, playstatusColumnMapper);
+        execOnly(pt.sqlForUpdate(detail));
     } else {
-        auto fields = std::vector {
-            identifier("group"),
-            identifier("item_id"),
-            identifier("playCount"),
-            identifier("lastPlayed"),
-            identifier("lastPlayedPosition"),
-            identifier("bookMarkPos"),
+        auto dict = std::map<PlaystatusCol, std::string> {
+            { PlaystatusCol::Group, quote(detail->getGroup()) },
+            { PlaystatusCol::ItemId, quote(detail->getItemId()) },
+            { PlaystatusCol::PlayCount, quote(detail->getPlayCount()) },
+            { PlaystatusCol::LastPlayed, quote(detail->getLastPlayed().count()) },
+            { PlaystatusCol::LastPlayedPosition, quote(detail->getLastPlayedPosition().count()) },
+            { PlaystatusCol::BookMarkPosition, quote(detail->getBookMarkPosition().count()) },
         };
-        auto values = std::vector {
-            quote(detail->getGroup()),
-            quote(detail->getItemId()),
-            quote(detail->getPlayCount()),
-            quote(detail->getLastPlayed().count()),
-            quote(detail->getLastPlayedPosition().count()),
-            quote(detail->getBookMarkPosition().count()),
-        };
-        insert(PLAYSTATUS_TABLE, fields, values, false, true);
+        Playstatus2Table pt(std::move(dict), Operation::Insert, playstatusColumnMapper);
+        execOnly(pt.sqlForInsert(detail));
     }
 
     commit("savePlayStatus");
@@ -2617,7 +2574,12 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
 std::vector<std::map<std::string, std::string>> SQLDatabase::getClientGroupStats()
 {
     auto res = select(fmt::format("SELECT {}, COUNT(*), SUM({}), MAX({}), COUNT(NULLIF({},0)) FROM {} GROUP BY {}",
-        identifier("group"), identifier("playCount"), identifier("lastPlayed"), identifier("bookMarkPos"), identifier(PLAYSTATUS_TABLE), identifier("group")));
+        playstatusColumnMapper->mapQuoted(PlaystatusCol::Group, true),
+        playstatusColumnMapper->mapQuoted(PlaystatusCol::PlayCount, true),
+        playstatusColumnMapper->mapQuoted(PlaystatusCol::LastPlayed, true),
+        playstatusColumnMapper->mapQuoted(PlaystatusCol::BookMarkPosition, true),
+        identifier(PLAYSTATUS_TABLE),
+        playstatusColumnMapper->mapQuoted(PlaystatusCol::Group, true)));
     if (!res)
         return {};
 
@@ -2664,7 +2626,9 @@ void SQLDatabase::updateAutoscanList(AutoscanScanMode scanmode, const std::share
 
         int objectID = findObjectIDByPath(location);
         log_debug("objectID = {}", objectID);
-        auto where = (objectID == INVALID_OBJECT_ID) ? fmt::format("{} = {}", identifier("location"), quote(location)) : fmt::format("{} = {}", identifier("obj_id"), objectID);
+        auto where = (objectID == INVALID_OBJECT_ID)
+            ? fmt::format("{} = {}", identifier("location"), quote(location))
+            : fmt::format("{} = {}", identifier("obj_id"), objectID);
 
         beginTransaction("updateAutoscanList x");
         auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} LIMIT 1", identifier("id"), identifier(AUTOSCAN_TABLE), where));
@@ -2788,45 +2752,30 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
 
     _autoscanChangePersistentFlag(objectID, true);
 
-    auto fields = std::vector {
-        identifier("obj_id"),
-        identifier("scan_mode"),
-        identifier("recursive"),
-        identifier("media_type"),
-        identifier("hidden"),
-        identifier("follow_symlinks"),
-        identifier("ct_audio"),
-        identifier("ct_image"),
-        identifier("ct_video"),
-        identifier("interval"),
-        identifier("last_modified"),
-        identifier("persistent"),
-        identifier("location"),
-        identifier("retry_count"),
-        identifier("dir_types"),
-        identifier("force_rescan"),
-        identifier("path_ids"),
+    auto fields = std::map<AutoscanColumn, std::string> {
+        { AutoscanColumn::ObjId, objectID >= 0 ? quote(objectID) : SQL_NULL },
+        { AutoscanColumn::ScanMode, quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) },
+        { AutoscanColumn::Recursive, quote(adir->getRecursive()) },
+        { AutoscanColumn::MediaType, quote(adir->getMediaType()) },
+        { AutoscanColumn::Hidden, quote(adir->getHidden()) },
+        { AutoscanColumn::FollowSymlinks, quote(adir->getFollowSymlinks()) },
+        { AutoscanColumn::CtAudio, quote(adir->getContainerTypes().at(AutoscanMediaMode::Audio)) },
+        { AutoscanColumn::CtImage, quote(adir->getContainerTypes().at(AutoscanMediaMode::Image)) },
+        { AutoscanColumn::CtVideo, quote(adir->getContainerTypes().at(AutoscanMediaMode::Video)) },
+        { AutoscanColumn::Interval, quote(adir->getInterval().count()) },
+        { AutoscanColumn::LastModified, quote(adir->getPreviousLMT().count()) },
+        { AutoscanColumn::Persistent, quote(adir->persistent()) },
+        { AutoscanColumn::Location, objectID >= 0 ? SQL_NULL : quote(adir->getLocation()) },
+        { AutoscanColumn::PathIds, pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ","))) },
+        { AutoscanColumn::RetryCount, quote(adir->getRetryCount()) },
+        { AutoscanColumn::DirTypes, quote(adir->hasDirTypes()) },
+        { AutoscanColumn::ForceRescan, quote(adir->getForceRescan()) },
     };
-    auto values = std::vector {
-        objectID >= 0 ? quote(objectID) : SQL_NULL,
-        quote(AutoscanDirectory::mapScanmode(adir->getScanMode())),
-        quote(adir->getRecursive()),
-        quote(adir->getMediaType()),
-        quote(adir->getHidden()),
-        quote(adir->getFollowSymlinks()),
-        quote(adir->getContainerTypes().at(AutoscanMediaMode::Audio)),
-        quote(adir->getContainerTypes().at(AutoscanMediaMode::Image)),
-        quote(adir->getContainerTypes().at(AutoscanMediaMode::Video)),
-        quote(adir->getInterval().count()),
-        quote(adir->getPreviousLMT().count()),
-        quote(adir->persistent()),
-        objectID >= 0 ? SQL_NULL : quote(adir->getLocation()),
-        quote(adir->getRetryCount()),
-        quote(adir->hasDirTypes()),
-        quote(adir->getForceRescan()),
-        pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ","))),
-    };
-    adir->setDatabaseID(insert(AUTOSCAN_TABLE, fields, values, true));
+    if (adir->getPreviousLMT() > std::chrono::seconds::zero()) {
+        fields[AutoscanColumn::LastModified] = quote(adir->getPreviousLMT().count());
+    }
+    Autoscan2Table at(fields, Operation::Insert, autoscanColumnMapper);
+    adir->setDatabaseID(exec(at.sqlForInsert(adir), true));
 }
 
 void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
@@ -2845,29 +2794,30 @@ void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirector
             _autoscanChangePersistentFlag(objectIDold, false);
         _autoscanChangePersistentFlag(objectID, true);
     }
-    auto fields = std::vector {
-        ColumnUpdate(identifier("obj_id"), objectID >= 0 ? quote(objectID) : SQL_NULL),
-        ColumnUpdate(identifier("scan_mode"), quote(AutoscanDirectory::mapScanmode(adir->getScanMode()))),
-        ColumnUpdate(identifier("recursive"), quote(adir->getRecursive())),
-        ColumnUpdate(identifier("media_type"), quote(adir->getMediaType())),
-        ColumnUpdate(identifier("hidden"), quote(adir->getHidden())),
-        ColumnUpdate(identifier("follow_symlinks"), quote(adir->getFollowSymlinks())),
-        ColumnUpdate(identifier("ct_audio"), quote(adir->getContainerTypes().at(AutoscanMediaMode::Audio))),
-        ColumnUpdate(identifier("ct_image"), quote(adir->getContainerTypes().at(AutoscanMediaMode::Image))),
-        ColumnUpdate(identifier("ct_video"), quote(adir->getContainerTypes().at(AutoscanMediaMode::Video))),
-        ColumnUpdate(identifier("interval"), quote(adir->getInterval().count())),
-        ColumnUpdate(identifier("persistent"), quote(adir->persistent())),
-        ColumnUpdate(identifier("location"), objectID >= 0 ? SQL_NULL : quote(adir->getLocation())),
-        ColumnUpdate(identifier("path_ids"), pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ",")))),
-        ColumnUpdate(identifier("retry_count"), quote(adir->getRetryCount())),
-        ColumnUpdate(identifier("dir_types"), quote(adir->hasDirTypes())),
-        ColumnUpdate(identifier("force_rescan"), quote(adir->getForceRescan())),
-        ColumnUpdate(identifier("touched"), quote(true)),
+    auto fields = std::map<AutoscanColumn, std::string> {
+        { AutoscanColumn::ObjId, objectID >= 0 ? quote(objectID) : SQL_NULL },
+        { AutoscanColumn::ScanMode, quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) },
+        { AutoscanColumn::Recursive, quote(adir->getRecursive()) },
+        { AutoscanColumn::MediaType, quote(adir->getMediaType()) },
+        { AutoscanColumn::Hidden, quote(adir->getHidden()) },
+        { AutoscanColumn::FollowSymlinks, quote(adir->getFollowSymlinks()) },
+        { AutoscanColumn::CtAudio, quote(adir->getContainerTypes().at(AutoscanMediaMode::Audio)) },
+        { AutoscanColumn::CtImage, quote(adir->getContainerTypes().at(AutoscanMediaMode::Image)) },
+        { AutoscanColumn::CtVideo, quote(adir->getContainerTypes().at(AutoscanMediaMode::Video)) },
+        { AutoscanColumn::Interval, quote(adir->getInterval().count()) },
+        { AutoscanColumn::Persistent, quote(adir->persistent()) },
+        { AutoscanColumn::Location, objectID >= 0 ? SQL_NULL : quote(adir->getLocation()) },
+        { AutoscanColumn::PathIds, pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ","))) },
+        { AutoscanColumn::RetryCount, quote(adir->getRetryCount()) },
+        { AutoscanColumn::DirTypes, quote(adir->hasDirTypes()) },
+        { AutoscanColumn::ForceRescan, quote(adir->getForceRescan()) },
+        { AutoscanColumn::Touched, quote(true) },
     };
     if (adir->getPreviousLMT() > std::chrono::seconds::zero()) {
-        fields.emplace_back(identifier("last_modified"), quote(adir->getPreviousLMT().count()));
+        fields[AutoscanColumn::LastModified] = quote(adir->getPreviousLMT().count());
     }
-    updateRow(AUTOSCAN_TABLE, fields, "id", adir->getDatabaseID());
+    Autoscan2Table at(fields, Operation::Update, autoscanColumnMapper);
+    exec(AUTOSCAN_TABLE, at.sqlForUpdate(adir), adir->getDatabaseID());
 }
 
 void SQLDatabase::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
@@ -2906,7 +2856,10 @@ void SQLDatabase::_autoscanChangePersistentFlag(int objectID, bool persistent)
         log_warning("cannot change autoscan to persistent {} with illegal ID", persistent);
         return;
     }
-    exec(fmt::format("UPDATE {0}{2}{1} SET {0}flags{1} = ({0}flags{1} {3}{4}) WHERE {0}id{1} = {5}", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE, (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER, objectID));
+    exec(fmt::format("UPDATE {0} SET {1} = ({1} {2}{3}) WHERE {4} = {5}",
+        identifier(CDS_OBJECT_TABLE),
+        identifier("flags"), (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER,
+        identifier("id"), quote(objectID)));
 }
 
 void SQLDatabase::checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir)
@@ -3003,7 +2956,7 @@ std::vector<int> SQLDatabase::getPathIDs(int objectID)
     if (objectID == INVALID_OBJECT_ID)
         return pathIDs;
 
-    auto sel = fmt::format("SELECT {0}parent_id{1} FROM {0}{2}{1} WHERE {0}id{1} = ", table_quote_begin, table_quote_end, CDS_OBJECT_TABLE);
+    auto sel = fmt::format("SELECT {} FROM {} WHERE {} = ", identifier("parent_id"), identifier(CDS_OBJECT_TABLE), identifier("id"));
 
     while (objectID != CDS_ID_ROOT) {
         pathIDs.push_back(objectID);
@@ -3018,20 +2971,34 @@ std::vector<int> SQLDatabase::getPathIDs(int objectID)
     return pathIDs;
 }
 
-void SQLDatabase::generateMetaDataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations) const
+void SQLDatabase::generateMetaDataDBOperations(
+    const std::shared_ptr<CdsObject>& obj,
+    Operation op,
+    std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>>& operations) const
 {
     const auto& dict = obj->getMetaData();
     operations.reserve(operations.size() + dict.size());
     if (op == Operation::Insert) {
         for (auto&& [key, val] : dict) {
-            operations.emplace_back(METADATA_TABLE, std::map<std::string, std::string> { { "property_name", quote(key) }, { "property_value", quote(val) } }, Operation::Insert);
+            auto mt = std::make_shared<Metadata2Table>(
+                std::map<MetadataCol, std::string> {
+                    { MetadataCol::PropertyName, quote(key) },
+                    { MetadataCol::PropertyValue, quote(val, metaColMap.at(MetadataCol::PropertyValue).length) } },
+                Operation::Insert, metaColumnMapper);
+            operations.push_back(std::move(mt));
         }
     } else {
         // delete current metadata from DB
-        operations.emplace_back(METADATA_TABLE, std::map<std::string, std::string>(), Operation::Delete);
+        auto mt = std::make_shared<Metadata2Table>(std::map<MetadataCol, std::string>(), Operation::Delete, metaColumnMapper);
+        operations.push_back(std::move(mt));
         if (op != Operation::Delete) {
             for (auto&& [key, val] : dict) {
-                operations.emplace_back(METADATA_TABLE, std::map<std::string, std::string> { { "property_name", quote(key) }, { "property_value", quote(val) } }, Operation::Insert);
+                auto mtk = std::make_shared<Metadata2Table>(
+                    std::map<MetadataCol, std::string> {
+                        { MetadataCol::PropertyName, quote(key) },
+                        { MetadataCol::PropertyValue, quote(val, metaColMap.at(MetadataCol::PropertyValue).length) } },
+                    Operation::Insert, metaColumnMapper);
+                operations.push_back(std::move(mtk));
             }
         }
     }
@@ -3070,30 +3037,34 @@ std::vector<std::shared_ptr<CdsResource>> SQLDatabase::retrieveResourcesForObjec
     return resources;
 }
 
-void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op,
-    std::vector<AddUpdateTable>& operations)
+void SQLDatabase::generateResourceDBOperations(
+    const std::shared_ptr<CdsObject>& obj,
+    Operation op,
+    std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>>& operations)
 {
     const auto& resources = obj->getResources();
     operations.reserve(operations.size() + resources.size());
     if (op == Operation::Insert) {
         std::size_t resId = 0;
         for (auto&& resource : resources) {
-            std::map<std::string, std::string> resourceSql;
-            resourceSql["res_id"] = quote(resId);
-            resourceSql["handlerType"] = quote(to_underlying(resource->getHandlerType()));
-            resourceSql["purpose"] = quote(to_underlying(resource->getPurpose()));
+            std::map<ResourceCol, std::string> resourceSql;
+            resourceSql[ResourceCol::ResId] = quote(resId);
+            resourceSql[ResourceCol::HandlerType] = quote(to_underlying(resource->getHandlerType()));
+            resourceSql[ResourceCol::Purpose] = quote(to_underlying(resource->getPurpose()));
             auto&& options = resource->getOptions();
             if (!options.empty()) {
-                resourceSql["options"] = quote(URLUtils::dictEncode(options));
+                resourceSql[ResourceCol::Options] = quote(URLUtils::dictEncode(options));
             }
             auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
-                resourceSql["parameters"] = quote(URLUtils::dictEncode(parameters));
+                resourceSql[ResourceCol::Parameters] = quote(URLUtils::dictEncode(parameters));
             }
+            std::map<ResourceAttribute, std::string> resourceAttrs;
             for (auto&& [key, val] : resource->getAttributes()) {
-                resourceSql[EnumMapper::getAttributeName(key)] = quote(val);
+                resourceAttrs[key] = quote(val);
             }
-            operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), Operation::Insert);
+            auto rt = std::make_shared<Resource2Table>(std::move(resourceSql), std::move(resourceAttrs), Operation::Insert, resColumnMapper);
+            operations.push_back(std::move(rt));
             resId++;
         }
     } else {
@@ -3102,117 +3073,38 @@ void SQLDatabase::generateResourceDBOperations(const std::shared_ptr<CdsObject>&
         std::size_t resId = 0;
         for (auto&& resource : resources) {
             Operation operation = resId < dbResources.size() ? Operation::Update : Operation::Insert;
-            std::map<std::string, std::string> resourceSql;
-            resourceSql["res_id"] = quote(resId);
-            resourceSql["handlerType"] = quote(to_underlying(resource->getHandlerType()));
-            resourceSql["purpose"] = quote(to_underlying(resource->getPurpose()));
+            std::map<ResourceCol, std::string> resourceSql;
+            resourceSql[ResourceCol::ResId] = quote(resId);
+            resourceSql[ResourceCol::HandlerType] = quote(to_underlying(resource->getHandlerType()));
+            resourceSql[ResourceCol::Purpose] = quote(to_underlying(resource->getPurpose()));
             auto&& options = resource->getOptions();
             if (!options.empty()) {
-                resourceSql["options"] = quote(URLUtils::dictEncode(options));
+                resourceSql[ResourceCol::Options] = quote(URLUtils::dictEncode(options));
             }
             auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
-                resourceSql["parameters"] = quote(URLUtils::dictEncode(parameters));
+                resourceSql[ResourceCol::Parameters] = quote(URLUtils::dictEncode(parameters));
             }
+            std::map<ResourceAttribute, std::string> resourceAttrs;
             for (auto&& [key, val] : resource->getAttributes()) {
-                resourceSql[EnumMapper::getAttributeName(key)] = quote(val);
+                resourceAttrs[key] = quote(val);
             }
-            operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), operation);
+            auto rt = std::make_shared<Resource2Table>(std::move(resourceSql), std::move(resourceAttrs), operation, resColumnMapper);
+            operations.push_back(std::move(rt));
             resId++;
         }
         // res_id in db resources but not obj resources, so needs a delete
         while (resId < dbResources.size()) {
             if (dbResources.at(resId)) {
-                std::map<std::string, std::string> resourceSql;
-                resourceSql["res_id"] = quote(resId);
-                operations.emplace_back(RESOURCE_TABLE, std::move(resourceSql), Operation::Delete);
+                std::map<ResourceCol, std::string> resourceSql;
+                std::map<ResourceAttribute, std::string> resourceAttrs;
+                resourceSql[ResourceCol::ResId] = quote(resId);
+                auto rt = std::make_shared<Resource2Table>(std::move(resourceSql), std::move(resourceAttrs), Operation::Delete, resColumnMapper);
+                operations.push_back(std::move(rt));
             }
             ++resId;
         }
     }
-}
-
-std::string SQLDatabase::sqlForInsert(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const
-{
-    const std::string& tableName = addUpdateTable.getTableName();
-
-    if (tableName == CDS_OBJECT_TABLE && obj->getID() != INVALID_OBJECT_ID) {
-        throw DatabaseException("Attempted to insert new object with ID!", LINE_MESSAGE);
-    }
-
-    const auto& dict = addUpdateTable.getDict();
-
-    std::vector<SQLIdentifier> fields;
-    std::vector<std::string> values;
-    fields.reserve(dict.size() + 1); // extra only used for METADATA_TABLE and RESOURCE_TABLE
-    values.reserve(dict.size() + 1); // extra only used for METADATA_TABLE and RESOURCE_TABLE
-
-    if (tableName == METADATA_TABLE || tableName == RESOURCE_TABLE) {
-        fields.push_back(identifier("item_id"));
-        values.push_back(fmt::to_string(obj->getID()));
-    }
-    for (auto&& field : tableColumnOrder.at(tableName)) {
-        if (dict.find(field) != dict.end()) {
-            fields.push_back(identifier(field));
-            values.push_back(dict.at(field));
-        }
-    }
-
-    return fmt::format("INSERT INTO {} ({}) VALUES ({})", identifier(tableName), fmt::join(fields, ", "), fmt::join(values, ", "));
-}
-
-std::string SQLDatabase::sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const
-{
-    const std::string& tableName = addUpdateTable.getTableName();
-    const auto& dict = addUpdateTable.getDict();
-
-    if (tableName == METADATA_TABLE && dict.size() != 2)
-        throw DatabaseException("sqlForUpdate called with invalid arguments", LINE_MESSAGE);
-
-    std::vector<std::string> fields;
-    fields.reserve(dict.size());
-    for (auto&& field : tableColumnOrder.at(tableName)) {
-        if (dict.find(field) != dict.end()) {
-            fields.push_back(fmt::format("{} = {}", identifier(field), dict.at(field)));
-        }
-    }
-
-    std::vector<std::string> where;
-    if (tableName == RESOURCE_TABLE) {
-        where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
-        where.push_back(fmt::format("{} = {}", identifier("res_id"), dict.at("res_id")));
-    } else if (tableName == METADATA_TABLE) {
-        // relying on only one element when tableName is mt_metadata
-        where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
-        where.push_back(fmt::format("{} = {}", identifier("property_name"), dict.begin()->second));
-    } else {
-        where.push_back(fmt::format("{} = {}", identifier("id"), obj->getID()));
-    }
-
-    return fmt::format("UPDATE {} SET {} WHERE {}", identifier(tableName), fmt::join(fields, ", "), fmt::join(where, " AND "));
-}
-
-std::string SQLDatabase::sqlForDelete(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const
-{
-    const std::string& tableName = addUpdateTable.getTableName();
-    const auto& dict = addUpdateTable.getDict();
-
-    std::vector<std::string> where;
-    if (tableName == RESOURCE_TABLE) {
-        where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
-        where.push_back(fmt::format("{} = {}", identifier("res_id"), dict.at("res_id")));
-    } else if (tableName == METADATA_TABLE) {
-        if (!dict.empty() && dict.size() != 2)
-            throw DatabaseException("sqlForDelete called with invalid arguments", LINE_MESSAGE);
-        // relying on only one element when tableName is mt_metadata
-        where.push_back(fmt::format("{} = {}", identifier("item_id"), obj->getID()));
-        if (!dict.empty())
-            where.push_back(fmt::format("{} = {}", identifier("property_name"), dict.begin()->second));
-    } else {
-        where.push_back(fmt::format("{} = {}", identifier("id"), obj->getID()));
-    }
-
-    return fmt::format("{}", fmt::join(where, " AND "));
 }
 
 // column metadata is dropped in DBVERSION 12
@@ -3249,25 +3141,22 @@ bool SQLDatabase::doMetadataMigration()
 
 void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
 {
-    std::map<std::string, std::string> dict = URLUtils::dictDecode(metadataStr);
+    std::map<std::string, std::string> itemMetadata = URLUtils::dictDecode(metadataStr);
 
-    if (!dict.empty()) {
+    if (!itemMetadata.empty()) {
         log_debug("Migrating metadata for cds object {}", objectId);
-        std::map<std::string, std::string> metadataSQLVals;
-        for (auto&& [key, val] : dict) {
-            metadataSQLVals[quote(key)] = quote(val);
+        std::vector<std::map<MetadataCol, std::string>> multiDict;
+        multiDict.reserve(itemMetadata.size());
+        for (auto&& [key, val] : itemMetadata) {
+            auto mDict = std::map<MetadataCol, std::string> {
+                { MetadataCol::ItemId, quote(objectId) },
+                { MetadataCol::PropertyName, quote(key) },
+                { MetadataCol::PropertyValue, quote(val) },
+            };
+            multiDict.push_back(std::move(mDict));
         }
-        auto fields = std::vector {
-            identifier("item_id"),
-            identifier("property_name"),
-            identifier("property_value"),
-        };
-        std::vector<std::vector<std::string>> valuesets;
-        valuesets.reserve(metadataSQLVals.size());
-        for (auto&& [key, val] : metadataSQLVals) {
-            valuesets.push_back({ fmt::to_string(objectId), key, val });
-        }
-        insertMultipleRows(METADATA_TABLE, fields, valuesets);
+        Metadata2Table mt(std::move(multiDict), metaColumnMapper);
+        exec(METADATA_TABLE, mt.sqlForMultiInsert(nullptr), objectId);
     } else {
         log_debug("Skipping migration - no metadata for cds object {}", objectId);
     }
@@ -3336,38 +3225,27 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
         auto resources = splitString(resourcesStr, RESOURCE_SEP);
         std::size_t resId = 0;
         for (auto&& resString : resources) {
-            std::map<std::string, std::string> resourceSQLVals;
+            std::map<ResourceAttribute, std::string> resourceVals;
             auto&& resource = CdsResource::decode(resString);
             for (auto&& [key, val] : resource->getAttributes()) {
-                resourceSQLVals[EnumMapper::getAttributeName(key)] = quote(val);
+                resourceVals[key] = quote(val);
             }
-            auto fields = std::vector {
-                identifier("item_id"),
-                identifier("res_id"),
-                identifier("handlerType"),
-                identifier("purpose"),
-            };
-            auto values = std::vector {
-                fmt::to_string(objectId),
-                fmt::to_string(resId),
-                fmt::to_string(to_underlying(resource->getHandlerType())),
-                fmt::to_string(to_underlying(resource->getPurpose())),
+            auto dict = std::map<ResourceCol, std::string> {
+                { ResourceCol::ItemId, quote(objectId) },
+                { ResourceCol::ResId, quote(resId) },
+                { ResourceCol::HandlerType, quote(to_underlying(resource->getHandlerType())) },
+                { ResourceCol::Purpose, quote(to_underlying(resource->getPurpose())) },
             };
             auto&& options = resource->getOptions();
             if (!options.empty()) {
-                fields.push_back(identifier("options"));
-                values.push_back(quote(URLUtils::dictEncode(options)));
+                dict[ResourceCol::Options] = quote(URLUtils::dictEncode(options));
             }
             auto&& parameters = resource->getParameters();
             if (!parameters.empty()) {
-                fields.push_back(identifier("parameters"));
-                values.push_back(quote(URLUtils::dictEncode(parameters)));
+                dict[ResourceCol::Parameters] = quote(URLUtils::dictEncode(parameters));
             }
-            for (auto&& [key, val] : resourceSQLVals) {
-                fields.push_back(identifier(key));
-                values.push_back(val);
-            }
-            insert(RESOURCE_TABLE, fields, values);
+            Resource2Table rt(std::move(dict), std::move(resourceVals), Operation::Insert, resColumnMapper);
+            exec(RESOURCE_TABLE, rt.sqlForInsert(nullptr), objectId);
             resId++;
         }
     } else {

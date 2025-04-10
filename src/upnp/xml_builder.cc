@@ -156,18 +156,6 @@ std::string UpnpXMLBuilder::encodeEscapes(std::string s)
     return s;
 }
 
-static constexpr std::string_view ellipse("...");
-
-static std::string limitString(std::size_t stringLimit, const std::string& s)
-{
-    // Do nothing if string is already short enough
-    if (s.length() <= stringLimit)
-        return s;
-
-    ssize_t cutPosition = getValidUTF8CutPosition(s, stringLimit - ellipse.size());
-    return fmt::format("{}{}", s.substr(0, cutPosition), ellipse);
-}
-
 std::string UpnpXMLBuilder::formatXmlString(
     const UpnpXMLBuilder::XmlStringFormat& xmlFormat,
     const std::string& input)

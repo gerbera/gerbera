@@ -45,21 +45,17 @@
 #include <utility>
 
 // forward declarations
+template <class Item>
+class AddUpdateTable;
 class CdsContainer;
 class CdsResource;
 class SQLResult;
 class SQLEmitter;
+enum class Operation;
 
 #define DBVERSION 24
 
-#define CDS_OBJECT_TABLE "mt_cds_object"
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
-#define AUTOSCAN_TABLE "mt_autoscan"
-#define METADATA_TABLE "mt_metadata"
-#define RESOURCE_TABLE "grb_cds_resource"
-#define CONFIG_VALUE_TABLE "grb_config_value"
-#define CLIENTS_TABLE "grb_client"
-#define PLAYSTATUS_TABLE "grb_playstatus"
 
 class SQLRow {
 public:
@@ -107,9 +103,10 @@ public:
 class SQLDatabase : public Database {
 public:
     /* methods to override in subclasses */
-    virtual std::string quote(const std::string& str) const = 0;
-    // required to handle #defines
-    std::string quote(const char* str) const { return quote(std::string(str)); }
+    virtual std::string quote(const std::string& value) const = 0;
+    std::string quote(const std::string& value, std::size_t len) const;
+    /// \brief ensure correct string quoting for SQL statement
+    std::string quote(const char* str, std::size_t len = 0) const { return quote(std::string(str), len); }
     /* wrapper functions for different types */
     std::string quote(char val) const { return quote(fmt::to_string(val)); }
     static std::string quote(int val) { return fmt::to_string(val); }
@@ -118,6 +115,9 @@ public:
     static std::string quote(unsigned long val) { return fmt::to_string(val); }
     static std::string quote(bool val) { return val ? "1" : "0"; }
     static std::string quote(long long val) { return fmt::to_string(val); }
+
+    /// \brief returns a fmt-printable identifier name
+    SQLIdentifier identifier(const std::string& name) const { return { name, table_quote_begin, table_quote_end }; }
 
     // hooks for transactions
     virtual void beginTransaction(std::string_view tName) { }
@@ -206,10 +206,6 @@ public:
 
     unsigned int getHash(std::size_t index) const { return index < DBVERSION ? hashies.at(index) : 0; }
 
-    int insert(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::string>& values, bool getLastInsertId = false, bool warnOnly = false);
-    void insertMultipleRows(std::string_view tableName, const std::vector<SQLIdentifier>& fields, const std::vector<std::vector<std::string>>& valuesets);
-    template <typename T>
-    void updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view key, const T& value);
     void deleteAll(std::string_view tableName);
     template <typename T>
     void deleteRow(const std::string& tableName, const std::string& key, const T& value);
@@ -230,9 +226,6 @@ protected:
     /// \brief migrate resources from mt_cds_objects to grb_resource before removing the column (DBVERSION 13)
     bool doResourceMigration();
     void migrateResources(int objectId, const std::string& resourcesStr);
-
-    /// \brief returns a fmt-printable identifier name
-    SQLIdentifier identifier(const std::string& name) const { return { name, table_quote_begin, table_quote_end }; }
 
     std::shared_ptr<Mime> mime;
     std::shared_ptr<ConverterManager> converterManager;
@@ -258,9 +251,6 @@ private:
     std::string sql_autoscan_query;
     std::string sql_resource_query;
     std::string addResourceColumnCmd;
-    /// \brief List of column names to be used in insert and update to ensure correct order of columns
-    // only columns listed here are added to the insert and update statements
-    std::map<std::string, std::vector<std::string>> tableColumnOrder;
 
     /// \brief Configuration content for dynamic folders
     std::shared_ptr<DynamicContentList> dynamicContentList;
@@ -274,39 +264,19 @@ private:
     std::vector<std::pair<std::string, std::string>> retrieveMetaDataForObject(int objectId);
     std::vector<std::shared_ptr<CdsResource>> retrieveResourcesForObject(int objectId);
 
-    enum class Operation {
-        Insert,
-        Update,
-        Delete
-    };
+    std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> _addUpdateObject(
+        const std::shared_ptr<CdsObject>& obj,
+        Operation op,
+        int* changedContainer);
 
-    /* helper class and helper function for addObject and updateObject */
-    class AddUpdateTable {
-    public:
-        AddUpdateTable(std::string&& tableName, std::map<std::string, std::string>&& dict, Operation operation) noexcept
-            : tableName(std::move(tableName))
-            , dict(std::move(dict))
-            , operation(operation)
-        {
-        }
-        ~AddUpdateTable() = default;
-        [[nodiscard]] const std::string& getTableName() const noexcept { return tableName; }
-        [[nodiscard]] const std::map<std::string, std::string>& getDict() const noexcept { return dict; }
-        [[nodiscard]] Operation getOperation() const noexcept { return operation; }
-
-    protected:
-        std::string tableName;
-        std::map<std::string, std::string> dict;
-        Operation operation;
-    };
-    std::vector<AddUpdateTable> _addUpdateObject(const std::shared_ptr<CdsObject>& obj, Operation op, int* changedContainer);
-
-    void generateMetaDataDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations) const;
-    void generateResourceDBOperations(const std::shared_ptr<CdsObject>& obj, Operation op, std::vector<AddUpdateTable>& operations);
-
-    std::string sqlForInsert(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const;
-    std::string sqlForUpdate(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const;
-    std::string sqlForDelete(const std::shared_ptr<CdsObject>& obj, const AddUpdateTable& addUpdateTable) const;
+    void generateMetaDataDBOperations(
+        const std::shared_ptr<CdsObject>& obj,
+        Operation op,
+        std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>>& operations) const;
+    void generateResourceDBOperations(
+        const std::shared_ptr<CdsObject>& obj,
+        Operation op,
+        std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>>& operations);
 
     /* helper for removeObject(s) */
     void _removeObjects(const std::vector<std::int32_t>& objectIDs);
@@ -340,12 +310,6 @@ private:
 
     using AutoLock = std::scoped_lock<std::mutex>;
 };
-
-template <typename T>
-void SQLDatabase::updateRow(std::string_view tableName, const std::vector<ColumnUpdate>& values, std::string_view key, const T& value)
-{
-    exec(fmt::format("UPDATE {} SET {} WHERE {} = {}", identifier(std::string(tableName)), fmt::join(values, ", "), identifier(std::string(key)), quote(value)));
-}
 
 template <typename T>
 void SQLDatabase::deleteRow(const std::string& tableName, const std::string& key, const T& value)
