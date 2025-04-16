@@ -11,9 +11,12 @@ Sqlite backup is now enabled by default.
 
 ### FIXES
 
+- Changing autoscans via ui failed in some cases
+
 ### Code Improvements
 
 - Use JsonCpp to generate responses in web request handlers
+- Sql database code uses enum properties instead of column names
 - Update versions of npupnp (6.2.1), spdlog (1.15.2)
 
 ## v2.5.0

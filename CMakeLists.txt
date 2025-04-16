@@ -794,6 +794,14 @@ if(BUILD_CHANGELOG)
     )
 endif()
 
+set(BASH_COMPLETION_DIR "/usr/share/bash-completion/completions")
+
+install(FILES
+        scripts/gerbera-completion.sh
+        DESTINATION "${BASH_COMPLETION_DIR}"
+        RENAME gerbera
+)
+
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${DEBIAN_EXTRA_FILES})
 
 INSTALL(TARGETS gerbera DESTINATION ${CMAKE_INSTALL_BINDIR})
