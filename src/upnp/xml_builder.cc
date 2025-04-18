@@ -1038,11 +1038,13 @@ void UpnpXMLBuilder::addResources(
         // Set Album art if we have a thumbnail
         // Note we dont actually add these as res tags.
         if (purpose == ResourcePurpose::Thumbnail) {
+            auto mimeType = getMimeType(*res, mimeMappings);
+            if (mimeType.empty())
+                continue;
             auto aa = parent.append_child(MetaEnumMapper::getMetaFieldName(MetadataFields::M_ALBUMARTURI).data());
             aa.append_child(pugi::node_pcdata).set_value(url.c_str());
 
             aa.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_METADATA_NAMESPACE;
-            auto mimeType = getMimeType(*res, mimeMappings);
             auto contentType = getValueOrDefault(ctMappings, mimeType);
             auto dlnaProfile = dlnaProfileString(*res, contentType, quirks, false);
             if (!dlnaProfile.empty())
@@ -1100,9 +1102,9 @@ void UpnpXMLBuilder::addResources(
             clientSpecficAttrs["pv:subtitleFileUri"] = captionInfo[""];
         }
 
-        buildProtocolInfo(*res, mimeMappings, quirks);
+        auto protocolInfo = buildProtocolInfo(*res, mimeMappings, quirks);
 
-        if (!hideOriginalResource || purpose == ResourcePurpose::Transcode || originalResource != res->getResId())
+        if (!protocolInfo.empty() && (!hideOriginalResource || purpose == ResourcePurpose::Transcode || originalResource != res->getResId()))
             renderResource(*item, *res, parent, filter, quirks, clientSpecficAttrs, clientGroup, mimeMappings);
     }
 }
@@ -1151,6 +1153,8 @@ std::string UpnpXMLBuilder::buildProtocolInfo(
     // Why is this here? Just for transcoding maybe?
 
     auto mimeType = getMimeType(resource, mimeMappings);
+    if (mimeType.empty())
+        return "";
     auto contentType = getValueOrDefault(ctMappings, mimeType);
     auto extend = dlnaProfileString(resource, contentType, quirks);
     // we do not support seeking at all, so 00
