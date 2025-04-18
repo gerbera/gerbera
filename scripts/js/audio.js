@@ -312,7 +312,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
   var init = mapInitial(audio.albumArtist.charAt(0));
   if (audio.disknr != '') {
     if (specialGenre.exec(audio.genre)) {
-      if (disknr.length == 1) {
+      if (audio.disknr.length == 1) {
         chain.album.title = '0' + audio.disknr + ' - ' + audio.album;
       } else {
         chain.album.title = audio.disknr + ' - ' + audio.album;
