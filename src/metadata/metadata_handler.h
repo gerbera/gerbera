@@ -43,6 +43,7 @@
 
 // forward declarations
 class CdsObject;
+class CdsItem;
 class CdsResource;
 class Config;
 class Context;
@@ -56,8 +57,11 @@ enum class MetadataFields;
 /// \brief This class is responsible for providing access to metadata information
 class MetadataHandler {
 protected:
+    /// \brief access configurtion
     std::shared_ptr<Config> config;
+    /// \brief access mime handler
     std::shared_ptr<Mime> mime;
+    /// \brief store all mime type mappings from configuration
     std::map<std::string, std::string> mimeContentTypeMappings;
 
 public:
@@ -80,12 +84,26 @@ public:
 /// of various media.
 class MediaMetadataHandler : public MetadataHandler {
 protected:
+    /// \brief allow handler to be disabled by config
     bool isEnabled {};
+    /// \brief allow comment generation to be disabled by config
     bool isCommentEnabled {};
+    /// \brief store all found metadata tags
     std::map<std::string, std::string> metaTags;
+    /// \brief store all found aux tags
     std::vector<std::string> auxTags;
+    /// \brief store all found comment items
     std::map<std::string, std::string> commentMap;
+    /// \brief access converter
     std::shared_ptr<ConverterManager> converterManager;
+
+    /// \brief check mimetype validity
+    static bool isValidArtworkContentType(std::string_view artMimetype);
+    /// \brief create resource to store artwork image information
+    static void addArtworkResource(
+        const std::shared_ptr<CdsItem>& item,
+        ContentHandler ch,
+        const std::string& artMimetype);
 
 public:
     explicit MediaMetadataHandler(

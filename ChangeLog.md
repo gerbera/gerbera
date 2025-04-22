@@ -7,6 +7,7 @@
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
 - Fix import and xml
 - Fix SQL for changing persistent object flag in database
+- Get multiple streams in FFMpeg handler
 - Improve compile info output
 - Limit strings to column size
 - Provide bash completion file

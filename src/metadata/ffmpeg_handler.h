@@ -74,13 +74,15 @@ private:
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject) const;
     /// \brief get additional resource fields
-    static void addFfmpegResourceFields(
+    void addFfmpegResourceFields(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject);
     /// \brief fabricate comment from metadata
     void addFfmpegComment(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject) const;
+    /// \brief try to extract mime type and content type from stream data
+    std::string getContentTypeFromByteVector(const std::vector<std::uint8_t>& data) const;
 
     static constexpr std::array propertyMap {
         std::pair(MetadataFields::M_TITLE, "title"),
@@ -95,6 +97,8 @@ private:
         std::pair(MetadataFields::M_DATE, "date"),
         std::pair(MetadataFields::M_CREATION_DATE, "creation_time"),
     };
+    /// \brief activate separation of artwork found by handler
+    bool artWorkEnabled;
 };
 
 #endif // HAVE_FFMPEG

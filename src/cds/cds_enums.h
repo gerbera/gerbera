@@ -115,7 +115,7 @@ enum class ContentHandler : int {
     ID3 = 2,
     TRANSCODE = 3,
     EXTURL = 4,
-    MP4 = 5,
+    FFMPEG = 5,
     FFTH = 6,
     FLAC = 7,
     FANART = 8,

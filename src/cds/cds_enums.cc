@@ -48,7 +48,6 @@ static constexpr std::array chKeys = {
 #endif
     std::pair(ContentHandler::TRANSCODE, "Transcode"),
     std::pair(ContentHandler::EXTURL, "Exturl"),
-    std::pair(ContentHandler::MP4, "MP4"),
 #ifdef HAVE_FFMPEGTHUMBNAILER
     std::pair(ContentHandler::FFTH, "FFmpegThumbnailer"),
 #endif
@@ -60,6 +59,9 @@ static constexpr std::array chKeys = {
 #endif
 #ifdef HAVE_WAVPACK
     std::pair(ContentHandler::WAVPACK, "WavPack"),
+#endif
+#ifdef HAVE_FFMPEG
+    std::pair(ContentHandler::FFMPEG, "FFmpeg"),
 #endif
     std::pair(ContentHandler::SUBTITLE, "Subtitle"),
     std::pair(ContentHandler::METAFILE, "MetaFile"),

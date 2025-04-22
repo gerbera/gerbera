@@ -571,6 +571,7 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_ENABLED, false },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_LIST, false },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_ENABLED, false },
+        { ConfigVal::IMPORT_LIBOPTS_FFMPEG_ARTWORK_ENABLED, false },
 #endif
 #ifdef HAVE_MATROSKA
         { ConfigVal::IMPORT_LIBOPTS_MKV_AUXDATA_TAGS_LIST, false },

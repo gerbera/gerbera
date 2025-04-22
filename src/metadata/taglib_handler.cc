@@ -369,13 +369,6 @@ void TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     log_debug("Done {}", item->getLocation().c_str());
 }
 
-bool TagLibHandler::isValidArtworkContentType(std::string_view artMimetype)
-{
-    // saw that simply "PNG" was used with some mp3's, so mimetype setting
-    // was probably invalid
-    return artMimetype.find('/') != std::string_view::npos;
-}
-
 std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data) const
 {
 #ifdef HAVE_MAGIC
@@ -384,19 +377,6 @@ std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector
 #else
     return MIMETYPE_DEFAULT;
 #endif
-}
-
-void TagLibHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, const std::string& artMimetype)
-{
-    // if we could not determine the mimetype, then there is no
-    // point to add the resource - it's probably garbage
-    log_debug("Found artwork of type {} in file {}", artMimetype, item->getLocation().c_str());
-
-    if (artMimetype != MIMETYPE_DEFAULT) {
-        auto resource = std::make_shared<CdsResource>(ContentHandler::ID3, ResourcePurpose::Thumbnail);
-        resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
-        item->addResource(resource);
-    }
 }
 
 /// \brief stream content of object or resource to client
@@ -661,7 +641,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr
             artMimetype = getContentTypeFromByteVector(pic);
         }
 
-        addArtworkResource(item, artMimetype);
+        addArtworkResource(item, ContentHandler::ID3, artMimetype);
     }
 }
 
@@ -720,7 +700,7 @@ void TagLibHandler::extractOgg(TagLib::IOStream& roStream, const std::shared_ptr
     if (!isValidArtworkContentType(artMimetype)) {
         artMimetype = getContentTypeFromByteVector(data);
     }
-    addArtworkResource(item, artMimetype);
+    addArtworkResource(item, ContentHandler::ID3, artMimetype);
 }
 
 void TagLibHandler::extractASF(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
@@ -753,7 +733,7 @@ void TagLibHandler::extractASF(TagLib::IOStream& roStream, const std::shared_ptr
         if (!isValidArtworkContentType(artMimetype)) {
             artMimetype = getContentTypeFromByteVector(wmpic.picture());
         }
-        addArtworkResource(item, artMimetype);
+        addArtworkResource(item, ContentHandler::ID3, artMimetype);
     }
 }
 
@@ -788,7 +768,7 @@ void TagLibHandler::extractFLAC(TagLib::IOStream& roStream, const std::shared_pt
     if (!isValidArtworkContentType(artMimetype)) {
         artMimetype = getContentTypeFromByteVector(data);
     }
-    addArtworkResource(item, artMimetype);
+    addArtworkResource(item, ContentHandler::ID3, artMimetype);
 }
 
 void TagLibHandler::extractAPE(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
@@ -854,7 +834,7 @@ void TagLibHandler::extractMP4(TagLib::IOStream& roStream, const std::shared_ptr
         const auto& coverArt = coverArtList.front();
         auto artMimetype = getContentTypeFromByteVector(coverArt.data());
         if (!artMimetype.empty()) {
-            addArtworkResource(item, artMimetype);
+            addArtworkResource(item, ContentHandler::ID3, artMimetype);
         }
     } else {
         log_debug("TagLibHandler {}: mp4 file has no 'covr' item",

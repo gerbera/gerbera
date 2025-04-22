@@ -234,6 +234,12 @@ std::shared_ptr<MetadataHandler> MetadataService::getHandler(ContentHandler hand
 #else
         break;
 #endif
+    case ContentHandler::FFMPEG:
+#ifdef HAVE_FFMPEG
+        return handlers[MetadataType::Ffmpeg];
+#else
+        break;
+#endif
     case ContentHandler::FANART:
         return handlers[MetadataType::FanArt];
     case ContentHandler::CONTAINERART:
@@ -247,7 +253,6 @@ std::shared_ptr<MetadataHandler> MetadataService::getHandler(ContentHandler hand
     case ContentHandler::DEFAULT:
     case ContentHandler::TRANSCODE:
     case ContentHandler::EXTURL:
-    case ContentHandler::MP4:
     case ContentHandler::FLAC:
         break;
     }

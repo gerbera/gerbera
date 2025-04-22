@@ -118,13 +118,14 @@ const runScan = (event) => {
   const item = event.data;
   if (item) {
     const fromFs = GerberaApp.getType() === 'fs';
-    let requestData = {
+    const request = {
       req_type: 'autoscan',
       object_id: item.id,
       action: 'as_run',
       from_fs: fromFs,
     }
-    requestData[Auth.SID] = Auth.getSessionId();
+    request[Auth.SID] = Auth.getSessionId();
+    let requestData = $.extend({}, request, item);
     if (GerberaApp.getType() === 'db') {
       requestData = $.extend({}, requestData, { updates: 'check' });
     }

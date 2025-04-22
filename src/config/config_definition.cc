@@ -196,7 +196,7 @@ static const std::map<std::string, std::string> mtTransferDefaults {
     { "image/*", UPNP_DLNA_TRANSFER_MODE_INTERACTIVE },
     { "video/*", UPNP_DLNA_TRANSFER_MODE_STREAMING },
     { "text/*", UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
-    { "application/x-srt", UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
+    { MIME_TYPE_SRT_SUBTITLE, UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
     { "srt", UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
 };
 
@@ -1532,6 +1532,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
             YES),
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_ENABLED,
             "/import/library-options/ffmpeg/comment/attribute::enabled", "config-import.html#comment",
+            NO),
+        std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_FFMPEG_ARTWORK_ENABLED,
+            "/import/library-options/ffmpeg/attribute::artwork-enabled", "config-import.html#artwork-enabled",
             NO),
         std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_LIST,
             "/import/library-options/ffmpeg/comment", "config-import.html#ffmpeg",

@@ -47,10 +47,14 @@
 #include "ffmpeg_handler.h"
 
 #include "cds/cds_item.h"
+#include "config/config.h"
 #include "config/config_val.h"
 #include "iohandler/io_handler.h"
+#include "iohandler/mem_io_handler.h"
+#include "metadata_enums.h"
 #include "upnp/upnp_common.h"
 #include "util/grb_time.h"
+#include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -73,6 +77,7 @@ extern "C" {
 #define as_codecpar(s) s->codec
 #endif
 
+/// \brief Wrapper class to log FFMpeg messages
 class FfmpegLogger {
 public:
     FfmpegLogger()
@@ -143,7 +148,12 @@ FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_ENABLED,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_LIST)
+    , artWorkEnabled(config->getBoolOption(ConfigVal::IMPORT_LIBOPTS_FFMPEG_ARTWORK_ENABLED))
 {
+#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100))
+    // Register all formats and codecs
+    av_register_all();
+#endif
 }
 
 /// \brief Wrapper class to interface with FFMpeg
@@ -157,14 +167,19 @@ public:
         : location(item->getLocation())
         , sc(converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET, location))
     {
+        // ffmpeg library context
+        pFormatCtx = avformat_alloc_context();
         // Open media file
         if (avformat_open_input(&pFormatCtx, item->getLocation().c_str(), nullptr, nullptr) != 0) {
+            log_debug("Could not open file");
+            avformat_free_context(pFormatCtx);
             pFormatCtx = nullptr;
             return; // Couldn't open file
         }
 
         // Retrieve stream information
         if (avformat_find_stream_info(pFormatCtx, nullptr) < 0) {
+            log_debug("Could not find stream information");
             avformat_close_input(&pFormatCtx);
             pFormatCtx = nullptr;
             return; // Couldn't find stream information
@@ -217,7 +232,7 @@ void FfmpegHandler::addFfmpegAuxdataFields(
             }
         }
     }
-} // addFfmpegAuxdataFields
+}
 
 void FfmpegHandler::addFfmpegComment(
     const std::shared_ptr<CdsItem>& item,
@@ -328,7 +343,7 @@ void FfmpegHandler::addFfmpegMetadataFields(
     }
 }
 
-/// \brief Convert Rotaiton Informaion to 360 degree value
+/// \brief Convert Rotation Information to 360 degree value
 static double get_rotation(const std::int32_t* displaymatrix)
 {
     double rot = 0;
@@ -343,7 +358,131 @@ static double get_rotation(const std::int32_t* displaymatrix)
     return rot;
 }
 
-// ffmpeg library calls
+/// \brief Extract Artwork from media file
+static std::vector<std::uint8_t> extractArtImage(const FfmpegObject& ffmpegObject)
+{
+    log_debug("start");
+    if (!ffmpegObject) {
+        return {};
+    }
+
+    AVStream* audioStream = nullptr;
+    // Find Audio Stream with attaced picture
+    for (unsigned int i = 0; i < ffmpegObject.pFormatCtx->nb_streams; i++) {
+        if (ffmpegObject.pFormatCtx->streams[i]->disposition & AV_DISPOSITION_ATTACHED_PIC) { // implies codec_type == AVMEDIA_TYPE_AUDIO
+            audioStream = ffmpegObject.pFormatCtx->streams[i];
+            break;
+        }
+    }
+
+    if (!audioStream) {
+        log_debug("No audio stream found in the file");
+        return {};
+    }
+
+    // Thanks to https://stackoverflow.com/questions/13592709/retrieve-album-art-using-ffmpeg
+    AVPacket pkt = audioStream->attached_pic;
+    if (pkt.size > 0) {
+        log_debug("end {}", pkt.size);
+        return std::vector<std::uint8_t>(pkt.data, pkt.data + pkt.size);
+    }
+
+    AVDictionaryEntry* avEntry = nullptr;
+    avEntry = av_dict_get(ffmpegObject.pFormatCtx->metadata, "APIC", avEntry, 0);
+    if (!avEntry) {
+        log_debug("No embedded image found in the file");
+        return {};
+    }
+
+    log_debug("end");
+    return std::vector<std::uint8_t>(avEntry->value, avEntry->value + strlen(avEntry->value));
+}
+
+/// \brief Extract Subtitle from media file
+static std::vector<std::uint8_t> extractSubtitle(const FfmpegObject& ffmpegObject)
+{
+    log_debug("start");
+    if (!ffmpegObject) {
+        return {};
+    }
+
+    // Find Subtitle Stream
+    int subtitleStreamIndex = -1;
+    for (unsigned int i = 0; i < ffmpegObject.pFormatCtx->nb_streams; ++i) {
+        if (as_codecpar(ffmpegObject.pFormatCtx->streams[i])->codec_type == AVMEDIA_TYPE_SUBTITLE) {
+            subtitleStreamIndex = i;
+            break;
+        }
+    }
+    AVPacket* packet = av_packet_alloc();
+    if (!packet) {
+        log_debug("Could not allocate packet");
+        return {};
+    }
+
+    // Store subtitle packets
+    while (av_read_frame(ffmpegObject.pFormatCtx, packet) >= 0) {
+        if (packet->stream_index == subtitleStreamIndex) {
+            return std::vector<uint8_t>(packet->data, packet->data + packet->size);
+        }
+        av_packet_unref(packet);
+    }
+    return {};
+}
+
+/// \brief extract orientation from stream
+static int getOrientation(AVStream* st)
+{
+    AVDictionaryEntry* entry = nullptr;
+    entry = av_dict_get(st->metadata, "rotate", entry, AV_DICT_MATCH_CASE);
+    double rot = 0;
+    if (entry) {
+        rot = stoiString(entry->value);
+        log_debug("{} = {}", "rotate", rot);
+    } else {
+#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(60, 0, 0))
+        auto displaymatrix = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, nullptr);
+        if (displaymatrix) {
+            rot = get_rotation(reinterpret_cast<std::int32_t*>(displaymatrix));
+            log_debug("{} = {}", "displaymatrix", rot);
+        }
+#else
+        int32_t* displayMatrix = nullptr;
+        auto psd = av_packet_side_data_get(as_codecpar(st)->coded_side_data,
+            as_codecpar(st)->nb_coded_side_data, AV_PKT_DATA_DISPLAYMATRIX);
+        if (psd)
+            displayMatrix = reinterpret_cast<std::int32_t*>(psd->data);
+        if (displayMatrix) {
+            rot = get_rotation(displayMatrix);
+            log_debug("{} = {}", "displayMatrix", rot);
+        }
+#endif
+    }
+    int orientation = 0;
+    if (rot == 0) {
+        orientation = 1;
+    } else if (rot == 90) {
+        orientation = 6;
+    } else if (rot == -90) {
+        orientation = 8;
+    } else if (rot == -180 || rot == 180) {
+        orientation = 3;
+    }
+    log_debug("Orientation = {}", orientation);
+    return orientation;
+}
+
+std::string FfmpegHandler::getContentTypeFromByteVector(const std::vector<std::uint8_t>& data) const
+{
+#ifdef HAVE_MAGIC
+    auto artMimetype = mime->bufferToMimeType(data.data(), data.size());
+    log_debug("found mime {}", artMimetype);
+    return artMimetype.empty() ? UPNP_DESC_ICON_JPG_MIMETYPE : artMimetype;
+#else
+    return UPNP_DESC_ICON_JPG_MIMETYPE;
+#endif
+}
+
 void FfmpegHandler::addFfmpegResourceFields(
     const std::shared_ptr<CdsItem>& item,
     const FfmpegObject& ffmpegObject)
@@ -355,7 +494,11 @@ void FfmpegHandler::addFfmpegResourceFields(
 
     auto resource = item->getResource(ContentHandler::DEFAULT);
     bool isAudioFile = item->isSubClass(UPNP_CLASS_AUDIO_ITEM) && item->getResource(ResourcePurpose::Thumbnail);
-    auto resource2 = isAudioFile ? item->getResource(ResourcePurpose::Thumbnail) : item->getResource(ContentHandler::DEFAULT);
+    auto resource2 = isAudioFile ? item->getResource(ResourcePurpose::Thumbnail) : resource;
+    if (!resource2) {
+        resource2 = std::make_shared<CdsResource>(ContentHandler::FFMPEG, ResourcePurpose::Thumbnail);
+        item->addResource(resource2);
+    }
 
     // duration
     if (ffmpegObject.pFormatCtx->duration > 0) {
@@ -374,53 +517,36 @@ void FfmpegHandler::addFfmpegResourceFields(
     }
 
     // video resolution, audio sampling rate, nr of audio channels
-    bool audioSet = false;
-    bool videoSet = false;
+    int audioSet = 0;
+    int videoSet = artWorkEnabled && isAudioFile ? 1 : 0;
     for (std::size_t i = 0; i < ffmpegObject.pFormatCtx->nb_streams; i++) {
         auto st = ffmpegObject.pFormatCtx->streams[i];
 
-        if (st && !videoSet && as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO) {
-            // orientation
-            {
-                AVDictionaryEntry* entry = nullptr;
-                entry = av_dict_get(st->metadata, "rotate", entry, AV_DICT_MATCH_CASE);
-                double rot = 0;
-                if (entry) {
-                    rot = stoiString(entry->value);
-                    log_debug("{} = {}", "rotate", rot);
-                } else {
-#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(60, 0, 0))
-                    auto displaymatrix = av_stream_get_side_data(st, AV_PKT_DATA_DISPLAYMATRIX, nullptr);
-                    if (displaymatrix) {
-                        rot = get_rotation(reinterpret_cast<std::int32_t*>(displaymatrix));
-                        log_debug("{} = {}", "displaymatrix", rot);
-                    }
-#else
-                    int32_t* displayMatrix = nullptr;
-                    auto psd = av_packet_side_data_get(as_codecpar(st)->coded_side_data,
-                        as_codecpar(st)->nb_coded_side_data, AV_PKT_DATA_DISPLAYMATRIX);
-                    if (psd)
-                        displayMatrix = reinterpret_cast<std::int32_t*>(psd->data);
-                    if (displayMatrix) {
-                        rot = get_rotation(displayMatrix);
-                        log_debug("{} = {}", "displayMatrix", rot);
-                    }
-#endif
-                }
-                int orientation = 0;
-                if (rot == 0) {
-                    orientation = 1;
-                } else if (rot == 90) {
-                    orientation = 6;
-                } else if (rot == -90) {
-                    orientation = 8;
-                } else if (rot == -180 || rot == 180) {
-                    orientation = 3;
-                }
-                log_debug("Added orientation: {}", orientation);
-                resource2->addAttribute(ResourceAttribute::ORIENTATION, fmt::format("{}", orientation));
+        if (!st)
+            continue;
+
+        switch (as_codecpar(st)->codec_type) {
+        case AVMEDIA_TYPE_VIDEO: {
+            if (videoSet > 0) {
+                resource2 = std::make_shared<CdsResource>(ContentHandler::FFMPEG, isAudioFile ? ResourcePurpose::Thumbnail : ResourcePurpose::Content);
+                item->addResource(resource2);
             }
 
+            if (videoSet == 1 && artWorkEnabled && isAudioFile) {
+                // use ffmpeg to get artwork
+                auto image = extractArtImage(ffmpegObject);
+                if (!image.empty()) {
+                    auto artMimetype = getContentTypeFromByteVector(image);
+                    log_debug("art {} {}", image.size(), artMimetype);
+                    if (artMimetype != MIMETYPE_DEFAULT) {
+                        resource2->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
+                    }
+                }
+            }
+            // orientation
+            resource2->addAttribute(ResourceAttribute::ORIENTATION, fmt::format("{}", getOrientation(st)));
+
+            // video codec
             auto codecId = as_codecpar(st)->codec_id;
             resource2->addAttribute(ResourceAttribute::VIDEOCODEC, avcodec_get_name(codecId));
 
@@ -445,8 +571,9 @@ void FfmpegHandler::addFfmpegResourceFields(
 
                 log_debug("Added resolution: {} pixel from stream {}", resolution, i);
                 resource2->addAttribute(ResourceAttribute::RESOLUTION, resolution);
-                videoSet = true;
+                videoSet++;
             }
+
             // pixelformat
             {
                 AVPixelFormat pix_fmt = static_cast<AVPixelFormat>(as_codecpar(st)->format);
@@ -460,8 +587,48 @@ void FfmpegHandler::addFfmpegResourceFields(
                     log_debug("Unknown Pixel Format");
                 }
             }
+            break;
         }
-        if (st && !audioSet && as_codecpar(st)->codec_type == AVMEDIA_TYPE_AUDIO) {
+        case AVMEDIA_TYPE_SUBTITLE: {
+            auto stResource = std::make_shared<CdsResource>(ContentHandler::FFMPEG, ResourcePurpose::Subtitle);
+            item->addResource(stResource);
+            // subtitle codec
+            auto codecId = as_codecpar(st)->codec_id;
+            stResource->addAttribute(ResourceAttribute::TYPE, avcodec_get_name(codecId));
+
+            auto subtitle = extractSubtitle(ffmpegObject);
+            if (!subtitle.empty()) {
+                auto subMimetype = getContentTypeFromByteVector(subtitle);
+                log_debug("subtitle {} {}", subtitle.size(), subMimetype);
+                if (subMimetype != MIMETYPE_DEFAULT) {
+                    stResource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(subMimetype));
+                }
+            }
+
+            AVDictionaryEntry* lang = av_dict_get(st->metadata, "language", nullptr, 0);
+            if (lang && lang->value) {
+                log_debug("Subtitle Language: {}", lang->value);
+                stResource->addAttribute(ResourceAttribute::LANGUAGE, lang->value);
+            }
+
+            if (as_codecpar(st)->extradata && as_codecpar(st)->extradata_size > 0) {
+                log_debug("Subtitle Size: {}", as_codecpar(st)->extradata_size);
+                stResource->addAttribute(ResourceAttribute::SIZE, fmt::format("{}", as_codecpar(st)->extradata_size));
+            }
+            break;
+        }
+        case AVMEDIA_TYPE_DATA: // Opaque data information usually continuous.
+        case AVMEDIA_TYPE_ATTACHMENT: // Opaque data information usually sparse.
+        case AVMEDIA_TYPE_NB:
+            log_debug("media type {}: {}", i, as_codecpar(st)->codec_type);
+            break;
+        case AVMEDIA_TYPE_AUDIO: {
+            if (audioSet > 0) {
+                resource = std::make_shared<CdsResource>(ContentHandler::FFMPEG, ResourcePurpose::Content);
+                item->addResource(resource);
+            }
+
+            // audio codec
             auto codecId = as_codecpar(st)->codec_id;
             resource->addAttribute(ResourceAttribute::AUDIOCODEC, avcodec_get_name(codecId));
             // find the first stream that has a valid sample rate
@@ -485,18 +652,22 @@ void FfmpegHandler::addFfmpegResourceFields(
 
                 log_debug("Added sample frequency: {} Hz from stream {}", sampleFreq, i);
                 resource->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, fmt::to_string(sampleFreq));
-                audioSet = true;
+                audioSet++;
+            }
 // FF_API_OLD_CHANNEL_LAYOUT
 #if LIBAVUTIL_VERSION_MAJOR < 57
-                int audioCh = as_codecpar(st)->channels;
+            int audioCh = as_codecpar(st)->channels;
 #else
-                int audioCh = as_codecpar(st)->ch_layout.nb_channels;
+            int audioCh = as_codecpar(st)->ch_layout.nb_channels;
 #endif
-                if (audioCh > 0) {
-                    log_debug("Added number of audio channels: {} from stream {}", audioCh, i);
-                    resource->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(audioCh));
-                }
+            if (audioCh > 0) {
+                log_debug("Added number of audio channels: {} from stream {}", audioCh, i);
+                resource->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(audioCh));
             }
+            break;
+        }
+        case AVMEDIA_TYPE_UNKNOWN:
+            break;
         }
     }
 }
@@ -509,10 +680,6 @@ void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
 
-#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100))
-    // Register all formats and codecs
-    av_register_all();
-#endif
     FfmpegObject ffmpegObject(converterManager, item);
 
     // Add metadata for unset values
@@ -530,13 +697,30 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(
     const std::shared_ptr<CdsObject>& obj,
     const std::shared_ptr<CdsResource>& resource)
 {
-    // nothing to serve here, yet
+    auto item = std::dynamic_pointer_cast<CdsItem>(obj);
+    if (!item || !isEnabled || !resource)
+        return nullptr;
+
+    log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
+
+    if (resource->getPurpose() == ResourcePurpose::Thumbnail) {
+        FfmpegObject ffmpegObject(converterManager, item);
+        auto image = extractArtImage(ffmpegObject);
+        if (!image.empty())
+            return std::make_unique<MemIOHandler>(image.data(), image.size());
+    }
+    if (resource->getPurpose() == ResourcePurpose::Subtitle) {
+        FfmpegObject ffmpegObject(converterManager, item);
+        auto subtitle = extractSubtitle(ffmpegObject);
+        if (!subtitle.empty())
+            return std::make_unique<MemIOHandler>(subtitle.data(), subtitle.size());
+    }
     return nullptr;
 }
 
 std::string FfmpegHandler::getMimeType() const
 {
-    return getValueOrDefault(mimeContentTypeMappings, CONTENT_TYPE_JPG, "image/jpeg");
+    return getValueOrDefault(mimeContentTypeMappings, CONTENT_TYPE_JPG, UPNP_DESC_ICON_JPG_MIMETYPE);
 }
 
 #endif // HAVE_FFMPEG
