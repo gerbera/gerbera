@@ -103,7 +103,10 @@ void Web::Autoscan::runScan(
         auto object = database->loadObject(intParam("object_id"));
         adir = object ? content->getAutoscanDirectory(object->getLocation()) : database->getAutoscanDirectory(intParam("object_id"));
     }
-    content->rescanDirectory(adir, adir->getObjectID(), path, true);
+    if (adir)
+        content->rescanDirectory(adir, adir->getObjectID(), path, true);
+    else
+        throw_std_runtime_error("runScan called with illegal parameters {}", fromFs ? path.string() : param("object_id"));
 }
 
 void Web::Autoscan::editSave(

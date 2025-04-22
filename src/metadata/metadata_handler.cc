@@ -22,12 +22,15 @@
 */
 
 /// \file metadata_handler.cc
+#define GRB_LOG_FAC GrbLogFacility::metadata
 
 #include "metadata_handler.h"
 
+#include "cds/cds_item.h"
 #include "config/config.h"
 #include "config/config_val.h"
 #include "context.h"
+#include "util/tools.h"
 
 MetadataHandler::MetadataHandler(const std::shared_ptr<Context>& context)
     : config(context->getConfig())
@@ -71,4 +74,24 @@ MediaMetadataHandler::MediaMetadataHandler(
     , commentMap(this->config->getDictionaryOption(commentOption))
     , converterManager(context->getConverterManager())
 {
+}
+
+bool MediaMetadataHandler::isValidArtworkContentType(std::string_view artMimetype)
+{
+    // saw that simply "PNG" was used with some mp3's, so mimetype setting
+    // was probably invalid
+    return artMimetype.find('/') != std::string_view::npos;
+}
+
+void MediaMetadataHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, ContentHandler ch, const std::string& artMimetype)
+{
+    // if we could not determine the mimetype, then there is no
+    // point to add the resource - it's probably garbage
+    log_debug("Found artwork of type {} in file {}", artMimetype, item->getLocation().c_str());
+
+    if (artMimetype != MIMETYPE_DEFAULT) {
+        auto resource = std::make_shared<CdsResource>(ch, ResourcePurpose::Thumbnail);
+        resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
+        item->addResource(resource);
+    }
 }

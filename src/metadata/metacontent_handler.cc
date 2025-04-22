@@ -55,7 +55,7 @@ ContentPathSetup::ContentPathSetup(std::shared_ptr<Config> config, const std::sh
 std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<CdsObject>& obj, const std::string& setting, fs::path folder) const
 {
     auto objLocation = obj->getLocation();
-    auto tweak = allTweaks->getKey(objLocation);
+    auto tweak = allTweaks ? allTweaks->getKey(objLocation) : nullptr;
     auto files = !tweak || !tweak->hasSetting(setting) ? this->names : std::vector<std::string> { tweak->getSetting(setting) };
     auto isCaseSensitive = tweak && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : this->caseSensitive;
 
@@ -226,13 +226,20 @@ void FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     for (auto&& path : pathList) {
         if (!path.empty()) {
-            auto resource = std::make_shared<CdsResource>(ContentHandler::FANART, ResourcePurpose::Thumbnail);
             std::string type = path.extension().string().substr(1);
             auto mimeType = std::get<1>(mime->getMimeType(path, fmt::format("image/{}", type)));
+            auto [mval, err] = f2i->convert(path.string());
+            if (!err.empty()) {
+                log_warning("{}: {}", path.string(), err);
+            }
+            auto resource = obj->getResource(ResourceAttribute::RESOURCE_FILE, mval);
+            if (resource)
+                continue;
 
+            resource = std::make_shared<CdsResource>(ContentHandler::FANART, ResourcePurpose::Thumbnail);
             if (!mimeType.empty()) {
                 resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, path.string());
+                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, mval);
             }
             obj->addResource(resource);
         }
@@ -278,16 +285,20 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     for (auto&& path : pathList) {
         if (!path.empty()) {
             log_debug("Running ContainerArt handler on {}", !path.empty() ? path.c_str() : obj->getLocation().c_str());
-            auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
             std::string type = path.extension().string().substr(1);
+            auto [mval, err] = f2i->convert(path.string());
+            if (!err.empty()) {
+                log_warning("{}: {}", path.string(), err);
+            }
+            auto resource = obj->getResource(ResourceAttribute::RESOURCE_FILE, mval);
+            if (resource)
+                continue;
+
+            resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
             auto mimeType = std::get<1>(mime->getMimeType(path, fmt::format("image/{}", type)));
             if (!mimeType.empty()) {
                 resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-                auto [val, err] = f2i->convert(path.string());
-                if (!err.empty()) {
-                    log_warning("{}: {}", path.string(), err);
-                }
-                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, val);
+                resource->addAttribute(ResourceAttribute::RESOURCE_FILE, mval);
             }
             obj->addResource(resource);
         }
@@ -334,7 +345,15 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     for (auto&& path : pathList) {
         if (!path.empty()) {
             log_debug("Running subtitle handler on {} -> {}", obj->getLocation().c_str(), path.c_str());
-            auto resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, ResourcePurpose::Subtitle);
+            auto [mval, err] = f2i->convert(path.string());
+            if (!err.empty()) {
+                log_warning("{}: {}", path.string(), err);
+            }
+            auto resource = obj->getResource(ResourceAttribute::RESOURCE_FILE, mval);
+            if (resource)
+                continue;
+
+            resource = std::make_shared<CdsResource>(ContentHandler::SUBTITLE, ResourcePurpose::Subtitle);
             std::string type = path.extension().string().substr(1);
 
             auto mimeType = std::get<1>(mime->getMimeType(path, fmt::format("text/{}", type)));
@@ -344,10 +363,6 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             }
 
             resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimeType));
-            auto [mval, err] = f2i->convert(path.string());
-            if (!err.empty()) {
-                log_warning("{}: {}", path.string(), err);
-            }
             resource->addAttribute(ResourceAttribute::RESOURCE_FILE, mval);
             resource->addAttribute(ResourceAttribute::TYPE, type);
             auto lang = path.stem().string();
@@ -434,12 +449,16 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     for (auto&& path : pathList) {
         if (!path.empty() && toLower(path.string()) == toLower(obj->getLocation().string())) {
             log_debug("Running resource handler check on {} -> {}", obj->getLocation().string(), path.string());
-            auto resource = std::make_shared<CdsResource>(ContentHandler::RESOURCE, ResourcePurpose::Thumbnail);
-            resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("res"));
             auto [mval, err] = f2i->convert(path.string());
             if (!err.empty()) {
                 log_warning("{}: {}", path.string(), err);
             }
+            auto resource = obj->getResource(ResourceAttribute::RESOURCE_FILE, mval);
+            if (resource)
+                continue;
+
+            resource = std::make_shared<CdsResource>(ContentHandler::RESOURCE, ResourcePurpose::Thumbnail);
+            resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("res"));
             resource->addAttribute(ResourceAttribute::RESOURCE_FILE, mval);
             obj->addResource(resource);
         }

@@ -351,7 +351,7 @@
                     <add-data tag="PERFORMER" key="upnp:artist@role[Performer]"/>
                 </metadata>
             </id3>
-            <ffmpeg charset="UTF-8" enabled="yes">
+            <ffmpeg charset="UTF-8" enabled="yes" artwork-enabled="no">
                 <auxdata/>
                 <metadata>
                     <add-data tag="performer" key="upnp:artist@role[Performer]"/>

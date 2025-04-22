@@ -1745,7 +1745,7 @@ A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-    <ffmpeg> </ffmpeg>
+    <ffmpeg artwork-enabled="yes"> </ffmpeg>
 
 * Optional
 
@@ -1754,11 +1754,24 @@ These options apply to ffmpeg library.
 `This page <https://wiki.multimedia.cx/index.php?title=FFmpeg_Metadata>`__
 documents all of the metadata keys that FFmpeg honors, depending on the format being encoded.
 
+**Attributes:**
+
+``artwork-enabled``
+-------------------
+
+* Optional
+
+Create a separate resource for the artwork if detected by ffmpeg instead of merging
+the attributes into the existing thumbnail resource (e.g. created by taglib)
+
+* Default: **no**
+
+
 A sample configuration for the example described above would be:
 
 .. code-block:: xml
 
-    <ffmpeg>
+    <ffmpeg artwork-enabled="yes">
         <auxdata>
             <add-data tag="COLLECTION"/>
             <add-data tag="SHOW"/>

@@ -60,6 +60,7 @@
 #define CONTENT_TYPE_WMA "wma"
 
 #define MIME_TYPE_ASX_PLAYLIST "video/x-ms-asx"
+#define MIME_TYPE_SRT_SUBTITLE "application/x-srt"
 
 #define DC_DATE "dc:date"
 #define DC_TITLE "dc:title"

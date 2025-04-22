@@ -543,7 +543,14 @@ std::vector<int> Script::call(const std::shared_ptr<CdsObject>& obj,
 
 void Script::setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string& val) const
 {
-    if (sym == MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER) && item) {
+    if (sym == DC_TITLE)
+        obj->setTitle(val);
+
+    if (sym == UPNP_SEARCH_CLASS) {
+        obj->setClass(val);
+    } else if (sym == "mimetype" && item) {
+        item->setMimeType(val);
+    } else if (sym == MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER) && item) {
         int j = stoiString(val, 0);
         if (j > 0) {
             item->addMetaData(sym, val);

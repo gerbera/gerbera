@@ -364,6 +364,16 @@ public:
         return {};
     }
 
+    /// \brief Query resource attribute with the given value
+    std::shared_ptr<CdsResource> getResource(ResourceAttribute attrib, const std::string& value) const
+    {
+        auto it = std::find_if(resources.begin(), resources.end(), [=](auto&& res) { return value == res->getAttributeValue(attrib); });
+        if (it != resources.end()) {
+            return *it;
+        }
+        return {};
+    }
+
     /// \brief Add resource tag
     void addResource(const std::shared_ptr<CdsResource>& resource)
     {

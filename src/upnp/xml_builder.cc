@@ -304,7 +304,9 @@ void UpnpXMLBuilder::renderObject(
 {
     ConfigVal itemProps = ConfigVal::UPNP_TITLE_PROPERTIES;
     ConfigVal nsProp = ConfigVal::UPNP_TITLE_NAMESPACES;
-    const std::string upnpClass = obj->getClass();
+    std::string upnpClass = obj->getClass();
+    if (upnpClass.empty())
+        upnpClass = UPNP_CLASS_ITEM;
     if (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM)) {
         itemProps = ConfigVal::UPNP_ALBUM_PROPERTIES;
         nsProp = ConfigVal::UPNP_ALBUM_NAMESPACES;
@@ -449,7 +451,7 @@ void UpnpXMLBuilder::renderObject(
         auto playStatus = item->getPlayStatus();
         if (playStatus) {
             auxData[UPNP_SEARCH_PLAY_COUNT] = fmt::format("{}", playStatus->getPlayCount());
-            auxData[UPNP_SEARCH_LAST_PLAYED] = fmt::format("{:%Y-%m-%d T %H:%M:%S}", fmt::localtime(playStatus->getLastPlayed().count()));
+            auxData[UPNP_SEARCH_LAST_PLAYED] = fmt::format("{:%Y-%m-%dT%H:%M:%S}", fmt::localtime(playStatus->getLastPlayed().count()));
             auxData["upnp:lastPlaybackPosition"] = fmt::format("{}", millisecondsToHMSF(playStatus->getLastPlayedPosition().count()));
             propNames.push_back(addField(result, objFilter, UPNP_SEARCH_PLAY_COUNT, auxData[UPNP_SEARCH_PLAY_COUNT]));
             propNames.push_back(addField(result, objFilter, UPNP_SEARCH_LAST_PLAYED, auxData[UPNP_SEARCH_LAST_PLAYED]));
@@ -573,9 +575,14 @@ void UpnpXMLBuilder::renderResource(const CdsObject& object,
     }
 }
 
-std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsResource& res, const std::map<std::string, std::string>& mimeMappings, const std::string& clientGroup) const
+std::string UpnpXMLBuilder::renderResourceURL(
+    const CdsObject& item,
+    const CdsResource& res,
+    const std::map<std::string, std::string>& mimeMappings,
+    const std::string& clientGroup) const
 {
     std::string url;
+    auto purpose = res.getPurpose();
 
     if (item.isContainer()) {
         auto resFile = res.getAttribute(ResourceAttribute::RESOURCE_FILE);
@@ -608,7 +615,7 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
             url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(objID), URL_RESOURCE_ID, fmt::to_string(resID) });
         }
     } else if (item.isExternalItem()) {
-        if (res.getPurpose() == ResourcePurpose::Content) {
+        if (purpose == ResourcePurpose::Content) {
             // Remote URL is just passed straight out
             // FIXME: OBJECT_FLAG_PROXY_URL and location should be on the resource not the item!
             if (!item.getFlag(OBJECT_FLAG_PROXY_URL)) {
@@ -619,10 +626,10 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
             if (item.getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item.getFlag(OBJECT_FLAG_PROXY_URL)) {
                 url = virtualURL + URLUtils::joinUrl({ CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
             }
-        } else if (res.getPurpose() == ResourcePurpose::Transcode) {
+        } else if (purpose == ResourcePurpose::Transcode) {
             // Transcoded resources dont set a resId, uses pr_name from params instead.
             url = virtualURL + URLUtils::joinUrl({ CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, URL_VALUE_TRANSCODE_NO_RES_ID });
-        } else if (res.getPurpose() == ResourcePurpose::Thumbnail && res.getHandlerType() == ContentHandler::EXTURL && !item.getFlag(OBJECT_FLAG_PROXY_URL)) {
+        } else if (purpose == ResourcePurpose::Thumbnail && res.getHandlerType() == ContentHandler::EXTURL && !item.getFlag(OBJECT_FLAG_PROXY_URL)) {
             url = res.getAttribute(ResourceAttribute::RESOURCE_FILE);
             if (url.empty())
                 throw_std_runtime_error("Missing attribute thumbnail URL");
@@ -636,7 +643,7 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
 
     // Standard Resource
     if (url.empty()) {
-        if (res.getPurpose() == ResourcePurpose::Transcode) {
+        if (purpose == ResourcePurpose::Transcode) {
             // Transcoded resources dont set a resId, uses pr_name from params instead.
             url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, URL_VALUE_TRANSCODE_NO_RES_ID });
         } else {
@@ -652,7 +659,7 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
     }
 
     // Inject client group for content
-    if (!clientGroup.empty() && (res.getPurpose() == ResourcePurpose::Content || res.getPurpose() == ResourcePurpose::Transcode)) {
+    if (!clientGroup.empty() && (purpose == ResourcePurpose::Content || purpose == ResourcePurpose::Transcode)) {
         url.append(URLUtils::joinUrl({ CLIENT_GROUP_TAG, clientGroup }));
     }
 
@@ -663,7 +670,9 @@ std::string UpnpXMLBuilder::renderResourceURL(const CdsObject& item, const CdsRe
     if (ext.empty()) {
         auto mimeType = getMimeType(res, mimeMappings);
         auto contentType = getValueOrDefault(ctMappings, mimeType);
-        ext = renderExtension(contentType, res.getPurpose() == ResourcePurpose::Transcode ? "" : item.getLocation(), lang);
+        if (contentType.empty() && purpose == ResourcePurpose::Subtitle)
+            contentType = getValueOrDefault(ctMappings, MIME_TYPE_SRT_SUBTITLE, "sub");
+        ext = renderExtension(contentType, purpose == ResourcePurpose::Transcode ? "" : item.getLocation(), lang);
     }
     url.append(ext);
 
@@ -709,11 +718,16 @@ std::optional<std::string> UpnpXMLBuilder::renderSubtitleURL(const std::shared_p
     return {};
 }
 
-std::string UpnpXMLBuilder::renderExtension(const std::string& contentType, const fs::path& location, const std::string& language) const
+std::string UpnpXMLBuilder::renderExtension(
+    const std::string& contentType,
+    const fs::path& location,
+    const std::string& language) const
 {
     auto urlExt = URLUtils::joinUrl({ URL_FILE_EXTENSION, "file" });
 
     if (!contentType.empty() && (contentType != CONTENT_TYPE_PLAYLIST)) {
+        if (!language.empty())
+            return fmt::format("{}.{}.{}", urlExt, URLUtils::urlEscape(language), contentType);
         return fmt::format("{}.{}", urlExt, contentType);
     }
 
@@ -753,7 +767,7 @@ static const std::map<std::string_view, std::map<std::string_view, std::string_v
                             { RESOURCE_IMAGE_STEP_HD, UPNP_DLNA_PROFILE_JPEG_MED },
                             { RESOURCE_IMAGE_STEP_UHD, UPNP_DLNA_PROFILE_JPEG_LRG },
                             { RESOURCE_IMAGE_STEP_XHD, UPNP_DLNA_PROFILE_JPEG_LRG },
-                            { RESOURCE_IMAGE_STEP_DEF, UPNP_DLNA_PROFILE_JPEG_TN },
+                            { RESOURCE_IMAGE_STEP_DEF, UPNP_DLNA_PROFILE_JPEG_SM },
                         } },
     { CONTENT_TYPE_PNG, {
                             { RESOURCE_IMAGE_STEP_ICO, UPNP_DLNA_PROFILE_PNG_SM_ICO },
@@ -763,7 +777,7 @@ static const std::map<std::string_view, std::map<std::string_view, std::string_v
                             { RESOURCE_IMAGE_STEP_HD, UPNP_DLNA_PROFILE_PNG_MED },
                             { RESOURCE_IMAGE_STEP_UHD, UPNP_DLNA_PROFILE_PNG_LRG },
                             { RESOURCE_IMAGE_STEP_XHD, UPNP_DLNA_PROFILE_PNG_LRG },
-                            { RESOURCE_IMAGE_STEP_DEF, UPNP_DLNA_PROFILE_PNG_TN },
+                            { RESOURCE_IMAGE_STEP_DEF, UPNP_DLNA_PROFILE_PNG_SM },
                         } },
 };
 
@@ -777,10 +791,12 @@ std::string UpnpXMLBuilder::dlnaProfileString(
     if (profileList.find(contentType) != profileList.end()) {
         auto profiles = profileList.at(contentType);
         std::string resValue = res.getAttributeValue(ResourceAttribute::RESOLUTION);
-        dlnaProfile = profiles.at(RESOURCE_IMAGE_STEP_DEF);
-        if (res.getPurpose() == ResourcePurpose::Content && !resValue.empty()) {
-            if (profiles.find(resValue) != profiles.end())
+        if (res.getPurpose() == ResourcePurpose::Content) {
+            dlnaProfile = profiles.at(RESOURCE_IMAGE_STEP_DEF);
+            if (!resValue.empty() && profiles.find(resValue) != profiles.end())
                 dlnaProfile = profiles.at(resValue);
+        } else {
+            dlnaProfile = profiles.at(RESOURCE_IMAGE_STEP_TN);
         }
     }
     if (dlnaProfile.empty()) {

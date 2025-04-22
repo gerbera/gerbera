@@ -8,6 +8,7 @@ Sqlite backup is now enabled by default.
 
 - Support "natural" file sorting for numbers in file names
 - Support transliteration of device output
+- Extract multiple stream information in ffmpeg handler including embedded subtitles
 
 ### FIXES
 
