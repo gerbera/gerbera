@@ -903,7 +903,7 @@ Adding Items
 
 We will first look at a helper function:
 
-.. js:function:: addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result) {
+.. js:function:: addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result)
 
 It is defined in common.js, it receives the title, the location (path on disk or HTTP URL), the entry itself and the desired
 position of the item in the database layout (remember the container chains used in the import script).
@@ -962,7 +962,7 @@ Prerequisits
 Create a transcoder-script
 --------------------------
 
-::
+.. code-block:: sh
 
   #!/bin/bash
   # flac2wav.sh transcoding script to play a range from a flac file.
@@ -1006,7 +1006,7 @@ Modify Your Import Scripts
 
 Add following code to the playlists.js script inside the if-statement.
 
-::
+.. code-block:: js
 
   else if (type == 'cue')
   {
@@ -1134,7 +1134,7 @@ Add following code to the playlists.js script inside the if-statement.
 
 And add a function createSubItem to playlists.js:
 
-::
+.. code-block:: js
 
   function createSubItem(thisFileName, thisGenre, thisDate, thisDiscArtist,
        thisDiscTitle, thisArtist, thisTitle, thisTrackIdx, thisStart, thisStop)
@@ -1198,7 +1198,7 @@ You see that we create for each track a external link object with a mime type "a
 
 In my case the JavaScipt-funtion btoa was not included in the runtime environment so we add our own btoa() to common.js.
 
-::
+.. code-block:: js
 
   var Base64 = new function() {
     var keyStr = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/="
@@ -1302,7 +1302,7 @@ In my case the JavaScipt-funtion btoa was not included in the runtime environmen
 
 Inside the function addAudio(obj) insert following code according to your virtual layout:
 
-::
+.. code-block:: js
 
   if (obj.objectType == OBJECT_TYPE_ITEM_EXTERNAL_URL) {
     chain = new Array('CD Images', artist, album);
@@ -1319,7 +1319,7 @@ Edit Your config.xml
 
 In the config.xml you must tell gerbera to treat cue-files as a playlist. Make sure that <playlist-script> is set correctly:
 
-::
+.. code-block:: xml
 
   <mappings>
     ...
@@ -1339,7 +1339,7 @@ In the config.xml you must tell gerbera to treat cue-files as a playlist. Make s
 
 Enable transcoding and set the correct path to the transcoding script.
 
-::
+.. code-block:: xml
 
   <transcoding enabled="yes">
     <mimetype-profile-mappings>

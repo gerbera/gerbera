@@ -5,6 +5,7 @@ DOC_BUILD_DIR=$PWD/_build
 DOC_DIST_DIR=$DOC_BUILD_DIR/dist
 VENV_NAME=gerbera-env
 SPHINX_THEME=sphinx_rtd_theme
+SPHINX_THEME2=sphinx_rtd_dark_mode
 SPHINX_BUILDER=html
 CLOBBER=$1
 
@@ -31,7 +32,7 @@ function setup {
     if [ ! -d "$DOC_BUILD_DIR/$VENV_NAME" ]
     then
       printf "\nCreating Gerbera Python virtualenv\n\n"
-      python3.11 -m virtualenv $VENV_NAME
+      python3.12 -m virtualenv $VENV_NAME
     fi
 
     source $VENV_NAME/bin/activate
@@ -39,7 +40,7 @@ function setup {
 
 function install {
     printf "\nInstalling Sphinx document generator with $SPHINX_THEME theme\n\n"
-    pip3.11 install Sphinx $SPHINX_THEME
+    pip3.12 install Sphinx $SPHINX_THEME $SPHINX_THEME2
 }
 
 function build {

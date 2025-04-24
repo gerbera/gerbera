@@ -1,5 +1,9 @@
 @import url('https://fonts.googleapis.com/css?family=Lato');
 
+:root {
+  --dark-link-color: #ff7f00 !important;
+}
+
 body {
     font-family: 'Lato', sans-serif;
 }
@@ -22,8 +26,12 @@ a {
     background-color: #ff7f00;
 }
 
-.wy-side-nav-search {
+html[data-theme="light"] .wy-side-nav-search {
     background-color: #ff7f00;
+}
+
+html[data-theme="dark"] .wy-side-nav-search {
+    background-color: #ff7f00 !important;
 }
 
 .wy-side-nav-search > div.version {
@@ -38,7 +46,25 @@ a {
     background-color: #ff7f00;
 }
 
-.rst-content dl:not(.docutils) dt {
+html[data-theme="light"] .rst-content dl:not(.docutils) dt {
     background: #faf4ec;
     border-top: solid 3px #ff7f00;
+}
+
+html[data-theme="dark"] .rst-content dl:not(.docutils) dt {
+    background: #0d0d0d;
+    border-top: solid 3px #ff7f00;
+}
+
+html[data-theme="dark"] .descclassname,
+html[data-theme="dark"] .descname {
+    background: #0d0d0d !important;
+    color: #ff7f00 !important;
+}
+
+html[data-theme="light"] .only-dark {
+   display: none;
+}
+html[data-theme="dark"] .only-light {
+   display: none;
 }

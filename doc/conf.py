@@ -25,12 +25,14 @@
 
 # If your documentation needs a minimal Sphinx version, state it here.
 #
-needs_sphinx = '6.2'
+needs_sphinx = '8.2'
 
 # Add any Sphinx extension module names here, as strings. They can be
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
-extensions = []
+extensions = [
+    "sphinx_rtd_dark_mode"
+]
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -39,7 +41,7 @@ templates_path = ['_templates']
 # You can specify multiple suffix as a list of string:
 #
 # source_suffix = ['.rst', '.md']
-source_suffix = '.rst'
+source_suffix = {'.rst': 'restructuredtext'}
 
 # The master toctree document.
 master_doc = 'index'
@@ -91,12 +93,28 @@ html_theme = 'sphinx_rtd_theme'
 # Theme options
 html_theme_options = {
     # 'typekit_id': 'hiw1hhg',
-    # 'analytics_id': '',
-    # 'sticky_navigation': True  # Set to False to disable the sticky nav while scrolling.
+    # 'analytics_id': 'G-XXXXXXXXXX',  #  Provided by Google in your dashboard
+    # 'analytics_anonymize_ip': False,
     'logo_only': True,  # if we have a html_logo below, this shows /only/ the logo with no title text
+    # 'prev_next_buttons_location': 'bottom',
+    # 'style_external_links': False,
+    # 'vcs_pageview_mode': '',
+    # 'style_nav_header_background': 'white', # background of the search area in the navigation bar
+    # 'flyout_display': 'hidden', # how to display the flyout (language and version selector)
+    'version_selector': False, # version selector below the title. This feature makes usage of Read the Docs Addons
+    'language_selector': False, # language selector below the title. This feature makes usage of Read the Docs Addons
+
+    # Toc options
+    # 'collapse_navigation': True, #  navigation entries are not expandable – the [+] icons next to each entry are removed
+    # 'sticky_navigation': True  # Set to False to disable the sticky nav while scrolling.
     # 'collapse_navigation': False,  # Collapse navigation (False makes it tree-like)
-    # 'display_version': True,  # Display the docs version
     'navigation_depth': 5,  # Depth of the headers shown in the navigation bar
+    # 'includehidden': True, # navigation includes :hidden: toc entries
+    # 'titles_only': False #  page subheadings are not included in the navigation.
+}
+
+html_context = {
+   "default_mode": "auto" # dark and light mode selection
 }
 
 # Add any paths that contain custom static files (such as style sheets) here,
@@ -104,6 +122,9 @@ html_theme_options = {
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
 
+html_css_files = [
+    'css/custom.css',
+]
 
 html_logo = '_static/gerbera-logo-white.png'
 
@@ -164,5 +185,3 @@ texinfo_documents = [
      'Miscellaneous'),
 ]
 
-def setup(app):
-    app.add_css_file('css/custom.css')

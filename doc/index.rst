@@ -1,6 +1,12 @@
 .. image:: _static/gerbera-logo.png
-   :alt: Gerbera Media Server Logo
-   :target: .
+    :class: only-light
+    :alt: Gerbera Media Server Logo
+    :target: .
+
+.. image:: _static/gerbera-logo-light.png
+    :class: only-dark
+    :alt: Gerbera Media Server Logo
+    :target: .
 
 ~~~~
 

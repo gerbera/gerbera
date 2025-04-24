@@ -17,6 +17,7 @@
 - Tweak for old Samsung TV
 - Update NPUPnP
 - Update spdlog to 1.15.2
+- Upgrade documentation build environment
 - Use JsonCpp for web JSON output
 
 ### v2.5.0
