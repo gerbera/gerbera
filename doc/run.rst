@@ -76,7 +76,7 @@ Apache
 
 * Enable Apache modules
 
-::
+.. code-block:: sh
 
     $ sudo a2enmod proxy proxy_http ssl
 
@@ -126,7 +126,7 @@ the appropriate permissions. Note that user names and passwords in MySQL have no
 MySQL has it's own user names/passwords. Connect to the MySQL database as ”root” or any other user with the
 appropriate permissions:
 
-::
+.. code-block:: sh
 
     $ mysql [-u <username>] [-p]
 
@@ -134,7 +134,7 @@ appropriate permissions:
 
 Create a new database for Gerbera: (substitute ”<database name>” with the name of the database)
 
-::
+.. code:: sql
 
     mysql> CREATE DATABASE <database name>;
 
@@ -142,7 +142,7 @@ Create a new database for Gerbera: (substitute ”<database name>” with the na
 
 Give Gerbera the permissions to access the database:
 
-::
+.. code:: sql
 
     mysql> GRANT ALL ON <database name>.*
            TO '<user name>'@'<hostname>'
@@ -154,7 +154,7 @@ with Gerbera directly, but this is not recommended.
 To create a database and a user named **gerbera** (who is only able to connect via ``localhost``) without a
 password (the defaults) use:
 
-::
+.. code:: sql
 
     mysql> CREATE DATABASE gerbera;
     mysql> GRANT ALL ON gerbera.* TO 'gerbera'@'localhost';
@@ -165,7 +165,7 @@ However, this is not recommended.
 
 If database auto creation was not compiled in you have to create the tables manually:
 
-::
+.. code-block:: sh
 
     $ mysql [-u <username>] [-p] \
       <database name> < \
@@ -182,7 +182,7 @@ Command Line Options
 There is a number of options that can be passed via command line upon server start up, for a short summary you can
 invoke Gerbera with the following parameter:
 
-::
+.. code-block:: sh
 
     $ gerbera --help
 

@@ -153,7 +153,7 @@ Additional cmake Options
 Quick Start Build
 ~~~~~~~~~~~~~~~~~
 
-::
+.. code-block:: sh
 
   git clone https://github.com/gerbera/gerbera.git
   mkdir build
@@ -164,7 +164,7 @@ Quick Start Build
   sudo make install
 
 If you want to have the same build as the official release:
-::
+.. code-block:: sh
 
   git clone https://github.com/gerbera/gerbera.git
   mkdir build
@@ -175,7 +175,7 @@ If you want to have the same build as the official release:
 
 
 Alternatively, the options can be set using a GUI (make sure to press "c" to configure after toggling settings in the GUI):
-::
+.. code-block:: sh
 
   git clone https://github.com/gerbera/gerbera.git
   mkdir build
@@ -200,7 +200,7 @@ Please read more :ref:`here <gerbera-conan>`.
 Build On Ubuntu 16.04
 ~~~~~~~~~~~~~~~~~~~~~
 
-::
+.. code-block:: sh
 
   apt-get install uuid-dev libsqlite3-dev libmysqlclient-dev \
   libmagic-dev libexif-dev libcurl4-openssl-dev libspdlog-dev libpugixml-dev
@@ -220,7 +220,7 @@ Build On Ubuntu 18.04
 
 To build gerbera on Ubuntu 18.04 you have to install a newer version of the gcc++ compiler and clang++:
 
-::
+.. code-block:: sh
 
   sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
   sudo apt update
@@ -241,7 +241,7 @@ To build gerbera on Ubuntu 18.04 you have to install a newer version of the gcc+
   sudo update-alternatives --set cc /usr/bin/clang
   sudo update-alternatives --set c++ /usr/bin/clang++
 
-::
+.. code-block:: sh
 
   git clone https://github.com/Kitware/CMake
   cd CMake
@@ -254,7 +254,7 @@ To build gerbera on Ubuntu 18.04 you have to install a newer version of the gcc+
 Install all libraries gerbera needs. Because they are to old libupnp, libfmt must be
 build and installed from the source:
 
-::
+.. code-block:: sh
 
   sudo apt install -y uuid-dev libsqlite3-dev libmysqlclient-dev libmagic-dev \
   libexif-dev libcurl4-openssl-dev libspdlog-dev libpugixml-dev libavutil-dev \
@@ -266,7 +266,7 @@ build and installed from the source:
 Build and install libupnp with the ``--enable-ipv6``, ``--enable-reuseaddr`` and ``--disable-blocking-tcp-connections``
 options and libfmt from source
 
-::
+.. code-block:: sh
 
   wget "https://github.com/pupnp/pupnp/releases/download/release-1.14.19/libupnp-1.14.19.tar.bz2" -O libupnp-1.14.19.tar.bz2
   tar -xf libupnp-1.14.19.tar.bz2
@@ -285,7 +285,7 @@ options and libfmt from source
 
 It is strongly recommended to to rebuild spdlog without bundled fmt:
 
-::
+.. code-block:: sh
 
   git clone https://github.com/gabime/spdlog
   cd spdlog
@@ -332,13 +332,13 @@ This guide is based on building Gerbera on Pogo Kirkwood Armel architecture boxe
 
 5. Clone the Gerbera git and edit the CMakeLists.txt file and comment the original version and add the new.
 
-::
+.. code-block:: sh
 
   # set(GERBERA_VERSION "git")
   set(GERBERA_VERSION "1.6.4-185-gae283931+d")
 
 and add these lines to make the debian package
-::
+.. code-block:: sh
 
   SET(CPACK_GENERATOR "DEB")
   SET(CPACK_DEBIAN_PACKAGE_MAINTAINER "KK")
@@ -347,7 +347,7 @@ and add these lines to make the debian package
 
 6. This is the Cmake command:
 
-::
+.. code-block:: sh
 
   cmake -g DEB ../gerbera -DWITH_NPUPNP=YES -DWITH_JS=1 -DWITH_MYSQL=1 -DWITH_CURL=1 -DWITH_TAGLIB=1 -DWITH_MAGIC=1 -DWITH_MATROSKA=0 -DWITH_AVCODEC=1 -DWITH_EXIF=1 -DWITH_EXIV2=0 -DWITH_LASTFM=0 -DWITH_FFMPEGTHUMBNAILER=1 -DWITH_INOTIFY=1
 
@@ -359,24 +359,24 @@ Resolve any dependency issues now!
 
 9. follow the gerbera manual for installation. Create the gerbera user (give the user a home directory e.g. /home/gerbera). Make the /etc/gerbera folder and get the config.xml. Symbolic link the config file:
 
-::
+.. code-block:: sh
 
   ln -s /etc/gerbera/config.xml /home/gerbera/.config/gerbera
 
 Symbolic link the web directory:
-::
+.. code-block:: sh
 
   ln -s /usr/share/gerbera /usr/local/share
 
 10. Edit ``config.xml`` and change the path to
 
-::
+.. code-block:: sh
 
   <home>/home/gerbera/.config/gerbera</home>
 
 11. Start gerbera with the standard launch command. The server should start - watch the messages for errors. Check the web interface functions too. when happy that all is good - control-c to get back to shell
 
-::
+.. code-block:: sh
 
   gerbera -c /etc/gerbera/config.xml
 
@@ -390,7 +390,7 @@ Symbolic link the web directory:
 
 14. You need to put your new gerbera package on hold to prevent apt-get upgrade downgrading back to 1.1
 
-::
+.. code-block:: sh
 
   apt-mark hold gerbera
 
@@ -407,7 +407,7 @@ Build On FreeBSD
 1. Install the required :ref:`prerequisites <gerbera-requirements>` as root using either ports or packages. This can be done via Package manager or ports.
 (pkg manager is used here.)  Include mysql if you wish to use that instead of SQLite3.
 
-::
+.. code-block:: sh
 
   pkg install wget git autoconf automake libtool taglib cmake gcc libav ffmpeg \
   libexif pkgconf liblastfm gmake
@@ -415,7 +415,7 @@ Build On FreeBSD
 
 2. Clone repository, build depdences in current in ports and then build gerbera.
 
-::
+.. code-block:: sh
 
   git clone https://github.com/gerbera/gerbera.git
   mkdir build
@@ -447,17 +447,17 @@ Build Docker Container On Ubuntu
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Install required tools in Ubuntu
-::
+.. code-block:: sh
 
   sudo apt-get install docker.io git
 
 Simplest way of building:
-::
+.. code-block:: sh
 
   sudo docker build https://github.com/gerbera/gerbera.git
 
 After successfull build you should get something like
-::
+.. code-block:: sh
 
   Successfully built a13ccc793373
 
@@ -466,7 +466,7 @@ documentation while replacing "gerbera/gerbera:vX.X.X" with the unique ID report
 
 To change the compile options of Gerbera split up the process.
 Download the project:
-::
+.. code-block:: sh
 
   git clone https://github.com/gerbera/gerbera.git
 
@@ -474,7 +474,7 @@ Then modify the compile parameter values in gerbera/Dockerfile. Also additional 
 E.g. to build a container with exiv2 support add the compile option "-DWITH_EXIV2=YES" and the library
 "exiv2-dev" in the first "RUN apk" command and "exiv2" in the second "RUN apk" command in the gerbera/Dockerfile.
 To start the build enter
-::
+.. code-block:: sh
 
   sudo docker build gerbera/
 
@@ -497,7 +497,7 @@ First Steps
 
 2. Clone your fork:
 
-::
+.. code-block:: sh
 
     git clone git@github.com:your-username/gerbera.git
 
