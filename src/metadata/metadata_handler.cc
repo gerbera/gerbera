@@ -83,7 +83,10 @@ bool MediaMetadataHandler::isValidArtworkContentType(std::string_view artMimetyp
     return artMimetype.find('/') != std::string_view::npos;
 }
 
-void MediaMetadataHandler::addArtworkResource(const std::shared_ptr<CdsItem>& item, ContentHandler ch, const std::string& artMimetype)
+std::shared_ptr<CdsResource> MediaMetadataHandler::addArtworkResource(
+    const std::shared_ptr<CdsItem>& item,
+    ContentHandler ch,
+    const std::string& artMimetype)
 {
     // if we could not determine the mimetype, then there is no
     // point to add the resource - it's probably garbage
@@ -93,5 +96,7 @@ void MediaMetadataHandler::addArtworkResource(const std::shared_ptr<CdsItem>& it
         auto resource = std::make_shared<CdsResource>(ch, ResourcePurpose::Thumbnail);
         resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
         item->addResource(resource);
+        return resource;
     }
+    return {};
 }

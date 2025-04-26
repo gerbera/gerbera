@@ -641,7 +641,9 @@ void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr
             artMimetype = getContentTypeFromByteVector(pic);
         }
 
-        addArtworkResource(item, ContentHandler::ID3, artMimetype);
+        auto resource = addArtworkResource(item, ContentHandler::ID3, artMimetype);
+        if (resource)
+            resource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(pic.size()));
     }
 }
 

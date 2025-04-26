@@ -359,18 +359,21 @@ static double get_rotation(const std::int32_t* displaymatrix)
 }
 
 /// \brief Extract Artwork from media file
-static std::vector<std::uint8_t> extractArtImage(const FfmpegObject& ffmpegObject)
+static std::vector<std::uint8_t> extractArtImage(
+    const FfmpegObject& ffmpegObject,
+    std::size_t imageStreamIndex)
 {
     log_debug("start");
     if (!ffmpegObject) {
         return {};
     }
 
+    av_seek_frame(ffmpegObject.pFormatCtx, imageStreamIndex, 0, 0);
     AVStream* audioStream = nullptr;
     // Find Audio Stream with attaced picture
-    for (unsigned int i = 0; i < ffmpegObject.pFormatCtx->nb_streams; i++) {
-        if (ffmpegObject.pFormatCtx->streams[i]->disposition & AV_DISPOSITION_ATTACHED_PIC) { // implies codec_type == AVMEDIA_TYPE_AUDIO
-            audioStream = ffmpegObject.pFormatCtx->streams[i];
+    for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
+        if ((ffmpegObject.pFormatCtx->streams[stream_number]->disposition & AV_DISPOSITION_ATTACHED_PIC) && stream_number == imageStreamIndex) { // implies codec_type == AVMEDIA_TYPE_AUDIO
+            audioStream = ffmpegObject.pFormatCtx->streams[stream_number];
             break;
         }
     }
@@ -399,35 +402,34 @@ static std::vector<std::uint8_t> extractArtImage(const FfmpegObject& ffmpegObjec
 }
 
 /// \brief Extract Subtitle from media file
-static std::vector<std::uint8_t> extractSubtitle(const FfmpegObject& ffmpegObject)
+static std::vector<std::uint8_t> extractSubtitle(
+    const FfmpegObject& ffmpegObject,
+    long long subtitleStreamIndex)
 {
     log_debug("start");
     if (!ffmpegObject) {
         return {};
     }
 
-    // Find Subtitle Stream
-    int subtitleStreamIndex = -1;
-    for (unsigned int i = 0; i < ffmpegObject.pFormatCtx->nb_streams; ++i) {
-        if (as_codecpar(ffmpegObject.pFormatCtx->streams[i])->codec_type == AVMEDIA_TYPE_SUBTITLE) {
-            subtitleStreamIndex = i;
-            break;
-        }
-    }
     AVPacket* packet = av_packet_alloc();
     if (!packet) {
         log_debug("Could not allocate packet");
         return {};
     }
 
+    av_seek_frame(ffmpegObject.pFormatCtx, subtitleStreamIndex, 0, 0);
+
+    std::vector<std::uint8_t> result;
     // Store subtitle packets
     while (av_read_frame(ffmpegObject.pFormatCtx, packet) >= 0) {
         if (packet->stream_index == subtitleStreamIndex) {
-            return std::vector<uint8_t>(packet->data, packet->data + packet->size);
+            auto chunk = std::vector<uint8_t>(packet->data, packet->data + packet->size);
+            result.reserve(result.size() + chunk.size());
+            result.insert(result.end(), chunk.begin(), chunk.end());
         }
         av_packet_unref(packet);
     }
-    return {};
+    return result;
 }
 
 /// \brief extract orientation from stream
@@ -519,8 +521,8 @@ void FfmpegHandler::addFfmpegResourceFields(
     // video resolution, audio sampling rate, nr of audio channels
     int audioSet = 0;
     int videoSet = artWorkEnabled && isAudioFile ? 1 : 0;
-    for (std::size_t i = 0; i < ffmpegObject.pFormatCtx->nb_streams; i++) {
-        auto st = ffmpegObject.pFormatCtx->streams[i];
+    for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
+        auto st = ffmpegObject.pFormatCtx->streams[stream_number];
 
         if (!st)
             continue;
@@ -534,7 +536,7 @@ void FfmpegHandler::addFfmpegResourceFields(
 
             if (videoSet == 1 && artWorkEnabled && isAudioFile) {
                 // use ffmpeg to get artwork
-                auto image = extractArtImage(ffmpegObject);
+                auto image = extractArtImage(ffmpegObject, stream_number);
                 if (!image.empty()) {
                     auto artMimetype = getContentTypeFromByteVector(image);
                     log_debug("art {} {}", image.size(), artMimetype);
@@ -542,6 +544,7 @@ void FfmpegHandler::addFfmpegResourceFields(
                         resource2->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
                     }
                 }
+                resource2->addAttribute(ResourceAttribute::SIZE, fmt::to_string(image.size()));
             }
             // orientation
             resource2->addAttribute(ResourceAttribute::ORIENTATION, fmt::format("{}", getOrientation(st)));
@@ -559,7 +562,7 @@ void FfmpegHandler::addFfmpegResourceFields(
                 fourcc[3] = as_codecpar(st)->codec_tag >> 24;
                 fourcc[4] = '\0';
 
-                log_debug("FourCC: 0x{:x} = {} from stream {}", as_codecpar(st)->codec_tag, fourcc, i);
+                log_debug("FourCC: 0x{:x} = {} from stream {}", as_codecpar(st)->codec_tag, fourcc, stream_number);
                 std::string fcc = fourcc;
                 if (!fcc.empty())
                     resource->addOption(RESOURCE_OPTION_FOURCC, fcc);
@@ -569,7 +572,7 @@ void FfmpegHandler::addFfmpegResourceFields(
             if (as_codecpar(st)->width > 0 && as_codecpar(st)->height > 0) {
                 auto resolution = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
 
-                log_debug("Added resolution: {} pixel from stream {}", resolution, i);
+                log_debug("Added resolution: {} pixel from stream {}", resolution, stream_number);
                 resource2->addAttribute(ResourceAttribute::RESOLUTION, resolution);
                 videoSet++;
             }
@@ -596,7 +599,7 @@ void FfmpegHandler::addFfmpegResourceFields(
             auto codecId = as_codecpar(st)->codec_id;
             stResource->addAttribute(ResourceAttribute::TYPE, avcodec_get_name(codecId));
 
-            auto subtitle = extractSubtitle(ffmpegObject);
+            auto subtitle = extractSubtitle(ffmpegObject, stream_number);
             if (!subtitle.empty()) {
                 auto subMimetype = getContentTypeFromByteVector(subtitle);
                 log_debug("subtitle {} {}", subtitle.size(), subMimetype);
@@ -609,18 +612,21 @@ void FfmpegHandler::addFfmpegResourceFields(
             if (lang && lang->value) {
                 log_debug("Subtitle Language: {}", lang->value);
                 stResource->addAttribute(ResourceAttribute::LANGUAGE, lang->value);
+            } else {
+                stResource->addAttribute(ResourceAttribute::LANGUAGE, fmt::to_string(stream_number));
             }
 
             if (as_codecpar(st)->extradata && as_codecpar(st)->extradata_size > 0) {
                 log_debug("Subtitle Size: {}", as_codecpar(st)->extradata_size);
                 stResource->addAttribute(ResourceAttribute::SIZE, fmt::format("{}", as_codecpar(st)->extradata_size));
-            }
+            } else
+                stResource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(subtitle.size()));
             break;
         }
         case AVMEDIA_TYPE_DATA: // Opaque data information usually continuous.
         case AVMEDIA_TYPE_ATTACHMENT: // Opaque data information usually sparse.
         case AVMEDIA_TYPE_NB:
-            log_debug("media type {}: {}", i, as_codecpar(st)->codec_type);
+            log_debug("media type {}: {}", stream_number, as_codecpar(st)->codec_type);
             break;
         case AVMEDIA_TYPE_AUDIO: {
             if (audioSet > 0) {
@@ -650,7 +656,7 @@ void FfmpegHandler::addFfmpegResourceFields(
                     }
                 }
 
-                log_debug("Added sample frequency: {} Hz from stream {}", sampleFreq, i);
+                log_debug("Added sample frequency: {} Hz from stream {}", sampleFreq, stream_number);
                 resource->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, fmt::to_string(sampleFreq));
                 audioSet++;
             }
@@ -661,7 +667,7 @@ void FfmpegHandler::addFfmpegResourceFields(
             int audioCh = as_codecpar(st)->ch_layout.nb_channels;
 #endif
             if (audioCh > 0) {
-                log_debug("Added number of audio channels: {} from stream {}", audioCh, i);
+                log_debug("Added number of audio channels: {} from stream {}", audioCh, stream_number);
                 resource->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(audioCh));
             }
             break;
@@ -705,15 +711,48 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(
 
     if (resource->getPurpose() == ResourcePurpose::Thumbnail) {
         FfmpegObject ffmpegObject(converterManager, item);
-        auto image = extractArtImage(ffmpegObject);
-        if (!image.empty())
-            return std::make_unique<MemIOHandler>(image.data(), image.size());
+        auto resolution = resource->getAttribute(ResourceAttribute::RESOLUTION);
+        for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
+            auto st = ffmpegObject.pFormatCtx->streams[stream_number];
+
+            if (!st)
+                continue;
+
+            if (as_codecpar(st)->width > 0 && as_codecpar(st)->height > 0) {
+                auto res = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
+                if (res != resolution)
+                    continue;
+                auto image = extractArtImage(ffmpegObject, stream_number);
+                if (!image.empty()) {
+                    return std::make_unique<MemIOHandler>(image.data(), image.size());
+                }
+            }
+        }
     }
     if (resource->getPurpose() == ResourcePurpose::Subtitle) {
         FfmpegObject ffmpegObject(converterManager, item);
-        auto subtitle = extractSubtitle(ffmpegObject);
-        if (!subtitle.empty())
-            return std::make_unique<MemIOHandler>(subtitle.data(), subtitle.size());
+        auto language = resource->getAttribute(ResourceAttribute::LANGUAGE);
+        for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
+            auto st = ffmpegObject.pFormatCtx->streams[stream_number];
+
+            if (!st)
+                continue;
+
+            AVDictionaryEntry* langEntry = av_dict_get(st->metadata, "language", nullptr, 0);
+            std::string lang = (langEntry && langEntry->value) ? langEntry->value : fmt::to_string(stream_number);
+
+            if (language == lang) {
+                auto subtitle = extractSubtitle(ffmpegObject, stream_number);
+                if (!subtitle.empty()) {
+                    auto subString = std::string(reinterpret_cast<const char*>(subtitle.data()), subtitle.size());
+                    auto [val, err] = ffmpegObject.sc->convert(subString);
+                    if (!err.empty()) {
+                        log_warning("{} {}: {}", ffmpegObject.location, subString, err);
+                    }
+                    return std::make_unique<MemIOHandler>(val);
+                }
+            }
+        }
     }
     return nullptr;
 }
