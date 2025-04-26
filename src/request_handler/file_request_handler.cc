@@ -137,20 +137,26 @@ bool FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         if (mimeType.empty()) {
             mimeType = metadataHandler->getMimeType();
         }
+        if (startswith(mimeType, "text"))
+            mimeType = fmt::format("{}; charset=utf-8", mimeType);
 
-        auto ioHandler = metadataHandler->serveContent(obj, resource);
-
-        if (ioHandler) {
-            // Get size
-            ioHandler->open(UPNP_READ);
-            ioHandler->seek(0L, SEEK_END);
-            off_t size = ioHandler->tell();
-            ioHandler->close();
-            UpnpFileInfo_set_FileLength(info, size);
+        auto resSize = resource->getAttribute(ResourceAttribute::SIZE);
+        if (!resSize.empty()) {
+            UpnpFileInfo_set_FileLength(info, stoiString(resSize));
         } else {
-            UpnpFileInfo_set_FileLength(info, 0);
-        }
+            auto ioHandler = metadataHandler->serveContent(obj, resource);
 
+            if (ioHandler) {
+                // Get size
+                ioHandler->open(UPNP_READ);
+                ioHandler->seek(0L, SEEK_END);
+                off_t size = ioHandler->tell();
+                ioHandler->close();
+                UpnpFileInfo_set_FileLength(info, size);
+            } else {
+                UpnpFileInfo_set_FileLength(info, 0);
+            }
+        }
     } else if (!isResourceFile && !trProfile.empty()) {
 
         auto transcodingProfile = config->getTranscodingProfileListOption(ConfigVal::TRANSCODING_PROFILE_LIST)->getByName(trProfile);

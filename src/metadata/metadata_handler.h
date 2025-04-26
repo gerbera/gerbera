@@ -100,7 +100,7 @@ protected:
     /// \brief check mimetype validity
     static bool isValidArtworkContentType(std::string_view artMimetype);
     /// \brief create resource to store artwork image information
-    static void addArtworkResource(
+    static std::shared_ptr<CdsResource> addArtworkResource(
         const std::shared_ptr<CdsItem>& item,
         ContentHandler ch,
         const std::string& artMimetype);
