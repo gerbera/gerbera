@@ -22,8 +22,9 @@ a {
     }
 }
 
+html[data-theme="light"] .wy-nav-top,
 .wy-nav-top {
-    background-color: #ff7f00;
+    background-color: #ff7f00 !important;
 }
 
 html[data-theme="light"] .wy-side-nav-search {

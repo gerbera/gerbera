@@ -2313,6 +2313,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     if (maybeEmpty.upnp.empty() && maybeEmpty.ui.empty())
         return changedContainers;
 
+    // Create temporary mapper
     constexpr const char* folAlias = "fol";
     constexpr const char* cldAlias = "cld";
     static const std::map<BrowseColumn, SearchProperty> purgeColMap {
@@ -2331,6 +2332,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         pcm.mapQuoted(BrowseColumn::ParentId),
         pcm.mapQuoted(BrowseColumn::Flags),
     };
+    // prepare select statement
     std::string selectSql = fmt::format("SELECT {0} FROM {1} {2} LEFT JOIN {1} {3} ON {4} = {5} WHERE {6} AND {4}",
         fmt::join(fields, ","),
         pcm.getTableName(),
@@ -2340,7 +2342,6 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         pcm.getClause(BrowseColumn::ObjectType, quote(OBJECT_TYPE_CONTAINER)));
 
     std::vector<std::int32_t> del;
-
     std::unique_ptr<SQLRow> row;
 
     auto selUi = std::vector(maybeEmpty.ui);
@@ -2351,6 +2352,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     do {
         again = false;
 
+        // find deletable containers for upnp
         if (!selUpnp.empty()) {
             auto sql = fmt::format("{} IN ({}) GROUP BY {}", selectSql, fmt::join(selUpnp, ","), pcm.mapQuoted(BrowseColumn::Id));
             log_debug("upnp-sql: {}", sql);
@@ -2371,6 +2373,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             }
         }
 
+        // find deletable containers from ui
         if (!selUi.empty()) {
             auto sql = fmt::format("{} IN ({}) GROUP BY {}", selectSql, fmt::join(selUi, ","), pcm.mapQuoted(BrowseColumn::Id));
             log_debug("ui-sql: {}", sql);
@@ -2392,6 +2395,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             }
         }
 
+        // delete everything
         log_vdebug("selecting: {}; removing: {}", selectSql, fmt::join(del, ","));
         if (!del.empty()) {
             _removeObjects(del);
@@ -2403,6 +2407,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             throw DatabaseException("there seems to be an infinite loop...", LINE_MESSAGE);
     } while (again);
 
+    // get list of updated containers
     auto& changedUi = changedContainers->ui;
     auto& changedUpnp = changedContainers->upnp;
     if (!selUi.empty()) {
