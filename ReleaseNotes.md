@@ -19,7 +19,7 @@ Sqlite backup is now enabled by default.
 - Use JsonCpp to generate responses in web request handlers
 - Sql database code uses enum properties instead of column names
 - Upgrade documentation build environment to sphinx 8.2 with python 3.12
-- Update versions of npupnp (6.2.1), spdlog (1.15.2)
+- Update versions of npupnp (6.2.1), spdlog (1.15.2), googletest (1.17.0)
 
 ## v2.5.0
 
