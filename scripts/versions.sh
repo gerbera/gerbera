@@ -63,7 +63,7 @@ else
     EXIV2="v0.28.5"
     EXIF="v0.6.25"
     FFMPEGTHUMBNAILER="2.2.3"
-    FMT="11.1.4"
+    FMT="11.2.0"
     GOOGLETEST="1.17.0"
     LASTFM="0.4.0"
     MATROSKA="1.7.1"
