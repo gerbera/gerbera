@@ -16,6 +16,7 @@
 - Reorganise installation scripts
 - Support "natural" file sorting
 - Tweak for old Samsung TV
+- Update fmtlib to 11.2.0
 - Update googletest to 1.17.0
 - Update NPUPnP
 - Update spdlog to 1.15.2
