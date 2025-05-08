@@ -314,8 +314,10 @@
     <visible-directories></visible-directories>
     <resources case-sensitive="yes">
       <order></order>
-      <fanart></fanart>
-      <subtitle></subtitle>
+      <fanart><add-dir name="." pattern="%filename%" mime="image/*" />
+      </fanart>
+      <subtitle><add-dir name="." pattern="%filename%" mime="application/x-srt" />
+      </subtitle>
       <metafile></metafile>
       <resource></resource>
       <container location="" parentCount="2" minDepth="2"></container>
@@ -344,6 +346,7 @@
         <map from="ogv" to="video/ogg" />
         <map from="ogx" to="application/ogg" />
         <map from="pls" to="audio/x-scpls" />
+        <map from="srt" to="application/x-srt" />
         <map from="ts" to="video/mp2t" />
         <map from="tsa" to="audio/mp2t" />
         <map from="tsv" to="video/mp2t" />
@@ -437,11 +440,19 @@
         <agent command="ffmpeg" arguments="-y -i %in -f mp3 %out" />
         <buffer size="1048576" chunk-size="131072" fill-size="262144" />
       </profile>
-      <profile name="vlcmpeg" enabled="no" type="external">
+      <profile name="vlcmpeg" enabled="no" type="external" no-transcoding="" dlna-profile="MP4">
         <mimetype>video/mpeg</mimetype>
         <accept-url>yes</accept-url>
         <first-resource>yes</first-resource>
         <accept-ogg-theora>yes</accept-ogg-theora>
+        <sample-frequency>-1</sample-frequency>
+        <audio-channels>-1</audio-channels>
+        <thumbnail>no</thumbnail>
+        <hide-original-resource>no</hide-original-resource>
+        <avi-fourcc-list mode="Ignore">
+          <fourcc>XVID</fourcc>
+          <fourcc>DX50</fourcc>
+        </avi-fourcc-list>
         <agent command="vlc" arguments="-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc://quit" />
         <buffer size="14400000" chunk-size="512000" fill-size="120000" />
       </profile>

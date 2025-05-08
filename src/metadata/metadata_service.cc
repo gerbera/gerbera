@@ -113,7 +113,9 @@ MetadataService::MetadataService(const std::shared_ptr<Context>& context, const 
     };
 }
 
-void MetadataService::extractMetaData(const std::shared_ptr<CdsItem>& item, const fs::directory_entry& dirEnt)
+void MetadataService::extractMetaData(
+    const std::shared_ptr<CdsItem>& item,
+    const fs::directory_entry& dirEnt)
 {
     std::error_code ec;
     if (!isRegularFile(dirEnt, ec))
@@ -179,6 +181,20 @@ void MetadataService::extractMetaData(const std::shared_ptr<CdsItem>& item, cons
     }
 #endif // HAVE_FFMPEG
 
+    // Metadata from text files
+    handlers[MetadataType::Metafile]->fillMetadata(item);
+}
+
+void MetadataService::attachResourceFiles(
+    const std::shared_ptr<CdsItem>& item,
+    const fs::directory_entry& dirEnt)
+{
+    std::error_code ec;
+    if (!isRegularFile(dirEnt, ec))
+        throw_std_runtime_error("Not a file: {}", dirEnt.path().c_str());
+
+    auto mediaType = item->getMediaType();
+
 #ifdef HAVE_FFMPEGTHUMBNAILER
     // Thumbnails for videos and images
     if (mediaType == ObjectType::Video)
@@ -194,9 +210,6 @@ void MetadataService::extractMetaData(const std::shared_ptr<CdsItem>& item, cons
     // Subtitles for videos
     if (mediaType == ObjectType::Video)
         handlers[MetadataType::Subtitle]->fillMetadata(item);
-
-    // Metadata from text files
-    handlers[MetadataType::Metafile]->fillMetadata(item);
 
     handlers[MetadataType::ResourceFile]->fillMetadata(item);
 }

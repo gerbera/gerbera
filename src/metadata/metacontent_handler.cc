@@ -26,6 +26,7 @@
 
 #include "metacontent_handler.h" // API
 
+#include "cds/cds_item.h"
 #include "cds/cds_objects.h"
 #include "config/config.h"
 #include "config/config_definition.h"
@@ -33,6 +34,7 @@
 #include "config/result/directory_tweak.h"
 #include "content/content.h"
 #include "context.h"
+#include "database/database.h"
 #include "iohandler/file_io_handler.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
@@ -42,8 +44,14 @@
 #include <regex>
 #include <sys/stat.h>
 
-ContentPathSetup::ContentPathSetup(std::shared_ptr<Config> config, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal fileListOption, ConfigVal dirListOption)
+ContentPathSetup::ContentPathSetup(
+    std::shared_ptr<Config> config,
+    std::shared_ptr<Database> database,
+    const std::shared_ptr<ConfigDefinition>& definition,
+    ConfigVal fileListOption,
+    ConfigVal dirListOption)
     : config(std::move(config))
+    , database(std::move(database))
     , names(this->config->getArrayOption(fileListOption))
     , patterns(this->config->getVectorOption(dirListOption))
     , allTweaks(this->config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST))
@@ -52,7 +60,10 @@ ContentPathSetup::ContentPathSetup(std::shared_ptr<Config> config, const std::sh
 {
 }
 
-std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<CdsObject>& obj, const std::string& setting, fs::path folder) const
+std::vector<fs::path> ContentPathSetup::getContentPath(
+    const std::shared_ptr<CdsObject>& obj,
+    const std::string& setting,
+    fs::path folder) const
 {
     auto objLocation = obj->getLocation();
     auto tweak = allTweaks ? allTweaks->getKey(objLocation) : nullptr;
@@ -62,9 +73,11 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
     static auto nameOption = definition->removeAttribute(ConfigVal::A_IMPORT_RESOURCES_NAME);
     static auto extOption = definition->removeAttribute(ConfigVal::A_IMPORT_RESOURCES_EXT);
     static auto pttOption = definition->removeAttribute(ConfigVal::A_IMPORT_RESOURCES_PTT);
+    static auto mimeOption = definition->removeAttribute(ConfigVal::A_IMPORT_RESOURCES_MIME);
 
     std::vector<fs::path> result;
 
+    // resources directly added with add-file
     if (!files.empty()) {
         if (folder.empty()) {
             folder = (obj->isContainer()) ? objLocation : objLocation.parent_path();
@@ -101,58 +114,88 @@ std::vector<fs::path> ContentPathSetup::getContentPath(const std::shared_ptr<Cds
                 }
             }
         }
-        if (!patterns.empty()) {
-            // filter files matching patterns
-            for (auto&& pattern : patterns) {
-                std::string dir;
-                std::string ext;
-                std::string ptt;
-                for (auto&& [key, val] : pattern) {
-                    if (key == nameOption)
-                        dir = val;
-                    else if (key == extOption)
-                        ext = val;
-                    else if (key == pttOption)
-                        ptt = val;
+    }
+
+    // resources added with add-dir
+    if (!patterns.empty()) {
+        // filter files matching patterns
+        for (auto&& pattern : patterns) {
+            std::string dir;
+            std::string ext;
+            std::string ptt;
+            std::string mime;
+            for (auto&& [key, val] : pattern) {
+                if (key == nameOption)
+                    dir = val;
+                else if (key == extOption)
+                    ext = val;
+                else if (key == pttOption)
+                    ptt = val;
+                else if (key == mimeOption) {
+                    mime = val;
+                    std::vector<std::string> parts = splitString(mime, '/');
+                    if (parts.size() == 2 && parts.at(1) == "*")
+                        mime = fmt::format("{}/", parts.at(0));
                 }
-                auto contentPath = fs::path(expandName(dir, obj));
-                auto extn = fs::path(expandName(ext, obj));
-                ptt = expandName(ptt, obj);
-                auto stem = isCaseSensitive ? extn.stem().string() : toLower(extn.stem().string());
-                if (extn.has_extension()) {
-                    extn = isCaseSensitive ? extn.extension().string() : toLower(extn.extension().string());
-                } else {
-                    extn = fmt::format(".{}", isCaseSensitive ? ext : toLower(ext));
-                    stem.clear();
-                }
-                if (!ptt.empty()) {
-                    stem = fmt::format("{}{}", ptt, stem);
-                }
-                std::error_code ec;
-                if (contentPath.is_relative()) {
-                    contentPath = fs::weakly_canonical(folder / contentPath);
-                }
-                if (!fs::is_directory(contentPath)) {
-                    log_debug("{}: not a directory", contentPath.string());
-                    continue;
-                }
-                // Check files using patterns
-                for (auto&& contentFile : fs::directory_iterator(contentPath, ec)) {
-                    if (isRegularFile(contentFile, ec)
-                        && (ext.empty() || (isCaseSensitive && contentFile.path().extension() == extn) || (!isCaseSensitive && toLower(contentFile.path().extension().string()) == extn))
-                        && contentFile.path() != objLocation) {
-                        if (!stem.empty()) {
-                            replaceAllString(stem, "?", ".");
-                            replaceAllString(stem, "*", ".*");
-                            auto re = std::regex(fmt::format("^{}$", stem));
-                            if (std::regex_match(contentFile.path().stem().string(), re)) {
-                                log_debug("{}: found", contentFile.path().string());
-                                result.push_back(contentFile.path());
-                            }
-                        } else {
+            }
+            auto contentPath = fs::path(expandName(dir, obj));
+            auto extn = fs::path(expandName(ext, obj));
+            ptt = expandName(ptt, obj);
+            auto stem = isCaseSensitive ? extn.stem().string() : toLower(extn.stem().string());
+            if (extn.has_extension()) {
+                extn = isCaseSensitive ? extn.extension().string() : toLower(extn.extension().string());
+            } else {
+                extn = fmt::format(".{}", isCaseSensitive ? ext : toLower(ext));
+                stem.clear();
+            }
+            if (!ptt.empty()) {
+                replaceAllString(ptt, "?", ".");
+                replaceAllString(ptt, "*", ".*");
+                stem = fmt::format("{}{}", ptt, stem);
+            }
+            if (!stem.empty()) {
+                replaceAllString(stem, "[", "\\\[");
+                replaceAllString(stem, "]", "\\]");
+                replaceAllString(stem, "(", "\\\(");
+                replaceAllString(stem, ")", "\\)");
+            }
+            auto re = std::regex(fmt::format("^{}$", stem));
+
+            std::error_code ec;
+            if (contentPath.is_relative()) {
+                contentPath = fs::weakly_canonical(folder / contentPath);
+            }
+            if (!fs::is_directory(contentPath)) {
+                log_debug("{}: not a directory", contentPath.string());
+                continue;
+            }
+            // Check files using patterns
+            for (auto&& contentFile : fs::directory_iterator(contentPath, ec)) {
+                if (isRegularFile(contentFile, ec)
+                    && (ext.empty() || (isCaseSensitive && contentFile.path().extension() == extn) || (!isCaseSensitive && toLower(contentFile.path().extension().string()) == extn))
+                    && contentFile.path() != objLocation) //
+                {
+                    fs::path resourceLocation;
+                    if (!stem.empty()) {
+                        if (std::regex_match(contentFile.path().stem().string(), re)) {
                             log_debug("{}: found", contentFile.path().string());
-                            result.push_back(contentFile.path());
+                            resourceLocation = contentFile.path();
                         }
+                    } else {
+                        log_debug("{}: found", contentFile.path().string());
+                        resourceLocation = contentFile.path();
+                    }
+                    if (!resourceLocation.empty() && !mime.empty()) {
+                        auto cdsObj = database->findObjectByPath(resourceLocation, DEFAULT_CLIENT_GROUP, DbFileType::File);
+                        resourceLocation.clear();
+                        if (cdsObj && cdsObj->isItem()) {
+                            auto cdsItem = std::dynamic_pointer_cast<CdsItem>(cdsObj);
+                            if (startswith(cdsItem->getMimeType(), mime))
+                                resourceLocation = contentFile.path();
+                        }
+                    }
+                    if (!resourceLocation.empty()) {
+                        result.push_back(resourceLocation);
                     }
                 }
             }
@@ -205,6 +248,7 @@ MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
     : MetadataHandler(context)
     , f2i(context->getConverterManager()->f2i())
     , definition(context->getDefinition())
+    , database(context->getDatabase())
 {
 }
 
@@ -212,7 +256,7 @@ FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, definition, ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST);
     }
 }
 
@@ -268,7 +312,7 @@ ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, definition, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST);
     }
 }
 
@@ -330,7 +374,7 @@ SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, definition, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST);
     }
 }
 
@@ -403,7 +447,7 @@ MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context, std::s
     , content(std::move(content))
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, definition, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST);
     }
 }
 
@@ -435,7 +479,7 @@ ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {
     if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, definition, ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST);
+        setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST);
     }
 }
 

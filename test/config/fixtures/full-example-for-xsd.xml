@@ -409,12 +409,14 @@
                 <add-file name="cover.jpg"/>
                 <add-file name="album.jpg"/>
                 <add-file name="front.jpg"/>
+                <add-dir name="." pattern="%filename%" mime="image/*" />
             </fanart>
             <subtitle>
                 <add-file name="%filename%.srt"/>
                 <add-file name="%filename%.Deutsch.srt"/>
                 <add-dir name="%filename%" ext="srt"/>
                 <add-dir name="." pattern="%filename%*" ext="srt"/>
+                <add-dir name="." pattern="%filename%" mime="application/x-srt" />
             </subtitle>
             <metafile>
                 <add-file name="%filename%.nfo"/>
@@ -447,6 +449,7 @@
                 <map from="ogv" to="video/ogg"/>
                 <map from="ogx" to="application/ogg"/>
                 <map from="pls" to="audio/x-scpls"/>
+                <map from="srt" to="application/x-srt" />
                 <map from="ts" to="video/mp2t"/>
                 <map from="tsa" to="audio/mp2t"/>
                 <map from="tsv" to="video/mp2t"/>
@@ -539,6 +542,8 @@
                 <accept-url>no</accept-url>
                 <first-resource>yes</first-resource>
                 <accept-ogg-theora>no</accept-ogg-theora>
+                <sample-frequency>-1</sample-frequency>
+                <audio-channels>-1</audio-channels>
                 <agent command="ffmpeg" arguments="-y -i %in -f mp3 %out"/>
                 <buffer size="1048576" chunk-size="131072" fill-size="262144"/>
             </profile>
@@ -551,6 +556,8 @@
                     <fourcc>XVID</fourcc>
                     <fourcc>DX50</fourcc>
                 </avi-fourcc-list>
+                <sample-frequency>off</sample-frequency>
+                <audio-channels>off</audio-channels>
                 <agent command="vlc" arguments="-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc://quit"/>
                 <buffer size="14400000" chunk-size="512000" fill-size="120000"/>
             </profile>
@@ -562,6 +569,8 @@
                 </mimetype>
                 <accept-url>no</accept-url>
                 <first-resource>yes</first-resource>
+                <sample-frequency>source</sample-frequency>
+                <audio-channels>source</audio-channels>
                 <accept-ogg-theora>no</accept-ogg-theora>
                 <agent command="ogg123" arguments="-d raw -o byteorder:big -f %out %in"/>
                 <buffer size="1048576" chunk-size="131072" fill-size="262144"/>

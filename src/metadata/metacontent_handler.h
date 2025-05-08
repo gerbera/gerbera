@@ -34,15 +34,26 @@
 
 class ConfigDefinition;
 class Content;
+class Database;
 class StringConverter;
 
+/// \brief This class is responsible for expanding configuration options to file names
 class ContentPathSetup {
 public:
-    explicit ContentPathSetup(std::shared_ptr<Config> config, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal fileListOption, ConfigVal dirListOption);
-    std::vector<fs::path> getContentPath(const std::shared_ptr<CdsObject>& obj, const std::string& setting, fs::path folder = "") const;
+    explicit ContentPathSetup(
+        std::shared_ptr<Config> config,
+        std::shared_ptr<Database> database,
+        const std::shared_ptr<ConfigDefinition>& definition,
+        ConfigVal fileListOption,
+        ConfigVal dirListOption);
+    std::vector<fs::path> getContentPath(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::string& setting,
+        fs::path folder = "") const;
 
 private:
     std::shared_ptr<Config> config;
+    std::shared_ptr<Database> database;
     std::vector<std::string> names;
     std::vector<std::vector<std::pair<std::string, std::string>>> patterns;
     std::shared_ptr<DirectoryConfigList> allTweaks;
@@ -59,6 +70,7 @@ public:
 protected:
     const std::shared_ptr<StringConverter> f2i;
     std::shared_ptr<ConfigDefinition> definition;
+    std::shared_ptr<Database> database;
 };
 
 /// \brief This class is responsible for populating filesystem based album and fan art

@@ -182,6 +182,17 @@ TEST(ToolsTest, splitStringTest)
     ASSERT_EQ(parts1.size(), 4);
 }
 
+TEST(ToolsTest, replaceAllStringTest)
+{
+    std::string str = "test ( with br";
+    replaceAllString(str, "(", "\\\(");
+    EXPECT_EQ(str, "test \\" "( with br");
+
+    str = "test ] with br";
+    replaceAllString(str, "]", "\\]");
+    EXPECT_EQ(str, "test \\] with br");
+}
+
 TEST(ToolsTest, trimStringTest)
 {
     EXPECT_EQ(trimString(""), "");

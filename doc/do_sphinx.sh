@@ -40,7 +40,7 @@ function setup {
 
 function install {
     printf "\nInstalling Sphinx document generator with $SPHINX_THEME theme\n\n"
-    pip3.12 install Sphinx $SPHINX_THEME $SPHINX_THEME2
+    pip3.12 install -r ${ROOT_PATH}/requirements.txt
 }
 
 function build {
