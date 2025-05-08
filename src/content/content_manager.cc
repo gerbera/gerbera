@@ -409,6 +409,7 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(
     } else if (obj->isItem() && processExisting) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
         getImportService(adir)->getMetadataService()->extractMetaData(item, dirEnt);
+        getImportService(adir)->getMetadataService()->attachResourceFiles(item, dirEnt);
         getImportService(adir)->updateItemData(item, item->getMimeType());
     }
     if (processExisting || isNew) {

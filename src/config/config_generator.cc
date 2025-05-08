@@ -122,7 +122,11 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::getNode(const std::string& tag)
     return generated.at(tag);
 }
 
-std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag, const std::shared_ptr<ConfigSetup>& cs, const std::string& value, bool makeLastChild)
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(
+    const std::string& tag,
+    const std::shared_ptr<ConfigSetup>& cs,
+    const std::string& value,
+    bool makeLastChild)
 {
     auto split = splitString(tag, '/');
     std::shared_ptr<pugi::xml_node> result;
@@ -168,13 +172,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::string& tag
     return result;
 }
 
-std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, const std::string& value)
-{
-    auto cs = definition->findConfigSetup(option);
-    return setValue(cs->xpath, cs, value.empty() ? cs->getDefaultValue() : value);
-}
-
-std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::shared_ptr<pugi::xml_node>& parent, ConfigVal option, const std::string& value)
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setXmlValue(const std::shared_ptr<pugi::xml_node>& parent, ConfigVal option, const std::string& value)
 {
     auto cs = std::string(definition->mapConfigOption(option));
     if (startswith(cs, ConfigDefinition::ATTRIBUTE)) {
@@ -184,6 +182,12 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(const std::shared_ptr<
         parent->append_child(cs.c_str()).append_child(pugi::node_pcdata).set_value(value.c_str());
     }
     return parent;
+}
+
+std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, const std::string& value)
+{
+    auto cs = definition->findConfigSetup(option);
+    return setValue(cs->xpath, cs, value.empty() ? cs->getDefaultValue() : value);
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::setValue(ConfigVal option, ConfigVal attr, const std::string& value)
@@ -407,23 +411,23 @@ void ConfigGenerator::generateDynamics()
     auto&& containerTag = definition->mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER);
 
     auto container = setValue(fmt::format("{}/{}/", containersTag, containerTag), {}, "", true);
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastAdded");
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Recently Added");
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-last_updated");
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_updated > "@last7")");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastAdded");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Recently Added");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-last_updated");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_updated > "@last7")");
 
     container = setValue(fmt::format("{}/{}/", containersTag, containerTag), {}, "", true);
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastModified");
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Recently Modified");
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-last_modified");
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_modified > "@last7")");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastModified");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Recently Modified");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-last_modified");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_modified > "@last7")");
 
     container = setValue(fmt::format("{}/{}/", containersTag, containerTag), {}, "", true);
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastPlayed");
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Music Recently Played");
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-upnp:lastPlaybackTime");
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT, "MUSIC_LAST_PLAYED");
-    setValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item.audioItem" and upnp:lastPlaybackTime > "@last7")");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastPlayed");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Music Recently Played");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-upnp:lastPlaybackTime");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT, "MUSIC_LAST_PLAYED");
+    setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item.audioItem" and upnp:lastPlaybackTime > "@last7")");
 }
 
 void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
@@ -647,18 +651,18 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
 #ifdef HAVE_INOTIFY
         auto&& autoscanTag = definition->mapConfigOption(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST);
         auto as = setValue(fmt::format("{}/{}/", autoscanTag, directoryTag), {}, "", true);
-        setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, "/media");
-        setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, "inotify");
+        setXmlValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, "/media");
+        setXmlValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, "inotify");
 #else
         auto&& autoscanTag = definition->mapConfigOption(ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST);
         auto as = setValue(fmt::format("{}/{}/", autoscanTag, directoryTag), {}, "", true);
-        setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, "/media");
-        setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, "timed");
-        setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL, "1000");
+        setXmlValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, "/media");
+        setXmlValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, "timed");
+        setXmlValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL, "1000");
 #endif
-        setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE, "yes");
-        setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES, "yes");
-        setValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE, "Any");
+        setXmlValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE, "yes");
+        setXmlValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES, "yes");
+        setXmlValue(as, ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE, "Any");
     }
     {
         // Generate Charsets
@@ -745,15 +749,15 @@ void ConfigGenerator::generateBoxlayout(ConfigVal option)
 
     for (auto&& bl : cs->getDefault()) {
         auto box = setValue(fmt::format("{}/", boxTag), {}, "", true);
-        setValue(box, ConfigVal::A_BOXLAYOUT_BOX_KEY, bl.getKey());
-        setValue(box, ConfigVal::A_BOXLAYOUT_BOX_TITLE, bl.getTitle());
-        setValue(box, ConfigVal::A_BOXLAYOUT_BOX_CLASS, bl.getClass());
+        setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_KEY, bl.getKey());
+        setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_TITLE, bl.getTitle());
+        setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_CLASS, bl.getClass());
         if (!bl.getUpnpShortcut().empty())
-            setValue(box, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT, bl.getUpnpShortcut());
+            setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT, bl.getUpnpShortcut());
         if (bl.getSize() != 1)
-            setValue(box, ConfigVal::A_BOXLAYOUT_BOX_SIZE, fmt::to_string(bl.getSize()));
+            setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_SIZE, fmt::to_string(bl.getSize()));
         if (!bl.getEnabled())
-            setValue(box, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, fmt::to_string(bl.getEnabled()));
+            setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, fmt::to_string(bl.getEnabled()));
     }
 }
 
@@ -790,40 +794,52 @@ void ConfigGenerator::generateTranscoding()
     const auto profileTag = definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE);
 
     auto oggmp3 = setValue(fmt::format("{}/", profileTag), {}, "", true);
-    setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME, "ogg2mp3");
-    setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);
-    setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE, "external");
-    setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE, "audio/mpeg");
-    setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL, NO);
-    setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
-    setValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG, NO);
+    setXmlValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME, "ogg2mp3");
+    setXmlValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);
+    setXmlValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE, "external");
+    setXmlValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE, "audio/mpeg");
+    setXmlValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL, NO);
+    setXmlValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
+    setXmlValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG, NO);
 
     auto agent = setValue(fmt::format("{}/{}/", profileTag, definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)), {}, "", true);
-    setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "ffmpeg");
-    setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-y -i %in -f mp3 %out");
+    setXmlValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "ffmpeg");
+    setXmlValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-y -i %in -f mp3 %out");
 
     auto buffer = setValue(fmt::format("{}/{}/", profileTag, definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)), {}, "", true);
-    setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
-    setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
-    setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_AUDIO_FILL_SIZE));
+    setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
+    setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
+    setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_AUDIO_FILL_SIZE));
 
     auto vlcmpeg = setValue(fmt::format("{}/", profileTag), {}, "", true);
-    setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME, "vlcmpeg");
-    setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);
-    setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE, "external");
-    setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE, "video/mpeg");
-    setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL, YES);
-    setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
-    setValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG, YES);
+    setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME, "vlcmpeg");
+    setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);
+    setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE, "external");
+    setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE, "video/mpeg");
+    setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL, YES);
+    setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
+    setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG, YES);
+    if (example) {
+        setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SAMPFREQ, GRB_STRINGIZE(SOURCE));
+        setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NRCHAN, GRB_STRINGIZE(SOURCE));
+        setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_THUMB, NO);
+        setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_HIDEORIG, NO);
+        setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING, "");
+        setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_DLNAPROF, "MP4");
+        auto fourCc = setValue(fmt::format("{}/{}/", profileTag, definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC)), {}, "", true);
+        setXmlValue(fourCc, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE, "Ignore");
+        setXmlValue(fourCc, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC, "XVID");
+        setXmlValue(fourCc, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC, "DX50");
+    }
 
     agent = setValue(fmt::format("{}/{}/", profileTag, definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)), {}, "", true);
-    setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "vlc");
-    setValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc://quit");
+    setXmlValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, "vlc");
+    setXmlValue(agent, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, "-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc://quit");
 
     buffer = setValue(fmt::format("{}/{}/", profileTag, definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)), {}, "", true);
-    setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
-    setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
-    setValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_VIDEO_FILL_SIZE));
+    setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
+    setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
+    setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_VIDEO_FILL_SIZE));
 }
 
 void ConfigGenerator::generateUdn(bool doExport)

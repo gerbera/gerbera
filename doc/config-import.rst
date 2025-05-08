@@ -1100,6 +1100,7 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         <add-dir name="/data/subtitles" ext="%title%*.srt"/>
         <add-dir name="%filename%" ext="srt"/>
         <add-dir pattern="%filename%*" ext="srt"/>
+        <add-dir name="." pattern="%filename%*" mime="image/*"/>
 
     * Optional
 
@@ -1132,6 +1133,15 @@ You can set up your correct fanart file by yourself, if no image is embedded in 
         Define the file name pattern in the directory. The search pattern can contain the same variables as ``add-file``.
         It can contain ``*`` and ``?`` as wildcards and must exactly match the resource file name.
 
+        .. code:: xml
+
+            mime="image/*"
+
+        * Optional
+
+        Define the mime type to search for with pattern as name. Specifying a mime type allows omitting the extension in conjunciton with
+        :ref:`extension-to-mimetype-mapping <extension-mimetype>`.
+
 
 A sample configuration would be:
 
@@ -1140,6 +1150,7 @@ A sample configuration would be:
     <resources case-sensitive="no">
         <fanart>
             <add-file name="cover.png"/>
+            <add-dir name="." pattern="%filename%*" mime="image/*"/>
         </fanart>
         <subtitle>
             <add-file name="%filename%.srt"/>

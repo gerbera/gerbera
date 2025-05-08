@@ -33,8 +33,11 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
-#define SOURCE (-1)
-#define OFF (0)
+#define SOURCE -1
+#define OFF 0
+
+#define GRB_STRINGIZE_IMPL(x) #x
+#define GRB_STRINGIZE(x) GRB_STRINGIZE_IMPL(x)
 
 // fixed CdsObjectIDs
 #define CDS_ID_ROOT (0)

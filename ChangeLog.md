@@ -5,6 +5,7 @@
 - Add missing jsoncpp to `Dockerfile`s
 - Add support for transliterating device output strings
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
+- Filter resources by mimetype
 - Fix import and xml
 - Fix SQL for changing persistent object flag in database
 - Get correct ffmpeg subtitle stream

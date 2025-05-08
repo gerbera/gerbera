@@ -1099,6 +1099,18 @@ std::pair<int, bool> ImportService::addContainerTree(
 void ImportService::updateFanArt(bool isDir)
 {
     for (auto&& [contPath, stateEntry] : contentStateCache) {
+        if (!stateEntry || !stateEntry->getObject() || !stateEntry->getObject()->isItem())
+            continue;
+
+        auto dirEntry = stateEntry->getDirEntry();
+        auto item = std::dynamic_pointer_cast<CdsItem>(stateEntry->getObject());
+        try {
+            metadataService->attachResourceFiles(item, dirEntry);
+        } catch (const std::runtime_error& ex) {
+            log_error("Updating FanArt for '{}' failed: {}", dirEntry.path().string(), ex.what());
+        }
+    }
+    for (auto&& [contPath, stateEntry] : contentStateCache) {
         if (!stateEntry || !stateEntry->getObject() || !stateEntry->getObject()->isContainer())
             continue;
         std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(stateEntry->getObject());

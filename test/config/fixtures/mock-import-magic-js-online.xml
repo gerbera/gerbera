@@ -80,6 +80,7 @@
       <map from="ogv" to="video/ogg" />
       <map from="ogx" to="application/ogg" />
       <map from="pls" to="audio/x-scpls" />
+      <map from="srt" to="application/x-srt" />
       <map from="ts" to="video/mp2t" />
       <map from="tsa" to="audio/mp2t" />
       <map from="tsv" to="video/mp2t" />

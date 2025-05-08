@@ -1099,8 +1099,9 @@
     <xs:element name="add-dir">
         <xs:complexType>
             <xs:attribute name="name" type="xs:string" use="required"/>
-            <xs:attribute name="ext" type="xs:string" use="required"/>
+            <xs:attribute name="ext" type="xs:string"/>
             <xs:attribute name="pattern" type="xs:string"/>
+            <xs:attribute name="mime" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -1293,6 +1294,8 @@
                 <xs:element ref="avi-fourcc-list" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="dlna-profile" type="xs:string"/>
+            <xs:attribute name="no-transcoding" type="xs:string"/>
             <xs:attribute name="client-flags" type="xs:string"/>
             <xs:attribute name="enabled" type="boolean" use="required"/>
             <xs:attribute name="type" use="required">

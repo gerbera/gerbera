@@ -3,12 +3,14 @@
 ## HEAD
 
 Sqlite backup is now enabled by default.
+Filtering resources by mimetype instead of extension reduces effort of configuration
 
 ### NEW Features
 
 - Support "natural" file sorting for numbers in file names
 - Support transliteration of device output
 - Extract multiple stream information in ffmpeg handler including embedded subtitles
+- Filter resources by mimetype instead of extension
 
 ### FIXES
 

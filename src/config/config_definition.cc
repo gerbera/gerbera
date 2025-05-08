@@ -101,6 +101,11 @@ static const std::vector<std::string> defaultFanArtFile {
     // "%album%.jpg",
 };
 
+/// \brief default values for ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST
+static const std::vector<std::vector<std::pair<std::string, std::string>>> defaultFanArtDirectory {
+    { { "name", "." }, { "pattern", "%filename%" }, { "mime", "image/*" } },
+};
+
 /// \brief default values for ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST
 static const std::vector<std::string> defaultContainerArtFile {
     // "folder.jpg",
@@ -113,6 +118,11 @@ static const std::vector<std::string> defaultContainerArtFile {
 static const std::vector<std::string> defaultSubtitleFile {
     // "%title%.srt",
     // "%filename%.srt"
+};
+
+/// \brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST
+static const std::vector<std::vector<std::pair<std::string, std::string>>> defaultSubtitleDirectory {
+    { { "name", "." }, { "pattern", "%filename%" }, { "mime", MIME_TYPE_SRT_SUBTITLE } },
 };
 
 /// \brief default values for ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST
@@ -222,6 +232,7 @@ static const std::map<std::string, std::string> extMtDefaults {
     { "ogv", "video/ogg" },
     { "ogx", "application/ogg" },
     { "pls", "audio/x-scpls" },
+    { "srt", MIME_TYPE_SRT_SUBTITLE },
     { "ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
     { "tsa", "audio/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
     { "tsv", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
@@ -1190,8 +1201,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST,
             "/import/resources/fanart", "config-import.html#resources",
             ConfigVal::A_IMPORT_RESOURCES_ADD_DIR,
-            std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT },
-            false, false, false),
+            std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT, ConfigVal::A_IMPORT_RESOURCES_MIME },
+            false, false, false,
+            defaultFanArtDirectory),
 
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST,
             "/import/resources/container", "config-import.html#container",
@@ -1200,7 +1212,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST,
             "/import/resources/container", "config-import.html#container",
             ConfigVal::A_IMPORT_RESOURCES_ADD_DIR,
-            std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT },
+            std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT, ConfigVal::A_IMPORT_RESOURCES_MIME },
             false, false, false),
         std::make_shared<ConfigPathSetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION,
             "/import/resources/container/attribute::location", "config-import.html#container",
@@ -1219,8 +1231,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST,
             "/import/resources/subtitle", "config-import.html#resources",
             ConfigVal::A_IMPORT_RESOURCES_ADD_DIR,
-            std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT },
-            false, false, false),
+            std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT, ConfigVal::A_IMPORT_RESOURCES_MIME },
+            false, false, false,
+            defaultSubtitleDirectory),
 
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST,
             "/import/resources/metafile", "config-import.html#resources",
@@ -1229,7 +1242,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST,
             "/import/resources/metafile", "config-import.html#resources",
             ConfigVal::A_IMPORT_RESOURCES_ADD_DIR,
-            std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT },
+            std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT, ConfigVal::A_IMPORT_RESOURCES_MIME },
             false, false, false),
 
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST,
@@ -1239,7 +1252,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST,
             "/import/resources/resource", "config-import.html#resources",
             ConfigVal::A_IMPORT_RESOURCES_ADD_DIR,
-            std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT },
+            std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT, ConfigVal::A_IMPORT_RESOURCES_MIME },
             false, false, false),
 
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_ORDER,
@@ -1381,6 +1394,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             ""),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_IMPORT_RESOURCES_EXT,
             "attribute::ext", "config-import.html#resources",
+            ""),
+        std::make_shared<ConfigStringSetup>(ConfigVal::A_IMPORT_RESOURCES_MIME,
+            "attribute::mime", "config-import.html#resources",
             ""),
 
         std::make_shared<ConfigStringSetup>(ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM,
@@ -1658,7 +1674,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             "attribute::type", "config-transcode.html#profiles",
             std::map<std::string, TranscodingType>({ { "none", TranscodingType::None }, { "external", TranscodingType::External }, /* for the future...{"remote", TranscodingType::Remote}*/ })),
         std::make_shared<ConfigEnumSetup<AviFourccListmode>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE,
-            "mode", "config-transcode.html#profiles",
+            "attribute::mode", "config-transcode.html#profiles",
             std::map<std::string, AviFourccListmode>({ { "ignore", AviFourccListmode::Ignore }, { "process", AviFourccListmode::Process }, { "disabled", AviFourccListmode::None } })),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC,
             "fourcc", "config-transcode.html#profiles",
@@ -1687,10 +1703,10 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             true, true),
         std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SAMPFREQ,
             "sample-frequency", "config-transcode.html#profiles",
-            "-1", CheckProfileNumberValue),
+            GRB_STRINGIZE(SOURCE), CheckProfileNumberValue),
         std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NRCHAN,
             "audio-channels", "config-transcode.html#profiles",
-            "-1", CheckProfileNumberValue),
+            GRB_STRINGIZE(SOURCE), CheckProfileNumberValue),
         std::make_shared<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE,
             "/transcoding/profiles/profile", "config-transcode.html#profiles",
             ""),
@@ -2032,6 +2048,8 @@ void ConfigDefinition::initHierarchy()
                                                  ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST } },
         { ConfigVal::A_IMPORT_RESOURCES_PTT, { ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, //
                                                  ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST } },
+        { ConfigVal::A_IMPORT_RESOURCES_MIME, { ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, //
+                                                  ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST } },
 
         { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, { ConfigVal::IMPORT_LAYOUT_MAPPING, ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
         { ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO, { ConfigVal::IMPORT_LAYOUT_MAPPING, ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
