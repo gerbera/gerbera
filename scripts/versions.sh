@@ -70,7 +70,7 @@ else
     NPUPNP="6.2.1"
     PUGIXML="1.15"
     PUPNP="1.14.20"
-    SPDLOG="1.15.2"
+    SPDLOG="1.15.3"
     WAVPACK="5.8.1"
     TAGLIB="2.0.2"
     JSONCPP="1.9.6"

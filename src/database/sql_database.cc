@@ -1509,7 +1509,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
         *changedContainer = parentID;
 
     std::vector<std::pair<std::string, std::string>> itemMetadata;
-    itemMetadata.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE), fmt::format("{:%FT%T%z}", fmt::localtime(toSeconds(fs::last_write_time(path)).count())));
+    itemMetadata.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE), grbLocaltime("{:%FT%T%z}", toSeconds(fs::last_write_time(path))));
 
     auto f2i = converterManager->f2i();
     auto [mval, err] = f2i->convert(path.filename());
@@ -1675,7 +1675,7 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     commit("addContainer");
 
     if (cont->getMetaData(MetadataFields::M_DATE).empty())
-        cont->addMetaData(MetadataFields::M_DATE, fmt::format("{:%FT%T%z}", fmt::localtime(cont->getMTime().count())));
+        cont->addMetaData(MetadataFields::M_DATE, grbLocaltime("{:%FT%T%z}", cont->getMTime()));
 
     *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), cont->isVirtual(), cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getMetaData(), cont->getResources());
     return true;
@@ -2679,7 +2679,7 @@ std::vector<std::map<std::string, std::string>> SQLDatabase::getClientGroupStats
         stats["name"] = row->col(0);
         stats["count"] = fmt::format("{}", row->col_int(1, -1));
         stats["playCount"] = fmt::format("{}", row->col_int(2, -1));
-        stats["last"] = fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(std::chrono::seconds(row->col_int(3, 0)).count()));
+        stats["last"] = grbLocaltime("{:%a %b %d %H:%M:%S %Y}", std::chrono::seconds(row->col_int(3, 0)));
         stats["bookmarks"] = fmt::format("{}", row->col_int(4, -1));
         result.push_back(std::move(stats));
     }
@@ -2826,7 +2826,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
         interval = std::stoi(getCol(row, AutoscanColumn::Interval));
     auto lastModified = std::chrono::seconds(std::stol(getCol(row, AutoscanColumn::LastModified)));
 
-    log_info("Loading autoscan location: {}; recursive: {}, mt: {}/{}, last_modified: {}", location.c_str(), recursive, mt, AutoscanDirectory::mapMediaType(mt), lastModified > std::chrono::seconds::zero() ? fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(lastModified.count())) : "unset");
+    log_info("Loading autoscan location: {}; recursive: {}, mt: {}/{}, last_modified: {}", location.c_str(), recursive, mt, AutoscanDirectory::mapMediaType(mt), lastModified > std::chrono::seconds::zero() ? grbLocaltime("{:%Y-%m-%d %H:%M:%S}", lastModified) : "unset");
 
     auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, interval, hidden, followSymlinks, mt, containerMap);
     dir->setObjectID(objectID);

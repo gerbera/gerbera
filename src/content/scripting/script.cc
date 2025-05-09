@@ -237,7 +237,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
                 setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT), adir->getActiveScanCount());
                 setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_TASKCOUNT), adir->getTaskCount());
                 setIntProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_RETRYCOUNT), adir->getRetryCount());
-                setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT), fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
+                setProperty(definition->removeAttribute(ConfigVal::A_AUTOSCAN_DIRECTORY_LMT), grbLocaltime("{:%Y-%m-%d %H:%M:%S}", adir->getPreviousLMT()));
 
                 duk_put_prop_string(ctx, -2, fmt::to_string(adir->getScanID()).c_str());
                 log_debug("Adding config[{}][{}] {}", autoscanItemPath, adir->getScanID(), adir->getLocation().string());

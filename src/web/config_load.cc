@@ -859,7 +859,7 @@ void Web::ConfigLoad::writeAutoscan(Json::Value& values)
             // Last modified
             addValue(values,
                 ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_LMT }),
-                ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT, fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(adir->getPreviousLMT().count())));
+                ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LMT, grbLocaltime("{:%Y-%m-%d %H:%M:%S}", adir->getPreviousLMT()));
         }
         // Allow creation of entry in blank config
         // path

@@ -21,6 +21,7 @@
 - Update googletest to 1.17.0
 - Update NPUPnP
 - Update spdlog to 1.15.2
+- Update spdlog to 1.15.3
 - Upgrade documentation build environment
 - Use JsonCpp for web JSON output
 
