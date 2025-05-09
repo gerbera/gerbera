@@ -106,7 +106,7 @@ void Web::EditLoad::writeCoreInfo(
 
     Json::Value lmtEl;
     if (obj->getMTime() > std::chrono::seconds::zero()) {
-        lmtEl["value"] = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getMTime().count()));
+        lmtEl["value"] = grbLocaltime("{:%Y-%m-%d %H:%M:%S}", obj->getMTime());
     } else {
         lmtEl["value"] = "";
     }
@@ -115,7 +115,7 @@ void Web::EditLoad::writeCoreInfo(
 
     Json::Value lutEl;
     if (obj->getUTime() > std::chrono::seconds::zero()) {
-        lutEl["value"] = fmt::format("{:%Y-%m-%d %H:%M:%S}", fmt::localtime(obj->getUTime().count()));
+        lutEl["value"] = grbLocaltime("{:%Y-%m-%d %H:%M:%S}", obj->getUTime());
     } else {
         lutEl["value"] = "";
     }
@@ -270,7 +270,7 @@ void Web::EditLoad::writeItemInfo(
         {
             Json::Value metaEntry;
             metaEntry["metaname"] = fmt::format("upnp:lastPlaybackTime@group[{}]", playStatus->getGroup());
-            metaEntry["metavalue"] = fmt::format("{:%Y-%m-%d T %H:%M:%S}", fmt::localtime(playStatus->getLastPlayed().count()));
+            metaEntry["metavalue"] = grbLocaltime("{:%Y-%m-%d T %H:%M:%S}", playStatus->getLastPlayed());
             metaEntry["editable"] = false;
             metadataArray.append(metaEntry);
         }

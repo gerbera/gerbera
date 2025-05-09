@@ -173,3 +173,11 @@ bool parseTime(int& value, std::string& timeValue, GrbTimeType type)
         timeValue = fmt::to_string(value);
     return !list.empty();
 }
+
+std::string grbLocaltime(const std::string& format, const std::chrono::seconds& t)
+{
+    std::time_t time = t.count();
+    std::tm tm;
+    localtime_r(&time, &tm);
+    return fmt::format(format, tm);
+}

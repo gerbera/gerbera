@@ -39,7 +39,7 @@
 
 static std::string secondsToString(const std::chrono::seconds& t)
 {
-    return fmt::format("{:%a %b %d %H:%M:%S %Y}", fmt::localtime(t.count()));
+    return grbLocaltime("{:%a %b %d %H:%M:%S %Y}", t);
 }
 
 const std::string_view Web::Clients::PAGE = "clients";

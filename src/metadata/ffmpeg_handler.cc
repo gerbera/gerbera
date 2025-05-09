@@ -313,11 +313,11 @@ void FfmpegHandler::addFfmpegMetadataFields(
                     std::tm tmWork {};
                     if (strptime(avEntry->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
                         // convert creation_time to local time
-                        auto utcTime = timegm(&tmWork);
+                        std::time_t utcTime = timegm(&tmWork);
                         if (utcTime == -1) {
                             continue;
                         }
-                        tmWork = fmt::localtime(utcTime);
+                        tmWork = *std::localtime(&utcTime);
                     } else if (strptime(avEntry->value, "%Y-%m-%d", &tmWork)) {
                         ; // use the value as is
                     } else if (strptime(avEntry->value, "%Y", &tmWork)) {
