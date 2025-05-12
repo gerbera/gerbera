@@ -76,11 +76,11 @@ WavPackHandler::~WavPackHandler()
         context = WavpackCloseFile(context);
 }
 
-void WavPackHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool WavPackHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !isEnabled)
-        return;
+        return false;
 
     char error[MAX_WV_TEXT_SIZE];
     /* WavpackContext * WavpackOpenFileInput (const char *inFileName, char *error, int flags, int norm_offset);
@@ -98,11 +98,12 @@ void WavPackHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     WavpackContext* context = WavpackOpenFileInput(item->getLocation().c_str(), error, OPEN_TAGS | OPEN_2CH_MAX | OPEN_DSD_NATIVE, 0);
     if (!context) {
         log_error("Could not open {} as WavPack file: {}", item->getLocation().c_str(), error);
-        return;
+        return false;
     }
-    getAttributes(context, item);
-    getTags(context, item);
-    getAttachments(context, item);
+    bool result = false;
+    result = getAttributes(context, item) || result;
+    result = getTags(context, item) || result;
+    result = getAttachments(context, item) || result;
 
 #ifdef UNUSED_WAVPACK
     auto bytesPerSample = WavpackGetBytesPerSample(context);
@@ -151,9 +152,11 @@ void WavPackHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     auto numSamples = WavpackGetNumSamples64(context);
     auto ratio = WavpackGetRatio(context);
 #endif
+
+    return result;
 }
 
-void WavPackHandler::getAttributes(
+bool WavPackHandler::getAttributes(
     WavpackContext* context,
     const std::shared_ptr<CdsItem>& item)
 {
@@ -179,6 +182,7 @@ void WavPackHandler::getAttributes(
     resource->addAttribute(ResourceAttribute::FORMAT, fileFormats.at(fileFormat).data());
     auto avgBitrate = WavpackGetAverageBitrate(context, 0);
     resource->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(avgBitrate));
+    return true;
 }
 
 std::string WavPackHandler::getMimeTypeFromByteVector(
@@ -193,13 +197,14 @@ std::string WavPackHandler::getMimeTypeFromByteVector(
 #endif
 }
 
-void WavPackHandler::getAttachments(
+bool WavPackHandler::getAttachments(
     WavpackContext* context,
     const std::shared_ptr<CdsItem>& item)
 {
     auto tagCount = WavpackGetNumBinaryTagItems(context);
     char tag[MAX_WV_TEXT_SIZE];
     char value[MAX_WV_IMAGE_SIZE];
+    bool result = false;
     for (int index = 0; index < tagCount; index++) {
         auto size = WavpackGetBinaryTagItemIndexed(context, index, tag, MAX_WV_TEXT_SIZE);
         if (size > MAX_WV_TEXT_SIZE) {
@@ -226,6 +231,7 @@ void WavPackHandler::getAttachments(
                     resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
                 resource->addOption(ATTACHMENT_OPTION, tag);
                 item->addResource(resource);
+                result = true;
             } else {
                 log_warning("file {}: wavpack binary tag {} unknown", item->getLocation().c_str(), tag);
                 log_debug("Adding resource '{}'", protocolInfo);
@@ -233,9 +239,11 @@ void WavPackHandler::getAttachments(
                 resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
                 resource->addOption(ATTACHMENT_OPTION, tag);
                 item->addResource(resource);
+                result = true;
             }
         }
     }
+    return result;
 }
 
 /// \brief Wrapper class to interface with libwavpack
@@ -303,13 +311,14 @@ public:
     }
 };
 
-void WavPackHandler::getTags(
+bool WavPackHandler::getTags(
     WavpackContext* context,
     const std::shared_ptr<CdsItem>& item)
 {
     auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_WAVPACK_CHARSET, item->getLocation());
     auto tagCount = WavpackGetNumTagItems(context);
     std::vector<std::string> snippets;
+    bool result = false;
     for (int index = 0; index < tagCount; index++) {
         WavPackObject wavpackObject(context, index, sc, item);
         if (wavpackObject) {
@@ -321,6 +330,7 @@ void WavPackHandler::getTags(
                         log_debug("Identified metadata '{}': {}", wavpackObject.tag, dateValue);
                         item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-01-01", dateValue));
                         item->addMetaData(MetadataFields::M_UPNP_DATE, fmt::format("{}-01-01", dateValue));
+                        result = true;
                     }
                 } else {
                     log_warning("file {}: wavpack tag {} unknown", item->getLocation().string(), wavpackObject.tag);
@@ -331,6 +341,7 @@ void WavPackHandler::getTags(
                     log_debug("Identified metadata '{}': {}", wavpackObject.tag, val);
                     item->removeMetaData(propertyMap.at(wavpackObject.tag)); // wavpack tags overwrite existing values
                     item->addMetaData(propertyMap.at(wavpackObject.tag), val);
+                    result = true;
                 }
             }
             auto meta = metaTags.find(wavpackObject.tag);
@@ -340,6 +351,7 @@ void WavPackHandler::getTags(
                     if (!dateValue.empty()) {
                         log_debug("Identified metadata '{}': {}", wavpackObject.tag, dateValue);
                         item->addMetaData(meta->first, fmt::format("{}-01-01", dateValue));
+                        result = true;
                     }
                 } else {
                     auto val = wavpackObject.getValue();
@@ -347,6 +359,7 @@ void WavPackHandler::getTags(
                         log_debug("Identified metadata '{}': {}", wavpackObject.tag, val);
                         item->removeMetaData(metaTags.at(wavpackObject.tag)); // wavpack tags overwrite existing values
                         item->addMetaData(metaTags.at(wavpackObject.tag), val);
+                        result = true;
                     }
                 }
             }
@@ -356,6 +369,7 @@ void WavPackHandler::getTags(
                 if (!val.empty()) {
                     log_debug("Identified auxdata '{}': {}", wavpackObject.tag, val);
                     item->setAuxData(wavpackObject.tag, val);
+                    result = true;
                 }
             }
             auto comment = std::find_if(commentMap.begin(), commentMap.end(), [&](auto& c) { return c.second == wavpackObject.tag; });
@@ -372,7 +386,9 @@ void WavPackHandler::getTags(
         auto comment = fmt::format("{}", fmt::join(snippets, ", "));
         log_debug("Fabricated Comment: {}", comment);
         item->addMetaData(MetadataFields::M_DESCRIPTION, comment);
+        result = true;
     }
+    return result;
 }
 
 std::unique_ptr<IOHandler> WavPackHandler::serveContent(

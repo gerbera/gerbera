@@ -78,10 +78,10 @@ private:
 public:
     explicit MetadataService(const std::shared_ptr<Context>& context, const std::shared_ptr<Content>& content);
 
-    void extractMetaData(
+    bool extractMetaData(
         const std::shared_ptr<CdsItem>& item,
         const fs::directory_entry& dirEnt);
-    void attachResourceFiles(
+    bool attachResourceFiles(
         const std::shared_ptr<CdsItem>& item,
         const fs::directory_entry& dirEnt);
     std::shared_ptr<MetadataHandler> getHandler(ContentHandler handlerType);

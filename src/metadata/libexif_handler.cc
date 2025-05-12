@@ -412,18 +412,18 @@ void LibExifHandler::process_ifd(
     }
 }
 
-void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !isEnabled)
-        return;
+        return false;
 
     LibExifObject exifObject(converterManager, item);
 
     if (!exifObject) {
         log_debug("Exif data not found, attempting to set resolution internally...");
         setJpegResolutionResource(item);
-        return;
+        return true;
     }
 
     // image resolution in pixels
@@ -462,6 +462,7 @@ void LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         if (!resolution.empty())
             resource->addAttribute(ResourceAttribute::RESOLUTION, resolution);
     }
+    return true;
 }
 
 std::unique_ptr<IOHandler> LibExifHandler::serveContent(

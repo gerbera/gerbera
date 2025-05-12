@@ -44,16 +44,16 @@ public:
     WavPackHandler(const WavPackHandler&) = delete;
     WavPackHandler& operator=(const WavPackHandler&) = delete;
 
-    void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
+    bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
 
 private:
     /// \brief read media attributes from stream
-    static void getAttributes(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
+    static bool getAttributes(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
     /// \brief get read meta data tags from file
-    void getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
+    bool getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
     /// \brief get attachments like artwork
-    void getAttachments(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
+    bool getAttachments(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
     /// \brief try to identify mime type from binary object
     std::string getMimeTypeFromByteVector(const char* data, int size) const;
 

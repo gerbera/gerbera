@@ -118,19 +118,19 @@ std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::sha
     }
 }
 
-void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     if (!isEnabled)
-        return;
+        return false;
 
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)
-        return;
+        return false;
 
     try {
         std::string videoResolution = item->getResource(ContentHandler::DEFAULT)->getAttribute(ResourceAttribute::RESOLUTION);
         if (videoResolution.empty())
-            return;
+            return false;
         auto resolution = Resolution(videoResolution);
         std::string thumbMimetype = getValueOrDefault(mimeContentTypeMappings, CONTENT_TYPE_JPG, "image/jpeg");
 
@@ -142,10 +142,12 @@ void FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
         thumbResource->addAttribute(ResourceAttribute::RESOLUTION, fmt::format("{}x{}", x, y));
         item->addResource(thumbResource);
         log_debug("Adding resource for video thumbnail");
+        return true;
 
     } catch (const std::runtime_error& e) {
         log_warning("Failed to generate resource for thumbnail: {} {}", item->getLocation().c_str(), e.what());
     }
+    return false;
 }
 
 FfmpegThumbnailerHandler::FfmpegThumbnailerHandler(const std::shared_ptr<Context>& context, ConfigVal checkOption)

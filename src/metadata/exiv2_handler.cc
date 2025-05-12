@@ -141,17 +141,18 @@ public:
     }
 };
 
-void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !isEnabled)
-        return;
+        return false;
 
+    bool result = true;
     try {
         Exiv2Object exivObj(converterManager, item);
         if (exivObj.exifData->empty()) {
             // no exiv2 record found in image
-            return;
+            return false;
         }
 
         auto date = exivObj.getDate();
@@ -216,11 +217,14 @@ void Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         }
     } catch (const Exiv2::AnyError& ex) {
         log_warning("Caught Exiv2 exception processing {}: '{}'", item->getLocation().string(), ex.what());
+        result = false;
     } catch (const std::runtime_error& e) {
         log_warning("Caught exception processing {}: '{}'", item->getLocation().string(), e.what());
+        result = false;
     }
 
     Exiv2::XmpProperties::unregisterNs();
+    return result;
 }
 
 std::unique_ptr<IOHandler> Exiv2Handler::serveContent(
