@@ -58,7 +58,7 @@ class FfmpegHandler : public MediaMetadataHandler {
 public:
     explicit FfmpegHandler(const std::shared_ptr<Context>& context);
 
-    void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
+    bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsResource>& resource) override;
@@ -66,19 +66,19 @@ public:
 
 private:
     /// \brief get all AUX values as configured
-    void addFfmpegAuxdataFields(
+    bool addFfmpegAuxdataFields(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject) const;
     /// \brief get all metadata fields
-    void addFfmpegMetadataFields(
+    bool addFfmpegMetadataFields(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject) const;
     /// \brief get additional resource fields
-    void addFfmpegResourceFields(
+    bool addFfmpegResourceFields(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject);
     /// \brief fabricate comment from metadata
-    void addFfmpegComment(
+    bool addFfmpegComment(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject) const;
     /// \brief try to extract mime type and content type from stream data

@@ -118,13 +118,14 @@ MatroskaHandler::MatroskaHandler(const std::shared_ptr<Context>& context)
 {
 }
 
-void MatroskaHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool MatroskaHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !isEnabled)
-        return;
+        return false;
 
     parseMKV(item, nullptr);
+    return activeFlag == 0;
 }
 
 std::unique_ptr<IOHandler> MatroskaHandler::serveContent(

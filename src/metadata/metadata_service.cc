@@ -113,7 +113,7 @@ MetadataService::MetadataService(const std::shared_ptr<Context>& context, const 
     };
 }
 
-void MetadataService::extractMetaData(
+bool MetadataService::extractMetaData(
     const std::shared_ptr<CdsItem>& item,
     const fs::directory_entry& dirEnt)
 {
@@ -137,55 +137,59 @@ void MetadataService::extractMetaData(
     }
 
     auto mediaType = item->getMediaType(contentType);
+    bool result = false;
 
 #ifdef HAVE_TAGLIB
     if ((contentType == CONTENT_TYPE_MP3) || ((contentType == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) || (contentType == CONTENT_TYPE_WMA) || (contentType == CONTENT_TYPE_WAVPACK) || (contentType == CONTENT_TYPE_FLAC) || (contentType == CONTENT_TYPE_PCM) || (contentType == CONTENT_TYPE_AIFF) || (contentType == CONTENT_TYPE_APE) || (contentType == CONTENT_TYPE_MP4)) {
-        handlers[MetadataType::TagLib]->fillMetadata(item);
+        result = handlers[MetadataType::TagLib]->fillMetadata(item) || result;
     }
 #endif // HAVE_TAGLIB
 
 #ifdef HAVE_EXIV2
     if (mediaType == ObjectType::Image) {
-        handlers[MetadataType::Exiv2]->fillMetadata(item);
+        result = handlers[MetadataType::Exiv2]->fillMetadata(item) || result;
     }
 #endif
 
 #ifdef HAVE_LIBEXIF
     if (contentType == CONTENT_TYPE_JPG) {
-        handlers[MetadataType::LibExif]->fillMetadata(item);
+        result = handlers[MetadataType::LibExif]->fillMetadata(item) || result;
     }
 #endif // HAVE_LIBEXIF
 
 #ifdef HAVE_MATROSKA
     if (contentType == CONTENT_TYPE_MKV) {
-        handlers[MetadataType::Matroska]->fillMetadata(item);
+        result = handlers[MetadataType::Matroska]->fillMetadata(item) || result;
     }
 #endif
 
 #ifdef HAVE_WAVPACK
     if (contentType == CONTENT_TYPE_WAVPACK) {
-        handlers[MetadataType::WavPack]->fillMetadata(item);
+        result = handlers[MetadataType::WavPack]->fillMetadata(item) || result;
     }
 #endif
 
 #ifdef HAVE_FFMPEG
     if (mediaType == ObjectType::Audio || mediaType == ObjectType::Video) {
-        handlers[MetadataType::Ffmpeg]->fillMetadata(item);
+        result = handlers[MetadataType::Ffmpeg]->fillMetadata(item) || result;
     }
 #else
     if (contentType == CONTENT_TYPE_AVI) {
         std::string fourcc = getAVIFourCC(dirEnt.path());
         if (!fourcc.empty()) {
             resource->addOption(RESOURCE_OPTION_FOURCC, fourcc);
+            result = true;
         }
     }
 #endif // HAVE_FFMPEG
 
     // Metadata from text files
-    handlers[MetadataType::Metafile]->fillMetadata(item);
+    result = handlers[MetadataType::Metafile]->fillMetadata(item) || result;
+
+    return result;
 }
 
-void MetadataService::attachResourceFiles(
+bool MetadataService::attachResourceFiles(
     const std::shared_ptr<CdsItem>& item,
     const fs::directory_entry& dirEnt)
 {
@@ -195,23 +199,27 @@ void MetadataService::attachResourceFiles(
 
     auto mediaType = item->getMediaType();
 
+    bool result = false;
+
 #ifdef HAVE_FFMPEGTHUMBNAILER
     // Thumbnails for videos and images
     if (mediaType == ObjectType::Video)
-        handlers[MetadataType::VideoThumbnailer]->fillMetadata(item);
+        result = handlers[MetadataType::VideoThumbnailer]->fillMetadata(item) || result;
     else if (mediaType == ObjectType::Image)
-        handlers[MetadataType::ImageThumbnailer]->fillMetadata(item);
+        result = handlers[MetadataType::ImageThumbnailer]->fillMetadata(item) || result;
 #endif
 
     // Fanart for audio and video
     if (mediaType == ObjectType::Audio || mediaType == ObjectType::Video)
-        handlers[MetadataType::FanArt]->fillMetadata(item);
+        result = handlers[MetadataType::FanArt]->fillMetadata(item) || result;
 
     // Subtitles for videos
     if (mediaType == ObjectType::Video)
-        handlers[MetadataType::Subtitle]->fillMetadata(item);
+        result = handlers[MetadataType::Subtitle]->fillMetadata(item) || result;
 
-    handlers[MetadataType::ResourceFile]->fillMetadata(item);
+    result = handlers[MetadataType::ResourceFile]->fillMetadata(item) || result;
+
+    return result;
 }
 
 std::shared_ptr<MetadataHandler> MetadataService::getHandler(ContentHandler handlerType)

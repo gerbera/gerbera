@@ -1105,7 +1105,8 @@ void ImportService::updateFanArt(bool isDir)
         auto dirEntry = stateEntry->getDirEntry();
         auto item = std::dynamic_pointer_cast<CdsItem>(stateEntry->getObject());
         try {
-            metadataService->attachResourceFiles(item, dirEntry);
+            if (metadataService->attachResourceFiles(item, dirEntry))
+                database->updateObject(item, nullptr);
         } catch (const std::runtime_error& ex) {
             log_error("Updating FanArt for '{}' failed: {}", dirEntry.path().string(), ex.what());
         }

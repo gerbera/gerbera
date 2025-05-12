@@ -216,36 +216,39 @@ public:
     }
 };
 
-void FfmpegHandler::addFfmpegAuxdataFields(
+bool FfmpegHandler::addFfmpegAuxdataFields(
     const std::shared_ptr<CdsItem>& item,
     const FfmpegObject& ffmpegObject) const
 {
     if (!ffmpegObject) {
         log_debug("no metadata");
-        return;
+        return false;
     }
 
+    bool result = false;
     for (auto&& desiredTag : auxTags) {
         if (!desiredTag.empty()) {
             auto val = ffmpegObject.getKey(desiredTag);
             if (!val.empty()) {
                 log_debug("Added {}: {}", desiredTag.c_str(), val);
                 item->setAuxData(desiredTag, val);
+                result = true;
             }
         }
     }
+    return result;
 }
 
-void FfmpegHandler::addFfmpegComment(
+bool FfmpegHandler::addFfmpegComment(
     const std::shared_ptr<CdsItem>& item,
     const FfmpegObject& ffmpegObject) const
 {
     if (!ffmpegObject) {
         log_debug("no metadata");
-        return;
+        return false;
     }
     if (!isCommentEnabled)
-        return;
+        return false;
 
     std::vector<std::string> snippets;
     for (auto&& [label, desiredTag] : commentMap) {
@@ -261,18 +264,21 @@ void FfmpegHandler::addFfmpegComment(
         auto comment = fmt::format("{}", fmt::join(snippets, ", "));
         log_debug("Fabricated Comment: {}", comment);
         item->addMetaData(MetadataFields::M_DESCRIPTION, comment);
+        return true;
     }
+    return false;
 }
 
-void FfmpegHandler::addFfmpegMetadataFields(
+bool FfmpegHandler::addFfmpegMetadataFields(
     const std::shared_ptr<CdsItem>& item,
     const FfmpegObject& ffmpegObject) const
 {
     if (!ffmpegObject) {
         log_debug("no metadata");
-        return;
+        return false;
     }
 
+    bool result = false;
     // only use ffmpeg meta data if not found by other handlers
     auto emptyProperties = std::map<MetadataFields, bool>();
     for (auto&& prop : propertyMap) {
@@ -339,10 +345,12 @@ void FfmpegHandler::addFfmpegMetadataFields(
             } else if (field == MetadataFields::M_PARTNUMBER) {
                 item->setPartNumber(stoiString(value));
             }
+            result = true;
         } else {
             log_debug("Unhandled metadata {} = '{}'", key, value);
         }
     }
+    return result;
 }
 
 /// \brief Convert Rotation Information to 360 degree value
@@ -487,13 +495,13 @@ std::string FfmpegHandler::getContentTypeFromByteVector(const std::vector<std::u
 #endif
 }
 
-void FfmpegHandler::addFfmpegResourceFields(
+bool FfmpegHandler::addFfmpegResourceFields(
     const std::shared_ptr<CdsItem>& item,
     const FfmpegObject& ffmpegObject)
 {
     if (!ffmpegObject) {
         log_debug("no metadata");
-        return;
+        return false;
     }
 
     auto resource = item->getResource(ContentHandler::DEFAULT);
@@ -523,6 +531,7 @@ void FfmpegHandler::addFfmpegResourceFields(
     // video resolution, audio sampling rate, nr of audio channels
     int audioSet = 0;
     int videoSet = artWorkEnabled && isAudioFile ? 1 : 0;
+    bool result = false;
     for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
         auto st = ffmpegObject.pFormatCtx->streams[stream_number];
 
@@ -593,6 +602,7 @@ void FfmpegHandler::addFfmpegResourceFields(
                     log_debug("Unknown Pixel Format");
                 }
             }
+            result = true;
             break;
         }
         case AVMEDIA_TYPE_SUBTITLE: {
@@ -625,6 +635,7 @@ void FfmpegHandler::addFfmpegResourceFields(
                 stResource->addAttribute(ResourceAttribute::SIZE, fmt::format("{}", as_codecpar(st)->extradata_size));
             } else
                 stResource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(subtitle.size()));
+            result = true;
             break;
         }
         case AVMEDIA_TYPE_DATA: // Opaque data information usually continuous.
@@ -675,33 +686,38 @@ void FfmpegHandler::addFfmpegResourceFields(
                 log_debug("Added number of audio channels: {} from stream {}", audioCh, stream_number);
                 resource->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(audioCh));
             }
+            result = true;
             break;
         }
         case AVMEDIA_TYPE_UNKNOWN:
             break;
         }
     }
+
+    return result;
 }
 
-void FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !isEnabled)
-        return;
+        return false;
 
     log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
 
     FfmpegObject ffmpegObject(converterManager, item);
 
+    bool result = false;
     // Add metadata for unset values
-    addFfmpegMetadataFields(item, ffmpegObject);
+    result = addFfmpegMetadataFields(item, ffmpegObject) || result;
     // Add auxdata
-    addFfmpegAuxdataFields(item, ffmpegObject);
+    result = addFfmpegAuxdataFields(item, ffmpegObject) || result;
     // Add special resource properties
-    addFfmpegResourceFields(item, ffmpegObject);
+    result = addFfmpegResourceFields(item, ffmpegObject) || result;
     // Fabricate comment
     if (item->getMetaData(MetadataFields::M_DESCRIPTION).empty())
-        addFfmpegComment(item, ffmpegObject);
+        result = addFfmpegComment(item, ffmpegObject) || result;
+    return true;
 }
 
 std::unique_ptr<IOHandler> FfmpegHandler::serveContent(

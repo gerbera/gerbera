@@ -260,11 +260,12 @@ FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
     }
 }
 
-void FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     log_debug("Running fanart handler on {}", obj->getLocation().c_str());
     auto pathList = setup->getContentPath(obj, SETTING_FANART);
 
+    bool result = false;
     if (pathList.empty() || pathList[0].empty())
         obj->removeResource(ContentHandler::FANART);
 
@@ -286,8 +287,10 @@ void FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
                 resource->addAttribute(ResourceAttribute::RESOURCE_FILE, mval);
             }
             obj->addResource(resource);
+            result = true;
         }
     }
+    return result;
 }
 
 std::unique_ptr<IOHandler> FanArtHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
@@ -316,13 +319,14 @@ ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context
     }
 }
 
-void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto pathList = setup->getContentPath(obj, SETTING_CONTAINERART, config->getOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION));
     if (pathList.empty() || pathList[0].empty()) {
         pathList = setup->getContentPath(obj, SETTING_CONTAINERART);
     }
 
+    bool result = false;
     if (pathList.empty() || pathList[0].empty())
         obj->removeResource(ContentHandler::CONTAINERART);
 
@@ -345,8 +349,10 @@ void ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
                 resource->addAttribute(ResourceAttribute::RESOURCE_FILE, mval);
             }
             obj->addResource(resource);
+            result = true;
         }
     }
+    return result;
 }
 
 std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
@@ -378,11 +384,12 @@ SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
     }
 }
 
-void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto pathList = setup->getContentPath(obj, SETTING_SUBTITLE);
     auto objFilename = obj->getLocation().filename().stem().string();
 
+    bool result = false;
     if (pathList.empty() || pathList[0].empty())
         obj->removeResource(ContentHandler::SUBTITLE);
 
@@ -420,8 +427,10 @@ void SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
                 resource->addAttribute(ResourceAttribute::LANGUAGE, lang); // assume file name is related to some language
             resource->addParameter("type", type);
             obj->addResource(resource);
+            result = true;
         }
     }
+    return result;
 }
 
 std::unique_ptr<IOHandler> SubtitleHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
@@ -451,8 +460,9 @@ MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context, std::s
     }
 }
 
-void MetafileHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool MetafileHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
+    bool result = false;
 #ifdef HAVE_JS
     auto pathList = setup->getContentPath(obj, SETTING_METAFILE);
 
@@ -463,9 +473,11 @@ void MetafileHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         if (!path.empty()) {
             log_debug("Running metafile handler on {} -> '{}'", obj->getLocation().c_str(), path.c_str());
             content->parseMetafile(obj, path);
+            result = true;
         }
     }
 #endif
+    return result;
 }
 
 std::unique_ptr<IOHandler> MetafileHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
@@ -483,10 +495,11 @@ ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
     }
 }
 
-void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto pathList = setup->getContentPath(obj, SETTING_RESOURCE);
 
+    bool result = false;
     if (pathList.empty() || pathList[0].empty())
         obj->removeResource(ContentHandler::RESOURCE);
 
@@ -505,8 +518,10 @@ void ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
             resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("res"));
             resource->addAttribute(ResourceAttribute::RESOURCE_FILE, mval);
             obj->addResource(resource);
+            result = true;
         }
     }
+    return result;
 }
 
 std::unique_ptr<IOHandler> ResourceHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)

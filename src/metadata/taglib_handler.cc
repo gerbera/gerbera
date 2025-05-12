@@ -336,17 +336,18 @@ void TagLibHandler::makeComment(
 
 /// \brief read metadata from file and add to object
 /// \param obj Object to handle
-void TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !isEnabled)
-        return;
+        return false;
 
     std::string contentType = getValueOrDefault(mimeContentTypeMappings, item->getMimeType());
 
     log_debug("Reading {}, content type {}", item->getLocation().c_str(), contentType);
     auto fs = TagLib::FileStream(item->getLocation().c_str(), true); // true = Read only
 
+    bool result = true;
     if (contentType == CONTENT_TYPE_MP3) {
         extractMP3(fs, item);
     } else if (contentType == CONTENT_TYPE_FLAC) {
@@ -365,8 +366,10 @@ void TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         extractAiff(fs, item);
     } else {
         log_warning("TagLibHandler: File '{}' has unhandled content type '{}'", item->getLocation().c_str(), contentType.c_str());
+        result = false;
     }
     log_debug("Done {}", item->getLocation().c_str());
+    return result;
 }
 
 std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector& data) const
