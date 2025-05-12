@@ -1191,6 +1191,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             "/import/library-options/attribute::legacy-value-separator", "config-import.html#library-options",
             ""),
 
+        // resources
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_RESOURCES_CASE_SENSITIVE,
             "/import/resources/attribute::case-sensitive", "config-import.html#resources",
             DEFAULT_RESOURCES_CASE_SENSITIVE),
@@ -1205,6 +1206,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             false, false, false,
             defaultFanArtDirectory),
 
+        // container art
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST,
             "/import/resources/container", "config-import.html#container",
             ConfigVal::A_IMPORT_RESOURCES_ADD_FILE, ConfigVal::A_IMPORT_RESOURCES_NAME,
@@ -1224,6 +1226,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             "/import/resources/container/attribute::minDepth", "config-import.html#container",
             2, 0, ConfigIntSetup::CheckMinValue),
 
+        // subtitles
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
             "/import/resources/subtitle", "config-import.html#resources",
             ConfigVal::A_IMPORT_RESOURCES_ADD_FILE, ConfigVal::A_IMPORT_RESOURCES_NAME,
@@ -1235,6 +1238,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             false, false, false,
             defaultSubtitleDirectory),
 
+        // meta files
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST,
             "/import/resources/metafile", "config-import.html#resources",
             ConfigVal::A_IMPORT_RESOURCES_ADD_FILE, ConfigVal::A_IMPORT_RESOURCES_NAME,
@@ -1245,6 +1249,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             std::vector<ConfigVal> { ConfigVal::A_IMPORT_RESOURCES_NAME, ConfigVal::A_IMPORT_RESOURCES_PTT, ConfigVal::A_IMPORT_RESOURCES_EXT, ConfigVal::A_IMPORT_RESOURCES_MIME },
             false, false, false),
 
+        // resource reverse
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST,
             "/import/resources/resource", "config-import.html#resources",
             ConfigVal::A_IMPORT_RESOURCES_ADD_FILE, ConfigVal::A_IMPORT_RESOURCES_NAME,
@@ -1370,6 +1375,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             "attribute::resource-file", "config-import.html#resources",
             ""),
 
+        // mapping attributes
         std::make_shared<ConfigStringSetup>(ConfigVal::A_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT,
             "treat", "config-import.html#mappings",
             ""),
@@ -1416,6 +1422,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             "container-type-video", "config-import.html#autoscan",
             UPNP_CLASS_CONTAINER),
 
+        // library attributes
         std::make_shared<ConfigStringSetup>(ConfigVal::A_IMPORT_LIBOPTS_AUXDATA_TAG,
             "attribute::tag", "config-import.html#auxdata",
             ""),

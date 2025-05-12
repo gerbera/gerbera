@@ -77,6 +77,8 @@ extern "C" {
 #define as_codecpar(s) s->codec
 #endif
 
+#define STREAM_NUMBER_OPTION "streamNumber"
+
 /// \brief Wrapper class to log FFMpeg messages
 class FfmpegLogger {
 public:
@@ -532,6 +534,7 @@ void FfmpegHandler::addFfmpegResourceFields(
             if (videoSet > 0) {
                 resource2 = std::make_shared<CdsResource>(ContentHandler::FFMPEG, isAudioFile ? ResourcePurpose::Thumbnail : ResourcePurpose::Content);
                 item->addResource(resource2);
+                resource2->addOption(STREAM_NUMBER_OPTION, fmt::to_string(stream_number));
             }
 
             if (videoSet == 1 && artWorkEnabled && isAudioFile) {
@@ -598,6 +601,7 @@ void FfmpegHandler::addFfmpegResourceFields(
             // subtitle codec
             auto codecId = as_codecpar(st)->codec_id;
             stResource->addAttribute(ResourceAttribute::TYPE, avcodec_get_name(codecId));
+            stResource->addOption(STREAM_NUMBER_OPTION, fmt::to_string(stream_number));
 
             auto subtitle = extractSubtitle(ffmpegObject, stream_number);
             if (!subtitle.empty()) {
@@ -632,6 +636,7 @@ void FfmpegHandler::addFfmpegResourceFields(
             if (audioSet > 0) {
                 resource = std::make_shared<CdsResource>(ContentHandler::FFMPEG, ResourcePurpose::Content);
                 item->addResource(resource);
+                resource->addOption(STREAM_NUMBER_OPTION, fmt::to_string(stream_number));
             }
 
             // audio codec
@@ -706,51 +711,54 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !isEnabled || !resource)
         return nullptr;
+    auto streamIndex = stoulString(resource->getOption(STREAM_NUMBER_OPTION));
+    if (streamIndex < 1)
+        return nullptr;
 
     log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
 
     if (resource->getPurpose() == ResourcePurpose::Thumbnail) {
         FfmpegObject ffmpegObject(converterManager, item);
         auto resolution = resource->getAttribute(ResourceAttribute::RESOLUTION);
-        for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
-            auto st = ffmpegObject.pFormatCtx->streams[stream_number];
+        auto st = ffmpegObject.pFormatCtx->streams[streamIndex];
 
-            if (!st)
-                continue;
+        if (!st) {
+            log_warning("resource {} pointing to wrong stream", streamIndex);
+            return nullptr;
+        }
 
-            if (as_codecpar(st)->width > 0 && as_codecpar(st)->height > 0) {
-                auto res = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
-                if (res != resolution)
-                    continue;
-                auto image = extractArtImage(ffmpegObject, stream_number);
-                if (!image.empty()) {
-                    return std::make_unique<MemIOHandler>(image.data(), image.size());
-                }
+        if (as_codecpar(st)->width > 0 && as_codecpar(st)->height > 0) {
+            auto res = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
+            if (res != resolution)
+                log_warning("resource {} pointing to wrong index {}, resolution mismatch {} - {}", streamIndex, res, resolution);
+            auto image = extractArtImage(ffmpegObject, streamIndex);
+            if (!image.empty()) {
+                return std::make_unique<MemIOHandler>(image.data(), image.size());
             }
         }
     }
     if (resource->getPurpose() == ResourcePurpose::Subtitle) {
         FfmpegObject ffmpegObject(converterManager, item);
         auto language = resource->getAttribute(ResourceAttribute::LANGUAGE);
-        for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
-            auto st = ffmpegObject.pFormatCtx->streams[stream_number];
+        auto st = ffmpegObject.pFormatCtx->streams[streamIndex];
 
-            if (!st)
-                continue;
+        if (!st) {
+            log_warning("resource {} pointing to wrong stream", streamIndex);
+            return nullptr;
+        }
 
-            AVDictionaryEntry* langEntry = av_dict_get(st->metadata, "language", nullptr, 0);
-            std::string lang = (langEntry && langEntry->value) ? langEntry->value : fmt::to_string(stream_number);
+        AVDictionaryEntry* langEntry = av_dict_get(st->metadata, "language", nullptr, 0);
+        std::string lang = (langEntry && langEntry->value) ? langEntry->value : fmt::to_string(streamIndex);
 
-            if (language == lang) {
-                auto subtitle = extractSubtitle(ffmpegObject, stream_number);
-                if (!subtitle.empty()) {
-                    auto subString = std::string(reinterpret_cast<const char*>(subtitle.data()), subtitle.size());
-                    auto [val, err] = ffmpegObject.sc->convert(subString);
-                    if (!err.empty()) {
-                        log_warning("{} {}: {}", ffmpegObject.location, subString, err);
-                    }
-                    return std::make_unique<MemIOHandler>(val);
+        if (language == lang) {
+            auto subtitle = extractSubtitle(ffmpegObject, streamIndex);
+            if (!subtitle.empty()) {
+                auto subString = std::string(reinterpret_cast<const char*>(subtitle.data()), subtitle.size());
+                auto [val, err] = ffmpegObject.sc->convert(subString);
+                if (!err.empty()) {
+                    log_warning("{} {}: {}", ffmpegObject.location, subString, err);
                 }
+                return std::make_unique<MemIOHandler>(val);
             }
         }
     }
