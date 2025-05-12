@@ -43,15 +43,21 @@ public:
     ~WavPackHandler() override;
     WavPackHandler(const WavPackHandler&) = delete;
     WavPackHandler& operator=(const WavPackHandler&) = delete;
+
     void fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
 
 private:
+    /// \brief read media attributes from stream
     static void getAttributes(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
+    /// \brief get read meta data tags from file
     void getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
+    /// \brief get attachments like artwork
     void getAttachments(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
-    std::string getContentTypeFromByteVector(const char* data, int size) const;
+    /// \brief try to identify mime type from binary object
+    std::string getMimeTypeFromByteVector(const char* data, int size) const;
 
+    /// \brief reference to WavPack context
     WavpackContext* context = nullptr;
 };
 

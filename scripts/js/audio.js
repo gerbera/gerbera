@@ -363,7 +363,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
           result.push(addCdsObject(obj, container));
         }
         if (specialGenre.exec(chain.genre.title)) {
-          if (disknr.length === 1) {
+          if (audio.disknr.length === 1) {
             chain.album.title = '0' + audio.disknr + ' - ' + audio.album;
           } else {
             chain.album.title = audio.disknr + ' - ' + audio.album;

@@ -56,7 +56,8 @@ static const auto propertyMap = std::map<std::string_view, MetadataFields> {
 
 #define MAX_WV_TEXT_SIZE 256
 #define MAX_WV_IMAGE_SIZE 1024 * 1024
-#define ALBUMART_OPTION "albumArtTag"
+#define ATTACHMENT_OPTION "albumArtTag"
+#define ARTWORK_TAG "Cover"
 
 WavPackHandler::WavPackHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(
@@ -152,7 +153,9 @@ void WavPackHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 #endif
 }
 
-void WavPackHandler::getAttributes(WavpackContext* context, const std::shared_ptr<CdsItem>& item)
+void WavPackHandler::getAttributes(
+    WavpackContext* context,
+    const std::shared_ptr<CdsItem>& item)
 {
     auto resource = item->getResource(ContentHandler::DEFAULT);
     auto nrChannels = WavpackGetNumChannels(context);
@@ -178,7 +181,9 @@ void WavPackHandler::getAttributes(WavpackContext* context, const std::shared_pt
     resource->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(avgBitrate));
 }
 
-std::string WavPackHandler::getContentTypeFromByteVector(const char* data, int size) const
+std::string WavPackHandler::getMimeTypeFromByteVector(
+    const char* data,
+    int size) const
 {
 #ifdef HAVE_MAGIC
     auto artMimetype = mime->bufferToMimeType(data, size);
@@ -188,7 +193,9 @@ std::string WavPackHandler::getContentTypeFromByteVector(const char* data, int s
 #endif
 }
 
-void WavPackHandler::getAttachments(WavpackContext* context, const std::shared_ptr<CdsItem>& item)
+void WavPackHandler::getAttachments(
+    WavpackContext* context,
+    const std::shared_ptr<CdsItem>& item)
 {
     auto tagCount = WavpackGetNumBinaryTagItems(context);
     char tag[MAX_WV_TEXT_SIZE];
@@ -203,24 +210,29 @@ void WavPackHandler::getAttachments(WavpackContext* context, const std::shared_p
                 log_warning("file {}: wavpack binary tag {} value '{}' truncated (full size {})", item->getLocation().c_str(), tag, value, size);
                 size = MAX_WV_IMAGE_SIZE;
             }
-            if (startswith(tag, "Cover Art")) {
-                log_debug("Identified metadata '{}': {}", tag, value);
+            auto attmtMimetype = getMimeTypeFromByteVector(value + strlen(value) + 1, size - strlen(value) - 1);
+            auto protocolInfo = renderProtocolInfo(attmtMimetype);
+            log_debug("Identified metadata '{}': {}", tag, value);
+            if (startswith(tag, ARTWORK_TAG)) {
 
                 /* The convention for binary tag items in APEv2 tags is that the data starts with a NULLterminated
                    string representing a filename. After the terminating NULL, the actual binary data
                    starts. In the WavPack code this filename has only the extension of the actual file; the name
                    portion is made up of the tag item name.
                 */
-                auto artMimetype = getContentTypeFromByteVector(value + strlen(value) + 1, size - strlen(value) - 1);
-                if (artMimetype != MIMETYPE_DEFAULT) {
-                    log_debug("Adding resource '{}'", renderProtocolInfo(artMimetype));
-                    auto resource = std::make_shared<CdsResource>(ContentHandler::WAVPACK, ResourcePurpose::Thumbnail);
-                    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
-                    resource->addOption(ALBUMART_OPTION, tag);
-                    item->addResource(resource);
-                }
+                log_debug("Adding album art '{}'", protocolInfo);
+                auto resource = std::make_shared<CdsResource>(ContentHandler::WAVPACK, ResourcePurpose::Thumbnail);
+                if (attmtMimetype != MIMETYPE_DEFAULT)
+                    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
+                resource->addOption(ATTACHMENT_OPTION, tag);
+                item->addResource(resource);
             } else {
                 log_warning("file {}: wavpack binary tag {} unknown", item->getLocation().c_str(), tag);
+                log_debug("Adding resource '{}'", protocolInfo);
+                auto resource = std::make_shared<CdsResource>(ContentHandler::WAVPACK, ResourcePurpose::Content);
+                resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
+                resource->addOption(ATTACHMENT_OPTION, tag);
+                item->addResource(resource);
             }
         }
     }
@@ -237,7 +249,11 @@ private:
 public:
     char tag[MAX_WV_TEXT_SIZE] { '\0' };
 
-    WavPackObject(WavpackContext* context, int index, const std::shared_ptr<StringConverter> sc, const std::shared_ptr<CdsItem>& item)
+    WavPackObject(
+        WavpackContext* context,
+        int index,
+        const std::shared_ptr<StringConverter> sc,
+        const std::shared_ptr<CdsItem>& item)
         : location(item->getLocation())
         , sc(sc)
     {
@@ -287,7 +303,9 @@ public:
     }
 };
 
-void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item)
+void WavPackHandler::getTags(
+    WavpackContext* context,
+    const std::shared_ptr<CdsItem>& item)
 {
     auto sc = converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_WAVPACK_CHARSET, item->getLocation());
     auto tagCount = WavpackGetNumTagItems(context);
@@ -357,34 +375,36 @@ void WavPackHandler::getTags(WavpackContext* context, const std::shared_ptr<CdsI
     }
 }
 
-std::unique_ptr<IOHandler> WavPackHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
+std::unique_ptr<IOHandler> WavPackHandler::serveContent(
+    const std::shared_ptr<CdsObject>& obj,
+    const std::shared_ptr<CdsResource>& resource)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item) // not streamable
         return {};
     if (!resource)
         return {};
-    auto artTag = resource->getOption(ALBUMART_OPTION);
-    if (artTag.empty())
+    auto attmtTag = resource->getOption(ATTACHMENT_OPTION);
+    if (attmtTag.empty())
         return {};
 
-    char error[MAX_WV_TEXT_SIZE];
+    char error[MAX_WV_TEXT_SIZE] = { '\0' };
     context = WavpackOpenFileInput(item->getLocation().c_str(), error, OPEN_TAGS | OPEN_2CH_MAX | OPEN_DSD_NATIVE, 0);
     if (!context) {
         log_error("Could not open {} as WavPack file: {}", item->getLocation().c_str(), error);
     }
 
-    char value[MAX_WV_IMAGE_SIZE];
-    auto size = WavpackGetBinaryTagItem(context, artTag.c_str(), value, MAX_WV_IMAGE_SIZE);
+    char value[MAX_WV_IMAGE_SIZE] = { '\0' };
+    auto size = WavpackGetBinaryTagItem(context, attmtTag.c_str(), value, MAX_WV_IMAGE_SIZE);
     if (size > MAX_WV_IMAGE_SIZE) {
-        log_warning("file {}: wavpack binary tag {} value '{}' truncated (full size {})", item->getLocation().c_str(), artTag, value, size);
+        log_warning("file {}: wavpack binary tag {} value '{}' truncated (full size {})", item->getLocation().c_str(), attmtTag, value, size);
         size = MAX_WV_IMAGE_SIZE;
     }
-    if (startswith(artTag, "Cover Art")) {
-        log_debug("Found image '{}': {}", artTag, value);
+    if (startswith(attmtTag, ARTWORK_TAG)) {
+        log_debug("Found image '{}': {}", attmtTag, value);
         return std::make_unique<MemIOHandler>(value + strlen(value) + 1, size - strlen(value) - 1);
     }
-    log_warning("file {}: wavpack binary tag {} unknown", item->getLocation().c_str(), artTag);
+    log_warning("file {}: wavpack binary tag {} unknown", item->getLocation().c_str(), attmtTag);
 
     return {};
 }
