@@ -2636,6 +2636,7 @@ void SQLDatabase::savePlayStatus(const std::shared_ptr<ClientStatusDetail>& deta
 
     if (doUpdate) {
         auto dict = std::map<PlaystatusColumn, std::string> {
+            { PlaystatusColumn::Group, quote(detail->getGroup()) },
             { PlaystatusColumn::PlayCount, quote(detail->getPlayCount()) },
             { PlaystatusColumn::LastPlayed, quote(detail->getLastPlayed().count()) },
             { PlaystatusColumn::LastPlayedPosition, quote(detail->getLastPlayedPosition().count()) },

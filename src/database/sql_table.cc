@@ -270,7 +270,7 @@ std::vector<std::string> Client2Table::getWhere(
     const std::shared_ptr<ClientObservation>& obj) const
 {
     return {
-        columnMapper->getClause(ClientColumn::Addr, obj && obj->addr ? obj->addr->getNameInfo(false) : rowData.at(ClientColumn::Addr), true),
+        columnMapper->getClause(ClientColumn::Addr, rowData.at(ClientColumn::Addr), true),
         columnMapper->getClause(ClientColumn::Port, obj && obj->addr ? fmt::to_string(obj->addr->getPort()) : rowData.at(ClientColumn::Port), true),
     };
 }
@@ -279,7 +279,7 @@ std::vector<std::string> Playstatus2Table::getWhere(
     const std::shared_ptr<ClientStatusDetail>& obj) const
 {
     return {
-        columnMapper->getClause(PlaystatusColumn::Group, obj ? obj->getGroup() : rowData.at(PlaystatusColumn::Group), true),
+        columnMapper->getClause(PlaystatusColumn::Group, rowData.at(PlaystatusColumn::Group), true),
         columnMapper->getClause(PlaystatusColumn::ItemId, obj ? fmt::to_string(obj->getItemId()) : rowData.at(PlaystatusColumn::ItemId), true),
     };
 }
