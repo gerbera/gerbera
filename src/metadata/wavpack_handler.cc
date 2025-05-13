@@ -76,6 +76,15 @@ WavPackHandler::~WavPackHandler()
         context = WavpackCloseFile(context);
 }
 
+bool WavPackHandler::isSupported(
+    const std::string& contentType,
+    bool isOggTheora,
+    const std::string& mimeType,
+    ObjectType mediaType)
+{
+    return contentType == CONTENT_TYPE_WAVPACK;
+}
+
 bool WavPackHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);

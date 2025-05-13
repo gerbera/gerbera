@@ -53,6 +53,10 @@ class TagLibHandler : public MediaMetadataHandler {
 public:
     explicit TagLibHandler(const std::shared_ptr<Context>& context);
 
+    bool isSupported(const std::string& contentType,
+        bool isOggTheora,
+        const std::string& mimeType,
+        ObjectType mediaType) override;
     /// \brief read metadata from file and add to object
     /// \param obj Object to handle
     bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
@@ -83,6 +87,7 @@ private:
 
     void populateGenericTags(
         const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res,
         const TagLib::File& file,
         const TagLib::PropertyMap& propertyMap,
         const std::shared_ptr<StringConverter>& sc) const;
@@ -95,17 +100,48 @@ private:
         const TagLib::PropertyMap& propertyMap,
         const std::shared_ptr<StringConverter>& sc) const;
     std::string getContentTypeFromByteVector(const TagLib::ByteVector& data) const;
-    void extractMP3(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const;
-    void extractOgg(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const;
-    void extractASF(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const;
-    void extractFLAC(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const;
-    void extractAPE(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const;
-    void extractWavPack(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const;
-    void extractMP4(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const;
-    void extractAiff(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const;
+    void extractMP3(
+        TagLib::IOStream& roStream,
+        const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res) const;
+    void extractOgg(
+        TagLib::IOStream& roStream,
+        const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res) const;
+    void extractASF(
+        TagLib::IOStream& roStream,
+        const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res) const;
+    void extractFLAC(
+        TagLib::IOStream& roStream,
+        const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res) const;
+    void extractAPE(
+        TagLib::IOStream& roStream,
+        const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res) const;
+    void extractWavPack(
+        TagLib::IOStream& roStream,
+        const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res) const;
+    void extractDSF(
+        TagLib::IOStream& roStream,
+        const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res) const;
+    void extractMP4(
+        TagLib::IOStream& roStream,
+        const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res) const;
+    void extractAiff(
+        TagLib::IOStream& roStream,
+        const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res) const;
 
     template <class Media>
-    void setBitsPerSample(const std::shared_ptr<CdsItem>& item, Media& media) const;
+    void setBitsPerSample(
+        const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res,
+        Media& media) const;
 };
 
 #endif

@@ -26,7 +26,6 @@ RUN apk add --no-cache  \
     pugixml-dev \
     spdlog-dev \
     sqlite-dev \
-    taglib-dev \
     jsoncpp-dev \
     icu-dev \
     tini \
@@ -48,6 +47,12 @@ WORKDIR /libupnp_build
 COPY scripts/install-pupnp.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-pupnp.sh
+
+# Build taglib
+WORKDIR /taglib_build
+COPY scripts/install-taglib.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/alpine/deps/*.sh ./alpine/deps/
+RUN ./install-taglib.sh
 
 # Build libexiv2
 WORKDIR /libexiv2_build
@@ -98,7 +103,6 @@ RUN apk add --no-cache \
     jsoncpp \
     icu \
     su-exec \
-    taglib \
     tini \
     tzdata \
     util-linux \

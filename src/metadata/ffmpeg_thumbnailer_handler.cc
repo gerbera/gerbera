@@ -141,7 +141,7 @@ bool FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
         auto x = config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
         thumbResource->addAttribute(ResourceAttribute::RESOLUTION, fmt::format("{}x{}", x, y));
         item->addResource(thumbResource);
-        log_debug("Adding resource for video thumbnail");
+        log_debug("Adding resource for {} thumbnail", EnumMapper::mapObjectType(mediaType));
         return true;
 
     } catch (const std::runtime_error& e) {
@@ -150,8 +150,12 @@ bool FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
     return false;
 }
 
-FfmpegThumbnailerHandler::FfmpegThumbnailerHandler(const std::shared_ptr<Context>& context, ConfigVal checkOption)
+FfmpegThumbnailerHandler::FfmpegThumbnailerHandler(
+    const std::shared_ptr<Context>& context,
+    ConfigVal checkOption,
+    ObjectType mediaType)
     : MediaMetadataHandler(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)
+    , mediaType(mediaType)
 {
     isEnabled = this->isEnabled && config->getBoolOption(checkOption);
     if (isEnabled) {
@@ -163,6 +167,15 @@ FfmpegThumbnailerHandler::FfmpegThumbnailerHandler(const std::shared_ptr<Context
             cachePath = fs::path(home) / "cache-dir";
         }
     }
+}
+
+bool FfmpegThumbnailerHandler::isSupported(
+    const std::string& contentType,
+    bool isOggTheora,
+    const std::string& mimeType,
+    ObjectType mediaType)
+{
+    return (this->mediaType == ObjectType::Unknown && (mediaType == ObjectType::Video || mediaType == ObjectType::Image)) || this->mediaType == mediaType;
 }
 
 #endif

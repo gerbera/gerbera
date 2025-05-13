@@ -12,6 +12,7 @@ Improved resource handling for WavPack and FFMpeg requrires reimport of the libr
 - Support transliteration of device output
 - Extract multiple stream information in ffmpeg handler including embedded subtitles
 - Filter resources by mimetype instead of extension
+- Artwork support for dsf files
 
 ### FIXES
 

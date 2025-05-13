@@ -67,6 +67,7 @@
 #include <wavpackfile.h>
 
 #if TAGLIB_MAJOR_VERSION >= 2
+#include <dsffile.h>
 #include <mp4itemfactory.h>
 #endif
 
@@ -101,6 +102,15 @@ TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
     trimStringInPlace(legacyEntrySeparator);
     if (legacyEntrySeparator.empty())
         legacyEntrySeparator = "\n";
+}
+
+bool TagLibHandler::isSupported(
+    const std::string& contentType,
+    bool isOggTheora,
+    const std::string& mimeType,
+    ObjectType mediaType)
+{
+    return contentType == CONTENT_TYPE_MP3 || (contentType == CONTENT_TYPE_OGG && !isOggTheora) || contentType == CONTENT_TYPE_WMA || contentType == CONTENT_TYPE_WAVPACK || contentType == CONTENT_TYPE_FLAC || contentType == CONTENT_TYPE_PCM || contentType == CONTENT_TYPE_AIFF || contentType == CONTENT_TYPE_APE || contentType == CONTENT_TYPE_MP4 || contentType == CONTENT_TYPE_DSD;
 }
 
 void TagLibHandler::addField(
@@ -228,6 +238,7 @@ void TagLibHandler::addSpecialFields(
 
 void TagLibHandler::populateGenericTags(
     const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res,
     const TagLib::File& file,
     const TagLib::PropertyMap& propertyMap,
     const std::shared_ptr<StringConverter>& sc) const
@@ -245,27 +256,33 @@ void TagLibHandler::populateGenericTags(
     if (!audioProps)
         return;
 
-    auto res = item->getResource(ContentHandler::DEFAULT);
-
-    // UPnP bitrate is in bytes/second
-    int temp = audioProps->bitrate() * 1024 / 8; // kbit/second -> byte/second
-    if (temp > 0) {
-        res->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(temp));
+    {
+        // UPnP bitrate is in bytes/second
+        int temp = audioProps->bitrate() * 1024 / 8; // kbit/second -> byte/second
+        if (temp > 0) {
+            res->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(temp));
+        }
     }
 
-    temp = audioProps->lengthInMilliseconds();
-    if (temp > 0) {
-        res->addAttribute(ResourceAttribute::DURATION, millisecondsToHMSF(temp));
+    {
+        int temp = audioProps->lengthInMilliseconds();
+        if (temp > 0) {
+            res->addAttribute(ResourceAttribute::DURATION, millisecondsToHMSF(temp));
+        }
     }
 
-    temp = audioProps->sampleRate();
-    if (temp > 0) {
-        res->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, fmt::to_string(temp));
+    {
+        int temp = audioProps->sampleRate();
+        if (temp > 0) {
+            res->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, fmt::to_string(temp));
+        }
     }
 
-    temp = audioProps->channels();
-    if (temp > 0) {
-        res->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(temp));
+    {
+        int temp = audioProps->channels();
+        if (temp > 0) {
+            res->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(temp));
+        }
     }
 
     populateAuxTags(item, propertyMap, sc);
@@ -342,6 +359,7 @@ bool TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     if (!item || !isEnabled)
         return false;
 
+    auto res = item->getResource(ContentHandler::DEFAULT);
     std::string contentType = getValueOrDefault(mimeContentTypeMappings, item->getMimeType());
 
     log_debug("Reading {}, content type {}", item->getLocation().c_str(), contentType);
@@ -349,21 +367,23 @@ bool TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     bool result = true;
     if (contentType == CONTENT_TYPE_MP3) {
-        extractMP3(fs, item);
+        extractMP3(fs, item, res);
     } else if (contentType == CONTENT_TYPE_FLAC) {
-        extractFLAC(fs, item);
+        extractFLAC(fs, item, res);
     } else if (contentType == CONTENT_TYPE_MP4) {
-        extractMP4(fs, item);
+        extractMP4(fs, item, res);
     } else if (contentType == CONTENT_TYPE_OGG) {
-        extractOgg(fs, item);
+        extractOgg(fs, item, res);
     } else if (contentType == CONTENT_TYPE_APE) {
-        extractAPE(fs, item);
+        extractAPE(fs, item, res);
     } else if (contentType == CONTENT_TYPE_WMA) {
-        extractASF(fs, item);
+        extractASF(fs, item, res);
     } else if (contentType == CONTENT_TYPE_WAVPACK) {
-        extractWavPack(fs, item);
+        extractWavPack(fs, item, res);
+    } else if (contentType == CONTENT_TYPE_DSD) {
+        extractDSF(fs, item, res);
     } else if (contentType == CONTENT_TYPE_AIFF) {
-        extractAiff(fs, item);
+        extractAiff(fs, item, res);
     } else {
         log_warning("TagLibHandler: File '{}' has unhandled content type '{}'", item->getLocation().c_str(), contentType.c_str());
         result = false;
@@ -423,6 +443,30 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(
         }
 
         return std::make_unique<MemIOHandler>(art->picture().data(), art->picture().size());
+    }
+    if (contentType == CONTENT_TYPE_DSD) {
+#if TAGLIB_MAJOR_VERSION >= 2
+        auto f = TagLib::DSF::File(&roStream);
+
+        if (!f.isValid())
+            throw_std_runtime_error("Could not open file {} as DSF", itemLocation);
+
+        if (!f.tag())
+            throw_std_runtime_error("DSF resource {} has no ID3 information", itemLocation);
+
+        auto&& list = f.tag()->frameList("APIC");
+        if (list.isEmpty())
+            throw_std_runtime_error("DSF resource {} has no album information", itemLocation);
+
+        auto art = dynamic_cast<TagLib::ID3v2::AttachedPictureFrame*>(list.front());
+        if (!art) {
+            return nullptr;
+        }
+
+        return std::make_unique<MemIOHandler>(art->picture().data(), art->picture().size());
+#else
+        return nullptr;
+#endif
     }
     if (contentType == CONTENT_TYPE_FLAC) {
         // stream album art from FLAC file
@@ -515,7 +559,10 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(
     throw_std_runtime_error("File {} has unsupported content type {}", itemLocation, contentType);
 }
 
-void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractMP3(
+    TagLib::IOStream& roStream,
+    const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res) const
 {
 #if TAGLIB_MAJOR_VERSION >= 2
     auto mp3 = TagLib::MPEG::File(&roStream, true, TagLib::MPEG::Properties::Average, TagLib::ID3v2::FrameFactory::instance());
@@ -528,7 +575,7 @@ void TagLibHandler::extractMP3(TagLib::IOStream& roStream, const std::shared_ptr
     }
 
     auto sc = converterManager->i2i();
-    populateGenericTags(item, mp3, mp3.hasID3v2Tag() ? mp3.ID3v2Tag()->properties() : mp3.properties(), sc);
+    populateGenericTags(item, res, mp3, mp3.hasID3v2Tag() ? mp3.ID3v2Tag()->properties() : mp3.properties(), sc);
 
     if (!mp3.hasID3v2Tag()) {
         log_debug("{}: has no IDv2 tags", item->getLocation().c_str());
@@ -672,7 +719,10 @@ std::unique_ptr<TagLib::File> TagLibHandler::getOggFile(TagLib::IOStream& ioStre
     return nullptr;
 }
 
-void TagLibHandler::extractOgg(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractOgg(
+    TagLib::IOStream& roStream,
+    const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res) const
 {
     auto oggFile = getOggFile(roStream);
 
@@ -681,7 +731,7 @@ void TagLibHandler::extractOgg(TagLib::IOStream& roStream, const std::shared_ptr
         return;
     }
     auto sc = converterManager->i2i();
-    populateGenericTags(item, *oggFile, oggFile->properties(), sc);
+    populateGenericTags(item, res, *oggFile, oggFile->properties(), sc);
 
     if (!oggFile->tag()) {
         log_debug("{}: has no tags", item->getLocation().c_str());
@@ -708,7 +758,10 @@ void TagLibHandler::extractOgg(TagLib::IOStream& roStream, const std::shared_ptr
     addArtworkResource(item, ContentHandler::ID3, artMimetype);
 }
 
-void TagLibHandler::extractASF(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractASF(
+    TagLib::IOStream& roStream,
+    const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res) const
 {
     auto asf = TagLib::ASF::File(&roStream);
 
@@ -717,9 +770,9 @@ void TagLibHandler::extractASF(TagLib::IOStream& roStream, const std::shared_ptr
         return;
     }
     auto sc = converterManager->i2i();
-    populateGenericTags(item, asf, asf.properties(), sc);
+    populateGenericTags(item, res, asf, asf.properties(), sc);
 
-    setBitsPerSample(item, asf);
+    setBitsPerSample(item, res, asf);
 
     const TagLib::ASF::AttributeListMap& attrListMap = asf.tag()->attributeListMap();
     if (attrListMap.contains("WM/Picture")) {
@@ -742,7 +795,10 @@ void TagLibHandler::extractASF(TagLib::IOStream& roStream, const std::shared_ptr
     }
 }
 
-void TagLibHandler::extractFLAC(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractFLAC(
+    TagLib::IOStream& roStream,
+    const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res) const
 {
 #if TAGLIB_MAJOR_VERSION >= 2
     auto flac = TagLib::FLAC::File(&roStream, true, TagLib::MPEG::Properties::Average, TagLib::ID3v2::FrameFactory::instance());
@@ -755,9 +811,9 @@ void TagLibHandler::extractFLAC(TagLib::IOStream& roStream, const std::shared_pt
         return;
     }
     auto sc = converterManager->i2i();
-    populateGenericTags(item, flac, flac.properties(), sc);
+    populateGenericTags(item, res, flac, flac.properties(), sc);
 
-    setBitsPerSample(item, flac);
+    setBitsPerSample(item, res, flac);
 
     if (flac.pictureList().isEmpty()) {
         log_debug("TagLibHandler: flac resource has no picture information");
@@ -776,7 +832,10 @@ void TagLibHandler::extractFLAC(TagLib::IOStream& roStream, const std::shared_pt
     addArtworkResource(item, ContentHandler::ID3, artMimetype);
 }
 
-void TagLibHandler::extractAPE(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractAPE(
+    TagLib::IOStream& roStream,
+    const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res) const
 {
     auto ape = TagLib::APE::File(&roStream);
 
@@ -785,12 +844,15 @@ void TagLibHandler::extractAPE(TagLib::IOStream& roStream, const std::shared_ptr
         return;
     }
     auto sc = converterManager->i2i();
-    populateGenericTags(item, ape, ape.properties(), sc);
+    populateGenericTags(item, res, ape, ape.properties(), sc);
 
-    setBitsPerSample(item, ape);
+    setBitsPerSample(item, res, ape);
 }
 
-void TagLibHandler::extractWavPack(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractWavPack(
+    TagLib::IOStream& roStream,
+    const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res) const
 {
     auto wavpack = TagLib::WavPack::File(&roStream);
 
@@ -799,12 +861,55 @@ void TagLibHandler::extractWavPack(TagLib::IOStream& roStream, const std::shared
         return;
     }
     auto sc = converterManager->i2i();
-    populateGenericTags(item, wavpack, wavpack.properties(), sc);
+    populateGenericTags(item, res, wavpack, wavpack.properties(), sc);
 
-    setBitsPerSample(item, wavpack);
+    setBitsPerSample(item, res, wavpack);
 }
 
-void TagLibHandler::extractMP4(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractDSF(
+    TagLib::IOStream& roStream,
+    const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res) const
+{
+#if TAGLIB_MAJOR_VERSION >= 2
+    auto dsf = TagLib::DSF::File(&roStream);
+
+    if (!dsf.isValid()) {
+        log_info("TagLibHandler {}: does not appear to be a valid dsf file", item->getLocation().c_str());
+        return;
+    }
+    auto sc = converterManager->i2i();
+    populateGenericTags(item, res, dsf, dsf.properties(), sc);
+
+    setBitsPerSample(item, res, dsf);
+
+    auto&& apicFrameList = dsf.tag()->frameList("APIC");
+    if (!apicFrameList.isEmpty()) {
+        auto art = dynamic_cast<const TagLib::ID3v2::AttachedPictureFrame*>(apicFrameList.front());
+        if (!art) {
+            return;
+        }
+
+        auto pic = art->picture();
+        auto [artMimetype, err] = sc->convert(art->mimeType().to8Bit(true));
+        if (!err.empty()) {
+            log_warning("{}: {}", item->getLocation().string(), err);
+        }
+        if (!isValidArtworkContentType(artMimetype)) {
+            artMimetype = getContentTypeFromByteVector(pic);
+        }
+
+        auto resource = addArtworkResource(item, ContentHandler::ID3, artMimetype);
+        if (resource)
+            resource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(pic.size()));
+    }
+#endif
+}
+
+void TagLibHandler::extractMP4(
+    TagLib::IOStream& roStream,
+    const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res) const
 {
 #if TAGLIB_MAJOR_VERSION >= 2
     auto mp4 = TagLib::MP4::File(&roStream, true, TagLib::MP4::Properties::Average, TagLib::MP4::ItemFactory::instance());
@@ -818,14 +923,14 @@ void TagLibHandler::extractMP4(TagLib::IOStream& roStream, const std::shared_ptr
     }
 
     auto sc = converterManager->i2i();
-    populateGenericTags(item, mp4, mp4.hasMP4Tag() ? mp4.tag()->properties() : mp4.properties(), sc);
+    populateGenericTags(item, res, mp4, mp4.hasMP4Tag() ? mp4.tag()->properties() : mp4.properties(), sc);
 
     if (!mp4.hasMP4Tag()) {
         log_debug("TagLibHandler {}: mp4 file has no tag information", item->getLocation().c_str());
         return;
     }
 
-    setBitsPerSample(item, mp4);
+    setBitsPerSample(item, res, mp4);
 
     if (mp4.tag()->contains("covr")) {
         auto coverItem = mp4.tag()->item("covr");
@@ -847,7 +952,10 @@ void TagLibHandler::extractMP4(TagLib::IOStream& roStream, const std::shared_ptr
     }
 }
 
-void TagLibHandler::extractAiff(TagLib::IOStream& roStream, const std::shared_ptr<CdsItem>& item) const
+void TagLibHandler::extractAiff(
+    TagLib::IOStream& roStream,
+    const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res) const
 {
     auto aiff = TagLib::RIFF::AIFF::File(&roStream);
 
@@ -857,17 +965,19 @@ void TagLibHandler::extractAiff(TagLib::IOStream& roStream, const std::shared_pt
     }
 
     auto sc = converterManager->i2i();
-    populateGenericTags(item, aiff, aiff.properties(), sc);
+    populateGenericTags(item, res, aiff, aiff.properties(), sc);
 
-    setBitsPerSample(item, aiff);
+    setBitsPerSample(item, res, aiff);
 }
 
 template <class Media>
-void TagLibHandler::setBitsPerSample(const std::shared_ptr<CdsItem>& item, Media& media) const
+void TagLibHandler::setBitsPerSample(
+    const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res,
+    Media& media) const
 {
     auto audioProps = media.audioProperties();
     auto bps = audioProps->bitsPerSample();
-    auto res = item->getResource(ContentHandler::DEFAULT);
     if (bps > 0) {
         res->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, fmt::to_string(bps));
     }

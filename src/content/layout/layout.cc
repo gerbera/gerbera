@@ -70,7 +70,7 @@ void Layout::processCdsObject(const std::shared_ptr<CdsObject>& obj,
         log_debug("Playlist not handled in layout: {}", obj->getLocation().c_str());
         return;
     default:
-        log_warning("Unknown media type {}", obj->getClass());
+        log_warning("Unknown media type for {}: {}", obj->getLocation().c_str(), obj->getClass());
         break;
     }
 

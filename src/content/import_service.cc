@@ -1099,7 +1099,7 @@ std::pair<int, bool> ImportService::addContainerTree(
 void ImportService::updateFanArt(bool isDir)
 {
     for (auto&& [contPath, stateEntry] : contentStateCache) {
-        if (!stateEntry || !stateEntry->getObject() || !stateEntry->getObject()->isItem())
+        if (!stateEntry || !stateEntry->getObject() || !stateEntry->getObject()->isItem() || stateEntry->getState() != ImportState::Loaded)
             continue;
 
         auto dirEntry = stateEntry->getDirEntry();

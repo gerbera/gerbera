@@ -260,6 +260,15 @@ FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
     }
 }
 
+bool FanArtHandler::isSupported(
+    const std::string& contentType,
+    bool isOggTheora,
+    const std::string& mimeType,
+    ObjectType mediaType)
+{
+    return mediaType == ObjectType::Audio || mediaType == ObjectType::Video;
+}
+
 bool FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     log_debug("Running fanart handler on {}", obj->getLocation().c_str());
@@ -382,6 +391,15 @@ SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
     if (!setup) {
         setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST);
     }
+}
+
+bool SubtitleHandler::isSupported(
+    const std::string& contentType,
+    bool isOggTheora,
+    const std::string& mimeType,
+    ObjectType mediaType)
+{
+    return mediaType == ObjectType::Video;
 }
 
 bool SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
