@@ -58,6 +58,10 @@ class FfmpegHandler : public MediaMetadataHandler {
 public:
     explicit FfmpegHandler(const std::shared_ptr<Context>& context);
 
+    bool isSupported(const std::string& contentType,
+        bool isOggTheora,
+        const std::string& mimeType,
+        ObjectType mediaType) override;
     bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(
         const std::shared_ptr<CdsObject>& obj,

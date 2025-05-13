@@ -68,6 +68,23 @@ static constexpr std::array chKeys = {
     std::pair(ContentHandler::RESOURCE, "Resource"),
 };
 
+static const auto otKeys = std::map<ObjectType, std::string_view> {
+    { ObjectType::Unknown, "Unknown" },
+    { ObjectType::Folder, "Folder" },
+    { ObjectType::Playlist, "Playlist" },
+    { ObjectType::Audio, "Audio" },
+    { ObjectType::Video, "Video" },
+    { ObjectType::Image, "Image" },
+#ifdef ONLINE_SERVICES
+    { ObjectType::OnlineService, "OnlineService" },
+#endif
+};
+
+std::string EnumMapper::mapObjectType(ObjectType ot)
+{
+    return otKeys.at(ot).data();
+}
+
 bool EnumMapper::checkContentHandler(const std::string& contHandler)
 {
     auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });

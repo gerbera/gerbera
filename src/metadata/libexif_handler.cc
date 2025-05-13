@@ -314,6 +314,15 @@ public:
     }
 };
 
+bool LibExifHandler::isSupported(
+    const std::string& contentType,
+    bool isOggTheora,
+    const std::string& mimeType,
+    ObjectType mediaType)
+{
+    return contentType == CONTENT_TYPE_JPG;
+}
+
 void LibExifHandler::process_ifd(
     const ExifContent* content,
     const std::shared_ptr<CdsItem>& item,

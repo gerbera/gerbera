@@ -181,6 +181,8 @@ private:
     };
 
 public:
+    static std::string mapObjectType(ObjectType ot);
+
     static std::string mapContentHandler2String(ContentHandler ch);
     static bool checkContentHandler(const std::string& contHandler);
     static ContentHandler remapContentHandler(const std::string& contHandler);

@@ -77,8 +77,15 @@ protected:
 class FanArtHandler : public MetacontentHandler {
 public:
     explicit FanArtHandler(const std::shared_ptr<Context>& context);
+
+    bool isSupported(const std::string& contentType,
+        bool isOggTheora,
+        const std::string& mimeType,
+        ObjectType mediaType) override;
     bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource) override;
 
 private:
     static std::unique_ptr<ContentPathSetup> setup;
@@ -89,7 +96,9 @@ class ContainerArtHandler : public MetacontentHandler {
 public:
     explicit ContainerArtHandler(const std::shared_ptr<Context>& context);
     bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource) override;
 
 private:
     static std::unique_ptr<ContentPathSetup> setup;
@@ -99,8 +108,15 @@ private:
 class SubtitleHandler : public MetacontentHandler {
 public:
     explicit SubtitleHandler(const std::shared_ptr<Context>& context);
+
+    bool isSupported(const std::string& contentType,
+        bool isOggTheora,
+        const std::string& mimeType,
+        ObjectType mediaType) override;
     bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource) override;
 
 private:
     static std::unique_ptr<ContentPathSetup> setup;
@@ -111,7 +127,9 @@ class MetafileHandler : public MetacontentHandler {
 public:
     explicit MetafileHandler(const std::shared_ptr<Context>& context, std::shared_ptr<Content> content);
     bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource) override;
 
 private:
     static std::unique_ptr<ContentPathSetup> setup;
@@ -123,7 +141,9 @@ class ResourceHandler : public MetacontentHandler {
 public:
     explicit ResourceHandler(const std::shared_ptr<Context>& context);
     bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource) override;
 
 private:
     static std::unique_ptr<ContentPathSetup> setup;

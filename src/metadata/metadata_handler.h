@@ -52,6 +52,7 @@ class IOHandler;
 class Mime;
 enum class ConfigVal;
 enum class ContentHandler;
+enum class ObjectType;
 enum class MetadataFields;
 
 /// \brief This class is responsible for providing access to metadata information
@@ -68,6 +69,11 @@ public:
     explicit MetadataHandler(const std::shared_ptr<Context>& context);
     virtual ~MetadataHandler() = default;
 
+    /// \brief check whether file type is supported by handler
+    virtual bool isSupported(const std::string& contentType,
+        bool isOggTheora,
+        const std::string& mimeType,
+        ObjectType mediaType) { return true; }
     /// \brief read metadata from file and add to object
     /// \param obj Object to handle
     virtual bool fillMetadata(const std::shared_ptr<CdsObject>& obj) = 0;
@@ -76,7 +82,10 @@ public:
     /// \param obj Object to stream
     /// \param resource the resource
     /// \return iohandler to stream to client
-    virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) = 0;
+    virtual std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource)
+        = 0;
     virtual std::string getMimeType() const { return MIMETYPE_DEFAULT; }
 };
 

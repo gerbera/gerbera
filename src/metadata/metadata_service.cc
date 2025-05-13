@@ -101,9 +101,9 @@ MetadataService::MetadataService(const std::shared_ptr<Context>& context, const 
         { MetadataType::Ffmpeg, std::make_shared<FfmpegHandler>(context) },
 #endif
 #ifdef HAVE_FFMPEGTHUMBNAILER
-        { MetadataType::VideoThumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED) },
-        { MetadataType::ImageThumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_ENABLED) },
-        { MetadataType::Thumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED) },
+        { MetadataType::VideoThumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED, ObjectType::Video) },
+        { MetadataType::ImageThumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_ENABLED, ObjectType::Image) },
+        { MetadataType::Thumbnailer, std::make_shared<FfmpegThumbnailerHandler>(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED, ObjectType::Unknown) },
 #endif
         { MetadataType::FanArt, std::make_shared<FanArtHandler>(context) },
         { MetadataType::ContainerArt, std::make_shared<ContainerArtHandler>(context) },
@@ -132,48 +132,43 @@ bool MetadataService::extractMetaData(
     item->clearMetaData();
 
     std::string contentType = getValueOrDefault(mappings, mimetype);
+    bool isOggTheora = false;
     if ((contentType == CONTENT_TYPE_OGG) && (isTheora(item->getLocation()))) {
         item->setFlag(OBJECT_FLAG_OGG_THEORA);
+        isOggTheora = true;
     }
 
     auto mediaType = item->getMediaType(contentType);
-    bool result = false;
-
+    constexpr auto metaHandlers = std::array {
 #ifdef HAVE_TAGLIB
-    if ((contentType == CONTENT_TYPE_MP3) || ((contentType == CONTENT_TYPE_OGG) && (!item->getFlag(OBJECT_FLAG_OGG_THEORA))) || (contentType == CONTENT_TYPE_WMA) || (contentType == CONTENT_TYPE_WAVPACK) || (contentType == CONTENT_TYPE_FLAC) || (contentType == CONTENT_TYPE_PCM) || (contentType == CONTENT_TYPE_AIFF) || (contentType == CONTENT_TYPE_APE) || (contentType == CONTENT_TYPE_MP4)) {
-        result = handlers[MetadataType::TagLib]->fillMetadata(item) || result;
-    }
-#endif // HAVE_TAGLIB
-
+        MetadataType::TagLib,
+#endif
 #ifdef HAVE_EXIV2
-    if (mediaType == ObjectType::Image) {
-        result = handlers[MetadataType::Exiv2]->fillMetadata(item) || result;
-    }
+        MetadataType::Exiv2,
 #endif
-
 #ifdef HAVE_LIBEXIF
-    if (contentType == CONTENT_TYPE_JPG) {
-        result = handlers[MetadataType::LibExif]->fillMetadata(item) || result;
-    }
-#endif // HAVE_LIBEXIF
-
+        MetadataType::LibExif,
+#endif
 #ifdef HAVE_MATROSKA
-    if (contentType == CONTENT_TYPE_MKV) {
-        result = handlers[MetadataType::Matroska]->fillMetadata(item) || result;
-    }
+        MetadataType::Matroska,
 #endif
-
 #ifdef HAVE_WAVPACK
-    if (contentType == CONTENT_TYPE_WAVPACK) {
-        result = handlers[MetadataType::WavPack]->fillMetadata(item) || result;
-    }
+        MetadataType::WavPack,
 #endif
-
 #ifdef HAVE_FFMPEG
-    if (mediaType == ObjectType::Audio || mediaType == ObjectType::Video) {
-        result = handlers[MetadataType::Ffmpeg]->fillMetadata(item) || result;
+        MetadataType::Ffmpeg,
+#endif
+        // Metadata from text files
+        MetadataType::Metafile,
+    };
+    bool result = false;
+    for (auto handler : metaHandlers) {
+        if (handlers.at(handler)->isSupported(contentType, isOggTheora, mimetype, mediaType)) {
+            result = handlers.at(handler)->fillMetadata(item) || result;
+        }
     }
-#else
+
+#ifndef HAVE_FFMPEG
     if (contentType == CONTENT_TYPE_AVI) {
         std::string fourcc = getAVIFourCC(dirEnt.path());
         if (!fourcc.empty()) {
@@ -182,9 +177,6 @@ bool MetadataService::extractMetaData(
         }
     }
 #endif // HAVE_FFMPEG
-
-    // Metadata from text files
-    result = handlers[MetadataType::Metafile]->fillMetadata(item) || result;
 
     return result;
 }
@@ -198,26 +190,28 @@ bool MetadataService::attachResourceFiles(
         throw_std_runtime_error("Not a file: {}", dirEnt.path().c_str());
 
     auto mediaType = item->getMediaType();
+    std::string mimeType = item->getMimeType();
+    std::string contentType = getValueOrDefault(mappings, mimeType);
 
-    bool result = false;
-
+    constexpr auto metaHandlers = std::array {
 #ifdef HAVE_FFMPEGTHUMBNAILER
-    // Thumbnails for videos and images
-    if (mediaType == ObjectType::Video)
-        result = handlers[MetadataType::VideoThumbnailer]->fillMetadata(item) || result;
-    else if (mediaType == ObjectType::Image)
-        result = handlers[MetadataType::ImageThumbnailer]->fillMetadata(item) || result;
+        // Thumbnails for videos and images
+        MetadataType::VideoThumbnailer,
+        MetadataType::ImageThumbnailer,
 #endif
-
-    // Fanart for audio and video
-    if (mediaType == ObjectType::Audio || mediaType == ObjectType::Video)
-        result = handlers[MetadataType::FanArt]->fillMetadata(item) || result;
-
-    // Subtitles for videos
-    if (mediaType == ObjectType::Video)
-        result = handlers[MetadataType::Subtitle]->fillMetadata(item) || result;
-
-    result = handlers[MetadataType::ResourceFile]->fillMetadata(item) || result;
+        // Fanart for audio and video
+        MetadataType::FanArt,
+        // Subtitles for videos
+        MetadataType::Subtitle,
+        // Resource triggers
+        MetadataType::ResourceFile,
+    };
+    bool result = false;
+    for (auto handler : metaHandlers) {
+        if (handlers.at(handler)->isSupported(contentType, false, mimeType, mediaType)) {
+            result = handlers.at(handler)->fillMetadata(item) || result;
+        }
+    }
 
     return result;
 }

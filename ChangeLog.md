@@ -4,6 +4,7 @@
 
 - Add missing jsoncpp to `Dockerfile`s
 - Add support for transliterating device output strings
+- Add taglib and artwork support for dsf files
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
 - Extend details extracted by WavPack handler
 - Filter resources by mimetype

@@ -141,6 +141,15 @@ public:
     }
 };
 
+bool Exiv2Handler::isSupported(
+    const std::string& contentType,
+    bool isOggTheora,
+    const std::string& mimeType,
+    ObjectType mediaType)
+{
+    return mediaType == ObjectType::Image;
+}
+
 bool Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);

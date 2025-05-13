@@ -21,6 +21,7 @@
     $Id$
 */
 
+#include "cds/cds_item.h"
 #include "config/config_definition.h"
 #include "config/config_val.h"
 #include "context.h"
@@ -52,7 +53,7 @@ TEST(Thumbnailer_Cache, BaseDirFromConfig)
     auto cfg = std::static_pointer_cast<ConfigMock>(ctx->getConfig());
     EXPECT_CALL(*cfg, getOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR))
         .WillOnce(Return("/var/lib/cache"));
-    EXPECT_EQ(FfmpegThumbnailerHandlerTest(ctx, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED).getCacheBasePath(), fs::path { "/var/lib/cache" });
+    EXPECT_EQ(FfmpegThumbnailerHandlerTest(ctx, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED, ObjectType::Video).getCacheBasePath(), fs::path { "/var/lib/cache" });
 }
 
 TEST(Thumbnailer_Cache, BaseDirDefaultFromUserHome)
@@ -65,7 +66,7 @@ TEST(Thumbnailer_Cache, BaseDirDefaultFromUserHome)
         .WillOnce(Return(""));
     EXPECT_CALL(*cfg, getOption(ConfigVal::SERVER_HOME))
         .WillOnce(Return("/var/lib/gerbera"));
-    EXPECT_EQ(FfmpegThumbnailerHandlerTest(ctx, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED).getCacheBasePath(), fs::path { "/var/lib/gerbera/cache-dir" });
+    EXPECT_EQ(FfmpegThumbnailerHandlerTest(ctx, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED, ObjectType::Video).getCacheBasePath(), fs::path { "/var/lib/gerbera/cache-dir" });
 }
 
 TEST(Thumbnailer_Cache, CachePathAppendsAbsolute)

@@ -158,6 +158,15 @@ FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
 #endif
 }
 
+bool FfmpegHandler::isSupported(
+    const std::string& contentType,
+    bool isOggTheora,
+    const std::string& mimeType,
+    ObjectType mediaType)
+{
+    return mediaType == ObjectType::Audio || mediaType == ObjectType::Video;
+}
+
 /// \brief Wrapper class to interface with FFMpeg
 class FfmpegObject {
 public:
@@ -505,12 +514,9 @@ bool FfmpegHandler::addFfmpegResourceFields(
     }
 
     auto resource = item->getResource(ContentHandler::DEFAULT);
-    bool isAudioFile = item->isSubClass(UPNP_CLASS_AUDIO_ITEM) && item->getResource(ResourcePurpose::Thumbnail);
+    bool isAudioFile = item->isSubClass(UPNP_CLASS_AUDIO_ITEM);
+    bool hasThumb = !!item->getResource(ResourcePurpose::Thumbnail);
     auto resource2 = isAudioFile ? item->getResource(ResourcePurpose::Thumbnail) : resource;
-    if (!resource2) {
-        resource2 = std::make_shared<CdsResource>(ContentHandler::FFMPEG, ResourcePurpose::Thumbnail);
-        item->addResource(resource2);
-    }
 
     // duration
     if (ffmpegObject.pFormatCtx->duration > 0) {
@@ -530,7 +536,7 @@ bool FfmpegHandler::addFfmpegResourceFields(
 
     // video resolution, audio sampling rate, nr of audio channels
     int audioSet = 0;
-    int videoSet = artWorkEnabled && isAudioFile ? 1 : 0;
+    int videoSet = artWorkEnabled && isAudioFile && hasThumb ? 1 : 0;
     bool result = false;
     for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
         auto st = ffmpegObject.pFormatCtx->streams[stream_number];
@@ -540,17 +546,18 @@ bool FfmpegHandler::addFfmpegResourceFields(
 
         switch (as_codecpar(st)->codec_type) {
         case AVMEDIA_TYPE_VIDEO: {
-            if (videoSet > 0) {
+            if (videoSet > 0 || !resource2) {
                 resource2 = std::make_shared<CdsResource>(ContentHandler::FFMPEG, isAudioFile ? ResourcePurpose::Thumbnail : ResourcePurpose::Content);
                 item->addResource(resource2);
                 resource2->addOption(STREAM_NUMBER_OPTION, fmt::to_string(stream_number));
             }
 
-            if (videoSet == 1 && artWorkEnabled && isAudioFile) {
+            if (((videoSet >= 1 && artWorkEnabled) || !hasThumb) && isAudioFile) {
                 // use ffmpeg to get artwork
                 auto image = extractArtImage(ffmpegObject, stream_number);
                 if (!image.empty()) {
                     auto artMimetype = getContentTypeFromByteVector(image);
+                    hasThumb = true;
                     log_debug("art {} {}", image.size(), artMimetype);
                     if (artMimetype != MIMETYPE_DEFAULT) {
                         resource2->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));

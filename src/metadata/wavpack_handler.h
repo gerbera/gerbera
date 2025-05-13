@@ -44,8 +44,14 @@ public:
     WavPackHandler(const WavPackHandler&) = delete;
     WavPackHandler& operator=(const WavPackHandler&) = delete;
 
+    bool isSupported(const std::string& contentType,
+        bool isOggTheora,
+        const std::string& mimeType,
+        ObjectType mediaType) override;
     bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource) override;
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsResource>& resource) override;
 
 private:
     /// \brief read media attributes from stream
