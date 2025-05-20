@@ -127,6 +127,7 @@ static constexpr std::array clientTypes {
     std::pair("PanasonicTV", ClientType::PanasonicTV),
     std::pair("BoseSoundtouch", ClientType::BoseSoundtouch),
     std::pair("YamahaRX", ClientType::YamahaRX),
+    std::pair("FreeboxPlayer", ClientType::Freebox),
     std::pair("StandardUPnP", ClientType::StandardUPnP),
 };
 
@@ -186,6 +187,7 @@ static constexpr std::array quirkFlags {
     std::pair("DCM10", QUIRK_FLAG_DCM10),
     std::pair("HIDE_CONTAINER_SHORTCUTS", QUIRK_FLAG_HIDE_CONTAINER_SHORTCUTS),
     std::pair("ASCIIXML", QUIRK_FLAG_ASCIIXML),
+    std::pair("NO_CONVERSION", QUIRK_FLAG_FORCE_NO_CONVERSION),
     std::pair("TRANSCODING1", QUIRK_FLAG_TRANSCODING1),
     std::pair("TRANSCODING2", QUIRK_FLAG_TRANSCODING2),
     std::pair("TRANSCODING3", QUIRK_FLAG_TRANSCODING3),

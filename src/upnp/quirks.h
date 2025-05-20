@@ -53,9 +53,10 @@ using QuirkFlags = std::uint32_t;
 #define QUIRK_FLAG_DCM10 0x00002000
 #define QUIRK_FLAG_HIDE_CONTAINER_SHORTCUTS 0x00004000
 #define QUIRK_FLAG_ASCIIXML 0x00008000
-#define QUIRK_FLAG_TRANSCODING1 0x00010000
-#define QUIRK_FLAG_TRANSCODING2 0x00020000
-#define QUIRK_FLAG_TRANSCODING3 0x00040000
+#define QUIRK_FLAG_FORCE_NO_CONVERSION 0x00010000
+#define QUIRK_FLAG_TRANSCODING1 0x00100000
+#define QUIRK_FLAG_TRANSCODING2 0x00200000
+#define QUIRK_FLAG_TRANSCODING3 0x00400000
 
 // forward declaration
 class ActionRequest;
@@ -207,6 +208,13 @@ public:
      *
      */
     bool needsSimpleDate() const;
+
+    /** \brief UPnP client does not support conversion
+     *
+     * \return bool
+     *
+     */
+    bool needsNoConversion() const;
 
     /** \brief Get multi value upnp properties
      *

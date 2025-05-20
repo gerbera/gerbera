@@ -1176,7 +1176,7 @@ std::string UpnpXMLBuilder::buildProtocolInfo(
     // we do not support seeking at all, so 00
     // and the media is converted, so set CI to 1
     if (resource.getPurpose() == ResourcePurpose::Transcode) {
-        extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_CONVERSION));
+        extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, quirks && quirks->needsNoConversion() ? UPNP_DLNA_NO_CONVERSION : UPNP_DLNA_CONVERSION));
     } else {
         extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION));
     }
