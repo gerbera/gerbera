@@ -385,6 +385,11 @@ bool Quirks::needsAsciiXml() const
     return hasFlag(QUIRK_FLAG_ASCIIXML);
 }
 
+bool Quirks::needsNoConversion() const
+{
+    return hasFlag(QUIRK_FLAG_FORCE_NO_CONVERSION);
+}
+
 bool Quirks::needsSimpleDate() const
 {
     return hasFlag(QUIRK_FLAG_SIMPLE_DATE);

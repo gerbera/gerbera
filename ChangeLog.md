@@ -15,6 +15,7 @@
 - Get multiple streams in FFMpeg handler
 - Improve compile info output
 - Limit strings to column size
+- Quirks for Freebox Player
 - Provide bash completion file
 - Remove legacy compile option SQLITE_BACKUP_ENABLED
 - Reorganise installation scripts

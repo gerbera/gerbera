@@ -54,6 +54,7 @@ enum class ClientType {
     PanasonicTV,
     BoseSoundtouch,
     YamahaRX,
+    Freebox,
     StandardUPnP,
     Custom
 };

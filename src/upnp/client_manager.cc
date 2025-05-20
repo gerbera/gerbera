@@ -203,6 +203,16 @@ void ClientManager::refresh()
             ClientMatchType::UserAgent,
             "KnOS/3.2",
         },
+
+        // User-Agent(actionReq): Linux/2.6 UPnP/1.0 fbxupnpav/6.0
+        {
+            "Freebox Player",
+            DEFAULT_CLIENT_GROUP,
+            ClientType::Freebox,
+            QUIRK_FLAG_FORCE_NO_CONVERSION,
+            ClientMatchType::UserAgent,
+            "fbxupnpav/6.0",
+        },
     };
 
     auto configList = config->getClientConfigListOption(ConfigVal::CLIENTS_LIST);
