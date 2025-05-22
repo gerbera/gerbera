@@ -60,7 +60,9 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& conte
     }
 }
 
-std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath)
+std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(
+    const std::shared_ptr<CdsObject>& origObject,
+    const std::string& rootPath)
 {
     int otype = ScriptNamedProperty(ctx, "objectType").getIntValue(-1);
     if (otype == -1) {
@@ -68,8 +70,9 @@ std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cd
         return { {}, INVALID_OBJECT_ID };
     }
 
-    if (IS_CDS_ITEM_EXTERNAL_URL(otype))
+    if (IS_CDS_ITEM_EXTERNAL_URL(otype)) {
         return { dukObject2cdsObject(origObject), INVALID_OBJECT_ID };
+    }
 
     fs::path loc = fs::weakly_canonical(ScriptNamedProperty(ctx, "location").getStringValue()); // make sure relative paths can be retrieved
     std::error_code ec;
@@ -107,8 +110,10 @@ bool PlaylistParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
         if (pcdId == INVALID_OBJECT_ID) {
             return false;
         }
-        cdsObj->setRefID(pcdId);
-        cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+        if (cdsObj->getID() != pcdId) {
+            cdsObj->setRefID(pcdId);
+            cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+        }
     } else if (config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS) || config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS)) {
         cdsObj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
         cdsObj->setRefID(origObject->getID());
@@ -123,7 +128,10 @@ void PlaylistParserScript::handleObject2cdsContainer(duk_context* ctx, const std
     }
 }
 
-void PlaylistParserScript::handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item)
+void PlaylistParserScript::handleObject2cdsItem(
+    duk_context* ctx,
+    const std::shared_ptr<CdsObject>& pcd,
+    const std::shared_ptr<CdsItem>& item)
 {
     int writeThrough = ScriptNamedProperty(ctx, "writeThrough").getIntValue(-1);
     ScriptNamedProperty(ctx, "extra").getObject([&]() {
@@ -155,7 +163,10 @@ void PlaylistParserScript::handleObject2cdsItem(duk_context* ctx, const std::sha
     item->setPartNumber(0);
 }
 
-void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath)
+void PlaylistParserScript::processPlaylistObject(
+    const std::shared_ptr<CdsObject>& obj,
+    std::shared_ptr<GenericTask> task,
+    const std::string& rootPath)
 {
     if (currentObjectID != INVALID_OBJECT_ID || currentHandle || currentLine) {
         throw_std_runtime_error("Recursion in playlists not allowed");
@@ -209,7 +220,7 @@ void PlaylistParserScript::processPlaylistObject(const std::shared_ptr<CdsObject
 
     currentHandle = nullptr;
 
-    log_debug("Done playlist {} ...", obj->getLocation().string());
+    log_debug("Done playlist {} ({})...", obj->getLocation().string(), obj->getID());
 
     delete[] currentLine;
     currentLine = nullptr;

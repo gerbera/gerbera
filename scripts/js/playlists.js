@@ -71,7 +71,7 @@ function importPlaylist(obj, cont, rootPath, autoscanId, containerType) {
     chain.objRoot.metaData[M_CONTENT_CLASS] = [ UPNP_CLASS_PLAYLIST_ITEM ];
     var last_path = getLastPath2(obj.location, boxSetup[BK_playlistAllDirectories].size);
 
-    var objChain = addContainerTree([chain.objRoot, chain.allPlaylists, chain.title]);
+    const objChain = addContainerTree([chain.objRoot, chain.allPlaylists, chain.title]);
 
     var result = [];
     var objDirChain;

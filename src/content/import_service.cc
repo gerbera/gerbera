@@ -305,13 +305,16 @@ void ImportService::doImport(
     for (auto&& [itemPath, stateEntry] : contentStateCache) {
         if (!stateEntry)
             continue;
-        if (stateEntry->getObject() && stateEntry->getState() == ImportState::Existing) {
+        if (stateEntry->getObject() && stateEntry->getState() <= ImportState::Existing) {
             auto entry = currentContent.find(stateEntry->getObject()->getID());
             if (entry != currentContent.end()) {
                 currentContent.erase(stateEntry->getObject()->getID());
             }
         }
     }
+    if (!currentContent.empty())
+        clearCache();
+
     log_debug("import of {} left {} item(s) to be deleted", location.c_str(), currentContent.size());
 
     if (!task && autoscanDir && autoscanDir->updateLMT()) {
@@ -751,7 +754,8 @@ void ImportService::fillLayout(const std::shared_ptr<GenericTask>& task)
 }
 
 /// \param object used to make code compatible with legacy scan
-void ImportService::fillSingleLayout(const std::shared_ptr<ContentState>& state,
+void ImportService::fillSingleLayout(
+    const std::shared_ptr<ContentState>& state,
     std::shared_ptr<CdsObject> object,
     const std::shared_ptr<CdsContainer>& parent,
     const std::shared_ptr<GenericTask>& task)
