@@ -9,6 +9,7 @@
 - Extend details extracted by WavPack handler
 - Filter resources by mimetype
 - Fix import and xml
+- Fix timed playlist import
 - Fix resources for containers
 - Fix SQL for changing persistent object flag in database
 - Get correct ffmpeg subtitle stream

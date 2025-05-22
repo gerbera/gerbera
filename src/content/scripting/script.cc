@@ -590,13 +590,13 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
     if (id != INVALID_OBJECT_ID) {
         obj->setID(id);
     }
-    id = ScriptNamedProperty(ctx, "refID").getIntValue(INVALID_OBJECT_ID);
-    if (id != INVALID_OBJECT_ID) {
-        obj->setRefID(id);
+    int refId = ScriptNamedProperty(ctx, "refID").getIntValue(INVALID_OBJECT_ID);
+    if (refId != INVALID_OBJECT_ID && refId != id) {
+        obj->setRefID(refId);
     }
-    id = ScriptNamedProperty(ctx, "parentID").getIntValue(INVALID_OBJECT_ID);
-    if (id != INVALID_OBJECT_ID) {
-        obj->setParentID(id);
+    int parentID = ScriptNamedProperty(ctx, "parentID").getIntValue(INVALID_OBJECT_ID);
+    if (parentID != INVALID_OBJECT_ID) {
+        obj->setParentID(parentID);
     }
 
     ScriptNamedProperty(ctx, "parent").getObject([&]() {

@@ -21,6 +21,7 @@
 */
 
 /// \file sql_table.cc
+#define GRB_LOG_FAC GrbLogFacility::sqldatabase
 
 #include "sql_table.h" // API
 
@@ -30,6 +31,7 @@
 #include "sql_database.h"
 #include "upnp/clients.h"
 #include "util/grb_net.h"
+#include "util/logger.h"
 
 const std::vector<BrowseColumn> Object2Table::tableColumnOrder = {
     BrowseColumn::RefId,
@@ -59,7 +61,6 @@ const std::vector<MetadataColumn> Metadata2Table::tableColumnOrder = {
 
 const std::vector<ResourceColumn> Resource2Table::tableColumnOrder = {
     ResourceColumn::ItemId,
-    ResourceColumn::ResId,
     ResourceColumn::ResId,
     ResourceColumn::HandlerType,
     ResourceColumn::Purpose,

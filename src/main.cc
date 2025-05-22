@@ -129,7 +129,7 @@ static void installSignalHandler()
     if (pthread_sigmask(SIG_SETMASK, &maskSet, nullptr))
         log_error("Error installing masked signals {}", std::strerror(errno));
 
-    struct sigaction action = {};
+    struct sigaction action = { 0 };
     action.sa_handler = signalHandler;
     action.sa_flags = SA_NOCLDSTOP;
     sigfillset(&action.sa_mask);

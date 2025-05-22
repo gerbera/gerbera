@@ -60,7 +60,7 @@ class PlaylistParserScript;
 class MetafileParserScript;
 #endif // HAVE_JS
 
-enum class ImportState {
+enum class ImportState : int {
     New,
     Loaded,
     Created,

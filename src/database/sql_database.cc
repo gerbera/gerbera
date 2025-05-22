@@ -704,9 +704,9 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
     std::map<BrowseColumn, std::string> cdsObjectSql;
     cdsObjectSql.emplace(BrowseColumn::ObjectType, quote(obj->getObjectType()));
 
-    if (hasReference || playlistRef)
+    if ((hasReference || playlistRef) && refObj->getID() != obj->getID()) {
         cdsObjectSql.emplace(BrowseColumn::RefId, quote(refObj->getID()));
-    else if (op == Operation::Update)
+    } else if (op == Operation::Update)
         cdsObjectSql.emplace(BrowseColumn::RefId, SQL_NULL);
 
     if (!hasReference || refObj->getClass() != obj->getClass())
@@ -761,9 +761,6 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
                 setCol(cdsObjectSql, BrowseColumn::Location, loc, browseColMap);
                 cdsObjectSql.emplace(BrowseColumn::LocationHash, SQL_NULL);
             }
-        } else if (op == Operation::Update) {
-            cdsObjectSql.emplace(BrowseColumn::Location, SQL_NULL);
-            cdsObjectSql.emplace(BrowseColumn::LocationHash, SQL_NULL);
         }
 
         if (item->getTrackNumber() > 0) {
@@ -2338,7 +2335,8 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
         pcm.getTableName(),
         folAlias,
         cldAlias,
-        pcm.mapQuoted(BrowseColumn::Id), pcm.mapQuoted(BrowseColumn::RefId),
+        pcm.mapQuoted(BrowseColumn::Id),
+        pcm.mapQuoted(BrowseColumn::RefId),
         pcm.getClause(BrowseColumn::ObjectType, quote(OBJECT_TYPE_CONTAINER)));
 
     std::vector<std::int32_t> del;
