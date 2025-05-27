@@ -12,7 +12,7 @@
         <script>ALTER TABLE `mt_autoscan` ADD `path_ids` BLOB AFTER `location`</script>
     </version>
     <version number="4">
-        <script>ALTER TABLE `mt_cds_object` ADD `service_id` varchar(255) default NULL</script>
+        <script>ALTER TABLE `mt_cds_object` ADD `service_id` varchar(GRBMAX) default NULL</script>
         <script>ALTER TABLE `mt_cds_object` ADD KEY `cds_object_service_id` (`service_id`)</script>
     </version>
     <version number="5" remark="move to metadata">
@@ -100,7 +100,7 @@
     <version number="17" remark="add playstatus table">
         <script>
         CREATE TABLE `grb_playstatus` (
-            `group` varchar(255) NOT NULL,
+            `group` varchar(GRBMAX) NOT NULL,
             `item_id` int(11) NOT NULL,
             `playCount` int(11) NOT NULL default '0',
             `lastPlayed` int(11) NOT NULL default '0',
@@ -135,7 +135,7 @@
         <script>ALTER TABLE `mt_autoscan` ADD `ct_video` varchar(255) NOT NULL default 'object.container'</script>
     </version>
     <version number="21" remark="set default column colation">
-        <script>ALTER TABLE `mt_cds_object` MODIFY `dc_title` varchar(255) default NULL COLLATE utf8_general_ci</script>
+        <script>ALTER TABLE `mt_cds_object` MODIFY `dc_title` varchar(GRBMAX) default NULL COLLATE utf8_general_ci</script>
     </version>
     <version number="22" remark="add autoscan follow_symlinks">
         <script>ALTER TABLE `mt_autoscan` ADD `follow_symlinks` tinyint(4) unsigned NOT NULL default '1'</script>
@@ -146,7 +146,7 @@
         <script>ALTER TABLE `mt_autoscan` ADD `force_rescan` tinyint(4) unsigned NOT NULL default '0'</script>
     </version>
     <version number="24" remark="sort_key">
-        <script>ALTER TABLE `mt_cds_object` ADD `sort_key` varchar(255) default NULL COLLATE utf8_general_ci</script>
+        <script>ALTER TABLE `mt_cds_object` ADD `sort_key` varchar(GRBMAX) default NULL COLLATE utf8_general_ci</script>
         <script>
             UPDATE `mt_cds_object` SET `sort_key`=`dc_title`;
             ALTER TABLE `mt_cds_object` ADD KEY `mt_cds_object_title` (`dc_title`);

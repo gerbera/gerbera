@@ -54,6 +54,7 @@ class SQLEmitter;
 enum class Operation;
 
 #define DBVERSION 24
+#define STRING_LIMIT "GRBMAX"
 
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
 
@@ -234,6 +235,8 @@ protected:
     char table_quote_end { '\0' };
     std::array<unsigned int, DBVERSION> hashies;
 
+    /// \brief Maximum length designated as GRBMAX in ddl statement
+    unsigned int stringLimit;
     mutable std::recursive_mutex sqlMutex;
     using SqlAutoLock = std::scoped_lock<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;

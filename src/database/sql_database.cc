@@ -106,7 +106,7 @@ enum class ASColumn {
 
 /// \brief Map browse column ids to column names
 // map ensures entries are in correct order, each value of BrowseCol must be present
-static const std::map<BrowseColumn, SearchProperty> browseColMap {
+static std::map<BrowseColumn, SearchProperty> browseColMap {
     { BrowseColumn::Id, { ITM_ALIAS, "id" } },
     { BrowseColumn::RefId, { ITM_ALIAS, "ref_id" } },
     { BrowseColumn::ParentId, { ITM_ALIAS, "parent_id" } },
@@ -135,7 +135,7 @@ static const std::map<BrowseColumn, SearchProperty> browseColMap {
 
 /// \brief Map search column ids to column names
 // map ensures entries are in correct order, each value of SearchCol must be present
-static const std::map<SearchColumn, SearchProperty> searchColMap {
+static std::map<SearchColumn, SearchProperty> searchColMap {
     { SearchColumn::Id, { SRC_ALIAS, "id" } },
     { SearchColumn::RefId, { SRC_ALIAS, "ref_id" } },
     { SearchColumn::ParentId, { SRC_ALIAS, "parent_id" } },
@@ -357,10 +357,19 @@ SQLDatabase::SQLDatabase(
     : Database(config)
     , mime(std::move(mime))
     , converterManager(std::move(converterManager))
+    , stringLimit(this->config->getUIntOption(ConfigVal::SERVER_STORAGE_STRING_LIMIT))
     , dynamicContentList(this->config->getDynamicContentListOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST))
     , dynamicContentEnabled(this->config->getBoolOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST_ENABLED))
     , sortKeyEnabled(this->config->getBoolOption(ConfigVal::SERVER_STORAGE_SORT_KEY_ENABLED))
 {
+    for (auto&& [key, val] : browseColMap) {
+        if (val.type == FieldType::String && val.length > stringLimit)
+            val.length = stringLimit;
+    }
+    for (auto&& [key, val] : searchColMap) {
+        if (val.type == FieldType::String && val.length > stringLimit)
+            val.length = stringLimit;
+    }
 }
 
 void SQLDatabase::init()
@@ -570,6 +579,7 @@ void SQLDatabase::upgradeDatabase(
             log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
             for (auto&& [migrationCmd, upgradeCmd] : upgrade) {
                 bool actionResult = true;
+                replaceAllString(upgradeCmd, STRING_LIMIT, fmt::to_string(stringLimit));
                 if (!migrationCmd.empty() && migActions.find(migrationCmd) != migActions.end())
                     actionResult = (*this.*(migActions.at(migrationCmd)))();
                 if (actionResult && !upgradeCmd.empty())

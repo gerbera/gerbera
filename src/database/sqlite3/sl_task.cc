@@ -65,9 +65,13 @@ void SLTask::waitForTask()
 }
 
 /* SLInitTask */
-SLInitTask::SLInitTask(std::shared_ptr<Config> config, unsigned int hashie)
+SLInitTask::SLInitTask(
+    std::shared_ptr<Config> config,
+    unsigned int hashie,
+    unsigned int stringLimit)
     : config(std::move(config))
     , hashie(hashie)
+    , stringLimit(stringLimit)
 {
 }
 
@@ -86,6 +90,7 @@ void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
     log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
     auto sql = GrbFile(std::move(sqlFilePath)).readTextFile();
     auto&& myHash = stringHash(sql);
+    replaceAllString(sql, STRING_LIMIT, fmt::to_string(stringLimit));
 
     if (myHash == hashie) {
         sql += fmt::format("\n" SQLITE3_SET_VERSION ";", DBVERSION);
