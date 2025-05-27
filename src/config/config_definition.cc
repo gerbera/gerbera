@@ -548,6 +548,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_STORAGE_SORT_KEY_ENABLED,
             "/server/storage/attribute::enable-sort-key", "config-server.html#storage",
             YES),
+        std::make_shared<ConfigUIntSetup>(ConfigVal::SERVER_STORAGE_STRING_LIMIT,
+            "/server/storage/attribute::string-limit", "config-server.html#storage",
+            255),
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_MYSQL,
             "/server/storage/mysql", "config-server.html#storage"),
 #ifdef HAVE_MYSQL

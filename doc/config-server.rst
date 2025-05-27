@@ -711,6 +711,18 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
     Switches default sorting by property of ``dc_title`` to ``sort_key``. The sort key is derived from the filename by
     expanding all numbers to fixed digits.
 
+    ::
+
+        string-limit="250"
+
+    * Optional
+
+    * Default: **255**
+
+    Set the maximum length of indexed string columns like ``dc_title``. Changing this value after
+    initializing the database will produce a warning in gerbera log and may cause
+    database errors because the string is not correctly truncated.
+
     **SQLite**
 
     .. code-block:: xml

@@ -12,8 +12,8 @@ CREATE TABLE `mt_cds_object` (
   `parent_id` int(11) NOT NULL default '0',
   `object_type` tinyint(4) unsigned NOT NULL,
   `upnp_class` varchar(80) default NULL,
-  `dc_title` varchar(255) default NULL COLLATE utf8_general_ci,
-  `sort_key` varchar(255) default NULL COLLATE utf8_general_ci,
+  `dc_title` varchar(GRBMAX) default NULL COLLATE utf8_general_ci,
+  `sort_key` varchar(GRBMAX) default NULL COLLATE utf8_general_ci,
   `location` blob,
   `location_hash` int(11) unsigned default NULL,
   `auxdata` blob,
@@ -22,7 +22,7 @@ CREATE TABLE `mt_cds_object` (
   `flags` int(11) unsigned NOT NULL default '1',
   `part_number` int(11) default NULL,
   `track_number` int(11) default NULL,
-  `service_id` varchar(255) default NULL,
+  `service_id` varchar(GRBMAX) default NULL,
   `last_modified` bigint(20) unsigned default NULL,
   `last_updated` bigint(20) unsigned default '0',
   PRIMARY KEY  (`id`),
@@ -114,7 +114,7 @@ CREATE TABLE `grb_client` (
   PRIMARY KEY (`addr`, `port`)
 ) ENGINE=MyISAM CHARSET=utf8;
 CREATE TABLE `grb_playstatus` (
-  `group` varchar(255) NOT NULL,
+  `group` varchar(GRBMAX) NOT NULL,
   `item_id` int(11) NOT NULL,
   `playCount` int(11) NOT NULL default '0',
   `lastPlayed` int(11) NOT NULL default '0',

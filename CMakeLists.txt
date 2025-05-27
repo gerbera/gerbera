@@ -814,6 +814,7 @@ INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web
 
 INSTALL(FILES
         src/database/mysql/mysql.sql
+        src/database/mysql/mysql-drop.sql
         src/database/mysql/mysql-upgrade.xml
         src/database/sqlite3/sqlite3.sql
         src/database/sqlite3/sqlite3-upgrade.xml

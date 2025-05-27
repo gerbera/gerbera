@@ -79,7 +79,7 @@ Port
 ----
 
 In addition to UDP port ``1900`` (required by UPnP/SSDP), Gerbera uses a port in the range of ``49152``
-or above for serving media and for UPnP requests. 
+or above for serving media and for UPnP requests.
 If multiple instances of Gerbera or other UPnP media servers are running at the same time the port may be blocked.
 
 ::
@@ -89,20 +89,20 @@ If multiple instances of Gerbera or other UPnP media servers are running at the 
 Specify the server port that will be used for the web user interface, for serving media and for UPnP requests.
 The minimum allowed value is ``49152``. This can also be specified in the config file.
 If this option is omitted a default port will be chosen, but in
-this case it is possible that the port will change upon server restart. 
+this case it is possible that the port will change upon server restart.
 
 Gerbera's startup messages will tell you which server port it's actually using.
 
 Firewall
 --------
 
-If gerbera appears to be running but other devices on the network can't see it, ensure that your 
+If gerbera appears to be running but other devices on the network can't see it, ensure that your
 firewall is not blocking UDP port ``1900`` or the server port that Gerbera is using
-(e.g. ``49152``, see the :ref:`Port <troubleshoot_port>` section above). 
+(e.g. ``49152``, see the :ref:`Port <troubleshoot_port>` section above).
 
-If you have opened only a single server port in your firewall for Gerbera to use, consider adding that port 
+If you have opened only a single server port in your firewall for Gerbera to use, consider adding that port
 to the command line or config file to prevent it from changing upon server restart.
-If multiple instances of Gerbera or other UPnP media servers are running at the same time you may need 
+If multiple instances of Gerbera or other UPnP media servers are running at the same time you may need
 to open multiple ports.
 
 Debugging
@@ -167,7 +167,7 @@ Activate debugging messages only for certain subsystems. The following subsystem
     :caption: Subsystem names are the strings in quotes
     :language: c++
 
-Multiple subsystems can be combined with a ``|``. Names are not case sensitive. This is for developers and testers mostly and has to be activted in cmake 
+Multiple subsystems can be combined with a ``|``. Names are not case sensitive. This is for developers and testers mostly and has to be activted in cmake
 options at compile time (``-DWITH_DEBUG_OPTIONS=YES``).
 
 Check Config
@@ -248,3 +248,41 @@ is a set of client tweaks in :ref:`Device Flags <device-flags>`. If only some
 file types do not work you can add mimetype mapping to the
 :ref:`client config <clients>`.
 
+
+Database
+--------
+
+General
+~~~~~~~
+
+Normally, the database is migrated by gerbera automatically. In case migration
+fails or for new layout features you need to clear the database:
+
+- remove all sqlite db files incl. backup if using sqlite3
+  drop all tables from gerbera mysql database with ``mysql-drop.sql``
+
+If some of your titles are truncated or to safe disk space you can modify the
+``string-limit`` property of the ``<storage>`` config section. If you did so,
+you have to clear your database to avoid side effects.
+
+Sqlite
+~~~~~~
+
+The database files are locked by gerbera for performance. Opening the file
+with an editor while gerbera is running may corrupt the database. Create a
+copy to play with if necessary.
+
+Mysql
+~~~~~
+
+For 4byte utf8 support you may try
+
+.. code-block:: sql
+
+        ALTER DATABASE `gerbera` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        ALTER TABLE `mt_cds_object` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        ALTER TABLE `mt_metadata` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+        ALTER TABLE `grb_cds_resource` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+You will also have to set the ``string-limit`` to ``250`` to cope with the maximum
+index size of 1000.

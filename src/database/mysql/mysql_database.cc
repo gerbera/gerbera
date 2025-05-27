@@ -53,10 +53,10 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
     table_quote_end = '`';
 
     // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated
-    hashies = { 521486787, // index 0 is used for create script mysql.sql = Version 1
-        928913698, 1984244483, 2241152998, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, // upgrade 2-11
-        1512596496, 507706380, 3545156190, 31528140, 372163748, 4097073836, 751952276, 3893982139, 798767550, 3731206823, // upgrade 12-21
-        3643149536, 4280737637, 199055674 };
+    hashies = { 2130056931, // index 0 is used for create script mysql.sql = Version 1
+        928913698, 1984244483, 742641207, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, // upgrade 2-11
+        1512596496, 507706380, 3545156190, 31528140, 372163748, 2233365597, 751952276, 3893982139, 798767550, 2305803926, // upgrade 12-21
+        3643149536, 4280737637, 3587252907 };
 }
 
 MySQLDatabase::~MySQLDatabase()
@@ -164,6 +164,7 @@ std::string MySQLDatabase::prepareDatabase()
                 if (statement.empty()) {
                     continue;
                 }
+                replaceAllString(statement, STRING_LIMIT, fmt::to_string(stringLimit));
                 log_debug("executing statement: '{}'", statement);
                 int ret = mysql_real_query(&db, statement.c_str(), statement.size());
                 if (ret) {
@@ -196,6 +197,14 @@ void MySQLDatabase::init()
     connect();
     auto dbVersion = prepareDatabase();
     upgradeDatabase(std::stoul(dbVersion), hashies, ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, mysqlUpdateVersion, mysqlAddResourceAttr);
+
+    auto dbLimit = getInternalSetting("string_limit");
+    if (!dbLimit.empty() && std::stoul(dbLimit) > stringLimit)
+        log_warning("Your database was created with string length {} but your current config value is {}", dbLimit, stringLimit);
+    else if (dbLimit.empty()) {
+        log_info("Saving string limit {}", stringLimit);
+        storeInternalSetting("string_limit", fmt::to_string(stringLimit));
+    }
     initDynContainers();
 
     lock.unlock();

@@ -54,10 +54,10 @@ Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const st
     table_quote_end = '"';
 
     // if sqlite3.sql or sqlite3-upgrade.xml is changed hashies have to be updated
-    hashies = { 3951344025, // index 0 is used for create script sqlite3.sql = Version 1
-        778996897, 3362507034, 853149842, 4035419264, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, // upgrade 2-11
-        43189396, 2767540493, 2512852146, 1273710965, 319062951, 3593597366, 1028160353, 881071639, 1989518047, 3743992560, // upgrade 12-21
-        3135921396, 3108208, 839702476 };
+    hashies = { 1236557113, // index 0 is used for create script sqlite3.sql = Version 1
+        778996897, 3362507034, 853149842, 2776802417, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, // upgrade 2-11
+        3908767237, 509765404, 2512852146, 1273710965, 319062951, 2316641127, 1028160353, 881071639, 1989518047, 782849313, // upgrade 12-21
+        3135921396, 3108208, 2156790525 };
 }
 
 void Sqlite3Database::prepare()
@@ -102,7 +102,7 @@ std::string Sqlite3Database::prepareDatabase(const fs::path& dbFilePath, GrbFile
 
     if (dbVersion.empty() && !dbBackupFile.isReadable()) {
         log_info("No sqlite3 backup is available or backup is corrupt. Automatically creating new database file...");
-        auto itask = std::make_shared<SLInitTask>(config, hashies[0]);
+        auto itask = std::make_shared<SLInitTask>(config, hashies[0], stringLimit);
         addTask(itask);
         try {
             itask->waitForTask();
@@ -174,6 +174,14 @@ void Sqlite3Database::init()
             auto backupInterval = std::chrono::seconds(config->getIntOption(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL));
             timer->addTimerSubscriber(this, backupInterval, nullptr);
             hasBackupTimer = true;
+        }
+
+        auto dbLimit = getInternalSetting("string_limit");
+        if (!dbLimit.empty() && std::stoul(dbLimit) > stringLimit)
+            log_warning("Your database was created with string length {} but your current config value is {}", dbLimit, stringLimit);
+        else if (dbLimit.empty()) {
+            log_info("Saving string limit {}", stringLimit);
+            storeInternalSetting("string_limit", fmt::to_string(stringLimit));
         }
         dbInitDone = true;
     } catch (const std::runtime_error& e) {
