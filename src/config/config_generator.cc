@@ -756,6 +756,8 @@ void ConfigGenerator::generateBoxlayout(ConfigVal option)
         setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_CLASS, bl.getClass());
         if (!bl.getUpnpShortcut().empty())
             setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT, bl.getUpnpShortcut());
+        if (!bl.getSortKey().empty())
+            setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY, bl.getSortKey());
         if (bl.getSize() != 1)
             setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_SIZE, fmt::to_string(bl.getSize()));
         if (!bl.getEnabled())

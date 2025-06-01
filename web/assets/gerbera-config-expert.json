@@ -400,6 +400,16 @@
           "editable": false
         },
         {
+          "item": "/server/storage/attribute::enable-sort-key",
+          "caption": "Sort by sort_key instead of dc_title",
+          "editable": false
+        },
+        {
+          "item": "/server/storage/attribute::string-limit",
+          "caption": "String Length Limit",
+          "editable": false
+        },
+        {
           "item": "/server/storage/sqlite3",
           "caption": "SQLite",
           "type": "Element",
@@ -1130,6 +1140,11 @@
             {
               "item": "/import/scripting/virtual-layout/boxlayout/box/attribute::upnp-shortcut",
               "caption": "Upnp Shortcut",
+              "editable": true
+            },
+            {
+              "item": "/import/scripting/virtual-layout/boxlayout/box/attribute::sort-key",
+              "caption": "Sorting Key",
               "editable": true
             },
             {

@@ -60,79 +60,46 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
   const containerRefID = cont.res.count > 0 ? cont.id : obj.id;
   const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
 
+  const boxes = [
+     BK_audioRoot,
+     BK_audioAll,
+     BK_audioAllArtists,
+     BK_audioAllGenres,
+     BK_audioAllAlbums,
+     BK_audioAllYears,
+     BK_audioAllComposers,
+     BK_audioAllSongs,
+     BK_audioAllTracks,
+     BK_audioArtistChronology,
+     BK_audioInitialAllArtistTracks,
+     BK_audioInitialAbc,
+     BK_audioInitialAudioBookRoot,
+     BK_audioInitialAllBooks];
+  var _Chain = {};
+  for (var j = 0; j < boxes.length; j++) {
+    const bxSetup = boxSetup[boxes[j]];
+    _Chain[boxes[j]] = {
+      id: bxSetup.id,
+      title: bxSetup.title,
+      searchable: false,
+      objectType: OBJECT_TYPE_CONTAINER,
+      upnpclass: bxSetup.class,
+      upnpShortcut: bxSetup.upnpShortcut,
+      sortKey: bxSetup.sortKey,
+      metaData: []
+    };
+  }
+
   const chain = {
-    audio: {
-      id: boxSetup[BK_audioRoot].id,
-      title: boxSetup[BK_audioRoot].title,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: boxSetup[BK_audioRoot].class,
-      upnpShortcut: boxSetup[BK_audioRoot].upnpShortcut,
-      metaData: []
-    },
-    allAudio: {
-      id: boxSetup[BK_audioAll].id,
-      title: boxSetup[BK_audioAll].title,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: boxSetup[BK_audioAll].class,
-      upnpShortcut: boxSetup[BK_audioAll].upnpShortcut,
-      metaData: []
-    },
-    allArtists: {
-      id: boxSetup[BK_audioAllArtists].id,
-      title: boxSetup[BK_audioAllArtists].title,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: boxSetup[BK_audioAllArtists].class,
-      upnpShortcut: boxSetup[BK_audioAllArtists].upnpShortcut,
-      metaData: []
-    },
-    allGenres: {
-      id: boxSetup[BK_audioAllGenres].id,
-      title: boxSetup[BK_audioAllGenres].title,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: boxSetup[BK_audioAllGenres].class,
-      upnpShortcut: boxSetup[BK_audioAllGenres].upnpShortcut,
-      metaData: []
-    },
-    allAlbums: {
-      id: boxSetup[BK_audioAllAlbums].id,
-      title: boxSetup[BK_audioAllAlbums].title,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: boxSetup[BK_audioAllAlbums].class,
-      upnpShortcut: boxSetup[BK_audioAllAlbums].upnpShortcut,
-      metaData: []
-    },
-    allYears: {
-      id: boxSetup[BK_audioAllYears].id,
-      title: boxSetup[BK_audioAllYears].title,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: boxSetup[BK_audioAllYears].class,
-      upnpShortcut: boxSetup[BK_audioAllYears].upnpShortcut,
-      metaData: []
-    },
-    allComposers: {
-      id: boxSetup[BK_audioAllComposers].id,
-      title: boxSetup[BK_audioAllComposers].title,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: boxSetup[BK_audioAllComposers].class,
-      upnpShortcut: boxSetup[BK_audioAllComposers].upnpShortcut,
-      metaData: []
-    },
-    allSongs: {
-      id: boxSetup[BK_audioAllSongs].id,
-      title: boxSetup[BK_audioAllSongs].title,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: boxSetup[BK_audioAllSongs].class,
-      upnpShortcut: boxSetup[BK_audioAllSongs].upnpShortcut,
-      metaData: []
-    },
-    allFull: {
-      id: boxSetup[BK_audioAllTracks].id,
-      title: boxSetup[BK_audioAllTracks].title,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: boxSetup[BK_audioAllTracks].class,
-      upnpShortcut: boxSetup[BK_audioAllTracks].upnpShortcut,
-      metaData: []
-    },
+    audio: _Chain[BK_audioRoot],
+    allAudio: _Chain[BK_audioAll],
+    allArtists: _Chain[BK_audioAllArtists],
+    allGenres: _Chain[BK_audioAllGenres],
+    allAlbums: _Chain[BK_audioAllAlbums],
+    allYears: _Chain[BK_audioAllYears],
+    allComposers: _Chain[BK_audioAllComposers],
+    allSongs: _Chain[BK_audioAllSongs],
+    allFull: _Chain[BK_audioAllTracks],
     allFullArtist: {
       id: boxSetup[BK_audioAllTracks].id,
       title: boxSetup[BK_audioAllTracks].title,
@@ -140,14 +107,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
       upnpclass: boxSetup[BK_audioAllTracks].class,
       metaData: []
     },
-    artistChronology: {
-      id: boxSetup[BK_audioArtistChronology].id,
-      title: boxSetup[BK_audioArtistChronology].title,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: boxSetup[BK_audioArtistChronology].class,
-      upnpShortcut: boxSetup[BK_audioArtistChronology].upnpShortcut,
-      metaData: []
-    },
+    artistChronology: _Chain[BK_audioArtistChronology],
     all000: {
       id: boxSetup[BK_audioInitialAllArtistTracks].id,
       title: boxSetup[BK_audioInitialAllArtistTracks].title,
@@ -159,12 +119,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
       aux: obj.aux,
       refID: containerRefID
     },
-    abc: {
-      id: boxSetup[BK_audioInitialAbc].id,
-      title: boxSetup[BK_audioInitialAbc].title,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: boxSetup[BK_audioInitialAbc].class
-    },
+    abc: _Chain[BK_audioInitialAbc],
 
     init: {
       title: '_',

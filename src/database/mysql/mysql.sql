@@ -37,16 +37,6 @@ CREATE TABLE `mt_cds_object` (
   CONSTRAINT `mt_cds_object_ibfk_1` FOREIGN KEY (`ref_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `mt_cds_object_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_cds_object` (
-    `id`, `parent_id`, `object_type`, `flags`
-) VALUES (-1,-1,0,9);
-INSERT INTO `mt_cds_object` (
-    `id`, `parent_id`, `object_type`, `upnp_class`, `dc_title`, `flags`, `sort_key`
-) VALUES (0,-1,1,'object.container','Root',9,'000');
-UPDATE `mt_cds_object` SET `id`='0' WHERE `id`='1';
-INSERT INTO `mt_cds_object` (
-    `id`,  `parent_id`, `object_type`, `upnp_class`, `dc_title`, `flags`, `sort_key`
-) VALUES (1,0,1,'object.container','PC Directory',9,'000');
 CREATE TABLE `mt_internal_setting` (
   `key` varchar(40) NOT NULL,
   `value` varchar(255) NOT NULL,
@@ -85,9 +75,6 @@ CREATE TABLE `mt_metadata` (
   KEY `metadata_item_id` (`item_id`),
   CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_metadata` (
-  `id`, `item_id`, `property_name`, `property_value`
-) VALUES (NULL, '1', 'dc:date', '1900-01-01T00:00:00Z');
 CREATE TABLE `grb_config_value` (
   `item` varchar(255) primary key,
   `key` varchar(255) NOT NULL,
@@ -123,7 +110,6 @@ CREATE TABLE `grb_playstatus` (
   PRIMARY KEY (`group`, `item_id`),
   CONSTRAINT `grb_played_item` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=MyISAM CHARSET=utf8;
-INSERT INTO `mt_internal_setting` VALUES('resource_attribute', '');
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;

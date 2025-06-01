@@ -260,6 +260,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             setProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_TITLE), boxLayout->getTitle());
             setProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_CLASS), boxLayout->getClass());
             setProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT), boxLayout->getUpnpShortcut());
+            setProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY), boxLayout->getSortKey());
             duk_put_prop_string(ctx, -2, boxLayout->getKey().c_str());
         }
         std::string boxLayoutItemPath = bcs->getItemPathRoot(true); // prefix

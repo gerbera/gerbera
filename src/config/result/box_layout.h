@@ -29,6 +29,7 @@
 
 #include "common.h"
 #include "edit_helper.h"
+#include "upnp/upnp_common.h"
 
 #include <map>
 #include <memory>
@@ -42,6 +43,8 @@ using EditHelperBoxLayout = EditHelper<BoxLayout>;
 
 class BoxKeys {
 public:
+    static constexpr std::string_view root = "Root";
+    static constexpr std::string_view pcDirectory = "PCDirectory";
     static constexpr std::string_view audioAllAlbums = "Audio/allAlbums";
     static constexpr std::string_view audioAllArtists = "Audio/allArtists";
     static constexpr std::string_view audioAll = "Audio/allAudio";
@@ -104,11 +107,19 @@ class BoxLayout : public Editable {
 public:
     BoxLayout() = default;
     virtual ~BoxLayout() = default;
-    explicit BoxLayout(const std::string_view& key, std::string title, std::string objClass, std::string upnpShortcut = "", bool enabled = true, int size = 1)
+    explicit BoxLayout(
+        const std::string_view& key,
+        std::string title,
+        std::string objClass = UPNP_CLASS_CONTAINER,
+        std::string upnpShortcut = "",
+        std::string sortKey = "",
+        bool enabled = true,
+        int size = 1)
         : key(key)
         , title(std::move(title))
         , objClass(std::move(objClass))
         , upnpShortcut(std::move(upnpShortcut))
+        , sortKey(std::move(sortKey))
         , enabled(enabled)
         , size(size)
     {
@@ -137,6 +148,9 @@ public:
     void setId(int id) { this->id = id; }
     int getId() const { return id; }
 
+    void setSortKey(std::string sortKey) { this->sortKey = std::move(sortKey); }
+    std::string getSortKey() const { return sortKey; }
+
 protected:
     /// \brief key for the box to be referenced in layouts
     std::string key;
@@ -146,6 +160,8 @@ protected:
     std::string objClass;
     /// \brief shortcut name for upnp shortcuts list
     std::string upnpShortcut;
+    /// \brief sorting key for directory listing
+    std::string sortKey;
     /// \brief allow to disable boxes
     bool enabled { true };
     /// \brief size value for the box, esp. in structured layout

@@ -216,6 +216,8 @@ protected:
     explicit SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, std::shared_ptr<ConverterManager> converterManager);
     void init() override;
     void initDynContainers(const std::shared_ptr<CdsObject>& sParent = {});
+    /// \brief create core entries in fresh database
+    void fillDatabase();
 
     /// \brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
     bool doMetadataMigration();

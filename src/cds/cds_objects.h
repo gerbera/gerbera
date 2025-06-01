@@ -80,7 +80,7 @@ protected:
     bool virt {};
 
     /// \brief type of the object: item, container, etc.
-    unsigned int objectType {};
+    unsigned int objectType { 0 };
 
     /// \brief field which can hold various flags for the object
     unsigned int objectFlags { OBJECT_FLAG_RESTRICTED };
@@ -143,7 +143,11 @@ public:
     std::string getTitle() const { return title; }
 
     // \brief Set the object sortKey
-    void setSortKey(const std::string& sortKey) { this->sortKey = sortKey; }
+    void setSortKey(const std::string& sortKey)
+    {
+        if (!sortKey.empty())
+            this->sortKey = sortKey;
+    }
     /// \brief Retrieve the sortKey.
     std::string getSortKey() const { return sortKey; }
 

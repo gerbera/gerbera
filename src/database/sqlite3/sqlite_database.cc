@@ -54,7 +54,7 @@ Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const st
     table_quote_end = '"';
 
     // if sqlite3.sql or sqlite3-upgrade.xml is changed hashies have to be updated
-    hashies = { 1236557113, // index 0 is used for create script sqlite3.sql = Version 1
+    hashies = { 2771697970, // index 0 is used for create script sqlite3.sql = Version 1
         778996897, 3362507034, 853149842, 2776802417, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, // upgrade 2-11
         3908767237, 509765404, 2512852146, 1273710965, 319062951, 2316641127, 1028160353, 881071639, 1989518047, 782849313, // upgrade 12-21
         3135921396, 3108208, 2156790525 };
@@ -106,6 +106,9 @@ std::string Sqlite3Database::prepareDatabase(const fs::path& dbFilePath, GrbFile
         addTask(itask);
         try {
             itask->waitForTask();
+            fillDatabase();
+            storeInternalSetting("string_limit", fmt::to_string(stringLimit));
+            storeInternalSetting("resource_attribute", "");
             prepare();
             dbFile.setPermissions();
             dbVersion = getInternalSetting("db_version");

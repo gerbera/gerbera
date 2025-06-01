@@ -34,6 +34,7 @@
 #include "util/logger.h"
 
 const std::vector<BrowseColumn> Object2Table::tableColumnOrder = {
+    BrowseColumn::Id,
     BrowseColumn::RefId,
     BrowseColumn::ParentId,
     BrowseColumn::ObjectType,
