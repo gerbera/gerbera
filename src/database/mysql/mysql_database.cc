@@ -53,7 +53,7 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
     table_quote_end = '`';
 
     // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated
-    hashies = { 2130056931, // index 0 is used for create script mysql.sql = Version 1
+    hashies = { 2597415869, // index 0 is used for create script mysql.sql = Version 1
         928913698, 1984244483, 742641207, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, // upgrade 2-11
         1512596496, 507706380, 3545156190, 31528140, 372163748, 2233365597, 751952276, 3893982139, 798767550, 2305803926, // upgrade 12-21
         3643149536, 4280737637, 3587252907 };
@@ -173,6 +173,9 @@ std::string MySQLDatabase::prepareDatabase()
                 }
             }
             _exec(fmt::format(MYSQL_SET_VERSION, DBVERSION));
+            fillDatabase();
+            storeInternalSetting("string_limit", fmt::to_string(stringLimit));
+            storeInternalSetting("resource_attribute", "");
         } else {
             log_warning("Wrong hash for create script {}: {} != {}", DBVERSION, myHash, hashies[0]);
             throw_std_runtime_error("Wrong hash for create script {}", DBVERSION);

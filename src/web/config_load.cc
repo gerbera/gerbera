@@ -649,6 +649,9 @@ void Web::ConfigLoad::writeBoxLayout(Json::Value& values)
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT }),
             cs->option, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT, cont->getUpnpShortcut());
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY }),
+            cs->option, ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY, cont->getSortKey());
     }
     // Allow creation of entry in blank config
     addNewValue(values,

@@ -21,15 +21,6 @@ CREATE TABLE "mt_cds_object" (
   CONSTRAINT "cds_object_ibfk_1" FOREIGN KEY ("ref_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT "cds_object_ibfk_2" FOREIGN KEY ("parent_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO "mt_cds_object" (
-    id, ref_id, parent_id, object_type, upnp_class, dc_title, flags, sort_key
-) VALUES (-1, NULL, -1, 0, NULL, NULL, 9, NULL);
-INSERT INTO "mt_cds_object" (
-    id, ref_id, parent_id, object_type, upnp_class, dc_title, flags, sort_key
-) VALUES (0, NULL, -1, 1, 'object.container', 'Root', 9, '000');
-INSERT INTO "mt_cds_object" (
-    id, ref_id, parent_id, object_type, upnp_class, dc_title, flags, sort_key
-) VALUES (1, NULL, 0, 1, 'object.container', 'PC Directory', 9, '000');
 CREATE TABLE "mt_internal_setting" (
   "key" varchar(40) primary key NOT NULL,
   "value" varchar(255) NOT NULL
@@ -63,9 +54,6 @@ CREATE TABLE "mt_metadata" (
   "property_value" text NOT NULL,
   CONSTRAINT "mt_metadata_idfk1" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO "mt_metadata" (
-  "id", "item_id", "property_name", "property_value"
-) VALUES (NULL, '1', 'dc:date', '1900-01-01T00:00:00Z');
 CREATE TABLE "grb_config_value" (
   "item" varchar(255) primary key,
   "key" varchar(255) NOT NULL,
@@ -101,7 +89,6 @@ CREATE TABLE "grb_playstatus" (
   PRIMARY KEY ("group", "item_id"),
   CONSTRAINT "grb_played_item" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
 );
-INSERT INTO "mt_internal_setting" VALUES('resource_attribute', '');
 CREATE INDEX "mt_cds_object_ref_id" ON mt_cds_object(ref_id);
 CREATE INDEX "mt_cds_object_parent_id" ON mt_cds_object(parent_id,object_type,dc_title);
 CREATE INDEX "mt_object_type" ON mt_cds_object(object_type);

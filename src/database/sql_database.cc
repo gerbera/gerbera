@@ -39,6 +39,7 @@
 #include "config/config.h"
 #include "config/config_setup.h"
 #include "config/result/autoscan.h"
+#include "config/result/box_layout.h"
 #include "config/result/dynamic_content.h"
 #include "content/autoscan_list.h"
 #include "db_param.h"
@@ -522,6 +523,81 @@ void SQLDatabase::init()
     }
 
     sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper, playstatusColumnMapper);
+}
+
+static std::shared_ptr<CdsContainer> setDefaultContainer(
+    const std::shared_ptr<BoxLayout>& bl,
+    const std::string& defTitle)
+{
+    auto title = bl ? bl->getTitle() : defTitle;
+    auto sortKey = bl ? bl->getSortKey() : "000";
+    auto upnpClass = bl ? bl->getClass() : UPNP_CLASS_CONTAINER;
+    auto container = std::make_shared<CdsContainer>(title);
+    container->setSortKey(sortKey);
+    container->setClass(upnpClass);
+    container->setFlags(OBJECT_FLAG_PERSISTENT_CONTAINER | OBJECT_FLAG_RESTRICTED);
+    return container;
+}
+
+void SQLDatabase::fillDatabase()
+{
+    log_debug("start");
+    constexpr int nullID = -1;
+    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
+    auto nullObject = std::make_shared<CdsObject>();
+    nullObject->setFlags(OBJECT_FLAG_PERSISTENT_CONTAINER | OBJECT_FLAG_RESTRICTED);
+    nullObject->setID(nullID);
+    nullObject->setParentID(nullID);
+
+    auto blRoot = blOption->getKey(BoxKeys::root);
+    auto rootContainer = setDefaultContainer(blRoot, "Root");
+    rootContainer->setID(CDS_ID_ROOT);
+    rootContainer->setParentID(nullID);
+
+    auto blPc = blOption->getKey(BoxKeys::pcDirectory);
+    auto fileContainer = setDefaultContainer(blPc, "PC Directory");
+    fileContainer->setID(CDS_ID_FS_ROOT);
+    fileContainer->setParentID(CDS_ID_ROOT);
+    fileContainer->addMetaData(MetadataFields::M_DATE, "1900-01-01T00:00:00Z");
+
+    for (auto&& obj : std::array<std::shared_ptr<CdsObject>, 3> { nullObject, rootContainer, fileContainer }) {
+        std::map<BrowseColumn, std::string> cdsObjectSql;
+        cdsObjectSql.emplace(BrowseColumn::Id, quote(obj->getID()));
+        cdsObjectSql.emplace(BrowseColumn::ParentId, quote(obj->getParentID()));
+        cdsObjectSql.emplace(BrowseColumn::ObjectType, quote(obj->getObjectType()));
+        cdsObjectSql.emplace(BrowseColumn::Flags, quote(obj->getFlags()));
+        if (!obj->getClass().empty())
+            cdsObjectSql.emplace(BrowseColumn::UpnpClass, quote(obj->getClass()));
+
+        if (!obj->getTitle().empty())
+            setCol(cdsObjectSql, BrowseColumn::DcTitle, obj->getTitle(), browseColMap);
+        if (!obj->getSortKey().empty())
+            setCol(cdsObjectSql, BrowseColumn::SortKey, obj->getSortKey(), browseColMap);
+
+        std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> tables;
+        auto ot = std::make_shared<Object2Table>(std::move(cdsObjectSql), Operation::Insert, browseColumnMapper);
+        tables.push_back(std::move(ot));
+        generateMetaDataDBOperations(obj, Operation::Insert, tables);
+
+        for (auto&& table : tables) {
+            if (table->getTableName() == CDS_OBJECT_TABLE) {
+                auto qb = table->sqlForInsert(nullptr);
+                log_debug("Generated insert: {}", qb);
+
+                auto id = exec(qb, true);
+                if (id != obj->getID()) {
+                    // work around autoincrement columns not accepting value
+                    auto upd = fmt::format("UPDATE {0} SET {1} = {2} WHERE {1} = {3}", CDS_OBJECT_TABLE, identifier("id"), quote(obj->getID()), quote(id));
+                    log_debug("Generated update: {}", upd);
+                    execOnly(upd);
+                }
+            } else {
+                auto qb = table->sqlForInsert(obj);
+                log_debug("Generated insert: {}", qb);
+                execOnly(qb);
+            }
+        }
+    }
 }
 
 void SQLDatabase::upgradeDatabase(

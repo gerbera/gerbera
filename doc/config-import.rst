@@ -515,6 +515,14 @@ Below are the available scripting options:
 
             .. code:: xml
 
+                sort-key="0123"
+
+            * Optional
+
+            Define special sorting key for the box instead of its title.
+
+            .. code:: xml
+
                 enabled="no"
 
             * Optional

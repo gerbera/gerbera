@@ -3,6 +3,8 @@
   <scripting script-charset="UTF-8">
     <virtual-layout type="js">
       <boxlayout>
+        <box key="Root" title="Root" class="object.container" sort-key="00000" />
+        <box key="PCDirectory" title="PC Directory" class="object.container" sort-key="00000" />
         <box key="Audio/allAlbums" title="Albums" class="object.container" upnp-shortcut="MUSIC_ALBUMS" />
         <box key="Audio/allArtists" title="Artists" class="object.container" upnp-shortcut="MUSIC_ARTISTS" />
         <box key="Audio/allAudio" title="All Audio" class="object.container" />

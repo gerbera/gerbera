@@ -60,13 +60,14 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
         auto upnpShortcut = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->getXmlContent(child);
         auto size = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
         auto enabled = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
+        auto sortKey = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY)->getXmlContent(child);
 
         if (!enabled && ((key == BoxKeys::audioRoot) || (key == BoxKeys::audioAll) || (key == BoxKeys::imageRoot) || (key == BoxKeys::imageAll) || (key == BoxKeys::videoRoot) || (key == BoxKeys::videoAll))) {
             log_warning("Box '{}' cannot be disabled", key);
             enabled = true;
         }
 
-        auto box = std::make_shared<BoxLayout>(key, title, objClass, upnpShortcut, enabled, size);
+        auto box = std::make_shared<BoxLayout>(key, title, objClass, upnpShortcut, sortKey, enabled, size);
         try {
             result->add(box);
             allKeys.push_back(key);
@@ -77,7 +78,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
     }
     for (auto&& defEntry : defaultEntries) {
         if (std::find(allKeys.begin(), allKeys.end(), defEntry.getKey()) == allKeys.end()) {
-            auto box = std::make_shared<BoxLayout>(defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getUpnpShortcut(), defEntry.getEnabled(), defEntry.getSize());
+            auto box = std::make_shared<BoxLayout>(defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getUpnpShortcut(), defEntry.getSortKey(), defEntry.getEnabled(), defEntry.getSize());
             if (doExtend)
                 log_debug("Created default BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
             else
@@ -179,6 +180,16 @@ bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
         entry->setEnabled(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->checkValue(optValue));
         log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getEnabled());
         return true;
+    }
+    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY });
+    if (optItem == index) {
+        if (entry->getOrig())
+            config->setOrigValue(index, entry->getSortKey());
+        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY)->checkValue(optValue)) {
+            entry->setSortKey(optValue);
+            log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getSortKey());
+            return true;
+        }
     }
     return false;
 }

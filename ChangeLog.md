@@ -8,6 +8,7 @@
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
 - Configure limit of sql strings
 - Extend details extracted by WavPack handler
+- Fill database on startup
 - Filter resources by mimetype
 - Fix import and xml
 - Fix timed playlist import

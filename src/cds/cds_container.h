@@ -50,6 +50,7 @@ public:
     CdsContainer();
     explicit CdsContainer(const std::string& title, const std::string& upnpClass = UPNP_CLASS_CONTAINER)
     {
+        this->objectType = OBJECT_TYPE_CONTAINER;
         this->title = title;
         this->upnpClass = upnpClass;
     }
@@ -89,6 +90,7 @@ public:
     /// See description for CdsObject::equals() for details.
     bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) const override;
 
+    /// \brief Make container available to the UPnP shortcuts feature
     void setUpnpShortcut(const std::string& upnpShortcut) { addMetaData(MetadataFields::M_UPNP_SHORTCUT, upnpShortcut); }
     std::string getUpnpShortcut() const { return getMetaData(MetadataFields::M_UPNP_SHORTCUT); }
 };

@@ -322,37 +322,39 @@ static const std::vector<std::vector<std::pair<std::string, std::string>>> virtu
 
 /// \brief default values for ConfigVal::BOXLAYOUT_BOX
 static const std::vector<BoxLayout> boxLayoutDefaults {
+    BoxLayout(BoxKeys::root, "Root", UPNP_CLASS_CONTAINER, "", "00000"),
+    BoxLayout(BoxKeys::pcDirectory, "PC Directory", UPNP_CLASS_CONTAINER, "", "00000"),
     // FOLDER_STRUCTURE
 
     BoxLayout(BoxKeys::audioAllAlbums, "Albums", UPNP_CLASS_CONTAINER, "MUSIC_ALBUMS"),
     BoxLayout(BoxKeys::audioAllArtists, "Artists", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS"),
-    BoxLayout(BoxKeys::audioAll, "All Audio", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioAllComposers, "Composers", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::audioAll, "All Audio"),
+    BoxLayout(BoxKeys::audioAllComposers, "Composers"),
     BoxLayout(BoxKeys::audioAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_FOLDER_STRUCTURE"),
     BoxLayout(BoxKeys::audioAllGenres, "Genres", UPNP_CLASS_CONTAINER, "MUSIC_GENRES"),
-    BoxLayout(BoxKeys::audioAllSongs, "All Songs", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::audioAllSongs, "All Songs"),
     BoxLayout(BoxKeys::audioAllTracks, "All - full name", UPNP_CLASS_CONTAINER, "MUSIC_ALL"),
-    BoxLayout(BoxKeys::audioAllYears, "Year", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioRoot, "Audio", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioArtistChronology, "Album Chronology", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::audioAllYears, "Year"),
+    BoxLayout(BoxKeys::audioRoot, "Audio"),
+    BoxLayout(BoxKeys::audioArtistChronology, "Album Chronology"),
 
-    BoxLayout(BoxKeys::audioInitialAbc, "ABC", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioInitialAllArtistTracks, "000 All", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioInitialAllBooks, "Books", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::audioInitialAbc, "ABC"),
+    BoxLayout(BoxKeys::audioInitialAllArtistTracks, "000 All"),
+    BoxLayout(BoxKeys::audioInitialAllBooks, "Books"),
     BoxLayout(BoxKeys::audioInitialAudioBookRoot, "AudioBooks", UPNP_CLASS_CONTAINER, "MUSIC_AUDIOBOOKS"),
 
-    BoxLayout(BoxKeys::audioStructuredAllAlbums, "-Album-", UPNP_CLASS_CONTAINER, "MUSIC_ALBUMS", true, 6),
-    BoxLayout(BoxKeys::audioStructuredAllArtistTracks, "all", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS", true, 9),
-    BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", UPNP_CLASS_CONTAINER, "MUSIC_GENRES", true, 6),
-    BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", UPNP_CLASS_CONTAINER, "MUSIC_ALL", true, 6),
-    BoxLayout(BoxKeys::audioStructuredAllYears, "-Year-", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::audioStructuredAllAlbums, "-Album-", UPNP_CLASS_CONTAINER, "MUSIC_ALBUMS", "", true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllArtistTracks, "all"),
+    BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS", "", true, 9),
+    BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", UPNP_CLASS_CONTAINER, "MUSIC_GENRES", "", true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", UPNP_CLASS_CONTAINER, "MUSIC_ALL", "", true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllYears, "-Year-"),
 
     BoxLayout(BoxKeys::videoAllDates, "Date", UPNP_CLASS_CONTAINER, "VIDEOS_YEARS_MONTH"),
     BoxLayout(BoxKeys::videoAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "VIDEOS_FOLDER_STRUCTURE"),
     BoxLayout(BoxKeys::videoAll, "All Video", UPNP_CLASS_CONTAINER, "VIDEOS_ALL"),
     BoxLayout(BoxKeys::videoAllYears, "Year", UPNP_CLASS_CONTAINER, "VIDEOS_YEARS"),
-    BoxLayout(BoxKeys::videoUnknown, "Unknown", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::videoUnknown, "Unknown"),
     BoxLayout(BoxKeys::videoRoot, "Video", UPNP_CLASS_CONTAINER, "VIDEOS"),
     // VIDEOS_GENRES
     // VIDEOS_ALBUM
@@ -369,20 +371,20 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
     BoxLayout(BoxKeys::imageAll, "All Photos", UPNP_CLASS_CONTAINER, "IMAGES_ALL"),
     BoxLayout(BoxKeys::imageAllYears, "Year", UPNP_CLASS_CONTAINER, "IMAGES_YEARS"),
     BoxLayout(BoxKeys::imageRoot, "Photos", UPNP_CLASS_CONTAINER, "IMAGES"),
-    BoxLayout(BoxKeys::imageUnknown, "Unknown", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::imageUnknown, "Unknown"),
 
 #ifdef ONLINE_SERVICES
-    BoxLayout(BoxKeys::trailerRoot, "Online Services", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::trailerAll, "All Trailers", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::trailerAllGenres, "Genres", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::trailerRelDate, "Release Date", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::trailerPostDate, "Post Date", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::trailerUnknown, "Unknown", UPNP_CLASS_CONTAINER),
+    BoxLayout(BoxKeys::trailerRoot, "Online Services"),
+    BoxLayout(BoxKeys::trailerAll, "All Trailers"),
+    BoxLayout(BoxKeys::trailerAllGenres, "Genres"),
+    BoxLayout(BoxKeys::trailerRelDate, "Release Date"),
+    BoxLayout(BoxKeys::trailerPostDate, "Post Date"),
+    BoxLayout(BoxKeys::trailerUnknown, "Unknown"),
 #endif
 #ifdef HAVE_JS
-    BoxLayout(BoxKeys::playlistRoot, "Playlists", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::playlistAll, "All Playlists", UPNP_CLASS_CONTAINER),
-    BoxLayout(BoxKeys::playlistAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_PLAYLISTS", true, 1),
+    BoxLayout(BoxKeys::playlistRoot, "Playlists"),
+    BoxLayout(BoxKeys::playlistAll, "All Playlists"),
+    BoxLayout(BoxKeys::playlistAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_PLAYLISTS", "", true, 1),
 #endif
 };
 
@@ -1012,6 +1014,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED,
             "attribute::enabled", "config-import.html#boxlayout",
             YES),
+        std::make_shared<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY,
+            "attribute::sort-key", "config-import.html#boxlayout",
+            ""),
 
         // default file settings, can be overwritten in autoscan
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_HIDDEN_FILES,

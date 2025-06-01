@@ -252,6 +252,8 @@
                     <genre from="Pop|A Capella|Folk|Sports|Data|Disco|Diva|Electronica|World|Glam|New Age|Romantic|Vocals|European|Classic Prog|Urban AC" to="Pop"/>
                 </genre-map>
                 <boxlayout>
+                    <box key="Root" title="Root" class="object.container" sort-key="00000" />
+                    <box key="PCDirectory" title="PC Directory" class="object.container" sort-key="00000" />
                     <box key="Audio/allAlbums" title="Albums" class="object.container" upnp-shortcut="MUSIC_ALBUMS"/>
                     <box key="Audio/allArtists" title="Artists" class="object.container" upnp-shortcut="MUSIC_ARTISTS"/>
                     <box key="Audio/allAudio" title="All Audio" class="object.container"/>
