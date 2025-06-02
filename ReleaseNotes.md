@@ -12,7 +12,8 @@ Improved resource handling for WavPack and FFMpeg requrires reimport of the libr
 - Support transliteration of device output
 - Extract multiple stream information in ffmpeg handler including embedded subtitles
 - Filter resources by mimetype instead of extension
-- Artwork support for dsf files
+- Artwork support for dsf files with taglib 2.0
+- "PC Directory" can be configured with `<boxlayout>`
 
 ### FIXES
 
@@ -22,8 +23,9 @@ Improved resource handling for WavPack and FFMpeg requrires reimport of the libr
 
 - Use JsonCpp to generate responses in web request handlers
 - Sql database code uses enum properties instead of column names
+- Database initialisation does tables only, initial root values are in code
 - Upgrade documentation build environment to sphinx 8.2 with python 3.12
-- Update versions of npupnp (6.2.1), fmtlib (11.2.0), spdlog (1.15.3), googletest (1.17.0), fmtlib (11.2.0)
+- Update versions of npupnp (6.2.1), fmtlib (11.2.0), spdlog (1.15.3), googletest (1.17.0), pupnp (1.14.22), taglib (2.1.0)
 
 ## v2.5.0
 
