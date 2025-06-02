@@ -1,0 +1,11 @@
+diff -ur pupnp-1.14.21/upnp/src/threadutil/LinkedList.c pupnp-1.14.21-ks/upnp/src/threadutil/LinkedList.c
+--- pupnp-1.14.21/upnp/src/threadutil/LinkedList.c	2025-06-02 00:33:15.000000000 +0200
++++ pupnp-1.14.21-ks/upnp/src/threadutil/LinkedList.c	2025-06-02 19:09:44.919027205 +0200
+@@ -45,6 +45,7 @@
+ 
+ #include <assert.h>
+ #include <errno.h>
++#include <stddef.h>
+ 
+ static int freeListNode(ListNode *node, LinkedList *list)
+ {

@@ -39,30 +39,35 @@ RUN apk add --no-cache  \
 # Build ffmpegthumbnailer
 WORKDIR /ffmpegthumbnailer_build
 COPY scripts/install-ffmpegthumbnailer.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/alpine/*.* ./alpine/
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-ffmpegthumbnailer.sh
 
 # Build libupnp
 WORKDIR /libupnp_build
 COPY scripts/install-pupnp.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/alpine/*.* ./alpine/
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-pupnp.sh
 
 # Build taglib
 WORKDIR /taglib_build
 COPY scripts/install-taglib.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/alpine/*.* ./alpine/
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-taglib.sh
 
 # Build libexiv2
 WORKDIR /libexiv2_build
 COPY scripts/install-libexiv2.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/alpine/*.* ./alpine/
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-libexiv2.sh
 
 # Build libexif
 WORKDIR /libexif_build
 COPY scripts/install-libexif.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/alpine/*.* ./alpine/
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-libexif.sh
 

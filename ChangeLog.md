@@ -27,6 +27,7 @@
 - Update fmtlib to 11.2.0
 - Update googletest to 1.17.0
 - Update NPUPnP
+- Update PUpnp to 1.14.22 and taglib to 2.1
 - Update spdlog to 1.15.2
 - Update spdlog to 1.15.3
 - Upgrade documentation build environment

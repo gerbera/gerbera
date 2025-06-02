@@ -52,7 +52,7 @@ sudo make install
 
 | Library             | Min Version | Recommended | Latest tested        | Required?     | Note                       | Default  |
 |---------------------|-------------|-------------|----------------------|---------------|----------------------------|----------|
-| libupnp             | 1.14.6      | 1.14.20     | 1.14.20              | XOR libnpupnp | [pupnp]                    |          |
+| libupnp             | 1.14.6      | 1.14.20     | 1.14.22              | XOR libnpupnp | [pupnp]                    |          |
 | libnpupnp           | 4.2.1       | 5.1.2       | 6.2.1                | XOR libupnp   | [npupnp]                   | Disabled |
 | libuuid             |             |             |                      | Depends on OS | Not required on \*BSD      |          |
 | [pugixml]           |             | 1.10        | 1.15                 | Required      | XML file and data support  |          |
@@ -66,7 +66,7 @@ sudo make install
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0                | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |                      | Optional      | Alternate database storage | Disabled |
 | curl                |             |             |                      | Optional      | Enables web services       | Enabled  |
-| [taglib]            | 1.12        | 1.12        | 2.0.2                | Optional      | Audio tag support          | Enabled  |
+| [taglib]            | 1.12        | 1.12        | 2.1.0                | Optional      | Audio tag support          | Enabled  |
 | libmagic            |             |             |                      | Optional      | File type detection        | Enabled  |
 | [wavpack]           | 5.1.0       | 5.4.0       | 5.8.1                | Optional      | WavPack metadata support   | Disabled |
 | [libmatroska]       |             | 1.6.3       | 1.7.1                | Optional      | MKV metadata               | Enabled  |
