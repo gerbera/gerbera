@@ -1,0 +1,13 @@
+[wrap-file]
+directory = taglib-2.0
+source_url = https://github.com/taglib/taglib/archive/refs/tags/v2.0.tar.gz
+source_filename = taglib-2.0.tar.gz
+source_hash = e36ea877a6370810b97d84cf8f72b1e4ed205149ab3ac8232d44c850f38a2859
+patch_filename = taglib_2.0-1_patch.zip
+patch_url = https://wrapdb.mesonbuild.com/v2/taglib_2.0-1/get_patch
+patch_hash = bb860211f1f3722c65b62a7c243fc11801f60709141b11edd874cd0151b42c67
+source_fallback_url = https://github.com/mesonbuild/wrapdb/releases/download/taglib_2.0-1/taglib-2.0.tar.gz
+wrapdb_version = 2.0-1
+
+[provide]
+taglib = taglib_dep
