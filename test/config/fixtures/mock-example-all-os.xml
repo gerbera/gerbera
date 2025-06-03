@@ -157,6 +157,9 @@
         <password></password>
         <init-sql-file>/usr/local/share/gerbera/mysql.sql</init-sql-file>
         <upgrade-file>/usr/local/share/gerbera/mysql-upgrade.xml</upgrade-file>
+        <engine>MyISAM</engine>
+        <charset>utf8</charset>
+        <collation>utf8_general_ci</collation>
       </mysql>
     </storage>
     <containers enabled="yes">

@@ -53,7 +53,7 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
     table_quote_end = '`';
 
     // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated
-    hashies = { 2597415869, // index 0 is used for create script mysql.sql = Version 1
+    hashies = { 2551697181, // index 0 is used for create script mysql.sql = Version 1
         928913698, 1984244483, 742641207, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, // upgrade 2-11
         1512596496, 507706380, 3545156190, 31528140, 372163748, 2233365597, 751952276, 3893982139, 798767550, 2305803926, // upgrade 12-21
         3643149536, 4280737637, 3587252907 };
@@ -159,12 +159,18 @@ std::string MySQLDatabase::prepareDatabase()
         auto&& myHash = stringHash(sql);
 
         if (myHash == hashies[0]) {
+            auto engine = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_ENGINE);
+            auto charset = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_CHARSET);
+            auto collation = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_COLLATION);
             for (auto&& statement : splitString(sql, ';')) {
                 trimStringInPlace(statement);
                 if (statement.empty()) {
                     continue;
                 }
                 replaceAllString(statement, STRING_LIMIT, fmt::to_string(stringLimit));
+                replaceAllString(statement, "GRBENGINE", engine);
+                replaceAllString(statement, "GRBCHARSET", charset);
+                replaceAllString(statement, "GRBCOLLATION", collation);
                 log_debug("executing statement: '{}'", statement);
                 int ret = mysql_real_query(&db, statement.c_str(), statement.size());
                 if (ret) {
@@ -176,6 +182,9 @@ std::string MySQLDatabase::prepareDatabase()
             fillDatabase();
             storeInternalSetting("string_limit", fmt::to_string(stringLimit));
             storeInternalSetting("resource_attribute", "");
+            storeInternalSetting("engine", engine);
+            storeInternalSetting("charset", charset);
+            storeInternalSetting("collation", collation);
         } else {
             log_warning("Wrong hash for create script {}: {} != {}", DBVERSION, myHash, hashies[0]);
             throw_std_runtime_error("Wrong hash for create script {}", DBVERSION);
