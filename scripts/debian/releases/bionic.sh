@@ -50,5 +50,6 @@ function install-deb-s3() {
   sudo apt-get install -y ruby gpg
   sudo gem install thor -v 1.2.2
   sudo gem install aws-eventstream -v 1.3.2
+  sudo gem install aws-sigv4 -v 1.11.0
   sudo gem install deb-s3 -v 0.10.0
 }
