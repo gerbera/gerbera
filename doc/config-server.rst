@@ -54,7 +54,7 @@ This section defines the server configuration parameters.
       Allows pending requests to be handled.
 
 ``port``
-~~~~~~~~
+--------
 
 .. code-block:: xml
 
@@ -67,7 +67,7 @@ Specifies the port where the server will be listening for HTTP requests. Note, t
 only ports above 49152 are supported. The value of zero means, that a port will be automatically selected by the SDK.
 
 ``ip``
-~~~~~~
+------
 
 .. code-block:: xml
 
@@ -79,7 +79,7 @@ only ports above 49152 are supported. The value of zero means, that a port will 
 Specifies the IP address to bind to, by default one of the available interfaces will be selected.
 
 ``interface``
-~~~~~~~~~~~~~
+-------------
 
 .. code-block:: xml
 
@@ -91,7 +91,7 @@ Specifies the IP address to bind to, by default one of the available interfaces 
 Specifies the interface to bind to, by default one of the available interfaces will be selected.
 
 ``name``
-~~~~~~~~
+--------
 
 .. code-block:: xml
 
@@ -103,7 +103,7 @@ Specifies the interface to bind to, by default one of the available interfaces w
 Server friendly name, you will see this on your devices that you use to access the server.
 
 ``manufacturer``
-~~~~~~~~~~~~~~~~~~~
+----------------
 
 .. code-block:: xml
 
@@ -115,7 +115,7 @@ Server friendly name, you will see this on your devices that you use to access t
 This tag sets the manufacturer name of a UPnP device.
 
 ``manufacturerURL``
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 .. code-block:: xml
 
@@ -128,7 +128,7 @@ This tag sets the manufacturer URL of a UPnP device, a custom setting may be nec
 to enable special features that otherwise are only active with the vendor implemented server.
 
 ``virtualURL``
-~~~~~~~~~~~~~~
+--------------
 
 .. code-block:: xml
 
@@ -141,7 +141,7 @@ This tag sets the virtual URL of Gerbera content which is part of the browse res
 The value defaults to `http://<ip>:<port>`.
 
 ``externalURL``
-~~~~~~~~~~~~~~~
+---------------
 
 .. code-block:: xml
 
@@ -154,7 +154,7 @@ This tag sets the external URL of Gerbera web UI, a custom setting may be necess
 The value defaults to virtualURL or `http://<ip>:<port>` if virtualURL is not set.
 
 ``modelName``
-~~~~~~~~~~~~~
+-------------
 
 .. code-block:: xml
 
@@ -167,7 +167,7 @@ This tag sets the model name of a UPnP device, a custom setting may be necessary
 enable special features that otherwise are only active with the vendor implemented server.
 
 ``modelNumber``
-~~~~~~~~~~~~~~~
+---------------
 
 .. code-block:: xml
 
@@ -180,7 +180,7 @@ This tag sets the model number of a UPnP device, a custom setting may be necessa
 to enable special features that otherwise are only active with the vendor implemented server.
 
 ``modelURL``
-~~~~~~~~~~~~~~~
+------------
 
 .. code-block:: xml
 
@@ -192,7 +192,7 @@ to enable special features that otherwise are only active with the vendor implem
 This tag sets the model URL (homepage) of a UPnP device.
 
 ``serialNumber``
-~~~~~~~~~~~~~~~~
+----------------
 
 .. code-block:: xml
 
@@ -204,7 +204,7 @@ This tag sets the model URL (homepage) of a UPnP device.
 This tag sets the serial number of a UPnP device.
 
 ``presentationURL``
-~~~~~~~~~~~~~~~~~~~
+-------------------
 
 .. code-block:: xml
 
@@ -251,7 +251,7 @@ page of the device.
 
 
 ``udn``
-~~~~~~~
+-------
 
 .. code-block:: xml
 
@@ -265,7 +265,7 @@ yourself.  Review the :ref:`Generating Configuration <generateConfig>` section o
 ``gerbera`` to create a default configuration file.
 
 ``home``
-~~~~~~~~
+--------
 
 .. code-block:: xml
 
@@ -292,8 +292,20 @@ in which case the config file is expected as ``${GERBERA_HOME}/.config/gerbera``
       if it was read relative to the environment variables or from command line. This
       means that Gerbara changes its home during startup.
 
+``tmpdir``
+----------
+
+.. code-block:: xml
+
+    <tmpdir>/tmp/</tmpdir>
+
+* Optional
+* Default: **/tmp/**
+
+Selects the temporary directory that will be used by the server.
+
 ``webroot``
-~~~~~~~~~~~
+-----------
 
 .. code-block:: xml
 
@@ -339,19 +351,7 @@ Note:
 Enabling this option will make the PC-Directory container invisible for UPnP devices.
 
 Note:
-   independent of the above setting the container will be always visible in the web UI!
-
-``tmpdir``
-~~~~~~~~~~
-
-.. code-block:: xml
-
-    <tmpdir>/tmp/</tmpdir>
-
-* Optional
-* Default: **/tmp/**
-
-Selects the temporary directory that will be used by the server.
+   Independent of the above setting the container will be always visible in the web UI!
 
 ``bookmark``
 ~~~~~~~~~~~~
@@ -723,7 +723,8 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
     initializing the database will produce a warning in gerbera log and may cause
     database errors because the string is not correctly truncated.
 
-    **SQLite**
+**SQLite**
+----------
 
     .. code-block:: xml
 
@@ -842,7 +843,8 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
 
                 Defines the backup interval in seconds. The value can be given in a valid time format.
 
-    **MySQL**
+**MySQL**
+---------
 
     .. code-block:: xml
 
@@ -926,6 +928,36 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
         * Default: **Datadir / mysql-upgrade.xml**
 
         The full path to the upgrade settings for the database
+
+        .. code-block:: xml
+
+            <engine>Aria</engine>
+
+        Select the storage engine for the tables. Only effective if database has to be created on first start.
+        The storage engines for MariaDB can be found here https://mariadb.com/kb/en/choosing-the-right-storage-engine/ but may depend on your actual version.
+
+        * Optional
+        * Default: **MyISAM**
+
+        .. code-block:: xml
+
+            <charset>utf8mb4</charset>
+
+        Select the character set for the tables. Only effective if database has to be created on first start.
+        The character sets for MariaDB can be found here https://mariadb.com/kb/en/supported-character-sets-and-collations/ but may depend on your actual version.
+
+        * Optional
+        * Default: **utf8**
+
+        .. code-block:: xml
+
+            <collation>utf8mb4_unicode_ci</collation>
+
+        Select the collation for the string columns. Only effective if database has to be created on first start.
+        The collations for MariaDB can be found here https://mariadb.com/kb/en/supported-character-sets-and-collations/#collations but may depend on your actual version.
+
+        * Optional
+        * Default: **utf8_general_ci**
 
 .. _upnp:
 

@@ -14,10 +14,12 @@
 - Fix timed playlist import
 - Fix resources for containers
 - Fix SQL for changing persistent object flag in database
+- Fix upload for bionic
 - Get correct ffmpeg subtitle stream
 - Get multiple streams in FFMpeg handler
 - Improve compile info output
 - Limit strings to column size
+- MySql: Allow configuration of engine, charset and collation
 - Quirks for Freebox Player
 - Provide bash completion file
 - Remove legacy compile option SQLITE_BACKUP_ENABLED

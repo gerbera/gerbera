@@ -499,6 +499,21 @@
               "item": "/server/storage/mysql/database",
               "caption": "MySQL database",
               "editable": false
+            },
+            {
+              "item": "/server/storage/mysql/engine",
+              "caption": "MySQL Engine",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/mysql/charset",
+              "caption": "MySQL charset",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/mysql/collation",
+              "caption": "MySQL collation",
+              "editable": false
             }
           ]
         }

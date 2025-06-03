@@ -12,8 +12,8 @@ CREATE TABLE `mt_cds_object` (
   `parent_id` int(11) NOT NULL default '0',
   `object_type` tinyint(4) unsigned NOT NULL,
   `upnp_class` varchar(80) default NULL,
-  `dc_title` varchar(GRBMAX) default NULL COLLATE utf8_general_ci,
-  `sort_key` varchar(GRBMAX) default NULL COLLATE utf8_general_ci,
+  `dc_title` varchar(GRBMAX) default NULL COLLATE GRBCOLLATION,
+  `sort_key` varchar(GRBMAX) default NULL COLLATE GRBCOLLATION,
   `location` blob,
   `location_hash` int(11) unsigned default NULL,
   `auxdata` blob,
@@ -36,12 +36,12 @@ CREATE TABLE `mt_cds_object` (
   KEY `cds_object_sort_key` (`sort_key`),
   CONSTRAINT `mt_cds_object_ibfk_1` FOREIGN KEY (`ref_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT `mt_cds_object_ibfk_2` FOREIGN KEY (`parent_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=MyISAM CHARSET=utf8;
+) ENGINE=GRBENGINE CHARSET=GRBCHARSET;
 CREATE TABLE `mt_internal_setting` (
   `key` varchar(40) NOT NULL,
   `value` varchar(255) NOT NULL,
   PRIMARY KEY  (`key`)
-) ENGINE=MyISAM CHARSET=utf8;
+) ENGINE=GRBENGINE CHARSET=GRBCHARSET;
 CREATE TABLE `mt_autoscan` (
   `id` int(11) NOT NULL auto_increment,
   `obj_id` int(11) default NULL,
@@ -65,7 +65,7 @@ CREATE TABLE `mt_autoscan` (
   PRIMARY KEY `id` (`id`),
   UNIQUE KEY `mt_autoscan_obj_id` (`obj_id`),
   CONSTRAINT `mt_autoscan_ibfk_1` FOREIGN KEY (`obj_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=MyISAM CHARSET=utf8;
+) ENGINE=GRBENGINE CHARSET=GRBCHARSET;
 CREATE TABLE `mt_metadata` (
   `id` int(11) NOT NULL auto_increment,
   `item_id` int(11) NOT NULL,
@@ -74,13 +74,13 @@ CREATE TABLE `mt_metadata` (
   PRIMARY KEY `id` (`id`),
   KEY `metadata_item_id` (`item_id`),
   CONSTRAINT `mt_metadata_idfk1` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=MyISAM CHARSET=utf8;
+) ENGINE=GRBENGINE CHARSET=GRBCHARSET;
 CREATE TABLE `grb_config_value` (
   `item` varchar(255) primary key,
   `key` varchar(255) NOT NULL,
   `item_value` varchar(255) NOT NULL,
   `status` varchar(20) NOT NULL)
-  ENGINE=MyISAM CHARSET=utf8;
+  ENGINE=GRBENGINE CHARSET=GRBCHARSET;
 CREATE TABLE `grb_cds_resource` (
   `item_id` int(11) NOT NULL,
   `res_id` int(11) NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE `grb_cds_resource` (
   `parameters` text default NULL,
   PRIMARY KEY (`item_id`, `res_id`),
   CONSTRAINT `grb_cds_resource_fk` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=MyISAM CHARSET=utf8;
+) ENGINE=GRBENGINE CHARSET=GRBCHARSET;
 CREATE TABLE `grb_client` (
   `addr` varchar(32) NOT NULL,
   `port` int(11) NOT NULL,
@@ -99,7 +99,7 @@ CREATE TABLE `grb_client` (
   `last` int(11) NOT NULL,
   `age` int(11) NOT NULL,
   PRIMARY KEY (`addr`, `port`)
-) ENGINE=MyISAM CHARSET=utf8;
+) ENGINE=GRBENGINE CHARSET=GRBCHARSET;
 CREATE TABLE `grb_playstatus` (
   `group` varchar(GRBMAX) NOT NULL,
   `item_id` int(11) NOT NULL,
@@ -109,7 +109,7 @@ CREATE TABLE `grb_playstatus` (
   `bookMarkPos` int(11) NOT NULL default '0',
   PRIMARY KEY (`group`, `item_id`),
   CONSTRAINT `grb_played_item` FOREIGN KEY (`item_id`) REFERENCES `mt_cds_object` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=MyISAM CHARSET=utf8;
+) ENGINE=GRBENGINE CHARSET=GRBCHARSET;
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
 /*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
 /*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;

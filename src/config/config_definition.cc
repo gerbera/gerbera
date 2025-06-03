@@ -583,6 +583,15 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         std::make_shared<ConfigPathSetup>(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE,
             "/server/storage/mysql/upgrade-file", "config-server.html#storage",
             "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_MYSQL_ENGINE,
+            "/server/storage/mysql/engine", "config-server.html#storage",
+            "MyISAM"),
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_MYSQL_CHARSET,
+            "/server/storage/mysql/charset", "config-server.html#storage",
+            "utf8"),
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_MYSQL_COLLATION,
+            "/server/storage/mysql/collation", "config-server.html#storage",
+            "utf8_general_ci"),
 #else
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_STORAGE_MYSQL_ENABLED,
             "/server/storage/mysql/attribute::enabled", "config-server.html#storage",
@@ -2096,6 +2105,9 @@ void ConfigDefinition::initDependencies()
         { ConfigVal::SERVER_STORAGE_MYSQL_PASSWORD, ConfigVal::SERVER_STORAGE_MYSQL },
         { ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE, ConfigVal::SERVER_STORAGE_MYSQL },
         { ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, ConfigVal::SERVER_STORAGE_MYSQL },
+        { ConfigVal::SERVER_STORAGE_MYSQL_ENGINE, ConfigVal::SERVER_STORAGE_MYSQL },
+        { ConfigVal::SERVER_STORAGE_MYSQL_CHARSET, ConfigVal::SERVER_STORAGE_MYSQL },
+        { ConfigVal::SERVER_STORAGE_MYSQL_COLLATION, ConfigVal::SERVER_STORAGE_MYSQL },
 #endif
 #ifdef HAVE_CURL
         { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE, ConfigVal::TRANSCODING_TRANSCODING_ENABLED },

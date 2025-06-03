@@ -458,6 +458,9 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
         { ConfigVal::SERVER_STORAGE_MYSQL_PASSWORD, false },
         { ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE, false },
         { ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, false },
+        { ConfigVal::SERVER_STORAGE_MYSQL_ENGINE, false },
+        { ConfigVal::SERVER_STORAGE_MYSQL_CHARSET, false },
+        { ConfigVal::SERVER_STORAGE_MYSQL_COLLATION, false },
 #endif
     };
     {
