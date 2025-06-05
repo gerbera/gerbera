@@ -267,7 +267,7 @@ void ImportService::doImport(
     if (activeScan.empty()) {
         auto cacheLock = CacheAutoLock(cacheMutex);
         contentStateCache.clear();
-        if (settings.changedObject)
+        if (settings.changedObject || !autoscanDir || autoscanDir->getScanMode() != AutoscanScanMode::INotify)
             clearCache();
         activeScan = location;
     } else {
@@ -322,7 +322,7 @@ void ImportService::doImport(
         database->updateAutoscanDirectory(autoscanDir);
     }
     if (activeScan == location)
-        activeScan = "";
+        activeScan.clear();
 }
 
 std::shared_ptr<CdsObject> ImportService::getObject(const fs::path& location) const

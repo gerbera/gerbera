@@ -71,6 +71,7 @@ std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cd
     }
 
     if (IS_CDS_ITEM_EXTERNAL_URL(otype)) {
+        log_debug("Creating external");
         return { dukObject2cdsObject(origObject), INVALID_OBJECT_ID };
     }
 
