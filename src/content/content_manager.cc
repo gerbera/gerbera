@@ -443,8 +443,9 @@ std::shared_ptr<CdsObject> ContentManager::_addFile(
 
     if (importMode == ImportMode::Gerbera) {
         std::unordered_set<int> currentContent;
-        if (asSetting.changedObject)
+        if (asSetting.changedObject || !asSetting.adir || asSetting.adir->getScanMode() != AutoscanScanMode::INotify) {
             importService->clearCache(); // may be called by layout
+        }
         getImportService(asSetting.adir)->doImport(dirEnt.path(), asSetting, currentContent, task);
 
         return getImportService(asSetting.adir)->getObject(dirEnt.path());
@@ -675,8 +676,9 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     }
 
     if (importMode == ImportMode::Gerbera) {
-        if (asSetting.changedObject)
+        if (asSetting.changedObject || !adir || adir->getScanMode() != AutoscanScanMode::INotify) {
             importService->clearCache(); // may be called by layout
+        }
         getImportService(adir)->doImport(location, asSetting, list, task);
     } else {
         auto lastModifiedCurrentMax = adir->getPreviousLMT(location, parentContainer);

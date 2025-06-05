@@ -2082,11 +2082,15 @@ std::size_t SQLDatabase::getObjects(int parentID, bool withoutContainer, std::un
 
     std::unique_ptr<SQLRow> row;
     while ((row = res->nextRow())) {
+        auto id = row->col_int(0, INVALID_OBJECT_ID);
         if ((!withoutContainer && !full) || row->col_int(1, OBJECT_TYPE_CONTAINER) != OBJECT_TYPE_CONTAINER)
-            ret.insert(row->col_int(0, INVALID_OBJECT_ID));
-        else if (!withoutContainer && full)
-            getObjects(row->col_int(0, INVALID_OBJECT_ID), withoutContainer, ret, full);
+            ret.insert(id);
+        else if (!withoutContainer && full) {
+            ret.insert(id);
+            getObjects(id, withoutContainer, ret, full);
+        }
     }
+    log_debug("found {} child objects of {}", ret.size(), parentID);
     return ret.size();
 }
 
