@@ -27,9 +27,7 @@ main_dir=$(realpath "${main_dir}")/
 
 VERSION="${EXIV2-v0.27.7}"
 
-script_dir=`pwd -P`
-src_dir="${script_dir}/libexiv2-${VERSION}"
-tgz_file="${script_dir}/libexiv2-${VERSION}.tar.gz"
+setFiles libexiv2 tar.gz
 source_files+=("https://github.com/Exiv2/exiv2/archive/refs/tags/${VERSION}.tar.gz")
 
 BUILD_SHARED=YES

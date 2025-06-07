@@ -36,7 +36,6 @@ if [ $# -gt 0 ]; then
     fi
 fi
 
-script_dir=`pwd -P`
 src_file="https://github.com/gabime/spdlog/archive/v${VERSION}.tar.gz"
 
 if [ -n "${COMMIT}" ]; then
@@ -44,8 +43,7 @@ if [ -n "${COMMIT}" ]; then
     VERSION+="-"
     VERSION+=`echo $COMMIT | cut -c 1-6`
 fi
-src_dir="${script_dir}/spdlog-${VERSION}"
-tgz_file="${script_dir}/spdlog-${VERSION}.tgz"
+setFiles spdlog tgz
 source_files+=("${src_file}")
 
 downloadSource

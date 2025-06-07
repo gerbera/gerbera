@@ -27,9 +27,7 @@ main_dir=$(realpath "${main_dir}")/
 
 VERSION="${NPUPNP-6.1.0}"
 
-script_dir=`pwd -P`
-src_dir="${script_dir}/npupnp-${VERSION}"
-tgz_file="${script_dir}/npupnp-${VERSION}.tgz"
+setFiles npupnp tgz
 source_files+=("https://framagit.org/medoc92/npupnp/-/archive/libnpupnp-v${VERSION}/npupnp-libnpupnp-v${VERSION}.tar.gz")
 
 downloadSource

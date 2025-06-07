@@ -28,7 +28,6 @@ main_dir=$(realpath "${main_dir}")/
 VERSION="${FFMPEGTHUMBNAILER-2.2.2}"
 COMMIT="${FFMPEGTHUMBNAILER_commit:-}"
 
-script_dir=`pwd -P`
 src_file="https://github.com/dirkvdb/ffmpegthumbnailer/archive/refs/tags/${VERSION}.tar.gz"
 
 if [ -n "${COMMIT}" ]; then
@@ -36,8 +35,7 @@ if [ -n "${COMMIT}" ]; then
     VERSION+="-"
     VERSION+=`echo $COMMIT | cut -c 1-6`
 fi
-src_dir="${script_dir}/ffmpegthumbnailer-${VERSION}"
-tgz_file="${script_dir}/ffmpegthumbnailer-${VERSION}.tgz"
+setFiles ffmpegthumbnailer tgz
 source_files+=("${src_file}")
 
 downloadSource
