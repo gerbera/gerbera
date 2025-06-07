@@ -27,9 +27,7 @@ main_dir=$(realpath "${main_dir}")/
 
 VERSION="${PUGIXML-1.11.4}"
 
-script_dir=`pwd -P`
-src_dir="${script_dir}/pugixml-${VERSION}"
-tgz_file="${script_dir}/pugixml-${VERSION}.tgz"
+setFiles pugixml tgz
 source_files+=("https://github.com/zeux/pugixml/releases/download/v${VERSION}/pugixml-${VERSION}.tar.gz")
 
 downloadSource
