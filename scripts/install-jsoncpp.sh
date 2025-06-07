@@ -27,9 +27,7 @@ main_dir=$(realpath "${main_dir}")/
 
 VERSION="${JSONCPP-1.9.6}"
 
-script_dir=`pwd -P`
-src_dir="${script_dir}/jsoncpp-${VERSION}"
-tgz_file="${script_dir}/jsoncpp-${VERSION}.tar.gz"
+setFiles jsoncpp tar.gz
 source_files+=("https://github.com//open-source-parsers/jsoncpp/archive/refs/tags/${VERSION}.tar.gz")
 
 BUILD_STATIC=ON

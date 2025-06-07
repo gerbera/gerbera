@@ -27,9 +27,7 @@ main_dir=$(realpath "${main_dir}")/
 
 VERSION="${FMT-8.0.1}"
 
-script_dir=`pwd -P`
-src_dir="${script_dir}/fmt-${VERSION}"
-tgz_file="${script_dir}/fmt-${VERSION}.tgz"
+setFiles fmt tgz
 source_files+=("https://github.com/fmtlib/fmt/archive/refs/tags/${VERSION}.tar.gz")
 
 BUILD_SHARED=YES

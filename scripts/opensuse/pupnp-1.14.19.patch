@@ -1,0 +1,34 @@
+diff -ur pupnp-release-1.14.19/upnp/src/genlib/net/http/webserver.c pupnp-1.14.19-ks/upnp/src/genlib/net/http/webserver.c
+--- pupnp-release-1.14.19/upnp/src/genlib/net/http/webserver.c	2024-04-22 20:44:46.000000000 +0200
++++ pupnp-1.14.19-ks/upnp/src/genlib/net/http/webserver.c	2024-05-01 13:54:28.265400448 +0200
+@@ -1359,6 +1359,13 @@
+ 				err_code = HTTP_FORBIDDEN;
+ 				goto error_handler;
+ 			}
++
++			{
++				UpnpListHead* eHeader = UpnpFileInfo_get_ExtraHeadersList(finfo);
++				UpnpExtraHeaders* h = UpnpExtraHeaders_new();
++				UpnpExtraHeaders_set_resp(h, "Access-Control-Allow-Origin: *");
++				UpnpListInsert(eHeader, UpnpListEnd(eHeader), UpnpExtraHeaders_get_node(h));
++			}
+ 		}
+ 		/* finally, get content type */
+ 		/*      if ( get_content_type(filename->buf, &content_type) != 0
+diff -ur pupnp-release-1.14.19/upnp/src/soap/soap_device.c pupnp-1.14.19-ks/upnp/src/soap/soap_device.c
+--- pupnp-release-1.14.19/upnp/src/soap/soap_device.c	2024-04-22 20:44:46.000000000 +0200
++++ pupnp-1.14.19-ks/upnp/src/soap/soap_device.c	2024-07-08 12:13:13.968562088 +0200
+@@ -613,9 +613,11 @@
+ 
+ 	/* check service type */
+ 	if (value.buf[0] != '\"') {
+-		goto error_handler;
++		serv_type = &value.buf[0];
++	} else {
++		serv_type = &value.buf[1];
+ 	}
+-	serv_type = &value.buf[1];
++
+ 	col_pos1 = strrchr(serv_type, ':');
+ 	if (NULL == col_pos1) {
+ 		goto error_handler;

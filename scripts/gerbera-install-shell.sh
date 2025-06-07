@@ -21,7 +21,7 @@
 UNAME=$(uname)
 
 source_files=()
-patch_file=""
+patch_files=()
 COMMIT=""
 
 if [ "$(id -u)" != 0 ]; then
@@ -77,9 +77,11 @@ function downloadSource()
 
     cd "${src_dir}"
 
-    if [[ "${patch_file}" != "" && -f "${patch_file}" ]]; then
-        patch -p1 < "${patch_file}"
-    fi
+    for patch_file in "${patch_files[@]}"; do
+        if [[ "${patch_file}" != "" && -f "${patch_file}" ]]; then
+            patch -p1 < "${patch_file}"
+        fi
+    done
 
     if [[ -d build ]]; then
         rm -R build
@@ -130,4 +132,16 @@ function ldConfig()
             ldconfig
         fi
     fi
+}
+
+function setFiles() {
+  package=${1}
+  extn=${2}
+  script_dir=`pwd -P`
+  src_dir="${script_dir}/${package}-${VERSION}"
+  tgz_file="${script_dir}/${package}-${VERSION}.${extn}"
+  patch_files+=("${main_dir}/${lsb_distro}/${package}-${VERSION}.patch")
+  patch_files+=("${main_dir}/${lsb_distro}/${package}.patch")
+  patch_files+=("${main_dir}/${package}-${VERSION}.patch")
+  patch_files+=("${main_dir}/${package}.patch")
 }

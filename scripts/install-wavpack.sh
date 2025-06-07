@@ -27,9 +27,7 @@ main_dir=$(realpath "${main_dir}")/
 
 VERSION="${WAVPACK-5.4.0}"
 
-script_dir=`pwd -P`
-src_dir="${script_dir}/wavpack-${VERSION}"
-tgz_file="${script_dir}/wavpack-${VERSION}.tar.xz"
+setFiles wavpack tar.xz
 source_files+=("https://github.com/dbry/WavPack/releases/download/${VERSION}/wavpack-${VERSION}.tar.xz")
 
 BUILD_SHARED=YES

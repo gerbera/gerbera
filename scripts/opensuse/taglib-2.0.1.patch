@@ -1,0 +1,96 @@
+diff -ur taglib-2.0/taglib/mp4/mp4atom.cpp taglib-2.0-karl/taglib/mp4/mp4atom.cpp
+--- taglib-2.0/taglib/mp4/mp4atom.cpp	2024-01-24 05:10:43.000000000 +0100
++++ taglib-2.0-karl/taglib/mp4/mp4atom.cpp	2024-04-09 18:40:06.913959546 +0200
+@@ -97,9 +97,11 @@
+   d->name = header.mid(4, 4);
+   for(int i = 0; i < 4; ++i) {
+     if(const char ch = d->name.at(i); (ch < ' ' || ch > '~') && ch != '\251') {
+-      debug("MP4: Invalid atom type");
+-      d->length = 0;
+-      file->seek(0, File::End);
++      debug("MP4: Invalid atom type '" + String(ch) + "'");
++      file->seek(d->offset + d->length);
++      return;
++      // d->length = 0;
++      //file->seek(0, File::End);
+     }
+   }
+ 
+@@ -121,16 +123,19 @@
+       else if(d->name == "stsd") {
+         file->seek(8, File::Current);
+       }
++      // debug("MP4: atom type '" + d->name + "'");
+       while(file->tell() < d->offset + d->length) {
+         auto child = new MP4::Atom(file);
+         d->children.append(child);
+         if(child->d->length == 0)
+-          return;
++          break;
+       }
+-      return;
++      break;
+     }
+   }
+ 
++  file->seek(0, File::End);
++  file->seek(0);
+   file->seek(d->offset + d->length);
+ }
+ 
+@@ -144,6 +149,8 @@
+   }
+   auto it = std::find_if(d->children.cbegin(), d->children.cend(),
+       [&name1](const Atom *child) { return child->d->name == name1; });
++  // debug(name1 != nullptr ? name1 : "-");
++  // debug(it != d->children.cend() ? "found" : "end");
+   return it != d->children.cend() ? (*it)->find(name2, name3, name4) : nullptr;
+ }
+ 
+diff -ur taglib-2.0/taglib/mp4/mp4file.cpp taglib-2.0-karl/taglib/mp4/mp4file.cpp
+--- taglib-2.0/taglib/mp4/mp4file.cpp	2024-01-24 05:10:43.000000000 +0100
++++ taglib-2.0-karl/taglib/mp4/mp4file.cpp	2024-04-09 23:43:40.551033756 +0200
+@@ -114,17 +114,21 @@
+ void
+ MP4::File::read(bool readProperties)
+ {
+-  if(!isValid())
++  if(!isValid()) {
++    debug("MP4::File::read() -- File invalid.");
+     return;
++  }
+ 
+   d->atoms = std::make_unique<Atoms>(this);
+   if(!d->atoms->checkRootLevelAtoms()) {
++    debug("MP4::File::read() -- Rootlevel invalid.");
+     setValid(false);
+     return;
+   }
+ 
+   // must have a moov atom, otherwise consider it invalid
+   if(!d->atoms->find("moov")) {
++    debug("MP4::File::read() -- moov invalid.");
+     setValid(false);
+     return;
+   }
+@@ -174,5 +178,7 @@
+ bool
+ MP4::File::hasMP4Tag() const
+ {
+-  return d->atoms->find("moov", "udta", "meta", "ilst") != nullptr;
++  return d->atoms->find("moov", "udta", "meta", "ilst") != nullptr
++     || d->atoms->find("moov", "meta", "ilst") != nullptr
++     || d->atoms->find("moov", "trak", "mdia", "mdhd") != nullptr;
+ }
+diff -ur taglib-2.0/taglib/toolkit/tstring.cpp taglib-2.0-karl/taglib/toolkit/tstring.cpp
+--- taglib-2.0/taglib/toolkit/tstring.cpp	2024-01-24 05:10:43.000000000 +0100
++++ taglib-2.0-karl/taglib/toolkit/tstring.cpp	2024-04-08 19:39:26.089917953 +0200
+@@ -28,7 +28,7 @@
+ #include <cerrno>
+ #include <climits>
+ #include <iostream>
+-#include <utf8.h>
++#include <utf8cpp/utf8.h>
+ 
+ #include "tdebug.h"
+ #include "tstringlist.h"

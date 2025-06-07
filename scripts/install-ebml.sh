@@ -27,9 +27,7 @@ main_dir=$(realpath "${main_dir}")/
 
 VERSION="${EBML-1.4.2}"
 
-script_dir=`pwd -P`
-src_dir="${script_dir}/libebml-${VERSION}"
-tgz_file="${script_dir}/libebml-${VERSION}.tar.gz"
+setFiles libebml tar.gz
 source_files+=("https://github.com/Matroska-Org/libebml/archive/refs/tags/release-${VERSION}.tar.gz")
 
 BUILD_SHARED=YES

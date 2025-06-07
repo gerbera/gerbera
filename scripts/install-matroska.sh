@@ -27,9 +27,7 @@ main_dir=$(realpath "${main_dir}")/
 
 VERSION="${MATROSKA-1.6.3}"
 
-script_dir=`pwd -P`
-src_dir="${script_dir}/libmatroska-${VERSION}"
-tgz_file="${script_dir}/libmatroska-${VERSION}.tar.gz"
+setFiles libmatroska tar.gz
 source_files+=("https://github.com/Matroska-Org/libmatroska/archive/refs/tags/release-${VERSION}.tar.gz")
 
 BUILD_SHARED=YES
