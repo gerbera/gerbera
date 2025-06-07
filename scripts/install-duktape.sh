@@ -28,7 +28,6 @@ main_dir=$(realpath "${main_dir}")/
 VERSION="${DUKTAPE-2.6.0}"
 COMMIT="${DUKTAPE_commit:-}"
 
-script_dir=`pwd -P`
 src_file="https://github.com/svaarala/duktape/releases/download/v${VERSION}/duktape-${VERSION}.tar.xz"
 
 if [ -n "${COMMIT}" ]; then
@@ -37,8 +36,7 @@ if [ -n "${COMMIT}" ]; then
     VERSION+=`echo $COMMIT | cut -c 1-6`
 fi
 
-src_dir="${script_dir}/duktape-${VERSION}"
-tgz_file="${script_dir}/duktape-${VERSION}.tar.xz"
+setFiles duktape tar.xz
 source_files+=("${src_file}")
 
 downloadSource

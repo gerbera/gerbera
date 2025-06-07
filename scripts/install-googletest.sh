@@ -27,9 +27,7 @@ main_dir=$(realpath "${main_dir}")/
 
 VERSION="${GOOGLETEST-1.11.0}"
 
-script_dir=`pwd -P`
-src_dir="${script_dir}/gtest-${VERSION}"
-tgz_file="${script_dir}/gtest-${VERSION}.tgz"
+setFiles gtest tgz
 source_files+=("https://github.com/google/googletest/archive/refs/tags/v${VERSION}.tar.gz")
 source_files+=("https://github.com/google/googletest/archive/refs/tags/release-${VERSION}.tar.gz")
 
