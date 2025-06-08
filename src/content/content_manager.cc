@@ -446,9 +446,7 @@ std::shared_ptr<CdsObject> ContentManager::_addFile(
         if (asSetting.changedObject || !asSetting.adir || asSetting.adir->getScanMode() != AutoscanScanMode::INotify) {
             importService->clearCache(); // may be called by layout
         }
-        getImportService(asSetting.adir)->doImport(dirEnt.path(), asSetting, currentContent, task);
-
-        return getImportService(asSetting.adir)->getObject(dirEnt.path());
+        return getImportService(asSetting.adir)->doImport(dirEnt.path(), asSetting, currentContent, task);
     }
     // checkDatabase, don't process existing
     std::shared_ptr<CdsContainer> parent;

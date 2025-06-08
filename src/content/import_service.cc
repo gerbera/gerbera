@@ -157,6 +157,41 @@ AutoscanMediaMode ContentState::getMediaMode() const
     return mediaMode;
 }
 
+void StateCache::cacheState(
+    const fs::path& entryPath,
+    const fs::directory_entry& dirEntry,
+    ImportState state,
+    std::chrono::seconds mtime,
+    const std::shared_ptr<CdsObject>& cdsObject)
+{
+    auto cacheLock = CacheAutoLock(cacheMutex);
+    log_debug("cache '{}' , '{}' ({})", entryPath.string(), dirEntry.path().string(), state);
+
+    if (entryPath.empty())
+        return;
+
+    if (contentStateCache.find(entryPath) == contentStateCache.end()) {
+        contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, state, mtime, cdsObject);
+    } else {
+        state = contentStateCache.at(entryPath)->getState() < state ? state : contentStateCache[entryPath]->getState();
+        if (!cdsObject)
+            contentStateCache.at(entryPath)->setState(state);
+        else
+            contentStateCache.at(entryPath)->setObject(state, cdsObject);
+        if (mtime > std::chrono::seconds::zero())
+            contentStateCache.at(entryPath)->setMTime(mtime);
+    }
+}
+
+std::shared_ptr<CdsObject> StateCache::getObject(const fs::path& location) const
+{
+    log_debug("start {}", location.string());
+    if (contentStateCache.find(location) != contentStateCache.end()) {
+        return contentStateCache.at(location)->getObject();
+    }
+    return {};
+}
+
 ImportService::ImportService(std::shared_ptr<Context> context, std::shared_ptr<ConverterManager> converterManager)
     : context(std::move(context))
     , config(this->context->getConfig())
@@ -164,6 +199,7 @@ ImportService::ImportService(std::shared_ptr<Context> context, std::shared_ptr<C
     , database(this->context->getDatabase())
     , converterManager(std::move(converterManager))
     , containerTypeMap(AutoscanDirectory::ContainerTypesDefaults)
+    , importStateCache(std::make_shared<StateCache>())
 {
     hasReadableNames = config->getBoolOption(ConfigVal::IMPORT_READABLE_NAMES);
     hasCaseSensitiveNames = config->getBoolOption(ConfigVal::IMPORT_CASE_SENSITIVE_TAGS);
@@ -257,52 +293,53 @@ void ImportService::clearCache()
     containersWithFanArt.clear();
 }
 
-void ImportService::doImport(
+std::shared_ptr<CdsObject> ImportService::doImport(
     const fs::path& location,
     AutoScanSetting& settings,
     std::unordered_set<int>& currentContent,
     const std::shared_ptr<GenericTask>& task)
 {
+    auto stateCache = std::make_shared<StateCache>();
     log_debug("start {} root '{}' update {}", location.string(), rootPath.string(), !!settings.changedObject);
     if (activeScan.empty()) {
-        auto cacheLock = CacheAutoLock(cacheMutex);
-        contentStateCache.clear();
         if (settings.changedObject || !autoscanDir || autoscanDir->getScanMode() != AutoscanScanMode::INotify)
             clearCache();
         activeScan = location;
+        if (importStateCache->contentStateCache.size() == 0 || location == rootPath)
+            importStateCache = stateCache;
     } else {
         log_debug("Additional scan {}, already active {}", location.c_str(), activeScan.c_str());
     }
 
     if (!rootPath.empty()) {
         auto rootDirEntry = fs::directory_entry(rootPath);
-        cacheState(rootPath, rootDirEntry, ImportState::New, toSeconds(rootDirEntry.last_write_time(ec)));
+        stateCache->cacheState(rootPath, rootDirEntry, ImportState::New, toSeconds(rootDirEntry.last_write_time(ec)));
     }
     auto rootEntry = fs::directory_entry(location, ec);
     if (ec) {
         log_error("Failed to start {}, {}", location.c_str(), ec.message());
-        return;
+        return {};
     }
     auto isDir = rootEntry.is_directory(ec);
     if (ec) {
         log_error("Failed to start {}, {}", location.c_str(), ec.message());
-        return;
+        return {};
     }
 
-    cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)), settings.changedObject);
+    stateCache->cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)), settings.changedObject);
     if (isDir) {
-        readDir(location, settings);
+        readDir(stateCache, location, settings);
     } else {
-        readFile(location);
+        readFile(stateCache, location);
     }
-    removeHidden(settings);
-    createContainers(CDS_ID_FS_ROOT, settings);
-    createItems(settings);
-    updateFanArt(isDir);
-    fillLayout(task);
+    removeHidden(stateCache, settings);
+    createContainers(stateCache, CDS_ID_FS_ROOT, settings);
+    createItems(stateCache, settings);
+    updateFanArt(stateCache, isDir);
+    fillLayout(stateCache, task);
 
     // update currentContent
-    for (auto&& [itemPath, stateEntry] : contentStateCache) {
+    for (auto&& [itemPath, stateEntry] : stateCache->contentStateCache) {
         if (!stateEntry)
             continue;
         if (stateEntry->getObject() && stateEntry->getState() <= ImportState::Existing) {
@@ -323,18 +360,14 @@ void ImportService::doImport(
     }
     if (activeScan == location)
         activeScan.clear();
+    if (importStateCache->contentStateCache.size() < stateCache->contentStateCache.size())
+        importStateCache = stateCache;
+    return stateCache->getObject(location);
 }
 
-std::shared_ptr<CdsObject> ImportService::getObject(const fs::path& location) const
-{
-    log_debug("start {}", location.string());
-    if (contentStateCache.find(location) != contentStateCache.end()) {
-        return contentStateCache.at(location)->getObject();
-    }
-    return {};
-}
-
-void ImportService::readDir(const fs::path& location, AutoScanSetting settings)
+void ImportService::readDir(
+    const std::shared_ptr<StateCache>& stateCache,
+    const fs::path& location, AutoScanSetting settings)
 {
     log_debug("start {}", location.string());
     auto dirIterator = fs::directory_iterator(location, ec);
@@ -348,70 +381,46 @@ void ImportService::readDir(const fs::path& location, AutoScanSetting settings)
         if (entryPath.empty() || isHiddenFile(entryPath, true, dirEntry, settings)) {
             continue;
         }
-        cacheState(entryPath, dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
+        stateCache->cacheState(entryPath, dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
         if (dirEntry.is_directory(ec) && settings.recursive) {
             if (!ec) {
-                readDir(entryPath, settings);
+                readDir(stateCache, entryPath, settings);
             } else {
-                cacheState(entryPath, dirEntry, ImportState::Broken);
+                stateCache->cacheState(entryPath, dirEntry, ImportState::Broken);
                 log_error("ImportService::readDir {}: Failed to read {}, {}", location.c_str(), entryPath.c_str(), ec.message());
             }
         } else if (ec) {
-            cacheState(entryPath, dirEntry, ImportState::Broken);
+            stateCache->cacheState(entryPath, dirEntry, ImportState::Broken);
             log_error("ImportService::readDir {}: Failed to read {}, {}", location.c_str(), entryPath.c_str(), ec.message());
         }
     }
     log_debug("end {}", location.string());
 }
 
-void ImportService::cacheState(
-    const fs::path& entryPath,
-    const fs::directory_entry& dirEntry,
-    ImportState state,
-    std::chrono::seconds mtime,
-    const std::shared_ptr<CdsObject>& cdsObject)
-{
-    auto cacheLock = CacheAutoLock(cacheMutex);
-    log_debug("cache '{}' , '{}' ({})", entryPath.string(), dirEntry.path().string(), state);
-
-    if (entryPath.empty())
-        return;
-
-    if (contentStateCache.find(entryPath) == contentStateCache.end()) {
-        contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, state, mtime, cdsObject);
-    } else {
-        state = contentStateCache.at(entryPath)->getState() < state ? state : contentStateCache[entryPath]->getState();
-        if (!cdsObject)
-            contentStateCache.at(entryPath)->setState(state);
-        else
-            contentStateCache.at(entryPath)->setObject(state, cdsObject);
-        if (mtime > std::chrono::seconds::zero())
-            contentStateCache.at(entryPath)->setMTime(mtime);
-    }
-}
-
-void ImportService::readFile(const fs::path& location)
+void ImportService::readFile(
+    const std::shared_ptr<StateCache>& stateCache,
+    const fs::path& location)
 {
     auto dirEntry = fs::directory_entry(location.parent_path());
-    cacheState(location.parent_path(), dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
+    stateCache->cacheState(location.parent_path(), dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
 
     auto entryPath = dirEntry.path().parent_path();
     while (entryPath != "/" && !entryPath.empty() && entryPath != rootPath) {
         dirEntry.assign(entryPath, ec);
         if (ec) {
-            cacheState(entryPath, dirEntry, ImportState::Broken);
+            stateCache->cacheState(entryPath, dirEntry, ImportState::Broken);
             log_error("ImportService::readFile {}: Failed to navigate up {}, {}", location.c_str(), entryPath.c_str(), ec.message());
             break;
         }
-        cacheState(entryPath, dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
+        stateCache->cacheState(entryPath, dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
         entryPath = entryPath.parent_path();
     }
 }
 
-void ImportService::removeHidden(const AutoScanSetting& settings)
+void ImportService::removeHidden(const std::shared_ptr<StateCache>& stateCache, const AutoScanSetting& settings)
 {
     auto hiddenPaths = std::vector<fs::path>();
-    for (auto&& [itemPath, stateEntry] : contentStateCache) {
+    for (auto&& [itemPath, stateEntry] : stateCache->contentStateCache) {
         if (!stateEntry)
             continue;
         auto dirEntry = stateEntry->getDirEntry();
@@ -421,11 +430,11 @@ void ImportService::removeHidden(const AutoScanSetting& settings)
     }
 
     {
-        auto cacheLock = CacheAutoLock(cacheMutex);
+        auto cacheLock = StateCache::CacheAutoLock(stateCache->cacheMutex);
         for (auto&& hiddenPath : hiddenPaths) {
-            for (auto it = contentStateCache.begin(); it != contentStateCache.end();) {
+            for (auto it = stateCache->contentStateCache.begin(); it != stateCache->contentStateCache.end();) {
                 if (startswith(it->first.string(), hiddenPath.string())) {
-                    contentStateCache.erase(it++);
+                    stateCache->contentStateCache.erase(it++);
                 } else {
                     ++it;
                 }
@@ -434,7 +443,11 @@ void ImportService::removeHidden(const AutoScanSetting& settings)
     }
 }
 
-bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, const AutoScanSetting& settings)
+bool ImportService::isHiddenFile(
+    const fs::path& entryPath,
+    bool isDirectory,
+    const fs::directory_entry& dirEntry,
+    const AutoScanSetting& settings)
 {
     auto&& name = entryPath.filename().string();
     if (name.empty())
@@ -442,28 +455,29 @@ bool ImportService::isHiddenFile(const fs::path& entryPath, bool isDirectory, co
     if ((name.at(0) == '.' && !settings.hidden)
         || (!settings.followSymlinks && dirEntry.is_symlink())
         || config->getConfigFilename() == entryPath) {
-        cacheState(entryPath, dirEntry, ImportState::ToDelete);
+        importStateCache->cacheState(entryPath, dirEntry, ImportState::ToDelete);
         log_vdebug("hidden {}", entryPath.string());
         return true;
     }
     if (!noMediaName.empty()) {
         auto noMediaFile = (isDirectory) ? entryPath / noMediaName : entryPath.parent_path() / noMediaName;
         {
-            auto cacheLock = CacheAutoLock(cacheMutex);
-            if (contentStateCache.find(noMediaFile) != contentStateCache.end()) {
-                return !contentStateCache.at(noMediaFile) || contentStateCache.at(noMediaFile)->getState() != ImportState::Broken; // broken means: file not found
+            auto cacheLock = StateCache::CacheAutoLock(importStateCache->cacheMutex);
+            if (importStateCache->contentStateCache.find(noMediaFile) != importStateCache->contentStateCache.end()) {
+                return !importStateCache->contentStateCache.at(noMediaFile) || importStateCache->contentStateCache.at(noMediaFile)->getState() != ImportState::Broken; // broken means: file not found
             }
         }
-        // if file exists it will be automatically created
     }
     return false;
 }
 
-///\brief create containers for all discovered folders
-void ImportService::createContainers(int parentContainerId, AutoScanSetting& settings)
+void ImportService::createContainers(
+    const std::shared_ptr<StateCache>& stateCache,
+    int parentContainerId,
+    AutoScanSetting& settings)
 {
     log_debug("start {} {}", rootPath.string(), parentContainerId);
-    for (auto&& [contPath, stateEntry] : contentStateCache) {
+    for (auto&& [contPath, stateEntry] : stateCache->contentStateCache) {
         if (!stateEntry || stateEntry->getState() != ImportState::New)
             continue;
         auto dirEntry = stateEntry->getDirEntry();
@@ -481,7 +495,7 @@ void ImportService::createContainers(int parentContainerId, AutoScanSetting& set
                 }
                 doUpdate = true;
                 log_debug("Container moved {} {}", oldLocation.string(), contPath.string());
-                for (auto&& [childPath, childEntry] : contentStateCache) {
+                for (auto&& [childPath, childEntry] : stateCache->contentStateCache) {
                     // find direct folder entry with old name and rely on iteration to rename hierarchy
                     if (childEntry && childPath.parent_path() == contPath) {
                         auto childObj = database->findObjectByPath(oldLocation / childPath.filename(), UNUSED_CLIENT_GROUP, DbFileType::Any);
@@ -553,7 +567,9 @@ std::tuple<bool, std::string, std::string> ImportService::getMimeForFile(const f
 }
 
 ///\brief create items for all discovered files
-void ImportService::createItems(AutoScanSetting& settings)
+void ImportService::createItems(
+    const std::shared_ptr<StateCache>& stateCache,
+    AutoScanSetting& settings)
 {
     log_debug("start {}", rootPath.string());
     std::shared_ptr<CdsContainer> parentContainer = nullptr;
@@ -561,7 +577,7 @@ void ImportService::createItems(AutoScanSetting& settings)
     auto lastModifiedNewMax = lastModifiedCurrentMax;
     fs::path contPath;
 
-    for (auto&& [itemPath, stateEntry] : contentStateCache) {
+    for (auto&& [itemPath, stateEntry] : stateCache->contentStateCache) {
         if (!stateEntry) {
             log_debug("broken entry {}", itemPath.string());
             continue;
@@ -571,7 +587,7 @@ void ImportService::createItems(AutoScanSetting& settings)
         if (cdsObj && cdsObj->isContainer()) {
             std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(cdsObj);
             if (!contPath.empty()) {
-                contentStateCache.at(contPath)->setMTime(lastModifiedNewMax);
+                stateCache->contentStateCache.at(contPath)->setMTime(lastModifiedNewMax);
                 if (autoscanDir) {
                     autoscanDir->setCurrentLMT(contPath, lastModifiedNewMax);
                 }
@@ -592,7 +608,7 @@ void ImportService::createItems(AutoScanSetting& settings)
         auto dirEntry = stateEntry->getDirEntry();
         if (isRegularFile(dirEntry, ec)) {
             // Start with cached item
-            auto contState = contentStateCache.at(itemPath.parent_path());
+            auto contState = stateCache->contentStateCache.at(itemPath.parent_path());
             if (contState)
                 parentContainer = std::dynamic_pointer_cast<CdsContainer>(contState->getObject());
             else
@@ -728,7 +744,10 @@ std::string ImportService::makeTitle(const fs::path& objectPath, const std::stri
     return mval;
 }
 
-void ImportService::updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype)
+void ImportService::updateSingleItem(
+    const fs::directory_entry& dirEntry,
+    const std::shared_ptr<CdsItem>& item,
+    const std::string& mimetype)
 {
     auto mTime = toSeconds(dirEntry.last_write_time(ec));
     item->setMTime(mTime);
@@ -743,12 +762,14 @@ void ImportService::updateSingleItem(const fs::directory_entry& dirEntry, const 
     }
 }
 
-void ImportService::fillLayout(const std::shared_ptr<GenericTask>& task)
+void ImportService::fillLayout(
+    const std::shared_ptr<StateCache>& stateCache,
+    const std::shared_ptr<GenericTask>& task)
 {
-    for (auto&& [contPath, stateEntry] : contentStateCache) {
+    for (auto&& [contPath, stateEntry] : stateCache->contentStateCache) {
         if (!stateEntry || stateEntry->getState() != ImportState::Created)
             continue;
-        contentStateCache.at(contPath)->setObject(ImportState::Loaded, stateEntry->getObject());
+        stateCache->contentStateCache.at(contPath)->setObject(ImportState::Loaded, stateEntry->getObject());
         fillSingleLayout(stateEntry, nullptr, stateEntry->getParentObject(), task);
     }
 }
@@ -1100,9 +1121,9 @@ std::pair<int, bool> ImportService::addContainerTree(
     return { result, isNew };
 }
 
-void ImportService::updateFanArt(bool isDir)
+void ImportService::updateFanArt(const std::shared_ptr<StateCache>& stateCache, bool isDir)
 {
-    for (auto&& [contPath, stateEntry] : contentStateCache) {
+    for (auto&& [contPath, stateEntry] : stateCache->contentStateCache) {
         if (!stateEntry || !stateEntry->getObject() || !stateEntry->getObject()->isItem() || stateEntry->getState() != ImportState::Loaded)
             continue;
 
@@ -1115,7 +1136,7 @@ void ImportService::updateFanArt(bool isDir)
             log_error("Updating FanArt for '{}' failed: {}", dirEntry.path().string(), ex.what());
         }
     }
-    for (auto&& [contPath, stateEntry] : contentStateCache) {
+    for (auto&& [contPath, stateEntry] : stateCache->contentStateCache) {
         if (!stateEntry || !stateEntry->getObject() || !stateEntry->getObject()->isContainer())
             continue;
         std::shared_ptr<CdsContainer> container = std::dynamic_pointer_cast<CdsContainer>(stateEntry->getObject());

@@ -821,6 +821,9 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
 
             <backup enabled="no" interval="15:00"/>
 
+        Create a database backup file for easy recovery if the main file cannot be read. The backup file can also be used to analyse the database
+        contents while the main database is in use. This does not avoid loss of data like a regular backup.
+
         * Optional
 
         Backup parameters:
@@ -830,7 +833,7 @@ Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available opti
                     enabled=...
 
                 * Optional
-                * Default: **no**
+                * Default: **yes**
 
                 Enables or disables database backup.
 
