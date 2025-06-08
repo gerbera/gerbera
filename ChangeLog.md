@@ -20,6 +20,7 @@
 - Get multiple streams in FFMpeg handler
 - Improve compile info output
 - Limit strings to column size
+- Make ImportService stable for multiple calls
 - MySql: Allow configuration of engine, charset and collation
 - Quirks for Freebox Player
 - Provide bash completion file

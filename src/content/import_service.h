@@ -125,6 +125,24 @@ public:
     AutoscanMediaMode getMediaMode() const;
 };
 
+/// @brief Container for cache state map
+class StateCache {
+public:
+    mutable std::mutex cacheMutex;
+    using CacheAutoLock = std::scoped_lock<decltype(cacheMutex)>;
+
+    mutable std::map<fs::path, std::shared_ptr<ContentState>> contentStateCache = std::map<fs::path, std::shared_ptr<ContentState>>();
+    /// @brief: store entry in cache map
+    void cacheState(
+        const fs::path& entryPath,
+        const fs::directory_entry& dirEntry,
+        ImportState state,
+        std::chrono::seconds mtime = std::chrono::seconds::zero(),
+        const std::shared_ptr<CdsObject>& cdsObject = nullptr);
+    /// @brief: get object if stored in cache map
+    std::shared_ptr<CdsObject> getObject(const fs::path& location) const;
+};
+
 /// @brief Mapping logic to generate upnpClass from file (meta) data
 class UpnpMap {
 private:
@@ -164,9 +182,11 @@ private:
     std::map<std::string, std::string> configLayoutMapping;
     std::vector<UpnpMap> upnpMap {};
 
+    fs::path rootPath;
     std::shared_ptr<AutoscanDirectory> autoscanDir;
     std::map<AutoscanMediaMode, std::string> containerTypeMap;
-    fs::path rootPath;
+    std::shared_ptr<StateCache> importStateCache;
+
     std::string noMediaName;
     bool hasReadableNames { false };
     bool hasCaseSensitiveNames { true };
@@ -174,6 +194,7 @@ private:
     bool pcDirTypes { true };
     int containerImageParentCount { 2 };
     int containerImageMinDepth { 2 };
+
     std::vector<std::vector<std::pair<std::string, std::string>>> virtualDirKeys {};
 
     /// \brief cache for containers while creating new layout
@@ -184,14 +205,11 @@ private:
     using LayoutAutoLock = std::scoped_lock<decltype(layoutMutex)>;
     mutable std::shared_ptr<Layout> layout;
 
-    mutable std::mutex cacheMutex;
-    using CacheAutoLock = std::scoped_lock<decltype(cacheMutex)>;
 #ifdef HAVE_JS
     std::unique_ptr<PlaylistParserScript> playlistParserScript;
     std::unique_ptr<MetafileParserScript> metafileParserScript;
 #endif
 
-    mutable std::map<fs::path, std::shared_ptr<ContentState>> contentStateCache = std::map<fs::path, std::shared_ptr<ContentState>>();
     std::error_code ec;
     fs::path activeScan {};
 
@@ -201,16 +219,16 @@ private:
     std::string makeTitle(const fs::path& objectPath, const std::string upnpClass) const;
 
     /// @brief read files from one folder depnending on settings
-    void readDir(const fs::path& location, AutoScanSetting settings);
+    void readDir(const std::shared_ptr<StateCache>& stateCache, const fs::path& location, AutoScanSetting settings);
     /// @brief read single file (triggered by autoscan)
-    void readFile(const fs::path& location);
+    void readFile(const std::shared_ptr<StateCache>& stateCache, const fs::path& location);
     /// \brief create containers for all discovered folders
-    void createContainers(int parentContainerId, AutoScanSetting& settings);
+    void createContainers(const std::shared_ptr<StateCache>& stateCache, int parentContainerId, AutoScanSetting& settings);
     /// \brief create items for all discovered files
-    void createItems(AutoScanSetting& settings);
+    void createItems(const std::shared_ptr<StateCache>& stateCache, AutoScanSetting& settings);
     void updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
-    void fillLayout(const std::shared_ptr<GenericTask>& task);
-    void updateFanArt(bool isDir);
+    void fillLayout(const std::shared_ptr<StateCache>& stateCache, const std::shared_ptr<GenericTask>& task);
+    void updateFanArt(const std::shared_ptr<StateCache>& stateCache, bool isDir);
     /// @brief try to assign fanart to container
     /// @param container target object
     /// @param refObj object to point to for fanart
@@ -225,14 +243,7 @@ private:
         bool isDir,
         int count,
         bool isNew);
-    void removeHidden(const AutoScanSetting& settings);
-
-    void cacheState(
-        const fs::path& entryPath,
-        const fs::directory_entry& dirEntry,
-        ImportState state,
-        std::chrono::seconds mtime = std::chrono::seconds::zero(),
-        const std::shared_ptr<CdsObject>& cdsObject = nullptr);
+    void removeHidden(const std::shared_ptr<StateCache>& stateCache, const AutoScanSetting& settings);
 
     /// @brief Extract mime type and corresponding upnp class from file
     /// @param objectPath location of the file on the disk
@@ -242,15 +253,36 @@ private:
 public:
     ImportService(std::shared_ptr<Context> context, std::shared_ptr<ConverterManager> converterManager);
 
-    void run(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> autoScan = {}, fs::path path = "");
+    /// @brief: initialise import service with runtime properties
+    void run(
+        std::shared_ptr<ContentManager> content,
+        std::shared_ptr<AutoscanDirectory> autoScan = {},
+        fs::path path = "");
+
+    /// @brief: initialise layout generators
+
     void initLayout(LayoutType layoutType);
+    /// @brief: destroy layout generators
     void destroyLayout();
 
-    void doImport(const fs::path& location, AutoScanSetting& settings, std::unordered_set<int>& currentContent, const std::shared_ptr<GenericTask>& task);
+    /// @brief: run import of one file or folder
+    std::shared_ptr<CdsObject> doImport(
+        const fs::path& location,
+        AutoScanSetting& settings,
+        std::unordered_set<int>& currentContent,
+        const std::shared_ptr<GenericTask>& task);
+
+    /// @brief: clear caches from last import run
     void clearCache();
 
+    /// @brief: create item from directory entry
     std::pair<bool, std::shared_ptr<CdsObject>> createSingleItem(const fs::directory_entry& dirEntry);
-    std::shared_ptr<CdsContainer> createSingleContainer(int parentContainerId, const fs::directory_entry& dirEntry, const std::string& upnpClass);
+
+    /// @brief: create child container from directory entry
+    std::shared_ptr<CdsContainer> createSingleContainer(
+        int parentContainerId,
+        const fs::directory_entry& dirEntry,
+        const std::string& upnpClass);
 
     /// \brief create layout of a single itme
     /// \param state item state
@@ -263,8 +295,14 @@ public:
         const std::shared_ptr<CdsContainer>& parent,
         const std::shared_ptr<GenericTask>& task);
 
-    bool isHiddenFile(const fs::path& entryPath, bool isDirectory, const fs::directory_entry& dirEntry, const AutoScanSetting& settings);
+    /// @brief: check whether file is hiddem
+    bool isHiddenFile(
+        const fs::path& entryPath,
+        bool isDirectory,
+        const fs::directory_entry& dirEntry,
+        const AutoScanSetting& settings);
 
+    /// @brief: update properties of object
     void updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
 
     /// \brief Adds a virtual container chain specified by path.
@@ -286,7 +324,6 @@ public:
         const std::shared_ptr<CdsObject>& firstObject = nullptr);
 
     std::shared_ptr<CdsContainer> getContainer(const std::string& location) const;
-    std::shared_ptr<CdsObject> getObject(const fs::path& location) const;
     std::shared_ptr<Layout> getLayout() const { return layout; }
     std::shared_ptr<MetadataService> getMetadataService() const { return metadataService; }
 
