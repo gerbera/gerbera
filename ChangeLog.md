@@ -33,6 +33,7 @@
 - Update NPUPnP
 - Update PUpnp to 1.14.22 and taglib to 2.1
 - Update PUpnp to 1.14.23
+- Update PUpnp to 1.14.24
 - Update spdlog to 1.15.2
 - Update spdlog to 1.15.3
 - Upgrade documentation build environment

@@ -26,7 +26,7 @@ Improved resource handling for WavPack and FFMpeg requrires reimport of the libr
 - Sql database code uses enum properties instead of column names
 - Database initialisation does tables only, initial root values are in code
 - Upgrade documentation build environment to sphinx 8.2 with python 3.12
-- Update versions of npupnp (6.2.1), fmtlib (11.2.0), spdlog (1.15.3), googletest (1.17.0), pupnp (1.14.23), taglib (2.1.0)
+- Update versions of npupnp (6.2.1), fmtlib (11.2.0), spdlog (1.15.3), googletest (1.17.0), pupnp (1.14.24), taglib (2.1.0)
 
 ## v2.5.0
 
