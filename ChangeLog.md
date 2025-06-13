@@ -24,6 +24,7 @@
 - MySql: Allow configuration of engine, charset and collation
 - Quirks for Freebox Player
 - Provide bash completion file
+- Refactor ConfigSetup code
 - Remove legacy compile option SQLITE_BACKUP_ENABLED
 - Reorganise installation scripts
 - Support "natural" file sorting

@@ -124,97 +124,123 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
     const std::string& status) const
 {
     auto statusList = splitString(status, ',');
-    auto i = indexList.at(0);
     if (optItem == getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT }) && (statusList.at(0) == STATUS_ADDED || statusList.at(0) == STATUS_MANUAL)) {
         return true;
     }
-    {
-        // set client flags
-        auto index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_FLAGS });
+
+    static auto resultProperties = std::vector<ConfigResultProperty<ClientConfig>> {
+        // Flags
+        {
+            { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_FLAGS },
+            "Flags",
+            [&](const std::shared_ptr<ClientConfig>& entry) { return ClientConfig::mapFlags(entry->getFlags()); },
+            [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setFlags(definition->findConfigSetup<ConfigIntSetup>(cfg)->checkIntValue(optValue));
+                return true;
+            },
+        },
+        // IP
+        {
+            { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_IP },
+            "IP",
+            [&](const std::shared_ptr<ClientConfig>& entry) { return entry->getIp(); },
+            [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setIp(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Group
+        {
+            { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_GROUP },
+            "Group",
+            [&](const std::shared_ptr<ClientConfig>& entry) { return entry->getGroup(); },
+            [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setGroup(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Allowed
+        {
+            { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_ALLOWED },
+            "is allowed",
+            [&](const std::shared_ptr<ClientConfig>& entry) { return fmt::to_string(entry->getAllowed()); },
+            [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setAllowed(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // userAgent
+        {
+            { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_USERAGENT },
+            "userAgent",
+            [&](const std::shared_ptr<ClientConfig>& entry) { return entry->getUserAgent(); },
+            [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setUserAgent(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // upnp caption count
+        {
+            { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT },
+            "CaptionInfoCount",
+            [&](const std::shared_ptr<ClientConfig>& entry) { return fmt::to_string(entry->getCaptionInfoCount()); },
+            [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setCaptionInfoCount(definition->findConfigSetup<ConfigIntSetup>(cfg)->checkIntValue(optValue));
+                return true;
+            },
+        },
+        // upnp string limit
+        {
+            { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT },
+            "StringLimit",
+            [&](const std::shared_ptr<ClientConfig>& entry) { return fmt::to_string(entry->getStringLimit()); },
+            [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setStringLimit(definition->findConfigSetup<ConfigIntSetup>(cfg)->checkIntValue(optValue));
+                return true;
+            },
+        },
+        // upnp multi value
+        {
+            { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_ALLOWED },
+            "upnp multi value",
+            [&](const std::shared_ptr<ClientConfig>& entry) { return fmt::to_string(entry->getAllowed()); },
+            [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setAllowed(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // upnp full filter
+        {
+            { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_FILTER_FULL },
+            "upnp full filter",
+            [&](const std::shared_ptr<ClientConfig>& entry) { return fmt::to_string(entry->getFullFilter()); },
+            [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setFullFilter(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+    };
+
+    auto i = indexList.at(0);
+    for (auto&& [cfg, label, getProperty, setProperty] : resultProperties) {
+        auto index = getItemPath(indexList, cfg);
         if (optItem == index) {
             if (entry->getOrig())
-                config->setOrigValue(index, ClientConfig::mapFlags(entry->getFlags()));
-            entry->setFlags(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->checkIntValue(optValue));
-            log_debug("New Client Flags {} {}", index, ClientConfig::mapFlags(EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getFlags()));
-            return true;
-        }
-        // set client ip
-        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_IP });
-        if (optItem == index) {
-            if (entry->getOrig())
-                config->setOrigValue(index, entry->getIp());
-            if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->checkValue(optValue)) {
-                entry->setIp(optValue);
-                log_debug("New Client IP {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getIp());
+                config->setOrigValue(index, getProperty(entry));
+            if (setProperty(entry, definition, cfg.at(0), optValue)) {
+                auto nEntry = EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i);
+                log_debug("New value for Client {} {} = {}", label.data(), index, getProperty(nEntry));
                 return true;
             }
-        }
-        // set client group
-        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_GROUP });
-        if (optItem == index) {
-            if (entry->getOrig())
-                config->setOrigValue(index, entry->getGroup());
-            if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->checkValue(optValue)) {
-                entry->setGroup(optValue);
-                log_debug("New Client Group {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getGroup());
-                return true;
-            }
-        }
-        // set client allowed
-        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_ALLOWED });
-        if (optItem == index) {
-            if (entry->getOrig())
-                config->setOrigValue(index, entry->getAllowed());
-            entry->setAllowed(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->checkValue(optValue));
-            log_debug("New Client Allow {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getAllowed());
-            return true;
-        }
-        // set client userAgent
-        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_USERAGENT });
-        if (optItem == index) {
-            if (entry->getOrig())
-                config->setOrigValue(index, entry->getUserAgent());
-            if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->checkValue(optValue)) {
-                entry->setUserAgent(optValue);
-                log_debug("New Client UserAgent {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getUserAgent());
-                return true;
-            }
-        }
-        // set client upnp caption count
-        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT });
-        if (optItem == index) {
-            if (entry->getOrig())
-                config->setOrigValue(index, entry->getCaptionInfoCount());
-            entry->setCaptionInfoCount(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->checkIntValue(optValue));
-            log_debug("New Client CaptionInfoCount {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getCaptionInfoCount());
-            return true;
-        }
-        // set client string limit
-        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT });
-        if (optItem == index) {
-            if (entry->getOrig())
-                config->setOrigValue(index, entry->getStringLimit());
-            entry->setStringLimit(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->checkIntValue(optValue));
-            log_debug("New Client StringLimit {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getStringLimit());
-            return true;
-        }
-        // set client upnp multi value
-        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE });
-        if (optItem == index) {
-            if (entry->getOrig())
-                config->setOrigValue(index, entry->getMultiValue());
-            entry->setMultiValue(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->checkValue(optValue));
-            log_debug("New Client MultiValue {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getMultiValue());
-            return true;
-        }
-        // set client upnp full filter
-        index = getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_FILTER_FULL });
-        if (optItem == index) {
-            if (entry->getOrig())
-                config->setOrigValue(index, entry->getFullFilter());
-            entry->setFullFilter(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL)->checkValue(optValue));
-            log_debug("New Client FullFilter {} {}", index, EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i)->getFullFilter());
-            return true;
         }
     }
     // set client dictionaries

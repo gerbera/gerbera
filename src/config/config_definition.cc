@@ -1742,13 +1742,13 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             true, "", true),
 
         // Buffer
-        std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE,
+        std::make_shared<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE,
             "attribute::size", "config-transcode.html#profiles",
             0, 0, ConfigIntSetup::CheckMinValue),
-        std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK,
+        std::make_shared<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK,
             "attribute::chunk-size", "config-transcode.html#profiles",
             0, 0, ConfigIntSetup::CheckMinValue),
-        std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL,
+        std::make_shared<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL,
             "attribute::fill-size", "config-transcode.html#profiles",
             0, 0, ConfigIntSetup::CheckMinValue),
 

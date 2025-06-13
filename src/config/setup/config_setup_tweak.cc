@@ -109,122 +109,161 @@ void ConfigDirectorySetup::makeOption(const pugi::xml_node& root, const std::sha
     setOption(config);
 }
 
-bool ConfigDirectorySetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DirectoryTweak>& entry, std::string& optValue, const std::string& status) const
+bool ConfigDirectorySetup::updateItem(
+    const std::vector<std::size_t>& indexList,
+    const std::string& optItem,
+    const std::shared_ptr<Config>& config,
+    std::shared_ptr<DirectoryTweak>& entry,
+    std::string& optValue,
+    const std::string& status) const
 {
     if (optItem == getItemPath(indexList, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
 
-    auto index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_LOCATION });
+    static auto resultProperties = std::vector<ConfigResultProperty<DirectoryTweak>> {
+        // Location
+        {
+            { ConfigVal::A_DIRECTORIES_TWEAK_LOCATION },
+            "Location",
+            [&](const std::shared_ptr<DirectoryTweak>& entry) { return entry->getLocation(); },
+            [&](const std::shared_ptr<DirectoryTweak>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                auto pathValue = optValue;
+                if (definition->findConfigSetup<ConfigPathSetup>(cfg)->checkPathValue(optValue, pathValue)) {
+                    entry->setLocation(pathValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Inherit
+        {
+            { ConfigVal::A_DIRECTORIES_TWEAK_INHERIT },
+            "Inherit",
+            [&](const std::shared_ptr<DirectoryTweak>& entry) { return fmt::to_string(entry->getInherit()); },
+            [&](const std::shared_ptr<DirectoryTweak>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setInherit(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // Recursive
+        {
+            { ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE },
+            "Recursive",
+            [&](const std::shared_ptr<DirectoryTweak>& entry) { return fmt::to_string(entry->getRecursive()); },
+            [&](const std::shared_ptr<DirectoryTweak>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setRecursive(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // Hidden
+        {
+            { ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN },
+            "Hidden",
+            [&](const std::shared_ptr<DirectoryTweak>& entry) { return fmt::to_string(entry->getHidden()); },
+            [&](const std::shared_ptr<DirectoryTweak>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setHidden(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // case sensitive
+        {
+            { ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE },
+            "Case Sensitive",
+            [&](const std::shared_ptr<DirectoryTweak>& entry) { return fmt::to_string(entry->getCaseSensitive()); },
+            [&](const std::shared_ptr<DirectoryTweak>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setCaseSensitive(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // FollowSymlinks
+        {
+            { ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS },
+            "FollowSymlinks",
+            [&](const std::shared_ptr<DirectoryTweak>& entry) { return fmt::to_string(entry->getFollowSymlinks()); },
+            [&](const std::shared_ptr<DirectoryTweak>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setFollowSymlinks(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // Charset
+        {
+            { ConfigVal::A_DIRECTORIES_TWEAK_LOCATION },
+            "Charset",
+            [&](const std::shared_ptr<DirectoryTweak>& entry) { return entry->hasMetaCharset() ? entry->getMetaCharset() : ""; },
+            [&](const std::shared_ptr<DirectoryTweak>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setMetaCharset(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Fanart File
+        {
+            { ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE },
+            "Fanart File",
+            [&](const std::shared_ptr<DirectoryTweak>& entry) { return entry->hasFanArtFile() ? entry->getFanArtFile() : ""; },
+            [&](const std::shared_ptr<DirectoryTweak>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setFanArtFile(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Resource File
+        {
+            { ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE },
+            "Resource File",
+            [&](const std::shared_ptr<DirectoryTweak>& entry) { return entry->hasResourceFile() ? entry->getResourceFile() : ""; },
+            [&](const std::shared_ptr<DirectoryTweak>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setResourceFile(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Subtitle File
+        {
+            { ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE },
+            "Subtitle File",
+            [&](const std::shared_ptr<DirectoryTweak>& entry) { return entry->hasSubTitleFile() ? entry->getSubTitleFile() : ""; },
+            [&](const std::shared_ptr<DirectoryTweak>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setSubTitleFile(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Metadata File
+        {
+            { ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE },
+            "Metadata File",
+            [&](const std::shared_ptr<DirectoryTweak>& entry) { return entry->hasMetafile() ? entry->getMetafile() : ""; },
+            [&](const std::shared_ptr<DirectoryTweak>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setMetafile(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+    };
+
     auto i = indexList.at(0);
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getLocation());
-        auto pathValue = optValue;
-        if (definition->findConfigSetup<ConfigPathSetup>(ConfigVal::A_DIRECTORIES_TWEAK_LOCATION)->checkPathValue(optValue, pathValue)) {
-            entry->setLocation(pathValue);
-            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getLocation().string());
-            return true;
-        }
-    }
-    // inherit
-    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_INHERIT });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getInherit());
-        entry->setInherit(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_DIRECTORIES_TWEAK_INHERIT)->checkValue(optValue));
-        log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getInherit());
-        return true;
-    }
-    // recursive
-    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getRecursive());
-        entry->setRecursive(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE)->checkValue(optValue));
-        log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getRecursive());
-        return true;
-    }
-    // hidden
-    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getHidden());
-        entry->setHidden(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN)->checkValue(optValue));
-        log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getHidden());
-        return true;
-    }
-    // case sensitive
-    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getCaseSensitive());
-        entry->setCaseSensitive(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE)->checkValue(optValue));
-        log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getCaseSensitive());
-        return true;
-    }
-    // follow symlinks
-    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getFollowSymlinks());
-        entry->setFollowSymlinks(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS)->checkValue(optValue));
-        log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFollowSymlinks());
-        return true;
-    }
-    // charset
-    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->hasMetaCharset() ? entry->getMetaCharset() : "");
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET)->checkValue(optValue)) {
-            entry->setMetaCharset(optValue);
-            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getMetaCharset());
-            return true;
-        }
-    }
-    // fanart file
-    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->hasFanArtFile() ? entry->getFanArtFile() : "");
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE)->checkValue(optValue)) {
-            entry->setFanArtFile(optValue);
-            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getFanArtFile());
-            return true;
-        }
-    }
-    // resource file
-    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->hasResourceFile() ? entry->getResourceFile() : "");
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE)->checkValue(optValue)) {
-            entry->setResourceFile(optValue);
-            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getResourceFile());
-            return true;
-        }
-    }
-    // subtitle file
-    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->hasSubTitleFile() ? entry->getSubTitleFile() : "");
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE)->checkValue(optValue)) {
-            entry->setSubTitleFile(optValue);
-            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getSubTitleFile());
-            return true;
-        }
-    }
-    // metadata file
-    index = getItemPath(indexList, { ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->hasMetafile() ? entry->getMetafile() : "");
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE)->checkValue(optValue)) {
-            entry->setMetafile(optValue);
-            log_debug("New Tweak Detail {} {}", index, config->getDirectoryTweakOption(option)->get(i)->getMetafile());
-            return true;
+    for (auto&& [cfg, label, getProperty, setProperty] : resultProperties) {
+        auto index = getItemPath(indexList, cfg);
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, getProperty(entry));
+            if (setProperty(entry, definition, cfg.at(0), optValue)) {
+                auto nEntry = config->getDirectoryTweakOption(option)->get(i);
+                log_debug("New value for Directory Tweak {} {} = {}", label.data(), index, getProperty(nEntry));
+                return true;
+            }
         }
     }
 

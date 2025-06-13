@@ -29,8 +29,21 @@
 
 #include "util/tools.h"
 
+/// @brief: Utility struct to define properties for update
+template <class CfgResult>
+struct ConfigResultProperty {
+    using GetCallback = std::function<std::string(const std::shared_ptr<CfgResult>& entry)>;
+    using SetCallback = std::function<bool(const std::shared_ptr<CfgResult>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& val)>;
+    std::vector<ConfigVal> cfg;
+    std::string_view label;
+    GetCallback getProperty;
+    SetCallback setProperty;
+};
+
+/// @brief: Update config object with properties from UI or database
 template <class EditHelperConfig, class Setup, class Option, class Result>
-bool updateConfig(std::shared_ptr<EditHelperConfig> list,
+bool updateConfig(
+    std::shared_ptr<EditHelperConfig> list,
     const std::shared_ptr<Config>& config,
     Setup* setup,
     std::shared_ptr<Option>& value,
