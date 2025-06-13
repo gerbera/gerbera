@@ -94,6 +94,13 @@ public:
             } else if (valueMap.find(value) != valueMap.end()) {
                 result = valueMap.at(value);
                 return true;
+            } else {
+                for (auto&& val : valueMap) {
+                    if (fmt::to_string(val.second) == value) {
+                        result = val.second;
+                        return true;
+                    }
+                }
             }
         } catch (const std::out_of_range& ex) {
             log_error("Could not map '{}' for {}", value, xpath, ex.what());

@@ -5,6 +5,7 @@
 Sqlite backup is now enabled by default.
 Filtering resources by mimetype instead of extension reduces effort of configuration
 Improved resource handling for WavPack and FFMpeg requrires reimport of the library
+Changes to configure text for "PC Directory" can be merged with `--create-config=Boxlayout`
 
 ### NEW Features
 

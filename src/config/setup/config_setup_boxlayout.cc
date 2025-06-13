@@ -124,73 +124,109 @@ bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
     if (optItem == getItemPath(indexList, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
+
+    static auto resultProperties = std::vector<ConfigResultProperty<BoxLayout>> {
+        // Key
+        {
+            { ConfigVal::A_BOXLAYOUT_BOX_KEY },
+            "Key",
+            [&](const std::shared_ptr<BoxLayout>& entry) { return entry->getKey(); },
+            [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setKey(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Title
+        {
+            { ConfigVal::A_BOXLAYOUT_BOX_TITLE },
+            "Title",
+            [&](const std::shared_ptr<BoxLayout>& entry) { return entry->getTitle(); },
+            [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setTitle(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Class
+        {
+            { ConfigVal::A_BOXLAYOUT_BOX_CLASS },
+            "Class",
+            [&](const std::shared_ptr<BoxLayout>& entry) { return entry->getClass(); },
+            [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setClass(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // UpnpShortcut
+        {
+            { ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT },
+            "UpnpShortcut",
+            [&](const std::shared_ptr<BoxLayout>& entry) { return entry->getUpnpShortcut(); },
+            [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setUpnpShortcut(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // BoxSize
+        {
+            { ConfigVal::A_BOXLAYOUT_BOX_SIZE },
+            "BoxSize",
+            [&](const std::shared_ptr<BoxLayout>& entry) { return fmt::to_string(entry->getSize()); },
+            [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setSize(definition->findConfigSetup<ConfigIntSetup>(cfg)->checkIntValue(optValue));
+                return true;
+            },
+        },
+        // Enabled
+        {
+            { ConfigVal::A_BOXLAYOUT_BOX_ENABLED },
+            "Enabled",
+            [&](const std::shared_ptr<BoxLayout>& entry) { return fmt::to_string(entry->getEnabled()); },
+            [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setEnabled(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // SortKey
+        {
+            { ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY },
+            "SortKey",
+            [&](const std::shared_ptr<BoxLayout>& entry) { return entry->getSortKey(); },
+            [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setSortKey(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+    };
+
     auto i = indexList.at(0);
-    auto index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_KEY });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getKey());
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->checkValue(optValue)) {
-            entry->setKey(optValue);
-            log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getKey());
-            return true;
+    for (auto&& [cfg, label, getProperty, setProperty] : resultProperties) {
+        auto index = getItemPath(indexList, cfg);
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, getProperty(entry));
+            if (setProperty(entry, definition, cfg.at(0), optValue)) {
+                auto nEntry = config->getBoxLayoutListOption(option)->get(i);
+                log_debug("New value for BoxLayout {} {} = {}", label.data(), index, getProperty(nEntry));
+                return true;
+            }
         }
     }
-    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_TITLE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getTitle());
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->checkValue(optValue)) {
-            entry->setTitle(optValue);
-            log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getTitle());
-            return true;
-        }
-    }
-    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_CLASS });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getClass());
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->checkValue(optValue)) {
-            entry->setClass(optValue);
-            log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getClass());
-            return true;
-        }
-    }
-    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getUpnpShortcut());
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->checkValue(optValue)) {
-            entry->setUpnpShortcut(optValue);
-            log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getUpnpShortcut());
-            return true;
-        }
-    }
-    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_SIZE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getSize());
-        entry->setSize(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->checkIntValue(optValue));
-        log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getSize());
-        return true;
-    }
-    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getEnabled());
-        entry->setEnabled(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->checkValue(optValue));
-        log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getEnabled());
-        return true;
-    }
-    index = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getSortKey());
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY)->checkValue(optValue)) {
-            entry->setSortKey(optValue);
-            log_debug("New BoxLayout Detail {} {}", index, config->getBoxLayoutListOption(option)->get(i)->getSortKey());
-            return true;
-        }
-    }
+
     return false;
 }
 

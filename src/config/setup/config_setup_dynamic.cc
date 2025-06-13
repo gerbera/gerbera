@@ -88,81 +88,122 @@ void ConfigDynamicContentSetup::makeOption(const pugi::xml_node& root, const std
     setOption(config);
 }
 
-bool ConfigDynamicContentSetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, std::shared_ptr<DynamicContent>& entry, std::string& optValue, const std::string& status) const
+bool ConfigDynamicContentSetup::updateItem(
+    const std::vector<std::size_t>& indexList,
+    const std::string& optItem,
+    const std::shared_ptr<Config>& config,
+    std::shared_ptr<DynamicContent>& entry,
+    std::string& optValue,
+    const std::string& status) const
 {
     if (optItem == getItemPath(indexList, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
         return true;
     }
-    auto i = indexList.at(0);
 
-    auto index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_LOCATION });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getLocation());
-        auto pathValue = optValue;
-        if (definition->findConfigSetup<ConfigPathSetup>(ConfigVal::A_DYNAMIC_CONTAINER_LOCATION)->checkPathValue(optValue, pathValue)) {
-            entry->setLocation(pathValue);
-            log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getLocation().string());
-            return true;
+    static auto resultProperties = std::vector<ConfigResultProperty<DynamicContent>> {
+        // Location
+        {
+            { ConfigVal::A_DYNAMIC_CONTAINER_LOCATION },
+            "Location",
+            [&](const std::shared_ptr<DynamicContent>& entry) { return entry->getLocation(); },
+            [&](const std::shared_ptr<DynamicContent>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                auto pathValue = optValue;
+                if (definition->findConfigSetup<ConfigPathSetup>(cfg)->checkPathValue(optValue, pathValue)) {
+                    entry->setLocation(pathValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Image
+        {
+            { ConfigVal::A_DYNAMIC_CONTAINER_IMAGE },
+            "Image",
+            [&](const std::shared_ptr<DynamicContent>& entry) { return entry->getImage(); },
+            [&](const std::shared_ptr<DynamicContent>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigPathSetup>(cfg)->checkValue(optValue)) {
+                    entry->setImage(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Title
+        {
+            { ConfigVal::A_DYNAMIC_CONTAINER_TITLE },
+            "Title",
+            [&](const std::shared_ptr<DynamicContent>& entry) { return entry->getTitle(); },
+            [&](const std::shared_ptr<DynamicContent>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setTitle(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // Filter
+        {
+            { ConfigVal::A_DYNAMIC_CONTAINER_FILTER },
+            "Filter",
+            [&](const std::shared_ptr<DynamicContent>& entry) { return entry->getFilter(); },
+            [&](const std::shared_ptr<DynamicContent>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setFilter(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // shortcut
+        {
+            { ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT },
+            "shortcut",
+            [&](const std::shared_ptr<DynamicContent>& entry) { return entry->getUpnpShortcut(); },
+            [&](const std::shared_ptr<DynamicContent>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setUpnpShortcut(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // sort
+        {
+            { ConfigVal::A_DYNAMIC_CONTAINER_SORT },
+            "sort",
+            [&](const std::shared_ptr<DynamicContent>& entry) { return entry->getSort(); },
+            [&](const std::shared_ptr<DynamicContent>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                    entry->setSort(optValue);
+                    return true;
+                }
+                return false;
+            },
+        },
+        // max count
+        {
+            { ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT },
+            "max count",
+            [&](const std::shared_ptr<DynamicContent>& entry) { return fmt::to_string(entry->getMaxCount()); },
+            [&](const std::shared_ptr<DynamicContent>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setMaxCount(definition->findConfigSetup<ConfigIntSetup>(cfg)->checkIntValue(optValue));
+                return true;
+            },
+        },
+    };
+
+    auto i = indexList.at(0);
+    for (auto&& [cfg, label, getProperty, setProperty] : resultProperties) {
+        auto index = getItemPath(indexList, cfg);
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, getProperty(entry));
+            if (setProperty(entry, definition, cfg.at(0), optValue)) {
+                auto nEntry = config->getDynamicContentListOption(option)->get(i);
+                log_debug("New value for DynamicContent {} {} = {}", label.data(), index, getProperty(nEntry));
+                return true;
+            }
         }
-    }
-    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_IMAGE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getImage());
-        if (definition->findConfigSetup<ConfigPathSetup>(ConfigVal::A_DYNAMIC_CONTAINER_IMAGE)->checkValue(optValue)) {
-            entry->setImage(optValue);
-            log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getImage().string());
-            return true;
-        }
-    }
-    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_TITLE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getTitle());
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_TITLE)->checkValue(optValue)) {
-            entry->setTitle(optValue);
-            log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getTitle());
-            return true;
-        }
-    }
-    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_FILTER });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getFilter());
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_FILTER)->checkValue(optValue)) {
-            entry->setFilter(optValue);
-            log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getFilter());
-            return true;
-        }
-    }
-    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getUpnpShortcut());
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT)->checkValue(optValue)) {
-            entry->setUpnpShortcut(optValue);
-            log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getUpnpShortcut());
-            return true;
-        }
-    }
-    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_SORT });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getSort());
-        if (definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_SORT)->checkValue(optValue)) {
-            entry->setSort(optValue);
-            log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getSort());
-            return true;
-        }
-    }
-    index = getItemPath(indexList, { ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getMaxCount());
-        entry->setMaxCount(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT)->checkIntValue(optValue));
-        log_debug("New DynamicContent Detail {} {}", index, config->getDynamicContentListOption(option)->get(i)->getMaxCount());
-        return true;
     }
 
     return false;

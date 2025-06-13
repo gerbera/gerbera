@@ -26,8 +26,6 @@
 
 #include "config_setup_autoscan.h" // API
 
-#include <numeric>
-
 #include "config/config_definition.h"
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
@@ -40,6 +38,9 @@
 #include "config_setup_string.h"
 #include "config_setup_time.h"
 #include "content/autoscan_list.h"
+#include "setup_util.h"
+
+#include <numeric>
 
 std::string ConfigAutoscanSetup::getUniquePath() const
 {
@@ -129,102 +130,135 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
     return true;
 }
 
-bool ConfigAutoscanSetup::updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status) const
+bool ConfigAutoscanSetup::updateItem(
+    const std::vector<std::size_t>& indexList,
+    const std::string& optItem,
+    const std::shared_ptr<Config>& config,
+    const std::shared_ptr<AutoscanDirectory>& entry,
+    std::string& optValue,
+    const std::string& status) const
 {
-    auto index = getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION });
     if (optItem == getUniquePath() && status != STATUS_CHANGED) {
         return true;
     }
 
+    static auto resultProperties = std::vector<ConfigResultProperty<AutoscanDirectory>> {
+        // Location
+        {
+            { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION },
+            "Location",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return entry->getLocation(); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                auto pathValue = optValue;
+                if (definition->findConfigSetup<ConfigPathSetup>(cfg)->checkPathValue(optValue, pathValue)) {
+                    entry->setLocation(pathValue);
+                }
+                return true;
+            },
+        },
+        // Interval
+        {
+            { ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL },
+            "Interval",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return fmt::to_string(entry->getInterval().count()); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setInterval(std::chrono::seconds(definition->findConfigSetup<ConfigTimeSetup>(cfg)->checkTimeValue(optValue)));
+                return true;
+            },
+        },
+        // Recursive
+        {
+            { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE },
+            "Recursive",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return fmt::to_string(entry->getRecursive()); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setRecursive(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // DirTypes
+        {
+            { ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES },
+            "DirTypes",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return fmt::to_string(entry->hasDirTypes()); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setDirTypes(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // Hidden
+        {
+            { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES },
+            "Hidden",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return fmt::to_string(entry->getHidden()); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setHidden(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // FollowSymlinks
+        {
+            { ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS },
+            "FollowSymlinks",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return fmt::to_string(entry->getFollowSymlinks()); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setFollowSymlinks(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // ContainerType Audio
+        {
+            { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO },
+            "ContainerType Audio",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return entry->getContainerTypes().at(AutoscanMediaMode::Audio); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setContainerType(AutoscanMediaMode::Audio, optValue);
+                return true;
+            },
+        },
+        // ContainerType Image
+        {
+            { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE },
+            "ContainerType Image",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return entry->getContainerTypes().at(AutoscanMediaMode::Image); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setContainerType(AutoscanMediaMode::Image, optValue);
+                return true;
+            },
+        },
+        // ContainerType Video
+        {
+            { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO },
+            "ContainerType Video",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return entry->getContainerTypes().at(AutoscanMediaMode::Video); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setContainerType(AutoscanMediaMode::Video, optValue);
+                return true;
+            },
+        },
+    };
     auto i = indexList.at(0);
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getLocation());
-        auto pathValue = optValue;
-        if (definition->findConfigSetup<ConfigPathSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION)->checkPathValue(optValue, pathValue)) {
-            entry->setLocation(pathValue);
+    for (auto&& [cfg, label, getProperty, setProperty] : resultProperties) {
+        auto index = getItemPath(indexList, cfg);
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, getProperty(entry));
+            if (setProperty(entry, definition, cfg.at(0), optValue)) {
+                auto nEntry = config->getAutoscanListOption(option).at(i);
+                log_debug("New value for Autoscan {} {} = {}", label.data(), index, getProperty(nEntry));
+                return true;
+            }
         }
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getLocation().string());
-        return true;
     }
 
-    index = getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE });
-    if (optItem == index) {
-        log_error("Autoscan Mode cannot be changed {} {}", index, AutoscanDirectory::mapScanmode(entry->getScanMode()));
-        return true;
+    {
+        auto index = getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE });
+        if (optItem == index) {
+            log_error("Autoscan Mode cannot be changed {} {}", index, AutoscanDirectory::mapScanmode(entry->getScanMode()));
+            return true;
+        }
     }
 
-    index = getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, fmt::to_string(entry->getInterval().count()));
-        entry->setInterval(std::chrono::seconds(definition->findConfigSetup<ConfigTimeSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL)->checkTimeValue(optValue)));
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getInterval().count());
-        return true;
-    }
-
-    index = getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getRecursive());
-        entry->setRecursive(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE)->checkValue(optValue));
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getRecursive());
-        return true;
-    }
-
-    index = getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->hasDirTypes());
-        entry->setDirTypes(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES)->checkValue(optValue));
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->hasDirTypes());
-        return true;
-    }
-
-    index = getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getHidden());
-        entry->setHidden(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES)->checkValue(optValue));
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getHidden());
-        return true;
-    }
-
-    index = getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getFollowSymlinks());
-        entry->setFollowSymlinks(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS)->checkValue(optValue));
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getFollowSymlinks());
-        return true;
-    }
-
-    index = getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getContainerTypes().at(AutoscanMediaMode::Audio));
-        entry->setContainerType(AutoscanMediaMode::Audio, optValue);
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getContainerTypes().at(AutoscanMediaMode::Audio));
-        return true;
-    }
-
-    index = getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getContainerTypes().at(AutoscanMediaMode::Image));
-        entry->setContainerType(AutoscanMediaMode::Image, optValue);
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getContainerTypes().at(AutoscanMediaMode::Image));
-        return true;
-    }
-
-    index = getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO });
-    if (optItem == index) {
-        if (entry->getOrig())
-            config->setOrigValue(index, entry->getContainerTypes().at(AutoscanMediaMode::Video));
-        entry->setContainerType(AutoscanMediaMode::Video, optValue);
-        log_debug("New Autoscan Detail {} {}", index, config->getAutoscanListOption(option)[i]->getContainerTypes().at(AutoscanMediaMode::Video));
-        return true;
-    }
     return false;
 }
 

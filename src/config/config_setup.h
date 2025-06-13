@@ -59,6 +59,7 @@ static constexpr auto STATUS_UNCHANGED = std::string_view("unchanged");
 static constexpr auto STATUS_KILLED = std::string_view("killed");
 static constexpr auto STATUS_MANUAL = std::string_view("manual");
 
+/// @brief: Base class for config parsers
 class ConfigSetup {
 protected:
     std::shared_ptr<ConfigOption> optionValue;
