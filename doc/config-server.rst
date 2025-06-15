@@ -343,15 +343,31 @@ Note:
 
 .. code-block:: xml
 
-    <pc-directory upnp-hide="no"/>
+    <pc-directory upnp-hide="yes" web-hide="yes"/>
+
+Tweak visibility of PC directory, i.e. root entry for physical structure.
 
 * Optional
-* Default: **no**
 
-Enabling this option will make the PC-Directory container invisible for UPnP devices.
+    **Attributes:**
 
-Note:
-   Independent of the above setting the container will be always visible in the web UI!
+    .. code-block:: xml
+
+        upnp-hide="yes"
+
+    * Optional
+    * Default: **no**
+
+    Enabling this option will make the PC-Directory container invisible for UPnP devices.
+
+    .. code-block:: xml
+
+         web-hide="yes"
+
+    * Optional
+    * Default: **no**
+
+    Enabling this option will make the PC-Directory container invisible in the web UI.
 
 ``bookmark``
 ~~~~~~~~~~~~

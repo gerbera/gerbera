@@ -5,6 +5,7 @@
 - Add missing jsoncpp to `Dockerfile`s
 - Add support for transliterating device output strings
 - Add taglib and artwork support for dsf files
+- Allow hiding PC directory in web view
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
 - Configure limit of sql strings
 - Extend details extracted by WavPack handler
