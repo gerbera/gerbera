@@ -42,7 +42,9 @@
 
 /// \brief Creates an array of BoxLayout objects from a XML nodeset.
 /// \param element starting element of the nodeset.
-bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<BoxLayoutList>& result)
+bool ConfigBoxLayoutSetup::createOptionFromNode(
+    const pugi::xml_node& element,
+    const std::shared_ptr<BoxLayoutList>& result)
 {
     if (!element)
         return true;
@@ -51,6 +53,16 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
     auto&& ccs = definition->findConfigSetup<ConfigSetup>(option);
     auto doExtend = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element.parent());
     log_debug("is {} extensible {}", element.parent().path(), doExtend);
+    static constexpr auto rootKeys = std::array {
+        BoxKeys::root,
+        BoxKeys::pcDirectory,
+        BoxKeys::audioRoot,
+        BoxKeys::audioAll,
+        BoxKeys::imageRoot,
+        BoxKeys::imageAll,
+        BoxKeys::videoRoot,
+        BoxKeys::videoAll,
+    };
     for (auto&& it : ccs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
 
@@ -62,7 +74,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
         auto enabled = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
         auto sortKey = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY)->getXmlContent(child);
 
-        if (!enabled && ((key == BoxKeys::audioRoot) || (key == BoxKeys::audioAll) || (key == BoxKeys::imageRoot) || (key == BoxKeys::imageAll) || (key == BoxKeys::videoRoot) || (key == BoxKeys::videoAll))) {
+        if (!enabled && std::find(rootKeys.begin(), rootKeys.end(), key) != rootKeys.end()) {
             log_warning("Box '{}' cannot be disabled", key);
             enabled = true;
         }
@@ -91,7 +103,9 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(const pugi::xml_node& element, c
     return true;
 }
 
-bool ConfigBoxLayoutSetup::validate(const std::shared_ptr<Config>& config, const std::shared_ptr<BoxLayoutList>& values)
+bool ConfigBoxLayoutSetup::validate(
+    const std::shared_ptr<Config>& config,
+    const std::shared_ptr<BoxLayoutList>& values)
 {
     auto layoutType = EnumOption<LayoutType>::getEnumOption(config, ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
     if (layoutType == LayoutType::Js)
@@ -108,13 +122,17 @@ bool ConfigBoxLayoutSetup::validate(const std::shared_ptr<Config>& config, const
     return true;
 }
 
-void ConfigBoxLayoutSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+void ConfigBoxLayoutSetup::makeOption(
+    const pugi::xml_node& root,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     newOption(getXmlElement(root));
     setOption(config);
 }
 
-bool ConfigBoxLayoutSetup::updateItem(const std::vector<std::size_t>& indexList,
+bool ConfigBoxLayoutSetup::updateItem(
+    const std::vector<std::size_t>& indexList,
     const std::string& optItem,
     const std::shared_ptr<Config>& config,
     std::shared_ptr<BoxLayout>& entry,

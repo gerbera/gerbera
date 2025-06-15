@@ -32,7 +32,7 @@
     <serialNumber>1</serialNumber>
     <presentationURL append-to="none"></presentationURL>
     <tmpdir>/tmp/</tmpdir>
-    <pc-directory upnp-hide="no" />
+    <pc-directory upnp-hide="no" web-hide="no" />
     <bookmark>gerbera.html</bookmark>
     <upnp-string-limit>-1</upnp-string-limit>
     <virtualURL></virtualURL>

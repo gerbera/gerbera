@@ -49,7 +49,7 @@
         <serialNumber>20400</serialNumber>
         <presentationURL append-to="none"/>
         <tmpdir>/tmp/</tmpdir>
-        <pc-directory upnp-hide="no"/>
+        <pc-directory upnp-hide="no" web-hide="no" />
         <bookmark>gerbera.html</bookmark>
         <upnp-string-limit>-1</upnp-string-limit>
         <virtualURL>https://gerbera.io:50600</virtualURL>

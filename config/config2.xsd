@@ -280,6 +280,7 @@
     <xs:element name="pc-directory">
         <xs:complexType>
             <xs:attribute name="upnp-hide" type="boolean" use="required"/>
+            <xs:attribute name="web-hide" type="boolean" use="required"/>
         </xs:complexType>
     </xs:element>
 

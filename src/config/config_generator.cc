@@ -306,6 +306,7 @@ void ConfigGenerator::generateServerOptions(std::shared_ptr<pugi::xml_node>& ser
         { ConfigVal::SERVER_HOME_OVERRIDE, false },
         { ConfigVal::SERVER_TMPDIR, false },
         { ConfigVal::SERVER_HIDE_PC_DIRECTORY, false },
+        { ConfigVal::SERVER_HIDE_PC_DIRECTORY_WEB, false },
         { ConfigVal::SERVER_BOOKMARK_FILE, false },
         { ConfigVal::SERVER_UPNP_TITLE_AND_DESC_STRING_LIMIT, false },
         { ConfigVal::VIRTUAL_URL, false },
