@@ -172,7 +172,7 @@ OpenWrt (OpenWrt)
 ~~~~~~~~~~~~~~~~~
 .. index:: OpenWrt
 
-Gerbera is available in `OpenWrt <https://github.com/openwrt/packages/tree/master/multimedia/gerbera>`__ for your embedded device/router!
+Gerbera is available in `OpenWrt 22.03 <https://github.com/openwrt/packages/tree/openwrt-22.03/multimedia/gerbera>`__ for your embedded device/router!
 
 
 Buildroot
