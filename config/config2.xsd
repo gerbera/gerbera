@@ -542,10 +542,10 @@
 
     <xs:element name="clients">
         <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="client" minOccurs="0" maxOccurs="unbounded"/>
-                <xs:element ref="group" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element ref="client" />
+                <xs:element ref="group" />
+            </xs:choice>
             <xs:attribute name="enabled" type="boolean" default="no"/>
             <xs:attribute name="cache-threshold" type="xs:positiveInteger" default="6"/>
             <xs:attribute name="bookmark-offset" type="xs:positiveInteger" default="10"/>
@@ -807,10 +807,34 @@
 
     <xs:element name="boxlayout">
         <xs:complexType>
-            <xs:sequence>
-                <xs:element ref="box" minOccurs="0" maxOccurs="unbounded"/>
-            </xs:sequence>
+            <xs:choice maxOccurs="unbounded">
+                <xs:element ref="box" />
+                <xs:element ref="chain" />
+            </xs:choice>
             <xs:attribute name="extend" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="chain">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="link" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="type" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="link">
+        <xs:complexType>
+            <xs:attribute name="key" type="xs:string"/>
+            <xs:attribute name="title" type="xs:string"/>
+            <xs:attribute name="class" type="xs:string"/>
+            <xs:attribute name="sortKey" type="xs:string"/>
+            <xs:attribute name="upnpShortcut" type="xs:string"/>
+            <xs:attribute name="res" type="xs:string"/>
+            <xs:attribute name="aux" type="xs:string"/>
+            <xs:attribute name="metaData" type="xs:string"/>
+            <xs:attribute name="refID" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 

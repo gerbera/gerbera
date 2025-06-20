@@ -30,10 +30,13 @@
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
 #include "config/config_val.h"
+#include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
 #include "config_setup_bool.h"
+#include "config_setup_enum.h"
 #include "config_setup_int.h"
 #include "config_setup_string.h"
+#include "config_setup_vector.h"
 #include "setup_util.h"
 #include "util/logger.h"
 
@@ -50,9 +53,9 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
         return true;
 
     std::vector<std::string> allKeys;
-    auto&& ccs = definition->findConfigSetup<ConfigSetup>(option);
-    auto doExtend = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element.parent());
-    log_debug("is {} extensible {}", element.parent().path(), doExtend);
+    auto&& listcs = definition->findConfigSetup<ConfigSetup>(option);
+    auto doExtend = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element);
+    log_debug("is {} extensible {}", element.path(), doExtend);
     static constexpr auto rootKeys = std::array {
         BoxKeys::root,
         BoxKeys::pcDirectory,
@@ -63,39 +66,54 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
         BoxKeys::videoRoot,
         BoxKeys::videoAll,
     };
-    for (auto&& it : ccs->getXmlTree(element)) {
-        const pugi::xml_node& child = it.node();
 
-        auto key = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->getXmlContent(child);
-        auto title = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->getXmlContent(child);
-        auto objClass = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->getXmlContent(child);
-        auto upnpShortcut = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->getXmlContent(child);
-        auto size = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
-        auto enabled = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
-        auto sortKey = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY)->getXmlContent(child);
+    auto&& boxcs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_BOXLAYOUT_BOX);
+    auto&& chaincs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_BOXLAYOUT_CHAIN);
+    for (auto&& itBox : listcs->getXmlTree(element)) {
+        const pugi::xml_node& childBox = itBox.node();
+        for (auto&& it : boxcs->getXmlTree(childBox)) {
+            const pugi::xml_node& child = it.node();
 
-        if (!enabled && std::find(rootKeys.begin(), rootKeys.end(), key) != rootKeys.end()) {
-            log_warning("Box '{}' cannot be disabled", key);
-            enabled = true;
+            auto key = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->getXmlContent(child);
+            auto title = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->getXmlContent(child);
+            auto objClass = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->getXmlContent(child);
+            auto upnpShortcut = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->getXmlContent(child);
+            auto size = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
+            auto enabled = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
+            auto sortKey = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY)->getXmlContent(child);
+
+            if (!enabled && std::find(rootKeys.begin(), rootKeys.end(), key) != rootKeys.end()) {
+                log_warning("Box '{}' cannot be disabled", key);
+                enabled = true;
+            }
+
+            auto box = std::make_shared<BoxLayout>(key, title, objClass, upnpShortcut, sortKey, enabled, size);
+            try {
+                EDIT_CAST(EditHelperBoxLayout, result)->add(box);
+                allKeys.push_back(key);
+                log_debug("Created BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", key, title, objClass, enabled, size);
+            } catch (const std::runtime_error& e) {
+                throw_std_runtime_error("Could not add {} boxlayout: {}", key, e.what());
+            }
         }
-
-        auto box = std::make_shared<BoxLayout>(key, title, objClass, upnpShortcut, sortKey, enabled, size);
-        try {
-            result->add(box);
-            allKeys.push_back(key);
-            log_debug("Created BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", key, title, objClass, enabled, size);
-        } catch (const std::runtime_error& e) {
-            throw_std_runtime_error("Could not add {} boxlayout: {}", key, e.what());
+        std::size_t index = 0;
+        for (auto&& it : chaincs->getXmlTree(childBox)) {
+            const pugi::xml_node& child = it.node();
+            AutoscanMediaMode type = definition->findConfigSetup<ConfigEnumSetup<AutoscanMediaMode>>(ConfigVal::A_BOXLAYOUT_CHAIN_TYPE)->getXmlContent(child);
+            auto links = definition->findConfigSetup<ConfigVectorSetup>(ConfigVal::A_BOXLAYOUT_CHAIN_LINKS)->getXmlContent(child);
+            auto chain = std::make_shared<BoxChain>(index, type, links);
+            EDIT_CAST(EditHelperBoxChain, result)->add(chain);
+            ++index;
         }
     }
     for (auto&& defEntry : defaultEntries) {
         if (std::find(allKeys.begin(), allKeys.end(), defEntry.getKey()) == allKeys.end()) {
             auto box = std::make_shared<BoxLayout>(defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getUpnpShortcut(), defEntry.getSortKey(), defEntry.getEnabled(), defEntry.getSize());
             if (doExtend)
-                log_debug("Created default BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
+                log_debug("Automatically added default BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
             else
-                log_info("Created default BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
-            result->add(box);
+                log_info("Automatically added default BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
+            EDIT_CAST(EditHelperBoxLayout, result)->add(box);
             allKeys.push_back(defEntry.getKey());
         }
     }
@@ -111,7 +129,7 @@ bool ConfigBoxLayoutSetup::validate(
     if (layoutType == LayoutType::Js)
         return true;
 
-    for (auto&& theBox : values->getArrayCopy()) {
+    for (auto&& theBox : EDIT_CAST(EditHelperBoxLayout, values)->getArrayCopy()) {
         if (std::find_if(defaultEntries.cbegin(), defaultEntries.cend(), [&theBox](auto& box) { return theBox->getKey() == box.getKey(); }) == defaultEntries.cend()) {
             // Warn the user that his option will be ignored in built-in layout. But allow to use "unknown" options for js
             log_warning("Box key={}, title={}, objClass={}, enabled={}, size={} will be ignored in built-in layout. Unknown Key '{}'",
@@ -146,7 +164,7 @@ bool ConfigBoxLayoutSetup::updateItem(
     static auto resultProperties = std::vector<ConfigResultProperty<BoxLayout>> {
         // Key
         {
-            { ConfigVal::A_BOXLAYOUT_BOX_KEY },
+            { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_KEY },
             "Key",
             [&](const std::shared_ptr<BoxLayout>& entry) { return entry->getKey(); },
             [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
@@ -159,7 +177,7 @@ bool ConfigBoxLayoutSetup::updateItem(
         },
         // Title
         {
-            { ConfigVal::A_BOXLAYOUT_BOX_TITLE },
+            { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_TITLE },
             "Title",
             [&](const std::shared_ptr<BoxLayout>& entry) { return entry->getTitle(); },
             [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
@@ -172,7 +190,7 @@ bool ConfigBoxLayoutSetup::updateItem(
         },
         // Class
         {
-            { ConfigVal::A_BOXLAYOUT_BOX_CLASS },
+            { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_CLASS },
             "Class",
             [&](const std::shared_ptr<BoxLayout>& entry) { return entry->getClass(); },
             [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
@@ -185,7 +203,7 @@ bool ConfigBoxLayoutSetup::updateItem(
         },
         // UpnpShortcut
         {
-            { ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT },
+            { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT },
             "UpnpShortcut",
             [&](const std::shared_ptr<BoxLayout>& entry) { return entry->getUpnpShortcut(); },
             [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
@@ -198,7 +216,7 @@ bool ConfigBoxLayoutSetup::updateItem(
         },
         // BoxSize
         {
-            { ConfigVal::A_BOXLAYOUT_BOX_SIZE },
+            { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_SIZE },
             "BoxSize",
             [&](const std::shared_ptr<BoxLayout>& entry) { return fmt::to_string(entry->getSize()); },
             [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
@@ -208,7 +226,7 @@ bool ConfigBoxLayoutSetup::updateItem(
         },
         // Enabled
         {
-            { ConfigVal::A_BOXLAYOUT_BOX_ENABLED },
+            { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_ENABLED },
             "Enabled",
             [&](const std::shared_ptr<BoxLayout>& entry) { return fmt::to_string(entry->getEnabled()); },
             [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
@@ -218,7 +236,7 @@ bool ConfigBoxLayoutSetup::updateItem(
         },
         // SortKey
         {
-            { ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY },
+            { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY },
             "SortKey",
             [&](const std::shared_ptr<BoxLayout>& entry) { return entry->getSortKey(); },
             [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
@@ -238,9 +256,91 @@ bool ConfigBoxLayoutSetup::updateItem(
             if (entry->getOrig())
                 config->setOrigValue(index, getProperty(entry));
             if (setProperty(entry, definition, cfg.at(0), optValue)) {
-                auto nEntry = config->getBoxLayoutListOption(option)->get(i);
+                auto nEntry = EDIT_CAST(EditHelperBoxLayout, config->getBoxLayoutListOption(option))->get(i);
                 log_debug("New value for BoxLayout {} {} = {}", label.data(), index, getProperty(nEntry));
                 return true;
+            }
+        }
+    }
+
+    return false;
+}
+
+bool ConfigBoxLayoutSetup::updateItem(
+    const std::vector<std::size_t>& indexList,
+    const std::string& optItem,
+    const std::shared_ptr<Config>& config,
+    std::shared_ptr<BoxChain>& entry,
+    std::string& optValue,
+    const std::string& status) const
+{
+    if (optItem == getItemPath(indexList, {}) && (status == STATUS_ADDED || status == STATUS_MANUAL)) {
+        return true;
+    }
+
+    static auto chainProperties = std::vector<ConfigResultProperty<BoxChain>> {
+        // Type
+        {
+            { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_TYPE },
+            "Type",
+            [&](const std::shared_ptr<BoxChain>& entry) { return fmt::to_string(entry->getType()); },
+            [&](const std::shared_ptr<BoxChain>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                auto setup = definition->findConfigSetup<ConfigEnumSetup<AutoscanMediaMode>>(cfg);
+                AutoscanMediaMode type;
+                if (setup->checkEnumValue(optValue, type)) {
+                    entry->setType(type);
+                    return true;
+                }
+                return false;
+            },
+        },
+    };
+
+    auto i = indexList.at(0);
+    for (auto&& [cfg, label, getProperty, setProperty] : chainProperties) {
+        auto index = getItemPath(indexList, cfg);
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, getProperty(entry));
+            if (setProperty(entry, definition, cfg.at(0), optValue)) {
+                auto nEntry = EDIT_CAST(EditHelperBoxChain, config->getBoxLayoutListOption(option))->get(i);
+                log_debug("New value for BoxLayout {} {} = {}", label.data(), index, getProperty(nEntry));
+                return true;
+            }
+        }
+    }
+
+    // Links vector key
+    {
+        auto keyIndex = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, linkKey.data());
+        if (optItem == keyIndex) {
+            std::size_t j = indexList.at(1);
+            std::size_t k = indexList.at(2);
+            auto link = entry->getLinks(true).at(j);
+            if (status == STATUS_RESET && !optValue.empty()) {
+                entry->setLinkKey(j, k, config->getOrigValue(keyIndex));
+                log_debug("Reset link key {} {}", keyIndex, entry->getLinks(true).at(j).at(k).first);
+            } else {
+                config->setOrigValue(keyIndex, link.at(k).second);
+                entry->setLinkKey(j, k, optValue);
+                log_debug("New link key {} {}", keyIndex, optValue);
+            }
+        }
+    }
+    // Links vector value
+    {
+        auto valIndex = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, linkValue.data());
+        if (optItem == valIndex) {
+            std::size_t j = indexList.at(1);
+            std::size_t k = indexList.at(2);
+            auto link = entry->getLinks(true).at(j);
+            if (status == STATUS_RESET && !optValue.empty()) {
+                entry->setLinkValue(j, k, config->getOrigValue(valIndex));
+                log_debug("Reset link value {} {}", valIndex, entry->getLinks(true).at(j).at(k).first);
+            } else {
+                config->setOrigValue(valIndex, link.at(k).second);
+                entry->setLinkValue(j, k, optValue);
+                log_debug("New link value {} {}", valIndex, optValue);
             }
         }
     }
@@ -272,29 +372,63 @@ std::shared_ptr<ConfigOption> ConfigBoxLayoutSetup::newOption(const pugi::xml_no
     if (!createOptionFromNode(optValue, result)) {
         throw_std_runtime_error("Init {} BoxLayout config failed '{}'", xpath, optValue.name());
     }
-    if (result->size() == 0) {
+    if (EDIT_CAST(EditHelperBoxLayout, result)->size() == 0) {
         log_debug("{} assigning {} default values", xpath, defaultEntries.size());
         useDefault = true;
         for (auto&& bl : defaultEntries) {
-            result->add(std::make_shared<BoxLayout>(bl));
+            EDIT_CAST(EditHelperBoxLayout, result)->add(std::make_shared<BoxLayout>(bl));
         }
     }
     optionValue = std::make_shared<BoxLayoutListOption>(result);
     return optionValue;
 }
 
-std::string ConfigBoxLayoutSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
+std::string ConfigBoxLayoutSetup::getItemPath(
+    const std::vector<std::size_t>& indexList,
+    const std::vector<ConfigVal>& propOptions,
+    const std::string& propText) const
 {
     if (indexList.size() == 0) {
-        if (propOptions.size() > 0) {
-            return fmt::format("{}[_]/{}", definition->mapConfigOption(option), definition->ensureAttribute(propOptions[0]));
+        if (!propText.empty()) {
+            return fmt::format("{}/{}[_]/{}[_]/{}[_]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), definition->mapConfigOption(propOptions[1]), definition->mapConfigOption(propOptions[2]), propText);
         }
-        return fmt::format("{}[_]", definition->mapConfigOption(option));
+        if (propOptions.size() > 2) {
+            return fmt::format("{}/{}[_]//{}[_]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), definition->ensureAttribute(propOptions[1]), definition->mapConfigOption(propOptions[2]));
+        }
+        if (propOptions.size() > 1) {
+            return fmt::format("{}/{}[_]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), definition->ensureAttribute(propOptions[1]));
+        }
+        if (propOptions.size() > 0) {
+            return fmt::format("{}/{}[_]", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]));
+        }
+        return fmt::format("{}", definition->mapConfigOption(option));
+    }
+    if (indexList.size() == 1) {
+        if (propOptions.size() > 1) {
+            return fmt::format("{}/{}[{}]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0], definition->ensureAttribute(propOptions[1]));
+        }
+        if (propOptions.size() > 0) {
+            return fmt::format("{}/{}[{}]", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0]);
+        }
+    }
+    if (indexList.size() == 2) {
+        if (propOptions.size() > 1) {
+            return fmt::format("{}/{}[{}]/{}[{}]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0], definition->mapConfigOption(propOptions[1]), indexList[1], propText);
+        }
+        if (propOptions.size() > 0) {
+            return fmt::format("{}/{}[{}]/{}[{}]", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0], definition->mapConfigOption(propOptions[1]), indexList[1]);
+        }
+    }
+    if (propOptions.size() > 2) {
+        return fmt::format("{}/{}[{}]/{}[{}]/{}[{}]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0], definition->mapConfigOption(propOptions[1]), indexList[1], definition->mapConfigOption(propOptions[2]), indexList[2], propText);
+    }
+    if (propOptions.size() > 1) {
+        return fmt::format("{}/{}[{}]/{}[{}]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0], definition->mapConfigOption(propOptions[1]), indexList[1], propText);
     }
     if (propOptions.size() > 0) {
-        return fmt::format("{}[{}]/{}", definition->mapConfigOption(option), indexList[0], definition->ensureAttribute(propOptions[0]));
+        return fmt::format("{}/{}[{}]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0], propText);
     }
-    return fmt::format("{}[{}]", definition->mapConfigOption(option), indexList[0]);
+    return fmt::format("{}", definition->mapConfigOption(option));
 }
 
 std::string ConfigBoxLayoutSetup::getItemPathRoot(bool prefix) const

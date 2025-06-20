@@ -39,6 +39,8 @@ else()
 endif()
 
 target_compile_definitions(testconfig PRIVATE CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
+target_compile_definitions(testconfig PRIVATE GERBERA_TEST="gerbera-test")
+
 add_dependencies(testconfig libgerbera gerbera)
 
 include(GoogleTest)

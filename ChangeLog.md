@@ -7,6 +7,7 @@
 - Add taglib and artwork support for dsf files
 - Allow hiding PC directory in web view
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
+- Changed OpenWRT Installation note
 - Configure limit of sql strings
 - Extend details extracted by WavPack handler
 - Fill database on startup
@@ -40,6 +41,7 @@
 - Update spdlog to 1.15.3
 - Upgrade documentation build environment
 - Use JsonCpp for web JSON output
+- User Defined virtual tree parts
 
 ### v2.5.0
 

@@ -55,9 +55,11 @@ class ConfigGenerator {
 public:
     ConfigGenerator(
         std::shared_ptr<ConfigDefinition> definition,
+        const std::string& version,
         bool example,
         int sections = 0)
         : definition(std::move(definition))
+        , version(version)
         , example(example)
         , generateSections(sections)
     {
@@ -109,6 +111,8 @@ public:
 
 protected:
     std::shared_ptr<ConfigDefinition> definition;
+    /// @brief version of gerbera
+    std::string version;
     /// \brief activate generation of full example with all defaults
     bool example { false };
     /// \brief bitfield with all sections to generate

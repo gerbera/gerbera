@@ -21,13 +21,14 @@
     $Id$
 */
 
-/// \file box_layout.h
-///\brief Definition of the BoxLayout class.
+/// @file box_layout.h
+/// @brief Definition of the BoxLayout class.
 
 #ifndef __BOXLAYOUT_H_
 #define __BOXLAYOUT_H_
 
 #include "common.h"
+#include "config/config_options.h"
 #include "edit_helper.h"
 #include "upnp/upnp_common.h"
 
@@ -37,10 +38,14 @@
 #include <string>
 #include <vector>
 
-// forward declaration
+// forward declarations
 class BoxLayout;
+class BoxChain;
+enum class AutoscanMediaMode;
 using EditHelperBoxLayout = EditHelper<BoxLayout>;
+using EditHelperBoxChain = EditHelper<BoxChain>;
 
+/// @brief Predefined box keys
 class BoxKeys {
 public:
     static constexpr std::string_view root = "Root";
@@ -97,12 +102,13 @@ public:
     static constexpr std::string_view playlistRoot = "Playlist/playlistRoot";
 };
 
-class BoxLayoutList : public EditHelperBoxLayout {
+/// @brief Manager class for BoxLayout and BoxChain
+class BoxLayoutList : public EditHelperBoxLayout, public EditHelperBoxChain {
 public:
     std::shared_ptr<BoxLayout> getKey(const std::string_view& key) const;
 };
 
-/// \brief Define properties of a tree entry in virtual layout
+/// @brief Define properties of a tree entry in virtual layout
 class BoxLayout : public Editable {
 public:
     BoxLayout() = default;
@@ -168,6 +174,44 @@ protected:
     int size { 1 };
     /// \brief objectId of the box when existing
     int id { INVALID_OBJECT_ID };
+};
+
+/// @brief Define a tree in virtual layout
+class BoxChain : public Editable {
+public:
+    BoxChain() = default;
+    virtual ~BoxChain() = default;
+    explicit BoxChain(
+        std::size_t index,
+        AutoscanMediaMode type,
+        const std::vector<std::vector<std::pair<std::string, std::string>>>& links)
+        : index(index)
+        , type(type)
+        , links(VectorOption(links))
+    {
+    }
+
+    std::size_t getIndex() const { return index; }
+    AutoscanMediaMode getType() const { return type; }
+    void setType(AutoscanMediaMode type) { this->type = type; }
+
+    /// \brief comparison of chains
+    bool equals(const std::shared_ptr<BoxChain>& other) { return this->type == other->type && this->index == other->index; }
+
+    /// \brief links for chain
+    std::vector<std::vector<std::pair<std::string, std::string>>> getLinks(bool edit = false) const { return this->links.getVectorOption(edit); }
+    std::size_t getLinksSize(bool edit = false) const { return this->links.getVectorOption(edit).size(); }
+    void setLinks(const std::vector<std::vector<std::pair<std::string, std::string>>>& links) { this->links = VectorOption(links); }
+    void setLinkKey(std::size_t j, std::size_t k, const std::string& key) { return this->links.setKey(j, k, key); }
+    void setLinkValue(std::size_t j, std::size_t k, const std::string& value) { return this->links.setValue(j, k, value); }
+
+protected:
+    /// @brief identification of chains
+    std::size_t index = { 0 };
+    /// \brief media type chain applies to
+    AutoscanMediaMode type;
+    /// \brief list of chain links making up the virtual tree
+    VectorOption links;
 };
 
 #endif

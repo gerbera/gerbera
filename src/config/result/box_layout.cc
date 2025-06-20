@@ -33,9 +33,9 @@
 
 std::shared_ptr<BoxLayout> BoxLayoutList::getKey(const std::string_view& key) const
 {
-    AutoLock lock(mutex);
-    auto entry = std::find_if(list.begin(), list.end(), [&](auto&& d) { return d->getKey() == key; });
-    if (entry != list.end() && *entry) {
+    EditHelperBoxLayout::AutoLock lock(EditHelperBoxLayout::mutex);
+    auto entry = std::find_if(EditHelperBoxLayout::list.begin(), EditHelperBoxLayout::list.end(), [&](auto&& d) { return d->getKey() == key; });
+    if (entry != EditHelperBoxLayout::list.end() && *entry) {
         return *entry;
     }
     return nullptr;

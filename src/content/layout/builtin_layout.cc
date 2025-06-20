@@ -58,8 +58,8 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
     , converterManager(this->content->getContext()->getConverterManager())
     , genreMap(this->config->getDictionaryOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
 {
-    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
-    for (auto&& bl : blOption->getArrayCopy()) {
+    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST);
+    for (auto&& bl : EDIT_CAST(EditHelperBoxLayout, blOption)->getArrayCopy()) {
         // We could copy only the enabled containers, but to avoid checking dependencies here, we copy all of them!
         container[bl->getKey()] = std::make_shared<CdsContainer>(bl->getTitle());
         if (!bl->getUpnpShortcut().empty())
@@ -146,7 +146,7 @@ std::vector<int> BuiltinLayout::addVideo(
     const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     auto f2i = converterManager->f2i();
-    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
+    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST);
     std::vector<int> result;
 
     auto id = chain["/Video/All Video"];
@@ -215,7 +215,7 @@ std::vector<int> BuiltinLayout::addImage(
     const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     auto f2i = converterManager->f2i();
-    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
+    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST);
     std::vector<int> result;
 
     log_debug("add image file {}", obj->getLocation().string());
@@ -283,7 +283,7 @@ std::vector<int> BuiltinLayout::addAudio(
     const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     auto f2i = converterManager->f2i();
-    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
+    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST);
     std::vector<int> result;
 
     std::string desc;

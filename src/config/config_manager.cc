@@ -411,8 +411,8 @@ bool ConfigManager::validate()
                                 "however you specified \"js\" to be used for the "
                                 "virtual-layout.");
 #endif
-    auto co = definition->findConfigSetup<ConfigBoxLayoutSetup>(ConfigVal::BOXLAYOUT_BOX);
-    if (!co->validate(getSelf(), getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX)))
+    auto co = definition->findConfigSetup<ConfigBoxLayoutSetup>(ConfigVal::BOXLAYOUT_LIST);
+    if (!co->validate(getSelf(), getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST)))
         throw_std_runtime_error("Validation of {} failed", co->xpath);
 
     log_info("Configuration check succeeded.");

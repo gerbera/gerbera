@@ -1005,9 +1005,26 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
 {
     return {
         // boxlayout provides modification options like translation of tree items
-        std::make_shared<ConfigBoxLayoutSetup>(ConfigVal::BOXLAYOUT_BOX,
-            "/import/scripting/virtual-layout/boxlayout/box", "config-import.html#boxlayout",
+        std::make_shared<ConfigBoxLayoutSetup>(ConfigVal::BOXLAYOUT_LIST,
+            "/import/scripting/virtual-layout/boxlayout", "config-import.html#boxlayout",
             boxLayoutDefaults),
+        std::make_shared<ConfigSetup>(ConfigVal::A_BOXLAYOUT_CHAIN,
+            "chain", "config-import.html#boxlayout"),
+        std::make_shared<ConfigEnumSetup<AutoscanMediaMode>>(ConfigVal::A_BOXLAYOUT_CHAIN_TYPE,
+            "attribute::type", "config-import.html#boxlayout",
+            std::map<std::string, AutoscanMediaMode>(
+                {
+                    { "audio", AutoscanMediaMode::Audio },
+                    { "image", AutoscanMediaMode::Image },
+                    { "video", AutoscanMediaMode::Video },
+                })),
+        std::make_shared<ConfigVectorSetup>(ConfigVal::A_BOXLAYOUT_CHAIN_LINKS,
+            "links", "config-import.html#boxlayout",
+            ConfigVal::A_BOXLAYOUT_CHAIN_LINK,
+            std::vector<ConfigVal> { ConfigVal::A_BOXLAYOUT_BOX_KEY },
+            false, false, false),
+        std::make_shared<ConfigSetup>(ConfigVal::A_BOXLAYOUT_BOX,
+            "box", "config-import.html#boxlayout"),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY,
             "attribute::key", "config-import.html#boxlayout",
             ""),
@@ -1848,6 +1865,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getSimpleOptions()
             "header", ""),
         std::make_shared<ConfigSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE_PROFILE,
             "dlna", ""),
+        std::make_shared<ConfigSetup>(ConfigVal::A_BOXLAYOUT_CHAIN_LINK,
+            "link", ""),
         std::make_shared<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND,
             "attribute::extend", "config-overview.html#extend",
             NO),

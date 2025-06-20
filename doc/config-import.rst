@@ -28,6 +28,9 @@ The import settings define various options on how to aggregate the content.
           <strctured-layout/>
           <boxlayout>
             <box/>
+            <chain>
+              <link/>
+            </chain>
           </boxlayout>
         </virtual-layout>
         <common-script/>
@@ -549,6 +552,78 @@ Below are the available scripting options:
             -  **9**: Boxes with 5, 5, 5, 4, 1, 6 letters; a large box for T
             -  **13**: Boxes with 2 letters each
             -  **26**: A speparate box for each letter
+
+``chain``
+^^^^^^^^^
+
+            .. code:: xml
+
+                <chain type="audio|video|image">
+                  <link key=".." />
+                </chain>
+
+            * Optional
+
+            Define a user specific sub tree in virtual layout. Only available for
+            ``js`` layout.
+
+            **Attributes:**
+
+              ::
+
+                  type="audio|video|image"
+
+              * Required
+
+              Set the import script type where the chain is added. Valid values are:
+              ``audio``, ``video`` and ``image``.
+
+            **Child tags:**
+
+              .. code:: xml
+
+                  <link key="Audio/audioTest" title="obj.title" metaData="obj.metaData" />
+                  <link key="Audio/audioRoot"/>
+
+              * Optional
+
+              **Attributes:**
+
+              ::
+
+                  key="Audio/audioRoot"
+
+              * Required
+
+              Either the key of an existing ``<box>`` or the identifier of a new box.
+
+              ::
+
+                  title="obj.title"
+                  class="'object.container.genre.musicGenre'"
+                  upnpShortcut="''"
+                  sortKey="'0000' + obj.title"
+                  res="obj.res"
+                  aux="obj.aux"
+                  refID="obj.id"
+
+              * Optional
+
+              Set the properties of the container to be created. Property stateents
+              are evaluated in javascript with ``obj`` and ``media`` objects as
+              sources. Constant values must be enclosed in ticks ``''``.
+
+              ::
+
+                  metaData="obj.metaData"
+                  metaData="M_ALBUM: obj.metaData[M_ALBUM], M_ARTIST: obj.metaData[M_ALBUMARTIST]"
+
+              * Optional
+
+              Define the metadata of the new container. For metadata there is a second format for the
+              properties: ``M_ALBUM: obj.metaData[M_ALBUM], M_ARTIST: obj.metaData[M_ALBUMARTIST]``.
+              Individual metadata properties can be set and must be separated by commas. The list of
+              available properties can be found in :ref:`scripting <scripting>`.
 
 
 ``common-script``

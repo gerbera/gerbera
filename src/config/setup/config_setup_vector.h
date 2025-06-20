@@ -54,7 +54,13 @@ protected:
         const pugi::xml_node& element,
         std::vector<std::vector<std::pair<std::string, std::string>>>& result);
 
-    bool updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<VectorOption>& value, const std::string& optValue, const std::string& status = "") const;
+    bool updateItem(
+        const std::vector<std::size_t>& indexList,
+        const std::string& optItem,
+        const std::shared_ptr<Config>& config,
+        const std::shared_ptr<VectorOption>& value,
+        const std::string& optValue,
+        const std::string& status = "") const;
 
 public:
     ConfigVal nodeOption {};
@@ -62,7 +68,10 @@ public:
 
     explicit ConfigVectorSetup(ConfigVal option, const char* xpath, const char* help,
         ConfigVal nodeOption, std::vector<ConfigVal> optionList,
-        bool notEmpty = false, bool itemNotEmpty = false, bool required = false, std::vector<std::vector<std::pair<std::string, std::string>>> defaultEntries = {})
+        bool notEmpty = false,
+        bool itemNotEmpty = false,
+        bool required = false,
+        std::vector<std::vector<std::pair<std::string, std::string>>> defaultEntries = {})
         : ConfigSetup(option, xpath, help, required && defaultEntries.empty())
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
@@ -74,7 +83,10 @@ public:
 
     std::string getTypeString() const override { return "List"; }
 
-    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
     bool createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const override;
     bool updateDetail(

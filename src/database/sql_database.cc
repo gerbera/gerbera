@@ -543,7 +543,7 @@ void SQLDatabase::fillDatabase()
 {
     log_debug("start");
     constexpr int nullID = -1;
-    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_BOX);
+    auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST);
     auto nullObject = std::make_shared<CdsObject>();
     nullObject->setFlags(OBJECT_FLAG_PERSISTENT_CONTAINER | OBJECT_FLAG_RESTRICTED);
     nullObject->setID(nullID);

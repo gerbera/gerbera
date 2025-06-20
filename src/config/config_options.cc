@@ -107,10 +107,17 @@ std::size_t VectorOption::getEditSize() const
     return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
 }
 
+void VectorOption::setKey(std::size_t optionIndex, std::size_t entryIndex, std::string key)
+{
+    if (optionIndex < indexMap.size() && entryIndex < option.at(indexMap.at(optionIndex)).size()) {
+        option.at(indexMap.at(optionIndex)).at(entryIndex).first = std::move(key);
+    }
+}
+
 void VectorOption::setValue(std::size_t optionIndex, std::size_t entryIndex, std::string value)
 {
-    if (optionIndex < indexMap.size() && entryIndex < option[indexMap.at(optionIndex)].size()) {
-        option[indexMap.at(optionIndex)][entryIndex].second = std::move(value);
+    if (optionIndex < indexMap.size() && entryIndex < option.at(indexMap.at(optionIndex)).size()) {
+        option.at(indexMap.at(optionIndex)).at(entryIndex).second = std::move(value);
     }
 }
 
