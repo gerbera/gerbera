@@ -625,53 +625,89 @@ void Web::ConfigLoad::writeDynamicContent(Json::Value& values)
 /// \brief: write box layout
 void Web::ConfigLoad::writeBoxLayout(Json::Value& values)
 {
-    auto cs = definition->findConfigSetup(ConfigVal::BOXLAYOUT_BOX);
-    auto boxlayoutContent = cs->getValue()->getBoxLayoutListOption();
+    auto cs = definition->findConfigSetup(ConfigVal::BOXLAYOUT_LIST);
+    auto ctEnumSetup = definition->findConfigSetup<ConfigEnumSetup<AutoscanMediaMode>>(ConfigVal::A_BOXLAYOUT_CHAIN_TYPE);
+    auto boxlayoutContent = EDIT_CAST(EditHelperBoxLayout, cs->getValue()->getBoxLayoutListOption());
     for (std::size_t i = 0; i < boxlayoutContent->size(); i++) {
         auto cont = boxlayoutContent->get(i);
         std::vector<std::size_t> indexList = { i };
 
         addValue(values,
-            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_KEY }),
+            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_KEY }),
             cs->option, ConfigVal::A_BOXLAYOUT_BOX_KEY, cont->getKey());
         addValue(values,
-            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_TITLE }),
+            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_TITLE }),
             cs->option, ConfigVal::A_BOXLAYOUT_BOX_TITLE, cont->getTitle());
         addValue(values,
-            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_CLASS }),
+            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_CLASS }),
             cs->option, ConfigVal::A_BOXLAYOUT_BOX_CLASS, cont->getClass());
         addValue(values,
-            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_SIZE }),
+            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_SIZE }),
             cs->option, ConfigVal::A_BOXLAYOUT_BOX_SIZE, cont->getSize());
         addValue(values,
-            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED }),
+            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_ENABLED }),
             cs->option, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, cont->getEnabled());
         addValue(values,
-            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT }),
+            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT }),
             cs->option, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT, cont->getUpnpShortcut());
         addValue(values,
-            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY }),
+            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY }),
             cs->option, ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY, cont->getSortKey());
+    }
+    auto chainlayoutContent = EDIT_CAST(EditHelperBoxChain, cs->getValue()->getBoxLayoutListOption());
+    for (std::size_t i = 0; i < chainlayoutContent->size(); i++) {
+        auto cont = chainlayoutContent->get(i);
+        std::vector<std::size_t> indexList = { i };
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_TYPE }),
+            cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_TYPE, ctEnumSetup->mapEnumValue(cont->getType()));
+        std::size_t j = 0;
+        for (auto&& link : cont->getLinks(true)) {
+            std::size_t k = 0;
+            for (auto&& [key, value] : link) {
+                indexList = { i, j, k };
+                addValue(values,
+                    cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkKey.data()),
+                    cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_LINK, key);
+                addValue(values,
+                    cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkValue.data()),
+                    cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_LINK, value);
+                k++;
+            }
+            j++;
+        }
     }
     // Allow creation of entry in blank config
     addNewValue(values,
-        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_KEY }),
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_KEY }),
         cs->option, ConfigVal::A_BOXLAYOUT_BOX_KEY, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_KEY));
     addNewValue(values,
-        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_TITLE }),
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_TITLE }),
         cs->option, ConfigVal::A_BOXLAYOUT_BOX_TITLE, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_TITLE));
     addNewValue(values,
-        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_CLASS }),
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_CLASS }),
         cs->option, ConfigVal::A_BOXLAYOUT_BOX_CLASS, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_CLASS));
     addNewValue(values,
-        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_SIZE }),
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_SIZE }),
         cs->option, ConfigVal::A_BOXLAYOUT_BOX_SIZE, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_SIZE));
     addNewValue(values,
-        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_ENABLED }),
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_ENABLED }),
         cs->option, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_ENABLED));
     addNewValue(values,
-        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT }),
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT }),
         cs->option, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT));
+
+    addNewValue(values,
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_TYPE }),
+        cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_TYPE, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_CHAIN_TYPE));
+
+    addNewValue(values,
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkKey.data()),
+        cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_LINK, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_CHAIN_LINK));
+
+    addNewValue(values,
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkValue.data()),
+        cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_LINK, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_CHAIN_LINK));
 }
 
 /// \brief: write transconding configuration

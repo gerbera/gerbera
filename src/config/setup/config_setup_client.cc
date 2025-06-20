@@ -46,7 +46,9 @@
 
 /// \brief Creates an array of ClientConfig objects from a XML nodeset.
 /// \param element starting element of the nodeset.
-bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<ClientConfigList>& result) const
+bool ConfigClientSetup::createOptionFromNode(
+    const pugi::xml_node& element,
+    const std::shared_ptr<ClientConfigList>& result) const
 {
     if (!element)
         return true;
@@ -107,7 +109,10 @@ bool ConfigClientSetup::createOptionFromNode(const pugi::xml_node& element, cons
     return true;
 }
 
-void ConfigClientSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+void ConfigClientSetup::makeOption(
+    const pugi::xml_node& root,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     if (arguments && arguments->find("isEnabled") != arguments->end()) {
         isEnabled = arguments->at("isEnabled") == "true";
@@ -116,7 +121,8 @@ void ConfigClientSetup::makeOption(const pugi::xml_node& root, const std::shared
     setOption(config);
 }
 
-bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
+bool ConfigClientSetup::updateItem(
+    const std::vector<std::size_t>& indexList,
     const std::string& optItem,
     const std::shared_ptr<Config>& config,
     std::shared_ptr<ClientConfig>& entry,
@@ -386,7 +392,8 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
     return false;
 }
 
-bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
+bool ConfigClientSetup::updateItem(
+    const std::vector<std::size_t>& indexList,
     const std::string& optItem,
     const std::shared_ptr<Config>& config,
     std::shared_ptr<ClientGroupConfig>& entry,
@@ -426,7 +433,8 @@ bool ConfigClientSetup::updateItem(const std::vector<std::size_t>& indexList,
     return false;
 }
 
-bool ConfigClientSetup::updateDetail(const std::string& optItem,
+bool ConfigClientSetup::updateDetail(
+    const std::string& optItem,
     std::string& optValue,
     const std::shared_ptr<Config>& config,
     const std::map<std::string, std::string>* arguments)
@@ -463,7 +471,10 @@ std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node&
     return optionValue;
 }
 
-std::string ConfigClientSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
+std::string ConfigClientSetup::getItemPath(
+    const std::vector<std::size_t>& indexList,
+    const std::vector<ConfigVal>& propOptions,
+    const std::string& propText) const
 {
     if (indexList.size() == 0) {
         if (!propText.empty() && propOptions.size() > 1) {

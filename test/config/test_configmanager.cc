@@ -103,7 +103,7 @@ public:
 
     std::string createConfig() const
     {
-        ConfigGenerator configGenerator(definition, false);
+        ConfigGenerator configGenerator(definition, GERBERA_TEST, false);
         return configGenerator.generate(home, confdir, prefix, magic);
     }
 

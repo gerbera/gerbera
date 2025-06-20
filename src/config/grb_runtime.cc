@@ -487,7 +487,7 @@ bool GerberaRuntime::checkDirs()
 
 bool GerberaRuntime::printConfig()
 {
-    ConfigGenerator configGenerator(definition, exampleConfigSet, sections);
+    ConfigGenerator configGenerator(definition, GERBERA_VERSION, exampleConfigSet, sections);
     if (!configDirSet) {
         confDir = "";
     }

@@ -77,7 +77,10 @@ bool ConfigVectorSetup::createOptionFromNode(
     return true;
 }
 
-void ConfigVectorSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+void ConfigVectorSetup::makeOption(
+    const pugi::xml_node& root,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     if (arguments && arguments->find("tolower") != arguments->end()) {
         tolower = arguments->at("tolower") == "true";
@@ -100,7 +103,8 @@ bool ConfigVectorSetup::createNodeFromDefaults(const std::shared_ptr<pugi::xml_n
     return true;
 }
 
-bool ConfigVectorSetup::updateItem(const std::vector<std::size_t>& indexList,
+bool ConfigVectorSetup::updateItem(
+    const std::vector<std::size_t>& indexList,
     const std::string& optItem,
     const std::shared_ptr<Config>& config,
     const std::shared_ptr<VectorOption>& value,
@@ -131,7 +135,8 @@ bool ConfigVectorSetup::updateItem(const std::vector<std::size_t>& indexList,
     return false;
 }
 
-bool ConfigVectorSetup::updateDetail(const std::string& optItem,
+bool ConfigVectorSetup::updateDetail(
+    const std::string& optItem,
     std::string& optValue,
     const std::shared_ptr<Config>& config,
     const std::map<std::string, std::string>* arguments)
@@ -174,7 +179,10 @@ bool ConfigVectorSetup::updateDetail(const std::string& optItem,
     return false;
 }
 
-std::string ConfigVectorSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
+std::string ConfigVectorSetup::getItemPath(
+    const std::vector<std::size_t>& indexList,
+    const std::vector<ConfigVal>& propOptions,
+    const std::string& propText) const
 {
     if (!propText.empty()) {
         if (indexList.size() == 0)

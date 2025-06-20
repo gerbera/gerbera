@@ -42,7 +42,7 @@
 
 #include "config_int_types.h"
 
-// forward declaration
+// forward declarations
 class AutoscanDirectory;
 class BoxLayoutList;
 class ClientConfigList;
@@ -50,6 +50,7 @@ class DirectoryConfigList;
 class DynamicContentList;
 class TranscodingProfileList;
 
+/// @brief Base class for option values
 class ConfigOption {
 public:
     virtual ~ConfigOption() = default;
@@ -123,6 +124,7 @@ public:
     }
 };
 
+/// @brief Implementation of option value for strings
 class Option : public ConfigOption {
 public:
     explicit Option(std::string option)
@@ -136,6 +138,7 @@ private:
     std::string option;
 };
 
+/// @brief Implementation of option value for signed integers
 class IntOption : public ConfigOption {
 public:
     explicit IntOption(IntOptionType option, std::string optionString = "")
@@ -153,6 +156,7 @@ private:
     std::string optionString;
 };
 
+/// @brief Implementation of option value for unsigned integers
 class UIntOption : public ConfigOption {
 public:
     explicit UIntOption(UIntOptionType option, std::string optionString = "")
@@ -170,6 +174,7 @@ private:
     std::string optionString;
 };
 
+/// @brief Implementation of option value for long integers
 class LongOption : public ConfigOption {
 public:
     explicit LongOption(LongOptionType option, std::string optionString = "")
@@ -200,6 +205,7 @@ private:
     bool option;
 };
 
+/// @brief Implementation of option value for dictionaries
 class DictionaryOption : public ConfigOption {
 public:
     explicit DictionaryOption(const std::map<std::string, std::string>& option)
@@ -232,6 +238,7 @@ private:
     std::map<std::size_t, std::string> indexMap;
 };
 
+/// @brief Implementation of option value for vectors
 class VectorOption : public ConfigOption {
 public:
     explicit VectorOption(const std::vector<std::vector<std::pair<std::string, std::string>>>& option)
@@ -248,6 +255,9 @@ public:
         return index < indexMap.size() ? indexMap[index] : indexMap.size();
     }
 
+    /// @brief Change key of a vector entry
+    void setKey(std::size_t optionIndex, std::size_t entryIndex, std::string key);
+    /// @brief Change value of a vector entry
     void setValue(std::size_t optionIndex, std::size_t entryIndex, std::string value);
 
     std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(bool forEdit = false) const override;
@@ -260,6 +270,7 @@ private:
     std::map<std::size_t, std::size_t> indexMap;
 };
 
+/// @brief Implementation of option value for arrays
 class ArrayOption : public ConfigOption {
 public:
     explicit ArrayOption(const std::vector<std::string>& option)
@@ -288,6 +299,7 @@ private:
     std::map<std::size_t, std::size_t> indexMap;
 };
 
+/// @brief Implementation of option value for autoscan lists
 class AutoscanListOption : public ConfigOption {
 public:
     explicit AutoscanListOption(std::vector<std::shared_ptr<AutoscanDirectory>> autoscans_)
@@ -301,6 +313,7 @@ private:
     std::vector<std::shared_ptr<AutoscanDirectory>> autoscans;
 };
 
+/// @brief Implementation of option value for boxlayout lists
 class BoxLayoutListOption : public ConfigOption {
 public:
     explicit BoxLayoutListOption(std::shared_ptr<BoxLayoutList> option)
@@ -313,6 +326,7 @@ private:
     std::shared_ptr<BoxLayoutList> option;
 };
 
+/// @brief Implementation of option value for client lists
 class ClientConfigListOption : public ConfigOption {
 public:
     explicit ClientConfigListOption(std::shared_ptr<ClientConfigList> option)
@@ -325,6 +339,7 @@ private:
     std::shared_ptr<ClientConfigList> option;
 };
 
+/// @brief Implementation of option value for directory tweaks
 class DirectoryTweakOption : public ConfigOption {
 public:
     explicit DirectoryTweakOption(std::shared_ptr<DirectoryConfigList> option)
@@ -337,6 +352,7 @@ protected:
     std::shared_ptr<DirectoryConfigList> option;
 };
 
+/// @brief Implementation of option value for transcoding profile lists
 class TranscodingProfileListOption : public ConfigOption {
 public:
     explicit TranscodingProfileListOption(std::shared_ptr<TranscodingProfileList> option)
@@ -353,6 +369,7 @@ protected:
     std::shared_ptr<TranscodingProfileList> option;
 };
 
+/// @brief Implementation of option value for dynamic tree content lists
 class DynamicContentListOption : public ConfigOption {
 public:
     explicit DynamicContentListOption(std::shared_ptr<DynamicContentList> option)

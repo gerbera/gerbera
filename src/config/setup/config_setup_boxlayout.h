@@ -29,48 +29,86 @@
 
 #include "config/config_setup.h"
 
+class BoxChain;
 class BoxLayout;
 class BoxLayoutList;
 
+/// @brief Class for BoxLayout config parser
 class ConfigBoxLayoutSetup : public ConfigSetup {
 protected:
     std::vector<BoxLayout> defaultEntries;
 
-    /// \brief Creates an array of BoxLayout objects from a XML nodeset.
-    /// \param element starting element of the nodeset.
-    /// \param result contents of config.
-    bool createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<BoxLayoutList>& result);
+    /// @brief Creates an array of BoxLayout objects from a XML nodeset.
+    /// @param element starting element of the nodeset.
+    /// @param result contents of config.
+    bool createOptionFromNode(
+        const pugi::xml_node& element,
+        const std::shared_ptr<BoxLayoutList>& result);
 
 public:
-    bool updateItem(const std::vector<std::size_t>& indexList,
+    ConfigBoxLayoutSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        std::vector<BoxLayout> defaultEntries)
+        : ConfigSetup(option, xpath, help)
+        , defaultEntries(std::move(defaultEntries))
+    {
+    }
+
+    /// @brief Update Option from Web UI or Database
+    bool updateItem(
+        const std::vector<std::size_t>& indexList,
         const std::string& optItem,
         const std::shared_ptr<Config>& config,
         std::shared_ptr<BoxLayout>& entry,
         std::string& optValue,
         const std::string& status = "") const;
 
-    ConfigBoxLayoutSetup(ConfigVal option, const char* xpath, const char* help, std::vector<BoxLayout> defaultEntries)
-        : ConfigSetup(option, xpath, help)
-        , defaultEntries(std::move(defaultEntries))
-    {
-    }
+    /// @brief Update Option from Web UI or Database
+    bool updateItem(
+        const std::vector<std::size_t>& indexList,
+        const std::string& optItem,
+        const std::shared_ptr<Config>& config,
+        std::shared_ptr<BoxChain>& entry,
+        std::string& optValue,
+        const std::string& status = "") const;
+
+    // @brief make config option from xml content
+    std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
+
+    /// @brief get default value
+    const std::vector<BoxLayout>& getDefault() const { return defaultEntries; }
+
+    /// @brief Ensure that config value complies with rules
+    bool validate(
+        const std::shared_ptr<Config>& config,
+        const std::shared_ptr<BoxLayoutList>& values);
 
     std::string getTypeString() const override { return "List"; }
 
-    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    bool updateDetail(
+        const std::string& optItem,
+        std::string& optValue,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText = "") const override;
+    std::string getItemPath(
+        const std::vector<std::size_t>& indexList,
+        const std::vector<ConfigVal>& propOptions,
+        const std::string& propText = "") const override;
+
     std::string getItemPathRoot(bool prefix = false) const override;
-
-    std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
 
     std::string getCurrentValue() const override { return {}; }
 
-    const std::vector<BoxLayout>& getDefault() const { return defaultEntries; }
-
-    bool validate(const std::shared_ptr<Config>& config, const std::shared_ptr<BoxLayoutList>& values);
+    constexpr static std::string_view linkKey = "key";
+    constexpr static std::string_view linkValue = "value";
 };
 
 #endif // __CONFIG_SETUP_BOXLAYOUT_H__

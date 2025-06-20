@@ -59,26 +59,39 @@ static constexpr auto STATUS_UNCHANGED = std::string_view("unchanged");
 static constexpr auto STATUS_KILLED = std::string_view("killed");
 static constexpr auto STATUS_MANUAL = std::string_view("manual");
 
-/// @brief: Base class for config parsers
+/// @brief Base class for config parsers
 class ConfigSetup {
 protected:
+    /// @brief Reference to value object
     std::shared_ptr<ConfigOption> optionValue;
+    /// @brief full path of the config item
     std::string cpath;
+    /// @brief true if option must be in config file
     bool required = false;
+    /// @brief true if used default value
     bool useDefault = false;
+    /// @brief Function to check value format and content
     StringCheckFunction rawCheck {};
-    /// \brief defaultValue default value if option not found
+    /// @brief defaultValue default value if option not found
     std::string defaultValue;
+    /// @brief name of the help page
     const char* help;
+    /// @brief reference to definition management
     std::shared_ptr<ConfigDefinition> definition;
 
+    /// @brief extract array indicies from xpath statement
     static std::vector<std::size_t> extractIndexList(const std::string& item);
+
+    /// @brief Get descriptive text to documentation for home page
     std::string getDocs();
 
+    /// @brief add config option to configuration manager
     void setOption(const std::shared_ptr<Config>& config)
     {
         config->addOption(option, optionValue);
     }
+
+    /// @brief construct config item path from settings
     static std::string buildCpath(const char* xpath)
     {
         auto cPath = std::string_view(xpath);
@@ -88,15 +101,12 @@ protected:
     }
 
 public:
-    virtual ~ConfigSetup() = default;
-
     static constexpr auto ROOT_NAME = std::string_view("config");
 
-    pugi::xpath_node_set getXmlTree(const pugi::xml_node& element) const;
-
+    /// @brief Id of the config item
     ConfigVal option;
 
-    /// \param xpath option xpath
+    /// @brief xpath option xpath
     /// The xpath parameter has XPath syntax:
     /// "/path/to/option" will return the text value of the given "option" element
     /// "/path/to/option/attribute::attr" will return the value of the attribute "attr"
@@ -124,56 +134,78 @@ public:
     {
     }
 
+    virtual ~ConfigSetup() = default;
+
+    /// @brief get xml tree based on config item
+    pugi::xpath_node_set getXmlTree(const pugi::xml_node& element) const;
+
+    /// @brief set default value
     void setDefaultValue(std::string defaultValue)
     {
         this->defaultValue = std::move(defaultValue);
     }
+
+    /// @brief get default value
     std::string getDefaultValue() const
     {
         return this->defaultValue;
     }
 
-    /// \brief inject definition object
+    /// @brief inject definition object
     void setDefinition(const std::shared_ptr<ConfigDefinition>& definition)
     {
         this->definition = definition;
     }
-    /// \brief Create the xml representation of the defaultEntries
+
+    /// @brief Create the xml representation of the defaultEntries
     virtual bool createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const
     {
         return false;
     }
 
+    /// @brief Report if default value was used
     bool isDefaultValueUsed() const
     {
         return this->useDefault;
     }
 
+    /// @brief Check config value complies with rules
     bool checkValue(std::string& optValue) const
     {
         return !rawCheck || rawCheck(optValue);
     }
+
+    /// @brief Get link to help page for web ui
     const char* getHelp() const { return help; }
+
+    /// @brief Get current value of config option
     std::shared_ptr<ConfigOption> getValue() const { return optionValue; }
+
+    /// @brief Get Type of config item for web ui
     virtual std::string getTypeString() const { return "Unset"; }
 
+    /// @brief Extract node based on config item
     pugi::xml_node getXmlElement(const pugi::xml_node& root) const;
 
+    /// @brief Check if node for config item exists
     bool hasXmlElement(const pugi::xml_node& root) const;
 
-    /// \brief Returns a config option with the given xpath, if option does not exist a default value is returned.
+    /// @brief Returns a config option with the given xpath, if option does not exist a default value is returned.
     std::string getXmlContent(const pugi::xml_node& root, bool trim = true);
 
+    /// @brief Gererate Option from config file entry
     virtual void makeOption(
         const pugi::xml_node& root,
         const std::shared_ptr<Config>& config,
         const std::map<std::string, std::string>* arguments = nullptr);
 
+    /// @brief Gererate Option from config value
     virtual void makeOption(
         std::string optValue,
         const std::shared_ptr<Config>& config,
         const std::map<std::string, std::string>* arguments = nullptr);
 
+    /// @brief Update Option from Web UI or Database
     virtual bool updateDetail(
         const std::string& optItem,
         std::string& optValue,
@@ -183,11 +215,11 @@ public:
         return false;
     }
 
-    /// \brief calculate xpath for entry
-    /// \param indexList indexed for arrays
-    /// \param propOptions options to get section or attribute from
-    /// \param propText text option (mostly for dynamic vectors)
-    /// \return xpath of entry
+    /// @brief calculate xpath for entry
+    /// @param indexList indexed for arrays
+    /// @param propOptions options to get section or attribute from
+    /// @param propText text option (mostly for dynamic vectors)
+    /// @return xpath of entry
     virtual std::string getItemPath(
         const std::vector<std::size_t>& indexList,
         const std::vector<ConfigVal>& propOptions,
@@ -195,9 +227,14 @@ public:
     {
         return xpath;
     }
+
+    /// @brief Get root path to config item in xml
     virtual std::string getItemPathRoot(bool prefix = false) const { return xpath; }
 
+    /// @brief Get full path to config item in xml
     virtual std::string getUniquePath() const { return xpath; }
+
+    /// @brief Get current value of config item
     virtual std::string getCurrentValue() const { return optionValue ? optionValue->getOption() : ""; }
 };
 

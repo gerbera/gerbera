@@ -59,7 +59,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
   const containerResource = parentCount > 1 ? cont.res : undefined;
   const containerRefID = cont.res.count > 0 ? cont.id : obj.id;
   const boxSetup = config['/import/scripting/virtual-layout/boxlayout/box'];
-
+  const chainSetup = config['/import/scripting/virtual-layout/boxlayout/chain/audio'];
   const boxes = [
      BK_audioRoot,
      BK_audioAll,
@@ -75,21 +75,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
      BK_audioInitialAbc,
      BK_audioInitialAudioBookRoot,
      BK_audioInitialAllBooks];
-  var _Chain = {};
-  for (var j = 0; j < boxes.length; j++) {
-    const bxSetup = boxSetup[boxes[j]];
-    _Chain[boxes[j]] = {
-      id: bxSetup.id,
-      title: bxSetup.title,
-      searchable: false,
-      objectType: OBJECT_TYPE_CONTAINER,
-      upnpclass: bxSetup.class,
-      upnpShortcut: bxSetup.upnpShortcut,
-      sortKey: bxSetup.sortKey,
-      metaData: []
-    };
-  }
-
+  const _Chain = prepareChains(boxes, boxSetup, chainSetup);
   const chain = {
     audio: _Chain[BK_audioRoot],
     allAudio: _Chain[BK_audioAll],
@@ -105,7 +91,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
       title: boxSetup[BK_audioAllTracks].title,
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: boxSetup[BK_audioAllTracks].class,
-      metaData: []
+      metaData: {},
     },
     artistChronology: _Chain[BK_audioArtistChronology],
     all000: {
@@ -114,7 +100,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: boxSetup[BK_audioInitialAllArtistTracks].class,
       upnpShortcut: boxSetup[BK_audioInitialAllArtistTracks].upnpShortcut,
-      metaData: [],
+      metaData: {},
       res: parentCount > 0 ? cont.res : undefined,
       aux: obj.aux,
       refID: containerRefID
@@ -131,7 +117,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
       location: audio.albumArtist,
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST,
-      metaData: [],
+      metaData: {},
       res: containerResource,
       aux: obj.aux,
       refID: containerRefID
@@ -141,7 +127,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
       location: getRootPath(rootPath, obj.location).join('_'),
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: containerType,
-      metaData: [],
+      metaData: {},
       res: parentCount > 0 ? cont.res : undefined,
       aux: obj.aux,
       refID: containerRefID
@@ -150,7 +136,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
       title: audio.genre,
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE,
-      metaData: [],
+      metaData: {},
       res: containerResource,
       aux: obj.aux,
       refID: containerRefID
@@ -160,7 +146,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
       objectType: OBJECT_TYPE_CONTAINER,
       searchable: true,
       upnpclass: UPNP_CLASS_CONTAINER,
-      metaData: [],
+      metaData: {},
       res: containerResource,
       aux: obj.aux,
       refID: containerRefID
@@ -170,7 +156,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
       objectType: OBJECT_TYPE_CONTAINER,
       searchable: true,
       upnpclass: UPNP_CLASS_CONTAINER_MUSIC_COMPOSER,
-      metaData: [],
+      metaData: {},
       res: containerResource,
       aux: obj.aux,
       refID: containerRefID
@@ -194,6 +180,8 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
   chain.composer.metaData[M_COMPOSER] = [audio.composer];
 
   const result = [];
+
+  createUserChain(obj, audio, _Chain, boxSetup, chainSetup, result);
 
   var container;
   if (isAudioBook) {

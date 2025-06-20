@@ -1168,6 +1168,45 @@
               "editable": true
             }
           ]
+        },
+        {
+          "item": "/import/scripting/virtual-layout/boxlayout/chain",
+          "caption": "Chain Layout",
+          "type": "List",
+          "editable": false,
+          "children": [
+            {
+              "item": "/import/scripting/virtual-layout/boxlayout/chain/attribute::type",
+              "caption": "Type",
+              "editable": true
+            },
+            {
+              "item": "/import/scripting/virtual-layout/boxlayout/chain/links",
+              "caption": "Chain Links",
+              "type": "List",
+              "editable": false,
+              "children": [
+                {
+                  "item": "/import/scripting/virtual-layout/boxlayout/chain/links/link",
+                  "caption": "Property Values",
+                  "type": "List",
+                  "editable": false,
+                  "children": [
+                    {
+                      "item": "/import/scripting/virtual-layout/boxlayout/chain/links/link/key",
+                      "caption": "Property",
+                      "editable": false
+                    },
+                    {
+                      "item": "/import/scripting/virtual-layout/boxlayout/chain/links/link/value",
+                      "caption": "Value",
+                      "editable": false
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
         }
       ]
     },

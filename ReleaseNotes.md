@@ -16,6 +16,7 @@ Changes to configure text for "PC Directory" can be merged with `--create-config
 - Artwork support for dsf files with taglib 2.0
 - "PC Directory" can be configured with `<boxlayout>`
 - MySql: Configuration of engine, charset and collation before first run
+- User defined virtual layout sub trees
 
 ### FIXES
 

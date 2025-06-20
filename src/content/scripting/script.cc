@@ -44,6 +44,7 @@
 #include "config/setup/config_setup_autoscan.h"
 #include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_dictionary.h"
+#include "config/setup/config_setup_enum.h"
 #include "content/autoscan_setting.h"
 #include "content/content.h"
 #include "context.h"
@@ -248,12 +249,16 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
         log_debug("Adding config[{}] {}", autoscanItemPath, idx);
     }
 
+    auto&& boxSetup = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_BOXLAYOUT_BOX);
+    auto&& chainSetup = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_BOXLAYOUT_CHAIN);
+    auto&& typeSetup = definition->findConfigSetup<ConfigEnumSetup<AutoscanMediaMode>>(ConfigVal::A_BOXLAYOUT_CHAIN_TYPE);
     for (auto&& bcs : definition->getConfigSetupList<ConfigBoxLayoutSetup>()) {
-        duk_push_object(ctx); // box-layout
         auto boxLayoutList = bcs->getValue()->getBoxLayoutListOption();
-        for (std::size_t i = 0; i < boxLayoutList->size(); i++) {
+
+        duk_push_object(ctx); // box-layout
+        for (std::size_t i = 0; i < EDIT_CAST(EditHelperBoxLayout, boxLayoutList)->size(); i++) {
             duk_push_object(ctx);
-            auto boxLayout = boxLayoutList->get(i);
+            auto boxLayout = EDIT_CAST(EditHelperBoxLayout, boxLayoutList)->get(i);
             setIntProperty("id", boxLayout->getId());
             setIntProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_SIZE), boxLayout->getSize());
             setBoolProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_ENABLED), boxLayout->getEnabled());
@@ -263,9 +268,37 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             setProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY), boxLayout->getSortKey());
             duk_put_prop_string(ctx, -2, boxLayout->getKey().c_str());
         }
-        std::string boxLayoutItemPath = bcs->getItemPathRoot(true); // prefix
+        std::string boxLayoutItemPath = fmt::format("{}/{}", bcs->getItemPathRoot(true), boxSetup->getItemPathRoot(true));
+        log_debug("Adding box config[{}] {}", boxLayoutItemPath, EDIT_CAST(EditHelperBoxLayout, boxLayoutList)->size());
         duk_put_prop_string(ctx, -2, boxLayoutItemPath.c_str()); // box-layout
-        log_debug("Adding config[{}] {}", boxLayoutItemPath, boxLayoutList->size());
+
+        for (auto&& type : { AutoscanMediaMode::Audio, AutoscanMediaMode::Image, AutoscanMediaMode::Video }) {
+            duk_push_object(ctx); // chain-layout
+            std::size_t size = 0;
+            for (std::size_t i = 0; i < EDIT_CAST(EditHelperBoxChain, boxLayoutList)->size(); i++) {
+                auto&& chain = EDIT_CAST(EditHelperBoxChain, boxLayoutList)->get(i);
+                if (chain->getType() == type) {
+                    duk_push_object(ctx);
+                    setIntProperty("index", chain->getIndex());
+                    setIntProperty("size", chain->getLinksSize());
+                    auto&& links = chain->getLinks();
+                    for (std::size_t j = 0; j < links.size(); j++) {
+                        duk_push_object(ctx);
+                        auto&& link = links.at(j);
+                        for (auto&& [key, value] : link) {
+                            setProperty(key, value);
+                        }
+                        duk_put_prop_string(ctx, -2, fmt::to_string(j).c_str());
+                    }
+                    duk_put_prop_string(ctx, -2, fmt::to_string(chain->getIndex()).c_str());
+                    ++size;
+                }
+            }
+            setIntProperty("size", size);
+            std::string chainLayoutItemPath = fmt::format("{}/{}/{}", bcs->getItemPathRoot(true), chainSetup->getItemPathRoot(true), typeSetup->mapEnumValue(type));
+            log_debug("Adding chain config[{}] {}", chainLayoutItemPath, EDIT_CAST(EditHelperBoxChain, boxLayoutList)->size());
+            duk_put_prop_string(ctx, -2, chainLayoutItemPath.c_str()); // chain-layout
+        }
     }
 
     duk_put_global_string(ctx, "config");
