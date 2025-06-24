@@ -70,6 +70,10 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#ifdef HAVE_EXECINFO
+#include <execinfo.h>
+#endif
+
 static struct {
     int shutdownFlag = 0;
     int restartFlag = 0;
@@ -84,6 +88,19 @@ static GerberaRuntime runtime;
 
 static void signalHandler(int signum)
 {
+#ifdef HAVE_EXECINFO
+    if (signum == SIGSEGV || signum == SIGABRT || signum == SIGILL) {
+        void* array[50];
+
+        // get void*'s for all entries on the stack
+        std::size_t size = backtrace(array, 50);
+        // print out all the frames to stderr
+        auto strings = backtrace_symbols(array, size);
+        for (std::size_t i = 0; i < size; i++)
+            log_error("{}\n", strings[i]);
+    }
+#endif
+
     if (_ctx.mainThreadId != pthread_self()) {
         return;
     }
