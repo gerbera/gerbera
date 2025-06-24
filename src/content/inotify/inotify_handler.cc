@@ -51,7 +51,7 @@
 #define AUTOSCAN_IS_MOVED(mask) ((mask) & (IN_MOVED_TO))
 #define AUTOSCAN_IS_NEW(mask) ((mask) & (IN_CREATE | IN_MOVED_TO | IN_ATTRIB))
 #define AUTOSCAN_IS_CREATED(mask) ((mask) & (IN_CREATE | IN_ATTRIB))
-#define AUTOSCAN_IS_WRITTEN(mask) ((mask) & (IN_CLOSE_WRITE | IN_ATTRIB))
+#define AUTOSCAN_IS_WRITTEN(mask) ((mask) & (IN_CLOSE_WRITE | IN_MOVE_SELF | IN_ATTRIB))
 #define AUTOSCAN_IS_IGNORED(mask) ((mask) & (IN_IGNORED))
 
 #ifndef IN_MASK_CREATE
