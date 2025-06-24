@@ -15,6 +15,7 @@
 - Filter resources by mimetype
 - Fix issue with stale objects in autoscan
 - Fix import and xml
+- Fix subtitle detection in import
 - Fix timed playlist import
 - Fix resources for containers
 - Fix SQL for changing persistent object flag in database

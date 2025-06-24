@@ -756,6 +756,7 @@ void ImportService::updateSingleItem(
 
     try {
         metadataService->extractMetaData(item, dirEntry);
+        metadataService->attachResourceFiles(item, dirEntry);
         updateItemData(item, mimetype);
     } catch (const std::runtime_error& ex) {
         log_error("updateSingleItem '{}' failed: {}", dirEntry.path().string(), ex.what());

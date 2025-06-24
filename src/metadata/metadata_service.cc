@@ -74,6 +74,37 @@
 
 #include "metadata/metacontent_handler.h"
 
+static const auto handlerNames = std::map {
+#ifdef HAVE_TAGLIB
+    std::pair<MetadataType, std::string_view> { MetadataType::TagLib, "TagLib" },
+#endif
+#ifdef HAVE_EXIV2
+    std::pair<MetadataType, std::string_view> { MetadataType::Exiv2, "Exiv2" },
+#endif
+#ifdef HAVE_LIBEXIF
+    std::pair<MetadataType, std::string_view> { MetadataType::LibExif, "LibExif" },
+#endif
+#ifdef HAVE_MATROSKA
+    std::pair<MetadataType, std::string_view> { MetadataType::Matroska, "Matroska" },
+#endif
+#ifdef HAVE_WAVPACK
+    std::pair<MetadataType, std::string_view> { MetadataType::WavPack, "WavPack" },
+#endif
+#ifdef HAVE_FFMPEG
+    std::pair<MetadataType, std::string_view> { MetadataType::Ffmpeg, "Ffmpeg" },
+#endif
+#ifdef HAVE_FFMPEGTHUMBNAILER
+    std::pair<MetadataType, std::string_view> { MetadataType::Thumbnailer, "Thumbnailer" },
+    std::pair<MetadataType, std::string_view> { MetadataType::VideoThumbnailer, "VideoThumbnailer" },
+    std::pair<MetadataType, std::string_view> { MetadataType::ImageThumbnailer, "ImageThumbnailer" },
+#endif
+    std::pair<MetadataType, std::string_view> { MetadataType::FanArt, "FanArt" },
+    std::pair<MetadataType, std::string_view> { MetadataType::ContainerArt, "ContainerArt" },
+    std::pair<MetadataType, std::string_view> { MetadataType::Subtitle, "Subtitle" },
+    std::pair<MetadataType, std::string_view> { MetadataType::Metafile, "Metafile" },
+    std::pair<MetadataType, std::string_view> { MetadataType::ResourceFile, "ResourceFile" },
+};
+
 MetadataService::MetadataService(const std::shared_ptr<Context>& context, const std::shared_ptr<Content>& content)
     : context(context)
     , config(context->getConfig())
@@ -164,7 +195,9 @@ bool MetadataService::extractMetaData(
     bool result = false;
     for (auto handler : metaHandlers) {
         if (handlers.at(handler)->isSupported(contentType, isOggTheora, mimetype, mediaType)) {
-            result = handlers.at(handler)->fillMetadata(item) || result;
+            log_debug("Running {} for {}", handlerNames.at(handler), item->getLocation().c_str());
+            auto handlerResult = handlers.at(handler)->fillMetadata(item);
+            result = result || handlerResult;
         }
     }
 
@@ -209,7 +242,11 @@ bool MetadataService::attachResourceFiles(
     bool result = false;
     for (auto handler : metaHandlers) {
         if (handlers.at(handler)->isSupported(contentType, false, mimeType, mediaType)) {
-            result = handlers.at(handler)->fillMetadata(item) || result;
+            log_debug("Running {} for {}", handlerNames.at(handler), item->getLocation().c_str());
+            auto handlerResult = handlers.at(handler)->fillMetadata(item) || result;
+            result = result || handlerResult;
+        } else {
+            log_debug("Handler {} not supported for {}, {}, {}, {}", handlerNames.at(handler), item->getLocation().c_str(), contentType, mimeType, EnumMapper::mapObjectType(mediaType));
         }
     }
 
