@@ -211,11 +211,11 @@ void AutoscanInotify::threadProc()
                 // changed
                 if (adir && handler.hasEvent()) {
                     // not new
-                    int wd = handler.doExistingFile(database, content, wdObj, importMode, isDir);
+                    int wd = handler.doExistingEntry(database, content, wdObj, importMode, isDir);
                     if (wd > INOTIFY_ROOT)
                         inotify->removeWatch(wd);
                     // new file
-                    handler.doNewFile(asSetting, content, isDir);
+                    handler.doNewEntry(asSetting, content, isDir);
                 }
                 // target is directory
                 if (isDir) {

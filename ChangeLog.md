@@ -15,6 +15,7 @@
 - Filter resources by mimetype
 - Fix issue with stale objects in autoscan
 - Fix import and xml
+- Fix inotify for files
 - Fix subtitle detection in import
 - Fix timed playlist import
 - Fix resources for containers
