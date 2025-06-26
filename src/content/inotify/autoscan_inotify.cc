@@ -107,7 +107,6 @@ void AutoscanInotify::threadProc()
 {
     std::error_code ec;
     auto importMode = EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
-    AutoScanSetting asSetting;
     while (!shutdownFlag) {
         try {
             std::unique_lock<std::mutex> lock(mutex);
@@ -199,6 +198,7 @@ void AutoscanInotify::threadProc()
 
                 handler.doMove(wdObj);
 
+                AutoScanSetting asSetting;
                 asSetting.adir = adir;
                 asSetting.followSymlinks = adir ? adir->getFollowSymlinks() : defFollowSymlinks;
                 asSetting.recursive = adir ? adir->getRecursive() : false;
@@ -211,17 +211,18 @@ void AutoscanInotify::threadProc()
                 // changed
                 if (adir && handler.hasEvent()) {
                     // not new
-                    int wd = handler.doExistingFile(database, content, wdObj, importMode, isDir);
+                    int wd = handler.doExistingEntry(database, content, wdObj, importMode, isDir);
                     if (wd > INOTIFY_ROOT)
                         inotify->removeWatch(wd);
                     // new file
-                    handler.doNewFile(asSetting, content, isDir);
+                    handler.doNewEntry(asSetting, content, isDir);
                 }
                 // target is directory
                 if (isDir) {
                     handler.doDirectory(asSetting, content, wdObj);
                 }
                 handler.doIgnored();
+                log_debug("end event {}", event->wd);
             }
         } catch (const std::runtime_error& e) {
             log_error("Inotify thread caught exception: {}", e.what());
