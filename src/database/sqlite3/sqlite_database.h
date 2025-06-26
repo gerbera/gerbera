@@ -76,7 +76,7 @@ private:
     void execOnly(const std::string& query) override;
 
     /// \brief Implement common behaviour on exceptions while calling the database
-    void handleException(const std::runtime_error& exc, const std::string& lineMessage);
+    void handleException(const std::exception& exc, const std::string& lineMessage);
 
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 

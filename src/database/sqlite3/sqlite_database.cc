@@ -265,7 +265,7 @@ void Sqlite3DatabaseWithTransactions::commit(std::string_view tName)
     }
 }
 
-void Sqlite3Database::handleException(const std::runtime_error& exc, const std::string& lineMessage)
+void Sqlite3Database::handleException(const std::exception& exc, const std::string& lineMessage)
 {
     if (!dbInitDone)
         throw_std_runtime_error(exc.what());
@@ -399,6 +399,8 @@ void Sqlite3Database::threadProc()
                         dirty = false;
                     task->sendSignal();
                 } catch (const std::runtime_error& e) {
+                    task->sendSignal(e.what());
+                } catch (const std::logic_error& e) {
                     task->sendSignal(e.what());
                 }
                 lock.lock();

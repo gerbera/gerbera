@@ -36,6 +36,7 @@ function setup {
     fi
 
     source $VENV_NAME/bin/activate
+    pip install --upgrade pip
 }
 
 function install {

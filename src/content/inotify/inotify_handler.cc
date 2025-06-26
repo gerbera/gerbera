@@ -47,7 +47,7 @@
 #define AUTOSCAN_IS_GONE(mask) ((mask) & (IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT))
 #define AUTOSCAN_WAS_REMOVED(mask) ((mask) & (IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_MOVED_FROM | IN_UNMOUNT))
 #define AUTOSCAN_IS_DIR(mask) ((mask) & (IN_ISDIR))
-#define AUTOSCAN_IS_NEW_FILE(mask) ((mask) & (IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_TO | IN_ATTRIB))
+#define AUTOSCAN_IS_NEW_ENTRY(mask, noFile) ((mask) & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_ATTRIB) || ((noFile) && ((mask) & IN_CREATE)))
 #define AUTOSCAN_IS_MOVED(mask) ((mask) & (IN_MOVED_TO))
 #define AUTOSCAN_IS_NEW(mask) ((mask) & (IN_CREATE | IN_MOVED_TO | IN_ATTRIB))
 #define AUTOSCAN_IS_CREATED(mask) ((mask) & (IN_CREATE | IN_ATTRIB))
@@ -167,7 +167,7 @@ std::pair<bool, std::shared_ptr<AutoscanDirectory>> InotifyHandler::getAutoscanD
     return { isDir, adir };
 }
 
-void InotifyHandler::doMove(const std::shared_ptr<DirectoryWatch>& wdObj)
+void InotifyHandler::doMove(const std::shared_ptr<DirectoryWatch>& wdObj) const
 {
     // file is renamed
     if (AUTOSCAN_WAS_MOVED(mask)) {
@@ -180,7 +180,10 @@ void InotifyHandler::doMove(const std::shared_ptr<DirectoryWatch>& wdObj)
     }
 }
 
-void InotifyHandler::doDirectory(AutoScanSetting& asSetting, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj)
+void InotifyHandler::doDirectory(
+    AutoScanSetting& asSetting,
+    const std::shared_ptr<Content>& content,
+    const std::shared_ptr<DirectoryWatch>& wdObj) const
 {
     if (AUTOSCAN_IS_NEW(mask)) {
         ai->recheckNonexistingMonitors(wd, wdObj);
@@ -196,7 +199,11 @@ void InotifyHandler::doDirectory(AutoScanSetting& asSetting, const std::shared_p
     }
 }
 
-int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj, ImportMode importMode, bool& isDir)
+int InotifyHandler::doExistingEntry(
+    const std::shared_ptr<Database>& database,
+    const std::shared_ptr<Content>& content,
+    const std::shared_ptr<DirectoryWatch>& wdObj,
+    ImportMode importMode, bool& isDir)
 {
     int result = INOTIFY_ROOT;
     if (!AUTOSCAN_IS_NEW(mask)) {
@@ -227,12 +234,15 @@ int InotifyHandler::doExistingFile(const std::shared_ptr<Database>& database, co
     return result;
 }
 
-void InotifyHandler::doNewFile(AutoScanSetting& asSetting, const std::shared_ptr<Content>& content, bool isDir)
+void InotifyHandler::doNewEntry(
+    AutoScanSetting& asSetting,
+    const std::shared_ptr<Content>& content,
+    bool isDir) const
 {
     if (changedObject)
         asSetting.changedObject = changedObject;
 
-    if (AUTOSCAN_IS_NEW_FILE(mask)) {
+    if (AUTOSCAN_IS_NEW_ENTRY(mask, isDir || dirEnt.is_symlink())) {
         log_debug("Adding {}", path.c_str());
         // dirEnt, path, rootPath, settings, lowPriority, cancellable
         content->addFile(dirEnt, adir->getLocation(), asSetting, true, false);
@@ -247,7 +257,7 @@ void InotifyHandler::doNewFile(AutoScanSetting& asSetting, const std::shared_ptr
     }
 }
 
-void InotifyHandler::doIgnored()
+void InotifyHandler::doIgnored() const
 {
     if (AUTOSCAN_IS_IGNORED(mask)) {
         ai->removeWatchMoves(wd);
