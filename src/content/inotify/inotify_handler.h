@@ -49,16 +49,45 @@ public:
     static InotifyFlags makeFlags(const std::string& optValue);
     static InotifyFlags remapFlag(const std::string& flag);
 
+    /// @brief Get File Path for new event
     fs::path getPath(const std::shared_ptr<DirectoryWatch>& wdObj);
-    std::pair<bool, std::shared_ptr<AutoscanDirectory>> getAutoscanDirectory(const std::shared_ptr<DirectoryWatch>& wdObj);
-    void doMove(const std::shared_ptr<DirectoryWatch>& wdObj);
-    void doDirectory(AutoScanSetting& asSetting, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj);
-    int doExistingFile(const std::shared_ptr<Database>& database, const std::shared_ptr<Content>& content, const std::shared_ptr<DirectoryWatch>& wdObj, ImportMode importMode, bool& isDir);
-    void doNewFile(AutoScanSetting& asSetting, const std::shared_ptr<Content>& content, bool isDir);
-    void doIgnored();
 
+    /// @brief Get Autoscan DIrectory for new event
+    std::pair<bool, std::shared_ptr<AutoscanDirectory>> getAutoscanDirectory(const std::shared_ptr<DirectoryWatch>& wdObj);
+
+    /// @brief Handle file or folder being moved
+    void doMove(const std::shared_ptr<DirectoryWatch>& wdObj) const;
+
+    /// @brief Handle directory
+    void doDirectory(
+        AutoScanSetting& asSetting,
+        const std::shared_ptr<Content>& content,
+        const std::shared_ptr<DirectoryWatch>& wdObj) const;
+
+    /// @brief Handle existing filesystem entry
+    int doExistingEntry(
+        const std::shared_ptr<Database>& database,
+        const std::shared_ptr<Content>& content,
+        const std::shared_ptr<DirectoryWatch>& wdObj,
+        ImportMode importMode,
+        bool& isDir);
+
+    /// @brief Handle new filesystem entry
+    void doNewEntry(
+        AutoScanSetting& asSetting,
+        const std::shared_ptr<Content>& content,
+        bool isDir) const;
+
+    /// @brief handle ignoring filesystem entries
+    void doIgnored() const;
+
+    /// @brief Check whether event is actively monitored
     bool hasEvent() const { return mask; }
+
+    /// @brief Get Watch Descriptor for current event
     int getWd() const { return wd; }
+
+    /// @brief Get File Path for current event
     fs::path getPath() const { return path; }
 
 private:

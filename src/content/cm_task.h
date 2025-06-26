@@ -40,6 +40,7 @@ class Timer;
 class OnlineService;
 #endif // ONLINE_SERVICES
 
+/// @brief Task to add an entry to the database
 class CMAddFileTask : public GenericTask, public std::enable_shared_from_this<CMAddFileTask> {
 protected:
     std::shared_ptr<ContentManager> content;
@@ -48,13 +49,18 @@ protected:
     AutoScanSetting asSetting;
 
 public:
-    CMAddFileTask(std::shared_ptr<ContentManager> content,
-        fs::directory_entry dirEnt, fs::path rootpath, AutoScanSetting asSetting, bool cancellable = true);
+    CMAddFileTask(
+        std::shared_ptr<ContentManager> content,
+        fs::directory_entry dirEnt,
+        fs::path rootpath,
+        AutoScanSetting asSetting,
+        bool cancellable = true);
     fs::path getPath() const;
     fs::path getRootPath() const;
     void run() override;
 };
 
+/// @brief Task to remove an entry from the database
 class CMRemoveObjectTask : public GenericTask {
 protected:
     std::shared_ptr<ContentManager> content;
@@ -65,11 +71,17 @@ protected:
     bool rescanResource;
 
 public:
-    CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
-        std::shared_ptr<CdsObject> object, fs::path path, bool rescanResource, bool all);
+    CMRemoveObjectTask(
+        std::shared_ptr<ContentManager> content,
+        std::shared_ptr<AutoscanDirectory> adir,
+        std::shared_ptr<CdsObject> object,
+        fs::path path,
+        bool rescanResource,
+        bool all);
     void run() override;
 };
 
+/// @brief Task to run a full rescan of a container
 class CMRescanDirectoryTask : public GenericTask, public std::enable_shared_from_this<CMRescanDirectoryTask> {
 protected:
     std::shared_ptr<ContentManager> content;
@@ -77,12 +89,16 @@ protected:
     int containerID;
 
 public:
-    CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
-        std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable);
+    CMRescanDirectoryTask(
+        std::shared_ptr<ContentManager> content,
+        std::shared_ptr<AutoscanDirectory> adir,
+        int containerId,
+        bool cancellable);
     void run() override;
 };
 
 #ifdef ONLINE_SERVICES
+/// @brief Task to update references to o line content
 class CMFetchOnlineContentTask : public GenericTask {
 protected:
     std::shared_ptr<ContentManager> content;
@@ -93,11 +109,14 @@ protected:
     bool unscheduled_refresh;
 
 public:
-    CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
+    CMFetchOnlineContentTask(
+        std::shared_ptr<ContentManager> content,
         std::shared_ptr<TaskProcessor> taskProcessor,
         std::shared_ptr<Timer> timer,
-        std::shared_ptr<OnlineService> service, std::shared_ptr<Layout> layout,
-        bool cancellable, bool unscheduledRefresh);
+        std::shared_ptr<OnlineService> service,
+        std::shared_ptr<Layout> layout,
+        bool cancellable,
+        bool unscheduledRefresh);
     void run() override;
 };
 #endif
