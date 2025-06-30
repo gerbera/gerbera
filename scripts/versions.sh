@@ -72,7 +72,7 @@ else
     PUPNP="1.14.24"
     SPDLOG="1.15.3"
     WAVPACK="5.8.1"
-    TAGLIB="2.1"
+    TAGLIB="2.1.1"
     JSONCPP="1.9.6"
 
 fi

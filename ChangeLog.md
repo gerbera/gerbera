@@ -41,6 +41,7 @@
 - Update PUpnp to 1.14.24
 - Update spdlog to 1.15.2
 - Update spdlog to 1.15.3
+- Update taglib to 2.1.1
 - Upgrade documentation build environment
 - Use JsonCpp for web JSON output
 - User Defined virtual tree parts
