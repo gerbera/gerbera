@@ -1,4 +1,4 @@
-.. index:: Import
+.. index:: Configure Import
 
 Configure Import
 ================
@@ -319,6 +319,7 @@ Below are the available scripting options:
 
         * Optional
         * Default: **Default**
+        * Deprecated: Think about migrating your configuration to use :ref:`import-function`.
 
         Specifies the virtual layout to be created:
 

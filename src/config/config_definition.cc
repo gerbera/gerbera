@@ -466,6 +466,20 @@ static const std::map<std::string, std::string> exiv2CommentDefaults {
     { "Focal length 35 mm equivalent", "Exif.Photo.FocalLengthIn35mmFilm" },
 };
 
+static const std::vector<ConfigVal> deprecatedOptions {
+#ifdef HAVE_JS
+    ConfigVal::IMPORT_SCRIPTING_COMMON_SCRIPT,
+    ConfigVal::IMPORT_SCRIPTING_CUSTOM_SCRIPT,
+    ConfigVal::IMPORT_SCRIPTING_METAFILE_SCRIPT,
+    ConfigVal::IMPORT_SCRIPTING_PLAYLIST_SCRIPT,
+    ConfigVal::IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS,
+    ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT,
+    ConfigVal::IMPORT_SCRIPTING_IMPORT_LAYOUT_AUDIO,
+    ConfigVal::IMPORT_SCRIPTING_IMPORT_LAYOUT_VIDEO,
+    ConfigVal::IMPORT_SCRIPTING_IMPORT_LAYOUT_IMAGE,
+#endif
+};
+
 std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
 {
     return {
@@ -2148,6 +2162,15 @@ void ConfigDefinition::initDependencies()
         { ConfigVal::SERVER_EXTOPTS_LASTFM_PASSWORD, ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED },
 #endif
     };
+}
+
+void ConfigDefinition::markDeprecated()
+{
+    for (auto&& opt : deprecatedOptions) {
+        auto co = findConfigSetup(opt);
+        if (co)
+            co->setDeprecated();
+    }
 }
 
 const char* ConfigDefinition::mapConfigOption(ConfigVal option) const
