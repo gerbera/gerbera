@@ -415,6 +415,15 @@ bool ConfigManager::validate()
     if (!co->validate(getSelf(), getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST)))
         throw_std_runtime_error("Validation of {} failed", co->xpath);
 
+    for (auto&& optionKey : ConfigOptionIterator()) {
+        if (options.at(to_underlying(optionKey))) {
+            auto cs = definition->findConfigSetup(optionKey);
+            if (cs->isOptionDeprecated() && !cs->isDefaultValueUsed()) {
+                log_warning("Option {} is deprecated, see {} and update your config.xml ", cs->xpath, cs->getHelp());
+            }
+        }
+    }
+
     log_info("Configuration check succeeded.");
     return true;
 }

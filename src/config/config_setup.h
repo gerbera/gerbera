@@ -70,6 +70,8 @@ protected:
     bool required = false;
     /// @brief true if used default value
     bool useDefault = false;
+    /// @brief true if option will be removed soon
+    bool isDeprecated = false;
     /// @brief Function to check value format and content
     StringCheckFunction rawCheck {};
     /// @brief defaultValue default value if option not found
@@ -161,6 +163,18 @@ public:
     virtual bool createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const
     {
         return false;
+    }
+
+    /// @brief Report if option is deprecated
+    bool isOptionDeprecated() const
+    {
+        return this->isDeprecated;
+    }
+
+    /// @brief Set option to deprecated
+    void setDeprecated()
+    {
+        this->isDeprecated = true;
     }
 
     /// @brief Report if default value was used

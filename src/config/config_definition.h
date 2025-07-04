@@ -138,6 +138,7 @@ public:
         initOptions(self);
         initHierarchy();
         initDependencies();
+        markDeprecated();
     }
 
     static constexpr auto ATTRIBUTE = std::string_view("attribute::");
@@ -157,6 +158,8 @@ private:
     void initDependencies();
     /// \brief define parent options for path search
     void initHierarchy();
+    /// \brief mark option to be removed soon
+    void markDeprecated();
 
     /// \brief all known options
     std::vector<std::shared_ptr<ConfigSetup>> complexOptions;
