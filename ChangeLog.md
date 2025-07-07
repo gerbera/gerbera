@@ -32,6 +32,7 @@
 - Provide bash completion file
 - Refactor ConfigSetup code
 - Remove legacy compile option SQLITE_BACKUP_ENABLED
+- Restore owner of config file in docker
 - Reorganise installation scripts
 - Support "natural" file sorting
 - Tweak for old Samsung TV

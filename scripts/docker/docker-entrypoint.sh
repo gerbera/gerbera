@@ -76,7 +76,16 @@ if [ -e /dev/dri ]; then
   sudo chown root:video /dev/dri
 fi
 
+GRB_CONFIG_USER=$IMAGE_USER
+if [ -f  /var/run/gerbera/config.xml ]; then
+    GRB_CONFIG_USER=$(sudo stat -c "%u" /var/run/gerbera/config.xml)
+fi
 sudo chown -R $IMAGE_USER:$IMAGE_GROUP /var/run/gerbera
+if [ -f  /var/run/gerbera/config.xml ]; then
+    sudo chown $GRB_CONFIG_USER /var/run/gerbera/config.xml
+    sudo chmod g+r /var/run/gerbera/config.xml
+fi
+
 
 # If we are root, chown home and drop privs
 if [ "$1" = 'gerbera' -a "$(id -u)" = '0' ]; then
