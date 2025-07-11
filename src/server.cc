@@ -192,13 +192,13 @@ void Server::run()
     log_debug("Creating UpnpXMLBuilders");
     upnpXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getVirtualUrl());
     webXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getExternalUrl());
-    auto devDescHdl = std::make_shared<DeviceDescriptionHandler>(content, webXmlBuilder, nullptr, ip, port);
+    auto devDescHdl = std::make_shared<DeviceDescriptionHandler>(content, webXmlBuilder, nullptr, getIp(), getPort());
 
     int activeUpnpDescription = config->getBoolOption(ConfigVal::UPNP_DYNAMIC_DESCRIPTION) ? 0 : 1;
     // register root device with the library
     auto upnpDesc = std::vector<UpnpDesc> {
-        { UPNPREG_URL_DESC, fmt::format("http://{}{}", GrbNet::renderWebUri(ip, port), DEVICE_DESCRIPTION_PATH), -1 },
-        { UPNPREG_BUF_DESC, devDescHdl->renderDeviceDescription(ip, port, nullptr), 0 }
+        { UPNPREG_URL_DESC, fmt::format("http://{}{}", GrbNet::renderWebUri(getIp(), getPort()), DEVICE_DESCRIPTION_PATH), -1 },
+        { UPNPREG_BUF_DESC, devDescHdl->renderDeviceDescription(getIp(), getPort(), nullptr), 0 }
     };
     log_debug("Registering with UPnP... ({})", upnpDesc[activeUpnpDescription].desc);
     ret = UpnpRegisterRootDevice2(
@@ -244,7 +244,6 @@ void Server::run()
         UpnpSetAllowLiteralHostRedirection(1);
     }
 
-    std::string ipv6 = UpnpGetServerIp6Address();
     {
         std::string url = getVirtualUrl();
         writeBookmark(url);
@@ -253,9 +252,11 @@ void Server::run()
         validHosts = std::vector<std::string> {
             std::string(UpnpGetServerIpAddress()),
         };
-        if (!ipv6.empty()) {
-            validHosts.push_back(ipv6);
-            validHosts.push_back(UpnpGetServerUlaGuaIp6Address());
+        if (!ip6.empty()) {
+            validHosts.push_back(ip6);
+        }
+        if (!ulaGuaIp6.empty()) {
+            validHosts.push_back(ulaGuaIp6);
         }
         if (!url.empty()) {
             validHosts.push_back(url);
@@ -271,9 +272,11 @@ void Server::run()
             "'self'",
             fmt::format("http://{}", UpnpGetServerIpAddress()),
         };
-        if (!ipv6.empty()) {
-            corsHosts.push_back(fmt::format("http://[{}]", ipv6));
-            corsHosts.push_back(fmt::format("http://[{}]", UpnpGetServerUlaGuaIp6Address()));
+        if (!ip6.empty()) {
+            corsHosts.push_back(fmt::format("http://[{}]", ip6));
+        }
+        if (!ulaGuaIp6.empty()) {
+            corsHosts.push_back(fmt::format("http://[{}]", ulaGuaIp6));
         }
         std::string url = getVirtualUrl();
         if (!url.empty()) {
@@ -287,6 +290,28 @@ void Server::run()
     }
 
     UpnpSetHostValidateCallback(HostValidateCallback, this);
+}
+
+std::string Server::getIp() const
+{
+    if (port > 0)
+        return ip;
+    if (port6 > 0)
+        return ip6;
+    if (ulaGuaPort6 > 0)
+        return ulaGuaIp6;
+    return "127.0.0.1";
+}
+
+in_port_t Server::getPort() const
+{
+    if (port > 0)
+        return port;
+    if (port6 > 0)
+        return port6;
+    if (ulaGuaPort6 > 0)
+        return ulaGuaPort6;
+    return -1;
 }
 
 int Server::startupInterface(const std::string& iface, in_port_t inPort)
@@ -324,8 +349,15 @@ int Server::startupInterface(const std::string& iface, in_port_t inPort)
     ip = UpnpGetServerIpAddress();
 
     log_info("IPv4: Server bound to: {}:{}", ip, port);
-    log_info("IPv6: Server bound to: {}:{}", UpnpGetServerIp6Address(), UpnpGetServerPort6());
-    log_info("IPv6 ULA/GLA: Server bound to: {}:{}", UpnpGetServerUlaGuaIp6Address(), UpnpGetServerUlaGuaPort6());
+    port6 = UpnpGetServerPort6();
+    ip6 = UpnpGetServerIp6Address();
+    if (port6 > 0)
+        log_info("IPv6: Server bound to: {}:{}", ip6, port6);
+
+    ulaGuaPort6 = UpnpGetServerUlaGuaPort6();
+    ulaGuaIp6 = UpnpGetServerUlaGuaIp6Address();
+    if (ulaGuaPort6 > 0)
+        log_info("IPv6 ULA/GLA: Server bound to: {}:{}", ulaGuaIp6, ulaGuaPort6);
 
     return ret;
 }
@@ -354,7 +386,7 @@ std::string Server::getVirtualUrl() const
 {
     auto virtUrl = config->getOption(ConfigVal::VIRTUAL_URL);
     if (virtUrl.empty()) {
-        virtUrl = GrbNet::renderWebUri(ip, port);
+        virtUrl = GrbNet::renderWebUri(getIp(), getPort());
     }
     if (!startswith(virtUrl, "http")) { // url does not start with http
         virtUrl = fmt::format("http://{}", virtUrl);
@@ -370,7 +402,7 @@ std::string Server::getExternalUrl() const
     if (virtUrl.empty()) {
         virtUrl = config->getOption(ConfigVal::VIRTUAL_URL);
         if (virtUrl.empty()) {
-            virtUrl = GrbNet::renderWebUri(ip, port);
+            virtUrl = GrbNet::renderWebUri(getIp(), getPort());
         }
     }
     if (!startswith(virtUrl, "http")) { // url does not start with http
@@ -605,7 +637,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
     }
 
     if (startswith(link, DEVICE_DESCRIPTION_PATH) || endswith(link, UPNP_DESC_DEVICE_DESCRIPTION)) {
-        return std::make_unique<DeviceDescriptionHandler>(content, upnpXmlBuilder, quirks, ip, port);
+        return std::make_unique<DeviceDescriptionHandler>(content, upnpXmlBuilder, quirks, getIp(), getPort());
     }
 
     if (startswith(link, UPNP_DESC_SCPD_URL) || endswith(link, UPNP_DESC_CDS_SCPD_URL) || endswith(link, UPNP_DESC_CM_SCPD_URL) || endswith(link, UPNP_DESC_MRREG_SCPD_URL)) {
@@ -668,8 +700,8 @@ int Server::GetInfoCallback(const char* filename, UpnpFileInfo* info, const void
         auto quirks = server->getQuirks(info, startswith(filename, fmt::format("/{}", CONTENT_UI_HANDLER)));
         auto client = quirks->getClient();
         if (quirks && !quirks->isAllowed()) {
-            auto ip = client && client->addr ? client->addr->getHostName() : "unknown";
-            log_debug("Client blocked {}", ip);
+            auto clientIp = client && client->addr ? client->addr->getHostName() : "unknown";
+            log_debug("Client blocked {}", clientIp);
             return -1;
         }
         auto reqHandler = server->createRequestHandler(filename, quirks);
@@ -698,8 +730,8 @@ UpnpWebFileHandle Server::OpenCallback(const char* filename, enum UpnpOpenFileMo
         auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
         auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
         if (quirks && !quirks->isAllowed()) {
-            auto ip = client && client->addr ? client->addr->getHostName() : "unknown";
-            log_debug("Client blocked {}", ip);
+            auto clientIp = client && client->addr ? client->addr->getHostName() : "unknown";
+            log_debug("Client blocked {}", clientIp);
             return nullptr;
         }
         auto reqHandler = server->createRequestHandler(filename, quirks);
@@ -730,8 +762,8 @@ int Server::ReadCallback(UpnpWebFileHandle f, char* buf, std::size_t length, con
     auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
     auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
     if (quirks && !quirks->isAllowed()) {
-        auto ip = client && client->addr ? client->addr->getHostName() : "unknown";
-        log_debug("Client blocked {}", ip);
+        auto clientIp = client && client->addr ? client->addr->getHostName() : "unknown";
+        log_debug("Client blocked {}", clientIp);
         return -1;
     }
 
@@ -752,8 +784,8 @@ int Server::SeekCallback(UpnpWebFileHandle f, off_t offset, int whence, const vo
         auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
         auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
         if (quirks && !quirks->isAllowed()) {
-            auto ip = client && client->addr ? client->addr->getHostName() : "unknown";
-            log_debug("Client blocked {}", ip);
+            auto clientIp = client && client->addr ? client->addr->getHostName() : "unknown";
+            log_debug("Client blocked {}", clientIp);
             return -1;
         }
         auto ioHandler = static_cast<IOHandler*>(f);

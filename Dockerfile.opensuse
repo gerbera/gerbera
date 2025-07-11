@@ -225,7 +225,7 @@ ARG IMAGE_PORT=49494
 
 RUN groupadd --system ${IMAGE_GROUP} --gid=${IMAGE_GID} 2>/dev/null \
     && useradd --system -d /var/run/gerbera -s /bin/bash -G "${IMAGE_GROUP},video" -g ${IMAGE_GROUP} --uid=${IMAGE_UID} ${IMAGE_USER} 2>/dev/null \
-    && echo "${IMAGE_USER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers \
+    && echo "${IMAGE_USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
     && mkdir /var/run/gerbera/ \
     && chmod 2775 /var/run/gerbera/ \
     && mkdir /content \

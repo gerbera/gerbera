@@ -29,6 +29,7 @@
 - Make ImportService stable for multiple calls
 - Mark some options as deprecated
 - MySql: Allow configuration of engine, charset and collation
+- Properly support ipv6-only environments
 - Provide bash completion file
 - Quirks for Freebox Player
 - Refactor ConfigSetup code
