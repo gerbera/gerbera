@@ -40,7 +40,7 @@ fi
 
 downloadSource
 
-cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED}
+cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED} -DCMAKE_POLICY_VERSION_MINIMUM=3.5
 
 makeInstall
 

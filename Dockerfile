@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=alpine:3.21
+ARG BASE_IMAGE=alpine:3.22
 
 FROM ${BASE_IMAGE} AS builder
 
@@ -137,7 +137,7 @@ ARG IMAGE_PORT=49494
 
 RUN addgroup -S ${IMAGE_GROUP} --gid=${IMAGE_GID} 2>/dev/null \
     && adduser -S -D -H -h /var/run/gerbera -s /sbin/nologin -G ${IMAGE_GROUP} -g ${IMAGE_GROUP} --uid=${IMAGE_UID} ${IMAGE_USER} 2>/dev/null \
-    && echo "${IMAGE_USER} ALL=(ALL) NOPASSWD: ALL" > /etc/sudoers \
+    && echo "${IMAGE_USER} ALL=(ALL) NOPASSWD: ALL" >> /etc/sudoers \
     && addgroup ${IMAGE_USER} video \
     && mkdir /var/run/gerbera/ \
     && chmod 2775 /var/run/gerbera/ \

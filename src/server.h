@@ -113,7 +113,11 @@ protected:
     std::shared_ptr<Server> self;
 
     std::string ip;
+    std::string ip6;
+    std::string ulaGuaIp6;
     in_port_t port {};
+    in_port_t port6 {};
+    in_port_t ulaGuaPort6 {};
     std::vector<std::string> validHosts {};
     std::vector<std::string> corsHosts {};
 
@@ -140,6 +144,11 @@ protected:
     std::shared_ptr<UpnpXMLBuilder> upnpXmlBuilder;
     std::shared_ptr<UpnpXMLBuilder> webXmlBuilder;
     std::vector<std::unique_ptr<UpnpService>> serviceList;
+
+    /// @brief get string for active ip
+    std::string getIp() const;
+    /// @brief get active port
+    in_port_t getPort() const;
 
     /// \brief Dispatched an ActionRequest between the services.
     /// \param request Incoming ActionRequest.
