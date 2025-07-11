@@ -36,6 +36,11 @@ if [ ! -d /var/run/gerbera/.config/gerbera ]; then
 fi
 
 if [ ! -f /var/run/gerbera/config.xml ]; then
+  if [ ! -d /var/run/gerbera/ -o "$(id -u)" -ne '0'  ]; then
+    sudo mkdir -p /var/run/gerbera
+    sudo chown "${_UID}:${_GID}" /var/run/gerbera
+  fi
+
   # Generate a config file with home set
   gerbera --create-config --home /var/run/gerbera > /var/run/gerbera/config.xml
 
@@ -86,10 +91,10 @@ if [ -f  /var/run/gerbera/config.xml ]; then
     sudo chmod g+r /var/run/gerbera/config.xml
 fi
 
-
 # If we are root, chown home and drop privs
-if [ "$1" = 'gerbera' -a "$(id -u)" = '0' ]; then
-
+if [[ "$3" =~ "^gerbera " || "$1" == "gerbera" ]]; then
+  if [ "$(id -u)" -eq '0' ]; then
+    echo "Root DEF"
     if ! (command su-exec 2>&1) > /dev/null
     then
         sudo touch /var/run/gerbera/run.sh
@@ -100,11 +105,12 @@ if [ "$1" = 'gerbera' -a "$(id -u)" = '0' ]; then
     else
         exec su-exec $IMAGE_USER "$@"
     fi
-
-else
-    # Otherwise run as the user provided
-    if [ "$1" = "--" ]; then
-        shift
-    fi
-    exec "$@"
+    exit
+  fi
 fi
+
+# Otherwise run as the user provided
+if [ "$1" = "--" ]; then
+    shift
+fi
+exec "$@"
