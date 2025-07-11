@@ -13,13 +13,14 @@
 - Extend details extracted by WavPack handler
 - Fill database on startup
 - Filter resources by mimetype
-- Fix issue with stale objects in autoscan
 - Fix import and xml
 - Fix inotify for files
-- Fix subtitle detection in import
-- Fix timed playlist import
+- Fix issue with stale objects in autoscan
 - Fix resources for containers
 - Fix SQL for changing persistent object flag in database
+- Fix subtitle detection in import
+- Fix Support for non-root user in docker image
+- Fix timed playlist import
 - Fix upload for bionic
 - Get correct ffmpeg subtitle stream
 - Get multiple streams in FFMpeg handler
@@ -28,12 +29,12 @@
 - Make ImportService stable for multiple calls
 - Mark some options as deprecated
 - MySql: Allow configuration of engine, charset and collation
-- Quirks for Freebox Player
 - Provide bash completion file
+- Quirks for Freebox Player
 - Refactor ConfigSetup code
 - Remove legacy compile option SQLITE_BACKUP_ENABLED
-- Restore owner of config file in docker
 - Reorganise installation scripts
+- Restore owner of config file in docker
 - Support "natural" file sorting
 - Tweak for old Samsung TV
 - Update fmtlib to 11.2.0
