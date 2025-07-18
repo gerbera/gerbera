@@ -14,6 +14,7 @@
 - Fill database on startup
 - Filter resources by mimetype
 - Fix import and xml
+- Fix captionInfoCount handling
 - Fix inotify for files
 - Fix issue with stale objects in autoscan
 - Fix resources for containers

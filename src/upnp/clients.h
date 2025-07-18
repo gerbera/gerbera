@@ -81,7 +81,7 @@ struct ClientProfile {
     DictionaryOption mimeMappings = DictionaryOption({});
     DictionaryOption headers = DictionaryOption({});
     VectorOption dlnaMappings = VectorOption({});
-    int captionInfoCount { 1 };
+    int captionInfoCount { -1 };
     int stringLimit { -1 };
     bool multiValue { true };
     bool fullFilter { false };
