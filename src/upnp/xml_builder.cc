@@ -1088,9 +1088,10 @@ void UpnpXMLBuilder::addResources(
 
     if (!captionInfoEx.empty()) {
         auto count = (quirks && quirks->getCaptionInfoCount() > -1) ? quirks->getCaptionInfoCount() : config->getIntOption(ConfigVal::UPNP_CAPTION_COUNT);
+        bool doCount = (count > -1);
         for (auto&& captionInfo : captionInfoEx) {
             count--;
-            if (count < 0)
+            if (count < 0 && doCount)
                 break;
             auto vs = parent.append_child("sec:CaptionInfoEx");
             for (auto&& [key, val] : captionInfo) {

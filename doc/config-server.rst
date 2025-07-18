@@ -461,7 +461,7 @@ Note:
 
     ::
 
-        enabled=...
+        enabled="no"
 
     * Optional
     * Default: **yes**
@@ -470,7 +470,7 @@ Note:
 
     ::
 
-        show-tooltips=...
+        show-tooltips="no"
 
     * Optional
     * Default: **yes**
@@ -479,7 +479,7 @@ Note:
 
     ::
 
-        show-numbering=...
+        show-numbering="no"
 
     * Optional
     * Default: **yes**
@@ -488,7 +488,7 @@ Note:
 
     ::
 
-        show-thumbnail=...
+        show-thumbnail="no"
 
     * Optional
     * Default: **yes**
@@ -497,7 +497,7 @@ Note:
 
     ::
 
-        poll-interval=...
+        poll-interval="10"
 
     * Optional
     * Default: **2**
@@ -507,7 +507,7 @@ Note:
 
     ::
 
-        fs-add-item=...
+        fs-add-item="yes"
 
     * Optional
     * Default: **no**
@@ -1076,9 +1076,9 @@ This section defines the properties which are send to UPnP clients as part of th
 
         * Optional
 
-        * Default: **1**
+        * Default: **-1**
 
-        Number of ``sec::CaptionInfoEx`` entries to write to UPnP result. Default can be overwritten by clients setting.
+        Number of ``sec::CaptionInfoEx`` entries to write to UPnP result. Default can be overwritten by clients setting. -1 means unlimted
 
     **Child tags:**
 
