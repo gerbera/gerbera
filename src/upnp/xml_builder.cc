@@ -1069,6 +1069,9 @@ void UpnpXMLBuilder::addResources(
         }
 
         if (purpose == ResourcePurpose::Subtitle) {
+            if (quirks && res->getHandlerType() != ContentHandler::SUBTITLE && !quirks->showInternalSubtitles()) {
+                continue;
+            }
             auto captionInfo = std::map<std::string, std::string>();
             captionInfo[""] = url;
             captionInfo["sec:type"] = res->getAttribute(ResourceAttribute::TYPE).empty() ? res->getParameter("type") : res->getAttribute(ResourceAttribute::TYPE);
@@ -1109,8 +1112,13 @@ void UpnpXMLBuilder::addResources(
     auto clientGroup = quirks ? quirks->getGroup() : DEFAULT_CLIENT_GROUP;
     for (auto&& res : orderedResources) {
         auto purpose = res->getPurpose();
-        if (quirks && !quirks->supportsResource(purpose)) {
-            continue;
+        if (quirks) {
+            if (!quirks->supportsResource(purpose)) {
+                continue;
+            }
+            if (purpose == ResourcePurpose::Subtitle && res->getHandlerType() != ContentHandler::SUBTITLE && !quirks->showInternalSubtitles()) {
+                continue;
+            }
         }
         std::map<std::string, std::string> clientSpecficAttrs;
         if (res->getHandlerType() == ContentHandler::DEFAULT && !captionInfoEx.empty() && quirks && quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES)) {

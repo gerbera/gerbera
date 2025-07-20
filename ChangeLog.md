@@ -9,6 +9,7 @@
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
 - Changed OpenWRT Installation note
 - Configure limit of sql strings
+- Do not send internal subtitles as UPnP resources
 - Execinfo for stack traces in error log
 - Extend details extracted by WavPack handler
 - Fill database on startup

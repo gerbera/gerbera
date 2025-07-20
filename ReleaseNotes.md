@@ -7,6 +7,15 @@ Filtering resources by mimetype instead of extension reduces effort of configura
 Improved resource handling for WavPack and FFMpeg requrires reimport of the library
 Changes to configure text for "PC Directory" can be merged with `--create-config=Boxlayout`
 
+### Deprecation Info
+
+The scripting interface will soon support the `import-function`-approach only. This means that
+entries like `import-script` and `playlist-script` will not work anymore and the respective scripts
+will be loaded on startup with no argument. Instead the defaults of `import-function/audio-file`
+will be applied. To prepare your config file run `gerbera --check-config -c <YourConfigFile>`.
+If you get deprecation warnings, run `gerbera --create-config=Import` and merge the output into your
+config file.
+
 ### NEW Features
 
 - Support "natural" file sorting for numbers in file names
