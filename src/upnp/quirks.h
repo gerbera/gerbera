@@ -54,6 +54,7 @@ using QuirkFlags = std::uint32_t;
 #define QUIRK_FLAG_HIDE_CONTAINER_SHORTCUTS 0x00004000
 #define QUIRK_FLAG_ASCIIXML 0x00008000
 #define QUIRK_FLAG_FORCE_NO_CONVERSION 0x00010000
+#define QUIRK_FLAG_SHOW_INTERNAL_SUBTITLES 0x00020000
 #define QUIRK_FLAG_TRANSCODING1 0x00100000
 #define QUIRK_FLAG_TRANSCODING2 0x00200000
 #define QUIRK_FLAG_TRANSCODING3 0x00400000
@@ -74,7 +75,11 @@ struct ClientObservation;
 
 class Quirks {
 public:
-    Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<ClientManager>& clientManager, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent);
+    Quirks(
+        std::shared_ptr<UpnpXMLBuilder> xmlBuilder,
+        const std::shared_ptr<ClientManager>& clientManager,
+        const std::shared_ptr<GrbNet>& addr,
+        const std::string& userAgent);
 
     Quirks(const struct ClientObservation* client);
 
@@ -90,7 +95,10 @@ public:
      * \return void
      *
      */
-    void restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node& result, int offset = 10) const;
+    void restoreSamsungBookMarkedPosition(
+        const std::shared_ptr<CdsItem>& item,
+        pugi::xml_node& result,
+        int offset = 10) const;
 
     /** \brief Stored bookmark information into the database
      *
@@ -230,6 +238,13 @@ public:
      */
     bool getFullFilter() const;
 
+    /** \brief Get visibility if internal subtitles
+     *
+     * \return true if internal subtitles are visible
+     *
+     */
+    bool showInternalSubtitles() const;
+
     /** \brief Get group for ClientStatusDetail
      *
      * \return group for ClientStatusDetail
@@ -259,7 +274,12 @@ public:
      */
     bool isAllowed() const;
 
+    /** \brief Check for active flag
+     */
     bool hasFlag(QuirkFlags flag) const;
+
+    /** \brief Get list of source folders to hide from client
+     */
     std::vector<std::string> getForbiddenDirectories() const;
 
     const struct ClientProfile* getProfile() const { return pClientProfile; }

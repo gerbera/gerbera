@@ -294,22 +294,22 @@ void Server::run()
 
 std::string Server::getIp() const
 {
-    if (port > 0)
+    if (port > 0 && !ip.empty())
         return ip;
-    if (port6 > 0)
+    if (port6 > 0 && !ip6.empty())
         return ip6;
-    if (ulaGuaPort6 > 0)
+    if (ulaGuaPort6 > 0 && !ulaGuaIp6.empty())
         return ulaGuaIp6;
     return "127.0.0.1";
 }
 
 in_port_t Server::getPort() const
 {
-    if (port > 0)
+    if (port > 0 && !ip.empty())
         return port;
-    if (port6 > 0)
+    if (port6 > 0 && !ip6.empty())
         return port6;
-    if (ulaGuaPort6 > 0)
+    if (ulaGuaPort6 > 0 && !ulaGuaIp6.empty())
         return ulaGuaPort6;
     return -1;
 }

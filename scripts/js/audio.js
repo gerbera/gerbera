@@ -252,7 +252,6 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
     }
   }
 
-  var init = mapInitial(audio.albumArtist.charAt(0));
   if (audio.disknr != '') {
     if (specialGenre.exec(audio.genre)) {
       if (audio.disknr.length == 1) {
@@ -262,6 +261,7 @@ function addAudioInitial(obj, cont, rootPath, containerType) {
       }
     }
   }
+  var init = mapInitial(audio.albumArtist.charAt(0));
   if (init && init !== '') {
     chain.init.title = init;
   }

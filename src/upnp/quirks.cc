@@ -390,6 +390,11 @@ bool Quirks::needsNoConversion() const
     return hasFlag(QUIRK_FLAG_FORCE_NO_CONVERSION);
 }
 
+bool Quirks::showInternalSubtitles() const
+{
+    return hasFlag(QUIRK_FLAG_SHOW_INTERNAL_SUBTITLES);
+}
+
 bool Quirks::needsSimpleDate() const
 {
     return hasFlag(QUIRK_FLAG_SIMPLE_DATE);

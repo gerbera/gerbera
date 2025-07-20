@@ -252,8 +252,8 @@ file types do not work you can add mimetype mapping to the
 Database
 --------
 
-General
-~~~~~~~
+Migration
+~~~~~~~~~
 
 Normally, the database is migrated by gerbera automatically. In case migration
 fails or for new layout features you need to clear the database:
@@ -261,7 +261,10 @@ fails or for new layout features you need to clear the database:
 - remove all sqlite db files incl. backup if using sqlite3
   drop all tables from gerbera mysql database with ``mysql-drop.sql``
 
-If some of your titles are truncated or to safe disk space you can modify the
+Storage size
+~~~~~~~~~~~~
+
+If some of your titles are truncated or to safe disk space you can extend or reduce the
 ``string-limit`` property of the ``<storage>`` config section. If you did so,
 you have to clear your database to avoid side effects.
 
