@@ -375,6 +375,9 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithExiv2AllDefinitions
     std::string mockXml = mockConfigXml("fixtures/mock-example-exiv2-all.xml");
 #endif
     std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
+#ifdef GERBERA_RELEASE
+    replaceAllString(mockXml, "https://docs.gerbera.io/en/latest/", "https://docs.gerbera.io/en/stable/");
+#endif
 
     // remove UUID, for simple compare...TODO: mock UUID?
     std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
@@ -392,6 +395,9 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 #else
     std::string mockXml = mockConfigXml("fixtures/mock-example-all.xml");
 #endif
+#ifdef GERBERA_RELEASE
+    replaceAllString(mockXml, "https://docs.gerbera.io/en/latest/", "https://docs.gerbera.io/en/stable/");
+#endif
     std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 
     // remove UUID, for simple compare...TODO: mock UUID?
@@ -406,6 +412,9 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 TEST_F(ExampleConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-example-minimal.xml");
+#ifdef GERBERA_RELEASE
+    replaceAllString(mockXml, "https://docs.gerbera.io/en/latest/", "https://docs.gerbera.io/en/stable/");
+#endif
 
     std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 

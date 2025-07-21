@@ -8,6 +8,10 @@
     "editable": false,
     "value": "object.container"
   },
+  "sortKey": {
+    "editable": true,
+    "value": "container title"
+  },
   "flags": {
     "editable": true,
     "value": "Restricted"

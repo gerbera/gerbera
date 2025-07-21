@@ -6,6 +6,10 @@
       "editable": false,
       "value": "container title"
     },
+    "sortKey": {
+      "editable": false,
+      "value": "container title"
+    },
     "class": {
       "editable": false,
       "value": "object.container"

@@ -23,6 +23,13 @@ echo "Loading functions for ${lsb_codename}"
 
 function install-cmake() {
   echo "::group::Installing CMake"
+  sudo apt-get install build-essential -y
+  sudo bash "${GRB_SH_DIR}install-cmake.sh"
+  echo "::endgroup::"
+}
+
+function install-cmake-backport() {
+  echo "::group::Installing CMake"
   sudo apt-get install apt-transport-https ca-certificates gnupg software-properties-common wget -y
   sudo apt-add-repository "deb http://deb.debian.org/debian ${lsb_codename}-backports main"
   sudo apt-get update -y

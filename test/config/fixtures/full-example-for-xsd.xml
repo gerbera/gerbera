@@ -7,7 +7,7 @@
     -->
     <server debug-mode="content|xml">
         <logging rotate-file-size="1000000" rotate-file-count="5"/>
-        <ui enabled="yes" show-tooltips="yes" poll-interval="2" poll-when-idle="no" show-numbering="yes" show-thumbnail="yes" show-video="no">
+        <ui enabled="yes" show-tooltips="yes" poll-interval="2" poll-when-idle="no" show-numbering="yes" show-thumbnail="yes" show-video="no" edit-sortkey="no" fs-add-item="no">
             <content-security-policy>
                 font-src %HOSTS% https://fonts.gstatic.com/
                 style-src %HOSTS% https://fonts.googleapis.com 'unsafe-inline'

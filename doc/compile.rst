@@ -54,6 +54,8 @@ Required Packages
 +------------+------------------------------+---------------------+--------------------+
 | spdlog_    | Runtime logging              |                     | install-spdlog.sh  |
 +------------+------------------------------+---------------------+--------------------+
+| cmake_     | Build processing             |                     | install-cmake.sh   |
++------------+------------------------------+---------------------+--------------------+
 
 Optional Packages
 -----------------
@@ -95,6 +97,7 @@ Optional Packages
 | wavpack_            | WavPack metadata support   | WITH\_WAVPACK           | Disabled | install-wavpack.sh           |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 
+.. _cmake: https://cmake.org
 .. _doxygen: https://github.com/doxygen/doxygen
 .. _duktape: https://duktape.org
 .. _ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer

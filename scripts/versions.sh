@@ -36,6 +36,7 @@ if [[ "${GERBERA_ENV-head}" == "minimum" ]]; then
     WAVPACK="5.1.0"
     TAGLIB="1.12"
     JSONCPP="1.7.4"
+    CMAKE="3.31.8"
 
 elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
 
@@ -55,6 +56,7 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
     WAVPACK="5.4.0"
     TAGLIB="1.12"
     JSONCPP="1.9.6"
+    CMAKE="3.31.8"
 
 else
 
@@ -74,5 +76,6 @@ else
     WAVPACK="5.8.1"
     TAGLIB="2.1.1"
     JSONCPP="1.9.6"
+    CMAKE="4.0.3"
 
 fi

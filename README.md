@@ -84,6 +84,7 @@ sudo make install
 |---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
 | [googletest]        | 1.10.0      | 1.10.0      | 1.17.0        | Optional      | Running tests                  | Disabled |
 | [doxygen]           |             | 1.8.14      | 1.8.14        | Optional      | Building source documentation  | Disabled |
+| [cmake]             | 3.25.0      | 3.31.38     | 4.0.3         | Optional      | Build processing               | Disabled |
 
 ## License
 
@@ -101,6 +102,7 @@ sudo make install
     Copyright (C) 2016-2025
         Gerbera Contributors
 
+[cmake]: https://cmake.org/
 [Docker Hub]: https://hub.docker.com/r/gerbera/gerbera
 [duktape]: https://duktape.org
 [doxygen]: https://github.com/doxygen/doxygen
