@@ -11,6 +11,7 @@
 - Changed OpenWRT Installation note
 - Configure limit of sql strings
 - Do not send internal subtitles as UPnP resources
+- Edit SortKey on web ui
 - Execinfo for stack traces in error log
 - Extend details extracted by WavPack handler
 - Extract metadata from substreams with ffmpeg

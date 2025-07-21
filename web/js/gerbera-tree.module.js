@@ -292,6 +292,7 @@ const transformContainers = (response, createParent) => {
       id: item.id,
       childCount: item.child_count,
       path: item.location ?? null,
+      sortKey: item.sortKey ?? null,
       upnpClass: item.upnp_class ?? null,
       upnpShortcut: item.upnp_shortcut ?? null,
       autoScanMode: item.autoscan_mode,

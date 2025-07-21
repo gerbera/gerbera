@@ -98,7 +98,8 @@ export class ItemView {
       onDownload: Items.downloadItem,
       onAdd: Items.addFileItem,
       itemType: GerberaApp.getType(),
-      parentItem: response.items
+      parentItem: response.items,
+      serverConfig: GerberaApp.serverConfig
     }
   }
 }
@@ -173,7 +174,8 @@ export class FileItemView extends ItemView {
       onDownload: Items.downloadItem,
       onAdd: GerberaApp.serverConfig.fsAddItem ? Items.addFileItem : undefined,
       itemType: GerberaApp.getType(),
-      parentItem: response.files
+      parentItem: response.files,
+      serverConfig: GerberaApp.serverConfig
     }
   }
 }
@@ -439,6 +441,7 @@ const loadEditItem = (response) => {
   if (response.success) {
     editModal.editmodal('loadItem', {
       item: response.item,
+      serverConfig: GerberaApp.serverConfig,
       onSave: saveItem,
       onDetails: showDetails,
       onHide: hideDetails,
@@ -460,6 +463,7 @@ const transformItems = (items) => {
       url: gItem.res,
       mtype: ('mtype' in gItem) ? gItem.mtype : null,
       upnp_class: ('upnp_class' in gItem) ? gItem.upnp_class : null,
+      sortKey: ('sortKey' in gItem) ? gItem.sortKey : null,
       image: ('image' in gItem) ? gItem.image : null,
       index: ('index' in gItem) ? gItem.index : null,
       part: ('part' in gItem) ? gItem.part : null,

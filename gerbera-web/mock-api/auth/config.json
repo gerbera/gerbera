@@ -9,6 +9,8 @@
     "poll-when-idle": false,
     "poll-interval": 2,
     "have-inotify": true,
+    "fsAddItem": false,
+    "editSortKey": true,
     "sourceDocs": "./dev/index.html",
     "searchCaps": "upnp:class,upnp:playbackCount,upnp:lastPlaybackTime,play_group,dc:title,upnp:artist,upnp:album,dc:date,dc:created,upnp:date,upnp:genre,dc:description,upnp:longDescription,upnp:episodeSeason,upnp:originalTrackNumber,upnp:albumArtURI,upnp:region,dc:creator,upnp:author,upnp:director,dc:publisher,upnp:rating,upnp:actor,upnp:producer,upnp:artist@role[AlbumArtist],upnp:composer,upnp:conductor,upnp:orchestra,upnp:contentClass,res,res@size,res@duration,res@bitrate,res@sampleFrequency,res@nrAudioChannels,res@resolution,res@colorDepth,res@protocolInfo,res@resFile,res@type,res@fanArtObject,res@fanArtResource,res@bitsPerSample,res@dc:language,res@sec:acodec,res@sec:vcodec,res@format,res@orientation",
     "sortCaps": "upnp:episodeSeason,upnp:originalTrackNumber,dc:title,upnp:class,path,@refID,@parentID,@id,last_updated,last_modified,upnp:artist,upnp:album,dc:date,dc:created,upnp:date,upnp:genre,dc:description,upnp:longDescription,upnp:albumArtURI,upnp:region,dc:creator,upnp:author,upnp:director,dc:publisher,upnp:rating,upnp:actor,upnp:producer,upnp:artist@role[AlbumArtist],upnp:composer,upnp:conductor,upnp:orchestra,upnp:contentClass",
@@ -25,6 +27,6 @@
       "action": []
     },
     "friendlyName" : "Wombat",
-    "version": "2.5.0"
+    "version": "2.6.0"
   }
 }

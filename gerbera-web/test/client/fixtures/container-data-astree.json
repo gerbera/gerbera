@@ -19,7 +19,8 @@
           "image": null,
           "path": null,
           "upnpShortcut": null,
-          "upnpClass": null
+          "upnpClass": null,
+          "sortKey": null
         }
       },
       {
@@ -34,7 +35,8 @@
           "image": null,
           "path": null,
           "upnpShortcut": null,
-          "upnpClass": null
+          "upnpClass": null,
+          "sortKey": null
         }
       },
       {
@@ -49,7 +51,8 @@
           "image": null,
           "path": "/my/Directory/",
           "upnpShortcut": null,
-          "upnpClass": "upnp.class"
+          "upnpClass": "upnp.class",
+          "sortKey": null
         }
       },
       {
@@ -64,7 +67,8 @@
           "image": null,
           "path": null,
           "upnpShortcut": null,
-          "upnpClass": null
+          "upnpClass": null,
+          "sortKey": null
         }
       },
       {
@@ -79,7 +83,8 @@
           "image": null,
           "path": null,
           "upnpShortcut": null,
-          "upnpClass": null
+          "upnpClass": null,
+          "sortKey": null
         }
       }
     ]

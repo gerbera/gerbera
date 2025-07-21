@@ -36,6 +36,8 @@
 
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
+#include "config/config.h"
+#include "config/config_val.h"
 #include "database/database.h"
 #include "exceptions.h"
 #include "upnp/clients.h"
@@ -93,6 +95,11 @@ void Web::EditLoad::writeCoreInfo(
     title["value"] = obj->getTitle();
     title["editable"] = obj->isVirtual() || objectID == CDS_ID_FS_ROOT;
     item["title"] = title;
+
+    Json::Value sortEl;
+    sortEl["value"] = obj->getSortKey();
+    sortEl["editable"] = config->getBoolOption(ConfigVal::SERVER_UI_EDIT_SORTKEY);
+    item["sortKey"] = sortEl;
 
     Json::Value classEl;
     classEl["value"] = obj->getClass();

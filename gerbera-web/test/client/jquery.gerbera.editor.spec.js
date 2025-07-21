@@ -56,21 +56,21 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('defaults fields based on type', () => {
-      editModal.editmodal('addNewItem', {type: 'container', item: item});
+      editModal.editmodal('addNewItem', { type: 'container', item: item, serverConfig: { editSortKey: true } });
 
       expect(editTitle.val()).toBe('');
       expect(editClass.val()).toBe('object.container');
     });
 
     it('makes object type enabled and not readonly', () => {
-      editModal.editmodal('addNewItem', {type: 'container', item: item});
+      editModal.editmodal('addNewItem', { type: 'container', item: item, serverConfig: { editSortKey: true } });
 
       expect(editObjectType.is(':disabled')).toBeFalsy();
       expect(editObjectType.prop('readonly')).toBe(false);
     });
 
     it('defaults editable fields when item selected', () => {
-      editModal.editmodal('addNewItem', {type: 'item', item: item});
+      editModal.editmodal('addNewItem', { type: 'item', item: item, serverConfig: { editSortKey: true } });
 
       expect(editTitle.val()).toBe('');
       expect(editLocation.val()).toBe('');
@@ -81,7 +81,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('defaults editable fields when external_url is selected', () => {
-      editModal.editmodal('addNewItem', {type: 'external_url', item: item});
+      editModal.editmodal('addNewItem', { type: 'external_url', item: item, serverConfig: { editSortKey: true } });
 
       expect(editTitle.val()).toBe('');
       expect(editLocation.val()).toBe('');
@@ -95,7 +95,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
     it('binds the onSave event to the Add button', () => {
       const saveSpy = jasmine.createSpy('save');
-      const itemData = {type: 'external_url', item: item, onSave: saveSpy};
+      const itemData = { type: 'external_url', item: item, onSave: saveSpy, serverConfig: { editSortKey: true } };
 
       editModal.editmodal('addNewItem', itemData);
       $('#editSave').click();
@@ -147,7 +147,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
     it('should set fields in editor for `container`', () => {
       const itemData = {
-        item: container
+        item: container,
+        serverConfig: { editSortKey: true }
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -168,7 +169,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
     it('should set fields in editor for `item`', () => {
       const itemData = {
-        item: itemJson
+        item: itemJson,
+        serverConfig: { editSortKey: true }
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -189,7 +191,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
     it('should set fields in editor for `external_url`', () => {
       const itemData = {
-        item: externalUrl
+        item: externalUrl,
+        serverConfig: { editSortKey: true }
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -212,7 +215,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       const saveSpy = jasmine.createSpy('save');
       const itemData = {
         item: externalUrl,
-        onSave: saveSpy
+        onSave: saveSpy,
+        serverConfig: { editSortKey: true }
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -230,7 +234,10 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('gives proper data for `item` object to save', () => {
-      const itemData = { item: itemJson };
+      const itemData = {
+        item: itemJson,
+        serverConfig: { editSortKey: true }
+      };
       editModal.editmodal('loadItem', itemData);
 
       const result = editModal.editmodal('saveItem');
@@ -238,6 +245,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(result).toEqual({
         object_id: '39479',
         title: 'Test.mp4',
+        sortKey: 'Test.mp4',
         description: 'A%20description',
         flags: 'Restricted',
         resources: '',
@@ -245,7 +253,10 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('gives proper data for `container` object to save', () => {
-      const itemData = { item: container };
+      const itemData = {
+        item: container,
+        serverConfig: { editSortKey: true }
+      };
       editModal.editmodal('loadItem', itemData);
 
       const result = editModal.editmodal('saveItem');
@@ -253,13 +264,17 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(result).toEqual({
         object_id: '1471',
         title: 'container%20title',
+        sortKey: 'container%20title',
         flags: 'Restricted',
         resources: '',
       });
     });
 
     it('gives proper data for `external_url` object to save', () => {
-      const itemData = { item: externalUrl };
+      const itemData = {
+        item: externalUrl,
+        serverConfig: { editSortKey: true }
+      };
       editModal.editmodal('loadItem', itemData);
 
       const result = editModal.editmodal('saveItem');
@@ -268,6 +283,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         object_id: '1469',
         title: 'title',
         location: 'http%3A%2F%2Flocalhost',
+        sortKey: 'title',
         description: 'description',
         'mime-type': 'video%2Fts',
         flags: 'Restricted',
@@ -289,7 +305,10 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('gives proper data for `item` object to add', () => {
-      editModal.editmodal('addNewItem', {type: 'item', item: item});
+      editModal.editmodal('addNewItem', {
+        type: 'item', item: item,
+        serverConfig: { editSortKey: true }
+      });
 
       const result = editModal.editmodal('addObject');
 
@@ -298,6 +317,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         obj_type: 'item',
         class: 'object.item',
         location: '',
+        sortKey: '',
         title: '',
         flags: '',
         description: '',
@@ -306,7 +326,10 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('gives proper data for `container` object to add', () => {
-      editModal.editmodal('addNewItem', {type: 'container', item: item});
+      editModal.editmodal('addNewItem', {
+        type: 'container', item: item,
+        serverConfig: { editSortKey: true }
+      });
 
       const result = editModal.editmodal('addObject');
 
@@ -314,6 +337,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         parent_id: '9999',
         obj_type: 'container',
         class: 'object.container',
+        sortKey: '',
         flags: '',
         title: '',
         resources: '',
@@ -321,7 +345,10 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     });
 
     it('gives proper data for `external_url` object to add', () => {
-      editModal.editmodal('addNewItem', {type: 'external_url', item: item});
+      editModal.editmodal('addNewItem', {
+        type: 'external_url', item: item,
+        serverConfig: { editSortKey: true }
+      });
 
       const result = editModal.editmodal('addObject');
 
@@ -331,6 +358,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
         class: 'object.item',
         title: '',
         location: '',
+        sortKey: '',
         description: '',
         'mime-type': '',
         flags: '',

@@ -215,7 +215,8 @@ describe('Gerbera Tree', () => {
             image: null,
             path: "/my/Directory/",
             upnpShortcut: null,
-            upnpClass: "upnp.class"
+            upnpClass: "upnp.class",
+            sortKey: null
           }
         }
       );
@@ -248,7 +249,8 @@ describe('Gerbera Tree', () => {
             image: null,
             path: "/my/Directory/",
             upnpShortcut: null,
-            upnpClass: "upnp.class"
+            upnpClass: "upnp.class",
+            sortKey: null
           }
         }
       );
@@ -402,7 +404,8 @@ describe('Gerbera Tree', () => {
           image: null,
           path: null,
           upnpShortcut: null,
-          upnpClass: null
+          upnpClass: null,
+          sortKey: null
         }
       });
     });

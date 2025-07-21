@@ -8,6 +8,8 @@
     "poll-when-idle": false,
     "poll-interval": 2,
     "have-inotify": true,
+    "fsAddItem": false,
+    "editSortKey": true,
     "items-per-page": {
       "default": 25,
       "option": [

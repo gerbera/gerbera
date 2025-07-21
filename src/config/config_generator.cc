@@ -393,6 +393,13 @@ void ConfigGenerator::generateUi()
         { ConfigVal::SERVER_UI_ENABLE_VIDEO, false },
         { ConfigVal::SERVER_UI_DEFAULT_ITEMS_PER_PAGE, false },
         { ConfigVal::SERVER_UI_ITEMS_PER_PAGE_DROPDOWN, false },
+        { ConfigVal::SERVER_UI_EDIT_SORTKEY, false },
+        { ConfigVal::SERVER_UI_FS_SUPPORT_ADD_ITEM, false },
+        { ConfigVal::SERVER_UI_CONTENT_SECURITY_POLICY, false },
+        { ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_MAPPING, false },
+        { ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_DEFAULT, false },
+        { ConfigVal::SERVER_UI_DOCUMENTATION_SOURCE, false },
+        { ConfigVal::SERVER_UI_DOCUMENTATION_USER, false },
     };
     generateOptions(options);
     setValue(ConfigVal::SERVER_UI_ACCOUNT_LIST, ConfigVal::A_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ConfigVal::A_SERVER_UI_ACCOUNT_LIST_USER, DEFAULT_ACCOUNT_USER);

@@ -6,6 +6,10 @@
       "editable": true,
       "value": "My Title"
     },
+    "sortKey": {
+      "editable": true,
+      "value": "My Title"
+    },
     "class": {
       "editable": true,
       "value": "object.item.videoItem"
@@ -31,80 +35,95 @@
       "editable": false,
       "value": "Restricted"
     },
-    "metadata": {
-      "metadata": [ {
-	"metaname":"dc:date",
-	"metavalue":"2020-01-01",
-	"editable":false
-	},
-	{
-	"metaname":"dc:description",
-	"metavalue":"A description",
-	"editable":false
-	}, {
-	"metaname":"dc:title",
-	"metavalue":"My Title",
-	"editable":false
-	}, {
-	"metaname":"upnp:artist",
-	"metavalue":"The Artist",
-	"editable":false
-	},{
-	"metaname":"upnp:genre",
-	"metavalue":"Genre",
-	"editable":false
-	},{
-	"metaname":"upnp:playbackCount@group[default]",
-	"metavalue":"2",
-	"editable":false
-	},{
-	"metaname":"upnp:lastPlaybackTime@group[default]",
-	"metavalue":"2022-03-16 T 20:31:46",
-	"editable":false
-	}]},
-    "auxdata":{"auxdata":[]},
-    "resources":{
-      "resources": [ {
-        "resname":"----RESOURCE----",
-	"resvalue":"0",
-	"editable":false
-	},{
-	"resname":"handlerType",
-	"resvalue":"Default",
-	"editable":false
-	},{
-	"resname":"bitrate",
-	"resvalue":"5985 Kbps",
-	"rawvalue":"748197",
-	"editable":false
-	},{
-	"resname":"duration",
-	"resvalue":"00:08:15.0",
-	"editable":false
-	},{
-	"resname":"nrAudioChannels",
-	"resvalue":"2",
-	"editable":false
-	},{
-	"resname":"protocolInfo",
-	"resvalue":"http-get:*:video/mp4:*",
-	"editable":false
-	},{
-	"resname":"sampleFrequency",
-	"resvalue":"44.1 kHz",
-	"rawvalue":"44100",
-	"editable":false
-	},{
-	"resname":"resolution",
-	"resvalue":"HD",
-	"rawvalue":"720x576",
-	"editable":false
-	},{
-	"resname":"size",
-	"resvalue":"7.07 MB",
-	"rawvalue":"7417561",
-	"editable":false
-	}]}
+    "metadata": [
+      {
+        "metaname": "dc:date",
+        "metavalue": "2020-01-01",
+        "editable": false
+      },
+      {
+        "metaname": "dc:description",
+        "metavalue": "A description",
+        "editable": false
+      },
+      {
+        "metaname": "dc:title",
+        "metavalue": "My Title",
+        "editable": false
+      },
+      {
+        "metaname": "upnp:artist",
+        "metavalue": "The Artist",
+        "editable": false
+      },
+      {
+        "metaname": "upnp:genre",
+        "metavalue": "Genre",
+        "editable": false
+      },
+      {
+        "metaname": "upnp:playbackCount@group[default]",
+        "metavalue": "2",
+        "editable": false
+      },
+      {
+        "metaname": "upnp:lastPlaybackTime@group[default]",
+        "metavalue": "2022-03-16 T 20:31:46",
+        "editable": false
+      }
+    ],
+    "auxdata": [],
+    "resources": [
+      {
+        "resname": "----RESOURCE----",
+        "resvalue": "0",
+        "editable": false
+      },
+      {
+        "resname": "handlerType",
+        "resvalue": "Default",
+        "editable": false
+      },
+      {
+        "resname": "bitrate",
+        "resvalue": "5985 Kbps",
+        "rawvalue": "748197",
+        "editable": false
+      },
+      {
+        "resname": "duration",
+        "resvalue": "00:08:15.0",
+        "editable": false
+      },
+      {
+        "resname": "nrAudioChannels",
+        "resvalue": "2",
+        "editable": false
+      },
+      {
+        "resname": "protocolInfo",
+        "resvalue": "http-get:*:video/mp4:*",
+        "editable": false
+      },
+      {
+        "resname": "sampleFrequency",
+        "resvalue": "44.1 kHz",
+        "rawvalue": "44100",
+        "editable": false
+      },
+      {
+        "resname": "resolution",
+        "resvalue": "HD",
+        "rawvalue": "720x576",
+        "editable": false
+      },
+      {
+        "resname": "size",
+        "resvalue": "7.07 MB",
+        "rawvalue": "7417561",
+        "editable": false
+      }
+    ]
   },
   "update_ids": {
     "pending": false

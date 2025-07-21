@@ -109,6 +109,7 @@ bool Web::Auth::getConfig(Json::Value& element)
     cfg["poll-when-idle"] = config->getBoolOption(ConfigVal::SERVER_UI_POLL_WHEN_IDLE);
     cfg["poll-interval"] = config->getIntOption(ConfigVal::SERVER_UI_POLL_INTERVAL);
     cfg["fsAddItem"] = config->getBoolOption(ConfigVal::SERVER_UI_FS_SUPPORT_ADD_ITEM);
+    cfg["editSortKey"] = config->getBoolOption(ConfigVal::SERVER_UI_EDIT_SORTKEY);
     cfg["sourceDocs"] = config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_SOURCE);
     cfg["userDocs"] = config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_USER);
     cfg["searchCaps"] = SQLDatabase::getSearchCapabilities();

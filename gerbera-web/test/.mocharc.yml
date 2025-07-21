@@ -1,4 +1,4 @@
 timeout: 60000
-slow: 10000
-retries: 3
+slow: 5000
+retries: 5
 parallel: false

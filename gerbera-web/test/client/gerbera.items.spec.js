@@ -42,6 +42,7 @@ describe('Gerbera Items', () => {
   let lsSpy;
   let viewFactoryData;
   beforeEach(() => {
+    GerberaApp.serverConfig = mockConfig.config;
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
     viewFactoryData = {
@@ -90,7 +91,6 @@ describe('Gerbera Items', () => {
 
     it('updates the breadcrumb based on the selected item', async () => {
       spyOn(GerberaApp, 'getType').and.returnValue('db');
-      GerberaApp.serverConfig = mockConfig.config;
 
       await Items.initialize();
       Items.treeItemSelected(viewFactoryData);
@@ -384,7 +384,8 @@ describe('Gerbera Items', () => {
 
     it('calls the server with the `item` details', () => {
       const itemData = {
-        item: itemMock
+        item: itemMock,
+        serverConfig: GerberaApp.serverConfig
       };
       editModal.editmodal('loadItem', itemData);
 
@@ -393,6 +394,7 @@ describe('Gerbera Items', () => {
         req_type: 'edit_save',
         object_id: '39479',
         title: 'Test.mp4',
+        sortKey: 'Test.mp4',
         description: 'A%20description',
         updates: 'check',
         flags: 'Restricted',
@@ -407,7 +409,8 @@ describe('Gerbera Items', () => {
 
     it('calls the server with the `container` details', () => {
       const itemData = {
-        item: containerMock
+        item: containerMock,
+        serverConfig: GerberaApp.serverConfig
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -417,6 +420,7 @@ describe('Gerbera Items', () => {
         req_type: 'edit_save',
         object_id: '1471',
         title: 'container%20title',
+        sortKey: 'container%20title',
         updates: 'check',
         flags: 'Restricted',
         resources: '',
@@ -430,7 +434,8 @@ describe('Gerbera Items', () => {
 
     it('calls the server with the `external_url` details', () => {
       const itemData = {
-        item: externalUrl
+        item: externalUrl,
+        serverConfig: GerberaApp.serverConfig
       };
 
       editModal.editmodal('loadItem', itemData);
@@ -441,6 +446,7 @@ describe('Gerbera Items', () => {
         object_id: '1469',
         title: 'title',
         location: 'http%3A%2F%2Flocalhost',
+        sortKey: 'title',
         description: 'description',
         'mime-type': 'video%2Fts',
         protocol: 'http-get',
@@ -606,6 +612,7 @@ describe('Gerbera Items', () => {
         obj_type: 'item',
         class: 'object.item',
         location: '',
+        sortKey: '',
         title: '',
         description: '',
         updates: 'check',
@@ -631,6 +638,7 @@ describe('Gerbera Items', () => {
         obj_type: 'container',
         class: 'object.container',
         title: '',
+        sortKey: '',
         updates: 'check',
         flags: '',
         resources: '',
@@ -651,6 +659,7 @@ describe('Gerbera Items', () => {
         obj_type: 'container',
         class: 'object.container',
         title: '',
+        sortKey: '',
         updates: 'check',
         flags: '',
         resources: '',
@@ -671,6 +680,7 @@ describe('Gerbera Items', () => {
         obj_type: 'external_url',
         class: 'object.item',
         title: '',
+        sortKey: '',
         location: '',
         description: '',
         'mime-type': '',

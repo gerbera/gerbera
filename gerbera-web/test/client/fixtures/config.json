@@ -7,6 +7,7 @@
     "poll-interval": 2,
     "have-inotify": true,
     "fsAddItem": false,
+    "editSortKey": true,
     "searchCaps": "dc:title",
     "sortCaps": "dc:title",
     "items-per-page": {
@@ -22,6 +23,6 @@
       "action": []
     },
     "friendlyName" : "Wombat",
-    "version": "2.5.0"
+    "version": "2.6.0"
   }
 }

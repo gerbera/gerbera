@@ -516,6 +516,15 @@ Note:
 
     ::
 
+        edit-sortkey="yes"
+
+    * Optional
+    * Default: **no**
+
+    Show the edit field ``sortKey`` for objects.
+
+    ::
+
         poll-when-idle=...
 
     * Optional

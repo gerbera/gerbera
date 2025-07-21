@@ -61,6 +61,9 @@
     "OggTheora",
   ];
   let resources = [];
+  let serverConfig = {
+    editSortKey: true,
+  };
   function addNewItem(modal, itemData) {
     const itemType = itemData.type;
     const item = itemData.item;
@@ -68,6 +71,7 @@
     const editTitle = modal.find('#editTitle');
     const editLocation = modal.find('#editLocation');
     const editClass = modal.find('#editClass');
+    const editSortKey = modal.find('#editSortKey');
     const editDesc = modal.find('#editDesc');
     const editMime = modal.find('#editMime');
     const editProtocol = modal.find('#editProtocol');
@@ -114,6 +118,11 @@
     editClass.val(defaultClasses[itemType].oclass);
     modal.find('.modal-dialog').removeClass('modal-xl');
     $("#editCol").hide();
+    if (serverConfig.editSortKey) {
+      showFields([editSortKey]);
+    } else {
+      hideFields([editSortKey]);
+    }
     if (defaultClasses[itemType].type === 'container') {
       showFields([editObjectType, editTitle, editClass, editFlags, editFlagBox['Searchable']]);
       hideFields([editLocation, editDesc, editMime, editProtocol]);
@@ -231,6 +240,7 @@
     modal.find('#editTitle').val('').prop('disabled', false);
     modal.find('#editLocation').val('').prop('disabled', false);
     modal.find('#editClass').val('').prop('disabled', false);
+    modal.find('#editSortKey').val('').prop('disabled', false);
     modal.find('#editDesc').val('').prop('disabled', false);
     modal.find('#editMime').val('').prop('disabled', false);
     modal.find('#editFlags').val('').prop('disabled', true);
@@ -332,6 +342,7 @@
 
   function loadItem(modal, itemData) {
     const item = itemData.item;
+    serverConfig = itemData.serverConfig;
     if (item) {
       if (item.image) {
         modal.find('#mediaimage').prop('src', item.image.value);
@@ -468,6 +479,18 @@
       .prop('disabled', true)
       .closest('.form-group').show();
 
+    if (serverConfig.editSortKey) {
+      modal.find('#editSortKey')
+        .val(item.sortKey.value)
+        .prop('disabled', !item.sortKey.editable)
+        .closest('.form-group').show();
+    } else {
+      modal.find('#editSortKey')
+        .val(item.sortKey.value)
+        .prop('disabled', !item.sortKey.editable)
+        .closest('.form-group').hide();
+    }
+
     if ('last_modified' in item && item['last_modified'].value !== '') {
       modal.find('#editLmt')
         .val(item['last_modified'].value)
@@ -603,11 +626,16 @@
     ]);
   }
 
+  function getSortKey(editSortKey, editTitle) {
+    return (serverConfig.editSortKey || editSortKey.val() !== '') ? editSortKey.val() : editTitle.val();
+  }
+
   function saveItem(modal) {
     let item;
     const objectId = modal.find('#objectId');
     const editObjectType = modal.find('#editObjectType');
     const editTitle = modal.find('#editTitle');
+    const editSortKey = modal.find('#editSortKey');
     const editLocation = modal.find('#editLocation');
     const editDesc = modal.find('#editDesc');
     const editMime = modal.find('#editMime');
@@ -618,6 +646,7 @@
         item = {
           object_id: objectId.val(),
           title: encodeURIComponent(editTitle.val()),
+          sortKey: encodeURIComponent(getSortKey(editSortKey, editTitle)),
           description: encodeURIComponent(editDesc.val()),
           flags: readFlags(modal),
         };
@@ -628,6 +657,7 @@
         item = {
           object_id: objectId.val(),
           title: encodeURIComponent(editTitle.val()),
+          sortKey: encodeURIComponent(getSortKey(editSortKey, editTitle)),
           flags: readFlags(modal),
         };
         readResources(item);
@@ -637,6 +667,7 @@
         item = {
           object_id: objectId.val(),
           title: encodeURIComponent(editTitle.val()),
+          sortKey: encodeURIComponent(getSortKey(editSortKey, editTitle)),
           description: encodeURIComponent(editDesc.val()),
           location: encodeURIComponent(editLocation.val()),
           'mime-type': encodeURIComponent(editMime.val()),
@@ -655,6 +686,7 @@
     const parentId = modal.find('#addParentId');
     const editObjectType = modal.find('#editObjectType');
     const editClass = modal.find('#editClass');
+    const editSortKey = modal.find('#editSortKey');
     const editTitle = modal.find('#editTitle');
     const editLocation = modal.find('#editLocation');
     const editDesc = modal.find('#editDesc');
@@ -668,6 +700,7 @@
           obj_type: defaultClasses[editObjectType.val()].type,
           class: editClass.val(),
           title: encodeURIComponent(editTitle.val()),
+          sortKey: encodeURIComponent(getSortKey(editSortKey, editTitle)),
           location: encodeURIComponent(editLocation.val()),
           description: encodeURIComponent(editDesc.val()),
           flags: readFlags(modal),
@@ -681,6 +714,7 @@
           obj_type: defaultClasses[editObjectType.val()].type,
           class: editClass.val(),
           title: encodeURIComponent(editTitle.val()),
+          sortKey: encodeURIComponent(getSortKey(editSortKey, editTitle)),
           flags: readFlags(modal),
         };
         readResources(item);
@@ -692,6 +726,7 @@
           obj_type: defaultClasses[editObjectType.val()].type,
           class: editClass.val(),
           title: encodeURIComponent(editTitle.val()),
+          sortKey: encodeURIComponent(getSortKey(editSortKey, editTitle)),
           description: encodeURIComponent(editDesc.val()),
           location: encodeURIComponent(editLocation.val()),
           'mime-type': encodeURIComponent(editMime.val()),

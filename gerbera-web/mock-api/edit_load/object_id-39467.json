@@ -6,6 +6,10 @@
       "editable": true,
       "value": "Test.mp4"
     },
+    "sortKey": {
+      "editable": true,
+      "value": "Test.mp4"
+    },
     "class": {
       "editable": true,
       "value": "object.item.videoItem"

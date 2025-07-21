@@ -4,6 +4,10 @@
     "editable": true,
     "value": "title"
   },
+  "sortKey": {
+    "editable": true,
+    "value": "title"
+  },
   "class": {
     "editable": true,
     "value": "object.item"
