@@ -49,7 +49,7 @@ protected:
     /// \brief unique service ID
     std::string serviceID;
 
-    std::shared_ptr<ClientStatusDetail> playStatus {};
+    std::shared_ptr<ClientStatusDetail> playStatus;
 
 public:
     /// \brief Constructor, sets the object type and default upnp:class (object.item)

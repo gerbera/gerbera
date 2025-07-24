@@ -64,7 +64,7 @@ protected:
 
 public:
     ConfigVal nodeOption {};
-    std::vector<ConfigVal> optionList {};
+    std::vector<ConfigVal> optionList;
 
     explicit ConfigVectorSetup(ConfigVal option, const char* xpath, const char* help,
         ConfigVal nodeOption, std::vector<ConfigVal> optionList,

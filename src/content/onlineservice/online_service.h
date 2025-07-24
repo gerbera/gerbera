@@ -156,7 +156,7 @@ public:
     std::shared_ptr<OnlineService> getService(OnlineServiceType service) const;
 
 protected:
-    std::map<OnlineServiceType, std::shared_ptr<OnlineService>> service_list {};
+    std::map<OnlineServiceType, std::shared_ptr<OnlineService>> service_list;
 };
 
 #endif // ONLINE_SERVICES

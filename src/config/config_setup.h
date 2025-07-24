@@ -73,7 +73,7 @@ protected:
     /// @brief true if option will be removed soon
     bool isDeprecated = false;
     /// @brief Function to check value format and content
-    StringCheckFunction rawCheck {};
+    StringCheckFunction rawCheck;
     /// @brief defaultValue default value if option not found
     std::string defaultValue;
     /// @brief name of the help page

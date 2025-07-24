@@ -100,7 +100,7 @@ struct ClientObservation {
     {
     }
 
-    std::shared_ptr<GrbNet> addr {};
+    std::shared_ptr<GrbNet> addr;
     std::string userAgent;
     std::chrono::seconds last;
     std::chrono::seconds age;
