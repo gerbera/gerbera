@@ -206,20 +206,41 @@ public:
     /// \brief check if FFMpeg information is available
     operator bool() const
     {
-        return pFormatCtx && pFormatCtx->metadata;
+        if (!(pFormatCtx && pFormatCtx->metadata)) {
+            for (std::size_t stream_number = 0; stream_number < pFormatCtx->nb_streams; stream_number++) {
+                if (pFormatCtx->streams[stream_number]->metadata)
+                    return true;
+            }
+            return false;
+        }
+        return true;
     }
 
     /// \brief get key value from image
     std::string getKey(const std::string& desiredTag) const
     {
         log_debug("key: {} ", desiredTag);
-        auto tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), nullptr, AV_DICT_IGNORE_SUFFIX);
-        if (tag && tag->value && tag->value[0]) {
-            auto [val, err] = sc->convert(trimString(tag->value));
-            if (!err.empty()) {
-                log_warning("{} {}: {}", location, desiredTag, err);
+        if (pFormatCtx->metadata) {
+            auto tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), nullptr, AV_DICT_IGNORE_SUFFIX);
+            if (tag && tag->value && tag->value[0]) {
+                auto [val, err] = sc->convert(trimString(tag->value));
+                if (!err.empty()) {
+                    log_warning("{} {}: {}", location, desiredTag, err);
+                }
+                return val;
             }
-            return val;
+        }
+        for (std::size_t stream_number = 0; stream_number < pFormatCtx->nb_streams; stream_number++) {
+            if (pFormatCtx->streams[stream_number]->metadata) {
+                auto tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), nullptr, AV_DICT_IGNORE_SUFFIX);
+                if (tag && tag->value && tag->value[0]) {
+                    auto [val, err] = sc->convert(trimString(tag->value));
+                    if (!err.empty()) {
+                        log_warning("{} stream {} {}: {}", location, stream_number, desiredTag, err);
+                    }
+                    return val;
+                }
+            }
         }
         return "";
     }
@@ -299,65 +320,87 @@ bool FfmpegHandler::addFfmpegMetadataFields(
     }
 
     AVDictionaryEntry* avEntry = nullptr;
-    while ((avEntry = av_dict_get(ffmpegObject.pFormatCtx->metadata, "", avEntry, AV_DICT_IGNORE_SUFFIX))) {
-        std::string key = toLower(avEntry->key);
-        std::string value = avEntry->value;
-        log_debug("FFMpeg tag: {}: {}", key, value);
-        {
-            auto [val, err] = ffmpegObject.sc->convert(trimString(value));
-            if (!err.empty()) {
-                log_warning("{} {}: {}", ffmpegObject.location, key, err);
-            }
-            value = val;
+    if (ffmpegObject.pFormatCtx->metadata)
+        while ((avEntry = av_dict_get(ffmpegObject.pFormatCtx->metadata, "", avEntry, AV_DICT_IGNORE_SUFFIX))) {
+            result = getFfmpegMetadataField(item, ffmpegObject, avEntry, emptyProperties, emptySpecProperties) || result;
         }
-        auto it = metaTags.find(avEntry->key);
-        if (it == metaTags.end())
-            it = metaTags.find(key); // search lowercase string as well
-        if (it != metaTags.end() && emptySpecProperties[it->second]) {
-            log_debug("Identified special metadata '{}' as '{}': '{}'", it->first, it->second, value);
-            item->addMetaData(it->second, value);
-            continue; // iterate while loop
-        }
-        auto pIt = std::find_if(propertyMap.begin(), propertyMap.end(),
-            [&](auto&& p) {
-                return p.second == key && item->getMetaData(p.first).empty();
-            });
-        if (pIt != propertyMap.end()) {
-            log_debug("Identified default metadata '{}': {}", pIt->second, value);
-            const auto field = pIt->first;
-            if (emptyProperties[field]) {
-                if (field == MetadataFields::M_DATE || field == MetadataFields::M_CREATION_DATE) {
-                    std::tm tmWork {};
-                    if (strptime(avEntry->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
-                        // convert creation_time to local time
-                        std::time_t utcTime = timegm(&tmWork);
-                        if (utcTime == -1) {
-                            continue;
-                        }
-                        tmWork = *std::localtime(&utcTime);
-                    } else if (strptime(avEntry->value, "%Y-%m-%d", &tmWork)) {
-                        ; // use the value as is
-                    } else if (strptime(avEntry->value, "%Y", &tmWork)) {
-                        // convert the value to "XXXX-01-01"
-                        tmWork.tm_mon = 0; // Month (0-11)
-                        tmWork.tm_mday = 1; // Day of the month (1-31)
-                    } else
-                        continue;
-                    auto mDate = fmt::format("{:%Y-%m-%d}", tmWork);
-                    item->addMetaData(field, mDate);
-                } else {
-                    item->addMetaData(field, value);
-                }
+    for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
+        if (ffmpegObject.pFormatCtx->streams[stream_number]->metadata) {
+            while ((avEntry = av_dict_get(ffmpegObject.pFormatCtx->streams[stream_number]->metadata, "", avEntry, AV_DICT_IGNORE_SUFFIX))) {
+                result = getFfmpegMetadataField(item, ffmpegObject, avEntry, emptyProperties, emptySpecProperties) || result;
             }
-            if (field == MetadataFields::M_TRACKNUMBER) {
-                item->setTrackNumber(stoiString(value));
-            } else if (field == MetadataFields::M_PARTNUMBER) {
-                item->setPartNumber(stoiString(value));
-            }
-            result = true;
-        } else {
-            log_debug("Unhandled metadata {} = '{}'", key, value);
         }
+    }
+    return result;
+}
+
+bool FfmpegHandler::getFfmpegMetadataField(
+    const std::shared_ptr<CdsItem>& item,
+    const FfmpegObject& ffmpegObject,
+    AVDictionaryEntry* avEntry,
+    std::map<MetadataFields, bool>& emptyProperties,
+    std::map<std::string, bool>& emptySpecProperties) const
+{
+    bool result = false;
+    std::string key = toLower(avEntry->key);
+    std::string value = avEntry->value;
+    log_debug("FFMpeg tag: {}: {}", key, value);
+    {
+        auto [val, err] = ffmpegObject.sc->convert(trimString(value));
+        if (!err.empty()) {
+            log_warning("{} {}: {}", ffmpegObject.location, key, err);
+        }
+        value = val;
+    }
+    auto it = metaTags.find(avEntry->key);
+    if (it == metaTags.end())
+        it = metaTags.find(key); // search lowercase string as well
+    if (it != metaTags.end() && emptySpecProperties[it->second]) {
+        log_debug("Identified special metadata '{}' as '{}': '{}'", it->first, it->second, value);
+        item->addMetaData(it->second, value);
+        emptySpecProperties[it->second] = false;
+        return result; // iterate while loop
+    }
+    auto pIt = std::find_if(propertyMap.begin(), propertyMap.end(),
+        [&](auto&& p) {
+            return p.second == key && item->getMetaData(p.first).empty();
+        });
+    if (pIt != propertyMap.end()) {
+        log_debug("Identified default metadata '{}': {}", pIt->second, value);
+        const auto field = pIt->first;
+        if (emptyProperties[field]) {
+            if (field == MetadataFields::M_DATE || field == MetadataFields::M_CREATION_DATE) {
+                std::tm tmWork {};
+                if (strptime(avEntry->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
+                    // convert creation_time to local time
+                    std::time_t utcTime = timegm(&tmWork);
+                    if (utcTime == -1) {
+                        return result;
+                    }
+                    tmWork = *std::localtime(&utcTime);
+                } else if (strptime(avEntry->value, "%Y-%m-%d", &tmWork)) {
+                    ; // use the value as is
+                } else if (strptime(avEntry->value, "%Y", &tmWork)) {
+                    // convert the value to "XXXX-01-01"
+                    tmWork.tm_mon = 0; // Month (0-11)
+                    tmWork.tm_mday = 1; // Day of the month (1-31)
+                } else
+                    return result;
+                auto mDate = fmt::format("{:%Y-%m-%d}", tmWork);
+                item->addMetaData(field, mDate);
+            } else {
+                item->addMetaData(field, value);
+            }
+            emptyProperties[field] = false;
+        }
+        if (field == MetadataFields::M_TRACKNUMBER) {
+            item->setTrackNumber(stoiString(value));
+        } else if (field == MetadataFields::M_PARTNUMBER) {
+            item->setPartNumber(stoiString(value));
+        }
+        result = true;
+    } else {
+        log_debug("Unhandled metadata {} = '{}'", key, value);
     }
     return result;
 }
@@ -504,12 +547,33 @@ std::string FfmpegHandler::getContentTypeFromByteVector(const std::vector<std::u
 #endif
 }
 
+// duration
+static void setDuration(const std::shared_ptr<CdsResource>& res, int64_t value)
+{
+    if (value != AV_NOPTS_VALUE) {
+        auto duration = millisecondsToHMSF(value / (AV_TIME_BASE / 1000));
+        log_debug("Added duration: {}", duration);
+        res->addAttribute(ResourceAttribute::DURATION, duration);
+    }
+}
+
+static void setBitRate(const std::shared_ptr<CdsResource>& res, int64_t value)
+{
+    if (value > 0) {
+        // ffmpeg's bit_rate is in bits/sec, upnp wants it in bytes/sec
+        // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
+        auto bitrate = value / 8;
+        log_debug("Added bitrate: {} kb/s", bitrate);
+        res->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(bitrate));
+    }
+}
+
 bool FfmpegHandler::addFfmpegResourceFields(
     const std::shared_ptr<CdsItem>& item,
     const FfmpegObject& ffmpegObject)
 {
-    if (!ffmpegObject) {
-        log_debug("no metadata");
+    if (!ffmpegObject.pFormatCtx) {
+        log_debug("no resource data");
         return false;
     }
 
@@ -519,20 +583,9 @@ bool FfmpegHandler::addFfmpegResourceFields(
     auto resource2 = isAudioFile ? item->getResource(ResourcePurpose::Thumbnail) : resource;
 
     // duration
-    if (ffmpegObject.pFormatCtx->duration > 0) {
-        auto duration = millisecondsToHMSF(ffmpegObject.pFormatCtx->duration / (AV_TIME_BASE / 1000));
-        log_debug("Added duration: {}", duration);
-        resource->addAttribute(ResourceAttribute::DURATION, duration);
-    }
-
+    setDuration(resource, ffmpegObject.pFormatCtx->duration);
     // bitrate
-    if (ffmpegObject.pFormatCtx->bit_rate > 0) {
-        // ffmpeg's bit_rate is in bits/sec, upnp wants it in bytes/sec
-        // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
-        auto bitrate = ffmpegObject.pFormatCtx->bit_rate / 8;
-        log_debug("Added bitrate: {} kb/s", bitrate);
-        resource->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(bitrate));
-    }
+    setBitRate(resource, ffmpegObject.pFormatCtx->bit_rate);
 
     // video resolution, audio sampling rate, nr of audio channels
     int audioSet = 0;
@@ -567,6 +620,12 @@ bool FfmpegHandler::addFfmpegResourceFields(
             }
             // orientation
             resource2->addAttribute(ResourceAttribute::ORIENTATION, fmt::format("{}", getOrientation(st)));
+
+            // duration of stream
+            if (st->duration * av_q2d(st->time_base) > ffmpegObject.pFormatCtx->duration || resource2->getAttribute(ResourceAttribute::DURATION).empty())
+                setDuration(resource2, st->duration * av_q2d(st->time_base));
+            // bitrate of stream
+            setBitRate(resource2, as_codecpar(st)->bit_rate);
 
             // video codec
             auto codecId = as_codecpar(st)->codec_id;
@@ -629,7 +688,7 @@ bool FfmpegHandler::addFfmpegResourceFields(
                 }
             }
 
-            AVDictionaryEntry* lang = av_dict_get(st->metadata, "language", nullptr, 0);
+            AVDictionaryEntry* lang = (st->metadata) ? av_dict_get(st->metadata, "language", nullptr, 0) : nullptr;
             if (lang && lang->value) {
                 log_debug("Subtitle Language: {}", lang->value);
                 stResource->addAttribute(ResourceAttribute::LANGUAGE, lang->value);
@@ -661,6 +720,12 @@ bool FfmpegHandler::addFfmpegResourceFields(
             auto codecId = as_codecpar(st)->codec_id;
             resource->addAttribute(ResourceAttribute::AUDIOCODEC, avcodec_get_name(codecId));
             // find the first stream that has a valid sample rate
+
+            // duration of stream
+            if (st->duration * av_q2d(st->time_base) > ffmpegObject.pFormatCtx->duration || resource->getAttribute(ResourceAttribute::DURATION).empty())
+                setDuration(resource, st->duration * av_q2d(st->time_base));
+            // bitrate of stream
+            setBitRate(resource, as_codecpar(st)->bit_rate);
 
             if (as_codecpar(st)->sample_rate > 0) {
                 int sampleFreq = as_codecpar(st)->sample_rate;
