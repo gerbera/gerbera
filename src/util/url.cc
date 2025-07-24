@@ -40,9 +40,10 @@
 #include "util/logger.h"
 
 #include <sstream>
+#include <utility>
 
-URL::URL(const std::string& url, CURL* curlHandle)
-    : url(url)
+URL::URL(std::string url, CURL* curlHandle)
+    : url(std::move(url))
     , curlHandle(curlHandle)
 {
     if (!curlHandle) {

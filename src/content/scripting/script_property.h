@@ -40,9 +40,7 @@ public:
         valid = global || duk_is_object_coercible(ctx, index);
     }
 
-    virtual ~ScriptProperty()
-    {
-    }
+    virtual ~ScriptProperty() = default;
 
     std::vector<std::string> getStringArrayValue() const;
     std::vector<int> getIntArrayValue() const;
@@ -50,7 +48,7 @@ public:
     int getIntValue(int defValue) const;
     int getBoolValue() const;
     std::vector<std::string> getPropertyNames() const;
-    void getObject(std::function<void()> objectHandler) const
+    void getObject(const std::function<void()>& objectHandler) const
     {
         if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
             duk_to_object(ctx, -1);
@@ -76,9 +74,9 @@ private:
 
 class ScriptGlobalProperty : public ScriptProperty {
 public:
-    ScriptGlobalProperty(duk_context* ctx, std::string propertyName, int index = -1)
+    ScriptGlobalProperty(duk_context* ctx, const std::string& propertyName, int index = -1)
         : ScriptProperty(ctx, index, true)
-        , propertyName(std::move(propertyName))
+        , propertyName(propertyName)
     {
         duk_get_global_string(ctx, propertyName.c_str());
     }

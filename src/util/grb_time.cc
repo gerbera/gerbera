@@ -156,7 +156,7 @@ bool parseTime(int& value, std::string& timeValue, GrbTimeType type)
     auto list = splitString(timeValue, ':');
     std::reverse(list.begin(), list.end());
 
-    auto factors = timeFactors.at(type);
+    const auto& factors = timeFactors.at(type);
     if (list.size() > factors.size())
         return false;
     int index = 0;

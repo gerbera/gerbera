@@ -36,7 +36,7 @@ Gerbera - https://gerbera.io/
 #include <libffmpegthumbnailer/filmstripfilter.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
 
-static void ffmpegThLogger(ThumbnailerLogLevel logLevel, const std::string message)
+static void ffmpegThLogger(ThumbnailerLogLevel logLevel, const std::string& message)
 {
     switch (logLevel) {
     case ThumbnailerLogLevelError:

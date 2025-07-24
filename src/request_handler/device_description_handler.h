@@ -37,7 +37,7 @@ public:
     explicit DeviceDescriptionHandler(const std::shared_ptr<Content>& content,
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
         const std::shared_ptr<Quirks>& quirks,
-        std::string ip, in_port_t port);
+        const std::string& ip, in_port_t port);
 
     /// \inherit
     bool getInfo(const char* filename, UpnpFileInfo* info) override;
@@ -48,10 +48,10 @@ public:
     /// \param mode either UPNP_READ or UPNP_WRITE
     /// \return the appropriate IOHandler for the request.
     std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
-    std::string renderDeviceDescription(std::string ip, in_port_t port, const std::shared_ptr<Quirks>& quirks) const;
+    std::string renderDeviceDescription(const std::string& ip, in_port_t port, const std::shared_ptr<Quirks>& quirks) const;
 
 private:
-    std::string getPresentationUrl(std::string ip, in_port_t port) const;
+    std::string getPresentationUrl(const std::string& ip, in_port_t port) const;
 
     std::string ip;
     in_port_t port;

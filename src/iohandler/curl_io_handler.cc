@@ -35,13 +35,15 @@
 #ifdef HAVE_CURL
 #include "curl_io_handler.h" // API
 
+#include <utility>
+
 #include "config/config.h"
 #include "exceptions.h"
 #include "util/tools.h"
 
-CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, const std::string& url, std::size_t bufSize, std::size_t initialFillSize)
+CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, std::string url, std::size_t bufSize, std::size_t initialFillSize)
     : IOHandlerBufferHelper(config, bufSize, initialFillSize)
-    , URL(url)
+    , URL(std::move(url))
     , external_curl_handle(false)
     , curl_handle(nullptr)
 {
@@ -56,7 +58,7 @@ CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, const std::s
     seekEnabled = true;
 }
 
-CurlIOHandler::~CurlIOHandler()
+CurlIOHandler::~CurlIOHandler() noexcept
 {
     CurlIOHandler::close();
 }

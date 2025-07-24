@@ -34,7 +34,7 @@ std::size_t DictionaryOption::getEditSize() const
     if (indexMap.empty()) {
         return 0;
     }
-    return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
+    return std::max_element(indexMap.begin(), indexMap.end(), [](const auto& a, const auto& b) { return (a.first < b.first); })->first + 1;
 }
 
 std::map<std::string, std::string> DictionaryOption::getDictionaryOption(bool forEdit) const

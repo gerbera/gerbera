@@ -241,7 +241,7 @@ std::shared_ptr<CdsResource> CdsResource::decode(const std::string& serial)
 
     attr = URLUtils::dictDecode(parts[1]);
     std::map<ResourceAttribute, std::string> attrParsed;
-    for (auto [k, v] : attr) {
+    for (const auto& [k, v] : attr) {
         attrParsed[EnumMapper::mapAttributeName(k)] = v;
     }
 

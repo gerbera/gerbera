@@ -51,7 +51,7 @@ Quirks::Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr
     }
 }
 
-Quirks::Quirks(const struct ClientObservation* client)
+Quirks::Quirks(const ClientObservation* client)
     : pClientProfile(client->pInfo)
     , pClient(client)
 {

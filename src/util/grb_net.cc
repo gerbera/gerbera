@@ -118,7 +118,7 @@ int GrbNet::getAdressFamily() const
 bool GrbNet::equals(const std::string& match) const
 {
     auto net = splitString(match, '/');
-    auto ip = net[0];
+    const auto& ip = net.front();
     if (ip.find(':') != std::string::npos) {
         auto prefix = stoiString(net.size() > 1 ? net[1] : "128", 128);
         // IPv6

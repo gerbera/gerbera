@@ -32,6 +32,7 @@
 
 #include <map>
 #include <mutex>
+#include <utility>
 #include <vector>
 
 // forward declaration
@@ -50,8 +51,8 @@ public:
 /// \brief Provides information about client group settings.
 class ClientGroupConfig : public Editable {
 public:
-    ClientGroupConfig(const std::string& name = "")
-        : groupName(name)
+    ClientGroupConfig(std::string name = "")
+        : groupName(std::move(name))
     {
     }
 
@@ -149,7 +150,7 @@ public:
     }
 
     std::string getGroup() const { return this->clientProfile.groupConfig ? this->clientProfile.groupConfig->getGroupName() : this->clientProfile.group; }
-    void setGroup(std::string_view group, std::shared_ptr<ClientGroupConfig> groupConfig = {})
+    void setGroup(std::string_view group, const std::shared_ptr<ClientGroupConfig>& groupConfig = {})
     {
         this->clientProfile.groupConfig = groupConfig;
         if (groupConfig)

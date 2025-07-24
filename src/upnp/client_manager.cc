@@ -341,7 +341,7 @@ void ClientManager::removeClient(const std::string& clientIp)
 {
     AutoLock lock(mutex);
     cache.erase(std::remove_if(cache.begin(), cache.end(),
-                    [this, clientIp](auto&& entry) { return entry.addr && entry.addr->equals(clientIp); }),
+                    [clientIp](auto&& entry) { return entry.addr && entry.addr->equals(clientIp); }),
         cache.end());
     if (this->database)
         this->database->saveClients(cache);

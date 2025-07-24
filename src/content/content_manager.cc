@@ -849,7 +849,7 @@ std::shared_ptr<AutoscanDirectory> ContentManager::findAutoscanDirectory(fs::pat
         if (dir) {
             log_debug("AutoscanDir ({}): {}", AutoscanDirectory::mapScanmode(dir->getScanMode()), i);
             if (isSubDir(path, dir->getLocation()) && fs::is_directory(dir->getLocation(), ec)) {
-                autoscanDir = std::move(dir);
+                autoscanDir = dir;
             }
             if (ec) {
                 log_warning("No AutoscanDir {} has problems '{}'", dir->getLocation().string(), ec.message());

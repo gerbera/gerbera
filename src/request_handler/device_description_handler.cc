@@ -40,10 +40,11 @@
 #include <array>
 #include <fmt/chrono.h>
 #include <sstream>
+#include <utility>
 
 DeviceDescriptionHandler::DeviceDescriptionHandler(const std::shared_ptr<Content>& content,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, const std::shared_ptr<Quirks>& quirks,
-    std::string ip, in_port_t port)
+    const std::string& ip, in_port_t port)
     : RequestHandler(content, xmlBuilder, quirks)
     , ip(ip)
     , port(port)
@@ -83,7 +84,7 @@ std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, 
     return ioHandler;
 }
 
-std::string DeviceDescriptionHandler::getPresentationUrl(std::string ip, in_port_t port) const
+std::string DeviceDescriptionHandler::getPresentationUrl(const std::string& ip, in_port_t port) const
 {
     std::string presentationURL = config->getOption(ConfigVal::SERVER_PRESENTATION_URL);
     if (presentationURL.empty()) {
@@ -113,7 +114,7 @@ struct ServiceCapabilities {
     std::vector<ServiceCapabilityValues> serviceValues;
 };
 
-std::string DeviceDescriptionHandler::renderDeviceDescription(std::string ip, in_port_t port, const std::shared_ptr<Quirks>& quirks) const
+std::string DeviceDescriptionHandler::renderDeviceDescription(const std::string& ip, in_port_t port, const std::shared_ptr<Quirks>& quirks) const
 {
     auto doc = std::make_unique<pugi::xml_document>();
 
