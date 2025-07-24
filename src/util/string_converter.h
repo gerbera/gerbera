@@ -83,20 +83,20 @@ public:
     virtual ~ConverterManager() = default;
 
     /// \brief metadata to internal
-    const std::shared_ptr<StringConverter> m2i(ConfigVal option, const fs::path& location);
+    const std::shared_ptr<StringConverter>& m2i(ConfigVal option, const fs::path& location);
     /// \brief filesystem to internal
-    const std::shared_ptr<StringConverter> f2i() const;
+    const std::shared_ptr<StringConverter>& f2i() const;
 #if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(HAVE_MATROSKA)
     /// \brief safeguard - internal to internal - needed to catch some
     /// scenarious where the user may have forgotten to add proper conversion
     /// in the script.
-    const std::shared_ptr<StringConverter> i2i() const;
+    const std::shared_ptr<StringConverter>& i2i() const;
 #endif
 #ifdef HAVE_JS
     /// \brief scripting to internal
-    const std::shared_ptr<StringConverter> j2i() const;
+    const std::shared_ptr<StringConverter>& j2i() const;
     /// \brief playlist to internal
-    const std::shared_ptr<StringConverter> p2i() const;
+    const std::shared_ptr<StringConverter>& p2i() const;
 #endif
 
 protected:

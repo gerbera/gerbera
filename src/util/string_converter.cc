@@ -235,7 +235,7 @@ ConverterManager::ConverterManager(const std::shared_ptr<Config>& cm)
     }
 }
 
-const std::shared_ptr<StringConverter> ConverterManager::m2i(ConfigVal option, const fs::path& location)
+const std::shared_ptr<StringConverter>& ConverterManager::m2i(ConfigVal option, const fs::path& location)
 {
     auto charset = charsets.at(option);
     if (charset.empty()) {
@@ -252,25 +252,25 @@ const std::shared_ptr<StringConverter> ConverterManager::m2i(ConfigVal option, c
     return converters.at(charset);
 }
 
-const std::shared_ptr<StringConverter> ConverterManager::f2i() const
+const std::shared_ptr<StringConverter>& ConverterManager::f2i() const
 {
     return converters.at(charsets.at(ConfigVal::IMPORT_FILESYSTEM_CHARSET));
 }
 
 #if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(HAVE_MATROSKA)
-const std::shared_ptr<StringConverter> ConverterManager::i2i() const
+const std::shared_ptr<StringConverter>& ConverterManager::i2i() const
 {
     return converters.at(charsets.at(ConfigVal::MAX));
 }
 #endif
 
 #ifdef HAVE_JS
-const std::shared_ptr<StringConverter> ConverterManager::j2i() const
+const std::shared_ptr<StringConverter>& ConverterManager::j2i() const
 {
     return converters.at(charsets.at(ConfigVal::IMPORT_SCRIPTING_CHARSET));
 }
 
-const std::shared_ptr<StringConverter> ConverterManager::p2i() const
+const std::shared_ptr<StringConverter>& ConverterManager::p2i() const
 {
     return converters.at(charsets.at(ConfigVal::IMPORT_PLAYLIST_CHARSET));
 }
