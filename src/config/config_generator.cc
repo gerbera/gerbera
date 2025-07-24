@@ -111,7 +111,7 @@ int ConfigGenerator::remapGeneratorSections(const std::string& arg)
     return stoiString(arg, 0, 0);
 }
 
-bool ConfigGenerator::isGenerated(GeneratorSections section)
+bool ConfigGenerator::isGenerated(GeneratorSections section) const
 {
     return this->generateSections == 0 || (this->generateSections & (1 << to_underlying(section)));
 }

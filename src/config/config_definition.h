@@ -159,7 +159,7 @@ private:
     /// \brief define parent options for path search
     void initHierarchy();
     /// \brief mark option to be removed soon
-    void markDeprecated();
+    void markDeprecated() const;
 
     /// \brief all known options
     std::vector<std::shared_ptr<ConfigSetup>> complexOptions;

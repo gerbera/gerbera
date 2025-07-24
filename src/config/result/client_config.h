@@ -89,7 +89,7 @@ public:
         const std::map<ClientMatchType, std::string>& matchValues,
         int captionInfoCount, int stringLimit, bool multiValue, bool isAllowed);
 
-    bool equals(const std::shared_ptr<ClientConfig>& other) { return this->getIp() == other->getIp() && this->getUserAgent() == other->getUserAgent(); }
+    bool equals(const std::shared_ptr<ClientConfig>& other) const { return this->getIp() == other->getIp() && this->getUserAgent() == other->getUserAgent(); }
     const ClientProfile& getClientProfile() const { return clientProfile; }
 
     int getFlags() const { return this->clientProfile.flags; }

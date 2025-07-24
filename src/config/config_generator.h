@@ -102,7 +102,7 @@ public:
     std::shared_ptr<pugi::xml_node> getNode(const std::string& tag) const;
 
     /// \brief check selected sections
-    bool isGenerated(GeneratorSections section);
+    bool isGenerated(GeneratorSections section) const;
     /// \brief extract section id from string argument
     static int remapGeneratorSections(const std::string& arg);
     /// \brief print section names for given id

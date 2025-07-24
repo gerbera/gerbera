@@ -115,8 +115,8 @@ public:
     fs::path getConfDir() { return confDir.value_or(""); }
     std::string getDataDir() { return dataDir.value_or(""); }
     fs::path getPidFile() { return pidfile.value_or(""); }
-    bool getDebug() { return debug; }
-    bool getOffline() { return offline; }
+    bool getDebug() const { return debug; }
+    bool getOffline() const { return offline; }
 
     static const std::string ProgramName;
 

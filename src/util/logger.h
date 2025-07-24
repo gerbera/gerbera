@@ -149,7 +149,7 @@ class GrbLogger {
 public:
     static GrbLogger Logger;
 
-    bool isDebugLogging() { return debug; }
+    bool isDebugLogging() const { return debug; }
     void setDebugLogging(bool deb) { debug = deb; }
 
 private:
