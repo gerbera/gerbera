@@ -46,6 +46,7 @@
 #include "util/logger.h"
 #include "util/tools.h"
 
+#include <algorithm>
 #include <array>
 #include <sys/inotify.h>
 #include <sys/ioctl.h>
@@ -182,8 +183,7 @@ struct inotify_event* Inotify::nextEvent()
 
     FD_SET(stop_fd_read, &readFds);
 
-    if (stop_fd_read > fdMax)
-        fdMax = stop_fd_read;
+    fdMax = std::max(stop_fd_read, fdMax);
 
     rc = select(fdMax + 1, &readFds, nullptr, nullptr, nullptr);
     if (rc < 0) {

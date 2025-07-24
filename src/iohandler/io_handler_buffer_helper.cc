@@ -98,12 +98,12 @@ grb_read_t IOHandlerBufferHelper::read(std::byte* buf, std::size_t length)
     auto currentFillSize = static_cast<int>(bLocal - a);
     if (currentFillSize <= 0)
         currentFillSize += bufSize;
-    auto maxRead1 = (a < bLocal ? bLocal - a : bufSize - a);
-    auto read1 = (maxRead1 > length ? length : maxRead1);
-    auto maxRead2 = static_cast<std::size_t>(currentFillSize - read1);
-    auto read2 = (read1 < length ? length - read1 : 0);
-    if (read2 > maxRead2)
-        read2 = maxRead2;
+
+    auto maxRead1 = (a < bLocal) ? bLocal - a : bufSize - a;
+    auto read1 = std::min(length, maxRead1);
+
+    auto remaining = (length > read1) ? length - read1 : 0;
+    auto read2 = std::min(remaining, static_cast<std::size_t>(currentFillSize - read1));
 
     std::copy_n(buffer + a, read1, buf);
     if (read2)
