@@ -355,7 +355,7 @@ public:
     template <class MkvKey>
     std::string getDate(EbmlElement* el)
     {
-        MkvKey* dateEl = dynamic_cast<MkvKey*>(el);
+        auto dateEl = dynamic_cast<MkvKey*>(el);
         if (!dateEl)
             return "";
 
@@ -373,7 +373,7 @@ public:
     template <class MkvKey>
     std::string getString(EbmlElement* el)
     {
-        MkvKey* elValue = dynamic_cast<MkvKey*>(el);
+        auto elValue = dynamic_cast<MkvKey*>(el);
         if (!elValue)
             return "";
 

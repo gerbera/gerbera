@@ -367,7 +367,7 @@ void UpnpXMLBuilder::renderObject(
     if (allResProps || resFilter.empty()) {
         resFilter = { "*" };
     } else {
-        resFilter.push_back("protocolInfo");
+        resFilter.emplace_back("protocolInfo");
     }
     log_debug("Object Filters {}", fmt::join(objFilter, ", "));
     log_debug("Container Filters {}", fmt::join(cntFilter, ", "));

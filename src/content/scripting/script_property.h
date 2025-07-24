@@ -95,9 +95,8 @@ public:
         : ScriptProperty(ctx, index, true)
     {
     }
-    ~ScriptResultProperty() override
-    {
-    }
+
+    ~ScriptResultProperty() override = default;
 
 private:
     std::string propertyName;
