@@ -38,6 +38,7 @@ config file.
 - Database initialisation does tables only, initial root values are in code
 - Upgrade documentation build environment to sphinx 8.2 with python 3.12
 - Update versions of npupnp (6.2.1), fmtlib (11.2.0), spdlog (1.15.3), googletest (1.17.0), pupnp (1.14.24), taglib (2.1.1)
+- Install script for cmake
 
 ## v2.5.0
 

@@ -51,6 +51,7 @@ class CdsItem;
 class FfmpegObject;
 class IOHandler;
 struct AVFormatContext;
+struct AVDictionaryEntry;
 class StringConverter;
 
 /// \brief This class is responsible for reading id3 tags metadata
@@ -77,6 +78,13 @@ private:
     bool addFfmpegMetadataFields(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject) const;
+    /// \brief get one metadata field
+    bool getFfmpegMetadataField(
+        const std::shared_ptr<CdsItem>& item,
+        const FfmpegObject& ffmpegObject,
+        AVDictionaryEntry* avEntry,
+        std::map<MetadataFields, bool>& emptyProperties,
+        std::map<std::string, bool>& emptySpecProperties) const;
     /// \brief get additional resource fields
     bool addFfmpegResourceFields(
         const std::shared_ptr<CdsItem>& item,

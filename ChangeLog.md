@@ -7,11 +7,13 @@
 - Add taglib and artwork support for dsf files
 - Allow hiding PC directory in web view
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
+- Bump form-data from 4.0.2 to 4.0.4 in /gerbera-web
 - Changed OpenWRT Installation note
 - Configure limit of sql strings
 - Do not send internal subtitles as UPnP resources
 - Execinfo for stack traces in error log
 - Extend details extracted by WavPack handler
+- Extract metadata from substreams with ffmpeg
 - Fill database on startup
 - Filter resources by mimetype
 - Fix import and xml
