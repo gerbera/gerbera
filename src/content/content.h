@@ -52,7 +52,7 @@ enum class ImportMode {
 
 class Content : public Timer::Subscriber {
 public:
-    virtual ~Content() = default;
+    ~Content() override = default;
     virtual void run() = 0;
     virtual void shutdown() = 0;
     virtual std::shared_ptr<Context> getContext() const = 0;

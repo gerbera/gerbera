@@ -112,7 +112,7 @@ public:
 class BoxLayout : public Editable {
 public:
     BoxLayout() = default;
-    virtual ~BoxLayout() = default;
+    ~BoxLayout() override = default;
     explicit BoxLayout(
         const std::string_view& key,
         std::string title,

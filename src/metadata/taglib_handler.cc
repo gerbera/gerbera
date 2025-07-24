@@ -80,7 +80,7 @@ private:
         TagLib::setDebugListener(this);
     }
 
-    virtual void printMessage(const TagLib::String& msg) override
+    void printMessage(const TagLib::String& msg) override
     {
         // Remove trailing newlines.
         log_debug("{}", msg.stripWhiteSpace().to8Bit(true));

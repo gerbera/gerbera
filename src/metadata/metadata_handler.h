@@ -130,7 +130,7 @@ public:
         ConfigVal auxOption,
         ConfigVal enableCommentOption,
         ConfigVal commentOption);
-    virtual ~MediaMetadataHandler() = default;
+    ~MediaMetadataHandler() override = default;
 };
 
 #endif // __METADATA_HANDLER_H__
