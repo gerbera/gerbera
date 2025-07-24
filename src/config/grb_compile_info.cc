@@ -196,8 +196,7 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
         "-----------\n");
     std::size_t len = 0;
     for (auto&& opt : buildOptions) {
-        if (opt.first.size() > len)
-            len = opt.first.size();
+        len = std::max(opt.first.size(), len);
     }
     for (auto&& [lib, vers] : buildOptions) {
         if (vers.empty())
