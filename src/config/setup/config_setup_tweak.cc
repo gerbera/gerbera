@@ -300,13 +300,13 @@ std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(const pugi::xml_no
 
 std::string ConfigDirectorySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
-    if (indexList.size() == 0) {
-        if (propOptions.size() > 0) {
+    if (indexList.empty()) {
+        if (!propOptions.empty()) {
             return fmt::format("{}[_]/{}", definition->mapConfigOption(ConfigVal::A_DIRECTORIES_TWEAK), definition->ensureAttribute(propOptions[0]));
         }
         return fmt::format("{}[_]", definition->mapConfigOption(ConfigVal::A_DIRECTORIES_TWEAK));
     }
-    if (propOptions.size() > 0) {
+    if (!propOptions.empty()) {
         return fmt::format("{}[{}]/{}", definition->mapConfigOption(ConfigVal::A_DIRECTORIES_TWEAK), indexList[0], definition->ensureAttribute(propOptions[0]));
     }
     return fmt::format("{}[{}]", definition->mapConfigOption(ConfigVal::A_DIRECTORIES_TWEAK), indexList[0]);

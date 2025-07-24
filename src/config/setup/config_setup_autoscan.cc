@@ -49,13 +49,13 @@ std::string ConfigAutoscanSetup::getUniquePath() const
 
 std::string ConfigAutoscanSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
-    if (indexList.size() == 0) {
-        if (propOptions.size() > 0)
+    if (indexList.empty()) {
+        if (!propOptions.empty())
             return fmt::format("{}/{}/{}[_]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY), definition->ensureAttribute(propOptions[0]));
         else
             return fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY));
     }
-    if (propOptions.size() > 0)
+    if (!propOptions.empty())
         return fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY), indexList[0], definition->ensureAttribute(propOptions[0]));
 
     return fmt::format("{}/{}", xpath, definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY));
@@ -275,7 +275,7 @@ bool ConfigAutoscanSetup::updateDetail(const std::string& optItem, std::string& 
     auto list = value->getAutoscanListOption();
     auto indexList = extractIndexList(optItem);
 
-    if (indexList.size() > 0) {
+    if (!indexList.empty()) {
         auto i = indexList.at(0);
         std::string status = arguments && arguments->find("status") != arguments->end() ? arguments->at("status") : "";
 

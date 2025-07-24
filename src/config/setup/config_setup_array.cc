@@ -120,7 +120,7 @@ bool ConfigArraySetup::updateDetail(
         log_debug("Updating Array Detail {} {} {}", xpath, optItem, optValue);
 
         auto indexList = extractIndexList(optItem);
-        if (indexList.size() > 0) {
+        if (!indexList.empty()) {
             if (updateItem(indexList, optItem, config, value, optValue)) {
                 return true;
             }
@@ -153,11 +153,11 @@ bool ConfigArraySetup::updateDetail(
 std::string ConfigArraySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
     if (attrOption != ConfigVal::MAX) {
-        if (indexList.size() == 0)
+        if (indexList.empty())
             return fmt::format("{}/{}[_]/{}", xpath, definition->mapConfigOption(nodeOption), definition->ensureAttribute(attrOption));
         return fmt::format("{}/{}[{}]/{}", xpath, definition->mapConfigOption(nodeOption), indexList[0], definition->ensureAttribute(attrOption));
     }
-    if (indexList.size() == 0)
+    if (indexList.empty())
         return fmt::format("{}/{}[_]", xpath, definition->mapConfigOption(nodeOption));
     return fmt::format("{}/{}[{}]", xpath, definition->mapConfigOption(nodeOption), indexList[0]);
 }

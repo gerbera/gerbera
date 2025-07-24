@@ -388,7 +388,7 @@ std::string ConfigBoxLayoutSetup::getItemPath(
     const std::vector<ConfigVal>& propOptions,
     const std::string& propText) const
 {
-    if (indexList.size() == 0) {
+    if (indexList.empty()) {
         if (!propText.empty()) {
             return fmt::format("{}/{}[_]/{}[_]/{}[_]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), definition->mapConfigOption(propOptions[1]), definition->mapConfigOption(propOptions[2]), propText);
         }
@@ -398,7 +398,7 @@ std::string ConfigBoxLayoutSetup::getItemPath(
         if (propOptions.size() > 1) {
             return fmt::format("{}/{}[_]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), definition->ensureAttribute(propOptions[1]));
         }
-        if (propOptions.size() > 0) {
+        if (!propOptions.empty()) {
             return fmt::format("{}/{}[_]", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]));
         }
         return fmt::format("{}", definition->mapConfigOption(option));
@@ -407,7 +407,7 @@ std::string ConfigBoxLayoutSetup::getItemPath(
         if (propOptions.size() > 1) {
             return fmt::format("{}/{}[{}]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0], definition->ensureAttribute(propOptions[1]));
         }
-        if (propOptions.size() > 0) {
+        if (!propOptions.empty()) {
             return fmt::format("{}/{}[{}]", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0]);
         }
     }
@@ -415,7 +415,7 @@ std::string ConfigBoxLayoutSetup::getItemPath(
         if (propOptions.size() > 1) {
             return fmt::format("{}/{}[{}]/{}[{}]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0], definition->mapConfigOption(propOptions[1]), indexList[1], propText);
         }
-        if (propOptions.size() > 0) {
+        if (!propOptions.empty()) {
             return fmt::format("{}/{}[{}]/{}[{}]", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0], definition->mapConfigOption(propOptions[1]), indexList[1]);
         }
     }
@@ -425,7 +425,7 @@ std::string ConfigBoxLayoutSetup::getItemPath(
     if (propOptions.size() > 1) {
         return fmt::format("{}/{}[{}]/{}[{}]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0], definition->mapConfigOption(propOptions[1]), indexList[1], propText);
     }
-    if (propOptions.size() > 0) {
+    if (!propOptions.empty()) {
         return fmt::format("{}/{}[{}]/{}", definition->mapConfigOption(option), definition->mapConfigOption(propOptions[0]), indexList[0], propText);
     }
     return fmt::format("{}", definition->mapConfigOption(option));

@@ -239,13 +239,13 @@ std::shared_ptr<ConfigOption> ConfigDynamicContentSetup::newOption(const pugi::x
 
 std::string ConfigDynamicContentSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
-    if (indexList.size() == 0) {
-        if (propOptions.size() > 0) {
+    if (indexList.empty()) {
+        if (!propOptions.empty()) {
             return fmt::format("{}/{}[_]/{}", xpath, definition->mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER), definition->ensureAttribute(propOptions[0]));
         }
         return fmt::format("{}/{}[_]", xpath, definition->mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER));
     }
-    if (propOptions.size() > 0) {
+    if (!propOptions.empty()) {
         return fmt::format("{}/{}[{}]/{}", xpath, definition->mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER), indexList[0], definition->ensureAttribute(propOptions[0]));
     }
     return fmt::format("{}/{}[{}]", xpath, definition->mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER), indexList[0]);

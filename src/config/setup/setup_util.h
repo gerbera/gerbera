@@ -52,7 +52,7 @@ bool updateConfig(
     std::vector<std::size_t> indexList,
     const std::string& status)
 {
-    if (indexList.size() > 0) {
+    if (!indexList.empty()) {
         auto statusList = splitString(status, ',');
         auto index = indexList.at(0);
         std::shared_ptr<Result> entry = list->get(index, true);

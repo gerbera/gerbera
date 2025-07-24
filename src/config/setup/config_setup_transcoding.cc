@@ -266,9 +266,9 @@ std::string ConfigTranscodingSetup::getItemPath(const std::vector<std::size_t>& 
     auto opt2 = definition->ensureAttribute(propOptions.size() > 1 ? propOptions[1] : ConfigVal::MAX, propOptions.size() == 2);
     auto opt3 = definition->ensureAttribute(propOptions.size() > 2 ? propOptions[2] : ConfigVal::MAX, propOptions.size() == 3);
     auto opt4 = definition->ensureAttribute(propOptions.size() > 3 ? propOptions[3] : ConfigVal::MAX, propOptions.size() > 4);
-    auto propOption = propOptions.size() > 0 ? propOptions[0] : ConfigVal::MAX;
+    auto propOption = !propOptions.empty() ? propOptions[0] : ConfigVal::MAX;
 
-    auto index = indexList.size() > 0 ? fmt::format("{}", indexList[0]) : "_";
+    auto index = !indexList.empty() ? fmt::format("{}", indexList[0]) : "_";
 
     if (propOption == ConfigVal::A_TRANSCODING_PROFILES_PROFLE || propOption == ConfigVal::A_TRANSCODING_MIMETYPE_FILTER) {
         if (propOptions.size() < 3) {

@@ -305,7 +305,7 @@ std::shared_ptr<CdsObject> ImportService::doImport(
         if (settings.changedObject || !autoscanDir || autoscanDir->getScanMode() != AutoscanScanMode::INotify)
             clearCache();
         activeScan = location;
-        if (importStateCache->contentStateCache.size() == 0 || location == rootPath)
+        if (importStateCache->contentStateCache.empty() || location == rootPath)
             importStateCache = stateCache;
     } else {
         log_debug("Additional scan {}, already active {}", location.c_str(), activeScan.c_str());

@@ -146,7 +146,7 @@ bool ConfigVectorSetup::updateDetail(
         log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue);
 
         auto indexList = extractIndexList(optItem);
-        if (indexList.size() > 0) {
+        if (!indexList.empty()) {
             if (updateItem(indexList, optItem, config, value, optValue)) {
                 return true;
             }
@@ -185,12 +185,12 @@ std::string ConfigVectorSetup::getItemPath(
     const std::string& propText) const
 {
     if (!propText.empty()) {
-        if (indexList.size() == 0)
+        if (indexList.empty())
             return fmt::format("{}/{}[_]/{}{}", xpath, definition->mapConfigOption(nodeOption), ConfigDefinition::ATTRIBUTE, propText);
         return fmt::format("{}/{}[{}]/{}{}", xpath, definition->mapConfigOption(nodeOption), indexList.at(0), ConfigDefinition::ATTRIBUTE, propText);
     }
-    auto opt = definition->ensureAttribute(propOptions.size() > 0 ? propOptions.at(0) : ConfigVal::MAX);
-    if (indexList.size() == 0)
+    auto opt = definition->ensureAttribute(!propOptions.empty() ? propOptions.at(0) : ConfigVal::MAX);
+    if (indexList.empty())
         return fmt::format("{}/{}[_]/{}", xpath, definition->mapConfigOption(nodeOption), opt);
 
     return fmt::format("{}/{}[{}]/{}", xpath, definition->mapConfigOption(nodeOption), indexList.at(0), opt);
