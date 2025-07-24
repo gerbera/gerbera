@@ -2167,7 +2167,7 @@ void ConfigDefinition::initDependencies()
     };
 }
 
-void ConfigDefinition::markDeprecated()
+void ConfigDefinition::markDeprecated() const
 {
     for (auto&& opt : deprecatedOptions) {
         auto co = findConfigSetup(opt);

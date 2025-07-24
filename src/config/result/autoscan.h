@@ -119,7 +119,7 @@ public:
         const std::map<AutoscanMediaMode, std::string>& containerMap = ContainerTypesDefaults);
     ~AutoscanDirectory() override = default;
 
-    bool equals(const std::shared_ptr<AutoscanDirectory>& other) { return this->getScanID() == other->getScanID(); }
+    bool equals(const std::shared_ptr<AutoscanDirectory>& other) const { return this->getScanID() == other->getScanID(); }
 
     void setDatabaseID(int databaseID) { this->databaseID = databaseID; }
     int getDatabaseID() const { return databaseID; }
