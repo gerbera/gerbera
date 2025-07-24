@@ -101,8 +101,8 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
-    std::map<ConfigVal, std::string> charsets {};
-    std::map<std::string, std::shared_ptr<StringConverter>> converters {};
+    std::map<ConfigVal, std::string> charsets;
+    std::map<std::string, std::shared_ptr<StringConverter>> converters;
 };
 
 #endif // __STRING_CONVERTER_H__

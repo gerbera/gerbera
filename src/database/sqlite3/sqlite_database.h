@@ -98,7 +98,7 @@ private:
 
     mutable std::mutex del_mutex;
     using DelAutoLock = std::scoped_lock<std::mutex>;
-    mutable std::vector<std::string> deletedEntries {};
+    mutable std::vector<std::string> deletedEntries;
     size_t maxDeleteCount { DELETE_CACHE_MAX_SIZE };
     std::chrono::seconds lastDelete;
 

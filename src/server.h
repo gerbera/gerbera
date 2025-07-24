@@ -118,8 +118,8 @@ protected:
     in_port_t port {};
     in_port_t port6 {};
     in_port_t ulaGuaPort6 {};
-    std::vector<std::string> validHosts {};
-    std::vector<std::string> corsHosts {};
+    std::vector<std::string> validHosts;
+    std::vector<std::string> corsHosts;
 
     /// \brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag {};

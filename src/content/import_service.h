@@ -131,7 +131,7 @@ public:
     mutable std::mutex cacheMutex;
     using CacheAutoLock = std::scoped_lock<decltype(cacheMutex)>;
 
-    mutable std::map<fs::path, std::shared_ptr<ContentState>> contentStateCache = std::map<fs::path, std::shared_ptr<ContentState>>();
+    mutable std::map<fs::path, std::shared_ptr<ContentState>> contentStateCache;
     /// @brief: store entry in cache map
     void cacheState(
         const fs::path& entryPath,
@@ -180,7 +180,7 @@ private:
     std::map<std::string, std::string> mimetypeContenttypeMap;
     std::map<std::string, std::string> mimetypeUpnpclassMap;
     std::map<std::string, std::string> configLayoutMapping;
-    std::vector<UpnpMap> upnpMap {};
+    std::vector<UpnpMap> upnpMap;
 
     fs::path rootPath;
     std::shared_ptr<AutoscanDirectory> autoscanDir;
@@ -195,7 +195,7 @@ private:
     int containerImageParentCount { 2 };
     int containerImageMinDepth { 2 };
 
-    std::vector<std::vector<std::pair<std::string, std::string>>> virtualDirKeys {};
+    std::vector<std::vector<std::pair<std::string, std::string>>> virtualDirKeys;
 
     /// \brief cache for containers while creating new layout
     mutable std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
@@ -211,7 +211,7 @@ private:
 #endif
 
     std::error_code ec;
-    fs::path activeScan {};
+    fs::path activeScan;
 
     /// @brief build upnp class based on mime type
     std::string mimeTypeToUpnpClass(const std::string& mimeType) const;

@@ -33,7 +33,7 @@ protected:
     int startingIndex {};
     int requestedCount {};
     std::string group;
-    std::vector<std::string> forbiddenDirectories = {};
+    std::vector<std::string> forbiddenDirectories;
 
     // output parameters
     int totalMatches {};
