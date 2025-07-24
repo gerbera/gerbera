@@ -29,6 +29,7 @@
 #include "config/config.h"
 
 #include <pugixml.hpp>
+#include <utility>
 
 // forward declarations
 class ConfigDefinition;
@@ -55,11 +56,11 @@ class ConfigGenerator {
 public:
     ConfigGenerator(
         std::shared_ptr<ConfigDefinition> definition,
-        const std::string& version,
+        std::string version,
         bool example,
         int sections = 0)
         : definition(std::move(definition))
-        , version(version)
+        , version(std::move(version))
         , example(example)
         , generateSections(sections)
     {

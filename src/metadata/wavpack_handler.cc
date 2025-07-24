@@ -269,7 +269,7 @@ public:
     WavPackObject(
         WavpackContext* context,
         int index,
-        const std::shared_ptr<StringConverter> sc,
+        const std::shared_ptr<StringConverter>& sc,
         const std::shared_ptr<CdsItem>& item)
         : location(item->getLocation())
         , sc(sc)

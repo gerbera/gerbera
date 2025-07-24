@@ -270,7 +270,7 @@ bool UpnpXMLBuilder::checkFilterNamespace(const std::string& f, ConfigVal nsProp
     auto parts = splitString(f, ':');
     auto namespaceMap = objectNamespaces.at(nsProp);
     if (parts.size() > 1) {
-        auto nsp = parts.at(0);
+        const auto& nsp = parts.at(0);
         if (nsp != "dc" && nsp != "upnp" && namespaceMap.find(nsp) == namespaceMap.end())
             return false;
     }

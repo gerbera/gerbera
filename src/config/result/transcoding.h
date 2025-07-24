@@ -42,6 +42,7 @@
 #include "util/grb_fs.h"
 
 #include <map>
+#include <utility>
 #include <vector>
 
 enum class TranscodingType {
@@ -58,8 +59,8 @@ enum class AviFourccListmode {
 
 class TranscodingMimeProperty {
 public:
-    TranscodingMimeProperty(const std::string& key, ResourceAttribute attribute, MetadataFields metadata)
-        : key(key)
+    TranscodingMimeProperty(std::string key, ResourceAttribute attribute, MetadataFields metadata)
+        : key(std::move(key))
         , attribute(attribute)
         , metadata(metadata)
     {

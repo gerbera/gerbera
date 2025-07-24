@@ -728,7 +728,7 @@ std::pair<bool, std::shared_ptr<CdsObject>> ImportService::createSingleItem(cons
     return { skip, item };
 }
 
-std::string ImportService::makeTitle(const fs::path& objectPath, const std::string upnpClass) const
+std::string ImportService::makeTitle(const fs::path& objectPath, const std::string& upnpClass) const
 {
     auto f2i = converterManager->f2i();
     std::string title = objectPath.filename().string();

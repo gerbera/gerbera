@@ -53,7 +53,7 @@ BufferedIOHandler::BufferedIOHandler(const std::shared_ptr<Config>& config, std:
     // seekEnabled = true;
 }
 
-BufferedIOHandler::~BufferedIOHandler()
+BufferedIOHandler::~BufferedIOHandler() noexcept
 {
     BufferedIOHandler::close();
 }

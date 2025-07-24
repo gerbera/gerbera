@@ -408,6 +408,7 @@ void SQLDatabase::init()
     // entries are handled sequentially,
     // duplicate entries are added to statement in same order if key is present in SortCriteria
     std::vector<std::pair<std::string, int>> resourceTagMap;
+    resourceTagMap.reserve(resTagMap.size());
     for (auto&& [key, val] : resTagMap) {
         resourceTagMap.emplace_back(key, to_underlying(val));
     }
@@ -415,6 +416,7 @@ void SQLDatabase::init()
     /// \brief Map resource column ids to column names
     // map ensures entries are in correct order, each value of ResourceCol must be present
     std::map<int, SearchProperty> resourceColMap;
+    resourceColMap.reserve(resColMap.size());
     for (auto&& [key, val] : resColMap) {
         resourceColMap[to_underlying(key)] = val;
     }
@@ -960,7 +962,7 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
     beginTransaction("updateObject");
     for (auto&& addUpdateTable : data) {
         Operation op = addUpdateTable->getOperation();
-        auto qb = [this, &obj, op, &addUpdateTable]() {
+        auto qb = [&obj, op, &addUpdateTable] {
             switch (op) {
             case Operation::Insert:
                 return addUpdateTable->sqlForInsert(obj);
@@ -2176,7 +2178,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
     }
 
     auto rr = _recursiveRemove(items, containers, all);
-    return _purgeEmptyContainers(std::move(rr));
+    return _purgeEmptyContainers(rr);
 }
 
 void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
@@ -2264,7 +2266,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObject(int objec
     auto changedContainers = _recursiveRemove(itemIds, containerIds, all);
     if (!path.empty())
         del(RESOURCE_TABLE, fmt::format("{} = {}", identifier(EnumMapper::getAttributeName(ResourceAttribute::RESOURCE_FILE)), quote(path.string())), {});
-    return _purgeEmptyContainers(std::move(changedContainers));
+    return _purgeEmptyContainers(changedContainers);
 }
 
 Database::ChangedContainers SQLDatabase::_recursiveRemove(
@@ -2397,7 +2399,7 @@ Database::ChangedContainers SQLDatabase::_recursiveRemove(
     return changedContainers;
 }
 
-std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(ChangedContainers maybeEmpty)
+std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(const ChangedContainers& maybeEmpty)
 {
     log_debug("start upnp: {}; ui: {}", fmt::to_string(fmt::join(maybeEmpty.upnp, ",")), fmt::to_string(fmt::join(maybeEmpty.ui, ",")));
     auto changedContainers = std::make_unique<ChangedContainers>();

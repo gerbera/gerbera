@@ -216,7 +216,7 @@ private:
     /// @brief build upnp class based on mime type
     std::string mimeTypeToUpnpClass(const std::string& mimeType) const;
     /// @brief build object titles based on location and upnpClass
-    std::string makeTitle(const fs::path& objectPath, const std::string upnpClass) const;
+    std::string makeTitle(const fs::path& objectPath, const std::string& upnpClass) const;
 
     /// @brief read files from one folder depnending on settings
     void readDir(const std::shared_ptr<StateCache>& stateCache, const fs::path& location, AutoScanSetting settings);

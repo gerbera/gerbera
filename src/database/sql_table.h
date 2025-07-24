@@ -41,7 +41,7 @@
 // forward declarations
 class AutoscanDirectory;
 class CdsObject;
-class ClientObservation;
+struct ClientObservation;
 class ClientStatusDetail;
 class ConfigValue;
 enum class ResourceAttribute;

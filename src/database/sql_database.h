@@ -290,7 +290,7 @@ private:
         const std::vector<std::int32_t>& items,
         const std::vector<std::int32_t>& containers, bool all);
 
-    virtual std::unique_ptr<ChangedContainers> _purgeEmptyContainers(ChangedContainers maybeEmpty);
+    std::unique_ptr<ChangedContainers> _purgeEmptyContainers(const ChangedContainers& maybeEmpty);
 
     /* helpers for autoscan */
     void _removeAutoscanDirectory(int autoscanID);

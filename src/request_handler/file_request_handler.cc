@@ -168,7 +168,7 @@ bool FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         if (mimeProperties.size() > 0) {
             auto res = obj->getResource(ContentHandler::DEFAULT);
             std::vector<std::string> propList = { mimeType };
-            for (auto prop : mimeProperties) {
+            for (const auto& prop : mimeProperties) {
                 std::string value;
                 if (prop.getAttribute() != ResourceAttribute::MAX)
                     value = res->getAttribute(prop.getAttribute());

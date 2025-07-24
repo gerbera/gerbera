@@ -81,7 +81,7 @@ public:
         const std::shared_ptr<GrbNet>& addr,
         const std::string& userAgent);
 
-    Quirks(const struct ClientObservation* client);
+    Quirks(const ClientObservation* client);
 
     // Look for subtitle file and returns its URL in CaptionInfo.sec response header.
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
@@ -282,8 +282,8 @@ public:
      */
     std::vector<std::string> getForbiddenDirectories() const;
 
-    const struct ClientProfile* getProfile() const { return pClientProfile; }
-    const struct ClientObservation* getClient() const { return pClient; }
+    const ClientProfile* getProfile() const { return pClientProfile; }
+    const ClientObservation* getClient() const { return pClient; }
 
 private:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;

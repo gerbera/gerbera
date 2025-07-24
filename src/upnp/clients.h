@@ -91,7 +91,7 @@ struct ClientProfile {
 };
 
 struct ClientObservation {
-    ClientObservation(std::shared_ptr<GrbNet> addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const struct ClientProfile* pInfo)
+    ClientObservation(std::shared_ptr<GrbNet> addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const ClientProfile* pInfo)
         : addr(std::move(addr))
         , userAgent(std::move(userAgent))
         , last(last)
@@ -104,7 +104,7 @@ struct ClientObservation {
     std::string userAgent;
     std::chrono::seconds last;
     std::chrono::seconds age;
-    const struct ClientProfile* pInfo;
+    const ClientProfile* pInfo;
 };
 
 class ClientStatusDetail {

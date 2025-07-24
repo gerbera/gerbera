@@ -73,7 +73,7 @@ public:
     /// \brief create url wrapper object
     /// \param url address to open
     /// \param curlHandle an initialized and ready to use curl handle
-    URL(const std::string& url, CURL* curlHandle = nullptr);
+    URL(std::string url, CURL* curlHandle = nullptr);
     ~URL();
 
     /// \brief downloads either the content or the headers to the buffer.

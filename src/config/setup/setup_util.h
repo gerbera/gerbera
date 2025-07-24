@@ -43,7 +43,7 @@ struct ConfigResultProperty {
 /// @brief: Update config object with properties from UI or database
 template <class EditHelperConfig, class Setup, class Option, class Result>
 bool updateConfig(
-    std::shared_ptr<EditHelperConfig> list,
+    const std::shared_ptr<EditHelperConfig>& list,
     const std::shared_ptr<Config>& config,
     Setup* setup,
     std::shared_ptr<Option>& value,
