@@ -147,7 +147,7 @@ public:
     {
     }
 
-    std::string getOption() const override { return optionString.length() == 0 ? fmt::to_string(option) : optionString; }
+    std::string getOption() const override { return optionString.empty() ? fmt::to_string(option) : optionString; }
 
     IntOptionType getIntOption() const override { return option; }
 
@@ -165,7 +165,7 @@ public:
     {
     }
 
-    std::string getOption() const override { return optionString.length() == 0 ? fmt::to_string(option) : optionString; }
+    std::string getOption() const override { return optionString.empty() ? fmt::to_string(option) : optionString; }
 
     UIntOptionType getUIntOption() const override { return option; }
 
@@ -183,7 +183,7 @@ public:
     {
     }
 
-    std::string getOption() const override { return optionString.length() == 0 ? fmt::to_string(option) : optionString; }
+    std::string getOption() const override { return optionString.empty() ? fmt::to_string(option) : optionString; }
 
     LongOptionType getLongOption() const override { return option; }
 

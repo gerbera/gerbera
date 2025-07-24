@@ -143,7 +143,7 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem,
         log_debug("Updating Dictionary Detail {} {} {}", xpath, optItem, optValue);
 
         auto indexList = extractIndexList(optItem);
-        if (indexList.size() > 0) {
+        if (!indexList.empty()) {
             auto i = indexList.at(0);
             if (updateItem(indexList, optItem, config, value, value->getKey(i), optValue)) {
                 return true;
@@ -181,8 +181,8 @@ bool ConfigDictionarySetup::updateDetail(const std::string& optItem,
 
 std::string ConfigDictionarySetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
-    auto opt = propOptions.size() > 0 ? definition->ensureAttribute(propOptions[0]) : "";
-    if (indexList.size() == 0) {
+    auto opt = !propOptions.empty() ? definition->ensureAttribute(propOptions[0]) : "";
+    if (indexList.empty()) {
         return fmt::format("{}/{}[_]/{}", xpath, definition->mapConfigOption(nodeOption), opt);
     }
 

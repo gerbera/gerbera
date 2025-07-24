@@ -476,7 +476,7 @@ std::string ConfigClientSetup::getItemPath(
     const std::vector<ConfigVal>& propOptions,
     const std::string& propText) const
 {
-    if (indexList.size() == 0) {
+    if (indexList.empty()) {
         if (!propText.empty() && propOptions.size() > 1) {
             return fmt::format("{}[_]/{}[_]/{}{}",
                 definition->mapConfigOption(propOptions.at(0)),
@@ -520,7 +520,7 @@ std::string ConfigClientSetup::getItemPath(
             indexList.at(0),
             definition->ensureAttribute(propOptions.at(1)));
     }
-    if (propOptions.size() > 0) {
+    if (!propOptions.empty()) {
         return fmt::format("{}[{}]",
             definition->mapConfigOption(propOptions.at(0)),
             indexList.at(0));

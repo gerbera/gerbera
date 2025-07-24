@@ -165,7 +165,7 @@ bool FileRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 
         mimeType = transcodingProfile->getTargetMimeType();
         auto mimeProperties = transcodingProfile->getTargetMimeProperties();
-        if (mimeProperties.size() > 0) {
+        if (!mimeProperties.empty()) {
             auto res = obj->getResource(ContentHandler::DEFAULT);
             std::vector<std::string> propList = { mimeType };
             for (const auto& prop : mimeProperties) {

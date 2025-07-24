@@ -38,7 +38,7 @@ public:
     {
     }
 
-    std::string getOption() const override { return optionString.length() == 0 ? fmt::format("{}", option) : optionString; }
+    std::string getOption() const override { return optionString.empty() ? fmt::format("{}", option) : optionString; }
 
     Enum getEnumOption() const { return option; }
 
