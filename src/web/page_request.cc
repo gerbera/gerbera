@@ -128,17 +128,13 @@ bool Web::PageRequest::readResources(const std::shared_ptr<CdsObject>& object)
     std::string resources = param("resources"); // contains list of changed resource properties separated by |
     bool result = false;
     if (!resources.empty()) {
-        auto resourceList = splitString(resources, '|');
         std::map<int, std::map<std::string, std::string>> resMap;
-        for (auto&& resValue : resourceList) {
+        for (auto&& resValue : splitString(resources, '|')) {
             auto propList = splitString(resValue, '.'); // resource property is formatted : resource.<index>.<propertyName>
             if (propList.size() >= 3) {
                 std::string prop = param(resValue);
-                auto resIndex = stoiString(propList[1]);
-                if (resMap.find(resIndex) == resMap.end()) {
-                    resMap[resIndex] = {};
-                }
-                resMap[resIndex][propList[2]] = prop;
+                auto& innerMap = resMap.try_emplace(stoiString(propList[1])).first->second;
+                innerMap[propList[2]] = prop;
             }
         }
         for (auto&& [resIndex, resDef] : resMap) {

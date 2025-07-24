@@ -245,11 +245,7 @@ const std::shared_ptr<StringConverter> ConverterManager::m2i(ConfigVal option, c
     auto tweak = config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST)->getKey(!location.empty() ? location : "/");
     if (tweak && tweak->hasMetaCharset()) {
         charset = tweak->getMetaCharset();
-        if (converters.find(charset) == converters.end()) {
-            converters[charset] = std::make_shared<StringConverter>(
-                charset,
-                DEFAULT_INTERNAL_CHARSET);
-        }
+        converters.try_emplace(charset, std::make_shared<StringConverter>(charset, DEFAULT_INTERNAL_CHARSET));
         log_debug("Using charset {} for {}", charset, location.string());
     }
 
