@@ -44,8 +44,7 @@
 CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, std::string url, std::size_t bufSize, std::size_t initialFillSize)
     : IOHandlerBufferHelper(config, bufSize, initialFillSize)
     , URL(std::move(url))
-    , external_curl_handle(false)
-    , curl_handle(nullptr)
+
 {
     if (this->URL.empty())
         throw_std_runtime_error("URL has not been set correctly");

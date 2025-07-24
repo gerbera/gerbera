@@ -62,7 +62,7 @@ public:
         UpnpDevice_Handle deviceHandle,
         std::string serviceId,
         bool offline = false);
-    virtual ~UpnpService() { }
+    virtual ~UpnpService() = default;
 
     std::string getServiceId() const { return serviceID; }
     bool isActiveMatch(const std::string& id) const { return !offline && id == serviceID; }

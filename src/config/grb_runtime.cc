@@ -183,7 +183,7 @@ bool GerberaRuntime::setLogFile(const std::string& arg)
         defaultLogger = spdlog::default_logger();
     spdlog::set_default_logger(fileLogger);
     spdlog::flush_on(spdlog::level::trace);
-    grbLoggers.push_back("file_logger");
+    grbLoggers.emplace_back("file_logger");
     return true;
 }
 
@@ -200,7 +200,7 @@ bool GerberaRuntime::setRotatelog(const std::string& arg)
         defaultLogger = spdlog::default_logger();
     spdlog::set_default_logger(rotateLogger);
     spdlog::flush_on(spdlog::level::trace);
-    grbLoggers.push_back("rotate_logger");
+    grbLoggers.emplace_back("rotate_logger");
     return true;
 }
 
@@ -216,7 +216,7 @@ bool GerberaRuntime::setSyslog(const std::string& arg)
         defaultLogger = spdlog::default_logger();
     spdlog::set_default_logger(sysLogger);
     spdlog::flush_on(spdlog::level::trace);
-    grbLoggers.push_back("syslog_logger");
+    grbLoggers.emplace_back("syslog_logger");
     return true;
 }
 

@@ -92,10 +92,10 @@ public:
         av_log_set_callback(nullptr);
     }
 
-private:
     FfmpegLogger(const FfmpegLogger&) = delete;
     FfmpegLogger& operator=(const FfmpegLogger&) = delete;
 
+private:
     static int printPrefix;
     static int logLevel;
 
@@ -659,7 +659,7 @@ bool FfmpegHandler::addFfmpegResourceFields(
 
             // pixelformat
             {
-                AVPixelFormat pix_fmt = static_cast<AVPixelFormat>(as_codecpar(st)->format);
+                auto pix_fmt = static_cast<AVPixelFormat>(as_codecpar(st)->format);
 
                 // Get pixel format name
                 auto pix_fmt_name = av_get_pix_fmt_name(pix_fmt);

@@ -55,8 +55,8 @@ public:
 
 private:
     std::string URL;
-    bool external_curl_handle;
-    CURL* curl_handle;
+    bool external_curl_handle { false };
+    CURL* curl_handle { nullptr };
 #if 0
     off_t bytesCurl { 0 };
 #endif

@@ -416,7 +416,6 @@ void SQLDatabase::init()
     /// \brief Map resource column ids to column names
     // map ensures entries are in correct order, each value of ResourceCol must be present
     std::map<int, SearchProperty> resourceColMap;
-    resourceColMap.reserve(resColMap.size());
     for (auto&& [key, val] : resColMap) {
         resourceColMap[to_underlying(key)] = val;
     }
