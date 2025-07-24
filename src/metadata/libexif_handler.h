@@ -63,7 +63,7 @@ private:
 
 public:
     explicit LibExifHandler(const std::shared_ptr<Context>& context);
-    ~LibExifHandler();
+    ~LibExifHandler() override;
 
     bool isSupported(const std::string& contentType,
         bool isOggTheora,
