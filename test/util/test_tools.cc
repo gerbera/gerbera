@@ -129,6 +129,14 @@ TEST(ToolsTest, subdirFileTest)
     EXPECT_EQ(isSubDir(test2, test), false);
 }
 
+TEST(ToolsTest, subdirSlashTest)
+{
+    std::string test = "/regular/path/";
+    std::string test2 = "/regular/path";
+    EXPECT_EQ(isSubDir(test, test2), true);
+    EXPECT_EQ(isSubDir(test2, test), true);
+}
+
 TEST(ToolsTest, splitStringTest)
 {
     auto parts = splitString("", ',');

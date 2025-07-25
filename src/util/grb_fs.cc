@@ -54,6 +54,8 @@ bool isSubDir(const fs::path& path, const fs::path& parent)
     auto chkStr = parent.string();
     rtrimPath(pathStr);
     rtrimPath(chkStr);
+    if (chkStr == pathStr)
+        return true;
     chkStr += "/";
     return startswith(pathStr, chkStr);
 }

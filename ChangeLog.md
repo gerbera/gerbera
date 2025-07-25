@@ -23,6 +23,7 @@
 - Fix issue with stale objects in autoscan
 - Fix resources for containers
 - Fix SQL for changing persistent object flag in database
+- Fix subdir logic
 - Fix subtitle detection in import
 - Fix Support for non-root user in docker image
 - Fix timed playlist import
