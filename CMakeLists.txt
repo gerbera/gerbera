@@ -437,10 +437,23 @@ endif(HAVE_ATOMIC)
 find_package(Filesystem REQUIRED)
 target_link_libraries(libgerbera PUBLIC std::filesystem)
 
-find_package(Iconv REQUIRED)
-target_link_libraries(libgerbera PUBLIC Iconv::Iconv)
+check_c_source_compiles("
+#define LIBICONV_PLUG 1 /* in case libiconv header is in include path */
+#include <stddef.h>
+#include <iconv.h>
+int main(int argc, char **argv) {
+  return !iconv_open(NULL,NULL);
+}" ICONV_IN_LIBC)
+
+if(NOT ICONV_IN_LIBC)
+    find_package(Iconv REQUIRED)
+    target_link_libraries(libgerbera PUBLIC Iconv::Iconv)
+    set(CMAKE_REQUIRED_LIBRARIES Iconv::Iconv)
+else()
+    target_compile_definitions(libgerbera PUBLIC LIBICONV_PLUG=1)
+endif()
+
 include(CheckPrototypeDefinition)
-set(CMAKE_REQUIRED_LIBRARIES Iconv::Iconv)
 check_prototype_definition(iconv "size_t iconv(iconv_t cd, const char **src, size_t *srcl, char **dst, size_t *dstl)" 0 "iconv.h" ICONV_CONST)
 if(ICONV_CONST)
     target_compile_definitions(libgerbera PRIVATE ICONV_CONST)
