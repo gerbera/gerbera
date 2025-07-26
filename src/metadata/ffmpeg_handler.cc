@@ -206,7 +206,9 @@ public:
     /// \brief check if FFMpeg information is available
     operator bool() const
     {
-        if (!(pFormatCtx && pFormatCtx->metadata)) {
+        if (!pFormatCtx)
+            return false;
+        if (!pFormatCtx->metadata) {
             for (std::size_t stream_number = 0; stream_number < pFormatCtx->nb_streams; stream_number++) {
                 if (pFormatCtx->streams[stream_number]->metadata)
                     return true;

@@ -69,6 +69,7 @@
 #if TAGLIB_MAJOR_VERSION >= 2
 #include <dsffile.h>
 #include <mp4itemfactory.h>
+#include <wavfile.h>
 #endif
 
 class GerberaTagLibDebugListener : public TagLib::DebugListener {
@@ -384,6 +385,8 @@ bool TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
         extractDSF(fs, item, res);
     } else if (contentType == CONTENT_TYPE_AIFF) {
         extractAiff(fs, item, res);
+    } else if (contentType == CONTENT_TYPE_PCM) {
+        extractPcm(fs, item, res);
     } else {
         log_warning("TagLibHandler: File '{}' has unhandled content type '{}'", item->getLocation().c_str(), contentType.c_str());
         result = false;
@@ -968,6 +971,25 @@ void TagLibHandler::extractAiff(
     populateGenericTags(item, res, aiff, aiff.properties(), sc);
 
     setBitsPerSample(item, res, aiff);
+}
+
+void TagLibHandler::extractPcm(
+    TagLib::IOStream& roStream,
+    const std::shared_ptr<CdsItem>& item,
+    const std::shared_ptr<CdsResource>& res) const
+{
+#if TAGLIB_MAJOR_VERSION >= 2
+    auto wav = TagLib::RIFF::WAV::File(&roStream);
+
+    if (!wav.isValid()) {
+        log_info("TagLibHandler {}: does not appear to be a valid WAV file", item->getLocation().c_str());
+        return;
+    }
+    auto sc = converterManager->i2i();
+    populateGenericTags(item, res, wav, wav.hasID3v2Tag() ? wav.ID3v2Tag()->properties() : wav.properties(), sc);
+
+    setBitsPerSample(item, res, wav);
+#endif
 }
 
 template <class Media>
