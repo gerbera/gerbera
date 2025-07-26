@@ -10,6 +10,7 @@
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
 - Bump form-data from 4.0.2 to 4.0.4 in /gerbera-web
 - Changed OpenWRT Installation note
+- Check for LIBICONV_PLUG
 - Configure limit of sql strings
 - Do not send internal subtitles as UPnP resources
 - Edit SortKey on web ui
