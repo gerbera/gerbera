@@ -747,7 +747,11 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
 
     // This should never happen - but fail softly
     // It means that something doesn't set the refID correctly
+#ifdef GERBERA_RELEASE
+    log_debug("Failed to loadObject with refid: {}", refID);
+#else
     log_warning("Failed to loadObject with refid: {}", refID);
+#endif
 
     return findObjectByPath(location, UNUSED_CLIENT_GROUP);
 }

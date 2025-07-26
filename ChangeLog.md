@@ -5,6 +5,7 @@
 - Add missing jsoncpp to `Dockerfile`s
 - Add support for transliterating device output strings
 - Add taglib and artwork support for dsf files
+- Add taglib support for pcm files
 - Allow hiding PC directory in web view
 - Bump axios from 1.7.9 to 1.8.3 in /gerbera-web
 - Bump form-data from 4.0.2 to 4.0.4 in /gerbera-web
