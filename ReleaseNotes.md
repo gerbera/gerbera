@@ -2,10 +2,15 @@
 
 ## HEAD
 
+This release especially brings new features in metadata extraction and
+layout configuration which require reimport of the library:
+- Improved resource handling for WavPack and FFMpeg
+- Additional file type support for DSF and WAV/PCM
+- Natural file sorting
+- Change displayed text for "PC Directory":
+  The changes to configure it, can be merged with `--create-config=Boxlayout`.
+
 Sqlite backup is now enabled by default.
-Filtering resources by mimetype instead of extension reduces effort of configuration
-Improved resource handling for WavPack and FFMpeg requrires reimport of the library
-Changes to configure text for "PC Directory" can be merged with `--create-config=Boxlayout`
 
 ### Deprecation Info
 
@@ -19,7 +24,7 @@ config file.
 ### NEW Features
 
 - Support "natural" file sorting for numbers in file names
-- Support transliteration of device output
+- Support transliteration of texts depending on device output
 - Extract multiple stream information in ffmpeg handler including embedded subtitles
 - Filter resources by mimetype instead of extension
 - Artwork support for dsf files with taglib 2.0
@@ -30,6 +35,7 @@ config file.
 ### FIXES
 
 - Changing autoscans via ui failed in some cases
+- Failing import including stale objects
 
 ### Code Improvements
 

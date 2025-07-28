@@ -1,7 +1,30 @@
-import {Tweaks} from '../../../web/js/gerbera-tweak.module';
-import {Auth} from '../../../web/js/gerbera-auth.module';
-import {GerberaApp} from '../../../web/js/gerbera-app.module';
-import {Updates} from '../../../web/js/gerbera-updates.module';
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    gerbera.dirtweak.spec.js - this file is part of Gerbera.
+
+    Copyright (C) 2016-2025 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
+/* global fixture */
+import { Tweaks } from '../../../web/js/gerbera-tweak.module';
+import { Auth } from '../../../web/js/gerbera-auth.module';
+import { GerberaApp } from '../../../web/js/gerbera-app.module';
+import { Updates } from '../../../web/js/gerbera-updates.module';
 import dirTweakItem from './fixtures/dirtweak-item';
 import dirTweakSubmit from './fixtures/dirtweak-submit';
 import dirTweakDeleteContent from './fixtures/dirtweak-delete';
@@ -11,7 +34,7 @@ describe('Gerbera DirTweaks', () => {
   let lsSpy;
   beforeEach(() => {
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
-        return;
+      return;
     });
   });
 

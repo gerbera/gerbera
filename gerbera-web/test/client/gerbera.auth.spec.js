@@ -1,11 +1,34 @@
-import {Auth} from '../../../web/js/gerbera-auth.module';
-import {GerberaApp} from '../../../web/js/gerbera-app.module';
-import {Tree} from '../../../web/js/gerbera-tree.module';
-import {Items} from '../../../web/js/gerbera-items.module';
-import {Menu} from '../../../web/js/gerbera-menu.module';
-import {Trail} from '../../../web/js/gerbera-trail.module';
-import {Autoscan} from '../../../web/js/gerbera-autoscan.module';
-import {Updates} from '../../../web/js/gerbera-updates.module';
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    gerbera.auth.spec.js - this file is part of Gerbera.
+
+    Copyright (C) 2016-2025 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
+/* global fixture */
+import { Auth } from '../../../web/js/gerbera-auth.module';
+import { GerberaApp } from '../../../web/js/gerbera-app.module';
+import { Tree } from '../../../web/js/gerbera-tree.module';
+import { Items } from '../../../web/js/gerbera-items.module';
+import { Menu } from '../../../web/js/gerbera-menu.module';
+import { Trail } from '../../../web/js/gerbera-trail.module';
+import { Autoscan } from '../../../web/js/gerbera-autoscan.module';
+import { Updates } from '../../../web/js/gerbera-updates.module';
 import mockGetSid from './fixtures/get_sid.not.logged_in';
 import mockToken from './fixtures/get_token.success';
 import mockLogin from './fixtures/login.success';
@@ -14,7 +37,7 @@ describe('Gerbera Auth', () => {
   let lsSpy;
   beforeEach(() => {
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
-        return;
+      return;
     });
   });
 
@@ -81,7 +104,7 @@ describe('Gerbera Auth', () => {
       fixture.setBase('test/client/fixtures');
       fixture.load('index.html');
       ajaxSpy = spyOn($, 'ajax').and.callFake(() => {
-        return Promise.resolve({success: true});
+        return Promise.resolve({ success: true });
       });
       Cookies.set(Auth.SID, '12345');
       GerberaApp.setLoggedIn(true);

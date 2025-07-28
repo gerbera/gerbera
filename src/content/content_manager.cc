@@ -973,6 +973,7 @@ template <typename T>
 std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
+    std::string sortKey = getValueOrDefault(parameters, "sortKey");
     std::string upnpClass = getValueOrDefault(parameters, "class");
     std::string mimetype = getValueOrDefault(parameters, "mime-type");
     std::string description = getValueOrDefault(parameters, "description");
@@ -988,6 +989,7 @@ template <>
 std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr<CdsContainer>& item, const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
+    std::string sortKey = getValueOrDefault(parameters, "sortKey");
     std::string upnpClass = getValueOrDefault(parameters, "class");
     std::string flags = getValueOrDefault(parameters, "flags");
 
@@ -998,6 +1000,8 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr
 
     if (!title.empty())
         clone->setTitle(title);
+    if (!sortKey.empty())
+        clone->setSortKey(sortKey);
     if (!upnpClass.empty())
         clone->setClass(upnpClass);
     if (!flags.empty())
@@ -1027,6 +1031,7 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr
     std::string mimetype = getValueOrDefault(parameters, "mime-type");
     std::string description = getValueOrDefault(parameters, "description");
     std::string location = getValueOrDefault(parameters, "location");
+    std::string sortKey = getValueOrDefault(parameters, "sortKey");
     std::string protocol = getValueOrDefault(parameters, "protocol");
     std::string flags = getValueOrDefault(parameters, "flags");
     log_debug("updateCdsObject: CdsItem {} updated", title);
@@ -1036,6 +1041,8 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr
 
     if (!title.empty())
         clone->setTitle(title);
+    if (!sortKey.empty())
+        clone->setSortKey(sortKey);
     if (!upnpClass.empty())
         clone->setClass(upnpClass);
     if (!location.empty())

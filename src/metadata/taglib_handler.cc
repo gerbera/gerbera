@@ -468,6 +468,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(
 
         return std::make_unique<MemIOHandler>(art->picture().data(), art->picture().size());
 #else
+        log_warning("For DSF support in file '{}' TaglibHandler needs to be built with taglib 2 and above", itemLocation);
         return nullptr;
 #endif
     }
@@ -906,6 +907,8 @@ void TagLibHandler::extractDSF(
         if (resource)
             resource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(pic.size()));
     }
+#else
+    log_warning("For DSF support in file '{}' TaglibHandler needs to be built with taglib 2 and above", item->getLocation().c_str());
 #endif
 }
 
@@ -989,6 +992,8 @@ void TagLibHandler::extractPcm(
     populateGenericTags(item, res, wav, wav.hasID3v2Tag() ? wav.ID3v2Tag()->properties() : wav.properties(), sc);
 
     setBitsPerSample(item, res, wav);
+#else
+    log_warning("For PCM support in file '{}' TaglibHandler needs to be built with taglib 2 and above", item->getLocation().c_str());
 #endif
 }
 

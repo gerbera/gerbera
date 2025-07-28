@@ -20,6 +20,7 @@
 
     $Id$
 */
+/* global fixture */
 import { GerberaApp } from "../../../web/js/gerbera-app.module";
 import { Items, BrowseItemView, SearchItemView, FileItemView } from '../../../web/js/gerbera-items.module';
 import { Trail } from "../../../web/js/gerbera-trail.module";
