@@ -20,6 +20,7 @@
 
     $Id$
 */
+/* global fixture */
 import datagridData from './fixtures/datagrid-data';
 
 describe('The jQuery Items Datagrid', () => {

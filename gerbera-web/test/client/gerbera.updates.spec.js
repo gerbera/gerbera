@@ -1,7 +1,30 @@
-import {Updates} from "../../../web/js/gerbera-updates.module";
-import {Auth} from "../../../web/js/gerbera-auth.module";
-import {GerberaApp} from "../../../web/js/gerbera-app.module";
-import {Tree} from '../../../web/js/gerbera-tree.module';
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    gerbera.updates.spec.js - this file is part of Gerbera.
+
+    Copyright (C) 2016-2025 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
+/* global fixture */
+import { Updates } from "../../../web/js/gerbera-updates.module";
+import { Auth } from "../../../web/js/gerbera-auth.module";
+import { GerberaApp } from "../../../web/js/gerbera-app.module";
+import { Tree } from '../../../web/js/gerbera-tree.module';
 import updatesNoTaskId from './fixtures/updates-no-taskId';
 import updatesWithTaskId from './fixtures/updates-with-task';
 import updatesWithNoTask from './fixtures/updates-with-no-task';
@@ -21,7 +44,7 @@ describe('Gerbera Updates', function () {
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
-        return;
+      return;
     });
     Updates.initialize();
   });
@@ -35,7 +58,7 @@ describe('Gerbera Updates', function () {
 
       Updates.showMessage('a message');
 
-      expect($.fn.toast).toHaveBeenCalledWith('show', {message: 'a message', type: undefined, icon: undefined});
+      expect($.fn.toast).toHaveBeenCalledWith('show', { message: 'a message', type: undefined, icon: undefined });
     });
   });
   describe('getUpdates()', function () {

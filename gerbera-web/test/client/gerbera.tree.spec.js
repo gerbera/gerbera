@@ -1,9 +1,33 @@
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    gerbera.tree.spec.js - this file is part of Gerbera.
+
+    Copyright (C) 2016-2025 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
+/* global fixture */
 import { Autoscan } from "../../../web/js/gerbera-autoscan.module";
 import { GerberaApp } from "../../../web/js/gerbera-app.module";
 import { Tree } from '../../../web/js/gerbera-tree.module';
 import { Items } from "../../../web/js/gerbera-items.module";
 import { Updates } from "../../../web/js/gerbera-updates.module";
 import { Trail } from "../../../web/js/gerbera-trail.module";
+
 import treeResponse from './fixtures/parent_id-0-select_it-0';
 import childTreeResponse from './fixtures/parent_id-7443-select_it-0';
 import trailData from './fixtures/trail-data';

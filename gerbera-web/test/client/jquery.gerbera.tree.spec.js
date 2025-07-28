@@ -1,3 +1,27 @@
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    jquery.gerbera.tree.spec.js - this file is part of Gerbera.
+
+    Copyright (C) 2016-2025 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
+
+/* global fixture */
 import treeDataJson from './fixtures/tree-data';
 import treeDataHierarchy from './fixtures/tree-data-hierarchy';
 import treeDataDiffJson from './fixtures/tree-data-diff';
@@ -14,7 +38,7 @@ describe('The jQuery Tree', () => {
 
   beforeEach(() => {
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
-        return;
+      return;
     });
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
@@ -147,10 +171,10 @@ describe('The jQuery Tree', () => {
 
       const parent = $(tree.find('li').get(4));
       const children = [
-        {'title': 'Folder 6', 'gerbera': {id: 6}},
-        {'title': 'Folder 7', 'gerbera': {id: 7}},
-        {'title': 'Folder 8', 'gerbera': {id: 8}},
-        {'title': 'Folder 9', 'gerbera': {id: 9}}
+        { 'title': 'Folder 6', 'gerbera': { id: 6 } },
+        { 'title': 'Folder 7', 'gerbera': { id: 7 } },
+        { 'title': 'Folder 8', 'gerbera': { id: 8 } },
+        { 'title': 'Folder 9', 'gerbera': { id: 9 } }
       ];
 
       tree.tree('append', parent, children);
@@ -212,10 +236,10 @@ describe('The jQuery Tree', () => {
 
       const parent = $($('#tree').find('li').get(4));
       const children = [
-        {'title': 'Folder 6', 'gerbera': {id: 6}},
-        {'title': 'Folder 7', 'gerbera': {id: 7}},
-        {'title': 'Folder 8', 'gerbera': {id: 8}},
-        {'title': 'Folder 9', 'gerbera': {id: 9}}
+        { 'title': 'Folder 6', 'gerbera': { id: 6 } },
+        { 'title': 'Folder 7', 'gerbera': { id: 7 } },
+        { 'title': 'Folder 8', 'gerbera': { id: 8 } },
+        { 'title': 'Folder 9', 'gerbera': { id: 9 } }
       ];
       tree.tree('append', parent, children);
 

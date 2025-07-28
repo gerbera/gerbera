@@ -1,4 +1,27 @@
-const {By, until} = require('selenium-webdriver');
+/*GRB*
+
+    Gerbera - https://gerbera.io/
+
+    login.page.js - this file is part of Gerbera.
+
+    Copyright (C) 2016-2025 Gerbera Contributors
+
+    Gerbera is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2
+    as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
+    $Id$
+*/
+
+const { By, until } = require('selenium-webdriver');
 const fs = require('fs');
 
 module.exports = function (driver) {
@@ -47,7 +70,7 @@ module.exports = function (driver) {
       await logoutBtn.click();
       const loginBtn = driver.findElement(By.id('login-submit'));
       result = await driver.wait(until.elementIsVisible(loginBtn), 5000);
-    } catch(err) {
+    } catch (err) {
       console.log(err);
       result = null;
     }
@@ -60,7 +83,7 @@ module.exports = function (driver) {
   };
 
   this.setDisplayMode = async (mode) => {
-    await driver.executeScript("document.documentElement.style.setProperty('color-scheme', "+ mode + ")");
+    await driver.executeScript("document.documentElement.style.setProperty('color-scheme', " + mode + ")");
   };
 
   this.getToastMessage = async () => {
@@ -79,7 +102,7 @@ module.exports = function (driver) {
     let result;
     try {
       result = await driver.manage().getCookie(cookie);
-    } catch(err) {
+    } catch (err) {
       result = null;
     }
     return Promise.resolve(result);
