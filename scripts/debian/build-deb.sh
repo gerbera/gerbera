@@ -77,10 +77,24 @@ function upload_to_repo() {
   install-deb-s3
 
   echo "${PKG_SIGNING_KEY}" | gpg --import
+  PRES_VERS='--no-preserve-versions'
+  if [[ "$1" == "debian" ]]; then
+      PRES_VERS='--preserve-versions'
+  fi
+
+  deb-s3 clean \
+    --bucket=gerbera \
+    --prefix="${1}" \
+    --lock \
+    --sign="${PKG_SIGNING_KEY_ID}" \
+    --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
+    --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
+    --endpoint="${DEB_UPLOAD_ENDPOINT}"
 
   deb-s3 upload \
     --bucket=gerbera \
     --prefix="${1}" \
+    ${PRES_VERS} \
     --codename="${lsb_codename}" \
     --arch="${deb_arch}" \
     --lock \
