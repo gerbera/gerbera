@@ -28,11 +28,11 @@
 #include "upnp_common.h"
 #include "util/tools.h"
 
-#include <cstddef>
-
 #if !defined(USING_NPUPNP)
 #include <UpnpExtraHeaders.h>
 #endif
+
+#include <cstddef>
 
 #if (UPNP_VERSION > 170000 && UPNP_VERSION <= 170110)
 #define Stringize(L) #L

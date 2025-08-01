@@ -1,6 +1,6 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v2.6.0
 
 This release especially brings new features in metadata extraction and
 layout configuration which require reimport of the library:

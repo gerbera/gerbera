@@ -1,6 +1,6 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v2.6.0
 
 - Add missing jsoncpp to `Dockerfile`s
 - Add support for transliterating device output strings
@@ -11,6 +11,9 @@
 - Bump form-data from 4.0.2 to 4.0.4 in /gerbera-web
 - Changed OpenWRT Installation note
 - Check for LIBICONV_PLUG
+- ci: deb-s3 clean does not allow --arch
+- ci: fix up pruning old deb packages
+- clang-tidy cleanups
 - Code layout in ui tests
 - Configure limit of sql strings
 - Do not send internal subtitles as UPnP resources
@@ -45,6 +48,7 @@
 - Remove legacy compile option SQLITE_BACKUP_ENABLED
 - Reorganise installation scripts
 - Restore owner of config file in docker
+- some more cleanups
 - Support "natural" file sorting
 - Tweak for old Samsung TV
 - Update fmtlib to 11.2.0
