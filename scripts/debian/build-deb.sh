@@ -82,15 +82,6 @@ function upload_to_repo() {
       PRES_VERS='--preserve-versions'
   fi
 
-  deb-s3 clean \
-    --bucket=gerbera \
-    --prefix="${1}" \
-    --lock \
-    --sign="${PKG_SIGNING_KEY_ID}" \
-    --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
-    --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
-    --endpoint="${DEB_UPLOAD_ENDPOINT}"
-
   deb-s3 upload \
     --bucket=gerbera \
     --prefix="${1}" \
@@ -103,6 +94,19 @@ function upload_to_repo() {
     --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
     --endpoint="${DEB_UPLOAD_ENDPOINT}" \
     "${deb_name}"
+
+  # Clean old debs after they are replaced above
+  if [[ "$1" != "debian" ]]; then
+    deb-s3 clean \
+      --bucket=gerbera \
+      --prefix="${1}" \
+      --arch="${deb_arch}" \
+      --codename="${lsb_codename}" \
+      --sign="${PKG_SIGNING_KEY_ID}" \
+      --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
+      --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
+      --endpoint="${DEB_UPLOAD_ENDPOINT}"
+    fi
   echo "::endgroup::"
 }
 
