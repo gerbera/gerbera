@@ -100,13 +100,12 @@ function upload_to_repo() {
     deb-s3 clean \
       --bucket=gerbera \
       --prefix="${1}" \
-      --arch="${deb_arch}" \
       --codename="${lsb_codename}" \
       --sign="${PKG_SIGNING_KEY_ID}" \
       --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
       --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
       --endpoint="${DEB_UPLOAD_ENDPOINT}"
-    fi
+  fi
   echo "::endgroup::"
 }
 
