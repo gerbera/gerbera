@@ -179,6 +179,8 @@ protected:
 /// @brief Define a tree in virtual layout
 class BoxChain : public Editable {
 public:
+    BoxChain() = default;
+    ~BoxChain() override = default;
     explicit BoxChain(
         std::size_t index,
         AutoscanMediaMode type,
