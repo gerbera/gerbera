@@ -106,10 +106,13 @@ std::shared_ptr<Editable> EditHelper<Editable>::get(std::size_t id, bool edit) c
 template <class Editable>
 std::size_t EditHelper<Editable>::getEditSize() const
 {
-    if (indexMap.empty()) {
+    if (indexMap.empty())
         return 0;
-    }
-    return std::max_element(indexMap.begin(), indexMap.end(), [](const auto& a, const auto& b) { return (a.first < b.first); })->first + 1;
+
+    size_t s = 0;
+    for (const auto& map : indexMap)
+        s = std::max(s, map.first);
+    return s + 1;
 }
 
 template <class Editable>

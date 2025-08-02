@@ -31,10 +31,13 @@
 
 std::size_t DictionaryOption::getEditSize() const
 {
-    if (indexMap.empty()) {
+    if (indexMap.empty())
         return 0;
-    }
-    return std::max_element(indexMap.begin(), indexMap.end(), [](const auto& a, const auto& b) { return (a.first < b.first); })->first + 1;
+
+    size_t s = 0;
+    for (const auto& map : indexMap)
+        s = std::max(s, map.first);
+    return s + 1;
 }
 
 std::map<std::string, std::string> DictionaryOption::getDictionaryOption(bool forEdit) const
@@ -101,10 +104,13 @@ std::vector<std::vector<std::pair<std::string, std::string>>> VectorOption::getV
 
 std::size_t VectorOption::getEditSize() const
 {
-    if (indexMap.empty()) {
+    if (indexMap.empty())
         return 0;
-    }
-    return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
+
+    size_t s = 0;
+    for (const auto& map : indexMap)
+        s = std::max(s, map.first);
+    return s + 1;
 }
 
 void VectorOption::setKey(std::size_t optionIndex, std::size_t entryIndex, std::string key)
@@ -188,8 +194,11 @@ void ArrayOption::setItem(std::size_t index, const std::string& value)
 
 std::size_t ArrayOption::getEditSize() const
 {
-    if (indexMap.empty()) {
+    if (indexMap.empty())
         return 0;
-    }
-    return std::max_element(indexMap.begin(), indexMap.end(), [](auto a, auto b) { return (a.first < b.first); })->first + 1;
+
+    size_t s = 0;
+    for (const auto& map : indexMap)
+        s = std::max(s, map.first);
+    return s + 1;
 }
