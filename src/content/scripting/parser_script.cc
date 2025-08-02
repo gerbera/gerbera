@@ -178,6 +178,8 @@ ParserScript::ParserScript(const std::shared_ptr<Content>& content, const std::s
     defineFunction("getCdsObject", jsGetCdsObject, 1);
 }
 
+ParserScript::~ParserScript() = default;
+
 pugi::xml_node ParserScript::nullNode;
 
 pugi::xml_node& ParserScript::readXml(int direction)

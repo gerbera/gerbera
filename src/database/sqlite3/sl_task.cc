@@ -29,6 +29,8 @@
 #include "sqlite_database.h"
 #include "util/tools.h"
 
+SLTask::~SLTask() = default;
+
 bool SLTask::is_running() const
 {
     return running;

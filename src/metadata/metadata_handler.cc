@@ -39,12 +39,16 @@ MetadataHandler::MetadataHandler(const std::shared_ptr<Context>& context)
 {
 }
 
+MetadataHandler::~MetadataHandler() = default;
+
 MediaMetadataHandler::MediaMetadataHandler(const std::shared_ptr<Context>& context, ConfigVal enableOption)
     : MetadataHandler(context)
     , isEnabled(this->config->getBoolOption(enableOption))
     , converterManager(context->getConverterManager())
 {
 }
+
+MediaMetadataHandler::~MediaMetadataHandler() = default;
 
 MediaMetadataHandler::MediaMetadataHandler(
     const std::shared_ptr<Context>& context,

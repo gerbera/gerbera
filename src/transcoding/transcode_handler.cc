@@ -34,3 +34,5 @@ TranscodeHandler::TranscodeHandler(const std::shared_ptr<Content>& content)
     , content(content)
 {
 }
+
+TranscodeHandler::~TranscodeHandler() = default;

@@ -80,7 +80,7 @@ protected:
 class ConverterManager {
 public:
     ConverterManager(const std::shared_ptr<Config>& cm);
-    virtual ~ConverterManager() = default;
+    virtual ~ConverterManager();
 
     /// \brief metadata to internal
     const std::shared_ptr<StringConverter>& m2i(ConfigVal option, const fs::path& location);

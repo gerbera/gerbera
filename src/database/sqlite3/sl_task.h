@@ -46,7 +46,7 @@ public:
     {
     }
 
-    virtual ~SLTask() = default;
+    virtual ~SLTask();
 
     /// \brief run the sqlite3 task
     /// \param db database api reference

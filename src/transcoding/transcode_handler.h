@@ -48,7 +48,7 @@ class TranscodingProfile;
 class TranscodeHandler {
 public:
     explicit TranscodeHandler(const std::shared_ptr<Content>& content);
-    virtual ~TranscodeHandler() = default;
+    virtual ~TranscodeHandler();
 
     virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<TranscodingProfile>& profile,
         const fs::path& location,

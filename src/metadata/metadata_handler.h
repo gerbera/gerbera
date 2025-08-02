@@ -67,7 +67,7 @@ protected:
 
 public:
     explicit MetadataHandler(const std::shared_ptr<Context>& context);
-    virtual ~MetadataHandler() = default;
+    virtual ~MetadataHandler();
 
     /// \brief check whether file type is supported by handler
     virtual bool isSupported(const std::string& contentType,
@@ -130,7 +130,7 @@ public:
         ConfigVal auxOption,
         ConfigVal enableCommentOption,
         ConfigVal commentOption);
-    ~MediaMetadataHandler() override = default;
+    ~MediaMetadataHandler() override;
 };
 
 #endif // __METADATA_HANDLER_H__

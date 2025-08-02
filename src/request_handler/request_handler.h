@@ -65,7 +65,7 @@ class UpnpXMLBuilder;
 class RequestHandler {
 public:
     explicit RequestHandler(std::shared_ptr<Content> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, std::shared_ptr<Quirks> quirks);
-    virtual ~RequestHandler() = default;
+    virtual ~RequestHandler();
 
     /// \brief Returns header information about the requested content.
     /// \param filename Requested URL

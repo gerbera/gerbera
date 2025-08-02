@@ -29,6 +29,8 @@
 #include "util/logger.h"
 #include "util/tools.h"
 
+ScriptProperty::~ScriptProperty() = default;
+
 std::vector<std::string> ScriptProperty::getStringArrayValue() const
 {
     std::vector<std::string> result;
