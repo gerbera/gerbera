@@ -35,11 +35,11 @@
 #ifdef HAVE_CURL
 #include "curl_io_handler.h" // API
 
-#include <utility>
-
 #include "config/config.h"
 #include "exceptions.h"
 #include "util/tools.h"
+
+#include <utility>
 
 CurlIOHandler::CurlIOHandler(const std::shared_ptr<Config>& config, std::string url, std::size_t bufSize, std::size_t initialFillSize)
     : IOHandlerBufferHelper(config, bufSize, initialFillSize)
