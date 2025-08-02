@@ -59,7 +59,7 @@
 #include "util/tools.h"
 
 #include <algorithm>
-#include <cinttypes>
+#include <cstdint>
 #include <fmt/chrono.h>
 
 extern "C" {

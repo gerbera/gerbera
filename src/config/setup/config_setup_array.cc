@@ -28,7 +28,6 @@
 
 #include "common.h"
 #include "config/config_definition.h"
-#include "config/config_options.h"
 #include "config/config_val.h"
 #include "config_setup_bool.h"
 #include "config_setup_int.h"

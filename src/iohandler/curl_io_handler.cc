@@ -37,7 +37,6 @@
 
 #include "config/config.h"
 #include "exceptions.h"
-#include "util/tools.h"
 
 #include <utility>
 

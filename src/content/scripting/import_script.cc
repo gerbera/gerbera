@@ -36,12 +36,10 @@
 #include "import_script.h" // API
 
 #include "cds/cds_objects.h"
-#include "common.h"
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "content/content.h"
 #include "context.h"
-#include "js_functions.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 

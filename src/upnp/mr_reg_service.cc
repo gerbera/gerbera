@@ -38,13 +38,11 @@
 #include "config/config.h"
 #include "config/config_val.h"
 #include "context.h"
-#include "exceptions.h"
 #include "subscription_request.h"
 #include "upnp/compat.h"
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
 #include "util/logger.h"
-#include "util/tools.h"
 
 MRRegistrarService::MRRegistrarService(const std::shared_ptr<Context>& context,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, UpnpDevice_Handle deviceHandle)

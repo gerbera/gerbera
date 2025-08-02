@@ -38,7 +38,6 @@
 #include "cds/cds_item.h"
 #include "config/config.h"
 #include "config/config_val.h"
-#include "content/scripting/script_names.h"
 #include "context.h"
 #include "exceptions.h"
 #include "metadata_enums.h"

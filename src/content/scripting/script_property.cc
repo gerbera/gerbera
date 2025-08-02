@@ -26,7 +26,6 @@
 
 #include "script_property.h" // API
 
-#include "util/logger.h"
 #include "util/tools.h"
 
 ScriptProperty::~ScriptProperty() = default;

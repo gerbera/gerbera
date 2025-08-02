@@ -39,9 +39,7 @@
 #include "database/database.h"
 #include "server.h"
 #include "upnp/upnp_common.h"
-#include "util/grb_net.h"
 #include "util/grb_time.h"
-#include "util/tools.h"
 
 static constexpr auto specInterval = std::chrono::seconds(2);
 static constexpr auto minSleep = std::chrono::milliseconds(1);

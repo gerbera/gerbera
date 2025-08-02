@@ -37,7 +37,6 @@
 #include "common.h"
 #include "config/config.h"
 #include "config/config_val.h"
-#include "exceptions.h"
 #include "util/logger.h"
 #include "util/string_converter.h"
 #include "util/tools.h"

@@ -35,7 +35,6 @@
 #include "builtin_layout.h" // API
 
 #include "cds/cds_container.h"
-#include "cds/cds_item.h"
 #include "config/config.h"
 #include "config/config_val.h"
 #include "config/result/autoscan.h"

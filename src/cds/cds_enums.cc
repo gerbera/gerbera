@@ -31,7 +31,6 @@ Gerbera - https://gerbera.io/
 
 #include "content/scripting/script_names.h"
 #include "exceptions.h"
-#include "util/logger.h"
 #include "util/tools.h"
 
 #include <algorithm>

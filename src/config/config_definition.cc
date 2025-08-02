@@ -47,7 +47,6 @@
 #include "config/setup/config_setup_transcoding.h"
 #include "config/setup/config_setup_tweak.h"
 #include "config/setup/config_setup_vector.h"
-#include "config_option_enum.h"
 #include "config_options.h"
 #include "config_setup.h"
 #include "config_val.h"

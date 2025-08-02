@@ -27,7 +27,6 @@
 #include "config_setup_transcoding.h" // API
 
 #include "config/config_definition.h"
-#include "config/config_option_enum.h"
 #include "config/config_options.h"
 #include "config/config_val.h"
 #include "config/result/transcoding.h"

@@ -27,8 +27,6 @@
 #include "directory_tweak.h" // API
 
 #include "config/config.h"
-#include "upnp/clients.h"
-#include "util/logger.h"
 
 #include <algorithm>
 

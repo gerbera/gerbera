@@ -40,7 +40,6 @@
 #include "database/database.h"
 #include "exceptions.h"
 #include "upnp/quirks.h"
-#include "util/grb_net.h"
 #include "util/tools.h"
 
 #include <fmt/core.h>

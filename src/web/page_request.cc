@@ -29,7 +29,6 @@
 #include "cds/cds_objects.h"
 #include "cds/cds_resource.h"
 #include "content/content.h"
-#include "exceptions.h"
 #include "util/generic_task.h"
 #include "util/logger.h"
 #include "web/session_manager.h"

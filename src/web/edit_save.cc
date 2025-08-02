@@ -36,7 +36,6 @@
 
 #include "content/content.h"
 #include "exceptions.h"
-#include "util/tools.h"
 
 const std::string_view Web::EditSave::PAGE = "edit_save";
 

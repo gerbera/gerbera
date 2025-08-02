@@ -44,7 +44,6 @@
 
 #include "exceptions.h"
 #include "util/logger.h"
-#include "util/tools.h"
 
 #include <algorithm>
 #include <array>

@@ -35,9 +35,6 @@ Gerbera - https://gerbera.io/
 #include "upnp/upnp_common.h"
 #include "util/grb_time.h"
 
-#include <array>
-#include <numeric>
-
 CdsItem::CdsItem()
 {
     objectType = OBJECT_TYPE_ITEM;

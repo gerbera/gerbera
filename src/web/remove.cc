@@ -36,7 +36,6 @@
 
 #include "content/content.h"
 #include "database/database.h"
-#include "util/tools.h"
 
 const std::string_view Web::Remove::PAGE = "remove";
 

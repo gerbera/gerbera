@@ -29,12 +29,10 @@
 #include "config/result/autoscan.h"
 #include "content.h"
 #include "database/database.h"
-#include "exceptions.h"
 #include "util/timer.h"
 
 #ifdef HAVE_INOTIFY
 #include "content/inotify/autoscan_inotify.h"
-#include "content/inotify/mt_inotify.h"
 #endif
 
 #include <algorithm>

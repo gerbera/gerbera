@@ -76,8 +76,6 @@
 #endif
 
 #include <algorithm>
-#include <fmt/chrono.h>
-#include <regex>
 
 ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     const std::shared_ptr<Server>& server, std::shared_ptr<Timer> timer)

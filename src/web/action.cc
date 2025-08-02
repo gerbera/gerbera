@@ -36,7 +36,6 @@
 
 #include "common.h"
 #include "config/config.h"
-#include "content/content.h"
 #include "exceptions.h"
 
 const std::string_view Web::Action::PAGE = "action";

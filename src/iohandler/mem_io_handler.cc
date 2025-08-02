@@ -36,8 +36,6 @@
 
 #include "exceptions.h"
 
-#include <algorithm>
-
 MemIOHandler::MemIOHandler(const void* buffer, int length)
     : buffer(new char[length])
     , length(length)
