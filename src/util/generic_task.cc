@@ -37,3 +37,5 @@ GenericTask::GenericTask(TaskOwner taskOwner)
     : taskOwner(taskOwner)
 {
 }
+
+GenericTask::~GenericTask() = default;

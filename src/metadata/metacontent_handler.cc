@@ -252,6 +252,8 @@ MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
 {
 }
 
+MetacontentHandler::~MetacontentHandler() = default;
+
 FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
 {

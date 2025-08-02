@@ -75,7 +75,7 @@ enum class DbFileType {
 class Database {
 public:
     explicit Database(std::shared_ptr<Config> config);
-    virtual ~Database() = default;
+    virtual ~Database();
     virtual void init() = 0;
 
     /// \brief shutdown the Database with its possible threads

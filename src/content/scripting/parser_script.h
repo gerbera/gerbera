@@ -59,6 +59,7 @@ public:
 
 protected:
     ParserScript(const std::shared_ptr<Content>& content, const std::string& parent, const std::string& name, const std::string& objName, bool needResult);
+    ~ParserScript() override;
 
     static pugi::xml_node nullNode;
     static constexpr int ONE_TEXTLINE_BYTES = 1024;

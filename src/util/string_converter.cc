@@ -235,6 +235,8 @@ ConverterManager::ConverterManager(const std::shared_ptr<Config>& cm)
     }
 }
 
+ConverterManager::~ConverterManager() = default;
+
 const std::shared_ptr<StringConverter>& ConverterManager::m2i(ConfigVal option, const fs::path& location)
 {
     auto charset = charsets.at(option);

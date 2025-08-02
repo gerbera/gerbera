@@ -51,6 +51,8 @@ UpnpService::UpnpService(const std::shared_ptr<Config>& config,
 {
 }
 
+UpnpService::~UpnpService() = default;
+
 void UpnpService::processActionRequest(ActionRequest& request) const
 {
     log_debug("start");

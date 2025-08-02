@@ -40,7 +40,7 @@ public:
         valid = global || duk_is_object_coercible(ctx, index);
     }
 
-    virtual ~ScriptProperty() = default;
+    virtual ~ScriptProperty();
 
     std::vector<std::string> getStringArrayValue() const;
     std::vector<int> getIntArrayValue() const;

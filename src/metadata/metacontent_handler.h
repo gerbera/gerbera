@@ -66,6 +66,7 @@ private:
 class MetacontentHandler : public MetadataHandler {
 public:
     explicit MetacontentHandler(const std::shared_ptr<Context>& context);
+    ~MetacontentHandler() override;
 
 protected:
     const std::shared_ptr<StringConverter> f2i;

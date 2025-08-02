@@ -56,6 +56,8 @@ RequestHandler::RequestHandler(std::shared_ptr<Content> content, std::shared_ptr
 {
 }
 
+RequestHandler::~RequestHandler() = default;
+
 std::shared_ptr<CdsObject> RequestHandler::loadObject(const std::map<std::string, std::string>& params) const
 {
     auto it = params.find("object_id");
