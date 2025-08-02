@@ -23,7 +23,6 @@ Gerbera - https://gerbera.io/
 
 #include "grb_runtime.h" // API
 
-#include "common.h"
 #include "config/config.h"
 #include "config/config_definition.h"
 #include "config/config_generator.h"

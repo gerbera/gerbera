@@ -23,12 +23,12 @@
 
 /// \file compat.cc
 
-#include <cinttypes>
-
 #include "compat.h"
 #include "exceptions.h"
 #include "upnp_common.h"
 #include "util/tools.h"
+
+#include <cstddef>
 
 #if !defined(USING_NPUPNP)
 #include <UpnpExtraHeaders.h>

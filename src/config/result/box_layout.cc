@@ -27,7 +27,6 @@
 #include "box_layout.h" // API
 
 #include "config/config.h"
-#include "util/logger.h"
 
 #include <algorithm>
 

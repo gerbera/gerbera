@@ -39,7 +39,6 @@
 #include "config/config_val.h"
 #include "context.h"
 #include "database/database.h"
-#include "exceptions.h"
 #include "subscription_request.h"
 #include "upnp/compat.h"
 #include "upnp/upnp_common.h"

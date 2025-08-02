@@ -28,15 +28,9 @@
 
 #include "action_request.h"
 #include "config/config.h"
-#include "config/config_val.h"
 #include "context.h"
-#include "exceptions.h"
-#include "subscription_request.h"
-#include "upnp/compat.h"
-#include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
 #include "util/logger.h"
-#include "util/tools.h"
 
 UpnpService::UpnpService(const std::shared_ptr<Config>& config,
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder,

@@ -37,7 +37,6 @@
 #include "action_request.h"
 #include "config/config.h"
 #include "config/config_definition.h"
-#include "config/config_option_enum.h"
 #include "config/config_setup.h"
 #include "config/config_val.h"
 #include "content/content_manager.h"
@@ -89,7 +88,6 @@
 #include <upnptools.h>
 #endif
 
-#include <sstream>
 #include <thread>
 
 constexpr auto DEVICE_DESCRIPTION_PATH = std::string_view(UPNP_DESC_SCPD_URL UPNP_DESC_DEVICE_DESCRIPTION);

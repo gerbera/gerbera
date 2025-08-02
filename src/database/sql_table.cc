@@ -28,10 +28,8 @@
 #include "cds/cds_objects.h"
 #include "config/config_setup.h"
 #include "config/result/autoscan.h"
-#include "sql_database.h"
 #include "upnp/clients.h"
 #include "util/grb_net.h"
-#include "util/logger.h"
 
 const std::vector<BrowseColumn> Object2Table::tableColumnOrder = {
     BrowseColumn::Id,

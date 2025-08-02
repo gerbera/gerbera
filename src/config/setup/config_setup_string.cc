@@ -27,13 +27,11 @@
 #include "config_setup_string.h" // API
 
 #include "common.h"
-#include "config/config_definition.h"
 #include "config/config_options.h"
+#include "exceptions.h"
 #include "util/logger.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
-
-#include <array>
 
 void ConfigStringSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
 {

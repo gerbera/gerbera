@@ -25,12 +25,10 @@
 
 #include "layout.h" // API
 
-#include "cds/cds_item.h"
+#include "cds/cds_objects.h"
 #include "content/content.h"
 #include "context.h"
 #include "database/database.h"
-#include "upnp/upnp_common.h"
-#include "util/tools.h"
 
 #ifdef ONLINE_SERVICES
 #include "content/onlineservice/online_service.h"

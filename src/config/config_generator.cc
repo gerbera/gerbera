@@ -27,15 +27,12 @@
 #include "config_generator.h" // API
 
 #include "config/config_definition.h"
-#include "config/config_options.h"
 #include "config/config_setup.h"
-#include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
 #include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_dictionary.h"
 #include "config/setup/config_setup_vector.h"
 #include "config_val.h"
-#include "util/grb_time.h"
 #include "util/tools.h"
 
 #include <numeric>

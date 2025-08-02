@@ -41,7 +41,6 @@
 #include "exceptions.h"
 #include "script.h"
 #include "script_property.h"
-#include "util/string_converter.h"
 #include "util/tools.h"
 
 duk_ret_t js_print2(duk_context* ctx)

@@ -33,7 +33,6 @@
 
 #include <algorithm>
 #include <array>
-#include <iterator>
 #include <numeric>
 
 std::shared_ptr<ClientGroupConfig> ClientConfigList::getGroup(const std::string& name) const

@@ -25,14 +25,12 @@
 #define GRB_LOG_FAC GrbLogFacility::sqldatabase
 #include "search_handler.h" // API
 
-#include "config/config_val.h"
 #include "database/sql_database.h"
 #include "exceptions.h"
 #include "metadata/metadata_enums.h"
 #include "util/grb_time.h"
 #include "util/tools.h"
 
-#include <algorithm>
 #include <stack>
 
 static const std::unordered_map<std::string_view, TokenType> tokenTypes {

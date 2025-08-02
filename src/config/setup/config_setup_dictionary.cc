@@ -30,7 +30,9 @@
 #include "config/config_options.h"
 #include "config/config_val.h"
 #include "config_setup_bool.h"
+#include "exceptions.h"
 #include "util/logger.h"
+#include "util/tools.h"
 
 #include <numeric>
 

@@ -35,7 +35,6 @@
 #include "config_setup_bool.h"
 #include "config_setup_dictionary.h"
 #include "config_setup_int.h"
-#include "config_setup_path.h"
 #include "config_setup_string.h"
 #include "config_setup_vector.h"
 #include "setup_util.h"

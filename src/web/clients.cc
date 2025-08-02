@@ -32,10 +32,7 @@
 #include "database/database.h"
 #include "upnp/client_manager.h"
 #include "upnp/clients.h"
-#include "upnp/xml_builder.h"
 #include "util/grb_net.h"
-
-#include <fmt/chrono.h>
 
 static std::string secondsToString(const std::chrono::seconds& t)
 {

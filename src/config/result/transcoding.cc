@@ -34,8 +34,6 @@
 
 #include "transcoding.h" // API
 
-#include "util/tools.h"
-
 TranscodingProfile::TranscodingProfile(bool enabled, TranscodingType trType, std::string name)
     : enabled(enabled)
     , name(std::move(name))

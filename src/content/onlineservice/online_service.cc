@@ -37,9 +37,7 @@
 
 #include "content/content.h"
 #include "context.h"
-#include "database/database.h"
 #include "exceptions.h"
-#include "util/tools.h"
 
 // DO NOT FORGET TO ADD SERVICE STORAGE PREFIXES TO THIS ARRAY WHEN ADDING
 // NEW SERVICES!
