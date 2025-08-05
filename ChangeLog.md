@@ -1,5 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### HEAD
+
+- Fix MySql config load
+
 ### v2.6.0
 
 - Add missing jsoncpp to `Dockerfile`s
