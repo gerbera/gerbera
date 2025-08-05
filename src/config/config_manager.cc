@@ -182,6 +182,9 @@ void ConfigManager::load(const fs::path& userHome)
         setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_PORT);
         setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_SOCKET);
         setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_PASSWORD);
+        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_ENGINE);
+        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_CHARSET);
+        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_COLLATION);
 
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
         co->setDefaultValue(dataDir / "mysql.sql");
