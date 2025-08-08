@@ -31,5 +31,6 @@
 using IntOptionType = std::int32_t;
 using UIntOptionType = std::uint32_t;
 using LongOptionType = std::int64_t;
+using ULongOptionType = unsigned long long;
 
 #endif

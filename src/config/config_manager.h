@@ -92,6 +92,7 @@ public:
     IntOptionType getIntOption(ConfigVal option) const override;
     UIntOptionType getUIntOption(ConfigVal option) const override;
     LongOptionType getLongOption(ConfigVal option) const override;
+    ULongOptionType getULongOption(ConfigVal option) const override;
 
     /// \brief returns a config option of any type
     /// \param option option to retrieve.
@@ -152,6 +153,7 @@ public:
     void setOrigValue(const std::string& item, IntOptionType value) override;
     void setOrigValue(const std::string& item, UIntOptionType value) override;
     void setOrigValue(const std::string& item, LongOptionType value) override;
+    void setOrigValue(const std::string& item, ULongOptionType value) override;
 
 protected:
     std::shared_ptr<ConfigDefinition> definition;

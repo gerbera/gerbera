@@ -718,7 +718,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
 
     // Logging and debugging
 #ifdef GRBDEBUG
-        std::make_shared<ConfigIntSetup>(ConfigVal::SERVER_LOG_DEBUG_MODE,
+        std::make_shared<ConfigULongSetup>(ConfigVal::SERVER_LOG_DEBUG_MODE,
             "/server/attribute::debug-mode", "config-server.html#debug-mode",
             0, GrbLogger::makeFacility, GrbLogger::printFacility),
 #endif
@@ -1141,6 +1141,17 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
 
     // Scripting
 #ifdef HAVE_JS
+        std::make_shared<ConfigEnumSetup<AutoscanScanMode>>(ConfigVal::IMPORT_SCRIPTING_SCAN_MODE,
+            "/import/scripting/attribute::scan-mode", "config-import.html#scripting",
+            AutoscanScanMode::Manual,
+            std::map<std::string, AutoscanScanMode>(
+                {
+                    { AUTOSCAN_MANUAL, AutoscanScanMode::Manual },
+                    { AUTOSCAN_TIMED, AutoscanScanMode::Timed },
+#ifdef HAVE_INOTIFY
+                    { AUTOSCAN_INOTIFY, AutoscanScanMode::INotify },
+#endif
+                })),
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_CHARSET,
             "/import/scripting/attribute::script-charset", "config-import.html#scripting",
             "UTF-8", ConfigStringSetup::CheckCharset),

@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file directory_watch.h
+/// @file directory_watch.h
 
 #ifndef __DIRECTORY_WATCH_H__
 #define __DIRECTORY_WATCH_H__
@@ -32,34 +32,58 @@
 
 #include <vector>
 
-class AutoscanDirectory;
+// forward declarations
 class Watch;
 class WatchAutoscan;
 
-class DirectoryWatch {
+/// @brief Manager class for watch with path and sub items
+class PathWatch {
 public:
-    DirectoryWatch(fs::path path, int wd, int parentWd)
+    PathWatch(fs::path path, int wd, int parentWd)
         : path(std::move(path))
         , parentWd(parentWd)
         , wd(wd)
     {
     }
+
+    /// @brief get associated path
     fs::path getPath() const { return path; }
+
+    /// @brief set associated path
     void setPath(const fs::path& newPath) { path = newPath; }
+
+    /// @brief get associated watch id
     int getWd() const { return wd; }
+
+    /// @brief get associated parent watch id
     int getParentWd() const { return parentWd; }
+
+    /// @brief set associated parent watch id
     void setParentWd(int parentWd) { this->parentWd = parentWd; }
 
+    /// @brief set associated child watches
     const std::unique_ptr<std::vector<std::shared_ptr<Watch>>>& getWdWatches() const { return wdWatches; }
-    void addWatch(const std::shared_ptr<Watch>& w) { wdWatches->push_back(w); }
-    std::shared_ptr<WatchAutoscan> getStartPoint() const;
-    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(const fs::path& path) const;
 
-private:
+    /// @brief add child watch
+    void addWatch(const std::shared_ptr<Watch>& w) { wdWatches->push_back(w); }
+
+protected:
     std::unique_ptr<std::vector<std::shared_ptr<Watch>>> wdWatches { std::make_unique<std::vector<std::shared_ptr<Watch>>>() };
     fs::path path;
     int parentWd;
     int wd;
+};
+
+/// @brief Manager class for autoscan directory watch
+class DirectoryWatch : public PathWatch {
+    using PathWatch::PathWatch;
+
+public:
+    /// @brief get root watch item for autoscan watch
+    std::shared_ptr<WatchAutoscan> getStartPoint() const;
+
+    /// @brief get autoscan watch item for path
+    std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(const fs::path& path) const;
 };
 
 #endif

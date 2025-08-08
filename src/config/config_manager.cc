@@ -508,6 +508,11 @@ void ConfigManager::setOrigValue(const std::string& item, LongOptionType value)
     origValues.try_emplace(item, fmt::to_string(value));
 }
 
+void ConfigManager::setOrigValue(const std::string& item, ULongOptionType value)
+{
+    origValues.try_emplace(item, fmt::to_string(value));
+}
+
 // The validate function ensures that the array is completely filled!
 std::string ConfigManager::getOption(ConfigVal option) const
 {
@@ -566,6 +571,22 @@ LongOptionType ConfigManager::getLongOption(ConfigVal option) const
             throw_std_runtime_error("long option {}='{}' not set", option, cs->getItemPathRoot());
         }
         return optionValue->getLongOption();
+    } catch (const std::out_of_range& oor) {
+        log_error("{}", oor.what());
+        auto cs = definition->findConfigSetup(option);
+        throw_std_runtime_error("unset long option {}='{}'", option, cs->getItemPathRoot());
+    }
+}
+
+ULongOptionType ConfigManager::getULongOption(ConfigVal option) const
+{
+    try {
+        auto optionValue = options.at(to_underlying(option));
+        if (!optionValue) {
+            auto cs = definition->findConfigSetup(option);
+            throw_std_runtime_error("long option {}='{}' not set", option, cs->getItemPathRoot());
+        }
+        return optionValue->getULongOption();
     } catch (const std::out_of_range& oor) {
         log_error("{}", oor.what());
         auto cs = definition->findConfigSetup(option);

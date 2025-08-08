@@ -149,6 +149,9 @@ template <>
 ConfigUIntSetup::ConvertFunction ConfigUIntSetup::converter = stoulString;
 
 template <>
+ConfigULongSetup::ConvertFunction ConfigULongSetup::converter = stoulString;
+
+template <>
 ConfigLongSetup::ConvertFunction ConfigLongSetup::converter = stolString;
 
 template <typename T, class OptionClass>
@@ -175,3 +178,4 @@ bool CheckPortValue(UIntOptionType value)
 template class ConfigIntegerSetup<IntOptionType, IntOption>;
 template class ConfigIntegerSetup<UIntOptionType, UIntOption>;
 template class ConfigIntegerSetup<LongOptionType, LongOption>;
+template class ConfigIntegerSetup<ULongOptionType, ULongOption>;

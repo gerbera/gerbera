@@ -543,6 +543,7 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
         { ConfigVal::IMPORT_PLAYLIST_CHARSET, false },
 #ifdef HAVE_JS
         { ConfigVal::IMPORT_SCRIPTING_CHARSET, true },
+        { ConfigVal::IMPORT_SCRIPTING_SCAN_MODE, false },
         { ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER, true },
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST, true },
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE, true },

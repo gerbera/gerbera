@@ -45,10 +45,6 @@ class InotifyHandler {
 public:
     InotifyHandler(AutoscanInotify* ai, struct inotify_event* event, InotifyFlags maskedEvent);
 
-    static std::string mapFlags(InotifyFlags flags);
-    static InotifyFlags makeFlags(const std::string& optValue);
-    static InotifyFlags remapFlag(const std::string& flag);
-
     /// @brief Get File Path for new event
     fs::path getPath(const std::shared_ptr<DirectoryWatch>& wdObj);
 

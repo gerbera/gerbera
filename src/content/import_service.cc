@@ -250,10 +250,12 @@ void ImportService::initLayout(LayoutType layoutType)
     }
 #ifdef HAVE_JS
     if (!playlistParserScript) {
-        playlistParserScript = std::make_unique<PlaylistParserScript>(content, rootPath.string());
+        playlistParserScript = std::make_shared<PlaylistParserScript>(content, rootPath.string());
+        playlistParserScript->init();
     }
     if (!metafileParserScript) {
-        metafileParserScript = std::make_unique<MetafileParserScript>(content, rootPath.string());
+        metafileParserScript = std::make_shared<MetafileParserScript>(content, rootPath.string());
+        metafileParserScript->init();
     }
 #endif
 }

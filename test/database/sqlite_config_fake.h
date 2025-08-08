@@ -52,6 +52,7 @@ public:
     std::int32_t getIntOption(ConfigVal option) const override { return 0; }
     std::uint32_t getUIntOption(ConfigVal option) const override { return 0; }
     std::int64_t getLongOption(ConfigVal option) const override { return 0; }
+    unsigned long long getULongOption(ConfigVal option) const override { return 0; }
     std::shared_ptr<ConfigOption> getConfigOption(ConfigVal option) const override { return {}; }
     bool getBoolOption(ConfigVal option) const override
     {
@@ -72,6 +73,7 @@ public:
     void setOrigValue(const std::string& item, std::int32_t value) override { }
     void setOrigValue(const std::string& item, std::uint32_t value) override { }
     void setOrigValue(const std::string& item, std::int64_t value) override { }
+    void setOrigValue(const std::string& item, unsigned long long value) override { }
     bool hasOrigValue(const std::string& item) const override { return false; }
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(ConfigVal option) const override { return nullptr; }
     std::shared_ptr<DynamicContentList> getDynamicContentListOption(ConfigVal option) const override { return nullptr; }

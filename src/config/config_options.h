@@ -72,6 +72,10 @@ public:
     {
         throw std::runtime_error("Wrong option type long");
     }
+    virtual ULongOptionType getULongOption() const
+    {
+        throw std::runtime_error("Wrong option type ulong");
+    }
 
     virtual bool getBoolOption() const
     {
@@ -192,6 +196,24 @@ private:
     std::string optionString;
 };
 
+/// @brief Implementation of option value for unsigned long long integers
+class ULongOption : public ConfigOption {
+public:
+    explicit ULongOption(ULongOptionType option, std::string optionString = "")
+        : option(option)
+        , optionString(std::move(optionString))
+    {
+    }
+
+    std::string getOption() const override { return optionString.empty() ? fmt::to_string(option) : optionString; }
+
+    ULongOptionType getULongOption() const override { return option; }
+
+private:
+    ULongOptionType option;
+    std::string optionString;
+};
+
 class BoolOption : public ConfigOption {
 public:
     explicit BoolOption(bool option)
@@ -208,6 +230,7 @@ private:
 /// @brief Implementation of option value for dictionaries
 class DictionaryOption : public ConfigOption {
 public:
+    explicit DictionaryOption() { }
     explicit DictionaryOption(const std::map<std::string, std::string>& option)
         : option(option)
         , origSize(option.size())
@@ -241,6 +264,7 @@ private:
 /// @brief Implementation of option value for vectors
 class VectorOption : public ConfigOption {
 public:
+    explicit VectorOption() { }
     explicit VectorOption(const std::vector<std::vector<std::pair<std::string, std::string>>>& option)
         : option(option)
         , origSize(option.size())

@@ -29,7 +29,8 @@
     $Id$
 */
 
-/// \file autoscan_inotify.cc
+/// @file autoscan_inotify.cc
+/// @brief Implement manager class for autoscan directories with inotify
 #define GRB_LOG_FAC GrbLogFacility::autoscan
 
 #ifdef HAVE_INOTIFY
@@ -42,16 +43,12 @@
 #include "content/content.h"
 #include "content/inotify/directory_watch.h"
 #include "content/inotify/inotify_handler.h"
-#include "content/inotify/mt_inotify.h"
+#include "content/inotify/inotify_manager_cc.h"
 #include "content/inotify/watch.h"
 #include "context.h"
 #include "database/database.h"
-#include "util/tools.h"
 
-#include <algorithm>
-#include <sys/inotify.h>
-
-#define INOTIFY_MAX_USER_WATCHES_FILE "/proc/sys/fs/inotify/max_user_watches"
+template void InotifyManager<DirectoryWatch>::run();
 
 AutoscanInotify::AutoscanInotify(const std::shared_ptr<Content>& content)
     : config(content->getContext()->getConfig())
@@ -60,49 +57,11 @@ AutoscanInotify::AutoscanInotify(const std::shared_ptr<Content>& content)
 {
     defFollowSymlinks = this->config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
     defHidden = this->config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
-    std::error_code ec;
-    if (isRegularFile(INOTIFY_MAX_USER_WATCHES_FILE, ec)) {
-        try {
-            [[maybe_unused]] int maxWatches = std::stoi(trimString(GrbFile(INOTIFY_MAX_USER_WATCHES_FILE).readTextFile()));
-            log_debug("Max watches on the system: {}", maxWatches);
-        } catch (const std::runtime_error& ex) {
-            log_error("Could not determine maximum number of inotify user watches: {}", ex.what());
-        }
-    }
 
-    shutdownFlag = true;
-    events = IN_CLOSE_WRITE | IN_CREATE | IN_MOVED_FROM | IN_MOVED_TO | IN_DELETE | IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT;
     if (this->config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_ATTRIB))
         events |= IN_ATTRIB;
 }
 
-AutoscanInotify::~AutoscanInotify()
-{
-    std::unique_lock<std::mutex> lock(mutex);
-    if (!shutdownFlag) {
-        log_debug("start");
-        shutdownFlag = true;
-        inotify->stop();
-        lock.unlock();
-        thread_.join();
-        log_debug("inotify thread died.");
-        inotify = nullptr;
-        watches.clear();
-    }
-}
-
-void AutoscanInotify::run()
-{
-    AutoLock lock(mutex);
-
-    if (shutdownFlag) {
-        shutdownFlag = false;
-        inotify = std::make_unique<Inotify>();
-        thread_ = std::thread([this] { threadProc(); });
-    }
-}
-
-/// \brief main proc for thread
 void AutoscanInotify::threadProc()
 {
     std::error_code ec;
@@ -462,7 +421,12 @@ std::shared_ptr<DirectoryWatch> AutoscanInotify::monitorUnmonitorRecursive(const
     return (result > INOTIFY_ROOT) ? watches.at(result) : nullptr;
 }
 
-int AutoscanInotify::monitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir, bool isStartPoint, bool hasNonExisting, const fs::path& nonExistingPath)
+int AutoscanInotify::monitorDirectory(
+    const fs::path& path,
+    const std::shared_ptr<AutoscanDirectory>& adir,
+    bool isStartPoint,
+    bool hasNonExisting,
+    const fs::path& nonExistingPath)
 {
     int wd = inotify->addWatch(path, events, adir->getRetryCount());
 

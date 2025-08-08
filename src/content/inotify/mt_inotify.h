@@ -53,7 +53,7 @@ public:
     /// \param events inotify event mask
     /// \param retryCount number of retries to acquire the watch before failing
     /// \return watch descriptor or a negative value on error
-    int addWatch(const fs::path& path, InotifyFlags events, unsigned int retryCount) const;
+    int addWatch(const fs::path& path, InotifyFlags events, unsigned int retryCount = 0) const;
 
     /// \brief Removes a previously added file or directory from the watch list
     /// \param wd watch descriptor that was returned by the add_watch function

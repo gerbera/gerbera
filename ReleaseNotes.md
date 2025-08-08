@@ -1,5 +1,15 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
+### NEW Features
+
+- Inotify support for script folders allows developing scripts without restarting the server
+
+### Code Improvements
+
+- Increased size of `debug-mode` config option to `unsigned long long` to avoid overflow. Includes new very long integer config option.
+
 ## v2.6.0
 
 This release especially brings new features in metadata extraction and
