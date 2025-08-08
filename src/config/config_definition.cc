@@ -2146,8 +2146,8 @@ void ConfigDefinition::initDependencies()
         { ConfigVal::SERVER_STORAGE_SQLITE_RESTORE, ConfigVal::SERVER_STORAGE_SQLITE_ENABLED },
         { ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED, ConfigVal::SERVER_STORAGE_SQLITE_ENABLED },
         { ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL, ConfigVal::SERVER_STORAGE_SQLITE_ENABLED },
-        { ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE, ConfigVal::SERVER_STORAGE_SQLITE_ENABLED },
-        { ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE, ConfigVal::SERVER_STORAGE_SQLITE_ENABLED },
+        { ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE, ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE },
+        { ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE, ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE },
 #ifdef HAVE_MYSQL
         { ConfigVal::SERVER_STORAGE_MYSQL_HOST, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
         { ConfigVal::SERVER_STORAGE_MYSQL_DATABASE, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
@@ -2155,11 +2155,11 @@ void ConfigDefinition::initDependencies()
         { ConfigVal::SERVER_STORAGE_MYSQL_PORT, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
         { ConfigVal::SERVER_STORAGE_MYSQL_SOCKET, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
         { ConfigVal::SERVER_STORAGE_MYSQL_PASSWORD, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
-        { ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
-        { ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
         { ConfigVal::SERVER_STORAGE_MYSQL_ENGINE, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
         { ConfigVal::SERVER_STORAGE_MYSQL_CHARSET, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
         { ConfigVal::SERVER_STORAGE_MYSQL_COLLATION, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
+        { ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE, ConfigVal::SERVER_STORAGE_MYSQL_DATABASE },
+        { ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, ConfigVal::SERVER_STORAGE_MYSQL_DATABASE },
 #endif
 #ifdef HAVE_CURL
         { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE, ConfigVal::TRANSCODING_TRANSCODING_ENABLED },
@@ -2201,6 +2201,16 @@ const char* ConfigDefinition::mapConfigOption(ConfigVal option) const
 bool ConfigDefinition::isDependent(ConfigVal option) const
 {
     return (dependencyMap.find(option) != dependencyMap.end());
+}
+
+std::vector<ConfigVal> ConfigDefinition::getDependencies(ConfigVal option) const
+{
+    std::vector<ConfigVal> result;
+    for (auto&& [key, val] : dependencyMap) {
+        if (val == option)
+            result.push_back(key);
+    }
+    return result;
 }
 
 std::shared_ptr<ConfigSetup> ConfigDefinition::findConfigSetup(ConfigVal option, bool save) const

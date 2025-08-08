@@ -76,6 +76,8 @@ public:
 
     /// \brief check whether option is only available when other option is set
     bool isDependent(ConfigVal option) const;
+    /// @brief get all options that depend on argument
+    std::vector<ConfigVal> getDependencies(ConfigVal option) const;
 
     /// \brief find setup for config option
     std::shared_ptr<ConfigSetup> findConfigSetup(ConfigVal option, bool save = false) const;
