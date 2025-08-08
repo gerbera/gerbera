@@ -176,15 +176,8 @@ void ConfigManager::load(const fs::path& userHome)
 #ifdef HAVE_MYSQL
     if (mysqlEn) {
         // read mysql options
-        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_HOST);
-        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_DATABASE);
-        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_USERNAME);
-        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_PORT);
-        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_SOCKET);
-        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_PASSWORD);
-        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_ENGINE);
-        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_CHARSET);
-        setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_COLLATION);
+        for (auto&& option : definition->getDependencies(ConfigVal::SERVER_STORAGE_MYSQL_ENABLED))
+            setOption(root, option);
 
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
         co->setDefaultValue(dataDir / "mysql.sql");
@@ -198,12 +191,8 @@ void ConfigManager::load(const fs::path& userHome)
 
     if (sqlite3En) {
         // read sqlite options
-        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
-        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_SYNCHRONOUS);
-        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_JOURNALMODE);
-        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_RESTORE);
-        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED);
-        setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL);
+        for (auto&& option : definition->getDependencies(ConfigVal::SERVER_STORAGE_SQLITE_ENABLED))
+            setOption(root, option);
 
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
         co->setDefaultValue(dataDir / "sqlite3.sql");
@@ -292,8 +281,9 @@ void ConfigManager::load(const fs::path& userHome)
 
 #ifdef HAVE_CURL
     if (trEn) {
-        setOption(root, ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE);
-        setOption(root, ConfigVal::EXTERNAL_TRANSCODING_CURL_FILL_SIZE);
+        for (auto&& option : definition->getDependencies(ConfigVal::TRANSCODING_TRANSCODING_ENABLED)) {
+            setOption(root, option);
+        }
     }
 #endif // HAVE_CURL
 
@@ -307,20 +297,18 @@ void ConfigManager::load(const fs::path& userHome)
 #ifdef HAVE_FFMPEGTHUMBNAILER
     auto ffmpEn = setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)->getBoolOption();
     if (ffmpEn) {
-        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
-        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE);
-        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY);
-        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY);
-        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
-        setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
+        for (auto&& option : definition->getDependencies(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)) {
+            setOption(root, option);
+        }
     }
 #endif
 
 #ifdef HAVE_LASTFMLIB
     auto lfmEn = setOption(root, ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED)->getBoolOption();
     if (lfmEn) {
-        setOption(root, ConfigVal::SERVER_EXTOPTS_LASTFM_USERNAME);
-        setOption(root, ConfigVal::SERVER_EXTOPTS_LASTFM_PASSWORD);
+        for (auto&& option : definition->getDependencies(ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED)) {
+            setOption(root, option);
+        }
     }
 #endif
 
