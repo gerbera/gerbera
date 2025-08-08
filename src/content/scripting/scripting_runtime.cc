@@ -36,6 +36,7 @@
 
 #include "scripting_runtime.h" // API
 
+#include "script.h"
 #include "util/logger.h"
 
 ScriptingRuntime::ScriptingRuntime()
@@ -46,6 +47,14 @@ ScriptingRuntime::ScriptingRuntime()
 ScriptingRuntime::~ScriptingRuntime()
 {
     duk_destroy_heap(ctx);
+}
+
+bool ScriptingRuntime::reloadFolders()
+{
+    for (auto&& script : activeScripts) {
+        script->loadContent();
+    }
+    return true;
 }
 
 duk_context* ScriptingRuntime::createContext(const std::string& name)

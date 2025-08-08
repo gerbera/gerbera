@@ -236,7 +236,7 @@ Same as above, but defines the charset of the metadata (i.e. id3 tags, Exif info
 
 .. code:: xml
 
-    <scripting script-charset="UTF-8">
+    <scripting script-charset="UTF-8" scan-mode="inotify">
 
 * Optional
 
@@ -248,6 +248,27 @@ Defines the scripting section.
 
     * Optional
     * Default: **UTF-8**
+
+    Change character set for scripts.
+
+    .. code:: xml
+
+         scan-mode="inotify"
+
+    * Optional
+    * Default: **manual**
+
+    Set mode to rescan script-folders
+
+    +---------+-------------------------------------------------------------+
+    | mode    | meaning                                                     |
+    +---------+-------------------------------------------------------------+
+    | manual  | folders are only rescanned on startup                       |
+    +---------+-------------------------------------------------------------+
+    | inotify | changes are detected automatically and scripts are reloaded |
+    +---------+-------------------------------------------------------------+
+    | timed   | folder is rescanned after ``scan-interval``                 |
+    +---------+-------------------------------------------------------------+
 
 Below are the available scripting options:
 

@@ -29,9 +29,22 @@
 #ifdef HAVE_INOTIFY
 
 #include <cinttypes>
+#include <string>
 
 struct inotify_event;
 typedef uint32_t InotifyFlags;
+
+class InotifyUtil {
+public:
+    /// @brief get string representation for InotifyFlags
+    static std::string mapFlags(InotifyFlags flags);
+
+    /// @brief make enum representation from combined string
+    static InotifyFlags makeFlags(const std::string& optValue);
+
+    /// @brief make enum representation from string
+    static InotifyFlags remapFlag(const std::string& flag);
+};
 
 #endif
 #endif

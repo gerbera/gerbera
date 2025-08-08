@@ -78,9 +78,9 @@ struct ClientProfile {
     // to match the client
     ClientMatchType matchType { ClientMatchType::None };
     std::string match;
-    DictionaryOption mimeMappings = DictionaryOption({});
-    DictionaryOption headers = DictionaryOption({});
-    VectorOption dlnaMappings = VectorOption({});
+    DictionaryOption mimeMappings = DictionaryOption();
+    DictionaryOption headers = DictionaryOption();
+    VectorOption dlnaMappings = VectorOption();
     int captionInfoCount { -1 };
     int stringLimit { -1 };
     bool multiValue { true };

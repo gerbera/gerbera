@@ -73,6 +73,7 @@
 
 #ifdef HAVE_INOTIFY
 #include "content/inotify/autoscan_inotify.h"
+#include "content/inotify/scripting_inotify.h"
 #endif
 
 #ifdef ONLINE_SERVICES

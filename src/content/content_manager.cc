@@ -73,6 +73,7 @@
 
 #ifdef HAVE_INOTIFY
 #include "content/inotify/autoscan_inotify.h"
+#include "content/inotify/scripting_inotify.h"
 #endif
 
 #include <algorithm>
@@ -99,6 +100,12 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 #endif
     importService = std::make_shared<ImportService>(this->context, converterManager);
     importMode = EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
+#ifdef HAVE_INOTIFY
+    useAsInotify = config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY);
+#endif
+#ifdef HAVE_JS
+    scriptScanMode = EnumOption<AutoscanScanMode>::getEnumOption(config, ConfigVal::IMPORT_SCRIPTING_SCAN_MODE);
+#endif
 }
 
 void ContentManager::run()
@@ -124,6 +131,7 @@ void ContentManager::run()
     // wait for ContentTaskThread to become ready
     threadRunner->waitForReady();
 
+    log_debug("ContentTaskThread ready");
     if (!threadRunner->isAlive()) {
         throw_std_runtime_error("Could not start ContentTaskThread thread");
     }
@@ -134,8 +142,12 @@ void ContentManager::run()
     auto cfScans = std::vector<ConfigVal> { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST };
 
 #ifdef HAVE_INOTIFY
-    inotify = std::make_unique<AutoscanInotify>(self);
-    if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
+    as_inotify = std::make_unique<AutoscanInotify>(self);
+#ifdef HAVE_JS
+    if (scriptScanMode == AutoscanScanMode::INotify)
+        script_inotify = std::make_unique<ScriptingInotify>(config, scriptingRuntime);
+#endif
+    if (useAsInotify) {
         dbScans.push_back(AutoscanScanMode::INotify);
         cfScans.push_back(ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST);
     }
@@ -184,7 +196,7 @@ void ContentManager::run()
     }
 #ifdef HAVE_INOTIFY
     // Start INotify thread
-    inotify->run();
+    as_inotify->run();
 #endif
 
     auto layoutType = EnumOption<LayoutType>::getEnumOption(config, ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE);
@@ -201,7 +213,18 @@ void ContentManager::run()
     autoscanList->notifyAll(this);
     auto self_content = std::dynamic_pointer_cast<Content>(self);
 #ifdef HAVE_INOTIFY
-    autoscanList->initTimer(self_content, timer, config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY), inotify);
+    autoscanList->initTimer(self_content, timer, config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY), as_inotify);
+#ifdef HAVE_JS
+    if (scriptScanMode == AutoscanScanMode::INotify) {
+        script_inotify->run();
+        std::string customFolderPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER);
+        std::string commonFolderPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER);
+        if (!customFolderPath.empty())
+            script_inotify->monitor(customFolderPath);
+        if (!commonFolderPath.empty())
+            script_inotify->monitor(commonFolderPath);
+    }
+#endif
 #else
     autoscanList->initTimer(self_content, timer);
 #endif
@@ -276,7 +299,11 @@ void ContentManager::shutdown()
 
         autoscanList.reset();
 #ifdef HAVE_INOTIFY
-        inotify.reset();
+        as_inotify.reset();
+#ifdef HAVE_JS
+        if (scriptScanMode == AutoscanScanMode::INotify)
+            script_inotify.reset();
+#endif
 #endif
     }
 
@@ -1480,7 +1507,7 @@ void ContentManager::cleanupTasks(const fs::path& path)
             timer->removeTimerSubscriber(this, rmList->get(i)->getTimerParameter(), true);
 #ifdef HAVE_INOTIFY
         } else if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
-            inotify->unmonitor(dir);
+            as_inotify->unmonitor(dir);
 #endif
         }
     }
@@ -1557,8 +1584,8 @@ void ContentManager::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirec
         timer->removeTimerSubscriber(this, adir->getTimerParameter(), true);
     }
 #ifdef HAVE_INOTIFY
-    else if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY) && (adir->getScanMode() == AutoscanScanMode::INotify)) {
-        inotify->unmonitor(adir);
+    else if (useAsInotify && (adir->getScanMode() == AutoscanScanMode::INotify)) {
+        as_inotify->unmonitor(adir);
     }
 #endif
 }
@@ -1622,8 +1649,8 @@ void ContentManager::setAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     if (original->getScanMode() == AutoscanScanMode::Timed)
         timer->removeTimerSubscriber(this, original->getTimerParameter(), true);
 #ifdef HAVE_INOTIFY
-    else if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY) && (original->getScanMode() == AutoscanScanMode::INotify))
-        inotify->unmonitor(original);
+    else if (useAsInotify && (original->getScanMode() == AutoscanScanMode::INotify))
+        as_inotify->unmonitor(original);
 #endif
 
     auto copy = std::make_shared<AutoscanDirectory>();
@@ -1653,8 +1680,8 @@ void ContentManager::scanDir(const std::shared_ptr<AutoscanDirectory>& dir, bool
     if (dir->getScanMode() == AutoscanScanMode::Timed)
         timerNotify(dir->getTimerParameter());
 #ifdef HAVE_INOTIFY
-    else if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY) && (dir->getScanMode() == AutoscanScanMode::INotify))
-        inotify->monitor(dir);
+    else if (useAsInotify && (dir->getScanMode() == AutoscanScanMode::INotify))
+        as_inotify->monitor(dir);
 #endif
 
     if (updateUI)

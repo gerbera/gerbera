@@ -45,6 +45,9 @@
 // forward declarations
 #ifdef HAVE_INOTIFY
 class AutoscanInotify;
+#ifdef HAVE_JS
+class ScriptingInotify;
+#endif
 #endif
 
 #ifdef ONLINE_SERVICES
@@ -249,7 +252,14 @@ protected:
 
     std::shared_ptr<AutoscanList> autoscanList;
 #ifdef HAVE_INOTIFY
-    std::unique_ptr<AutoscanInotify> inotify;
+    std::unique_ptr<AutoscanInotify> as_inotify;
+    bool useAsInotify {};
+#ifdef HAVE_JS
+    std::unique_ptr<ScriptingInotify> script_inotify;
+#endif
+#endif
+#ifdef HAVE_JS
+    AutoscanScanMode scriptScanMode;
 #endif
 
     std::vector<std::shared_ptr<Executor>> process_list;

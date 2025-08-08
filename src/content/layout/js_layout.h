@@ -45,7 +45,7 @@ class ScriptingRuntime;
 class JSLayout : public Layout {
 protected:
     std::shared_ptr<ScriptingRuntime> runtime;
-    std::unique_ptr<ImportScript> import_script;
+    std::shared_ptr<ImportScript> import_script;
 
     std::vector<int> addVideo(
         const std::shared_ptr<CdsObject>& obj,

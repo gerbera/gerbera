@@ -35,14 +35,21 @@
 #define __SCRIPTING_RUNTIME_H__
 
 #include <duktape.h>
+#include <memory>
 #include <mutex>
 #include <string>
+#include <vector>
+
+// forward declarations
+class Script;
 
 /// \brief ScriptingRuntime class definition.
 class ScriptingRuntime {
 protected:
     duk_context* ctx;
     mutable std::recursive_mutex mutex;
+
+    std::vector<std::shared_ptr<Script>> activeScripts;
 
 public:
     ScriptingRuntime();
@@ -51,7 +58,14 @@ public:
     ScriptingRuntime(const ScriptingRuntime&) = delete;
     ScriptingRuntime& operator=(const ScriptingRuntime&) = delete;
 
-    /// \brief Returns a new (sub)context. !!! Not thread-safe !!!
+    /// @brief script listens to changes in folders
+    void addScript(const std::shared_ptr<Script>& script) { activeScripts.push_back(script); }
+    /// @brief get scripts
+    const std::vector<std::shared_ptr<Script>>& getScripts() { return activeScripts; }
+    /// @brief reload scripts in folders
+    bool reloadFolders();
+
+    /// @brief Returns a new (sub)context. !!! Not thread-safe !!!
     duk_context* createContext(const std::string& name);
     void destroyContext(const std::string& name);
 

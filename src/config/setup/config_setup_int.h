@@ -132,5 +132,6 @@ bool CheckPortValue(UIntOptionType value);
 using ConfigIntSetup = ConfigIntegerSetup<IntOptionType, IntOption>;
 using ConfigUIntSetup = ConfigIntegerSetup<UIntOptionType, UIntOption>;
 using ConfigLongSetup = ConfigIntegerSetup<LongOptionType, LongOption>;
+using ConfigULongSetup = ConfigIntegerSetup<ULongOptionType, ULongOption>;
 
 #endif // __CONFIG_SETUP_INT_H__

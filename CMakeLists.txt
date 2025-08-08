@@ -176,9 +176,14 @@ add_library(libgerbera STATIC
         src/content/inotify/directory_watch.h
         src/content/inotify/inotify_handler.cc
         src/content/inotify/inotify_handler.h
+        src/content/inotify/inotify_manager_cc.h
+        src/content/inotify/inotify_manager.h
+        src/content/inotify/inotify_types.cc
         src/content/inotify/inotify_types.h
         src/content/inotify/mt_inotify.cc
         src/content/inotify/mt_inotify.h
+        src/content/inotify/scripting_inotify.cc
+        src/content/inotify/scripting_inotify.h
         src/content/inotify/watch.h
         src/content/layout/builtin_layout.cc
         src/content/layout/builtin_layout.h

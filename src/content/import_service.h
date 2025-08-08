@@ -52,7 +52,6 @@ enum class LayoutType;
 class MetadataService;
 class Mime;
 enum class ObjectType;
-class ScriptingRuntime;
 class UpnpMap;
 
 #ifdef HAVE_JS
@@ -206,8 +205,8 @@ private:
     mutable std::shared_ptr<Layout> layout;
 
 #ifdef HAVE_JS
-    std::unique_ptr<PlaylistParserScript> playlistParserScript;
-    std::unique_ptr<MetafileParserScript> metafileParserScript;
+    std::shared_ptr<PlaylistParserScript> playlistParserScript;
+    std::shared_ptr<MetafileParserScript> metafileParserScript;
 #endif
 
     std::error_code ec;

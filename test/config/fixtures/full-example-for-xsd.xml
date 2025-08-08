@@ -223,7 +223,7 @@
         <filesystem-charset>UTF-8</filesystem-charset>
         <metadata-charset>UTF-8</metadata-charset>
         <playlist-charset>UTF-8</playlist-charset>
-        <scripting script-charset="UTF-8">
+        <scripting script-charset="UTF-8" scan-mode="inotify">
             <script-folder>
                 <common>/usr/local/share/gerbera/js</common>
                 <custom>/tmp/.config/gerbera/js</custom>

@@ -242,7 +242,7 @@ int main(int argc, char** argv, char** envp)
             runtime.handleConfigOptions(configManager, additionalArgs);
             configManager->validate();
 #ifdef GRBDEBUG
-            GrbLogger::Logger.init(configManager->getIntOption(ConfigVal::SERVER_LOG_DEBUG_MODE));
+            GrbLogger::Logger.init(configManager->getULongOption(ConfigVal::SERVER_LOG_DEBUG_MODE));
 #endif
             if (results.count(GRB_OPTION_CHECKCONFIG) > 0) {
                 runtime.exit(EXIT_SUCCESS);
@@ -342,7 +342,7 @@ int main(int argc, char** argv, char** envp)
                         runtimeChild.handleConfigOptions(configManager, additionalArgs);
                         configManager->validate();
 #ifdef GRBDEBUG
-                        GrbLogger::Logger.init(configManager->getIntOption(ConfigVal::SERVER_LOG_DEBUG_MODE));
+                        GrbLogger::Logger.init(configManager->getULongOption(ConfigVal::SERVER_LOG_DEBUG_MODE));
 #endif
                         portnum = configManager->getUIntOption(ConfigVal::SERVER_PORT);
                     } catch (const ConfigParseException& ex) {

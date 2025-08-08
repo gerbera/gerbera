@@ -63,8 +63,8 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
             clientProfile.match = mLabel;
         }
     }
-    clientProfile.mimeMappings = DictionaryOption({});
-    clientProfile.headers = DictionaryOption({});
+    clientProfile.mimeMappings = DictionaryOption();
+    clientProfile.headers = DictionaryOption();
     clientProfile.group = group;
     clientProfile.groupConfig = {};
     clientProfile.flags = flags;

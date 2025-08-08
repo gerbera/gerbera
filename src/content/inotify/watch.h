@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file watch.h
+/// @file watch.h
 
 #ifndef __WATCH_DIR_H__
 #define __WATCH_DIR_H__
@@ -32,25 +32,55 @@
 
 #include <vector>
 
+// forward declaration
 class AutoscanDirectory;
 
 enum class WatchType {
     Autoscan,
+    Script,
     Move
 };
 
+/// @brief generic watch
 class Watch {
-public:
+protected:
     explicit Watch(WatchType type)
         : type(type)
     {
     }
+
+public:
+    /// @brief get type of watch
     WatchType getType() const { return type; }
 
 private:
     WatchType type;
 };
 
+/// @brief watch for autoscan directory
+class WatchScript : public Watch {
+public:
+    WatchScript(fs::path dir)
+        : Watch(WatchType::Script)
+        , dir(std::move(dir))
+    {
+    }
+
+    /// @brief get associated script directory
+    fs::path getPath() const { return dir; }
+
+    /// @brief add sub watch
+    void addDescendant(int wd) { descendants.push_back(wd); }
+
+    /// @brief get sub watches
+    const std::vector<int>& getDescendants() const { return descendants; }
+
+private:
+    std::vector<int> descendants;
+    fs::path dir;
+};
+
+/// @brief watch for autoscan directory
 class WatchAutoscan : public Watch {
 public:
     WatchAutoscan(bool isStartPoint, std::shared_ptr<AutoscanDirectory> adir)
@@ -59,11 +89,22 @@ public:
         , isStartPoint(isStartPoint)
     {
     }
+    /// @brief get associated autoscan directory
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory() const { return adir; }
+
+    /// @brief is watch root of a watch tree
     bool getIsStartPoint() const { return isStartPoint; }
+
+    /// @brief get watch for non existing path
     fs::path getNonExistingPath() const { return nonExistingPath; }
+
+    /// @brief set watch for non existing path
     void setNonExistingPath(const fs::path& nonExistingPath) { this->nonExistingPath = nonExistingPath; }
+
+    /// @brief add sub watch
     void addDescendant(int wd) { descendants.push_back(wd); }
+
+    /// @brief get sub watches
     const std::vector<int>& getDescendants() const { return descendants; }
 
 private:
@@ -73,6 +114,7 @@ private:
     fs::path nonExistingPath;
 };
 
+// @brief watch for move operations to be deleted
 class WatchMove : public Watch {
 public:
     explicit WatchMove(int removeWd)
@@ -80,6 +122,8 @@ public:
         , removeWd(removeWd)
     {
     }
+
+    // @brief get id to be deleted
     int getRemoveWd() const { return removeWd; }
 
 private:

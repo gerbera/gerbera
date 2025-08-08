@@ -133,7 +133,10 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
     _m2i = converterManager->m2i(ConfigVal::IMPORT_METADATA_CHARSET, "");
     _f2i = converterManager->f2i();
     _i2i = converterManager->i2i();
+}
 
+void Script::init()
+{
     duk_push_thread_stash(ctx, ctx);
     duk_push_pointer(ctx, this);
     duk_put_prop_string(ctx, -2, "this");
@@ -304,7 +307,12 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
     duk_put_global_string(ctx, "config");
 
     defineFunctions(jsGlobalFunctions.data());
+    loadContent();
+    runtime->addScript(shared_from_this());
+}
 
+void Script::loadContent()
+{
     std::string commonScrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_COMMON_SCRIPT);
     std::string commonFdrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER);
 
@@ -320,6 +328,7 @@ Script::Script(const std::shared_ptr<Content>& content, const std::string& paren
             log_error("Unable to load {}: {}", commonScrPath, e.what());
         }
     }
+
     std::string customScrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_CUSTOM_SCRIPT);
     std::string customFdrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER);
     if (!customScrPath.empty()) {

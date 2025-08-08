@@ -38,6 +38,7 @@
 
 #include <duktape.h>
 #include <map>
+#include <memory>
 #include <mutex>
 #include <vector>
 
@@ -65,12 +66,15 @@ enum class CharsetConversion {
     I2I,
 };
 
-class Script {
+class Script : public std::enable_shared_from_this<Script> {
 public:
     virtual ~Script();
 
     Script(const Script&) = delete;
     Script& operator=(const Script&) = delete;
+
+    /// @brief initialise script variables and library
+    void init();
 
     /// \brief Write property with string value to object
     /// \param name of property
@@ -93,6 +97,7 @@ public:
 
     void defineFunction(const std::string& name, duk_c_function function, std::uint32_t numParams);
     void defineFunctions(const duk_function_list_entry* functions);
+    void loadContent();
     void load(const fs::path& scriptPath);
     void loadFolder(const fs::path& scriptFolder);
 

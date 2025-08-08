@@ -54,6 +54,7 @@ public:
     virtual void setOrigValue(const std::string& item, IntOptionType value) = 0;
     virtual void setOrigValue(const std::string& item, UIntOptionType value) = 0;
     virtual void setOrigValue(const std::string& item, LongOptionType value) = 0;
+    virtual void setOrigValue(const std::string& item, ULongOptionType value) = 0;
     virtual bool hasOrigValue(const std::string& item) const = 0;
 
     /// \brief Returns the path of the config file that was used to launch the server.
@@ -78,6 +79,7 @@ public:
     virtual IntOptionType getIntOption(ConfigVal option) const = 0;
     virtual UIntOptionType getUIntOption(ConfigVal option) const = 0;
     virtual LongOptionType getLongOption(ConfigVal option) const = 0;
+    virtual ULongOptionType getULongOption(ConfigVal option) const = 0;
 
     /// \brief returns a config option of type bool
     /// \param option option to retrieve.

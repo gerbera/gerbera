@@ -39,8 +39,9 @@
 
 JSLayout::JSLayout(const std::shared_ptr<Content>& content, const std::string& parent)
     : Layout(content)
-    , import_script(std::make_unique<ImportScript>(content, parent))
+    , import_script(std::make_shared<ImportScript>(content, parent))
 {
+    import_script->init();
 }
 
 void JSLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj,
