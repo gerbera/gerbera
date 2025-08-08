@@ -654,6 +654,7 @@
                 <xs:element ref="virtual-layout" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="script-charset" type="xs:string" default="UTF-8"/>
+            <xs:attribute name="scan-interval" type="xs:string" default="48:00"/>
             <xs:attribute name="scan-mode">
                 <xs:simpleType>
                     <xs:restriction base="xs:string">

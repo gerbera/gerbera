@@ -174,7 +174,7 @@ void Sqlite3Database::init()
             btask->waitForTask();
 
             // add timer for backups
-            auto backupInterval = std::chrono::seconds(config->getIntOption(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL));
+            auto backupInterval = std::chrono::seconds(config->getLongOption(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL));
             timer->addTimerSubscriber(this, backupInterval, nullptr);
             hasBackupTimer = true;
         }

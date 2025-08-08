@@ -160,7 +160,7 @@ void Web::Autoscan::editSave(
 #endif
 
         AutoscanScanMode scanMode = AutoscanDirectory::remapScanmode(scanModeStr);
-        int interval;
+        long long interval;
         auto intervalParam = param("interval");
         parseTime(interval, intervalParam);
         if (scanMode == AutoscanScanMode::Timed && interval <= 0)

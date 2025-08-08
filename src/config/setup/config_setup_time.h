@@ -34,11 +34,18 @@
 class ConfigTimeSetup : public ConfigSetup {
 protected:
     GrbTimeType type = GrbTimeType::Seconds;
-    int minValue = -1;
-    int maxValue = -1;
+    LongOptionType minValue = -1;
+    LongOptionType maxValue = -1;
 
 public:
-    ConfigTimeSetup(ConfigVal option, const char* xpath, const char* help, GrbTimeType type, int defaultValue = 0, int minValue = -1, int maxValue = -1)
+    ConfigTimeSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        GrbTimeType type,
+        LongOptionType defaultValue = 0,
+        LongOptionType minValue = -1,
+        LongOptionType maxValue = -1)
         : ConfigSetup(option, xpath, help, false)
         , type(type)
         , minValue(minValue)
@@ -49,13 +56,19 @@ public:
 
     std::string getTypeString() const override { return "Time"; }
 
-    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    void makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        std::string optValue,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
     std::shared_ptr<ConfigOption> newOption(std::string& optValue);
-    int getXmlContent(const pugi::xml_node& root);
-    int checkTimeValue(std::string& optValue);
+    LongOptionType getXmlContent(const pugi::xml_node& root);
+    LongOptionType checkTimeValue(std::string& optValue);
 };
 
 #endif // __CONFIG_SETUP_TIME_H__

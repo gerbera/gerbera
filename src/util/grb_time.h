@@ -56,7 +56,7 @@ std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds ms);
 std::chrono::milliseconds getDeltaMillis(std::chrono::milliseconds first, std::chrono::milliseconds second);
 
 bool parseSimpleDate(const std::string& s, std::chrono::seconds& date);
-bool parseTime(int& value, std::string& timeValue, GrbTimeType type = GrbTimeType::Seconds);
+bool parseTime(long long& value, std::string& timeValue, GrbTimeType type = GrbTimeType::Seconds);
 std::string makeSimpleDate(std::string& s);
 
 /// \brief Converts seconds to localtime and prints a formatted string

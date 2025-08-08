@@ -131,7 +131,6 @@ void ContentManager::run()
     // wait for ContentTaskThread to become ready
     threadRunner->waitForReady();
 
-    log_debug("ContentTaskThread ready");
     if (!threadRunner->isAlive()) {
         throw_std_runtime_error("Could not start ContentTaskThread thread");
     }
@@ -213,9 +212,10 @@ void ContentManager::run()
     autoscanList->notifyAll(this);
     auto self_content = std::dynamic_pointer_cast<Content>(self);
 #ifdef HAVE_INOTIFY
-    autoscanList->initTimer(self_content, timer, config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY), as_inotify);
+    autoscanList->initTimer(self_content, timer, useAsInotify, as_inotify);
 #ifdef HAVE_JS
     if (scriptScanMode == AutoscanScanMode::INotify) {
+        log_info("Adding inotify script scan");
         script_inotify->run();
         std::string customFolderPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER);
         std::string commonFolderPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER);
@@ -227,6 +227,13 @@ void ContentManager::run()
 #endif
 #else
     autoscanList->initTimer(self_content, timer);
+#endif
+#ifdef HAVE_JS
+    if (scriptScanMode == AutoscanScanMode::Timed) {
+        auto param = std::make_shared<Timer::Parameter>(Timer::TimerParamType::IDScript, 0);
+        log_info("Adding timed script scan with interval {} minutes", config->getLongOption(ConfigVal::IMPORT_SCRIPTING_SCAN_INTERVAL));
+        timer->addTimerSubscriber(this, std::chrono::minutes(config->getLongOption(ConfigVal::IMPORT_SCRIPTING_SCAN_INTERVAL)), std::move(param), false);
+    }
 #endif
 }
 
@@ -266,11 +273,16 @@ void ContentManager::timerNotify(const std::shared_ptr<Timer::Parameter>& parame
 
         rescanDirectory(adir, adir->getObjectID());
     }
+#ifdef HAVE_JS
+    else if (parameter->whoami() == Timer::TimerParamType::IDScript) {
+        scriptingRuntime->reloadFolders();
+    }
+#endif
 #ifdef ONLINE_SERVICES
     else if (parameter->whoami() == Timer::TimerParamType::IDOnlineContent) {
         fetchOnlineContent(static_cast<OnlineServiceType>(parameter->getID()));
     }
-#endif // ONLINE_SERVICES
+#endif
 }
 
 void ContentManager::shutdown()
@@ -1506,7 +1518,7 @@ void ContentManager::cleanupTasks(const fs::path& path)
         if (dir->getScanMode() == AutoscanScanMode::Timed) {
             timer->removeTimerSubscriber(this, rmList->get(i)->getTimerParameter(), true);
 #ifdef HAVE_INOTIFY
-        } else if (config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)) {
+        } else if (useAsInotify) {
             as_inotify->unmonitor(dir);
 #endif
         }

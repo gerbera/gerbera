@@ -90,7 +90,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, st
             continue; // skip scan modes that we are not interested in (content manager needs one mode type per array)
         }
 
-        unsigned int interval = 0;
+        long long interval = 0;
         if (mode == AutoscanScanMode::Timed) {
             interval = definition->findConfigSetup<ConfigTimeSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL)->getXmlContent(child);
         }

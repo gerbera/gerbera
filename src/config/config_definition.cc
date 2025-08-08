@@ -1152,6 +1152,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
                     { AUTOSCAN_INOTIFY, AutoscanScanMode::INotify },
 #endif
                 })),
+        std::make_shared<ConfigTimeSetup>(ConfigVal::IMPORT_SCRIPTING_SCAN_INTERVAL,
+            "/import/scripting/attribute::scan-interval", "config-import.html#scripting",
+            GrbTimeType::Minutes, 48 * 60, 0),
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_CHARSET,
             "/import/scripting/attribute::script-charset", "config-import.html#scripting",
             "UTF-8", ConfigStringSetup::CheckCharset),

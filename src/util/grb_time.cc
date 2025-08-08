@@ -145,7 +145,7 @@ bool parseSimpleDate(const std::string& s, std::chrono::seconds& date)
     return false;
 }
 
-bool parseTime(int& value, std::string& timeValue, GrbTimeType type)
+bool parseTime(long long& value, std::string& timeValue, GrbTimeType type)
 {
     static auto re = std::regex("^([-0-9:]+)$");
     value = 0;

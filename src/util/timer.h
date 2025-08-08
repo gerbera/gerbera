@@ -45,6 +45,9 @@ class Timer {
 public:
     enum class TimerParamType {
         IDAutoscan,
+#ifdef HAVE_JS
+        IDScript,
+#endif
 #ifdef ONLINE_SERVICES
         IDOnlineContent,
 #endif

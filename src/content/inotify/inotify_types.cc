@@ -2,9 +2,9 @@
 
     Gerbera - https://gerbera.io/
 
-    inotify_handler.cc - this file is part of Gerbera.
+    inotify_types.cc - this file is part of Gerbera.
 
-    Copyright (C) 2024-2025 Gerbera Contributors
+    Copyright (C) 2025 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file inotify_handler.cc
+/// \file inotify_types.cc
 
 #ifdef HAVE_INOTIFY
 #include "content/inotify/inotify_types.h" // API
@@ -82,7 +82,7 @@ InotifyFlags InotifyUtil::remapFlag(const std::string& flag)
 InotifyFlags InotifyUtil::makeFlags(const std::string& optValue)
 {
     std::vector<std::string> flagsVector = splitString(optValue, '|', false);
-    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0ll, [](auto flg, auto&& i) { return flg | InotifyUtil::remapFlag(trimString(i)); });
+    return std::accumulate(flagsVector.begin(), flagsVector.end(), static_cast<InotifyFlags>(0), [](auto flg, auto&& i) { return flg | InotifyUtil::remapFlag(trimString(i)); });
 }
 
 std::string InotifyUtil::mapFlags(InotifyFlags flags)
