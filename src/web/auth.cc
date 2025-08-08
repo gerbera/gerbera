@@ -68,7 +68,7 @@ Web::Auth::Auth(const std::shared_ptr<Content>& content,
     const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
     const std::shared_ptr<Quirks>& quirks)
     : PageRequest(content, server, xmlBuilder, quirks)
-    , timeout(std::chrono::minutes(config->getIntOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT)))
+    , timeout(std::chrono::minutes(config->getLongOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT)))
     , accountsEnabled(config->getBoolOption(ConfigVal::SERVER_UI_ACCOUNTS_ENABLED))
 {
     doCheck = false;
@@ -107,7 +107,7 @@ bool Web::Auth::getConfig(Json::Value& element)
     cfg["enableVideo"] = config->getBoolOption(ConfigVal::SERVER_UI_ENABLE_VIDEO);
     cfg["show-tooltips"] = config->getBoolOption(ConfigVal::SERVER_UI_SHOW_TOOLTIPS);
     cfg["poll-when-idle"] = config->getBoolOption(ConfigVal::SERVER_UI_POLL_WHEN_IDLE);
-    cfg["poll-interval"] = config->getIntOption(ConfigVal::SERVER_UI_POLL_INTERVAL);
+    cfg["poll-interval"] = static_cast<Json::Int64>(config->getLongOption(ConfigVal::SERVER_UI_POLL_INTERVAL));
     cfg["fsAddItem"] = config->getBoolOption(ConfigVal::SERVER_UI_FS_SUPPORT_ADD_ITEM);
     cfg["editSortKey"] = config->getBoolOption(ConfigVal::SERVER_UI_EDIT_SORTKEY);
     cfg["sourceDocs"] = config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_SOURCE);

@@ -131,7 +131,7 @@ TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues)
     ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_ENABLED));
     ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_SHOW_TOOLTIPS));
     ASSERT_FALSE(shared->getBoolOption(ConfigVal::SERVER_UI_ACCOUNTS_ENABLED));
-    ASSERT_EQ(30, shared->getIntOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT));
+    ASSERT_EQ(30, shared->getLongOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT));
 }
 
 TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
@@ -165,5 +165,5 @@ TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified)
     ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_ENABLED));
     ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_SHOW_TOOLTIPS));
     ASSERT_FALSE(shared->getBoolOption(ConfigVal::SERVER_UI_ACCOUNTS_ENABLED));
-    ASSERT_EQ(30, shared->getIntOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT));
+    ASSERT_EQ(30, shared->getLongOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT));
 }

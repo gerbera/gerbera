@@ -313,7 +313,7 @@ TEST(ToolsTest, pathToMapTest)
 TEST(ToolsTest, parseTimeTest)
 {
     std::string value = "01:01:01:01";
-    int result = -1;
+    long long result = -1;
     ASSERT_EQ(parseTime(result, value), true);
     EXPECT_EQ(result, 90061);
     EXPECT_EQ(value, "90061");

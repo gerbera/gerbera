@@ -258,10 +258,10 @@ Defines the scripting section.
     * Optional
     * Default: **manual**
 
-    Set mode to rescan script-folders
+    Set mode to rescan script-folders.
 
     +---------+-------------------------------------------------------------+
-    | mode    | meaning                                                     |
+    | Mode    | Meaning                                                     |
     +---------+-------------------------------------------------------------+
     | manual  | folders are only rescanned on startup                       |
     +---------+-------------------------------------------------------------+
@@ -269,6 +269,16 @@ Defines the scripting section.
     +---------+-------------------------------------------------------------+
     | timed   | folder is rescanned after ``scan-interval``                 |
     +---------+-------------------------------------------------------------+
+
+    .. code:: xml
+
+         scan-interval="24:00"
+
+    * Optional
+    * Default: **48:00**
+
+    Set interval in minutes to rescan script-folders.
+
 
 Below are the available scripting options:
 

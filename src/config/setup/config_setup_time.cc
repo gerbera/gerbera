@@ -30,10 +30,10 @@
 #include "exceptions.h"
 #include "util/grb_time.h"
 
-int ConfigTimeSetup::getXmlContent(const pugi::xml_node& root)
+LongOptionType ConfigTimeSetup::getXmlContent(const pugi::xml_node& root)
 {
     auto optValue = ConfigSetup::getXmlContent(root, true);
-    int result;
+    LongOptionType result;
     if (!parseTime(result, optValue, type)) {
         throw_std_runtime_error("Invalid {} time format '{}'", xpath, optValue);
     }
@@ -56,7 +56,7 @@ void ConfigTimeSetup::makeOption(std::string optValue, const std::shared_ptr<Con
 std::shared_ptr<ConfigOption> ConfigTimeSetup::newOption(std::string& optValue)
 {
     auto pathValue = optValue;
-    int result;
+    LongOptionType result;
     if (!parseTime(result, optValue, type)) {
         throw_std_runtime_error("Invalid {} time format '{}'", xpath, optValue);
     }
@@ -66,13 +66,13 @@ std::shared_ptr<ConfigOption> ConfigTimeSetup::newOption(std::string& optValue)
     if (maxValue > -1 && result > maxValue) {
         throw_std_runtime_error("Time Value {} too small {} < {}", xpath, maxValue, result);
     }
-    optionValue = std::make_shared<IntOption>(result, optValue);
+    optionValue = std::make_shared<LongOption>(result, optValue);
     return optionValue;
 }
 
-int ConfigTimeSetup::checkTimeValue(std::string& optValue)
+LongOptionType ConfigTimeSetup::checkTimeValue(std::string& optValue)
 {
-    int result;
+    LongOptionType result;
     if (!parseTime(result, optValue, type)) {
         throw_std_runtime_error("Invalid {} time format '{}'", xpath, optValue);
     }

@@ -1293,6 +1293,21 @@
       "editable": true,
       "children": [
         {
+          "item": "/import/scripting/attribute::script-charset",
+          "caption": "Script Character Set",
+          "editable": false
+        },
+        {
+          "item": "/import/scripting/attribute::scan-mode",
+          "caption": "Script Folder Scan Mode",
+          "editable": false
+        },
+        {
+          "item": "/import/scripting/attribute::scan-interval",
+          "caption": "Script Folder Scan Interval",
+          "editable": false
+        },
+        {
           "item": "/import/scripting/script-folder/common",
           "caption": "Common Script Folder",
           "editable": true

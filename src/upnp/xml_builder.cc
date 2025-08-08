@@ -398,7 +398,7 @@ void UpnpXMLBuilder::renderObject(
 
         // client specific properties
         if (quirks) {
-            quirks->restoreSamsungBookMarkedPosition(item, result, config->getIntOption(ConfigVal::CLIENTS_BOOKMARK_OFFSET));
+            quirks->restoreSamsungBookMarkedPosition(item, result, config->getLongOption(ConfigVal::CLIENTS_BOOKMARK_OFFSET));
             mvMeta = quirks->getMultiValue();
             simpleDate = quirks->needsSimpleDate();
         }

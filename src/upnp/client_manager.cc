@@ -42,7 +42,7 @@
 ClientManager::ClientManager(std::shared_ptr<Config> config, std::shared_ptr<Database> database)
     : database(std::move(database))
     , config(std::move(config))
-    , cacheThreshold(this->config->getIntOption(ConfigVal::CLIENTS_CACHE_THRESHOLD))
+    , cacheThreshold(this->config->getLongOption(ConfigVal::CLIENTS_CACHE_THRESHOLD))
 {
     refresh();
     if (this->database) {
