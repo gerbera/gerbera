@@ -158,6 +158,8 @@ std::vector<fs::path> ContentPathSetup::getContentPath(
                 replaceAllString(stem, "]", "\\]");
                 replaceAllString(stem, "(", "\\\(");
                 replaceAllString(stem, ")", "\\)");
+                replaceAllString(stem, "{", "\\\{");
+                replaceAllString(stem, "}", "\\}");
             }
             auto re = std::regex(fmt::format("^{}$", stem));
 

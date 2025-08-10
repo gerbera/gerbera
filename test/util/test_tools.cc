@@ -199,6 +199,10 @@ TEST(ToolsTest, replaceAllStringTest)
     str = "test ] with br";
     replaceAllString(str, "]", "\\]");
     EXPECT_EQ(str, "test \\] with br");
+
+    str = "test {b} with br";
+    replaceString(str, "{b}", "[b]");
+    EXPECT_EQ(str, "test [b] with br");
 }
 
 TEST(ToolsTest, trimStringTest)
