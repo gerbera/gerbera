@@ -29,8 +29,9 @@ jobs:
           - "ubuntu:24.04"
           - "ubuntu:24.10"
           - "ubuntu:25.04"
-          - "debian:oldstable"
-          - "debian:stable"
+          - "debian:bullseye"
+          - "debian:bookworm"
+          - "debian:trixie"
           - "debian:testing"
           - "debian:unstable"
         arch:
