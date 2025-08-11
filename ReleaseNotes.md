@@ -2,6 +2,10 @@
 
 ## HEAD
 
+### FIXES
+
+- Configuration error when creating MySQL from scratch
+
 ### NEW Features
 
 - Inotify support for script folders allows developing scripts without restarting the server

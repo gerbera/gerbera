@@ -3,6 +3,7 @@
 ### HEAD
 
 - Bump tmp from 0.2.3 to 0.2.4 in /gerbera-web
+- Fix for MultiInsert statement
 - Fix MySql config load
 - Fix resource file pattern with braces
 - Inotify for scripts: reload without server restart
