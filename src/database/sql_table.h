@@ -467,6 +467,7 @@ std::string TableAdaptor<Tab, Item>::sqlForMultiInsert(
 {
     std::vector<std::string> fields;
     std::vector<Tab> activeFields;
+    std::vector<Tab> sortedFields;
     std::vector<std::string> tuples;
     fields.reserve(getTableColumnOrder().size());
     tuples.reserve(rowMultiData.size());
@@ -474,17 +475,22 @@ std::string TableAdaptor<Tab, Item>::sqlForMultiInsert(
     // get columns in right order
     for (auto&& field : getTableColumnOrder()) {
         for (auto&& row : rowMultiData) {
-            if (row.find(field) != row.end()) {
-                fields.push_back(columnMapper->mapQuoted(field, true));
+            if (row.find(field) != row.end() && std::find(activeFields.begin(), activeFields.end(), field) == activeFields.end()) {
                 activeFields.push_back(field);
             }
         }
     }
+    for (auto&& field : getTableColumnOrder()) {
+        if (std::find(activeFields.begin(), activeFields.end(), field) != activeFields.end()) {
+            fields.push_back(columnMapper->mapQuoted(field, true));
+            sortedFields.push_back(field);
+        }
+    }
     // get values for columns
     for (auto&& row : rowMultiData) {
-        std::vector<std::string> values(activeFields.size());
+        std::vector<std::string> values(sortedFields.size());
         std::size_t index = 0;
-        for (auto&& field : activeFields) {
+        for (auto&& field : sortedFields) {
             if (row.find(field) != row.end()) {
                 values[index] = row.at(field);
             } else {
