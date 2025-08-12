@@ -8,6 +8,7 @@
 - Fix resource file pattern with braces
 - Inotify for scripts: reload without server restart
 - Pull config dependencies
+- Update Actions
 
 ### v2.6.0
 

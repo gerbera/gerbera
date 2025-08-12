@@ -159,14 +159,14 @@ bool parseTime(long long& value, std::string& timeValue, GrbTimeType type)
     const auto& factors = timeFactors.at(type);
     if (list.size() > factors.size())
         return false;
-    int index = 0;
+    std::size_t index = 0;
     for (auto&& item : list) {
-        auto iVal = stoiString(item, -1);
+        auto iVal = stolString(item, -1);
         if (iVal < 0 && list.size() > 1) {
             value = 0;
             return false;
         }
-        value += iVal * factors[index];
+        value += iVal * factors.at(index);
         index++;
     }
     if (!list.empty())
