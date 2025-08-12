@@ -45,7 +45,7 @@ jobs:
       CXX: ${{ matrix.compiler.cxx }}
       CONAN_RUN_TESTS: 1
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       # Alternatively: uses: docker://conanio/gcc9:latest
       - name: Update package list
         run: |
@@ -101,7 +101,7 @@ jobs:
           apt-get update -y
           apt-get install -y lsb-release sudo wget curl git
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 

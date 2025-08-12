@@ -24,6 +24,8 @@
 /// @file inotify_manager_cc.h
 /// @brief Implement manager base class for inotify
 
+#ifndef __INOTIFY_MANAGER_CC_H__
+#define __INOTIFY_MANAGER_CC_H__
 #ifdef HAVE_INOTIFY
 
 #include "content/inotify/inotify_manager.h"
@@ -79,3 +81,4 @@ void InotifyManager<Watcher>::run()
 }
 
 #endif // HAVE_INOTIFY
+#endif // __INOTIFY_MANAGER_CC_H__
