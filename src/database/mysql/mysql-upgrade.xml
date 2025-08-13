@@ -147,10 +147,8 @@
     </version>
     <version number="24" remark="sort_key">
         <script>ALTER TABLE `mt_cds_object` ADD `sort_key` varchar(GRBMAX) default NULL COLLATE utf8_general_ci</script>
-        <script>
-            UPDATE `mt_cds_object` SET `sort_key`=`dc_title`;
-            ALTER TABLE `mt_cds_object` ADD KEY `mt_cds_object_title` (`dc_title`);
-            ALTER TABLE `mt_cds_object` ADD KEY `mt_cds_object_sort_key` (`sort_key`);
-        </script>
+        <script>UPDATE `mt_cds_object` SET `sort_key`=`dc_title`</script>
+        <script>ALTER TABLE `mt_cds_object` ADD KEY `mt_cds_object_title` (`dc_title`)</script>
+        <script>ALTER TABLE `mt_cds_object` ADD KEY `mt_cds_object_sort_key` (`sort_key`)</script>
     </version>
 </upgrade>
