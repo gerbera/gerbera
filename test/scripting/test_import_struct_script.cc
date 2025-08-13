@@ -22,9 +22,7 @@
 */
 #ifdef HAVE_JS
 
-#include "content/onlineservice/online_service.h"
-#include "metadata/metadata_handler.h"
-#include "upnp/upnp_common.h"
+#include "config/result/autoscan.h"
 
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
@@ -38,8 +36,7 @@ class ImportStructuredScriptTest : public CommonScriptTestFixture {
 public:
     ImportStructuredScriptTest()
     {
-        scriptName = "import.js";
-        audioLayout = "Structured";
+        functionName = "importAudioStructured";
     }
 };
 
@@ -204,7 +201,6 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     // Expecting the common script calls
     // and will proxy through the mock objects
     // for verification.
-    EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/mpeg"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getYear(Eq("2018-01-01"))).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, abcBox(Eq("Album"), Eq(6), Eq("-"))).WillOnce(Return(1));
@@ -261,10 +257,20 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Year-", "2010 - 2019", "2018", "Artist", "Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "55", UNDEFINED)).WillOnce(Return(0));
 
-    addGlobalFunctions(ctx, js_global_functions, { { "/import/scripting/virtual-layout/attribute::audio-layout", audioLayout }, }, audioBox);
+    addGlobalFunctions(ctx, js_global_functions, {},
+        audioBox);
 
-    dukMockItem(ctx, mimetype, UPNP_CLASS_AUDIO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
-    executeScript(ctx);
+    callFunction(ctx, dukMockItem,
+        { { "title", title },
+            { "id", id },
+            { "upnpclass", UPNP_CLASS_AUDIO_ITEM },
+            { "location", location },
+            { "onlineService", fmt::to_string(onlineService) },
+            { "theora", fmt::to_string(theora) },
+            { "mimetype", mimetype } },
+        meta, aux, res,
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
+        "/home/gerbera");
 }
 
-#endif //HAVE_JS
+#endif // HAVE_JS

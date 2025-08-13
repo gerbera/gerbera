@@ -65,7 +65,6 @@ std::vector<std::string> DukTestHelper::containerToPath(duk_context* ctx, duk_id
                 duk_pop(ctx); // item
                 break;
             }
-            //duk_to_object(ctx, -1);
             duk_get_prop_string(ctx, -1, "title");
             if (!duk_is_null_or_undefined(ctx, -1)) {
                 std::string val = duk_to_string(ctx, -1);
@@ -197,4 +196,4 @@ void DukTestHelper::printError(duk_context* ctx, const std::string& message, con
 {
     std::cerr << message << item << ": " << duk_safe_to_stacktrace(ctx, -1) << std::endl;
 }
-#endif //HAVE_JS
+#endif // HAVE_JS

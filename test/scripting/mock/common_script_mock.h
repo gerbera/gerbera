@@ -74,5 +74,5 @@ public:
     MOCK_METHOD2(getRootPath, duk_ret_t(std::string objScriptPath, std::string location));
     MOCK_METHOD3(abcBox, duk_ret_t(std::string inputValue, int boxType, std::string divChar));
 };
-#endif //HAVE_JS
-#endif //GERBERA_COMMON_SCRIPT_MOCK_H
+#endif // HAVE_JS
+#endif // GERBERA_COMMON_SCRIPT_MOCK_H

@@ -22,9 +22,8 @@
 */
 #ifdef HAVE_JS
 
+#include "config/result/autoscan.h"
 #include "content/onlineservice/online_service.h"
-#include "metadata/metadata_handler.h"
-#include "upnp/upnp_common.h"
 
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
@@ -38,7 +37,7 @@ class ImportScriptTest : public CommonScriptTestFixture {
 public:
     ImportScriptTest()
     {
-        scriptName = "import.js";
+        functionName = "importAudio";
     }
 };
 
@@ -241,7 +240,6 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     asAudioAllFullName.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
     asAudioAllFullName["title"] = "Artist - Album - Audio Title";
 
-
     std::map<std::string, std::string> asAudioTrackNumbered;
     asAudioTrackNumbered.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
     asAudioTrackNumbered["title"] = fmt::format("0{} {}", track, title);
@@ -249,9 +247,9 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     // Expecting the common script calls
     // and will proxy through the mock objects
     // for verification.
-    EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("audio/mpeg"))).WillOnce(Return(1));
+
     EXPECT_CALL(*commonScriptMock, getYear(Eq("2018-01-01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, getRootPath("object/script/path", location)).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getRootPath("/home/gerbera", location)).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All Audio"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "42", UNDEFINED)).WillOnce(Return(0));
@@ -286,8 +284,18 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, audioBox, configDicts);
-    dukMockItem(ctx, mimetype, UPNP_CLASS_AUDIO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
-    executeScript(ctx);
+
+    callFunction(ctx, dukMockItem,
+        { { "title", title },
+            { "id", id },
+            { "upnpclass", UPNP_CLASS_AUDIO_ITEM },
+            { "location", location },
+            { "onlineService", fmt::to_string(onlineService) },
+            { "theora", fmt::to_string(theora) },
+            { "mimetype", mimetype } },
+        meta, aux, res,
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
+        "/home/gerbera");
 }
 
 TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
@@ -314,19 +322,29 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     // Expecting the common script calls
     // and will proxy through the mock objects
     // for verification.
-    EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("video/mpeg"))).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "All Video"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "60", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, getRootPath("object/script/path", location)).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getRootPath("/home/gerbera", location)).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "Directories", "home", "gerbera"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, videoBox);
-    dukMockItem(ctx, mimetype, UPNP_CLASS_VIDEO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
-    executeScript(ctx);
+
+    functionName = "importVideo";
+    callFunction(ctx, dukMockItem,
+        { { "title", title },
+            { "id", id },
+            { "upnpclass", UPNP_CLASS_AUDIO_ITEM },
+            { "location", location },
+            { "onlineService", fmt::to_string(onlineService) },
+            { "theora", fmt::to_string(theora) },
+            { "mimetype", mimetype } },
+        meta, aux, res,
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video),
+        "/home/gerbera");
 }
 
 TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
@@ -359,7 +377,6 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     // Expecting the common script calls
     // and will proxy through the mock objects
     // for verification.
-    EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("image/jpeg"))).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "All Photos"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "70", UNDEFINED)).WillOnce(Return(0));
@@ -370,14 +387,25 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "Date", "2018-01-01"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "72", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, getRootPath("object/script/path", location)).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getRootPath("/home/gerbera", location)).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "Directories", "home", "gerbera"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "73", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, imageBox);
-    dukMockItem(ctx, mimetype, UPNP_CLASS_IMAGE_ITEM, id, theora, title, meta, aux, res, location, onlineService);
-    executeScript(ctx);
+
+    functionName = "importImage";
+    callFunction(ctx, dukMockItem,
+        { { "title", title },
+            { "id", id },
+            { "upnpclass", UPNP_CLASS_AUDIO_ITEM },
+            { "location", location },
+            { "onlineService", fmt::to_string(onlineService) },
+            { "theora", fmt::to_string(theora) },
+            { "mimetype", mimetype } },
+        meta, aux, res,
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image),
+        "/home/gerbera");
 }
 
 TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
@@ -404,19 +432,29 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     // Expecting the common script calls
     // and will proxy through the mock objects
     // for verification.
-    EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("application/ogg"))).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "All Video"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "60", UNDEFINED)).WillOnce(Return(0));
 
-    EXPECT_CALL(*commonScriptMock, getRootPath("object/script/path", location)).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getRootPath("/home/gerbera", location)).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "Directories", "home", "gerbera"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, videoBox);
-    dukMockItem(ctx, mimetype, UPNP_CLASS_VIDEO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
-    executeScript(ctx);
+
+    functionName = "importVideo";
+    callFunction(ctx, dukMockItem,
+        { { "title", title },
+            { "id", id },
+            { "upnpclass", UPNP_CLASS_AUDIO_ITEM },
+            { "location", location },
+            { "onlineService", fmt::to_string(onlineService) },
+            { "theora", fmt::to_string(theora) },
+            { "mimetype", mimetype } },
+        meta, aux, res,
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video),
+        "/home/gerbera");
 }
 
 TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
@@ -482,9 +520,8 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     // Expecting the common script calls
     // and will proxy through the mock objects
     // for verification.
-    EXPECT_CALL(*commonScriptMock, getPlaylistType(Eq("application/ogg"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getYear(Eq("2018-01-01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, getRootPath("object/script/path", location)).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getRootPath("/home/gerbera", location)).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All Audio"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "42", UNDEFINED)).WillOnce(Return(0));
@@ -517,8 +554,18 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, audioBox, configDicts);
-    dukMockItem(ctx, mimetype, UPNP_CLASS_AUDIO_ITEM, id, theora, title, meta, aux, res, location, onlineService);
-    executeScript(ctx);
+
+    callFunction(ctx, dukMockItem,
+        { { "title", title },
+            { "id", id },
+            { "upnpclass", UPNP_CLASS_AUDIO_ITEM },
+            { "location", location },
+            { "onlineService", fmt::to_string(onlineService) },
+            { "theora", fmt::to_string(theora) },
+            { "mimetype", mimetype } },
+        meta, aux, res,
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
+        "/home/gerbera");
 }
 
-#endif //HAVE_JS
+#endif // HAVE_JS

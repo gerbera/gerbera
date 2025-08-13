@@ -30,30 +30,10 @@
 
 #include <duktape.h>
 
-class CommonScriptTest : public ::testing::Test {
+class CommonScriptTest : public ScriptTestFixture {
 
 public:
-    CommonScriptTest() = default;
-    ~CommonScriptTest() override = default;
-
-    void SetUp() override
-    {
-        ctx = duk_create_heap(nullptr, nullptr, nullptr, nullptr, nullptr);
-
-        fs::path scriptPath = fs::path(SCRIPTS_DIR) / "js" / "common.js";
-        std::string script = GrbFile(scriptPath).readTextFile();
-        duk_push_string(ctx, scriptPath.c_str());
-        if (duk_pcompile_lstring_filename(ctx, 0, script.c_str(), script.length()) != 0) {
-            DukTestHelper::printError(ctx, "Failed to load script ", scriptPath);
-        } else {
-            duk_call(ctx, 0);
-        }
-    }
-
-    void TearDown() override
-    {
-        duk_destroy_heap(ctx);
-    }
+    CommonScriptTest() { }
 
     static std::string invokeABCBOX(duk_context* ctx, const std::string& input, int boxType, const std::string& divChar)
     {
@@ -78,8 +58,6 @@ public:
         duk_pcall(ctx, 3);
         return duk_to_string(ctx, -1);
     }
-
-    duk_context* ctx;
 };
 
 TEST_F(CommonScriptTest, CreatesDukContextWithCommonScript)
