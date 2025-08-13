@@ -23,8 +23,8 @@
 #ifdef HAVE_JS
 
 #include "cds/cds_objects.h"
+#include "config/result/autoscan.h"
 #include "exceptions.h"
-#include "upnp/upnp_common.h"
 #include "util/tools.h"
 
 #include "mock/common_script_mock.h"
@@ -43,9 +43,7 @@ class MetafileNfoTest : public CommonScriptTestFixture {
 public:
     MetafileNfoTest()
     {
-        scriptName = "metadata.js";
         functionName = "importMetadata";
-        objectName = "obj";
     }
 };
 
@@ -75,7 +73,7 @@ static duk_ret_t readXml(duk_context* ctx)
     } else if (root.next_sibling()) {
         root = root.next_sibling();
         node = root;
-    } else 
+    } else
         node = nullNode;
 
     std::ostringstream buf;
@@ -278,6 +276,9 @@ TEST_F(MetafileNfoTest, SetsPropertiesFromFile)
     EXPECT_CALL(*commonScriptMock, updateCdsObject(IsIdenticalMap(asDictionary))).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions);
-    callFunction(ctx, dukMockMetafile, {{"location", location}}, fileName);
+    callFunction(ctx, dukMockMetafile,
+        { { "location", location } }, {}, {}, {},
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video),
+        fileName);
 }
 #endif

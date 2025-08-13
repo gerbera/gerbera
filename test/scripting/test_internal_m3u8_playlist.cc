@@ -22,13 +22,12 @@
 */
 #ifdef HAVE_JS
 
-#include "cds/cds_objects.h"
-
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
 
 #include <duktape.h>
+#include <fmt/core.h>
 #include <memory>
 
 // Extends ScriptTestFixture to allow
@@ -38,9 +37,7 @@ class InternalUrlM3U8PlaylistTest : public CommonScriptTestFixture {
 public:
     InternalUrlM3U8PlaylistTest()
     {
-        scriptName = "playlists.js";
         functionName = "importPlaylist";
-        objectName = "playlist";
     }
 };
 
@@ -177,7 +174,7 @@ TEST_F(InternalUrlM3U8PlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlay
     EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq("Processing playlist: /location/of/playlist.m3u8"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, print2(Eq("Debug"), Eq("Playlist 'example\xE2\x9C\x85.mp3' Adding entry: 1 /home/gerbera/example\xE2\x9C\x85.mp3"))).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, getLastPath2(Eq("/location/of/playlist.m3u8"),Eq(1))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, getLastPath2(Eq("/location/of/playlist.m3u8"), Eq(1))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTM3U"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("#EXTINF:123, Example Artist, Thumbs Up Inc. ðŸ‘"))).WillOnce(Return(1));
@@ -189,6 +186,6 @@ TEST_F(InternalUrlM3U8PlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlay
     EXPECT_CALL(*commonScriptMock, copyObject(Eq(true))).WillRepeatedly(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
-    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.m3u8"}, {"mimetype", "audio/x-mpegurl"}});
+    callFunction(ctx, dukMockPlaylist, { { "title", "Playlist Title" }, { "location", "/location/of/playlist.m3u8" }, { "mimetype", "audio/x-mpegurl" } });
 }
 #endif

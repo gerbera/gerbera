@@ -2,12 +2,17 @@
 
 ### HEAD
 
+- Bump docker/build-push-action from 5 to 6
+- Bump DoozyX/clang-format-lint-action from 0.18 to 0.20
+- Bump peter-evans/dockerhub-description from 3 to 4
 - Bump tmp from 0.2.3 to 0.2.4 in /gerbera-web
 - Fix for MultiInsert statement
 - Fix MySql config load
+- Fix MySQL database upgrade from 23 to 24
 - Fix resource file pattern with braces
 - Inotify for scripts: reload without server restart
 - Pull config dependencies
+- Remove test support for loading scripts
 - Update Actions
 
 ### v2.6.0

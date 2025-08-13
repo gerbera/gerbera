@@ -42,9 +42,7 @@ class ExternalUrlAsxPlaylistTest : public CommonScriptTestFixture {
 public:
     ExternalUrlAsxPlaylistTest()
     {
-        scriptName = "playlists.js";
         functionName = "importPlaylist";
-        objectName = "playlist";
     }
 };
 
@@ -85,7 +83,7 @@ static duk_ret_t readXml(duk_context* ctx)
     } else if (root.next_sibling()) {
         root = root.next_sibling();
         node = root;
-    } else 
+    } else
         node = nullNode;
 
     std::ostringstream buf;
@@ -201,6 +199,6 @@ TEST_F(ExternalUrlAsxPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
-    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.asx"}, {"mimetype", MIME_TYPE_ASX_PLAYLIST}});
+    callFunction(ctx, dukMockPlaylist, { { "title", "Playlist Title" }, { "location", "/location/of/playlist.asx" }, { "mimetype", MIME_TYPE_ASX_PLAYLIST } });
 }
 #endif

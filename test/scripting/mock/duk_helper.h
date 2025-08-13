@@ -72,5 +72,5 @@ private:
     static bool isArrayNotation(const std::string& key);
 };
 
-#endif //GERBERA_DUK_HELPER_H
-#endif //HAVE_JS
+#endif // GERBERA_DUK_HELPER_H
+#endif // HAVE_JS

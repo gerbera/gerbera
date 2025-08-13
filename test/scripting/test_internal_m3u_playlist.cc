@@ -22,8 +22,6 @@
 */
 #ifdef HAVE_JS
 
-#include "cds/cds_objects.h"
-
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
@@ -38,9 +36,7 @@ class InternalUrlM3UPlaylistTest : public CommonScriptTestFixture {
 public:
     InternalUrlM3UPlaylistTest()
     {
-        scriptName = "playlists.js";
         functionName = "importPlaylist";
-        objectName = "playlist";
     }
 };
 
@@ -187,6 +183,6 @@ TEST_F(InternalUrlM3UPlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlayl
     EXPECT_CALL(*commonScriptMock, copyObject(Eq(true))).WillRepeatedly(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
-    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.m3u"}, {"mimetype", "audio/x-mpegurl"}});
+    callFunction(ctx, dukMockPlaylist, { { "title", "Playlist Title" }, { "location", "/location/of/playlist.m3u" }, { "mimetype", "audio/x-mpegurl" } });
 }
 #endif

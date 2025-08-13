@@ -22,7 +22,6 @@
 */
 #ifdef HAVE_JS
 
-#include "cds/cds_objects.h"
 #include "upnp/upnp_common.h"
 
 #include "mock/common_script_mock.h"
@@ -39,9 +38,7 @@ class ExternalUrlM3UPlaylistTest : public CommonScriptTestFixture {
 public:
     ExternalUrlM3UPlaylistTest()
     {
-        scriptName = "playlists.js";
         functionName = "importPlaylist";
-        objectName = "playlist";
     }
 };
 
@@ -140,7 +137,7 @@ TEST_F(ExternalUrlM3UPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
     EXPECT_CALL(*commonScriptMock, print2(Eq("Error"), Eq("Unknown playlist mimetype: 'no/type' of playlist '/location/of/playlist.m3u'"))).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
-    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.m3u"}, {"mimetype", "no/type"}});
+    callFunction(ctx, dukMockPlaylist, { { "title", "Playlist Title" }, { "location", "/location/of/playlist.m3u" }, { "mimetype", "no/type" } });
 }
 
 TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromPlaylistWithExternalUrlPlaylistAndDirChains)
@@ -186,7 +183,7 @@ TEST_F(ExternalUrlM3UPlaylistTest, AddsCdsObjectFromPlaylistWithExternalUrlPlayl
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
 
-    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.m3u"}, {"mimetype", "audio/x-mpegurl"}});
+    callFunction(ctx, dukMockPlaylist, { { "title", "Playlist Title" }, { "location", "/location/of/playlist.m3u" }, { "mimetype", "audio/x-mpegurl" } });
 }
 
 TEST_F(ExternalUrlM3UPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistAndDirChains)
@@ -231,6 +228,6 @@ TEST_F(ExternalUrlM3UPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistDirChain), "43", UNDEFINED)).WillOnce(Return(0));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
-    callFunction(ctx, dukMockPlaylist, {{"title", "Playlist Title"}, {"location", "/location/of/playlist.m3u"}, {"mimetype", "audio/x-mpegurl"}});
+    callFunction(ctx, dukMockPlaylist, { { "title", "Playlist Title" }, { "location", "/location/of/playlist.m3u" }, { "mimetype", "audio/x-mpegurl" } });
 }
 #endif

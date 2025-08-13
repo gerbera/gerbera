@@ -51,7 +51,7 @@ public:
         const std::string& contentClass,
         int startIndex,
         int count,
-        const std::string& group) { return {}; }
+        const std::string& group) override { return {}; }
     std::shared_ptr<CdsObject> findObjectByPath(const fs::path& path, const std::string& group, DbFileType fileType = DbFileType::Auto) override { return {}; }
     int findObjectIDByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) override { return INVALID_OBJECT_ID; }
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override { return {}; }
