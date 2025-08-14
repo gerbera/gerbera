@@ -461,7 +461,7 @@ static std::vector<std::uint8_t> extractArtImage(
         return {};
     }
 
-    log_debug("end");
+    log_debug("end APIC {}", strlen(avEntry->value));
     return std::vector<std::uint8_t>(avEntry->value, avEntry->value + strlen(avEntry->value));
 }
 
@@ -470,6 +470,9 @@ static std::vector<std::uint8_t> extractSubtitle(
     const FfmpegObject& ffmpegObject,
     long long subtitleStreamIndex)
 {
+#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(60, 0, 0))
+    return {}; // crashes when reading some subtitles
+#else
     log_debug("start");
     if (!ffmpegObject) {
         return {};
@@ -486,6 +489,7 @@ static std::vector<std::uint8_t> extractSubtitle(
     std::vector<std::uint8_t> result;
     // Store subtitle packets
     while (av_read_frame(ffmpegObject.pFormatCtx, packet) >= 0) {
+        log_vdebug("checking {} vs {}", packet->stream_index, subtitleStreamIndex);
         if (packet->stream_index == subtitleStreamIndex) {
             auto chunk = std::vector<uint8_t>(packet->data, packet->data + packet->size);
             result.reserve(result.size() + chunk.size());
@@ -493,7 +497,10 @@ static std::vector<std::uint8_t> extractSubtitle(
         }
         av_packet_unref(packet);
     }
+    av_packet_free(&packet);
+    log_debug("end {}", result.size());
     return result;
+#endif
 }
 
 /// \brief extract orientation from stream
@@ -791,7 +798,7 @@ bool FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     // Fabricate comment
     if (item->getMetaData(MetadataFields::M_DESCRIPTION).empty())
         result = addFfmpegComment(item, ffmpegObject) || result;
-    return true;
+    return result;
 }
 
 std::unique_ptr<IOHandler> FfmpegHandler::serveContent(
