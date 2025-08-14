@@ -194,9 +194,13 @@ bool MetadataService::extractMetaData(
     bool result = false;
     for (auto handler : metaHandlers) {
         if (handlers.at(handler)->isSupported(contentType, isOggTheora, mimetype, mediaType)) {
-            log_debug("Running {} for {}", handlerNames.at(handler), item->getLocation().c_str());
-            auto handlerResult = handlers.at(handler)->fillMetadata(item);
-            result = result || handlerResult;
+            try {
+                log_debug("Running {} for {}", handlerNames.at(handler), item->getLocation().c_str());
+                auto handlerResult = handlers.at(handler)->fillMetadata(item);
+                result = result || handlerResult;
+            } catch (const std::exception& ex) {
+                log_error("fillMetadata {} failed for {}: {}", handlerNames.at(handler), item->getLocation().c_str(), ex.what());
+            }
         }
     }
 
@@ -241,9 +245,13 @@ bool MetadataService::attachResourceFiles(
     bool result = false;
     for (auto handler : metaHandlers) {
         if (handlers.at(handler)->isSupported(contentType, false, mimeType, mediaType)) {
-            log_debug("Running {} for {}", handlerNames.at(handler), item->getLocation().c_str());
-            auto handlerResult = handlers.at(handler)->fillMetadata(item) || result;
-            result = result || handlerResult;
+            try {
+                log_debug("Running {} for {}", handlerNames.at(handler), item->getLocation().c_str());
+                auto handlerResult = handlers.at(handler)->fillMetadata(item);
+                result = result || handlerResult;
+            } catch (const std::exception& ex) {
+                log_error("fillMetadata {} failed for {}: {}", handlerNames.at(handler), item->getLocation().c_str(), ex.what());
+            }
         } else {
             log_debug("Handler {} not supported for {}, {}, {}, {}", handlerNames.at(handler), item->getLocation().c_str(), contentType, mimeType, EnumMapper::mapObjectType(mediaType));
         }
