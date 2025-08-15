@@ -471,6 +471,7 @@ static std::vector<std::uint8_t> extractSubtitle(
     long long subtitleStreamIndex)
 {
 #if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(60, 0, 0))
+    log_debug("extractSubtitle disabled - ffmpeg seems broken");
     return {}; // crashes when reading some subtitles
 #else
     log_debug("start");

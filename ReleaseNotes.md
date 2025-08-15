@@ -1,10 +1,14 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v2.6.1
+
+This release focuses on fixing MySQL issues and also stream internal subtitles.
+Also the scripting tests no longer support loading complete files.
 
 ### FIXES
 
 - Configuration error when creating MySQL from scratch
+- Internal subtitles seem to be broken on older ffmpeg
 
 ### NEW Features
 
@@ -13,6 +17,7 @@
 ### Code Improvements
 
 - Increased size of `debug-mode` config option to `unsigned long long` to avoid overflow. Includes new very long integer config option.
+- Support for loading scripts in tests is dropped in preperation of dropping the feature completely.
 
 ## v2.6.0
 
