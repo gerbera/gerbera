@@ -1,6 +1,6 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v2.6.1
 
 - Bump docker/build-push-action from 5 to 6
 - Bump DoozyX/clang-format-lint-action from 0.18 to 0.20
