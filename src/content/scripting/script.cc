@@ -584,9 +584,13 @@ std::vector<int> Script::call(const std::shared_ptr<CdsObject>& obj,
     return result;
 }
 
-void Script::setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string& val) const
+void Script::setMetaData(
+    const std::shared_ptr<CdsObject>& obj,
+    const std::shared_ptr<CdsItem>& item,
+    const std::string& sym,
+    const std::string& val) const
 {
-    if (sym == DC_TITLE)
+    if (obj->getTitle().empty() && sym == DC_TITLE)
         obj->setTitle(val);
 
     if (sym == UPNP_SEARCH_CLASS) {

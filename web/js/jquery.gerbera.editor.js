@@ -61,6 +61,7 @@
     "OggTheora",
   ];
   let resources = [];
+  let references = [];
   let serverConfig = {
     editSortKey: true,
   };
@@ -138,6 +139,8 @@
       $("#editCol").show();
       const restable = modal.find('#resdata');
       restable.html('');
+      const reftable = modal.find('#refdata');
+      reftable.html('');
       const tfoot = $('<tfoot></tfoot>');
       const trow = $('<tr></tr>');
       const th1 = $('<th></th>');
@@ -232,6 +235,7 @@
 
   function reset(modal) {
     resources = [];
+    references = [];
     modal.find('#editObjectType').val('item');
     modal.find('#objectId').val('');
     modal.find('#addParentId').val('');
@@ -255,6 +259,7 @@
     modal.find('#metadata').empty();
     modal.find('#auxdata').empty();
     modal.find('#resdata').empty();
+    modal.find('#refdata').empty();
     modal.find('#mediaimage').empty();
 
     hideDetails(modal);
@@ -435,6 +440,20 @@
         });
       } else {
         restable.hide();
+      }
+
+      const reftable = modal.find('#refdata');
+      if (item.references && item.references.length > 0) {
+        detailButton.show();
+        reftable.show();
+        references = item.references;
+        const tbody = makeDetailsHead(reftable, 'References', `(${references.length})`, itemData.onData);
+        tbody.hide();
+        references.forEach((ref) => {
+          appendMetaItem(tbody, ref.title, ref.location);
+        });
+      } else {
+        reftable.hide();
       }
 
       loadCdsObject(modal, item);

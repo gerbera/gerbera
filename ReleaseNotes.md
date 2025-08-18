@@ -1,5 +1,14 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
+### NEW Features
+
+- WebUI shows referenced items in other parts of layout in details
+
+### FIXES
+
+
 ## v2.6.1
 
 This release focuses on fixing MySQL issues and also stream internal subtitles.
