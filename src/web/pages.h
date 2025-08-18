@@ -225,6 +225,11 @@ protected:
     void writeAuxData(
         const std::shared_ptr<CdsObject>& obj,
         Json::Value& auxdataArray);
+
+    /// \brief info on referenced objects
+    void writeReferenceInfo(
+        const std::shared_ptr<CdsObject>& obj,
+        Json::Value& item);
 };
 
 /// \brief Call from WebUi to Save Item properties in database view

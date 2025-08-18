@@ -1,5 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### HEAD
+
+- WebUI: Show referenced items in details
+
 ### v2.6.1
 
 - Bump docker/build-push-action from 5 to 6

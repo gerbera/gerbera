@@ -65,6 +65,8 @@ bool Web::EditLoad::processPageAction(Json::Value& element, const std::string& a
     writeAuxData(obj, auxData);
     Json::Value resources(Json::arrayValue);
     writeResourceInfo(obj, resources);
+    Json::Value references(Json::arrayValue);
+    writeReferenceInfo(obj, references);
 
     // write item meta info
     if (obj->isItem()) {
@@ -79,6 +81,7 @@ bool Web::EditLoad::processPageAction(Json::Value& element, const std::string& a
     item["metadata"] = metaData;
     item["auxdata"] = auxData;
     item["resources"] = resources;
+    item["references"] = references;
     element["item"] = item;
     return true;
 }
@@ -317,5 +320,37 @@ void Web::EditLoad::writeContainerInfo(
         image["value"] = url.value();
         image["editable"] = false;
         item["image"] = image;
+    }
+}
+
+void Web::EditLoad::writeReferenceInfo(
+    const std::shared_ptr<CdsObject>& obj,
+    Json::Value& itemRefArray)
+{
+    auto tId = obj->getRefID() > CDS_ID_ROOT ? obj->getRefID() : obj->getID();
+    auto refObjects = database->getRefObjects(tId);
+    if (tId > CDS_ID_ROOT && tId != obj->getID()) {
+        auto refItem = database->loadObject(tId);
+        Json::Value refEntry;
+        refEntry["id"] = tId;
+        if (refItem) {
+            auto refParent = database->loadObject(refItem->getParentID());
+            refEntry["title"] = refItem->getTitle();
+            refEntry["location"] = refParent->getLocation().string();
+        }
+        itemRefArray.append(refEntry);
+    }
+    for (auto&& id : refObjects) {
+        auto refItem = database->loadObject(id);
+        if (id != obj->getID()) {
+            Json::Value refEntry;
+            refEntry["id"] = id;
+            if (refItem) {
+                auto refParent = database->loadObject(refItem->getParentID());
+                refEntry["title"] = refItem->getTitle();
+                refEntry["location"] = refParent->getLocation().string();
+            }
+            itemRefArray.append(refEntry);
+        }
     }
 }
