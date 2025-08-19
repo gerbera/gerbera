@@ -30,13 +30,14 @@
 #include <gtest/gtest.h>
 #include <memory>
 #include <tuple>
+#include <vector>
 
 using namespace ::testing;
 
 struct addCdsObjectParams {
     std::map<std::string, std::string> objectValues;
     std::string containerChain;
-    std::string objectType;
+    std::string rootPath;
 };
 
 struct boxConfig {
@@ -130,7 +131,7 @@ public:
         const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts = {});
 
     /// @brief: Access the global object(script) by name, and execute
-    void callFunction(
+    std::vector<int> callFunction(
         duk_context* ctx,
         DukMockFunction dukMockFunction,
         const std::map<std::string, std::string>& props,

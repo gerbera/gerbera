@@ -56,8 +56,9 @@ public:
 
     virtual ~Layout() = default;
 
-    /// \brief create virtual layout
-    virtual void processCdsObject(const std::shared_ptr<CdsObject>& obj,
+    /// \brief create virtual layout for single object
+    void processCdsObject(
+        const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
         const fs::path& rootpath,
         const std::string& contentType,
@@ -66,19 +67,22 @@ public:
 
 protected:
     /// \brief create virtual video layout
-    virtual std::vector<int> addVideo(const std::shared_ptr<CdsObject>& obj,
+    virtual std::vector<int> addVideo(
+        const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
         const fs::path& rootpath,
         const std::map<AutoscanMediaMode, std::string>& containerMap)
         = 0;
     /// \brief execute virtual image layout
-    virtual std::vector<int> addImage(const std::shared_ptr<CdsObject>& obj,
+    virtual std::vector<int> addImage(
+        const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
         const fs::path& rootpath,
         const std::map<AutoscanMediaMode, std::string>& containerMap)
         = 0;
     /// \brief execute virtual audio layout
-    virtual std::vector<int> addAudio(const std::shared_ptr<CdsObject>& obj,
+    virtual std::vector<int> addAudio(
+        const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
         const fs::path& rootpath,
         const std::map<AutoscanMediaMode, std::string>& containerMap)

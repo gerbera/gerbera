@@ -465,19 +465,7 @@ static const std::map<std::string, std::string> exiv2CommentDefaults {
     { "Focal length 35 mm equivalent", "Exif.Photo.FocalLengthIn35mmFilm" },
 };
 
-static const std::vector<ConfigVal> deprecatedOptions {
-#ifdef HAVE_JS
-    ConfigVal::IMPORT_SCRIPTING_COMMON_SCRIPT,
-    ConfigVal::IMPORT_SCRIPTING_CUSTOM_SCRIPT,
-    ConfigVal::IMPORT_SCRIPTING_METAFILE_SCRIPT,
-    ConfigVal::IMPORT_SCRIPTING_PLAYLIST_SCRIPT,
-    ConfigVal::IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS,
-    ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT,
-    ConfigVal::IMPORT_SCRIPTING_IMPORT_LAYOUT_AUDIO,
-    ConfigVal::IMPORT_SCRIPTING_IMPORT_LAYOUT_VIDEO,
-    ConfigVal::IMPORT_SCRIPTING_IMPORT_LAYOUT_IMAGE,
-#endif
-};
+static const std::vector<ConfigVal> deprecatedOptions {};
 
 std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
 {
@@ -1158,33 +1146,6 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_CHARSET,
             "/import/scripting/attribute::script-charset", "config-import.html#scripting",
             "UTF-8", ConfigStringSetup::CheckCharset),
-        std::make_shared<ConfigPathSetup>(ConfigVal::IMPORT_SCRIPTING_COMMON_SCRIPT,
-            "/import/scripting/common-script", "config-import.html#common-script",
-            "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist),
-        std::make_shared<ConfigPathSetup>(ConfigVal::IMPORT_SCRIPTING_CUSTOM_SCRIPT,
-            "/import/scripting/custom-script", "config-import.html#custom-script",
-            "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist),
-        std::make_shared<ConfigPathSetup>(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_SCRIPT,
-            "/import/scripting/playlist-script", "config-import.html#playlist-script",
-            "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist),
-        std::make_shared<ConfigPathSetup>(ConfigVal::IMPORT_SCRIPTING_METAFILE_SCRIPT,
-            "/import/scripting/metafile-script", "config-import.html#metafile-script",
-            "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist),
-        std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_SCRIPT_LINK_OBJECTS,
-            "/import/scripting/playlist-script/attribute::create-link", "config-import.html#playlist-script",
-            NO),
-        std::make_shared<ConfigPathSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT,
-            "/import/scripting/virtual-layout/import-script", "config-import.html#scripting",
-            "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist),
-        std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_LAYOUT_AUDIO,
-            "/import/scripting/virtual-layout/attribute::audio-layout", "config-import.html#scripting",
-            ""),
-        std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_LAYOUT_VIDEO,
-            "/import/scripting/virtual-layout/attribute::video-layout", "config-import.html#scripting",
-            ""),
-        std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_LAYOUT_IMAGE,
-            "/import/scripting/virtual-layout/attribute::image-layout", "config-import.html#scripting",
-            ""),
 
         std::make_shared<ConfigPathSetup>(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER,
             "/import/scripting/script-folder/common", "config-import.html#script-folder",

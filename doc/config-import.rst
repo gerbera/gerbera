@@ -33,10 +33,6 @@ The import settings define various options on how to aggregate the content.
             </chain>
           </boxlayout>
         </virtual-layout>
-        <common-script/>
-        <custom-script/>
-        <playlist-script/>
-        <metafile-script/>
       </scripting>
       <magic-file/>
       <autoscan>
@@ -294,7 +290,8 @@ Below are the available scripting options:
 
     Defines the locations of the script folders. If set, first all Javascript files from ``common`` are loaded and then all Javascript files from ``custom``.
     If a function is defined in a common and a custom file the custom defintion overwrites the common defintion. No function should be duplicate in
-    the same folder. Setting ``script-folder`` is the replacement for setting the various script files ``common-script``.
+    the same folder. Setting ``script-folder`` is the replacement for setting the
+    various script files with the former setting ``common-script``.
 
 .. _import-function:
 
@@ -350,7 +347,7 @@ Below are the available scripting options:
 
         * Optional
         * Default: **Default**
-        * Deprecated: Think about migrating your configuration to use :ref:`import-function`.
+        * Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
 
         Specifies the virtual layout to be created:
 
@@ -369,7 +366,7 @@ Below are the available scripting options:
 
         * Required:  **if virtual layout type is ”js\ ”**
         * Default: ``${prefix}/share/gerbera/js/import.js``, **where ${prefix} is your installation prefix directory.**
-        * Deprecated: Think about migrating your configuration to use :ref:`import-function`.
+        * Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
 
         Points to the script invoked upon media import. For more details read about :ref:`scripting <scripting>`.
 
@@ -667,7 +664,7 @@ Below are the available scripting options:
 
 * Optional
 * Default: ``${prefix}/share/gerbera/js/common.js``, **where ${prefix} is your installation prefix directory.**
-* Deprecated: Think about migrating your configuration to use :ref:`import-function`.
+* Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
 
 Points to the so called common script - it is a shared library of js helper functions.
 For more details read :ref:`scripting <scripting>`
@@ -681,7 +678,7 @@ For more details read :ref:`scripting <scripting>`
 
 * Optional
 * Default: **empty**
-* Deprecated: Think about migrating your configuration to use :ref:`import-function`.
+* Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
 
 Points to the custom script - think of it as a custom library of js helper functions, functions added
 there can be used in your import and in your playlist scripts. Theses functions also overwrite functions from the common script.
@@ -696,7 +693,7 @@ For more details read :ref:`scripting <scripting>`
 
 * Optional
 * Default: ``${prefix}/share/gerbera/js/playlists.js``, **where ${prefix} is your installation prefix directory.**
-* Deprecated: Think about migrating your configuration to use :ref:`import-function`.
+* Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
 
 Points to the script that is parsing various playlists, by default parsing of pls, m3u and asx playlists is implemented,
 however the script can be adapted to parse almost any kind of text based playlist. For more details read :ref:`scripting <scripting>`
@@ -721,7 +718,7 @@ however the script can be adapted to parse almost any kind of text based playlis
 
 * Optional
 * Default: ``${prefix}/share/gerbera/js/metadata.js``, **where ${prefix} is your installation prefix directory.**
-* Deprecated: Think about migrating your configuration to use :ref:`import-function`.
+* Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
 
 Points to the main metadata parsing script which is invoked during the first import phase to gather metadata from additional files.
 Currently support for nfo files is implemented. (https://kodi.wiki/view/NFO_files/Templates)

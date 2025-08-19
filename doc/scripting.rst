@@ -507,7 +507,7 @@ The server offers three functions which can be called from
 within the import and/or the playlist script:
 
 
-.. js:function:: addCdsObject(object, containerId)
+.. js:function:: addCdsObject(object, containerId, rootPath)
 
     Adds the object as a virtual object to the container chain
 
@@ -515,6 +515,8 @@ within the import and/or the playlist script:
         A virtual object that is either a copy of or a reference to 'orig'
     :param string containerId:
         A string, containing the container id as optained from ``addContainerTree``.
+    :param string rootPath:
+        A string, containing the start point of the autoscan directory.
     :returns: object id for use as result of the import function.
 
 
@@ -763,10 +765,6 @@ the ``/usr/share/gerbera/js/`` directory, but you will also find it in ``scripts
 On startup gerbera loads all the javascript files from that directory (`common-folder` in `config.xml`) then loads all files from
 `custom-folder`. If a function defined in a common file is also found in the custom folder it overwrites it.
 
-You can still use the former mechanism of defining `common-script` and `custom-script` in `config.xml` which works as follows:
-The functions are defined in `common.js` and can easily be overwritten in a file which is set in `custom-script` in `config.xml`.
-Compared to former versions of gerbera you do not have to copy the whole file to overwrite one function.
-
 .. Note::
   this is not a JavaScript tutorial, if you are new to JS you should probably make yourself familiar with the
   language.
@@ -791,12 +789,6 @@ The entry point of each import function has the following synopsis
     :param string containerType: UPnP  type configured to create containers
     :returns: nothing
 
-Each entry function is a wrapper around the common function that contains the logic
-
-.. literalinclude:: ../scripts/js/import.js
-    :start-after: // doc-import-begin
-    :end-before: // doc-import-end
-    :language: js
 
 Audio Content Handler
 ^^^^^^^^^^^^^^^^^^^^^
@@ -806,7 +798,7 @@ is simple: flac and mp3 files offer a lot of metadata like album,
 artist, genre, etc. information, this allows us to create a
 nice container layout.
 
-.. literalinclude:: ../scripts/js/common.js
+.. literalinclude:: ../scripts/js/audio.js
     :start-after: // doc-add-audio-begin
     :end-before: // doc-add-audio-end
     :language: js
@@ -834,7 +826,7 @@ or anything Exif field you might be interested in.
     specify the fields of interest in the import section of your configuration file
     (See documentation about library-options).
 
-.. literalinclude:: ../scripts/js/common.js
+.. literalinclude:: ../scripts/js/image.js
     :start-after: // doc-add-image-begin
     :end-before: // doc-add-image-end
     :language: js
@@ -855,7 +847,7 @@ keep it very simple - we just put everything into the 'All Video' container.
     specify the fields of interest in the import section of your configuration file
     (See documentation about library-options).
 
-.. literalinclude:: ../scripts/js/common.js
+.. literalinclude:: ../scripts/js/video.js
     :start-after: // doc-add-video-begin
     :end-before: // doc-add-video-end
     :language: js
@@ -876,13 +868,6 @@ In the default configuration these functions are registered as entry points so t
         <playlist create-link="yes">importPlaylist</playlist>
         <meta-file>importMetadata</meta-file>
     </import-function>
-
-If you set the deprecated `import-script` in `config.xml` the script is fully
-evaluated for each file and calls the wrapper to select the correct import function.
-
-.. literalinclude:: ../scripts/js/import.js
-    :start-after: // Global Variables
-    :language: js
 
 
 Playlist Script
@@ -932,7 +917,7 @@ the next line until end of file is reached.
 To keep things easy we will only list the m3u parsing here. Again, if you are not familiar with regular expressions, now is
 probably the time to take a closer look.
 
-.. literalinclude:: ../scripts/js/common.js
+.. literalinclude:: ../scripts/js/playlists.js
     :start-after: // doc-playlist-m3u-parse-begin
     :end-before: // doc-playlist-m3u-parse-end
     :language: js

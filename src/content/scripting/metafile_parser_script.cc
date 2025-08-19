@@ -45,16 +45,10 @@
 #include "util/string_converter.h"
 
 MetafileParserScript::MetafileParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
-    : ParserScript(content, parent, "metafile", "obj", false)
+    : ParserScript(content, parent, "metafile", "mtf", false)
 {
-    std::string scriptPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_METAFILE_SCRIPT);
     defineFunction("updateCdsObject", jsUpdateCdsObject, 1);
-    if (!scriptPath.empty()) {
-        load(scriptPath);
-        scriptMode = true;
-    } else {
-        metafileFunction = config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE);
-    }
+    metafileFunction = config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE);
 }
 
 void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, const fs::path& path)
@@ -83,17 +77,8 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     try {
-        if (scriptMode) {
-            execute(obj, path);
-        } else {
-            call(obj, nullptr, metafileFunction, path, "");
-        }
+        call(obj, nullptr, metafileFunction, path, "");
     } catch (const std::runtime_error&) {
-        if (scriptMode) {
-            cleanup();
-            duk_pop(ctx);
-        }
-
         currentHandle = nullptr;
 
         delete[] currentLine;

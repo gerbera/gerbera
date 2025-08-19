@@ -88,7 +88,7 @@ static duk_ret_t addCdsObject(duk_context* ctx)
         "metaData['upnp:orchestra']",
     };
     addCdsObjectParams params = ScriptTestFixture::addCdsObject(ctx, keys);
-    return ImportScriptTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
+    return ImportScriptTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.rootPath);
 }
 
 static duk_ret_t getYear(duk_context* ctx)
@@ -252,40 +252,40 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, getRootPath("/home/gerbera", location)).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All Audio"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "42", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "42", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "All Songs"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "43", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "43", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All - full name"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "44", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "44", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "All - full name"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "45", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "45", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioTrackNumbered), "46", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioTrackNumbered), "46", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Albums", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioTrackNumbered), "47", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioTrackNumbered), "47", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Genre2"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "481", UNDEFINED)).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "482", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "481", "/home/gerbera")).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "482", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "49", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "49", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", artist, "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", "/home/gerbera")).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, audioBox, configDicts);
 
-    callFunction(ctx, dukMockItem,
+    auto fnResult = callFunction(ctx, dukMockItem,
         { { "title", title },
             { "id", id },
             { "upnpclass", UPNP_CLASS_AUDIO_ITEM },
@@ -296,6 +296,8 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
         meta, aux, res,
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
         "/home/gerbera");
+    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 481000, 482000, 50000, 49000, 462000 };
+    EXPECT_EQ(fnResult, items);
 }
 
 TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
@@ -324,17 +326,17 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     // for verification.
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "All Video"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "60", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "60", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, getRootPath("/home/gerbera", location)).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "Directories", "home", "gerbera"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", "/home/gerbera")).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, videoBox);
 
     functionName = "importVideo";
-    callFunction(ctx, dukMockItem,
+    auto fnResult = callFunction(ctx, dukMockItem,
         { { "title", title },
             { "id", id },
             { "upnpclass", UPNP_CLASS_AUDIO_ITEM },
@@ -345,6 +347,8 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
         meta, aux, res,
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video),
         "/home/gerbera");
+    std::vector<int> items { 60000, 61000 };
+    EXPECT_EQ(fnResult, items);
 }
 
 TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
@@ -379,23 +383,23 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     // for verification.
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "All Photos"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "70", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "70", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "Year", "2018", "01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "71", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "71", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "Date", "2018-01-01"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "72", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "72", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, getRootPath("/home/gerbera", location)).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Photos", "Directories", "home", "gerbera"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "73", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asImagePhotos), "73", "/home/gerbera")).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, imageBox);
 
     functionName = "importImage";
-    callFunction(ctx, dukMockItem,
+    auto fnResult = callFunction(ctx, dukMockItem,
         { { "title", title },
             { "id", id },
             { "upnpclass", UPNP_CLASS_AUDIO_ITEM },
@@ -406,6 +410,8 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
         meta, aux, res,
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image),
         "/home/gerbera");
+    std::vector<int> items { 70000, 71000, 72000, 73000 };
+    EXPECT_EQ(fnResult, items);
 }
 
 TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
@@ -434,17 +440,17 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     // for verification.
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "All Video"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "60", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "60", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, getRootPath("/home/gerbera", location)).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Video", "Directories", "home", "gerbera"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asVideoAllVideo), "61", "/home/gerbera")).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, videoBox);
 
     functionName = "importVideo";
-    callFunction(ctx, dukMockItem,
+    auto fnResult = callFunction(ctx, dukMockItem,
         { { "title", title },
             { "id", id },
             { "upnpclass", UPNP_CLASS_AUDIO_ITEM },
@@ -455,6 +461,8 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
         meta, aux, res,
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video),
         "/home/gerbera");
+    std::vector<int> items { 60000, 61000 };
+    EXPECT_EQ(fnResult, items);
 }
 
 TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
@@ -524,38 +532,38 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, getRootPath("/home/gerbera", location)).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All Audio"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "42", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "42", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "All Songs"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "43", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "43", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "All - full name"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "44", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "44", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "All - full name"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "45", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "45", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "46", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "46", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Albums", "Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "47", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "47", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Genres", "Genre"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "481", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "481", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Composers", "Composer"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "49", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "49", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Year", "2018"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "50", "/home/gerbera")).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", artist, "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", "/home/gerbera")).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, audioBox, configDicts);
 
-    callFunction(ctx, dukMockItem,
+    auto fnResult = callFunction(ctx, dukMockItem,
         { { "title", title },
             { "id", id },
             { "upnpclass", UPNP_CLASS_AUDIO_ITEM },
@@ -566,6 +574,8 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
         meta, aux, res,
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
         "/home/gerbera");
+    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 481000, 50000, 49000, 462000 };
+    EXPECT_EQ(fnResult, items);
 }
 
 #endif // HAVE_JS

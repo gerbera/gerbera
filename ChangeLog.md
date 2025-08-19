@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Remove loading complete scripts to create virutal layout
 - WebUI: Show referenced items in details
 
 ### v2.6.1

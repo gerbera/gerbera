@@ -21,24 +21,89 @@
 */
 
 function importMetadata(meta, cont, rootPath, autoscanId, containerType) {
-    const arr = rootPath.split('.');
-    print2("Info", "Processing metafile: " + rootPath + " for " + meta.location + " " + arr[arr.length-1].toLowerCase());
-    var result = [];
-    switch (arr[arr.length-1].toLowerCase()) {
-        case "nfo":
-            parseNfo(meta, rootPath);
-            updateCdsObject(meta);
-            result.push(meta.id);
-            break;
-    }
-    return result;
+  const arr = rootPath.split('.');
+  print2("Info", "Processing metafile: " + rootPath + " for " + meta.location + " " + arr[arr.length - 1].toLowerCase());
+  var result = [];
+  switch (arr[arr.length - 1].toLowerCase()) {
+    case "nfo":
+      parseNfo(meta, rootPath);
+      updateCdsObject(meta);
+      result.push(meta.id);
+      break;
+  }
+  return result;
 }
 
-var obj;
-var cont;
-var object_ref_list;
-// compatibility with older configurations
-if (!cont || cont === undefined)
-    cont = obj;
-if (obj && obj !== undefined)
-    object_ref_list = importMetadata(obj, cont, object_script_path, -1, "");
+function parseNfo(obj, nfo_file_name) {
+  var node = readXml(-2);
+  var level = 0;
+  var isActor = false;
+
+  while (node || level > 0) {
+    if (!node && level > 0) {
+      node = readXml(-1); // read parent
+      node = readXml(0); // read next
+      isActor = false;
+      level--;
+    } else if (node.NAME === "movie") {
+      node = readXml(1); // read children
+      obj.upnpclass = UPNP_CLASS_VIDEO_MOVIE;
+      level++;
+    } else if (node.NAME === "musicvideo") {
+      node = readXml(1); // read children
+      obj.upnpclass = UPNP_CLASS_VIDEO_MUSICVIDEOCLIP;
+      level++;
+    } else if (node.NAME === "tvshow") {
+      node = readXml(1); // read children
+      obj.upnpclass = UPNP_CLASS_VIDEO_BROADCAST;
+      level++;
+    } else if (node.NAME === "episodedetails") {
+      node = readXml(1); // read children
+      obj.upnpclass = UPNP_CLASS_VIDEO_BROADCAST;
+      level++;
+    } else if (node.NAME === "actor") {
+      node = readXml(1); // read children
+      isActor = true;
+      level++;
+    } else if (node.NAME == "title") {
+      obj.title = node.VALUE;
+      node = readXml(0); // read next
+    } else if (node.NAME == "plot") {
+      obj.description = node.VALUE;
+      node = readXml(0); // read next
+    } else if (node.NAME == "name" && isActor) {
+      addMeta(obj, M_ACTOR, node.VALUE);
+      node = readXml(0); // read next
+    } else if (node.NAME == "genre") {
+      addMeta(obj, M_GENRE, node.VALUE);
+      node = readXml(0); // read next
+    } else if (node.NAME == "premiered") {
+      addMeta(obj, M_DATE, node.VALUE);
+      node = readXml(0); // read next
+    } else if (node.NAME == "season") {
+      addMeta(obj, M_PARTNUMBER, node.VALUE);
+      obj.partNumber = node.VALUE;
+      node = readXml(0); // read next
+    } else if (node.NAME == "episode") {
+      addMeta(obj, "upnp:episodeNumber", node.VALUE);
+      obj.trackNumber = node.VALUE;
+      node = readXml(0); // read next
+    } else if (node.NAME == "mpaa" && node.VALUE) {
+      addMeta(obj, "upnp:rating", node.VALUE);
+      addMeta(obj, "upnp:rating@type", "MPAA.ORG");
+      addMeta(obj, "upnp:rating@equivalentAge", node.VALUE);
+      node = readXml(0); // read next
+    } else if (node.NAME == "country") {
+      addMeta(obj, M_REGION, node.VALUE);
+      node = readXml(0); // read next
+    } else if (node.NAME == "studio") {
+      addMeta(obj, M_PUBLISHER, node.VALUE);
+      node = readXml(0); // read next
+    } else if (node.NAME == "director") {
+      addMeta(obj, M_DIRECTOR, node.VALUE);
+      node = readXml(0); // read next
+    } else {
+      node = readXml(0); // read next
+    }
+  }
+}

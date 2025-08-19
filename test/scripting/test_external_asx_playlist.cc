@@ -23,6 +23,7 @@
 #ifdef HAVE_JS
 
 #include "cds/cds_objects.h"
+#include "config/result/autoscan.h"
 #include "exceptions.h"
 #include "upnp/upnp_common.h"
 #include "util/tools.h"
@@ -116,7 +117,7 @@ static duk_ret_t addCdsObject(duk_context* ctx)
         "title", "protocol", "upnpclass",
         "description", "playlistOrder" };
     addCdsObjectParams params = ScriptTestFixture::addCdsObject(ctx, keys);
-    return ExternalUrlAsxPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
+    return ExternalUrlAsxPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.rootPath);
 }
 
 // Mock the Duktape C methods
@@ -195,10 +196,18 @@ TEST_F(ExternalUrlAsxPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
     EXPECT_CALL(*commonScriptMock, readXml(Eq("<ref href=https://10.0.0.10/pl/stream/12110/1641070200 ></ref>"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readXml(Eq("<param name=mimetype value=video/mp4 ></param>"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readXml(Eq("< ></>"))).Times(3).WillRepeatedly(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", "/home/gerbera")).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", "/home/gerbera")).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
-    callFunction(ctx, dukMockPlaylist, { { "title", "Playlist Title" }, { "location", "/location/of/playlist.asx" }, { "mimetype", MIME_TYPE_ASX_PLAYLIST } });
+    auto fnResult = callFunction(ctx, dukMockPlaylist,
+        { { "title", "Playlist Title" },
+            { "location", "/location/of/playlist.asx" },
+            { "mimetype", MIME_TYPE_ASX_PLAYLIST } },
+        {}, {}, {},
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
+        "/home/gerbera");
+    std::vector<int> items { 42000, 43000 };
+    EXPECT_EQ(fnResult, items);
 }
 #endif

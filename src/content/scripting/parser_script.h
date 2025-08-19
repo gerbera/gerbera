@@ -58,7 +58,12 @@ public:
     pugi::xml_node& readXml(int direction);
 
 protected:
-    ParserScript(const std::shared_ptr<Content>& content, const std::string& parent, const std::string& name, const std::string& objName, bool needResult);
+    ParserScript(
+        const std::shared_ptr<Content>& content,
+        const std::string& parent,
+        const std::string& name,
+        const std::string& objName,
+        bool needResult);
     ~ParserScript() override;
 
     static pugi::xml_node nullNode;
@@ -70,7 +75,6 @@ protected:
     std::shared_ptr<GenericTask> currentTask;
     std::unique_ptr<pugi::xml_document> xmlDoc { std::make_unique<pugi::xml_document>() };
     pugi::xml_node root;
-    bool scriptMode { false };
 };
 
 #endif // __PARSER_SCRIPT_H__

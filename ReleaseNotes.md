@@ -2,6 +2,8 @@
 
 ## HEAD
 
+**Support for loading layout scripts has been removed now. The javascript interface must be used by calling functions depending on the media type.**
+
 ### NEW Features
 
 - WebUI shows referenced items in other parts of layout in details
