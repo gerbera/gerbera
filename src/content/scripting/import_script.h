@@ -49,7 +49,6 @@ class ImportScript : public Script {
 public:
     ImportScript(const std::shared_ptr<Content>& content, const std::string& parent);
 
-    std::vector<int> processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap);
     std::vector<int> addVideo(const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& cont,
         const fs::path& scriptPath,
@@ -68,15 +67,20 @@ public:
         const std::map<AutoscanMediaMode, std::string>& containerMap);
 #endif
 
-    bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
-    std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override
+    bool setRefId(
+        const std::shared_ptr<CdsObject>& cdsObj,
+        const std::shared_ptr<CdsObject>& origObject,
+        int pcdId) override;
+    std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(
+        const std::shared_ptr<CdsObject>& origObject,
+        const std::string& rootPath) override
     {
         return { dukObject2cdsObject(origObject), INVALID_OBJECT_ID };
     }
-    bool hasImportFunctions() const;
 
 private:
-    std::vector<int> callFunction(const std::shared_ptr<CdsObject>& obj,
+    std::vector<int> callFunction(
+        const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& cont,
         const std::string& function,
         const fs::path& scriptPath,

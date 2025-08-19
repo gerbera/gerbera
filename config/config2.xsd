@@ -647,10 +647,6 @@
             <xs:all>
                 <xs:element ref="script-folder" minOccurs="0"/>
                 <xs:element ref="import-function" minOccurs="0"/>
-                <xs:element ref="common-script" minOccurs="0"/>
-                <xs:element ref="custom-script" minOccurs="0"/>
-                <xs:element ref="playlist-script" minOccurs="0"/>
-                <xs:element ref="metafile-script" minOccurs="0"/>
                 <xs:element ref="virtual-layout" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="script-charset" type="xs:string" default="UTF-8"/>
@@ -664,19 +660,6 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
-        </xs:complexType>
-    </xs:element>
-
-    <xs:element name="common-script" type="xs:string"/>
-    <xs:element name="custom-script" type="xs:string"/>
-    <xs:element name="metafile-script" type="xs:string"/>
-    <xs:element name="playlist-script">
-        <xs:complexType>
-            <xs:simpleContent>
-                <xs:extension base="xs:string">
-                    <xs:attribute name="create-link" type="boolean" default="yes"/>
-                </xs:extension>
-            </xs:simpleContent>
         </xs:complexType>
     </xs:element>
 

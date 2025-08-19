@@ -276,9 +276,11 @@ TEST_F(MetafileNfoTest, SetsPropertiesFromFile)
     EXPECT_CALL(*commonScriptMock, updateCdsObject(IsIdenticalMap(asDictionary))).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions);
-    callFunction(ctx, dukMockMetafile,
+    auto fnResult = callFunction(ctx, dukMockMetafile,
         { { "location", location } }, {}, {}, {},
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video),
         fileName);
+    std::vector<int> items {};
+    EXPECT_EQ(fnResult, items);
 }
 #endif

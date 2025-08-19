@@ -43,6 +43,9 @@ class ScriptingRuntime;
 
 /// \brief layout class implementation for flexible java script implemented virtual layout
 class JSLayout : public Layout {
+public:
+    JSLayout(const std::shared_ptr<Content>& content, const std::string& parent);
+
 protected:
     std::shared_ptr<ScriptingRuntime> runtime;
     std::shared_ptr<ImportScript> import_script;
@@ -70,16 +73,6 @@ protected:
         const fs::path& rootpath,
         const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 #endif
-
-public:
-    JSLayout(const std::shared_ptr<Content>& content, const std::string& parent);
-
-    void processCdsObject(const std::shared_ptr<CdsObject>& obj,
-        const std::shared_ptr<CdsContainer>& parent,
-        const fs::path& rootpath,
-        const std::string& contentType,
-        const std::map<AutoscanMediaMode, std::string>& containerMap,
-        std::vector<int>& refObjects) override;
 };
 
 #endif // __JS_LAYOUT_H__

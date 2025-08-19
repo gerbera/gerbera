@@ -22,6 +22,7 @@
 */
 #ifdef HAVE_JS
 
+#include "config/result/autoscan.h"
 #include "upnp/upnp_common.h"
 
 #include "mock/common_script_mock.h"
@@ -77,7 +78,7 @@ static duk_ret_t addCdsObject(duk_context* ctx)
         "title", "protocol", "upnpclass",
         "description", "playlistOrder" };
     addCdsObjectParams params = ScriptTestFixture::addCdsObject(ctx, keys);
-    return ExternalUrlPLSPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
+    return ExternalUrlPLSPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.rootPath);
 }
 
 // Mock the Duktape C methods
@@ -131,7 +132,15 @@ TEST_F(ExternalUrlPLSPlaylistTest, PrintsWarningWhenPlaylistTypeIsNotFound)
     EXPECT_CALL(*commonScriptMock, print2(Eq("Error"), Eq("Unknown playlist mimetype: 'no/type' of playlist '/location/of/playlist.pls'"))).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
-    callFunction(ctx, dukMockPlaylist, { { "title", "Playlist Title" }, { "location", "/location/of/playlist.pls" }, { "mimetype", "no/type" } });
+    auto fnResult = callFunction(ctx, dukMockPlaylist,
+        { { "title", "Playlist Title" },
+            { "location", "/location/of/playlist.pls" },
+            { "mimetype", "no/type" } },
+        {}, {}, {},
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
+        "/home/gerbera");
+    std::vector<int> items {};
+    EXPECT_EQ(fnResult, items);
 }
 
 TEST_F(ExternalUrlPLSPlaylistTest, AddsCdsObjectFromPlaylistWithExternalUrlPlaylistAndDirChains)
@@ -165,11 +174,18 @@ TEST_F(ExternalUrlPLSPlaylistTest, AddsCdsObjectFromPlaylistWithExternalUrlPlayl
     EXPECT_CALL(*commonScriptMock, readln(Eq("NumberOfEntries=1"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("Version=2"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("-EOF-"))).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", "/home/gerbera")).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", "/home/gerbera")).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
-    callFunction(ctx, dukMockPlaylist, { { "title", "Playlist Title" }, { "location", "/location/of/playlist.pls" }, { "mimetype", "audio/x-scpls" } });
+    auto fnResult = callFunction(ctx, dukMockPlaylist,
+        { { "title", "Playlist Title" },
+            { "location", "/location/of/playlist.pls" }, { "mimetype", "audio/x-scpls" } },
+        {}, {}, {},
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
+        "/home/gerbera");
+    std::vector<int> items { 42000, 43000 };
+    EXPECT_EQ(fnResult, items);
 }
 
 TEST_F(ExternalUrlPLSPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistAndDirChains)
@@ -204,10 +220,18 @@ TEST_F(ExternalUrlPLSPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
     EXPECT_CALL(*commonScriptMock, readln(Eq("NumberOfEntries=1"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("Version=2"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("-EOF-"))).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", "/home/gerbera")).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", "/home/gerbera")).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
-    callFunction(ctx, dukMockPlaylist, { { "title", "Playlist Title" }, { "location", "/location/of/playlist.pls" }, { "mimetype", "audio/x-scpls" } });
+    auto fnResult = callFunction(ctx, dukMockPlaylist,
+        { { "title", "Playlist Title" },
+            { "location", "/location/of/playlist.pls" },
+            { "mimetype", "audio/x-scpls" } },
+        {}, {}, {},
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
+        "/home/gerbera");
+    std::vector<int> items { 42000, 43000 };
+    EXPECT_EQ(fnResult, items);
 }
 #endif

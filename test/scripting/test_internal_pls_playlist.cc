@@ -22,6 +22,8 @@
 */
 #ifdef HAVE_JS
 
+#include "config/result/autoscan.h"
+
 #include "mock/common_script_mock.h"
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
@@ -72,7 +74,7 @@ static duk_ret_t addCdsObject(duk_context* ctx)
 {
     std::vector<std::string> keys { "objectType", "location", "title", "playlistOrder" };
     addCdsObjectParams params = ScriptTestFixture::addCdsObject(ctx, keys);
-    return InternalUrlPLSPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.objectType);
+    return InternalUrlPLSPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.rootPath);
 }
 
 static duk_ret_t copyObject(duk_context* ctx)
@@ -179,12 +181,20 @@ TEST_F(InternalUrlPLSPlaylistTest, AddsCdsObjectFromPlaylistWithInternalUrlPlayl
     EXPECT_CALL(*commonScriptMock, readln(Eq("NumberOfEntries=1"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("Version=2"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readln(Eq("-EOF-"))).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", UNDEFINED)).WillOnce(Return(0));
-    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", UNDEFINED)).WillOnce(Return(0));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", "/home/gerbera")).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", "/home/gerbera")).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getCdsObject(Eq("/home/gerbera/example.mp3"))).WillRepeatedly(Return(1));
     EXPECT_CALL(*commonScriptMock, copyObject(Eq(true))).WillRepeatedly(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
-    callFunction(ctx, dukMockPlaylist, { { "title", "Playlist Title" }, { "location", "/location/of/my/playlist.pls" }, { "mimetype", "audio/x-scpls" } });
+    auto fnResult = callFunction(ctx, dukMockPlaylist,
+        { { "title", "Playlist Title" },
+            { "location", "/location/of/my/playlist.pls" },
+            { "mimetype", "audio/x-scpls" } },
+        {}, {}, {},
+        AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
+        "/home/gerbera");
+    std::vector<int> items { 42000, 43000 };
+    EXPECT_EQ(fnResult, items);
 }
 #endif

@@ -23,6 +23,7 @@
 #ifdef HAVE_JS
 
 #include "content/scripting/script_names.h"
+#include "content/scripting/script_property.h"
 #include "util/grb_fs.h"
 #include "util/tools.h"
 
@@ -295,7 +296,7 @@ void ScriptTestFixture::addConfig(
     duk_put_global_string(ctx, "config");
 }
 
-void ScriptTestFixture::callFunction(
+std::vector<int> ScriptTestFixture::callFunction(
     duk_context* ctx,
     DukMockFunction dukMockFunction,
     const std::map<std::string, std::string>& props,
@@ -308,14 +309,14 @@ void ScriptTestFixture::callFunction(
     // functionName(object, container, rootPath, autoScanId, containerType)
     if (functionName.empty()) {
         std::cerr << "javascript function not set" << std::endl;
-        return;
+        return {};
     }
 
     // Push function onto stack
     if (!duk_get_global_string(ctx, functionName.c_str()) || !duk_is_function(ctx, -1)) {
         std::cerr << "javascript function not found: " << functionName << std::endl;
         duk_pop(ctx);
-        return;
+        return {};
     }
 
     int narg = 0;
@@ -345,9 +346,10 @@ void ScriptTestFixture::callFunction(
         // https://github.com/svaarala/duktape/blob/master/doc/error-objects.rst
         DukTestHelper::printError(ctx, "JavaScript runtime error ", functionName);
         duk_pop(ctx);
-        return;
+        return {};
     }
-    duk_pop(ctx);
+    auto result = ScriptResultProperty(ctx).getIntArrayValue();
+    return result;
 }
 
 std::vector<std::string> ScriptTestFixture::createContainerChain(duk_context* ctx)
@@ -483,20 +485,23 @@ std::vector<std::string> ScriptTestFixture::addContainerTree(
     return array;
 }
 
-addCdsObjectParams ScriptTestFixture::addCdsObject(duk_context* ctx, const std::vector<std::string>& keys)
+addCdsObjectParams ScriptTestFixture::addCdsObject(
+    duk_context* ctx,
+    const std::vector<std::string>& keys)
 {
     DukTestHelper dukHelper;
 
     // parameter list
     std::map<std::string, std::string> dukObjValues = dukHelper.extractValues(ctx, keys, 0);
     std::string containerChain = duk_to_string(ctx, 1);
-    std::string objContainer = duk_to_string(ctx, 2);
+    std::string rootPath = duk_to_string(ctx, 2);
 
     addCdsObjectParams params;
     params.objectValues = dukObjValues;
     params.containerChain = containerChain;
-    params.objectType = objContainer;
+    params.rootPath = rootPath;
 
+    duk_push_int(ctx, stoi(containerChain) * 1000);
     return params;
 }
 

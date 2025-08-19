@@ -150,16 +150,16 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
     const char* containerId = duk_to_string(ctx, 1);
     if (!containerId)
         containerId = "-1";
-    // stack: js_cds_obj containerId
+    // stack: js_cds_obj containerId rootPath
 
     try {
-        std::string rootPath = ScriptGlobalProperty(ctx, "object_script_path").getStringValue();
+        std::string rootPath = duk_to_string(ctx, 2);
 
         if (self->getOrigName().empty())
             duk_push_undefined(ctx);
         else
             duk_get_global_string(ctx, self->getOrigName().c_str());
-        // stack: js_cds_obj containerId js_orig_obj
+        // stack: js_cds_obj containerId rootPath js_orig_obj
 
         if (duk_is_undefined(ctx, -1)) {
             log_debug("Could not retrieve global {} object", self->getOrigName());
@@ -173,7 +173,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         }
 
         duk_swap_top(ctx, 0);
-        // stack: js_orig_obj containerId js_cds_obj
+        // stack: js_orig_obj containerId rootPath js_cds_obj
         auto [cdsObj, pcdId] = self->createObject2cdsObject(origObject, rootPath);
         if (!cdsObj) {
             log_debug("No content object");

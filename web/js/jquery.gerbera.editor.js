@@ -826,5 +826,5 @@
       retval = this;
     }
     return retval;
-  }, $.fn.editmodal)
+  }, $.fn.editmodal);
 })(jQuery);

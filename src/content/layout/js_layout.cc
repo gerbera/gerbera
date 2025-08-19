@@ -44,25 +44,11 @@ JSLayout::JSLayout(const std::shared_ptr<Content>& content, const std::string& p
     import_script->init();
 }
 
-void JSLayout::processCdsObject(const std::shared_ptr<CdsObject>& obj,
+std::vector<int> JSLayout::addAudio(
+    const std::shared_ptr<CdsObject>& obj,
     const std::shared_ptr<CdsContainer>& parent,
     const fs::path& rootpath,
-    const std::string& contentType,
-    const std::map<AutoscanMediaMode, std::string>& containerMap,
-    std::vector<int>& refObjects)
-{
-    if (!import_script)
-        return;
-
-    if (import_script->hasImportFunctions())
-        Layout::processCdsObject(obj, parent, rootpath, contentType, containerMap, refObjects);
-    else {
-        auto resObjects = import_script->processCdsObject(obj, rootpath, containerMap);
-        cleanUp(refObjects, resObjects);
-    }
-}
-
-std::vector<int> JSLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+    const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     if (!import_script)
         return {};
@@ -70,7 +56,11 @@ std::vector<int> JSLayout::addAudio(const std::shared_ptr<CdsObject>& obj, const
     return import_script->addAudio(obj, parent, rootpath, containerMap);
 }
 
-std::vector<int> JSLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+std::vector<int> JSLayout::addVideo(
+    const std::shared_ptr<CdsObject>& obj,
+    const std::shared_ptr<CdsContainer>& parent,
+    const fs::path& rootpath,
+    const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     if (!import_script)
         return {};
@@ -78,7 +68,11 @@ std::vector<int> JSLayout::addVideo(const std::shared_ptr<CdsObject>& obj, const
     return import_script->addVideo(obj, parent, rootpath, containerMap);
 }
 
-std::vector<int> JSLayout::addImage(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& parent, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+std::vector<int> JSLayout::addImage(
+    const std::shared_ptr<CdsObject>& obj,
+    const std::shared_ptr<CdsContainer>& parent,
+    const fs::path& rootpath,
+    const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     if (!import_script)
         return {};
@@ -87,7 +81,11 @@ std::vector<int> JSLayout::addImage(const std::shared_ptr<CdsObject>& obj, const
 }
 
 #ifdef ONLINE_SERVICES
-std::vector<int> JSLayout::addOnlineItem(const std::shared_ptr<CdsObject>& obj, OnlineServiceType serviceType, const fs::path& rootpath, const std::map<AutoscanMediaMode, std::string>& containerMap)
+std::vector<int> JSLayout::addOnlineItem(
+    const std::shared_ptr<CdsObject>& obj,
+    OnlineServiceType serviceType,
+    const fs::path& rootpath,
+    const std::map<AutoscanMediaMode, std::string>& containerMap)
 {
     if (!import_script)
         return {};

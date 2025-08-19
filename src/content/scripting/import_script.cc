@@ -46,35 +46,16 @@
 ImportScript::ImportScript(const std::shared_ptr<Content>& content, const std::string& parent)
     : Script(content, parent, "import", "orig", true, content->getContext()->getConverterManager()->i2i())
 {
-    std::string scriptPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT);
-    if (!scriptPath.empty()) {
-        load(scriptPath);
-    }
 }
 
-std::vector<int> ImportScript::processCdsObject(const std::shared_ptr<CdsObject>& obj, const fs::path& scriptPath, const std::map<AutoscanMediaMode, std::string>& containerMap)
-{
-    std::vector<int> result;
-    processed = obj;
-    try {
-        result = execute(obj, scriptPath);
-    } catch (const std::runtime_error&) {
-        cleanup();
-        processed = nullptr;
-        throw;
-    }
-
-    processed = nullptr;
-
-    gc_counter++;
-    if (gc_counter > JS_CALL_GC_AFTER_NUM) {
-        duk_gc(ctx, 0);
-        gc_counter = 0;
-    }
-    return result;
-}
-
-std::vector<int> ImportScript::callFunction(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& function, const fs::path& scriptPath, AutoscanMediaMode mediaMode, const std::map<AutoscanMediaMode, std::string>& containerMap)
+std::vector<int> ImportScript::callFunction(
+    const std::shared_ptr<CdsObject>& obj,
+    const std::shared_ptr<CdsContainer>& cont,
+    const std::string& function,
+    const fs::path& scriptPath,
+    AutoscanMediaMode mediaMode,
+    const std::map<AutoscanMediaMode,
+        std::string>& containerMap)
 {
     std::vector<int> result;
     processed = obj;
@@ -125,11 +106,6 @@ std::vector<int> ImportScript::addOnlineItem(const std::shared_ptr<CdsObject>& o
     return callFunction(obj, nullptr, config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER), scriptPath, AutoscanMediaMode::Video, containerMap);
 }
 #endif
-
-bool ImportScript::hasImportFunctions() const
-{
-    return config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT).empty();
-}
 
 bool ImportScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId)
 {

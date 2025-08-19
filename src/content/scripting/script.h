@@ -80,7 +80,10 @@ public:
     /// \param name of property
     /// \param value of property
     /// \param doEmpty write if property value is empty
-    void setProperty(const std::string& name, const std::string& value, bool doEmpty = true);
+    void setProperty(
+        const std::string& name,
+        const std::string& value,
+        bool doEmpty = true);
     /// \brief Write property with number value to object
     /// \param name of property
     /// \param value of property
@@ -95,10 +98,16 @@ public:
     /// \param value of property: write 1 if true 0 else
     void setBoolProperty(const std::string& name, bool value);
 
-    void defineFunction(const std::string& name, duk_c_function function, std::uint32_t numParams);
+    /// @brief add C function to js
+    void defineFunction(
+        const std::string& name,
+        duk_c_function function,
+        std::uint32_t numParams);
+    /// @brief add list of C functions to js
     void defineFunctions(const duk_function_list_entry* functions);
+    /// @brief load script content as conffigured
     void loadContent();
-    void load(const fs::path& scriptPath);
+    /// @brief load all js files from folder
     void loadFolder(const fs::path& scriptFolder);
 
     /// \brief Convert javascript object back to CdsObject
@@ -113,29 +122,67 @@ public:
     bool isHiddenFile(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
 
     std::string convertToCharset(const std::string& str, CharsetConversion chr);
-    virtual std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) = 0;
-    virtual bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) = 0;
+    /// @brief create cds object from duktape stack
+    virtual std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(
+        const std::shared_ptr<CdsObject>& origObject,
+        const std::string& rootPath)
+        = 0;
+    virtual bool setRefId(
+        const std::shared_ptr<CdsObject>& cdsObj,
+        const std::shared_ptr<CdsObject>& origObject,
+        int pcdId)
+        = 0;
+    /// @brief get script belonging to duktape context
     static Script* getContextScript(duk_context* ctx);
 
+    /// @brief the database target
     std::shared_ptr<Database> getDatabase() const { return database; }
+    /// @brief the content manager
     std::shared_ptr<Content> getContent() const { return content; }
+    /// @brief name of global js variable containing processed object
     std::string getOrigName() const { return objectName; }
+    /// @brief CdsObject currently processed by script
     std::shared_ptr<CdsObject> getProcessedObject() const { return processed; }
 
 protected:
-    Script(const std::shared_ptr<Content>& content, const std::string& parent,
-        const std::string& name, std::string objName, bool needResult, std::shared_ptr<StringConverter> sc);
+    Script(
+        const std::shared_ptr<Content>& content,
+        const std::string& parent,
+        const std::string& name,
+        std::string objName,
+        bool needResult,
+        std::shared_ptr<StringConverter> sc);
 
-    std::vector<int> execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
-    std::vector<int> call(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsContainer>& cont, const std::string& functionName, const fs::path& rootPath, const std::string& containerType);
-    void cleanup();
-    int gc_counter {};
-    void setMetaData(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsItem>& item, const std::string& sym, const std::string& val) const;
+    /// @brief call js function to generate layout for object
+    std::vector<int> call(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsContainer>& cont,
+        const std::string& functionName,
+        const fs::path& rootPath,
+        const std::string& containerType);
+    void setMetaData(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<CdsItem>& item,
+        const std::string& sym,
+        const std::string& val) const;
 
-    virtual void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) { }
-    virtual void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) { }
+    /// @brief hook for converting script objects to items
+    virtual void handleObject2cdsItem(
+        duk_context* ctx,
+        const std::shared_ptr<CdsObject>& pcd,
+        const std::shared_ptr<CdsItem>& item)
+    {
+    }
+    /// @brief hook for converting script objects to containers
+    virtual void handleObject2cdsContainer(
+        duk_context* ctx,
+        const std::shared_ptr<CdsObject>& pcd,
+        const std::shared_ptr<CdsContainer>& cont)
+    {
+    }
     virtual std::shared_ptr<CdsObject> createObject(const std::shared_ptr<CdsObject>& pcd);
 
+    int gc_counter {};
     /// \brief object that is currently being processed by the script (set in import script)
     std::shared_ptr<CdsObject> processed;
 

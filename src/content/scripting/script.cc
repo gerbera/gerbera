@@ -107,8 +107,13 @@ void Script::setBoolProperty(const std::string& name, bool value)
 
 /* **************** */
 
-Script::Script(const std::shared_ptr<Content>& content, const std::string& parent,
-    const std::string& name, std::string objName, bool needResult, std::shared_ptr<StringConverter> sc)
+Script::Script(
+    const std::shared_ptr<Content>& content,
+    const std::string& parent,
+    const std::string& name,
+    std::string objName,
+    bool needResult,
+    std::shared_ptr<StringConverter> sc)
     : config(content->getContext()->getConfig())
     , database(content->getContext()->getDatabase())
     , converterManager(content->getContext()->getConverterManager())
@@ -313,32 +318,16 @@ void Script::init()
 
 void Script::loadContent()
 {
-    std::string commonScrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_COMMON_SCRIPT);
     std::string commonFdrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER);
 
-    if (commonScrPath.empty() && commonFdrPath.empty()) {
+    if (commonFdrPath.empty()) {
         log_warning("Common script disabled in configuration");
-    } else if (commonScrPath.empty()) {
-        loadFolder(commonFdrPath);
     } else {
-        try {
-            _load(commonScrPath);
-            _execute();
-        } catch (const std::runtime_error& e) {
-            log_error("Unable to load {}: {}", commonScrPath, e.what());
-        }
+        loadFolder(commonFdrPath);
     }
 
-    std::string customScrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_CUSTOM_SCRIPT);
     std::string customFdrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER);
-    if (!customScrPath.empty()) {
-        try {
-            _load(customScrPath);
-            _execute();
-        } catch (const std::runtime_error& e) {
-            log_error("Unable to load {}: {}", customScrPath, e.what());
-        }
-    } else if (!customFdrPath.empty()) {
+    if (!customFdrPath.empty()) {
         loadFolder(customFdrPath);
     }
 }
@@ -361,7 +350,10 @@ Script* Script::getContextScript(duk_context* ctx)
     return self;
 }
 
-void Script::defineFunction(const std::string& name, duk_c_function function, std::uint32_t numParams)
+void Script::defineFunction(
+    const std::string& name,
+    duk_c_function function,
+    std::uint32_t numParams)
 {
     duk_push_c_function(ctx, function, numParams);
     duk_put_global_string(ctx, name.c_str());
@@ -397,16 +389,6 @@ void Script::_load(const fs::path& scriptPath)
         log_error("Failed to load script {}: {}", scriptPath.c_str(), duk_safe_to_stacktrace(ctx, -1));
         throw_std_runtime_error("Scripting: failed to compile {}", scriptPath.c_str());
     }
-}
-
-void Script::load(const fs::path& scriptPath)
-{
-    ScriptingRuntime::AutoLock lock(runtime->getMutex());
-    duk_push_thread_stash(ctx, ctx);
-    log_debug("Loading file {}", scriptPath.c_str());
-    _load(scriptPath);
-    duk_put_prop_string(ctx, -2, "script");
-    duk_pop(ctx);
 }
 
 void Script::_execute()
@@ -446,77 +428,8 @@ void Script::loadFolder(const fs::path& scriptFolder)
     }
 }
 
-#define GRB_CONTAINERTYPE_AUDIO "grb_container_type_audio"
-#define GRB_CONTAINERTYPE_IMAGE "grb_container_type_image"
-#define GRB_CONTAINERTYPE_VIDEO "grb_container_type_video"
-#define OBJECT_SCRIPT_PATH "object_script_path"
-#define OBJECT_AUTOSCAN_ID "object_autoscan_id"
-#define OBJECT_REF_LIST "object_ref_list"
-#define CONT_NAME "cont"
-
-void Script::cleanup()
-{
-    duk_push_global_object(ctx);
-    duk_del_prop_string(ctx, -1, objectName.c_str());
-    duk_del_prop_string(ctx, -1, CONT_NAME);
-    duk_del_prop_string(ctx, -1, OBJECT_SCRIPT_PATH);
-    duk_del_prop_string(ctx, -1, OBJECT_AUTOSCAN_ID);
-    duk_del_prop_string(ctx, -1, OBJECT_REF_LIST);
-    duk_del_prop_string(ctx, -1, GRB_CONTAINERTYPE_AUDIO);
-    duk_del_prop_string(ctx, -1, GRB_CONTAINERTYPE_VIDEO);
-    duk_del_prop_string(ctx, -1, GRB_CONTAINERTYPE_IMAGE);
-}
-
-std::vector<int> Script::execute(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath)
-{
-    cdsObject2dukObject(obj);
-    duk_put_global_string(ctx, objectName.c_str());
-
-    auto par = database->loadObject(obj->getParentID());
-    cdsObject2dukObject(par);
-    duk_put_global_string(ctx, CONT_NAME);
-
-    duk_push_string(ctx, rootPath.c_str());
-    duk_put_global_string(ctx, OBJECT_SCRIPT_PATH);
-
-    duk_push_array(ctx);
-    duk_put_global_string(ctx, OBJECT_REF_LIST);
-
-    auto autoScan = content->getAutoscanDirectory(rootPath);
-    if (autoScan && !rootPath.empty()) {
-        duk_push_sprintf(ctx, "%d", autoScan->getScanID());
-        duk_put_global_string(ctx, OBJECT_AUTOSCAN_ID);
-
-        auto containerMap = autoScan->getContainerTypes();
-        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio)).c_str());
-        duk_put_global_string(ctx, GRB_CONTAINERTYPE_AUDIO);
-        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanMediaMode::Image, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image)).c_str());
-        duk_put_global_string(ctx, GRB_CONTAINERTYPE_IMAGE);
-        duk_push_sprintf(ctx, "%s", getValueOrDefault(containerMap, AutoscanMediaMode::Video, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video)).c_str());
-        duk_put_global_string(ctx, GRB_CONTAINERTYPE_VIDEO);
-
-    } else {
-        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio).c_str());
-        duk_put_global_string(ctx, GRB_CONTAINERTYPE_AUDIO);
-        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image).c_str());
-        duk_put_global_string(ctx, GRB_CONTAINERTYPE_IMAGE);
-        duk_push_sprintf(ctx, "%s", AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video).c_str());
-        duk_put_global_string(ctx, GRB_CONTAINERTYPE_VIDEO);
-    }
-
-    ScriptingRuntime::AutoLock lock(runtime->getMutex());
-    duk_push_thread_stash(ctx, ctx);
-    duk_get_prop_string(ctx, -1, "script");
-    duk_remove(ctx, -2);
-
-    _execute();
-    std::vector<int> result = ScriptGlobalProperty(ctx, OBJECT_REF_LIST).getIntArrayValue();
-    cleanup();
-    duk_pop(ctx);
-    return result;
-}
-
-std::vector<int> Script::call(const std::shared_ptr<CdsObject>& obj,
+std::vector<int> Script::call(
+    const std::shared_ptr<CdsObject>& obj,
     const std::shared_ptr<CdsContainer>& cont,
     const std::string& functionName,
     const fs::path& rootPath,
@@ -527,8 +440,7 @@ std::vector<int> Script::call(const std::shared_ptr<CdsObject>& obj,
     log_debug("wrote global object {} as {}", obj != nullptr, objectName);
     duk_put_global_string(ctx, objectName.c_str());
 
-    // functionName(object, rootPath, autoScanId, containerType)
-
+    // functionName(object, container, rootPath, autoScanId, containerType)
     // Push function onto stack
     if (!duk_get_global_string(ctx, functionName.c_str()) || !duk_is_function(ctx, -1)) {
         log_error("javascript function not found: {}()", functionName);
