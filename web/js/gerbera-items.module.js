@@ -146,12 +146,19 @@ export class SearchItemView extends ItemView {
   searchGerberaItems() {
     this.searchCriteria = $('#searchQuery').val();
     this.sortCriteria = $('#searchSort').val();
+    GerberaApp.startLoading();
     GerberaApp.setSearch(this.searchCriteria, this.sortCriteria);
     $('#datagrid').show();
 
     this.retrieveGerberaItems()
-      .then((response) => Items.loadItems(response))
-      .catch((err) => GerberaApp.error(err));
+      .then((response) => {
+        Items.loadItems(response);
+        GerberaApp.stopLoading();
+      })
+      .catch((err) => {
+        GerberaApp.error(err);
+        GerberaApp.stopLoading();
+      });
   }
 }
 
@@ -203,10 +210,18 @@ const viewFactory = function (data) {
 };
 
 const treeItemSelected = function (data) {
-  if (viewFactory(data))
+  if (viewFactory(data)) {
+    GerberaApp.startLoading();
     currentItemView.retrieveGerberaItems()
-      .then((response) => loadItems(response, data.gerbera))
-      .catch((err) => GerberaApp.error(err));
+      .then((response) => {
+        loadItems(response, data.gerbera);
+        GerberaApp.stopLoading();
+      })
+      .catch((err) => {
+        GerberaApp.stopLoading();
+        GerberaApp.error(err);
+      });
+  }
 };
 
 const loadItems = (response, item) => {
@@ -508,12 +523,17 @@ const retrieveItemsForPage = (event) => {
   currentItemView.parentId = pageItem.parentId;
   currentItemView.count = pageItem.gridMode === 3 ? 1 : pageItem.itemsPerPage;
   currentItemView.start = (pageItem.pageNumber * currentItemView.count) - currentItemView.count;
+  GerberaApp.startLoading();
   return currentItemView.retrieveGerberaItems()
     .then((response) => loadItems(response))
     .then(() => {
       setPage(pageItem.pageNumber)
+      GerberaApp.stopLoading();
     })
-    .catch((err) => GerberaApp.error(err))
+    .catch((err) => {
+      GerberaApp.stopLoading();
+      GerberaApp.error(err);
+    })
 };
 
 const saveItem = () => {

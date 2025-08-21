@@ -20,9 +20,9 @@
 
     $Id$
 */
-import {Auth} from "./gerbera-auth.module.js";
-import {GerberaApp} from "./gerbera-app.module.js";
-import {Tree} from "./gerbera-tree.module.js";
+import { Auth } from "./gerbera-auth.module.js";
+import { GerberaApp } from "./gerbera-app.module.js";
+import { Tree } from "./gerbera-tree.module.js";
 
 let POLLING_INTERVAL;
 let UI_TIMEOUT;
@@ -38,9 +38,9 @@ const errorCheck = (event, xhr) => {
   if (response && !response.success) {
     if (response.error) {
       showMessage(response.error.text, undefined, 'danger', 'fa-exclamation-triangle');
-      if(response.error.code === 900) {
+      if (response.error.code === 900) {
         GerberaApp.disable();
-      } else if(response.error.code === 400) {
+      } else if (response.error.code === 400) {
         Auth.handleLogout();
       }
     }
@@ -49,7 +49,7 @@ const errorCheck = (event, xhr) => {
 
 const showMessage = (message, callback, type, icon) => {
   console.log(`${type}: ${message}`);
-  const toast = {message: message, type: type, icon: icon};
+  const toast = { message: message, type: type, icon: icon };
   if (callback) {
     toast.callback = callback;
   }
@@ -58,7 +58,7 @@ const showMessage = (message, callback, type, icon) => {
 
 const showTask = (message, callback, type, icon) => {
   console.log(`${type}: ${message}`);
-  const toast = {message: message, type: type, icon: icon};
+  const toast = { message: message, type: type, icon: icon };
   if (callback) {
     toast.callback = callback;
   }

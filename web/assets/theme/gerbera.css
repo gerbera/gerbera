@@ -973,6 +973,40 @@ body,
   font-weight: normal;
 }
 
+#loading-wrapper {
+  width: 100vw;
+  height: 100vh;
+  position: absolute;
+  background-color: var(--light-bg);
+  background-color: light-dark(var(--light-bg), var(--dark-bg));
+  opacity: 0.75;
+  z-index: 90;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+#loading {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background: transparent;
+  border-top: 4px solid #fff;
+  border-right: 4px solid #fff;
+  border-bottom: 4px solid #777;
+  border-left: 4px solid #777;
+  animation: loading 1.5s infinite linear;
+}
+
+@keyframes loading {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 #homeintro {
   padding-top: 8vh;
   padding-bottom: 4vh;

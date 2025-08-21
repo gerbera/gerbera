@@ -70,6 +70,9 @@ std::string WebRequestHandler::getGroup() const
 
 bool WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 {
+    if (!filename) {
+        return false;
+    }
     this->filename = filename;
     auto&& parameters = URLUtils::getQuery(this->filename);
     auto decodedParams = URLUtils::dictDecode(parameters);
@@ -106,6 +109,16 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(
     const std::shared_ptr<Quirks>& quirks,
     enum UpnpOpenFileMode mode)
 {
+    if (!filename) {
+        Json::Value errorJson;
+        errorJson["text"] = "Filename empty";
+        errorJson["code"] = 800;
+        jsonDoc["success"] = false;
+        jsonDoc["error"] = errorJson;
+
+        log_error("Web error on {}: Filename empty", getPage());
+        return nullptr;
+    }
     this->filename = filename;
     auto&& parameters = URLUtils::getQuery(this->filename);
     auto decodedParams = URLUtils::dictDecode(parameters);
@@ -142,10 +155,10 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(
         error = e.getUserMessage();
         errorCode = 500;
     } catch (const std::runtime_error& e) {
-        error = fmt::format("Error: {}", e.what());
+        error = fmt::format("Error on {}: {}", getPage(), e.what());
         errorCode = 800;
     } catch (const std::exception& e) {
-        error = fmt::format("Exception: {}", e.what());
+        error = fmt::format("Exception on {}: {}", getPage(), e.what());
         errorCode = 800;
     }
 
@@ -159,7 +172,7 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(
         errorJson["code"] = errorCode;
         jsonDoc["error"] = errorJson;
 
-        log_warning("Web Error: {} {}", errorCode, error);
+        log_warning("Web Error on {}: {} {}", getPage(), errorCode, error);
     }
 
     try {
@@ -167,9 +180,9 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(
         builder["indentation"] = "  ";
         output = Json::writeString(builder, jsonDoc);
     } catch (const std::runtime_error& e) {
-        log_error("Web marshalling error: {}", e.what());
+        log_error("Web marshalling on {} error: {}", getPage(), e.what());
     } catch (const std::exception& e) {
-        log_error("Web marshalling exception: {}", e.what());
+        log_error("Web marshalling on {} exception: {}", getPage(), e.what());
     }
 
     log_debug("output-----------------------{}", output);

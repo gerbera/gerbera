@@ -69,7 +69,7 @@ public:
     }
 
 #if LIBMATROSKA_VERSION < 0x020000
-    uint32
+    uint32_t
 #else
     std::size_t
 #endif
