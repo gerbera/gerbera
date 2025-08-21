@@ -56,8 +56,6 @@ protected:
     void process() override;
     /// \brief This method must be overridden by the subclasses that actually process the given request.
     virtual bool processPageAction(Json::Value& element, const std::string& action) = 0;
-    /// \brief get key for page
-    virtual std::string_view getPage() const = 0;
 
     /// \brief Checks if the incoming request is valid.
     ///

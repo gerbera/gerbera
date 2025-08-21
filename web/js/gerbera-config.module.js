@@ -54,13 +54,14 @@ const initialize = () => {
   current_config.values = null;
   current_config.meta = null;
   current_config.choice = GerberaApp.configMode();
-  current_config.userDocs = GerberaApp.serverConfig ? GerberaApp.serverConfig.userDocs : '',
+  current_config.userDocs = GerberaApp.serverConfig ? GerberaApp.serverConfig.userDocs : '';
   $('#configgrid').html('');
   return Promise.resolve();
 };
 
 const menuSelected = () => {
   current_config.choice = GerberaApp.configMode();
+  GerberaApp.startLoading();
   retrieveGerberaConfig()
     .then((response) => {
       if (typeof response === 'string') {
@@ -68,8 +69,12 @@ const menuSelected = () => {
       } else {
         loadConfig(response, 'config');
       }
+      GerberaApp.stopLoading();
     })
-    .catch((err) => GerberaApp.error(err));
+    .catch((err) => {
+      GerberaApp.stopLoading();
+      GerberaApp.error(err);
+    });
   retrieveGerberaValues('config_load')
     .then((response) => {
       loadConfig({ success: response.success, values: response.values.item }, 'values');
@@ -78,8 +83,12 @@ const menuSelected = () => {
       } else {
         loadConfig({ success: response.success, meta: [] }, 'meta');
       }
+      GerberaApp.stopLoading();
     })
-    .catch((err) => GerberaApp.error(err));
+    .catch((err) => {
+      GerberaApp.stopLoading();
+      GerberaApp.error(err);
+    });
 };
 
 const retrieveGerberaConfig = () => {
@@ -104,6 +113,7 @@ const configModeChanged = (mode) => {
   current_config.choice = mode;
   const oldValues = current_config.values;
   const oldMeta = current_config.meta;
+  GerberaApp.startLoading();
   GerberaApp.setCurrentConfig(mode);
   initialize();
   retrieveGerberaConfig()
@@ -115,8 +125,12 @@ const configModeChanged = (mode) => {
       }
       loadConfig({ success: true, values: oldValues }, 'values');
       loadConfig({ success: true, meta: oldMeta }, 'meta');
+      GerberaApp.stopLoading();
     })
-    .catch((err) => GerberaApp.error(err));
+    .catch((err) => {
+      GerberaApp.stopLoading();
+      GerberaApp.error(err);
+    });
 };
 
 const loadConfig = (response, item) => {

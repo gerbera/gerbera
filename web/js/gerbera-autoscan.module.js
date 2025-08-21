@@ -106,7 +106,7 @@ const submitAutoscan = () => {
     }).then((response) => {
       submitComplete(response);
       if (item.scan_mode === 'manual') {
-          runScan({ data: item });
+        runScan({ data: item });
       }
     }).catch((err) => {
       GerberaApp.error(err);

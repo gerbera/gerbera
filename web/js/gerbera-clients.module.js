@@ -38,16 +38,29 @@ const initialize = () => {
 };
 
 const menuSelected = () => {
+  GerberaApp.startLoading();
   retrieveGerberaItems('clients')
-    .then((response) => loadItems(response))
-    .catch((err) => GerberaApp.error(err));
+    .then((response) => {
+      loadItems(response);
+      GerberaApp.stopLoading();
+    })
+    .catch((err) => {
+      GerberaApp.stopLoading();
+      GerberaApp.error(err);
+    });
 };
 
 const deleteClicked = (client) => {
-  console.log(client);
+  GerberaApp.startLoading();
   deleteClient('clients', client)
-    .then((response) => loadItems(response))
-    .catch((err) => GerberaApp.error(err));
+    .then((response) => {
+      loadItems(response);
+      GerberaApp.stopLoading();
+    })
+    .catch((err) => {
+      GerberaApp.stopLoading();
+      GerberaApp.error(err);
+    });
 };
 
 const retrieveGerberaItems = (type) => {

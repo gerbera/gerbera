@@ -175,6 +175,7 @@ export class App {
 
   initialize() {
     $('#server-status').hide();
+    this.startLoading();
 
     this.pageInfo = {
       dbType: 'home',
@@ -233,8 +234,10 @@ export class App {
           $(this.navLinks[this.pageInfo.dbType]).click();
         }
         this.initDone = true;
+        this.stopLoading();
       })
       .catch((error) => {
+        this.stopLoading();
         this.error(error);
       });
   }
@@ -399,6 +402,7 @@ export class App {
         .then((response) => { return this.displayStatus(response); })
         .catch((error) => { this.error(error); });
     } else {
+      this.stopLoading();
       $('#login').show();
       $('#login-form').submit(function (event) {
         Auth.authenticate(event);
@@ -407,6 +411,13 @@ export class App {
       $('#logout').hide();
     }
     return Promise.resolve();
+  }
+
+  startLoading() {
+    $('#loading-wrapper').show();
+  }
+  stopLoading() {
+    $('#loading-wrapper').hide();
   }
 
   error(event) {

@@ -107,9 +107,9 @@ class TreeItem {
     try {
       this.source = "ui";
       if (!this.itemStatus.match(/added/)) {
-        $(this.editor[0].parentElement).removeClass(this.itemStatus.replace(/^.*,/,''));
+        $(this.editor[0].parentElement).removeClass(this.itemStatus.replace(/^.*,/, ''));
         this.itemStatus = 'changed';
-        $(this.editor[0].parentElement).addClass(this.itemStatus.replace(/^.*,/,''));
+        $(this.editor[0].parentElement).addClass(this.itemStatus.replace(/^.*,/, ''));
       }
       this.addResultItem();
     } catch (e) {
@@ -123,10 +123,10 @@ class TreeItem {
 
   resetEntry(event) {
     try {
-      $(this.editor[0].parentElement).removeClass(this.itemStatus.replace(/^.*,/,''));
+      $(this.editor[0].parentElement).removeClass(this.itemStatus.replace(/^.*,/, ''));
       this.itemStatus = 'reset';
       this.resetValue();
-      $(this.editor[0].parentElement).addClass(this.itemStatus.replace(/^.*,/,''));
+      $(this.editor[0].parentElement).addClass(this.itemStatus.replace(/^.*,/, ''));
       this.addResultItem();
     } catch (e) {
       console.error(event, e);
@@ -147,7 +147,7 @@ class TreeItem {
 
     input.attr('title', this._value ? this._value.item : this.xpath);
 
-    itemLine.addClass(this.itemStatus.replace(/^.*,/,''));
+    itemLine.addClass(this.itemStatus.replace(/^.*,/, ''));
 
     if (this.editable) {
       input.off('change').on('change', this.setEntryChanged);
@@ -595,8 +595,8 @@ class ListEntryTreeItem extends ParentTreeItem {
   constructor(parentItem, meta, item, values) {
     super(parentItem, meta, item, values, 'ListEntry');
     if (this.children.length > 0) {
-        this.itemStatus = this.children[0].itemStatus; // pull status up
-        this._id = this.children[0]._id; // pull id up
+      this.itemStatus = this.children[0].itemStatus; // pull status up
+      this._id = this.children[0]._id; // pull id up
     }
     this.removeItemClicked = this.removeItemClicked.bind(this);
     this.resetEntry = this.resetEntry.bind(this);
@@ -636,7 +636,7 @@ class ListEntryTreeItem extends ParentTreeItem {
       icon.appendTo(symbol);
       symbol.appendTo(line);
       this.editor = line;
-      this.editor.removeClass(this.itemStatus.replace(/^.*,/,'')).removeClass('unchanged').removeClass('default');
+      this.editor.removeClass(this.itemStatus.replace(/^.*,/, '')).removeClass('unchanged').removeClass('default');
       if (this.editable) {
         if (this.itemStatus.match(/added/)) {
           icon.removeClass('fa-undo');
@@ -645,7 +645,7 @@ class ListEntryTreeItem extends ParentTreeItem {
           icon.removeClass('fa-ban');
           icon.addClass('fa-undo');
         }
-        this.editor.addClass(this.itemStatus.replace(/^.*,/,''));
+        this.editor.addClass(this.itemStatus.replace(/^.*,/, ''));
         symbol.off('click').on('click', this.removeItemClicked);
       } else {
         icon.removeClass('fa-ban');
@@ -656,7 +656,7 @@ class ListEntryTreeItem extends ParentTreeItem {
       itemList.addClass('fa-ul');
       itemList.attr('id', itemId);
       line.append(itemList);
-      itemList.addClass(this.itemStatus.replace(/^.*,/,''));
+      itemList.addClass(this.itemStatus.replace(/^.*,/, ''));
       if (level === -1) {
         line.insertBefore(list[0].lastChild);
       } else {
@@ -669,7 +669,7 @@ class ListEntryTreeItem extends ParentTreeItem {
   removeItemClicked(event) {
     try {
       this.source = "ui";
-      this.editor.removeClass(this.itemStatus.replace(/^.*,/,''));
+      this.editor.removeClass(this.itemStatus.replace(/^.*,/, ''));
       const icon = $(this.editor).find('i')[0];
       if (this.itemStatus.match(/removed/)) {
         this.itemStatus = 'reset';
@@ -687,7 +687,7 @@ class ListEntryTreeItem extends ParentTreeItem {
       }
 
       this.addResultItem(true);
-      this.editor.addClass(this.itemStatus.replace(/^.*,/,''));
+      this.editor.addClass(this.itemStatus.replace(/^.*,/, ''));
     } catch (e) {
       console.error(event, e);
     }
@@ -753,7 +753,7 @@ class AddEntryTreeItem extends ParentTreeItem {
       if (this.item.type === 'SubList') {
         var checkParent = this.parentItem;
         while (checkParent.item.type !== 'List' && checkParent !== checkParent.parentItem) {
-            checkParent = checkParent.parentItem;
+          checkParent = checkParent.parentItem;
         }
         treeItem._id = treeItem._id === '-1' ? checkParent.id : treeItem._id;
         treeItem.itemStatus = 'changed,added';
@@ -842,16 +842,16 @@ $.widget('grb.config', {
     this.result = {};
     this.configModeChanged = this.options.configModeChanged;
 
-    const dbEntries = this.options.values.filter ((v) => v.source === 'database');
+    const dbEntries = this.options.values.filter((v) => v.source === 'database');
     const dbEntryCount = dbEntries.length;
     dbEntries.forEach((e) => {
-        this.options.addDatabaseItem({
-          item: e.item,
-          id: e.id,
-          value: e.value,
-          origValue: e.value,
-          status: e.item.split('[').length > 2 ? 'changed,killed' : 'killed'
-        });
+      this.options.addDatabaseItem({
+        item: e.item,
+        id: e.id,
+        value: e.value,
+        origValue: e.value,
+        status: e.item.split('[').length > 2 ? 'changed,killed' : 'killed'
+      });
     });
     const cBox = $('<div></div>');
     cBox.attr('style', 'display: block; margin-top: -25px; position: absolute; right: 0px;');
