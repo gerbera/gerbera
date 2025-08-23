@@ -123,6 +123,8 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     auto upnpClass = parent->getClass();
     if (sortCriteria.empty() && (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)))
         flag |= BROWSE_TRACK_SORT;
+    else if (quirks->hasFlag(QUIRK_FLAG_FORCE_SORT_CRITERIA_TITLE))
+        sortCriteria = fmt::format("+{}", MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE));
     if (filter.empty())
         filter = "*";
     if (config->getBoolOption(ConfigVal::SERVER_HIDE_PC_DIRECTORY))
@@ -231,7 +233,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
     if (quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES))
         didlLiteRoot.append_attribute("xmlns:pv") = "http://www.pv.com/pvns/";
-    if (sortCriteria.empty()) {
+    if (sortCriteria.empty() || quirks->hasFlag(QUIRK_FLAG_FORCE_SORT_CRITERIA_TITLE)) {
         sortCriteria = fmt::format("+{}", MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE));
     }
     if (filter.empty())
