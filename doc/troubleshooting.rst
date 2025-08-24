@@ -62,7 +62,7 @@ the correct IP address or the network interface.
     --ip or -i
 
 The server will bind to the given IP address, currently gerbera cannot bind to multiple interfaces so binding to ``0.0.0.0``
-is not be possible.
+is not be possible. (see also :confval:`ip`)
 
 Network Interface
 -----------------
@@ -71,7 +71,7 @@ Network Interface
 
     --interface or -e
 
-Interface to bind to, for example eth0, this can be specified instead of the IP address.
+Interface to bind to, for example eth0, this can be specified instead of the IP address. (see also :confval:`interface`)
 
 .. _troubleshoot_port:
 
@@ -87,7 +87,7 @@ If multiple instances of Gerbera or other UPnP media servers are running at the 
     --port or -p
 
 Specify the server port that will be used for the web user interface, for serving media and for UPnP requests.
-The minimum allowed value is ``49152``. This can also be specified in the config file.
+The minimum allowed value is ``49152``. This can also be specified in the config file with :confval:`port`.
 If this option is omitted a default port will be chosen, but in
 this case it is possible that the port will change upon server restart.
 
@@ -109,7 +109,7 @@ Debugging
 ~~~~~~~~~
 
 If you experience unexpected behaviour, you can run gerbera with ``--debug`` for
-a full log output or ``--debug-mode`` for specific parts of gerbera.
+a full log output or ``--debug-mode`` for specific parts of gerbera (see also :confval:`debug-mode`).
 
 Logging
 --------

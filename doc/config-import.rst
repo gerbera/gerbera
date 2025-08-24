@@ -5,749 +5,989 @@ Configure Import
 
 The import settings define various options on how to aggregate the content.
 
-.. code-block:: xml
-   :caption: Overall structure of import section
+.. admonition:: `Overall structure of import section (collapsible)`
+   :collapsible: closed
 
-    <import>
-      <filesystem-charset/>
-      <metadata-charset/>
-      <scripting>
-        <script-folder>
-          <common/>
-          <custom/>
-        </script-folder>
-        <import-function/>
-        <virtual-layout>
-          <import-script/>
-          <script-options>
-            <script-option/>
-          </script-options>
-          <genre-map>
-            </genre>
-          </genre-map>
-          <strctured-layout/>
-          <boxlayout>
-            <box/>
-            <chain>
-              <link/>
-            </chain>
-          </boxlayout>
-        </virtual-layout>
-      </scripting>
-      <magic-file/>
-      <autoscan>
-        <directory/>
-      </autoscan>
-      <system-directories>
-        <add-path/>
-      </system-directories>
-      <visible-directories>
-        <add-path/>
-      </visible-directories>
-      <layout>
-        <path/>
-      </layout>
-      <resources>
-        <order/>
-        <fanart/>
-        <subtitle/>
-        <metafile/>
-        <resource/>
-        <container/>
-      </resources>
-      <mappings>
-        <ignore-extensions/>
-        <extension-mimetype/>
-        <mimetype-contenttype/>
-        <mimetype-upnpclass/>
-        <mimetype-dlnatransfermode/>
-        <contenttype-dlnaprofile/>
-      </mappings>
-      <library-options>
-        <libexif>
-          <auxdata>
-            <add-data/>
-          </auxdata>
-        </libexif>
-        <id3>
-          <auxdata>
-            <add-data/>
-          </auxdata>
-          <metadata>
-            <add-data/>
-          </metadata>
-        </id3>
-        <ffmpeg>
-          <auxdata>
-            <add-data/>
-          </auxdata>
-          <metadata>
-            <add-data/>
-          </metadata>
-        </ffmpeg>
-        <exiv2>
-          <auxdata>
-            <add-data/>
-          </auxdata>
-          <metadata>
-            <add-data/>
-          </metadata>
-        </exiv2>
-        <mkv/>
-        <wavpack/>
-      </library-options>
-      <online-content>
-        ... see respective page
-      </online-content>
-    </import>
+   .. code-block:: xml
+
+      <import>
+        <filesystem-charset/>
+        <metadata-charset/>
+        <scripting>
+          <script-folder>
+            <common/>
+            <custom/>
+          </script-folder>
+          <import-function/>
+          <virtual-layout>
+            <import-script/>
+            <script-options>
+              <script-option/>
+            </script-options>
+            <genre-map>
+              </genre>
+            </genre-map>
+            <strctured-layout/>
+            <boxlayout>
+              <box/>
+              <chain>
+                <link/>
+              </chain>
+            </boxlayout>
+          </virtual-layout>
+        </scripting>
+        <magic-file/>
+        <autoscan>
+          <directory/>
+        </autoscan>
+        <system-directories>
+          <add-path/>
+        </system-directories>
+        <visible-directories>
+          <add-path/>
+        </visible-directories>
+        <layout>
+          <path/>
+        </layout>
+        <resources>
+          <order/>
+          <fanart/>
+          <subtitle/>
+          <metafile/>
+          <resource/>
+          <container/>
+        </resources>
+        <mappings>
+          <ignore-extensions/>
+          <extension-mimetype/>
+          <mimetype-contenttype/>
+          <mimetype-upnpclass/>
+          <mimetype-dlnatransfermode/>
+          <contenttype-dlnaprofile/>
+        </mappings>
+        <library-options>
+          <libexif>
+            <auxdata>
+              <add-data/>
+            </auxdata>
+          </libexif>
+          <id3>
+            <auxdata>
+              <add-data/>
+            </auxdata>
+            <metadata>
+              <add-data/>
+            </metadata>
+          </id3>
+          <ffmpeg>
+            <auxdata>
+              <add-data/>
+            </auxdata>
+            <metadata>
+              <add-data/>
+            </metadata>
+          </ffmpeg>
+          <exiv2>
+            <auxdata>
+              <add-data/>
+            </auxdata>
+            <metadata>
+              <add-data/>
+            </metadata>
+          </exiv2>
+          <mkv/>
+          <wavpack/>
+        </library-options>
+        <online-content>
+          ... see respective page
+        </online-content>
+      </import>
 
 
-``import``
-~~~~~~~~~~
+Import
+~~~~~~
 
 .. Note::
 
-    Whenever config entries in this section are changed, it is recommended to clear the database and restart a full import again. Otherwise the virtual layout can be broken or in some
+    Whenever config entries in this section are changed, it is recommended to clear the database
+    and restart a full import again. Otherwise the virtual layout can be broken or in some
     mixed state.
 
-.. code:: xml
+.. confval:: import
+   :type: :confval:`Section`
+   :required: true
 
-    <import hidden-files="no" follow-symlinks="no">
+   .. code:: xml
 
-* Optional
+       <import hidden-files="no" follow-symlinks="no">
 
 This tag defines the import section.
 
-**Attributes:**
+Import Attributes
+-----------------
 
-    .. code:: xml
+.. confval:: import hidden-files
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``no``
 
-        hidden-files="yes|no"
+   .. code:: xml
 
-    * Optional
+      hidden-files="yes"
 
-    * Default: **no**
+This attribute defines if files starting with a dot will be imported into the database (``yes``). Autoscan can
+override this attribute on a per directory basis. Hidden directories can also be marked with the ``nomedia-file``.
 
-    This attribute defines if files starting with a dot will be imported into the database (``yes``). Autoscan can
-    override this attribute on a per directory basis. Hidden directories can also be marked with the ``nomedia-file``.
+.. confval:: import follow-symlinks
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``yes``
 
-    .. code:: xml
+   .. code:: xml
 
-        follow-symlinks="yes|no"
+       follow-symlinks="no"
 
-    * Optional
+This attribute defines if symbolic links should be treated as regular items and imported into the database (``yes``).
+This can cause duplicate entries if the link target is also scanned.
 
-    * Default: **yes**
+.. confval:: default-date
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``yes``
 
-    This attribute defines if symbolic links should be treated as regular items and imported into the database (``yes``). This can cause duplicate entries if the link target is also scanned.
+   .. code:: xml
 
-    .. code:: xml
+       default-date="no"
 
-        default-date="yes|no"
+This attribute defines that each imported item will get a default media date set based on the modification
+time in order to ensure that sorting by "dc:date" works on upnp requests.
 
-    * Optional
+.. confval:: nomedia-file
+   :type: :confval:`String`
+   :required: false
+   :default: ``.nomedia``
 
-    * Default: **yes**
+   .. code:: xml
 
-    This attribute defines that each imported item will get a default media date set based on the modification
-    time in order to ensure that sorting by "dc:date" works on upnp requests.
+       nomedia-file=".skip"
 
-    .. code:: xml
+This attribute defines that a directory containing a file with this name is not imported into gerbera database.
+Only supported in "grb" import mode.
 
-        nomedia-file=".skip"
+.. confval:: readable-names
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``yes``
 
-    * Optional
+   .. code:: xml
 
-    * Default: **.nomedia**
+       readable-names="no"
 
-    This attribute defines that a directory containing a file with this name is not imported into gerbera database. Only supported in "grb" import mode.
+This attribute defines that filenames are made readable on import, i.e. underscores are replaced by space and 
+extensions are removed.
+This changes the title of the entry if no metadata is available
 
-    .. code:: xml
+.. confval:: case-sensitive-tags
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``yes``
 
-        readable-names="yes|no"
+   .. code:: xml
 
-    * Optional
+       case-sensitive-tags="no"
 
-    * Default: **yes**
+This attribute defines that virtual paths are case sensitive, e.g. artist names like `Ace Of Grace` and `Ace of Grace` are treated as different (``yes``) or identical (``no``).
+This changes the location property of created virtual entries.
 
-    This attribute defines that filenames are made readable on import, i.e. underscores are replaced by space and extensions are removed.
-    This changes the title of the entry if no metadata is available
+.. confval:: import-mode
+   :type: :confval:`Enum` ``grb|mt``
+   :required: false
+   :default: ``mt``
 
-    .. code:: xml
+   .. code:: xml
 
-        case-sensitive-tags="yes|no"
+       import-mode="grb"
 
-    * Optional
+This attribute sets the import process:
 
-    * Default: **yes**
-
-    This attribute defines that virtual paths are case sensitive, e.g. artist names like `Ace Of Grace` and `Ace of Grace` are treated as different (``yes``) or identical (``no``).
-    This changes the location property of created virtual entries.
-
-    .. code:: xml
-
-        import-mode="mt|grb"
-
-    * Optional
-
-    * Default: **mt**
-
-    This attribute sets the import process:
-
-    - **mt**: traditional mode, that handles each file completely
-    - **grb**: modern mode, that first imports all files and then processes the layout of the files
+- ``mt``: traditional mode, that handles each file completely
+- ``grb``: modern mode, that first imports all files and then processes the layout of the files
 
 
-**Child tags:**
+Import Items
+------------
 
-``filesystem-charset``
-~~~~~~~~~~~~~~~~~~~~~~
+Filesystem Charset
+^^^^^^^^^^^^^^^^^^
 
-.. code:: xml
+.. confval:: filesystem-charset
+   :type: :confval:`String`
+   :required: false
+   :default: if ``nl_langinfo()`` function is present, this setting will be auto detected based on your system locale, else set to ``UTF-8``.
 
-    <filesystem-charset>UTF-8</filesystem-charset>
+   .. code:: xml
 
-* Optional
-* Default: **if ``nl\_langinfo()`` function is present, this setting will be auto detected based on your system locale, else set to UTF-8**
+      <filesystem-charset>UTF-8</filesystem-charset>
 
 Defines the charset of the filesystem. For example, if you have file names in Cyrillic KOI8-R encoding, then you
 should specify that here. The server uses UTF-8 internally, this import parameter will help you to correctly import your data.
 
 
-``metadata-charset``
-~~~~~~~~~~~~~~~~~~~~
+Metadata Charset
+^^^^^^^^^^^^^^^^
 
-.. code:: xml
+.. confval:: metadata-charset
+   :type: :confval:`String`
+   :required: false
+   :default: if ``nl_langinfo()`` function is present, this setting will be auto detected based on your system locale, else set to ``UTF-8``.
 
-    <metadata-charset>UTF-8</metadata-charset>
+   .. code:: xml
 
-* Optional
-* Default: **if ``nl\_langinfo()`` function is present, this setting will be auto detected based on your system locale, else set to UTF-8**
+      <metadata-charset>UTF-8</metadata-charset>
 
-Same as above, but defines the charset of the metadata (i.e. id3 tags, Exif information, etc.)
+Same as above, but defines the charset of the metadata (i.e. id3 tags, Exif information, etc.). This can be overwritten by
+the character set selection of the metadata library.
+
+Magic File
+^^^^^^^^^^
+
+.. confval:: magic-file
+   :type: :confval:`String`
+   :required: false
+   :default: `System default`
+
+   .. code:: xml
+
+      <magic-file>/path/to/my/magic-file</magic-file>
+
+Specifies an alternative file for filemagic, containing mime type information.
 
 
-``scripting``
-~~~~~~~~~~~~~
+Scripting
+~~~~~~~~~
 
-.. code:: xml
+.. confval:: scripting
+   :type: :confval:`Section`
+   :required: false
 
-    <scripting script-charset="UTF-8" scan-mode="inotify">
+   .. code:: xml
 
-* Optional
+      <scripting script-charset="UTF-8" scan-mode="inotify">
 
 Defines the scripting section.
 
-    .. code:: xml
+Scripting Attributes
+--------------------
 
-        script-charset=...
+Character Set
+^^^^^^^^^^^^^
 
-    * Optional
-    * Default: **UTF-8**
+.. confval:: script-charset
+   :type: :confval:`String`
+   :required: false
+   :default: ``UTF-8``
 
-    Change character set for scripts.
+   .. code:: xml
 
-    .. code:: xml
+      script-charset="Latin1"
 
-         scan-mode="inotify"
+Change character set for scripts.
 
-    * Optional
-    * Default: **manual**
+Scan Mode for Script Folders
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-    Set mode to rescan script-folders.
+.. confval:: scripting scan-mode
+   :type: :confval:`Enum` (``manual|inotify|timed``)
+   :required: false
+   :default: ``manual``
 
-    +---------+-------------------------------------------------------------+
-    | Mode    | Meaning                                                     |
-    +---------+-------------------------------------------------------------+
-    | manual  | folders are only rescanned on startup                       |
-    +---------+-------------------------------------------------------------+
-    | inotify | changes are detected automatically and scripts are reloaded |
-    +---------+-------------------------------------------------------------+
-    | timed   | folder is rescanned after ``scan-interval``                 |
-    +---------+-------------------------------------------------------------+
+   .. code:: xml
 
-    .. code:: xml
+      scan-mode="inotify"
 
-         scan-interval="24:00"
+Set mode to rescan script-folders.
 
-    * Optional
-    * Default: **48:00**
++---------+---------------------------------------------------------------+
+| Mode    | Meaning                                                       |
++---------+---------------------------------------------------------------+
+| manual  | folders are only rescanned on startup                         |
++---------+---------------------------------------------------------------+
+| inotify | | changes are detected automatically and scripts are reloaded |
+|         | | if gerbera is compiled with inotify support                 |
++---------+---------------------------------------------------------------+
+| timed   | folder is rescanned after :confval:`scripting scan-interval`  |
++---------+---------------------------------------------------------------+
 
-    Set interval in minutes to rescan script-folders.
+Timed Scan Interval
+^^^^^^^^^^^^^^^^^^^
 
+.. confval:: scripting scan-interval
+   :type: :confval:`Time`
+   :required: false
+   :default: ``48:00``
+
+   .. code:: xml
+
+      scan-interval="24:00"
+
+Set interval in minutes to rescan script-folders if :confval:`scripting scan-mode` is set to ``timed``.
+
+Scripting Items
+---------------
 
 Below are the available scripting options:
 
-``script-folder``
------------------
+Script Folders
+^^^^^^^^^^^^^^
 
-    .. code:: xml
+.. confval:: script-folder
+   :type: :confval:`Section`
+   :required: true
+.. versionadded:: 2.0
+..
 
-        <script-folder>
-            <common>/usr/local/share/gerbera/js</common>
-            <custom>/home/dev/Source/gerbera/scripts/js</custom>
-        </script-folder>
+   .. code:: xml
 
-    Defines the locations of the script folders. If set, first all Javascript files from ``common`` are loaded and then all Javascript files from ``custom``.
-    If a function is defined in a common and a custom file the custom defintion overwrites the common defintion. No function should be duplicate in
-    the same folder. Setting ``script-folder`` is the replacement for setting the
-    various script files with the former setting ``common-script``.
+      <script-folder>
+          <common>/usr/local/share/gerbera/js</common>
+          <custom>/home/dev/Source/gerbera/scripts/js</custom>
+      </script-folder>
+
+
+Defines the locations of the script folders. If set, first all Javascript files from ``common`` are loaded and
+then all Javascript files from ``custom``. If a function is defined in a common and a custom file the custom defintion
+overwrites the common defintion. No function should be duplicate in the same folder as loading order is not defined.
+
+Setting ``script-folder`` is the replacement for setting the various script files with the former option :confval:`common-script` and :confval:`import-script`.
+
+.. confval:: script-folder common
+   :type: :confval:`Path`
+   :required: true
+   :default: ``${prefix}/share/gerbera/js``, `where ${prefix} is your installation prefix directory.`
+
+   .. code:: xml
+
+      <common>/usr/local/share/gerbera/js</common>
+
+Define the path to preinstalled script files. The files are part of the gerbera installation and should not be changed,
+because they may be overwritten by an update.
+
+.. confval:: script-folder custom
+   :type: :confval:`Path`
+   :required: false
+
+   .. code:: xml
+
+      <custom>/etc/gerbera/js</custom>
+
+Path for custom layout import scripts. Functions defined in js files in this folder are added to the script library.
 
 .. _import-function:
 
-``import-function``
--------------------
+Layout Functions
+^^^^^^^^^^^^^^^^
 
-    .. code:: xml
+.. confval:: import-function
+   :type: :confval:`Section`
+   :required: true
+.. versionadded:: 2.0
+..
 
-        <import-function>
-            <audio-file>importAudioInitial</audio-file>
-            <video-file>importVideo</video-file>
-            <image-file>importImage</image-file>
-            <playlist create-link="yes">importPlaylist</playlist>
-            <meta-file>importMetadata</meta-file>
-        </import-function>
+   .. code:: xml
 
-    Set the entry points for the virtual layout functions and file parsing functions. Selecting the entry point is the replacement for setting
-    the layout type in ``virtual-layout``. The entry points are directly called for Gerbera code and must have a defined synopsis.
-    For further details see :ref:`Scripting <scripting>`.
+       <import-function>
+           <audio-file>importAudioInitial</audio-file>
+           <video-file>importVideo</video-file>
+           <image-file>importImage</image-file>
+           <playlist create-link="yes">importPlaylist</playlist>
+           <meta-file>importMetadata</meta-file>
+       </import-function>
+
+Set the entry points for the virtual layout functions and file parsing functions. Selecting the entry point is the replacement for setting
+the layout type in :confval:`audio-layout`. The entry points are directly called for Gerbera code and must have a defined synopsis.
+For further details see :ref:`Scripting <scripting>`.
+
+.. confval:: audio-file
+   :type: :confval:`String`
+   :required: false
+   :default: ``importAudio``
+
+Name of the javascript function called to create the virtual layout for an audio file.
+In addition to ``importAudio`` also ``importAudioStructured`` and ``importAudioInitial`` are part of gerbera installation.
+
+.. confval:: video-file
+   :type: :confval:`String`
+   :required: false
+   :default: ``importVideo``
+
+Name of the javascript function called to create the virtual layout for a video file.
+
+.. confval:: image-file
+   :type: :confval:`String`
+   :required: false
+   :default: ``importImage``
+
+Name of the javascript function called to create the virtual layout for an image file.
+
+.. confval:: playlist
+   :type: :confval:`String`
+   :required: false
+   :default: ``importPlaylist``
+
+Name of the javascript function called to parse a playlist file.
+
+   .. confval:: playlist create-link
+          :type: :confval:`Boolean`
+          :required: false
+          :default: ``yes``
+   ..
+
+      .. code:: xml
+
+         create-link="no"
+
+    Links the playlist to the virtual container which contains the expanded playlist items. This means, that
+    if the actual playlist file is removed from the database, the virtual container corresponding to the playlist will also be removed.
+
+.. confval:: meta-file
+   :type: :confval:`String`
+   :required: false
+   :default: ``importMetadata``
+
+Name of the javascript function invoked during the first import phase to gather metadata from additional files.
+Currently support for ``nfo`` files is implemented (https://kodi.wiki/view/NFO_files/Templates).
+
+The search pattern to identify metadata files is set in :confval:`resources` section.
 
 .. _virtual-layout:
 
-``virtual-layout``
-~~~~~~~~~~~~~~~~~~
+Virtual Layout
+^^^^^^^^^^^^^^
 
-    .. code:: xml
+.. confval:: virtual-layout
+   :type: :confval:`Section`
+   :required: true
 
-        <virtual-layout type="builtin" audio-layout="Default">
+   .. code:: xml
 
-    * Optional
+      <virtual-layout type="builtin" audio-layout="Default">
 
-    Defines options for the virtual container layout; the so called ”virtual container layout” is the way how the
-    server organizes the media according to the extracted metadata. For example, it allows sorting audio files by Album, Artist, Year and so on.
+Defines options for the virtual container layout; the so called ”virtual container layout” is the way how the
+server organizes the media according to the extracted metadata.
+For example, it allows sorting audio files by Album, Artist, Year and so on.
 
-        .. code:: xml
+.. confval:: virtual-layout type
+   :type: :confval:`Enum` (``builtin|js|disabled``)
+   :required: false
+   :default: ``js`` if gerbera was compiled with javascript support, ``builtin`` otherwise.
 
-            type="builtin|js|disabled"
+   .. code:: xml
+   
+       type="js"
 
-        * Optional
-        * Default: **builtin**
+Specifies what will be used to create the virtual layout, possible values are:
 
-        Specifies what will be used to create the virtual layout, possible values are:
+-  ``builtin``: a default layout will be created by the server
+-  ``js``: a user customizable javascript will be used (Gerbera must be compiled with js support)
+-  ``disabled``: only PC-Directory structure will be created, i.e. no virtual layout
 
-        -  **builtin**: a default layout will be created by the server
-        -  **js**: a user customizable javascript will be used (Gerbera must be compiled with js support)
-        -  **disabled**: only PC-Directory structure will be created, i.e. no virtual layout
+Specifies the virtual layout to be created:
 
-        .. code:: xml
+.. confval:: audio-layout
+   :type: :confval:`String`
+   :required: false
+   :default: ``Default``
+.. versionremoved:: 2.6.2 Migrate your configuration to use :ref:`import-function`.
 
-            audio-layout="Default|Structured"
-            video-layout="Default"
-            image-layout="Default"
+-  **Default**: ``addAudio`` is used to create the virtual layout
+-  **Structured**: ``addAudioStructured`` is used to create the virtual layout (only in combination with javascript)
 
-        * Optional
-        * Default: **Default**
-        * Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
+.. confval:: video-layout
+   :type: :confval:`String`
+   :required: false
+   :default: ``Default``
+.. versionremoved:: 2.6.2 Migrate your configuration to use :ref:`import-function`.
 
-        Specifies the virtual layout to be created:
+.. confval:: image-layout
+   :type: :confval:`String`
+   :required: false
+   :default: ``Default``
+.. versionremoved:: 2.6.2 Migrate your configuration to use :ref:`import-function`.
 
-        -  **Default**: ``addAudio`` is used to create the virtual layout
-        -  **Structured**: ``addAudioStructured`` is used to create the virtual layout (only in combination with javascript)
+The virtual layout can be adjusted using an import script which is defined as follows:
 
-        The virtual layout can be adjusted using an import script which is defined as follows:
+   .. code:: xml
 
+      audio-layout="Default|Structured"
+      video-layout="Default"
+      image-layout="Default"
 
-``import-script``
------------------
+Layout Scripts (deprecated)
+^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-        .. code:: xml
+.. confval:: common-script
+   :type: :confval:`Path`
+   :required: false
+   :default: ``${prefix}/share/gerbera/js/common.js``, `where ${prefix} is your installation prefix directory.`
+.. versionremoved:: 2.6.2 Migrate your configuration to use :ref:`import-function`.
+.. versionchanged:: 2.0 Was required until 2.0, if virtual layout type is "js".
+..
 
-            <import-script>/path/to/my/import-script.js</import-script>
+   .. code:: xml
 
-        * Required:  **if virtual layout type is ”js\ ”**
-        * Default: ``${prefix}/share/gerbera/js/import.js``, **where ${prefix} is your installation prefix directory.**
-        * Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
-
-        Points to the script invoked upon media import. For more details read about :ref:`scripting <scripting>`.
-
-.. _script-options:
-
-``script-options``
-------------------
-
-        .. code:: xml
-
-            <script-options></script-options>
-
-        * Optional
-
-        Contains options to pass into scripts. All values are available in scripts as e.g.
-        ``config['/import/scripting/virtual-layout/script-options/script-option'].test``.
-        For more details see :ref:`scripting <scripting>`
-
-
-        **Child tags:**
-
-``script-option``
-^^^^^^^^^^^^^^^^^
-
-            .. code:: xml
-
-                <script-option name="test" value="42"/>
-
-            * Optional
-
-            Set option ``value`` for option ``name``
-
-                .. code:: xml
-
-                    name="..."
-
-                * Required
-
-                Name of the option.
-
-                .. code:: xml
-
-                    value="..."
-
-                * Required
-
-                Value of the option.
-
-``genre-map``
--------------
-
-        .. code:: xml
-
-            <genre-map></genre-map>
-
-        * Optional
-
-        Define mapping of genres to other text.
-
-
-        **Child tags:**
-
-``genre``
-^^^^^^^^^
-
-            .. code:: xml
-
-                <genre from="Disco" to="Pop"/>
-
-            * Optional
-
-            Replace genre ``from`` by genre ``to``.
-
-                .. code:: xml
-
-                    from="..."
-
-                * Required
-
-                Original genre value. Can be a regular expression.
-
-                .. code:: xml
-
-                    to="..."
-
-                * Required
-
-                Target genre value.
-
-
-``structured-layout``
----------------------
-
-        .. code:: xml
-
-            <structured-layout skip-chars="" div-char="-" />
-
-        * Optional
-
-        Adjust layout of boxes for large collections in structured layout. Set audio-layout to **Structured** and choose values best for your media library.
-
-            .. code:: xml
-
-                div-char="-"
-
-            * Optional
-            * Default: **-**
-
-            Symbols to use around the box text.
-
-            .. code:: xml
-
-                skip-chars="-"
-
-            * Optional
-
-            Special characters in the beginning of a title that are not used for building a box.
-
-
-.. _boxlayout:
-
-``boxlayout``
--------------
-
-        .. code:: xml
-
-            <boxlayout extend="true"></boxlayout>
-
-        * Optional
-        * Extensible Default: Without ``extend="true"`` all missing entries are reported
-
-        **Child tags:**
-
-``box``
-^^^^^^^
-
-            .. code:: xml
-
-                <box key=".." title=".." class=".." size=".." enabled=".." />
-
-            * Optional
-
-            Configure Box ``key``.
-
-            .. code:: xml
-
-                key="Audio/audioRoot"
-
-            * Required
-
-            The key that is used in javascript and builtin layout to refer the the config.
-
-            .. code:: xml
-
-                title="Music"
-
-            * Required
-
-            The title to use for the respective box.
-
-            .. code:: xml
-
-                class="object.container.album.musicAlbum"
-
-            * Optional
-
-            Set the upnp class for the respective box.
-
-            .. code:: xml
-
-                upnp-shortcut="MUSIC_ARTISTS"
-
-            * Optional
-
-            Set the upnp shortcut label for this box. The last container created based on this
-            box will be added to the shortcuts feature field.
-            For more details see UPnP-av-ContentDirectory-v4-Service, page 357.
-
-            .. code:: xml
-
-                sort-key="0123"
-
-            * Optional
-
-            Define special sorting key for the box instead of its title.
-
-            .. code:: xml
-
-                enabled="no"
-
-            * Optional
-            * Default: "yes"
-
-            Disable the respective box. Not all boxes can be disabled.
-
-            .. code:: xml
-
-                size="6"
-
-            * Optional
-            * Default: 1
-
-            Type of the box in structured layout. The following values are supported
-
-            -  **1**: One large box
-            -  **2**: Two boxes with 13 items each
-            -  **3**: Boxes with 8, 9, 9 letters
-            -  **4**: Boxes with 7, 6, 7, 6 letters
-            -  **5**: Boxes with 5, 5, 5, 6, 5 letters
-            -  **6**: Boxes with 4, 5, 4, 4, 5, 4 letters
-            -  **7**: Boxes with 4, 3, 4, 4, 4, 3, 4 letters
-            -  **9**: Boxes with 5, 5, 5, 4, 1, 6 letters; a large box for T
-            -  **13**: Boxes with 2 letters each
-            -  **26**: A speparate box for each letter
-
-``chain``
-^^^^^^^^^
-
-            .. code:: xml
-
-                <chain type="audio|video|image">
-                  <link key=".." />
-                </chain>
-
-            * Optional
-
-            Define a user specific sub tree in virtual layout. Only available for
-            ``js`` layout.
-
-            **Attributes:**
-
-              ::
-
-                  type="audio|video|image"
-
-              * Required
-
-              Set the import script type where the chain is added. Valid values are:
-              ``audio``, ``video`` and ``image``.
-
-            **Child tags:**
-
-              .. code:: xml
-
-                  <link key="Audio/audioTest" title="obj.title" metaData="obj.metaData" />
-                  <link key="Audio/audioRoot"/>
-
-              * Optional
-
-              **Attributes:**
-
-              ::
-
-                  key="Audio/audioRoot"
-
-              * Required
-
-              Either the key of an existing ``<box>`` or the identifier of a new box.
-
-              ::
-
-                  title="obj.title"
-                  class="'object.container.genre.musicGenre'"
-                  upnpShortcut="''"
-                  sortKey="'0000' + obj.title"
-                  res="obj.res"
-                  aux="obj.aux"
-                  refID="obj.id"
-
-              * Optional
-
-              Set the properties of the container to be created. Property stateents
-              are evaluated in javascript with ``obj`` and ``media`` objects as
-              sources. Constant values must be enclosed in ticks ``''``.
-
-              ::
-
-                  metaData="obj.metaData"
-                  metaData="M_ALBUM: obj.metaData[M_ALBUM], M_ARTIST: obj.metaData[M_ALBUMARTIST]"
-
-              * Optional
-
-              Define the metadata of the new container. For metadata there is a second format for the
-              properties: ``M_ALBUM: obj.metaData[M_ALBUM], M_ARTIST: obj.metaData[M_ALBUMARTIST]``.
-              Individual metadata properties can be set and must be separated by commas. The list of
-              available properties can be found in :ref:`scripting <scripting>`.
-
-
-``common-script``
-~~~~~~~~~~~~~~~~~
-
-.. code:: xml
-
-    <common-script>/path/to/my/common-script.js</common-script>
-
-* Optional
-* Default: ``${prefix}/share/gerbera/js/common.js``, **where ${prefix} is your installation prefix directory.**
-* Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
+       <common-script>/path/to/my/common-script.js</common-script>
 
 Points to the so called common script - it is a shared library of js helper functions.
 For more details read :ref:`scripting <scripting>`
 
-``custom-script``
-~~~~~~~~~~~~~~~~~
+.. confval:: custom-script
+   :type: :confval:`Path`
+   :required: false
+   :default: empty
+.. versionremoved:: 2.6.2 Migrate your configuration to use :ref:`import-function`.
+..
 
-.. code:: xml
+   .. code:: xml
 
-    <custom-script>/path/to/my/custom-script.js</custom-script>
-
-* Optional
-* Default: **empty**
-* Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
+      <custom-script>/path/to/my/custom-script.js</custom-script>
 
 Points to the custom script - think of it as a custom library of js helper functions, functions added
 there can be used in your import and in your playlist scripts. Theses functions also overwrite functions from the common script.
 For more details read :ref:`scripting <scripting>`
 
-``playlist-script``
-~~~~~~~~~~~~~~~~~~~
+.. confval:: import-script
+   :type: :confval:`Path`
+   :required: false
+   :default: ``${prefix}/share/gerbera/js/import.js``, `where ${prefix} is your installation prefix directory.`
+.. versionremoved:: 2.6.2 Migrate your configuration to use :ref:`import-function`.
+.. versionchanged:: 2.0 Was required until 2.0, if virtual layout type is "js".
+..
 
-.. code:: xml
+   .. code:: xml
 
-    <playlist-script create-link="yes">/path/to/my/playlist-script.js</playlist-script>
+      <import-script>/path/to/my/import-script.js</import-script>
 
-* Optional
-* Default: ``${prefix}/share/gerbera/js/playlists.js``, **where ${prefix} is your installation prefix directory.**
-* Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
+Points to the script invoked upon media import. For more details read about :ref:`scripting <scripting>`.
+
+.. confval:: playlist-script
+   :type: :confval:`Path`
+   :required: false
+   :default:  ``${prefix}/share/gerbera/js/playlists.js``, `where ${prefix} is your installation prefix directory.`
+.. versionremoved:: 2.6.2 Migrate your configuration to use :ref:`import-function`.
+.. versionchanged:: 2.0 Was required until 2.0, if virtual layout type is "js".
+..
+
+   .. code:: xml
+
+      <playlist-script create-link="yes">/path/to/my/playlist-script.js</playlist-script>
 
 Points to the script that is parsing various playlists, by default parsing of pls, m3u and asx playlists is implemented,
 however the script can be adapted to parse almost any kind of text based playlist. For more details read :ref:`scripting <scripting>`
 
-    .. code:: xml
 
-        create-link="yes|no"
+   .. confval:: playlist-script create-link
+          :type: :confval:`Boolean`
+          :required: false
+          :default: ``yes``
+   ..
 
-    * Optional
-    * Default: **yes**
+      .. code:: xml
+
+         create-link="no"
 
     Links the playlist to the virtual container which contains the expanded playlist items. This means, that
     if the actual playlist file is removed from the database, the virtual container corresponding to the playlist will also be removed.
 
 
-``metafile-script``
-~~~~~~~~~~~~~~~~~~~
+.. confval:: metafile-script
+   :type: :confval:`Path`
+   :required: false
+   :default:  ``${prefix}/share/gerbera/js/metadata.js``, `where ${prefix} is your installation prefix directory.`
+.. versionremoved:: 2.6.2 Migrate your configuration to use :ref:`import-function`.
+.. versionchanged:: 2.0 Was required until 2.0, if virtual layout type is "js".
+..
 
-.. code:: xml
+   .. code:: xml
 
-    <metafile-script>/path/to/my/metadata-script.js</metafile-script>
-
-* Optional
-* Default: ``${prefix}/share/gerbera/js/metadata.js``, **where ${prefix} is your installation prefix directory.**
-* Removed after 2.6.1: Migrate your configuration to use :ref:`import-function`.
+      <metafile-script>/path/to/my/metadata-script.js</metafile-script>
 
 Points to the main metadata parsing script which is invoked during the first import phase to gather metadata from additional files.
-Currently support for nfo files is implemented. (https://kodi.wiki/view/NFO_files/Templates)
+Currently support for nfo files is implemented (https://kodi.wiki/view/NFO_files/Templates).
 
 The search pattern is set in resources section.
 
+Structured Layout
+^^^^^^^^^^^^^^^^^
 
-``magic-file``
-~~~~~~~~~~~~~~
+.. confval:: structured-layout
+   :type: :confval:`Section`
+   :required: false
 
-.. code:: xml
+   .. code:: xml
 
-    <magic-file>/path/to/my/magic-file</magic-file>
+      <structured-layout skip-chars="" div-char="-" />
 
-* Optional
-* Default: **System default**
+Adjust layout of boxes for large collections in structured layout. Set :confval:`audio-file` to ``importAudioStructured`` and choose values best for your media library.
 
-Specifies an alternative file for filemagic, containing mime type information.
+   .. confval:: div-char
+      :type: :confval:`String`
+      :required: false
+      :default: ``-``
+   ..
+
+      .. code:: xml
+
+         div-char="+"
+
+   Symbols to use around the box text.
+
+   .. confval:: skip-chars
+      :type: :confval:`String`
+      :required: false
+      :default: ``-``
+   ..
+
+      .. code:: xml
+
+        skip-chars="+-"
+
+   Special characters in the beginning of a title that are not used for building a box.
+
+.. _script-options:
+
+Script Options
+^^^^^^^^^^^^^^
+
+.. confval:: script-options
+   :type: :confval:`Section`
+   :required: false
+
+   .. code:: xml
+
+       <script-options></script-options>
+
+Contains options to pass into scripts. All values are available in scripts as e.g.
+``config['/import/scripting/virtual-layout/script-options/script-option'].test``.
+For more details see :ref:`scripting <scripting>`
+
+**Child tags:**
+
+.. confval:: script-option
+   :type: :confval:`Section`
+   :required: false
+
+   .. code:: xml
+
+      <script-option name="test" value="42"/>
+
+Set option ``value`` for option ``name``.
+
+   .. confval:: script-option name
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+          name="test"
+
+   Name of the option.
+
+   .. confval:: script-option value
+      :type: :confval:`String`
+      :required: true
+   ..
+
+
+      .. code:: xml
+
+         value="42"
+
+    Value of the option.
+
+Mapping for Genres
+------------------
+
+Media files are tagged with a variety of genres. The goal of genre-mapping is to move serveral of these original genres into the
+same box instead of creating a box for each genre.
+
+.. confval:: genre-map
+   :type: :confval:`Section`
+   :required: false
+
+   .. code:: xml
+
+       <genre-map>
+          <genre from="Special Disco Mix" to="Pop"/>
+       </genre-map>
+
+Define mapping of genres to other text.
+Genres is relevant for :confval:`virtual-layout type` ``builtin`` and ``js`` regardless of its position
+in the configuration file.
+
+Genre
+^^^^^
+
+.. confval:: genre
+   :type: :confval:`Section`
+   :required: false
+
+   .. code:: xml
+
+      <genre from="Special Disco Mix" to="Pop"/>
+
+Replace genre ``from`` by genre ``to``.
+
+   .. confval:: genre from
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+          from="Special Disco Mix"
+
+   Original genre value. Can be a regular expression.
+
+   .. confval:: genre to
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+         to="Pop"
+
+   Target genre value.
+
+.. _boxlayout:
+
+Properties of Layout Boxes
+--------------------------
+
+.. confval:: boxlayout
+   :type: :confval:`Section`
+   :required: false
+   :default: Extensible Default: Without ``extend="true"`` all missing entries are reported
+
+   .. code:: xml
+
+      <boxlayout extend="true">
+         <box key="Audio/myBox" title="New" class="object.container.album.musicAlbum" size="8" enabled="yes" />
+      </boxlayout>
+
+Boxlayout is relevant for :confval:`virtual-layout type` ``builtin`` and ``js`` regardless of its position
+in the configuration file.
+
+Box Properties
+^^^^^^^^^^^^^^
+
+.. confval:: box
+   :type: :confval:`Section`
+   :required: false
+
+   .. code:: xml
+
+       <box key="Audio/myBox" title="New" class="object.container.album.musicAlbum" size="8" enabled="yes" />
+
+Set properties for box.
+
+   .. confval:: box key
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+          key="Audio/audioRoot"
+
+   Configure Box ``key``.
+   The key that is used in javascript and builtin layout to refer the the config.
+
+   .. confval:: box title
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+         title="Music"
+
+   The title to use for the respective box.
+
+   .. confval:: box class
+      :type: :confval:`String`
+      :required: false
+      :default: ``object.container``
+   ..
+
+      .. code:: xml
+
+         class="object.container.album.musicAlbum"
+
+   Set the upnp class for the respective box.
+
+   .. confval:: box upnp-shortcut
+      :type: :confval:`String`
+      :required: false
+      :default: empty
+   ..
+
+      .. code:: xml
+
+         upnp-shortcut="MUSIC_ARTISTS"
+
+   Set the upnp shortcut label for this box. The last container created based on this
+   box will be added to the shortcuts feature field.
+   For more details see UPnP-av-ContentDirectory-v4-Service, page 357.
+
+   .. confval:: box sort-key
+      :type: :confval:`String`
+      :required: false
+      :default: empty
+   ..
+
+      .. code:: xml
+
+         sort-key="0123"
+
+   Define special sorting key for the box instead of its title.
+
+   .. confval:: box enabled
+      :type: :confval:`Boolean`
+      :required: false
+      :default: ``yes``
+   ..
+
+      .. code:: xml
+
+         enabled="no"
+
+   Disable the respective box. Not all boxes can be disabled.
+
+   .. confval:: box size
+      :type: :confval:`Interval`
+      :required: false
+      :default: ``1``
+   ..
+
+      .. code:: xml
+
+         size="6"
+
+   Type of the box in structured layout. The following values are supported
+
+   -  ``1``: One large box
+   -  ``2``: Two boxes with 13 items each
+   -  ``3``: Boxes with 8, 9, 9 letters
+   -  ``4``: Boxes with 7, 6, 7, 6 letters
+   -  ``5``: Boxes with 5, 5, 5, 6, 5 letters
+   -  ``6``: Boxes with 4, 5, 4, 4, 5, 4 letters
+   -  ``7``: Boxes with 4, 3, 4, 4, 4, 3, 4 letters
+   -  ``9``: Boxes with 5, 5, 5, 4, 1, 6 letters; a large box for T
+   -  ``13``: Boxes with 2 letters each
+   -  ``26``: A speparate box for each letter
+
+Layout Sub Trees
+^^^^^^^^^^^^^^^^
+
+.. confval:: chain
+   :type: :confval:`Section`
+   :required: false
+
+   .. code:: xml
+
+      <chain type="audio|video|image">
+        <link key=".." />
+      </chain>
+
+Define a user specific sub tree in virtual layout. Only available for ``js`` layout.
+
+   .. confval:: chain type
+      :type: :confval:`Enum` (``audio|video|image``)
+      :required: true
+   ..
+
+      .. code:: xml
+
+         type="audio|video|image"
+
+      Set the import script type where the chain is added. Valid values are:
+      ``audio``, ``video`` and ``image``.
+
+**Child tags:**
+
+.. confval:: link
+   :type: :confval:`Section`
+   :required: false
+
+   .. code:: xml
+
+       <link key="Audio/audioTest" title="obj.title" metaData="obj.metaData" />
+       <link key="Audio/audioRoot"/>
+
+Define or reference link in chain.
+
+**Attributes:**
+
+   .. confval:: link key
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+         key="Audio/audioRoot"
+
+   Either the key of an existing ``<box>`` or the identifier of a new box.
+
+   .. confval:: link properties
+      :type: :confval:`String`
+      :required: false
+   ..
+
+      .. code:: xml
+
+         title="obj.title"
+         class="'object.container.genre.musicGenre'"
+         upnpShortcut="''"
+         sortKey="'0000' + obj.title"
+         res="obj.res"
+         aux="obj.aux"
+         refID="obj.id"
+
+   Set the properties of the container to be created. Property stateents
+   are evaluated in javascript with ``obj`` and ``media`` objects as
+   sources. Constant values must be enclosed in ticks ``''``.
+
+   .. confval:: link metaData
+      :type: :confval:`String`
+      :required: false
+   ..
+
+      .. code:: xml
+
+          metaData="obj.metaData"
+          metaData="M_ALBUM: obj.metaData[M_ALBUM], M_ARTIST: obj.metaData[M_ALBUMARTIST]"
+
+   Define the metadata of the new container. For metadata there is a second format for the
+   properties: ``M_ALBUM: obj.metaData[M_ALBUM], M_ARTIST: obj.metaData[M_ALBUMARTIST]``.
+   Individual metadata properties can be set and must be separated by commas. The list of
+   available properties can be found in :ref:`scripting <scripting>`.
+
 
 .. _autoscan:
 
-``autoscan``
-~~~~~~~~~~~~
+Autoscan
+~~~~~~~~
 
-.. code:: xml
+.. confval:: autoscan
+   :type: :confval:`Section`
+   :required: false
 
-    <autoscan use-inotify="auto" inotify-attrib="yes">
+   .. code:: xml
 
-* Optional
+      <autoscan use-inotify="auto" inotify-attrib="yes">
 
 Specifies a list of default autoscan directories.
 
@@ -756,336 +996,430 @@ the difference is that autoscan directories that are defined via the config file
 Even if the directory gets removed on disk, the server will try to monitor the specified location and will re add
 the removed directory if it becomes available/gets created again.
 
-    .. code:: xml
+Autoscan Attributes
+-------------------
 
-        use-inotify="yes|no|auto"
+   .. confval:: use-inotify
+      :type: :confval:`Enum` (``yes|no|auto``)
+      :required: false
+      :default: ``auto``
+   ..
 
-    * Optional
-    * Default: **auto**
+      .. code:: xml
 
-    Specifies if the inotify autoscan feature should be enabled. The default value is ``auto``, which means that
-    availability of inotify support on the system will be detected automatically, it will then be used if available.
-    Setting the option to 'no' will disable inotify even if it is available. Allowed values: "yes", "no", "auto"
+         use-inotify="yes"
 
-    .. code:: xml
+   Specifies if the inotify autoscan feature should be enabled. The default value is ``auto``, which means that
+   availability of inotify support on the system will be detected automatically, it will then be used if available.
+   Setting the option to 'no' will disable inotify even if it is available. Allowed values: "yes", "no", "auto"
 
-        inotify-attrib="yes|no"
+   .. confval:: inotify-attrib
+      :type: :confval:`Boolean`
+      :required: false
+      :default: ``no``
+   ..
 
-    * Optional
-    * Default: **no**
+      .. code:: xml
+
+         inotify-attrib="yes|no"
 
     Specifies if the inotify will also monitor for attribute changes like owner change or access given.
 
-    **Child tags:**
+Autoscan Directory
+------------------
 
-``directory``
--------------
+.. confval:: directory
+   :type: :confval:`Section`
+   :required: false
 
-    .. code:: xml
+   .. code:: xml
 
-        <directory location="/media" mode="timed" interval="3600"
-          recursive="no" hidden-files="no"/>
-        <directory location="/audio" mode="inotify"
-          recursive="yes" hidden-files="no"/>
-        <directory location="/video" mode="manual"
-          recursive="yes" hidden-files="no"/>
+      <directory location="/media" mode="timed" interval="3600"
+                 recursive="no" hidden-files="no"/>
+      <directory location="/audio" mode="inotify"
+                 recursive="yes" hidden-files="no"/>
+      <directory location="/video" mode="manual"
+                 recursive="yes" hidden-files="no"/>
 
-    * Optional
+Defines an autoscan directory and it's parameters.
 
-    Defines an autoscan directory and it's parameters.
+Directory Attributes
+^^^^^^^^^^^^^^^^^^^^
 
-    The attributes specify various autoscan options:
+.. confval:: directory location
+   :type: :confval:`Path`
+   :required: true
+..
 
-        .. code:: xml
+   .. code:: xml
 
-            location=...
+      location=...
 
-        * Required
+Absolute path to the directory that shall be monitored.
 
-        Absolute path to the directory that shall be monitored.
+.. confval:: directory mode
+   :type: :confval:`Enum` (``inotify|timed|manual``)
+   :required: true
+..
 
-        .. code:: xml
+   .. code:: xml
 
-            mode="inotify|timed|manual"
+      mode="inotify|timed|manual"
 
-        * Required
+The values have the following meaning:
 
-        Scan mode, currently ``inotify``, ``timed`` and ``manual`` are supported. Timed mode rescans the given directory in specified
-        intervals, inotify mode uses the kernel inotify mechanism to watch for filesystem events. Manual requires user interaction on web ui.
+- ``timed`` mode rescans the given directory in specified intervals
+- ``inotify`` mode uses the kernel inotify mechanism to watch for filesystem events.
+- ``manual`` requires user interaction on web ui.
 
-        .. code:: xml
+.. confval:: directory interval
+   :type: :confval:`Time`
+   :required: true
+..
 
-            interval=...
+   .. code:: xml
 
-        * Required: **for ”timed” mode**
+      interval="1500"
 
-        Scan interval in seconds. The value can be given in a valid time format.
+Scan interval in seconds. The value can be given in a valid time format.
 
-        .. code:: xml
+.. confval:: directory recursive
+   :type: :confval:`Boolean`
+   :required: true
+   :default: ``no``
+..
 
-            recursive="yes|no"
+   .. code:: xml
 
-        * Required
+      recursive="yes"
 
-        Values of ``yes`` or ``no`` are allowed, specifies if autoscan shall monitor the given directory including all sub directories.
+Specifies if autoscan shall monitor the given directory including all sub directories.
 
-        .. code:: xml
+.. confval:: directory dirtypes
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``yes``
+..
 
-            dirtypes="yes|no"
+   .. code:: xml
 
-        * Optional
-        * Default: ``yes``
+      dirtypes="no"
 
-        Values of ``yes`` or ``no`` are allowed, specifies if containers in
-        PC Directory will get container types like albums based on the majority
-        of child items.
+Specifies if containers in PC Directory will get container types like albums based
+on the majority of child items.
 
-        .. code:: xml
+.. confval:: directory hidden-files
+   :type: :confval:`Boolean`
+   :required: false
+   :default: `value specified in` :confval:`import hidden-files`
+..
 
-            hidden-files="yes|no"
+   .. code:: xml
 
-        * Optional
-        * Default: **value specified in <import hidden-files=””/>**
+      hidden-files="no"
 
-        Allowed values: ``yes`` or ``no``, process hidden files, overrides the ``hidden-files`` value in the ``<import/>`` tag.
+Process hidden files, overrides the ``hidden-files`` value in the ``<import/>`` tag.
 
-        .. code:: xml
+.. confval:: directory follow-symlinks
+   :type: :confval:`Boolean`
+   :required: false
+   :default: `value specified in` :confval:`import follow-symlinks`
+..
 
-            follow-symlinks="yes|no"
+   .. code:: xml
 
-        * Optional
-        * Default: **value specified in <import follow-symlinks=””/>**
+      follow-symlinks="no"
 
-        Allowed values: ``yes`` or ``no``, symbolic links should be treated as regular items and imported into the database (``yes``).
-        This can cause duplicate entries if the link target is also scanned
-        overrides the ``follow-symlinks`` value in the ``<import/>`` tag.
+Symbolic links should be treated as regular items and imported into the database (``yes``).
+This can cause duplicate entries if the link target is also scanned
+overrides the ``follow-symlinks`` value in the ``<import/>`` tag.
 
-        .. code:: xml
+.. confval:: directory retry-count
+   :type: :confval:`Integer` (non-negative)
+   :required: false
+   :default: ``0``
+..
 
-            retry-count="3"
+   .. code:: xml
 
-        * Optional
-        * Default: **0**
+      retry-count="3"
 
-        Allowed values: non-negative numbers.
-        This attribute can be used to allow multiple attempts to access files
-        in case of mounted volumes. In some cases inotify events are raised
-        before the directory or file is fully available, causing an access
-        permission error and the import fails.
-        This attribute is only available in config.xml at the moment.
+This attribute can be used to allow multiple attempts to access files
+in case of mounted volumes. In some cases inotify events are raised
+before the directory or file is fully available, causing an access
+permission error and the import fails.
+This attribute is only available in config.xml at the moment.
 
-        .. code:: xml
+.. confval:: force-reread-unknown
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``no``
+..
 
-            force-reread-unknown="yes|no"
+   .. code:: xml
 
-        * Optional
+      force-reread-unknown="yes"
 
-        * Default: **no**
+This attribute forces that files without changes are reread (on startup) if their upnp class is unset or "object.item".
+This can happen if the first scan (e.g. via inotify) did not get all details of the file correctly.
+This is mostly the case if the media folder is exported on the network and files are written via network.
+Be aware that the startup will take longer if there is a large number of non-media files in the folder
 
-        This attribute forces that files without changes are reread (on startup) if their upnp class is unset or "object.item".
-        This can happen if the first scan (e.g. via inotify) did not get all details of the file correctly.
-        This is mostly the case if the media folder is exported on the network and files are written via network.
-        Be aware that the startup will take longer if there is a large number of non-media files in the folder
+.. confval:: media-type
+   :type: :confval:`String`
+   :required: false
+   :default: ``Any``
+..
 
-        .. code:: xml
+   .. code:: xml
+   
+       media-type="Music|AudioBook"
 
-            media-type="Music|AudioBook"
+Only import audio/image/video from directory to virtual layout if upnp class is subclass.
+Values can be concatenated by ``|``. Allowed values are:
 
-        * Optional
-        * Default: **Any**
++------------------+--------------------------------------+
+| Value            | Upnp Class                           |
++==================+======================================+
+| Any              | object.item                          |
++------------------+--------------------------------------+
+| Audio            | object.item.audioItem                |
++------------------+--------------------------------------+
+| Music            | object.item.audioItem.musicTrack     |
++------------------+--------------------------------------+
+| AudioBook        | object.item.audioItem.audioBook      |
++------------------+--------------------------------------+
+| AudioBroadcast   | object.item.audioItem.audioBroadcast |
++------------------+--------------------------------------+
+| Image            | object.item.imageItem                |
++------------------+--------------------------------------+
+| Photo            | object.item.imageItem.photo          |
++------------------+--------------------------------------+
+| Video            | object.item.videoItem                |
++------------------+--------------------------------------+
+| Movie            | object.item.videoItem.movie          |
++------------------+--------------------------------------+
+| MusicVideo       | object.item.videoItem.musicVideoClip |
++------------------+--------------------------------------+
+| TV               | object.item.videoItem.videoBroadcast |
++------------------+--------------------------------------+
 
-        Only import audio/image/video from directory to virtual layout if upnp class is subclass.
-        Values can be concatenated by ``|``. Allowed values are :
+.. confval:: container-type-audio
+   :type: :confval:`String`
+   :required: false
+   :default: ``object.container.album.musicAlbum``
+..
 
-        +------------------+--------------------------------------+
-        | Value            | Upnp Class                           |
-        +==================+======================================+
-        | Any              | object.item                          |
-        +------------------+--------------------------------------+
-        | Audio            | object.item.audioItem                |
-        +------------------+--------------------------------------+
-        | Music            | object.item.audioItem.musicTrack     |
-        +------------------+--------------------------------------+
-        | AudioBook        | object.item.audioItem.audioBook      |
-        +------------------+--------------------------------------+
-        | AudioBroadcast   | object.item.audioItem.audioBroadcast |
-        +------------------+--------------------------------------+
-        | Image            | object.item.imageItem                |
-        +------------------+--------------------------------------+
-        | Photo            | object.item.imageItem.photo          |
-        +------------------+--------------------------------------+
-        | Video            | object.item.videoItem                |
-        +------------------+--------------------------------------+
-        | Movie            | object.item.videoItem.movie          |
-        +------------------+--------------------------------------+
-        | MusicVideo       | object.item.videoItem.musicVideoClip |
-        +------------------+--------------------------------------+
-        | TV               | object.item.videoItem.videoBroadcast |
-        +------------------+--------------------------------------+
+.. confval:: container-type-image
+   :type: :confval:`String`
+   :required: false
+   :default: ``object.container.album.photoAlbum``
+..
 
-        .. code:: xml
+.. confval:: container-type-video
+   :type: :confval:`String`
+   :required: false
+   :default: ``object.container``
+..
 
-            container-type-audio="object.container"
-            container-type-image="object.container"
-            container-type-video="object.container"
+   .. code:: xml
 
-        * Optional
-        * Default: **object.container.album.musicAlbum**/ **object.container.album.photoAlbum**/ **object.container**
+      container-type-audio="object.container"
+      container-type-image="object.container"
+      container-type-video="object.container"
 
-        Set the default container type for virtual containers and for physical containers in grb-mode during import.
-        This is especially useful if the virtual layout simulates the filesystem structure and is not derived from metadata.
-        The first object that is added to the container determines the property (audio/image/video) used.
+Set the default container type for virtual containers and for physical containers in grb-mode during import.
+This is especially useful if the virtual layout simulates the filesystem structure and is not derived from metadata.
+The first object that is added to the container determines the property (audio/image/video) used.
 
 
-``system-directories``
-~~~~~~~~~~~~~~~~~~~~~~
+System Directories
+~~~~~~~~~~~~~~~~~~
 
-.. code:: xml
+.. confval:: system-directories
+   :type: :confval:`Section`
+   :required: false
+   :default: Extensible Default, see :confval:`extend`
 
-    <system-directories>
+   .. code:: xml
 
-* Optional
-* Extensible Default
+      <system-directories>
+         <add-path name="/sys"/>
+      </system-directories>
 
 Specifies a list of system directories hidden in filesystem web ui.
 
-If the element does not exists, the default list of system directories is set to ``/bin, /boot, /dev, /etc, /lib, /lib32, /lib64, /libx32, /proc, /run, /sbin, /sys, /tmp, /usr, /var``
+If the element does not exists, the default list of system directories is set to ``/bin, /boot, /dev, /etc, /lib, /lib32, /lib64, /libx32, /proc, /run, /sbin, /sys, /tmp, /usr, /var``.
 
-    **Child tags:**
+Path
+----
 
-``add-path``
-------------
+.. confval:: system-directories add-path
+   :type: :confval:`Section`
+   :required: false
+..
 
-    .. code:: xml
+   .. code:: xml
 
-        <add-path name="/sys"/>
+      <add-path name="/sys"/>
 
-    * Optional
+Defines a system directory.
 
-    Defines a system directory.
+   .. confval:: system-directories add-path name
+      :type: :confval:`Path`
+      :required: true
+   ..
 
-    The attributes specify various options:
+      .. code:: xml
 
-        .. code:: xml
+         name="/sys"
 
-            name=...
-
-        * Required
-
-        Absolute path to the directory that shall be hidden.
+   Absolute path to the directory that shall be hidden.
 
 
-``visible-directories``
-~~~~~~~~~~~~~~~~~~~~~~~
+Visible Directories
+~~~~~~~~~~~~~~~~~~~
 
-.. code:: xml
+.. confval:: visible-directories
+   :type: :confval:`Section`
+   :required: false
+   :default: Extensible Default, see :confval:`extend`
 
-    <visible-directories>
+   .. code:: xml
 
-* Optional
+      <visible-directories>
+          <add-path name="/home/media"/>
+      </visible-directories>
 
 Specifies a list of system directories visible in filesystem web ui. It can contain any path which is accessible by the gerbera server.
 
-If the element exists it supercedes ``system-directories``, i.e. only visible directories can be selected in web ui.
+If the element exists it supercedes :confval:`system-directories`, i.e., only visible directories can be selected in web ui.
 This is the more forward way of defining content but cannot be defaulted.
 
-    **Child tags:**
+Path
+----
 
-``add-path``
-------------
+.. confval:: visible-directories add-path
+   :type: :confval:`Section`
+   :required: false
+..
 
-    .. code:: xml
+   .. code:: xml
+ 
+       <add-path name="/home/media"/>
 
-        <add-path name="/home/media"/>
+Defines a visible directory.
 
-    * Optional
+The attributes specify various options:
 
-    Defines a visible directory.
+   .. confval:: visible-directories add-path name
+      :type: :confval:`Path`
+      :required: true
+   ..
 
-    The attributes specify various options:
+      .. code:: xml
 
-        .. code:: xml
+         name="/home/media"
 
-            name=...
-
-        * Required
-
-        Absolute path to the directory that shall be visible.
+   Absolute path to the directory that shall be visible.
 
 
-``layout``
-~~~~~~~~~~
+Virtual Layout Details
+~~~~~~~~~~~~~~~~~~~~~~
 
-.. code:: xml
+.. confval:: layout
+   :type: :confval:`Section`
+   :required: false
+..
 
-    <layout>
+   .. code:: xml
 
-* Optional
+      <layout parent-path="yes">
+        <path from="Videos/Action" to="Action-Videos"/>
+      </layout>
 
 Defines various layout options for generated virtual layout.
 
-        .. code:: xml
+   .. confval:: parent-path
+      :type: :confval:`Boolean`
+      :required: true
+      :default: ``no``
+   ..
 
-            parent-path="yes|no"
+      .. code:: xml
 
-        * Optional
-        * Default: **no**
+         parent-path="yes"
 
-        Values of ``yes`` or ``no`` are allowed, specifies if parent path is added to virtual layout. If set to``no`` "/home/.../Videos/Action/a.mkv" with rootpath "/home/.../Videos" becomes "Action" otherwise "Videos/Action". Setting to ``yes`` produces the layout of gerbera before version 1.5.
+   Values of ``yes`` or ``no`` are allowed, specifies if parent path is added to virtual layout.
+   If set to ``no`` "/home/.../Videos/Action/a.mkv" with rootpath "/home/.../Videos" becomes "Action"
+   otherwise "Videos/Action". Setting to ``yes`` produces the layout of gerbera before version 1.5.
 
-    **Child tags:**
+Path
+----
 
-``path``
---------
+.. confval:: layout path
+   :type: :confval:`Section`
+   :required: false
+..
 
-        .. code:: xml
+   .. code:: xml
 
-            <path from="Videos/Action" to="Action-Videos"/>
+      <path from="Videos/Action" to="Action-Videos"/>
 
-        * Optional
+Map a virtual path element. This allows reducing path elements or merging different sources into a common tree.
+Thema replacement is executed after calculation of virtual layout, i.e. after builtin or js layout script.
 
-        Map a virtual path element. This allows reducing path elements or merging different sources into a common tree. Thema replacement is executed after calculation of virtual layout, i.e. after buildin or layout script.
+   .. confval:: path from
+      :type: :confval:`String`
+      :required: true
+   ..
 
-            .. code:: xml
+      .. code:: xml
 
-                from="..."
+         from="..."
 
-            * Required
+   Source path. Can be a regular expression.
 
-            Source path. Can be a regular expression.
+   .. confval:: path to
+      :type: :confval:`String`
+      :required: true
+   ..
 
-            .. code:: xml
+      .. code:: xml
 
-                to="..."
+         to="..."
 
-            * Required
-
-            Target path. / can be used to create sub structure.
+   Target path. ``/`` can be used to create sub structure.
 
 
-``resources``
-~~~~~~~~~~~~~
+Resource Files
+~~~~~~~~~~~~~~
 
-.. code:: xml
+.. confval:: resources
+   :type: :confval:`Section`
+   :required: false
+..
 
-    <resources case-sensitive="yes">
+   .. code:: xml
 
-* Optional
+      <resources case-sensitive="yes">
 
-Defines various resource options for file based resources. Older versions of Gerbera added sereral files automatically. For performance reasons no pattern is added by default anymore.
-You can set up your correct fanart file by yourself, if no image is embedded in your media. If you have subtitle files, add the correct pattern, also.
+Defines various resource options for file based resources. Older versions of Gerbera added sereral files automatically.
+For performance reasons no pattern is added by default anymore. You can set up your correct fanart file by yourself,
+if no image is embedded in your media. If you have subtitle files, add the correct pattern, also.
 
-    .. code:: xml
+   .. confval:: case-sensitive
+      :type: :confval:`Boolean`
+      :required: true
+      :default: ``yes``
+   ..
 
-        case-sensitive="yes|no"
+      .. code:: xml
 
-    * Optional
+         case-sensitive="no"
 
-    * Default: **yes**
-
-    This attribute defines whether search patterns are treated case sensitive or not, i.e. if set to **no** ``cover.png`` matches anything like ``Cover.PNG`` or ``cover.PNG``.
-
-**Child tags:**
+   This attribute defines whether search patterns are treated case sensitive or not, i.e. if set to ``no`` the file name
+   ``cover.png`` matches anything like ``Cover.PNG`` or ``cover.PNG``.
 
 ``order``
 ---------
@@ -1277,8 +1611,8 @@ A sample configuration would be:
 
 .. _import-mappings:
 
-``mappings``
-~~~~~~~~~~~~
+Mappings
+~~~~~~~~
 
 .. code:: xml
 
@@ -1578,8 +1912,8 @@ If you want to make your DLNA device play specific media the following list of p
 
 .. _virtual-directories:
 
-``virtual-directories``
-~~~~~~~~~~~~~~~~~~~~~~~
+Virtual Directories
+~~~~~~~~~~~~~~~~~~~
 
 .. code:: xml
 
@@ -1624,17 +1958,18 @@ The attribute ``class`` can be used to restrict the key to the upnp class.
         <key metadata="M_ARTIST_1" class="object.container.album.musicAlbum"/>
     </virtual-directories>
 
-
 .. _library-options:
 
-``library-options``
-~~~~~~~~~~~~~~~~~~~
+Import Library Options
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. code:: xml
 
     <library-options>
 
-* Optional
+.. confval:: library-options
+   :type: :confval:`Section`
+   :required: false
 
 This section holds options for the various supported import libraries, it is useful in conjunction with virtual
 container scripting, but also allows to tune some other features as well.
@@ -1666,10 +2001,12 @@ etc.
 
         multi-value-separator="..."
 
-    * Optional
-    * Default: **"; "**
+.. confval:: multi-value-separator
+   :type: string
+   :required: false
+   :default: ``"; "``
 
-    This string is used to join multi-valued items (e.g. Composer, Performer) into one string.
+This string is used to join multi-valued items (e.g. Composer, Performer) into one string.
 
     .. code:: xml
 

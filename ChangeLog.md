@@ -2,9 +2,11 @@
 
 ### HEAD
 
+- Docs: Introduce sphinx toolbox
+- Implement new Client Quirk to force SortCriteria 'title'
 - Remove loading complete scripts to create virutal layout
-- WebUI: Show spinner on loading
 - WebUI: Show referenced items in details
+- WebUI: Show spinner on loading
 
 ### v2.6.1
 
@@ -45,8 +47,8 @@
 - Extract metadata from substreams with ffmpeg
 - Fill database on startup
 - Filter resources by mimetype
-- Fix import and xml
 - Fix captionInfoCount handling
+- Fix import and xml
 - Fix inotify for files
 - Fix issue with stale objects in autoscan
 - Fix resources for containers

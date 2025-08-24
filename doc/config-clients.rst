@@ -1,4 +1,4 @@
-.. index:: Client Configuration
+.. index:: Configure Client
 
 Configure Client Quirks
 =======================

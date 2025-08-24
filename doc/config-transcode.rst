@@ -1,4 +1,4 @@
-.. index:: Transcoding Configuration
+.. index:: Configure Transcoding
 
 Configure Transcoding
 =====================
