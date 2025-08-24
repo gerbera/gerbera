@@ -9,7 +9,7 @@ Gerbera provides a command line flag ``--create-config`` to generate a default `
 the configuration file when running Gerbera for the first time.  Gerbera reports the missing configuration upon startup
 similar to the message below
 
-::
+.. code-block:: console
 
   The server configuration file could not be found in ~/.config/gerbera
   Gerbera could not find a default configuration file.
@@ -18,7 +18,7 @@ similar to the message below
 
 * Run command to create configuration
 
-::
+.. code-block:: console
 
   $ gerbera --create-config
 
@@ -36,13 +36,13 @@ You can use ``gerbera --check-config -c <file>`` to verify your settings before 
 
 * Run command to create configuration, storing in the ``/etc/gerbera`` directory.
 
-::
+.. code-block:: console
 
   $ gerbera --create-config | sudo tee /etc/gerbera/config.xml
 
 You can start Gerbera with similar command as below:
 
-::
+.. code-block:: console
 
   $ gerbera -c /etc/gerbera/config.xml
 

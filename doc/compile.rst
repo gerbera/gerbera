@@ -167,6 +167,7 @@ Quick Start Build
   sudo make install
 
 If you want to have the same build as the official release:
+
 .. code-block:: sh
 
   git clone https://github.com/gerbera/gerbera.git
@@ -178,6 +179,7 @@ If you want to have the same build as the official release:
 
 
 Alternatively, the options can be set using a GUI (make sure to press "c" to configure after toggling settings in the GUI):
+
 .. code-block:: sh
 
   git clone https://github.com/gerbera/gerbera.git
@@ -299,7 +301,7 @@ It is strongly recommended to to rebuild spdlog without bundled fmt:
 
 Now it's time to get the source of gerbera and compile it.
 
-::
+.. code-block:: sh
 
   git clone https://github.com/gerbera/gerbera.git
   mkdir build
@@ -450,16 +452,19 @@ Build Docker Container On Ubuntu
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Install required tools in Ubuntu
+
 .. code-block:: sh
 
   sudo apt-get install docker.io git
 
 Simplest way of building:
+
 .. code-block:: sh
 
   sudo docker build https://github.com/gerbera/gerbera.git
 
 After successfull build you should get something like
+
 .. code-block:: sh
 
   Successfully built a13ccc793373
@@ -469,6 +474,7 @@ documentation while replacing "gerbera/gerbera:vX.X.X" with the unique ID report
 
 To change the compile options of Gerbera split up the process.
 Download the project:
+
 .. code-block:: sh
 
   git clone https://github.com/gerbera/gerbera.git
@@ -477,6 +483,7 @@ Then modify the compile parameter values in gerbera/Dockerfile. Also additional 
 E.g. to build a container with exiv2 support add the compile option "-DWITH_EXIV2=YES" and the library
 "exiv2-dev" in the first "RUN apk" command and "exiv2" in the second "RUN apk" command in the gerbera/Dockerfile.
 To start the build enter
+
 .. code-block:: sh
 
   sudo docker build gerbera/
