@@ -31,7 +31,10 @@ needs_sphinx = '8.2'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
-    "sphinx_rtd_dark_mode"
+    "sphinx.ext.autosectionlabel",
+    'sphinx_toolbox.changeset',
+    'sphinx_toolbox.confval',
+    "sphinx_rtd_dark_mode",
 ]
 
 # Add any paths that contain templates here, relative to this directory.
@@ -78,6 +81,10 @@ pygments_style = 'native'
 # If true, `todo` and `todoList` produce output, else they produce nothing.
 todo_include_todos = False
 
+# options for sphinx.ext.autosectionlabel
+# Make sure the target is unique
+autosectionlabel_prefix_document = True
+autosectionlabel_maxdepth = 2
 
 # -- Options for HTML output ----------------------------------------------
 

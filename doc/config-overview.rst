@@ -10,34 +10,12 @@ If the configuration file is not found in the default location and no configurat
 Gerbera will generate a default config.xml file in the ``~/.config/gerbera`` directory. The file is in the XML format and can
 be edited by a simple text editor, here is the list of all available options:
 
-.. _extend:
+Below are links to the configuration sections
 
--  **Required** means that the server will not start if the tag is missing in the configuration.
-
--  **Optional**  means that the tag can be left out of the configuration file.
-
--  **Default**  contains the value or values if the section, entry or attribute is omitted. Sections with complex default values are completely overwriitwn by config file content.
-
--  **Extensible Default**  means that the additional attribute ``extend="true"`` can be used to keep the list of default values and the config entries are added. The default values can be found in the output of ``gerbera --create-example-config``.
-
-The root tag of Gerbera configuration is:
-
-.. code-block:: xml
-
-    <?xml version="1.0" encoding="UTF-8"?>
-    <config version="2"
-        xmlns="http://mediatomb.cc/config/2"
-        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://mediatomb.cc/config/2 http://mediatomb.cc/config/2.xsd">
-        ...
-    </config>
-
-The server configuration file has several options.  Below are links to the configuration sections
-
-
+* :doc:`General </config-general>`
 * :doc:`Server </config-server>`
 * :doc:`Extended Runtime Options </config-extended>`
-* :doc:`Clients </config-clients>`
+* :doc:`Client Options </config-clients>`
 * :doc:`Import Content </config-import>`
 * :doc:`Online Content </config-online>`
 * :doc:`Transcode Content </config-transcode>`
@@ -46,10 +24,11 @@ The server configuration file has several options.  Below are links to the confi
    :maxdepth: 1
    :hidden:
 
+   Configuration Basics     <config-general>
    Config Generation        <config-generate>
    Server Options           <config-server>
    Extended Options         <config-extended>
-   Clients                  <config-clients>
    Content Import Options   <config-import>
+   Client Options           <config-clients>
    Online Content Options   <config-online>
    Transcoding Options      <config-transcode>

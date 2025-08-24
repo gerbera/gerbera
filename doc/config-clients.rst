@@ -1,4 +1,4 @@
-.. index:: Client Configuration
+.. index:: Configure Client
 
 Configure Client Quirks
 =======================
@@ -7,220 +7,370 @@ These settings define the additions to the automatic client type detection.
 
 .. _clients:
 
-``clients``
-~~~~~~~~~~~
+Clients
+~~~~~~~
 
-.. code-block:: xml
+.. confval:: clients
+   :type: :confval:`Section`
+   :required: false
+..
 
-    <clients> ... </clients>
+   .. code-block:: xml
 
-* Optional
+      <clients> ... </clients>
 
 This section defines the client behaviour additions.
 
-**Attributes:**
+Clients Attributes
+------------------
+
+.. confval:: clients enabled
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``no``
+..
+
+   .. code:: xml
+
+        enabled="yes"
+
+This attribute defines if client overriding is enabled as a whole, possible values are ”yes” or ”no”.
+
+.. confval:: cache-threshold
+   :type: :confval:`Time`
+   :required: false
+   :default: ``6``
+..
 
     .. code:: xml
 
-        enabled=...
+        cache-threshold="24"
 
-    * Optional
-    * Default: **no**
+This attribute sets the amount of hours a client entry is kept in the cache.
 
-    This attribute defines if client overriding is enabled as a whole, possible values are ”yes” or ”no”.
-
-
-    .. code:: xml
-
-        cache-threshold=...
-
-    * Optional
-    * Default: **6**
-
-    This attribute sets the amount of hours a client entry is kept in the cache.
-
+.. confval:: bookmark-offset
+   :type: :confval:`Time`
+   :required: false
+   :default: ``10``
+..
 
     .. code:: xml
 
-        bookmark-offset=...
+        bookmark-offset="8"
 
-    * Optional
-    * Default: **10**
+This attribute sets the amount of seconds a playposition (Samsung bookmark) is reduced on resume to continue a bit before the last scene.
 
-    This attribute sets the amount of seconds a playposition (Samsung bookmark) is reduced on resume to continue a bit before the last scene.
-    The value can be given in a valid time format.
+Client Details
+~~~~~~~~~~~~~~
 
-**Child tags:**
+.. confval:: client
+   :type: :confval:`Section`
+   :required: false
+..
 
-``client``
-~~~~~~~~~~
+   .. code-block:: xml
 
-.. code-block:: xml
-
-    <client> ... </client>
-
-* Optional
+      <client>...</client>
 
 This section defines the client behaviour for one client.
 
-**Attributes:**
+Client Properties
+-----------------
 
-    .. code:: xml
+.. confval:: client ip
+   :type: :confval:`String`
+   :required: false
+   :default: `empty`
+..
 
-        ip=...
-    
-    * Optional
-    * Default: empty
-    
-    This allows to select clients by IP address. Allowed values are ip addresses (v4 or v6) which can be followed by ``/pref`` where pref is any allowed prefix length for the protocol.
+   .. code:: xml
+  
+       ip="10.10.10.10"
 
-    .. code:: xml
+This allows to select clients by IP address. Allowed values are ip addresses (v4 or v6) which can be followed by ``/pref`` where pref is any allowed prefix length for the protocol.
 
-        userAgent=...
+.. confval:: userAgent
+   :type: :confval:`String`
+   :required: false
+   :default: `empty`
+..
 
-    * Optional
-    * Default: empty
+   .. code:: xml
+  
+       userAgent="..."
 
-    This allows to filter clients by userAgent signature. It contains a part of the UserAgent http-signature of your client.
-    Run a network sniffer like wireshark or some UPnP utility to discover the signature.
-    If ``ip`` is set ``userAgent`` is ignored.
+This allows to filter clients by userAgent signature. It contains a part of the UserAgent http-signature of your client.
+Run a network sniffer like wireshark or some UPnP utility to discover the signature.
+If :confval:`client ip` is set :confval:`userAgent` is ignored.
 
-    .. code:: xml
+.. confval:: client friendlyName
+   :type: :confval:`String`
+   :required: false
+   :default: `empty`
+..
+.. versionadded:: 2.3.0
 
-        friendlyName=... modelName=... manufacturer=...
+.. confval:: client modelName
+   :type: :confval:`String`
+   :required: false
+   :default: `empty`
+..
+.. versionadded:: 2.3.0
 
-    This allows to filter clients by their UPnP description. It contains a properties in the device section of the xml.
-    UPnP network tools will provide you with the link to the xml document.
-    It is only used if ip and userAgent are not set. friendlyName overwrite modelName which overwrites manufacturer.
+.. confval:: client manufacturer
+   :type: :confval:`String`
+   :required: false
+   :default: `empty`
+..
 
-    .. code:: xml
+   .. versionadded:: 2.3.0
+   .. code:: xml
 
-        group=...
+       friendlyName="..." modelName="..." manufacturer="..."
 
-    * Optional
-    * Default: "default"
+This allows to filter clients by their UPnP description. It contains a properties in the device section of the xml.
+UPnP network tools will provide you with the link to the xml document.
+It is only used if ip and userAgent are not set. friendlyName overwrite modelName which overwrites manufacturer.
 
-    This assigns the client to a group which is key to store details on played items (playbackCount, lastPlaybackTime, lastPlaybackPosition, bookmarkPosition).
-    If you set another group here all actions are recorded for this group.
+.. confval:: client group
+   :type: :confval:`String`
+   :required: false
+   :default: ``default``
+..
 
-    .. code:: xml
+   .. code:: xml
+  
+       group="wombat"
 
-        flags=...
+This assigns the client to a group which is key to store details on played items (playbackCount, lastPlaybackTime, lastPlaybackPosition, bookmarkPosition).
+If you set another group here all actions are recorded for this group.
 
-    * Optional
-    * Default: 0
-    
-    Containing the flags you want to set. Must be given in the following format ``SAMSUNG|0x100``, where the text either contains 
-    one of the known flags or an integer number if the flags has no name.
-    For valid flags see :doc:`Supported Devices </supported-devices>`.
+.. confval:: flags
+   :type: :confval:`String`
+   :required: false
+   :default: ``0``
+..
 
-    .. code:: xml
+   .. code:: xml
 
-        caption-info-count="0"
+       flags="SAMSUNG|0x100"
 
-    * Optional
+Containing the flags you want to set. Must be given in the following format ``SAMSUNG|0x100``, where the text either contains 
+one of the known flags or an integer number if the flags has no name.
+For valid flags see :doc:`Supported Devices </supported-devices>`.
 
-    * Default: set by option server/upnp/caption-info-count
+.. confval:: client caption-info-count
+   :type: :confval:`Integer`
+   :required: false
+   :default: :confval:`caption-info-count`
+..
 
-    Number of ``sec::CaptionInfoEx`` entries to write to UPnP result.
+   .. code:: xml
 
-    .. code:: xml
+       caption-info-count="0"
 
-        upnp-string-limit="80"
+Number of ``sec::CaptionInfoEx`` entries to write to UPnP result.
 
-    * Optional
+.. confval:: client upnp-string-limit
+   :type: :confval:`Integer`
+   :required: false
+   :default: :confval:`upnp-string-limit`
+..
 
-    * Default: -1
+   .. code:: xml
 
-    Override the default ``upnp-string-limit`` of server.
+       upnp-string-limit="80"
 
-    .. code:: xml
+Override the default :confval:`upnp-string-limit` of server.
 
-        multi-value="no"
+.. confval:: client multi-value
+   :type: :confval:`Boolean`
+   :required: false
+   :default: :confval:`multi-value`
+..
 
-    * Optional
+   .. code:: xml
 
-    * Default: the same as the current value of ``server/upnp/multi-value`` (defaults to **yes**)
+       multi-value="no"
 
-    Override the default ``server/upnp/multi-value`` of server.
+Override the default :confval:`multi-value` of server.
 
-    .. code:: xml
+.. confval:: full-filter
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``no``
+..
 
-        full-filter="yes"
+   .. versionadded:: 2.4.0
+   .. code:: xml
 
-    * Optional
+       full-filter="yes"
 
-    * Default: **no**
+Enable the full UPnP filter support for this client. This means that all requested
+elements from the filter request property will be created in the response.
+Make sure that the namespaces are added with the the upnp section :ref:`upnp`
 
-    Enable the full UPnP filter support for this client. This means that all requested
-    elements from the filter request property will be created in the response.
-    Make sure that the namespaces are added with the the upnp section :ref:`upnp`
+.. confval:: client allowed
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``yes``
+..
 
-    .. code:: xml
+   .. versionadded:: 2.3.0
+   .. code:: xml
 
-        allowed="no"
+       allowed="no"
 
-    * Optional
-
-    * Default: **yes**
-
-    If set to no all requests from a client are blocked.
+If set to ``no`` all requests from a client are blocked.
 
 
-**Child Entries:**
+Child Entries
+-------------
 
-    .. code:: xml
+.. confval:: client map
+   :type: :confval:`Section`
+   :required: false
+..
 
-        <map from="application/x-srt" to="text/srt"/>
+   .. code:: xml
 
-    * Optional
+       <map from="application/x-srt" to="text/srt"/>
 
-    Map mimetype for client. Some clients require slightly different mimetype, e.g. for subtitles.
+Map mimetype for client. Some clients require slightly different mimetype, e.g. for subtitles.
 
-    .. code:: xml
+   .. confval:: client map from
+      :type: :confval:`String`
+      :required: true
+   ..
 
-        <header key="X-User-Agent" value="redsonic"/>
+      .. code:: xml
 
-    * Optional
+         from="application/x-srt"
 
-    Add or overwrite header value sent by responses for UPnP single files and Web Page content
+   Set source mimetype.
 
-    .. code:: xml
+   .. confval:: client map to
+      :type: :confval:`String`
+      :required: true
+   ..
 
-        <dlna from="mp4" videoCodec="h264" audioCodec="aac" to="AVC_MP4_MP_HD_720p_AAC"/>
+      .. code:: xml
 
-    * Optional
+         to="text/srt"
 
-    Map DLNA profile for client. Some clients do not support basic dlna profiles.
-    It overwrites general settings from ``contenttype-dlnaprofile`` with the same format, see :ref:`contenttype-dlnaprofile`.
+   Set target mimetype.
 
-``group``
-~~~~~~~~~
+.. confval:: client header
+   :type: :confval:`Section`
+   :required: false
+..
 
-.. code-block:: xml
+   .. versionadded:: 2.1.0
+   .. code:: xml
 
-    <group> ... </group>
+       <header key="X-User-Agent" value="redsonic"/>
 
-* Optional
+   Add or overwrite header value sent by responses for UPnP single files and Web Page content
+
+   .. confval:: client header key
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+         key="X-User-Agent"
+
+   Set header key.
+
+   .. confval:: client header value
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+         value="redsonic"
+
+   Set header value.
+
+.. confval:: client dlna
+   :type: :confval:`Section`
+   :required: false
+..
+
+   .. code:: xml
+
+       <dlna from="mp4" videoCodec="h264" audioCodec="aac" to="AVC_MP4_MP_HD_720p_AAC"/>
+
+Map DLNA profile for client. Some clients do not support basic dlna profiles.
+It overwrites general settings from :confval:`contenttype-dlnaprofile` with the same format, see :ref:`contenttype-dlnaprofile`.
+
+   .. confval:: client dlna from
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+         from="mp4"
+
+   Set source content type.
+
+   .. confval:: client dlna to
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+         to="AVC_MP4_MP_HD_720p_AAC"
+
+   Set target DLNA profile name.
+
+Client Group
+~~~~~~~~~~~~
+
+.. confval:: group
+   :type: :confval:`Section`
+   :required: false
+..
+
+   .. versionadded:: 2.4.0
+   .. code-block:: xml
+
+      <group> ... </group>
 
 This section defines the behaviour for a group of clients.
 
-**Attributes:**
+Group Attributes
+----------------
+.. confval:: group name
+   :type: :confval:`String`
+   :required: true
+..
 
-    .. code:: xml
+   .. code:: xml
 
-        name=...
+       name="wombat"
 
-    * Required
+Name of the group. Should correspond to one of the group names in client settings or ``default``
 
-    Name of the group. Should correspond to one of the group names in client settings or ``default``
+Group Details
+-------------
 
-**Child Entries:**
+.. confval:: hide
+   :type: :confval:`Section`
+   :required: false
+..
 
-    .. code:: xml
+   .. code:: xml
 
-        <hide location="/path/not/visible"/>
+       <hide location="/path/not/visible"/>
 
-    * required
+   .. confval:: hide location
+      :type: :confval:`Path`
+      :required: true
+   ..
 
     Define a location of files that have to be hidden from the output for the group.
