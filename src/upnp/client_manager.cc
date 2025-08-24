@@ -179,7 +179,7 @@ void ClientManager::refresh()
             "Panasonic TV",
             DEFAULT_CLIENT_GROUP,
             ClientType::PanasonicTV,
-            QUIRK_FLAG_PANASONIC,
+            QUIRK_FLAG_PANASONIC | QUIRK_FLAG_FORCE_SORT_CRITERIA_TITLE,
             ClientMatchType::UserAgent,
             "Panasonic MIL DLNA CP",
         },
