@@ -237,7 +237,7 @@
         "WITH_MATROSKA": "ON",
         "WITH_SYSTEMD": "OFF",
         "WITH_LASTFM": "OFF",
-        "WITH_ICU": "OFF",
+        "WITH_ICU": "ON",
         "WITH_DEBUG": "ON",
         "WITH_DEBUG_OPTIONS": "ON",
         "WITH_ONLINE_SERVICES": "OFF",
