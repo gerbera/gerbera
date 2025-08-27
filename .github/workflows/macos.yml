@@ -43,9 +43,8 @@ jobs:
 
       - name: Build
         run: |
-          alias nproc="sysctl -n hw.physicalcpu"
           cmake -S . -G Ninja -B build --preset=macos
-          cmake --build build -j$(nproc) --verbose
+          cmake --build build -j$(sysctl -n hw.physicalcpu) --verbose
 
       - name: Test
         run: |
