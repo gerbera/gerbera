@@ -44,7 +44,7 @@ jobs:
       - name: Build
         run: |
           cmake -S . -G Ninja -B build --preset=macos
-          cmake --build build -j$(nproc) --verbose
+          cmake --build build -j$(sysctl -n hw.physicalcpu) --verbose
 
       - name: Test
         run: |
