@@ -1,14 +1,21 @@
 .. index:: Configure Client
 
+#######################
 Configure Client Quirks
-=======================
+#######################
+
+.. contents::
+   :backlinks: entry
+.. sectnum::
+   :start: 3
 
 These settings define the additions to the automatic client type detection.
 
 .. _clients:
 
+*******
 Clients
-~~~~~~~
+*******
 
 .. confval:: clients
    :type: :confval:`Section`
@@ -22,7 +29,7 @@ Clients
 This section defines the client behaviour additions.
 
 Clients Attributes
-------------------
+==================
 
 .. confval:: clients enabled
    :type: :confval:`Boolean`
@@ -61,7 +68,7 @@ This attribute sets the amount of hours a client entry is kept in the cache.
 This attribute sets the amount of seconds a playposition (Samsung bookmark) is reduced on resume to continue a bit before the last scene.
 
 Client Details
-~~~~~~~~~~~~~~
+==============
 
 .. confval:: client
    :type: :confval:`Section`
@@ -74,7 +81,7 @@ Client Details
 
 This section defines the client behaviour for one client.
 
-Client Properties
+Client Attributes
 -----------------
 
 .. confval:: client ip
@@ -227,6 +234,9 @@ If set to ``no`` all requests from a client are blocked.
 Child Entries
 -------------
 
+Mimetype Mapping
+^^^^^^^^^^^^^^^^
+
 .. confval:: client map
    :type: :confval:`Section`
    :required: false
@@ -259,6 +269,9 @@ Map mimetype for client. Some clients require slightly different mimetype, e.g. 
          to="text/srt"
 
    Set target mimetype.
+
+Header
+^^^^^^
 
 .. confval:: client header
    :type: :confval:`Section`
@@ -293,6 +306,9 @@ Map mimetype for client. Some clients require slightly different mimetype, e.g. 
          value="redsonic"
 
    Set header value.
+
+DLNA Profiles
+^^^^^^^^^^^^^
 
 .. confval:: client dlna
    :type: :confval:`Section`
@@ -329,7 +345,7 @@ It overwrites general settings from :confval:`contenttype-dlnaprofile` with the 
    Set target DLNA profile name.
 
 Client Group
-~~~~~~~~~~~~
+============
 
 .. confval:: group
    :type: :confval:`Section`
@@ -345,6 +361,7 @@ This section defines the behaviour for a group of clients.
 
 Group Attributes
 ----------------
+
 .. confval:: group name
    :type: :confval:`String`
    :required: true

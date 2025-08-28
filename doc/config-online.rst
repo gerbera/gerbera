@@ -1,8 +1,14 @@
 .. index:: Online Content
 
+########################
 Configure Online Content
-========================
+########################
 
+.. contents::
+   :backlinks: entry
+.. sectnum::
+   :prefix: 2.
+   :start: 11
 
 This section resides under import and defines options for various supported online services.
 Currently there is none supported.
@@ -17,8 +23,9 @@ Example of online content XML configuration
     </import>
 
 
+**************
 Online Content
-~~~~~~~~~~~~~~
+**************
 
 .. confval:: online-content
    :type: :confval:`Section`
@@ -32,7 +39,7 @@ Online Content
 This tag defines the online content section.
 
 Attributes
-----------
+==========
 
 .. confval:: online fetch-buffer-size
    :type: :confval:`Integer`

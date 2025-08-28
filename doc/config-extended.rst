@@ -3,8 +3,16 @@ Configure Extended Runtime Options
 
 .. index:: Extended Runtime Options
 
+########################
 Extended Runtime Options
-~~~~~~~~~~~~~~~~~~~~~~~~
+########################
+
+.. contents::
+   :backlinks: entry
+.. sectnum::
+   :prefix: 1.
+   :start: 6
+
 
 .. confval:: extended-runtime-options
    :type: :confval:`Section`
@@ -27,8 +35,9 @@ options take effect, however after that they are immediately active.
 
 .. index:: FFMPEG Thumbnailer
 
+******************
 FFMpeg Thumbnailer
-~~~~~~~~~~~~~~~~~~
+******************
 
 .. confval:: ffmpegthumbnailer
    :type: :confval:`Section`
@@ -148,8 +157,9 @@ Sets the image quality of the generated thumbnails.
 
 .. index:: LastFM
 
+*******
 Last.FM
-~~~~~~~
+*******
 
 .. confval:: lastfm
    :type: :confval:`Section`
@@ -192,8 +202,9 @@ Your last.fm user name.
 
 Your last.fm password.
 
+*****************
 Mark Played Items
-~~~~~~~~~~~~~~~~~
+*****************
 
 .. confval:: mark-played-items
    :type: :confval:`Section`

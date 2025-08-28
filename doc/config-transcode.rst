@@ -1,12 +1,19 @@
 .. index:: Configure Transcoding
 
+#####################
 Configure Transcoding
-=====================
+#####################
 
 The transcoding section allows to define ways on how to transcode content.
 
+.. contents::
+   :backlinks: entry
+.. sectnum::
+   :start: 4
+
+***********
 Transcoding
-~~~~~~~~~~~
+***********
 
 .. confval:: transcoding
    :type: :confval:`Section`
@@ -20,7 +27,7 @@ Transcoding
 This tag defines the transcoding section.
 
 Transcoding Attributes
-----------------------
+======================
 
 .. confval:: transcoding enabled
    :type: :confval:`Boolean`
@@ -65,7 +72,7 @@ patiently wait for data and we anyway buffer on the output end. However, we obse
 files if it encounters buffer underruns - this setting helps to avoid this situation.
 
 Mimetype Profile Mappings
--------------------------
+=========================
 
 .. confval:: mimetype-profile-mappings
    :type: :confval:`Section`
@@ -98,7 +105,7 @@ Suppress errors when loading profiles. Mappings pointing to missing transcoding 
 as well as unknown mimetypes.
 
 Transcode
-^^^^^^^^^
+---------
 
 The mappings under mimetype-profile are defined in the following manner:
 
@@ -176,7 +183,7 @@ profile which is defined below.
 
 
 Profiles
---------
+========
 
 .. confval:: profiles
    :type: :confval:`Section`
@@ -202,7 +209,7 @@ This section defines the various transcoding profiles.
 Suppress errors when loading profiles. If ``no`` Unused profiles are not allowed in config and gerbera refuses to start.
 
 Profile
-^^^^^^^
+-------
 
 .. confval:: profile
    :type: :confval:`Section`
@@ -211,7 +218,7 @@ Profile
 
    .. code-block:: xml
 
-       <profile name="vlcmpeg" enabled="no" type="external" no-transcoding="" dlna-profile="MP4">
+      <profile name="vlcmpeg" enabled="no" type="external" no-transcoding="" dlna-profile="MP4">
         <mimetype>video/mpeg</mimetype>
         <accept-url>yes</accept-url>
         <first-resource>yes</first-resource>
@@ -229,8 +236,10 @@ Profile
         <buffer size="14400000" chunk-size="512000" fill-size="120000" />
       </profile>
 
-
 Definition of a transcoding profile.
+
+Profile Attributes
+^^^^^^^^^^^^^^^^^^
 
    .. confval:: profile name
       :type: :confval:`String`
@@ -278,6 +287,9 @@ Definition of a transcoding profile.
         type="external"
 
    Defines the profile type, currently only ``external`` is supported, this will change in the future.
+
+Profile Items
+^^^^^^^^^^^^^
 
    .. confval:: profile mimetype
       :type: :confval:`Enum` (``external``)
@@ -424,7 +436,7 @@ Definition of a transcoding profile.
    Note:
        This option has no effect on non AVI content.
 
-      .. confval:: 4cc mode
+      .. confval:: avi-fourcc-list mode
          :type: :confval:`Enum` (``disabled|process|ignore``)
          :required: false
          :default: ``disabled``
@@ -460,123 +472,6 @@ Definition of a transcoding profile.
              <fourcc>XVID</fourcc>
              <fourcc>DX50</fourcc>
 
-   .. confval:: agent
-      :type: :confval:`Section``
-      :required: true
-   ..
-
-      .. code-block:: xml
-
-          <agent command="ogg123" arguments="-d wav -f %out %in"/>
-          <agent command="vlc" arguments="-I dummy %in --sout #transcode{...}:standard{...} vlc:quit">
-              <environ name="LC_ALL" value="C"/>
-          </agent>
-      ..
-
-   Defines the transcoding agent and the parameters, in the example above we use ogg123 to convert ogg or flac to wav.
-
-      .. confval:: command
-         :type: :confval:`String`
-         :required: true
-      ..
-
-         .. code:: xml
-
-             command="vlc"
-
-      Defines the transcoder binary that will be executed by Gerbera upon a transcode request, the binary
-      must be in $PATH. It is very important that the transcoder is capable of writing the output to a FIFO,
-      some applications, for example ffmpeg, have problems with that. The command line arguments are specified
-      separately (see below).
-
-      .. confval:: arguments
-         :type: :confval:`String`
-         :required: true
-      ..
-
-         .. code:: xml
-
-             arguments="-I dummy %in --sout #transcode{...}:standard{...} vlc:quit"
-
-      Specifies the command line arguments that will be given to the transcoder application upon execution.
-      There are two special tokens: ``%in`` and ``%out``. Those tokens get substituted by the input file name 
-      and the output FIFO name before execution.
-
-   .. confval:: environ
-      :type: :confval:`Section`
-      :required: false
-   ..
-
-      .. code:: xml
-
-          <environ name="..." value=".."/>
-
-   Sets environment variable which may be required by the transcoding process.
-   Used to overwrite the environment of the gerbera process. The entry can appear multiple times.
-
-      .. confval:: environ name
-         :type: :confval:`String`
-         :required: true
-      ..
-
-      Set name of environment variable.
-
-      .. confval:: environ value
-         :type: :confval:`String`
-         :required: true
-      ..
-
-      Set value of environment variable.
-
-   .. confval:: buffer
-      :type: :confval:`Section`
-      :required: true
-   ..
-
-      .. code-block:: xml
-
-          <buffer size="1048576" chunk-size="131072" fill-size="262144"/>
-
-   These settings help you to achieve a smooth playback of transcoded media. The actual values need to be tuned
-   and depend on the speed of your system. The general idea is to buffer the data before sending it out to the
-   player, it is also possible to delay first playback until the buffer is filled to a certain amount.
-   The prefill should give you enough space to overcome some high bitrate scenes in case your system can not
-   transcode them in real time.
-
-      .. confval:: buffer size
-         :type: :confval:`Integer`
-         :required: true
-      ..
-
-      .. code:: xml
-
-          size="262144"
-
-      Size of the buffer in bytes.
-
-      .. confval:: buffer chunk-size
-         :type: :confval:`Integer`
-         :required: true
-      ..
-
-         .. code:: xml
-
-             chunk-size="65536"
-
-      Size of chunks in bytes, that are read by the buffer from the transcoder. Smaller chunks will produce a
-      more constant buffer fill ratio, however too small chunks may slow things down.
-
-      .. confval:: buffer fill-size
-         :type: :confval:`Integer`
-         :required: true
-      ..
-
-         .. code:: xml
-
-             fill-size="65536"
-
-      Initial fill size - number of bytes that have to be in the buffer before the first read (i.e. before
-      sending the data to the player for the first time). Set this to ``0`` (zero) if you want to disable prefilling.
 
    .. confval:: resolution
       :type: :confval:`String`
@@ -645,3 +540,128 @@ Definition of a transcoding profile.
 
    Use the option with caution, no extra checking is being done if the resulting mimetype represents an image,
    also, it is will only work if the output of the profile is a JPG image.
+
+
+Profile Agent
+-------------
+
+.. confval:: agent
+   :type: :confval:`Section``
+   :required: true
+..
+
+   .. code-block:: xml
+
+       <agent command="ogg123" arguments="-d wav -f %out %in"/>
+       <agent command="vlc" arguments="-I dummy %in --sout #transcode{...}:standard{...} vlc:quit">
+           <environ name="LC_ALL" value="C"/>
+       </agent>
+   ..
+
+Defines the transcoding agent and the parameters, in the example above we use ogg123 to convert ogg or flac to wav.
+
+   .. confval:: command
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+          command="vlc"
+
+   Defines the transcoder binary that will be executed by Gerbera upon a transcode request, the binary
+   must be in $PATH. It is very important that the transcoder is capable of writing the output to a FIFO,
+   some applications, for example ffmpeg, have problems with that. The command line arguments are specified
+   separately (see below).
+
+   .. confval:: arguments
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+          arguments="-I dummy %in --sout #transcode{...}:standard{...} vlc:quit"
+
+   Specifies the command line arguments that will be given to the transcoder application upon execution.
+   There are two special tokens: ``%in`` and ``%out``. Those tokens get substituted by the input file name 
+   and the output FIFO name before execution.
+
+.. confval:: environ
+   :type: :confval:`Section`
+   :required: false
+..
+
+   .. code:: xml
+
+       <environ name="..." value=".."/>
+
+Sets environment variable which may be required by the transcoding process.
+Used to overwrite the environment of the gerbera process. The entry can appear multiple times.
+
+   .. confval:: environ name
+      :type: :confval:`String`
+      :required: true
+   ..
+
+   Set name of environment variable.
+
+   .. confval:: environ value
+      :type: :confval:`String`
+      :required: true
+   ..
+
+Profile Buffer
+--------------
+
+   Set value of environment variable.
+
+.. confval:: buffer
+   :type: :confval:`Section`
+   :required: true
+..
+
+   .. code-block:: xml
+
+       <buffer size="1048576" chunk-size="131072" fill-size="262144"/>
+
+These settings help you to achieve a smooth playback of transcoded media. The actual values need to be tuned
+and depend on the speed of your system. The general idea is to buffer the data before sending it out to the
+player, it is also possible to delay first playback until the buffer is filled to a certain amount.
+The prefill should give you enough space to overcome some high bitrate scenes in case your system can not
+transcode them in real time.
+
+   .. confval:: buffer size
+      :type: :confval:`Integer`
+      :required: true
+   ..
+
+   .. code:: xml
+
+       size="262144"
+
+   Size of the buffer in bytes.
+
+   .. confval:: buffer chunk-size
+      :type: :confval:`Integer`
+      :required: true
+   ..
+
+      .. code:: xml
+
+          chunk-size="65536"
+
+   Size of chunks in bytes, that are read by the buffer from the transcoder. Smaller chunks will produce a
+   more constant buffer fill ratio, however too small chunks may slow things down.
+
+   .. confval:: buffer fill-size
+      :type: :confval:`Integer`
+      :required: true
+   ..
+
+      .. code:: xml
+
+          fill-size="65536"
+
+   Initial fill size - number of bytes that have to be in the buffer before the first read (i.e. before
+   sending the data to the player for the first time). Set this to ``0`` (zero) if you want to disable prefilling.

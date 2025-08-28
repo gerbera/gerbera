@@ -1,7 +1,8 @@
 .. index:: Configuration Overview
 
+#############
 Configuration
-=============
+#############
 
 Gerbera is highly configurable and allows the user to set various options and preferences that define the server's
 behavior. Rather than enforcing certain features upon the user, we prefer to offer a number of choices where possible.
@@ -29,6 +30,6 @@ Below are links to the configuration sections
    Server Options           <config-server>
    Extended Options         <config-extended>
    Content Import Options   <config-import>
-   Client Options           <config-clients>
    Online Content Options   <config-online>
+   Client Options           <config-clients>
    Transcoding Options      <config-transcode>

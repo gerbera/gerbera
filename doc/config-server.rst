@@ -1,14 +1,21 @@
 .. index:: Configure Server
 
+################
 Configure Server
-================
+################
 
 These settings define the server configuration, this includes UPnP behavior, selection of database, accounts for the UI as well as installation locations of shared data.
 
+.. contents::
+   :backlinks: entry
+.. sectnum::
+   :start: 1
+
 .. _server:
 
+******
 Server
-------
+******
 
 .. confval:: server
    :type: :confval:`Section`
@@ -21,7 +28,7 @@ Server
 This section defines the server configuration parameters.
 
 Server Attributes
-~~~~~~~~~~~~~~~~~
+=================
 
       .. confval:: debug-mode
          :type: enum
@@ -56,10 +63,10 @@ Server Attributes
       Allows pending requests to be handled.
 
 Server Items
-~~~~~~~~~~~~
+============
 
 Port
-^^^^
+----
 
 .. confval:: port
    :type: :confval:`Integer`
@@ -74,7 +81,7 @@ Specifies the port where the server will be listening for HTTP requests. Note, t
 only ports above 49152 are supported. The value of zero means, that a port will be automatically selected by the SDK.
 
 IP Address
-^^^^^^^^^^
+----------
 
 .. confval:: ip
    :type: :confval:`String`
@@ -88,7 +95,7 @@ IP Address
 Specifies the IP address to bind to, by default one of the available interfaces will be selected.
 
 Network interface
-^^^^^^^^^^^^^^^^^
+-----------------
 
 .. confval:: interface
    :type: :confval:`String`
@@ -102,7 +109,7 @@ Network interface
 Specifies the interface to bind to, by default one of the available interfaces will be selected.
 
 Name
-^^^^
+----
 
 .. confval:: server name
    :type: :confval:`String`
@@ -116,7 +123,7 @@ Name
 Server's friendly name, you will see this on your devices that you use to access the server.
 
 Manufacturer
-^^^^^^^^^^^^
+------------
 
 .. confval:: manufacturer
    :type: :confval:`String`
@@ -130,7 +137,7 @@ Manufacturer
 This tag sets the manufacturer name of a UPnP device.
 
 Manufacturer Url
-^^^^^^^^^^^^^^^^
+----------------
 
 .. confval:: manufacturerURL
    :type: :confval:`String`
@@ -145,7 +152,7 @@ This tag sets the manufacturer URL of a UPnP device, a custom setting may be nec
 to enable special features that otherwise are only active with the vendor implemented server.
 
 Virtual Url
-^^^^^^^^^^^
+-----------
 
 .. confval:: virtualURL
    :type: :confval:`String`
@@ -160,7 +167,7 @@ This tag sets the virtual URL of Gerbera content which is part of the browse res
 The value defaults to `http://<ip>:<port>`.
 
 External Url
-^^^^^^^^^^^^
+------------
 
 .. confval:: externalURL
    :type: :confval:`String`
@@ -176,7 +183,7 @@ This tag sets the external URL of Gerbera web UI, a custom setting may be necess
 The value defaults to virtualURL or `http://<ip>:<port>` if virtualURL is not set.
 
 Model Name
-^^^^^^^^^^
+----------
 
 .. confval:: modelName
    :type: :confval:`String`
@@ -191,7 +198,7 @@ This tag sets the model name of a UPnP device, a custom setting may be necessary
 enable special features that otherwise are only active with the vendor implemented server.
 
 Model Number
-^^^^^^^^^^^^
+------------
 
 .. confval:: modelNumber
    :type: :confval:`String`
@@ -206,7 +213,7 @@ This tag sets the model number of a UPnP device, a custom setting may be necessa
 to enable special features that otherwise are only active with the vendor implemented server.
 
 Model Url
-^^^^^^^^^
+---------
 
 .. confval:: modelURL
    :type: :confval:`String`
@@ -220,7 +227,7 @@ Model Url
 This tag sets the model URL (homepage) of a UPnP device.
 
 Serial Number
-^^^^^^^^^^^^^
+-------------
 
 .. confval:: serialNumber
    :type: :confval:`String`
@@ -234,7 +241,7 @@ Serial Number
 This tag sets the serial number of a UPnP device.
 
 Presentation Url
-^^^^^^^^^^^^^^^^
+----------------
 
 .. confval:: presentationURL
    :type: :confval:`String`
@@ -277,7 +284,7 @@ Attributes
       +-------+--------------------------------------------------------------------------------------------+
 
 UDN
-^^^
+---
 
 .. confval:: udn
    :type: :confval:`String`
@@ -293,7 +300,7 @@ yourself.  Review the :ref:`Generating Configuration <generateConfig>` section o
 ``gerbera`` to create a default configuration file.
 
 Home Directory
-^^^^^^^^^^^^^^
+--------------
 
 .. confval:: home
    :type: :confval:`Path`
@@ -328,7 +335,7 @@ in which case the config file is expected as ``${GERBERA_HOME}/.config/gerbera``
       means that Gerbara changes its home during startup.
 
 Temporary Directory
-^^^^^^^^^^^^^^^^^^^
+-------------------
 
 .. confval:: tmpdir
    :type: :confval:`Path`
@@ -342,7 +349,7 @@ Temporary Directory
 Selects the temporary directory that will be used by the server.
 
 Web Directory
-^^^^^^^^^^^^^
+-------------
 
 .. confval:: webroot
    :type: :confval:`Path`
@@ -357,7 +364,7 @@ Root directory for the web server, this is the location where device description
 UI html and js files, icons, etc. are stored.
 
 Alive Interval
-^^^^^^^^^^^^^^
+--------------
 
 .. confval:: alive
    :type: :confval:`Integer`
@@ -383,7 +390,7 @@ Note:
    you can try changing the alive value to 86400 (which is 24 hours).
 
 PC Directory
-^^^^^^^^^^^^
+------------
 
 .. confval:: pc-directory
    :type: :confval:`Section`
@@ -396,6 +403,7 @@ PC Directory
 Tweak visibility of PC directory, i.e. root entry for physical structure.
 
 Attributes
+^^^^^^^^^^
 
     .. confval:: upnp-hide
        :type: :confval:`Boolean`
@@ -422,7 +430,7 @@ Attributes
     Enabling this option will make the PC-Directory container invisible in the web UI.
 
 Bookmark File
-^^^^^^^^^^^^^
+-------------
 
 .. confval:: bookmark
    :type: :confval:`String`
@@ -439,7 +447,7 @@ redirect to the servers current IP address and port. To use it, simply bookmark 
 the default location is ``~/.config/gerbera/gerbera.html``
 
 UPnP String Limit
-^^^^^^^^^^^^^^^^^
+-----------------
 
 .. confval:: upnp-string-limit
    :type: :confval:`Integer`
@@ -458,7 +466,7 @@ to the string if it has been cut off to indicate that limiting took place.
 .. _logging:
 
 Logging
-^^^^^^^
+-------
 
 .. confval:: logging
    :type: :confval:`Section`
@@ -474,6 +482,7 @@ This section defines various logging settings.
 
 
 Attributes
+^^^^^^^^^^
 
     .. confval:: rotate-file-size
        :type: :confval:`Integer`
@@ -497,10 +506,12 @@ Attributes
 
     When using command line option ``--rotatelog`` this value defines the number of files in the log rotation.
 
+
 .. _ui:
 
+*************
 Web Interface
--------------
+*************
 
 .. confval:: ui
    :type: :confval:`Section`
@@ -523,7 +534,7 @@ Note:
    deactivated, thus allowing anyone on your network to connect to the user interface.
 
 Web Interface Attributes
-~~~~~~~~~~~~~~~~~~~~~~~~
+========================
 
     .. confval:: ui enabled
        :type: :confval:`Boolean`
@@ -631,7 +642,7 @@ Web Interface Attributes
     -  automatic rescans
 
 Source Documentation Url
-~~~~~~~~~~~~~~~~~~~~~~~~
+========================
 
 .. confval:: source-docs-link
    :type: :confval:`String`
@@ -646,7 +657,7 @@ Source Documentation Url
 Add link to some source documentation which can be generated by ``make doc``. If it is empty the link in the web UI will be hidden.
 
 User Documentation Url
-~~~~~~~~~~~~~~~~~~~~~~
+======================
 
 .. confval:: user-docs-link
    :type: :confval:`String`
@@ -661,7 +672,7 @@ User Documentation Url
 Add link to the user documentation if you want it locally hosted or make sure the version is matching you installation.
 
 Content Security Policy
-~~~~~~~~~~~~~~~~~~~~~~~
+=======================
 
 .. confval:: content-security-policy
    :type: :confval:`String`
@@ -692,7 +703,7 @@ Example:
        </content-security-policy>
 
 Extension Mimetype Mapping
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
 
 .. confval:: ui extension-mimetype
    :type: :confval:`Section`
@@ -722,7 +733,7 @@ Attributes
            default="application/octet-stream"
 
 Accounts
-~~~~~~~~
+========
 
 .. confval:: accounts
    :type: :confval:`Section`
@@ -772,7 +783,7 @@ Example:
     no per-user permissions.
 
 Items Per Page
-~~~~~~~~~~~~~~
+==============
 
 .. confval:: items-per-page
    :type: :confval:`Section`
@@ -817,8 +828,9 @@ Items
 
 .. _storage:
 
+*******
 Storage
--------
+*******
 
 .. confval:: storage
    :type: :confval:`Section`
@@ -834,7 +846,7 @@ Each storage driver has it's own configuration parameters.
 Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available options depend on the selected driver.
 
 Storage Attributes
-~~~~~~~~~~~~~~~~~~
+==================
 
 .. confval:: use-transactions
    :type: :confval:`Boolean`
@@ -878,7 +890,7 @@ database errors because the string is not correctly truncated.
 
 
 SQLite
-~~~~~~
+======
 
 .. confval:: sqlite3
    :type: :confval:`Section`
@@ -891,7 +903,7 @@ SQLite
 Defines the SQLite storage driver section.
 
 SQLite Attributes
-^^^^^^^^^^^^^^^^^
+-----------------
 
 .. confval:: sqlite3 enabled
    :type: :confval:`Boolean`
@@ -917,7 +929,7 @@ Enables SQLite database storage. If SQLite is enabled MySQL must be disabled.
 Number of attempts to shutdown the sqlite driver before forcing the application down.
 
 Init SQL File
-^^^^^^^^^^^^^
+-------------
 
 Below are the sqlite driver options:
 
@@ -933,7 +945,7 @@ Below are the sqlite driver options:
 The full path to the init script for the database.
 
 Upgrade Statement File
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 .. confval:: sqlite3 upgrade-file
    :type: :confval:`Path`
@@ -945,7 +957,7 @@ Upgrade Statement File
        <upgrade-file>/etc/gerbera/sqlite3-upgrade.xml</upgrade-file>
 
 Database File
-^^^^^^^^^^^^^
+-------------
 
 The full path to the upgrade settings for the database
 
@@ -962,7 +974,7 @@ The database location is relative to the server's home, if the sqlite database d
 created automatically.
 
 Sync Setting
-^^^^^^^^^^^^
+------------
 
 .. confval:: synchronous
    :type: :confval:`Enum`
@@ -979,7 +991,7 @@ This option sets the SQLite pragma ``synchronous``. This setting will affect the
 write operations. For more information about this option see the SQLite documentation: https://www.sqlite.org/pragma.html#pragma_synchronous
 
 Journal Mode
-^^^^^^^^^^^^
+------------
 
 .. confval:: journal-mode
    :type: :confval:`Enum`
@@ -996,7 +1008,7 @@ This option sets the SQLite pragma ``journal_mode``. This setting will affect th
 write operations. For more information about this option see the SQLite documentation: https://www.sqlite.org/pragma.html#pragma_journal_mode
 
 Error Behaviour
-^^^^^^^^^^^^^^^
+---------------
 
 .. confval:: on-error
    :type: :confval:`Enum` (``restore|fail``)
@@ -1014,7 +1026,7 @@ recreate a new database from scratch.
 If the option is set to ``fail``, Gerbera will abort on an SQLite error.
 
 SQLite Auto-Backup
-^^^^^^^^^^^^^^^^^^
+------------------
 
 .. confval:: backup
    :type: :confval:`Section`
@@ -1054,7 +1066,7 @@ Attributes:
 
 
 MySQL
-~~~~~
+=====
 
 .. confval:: mysql
    :type: :confval:`Section`
@@ -1067,7 +1079,7 @@ MySQL
 Defines the MySQL storage driver section.
 
 MySQL Attributes
-^^^^^^^^^^^^^^^^
+----------------
 
 .. confval:: mysql enabled
    :type: :confval:`Boolean`
@@ -1081,7 +1093,7 @@ MySQL Attributes
 Enables MySQL database storage. If MySQL is enabled SQLite must be disabled.
 
 Server Host
-^^^^^^^^^^^
+-----------
 
 .. confval:: mysql host
    :type: :confval:`String`
@@ -1095,7 +1107,7 @@ Server Host
 This specifies the host where your MySQL database is running.
 
 Server Port
-^^^^^^^^^^^
+-----------
 
 .. confval:: mysql port
    :type: :confval:`Integer`
@@ -1109,7 +1121,7 @@ Server Port
 This specifies the port where your MySQL database is running.
 
 Server User
-^^^^^^^^^^^
+-----------
 
 .. confval:: mysql username
    :type: :confval:`String`
@@ -1123,7 +1135,7 @@ Server User
 This option sets the user name that will be used to connect to the database.
 
 Server Password
-^^^^^^^^^^^^^^^
+---------------
 
 .. confval:: mysql password
    :type: :confval:`String`
@@ -1139,7 +1151,7 @@ the tag exists, but is empty Gerbera will use an empty password. MySQL has a dis
 no password and an empty password.
 
 Database Name
-^^^^^^^^^^^^^
+-------------
 
 .. confval:: database
    :type: :confval:`String`
@@ -1153,7 +1165,7 @@ Database Name
 Name of the database that will be used by Gerbera.
 
 Init SQL File
-^^^^^^^^^^^^^
+-------------
 
 .. confval:: mysql init-sql-file
    :type: :confval:`String`
@@ -1167,7 +1179,7 @@ Init SQL File
 The full path to the init script for the database.
 
 Upgrade Statement File
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 .. confval:: mysql upgrade-file
    :type: :confval:`String`
@@ -1181,7 +1193,7 @@ Upgrade Statement File
 The full path to the upgrade settings for the database
 
 Database Engine
-^^^^^^^^^^^^^^^
+---------------
 
 .. confval:: engine
    :type: :confval:`String`
@@ -1197,7 +1209,7 @@ Select the storage engine for the tables. Only effective if database has to be c
 The storage engines for MariaDB can be found here https://mariadb.com/kb/en/choosing-the-right-storage-engine/ but may depend on your actual version.
 
 Charset
-^^^^^^^
+-------
 
 .. confval:: mysql charset
    :type: :confval:`String`
@@ -1213,7 +1225,7 @@ Select the character set for the tables. Only effective if database has to be cr
 The character sets for MariaDB can be found here https://mariadb.com/kb/en/supported-character-sets-and-collations/ but may depend on your actual version.
 
 Collation
-^^^^^^^^^
+---------
 
 .. confval:: mysql collation
    :type: :confval:`String`
@@ -1230,8 +1242,9 @@ The collations for MariaDB can be found here https://mariadb.com/kb/en/supported
 
 .. _upnp:
 
+*************
 UPnP Protocol
--------------
+*************
 
 .. confval:: upnp
    :type: :confval:`Section`
@@ -1246,7 +1259,7 @@ Modify the settings for UPnP items.
 This section defines the properties which are sent to UPnP clients as part of the response.
 
 UPnP Attributes
-~~~~~~~~~~~~~~~
+===============
 
 .. confval:: searchable-container-flag
    :type: :confval:`Boolean`
@@ -1344,7 +1357,7 @@ Older versions of gerbera have been searching in the file name instead of the ti
 Number of ``sec::CaptionInfoEx`` entries to write to UPnP result. Default can be overwritten by clients setting. ``-1`` means unlimited.
 
 Search Item Result
-~~~~~~~~~~~~~~~~~~
+==================
 
    .. code-block:: xml
 
@@ -1373,7 +1386,7 @@ Add tag to result string.
 The list of valid tags can be found under :ref:`tags <upnp-tags>`
 
 Response Properties
-~~~~~~~~~~~~~~~~~~~
+===================
 
 .. code-block:: xml
 
@@ -1531,7 +1544,7 @@ Response properties contain the following entries.
     The attributes specify the property:
 
 Property Namespace
-^^^^^^^^^^^^^^^^^^
+------------------
 
 .. confval:: upnp-namespace
    :type: :confval:`Section`
@@ -1560,7 +1573,7 @@ Add namespace required for properties.
     Uri for the namespace
 
 Property Content
-^^^^^^^^^^^^^^^^
+----------------
 
 .. confval:: upnp-property
    :type: :confval:`Section`
@@ -1596,7 +1609,7 @@ Define value of an additional property
     Instead of metadata, you may also use auxdata entries as defined in :confval:`library-options`.
 
 Property Defaults
-~~~~~~~~~~~~~~~~~
+=================
 
 .. confval:: resource-defaults
    :type: :confval:`Section`
@@ -1660,8 +1673,9 @@ It contains the following entries.
     Default value for the property.
 
 
+******************
 Dynamic Containers
-------------------
+******************
 
 .. confval:: containers
    :type: :confval:`Section`
@@ -1690,7 +1704,7 @@ Attributes:
     Enables or disables the dynamic containers driver.
 
 Dynamic Containers Content
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================
 
 .. confval:: containers container
    :type: :confval:`Section`
@@ -1704,7 +1718,9 @@ Dynamic Containers Content
 
 Defines the properties of the dynamic container.
 
-Attributes:
+Containers Attributes
+---------------------
+
    The following attributes can be set for containers
 
     .. confval:: containers container location
@@ -1776,7 +1792,7 @@ Attributes:
     Path to an image to display for the container. It still depends on the client whether the image becomes visible.
 
 Dynamic Content Filter
-^^^^^^^^^^^^^^^^^^^^^^
+----------------------
 
 .. confval:: container filter
    :type: :confval:`String`

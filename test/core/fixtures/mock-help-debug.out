@@ -10,6 +10,9 @@ Usage:
                                 Print a default config.xml file and exit
       --create-example-config [=Section(=All)]
                                 Print a example config.xml file and exit
+      --create-advanced-config [=Section(=All)]
+                                Print a advanced example config.xml file 
+                                and exit
       --check-config            Check config.xml file and exit
       --print-options           Print simple config options and exit
       --offline                 Do not answer UPnP content requests

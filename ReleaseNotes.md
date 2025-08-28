@@ -7,9 +7,17 @@
 ### NEW Features
 
 - WebUI shows referenced items in other parts of layout in details
+- Spinner on WebUI while loading
+- New command line option for even more data in the config example
 
 ### FIXES
 
+- Integer conversion on 32 bit system
+
+### Code Improvements
+
+- MacOS build with ICU
+- Documentation is using special tags for config variables
 
 ## v2.6.1
 

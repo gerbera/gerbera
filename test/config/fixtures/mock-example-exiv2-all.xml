@@ -329,9 +329,11 @@
     <visible-directories></visible-directories>
     <resources case-sensitive="yes">
       <order></order>
-      <fanart><add-dir name="." pattern="%filename%" mime="image/*" />
+      <fanart>
+        <add-dir name="." pattern="%filename%" mime="image/*" />
       </fanart>
-      <subtitle><add-dir name="." pattern="%filename%" mime="application/x-srt" />
+      <subtitle>
+        <add-dir name="." pattern="%filename%" mime="application/x-srt" />
       </subtitle>
       <metafile></metafile>
       <resource></resource>

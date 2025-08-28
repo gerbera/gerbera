@@ -2,9 +2,16 @@
 
 ### HEAD
 
-- Docs: Introduce sphinx toolbox
+- Add Test for formatSizeValue
+- CI Tests: Try more alpine versions
+- Command line option for even more config details
+- Enable ICU for MacOS
+- Fix formatSizeValue on 32-bit systems
 - Implement new Client Quirk to force SortCriteria 'title'
+- Introduce sphinx toolbox
+- nproc missing on MacOS
 - Remove loading complete scripts to create virutal layout
+- Update CMakeLists.txt for ICU on APPLE
 - WebUI: Show referenced items in details
 - WebUI: Show spinner on loading
 

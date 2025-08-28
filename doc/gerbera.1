@@ -5,7 +5,7 @@
 \\$2 \(la\\$1\(ra\\$3
 ..
 .if \n(.g .mso www.tmac
-.TH gerbera 1 2021-11-04 "" ""
+.TH gerbera 1 2025-08-28 "" ""
 .SH NAME
 gerbera \- UPnP MediaServer
 .SH SYNOPSIS
@@ -27,6 +27,8 @@ gerbera \- UPnP MediaServer
 \fB--create-config=Sections\fR
 ] [
 \fB--create-example-config=Sections\fR
+] [
+\fB--create-advanced-config=Sections\fR
 ] [
 \fB--check-config\fR
 ] [
@@ -159,8 +161,11 @@ Daemonize after startup.
 Print the compilation configuration (defaults for used libraries and enabled features) and exit.
 .TP
 \*(T<\fB\-\-create\-config=Section\fR\*(T>
+.TP
 \*(T<\fB\-\-create\-example\-config=Section\fR\*(T>
-Output the default/example configuration to stdout and exit.
+.TP
+\*(T<\fB\-\-create\-advanced\-config=Section\fR\*(T>
+Output the default/example/advanced example configuration to stdout and exit.
 Copy the output to your config.xml and adjust to your needs.
 You can provide the names of sections separated by | to get the section only.
 .TP

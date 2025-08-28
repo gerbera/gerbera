@@ -76,7 +76,7 @@ function importImage(obj, cont, rootPath, autoscanId, containerType) {
   chain.imageRoot.metaData[M_CONTENT_CLASS] = [UPNP_CLASS_IMAGE_ITEM];
   const result = [];
 
-  createUserChain(obj, {}, _Chain, boxSetup, chainSetup, result, rootPath);
+  createUserChain(obj, image, _Chain, boxSetup, chainSetup, result, rootPath);
   result.push(addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]), rootPath));
 
   // Years
