@@ -50,6 +50,12 @@ enum class GeneratorSections {
     All,
 };
 
+enum class ConfigLevel : int {
+    Base, // --create-config
+    Example, // --create-example-config
+    Advanced, // --create-advanced-config
+};
+
 /// \brief Class to generate default or example configuration when called with respective command line
 /// also used in tests
 class ConfigGenerator {
@@ -57,11 +63,11 @@ public:
     ConfigGenerator(
         std::shared_ptr<ConfigDefinition> definition,
         std::string version,
-        bool example,
+        ConfigLevel level,
         int sections = 0)
         : definition(std::move(definition))
         , version(std::move(version))
-        , example(example)
+        , level(level)
         , generateSections(sections)
     {
     }
@@ -115,7 +121,7 @@ protected:
     /// @brief version of gerbera
     std::string version;
     /// \brief activate generation of full example with all defaults
-    bool example { false };
+    ConfigLevel level { ConfigLevel::Base };
     /// \brief bitfield with all sections to generate
     int generateSections { 0 };
     /// \brief dictionary with all generated nodes providing easy access to add subnotes
@@ -124,7 +130,7 @@ protected:
     pugi::xml_document doc;
 
     /// \brief generate list of options
-    void generateOptions(const std::vector<std::pair<ConfigVal, bool>>& options);
+    void generateOptions(const std::vector<std::pair<ConfigVal, ConfigLevel>>& options);
     /// \brief generate all server options
     void generateServerOptions(
         std::shared_ptr<pugi::xml_node>& server,

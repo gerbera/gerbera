@@ -103,6 +103,7 @@ void GerberaRuntime::init(
         { GRB_OPTION_SYSLOG, [=](const std::string& arg) { return this->setSyslog(arg); } },
         { GRB_OPTION_CREATECONFIG, [=](const std::string& arg) { return this->createConfig(arg); }, true, [=]() { return this->printConfig(); } },
         { GRB_OPTION_CREATEEXAMPLECONFIG, [=](const std::string& arg) { return this->createExampleConfig(arg); }, true, [=]() { return this->printConfig(); } },
+        { GRB_OPTION_CREATEADVANCEDCONFIG, [=](const std::string& arg) { return this->createAdvancedConfig(arg); }, true, [=]() { return this->printConfig(); } },
         { GRB_OPTION_HOME, [=](const std::string& arg) { return this->setHome(arg); } },
         { GRB_OPTION_USER, [=](const std::string& arg) { return this->setUser(arg); } },
         { GRB_OPTION_DAEMON, [=](const std::string& arg) { return this->runAsDeamon(arg); } },
@@ -425,9 +426,20 @@ bool GerberaRuntime::printCopyright(const std::string& arg)
     return true;
 }
 
+bool GerberaRuntime::createAdvancedConfig(const std::string& arg)
+{
+    exampleConfigSet = ConfigLevel::Advanced;
+    createConfigSet = true;
+    std::optional<std::string> sectionString = (*results)[arg].as<std::string>();
+
+    sections = ConfigGenerator::makeSections(sectionString.value_or("All"));
+    return true;
+}
+
 bool GerberaRuntime::createExampleConfig(const std::string& arg)
 {
-    exampleConfigSet = true;
+    exampleConfigSet = ConfigLevel::Example;
+    createConfigSet = true;
     std::optional<std::string> sectionString = (*results)[arg].as<std::string>();
 
     sections = ConfigGenerator::makeSections(sectionString.value_or("All"));
@@ -436,6 +448,7 @@ bool GerberaRuntime::createExampleConfig(const std::string& arg)
 
 bool GerberaRuntime::createConfig(const std::string& arg)
 {
+    exampleConfigSet = ConfigLevel::Base;
     createConfigSet = true;
     std::optional<std::string> sectionString = (*results)[arg].as<std::string>();
 
@@ -552,7 +565,7 @@ void GerberaRuntime::handleOptions(const cxxopts::ParseResult* results, bool sta
     auto finalHandlers = executeOptions(argumentCallbacks);
     // Action starts here
     offline = (*results)["offline"].as<bool>();
-    if (!createConfigSet && !exampleConfigSet && startup)
+    if (!createConfigSet && startup)
         logCopyright();
     checkDirs();
     finalizeOptions(finalHandlers);

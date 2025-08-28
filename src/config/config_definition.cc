@@ -106,18 +106,10 @@ static const std::vector<std::vector<std::pair<std::string, std::string>>> defau
 };
 
 /// \brief default values for ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST
-static const std::vector<std::string> defaultContainerArtFile {
-    // "folder.jpg",
-    // "poster.jpg",
-    // "cover.jpg",
-    // "albumartsmall.jpg",
-};
+static const std::vector<std::string> defaultContainerArtFile {};
 
 /// \brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST
-static const std::vector<std::string> defaultSubtitleFile {
-    // "%title%.srt",
-    // "%filename%.srt"
-};
+static const std::vector<std::string> defaultSubtitleFile {};
 
 /// \brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST
 static const std::vector<std::vector<std::pair<std::string, std::string>>> defaultSubtitleDirectory {
@@ -125,16 +117,10 @@ static const std::vector<std::vector<std::pair<std::string, std::string>>> defau
 };
 
 /// \brief default values for ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST
-static const std::vector<std::string> defaultMetadataFile {
-    // "%filename%.nfo"
-};
+static const std::vector<std::string> defaultMetadataFile {};
 
 /// \brief default values for ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST
-static const std::vector<std::string> defaultResourceFile {
-    // "%filename%.srt",
-    // "cover.jpg",
-    // "%album%.jpg",
-};
+static const std::vector<std::string> defaultResourceFile {};
 
 /// \brief default values for ConfigVal::SERVER_UI_ITEMS_PER_PAGE_DROPDOWN
 static const std::vector<std::string> defaultItemsPerPage {

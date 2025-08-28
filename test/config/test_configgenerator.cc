@@ -42,7 +42,7 @@ public:
     {
         std::shared_ptr<ConfigDefinition> definition = std::make_shared<ConfigDefinition>();
         definition->init(definition);
-        subject = new ConfigGenerator(definition, GERBERA_TEST, false);
+        subject = new ConfigGenerator(definition, GERBERA_TEST, ConfigLevel::Base);
         subject->init();
         homePath = "/tmp";
         configDir = ".config/gerbera";
@@ -339,7 +339,7 @@ public:
     {
         std::shared_ptr<ConfigDefinition> definition = std::make_shared<ConfigDefinition>();
         definition->init(definition);
-        subject = new ConfigGenerator(definition, GERBERA_TEST, true);
+        subject = new ConfigGenerator(definition, GERBERA_TEST, ConfigLevel::Example);
         subject->init();
         homePath = "/tmp";
         configDir = ".config/gerbera";

@@ -1,12 +1,19 @@
 .. index:: Configure Import
 
+################
 Configure Import
-================
+################
 
 The import settings define various options on how to aggregate the content.
 
+.. contents::
+   :backlinks: entry
+.. sectnum::
+   :start: 2
+
 .. admonition:: `Overall structure of import section (collapsible)`
    :collapsible: closed
+
 
    .. code-block:: xml
 
@@ -124,8 +131,9 @@ The import settings define various options on how to aggregate the content.
       </import>
 
 
+******
 Import
-~~~~~~
+******
 
 .. Note::
 
@@ -283,8 +291,9 @@ Magic File
 Specifies an alternative file for filemagic, containing mime type information.
 
 
+*********
 Scripting
-~~~~~~~~~
+*********
 
 .. confval:: scripting
    :type: :confval:`Section`
@@ -1003,8 +1012,9 @@ Define or reference link in chain.
 
 .. _autoscan:
 
+********
 Autoscan
-~~~~~~~~
+********
 
 .. confval:: autoscan
    :type: :confval:`Section`
@@ -1262,9 +1272,9 @@ Set the default container type for virtual containers and for physical container
 This is especially useful if the virtual layout simulates the filesystem structure and is not derived from metadata.
 The first object that is added to the container determines the property (audio/image/video) used.
 
-
+******************
 System Directories
-~~~~~~~~~~~~~~~~~~
+******************
 
 .. confval:: system-directories
    :type: :confval:`Section`
@@ -1307,8 +1317,9 @@ Defines a system directory.
    Absolute path to the directory that shall be hidden.
 
 
+*******************
 Visible Directories
-~~~~~~~~~~~~~~~~~~~
+*******************
 
 .. confval:: visible-directories
    :type: :confval:`Section`
@@ -1354,8 +1365,9 @@ The attributes specify various options:
    Absolute path to the directory that shall be visible.
 
 
+**********************
 Virtual Layout Details
-~~~~~~~~~~~~~~~~~~~~~~
+**********************
 
 .. confval:: layout
    :type: :confval:`Section`
@@ -1422,8 +1434,9 @@ Thema replacement is executed after calculation of virtual layout, i.e. after bu
    Target path. ``/`` can be used to create sub structure.
 
 
+**************
 Resource Files
-~~~~~~~~~~~~~~
+**************
 
 .. confval:: resources
    :type: :confval:`Section`
@@ -1711,10 +1724,12 @@ A sample configuration would be:
         </resource>
     </resources>
 
+
 .. _import-mappings:
 
+********
 Mappings
-~~~~~~~~
+********
 
 .. confval:: mappings
    :type: :confval:`Section`
@@ -2129,10 +2144,12 @@ Profile Catalog:
 
     Feel free to provide us improvements to this list!
 
+
 .. _virtual-directories:
 
+*******************
 Virtual Directories
-~~~~~~~~~~~~~~~~~~~
+*******************
 
 .. confval:: virtual-directories
    :type: :confval:`Section`
@@ -2191,10 +2208,12 @@ Add additional identifier for directory of upnp class.
 
    Restrict the key to containers of the given upnp class.
 
+
 .. _library-options:
 
+**********************
 Import Library Options
-~~~~~~~~~~~~~~~~~~~~~~
+**********************
 
 .. confval:: library-options
    :type: :confval:`Section`

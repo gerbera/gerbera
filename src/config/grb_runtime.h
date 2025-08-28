@@ -19,7 +19,7 @@ Gerbera - https://gerbera.io/
 */
 
 /// \file grb_runtime.h
-/// \brief Handling of command line arguments
+/// @brief Handling of command line arguments
 
 #ifndef __GRB_RUNTIME_H__
 #define __GRB_RUNTIME_H__
@@ -36,6 +36,7 @@ Gerbera - https://gerbera.io/
 class Config;
 class ConfigDefinition;
 class Server;
+enum class ConfigLevel;
 namespace spdlog {
 class logger;
 }
@@ -53,6 +54,7 @@ using HandleCallback = std::function<bool()>;
 #define GRB_OPTION_ROTATELOG "rotatelog"
 #define GRB_OPTION_CREATECONFIG "create-config"
 #define GRB_OPTION_CREATEEXAMPLECONFIG "create-example-config"
+#define GRB_OPTION_CREATEADVANCEDCONFIG "create-advanced-config"
 #define GRB_OPTION_CHECKCONFIG "check-config"
 #define GRB_OPTION_OFFLINE "offline"
 #define GRB_OPTION_DAEMON "daemon"
@@ -66,6 +68,7 @@ using HandleCallback = std::function<bool()>;
 
 #define DEFAULT_CONFIG_HOME ".config/gerbera"
 
+/// @brief Structure for command line handling
 struct ArgumentHandler {
     std::string argument;
     ParseCallback parseCallback;
@@ -73,6 +76,7 @@ struct ArgumentHandler {
     HandleCallback handleCallback = nullptr;
 };
 
+/// @brief Structure for command line arguments
 class ConfigOptionArgs {
 public:
     ConfigVal option;
@@ -83,12 +87,14 @@ public:
     std::string argDesc;
 };
 
+/// @brief class to handle Gerbera command line arguments
 class GerberaRuntime {
 public:
     explicit GerberaRuntime();
     explicit GerberaRuntime(
         std::shared_ptr<ConfigDefinition> definition,
         const cxxopts::Options* options);
+    /// @brief terminate gerbera
     void exit(int status)
     {
         cleanUp();
@@ -96,34 +102,47 @@ public:
         std::exit(status);
     }
 
-    /// \brief: Initialise runtime static object
+    /// @brief: Initialise runtime static object
     void init(
         const std::shared_ptr<ConfigDefinition>& definition,
         const cxxopts::Options* options);
-    /// \brief: Handle regular command line options
+    /// @brief: Handle regular command line options
     void handleOptions(const cxxopts::ParseResult* results, bool startup = true);
-    /// \brief: Handle command line options that are linked with configuration values
+    /// @brief: Handle command line options that are linked with configuration values
     void handleConfigOptions(const std::shared_ptr<Config>& configManager, const std::vector<ConfigOptionArgs>& additionalArgs);
-    /// \brief: Handle command line options that require a running server
+    /// @brief: Handle command line options that require a running server
     void handleServerOptions(const std::shared_ptr<Server>& server);
-    /// \brief: Release all loggers
+    /// @brief: Release all loggers
     void shutdown();
 
+    /// @brief access property for magic file
     std::optional<std::string> getMagic() { return magic; }
+    /// @brief access property for home directory
     fs::path getHome() { return home.value_or(""); }
+    /// @brief access property for configuration file
     fs::path getConfigFile() { return configFile.value_or(""); }
+    /// @brief access property for configuration directory
     fs::path getConfDir() { return confDir.value_or(""); }
+    /// @brief access property for data directory
     std::string getDataDir() { return dataDir.value_or(""); }
+    /// @brief access property for PID file
     fs::path getPidFile() { return pidfile.value_or(""); }
+    /// @brief access property for active debug flag
     bool getDebug() const { return debug; }
+    /// @brief access property for active offline flag
     bool getOffline() const { return offline; }
 
+    /// @brief Name of the appilcation from command line
     static const std::string ProgramName;
 
 private:
+    /// @brief Options for command line parsing
     const cxxopts::Options* options;
+    /// @brief First run arguments
     std::vector<ArgumentHandler> argumentCallbacks;
+    /// @brief Arguments to be read after config file loading
     std::vector<ArgumentHandler> argumentOptionCallbacks;
+    /// @brief Arguments to be read after server activation
     std::vector<ArgumentHandler> argumentServerCallbacks;
     std::optional<fs::path> logfile;
     std::optional<fs::path> home;
@@ -136,7 +155,7 @@ private:
     bool startup = false;
     bool debug = false;
     bool offline = false;
-    bool exampleConfigSet = false;
+    ConfigLevel exampleConfigSet;
     int sections;
     bool createConfigSet = false;
     bool configDirSet = false;
@@ -148,41 +167,68 @@ private:
     std::vector<std::string> grbLoggers;
     std::shared_ptr<spdlog::logger> defaultLogger;
 
+    /// @brief handler for help message
     bool printHelpMessage(const std::string& arg);
+    /// @brief handler for debug mode
     bool setDebugMode(const std::string& arg);
+    /// @brief handler for copyright
     bool printCopyright(const std::string& arg);
+    /// @brief handler for options
     bool printOptions(const std::string& arg);
+    /// @brief handler for compile info
     bool printCompileInfo(const std::string& arg);
+    /// @brief handler for log file settings
     bool setLogFile(const std::string& arg);
+    /// @brief handler for syslog
     bool setSyslog(const std::string& arg);
+    /// @brief handler for log file rotation
     bool setRotatelog(const std::string& arg);
+    /// @brief handler for config creation
     bool createConfig(const std::string& arg);
+    /// @brief handler for example config creation
     bool createExampleConfig(const std::string& arg);
+    /// @brief handler for advanced example config creation
+    bool createAdvancedConfig(const std::string& arg);
+    /// @brief handler for home directory
     bool setHome(const std::string& arg);
-    // are we requested to drop privs?
+    /// @brief are we requested to drop privs?
     bool setUser(const std::string& arg);
-    // are we requested to daemonize?
+    /// @brief are we requested to daemonize?
     bool runAsDeamon(const std::string& arg);
+    /// @brief handler for offline mode
     bool setOfflineMode(const std::string& arg);
-    // are we requested to write a pidfile ?
+    /// @brief are we requested to write a pidfile ?
     bool createPidFile(const std::string& arg);
+    /// @brief handler for config file
     bool setConfigFile(const std::string& arg);
+    /// @brief handler for config directory
     bool setConfigDir(const std::string& arg);
 
+    /// @brief handle command line arguments in configuration
     bool handleOptionArgs(const std::string& arg);
 
+    /// @brief add file to server
     bool addFile(const std::string& arg);
 
+    /// @brief print configuration
     bool printConfig();
+    /// @brief generate configuration
     bool generateConfig();
+    /// @brief check folders
     bool checkDirs();
 
+    /// @brief print copyright message
     static void logCopyright();
+    /// @brief load environment variables
     static std::optional<std::string> getEnv(const std::string& envVar);
 
+    /// @brief end command line parsing
     void cleanUp();
+    /// @brief handle list of command line arguments
     std::vector<std::pair<bool, HandleCallback>> executeOptions(const std::vector<ArgumentHandler>& callbacks);
+    /// @brief run handlers after parsing all arguments
     void finalizeOptions(std::vector<std::pair<bool, HandleCallback>> finalHandlers);
+    /// @brief run handlers additional arguments as config options
     void handleAdditionalArgs(const std::vector<ConfigOptionArgs>& additionalArgs);
 };
 
