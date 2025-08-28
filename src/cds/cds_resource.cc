@@ -167,7 +167,7 @@ std::string CdsResource::getAttributeValue(ResourceAttribute attr) const
         break;
     }
     case ResourceAttribute::SIZE: {
-        result = formatSizeValue(stoulString(result));
+        result = formatSizeValue(stoumaxString(result));
         break;
     }
     case ResourceAttribute::RESOLUTION: {

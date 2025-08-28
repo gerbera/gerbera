@@ -140,7 +140,7 @@ std::string toUpper(std::string str)
     return str;
 }
 
-std::int32_t stoiString(const std::string& str, std::int32_t def, std::int32_t base)
+std::int32_t stoiString(const std::string& str, std::int32_t def, int base)
 {
     if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
         return def;
@@ -154,7 +154,7 @@ std::int32_t stoiString(const std::string& str, std::int32_t def, std::int32_t b
     return def;
 }
 
-std::int64_t stolString(const std::string& str, std::int64_t def, std::int64_t base)
+std::int64_t stolString(const std::string& str, std::int64_t def, int base)
 {
     if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
         return def;
@@ -168,7 +168,7 @@ std::int64_t stolString(const std::string& str, std::int64_t def, std::int64_t b
     return def;
 }
 
-unsigned long stoulString(const std::string& str, unsigned long def, unsigned long base)
+unsigned long stoulString(const std::string& str, unsigned long def, int base)
 {
     if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
         return def;
@@ -176,6 +176,20 @@ unsigned long stoulString(const std::string& str, unsigned long def, unsigned lo
     try {
         std::size_t pos;
         return std::stoul(str, &pos, base);
+    } catch (const std::exception& ex) {
+        log_error("{} (input {})", ex.what(), str);
+    }
+    return def;
+}
+
+uintmax_t stoumaxString(const std::string& str, uintmax_t def, int base)
+{
+    if (str.empty() || (str[0] == '-' && !std::isdigit(*str.substr(1).c_str())) || (str[0] != '-' && !std::isdigit(*str.c_str())))
+        return def;
+
+    try {
+        char* endptr;
+        return std::strtoumax(str.c_str(), &endptr, base);
     } catch (const std::exception& ex) {
         log_error("{} (input {})", ex.what(), str);
     }
