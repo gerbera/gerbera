@@ -317,26 +317,19 @@ TEST(ToolsTest, pathToMapTest)
 
 TEST(ToolsTest, formatSizeTest)
 {
-    EXPECT_EQ(CdsResource::formatSizeValue(stoulString("512")), "512 B");
-    EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1024")), "1.00 kB");
-    EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1048576")), "1.00 MB");
-    EXPECT_EQ(CdsResource::formatSizeValue(stoulString("8388608")), "8.00 MB");
-    EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1073741824")), "1.00 GB");
+    EXPECT_EQ(CdsResource::formatSizeValue(stoumaxString("512")), "512 B");
+    EXPECT_EQ(CdsResource::formatSizeValue(stoumaxString("1024")), "1.00 kB");
+    EXPECT_EQ(CdsResource::formatSizeValue(stoumaxString("1048576")), "1.00 MB");
+    EXPECT_EQ(CdsResource::formatSizeValue(stoumaxString("8388608")), "8.00 MB");
+    EXPECT_EQ(CdsResource::formatSizeValue(stoumaxString("1073741824")), "1.00 GB");
+    EXPECT_EQ(CdsResource::formatSizeValue(stoumaxString("2147483648")), "2.00 GB");
+    EXPECT_EQ(CdsResource::formatSizeValue(stoumaxString("4294967296")), "4.00 GB");
+    EXPECT_EQ(CdsResource::formatSizeValue(stoumaxString("8589934592")), "8.00 GB");
+    EXPECT_EQ(CdsResource::formatSizeValue(stoumaxString("1099511627776")), "1.00 TB");
     EXPECT_EQ(CdsResource::formatSizeValue(1073741824), "1.00 GB");
     EXPECT_EQ(CdsResource::formatSizeValue(8589934592), "8.00 GB");
     EXPECT_EQ(CdsResource::formatSizeValue(1099511627776), "1.00 TB");
     EXPECT_EQ(CdsResource::formatSizeValue(1125899906842624LL), "1024.00 TB");
-}
-
-TEST(ToolsTest, formatSizeTestUlong)
-{
-    if (sizeof(unsigned long) >= 8) {
-        EXPECT_EQ(CdsResource::formatSizeValue(stoulString("8589934592")), "8.00 GB");
-        EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1099511627776")), "1.00 TB");
-    } else { // this is the error!
-        EXPECT_EQ(CdsResource::formatSizeValue(stoulString("8589934592")), "0 B");
-        EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1099511627776")), "0 B");
-    }
 }
 
 TEST(ToolsTest, parseTimeTest)
