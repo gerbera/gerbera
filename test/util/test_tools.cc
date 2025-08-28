@@ -315,19 +315,23 @@ TEST(ToolsTest, pathToMapTest)
     EXPECT_EQ(values[""], "meh");
 }
 
-TEST(ToolsTest, DISABLED_formatSizeTest)
+TEST(ToolsTest, formatSizeTest)
 {
     EXPECT_EQ(CdsResource::formatSizeValue(stoulString("512")), "512 B");
     EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1024")), "1.00 kB");
     EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1048576")), "1.00 MB");
     EXPECT_EQ(CdsResource::formatSizeValue(stoulString("8388608")), "8.00 MB");
     EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1073741824")), "1.00 GB");
-    EXPECT_EQ(CdsResource::formatSizeValue(stoulString("8589934592")), "8.00 GB");
-    EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1099511627776")), "1.00 TB");
     EXPECT_EQ(CdsResource::formatSizeValue(1073741824), "1.00 GB");
     EXPECT_EQ(CdsResource::formatSizeValue(8589934592), "8.00 GB");
     EXPECT_EQ(CdsResource::formatSizeValue(1099511627776), "1.00 TB");
     EXPECT_EQ(CdsResource::formatSizeValue(1125899906842624LL), "1024.00 TB");
+}
+
+TEST(ToolsTest, DISABLED_formatSizeTestUlong)
+{
+    EXPECT_EQ(CdsResource::formatSizeValue(stoulString("8589934592")), "8.00 GB");
+    EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1099511627776")), "1.00 TB");
 }
 
 TEST(ToolsTest, parseTimeTest)
