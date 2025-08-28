@@ -756,8 +756,16 @@ endif()
 #
 if(WITH_ICU)
     if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
-         set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/opt/icu4c/lib/pkgconfig")
-         list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/icu4c")
+        # Determine procesor type as there are different paths for "brew" installation.
+        if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64") # "arm64" -> Apple Silicon
+                set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/opt/homebrew/opt/icu4c/lib/pkgconfig")
+                list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/icu4c")
+                list(APPEND CMAKE_PKG_CONFIG_PC_LIB_DIRS "/opt/homebrew/opt/icu4c/lib/pkgconfig")
+        else() # "x86_64" -> Intel
+                set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/opt/icu4c/lib/pkgconfig")
+                list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/icu4c")
+                list(APPEND CMAKE_PKG_CONFIG_PC_LIB_DIRS "/usr/local/opt/icu4c/lib/pkgconfig")
+        endif()
     endif()
     find_package(ICU REQUIRED COMPONENTS i18n io uc)
     # pkg_check_modules(ICU REQUIRED icu-i18n icu-uc icu-io)
