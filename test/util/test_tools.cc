@@ -328,10 +328,15 @@ TEST(ToolsTest, formatSizeTest)
     EXPECT_EQ(CdsResource::formatSizeValue(1125899906842624LL), "1024.00 TB");
 }
 
-TEST(ToolsTest, DISABLED_formatSizeTestUlong)
+TEST(ToolsTest, formatSizeTestUlong)
 {
-    EXPECT_EQ(CdsResource::formatSizeValue(stoulString("8589934592")), "8.00 GB");
-    EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1099511627776")), "1.00 TB");
+    if (sizeof(unsigned long) >= 8) {
+        EXPECT_EQ(CdsResource::formatSizeValue(stoulString("8589934592")), "8.00 GB");
+        EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1099511627776")), "1.00 TB");
+    } else { // this is the error!
+        EXPECT_EQ(CdsResource::formatSizeValue(stoulString("8589934592")), "0 B");
+        EXPECT_EQ(CdsResource::formatSizeValue(stoulString("1099511627776")), "0 B");
+    }
 }
 
 TEST(ToolsTest, parseTimeTest)
