@@ -8,10 +8,12 @@
 - Enable ICU for MacOS
 - Fix formatSizeValue on 32-bit systems
 - Implement new Client Quirk to force SortCriteria 'title'
+- Improve MacOS build
 - Introduce sphinx toolbox
 - nproc missing on MacOS
 - Remove loading complete scripts to create virutal layout
 - Update CMakeLists.txt for ICU on APPLE
+- Update to exiv2 v0.28.6
 - WebUI: Show referenced items in details
 - WebUI: Show spinner on loading
 

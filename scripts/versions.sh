@@ -62,7 +62,7 @@ else
 
     DUKTAPE="2.7.0"
     EBML="1.4.5"
-    EXIV2="v0.28.5"
+    EXIV2="v0.28.6"
     EXIF="v0.6.25"
     FFMPEGTHUMBNAILER="2.2.3"
     FMT="11.2.0"
