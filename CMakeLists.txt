@@ -515,6 +515,18 @@ if (WITH_NPUPNP)
     target_link_libraries(libgerbera PUBLIC NPUPNP::NPUPNP)
 else()
     set(REQ_UPNP_VERSION 1.14.6)
+    if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+        # Determine processor type as there are different paths for "brew" installation.
+        if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64") # "arm64" -> Apple Silicon
+                set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/opt/homebrew/opt/libupnp/lib/pkgconfig")
+                list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/libupnp")
+                list(APPEND CMAKE_PKG_CONFIG_PC_LIB_DIRS "/opt/homebrew/opt/libupnp/lib/pkgconfig")
+        else() # "x86_64" -> Intel (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
+                set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/opt/libupnp/lib/pkgconfig")
+                list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/libupnp")
+                list(APPEND CMAKE_PKG_CONFIG_PC_LIB_DIRS "/usr/local/opt/libupnp/lib/pkgconfig")
+        endif()
+    endif()
     # LibUPnP official target since 1.16 (Lib version 18)
     # This will prefer the provided UPNPConfig.cmake if found, if not, it will fall back our FindUPNP.cmake
     find_package(UPNP ${REQ_UPNP_VERSION} QUIET)
@@ -756,12 +768,12 @@ endif()
 #
 if(WITH_ICU)
     if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
-        # Determine procesor type as there are different paths for "brew" installation.
+        # Determine processor type as there are different paths for "brew" installation.
         if (CMAKE_SYSTEM_PROCESSOR MATCHES "arm64") # "arm64" -> Apple Silicon
                 set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/opt/homebrew/opt/icu4c/lib/pkgconfig")
                 list(APPEND CMAKE_PREFIX_PATH "/opt/homebrew/opt/icu4c")
                 list(APPEND CMAKE_PKG_CONFIG_PC_LIB_DIRS "/opt/homebrew/opt/icu4c/lib/pkgconfig")
-        else() # "x86_64" -> Intel
+        else() # "x86_64" -> Intel (CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64")
                 set(ENV{PKG_CONFIG_PATH} "$ENV{PKG_CONFIG_PATH}:/usr/local/opt/icu4c/lib/pkgconfig")
                 list(APPEND CMAKE_PREFIX_PATH "/usr/local/opt/icu4c")
                 list(APPEND CMAKE_PKG_CONFIG_PC_LIB_DIRS "/usr/local/opt/icu4c/lib/pkgconfig")
@@ -829,13 +841,15 @@ if(BUILD_CHANGELOG)
     )
 endif()
 
-set(BASH_COMPLETION_DIR "/usr/share/bash-completion/completions")
+if(NOT CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    set(BASH_COMPLETION_DIR "/usr/share/bash-completion/completions")
 
-install(FILES
-        scripts/gerbera-completion.sh
-        DESTINATION "${BASH_COMPLETION_DIR}"
-        RENAME gerbera
-)
+    install(FILES
+            scripts/gerbera-completion.sh
+            DESTINATION "${BASH_COMPLETION_DIR}"
+            RENAME gerbera
+    )
+endif()
 
 set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${DEBIAN_EXTRA_FILES})
 
