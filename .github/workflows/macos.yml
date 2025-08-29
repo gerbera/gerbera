@@ -28,6 +28,7 @@ jobs:
             exiv2 \
             fmt \
             ffmpeg \
+            wavpack \
             ffmpegthumbnailer \
             googletest \
             libexif \

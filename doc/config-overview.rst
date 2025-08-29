@@ -13,6 +13,7 @@ be edited by a simple text editor, here is the list of all available options:
 
 Below are links to the configuration sections
 
+* :doc:`Generate Config File </config-generate>`
 * :doc:`General </config-general>`
 * :doc:`Server </config-server>`
 * :doc:`Extended Runtime Options </config-extended>`
@@ -25,8 +26,8 @@ Below are links to the configuration sections
    :maxdepth: 1
    :hidden:
 
-   Configuration Basics     <config-general>
    Config Generation        <config-generate>
+   Configuration Basics     <config-general>
    Server Options           <config-server>
    Extended Options         <config-extended>
    Content Import Options   <config-import>
