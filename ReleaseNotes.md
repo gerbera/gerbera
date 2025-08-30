@@ -2,6 +2,8 @@
 
 ## HEAD
 
+### Removed Features
+
 **Support for loading layout scripts has been removed now. The javascript interface must be used by calling functions depending on the media type.**
 
 ### NEW Features
@@ -16,9 +18,10 @@
 
 ### Code Improvements
 
-- MacOS build with ICU
+- MacOS build with ICU and WavPack
 - Documentation is using special tags for config variables
 - Update maximum library versions of exiv2 (0.28.7)
+
 
 ## v2.6.1
 
@@ -38,6 +41,7 @@ Also the scripting tests no longer support loading complete files.
 
 - Increased size of `debug-mode` config option to `unsigned long long` to avoid overflow. Includes new very long integer config option.
 - Support for loading scripts in tests is dropped in preperation of dropping the feature completely.
+
 
 ## v2.6.0
 
@@ -85,6 +89,7 @@ config file.
 - Update versions of npupnp (6.2.1), fmtlib (11.2.0), spdlog (1.15.3), googletest (1.17.0), pupnp (1.14.24), taglib (2.1.1)
 - Install script for cmake
 
+
 ## v2.5.0
 
 Changed default for layout to `js` if built with JavaScript support.
@@ -116,11 +121,13 @@ The new autoscan mode `manual` in conjunction with the action `Scan Now` replace
 - Removed static from ConfigDefinition
 - Update versions of pugixml (1.15), libexif (v0.6.25), wavpack (5.8.1), fmt (11.1.4), spdlog (1.15.1), wavpack (1.8.1), googletest (1.16.0), libexiv2 (0.28.5)
 
+
 ## v2.4.1
 
 ### FIXES
 
 - Fix Dockerfile
+
 
 ## v2.4.0
 
@@ -162,6 +169,7 @@ There are some noteworthy new features in this release:
 - Update versions of libpupnp (1.14.20), spdlog (1.15.0)
 - Update Build Environment
 - Update versions of js vendor files jquery-ui (v1.13.2 -> v1.14.1), js-cookie (v3.0.1 -> v3.0.5), @popperjs/core (v2.11.6 -> v2.11.8)
+
 
 ## v2.3.0
 
@@ -212,6 +220,7 @@ config being unused or triggering warnings.
 - Refactoring of UPnP services
 - Cleanup of several todos, FIXMES, code smells etc.
 
+
 ## v2.2.0
 
 This update brings a new design for the start page, better logging and a new repository for ubuntu and debian getting rid of jfrog.
@@ -252,6 +261,7 @@ This requires a change in js scripts: All import functions have to return a list
 - Refactoring of Config and Content code
 - Reduce header nesting
 
+
 ## v2.1.0
 
 This release started out as a mere bugfix release but gathered some nice features along the way.
@@ -278,6 +288,7 @@ custom headers for particular clients.
 - Build System: Use cmake presets
 - Build System: Update Conan to V2
 - Build System: Support build with NPUPNP
+
 
 ## v2.0.0
 
@@ -327,6 +338,7 @@ instead of deleted and recreated like before.
 - Update versions of googletest (1.14), pupnp (1.14.18), libexiv2 (v0.28.1), libebml (1.4.5), fmt (10.2.0), pugixml (1.14), spdlog (1.12.0) and taglib (1.13.1)
 - Compatibility with gcc14
 
+
 ## v1.12.1
 
 ### NEW Features
@@ -346,6 +358,7 @@ instead of deleted and recreated like before.
 
 - Reduced header nesting
 - Build with latest versions of pugixml (1.13), spdlog (1.11.0), taglib (1.13), wavpack (5.6.0)
+
 
 ## v1.12.0
 
@@ -375,6 +388,7 @@ instead of deleted and recreated like before.
 
 ### General
 If you activated nfo-metafile resources you have to reimport your media files.
+
 
 ## v1.11.0
 
@@ -409,6 +423,7 @@ If you activated nfo-metafile resources you have to reimport your media files.
 ### General
 To benefit from changes a rescan of all media files is recommended
 
+
 ## v1.10.0
 
 ### NEW Features
@@ -427,6 +442,7 @@ To benefit from changes a rescan of all media files is recommended
 
 ### Code Improvements
 - Update fmt version
+
 
 ## v1.9.2
 
