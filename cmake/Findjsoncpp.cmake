@@ -35,7 +35,7 @@ if (JSONCPP_FOUND)
     else ()
        set (jsoncpp_LIBRARIES ${JSONCPP_LIBRARY} ${PC_JSONCPP_LIBRARIES})
     endif ()
-    set (jsoncpp_INCLUDE_DIRS ${JSONCPP_INCLUDE_DIR} )
+    set (jsoncpp_INCLUDE_DIRS ${JSONCPP_INCLUDE_DIR})
 
     if(NOT TARGET jsoncpp::jsoncpp)
         add_library(jsoncpp::jsoncpp INTERFACE IMPORTED)

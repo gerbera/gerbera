@@ -22,8 +22,12 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(wavpack
     REQUIRED_VARS WAVPACK_LIBRARY WAVPACK_INCLUDE_DIR)
 
 if (WAVPACK_FOUND)
-    set (wavpack_LIBRARIES ${WAVPACK_LIBRARY} ${PC_WAVPACK_LIBRARIES})
-    set (wavpack_INCLUDE_DIRS ${WAVPACK_INCLUDE_DIR} )
+    if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+       set (wavpack_LIBRARIES ${WAVPACK_LIBRARY})
+    else ()
+       set (wavpack_LIBRARIES ${WAVPACK_LIBRARY} ${PC_WAVPACK_LIBRARIES})
+    endif ()
+    set (wavpack_INCLUDE_DIRS ${WAVPACK_INCLUDE_DIR})
 
     if(NOT TARGET wavpack::wavpack)
         add_library(wavpack::wavpack INTERFACE IMPORTED)
