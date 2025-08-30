@@ -230,7 +230,7 @@
         "WITH_JS": "ON",
         "WITH_TAGLIB": "ON",
         "WITH_AVCODEC": "ON",
-        "WITH_WAVPACK": "OFF",
+        "WITH_WAVPACK": "ON",
         "WITH_FFMPEGTHUMBNAILER": "ON",
         "WITH_EXIF": "ON",
         "WITH_EXIV2": "ON",
