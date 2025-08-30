@@ -24,6 +24,7 @@ jobs:
           brew uninstall cmake; \
           brew install \
             cmake \
+            pkg-config \
             duktape \
             exiv2 \
             fmt \
