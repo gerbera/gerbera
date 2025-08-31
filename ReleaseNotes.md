@@ -18,7 +18,7 @@
 
 - MacOS build with ICU
 - Documentation is using special tags for config variables
-- Update maximum library versions of exiv2 (0.28.6)
+- Update maximum library versions of exiv2 (0.28.7)
 
 ## v2.6.1
 
