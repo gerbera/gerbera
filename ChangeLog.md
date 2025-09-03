@@ -8,6 +8,7 @@
 - Enable ICU for MacOS
 - Fix formatSizeValue on 32-bit systems
 - Fix derivedFrom search handling
+- Handle title from nfo correctly
 - Implement new Client Quirk to force SortCriteria 'title'
 - Improve MacOS build
 - Introduce sphinx toolbox

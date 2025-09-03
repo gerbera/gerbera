@@ -38,6 +38,7 @@ function parseNfo(obj, nfo_file_name) {
   var node = readXml(-2);
   var level = 0;
   var isActor = false;
+  var isSeries = false;
 
   while (node || level > 0) {
     if (!node && level > 0) {
@@ -60,13 +61,20 @@ function parseNfo(obj, nfo_file_name) {
     } else if (node.NAME === "episodedetails") {
       node = readXml(1); // read children
       obj.upnpclass = UPNP_CLASS_VIDEO_BROADCAST;
+      isSeries = true;
       level++;
     } else if (node.NAME === "actor") {
       node = readXml(1); // read children
       isActor = true;
       level++;
     } else if (node.NAME == "title") {
-      obj.title = node.VALUE;
+      if (isSeries)
+        addMeta(obj, "upnp:programTitle", node.VALUE);
+      else
+        addMeta(obj, M_TITLE, node.VALUE);
+      node = readXml(0); // read next
+    } else if (node.NAME == "showtitle") {
+      addMeta(obj, "upnp:seriesTitle", node.VALUE);
       node = readXml(0); // read next
     } else if (node.NAME == "plot") {
       obj.description = node.VALUE;
