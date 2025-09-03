@@ -230,8 +230,8 @@ TEST_F(MetafileNfoTest, SetsPropertiesFromFile)
     root = xmlDoc.document_element();
     const std::string location = "/location/of/movie.mpg";
     const std::string fileName = "/location/of/movie.nfo";
-    const std::string plot = "UPnP Media Server for 2022";
-    const std::string title = "This is Gerbera";
+    const std::string plot = "UPnP Media Server for 2025";
+    const std::string title = "Gerbera rocks";
     std::map<std::string, std::string> asDictionary {
         { "upnpclass", UPNP_CLASS_VIDEO_MOVIE },
         { "title", title },
@@ -239,22 +239,23 @@ TEST_F(MetafileNfoTest, SetsPropertiesFromFile)
         { "0-upnp:originalTrackNumber", "10" },
         { "1-upnp:episodeSeason", "0" },
         { "2-upnp:none", "done" },
-        { "3-upnp:rating", "NONE" },
-        { "4-upnp:rating@type", "MPAA.ORG" },
-        { "5-upnp:rating@equivalentAge", "NONE" },
-        { "6-upnp:genre", "Mediaplayer" },
-        { "7-upnp:region", "Github" },
-        { "8-upnp:director", "Gerbera Team" },
-        { "9-dc:date", "2005-01-04" },
-        { "10-dc:publisher", "Gerbera Home" },
-        { "11-upnp:actor", "Ian Whyman" },
-        { "12-upnp:actor", "Karl Straussberger" },
+        { "3-dc:title", "This is Gerbera" },
+        { "4-upnp:rating", "NONE" },
+        { "5-upnp:rating@type", "MPAA.ORG" },
+        { "6-upnp:rating@equivalentAge", "NONE" },
+        { "7-upnp:genre", "Mediaplayer" },
+        { "8-upnp:region", "Github" },
+        { "9-upnp:director", "Gerbera Team" },
+        { "10-dc:date", "2005-01-04" },
+        { "11-dc:publisher", "Gerbera Home" },
+        { "12-upnp:actor", "Ian Whyman" },
+        { "13-upnp:actor", "Karl Straussberger" },
     };
 
     // Expecting the common script calls..and will proxy through the mock objects for verification.
     EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq(fmt::format("Processing metafile: {} for {} nfo", fileName, location)))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readXml(Eq("<movie ></movie>"))).Times(2).WillRepeatedly(Return(1));
-    EXPECT_CALL(*commonScriptMock, readXml(Eq(fmt::format("<title >{}</title>", title)))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, readXml(Eq("<title >This is Gerbera</title>"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readXml(Eq("<originaltitle >It was MediaTomb</originaltitle>"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readXml(Eq("<sorttitle >Gerbera</sorttitle>"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, readXml(Eq("<userrating >0</userrating>"))).WillOnce(Return(1));
@@ -277,7 +278,7 @@ TEST_F(MetafileNfoTest, SetsPropertiesFromFile)
 
     addGlobalFunctions(ctx, js_global_functions);
     auto fnResult = callFunction(ctx, dukMockMetafile,
-        { { "location", location } }, {}, {}, {},
+        { { "title", title }, { "location", location } }, {}, {}, {},
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video),
         fileName);
     std::vector<int> items {};

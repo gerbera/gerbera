@@ -297,19 +297,12 @@ function mapGenre(genre) {
 
 // doc-map-audio-details-begin
 function getAudioDetails(obj) {
-  // Note the difference between obj.title and obj.metaData[M_TITLE] -
-  // while object.title will originally be set to the file name,
-  // obj.metaData[M_TITLE] will contain the parsed title - in this
-  // particular example the ID3 title of an MP3.
-  var title = obj.title;
+  var title = getTitle(obj);
 
   // First we will gather all the metadata that is provided by our
   // object, of course it is possible that some fields are empty -
   // we will have to check that to make sure that we handle this
   // case correctly.
-  if (obj.metaData[M_TITLE] && obj.metaData[M_TITLE][0]) {
-    title = obj.metaData[M_TITLE][0];
-  }
 
   var desc = '';
   var artist = ['Unknown'];
@@ -584,12 +577,32 @@ function boolFromConfig(entry, defValue) {
 }
 // doc-map-bool-config-end
 
+function getTitle(obj) {
+  var title = '';
+
+  // Note the difference between obj.title and obj.metaData[M_TITLE] -
+  // while obj.title will originally be set to the file name,
+  // obj.metaData[M_TITLE] will contain the parsed title - in this
+  // particular example the ID3 title of an MP3.
+  if (obj.metaData["upnp:seriesTitle"] && obj.metaData["upnp:seriesTitle"][0])
+    title += ' ' + obj.metaData["upnp:seriesTitle"][0];
+  if (obj.metaData["upnp:programTitle"] && obj.metaData["upnp:programTitle"][0])
+    title += ' ' + obj.metaData["upnp:programTitle"][0];
+  if (obj.metaData[M_TITLE] && obj.metaData[M_TITLE][0] && obj.metaData[M_TITLE][0] !== obj.title)
+    title += ' ' + obj.metaData[M_TITLE][0];
+  if (!title || title === '')
+    title = obj.title;
+  return title;
+}
+
 function getVideoDetails(obj, rootPath) {
+  const title = getTitle(obj);
   const date = obj.metaData[M_CREATION_DATE] && obj.metaData[M_CREATION_DATE][0] ? obj.metaData[M_CREATION_DATE][0] : '';
   const dateParts = date.split('-');
   const dateParts2 = date.split('T');
   const dir = getRootPath(rootPath, obj.location);
   return {
+    title: title ? title.trim() : '',
     year: (dateParts.length > 1) ? dateParts[0] : '',
     month: (dateParts.length > 1) ? dateParts[1] : '',
     date: (dateParts2.length > 1) ? dateParts2[0] : date,
@@ -598,11 +611,13 @@ function getVideoDetails(obj, rootPath) {
 }
 
 function getImageDetails(obj, rootPath) {
+  const title = getTitle(obj);
   const date = obj.metaData[M_DATE] && obj.metaData[M_DATE][0] ? obj.metaData[M_DATE][0] : '';
   const dateParts = date.split('-');
   const dateParts2 = date.split('T');
   const dir = getRootPath(rootPath, obj.location);
   return {
+    title: title ? title.trim() : '',
     year: (dateParts.length > 1) ? dateParts[0] : '',
     month: (dateParts.length > 1) ? dateParts[1] : '',
     date: (dateParts2.length > 1) ? dateParts2[0] : date,

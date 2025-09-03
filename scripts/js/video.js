@@ -24,6 +24,7 @@
 function importVideo(obj, cont, rootPath, autoscanId, containerType) {
   const video = getVideoDetails(obj, rootPath);
   obj.sortKey = '';
+  obj.title = video.title;
   const parentCount = intFromConfig('/import/resources/container/attribute::parentCount', 1);
   const containerResource = parentCount > 1 ? cont.res : undefined;
   const containerRefID = cont.res.count > 0 ? cont.id : obj.id;
