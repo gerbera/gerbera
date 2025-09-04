@@ -76,6 +76,7 @@ sudo make install
 | [libexiv2]          | v0.26       | v0.27.7     | v0.28.7              | Optional      | Exif, IPTC, XMP metadata   | Disabled |
 | [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0                | Optional      | Enables scrobbling         | Disabled |
 | [ffmpegthumbnailer] |             | 2.2.2       | 2.2.3                | Optional      | Generate video thumbnails  | Disabled |
+| [libsystemd]        |             | 254         | 257                  | Optional      | Generate video thumbnails  | Disabled |
 | inotify             |             |             |                      | Optional      | Efficient file monitoring  | Enabled  |
 
 ## Development Dependencies
@@ -116,6 +117,7 @@ sudo make install
 [libexif]: https://github.com/libexif/libexif
 [libexiv2]: https://github.com/Exiv2/exiv2
 [libmatroska]: https://github.com/Matroska-Org/libmatroska
+[libsystemd]: https://github.com/systemd/systemd
 [npupnp]: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
 [pugixml]: https://github.com/zeux/pugixml
 [pupnp]: https://github.com/pupnp/pupnp

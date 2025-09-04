@@ -5,6 +5,7 @@ Wants=${SYSTEMD_WANTS_TARGET}
 
 [Service]
 Type=simple
+NotifyAccess=all
 User=gerbera
 Group=gerbera
 ExecStart=${CMAKE_INSTALL_PREFIX}/bin/gerbera -c /etc/gerbera/config.xml --syslog

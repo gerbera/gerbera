@@ -46,6 +46,10 @@ Gerbera - https://gerbera.io/
 #include <sys/types.h>
 #include <unistd.h>
 
+#ifdef HAVE_SYSTEMD
+#include <systemd/sd-daemon.h>
+#endif
+
 GerberaRuntime::GerberaRuntime()
     : confDir(DEFAULT_CONFIG_HOME)
 {
@@ -123,6 +127,15 @@ void GerberaRuntime::init(
     };
 }
 
+void GerberaRuntime::exit(int status)
+{
+    cleanUp();
+    shutdown();
+    notifySystemd(ServiceStatus::Terminated,
+        std::vector<std::string> { fmt::format("EXIT_STATUS={}", status) });
+    std::exit(status);
+}
+
 void GerberaRuntime::shutdown()
 {
     for (auto&& grbLogger : grbLoggers) {
@@ -130,6 +143,28 @@ void GerberaRuntime::shutdown()
     }
     if (defaultLogger)
         spdlog::set_default_logger(defaultLogger);
+}
+
+static const std::map<ServiceStatus, std::string_view> statusMessage {
+    { ServiceStatus::Ready, "READY=1" },
+    { ServiceStatus::Reloading, "RELOADING=1" },
+    { ServiceStatus::Stopping, "STOPPING=1" },
+    { ServiceStatus::Terminated, "STATUS=Stopped" },
+};
+
+void GerberaRuntime::notifySystemd(
+    ServiceStatus status,
+    const std::vector<std::string>& messages)
+{
+    std::vector<std::string> stateList;
+    stateList.emplace_back(statusMessage.at(status));
+    if (!messages.empty())
+        for (auto&& message : messages)
+            stateList.push_back(message);
+#ifdef HAVE_SYSTEMD
+    sd_notify(0, fmt::format("{}", fmt::join(stateList, "\n")).c_str());
+#endif
+    log_debug("systemd: {}", fmt::join(stateList, "\n"));
 }
 
 bool GerberaRuntime::handleOptionArgs(const std::string& arg)

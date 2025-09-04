@@ -90,6 +90,10 @@ Optional Packages
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | libmatroska_        | MKV metadata               | WITH\_MATROSKA          | Enabled  | install-matroska.sh          |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
+| libsystemd_         | Systemd support and        | WITH\_SYSTEMD           | Enabled  |                              |
+|                     |                            |                         |          |                              |
+|                     | Install Systemd unit file  |                         |          |                              |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
 | mysql               | Alternate database storage | WITH\_MYSQL             | Disabled |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | taglib_             | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh            |
@@ -112,6 +116,7 @@ Optional Packages
 .. _libmatroska: https://github.com/Matroska-Org/libmatroska
 .. _libnpupnp: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
 .. _libpupnp: https://github.com/pupnp/pupnp
+.. _libsystemd: https://github.com/systemd/systemd
 .. _pugixml: https://github.com/zeux/pugixml
 .. _spdlog: https://github.com/gabime/spdlog
 .. _taglib: https://taglib.org/
@@ -131,8 +136,6 @@ Additional cmake Options
 +------------------------+-----------------------------------------------------+----------+
 | Option                 | Note                                                | Default  |
 +========================+=====================================================+==========+
-| WITH\_SYSTEMD          | Install Systemd unit file                           | Enabled  |
-+------------------------+-----------------------------------------------------+----------+
 | WITH\_ONLINE_\SERVICES | Enable support for Online Services.                 | Disabled |
 |                        | Currently there is no online service left           |          |
 +------------------------+-----------------------------------------------------+----------+

@@ -56,6 +56,7 @@ class GerberaConan(ConanFile):
         "jsoncpp/[>=1.9.6]",
         "libiconv/[>=1.16]",
         "sqlite3/[>=3.35.5]",
+        "libsystemd/[>=255]",
         "zlib/1.3.1",
         "pupnp/[>=1.14.16]",
         "taglib/[>=1.12]",
