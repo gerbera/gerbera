@@ -5,6 +5,7 @@
 - Add Test for formatSizeValue
 - CI Tests: Try more alpine versions
 - Command line option for even more config details
+- Documentation on Return Path Filtering
 - Enable ICU for MacOS
 - Fix formatSizeValue on 32-bit systems
 - Fix derivedFrom search handling
