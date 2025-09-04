@@ -63,6 +63,29 @@ You should also make sure that your firewall is not blocking port UDP port ``190
 port of Gerbera. By default Gerbera will select a free port starting with ``49152``, however you can specify a port
 of your choice in the configuration file.
 
+Some systems turn on return path filtering by default. In this case gerbera may not receive the multicast packats, also.
+Filtering can be turned off by (select ``all`` if you only have one network interface):
+
+.. code-block:: console
+
+    $ echo 0 > /proc/sys/net/ipv4/conf/eth1/rp_filter
+    $ echo 0 > /proc/sys/net/ipv4/conf/all/rp_filter
+
+or
+
+.. code-block:: console
+
+    $ sysctl net.ipv4.conf.eth1.rp_filter=0
+    $ sysctl net.ipv4.conf.all.rp_filter=0
+
+or add the matching version of the following lines to ``/etc/sysctl.d/75-gerbera.conf``
+
+.. code-block:: console
+
+    $ net.ipv4.conf.eth1.rp_filter = 0
+    $ net.ipv4.conf.all.rp_filter = 0
+
+
 Reverse Proxy Setup
 ~~~~~~~~~~~~~~~~~~~
 
