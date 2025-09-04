@@ -17,9 +17,14 @@ find_path(EBML_INCLUDE_DIR EbmlVersion.h
         PATH_SUFFIXES ebml)
 FIND_LIBRARY(EBML_LIBRARY ebml
         HINTS ${PC_EBML_LIBDIR})
+set(EBML_VERSION ${PC_EBML_VERSION})
 
-find_package_handle_standard_args(EBML DEFAULT_MSG
-        EBML_LIBRARY EBML_INCLUDE_DIR)
+find_package_handle_standard_args(EBML
+    REQUIRED_VARS
+        EBML_LIBRARY EBML_INCLUDE_DIR
+    VERSION_VAR
+        EBML_VERSION)
+
 if (EBML_FOUND)
     set(EBML_LIBRARIES ${EBML_LIBRARY})
     set(EBML_INCLUDE_DIRS ${EBML_INCLUDE_DIR})

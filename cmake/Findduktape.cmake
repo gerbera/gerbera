@@ -8,7 +8,7 @@
 #
 
 find_package(PkgConfig QUIET)
-pkg_check_modules(PC_DUK QUIET duktape libduktape)
+pkg_search_module(PC_DUK QUIET duktape libduktape)
 
 find_path(DUKTAPE_INCLUDE_DIR duktape.h
     HINTS ${PC_DUK_INCLUDEDIR} ${PC_DUK_INCLUDE_DIRS}
@@ -17,10 +17,14 @@ find_path(DUKTAPE_INCLUDE_DIR duktape.h
 find_library(DUKTAPE_LIBRARY
     NAMES duktape libduktape
     HINTS ${PC_DUK_LIBDIR} ${PC_DUK_LIBRARY_DIRS})
+set(DUKTAPE_VERSION ${PC_DUK_VERSION})
 
 include(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(duktape
-    REQUIRED_VARS DUKTAPE_LIBRARY DUKTAPE_INCLUDE_DIR)
+    REQUIRED_VARS
+        DUKTAPE_LIBRARY DUKTAPE_INCLUDE_DIR
+    VERSION_VAR
+        DUKTAPE_VERSION)
 
 if (DUKTAPE_FOUND)
     set (DUKTAPE_LIBRARIES ${DUKTAPE_LIBRARY})

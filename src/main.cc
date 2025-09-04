@@ -235,6 +235,7 @@ int main(int argc, char** argv, char** envp)
         std::shared_ptr<ConfigManager> configManager;
         int portnum = -1;
         try {
+            runtime.notifySystemd(ServiceStatus::Reloading);
             configManager = std::make_shared<ConfigManager>(
                 definition,
                 runtime.getConfigFile(), runtime.getHome(), runtime.getConfDir(),
@@ -269,6 +270,7 @@ int main(int argc, char** argv, char** envp)
         try {
             server->init(definition, runtime.getOffline());
             server->run();
+            runtime.notifySystemd(ServiceStatus::Ready);
         } catch (const UpnpException& ue) {
             log_error("{}", ue.what());
 
@@ -293,6 +295,7 @@ int main(int argc, char** argv, char** envp)
             }
 
             try {
+                runtime.notifySystemd(ServiceStatus::Stopping);
                 if (server)
                     server->shutdown();
                 server.reset();
@@ -322,6 +325,7 @@ int main(int argc, char** argv, char** envp)
 
             if (_ctx.restartFlag != 0) {
                 log_info("Restarting Gerbera!");
+                runtime.notifySystemd(ServiceStatus::Reloading);
                 try {
                     server->shutdown();
                     server.reset();
@@ -365,6 +369,7 @@ int main(int argc, char** argv, char** envp)
                     server = std::make_shared<Server>(configManager);
                     server->init(definition, runtimeChild.getOffline());
                     server->run();
+                    runtime.notifySystemd(ServiceStatus::Ready);
 
                     _ctx.restartFlag = 0;
                 } catch (const std::runtime_error& ex) {
@@ -388,6 +393,7 @@ int main(int argc, char** argv, char** envp)
         // shutting down
         int ret = EXIT_SUCCESS;
         try {
+            runtime.notifySystemd(ServiceStatus::Stopping);
             server->shutdown();
             server.reset();
             configManager.reset();

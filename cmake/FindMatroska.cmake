@@ -17,9 +17,14 @@ find_path(Matroska_INCLUDE_DIR KaxVersion.h
         PATH_SUFFIXES matroska)
 find_library(Matroska_LIBRARY matroska
         HINTS ${PC_MAT_LIBDIR})
+set(Matroska_VERSION ${PC_MAT_VERSION})
 
-find_package_handle_standard_args(Matroska DEFAULT_MSG
-        Matroska_LIBRARY Matroska_INCLUDE_DIR)
+find_package_handle_standard_args(Matroska
+    REQUIRED_VARS
+        Matroska_LIBRARY Matroska_INCLUDE_DIR
+    VERSION_VAR
+        Matroska_VERSION)
+
 if (Matroska_FOUND)
     set(Matroska_LIBRARIES ${Matroska_LIBRARY})
     set(Matroska_INCLUDE_DIRS ${Matroska_INCLUDE_DIR})

@@ -76,6 +76,13 @@ struct ArgumentHandler {
     HandleCallback handleCallback = nullptr;
 };
 
+enum class ServiceStatus {
+    Ready,
+    Reloading,
+    Stopping,
+    Terminated,
+};
+
 /// @brief Structure for command line arguments
 class ConfigOptionArgs {
 public:
@@ -95,12 +102,7 @@ public:
         std::shared_ptr<ConfigDefinition> definition,
         const cxxopts::Options* options);
     /// @brief terminate gerbera
-    void exit(int status)
-    {
-        cleanUp();
-        shutdown();
-        std::exit(status);
-    }
+    void exit(int status);
 
     /// @brief: Initialise runtime static object
     void init(
@@ -114,6 +116,8 @@ public:
     void handleServerOptions(const std::shared_ptr<Server>& server);
     /// @brief: Release all loggers
     void shutdown();
+    /// @brief send status to systemd
+    static void notifySystemd(ServiceStatus status, const std::vector<std::string>& messages = {});
 
     /// @brief access property for magic file
     std::optional<std::string> getMagic() { return magic; }

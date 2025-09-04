@@ -11,16 +11,20 @@
 - WebUI shows referenced items in other parts of layout in details
 - Spinner on WebUI while loading
 - New command line option for even more data in the config example
+- Integration with systemd
 
 ### FIXES
 
 - Integer conversion on 32 bit system
+- Search for contentClass (Samsung TV)
+- Title from NFO files
 
 ### Code Improvements
 
 - MacOS build with ICU and WavPack
 - Documentation is using special tags for config variables
 - Update maximum library versions of exiv2 (0.28.7)
+- Cleanup of cmake modules
 
 
 ## v2.6.1

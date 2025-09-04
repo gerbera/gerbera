@@ -126,6 +126,9 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
 #ifdef HAVE_INOTIFY
         { "HAVE_INOTIFY", "" },
 #endif
+#ifdef HAVE_SYSTEMD
+        { "HAVE_SYSTEMD", LIBSYSTEMD_VERSION },
+#endif
 #ifdef HAVE_ICU
         { "HAVE_ICU", U_ICU_VERSION },
 #endif

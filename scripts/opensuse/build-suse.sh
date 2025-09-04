@@ -160,6 +160,7 @@ if [[ ! -d ${BUILD_DIR} ]]; then
       ${libmysqlclient} \
       ${libpugixml} \
       ${jsoncpp} \
+      systemd-devel \
       libicu-devel \
       sqlite3-devel \
       libuuid-devel
