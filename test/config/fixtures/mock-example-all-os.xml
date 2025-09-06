@@ -187,6 +187,7 @@
       <ffmpegthumbnailer enabled="yes" video-enabled="yes" image-enabled="yes">
         <thumbnail-size>160</thumbnail-size>
         <seek-percentage>5</seek-percentage>
+        <rotate>no</rotate>
         <filmstrip-overlay>no</filmstrip-overlay>
         <image-quality>8</image-quality>
         <cache-dir enabled="yes"></cache-dir>

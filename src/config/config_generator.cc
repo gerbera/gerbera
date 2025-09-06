@@ -512,6 +512,7 @@ void ConfigGenerator::generateExtendedRuntime()
         { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED, ConfigLevel::Base }, // clang does require additional indentation
         { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE, ConfigLevel::Base },
         { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE, ConfigLevel::Base },
+        { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ROTATE, ConfigLevel::Example },
         { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY, ConfigLevel::Base },
         { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY, ConfigLevel::Base },
         { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_VIDEO_ENABLED, ConfigLevel::Example },
