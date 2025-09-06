@@ -124,6 +124,7 @@ std::map<GrbLogFacility, std::string_view> GrbLogger::facilities = {
     { GrbLogFacility::curl, "Curl" },
     { GrbLogFacility::util, "Util" },
     { GrbLogFacility::inotify, "Inotify" },
+    { GrbLogFacility::thumbnailer, "Thumbnailer" },
     { GrbLogFacility::verbose, "VERBOSE" },
     // doc-debug-modes-end
 

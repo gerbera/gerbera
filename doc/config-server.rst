@@ -35,6 +35,8 @@ Server Attributes
          :required: false
          :default: unset
       .. versionadded:: 2.0.0
+      .. versionchanged:: 2.6.1 new option ``inotify``
+      .. versionchanged:: 2.6.2 new option ``thumbnailer``
 
       Activate debugging messages only for certain subsystems.
       The following subsystems are available:
@@ -44,7 +46,7 @@ Server Attributes
       ``exif``, ``exiv2``, ``transcoding``, ``taglib``, ``ffmpeg``, ``wavpack``,
       ``requests``, ``device``, ``connmgr``, ``mrregistrar``, ``xml``,
       ``clients``, ``iohandler``, ``online``, ``metadata``, ``matroska``,
-      ``curl``, ``util``, ``inotify`` and ``verbose``.
+      ``curl``, ``util``, ``inotify``, ``thumbnailer`` and ``verbose``.
       Multiple subsystems can be combined with a ``|``. Names are not case
       sensitive. ``verbose`` turns on even more messages for the subsystem.
       This is for developers and testers mostly and has to be

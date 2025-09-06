@@ -36,6 +36,7 @@ class CdsObject;
 class IOHandler;
 enum class ObjectType;
 
+/// @brief: class to treat virtual resource for videos and images to generate thumbnails
 class FfmpegThumbnailerHandler : public MediaMetadataHandler {
 public:
     explicit FfmpegThumbnailerHandler(
@@ -63,8 +64,13 @@ private:
     mutable std::mutex thumb_mutex;
     fs::path cachePath;
     ObjectType mediaType;
+    /// @brief: read cached thumbnail
     std::optional<std::vector<std::byte>> readThumbnailCacheFile(const fs::path& movieFilename) const;
-    void writeThumbnailCacheFile(const fs::path& movieFilename, const std::byte* data, std::size_t size) const;
+    /// @brief: cache generated thumb
+    void writeThumbnailCacheFile(
+        const fs::path& movieFilename,
+        const std::byte* data,
+        std::size_t size) const;
 };
 
 #endif // HAVE_FFMPEGTHUMBNAILER

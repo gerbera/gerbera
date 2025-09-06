@@ -170,6 +170,7 @@
                 <xs:element ref="thumbnail-size" minOccurs="1"/>
                 <xs:element ref="seek-percentage" minOccurs="1"/>
                 <xs:element ref="filmstrip-overlay" minOccurs="0"/>
+                <xs:element ref="rotate" minOccurs="0"/>
                 <xs:element ref="workaround-bugs" minOccurs="0"/>
                 <xs:element ref="image-quality" minOccurs="1"/>
             </xs:all>
@@ -179,15 +180,8 @@
         </xs:complexType>
     </xs:element>
 
-    <xs:element name="filmstrip-overlay" default="no">
-        <xs:simpleType>
-            <xs:restriction base="xs:string">
-                <xs:enumeration value="no"/>
-                <xs:enumeration value="yes"/>
-            </xs:restriction>
-        </xs:simpleType>
-    </xs:element>
-
+    <xs:element name="filmstrip-overlay" type="boolean" default="no"/>
+    <xs:element name="rotate" type="boolean" default="no"/>
     <xs:element name="cache-dir">
         <xs:complexType>
             <xs:simpleContent>
@@ -199,14 +193,7 @@
     </xs:element>
     <xs:element name="thumbnail-size" type="xs:positiveInteger" default="128"/>
     <xs:element name="seek-percentage" type="xs:positiveInteger" default="5"/>
-    <xs:element name="workaround-bugs" default="no">
-        <xs:simpleType>
-            <xs:restriction base="xs:string">
-                <xs:enumeration value="no"/>
-                <xs:enumeration value="yes"/>
-            </xs:restriction>
-        </xs:simpleType>
-    </xs:element>
+    <xs:element name="workaround-bugs" type="boolean" default="no"/>
     <xs:element name="image-quality" type="xs:positiveInteger" default="8"/>
 
     <xs:element name="mark-played-items">

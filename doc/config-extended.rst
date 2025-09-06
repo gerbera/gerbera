@@ -136,13 +136,26 @@ Time to seek to in the movie (percentage), values less than zero are not allowed
 .. confval:: ffmpegthumbnailer filmstrip-overlay
    :type: :confval:`Boolean`
    :required: false
-   :default: ``yes``
+   :default: ``no``
 
    .. code:: xml
 
-      <filmstrip-overlay>no</filmstrip-overlay>
+      <filmstrip-overlay>yes</filmstrip-overlay>
 
 Creates a filmstrip like border around the image, turn this option off if you want pure images.
+
+.. confval:: ffmpegthumbnailer rotate
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``no``
+
+   .. code:: xml
+
+      <rotate>yes</rotate>
+
+.. versionadded:: 2.6.2
+
+Rotates the thumbnail depending on orientation of the movie/picture.
 
 .. confval:: ffmpegthumbnailer image-quality
    :type: :confval:`Integer`

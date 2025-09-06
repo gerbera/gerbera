@@ -16,6 +16,7 @@
 - Introduce sphinx toolbox
 - nproc missing on MacOS
 - Remove loading complete scripts to create virutal layout
+- Rotation of thumbnails by ffmpegthumbnailer
 - Update CMakeLists.txt for ICU on APPLE
 - Update to exiv2 v0.28.6
 - Update to exiv2 v0.28.7
