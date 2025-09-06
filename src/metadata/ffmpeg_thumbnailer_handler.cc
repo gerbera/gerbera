@@ -49,6 +49,79 @@ static void ffmpegThLogger(ThumbnailerLogLevel logLevel, const std::string& mess
     }
 }
 
+class RotationFilter : public ffmpegthumbnailer::IFilter {
+protected:
+    int orientation;
+
+    // Hilfsfunktion: Berechnet die neue Bildgröße nach Rotation
+    static std::pair<int, int> computeRotatedSize(int width, int height, double radians)
+    {
+        double abs_cos = std::abs(std::cos(radians));
+        double abs_sin = std::abs(std::sin(radians));
+        int outWidth = static_cast<int>(std::ceil(width * abs_cos - height * abs_sin));
+        int outHeight = static_cast<int>(std::ceil(width * abs_sin + height * abs_cos));
+        return { outWidth, outHeight };
+    }
+
+public:
+    RotationFilter(int orientation)
+        : orientation(orientation)
+    {
+    }
+
+    void process(ffmpegthumbnailer::VideoFrame& videoFrame)
+    {
+        double rotation = 0;
+        if (orientation == 6) {
+            rotation = 90;
+        } else if (orientation == 8) {
+            rotation = -90;
+        } else if (orientation == 3) {
+            rotation = 180;
+        }
+        double radians = (rotation * M_PI) / 180;
+        double sinf = std::sin(radians);
+        double cosf = std::cos(radians);
+
+        auto [height, width] = computeRotatedSize(videoFrame.width, videoFrame.height, -radians);
+
+        double centerXOrig = 0.5 * (videoFrame.width - 1); // point to rotate about
+        double centerYOrig = 0.5 * (videoFrame.height - 1); // center of image
+
+        double centerX = 0.5 * (width - 1); // point to rotate about
+        double centerY = 0.5 * (height - 1); // center of image
+
+        int lineSize = ((width * 3) % 32) > 0 ? ((width * 3) / 32 + 1) * 32 : (width * 3);
+        std::vector<uint8_t> frameData(lineSize * height, 0);
+
+        for (int y = 0; y < height; ++y) {
+            for (int x = 0; x < width; ++x) {
+                long double x1 = x - centerX;
+                long double y1 = y - centerY;
+                int xx = static_cast<int>(std::round(x1 * cosf - y1 * sinf + centerXOrig));
+                int yy = static_cast<int>(std::round(x1 * sinf + y1 * cosf + centerYOrig));
+
+                int pixelIndexOrig = yy * videoFrame.lineSize + xx * 3;
+                int pixelIndex = y * lineSize + x * 3;
+
+                if (xx >= 0 && xx < videoFrame.width && yy >= 0 && yy < videoFrame.height) {
+                    frameData[pixelIndex + 0] = videoFrame.frameData.at(pixelIndexOrig + 0);
+                    frameData[pixelIndex + 1] = videoFrame.frameData.at(pixelIndexOrig + 1);
+                    frameData[pixelIndex + 2] = videoFrame.frameData.at(pixelIndexOrig + 2);
+                } else {
+                    frameData[pixelIndex + 0] = 0;
+                    frameData[pixelIndex + 1] = 0;
+                    frameData[pixelIndex + 2] = 0;
+                }
+            }
+        }
+        videoFrame.frameData = frameData;
+        videoFrame.height = height;
+        videoFrame.width = width;
+        videoFrame.lineSize = lineSize;
+    }
+};
+
 fs::path FfmpegThumbnailerHandler::getThumbnailCachePath(const fs::path& base, const fs::path& movie)
 {
     assert(movie.is_absolute());
@@ -93,6 +166,8 @@ std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::sha
         }
     }
 
+    std::unique_ptr<ffmpegthumbnailer::FilmStripFilter> filmStripFilter;
+    std::unique_ptr<RotationFilter> rotationFilter;
     try {
         auto thumbLock = std::scoped_lock<std::mutex>(thumb_mutex);
 
@@ -100,8 +175,14 @@ std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::sha
 
         th.setLogCallback(ffmpegThLogger);
         th.setSeekPercentage(config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
-        if (config->getBoolOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY))
-            th.addFilter(new ffmpegthumbnailer::FilmStripFilter());
+        if (config->getBoolOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ROTATE) && resource) {
+            rotationFilter = std::make_unique<RotationFilter>(stoiString(resource->getAttribute(ResourceAttribute::ORIENTATION)));
+            th.addFilter(rotationFilter.get());
+        }
+        if (config->getBoolOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY)) {
+            filmStripFilter = std::make_unique<ffmpegthumbnailer::FilmStripFilter>();
+            th.addFilter(filmStripFilter.get());
+        }
 
         log_debug("Generating thumbnail for file: {}", item->getLocation().c_str());
 
