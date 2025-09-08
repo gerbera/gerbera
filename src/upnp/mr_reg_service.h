@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file mr_reg_service.h
-/// \brief Definition of the MRRegistrarService class.
+/// @file upnp/mr_reg_service.h
+/// @brief Definition of the MRRegistrarService class.
 
 #ifndef __UPNP_MRREG_H__
 #define __UPNP_MRREG_H__
@@ -44,7 +44,7 @@
 class CdsObject;
 class Context;
 
-/// \brief This class is responsible for the UPnP Media Receiver Registrar Service operations.
+/// @brief This class is responsible for the UPnP Media Receiver Registrar Service operations.
 ///
 /// Handles subscription and action invocation requests for the Media Reciver Registrar.
 /// This is not a full implementation of the service, the IsAuthorized and IsValidated
@@ -52,43 +52,43 @@ class Context;
 /// These functions were only implemented to enable Xbox360 support.
 class MRRegistrarService : public UpnpService {
 protected:
-    /// \brief Media Receiver Registrar service action: IsAuthorized()
-    /// \param request Incoming ActionRequest.
+    /// @brief Media Receiver Registrar service action: IsAuthorized()
+    /// @param request Incoming ActionRequest.
     ///
     /// IsAuthorized(string DeviceID, i4 Result)
     ///
     /// This is currently unsupported (always returns 1)
     void doIsAuthorized(ActionRequest& request) const;
 
-    /// \brief Media Receiver Registrar service action: RegisterDevice()
-    /// \param request Incoming ActionRequest.
+    /// @brief Media Receiver Registrar service action: RegisterDevice()
+    /// @param request Incoming ActionRequest.
     ///
     /// RegisterDevice(bin.base64 RegistrationReqMsg, bin.base64 RegistrationRespMsg)
     ///
     /// This action is currently unsupported.
     void doRegisterDevice(ActionRequest& request) const;
 
-    /// \brief Media Receiver Registrar service action: IsValidated()
-    /// \param request Incoming ActionRequest.
+    /// @brief Media Receiver Registrar service action: IsValidated()
+    /// @param request Incoming ActionRequest.
     ///
     /// IsValidated(string DeviceID, i4 Result)
     void doIsValidated(ActionRequest& request) const;
 
 public:
-    /// \brief Constructor for MRReg
+    /// @brief Constructor for MRReg
     /// in internal variables.
     MRRegistrarService(const std::shared_ptr<Context>& context,
         const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, UpnpDevice_Handle deviceHandle);
 
-    /// \brief Processes an incoming SubscriptionRequest.
-    /// \param request Incoming SubscriptionRequest.
+    /// @brief Processes an incoming SubscriptionRequest.
+    /// @param request Incoming SubscriptionRequest.
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
     bool processSubscriptionRequest(const SubscriptionRequest& request) override;
 
-    /// \brief Sends out an event to all subscribed devices.
-    /// \param sourceProtocolCsv Comma Separated Value list of protocol information
+    /// @brief Sends out an event to all subscribed devices.
+    /// @param sourceProtocolCsv Comma Separated Value list of protocol information
     ///
     /// Sends out an update with protocol information to all subscribed devices
     bool sendSubscriptionUpdate(const std::string& sourceProtocolCsv) override;

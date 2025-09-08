@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file metadata_handler.h
-/// \brief Definition of the MetadataHandler class.
+/// @file metadata/metadata_handler.h
+/// @brief Definition of the MetadataHandler class.
 #ifndef __METADATA_HANDLER_H__
 #define __METADATA_HANDLER_H__
 
@@ -55,33 +55,33 @@ enum class ContentHandler;
 enum class ObjectType;
 enum class MetadataFields;
 
-/// \brief This class is responsible for providing access to metadata information
+/// @brief This class is responsible for providing access to metadata information
 class MetadataHandler {
 protected:
-    /// \brief access configurtion
+    /// @brief access configurtion
     std::shared_ptr<Config> config;
-    /// \brief access mime handler
+    /// @brief access mime handler
     std::shared_ptr<Mime> mime;
-    /// \brief store all mime type mappings from configuration
+    /// @brief store all mime type mappings from configuration
     std::map<std::string, std::string> mimeContentTypeMappings;
 
 public:
     explicit MetadataHandler(const std::shared_ptr<Context>& context);
     virtual ~MetadataHandler();
 
-    /// \brief check whether file type is supported by handler
+    /// @brief check whether file type is supported by handler
     virtual bool isSupported(const std::string& contentType,
         bool isOggTheora,
         const std::string& mimeType,
         ObjectType mediaType) { return true; }
-    /// \brief read metadata from file and add to object
-    /// \param obj Object to handle
+    /// @brief read metadata from file and add to object
+    /// @param obj Object to handle
     virtual bool fillMetadata(const std::shared_ptr<CdsObject>& obj) = 0;
 
-    /// \brief stream content of object or resource to client
-    /// \param obj Object to stream
-    /// \param resource the resource
-    /// \return iohandler to stream to client
+    /// @brief stream content of object or resource to client
+    /// @param obj Object to stream
+    /// @param resource the resource
+    /// @return iohandler to stream to client
     virtual std::unique_ptr<IOHandler> serveContent(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsResource>& resource)
@@ -89,26 +89,26 @@ public:
     virtual std::string getMimeType() const { return MIMETYPE_DEFAULT; }
 };
 
-/// \brief This class is responsible for providing access to metadata information
+/// @brief This class is responsible for providing access to metadata information
 /// of various media.
 class MediaMetadataHandler : public MetadataHandler {
 protected:
-    /// \brief allow handler to be disabled by config
+    /// @brief allow handler to be disabled by config
     bool isEnabled {};
-    /// \brief allow comment generation to be disabled by config
+    /// @brief allow comment generation to be disabled by config
     bool isCommentEnabled {};
-    /// \brief store all found metadata tags
+    /// @brief store all found metadata tags
     std::map<std::string, std::string> metaTags;
-    /// \brief store all found aux tags
+    /// @brief store all found aux tags
     std::vector<std::string> auxTags;
-    /// \brief store all found comment items
+    /// @brief store all found comment items
     std::map<std::string, std::string> commentMap;
-    /// \brief access converter
+    /// @brief access converter
     std::shared_ptr<ConverterManager> converterManager;
 
-    /// \brief check mimetype validity
+    /// @brief check mimetype validity
     static bool isValidArtworkContentType(std::string_view artMimetype);
-    /// \brief create resource to store artwork image information
+    /// @brief create resource to store artwork image information
     static std::shared_ptr<CdsResource> addArtworkResource(
         const std::shared_ptr<CdsItem>& item,
         ContentHandler ch,

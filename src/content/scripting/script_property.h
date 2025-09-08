@@ -19,7 +19,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file script_property.h
+/// @file content/scripting/script_property.h
 
 #ifndef __SCRIPTING_SCRIPT_PROPERTY_H__
 #define __SCRIPTING_SCRIPT_PROPERTY_H__

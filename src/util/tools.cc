@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file tools.cc
+/// @file util/tools.cc
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "tools.h" // API
 

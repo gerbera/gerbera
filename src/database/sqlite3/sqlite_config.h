@@ -18,8 +18,8 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file sqlite_config.h
-///\brief Definitions of the SqliteConfig class.
+/// @file database/sqlite3/sqlite_config.h
+/// @brief Definitions of the SqliteConfig class.
 
 #ifndef __SQLITE_CONFIG_H__
 #define __SQLITE_CONFIG_H__

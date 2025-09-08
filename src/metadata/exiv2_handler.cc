@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file exiv2_handler.cc
+/// @file metadata/exiv2_handler.cc
 
 #ifdef HAVE_EXIV2
 #define GRB_LOG_FAC GrbLogFacility::exiv2
@@ -60,7 +60,7 @@ Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
     Exiv2::LogMsg::setHandler([](auto, auto s) { log_debug("Exiv2: {}", s); });
 }
 
-/// \brief Wrapper class to interface with EXIV2
+/// @brief Wrapper class to interface with EXIV2
 class Exiv2Object {
 public:
     std::string location;
@@ -97,7 +97,7 @@ public:
         comment = image->comment();
     }
 
-    /// \brief get date/time
+    /// @brief get date/time
     std::string getDate() const
     {
         std::string value = getKey("Exif.Photo.DateTimeOriginal");
@@ -114,7 +114,7 @@ public:
         return value;
     }
 
-    /// \brief get key value from image
+    /// @brief get key value from image
     std::string getKey(const std::string& key) const
     {
         log_debug("key: {} ", key);

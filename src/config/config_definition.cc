@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file config_definition.cc
-///\brief Definitions of default values and setup for configuration.
+/// @file config/config_definition.cc
+/// @brief Definitions of default values and setup for configuration.
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_definition.h" // API
@@ -70,7 +70,7 @@
 
 #define DEFAULT_LIBOPTS_ENTRY_SEPARATOR "; "
 
-/// \brief default values for ConfigVal::IMPORT_SYSTEM_DIRECTORIES
+/// @brief default values for ConfigVal::IMPORT_SYSTEM_DIRECTORIES
 static const std::vector<std::string> excludesFullpath {
     "/bin",
     "/boot",
@@ -89,7 +89,7 @@ static const std::vector<std::string> excludesFullpath {
     "/var",
 };
 
-/// \brief default values for ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST
+/// @brief default values for ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST
 static const std::vector<std::string> defaultFanArtFile {
     // "%title%.jpg",
     // "%filename%.jpg",
@@ -100,29 +100,29 @@ static const std::vector<std::string> defaultFanArtFile {
     // "%album%.jpg",
 };
 
-/// \brief default values for ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST
+/// @brief default values for ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST
 static const std::vector<std::vector<std::pair<std::string, std::string>>> defaultFanArtDirectory {
     { { "name", "." }, { "pattern", "%filename%" }, { "mime", "image/*" } },
 };
 
-/// \brief default values for ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST
+/// @brief default values for ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST
 static const std::vector<std::string> defaultContainerArtFile {};
 
-/// \brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST
+/// @brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST
 static const std::vector<std::string> defaultSubtitleFile {};
 
-/// \brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST
+/// @brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST
 static const std::vector<std::vector<std::pair<std::string, std::string>>> defaultSubtitleDirectory {
     { { "name", "." }, { "pattern", "%filename%" }, { "mime", MIME_TYPE_SRT_SUBTITLE } },
 };
 
-/// \brief default values for ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST
+/// @brief default values for ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST
 static const std::vector<std::string> defaultMetadataFile {};
 
-/// \brief default values for ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST
+/// @brief default values for ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST
 static const std::vector<std::string> defaultResourceFile {};
 
-/// \brief default values for ConfigVal::SERVER_UI_ITEMS_PER_PAGE_DROPDOWN
+/// @brief default values for ConfigVal::SERVER_UI_ITEMS_PER_PAGE_DROPDOWN
 static const std::vector<std::string> defaultItemsPerPage {
     "10",
     "25",
@@ -130,7 +130,7 @@ static const std::vector<std::string> defaultItemsPerPage {
     "100",
 };
 
-/// \brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST
+/// @brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST
 static const std::map<std::string, std::string> mtCtDefaults {
     { "application/ogg", CONTENT_TYPE_OGG },
     { "audio/L16", CONTENT_TYPE_PCM },
@@ -158,7 +158,7 @@ static const std::map<std::string, std::string> mtCtDefaults {
     { "video/x-msvideo", CONTENT_TYPE_AVI },
 };
 
-/// \brief default values for ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST
+/// @brief default values for ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST
 static const std::vector<std::vector<std::pair<std::string, std::string>>> ctDlnaDefaults {
     { { "from", CONTENT_TYPE_ASF }, { "to", "VC_ASF_AP_L2_WMA" } },
     { { "from", CONTENT_TYPE_AVI }, { "to", "AVI" } },
@@ -176,7 +176,7 @@ static const std::vector<std::vector<std::pair<std::string, std::string>>> ctDln
     { { "from", CONTENT_TYPE_WMA }, { "to", "WMAFULL" } },
 };
 
-/// \brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
+/// @brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
 static const std::map<std::string, std::string> mtUpnpDefaults {
     { "application/ogg", UPNP_CLASS_MUSIC_TRACK },
     { "audio/*", UPNP_CLASS_MUSIC_TRACK },
@@ -184,7 +184,7 @@ static const std::map<std::string, std::string> mtUpnpDefaults {
     { "video/*", UPNP_CLASS_VIDEO_ITEM },
 };
 
-/// \brief default values for ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST
+/// @brief default values for ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST
 static const std::map<std::string, std::string> mtTransferDefaults {
     { "application/ogg", UPNP_DLNA_TRANSFER_MODE_STREAMING },
     { "audio/*", UPNP_DLNA_TRANSFER_MODE_STREAMING },
@@ -195,7 +195,7 @@ static const std::map<std::string, std::string> mtTransferDefaults {
     { "srt", UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
 };
 
-/// \brief default values for ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST
+/// @brief default values for ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST
 static const std::map<std::string, std::string> extMtDefaults {
     { "asf", "video/x-ms-asf" },
     { "asx", MIME_TYPE_ASX_PLAYLIST }, // tweak to handle asx as playlist
@@ -230,7 +230,7 @@ static const std::map<std::string, std::string> extMtDefaults {
     { "wvx", "video/x-ms-wvx" },
 };
 
-/// \brief default values for ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_MAPPING
+/// @brief default values for ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_MAPPING
 static const std::map<std::string, std::string> uiExtMtDefaults {
     { "css", "text/css" },
     { "html", "text/html" },
@@ -238,26 +238,26 @@ static const std::map<std::string, std::string> uiExtMtDefaults {
     { "json", "application/json" },
 };
 
-/// \brief default values for ConfigVal::IMPORT_MAPPINGS_IGNORED_EXTENSIONS
+/// @brief default values for ConfigVal::IMPORT_MAPPINGS_IGNORED_EXTENSIONS
 static const std::vector<std::string> ignoreDefaults {
     "part",
     "tmp",
 };
 
-/// \brief default values for ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP
+/// @brief default values for ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP
 static const std::map<std::string, std::string> trMtDefaults {
     { "video/x-flv", "vlcmpeg" },
     { "application/ogg", "vlcmpeg" },
     { "audio/ogg", "ogg2mp3" },
 };
 
-/// \brief default values for ConfigVal::UPNP_SEARCH_SEGMENTS
+/// @brief default values for ConfigVal::UPNP_SEARCH_SEGMENTS
 static const std::vector<std::string> upnpSearchSegmentDefaults {
     "M_ARTIST",
     "M_TITLE",
 };
 
-/// \brief default values for ConfigVal::UPNP_ALBUM_PROPERTIES
+/// @brief default values for ConfigVal::UPNP_ALBUM_PROPERTIES
 static const std::map<std::string, std::string> upnpAlbumPropDefaults {
     { "dc:creator", "M_ALBUMARTIST" },
     { UPNP_SEARCH_ARTIST, "M_ALBUMARTIST" },
@@ -272,40 +272,40 @@ static const std::map<std::string, std::string> upnpAlbumPropDefaults {
     { UPNP_SEARCH_GENRE, "M_GENRE" },
 };
 
-/// \brief default values for ConfigVal::UPNP_ARTIST_PROPERTIES
+/// @brief default values for ConfigVal::UPNP_ARTIST_PROPERTIES
 static const std::map<std::string, std::string> upnpArtistPropDefaults {
     { UPNP_SEARCH_ARTIST, "M_ALBUMARTIST" },
     { "upnp:albumArtist", "M_ALBUMARTIST" },
     { UPNP_SEARCH_GENRE, "M_GENRE" },
 };
 
-/// \brief default values for ConfigVal::UPNP_GENRE_PROPERTIES
+/// @brief default values for ConfigVal::UPNP_GENRE_PROPERTIES
 static const std::map<std::string, std::string> upnpGenrePropDefaults {
     { UPNP_SEARCH_GENRE, "M_GENRE" },
 };
 
-/// \brief default values for ConfigVal::UPNP_PLAYLIST_PROPERTIES
+/// @brief default values for ConfigVal::UPNP_PLAYLIST_PROPERTIES
 static const std::map<std::string, std::string> upnpPlaylistPropDefaults {
     { DC_DATE, "M_UPNP_DATE" },
 };
 
-/// \brief default values for ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST
+/// @brief default values for ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST
 static const std::map<std::string, std::string> id3SpecialPropertyMap {
     { "PERFORMER", UPNP_SEARCH_ARTIST "@role[Performer]" },
 };
 
-/// \brief default values for ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST
+/// @brief default values for ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST
 static const std::map<std::string, std::string> ffmpegSpecialPropertyMap {
     { "performer", UPNP_SEARCH_ARTIST "@role[Performer]" },
 };
 
-/// \brief default values for ConfigVal::IMPORT_VIRTUAL_DIRECTORY_KEYS
+/// @brief default values for ConfigVal::IMPORT_VIRTUAL_DIRECTORY_KEYS
 static const std::vector<std::vector<std::pair<std::string, std::string>>> virtualDirectoryKeys {
     { { "metadata", "M_ALBUMARTIST" }, { "class", UPNP_CLASS_MUSIC_ALBUM } },
     { { "metadata", "M_UPNP_DATE" }, { "class", UPNP_CLASS_MUSIC_ALBUM } },
 };
 
-/// \brief default values for ConfigVal::BOXLAYOUT_BOX
+/// @brief default values for ConfigVal::BOXLAYOUT_BOX
 static const std::vector<BoxLayout> boxLayoutDefaults {
     BoxLayout(BoxKeys::root, "Root", UPNP_CLASS_CONTAINER, "", "00000"),
     BoxLayout(BoxKeys::pcDirectory, "PC Directory", UPNP_CLASS_CONTAINER, "", "00000"),
@@ -373,7 +373,7 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
 #endif
 };
 
-/// \brief default values for ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS
+/// @brief default values for ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS
 static const std::map<std::string, std::string> upnpResourceDefaultPropDefaults {
     { "@allowedUse", "UNKNOWN" },
     { "@bitrate", "0" },
@@ -400,7 +400,7 @@ static const std::map<std::string, std::string> upnpResourceDefaultPropDefaults 
     { "@validityStart", "1900-01-01T00:00:00" },
 };
 
-/// \brief default values for ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS
+/// @brief default values for ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS
 static const std::map<std::string, std::string> upnpObjectDefaultPropDefaults {
     { "@id", "0" },
     { "@parentID", "0" },
@@ -428,7 +428,7 @@ static const std::map<std::string, std::string> upnpObjectDefaultPropDefaults {
     { "upnp:relation", "UNKNOWN" },
 };
 
-/// \brief default values for ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS
+/// @brief default values for ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS
 static const std::map<std::string, std::string> upnpContainerDefaultPropDefaults {
     { "@childContainerCount", "0" },
     { "@childCount", "0" },
@@ -443,7 +443,7 @@ static const std::map<std::string, std::string> upnpContainerDefaultPropDefaults
     { "upnp:storageUsed", "0" },
 };
 
-/// \brief default values for ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_LIST
+/// @brief default values for ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_LIST
 static const std::map<std::string, std::string> exiv2CommentDefaults {
     { "Taken with", "Exif.Image.Model" },
     { "Flash setting", "Exif.Photo.Flash" },
@@ -1872,7 +1872,7 @@ void ConfigDefinition::initOptions(const std::shared_ptr<ConfigDefinition>& self
     }
 }
 
-/// \brief define parent options for path search
+/// @brief define parent options for path search
 void ConfigDefinition::initHierarchy()
 {
     parentOptions = {
@@ -2086,7 +2086,7 @@ void ConfigDefinition::initHierarchy()
     };
 }
 
-/// \brief define option dependencies for automatic loading
+/// @brief define option dependencies for automatic loading
 void ConfigDefinition::initDependencies()
 {
     dependencyMap = {

@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file exceptions.h
+/// @file exceptions.h
 
 #ifndef __EXCEPTIONS_H__
 #define __EXCEPTIONS_H__

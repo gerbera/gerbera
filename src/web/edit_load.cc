@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file web/edit_load.cc
+/// @file web/edit_load.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
@@ -47,7 +47,7 @@
 
 const std::string_view Web::EditLoad::PAGE = "edit_load";
 
-/// \brief: process request 'edit_load' to list contents of a folder
+/// @brief process request 'edit_load' to list contents of a folder
 bool Web::EditLoad::processPageAction(Json::Value& element, const std::string& action)
 {
     std::string objID = param("object_id");

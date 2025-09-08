@@ -25,8 +25,8 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file cds_item.h
-/// \brief Definition for the CdsItem classes.
+/// @file cds/cds_item.h
+/// @brief Definition for the CdsItem classes.
 #ifndef __CDS_ITEM_H__
 #define __CDS_ITEM_H__
 
@@ -34,37 +34,37 @@ Gerbera - https://gerbera.io/
 
 class ClientStatusDetail;
 
-/// \brief An Item in the content directory.
+/// @brief An Item in the content directory.
 class CdsItem : public CdsObject {
 protected:
-    /// \brief mime-type of the media.
+    /// @brief mime-type of the media.
     std::string mimeType { MIMETYPE_DEFAULT };
 
-    /// \brief number of part, e.g. disk or season
+    /// @brief number of part, e.g. disk or season
     int partNumber {};
 
-    /// \brief number of track e.g. track on disk or episode of season
+    /// @brief number of track e.g. track on disk or episode of season
     int trackNumber {};
 
-    /// \brief unique service ID
+    /// @brief unique service ID
     std::string serviceID;
 
     std::shared_ptr<ClientStatusDetail> playStatus;
 
 public:
-    /// \brief Constructor, sets the object type and default upnp:class (object.item)
+    /// @brief Constructor, sets the object type and default upnp:class (object.item)
     CdsItem();
 
-    /// \brief Set mime-type information of the media.
+    /// @brief Set mime-type information of the media.
     void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
 
     bool isItem() const override { return true; }
     bool isPureItem() const override { return true; }
 
-    /// \brief Query mime-type information.
+    /// @brief Query mime-type information.
     std::string getMimeType() const { return mimeType; }
 
-    /// \brief Sets the upnp:originalTrackNumber property
+    /// @brief Sets the upnp:originalTrackNumber property
     void setTrackNumber(int trackNumber)
     {
         if (trackNumber >= 0)
@@ -73,7 +73,7 @@ public:
 
     int getTrackNumber() const { return trackNumber; }
 
-    /// \brief Sets the part number property
+    /// @brief Sets the part number property
     void setPartNumber(int partNumber)
     {
         if (partNumber >= 0)
@@ -82,55 +82,55 @@ public:
 
     int getPartNumber() const { return partNumber; }
 
-    /// \brief Copies all object properties to another object.
-    /// \param obj target object (clone)`
+    /// @brief Copies all object properties to another object.
+    /// @param obj target object (clone)`
     void copyTo(const std::shared_ptr<CdsObject>& obj) override;
 
-    /// \brief Checks if current object is equal to obj.
+    /// @brief Checks if current object is equal to obj.
     ///
     /// See description for CdsObject::equals() for details.
     bool equals(const std::shared_ptr<CdsObject>& obj, bool exactly = false) const override;
 
-    /// \brief Checks if the minimum required parameters for the object have been set and are valid.
+    /// @brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() const override;
 
-    /// \brief Set the unique service ID.
+    /// @brief Set the unique service ID.
     void setServiceID(const std::string& serviceID) { this->serviceID = serviceID; }
 
-    /// \brief Retrieve the unique service ID.
+    /// @brief Retrieve the unique service ID.
     std::string getServiceID() const { return serviceID; }
 
-    /// \brief Retrieve Play Status details
+    /// @brief Retrieve Play Status details
     void setPlayStatus(const std::shared_ptr<ClientStatusDetail>& playStatus) { this->playStatus = playStatus; }
 
-    /// \brief Set Play Status details
+    /// @brief Set Play Status details
     std::shared_ptr<ClientStatusDetail> getPlayStatus() const { return playStatus; }
 };
 
-/// \brief An item that is accessible via a URL.
+/// @brief An item that is accessible via a URL.
 class CdsItemExternalURL : public CdsItem {
 public:
-    /// \brief Constructor, sets the object type.
+    /// @brief Constructor, sets the object type.
     CdsItemExternalURL();
     bool isPureItem() const override { return false; }
     bool isExternalItem() const override { return true; }
 
-    /// \brief Sets the URL for the item.
-    /// \param URL full url to the item: http://somewhere.com/something.mpg
+    /// @brief Sets the URL for the item.
+    /// @param URL full url to the item: http://somewhere.com/something.mpg
     void setURL(const std::string& URL) { this->location = URL; }
 
 #if 0
-    /// \brief Copies all object properties to another object.
-    /// \param obj target object (clone)
+    /// @brief Copies all object properties to another object.
+    /// @param obj target object (clone)
     void copyTo(std::shared_ptr<CdsObject> obj) override;
 
-    /// \brief Checks if current object is equal to obj.
+    /// @brief Checks if current object is equal to obj.
     ///
     /// See description for \fn CdsObject#equals() for details.
     int equals(std::shared_ptr<CdsObject> obj, bool exactly=false) override;
 #endif
 
-    /// \brief Checks if the minimum required parameters for the object have been set and are valid.
+    /// @brief Checks if the minimum required parameters for the object have been set and are valid.
     void validate() const override;
 };
 

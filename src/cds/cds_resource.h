@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file cds_resource.h
+/// @file cds/cds_resource.h
 
 #ifndef __CDS_RESOURCE_H__
 #define __CDS_RESOURCE_H__
@@ -53,14 +53,14 @@
 
 class CdsResource {
 public:
-    /// \brief creates a new resource object.
+    /// @brief creates a new resource object.
     ///
     /// The CdsResource object represents a \<res\> tag in the DIDL-Lite XML.
     ///
-    /// \param handlerType of the associated handler
-    /// \param purpose of the associated handler
-    /// \param options options of resource
-    /// \param parameters parameters of resource
+    /// @param handlerType of the associated handler
+    /// @param purpose of the associated handler
+    /// @param options options of resource
+    /// @param parameters parameters of resource
     explicit CdsResource(
         ContentHandler handlerType,
         ResourcePurpose purpose,
@@ -74,35 +74,35 @@ public:
 
     int getResId() const { return resId; }
     void setResId(int rId) { resId = rId; }
-    /// \brief Adds a resource attribute.
+    /// @brief Adds a resource attribute.
     ///
     /// This maps to an attribute of the \<res\> tag in the DIDL-Lite XML.
     ///
-    /// \param res attribute name
-    /// \param value attribute value
+    /// @param res attribute name
+    /// @param value attribute value
     void addAttribute(ResourceAttribute res, std::string value);
 
-    /// \brief Merge existing attributes with new ones
+    /// @brief Merge existing attributes with new ones
     void mergeAttributes(const std::map<ResourceAttribute, std::string>& additional);
 
-    /// \brief Adds a parameter (will be appended to the URL)
+    /// @brief Adds a parameter (will be appended to the URL)
     ///
     /// The parameters will be appended to the object URL in the DIDL-Lite XML.
     /// This is useful for cases, where you need to identify specific options,
     /// i.e. something that is only relevant to a particular metadata handler
     /// and so on. The parameters will be automatically URL encoded.
     ///
-    /// \param name parameter name
-    /// \param value parameter value
+    /// @param name parameter name
+    /// @param value parameter value
     void addParameter(std::string name, std::string value);
 
-    /// \brief Add an option to the resource.
+    /// @brief Add an option to the resource.
     ///
     /// The options are internal, they do not appear in the URL or in the
     /// XML but can be used for any purpose.
     void addOption(std::string name, std::string value);
 
-    /// \brief Type of resource handler
+    /// @brief Type of resource handler
     ContentHandler getHandlerType() const { return handlerType; }
 
     const std::map<ResourceAttribute, std::string>& getAttributes() const;

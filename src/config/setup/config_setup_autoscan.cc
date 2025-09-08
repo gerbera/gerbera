@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_setup_autoscan.cc
+/// @file config/setup/config_setup_autoscan.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_setup_autoscan.h" // API
@@ -66,7 +66,7 @@ std::string ConfigAutoscanSetup::getItemPathRoot(bool prefix) const
     return fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY));
 }
 
-/// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
+/// @brief Creates an array of AutoscanDirectory objects from a XML nodeset.
 bool ConfigAutoscanSetup::createOptionFromNode(const pugi::xml_node& element, std::vector<std::shared_ptr<AutoscanDirectory>>& result)
 {
     if (!element)

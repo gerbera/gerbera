@@ -19,7 +19,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file ui_handler.h
+/// @file request_handler/ui_handler.h
 
 #ifndef GERBERA_UI_HANDLER_H
 #define GERBERA_UI_HANDLER_H

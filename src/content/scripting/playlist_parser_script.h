@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file playlist_parser_script.h
+/// @file content/scripting/playlist_parser_script.h
 
 #ifndef __PLAYLIST_PARSER_SCRIPT_H__
 #define __PLAYLIST_PARSER_SCRIPT_H__

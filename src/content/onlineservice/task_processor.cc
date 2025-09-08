@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file task_processor.cc
+/// @file content/onlineservice/task_processor.cc
 
 #ifdef ONLINE_SERVICES
 #define GRB_LOG_FAC GrbLogFacility::online

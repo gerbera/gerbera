@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file lastfm_scrobbler.h
-/// \brief Last.fm scrobbler.
+/// @file content/onlineservice/lastfm_scrobbler.h
+/// @brief Last.fm scrobbler.
 
 #ifdef HAVE_LASTFMLIB
 
@@ -48,24 +48,24 @@ class LastFm {
 public:
     explicit LastFm(const std::shared_ptr<Context>& context);
 
-    /// \brief Initializes the LastFm client.
+    /// @brief Initializes the LastFm client.
     ///
     /// This function reads information from the config and initializes
     /// various variables (like username and password).
     void run();
 
-    /// \brief Destroys the LastFm client.
+    /// @brief Destroys the LastFm client.
     ///
     /// This function destroys the LastFm client after submitting the
     /// last Track info
     void shutdown();
 
-    /// \brief indicates that a new file has started playing.
+    /// @brief indicates that a new file has started playing.
     ///
     /// This function uses notifies Last.fm that the user started listening
     /// to a file
     ///
-    /// \param item the audio item that is being played
+    /// @param item the audio item that is being played
     void startedPlaying(const std::shared_ptr<CdsItem>& item);
 
 private:

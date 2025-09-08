@@ -36,7 +36,7 @@
     inotify tools are licensed under GNU GPL Version 2
 */
 
-/// \file mt_inotify.cc
+/// @file content/inotify/mt_inotify.cc
 #define GRB_LOG_FAC GrbLogFacility::autoscan
 
 #ifdef HAVE_INOTIFY

@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file config_manager.cc
+/// @file config/config_manager.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_manager.h" // API
@@ -329,7 +329,7 @@ void ConfigManager::load(const fs::path& userHome)
     xmlDoc = nullptr;
 }
 
-/// \brief: Validate that correlated options have correct values
+/// @brief Validate that correlated options have correct values
 bool ConfigManager::validate()
 {
     log_info("Validating configuration...");

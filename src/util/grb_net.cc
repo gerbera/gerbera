@@ -18,7 +18,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file grb_net.cc
+/// @file util/grb_net.cc
 #define GRB_LOG_FAC GrbLogFacility::clients
 #include "grb_net.h" // API
 
@@ -40,7 +40,7 @@ Gerbera - https://gerbera.io/
 #define M_SOCK_ADDR_IN6_PTR(sa) reinterpret_cast<struct sockaddr_in6*>(sa)
 #define M_SOCK_ADDR_IN6_ADDR(sa) M_SOCK_ADDR_IN6_PTR(sa)->sin6_addr
 
-/// \brief Compare sockaddr
+/// @brief Compare sockaddr
 /// inspired by: http://www.opensource.apple.com/source/postfix/postfix-197/postfix/src/util/sock_addr.c
 #define SOCK_ADDR_IN_PTR(sa) reinterpret_cast<const struct sockaddr_in*>(sa)
 #define SOCK_ADDR_IN_ADDR(sa) SOCK_ADDR_IN_PTR(sa)->sin_addr

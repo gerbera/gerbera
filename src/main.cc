@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file main.cc
+/// @file main.cc
 
 /// \mainpage Sourcecode Documentation.
 ///

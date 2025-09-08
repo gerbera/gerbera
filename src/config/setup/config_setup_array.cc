@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_setup_array.cc
+/// @file config/setup/config_setup_array.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_setup_array.h" // API
@@ -35,7 +35,7 @@
 
 #include <numeric>
 
-/// \brief Creates an array of strings from an XML nodeset.
+/// @brief Creates an array of strings from an XML nodeset.
 bool ConfigArraySetup::createOptionFromNode(
     const pugi::xml_node& element,
     std::vector<std::string>& result)

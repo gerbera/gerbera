@@ -31,8 +31,8 @@
 #include "metadata/resolution.h"
 class IOHandler;
 
-/// \brief Extracts resolution from a JPEG image
-/// \param ioh the IOHandler must be opened. The function will read data and close the handler.
+/// @brief Extracts resolution from a JPEG image
+/// @param ioh the IOHandler must be opened. The function will read data and close the handler.
 Resolution getJpegResolution(IOHandler& ioh);
 
 #endif // GERBERA_JPEG_RESOLUTION_H

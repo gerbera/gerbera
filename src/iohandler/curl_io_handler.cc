@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file curl_io_handler.cc
+/// @file iohandler/curl_io_handler.cc
 #define GRB_LOG_FAC GrbLogFacility::curl
 
 #ifdef HAVE_CURL

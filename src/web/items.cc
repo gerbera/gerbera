@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file web/items.cc
+/// @file web/items.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
@@ -46,7 +46,7 @@
 
 const std::string_view Web::Items::PAGE = "items";
 
-/// \brief orocess request for item list in ui
+/// @brief orocess request for item list in ui
 bool Web::Items::processPageAction(Json::Value& element, const std::string& action)
 {
     int parentID = intParam("parent_id");

@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file web/config_load.cc
+/// @file web/config_load.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
@@ -172,7 +172,7 @@ void Web::ConfigLoad::setValue(Json::Value& item, const fs::path& value)
     item[CONFIG_LOAD_VALUE] = value.string();
 }
 
-/// \brief: process config_load request
+/// @brief process config_load request
 bool Web::ConfigLoad::processPageAction(Json::Value& element, const std::string& action)
 {
     Json::Value values;
@@ -215,7 +215,7 @@ bool Web::ConfigLoad::processPageAction(Json::Value& element, const std::string&
     return true;
 }
 
-/// \brief: write database status
+/// @brief write database status
 void Web::ConfigLoad::writeDatabaseStatus(Json::Value& values)
 {
     {
@@ -290,7 +290,7 @@ void Web::ConfigLoad::writeDatabaseStatus(Json::Value& values)
     }
 }
 
-/// \brief: write upnp shortcuts
+/// @brief write upnp shortcuts
 void Web::ConfigLoad::writeShortcuts(Json::Value& values)
 {
     auto shortcuts = database->getShortcuts();
@@ -306,7 +306,7 @@ void Web::ConfigLoad::writeShortcuts(Json::Value& values)
     }
 }
 
-/// \brief: write all values with simple type (string, int, bool)
+/// @brief write all values with simple type (string, int, bool)
 void Web::ConfigLoad::writeSimpleProperties(Json::Value& values)
 {
     for (auto&& option : ConfigOptionIterator()) {
@@ -320,7 +320,7 @@ void Web::ConfigLoad::writeSimpleProperties(Json::Value& values)
     }
 }
 
-/// \brief: write client configuration
+/// @brief write client configuration
 void Web::ConfigLoad::writeClientConfig(Json::Value& values)
 {
     // Output Clients
@@ -488,7 +488,7 @@ void Web::ConfigLoad::writeClientConfig(Json::Value& values)
         cs->option, ConfigVal::A_CLIENTS_GROUP_LOCATION, definition->findConfigSetup(ConfigVal::A_CLIENTS_GROUP_LOCATION));
 }
 
-/// \brief: write import tweaks
+/// @brief write import tweaks
 void Web::ConfigLoad::writeImportTweaks(Json::Value& values)
 {
     auto cs = definition->findConfigSetup(ConfigVal::IMPORT_DIRECTORIES_LIST);
@@ -567,7 +567,7 @@ void Web::ConfigLoad::writeImportTweaks(Json::Value& values)
         cs->option, ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE);
 }
 
-/// \brief: write dynamic content
+/// @brief write dynamic content
 void Web::ConfigLoad::writeDynamicContent(Json::Value& values)
 {
     auto cs = definition->findConfigSetup(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST);
@@ -622,7 +622,7 @@ void Web::ConfigLoad::writeDynamicContent(Json::Value& values)
         cs->option, ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT, definition->findConfigSetup(ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT));
 }
 
-/// \brief: write box layout
+/// @brief write box layout
 void Web::ConfigLoad::writeBoxLayout(Json::Value& values)
 {
     auto cs = definition->findConfigSetup(ConfigVal::BOXLAYOUT_LIST);
@@ -710,7 +710,7 @@ void Web::ConfigLoad::writeBoxLayout(Json::Value& values)
         cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_LINK, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_CHAIN_LINK));
 }
 
-/// \brief: write transconding configuration
+/// @brief write transconding configuration
 void Web::ConfigLoad::writeTranscoding(Json::Value& values)
 {
     auto cs = definition->findConfigSetup(ConfigVal::TRANSCODING_PROFILE_LIST);
@@ -828,7 +828,7 @@ void Web::ConfigLoad::writeTranscoding(Json::Value& values)
     }
 }
 
-/// \brief: write autoscan configuration
+/// @brief write autoscan configuration
 void Web::ConfigLoad::writeAutoscan(Json::Value& values)
 {
     for (auto&& ascs : definition->getConfigSetupList<ConfigAutoscanSetup>()) {
@@ -964,7 +964,7 @@ void Web::ConfigLoad::writeAutoscan(Json::Value& values)
     }
 }
 
-/// \brief: write content of all dictionaries
+/// @brief write content of all dictionaries
 void Web::ConfigLoad::writeDictionaries(Json::Value& values)
 {
     for (auto&& dcs : definition->getConfigSetupList<ConfigDictionarySetup>()) {
@@ -982,7 +982,7 @@ void Web::ConfigLoad::writeDictionaries(Json::Value& values)
     }
 }
 
-/// \brief: write content of all vectors
+/// @brief write content of all vectors
 void Web::ConfigLoad::writeVectors(Json::Value& values)
 {
     for (auto&& vcs : definition->getConfigSetupList<ConfigVectorSetup>()) {
@@ -1006,7 +1006,7 @@ void Web::ConfigLoad::writeVectors(Json::Value& values)
     }
 }
 
-/// \brief: write content of all arrays
+/// @brief write content of all arrays
 void Web::ConfigLoad::writeArrays(Json::Value& values)
 {
     for (auto&& acs : definition->getConfigSetupList<ConfigArraySetup>()) {
@@ -1023,7 +1023,7 @@ void Web::ConfigLoad::writeArrays(Json::Value& values)
     }
 }
 
-/// \brief: update entries with datebase values
+/// @brief update entries with datebase values
 void Web::ConfigLoad::updateEntriesFromDatabase(Json::Value& element, Json::Value& values)
 {
     for (auto&& entry : dbEntries) {

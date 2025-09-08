@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file subscription_request.h
-/// \brief Definition of the SubscriptionRequest class.
+/// @file subscription_request.h
+/// @brief Definition of the SubscriptionRequest class.
 
 #ifndef __SUBSCRIPTION_REQUEST_H__
 #define __SUBSCRIPTION_REQUEST_H__
@@ -38,43 +38,43 @@
 #include <string>
 #include <upnp.h>
 
-/// \brief This class represents the SubscriptionRequest type from the SDK.
+/// @brief This class represents the SubscriptionRequest type from the SDK.
 ///
 /// When we get a SubscriptionRequest from the SDK we convert it to our
 /// structure. We then have the possibility to easily access various
 /// information inside it.
 class SubscriptionRequest {
 protected:
-    /// \brief UpnpSubscriptionRequest that comes from the SDK.
+    /// @brief UpnpSubscriptionRequest that comes from the SDK.
     UpnpSubscriptionRequest* upnp_request;
 
-    /// \brief ID of the service.
+    /// @brief ID of the service.
     ///
     /// Returned by getServiceID()
     std::string serviceID;
 
-    /// \brief UDN of the recepient device (it should be our UDN)
+    /// @brief UDN of the recepient device (it should be our UDN)
     ///
     /// Returned by getUDN()
     std::string UDN;
 
-    /// \brief Subscription ID.
+    /// @brief Subscription ID.
     ///
     /// Returned by getSubscriptionID()
     std::string sID;
 
 public:
-    /// \brief The Constructor takes the values from the upnpRequest and fills in internal variables.
-    /// \param upnpRequest Pointer to the UpnpSubscriptionRequest structure.
+    /// @brief The Constructor takes the values from the upnpRequest and fills in internal variables.
+    /// @param upnpRequest Pointer to the UpnpSubscriptionRequest structure.
     explicit SubscriptionRequest(UpnpSubscriptionRequest* upnpRequest);
 
-    /// \brief Returns the service ID (should be one of the services that we support).
+    /// @brief Returns the service ID (should be one of the services that we support).
     const std::string& getServiceID() const;
 
-    /// \brief Returns the UDN of the recipient device (should be ours)
+    /// @brief Returns the UDN of the recipient device (should be ours)
     const std::string& getUDN() const;
 
-    /// \brief Returns the subscription ID.
+    /// @brief Returns the subscription ID.
     const std::string& getSubscriptionID() const;
 };
 

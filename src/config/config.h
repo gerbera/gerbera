@@ -21,6 +21,9 @@
     $Id$
 */
 
+/// @file config/config.h
+/// @brief Definition of the Config interface
+
 #ifndef __CONFIG_H__
 #define __CONFIG_H__
 
@@ -44,81 +47,89 @@ enum class ConfigVal;
 enum class UrlAppendMode;
 enum class LayoutType;
 
+/// @brief Definition of interface for configuration manager
 class Config {
 public:
     virtual ~Config() = default;
+
+    /// @brief load configuration from database
     virtual void updateConfigFromDatabase(const std::shared_ptr<Database>& database) = 0;
+
+    /// @brief get value before changes in the ui
     virtual std::string getOrigValue(const std::string& item) const = 0;
+
+    /// @brief store value before changes in the ui are applied
     virtual void setOrigValue(const std::string& item, const std::string& value) = 0;
     virtual void setOrigValue(const std::string& item, bool value) = 0;
     virtual void setOrigValue(const std::string& item, IntOptionType value) = 0;
     virtual void setOrigValue(const std::string& item, UIntOptionType value) = 0;
     virtual void setOrigValue(const std::string& item, LongOptionType value) = 0;
     virtual void setOrigValue(const std::string& item, ULongOptionType value) = 0;
+    /// @brief was value before changes in the ui are applied
     virtual bool hasOrigValue(const std::string& item) const = 0;
 
-    /// \brief Returns the path of the config file that was used to launch the server.
+    /// @brief Returns the path of the config file that was used to launch the server.
     virtual fs::path getConfigFilename() const = 0;
 
-    /// \brief generate UDN for server and store in database
+    /// @brief generate UDN for server and store in database
     virtual std::string generateUDN(const std::shared_ptr<Database>& database) = 0;
 
-    /// \brief add a config option
-    /// \param option option type to add.
-    /// \param optionValue option to add.
+    /// @brief add a config option
+    /// @param option option type to add.
+    /// @param optionValue option to add.
     virtual void addOption(ConfigVal option, const std::shared_ptr<ConfigOption>& optionValue) = 0;
 
     virtual std::shared_ptr<ConfigOption> getConfigOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type std::string
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type std::string
+    /// @param option option to retrieve.
     virtual std::string getOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type int
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type int
+    /// @param option option to retrieve.
     virtual IntOptionType getIntOption(ConfigVal option) const = 0;
     virtual UIntOptionType getUIntOption(ConfigVal option) const = 0;
     virtual LongOptionType getLongOption(ConfigVal option) const = 0;
     virtual ULongOptionType getULongOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type bool
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type bool
+    /// @param option option to retrieve.
     virtual bool getBoolOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type dictionary
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type dictionary
+    /// @param option option to retrieve.
     virtual std::map<std::string, std::string> getDictionaryOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type vector
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type vector
+    /// @param option option to retrieve.
     virtual std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type array of string
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type array of string
+    /// @param option option to retrieve.
     virtual std::vector<std::string> getArrayOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type AutoscanList
-    /// \param option to retrieve
+    /// @brief returns a config option of type AutoscanList
+    /// @param option to retrieve
     virtual std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type ClientConfigList
-    /// \param option to retrieve
+    /// @brief returns a config option of type ClientConfigList
+    /// @param option to retrieve
     virtual std::shared_ptr<ClientConfigList> getClientConfigListOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type BoxLayoutList
-    /// \param option to retrieve
+    /// @brief returns a config option of type BoxLayoutList
+    /// @param option to retrieve
     virtual std::shared_ptr<BoxLayoutList> getBoxLayoutListOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type DirectoryConfigList
-    /// \param option to retrieve
+    /// @brief returns a config option of type DirectoryConfigList
+    /// @param option to retrieve
     virtual std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type TranscodingProfileList
-    /// \param option to retrieve
+    /// @brief returns a config option of type TranscodingProfileList
+    /// @param option to retrieve
     virtual std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(ConfigVal option) const = 0;
 
-    /// \brief returns a config option of type DynamicContentList
-    /// \param option to retrieve
+    /// @brief returns a config option of type DynamicContentList
+    /// @param option to retrieve
     virtual std::shared_ptr<DynamicContentList> getDynamicContentListOption(ConfigVal option) const = 0;
 };
 

@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file generic_task.cc
+/// @file util/generic_task.cc
 
 #include "generic_task.h" // API
 

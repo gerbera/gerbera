@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file timer.cc
+/// @file util/timer.cc
 #define GRB_LOG_FAC GrbLogFacility::util
 #include "timer.h" // API
 

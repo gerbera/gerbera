@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file metacontent_handler.h
-/// \brief Definition of the Metacontent, FanArt and Subtitle classes.
+/// @file metadata/metacontent_handler.h
+/// @brief Definition of the Metacontent, FanArt and Subtitle classes.
 
 #ifndef __METADATA_CONTENT_H__
 #define __METADATA_CONTENT_H__
@@ -37,7 +37,7 @@ class Content;
 class Database;
 class StringConverter;
 
-/// \brief This class is responsible for expanding configuration options to file names
+/// @brief This class is responsible for expanding configuration options to file names
 class ContentPathSetup {
 public:
     explicit ContentPathSetup(
@@ -62,7 +62,7 @@ private:
     std::shared_ptr<ConfigDefinition> definition;
 };
 
-/// \brief This class is responsible for populating filesystem based metadata
+/// @brief This class is responsible for populating filesystem based metadata
 class MetacontentHandler : public MetadataHandler {
 public:
     explicit MetacontentHandler(const std::shared_ptr<Context>& context);
@@ -74,7 +74,7 @@ protected:
     std::shared_ptr<Database> database;
 };
 
-/// \brief This class is responsible for populating filesystem based album and fan art
+/// @brief This class is responsible for populating filesystem based album and fan art
 class FanArtHandler : public MetacontentHandler {
 public:
     explicit FanArtHandler(const std::shared_ptr<Context>& context);
@@ -92,7 +92,7 @@ private:
     static std::unique_ptr<ContentPathSetup> setup;
 };
 
-/// \brief This class is responsible for populating filesystem based album and fan art
+/// @brief This class is responsible for populating filesystem based album and fan art
 class ContainerArtHandler : public MetacontentHandler {
 public:
     explicit ContainerArtHandler(const std::shared_ptr<Context>& context);
@@ -105,7 +105,7 @@ private:
     static std::unique_ptr<ContentPathSetup> setup;
 };
 
-/// \brief This class is responsible for populating filesystem based subtitles
+/// @brief This class is responsible for populating filesystem based subtitles
 class SubtitleHandler : public MetacontentHandler {
 public:
     explicit SubtitleHandler(const std::shared_ptr<Context>& context);
@@ -123,7 +123,7 @@ private:
     static std::unique_ptr<ContentPathSetup> setup;
 };
 
-/// \brief This class is responsible for populating metadata from additional files
+/// @brief This class is responsible for populating metadata from additional files
 class MetafileHandler : public MetacontentHandler {
 public:
     explicit MetafileHandler(const std::shared_ptr<Context>& context, std::shared_ptr<Content> content);
@@ -137,7 +137,7 @@ private:
     std::shared_ptr<Content> content;
 };
 
-/// \brief This class is responsible for reverse mapping filesystem based resources
+/// @brief This class is responsible for reverse mapping filesystem based resources
 class ResourceHandler : public MetacontentHandler {
 public:
     explicit ResourceHandler(const std::shared_ptr<Context>& context);

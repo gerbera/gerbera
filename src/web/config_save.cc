@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file web/config_save.cc
+/// @file web/config_save.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API
@@ -48,7 +48,7 @@ Web::ConfigSave::ConfigSave(std::shared_ptr<Context> context,
 {
 }
 
-/// \brief: process config_save request
+/// @brief process config_save request
 bool Web::ConfigSave::processPageAction(Json::Value& element, const std::string& action)
 {
     int count = 0;

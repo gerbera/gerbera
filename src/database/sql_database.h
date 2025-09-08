@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file sql_database.h
+/// @file database/sql_database.h
 
 #ifndef __SQL_STORAGE_H__
 #define __SQL_STORAGE_H__
@@ -61,13 +61,13 @@ enum class Operation;
 class SQLRow {
 public:
     virtual ~SQLRow() = default;
-    /// \brief Returns true if the column index contains the value NULL
+    /// @brief Returns true if the column index contains the value NULL
     bool isNullOrEmpty(int index) const
     {
         const char* c = col_c_str(index);
         return c == nullptr || *c == '\0';
     }
-    /// \brief Return the value of column index as a string value
+    /// @brief Return the value of column index as a string value
     std::string col(int index) const
     {
         const char* c = col_c_str(index);
@@ -75,7 +75,7 @@ public:
             return {};
         return { c };
     }
-    /// \brief Return the value of column index as an integer value
+    /// @brief Return the value of column index as an integer value
     int col_int(int index, int null_value) const
     {
         const char* c = col_c_str(index);
@@ -83,7 +83,7 @@ public:
             return null_value;
         return std::atoi(c);
     }
-    /// \brief Return the value of column index as an integer value
+    /// @brief Return the value of column index as an integer value
     long long col_long(int index, long long null_value) const
     {
         const char* c = col_c_str(index);
@@ -106,7 +106,7 @@ public:
     /* methods to override in subclasses */
     virtual std::string quote(const std::string& value) const = 0;
     std::string quote(const std::string& value, std::size_t len) const;
-    /// \brief ensure correct string quoting for SQL statement
+    /// @brief ensure correct string quoting for SQL statement
     std::string quote(const char* str, std::size_t len = 0) const { return quote(std::string(str), len); }
     /* wrapper functions for different types */
     std::string quote(char val) const { return quote(fmt::to_string(val)); }
@@ -117,7 +117,7 @@ public:
     static std::string quote(bool val) { return val ? "1" : "0"; }
     static std::string quote(long long val) { return fmt::to_string(val); }
 
-    /// \brief returns a fmt-printable identifier name
+    /// @brief returns a fmt-printable identifier name
     SQLIdentifier identifier(const std::string& name) const { return { name, table_quote_begin, table_quote_end }; }
 
     // hooks for transactions
@@ -216,17 +216,17 @@ protected:
     explicit SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, std::shared_ptr<ConverterManager> converterManager);
     void init() override;
     void initDynContainers(const std::shared_ptr<CdsObject>& sParent = {});
-    /// \brief create core entries in fresh database
+    /// @brief create core entries in fresh database
     void fillDatabase();
 
-    /// \brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
+    /// @brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
     bool doMetadataMigration();
     void migrateMetadata(int objectId, const std::string& metadataStr);
 
-    /// \brief Add a column to resource table for each defined resource attribute
+    /// @brief Add a column to resource table for each defined resource attribute
     void prepareResourceTable(std::string_view addColumnCmd);
 
-    /// \brief migrate resources from mt_cds_objects to grb_resource before removing the column (DBVERSION 13)
+    /// @brief migrate resources from mt_cds_objects to grb_resource before removing the column (DBVERSION 13)
     bool doResourceMigration();
     void migrateResources(int objectId, const std::string& resourcesStr);
 
@@ -237,7 +237,7 @@ protected:
     char table_quote_end { '\0' };
     std::array<unsigned int, DBVERSION> hashies;
 
-    /// \brief Maximum length designated as GRBMAX in ddl statement
+    /// @brief Maximum length designated as GRBMAX in ddl statement
     unsigned int stringLimit;
     mutable std::recursive_mutex sqlMutex;
     using SqlAutoLock = std::scoped_lock<decltype(sqlMutex)>;
@@ -257,11 +257,11 @@ private:
     std::string sql_resource_query;
     std::string addResourceColumnCmd;
 
-    /// \brief Configuration content for dynamic folders
+    /// @brief Configuration content for dynamic folders
     std::shared_ptr<DynamicContentList> dynamicContentList;
-    /// \brief Are dynamic search folders enabled in config
+    /// @brief Are dynamic search folders enabled in config
     bool dynamicContentEnabled;
-    /// \brief Is sorting by sort_key enabled in config
+    /// @brief Is sorting by sort_key enabled in config
     bool sortKeyEnabled;
 
     std::shared_ptr<CdsObject> createObjectFromRow(const std::string& group, const std::unique_ptr<SQLRow>& row);

@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file playlist_parser_script.cc
+/// @file content/scripting/playlist_parser_script.cc
 
 #ifdef HAVE_JS
 #define GRB_LOG_FAC GrbLogFacility::script

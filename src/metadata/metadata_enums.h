@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file metadata_enums.h
+/// @file metadata/metadata_enums.h
 
 #ifndef __METADATA_ENUMS_H__
 #define __METADATA_ENUMS_H__
@@ -134,7 +134,7 @@ const static auto mt_single = std::map<MetadataFields, bool> {
 
 class MetaEnumMapper {
 public:
-    /// \brief Definition of the supported metadata fields.
+    /// @brief Definition of the supported metadata fields.
     static std::map<MetadataFields, std::string> mt_keys;
     static MetadataFields remapMetaDataField(const std::string& fieldName);
     static std::string getMetaFieldName(MetadataFields field);

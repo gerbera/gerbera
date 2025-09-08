@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file cds_objects.cc
+/// @file cds/cds_objects.cc
 
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_objects.h" // API
@@ -205,7 +205,7 @@ int CdsObject::remapFlags(const std::string& flag)
     return stoiString(flag, 0, 0);
 }
 
-/// \brief Query single auxdata value.
+/// @brief Query single auxdata value.
 std::string CdsObject::getAuxData(const std::string& key) const
 {
     return getValueOrDefault(auxdata, key);

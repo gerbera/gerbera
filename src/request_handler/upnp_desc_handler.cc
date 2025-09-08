@@ -19,7 +19,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file upnp_desc_handler.cc
+/// @file request_handler/upnp_desc_handler.cc
 #define GRB_LOG_FAC GrbLogFacility::device
 
 #include "upnp_desc_handler.h" // API

@@ -19,7 +19,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file ui_handler.cc
+/// @file request_handler/ui_handler.cc
 #define GRB_LOG_FAC GrbLogFacility::requests
 
 #include "ui_handler.h" // API

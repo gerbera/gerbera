@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file io_handler_chainer.cc
+/// @file iohandler/io_handler_chainer.cc
 #define GRB_LOG_FAC GrbLogFacility::iohandler
 
 #include "io_handler_chainer.h" // API

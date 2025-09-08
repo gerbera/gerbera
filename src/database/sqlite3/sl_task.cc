@@ -18,7 +18,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file sl_task.cc
+/// @file database/sqlite3/sl_task.cc
 #define GRB_LOG_FAC GrbLogFacility::sqlite3
 
 #include "sl_task.h" // API

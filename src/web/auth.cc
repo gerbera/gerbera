@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file web/auth.cc
+/// @file web/auth.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API

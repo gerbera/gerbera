@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file update_manager.cc
+/// @file content/update_manager.cc
 #define GRB_LOG_FAC GrbLogFacility::update
 
 #include "update_manager.h" // API

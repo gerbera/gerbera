@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file cm_task.h
+/// @file content/cm_task.h
 #ifndef __CM_TASK_H__
 #define __CM_TASK_H__
 

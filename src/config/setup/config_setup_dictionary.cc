@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_setup_dictionary.cc
+/// @file config/setup/config_setup_dictionary.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_setup_dictionary.h" // API
@@ -36,7 +36,7 @@
 
 #include <numeric>
 
-/// \brief Creates a dictionary from an XML nodeset.
+/// @brief Creates a dictionary from an XML nodeset.
 bool ConfigDictionarySetup::createOptionFromNode(
     const pugi::xml_node& element,
     std::map<std::string, std::string>& result)

@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file update_manager.h
+/// @file content/update_manager.h
 
 #ifndef __UPDATE_MANAGER_H__
 #define __UPDATE_MANAGER_H__

@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file server.cc
+/// @file server.cc
 #define GRB_LOG_FAC GrbLogFacility::server
 
 #include "server.h" // API
@@ -604,7 +604,7 @@ void Server::routeSubscriptionRequest(const SubscriptionRequest& request) const
     throw UpnpException(UPNP_E_BAD_REQUEST, "Service does not exist or subscriptions not supported");
 }
 
-/// \brief sendSubscriptionUpdate
+/// @brief sendSubscriptionUpdate
 void Server::sendSubscriptionUpdate(const std::string& updateString, const std::string& serviceId)
 {
     for (auto&& svc : serviceList) {

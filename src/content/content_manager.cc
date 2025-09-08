@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file content_manager.cc
+/// @file content/content_manager.cc
 #define GRB_LOG_FAC GrbLogFacility::content
 
 #include "content_manager.h" // API

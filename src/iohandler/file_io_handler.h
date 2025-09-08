@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file file_io_handler.h
-/// \brief Definition of the FileIOHandler class.
+/// @file iohandler/file_io_handler.h
+/// @brief Definition of the FileIOHandler class.
 
 #ifndef __FILE_IO_HANDLER_H__
 #define __FILE_IO_HANDLER_H__
@@ -38,46 +38,46 @@
 #include "io_handler.h"
 #include "util/grb_fs.h"
 
-/// \brief Allows the web server to read from a file.
+/// @brief Allows the web server to read from a file.
 class FileIOHandler : public IOHandler {
 protected:
-    /// \brief Name of the file.
+    /// @brief Name of the file.
     GrbFile file;
 
-    /// \brief Handle of the file.
+    /// @brief Handle of the file.
     std::FILE* f {};
 
 public:
-    /// \brief Sets the filename to work with.
+    /// @brief Sets the filename to work with.
     explicit FileIOHandler(const fs::path& filename);
 
-    /// \brief Opens file for reading (writing is not supported)
+    /// @brief Opens file for reading (writing is not supported)
     void open(enum UpnpOpenFileMode mode) override;
 
-    /// \brief Reads a previously opened file sequentially.
-    /// \param buf Data from the file will be copied into this buffer.
-    /// \param length Number of bytes to be copied into the buffer.
+    /// @brief Reads a previously opened file sequentially.
+    /// @param buf Data from the file will be copied into this buffer.
+    /// @param length Number of bytes to be copied into the buffer.
     grb_read_t read(std::byte* buf, std::size_t length) override;
 
-    /// \brief Writes to a previously opened file.
-    /// \param buf Data from the buffer will be written to the file.
-    /// \param length Number of bytes to be written from the buffer.
-    /// \return number of bytes written.
+    /// @brief Writes to a previously opened file.
+    /// @param buf Data from the buffer will be written to the file.
+    /// @param length Number of bytes to be written from the buffer.
+    /// @return number of bytes written.
     std::size_t write(std::byte* buf, std::size_t length) override;
 
-    /// \brief Performs seek on an open file.
-    /// \param offset Number of bytes to move in the file. For seeking forwards
+    /// @brief Performs seek on an open file.
+    /// @param offset Number of bytes to move in the file. For seeking forwards
     /// positive values are used, for seeking backwards - negative. Offset must
     /// be positive if origin is set to SEEK_SET
-    /// \param whence The position to move relative to. SEEK_CUR to move relative
+    /// @param whence The position to move relative to. SEEK_CUR to move relative
     /// to current position, SEEK_END to move relative to the end of file,
     /// SEEK_SET to specify an absolute offset.
     void seek(off_t offset, int whence) override;
 
-    /// \brief Return the current stream position.
+    /// @brief Return the current stream position.
     off_t tell() override;
 
-    /// \brief Close a previously opened file.
+    /// @brief Close a previously opened file.
     void close() override;
 };
 

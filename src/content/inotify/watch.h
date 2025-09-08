@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// @file watch.h
+/// @file content/inotify/watch.h
 
 #ifndef __WATCH_DIR_H__
 #define __WATCH_DIR_H__

@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file config_setup_bool.h
-///\brief Definitions of the ConfigBoolSetup class.
+/// @file config/setup/config_setup_bool.h
+/// @brief Definitions of the ConfigBoolSetup class.
 
 #ifndef __CONFIG_SETUP_BOOL_H__
 #define __CONFIG_SETUP_BOOL_H__

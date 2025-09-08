@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file upnp/client_manager.h
-/// \brief Definition of the ClientManager class.
+/// @file upnp/client_manager.h
+/// @brief Definition of the ClientManager class.
 /// inspired by https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.h
 
 #ifndef __UPNP_CLIENT_MANAGER_H__
@@ -52,7 +52,7 @@ public:
 
     void addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const std::string& descLocation);
     const std::vector<ClientObservation>& getClientList() const { return cache; }
-    /// \brief Remove single client from cache and database
+    /// @brief Remove single client from cache and database
     void removeClient(const std::string& clientIp);
 
 private:

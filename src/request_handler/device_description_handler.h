@@ -19,7 +19,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file device_description_handler.h
+/// @file request_handler/device_description_handler.h
 
 #ifndef GERBERA_DEVICE_DESCRIPTION_HANDLER_H
 #define GERBERA_DEVICE_DESCRIPTION_HANDLER_H
@@ -42,11 +42,11 @@ public:
     /// \inherit
     bool getInfo(const char* filename, UpnpFileInfo* info) override;
 
-    /// \brief Prepares the output buffer and calls the process function.
-    /// \param filename Requested URL
-    /// \param quirks allows modifying the content of the response based on the client
-    /// \param mode either UPNP_READ or UPNP_WRITE
-    /// \return the appropriate IOHandler for the request.
+    /// @brief Prepares the output buffer and calls the process function.
+    /// @param filename Requested URL
+    /// @param quirks allows modifying the content of the response based on the client
+    /// @param mode either UPNP_READ or UPNP_WRITE
+    /// @return the appropriate IOHandler for the request.
     std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
     std::string renderDeviceDescription(const std::string& ip, in_port_t port, const std::shared_ptr<Quirks>& quirks) const;
 

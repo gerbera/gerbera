@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file mem_io_handler.h
-/// \brief definition of the MemIOHandler class.
+/// @file iohandler/mem_io_handler.h
+/// @brief definition of the MemIOHandler class.
 #ifndef __MEM_IO_HANDLER_H__
 #define __MEM_IO_HANDLER_H__
 
@@ -38,20 +38,20 @@
 
 #include <string>
 
-/// \brief Allows the web server to read from a memory buffer instead of a file.
+/// @brief Allows the web server to read from a memory buffer instead of a file.
 class MemIOHandler : public IOHandler {
 protected:
-    /// \brief buffer that is holding our data.
+    /// @brief buffer that is holding our data.
     char* buffer;
     off_t length;
 
-    /// \brief current offset in the buffer
+    /// @brief current offset in the buffer
     off_t pos { -1 };
 
 public:
-    /// \brief Initializes the internal buffer.
-    /// \param buffer all operations will be done on this buffer.
-    /// \param length size of the buffer
+    /// @brief Initializes the internal buffer.
+    /// @param buffer all operations will be done on this buffer.
+    /// @param length size of the buffer
     MemIOHandler(const void* buffer, int length);
     explicit MemIOHandler(const std::string& str);
     ~MemIOHandler() override;

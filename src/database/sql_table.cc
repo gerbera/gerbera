@@ -20,7 +20,7 @@
   $Id$
 */
 
-/// \file sql_table.cc
+/// @file database/sql_table.cc
 #define GRB_LOG_FAC GrbLogFacility::sqldatabase
 
 #include "sql_table.h" // API
@@ -115,7 +115,7 @@ const std::vector<PlaystatusColumn> Playstatus2Table::tableColumnOrder = {
     PlaystatusColumn::BookMarkPosition,
 };
 
-/// \brief Generate INSERT statement from row data and object for object tables
+/// @brief Generate INSERT statement from row data and object for object tables
 template <>
 std::string TableAdaptor<BrowseColumn, CdsObject>::sqlForInsert(
     const std::shared_ptr<CdsObject>& obj) const
@@ -141,7 +141,7 @@ std::string TableAdaptor<BrowseColumn, CdsObject>::sqlForInsert(
         fmt::join(values, ", "));
 }
 
-/// \brief Generate INSERT statement from row data and object for metadata tables
+/// @brief Generate INSERT statement from row data and object for metadata tables
 template <>
 std::string TableAdaptor<MetadataColumn, CdsObject>::sqlForInsert(
     const std::shared_ptr<CdsObject>& obj) const

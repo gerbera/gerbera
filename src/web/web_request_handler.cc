@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file web/web_request_handler.cc
+/// @file web/web_request_handler.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "web_request_handler.h" // API

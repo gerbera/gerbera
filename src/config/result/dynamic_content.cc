@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file dynamic_content.cc
+/// @file config/result/dynamic_content.cc
 #define GRB_LOG_FAC GrbLogFacility::content
 
 #include "dynamic_content.h" // API

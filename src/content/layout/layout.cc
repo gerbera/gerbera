@@ -20,7 +20,7 @@
     $Id$
 */
 
-/// \file layout.cc
+/// @file content/layout/layout.cc
 #define GRB_LOG_FAC GrbLogFacility::layout
 
 #include "layout.h" // API

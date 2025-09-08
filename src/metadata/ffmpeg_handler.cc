@@ -33,7 +33,7 @@
     Copyright (C) 2007 Ingo Preiml <ipreiml@edu.uni-klu.ac.at>
 */
 
-/// \file ffmpeg_handler.cc
+/// @file metadata/ffmpeg_handler.cc
 
 // Information about the stream are to be found in the structure
 // AVFormatContext, defined in libavformat/avformat.h:335
@@ -79,7 +79,7 @@ extern "C" {
 
 #define STREAM_NUMBER_OPTION "streamNumber"
 
-/// \brief Wrapper class to log FFMpeg messages
+/// @brief Wrapper class to log FFMpeg messages
 class FfmpegLogger {
 public:
     FfmpegLogger()
@@ -167,7 +167,7 @@ bool FfmpegHandler::isSupported(
     return mediaType == ObjectType::Audio || mediaType == ObjectType::Video;
 }
 
-/// \brief Wrapper class to interface with FFMpeg
+/// @brief Wrapper class to interface with FFMpeg
 class FfmpegObject {
 public:
     std::string location;
@@ -203,7 +203,7 @@ public:
             avformat_close_input(&pFormatCtx);
     }
 
-    /// \brief check if FFMpeg information is available
+    /// @brief check if FFMpeg information is available
     operator bool() const
     {
         if (!pFormatCtx)
@@ -218,7 +218,7 @@ public:
         return true;
     }
 
-    /// \brief get key value from image
+    /// @brief get key value from image
     std::string getKey(const std::string& desiredTag) const
     {
         log_debug("key: {} ", desiredTag);
@@ -407,7 +407,7 @@ bool FfmpegHandler::getFfmpegMetadataField(
     return result;
 }
 
-/// \brief Convert Rotation Information to 360 degree value
+/// @brief Convert Rotation Information to 360 degree value
 static double get_rotation(const std::int32_t* displaymatrix)
 {
     double rot = 0;
@@ -422,7 +422,7 @@ static double get_rotation(const std::int32_t* displaymatrix)
     return rot;
 }
 
-/// \brief Extract Artwork from media file
+/// @brief Extract Artwork from media file
 static std::vector<std::uint8_t> extractArtImage(
     const FfmpegObject& ffmpegObject,
     std::size_t imageStreamIndex)
@@ -465,7 +465,7 @@ static std::vector<std::uint8_t> extractArtImage(
     return std::vector<std::uint8_t>(avEntry->value, avEntry->value + strlen(avEntry->value));
 }
 
-/// \brief Extract Subtitle from media file
+/// @brief Extract Subtitle from media file
 static std::vector<std::uint8_t> extractSubtitle(
     const FfmpegObject& ffmpegObject,
     long long subtitleStreamIndex)
@@ -504,7 +504,7 @@ static std::vector<std::uint8_t> extractSubtitle(
 #endif
 }
 
-/// \brief extract orientation from stream
+/// @brief extract orientation from stream
 static int getOrientation(AVStream* st)
 {
     AVDictionaryEntry* entry = nullptr;

@@ -28,11 +28,15 @@
 
     $Id$
 */
+
+/// @file util/generic_task.h
+
 #ifndef __GENERIC_TASK_H__
 #define __GENERIC_TASK_H__
 
 #include <string>
 
+/// @brief Type of tasks
 enum class TaskType {
     Invalid,
     AddFile,
@@ -41,11 +45,13 @@ enum class TaskType {
     FetchOnlineContent
 };
 
+/// @brief Type of task owners
 enum class TaskOwner {
     ContentManagerTask,
     TaskProcessorTask
 };
 
+/// @brief Abstract base class for tasks
 class GenericTask {
 protected:
     std::string description;

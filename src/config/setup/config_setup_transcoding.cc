@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_setup_transcoding.cc
+/// @file config/setup/config_setup_transcoding.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_setup_transcoding.h" // API
@@ -41,9 +41,9 @@
 #include "setup_util.h"
 #include "util/logger.h"
 
-/// \brief Creates an array of TranscodingProfile objects from an XML
+/// @brief Creates an array of TranscodingProfile objects from an XML
 /// nodeset.
-/// \param element starting element of the nodeset.
+/// @param element starting element of the nodeset.
 bool ConfigTranscodingSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result) const
 {
     if (!element)

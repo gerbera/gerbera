@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file web/session_manager.h
-/// \brief Definitions of the Session and SessionManager classes.
+/// @file web/session_manager.h
+/// @brief Definitions of the Session and SessionManager classes.
 #ifndef __SESSION_MANAGER_H__
 #define __SESSION_MANAGER_H__
 
@@ -47,7 +47,7 @@ class Config;
 
 namespace Web {
 
-/// \brief One UI session.
+/// @brief One UI session.
 ///
 /// When the user logs in for the first time (via the web UI) a new Session will be
 /// created. It then will be used to store various information to support
@@ -55,8 +55,8 @@ namespace Web {
 /// count for each driver and so on.
 class Session {
 public:
-    /// \brief Constructor, creates a session with a given timeout.
-    /// \param timeout time in milliseconds after which the session will expire if not accessed.
+    /// @brief Constructor, creates a session with a given timeout.
+    /// @param timeout time in milliseconds after which the session will expire if not accessed.
     ///
     /// The session is created with a given timeout, each access to the session updates the
     /// last_access value, if last access lies further back than the timeout - the session will
@@ -66,16 +66,16 @@ public:
     void put(const std::string& key, std::string value);
     std::string get(const std::string& key) const;
 
-    /// \brief Returns the time of last access to the session.
-    /// \return std::chrono::seconds
+    /// @brief Returns the time of last access to the session.
+    /// @return std::chrono::seconds
     std::chrono::seconds getLastAccessTime() const { return last_access; }
 
     std::chrono::seconds getTimeout() const { return timeout; }
 
-    /// \brief Returns the session identifier.
+    /// @brief Returns the session identifier.
     std::string getID() const { return sessionID; }
 
-    /// \brief Sets the session identifier.
+    /// @brief Sets the session identifier.
     void setID(const std::string& sessionID) { this->sessionID = sessionID; }
 
     bool isLoggedIn() const { return loggedIn; }
@@ -86,9 +86,9 @@ public:
 
     void access() { last_access = currentTime(); }
 
-    /// \brief Returns the updateIDs, collected for the sessions,
+    /// @brief Returns the updateIDs, collected for the sessions,
     /// and flushes the database for the ids
-    /// \return the container ids to be updated as String (comma separated)
+    /// @return the container ids to be updated as String (comma separated)
     std::string getUIUpdateIDs();
 
     bool hasUIUpdateIDs() const;
@@ -96,8 +96,8 @@ public:
     void clearUpdateIDs();
 
 protected:
-    /// \brief Is called by SessionManager if UI update is needed
-    /// \param objectID the container that needs to be updated
+    /// @brief Is called by SessionManager if UI update is needed
+    /// @param objectID the container that needs to be updated
     void containerChangedUI(int objectID);
 
     void containerChangedUI(const std::vector<int>& objectIDs);
@@ -106,19 +106,19 @@ protected:
     using AutoLockR = std::scoped_lock<decltype(rmutex)>;
     std::map<std::string, std::string> dict;
 
-    /// \brief True if the ui update id hash became to big and
+    /// @brief True if the ui update id hash became to big and
     /// the UI shall update every container
     bool updateAll {};
 
     std::unordered_set<int> uiUpdateIDs;
 
-    /// \brief maximum time the session can be idle (starting from last_access)
+    /// @brief maximum time the session can be idle (starting from last_access)
     std::chrono::seconds timeout;
 
-    /// \brief time of last access to the session, returned by getLastAccessTime()
+    /// @brief time of last access to the session, returned by getLastAccessTime()
     std::chrono::seconds last_access = std::chrono::seconds::zero();
 
-    /// \brief arbitrary but unique string representing the ID of the session (returned by getID())
+    /// @brief arbitrary but unique string representing the ID of the session (returned by getID())
     std::string sessionID;
 
     bool loggedIn {};
@@ -126,7 +126,7 @@ protected:
     friend class SessionManager;
 };
 
-/// \brief This class offers ways to create new sessoins, stores all available sessions and provides access to them.
+/// @brief This class offers ways to create new sessoins, stores all available sessions and provides access to them.
 class SessionManager : public Timer::Subscriber {
 protected:
     std::shared_ptr<Timer> timer;
@@ -134,7 +134,7 @@ protected:
     mutable std::mutex mutex;
     using AutoLock = std::scoped_lock<decltype(mutex)>;
 
-    /// \brief This array is holding available sessions.
+    /// @brief This array is holding available sessions.
     std::vector<std::shared_ptr<Session>> sessions;
 
     std::map<std::string, std::string> accounts;
@@ -143,28 +143,28 @@ protected:
     bool timerAdded {};
 
 public:
-    /// \brief Constructor, initializes the array.
+    /// @brief Constructor, initializes the array.
     SessionManager(const std::shared_ptr<Config>& config, std::shared_ptr<Timer> timer);
 
-    /// \brief Creates a Session with a given timeout.
-    /// \param timeout Session timeout in milliseconds.
+    /// @brief Creates a Session with a given timeout.
+    /// @param timeout Session timeout in milliseconds.
     std::shared_ptr<Session> createSession(std::chrono::seconds timeout);
 
-    /// \brief Returns the instance to a Session with a given sessionID
-    /// \param sessionID id of the Session.
-    /// \param doLock lock the thread
-    /// \return instance of the Session with a given ID or nullptr if no session with that ID was found.
+    /// @brief Returns the instance to a Session with a given sessionID
+    /// @param sessionID id of the Session.
+    /// @param doLock lock the thread
+    /// @return instance of the Session with a given ID or nullptr if no session with that ID was found.
     std::shared_ptr<Session> getSession(const std::string& sessionID, bool doLock = true) const;
 
-    /// \brief Removes a session
+    /// @brief Removes a session
     void removeSession(const std::string& sessionID);
 
     std::string getUserPassword(const std::string& user) const;
 
-    /// \brief Is called whenever a container changed in a way,
+    /// @brief Is called whenever a container changed in a way,
     /// so that it needs to be redrawn in the tree of the UI.
     /// notifies all active sessions.
-    /// \param objectID
+    /// @param objectID
     void containerChangedUI(int objectID);
 
     void containerChangedUI(const std::vector<int>& objectIDs);

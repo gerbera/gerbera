@@ -18,7 +18,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file grb_runtime.cc
+/// @file config/grb_runtime.cc
 #define GRB_LOG_FAC GrbLogFacility::server
 
 #include "grb_runtime.h" // API

@@ -21,8 +21,8 @@
     $Id$
 */
 
-// \file compat.h
-// \brief Haandle version compatibility
+/// @file upnp/compat.h
+/// @brief Handle version compatibility
 
 #ifndef GRB_UPNP_COMPAT_H__
 #define GRB_UPNP_COMPAT_H__

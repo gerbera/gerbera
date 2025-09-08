@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file subscription_request.cc
+/// @file subscription_request.cc
 #define GRB_LOG_FAC GrbLogFacility::requests
 
 #include "subscription_request.h" // API

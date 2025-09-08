@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_setup_path.cc
+/// @file config/setup/config_setup_path.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_setup_path.h" // API
@@ -80,7 +80,7 @@ fs::path ConfigPathSetup::getXmlContent(const pugi::xml_node& root, bool doResol
     return optValue;
 }
 
-/// \brief resolve path against home, an exception is raised if path does not exist on filesystem.
+/// @brief resolve path against home, an exception is raised if path does not exist on filesystem.
 fs::path ConfigPathSetup::resolvePath(fs::path path) const
 {
     if (!isSet(ConfigPathArguments::resolveEmpty) && path.empty()) {

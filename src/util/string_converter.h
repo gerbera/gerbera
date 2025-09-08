@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file string_converter.h
+/// @file util/string_converter.h
 
 #ifndef __STRING_CONVERTER_H__
 #define __STRING_CONVERTER_H__
@@ -46,19 +46,19 @@ enum class ConfigVal;
 
 class StringConverter {
 public:
-    /// \brief create a new converter
-    /// \param from source character set
-    /// \param to target character set
+    /// @brief create a new converter
+    /// @param from source character set
+    /// @param to target character set
     StringConverter(const std::string& from, const std::string& to);
     virtual ~StringConverter();
 
     StringConverter(const StringConverter&) = delete;
     StringConverter& operator=(const StringConverter&) = delete;
-    /// \brief Uses the from and to values that were passed
+    /// @brief Uses the from and to values that were passed
     /// to the constructor to convert the string str to a specific character
     /// set.
-    /// \param str String to be converted.
-    /// \param validate if this parameter is true then an exception will be
+    /// @param str String to be converted.
+    /// @param validate if this parameter is true then an exception will be
     /// thrown if illegal input is encountered. If false, illegal characters
     /// will be padded with '?' and the function will return the string.
     std::pair<std::string, std::string> convert(
@@ -82,20 +82,20 @@ public:
     ConverterManager(const std::shared_ptr<Config>& cm);
     virtual ~ConverterManager();
 
-    /// \brief metadata to internal
+    /// @brief metadata to internal
     const std::shared_ptr<StringConverter>& m2i(ConfigVal option, const fs::path& location);
-    /// \brief filesystem to internal
+    /// @brief filesystem to internal
     const std::shared_ptr<StringConverter>& f2i() const;
 #if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(HAVE_MATROSKA)
-    /// \brief safeguard - internal to internal - needed to catch some
+    /// @brief safeguard - internal to internal - needed to catch some
     /// scenarious where the user may have forgotten to add proper conversion
     /// in the script.
     const std::shared_ptr<StringConverter>& i2i() const;
 #endif
 #ifdef HAVE_JS
-    /// \brief scripting to internal
+    /// @brief scripting to internal
     const std::shared_ptr<StringConverter>& j2i() const;
-    /// \brief playlist to internal
+    /// @brief playlist to internal
     const std::shared_ptr<StringConverter>& p2i() const;
 #endif
 

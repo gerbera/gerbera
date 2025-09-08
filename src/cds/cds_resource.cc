@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file cds_resource.cc
+/// @file cds/cds_resource.cc
 
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_resource.h" // API

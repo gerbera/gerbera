@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file client_config.cc
+/// @file config/result/client_config.cc
 #define GRB_LOG_FAC GrbLogFacility::clients
 
 #include "client_config.h" // API

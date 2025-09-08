@@ -21,15 +21,15 @@
     $Id$
 */
 
-/// \file setup_util.h
-/// \brief Definitions of the setup utilities
+/// @file config/setup/setup_util.h
+/// @brief Definitions of the setup utilities
 
 #ifndef __GRB_SETUP_UTIL_H_
 #define __GRB_SETUP_UTIL_H_
 
 #include "util/tools.h"
 
-/// @brief: Utility struct to define properties for update
+/// @brief Utility struct to define properties for update
 template <class CfgResult>
 struct ConfigResultProperty {
     using GetCallback = std::function<std::string(const std::shared_ptr<CfgResult>& entry)>;
@@ -40,7 +40,7 @@ struct ConfigResultProperty {
     SetCallback setProperty;
 };
 
-/// @brief: Update config object with properties from UI or database
+/// @brief Update config object with properties from UI or database
 template <class EditHelperConfig, class Setup, class Option, class Result>
 bool updateConfig(
     const std::shared_ptr<EditHelperConfig>& list,

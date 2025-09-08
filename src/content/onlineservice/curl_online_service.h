@@ -21,9 +21,9 @@
     $Id$
 */
 
-/// \file curl_online_service.h
-/// \brief Definition of the CurlContentHandler class.
-/// \brief Definition of the CurlOnlineService class.
+/// @file content/onlineservice/curl_online_service.h
+/// @brief Definition of the CurlContentHandler class.
+/// @brief Definition of the CurlOnlineService class.
 
 #ifndef __CURL_ONLINE_SERVICE_H__
 #define __CURL_ONLINE_SERVICE_H__
@@ -42,27 +42,27 @@ class Context;
 class ConverterManager;
 class CdsObject;
 
-/// \brief this class is responsible for creating objects from the CurlContentHandler
+/// @brief this class is responsible for creating objects from the CurlContentHandler
 /// metadata XML.
 class CurlContentHandler {
 public:
     explicit CurlContentHandler(const std::shared_ptr<Context>& context);
     virtual ~CurlContentHandler() = default;
 
-    /// \brief Sets the service XML from which we will extract the objects.
-    /// \return \c false if service XML contained an error status.
+    /// @brief Sets the service XML from which we will extract the objects.
+    /// @return \c false if service XML contained an error status.
     virtual void setServiceContent(std::unique_ptr<pugi::xml_document> service) = 0;
 
-    /// \brief retrieves an object from the service.
+    /// @brief retrieves an object from the service.
     ///
     /// Each invokation of this funtion will return a new object,
     /// when the whole service XML is parsed and no more objects are left,
     /// this function will return nullptr.
     ///
-    /// \return \c CdsObject or \c nullptr if there are no more objects to parse.
+    /// @return \c CdsObject or \c nullptr if there are no more objects to parse.
     virtual std::shared_ptr<CdsObject> getNextObject() = 0;
 
-    /// \brief Checks whether we reached the end of the file
+    /// @brief Checks whether we reached the end of the file
     virtual bool isEnd() = 0;
 
 protected:
@@ -72,7 +72,7 @@ protected:
     std::unique_ptr<pugi::xml_document> service_xml;
 };
 
-/// \brief This is an interface for all online services, the function
+/// @brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
 class CurlOnlineService : public OnlineService {
 public:
@@ -82,11 +82,11 @@ public:
     CurlOnlineService(const CurlOnlineService&) = delete;
     CurlOnlineService& operator=(const CurlOnlineService&) = delete;
 
-    /// \brief Retrieves user specified content from the service and adds
+    /// @brief Retrieves user specified content from the service and adds
     /// the items to the database.
     bool refreshServiceData(const std::shared_ptr<Layout>& layout) override;
 
-    /// \brief Get the human readable name for the service
+    /// @brief Get the human readable name for the service
     std::string getServiceName() const override;
 
 protected:

@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file autoscan_list.h
+/// @file content/autoscan_list.h
 
 #ifndef __AUTOSCAN_LIST_H__
 #define __AUTOSCAN_LIST_H__
@@ -47,18 +47,18 @@ public:
 
     std::shared_ptr<AutoscanDirectory> getByObjectID(int objectID) const;
 
-    /// \brief removes the AutoscanDirectory if it is a subdirectory of a given location.
-    /// \param parent parent directory.
-    /// \param persistent also remove persistent directories.
-    /// \return AutoscanList of removed directories, where each directory object in the list is a copy and not the original reference.
+    /// @brief removes the AutoscanDirectory if it is a subdirectory of a given location.
+    /// @param parent parent directory.
+    /// @param persistent also remove persistent directories.
+    /// @return AutoscanList of removed directories, where each directory object in the list is a copy and not the original reference.
     std::shared_ptr<AutoscanList> removeIfSubdir(const fs::path& parent, bool persistent = false);
 
-    /// \brief Send notification for each directory that is stored in the list.
+    /// @brief Send notification for each directory that is stored in the list.
     ///
-    /// \param sub instance of the class that will receive the notifications.
+    /// @param sub instance of the class that will receive the notifications.
     void notifyAll(Timer::Subscriber* sub);
 
-    /// \brief updates the last_modified data for all AutoscanDirectories.
+    /// @brief updates the last_modified data for all AutoscanDirectories.
     void updateLMinDB(Database& database);
 
     void initTimer(

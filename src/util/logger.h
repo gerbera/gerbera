@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file logger.h
+/// @file util/logger.h
 
 #ifndef __LOGGER_H__
 #define __LOGGER_H__

@@ -19,8 +19,8 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file metadata_service.h
-/// \brief Definition of the MetadataService class.
+/// @file metadata/metadata_service.h
+/// @brief Definition of the MetadataService class.
 #ifndef __METADATA_SERVICE_H__
 #define __METADATA_SERVICE_H__
 

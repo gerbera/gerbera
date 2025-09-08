@@ -33,8 +33,8 @@
     Copyright (C) 2007 Ingo Preiml <ipreiml@edu.uni-klu.ac.at>
 */
 
-/// \file ffmpeg_handler.h
-/// \brief Definition of the FfmpegHandler class - getting metadata via
+/// @file metadata/ffmpeg_handler.h
+/// @brief Definition of the FfmpegHandler class - getting metadata via
 /// ffmpeg library calls.
 
 #ifndef __FFMPEG_HANDLER_H__
@@ -54,7 +54,7 @@ struct AVFormatContext;
 struct AVDictionaryEntry;
 class StringConverter;
 
-/// \brief This class is responsible for reading id3 tags metadata
+/// @brief This class is responsible for reading id3 tags metadata
 class FfmpegHandler : public MediaMetadataHandler {
 public:
     explicit FfmpegHandler(const std::shared_ptr<Context>& context);
@@ -70,30 +70,30 @@ public:
     std::string getMimeType() const override;
 
 private:
-    /// \brief get all AUX values as configured
+    /// @brief get all AUX values as configured
     bool addFfmpegAuxdataFields(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject) const;
-    /// \brief get all metadata fields
+    /// @brief get all metadata fields
     bool addFfmpegMetadataFields(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject) const;
-    /// \brief get one metadata field
+    /// @brief get one metadata field
     bool getFfmpegMetadataField(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject,
         AVDictionaryEntry* avEntry,
         std::map<MetadataFields, bool>& emptyProperties,
         std::map<std::string, bool>& emptySpecProperties) const;
-    /// \brief get additional resource fields
+    /// @brief get additional resource fields
     bool addFfmpegResourceFields(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject);
-    /// \brief fabricate comment from metadata
+    /// @brief fabricate comment from metadata
     bool addFfmpegComment(
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject) const;
-    /// \brief try to extract mime type and content type from stream data
+    /// @brief try to extract mime type and content type from stream data
     std::string getContentTypeFromByteVector(const std::vector<std::uint8_t>& data) const;
 
     static constexpr std::array propertyMap {
@@ -109,7 +109,7 @@ private:
         std::pair(MetadataFields::M_DATE, "date"),
         std::pair(MetadataFields::M_CREATION_DATE, "creation_time"),
     };
-    /// \brief activate separation of artwork found by handler
+    /// @brief activate separation of artwork found by handler
     bool artWorkEnabled;
 };
 

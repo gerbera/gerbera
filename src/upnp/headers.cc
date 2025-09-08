@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file headers.cc
+/// @file upnp/headers.cc
 #define GRB_LOG_FAC GrbLogFacility::clients
 
 #include "headers.h" // API

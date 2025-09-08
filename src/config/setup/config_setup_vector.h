@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file config_setup_vector.h
-/// \brief Definitions of the ConfigSetupVector class.
+/// @file config/setup/config_setup_vector.h
+/// @brief Definitions of the ConfigSetupVector class.
 
 #ifndef __CONFIG_SETUP_VECTOR_H__
 #define __CONFIG_SETUP_VECTOR_H__
@@ -37,9 +37,9 @@ protected:
     bool doExtend = false;
     std::vector<std::vector<std::pair<std::string, std::string>>> defaultEntries;
 
-    /// \brief Creates a vector from an XML nodeset.
-    /// \param element starting element of the nodeset.
-    /// \param result contents of config.
+    /// @brief Creates a vector from an XML nodeset.
+    /// @param element starting element of the nodeset.
+    /// @param result contents of config.
     ///
     /// The basic idea is the following:
     /// You have a piece of XML that looks like this

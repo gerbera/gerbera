@@ -19,7 +19,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file url_utils.cc
+/// @file util/url_utils.cc
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "url_utils.h" // API
 
@@ -37,11 +37,11 @@ Gerbera - https://gerbera.io/
 
 namespace URLUtils {
 
-/// \brief Splits the url into a path and parameters string.
+/// @brief Splits the url into a path and parameters string.
 /// Only '?' and '/' separators are allowed, otherwise an exception will
 /// be thrown.
-/// \param url URL that has to be processed
-/// \return pair of path and parameters which reference the input-view of url
+/// @param url URL that has to be processed
+/// @return pair of path and parameters which reference the input-view of url
 ///
 /// This function splits the url into its path and parameter components.
 /// content/media SEPARATOR object_id=12345&transcode=wav would be transformed to:
@@ -92,9 +92,9 @@ std::map<std::string, std::string> parseParameters(std::string_view filename, st
 
 static constexpr auto hexCharS2 = "0123456789ABCDEF";
 
-/// \brief Converts a string to a URL (meaning: %20 instead of space and so on)
-/// \param str String to be converted.
-/// \return string that contains the url-escaped representation of the original string.
+/// @brief Converts a string to a URL (meaning: %20 instead of space and so on)
+/// @param str String to be converted.
+/// @return string that contains the url-escaped representation of the original string.
 std::string urlEscape(std::string_view str)
 {
     std::ostringstream buf;
@@ -125,7 +125,7 @@ std::string urlEscape(std::string_view str)
     return buf.str();
 }
 
-/// \brief Opposite of urlEscape :)
+/// @brief Opposite of urlEscape :)
 std::string urlUnescape(std::string_view str)
 {
     auto data = str.data();

@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file transcode_dispatcher.h
-/// \brief Definition of the TranscodeRequest class.
+/// @file transcoding/transcode_dispatcher.h
+/// @brief Definition of the TranscodeRequest class.
 #ifndef __TRANSCODE_DISPATCHER_H__
 #define __TRANSCODE_DISPATCHER_H__
 

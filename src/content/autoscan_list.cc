@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file autoscan_list.cc
+/// @file content/autoscan_list.cc
 #define GRB_LOG_FAC GrbLogFacility::autoscan
 
 #include "autoscan_list.h"

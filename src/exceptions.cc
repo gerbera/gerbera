@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file exceptions.cc
+/// @file exceptions.cc
 
 #include "exceptions.h" // API
 

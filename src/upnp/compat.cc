@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file compat.cc
+/// @file upnp/compat.cc
 
 #include "compat.h"
 #include "exceptions.h"

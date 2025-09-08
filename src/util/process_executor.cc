@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file process_executor.cc
+/// @file util/process_executor.cc
 #define GRB_LOG_FAC GrbLogFacility::proc
 
 #include "process_executor.h" // API

@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file autoscan.cc
+/// @file config/result/autoscan.cc
 #define GRB_LOG_FAC GrbLogFacility::autoscan
 
 #include "autoscan.h" // API

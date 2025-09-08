@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file import_service.cc
+/// @file content/import_service.cc
 #define GRB_LOG_FAC GrbLogFacility::content
 
 #include "import_service.h" // API
@@ -568,7 +568,7 @@ std::tuple<bool, std::string, std::string> ImportService::getMimeForFile(const f
     return { skip, mimetype, upnpClass };
 }
 
-///\brief create items for all discovered files
+/// @brief create items for all discovered files
 void ImportService::createItems(
     const std::shared_ptr<StateCache>& stateCache,
     AutoScanSetting& settings)
@@ -777,7 +777,7 @@ void ImportService::fillLayout(
     }
 }
 
-/// \param object used to make code compatible with legacy scan
+/// @param object used to make code compatible with legacy scan
 void ImportService::fillSingleLayout(
     const std::shared_ptr<ContentState>& state,
     std::shared_ptr<CdsObject> object,
@@ -1010,7 +1010,7 @@ std::shared_ptr<CdsContainer> ImportService::createSingleContainer(
     return {};
 }
 
-/// \param createdIds used by messaging in ContentManager
+/// @param createdIds used by messaging in ContentManager
 std::pair<int, bool> ImportService::addContainerTree(
     int parentContainerId,
     const std::vector<std::shared_ptr<CdsObject>>& chain,

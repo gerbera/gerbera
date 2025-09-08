@@ -20,7 +20,7 @@
   $Id$
 */
 
-/// \file sql_table.h
+/// @file database/sql_table.h
 
 #ifndef __SQL_TABLE_H__
 #define __SQL_TABLE_H__
@@ -56,7 +56,7 @@ enum class ResourceAttribute;
 
 #define SQL_NULL "NULL"
 
-/// \brief type of database operation
+/// @brief type of database operation
 enum class Operation {
     Insert,
     InsertMulti,
@@ -64,14 +64,14 @@ enum class Operation {
     Delete,
 };
 
-/// \brief metadata column ids
+/// @brief metadata column ids
 enum class MetadataColumn {
     ItemId = 0,
     PropertyName,
     PropertyValue,
 };
 
-/// \brief resource column ids
+/// @brief resource column ids
 enum class ResourceColumn {
     ItemId = 0,
     ResId,
@@ -82,7 +82,7 @@ enum class ResourceColumn {
     Attributes, // index of first attribute
 };
 
-/// \brief browse column ids
+/// @brief browse column ids
 /// enum for createObjectFromRow's mode parameter
 enum class BrowseColumn {
     Id = 0,
@@ -111,7 +111,7 @@ enum class BrowseColumn {
     AsPersistent
 };
 
-/// \brief autoscan column ids
+/// @brief autoscan column ids
 enum class AutoscanColumn {
     Id = 0,
     ObjId,
@@ -136,7 +136,7 @@ enum class AutoscanColumn {
     ItemId,
 };
 
-/// \brief configvalue column ids
+/// @brief configvalue column ids
 enum class ConfigColumn {
     Key,
     Item,
@@ -144,7 +144,7 @@ enum class ConfigColumn {
     Status,
 };
 
-/// \brief client column ids
+/// @brief client column ids
 enum class ClientColumn {
     Addr,
     Port,
@@ -154,7 +154,7 @@ enum class ClientColumn {
     Age,
 };
 
-/// \brief playstatus column ids
+/// @brief playstatus column ids
 enum class PlaystatusColumn {
     Group = 0,
     ItemId,
@@ -164,7 +164,7 @@ enum class PlaystatusColumn {
     BookMarkPosition,
 };
 
-/// \brief base helper class for insert, update and delete operations
+/// @brief base helper class for insert, update and delete operations
 template <class Item>
 class AddUpdateTable {
 public:
@@ -176,25 +176,25 @@ public:
     {
     }
     virtual ~AddUpdateTable() = default;
-    /// \brief does the insert statement return an object id to retrieve
+    /// @brief does the insert statement return an object id to retrieve
     virtual bool hasInsertResult() { return false; }
-    /// \brief get the table name
+    /// @brief get the table name
     [[nodiscard]] const std::string& getTableName() const noexcept { return tableName; }
-    /// \brief get the required table operation
+    /// @brief get the required table operation
     [[nodiscard]] Operation getOperation() const noexcept { return operation; }
-    /// \brief Generate INSERT statement from row data and object
+    /// @brief Generate INSERT statement from row data and object
     virtual std::string sqlForInsert(
         const std::shared_ptr<Item>& obj) const
         = 0;
-    /// \brief Generate INSERT statement from row data and object
+    /// @brief Generate INSERT statement from row data and object
     virtual std::string sqlForMultiInsert(
         const std::shared_ptr<Item>& obj) const
         = 0;
-    /// \brief Generate UPDATE statement from row data and object
+    /// @brief Generate UPDATE statement from row data and object
     virtual std::string sqlForUpdate(
         const std::shared_ptr<Item>& obj) const
         = 0;
-    /// \brief Generate DELETE statement from row data and object
+    /// @brief Generate DELETE statement from row data and object
     virtual std::string sqlForDelete(
         const std::shared_ptr<Item>& obj) const
         = 0;
@@ -204,7 +204,7 @@ protected:
     Operation operation;
 };
 
-/// \brief base template class for insert, update and delete operations
+/// @brief base template class for insert, update and delete operations
 template <class Tab, class Item>
 class TableAdaptor : public AddUpdateTable<Item> {
 public:
@@ -239,26 +239,26 @@ public:
     virtual std::string sqlForDeleteAll(const std::map<Tab, std::string>& whereDict) const;
 
 protected:
-    /// \brief content to store in request
+    /// @brief content to store in request
     std::map<Tab, std::string> rowData;
-    /// \brief content to store in request
+    /// @brief content to store in request
     std::vector<std::map<Tab, std::string>> rowMultiData;
-    /// \brief mapper to convert enum member to column name
+    /// @brief mapper to convert enum member to column name
     std::shared_ptr<EnumColumnMapper<Tab>> columnMapper;
 
-    /// \brief check whether row data is valid for insert and update operations
+    /// @brief check whether row data is valid for insert and update operations
     virtual bool isValid() const { return true; }
 
-    /// \brief List of column names to be used in insert and update to ensure correct order of columns
+    /// @brief List of column names to be used in insert and update to ensure correct order of columns
     /// only columns listed here are added to the insert and update statements
     virtual const std::vector<Tab>& getTableColumnOrder() const = 0;
-    /// \brief Generate WHERE clause for statements from row data and object
+    /// @brief Generate WHERE clause for statements from row data and object
     virtual std::vector<std::string> getWhere(
         const std::shared_ptr<Item>& obj) const
         = 0;
 };
 
-/// \brief Adaptor for operations on mt_cds_objects Table
+/// @brief Adaptor for operations on mt_cds_objects Table
 class Object2Table : public TableAdaptor<BrowseColumn, CdsObject> {
 public:
     Object2Table(
@@ -282,7 +282,7 @@ private:
     static const std::vector<BrowseColumn> tableColumnOrder;
 };
 
-/// \brief Adaptor for operations on mt_metadata Table
+/// @brief Adaptor for operations on mt_metadata Table
 class Metadata2Table : public TableAdaptor<MetadataColumn, CdsObject> {
 public:
     Metadata2Table(
@@ -312,7 +312,7 @@ private:
     static const std::vector<MetadataColumn> tableColumnOrder;
 };
 
-/// \brief Adaptor for operations on grb_cds_resource Table
+/// @brief Adaptor for operations on grb_cds_resource Table
 class Resource2Table : public TableAdaptor<ResourceColumn, CdsObject> {
 public:
     Resource2Table(
@@ -342,7 +342,7 @@ private:
     std::map<ResourceAttribute, std::string> resDict;
 };
 
-/// \brief Adaptor for operations on mt_autoscan Table
+/// @brief Adaptor for operations on mt_autoscan Table
 class Autoscan2Table : public TableAdaptor<AutoscanColumn, AutoscanDirectory> {
 public:
     Autoscan2Table(
@@ -365,7 +365,7 @@ private:
     static const std::vector<AutoscanColumn> tableColumnOrder;
 };
 
-/// \brief Adaptor for operations on grb_config_value Table
+/// @brief Adaptor for operations on grb_config_value Table
 class Config2Table : public TableAdaptor<ConfigColumn, ConfigValue> {
 public:
     Config2Table(
@@ -388,7 +388,7 @@ private:
     static const std::vector<ConfigColumn> tableColumnOrder;
 };
 
-/// \brief Adaptor for operations on grb_client Table
+/// @brief Adaptor for operations on grb_client Table
 class Client2Table : public TableAdaptor<ClientColumn, ClientObservation> {
 public:
     Client2Table(
@@ -417,7 +417,7 @@ private:
     static const std::vector<ClientColumn> tableColumnOrder;
 };
 
-/// \brief Adaptor for operations on grb_playstatus Table
+/// @brief Adaptor for operations on grb_playstatus Table
 class Playstatus2Table : public TableAdaptor<PlaystatusColumn, ClientStatusDetail> {
 public:
     Playstatus2Table(

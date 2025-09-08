@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file config_setup_array.h
-///\brief Definitions of the ConfigSetupArray classes.
+/// @file config/setup/config_setup_array.h
+/// @brief Definitions of the ConfigSetupArray classes.
 
 #ifndef __CONFIG_SETUP_ARRAY_H__
 #define __CONFIG_SETUP_ARRAY_H__
@@ -42,9 +42,9 @@ protected:
     std::vector<std::string> defaultEntries;
     bool doExtend = false;
 
-    /// \brief Creates an array of strings from an XML nodeset.
-    /// \param element starting element of the nodeset.
-    /// \param result vector with contents of array
+    /// @brief Creates an array of strings from an XML nodeset.
+    /// @param element starting element of the nodeset.
+    /// @param result vector with contents of array
     ///
     /// Similar to \fn ConfigDictionarySetup#createOptionFromNode() this one extracts
     /// data from the following XML:

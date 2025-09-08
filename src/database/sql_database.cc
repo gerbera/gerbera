@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file sql_database.cc
+/// @file database/sql_database.cc
 #define GRB_LOG_FAC GrbLogFacility::sqldatabase
 
 #include "sql_database.h" // API
@@ -79,7 +79,7 @@
 #define LOC_VIRT_PREFIX 'V'
 #define LOC_ILLEGAL_PREFIX 'X'
 
-/// \brief search column ids
+/// @brief search column ids
 enum class SearchColumn {
     Id = 0,
     RefId,
@@ -97,14 +97,14 @@ enum class SearchColumn {
     LastUpdated,
 };
 
-/// \brief autoscan column ids
+/// @brief autoscan column ids
 enum class ASColumn {
     Id = 0,
     ObjId,
     Persistent,
 };
 
-/// \brief Map browse column ids to column names
+/// @brief Map browse column ids to column names
 // map ensures entries are in correct order, each value of BrowseCol must be present
 static std::map<BrowseColumn, SearchProperty> browseColMap {
     { BrowseColumn::Id, { ITM_ALIAS, "id" } },
@@ -133,7 +133,7 @@ static std::map<BrowseColumn, SearchProperty> browseColMap {
     { BrowseColumn::AsPersistent, { AUS_ALIAS, "persistent", FieldType::Bool } },
 };
 
-/// \brief Map search column ids to column names
+/// @brief Map search column ids to column names
 // map ensures entries are in correct order, each value of SearchCol must be present
 static std::map<SearchColumn, SearchProperty> searchColMap {
     { SearchColumn::Id, { SRC_ALIAS, "id" } },
@@ -152,7 +152,7 @@ static std::map<SearchColumn, SearchProperty> searchColMap {
     { SearchColumn::LastUpdated, { SRC_ALIAS, "last_updated", FieldType::Date } },
 };
 
-/// \brief Map meta column ids to column names
+/// @brief Map meta column ids to column names
 // map ensures entries are in correct order, each value of MetadataCol must be present
 static const std::map<MetadataColumn, SearchProperty> metaColMap {
     { MetadataColumn::ItemId, { MTA_ALIAS, "item_id" } },
@@ -160,7 +160,7 @@ static const std::map<MetadataColumn, SearchProperty> metaColMap {
     { MetadataColumn::PropertyValue, { MTA_ALIAS, "property_value", FieldType::String, 255 } },
 };
 
-/// \brief Map autoscan column ids to column names
+/// @brief Map autoscan column ids to column names
 // map ensures entries are in correct order, each value of AutoscanCol must be present
 static const std::map<ASColumn, SearchProperty> asColMap {
     { ASColumn::Id, { AUS_ALIAS, "id" } },
@@ -168,7 +168,7 @@ static const std::map<ASColumn, SearchProperty> asColMap {
     { ASColumn::Persistent, { AUS_ALIAS, "persistent", FieldType::Integer } },
 };
 
-/// \brief Map resource column ids to column names
+/// @brief Map resource column ids to column names
 // map ensures entries are in correct order, each value of ResourceCol must be present
 static const std::map<ResourceColumn, SearchProperty> resColMap {
     { ResourceColumn::ItemId, { RES_ALIAS, "item_id" } },
@@ -179,7 +179,7 @@ static const std::map<ResourceColumn, SearchProperty> resColMap {
     { ResourceColumn::Parameters, { RES_ALIAS, "parameters" } },
 };
 
-/// \brief Map resource search keys to column ids
+/// @brief Map resource search keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, ResourceColumn>> resTagMap {
@@ -187,7 +187,7 @@ static const std::vector<std::pair<std::string, ResourceColumn>> resTagMap {
     { "res@id", ResourceColumn::ResId },
 };
 
-/// \brief Map autoscan column ids to column names
+/// @brief Map autoscan column ids to column names
 // map ensures entries are in correct order, each value of AutoscanColumn must be present
 static const std::map<AutoscanColumn, SearchProperty> autoscanColMap {
     { AutoscanColumn::Id, { AUS_ALIAS, "id" } },
@@ -213,17 +213,17 @@ static const std::map<AutoscanColumn, SearchProperty> autoscanColMap {
     { AutoscanColumn::ItemId, { ITM_ALIAS, "id" } },
 };
 
-/// \brief Map browse sort keys to column ids
+/// @brief Map browse sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static std::vector<std::pair<std::string, BrowseColumn>> browseSortMap;
 
-/// \brief Map search sort keys to column ids
+/// @brief Map search sort keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static std::vector<std::pair<std::string, SearchColumn>> searchSortMap;
 
-/// \brief Map meta search keys to column ids
+/// @brief Map meta search keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, MetadataColumn>> metaTagMap {
@@ -232,7 +232,7 @@ static const std::vector<std::pair<std::string, MetadataColumn>> metaTagMap {
     { META_VALUE, MetadataColumn::PropertyValue },
 };
 
-/// \brief Map meta search keys to column ids
+/// @brief Map meta search keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, ASColumn>> asTagMap {
@@ -241,7 +241,7 @@ static const std::vector<std::pair<std::string, ASColumn>> asTagMap {
     { "persistent", ASColumn::Persistent },
 };
 
-/// \brief Autoscan search keys to column ids
+/// @brief Autoscan search keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap {
@@ -261,7 +261,7 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
     { "obj_location", AutoscanColumn::ObjLocation },
 };
 
-/// \brief Map playstatus column ids to column names
+/// @brief Map playstatus column ids to column names
 // map ensures entries are in correct order, each value of PlaystatusCol must be present
 static const std::map<PlaystatusColumn, SearchProperty> playstatusColMap {
     { PlaystatusColumn::Group, { PLY_ALIAS, "group" } },
@@ -272,7 +272,7 @@ static const std::map<PlaystatusColumn, SearchProperty> playstatusColMap {
     { PlaystatusColumn::BookMarkPosition, { PLY_ALIAS, "bookMarkPos", FieldType::Integer } },
 };
 
-/// \brief Playstatus search keys to column ids
+/// @brief Playstatus search keys to column ids
 // entries are handled sequentially,
 // duplicate entries are added to statement in same order if key is present in SortCriteria
 static const std::vector<std::pair<std::string, PlaystatusColumn>> playstatusTagMap {
@@ -284,7 +284,7 @@ static const std::vector<std::pair<std::string, PlaystatusColumn>> playstatusTag
     { "bookMarkPos", PlaystatusColumn::BookMarkPosition },
 };
 
-/// \brief Map config column ids to column names
+/// @brief Map config column ids to column names
 static const std::map<ConfigColumn, SearchProperty> configColumnMap {
     { ConfigColumn::Item, { CFG_ALIAS, "item" } },
     { ConfigColumn::Key, { CFG_ALIAS, "key" } },
@@ -292,7 +292,7 @@ static const std::map<ConfigColumn, SearchProperty> configColumnMap {
     { ConfigColumn::Status, { CFG_ALIAS, "status" } },
 };
 
-/// \brief Config search keys to column ids
+/// @brief Config search keys to column ids
 static const std::vector<std::pair<std::string, ConfigColumn>> configTagMap {
     { "item", ConfigColumn::Item },
     { "key", ConfigColumn::Key },
@@ -300,7 +300,7 @@ static const std::vector<std::pair<std::string, ConfigColumn>> configTagMap {
     { "status", ConfigColumn::Status },
 };
 
-/// \brief Map client column ids to column names
+/// @brief Map client column ids to column names
 static const std::map<ClientColumn, SearchProperty> clientColumnMap {
     { ClientColumn::Addr, { CLT_ALIAS, "addr" } },
     { ClientColumn::Port, { CLT_ALIAS, "port" } },
@@ -310,7 +310,7 @@ static const std::map<ClientColumn, SearchProperty> clientColumnMap {
     { ClientColumn::Age, { CLT_ALIAS, "age" } },
 };
 
-/// \brief Config search keys to column ids
+/// @brief Config search keys to column ids
 static const std::vector<std::pair<std::string, ClientColumn>> clientTagMap {
     { "addr", ClientColumn::Addr },
     { "port", ClientColumn::Port },
@@ -403,7 +403,7 @@ void SQLDatabase::init()
         { UPNP_SEARCH_LAST_UPDATED, SearchColumn::LastUpdated },
         { UPNP_SEARCH_LAST_MODIFIED, SearchColumn::LastModified },
     };
-    /// \brief Map resource search keys to column ids
+    /// @brief Map resource search keys to column ids
     // entries are handled sequentially,
     // duplicate entries are added to statement in same order if key is present in SortCriteria
     std::vector<std::pair<std::string, int>> resourceTagMap;
@@ -412,7 +412,7 @@ void SQLDatabase::init()
         resourceTagMap.emplace_back(key, to_underlying(val));
     }
 
-    /// \brief Map resource column ids to column names
+    /// @brief Map resource column ids to column names
     // map ensures entries are in correct order, each value of ResourceCol must be present
     std::map<int, SearchProperty> resourceColMap;
     for (auto&& [key, val] : resColMap) {

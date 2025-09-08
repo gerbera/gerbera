@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file sqlite_database.cc
+/// @file database/sqlite3/sqlite_database.cc
 #define GRB_LOG_FAC GrbLogFacility::sqlite3
 
 #include "sqlite_database.h" // API

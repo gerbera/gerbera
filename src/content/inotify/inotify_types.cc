@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file inotify_types.cc
+/// @file content/inotify/inotify_types.cc
 
 #ifdef HAVE_INOTIFY
 #include "content/inotify/inotify_types.h" // API

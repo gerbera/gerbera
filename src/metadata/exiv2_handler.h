@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file exiv2_handler.h
-/// \brief Definition of the Exiv2Handler class.
+/// @file metadata/exiv2_handler.h
+/// @brief Definition of the Exiv2Handler class.
 #ifndef __METADATA_EXIV2_H__
 #define __METADATA_EXIV2_H__
 
@@ -38,7 +38,7 @@
 
 #include "metadata_handler.h"
 
-/// \brief This class is responsible for reading exif header metadata
+/// @brief This class is responsible for reading exif header metadata
 class Exiv2Handler : public MediaMetadataHandler {
 public:
     explicit Exiv2Handler(const std::shared_ptr<Context>& context);

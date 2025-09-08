@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file config_manager.h
-///\brief Definitions of the ConfigManager class.
+/// @file config/config_manager.h
+/// @brief Definitions of the ConfigManager class.
 
 #ifndef __CONFIG_MANAGER_H__
 #define __CONFIG_MANAGER_H__
@@ -66,76 +66,76 @@ public:
         fs::path dataDir,
         bool debug);
 
-    /// \brief Returns the name of the config file that was used to launch the server.
+    /// @brief Returns the name of the config file that was used to launch the server.
     fs::path getConfigFilename() const override { return filename; }
 
-    /// \brief load configuration file and initialise values
+    /// @brief load configuration file and initialise values
     void load(const fs::path& userHome);
-    /// \brief validate configuration
+    /// @brief validate configuration
     bool validate();
-    /// \brief load all changed values from database
+    /// @brief load all changed values from database
     void updateConfigFromDatabase(const std::shared_ptr<Database>& database) override;
-    /// \brief generate UDN for server and store in database
+    /// @brief generate UDN for server and store in database
     std::string generateUDN(const std::shared_ptr<Database>& database) override;
 
-    /// \brief add a config option
-    /// \param option option type to add.
-    /// \param optionValue option to add.
+    /// @brief add a config option
+    /// @param option option type to add.
+    /// @param optionValue option to add.
     void addOption(ConfigVal option, const std::shared_ptr<ConfigOption>& optionValue) override;
 
-    /// \brief returns a config option of type std::string
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type std::string
+    /// @param option option to retrieve.
     std::string getOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of type int
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type int
+    /// @param option option to retrieve.
     IntOptionType getIntOption(ConfigVal option) const override;
     UIntOptionType getUIntOption(ConfigVal option) const override;
     LongOptionType getLongOption(ConfigVal option) const override;
     ULongOptionType getULongOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of any type
-    /// \param option option to retrieve.
+    /// @brief returns a config option of any type
+    /// @param option option to retrieve.
     std::shared_ptr<ConfigOption> getConfigOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of type bool
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type bool
+    /// @param option option to retrieve.
     bool getBoolOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of type dictionary
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type dictionary
+    /// @param option option to retrieve.
     std::map<std::string, std::string> getDictionaryOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of type vector
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type vector
+    /// @param option option to retrieve.
     std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of type array of string
-    /// \param option option to retrieve.
+    /// @brief returns a config option of type array of string
+    /// @param option option to retrieve.
     std::vector<std::string> getArrayOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of type AutoscanList
-    /// \param option to retrieve
+    /// @brief returns a config option of type AutoscanList
+    /// @param option to retrieve
     std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanListOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of type ClientConfigList
-    /// \param option to retrieve
+    /// @brief returns a config option of type ClientConfigList
+    /// @param option to retrieve
     std::shared_ptr<ClientConfigList> getClientConfigListOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of type BoxLayoutList
-    /// \param option to retrieve
+    /// @brief returns a config option of type BoxLayoutList
+    /// @param option to retrieve
     std::shared_ptr<BoxLayoutList> getBoxLayoutListOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of type DirectoryConfigList
-    /// \param option to retrieve
+    /// @brief returns a config option of type DirectoryConfigList
+    /// @param option to retrieve
     std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of type DynamicContentList
-    /// \param option to retrieve
+    /// @brief returns a config option of type DynamicContentList
+    /// @param option to retrieve
     std::shared_ptr<DynamicContentList> getDynamicContentListOption(ConfigVal option) const override;
 
-    /// \brief returns a config option of type TranscodingProfileList
-    /// \param option to retrieve
+    /// @brief returns a config option of type TranscodingProfileList
+    /// @param option to retrieve
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(ConfigVal option) const override;
 
     bool hasOrigValue(const std::string& item) const override

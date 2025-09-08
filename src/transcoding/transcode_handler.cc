@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file transcode_handler.cc
+/// @file transcoding/transcode_handler.cc
 #define GRB_LOG_FAC GrbLogFacility::transcoding
 
 #include "transcode_handler.h" // API

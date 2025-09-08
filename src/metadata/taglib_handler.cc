@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file taglib_handler.cc
+/// @file metadata/taglib_handler.cc
 
 #ifdef HAVE_TAGLIB
 #define GRB_LOG_FAC GrbLogFacility::taglib
@@ -352,8 +352,8 @@ void TagLibHandler::makeComment(
     log_debug("Fabricated Comment: {}", fmt::format("{}", fmt::join(snippets, ", ")));
 }
 
-/// \brief read metadata from file and add to object
-/// \param obj Object to handle
+/// @brief read metadata from file and add to object
+/// @param obj Object to handle
 bool TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
@@ -405,10 +405,10 @@ std::string TagLibHandler::getContentTypeFromByteVector(const TagLib::ByteVector
 #endif
 }
 
-/// \brief stream content of object or resource to client
-/// \param obj Object to stream
-/// \param resource the resource
-/// \return iohandler to stream to client
+/// @brief stream content of object or resource to client
+/// @param obj Object to stream
+/// @param resource the resource
+/// @return iohandler to stream to client
 std::unique_ptr<IOHandler> TagLibHandler::serveContent(
     const std::shared_ptr<CdsObject>& obj,
     const std::shared_ptr<CdsResource>& resource)

@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file js_functions.cc
+/// @file content/scripting/js_functions.cc
 
 #ifdef HAVE_JS
 #define GRB_LOG_FAC GrbLogFacility::script
@@ -139,6 +139,7 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
 
 duk_ret_t js_addCdsObject(duk_context* ctx)
 {
+    log_debug("start");
     auto self = Script::getContextScript(ctx);
 
     if (!duk_is_object(ctx, 0)) {
@@ -201,6 +202,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         self->getContent()->addObject(cdsObj, false);
 
         /* setting object ID as return value */
+        log_debug("object {} parent {}", cdsObj->getID(), parentId);
         duk_push_string(ctx, fmt::to_string(cdsObj->getID()).c_str());
         return 1;
     } catch (const ServerShutdownException&) {

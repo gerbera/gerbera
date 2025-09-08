@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file string_converter.cc
+/// @file util/string_converter.cc
 #define GRB_LOG_FAC GrbLogFacility::util
 #include "string_converter.h" // API
 

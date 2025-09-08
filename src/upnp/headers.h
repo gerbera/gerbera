@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file headers.h
+/// @file upnp/headers.h
 
 #ifndef GERBERA_HEADERS_H
 #define GERBERA_HEADERS_H

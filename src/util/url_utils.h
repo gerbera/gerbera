@@ -19,7 +19,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file url_utils.h
+/// @file util/url_utils.h
 
 #ifndef GERBERA_URL_UTILS_H
 #define GERBERA_URL_UTILS_H
@@ -34,12 +34,12 @@ constexpr auto URL_PARAM_SEPARATOR = std::string_view("/");
 
 namespace URLUtils {
 
-/// \brief Splits the url into a path and parameters string.
+/// @brief Splits the url into a path and parameters string.
 /// Only '?' and '/' separators are allowed, otherwise an exception will
 /// be thrown.
-/// \param url URL that has to be processed
-/// \param separator split url at this character
-/// \return pair of path and parameters which reference the input-view of url
+/// @param url URL that has to be processed
+/// @param separator split url at this character
+/// @return pair of path and parameters which reference the input-view of url
 ///
 /// This function splits the url into its path and parameter components.
 /// content/media SEPARATOR object_id=12345&transcode=wav would be transformed to:
@@ -51,12 +51,12 @@ std::string_view getFile(std::string_view url);
 std::string joinUrl(const std::vector<std::string>& components, bool addToEnd = false, std::string_view separator = URL_PARAM_SEPARATOR);
 std::map<std::string, std::string> parseParameters(std::string_view filename, std::string_view baseLink);
 
-/// \brief Converts a string to a URL (meaning: %20 instead of space and so on)
-/// \param str String to be converted.
-/// \return string that contains the url-escaped representation of the original string.
+/// @brief Converts a string to a URL (meaning: %20 instead of space and so on)
+/// @param str String to be converted.
+/// @return string that contains the url-escaped representation of the original string.
 std::string urlEscape(std::string_view str);
 
-/// \brief Opposite of urlEscape :)
+/// @brief Opposite of urlEscape :)
 std::string urlUnescape(std::string_view str);
 
 std::string dictEncode(const std::map<std::string, std::string>& dict);

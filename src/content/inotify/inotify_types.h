@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file inotify_types.h
+/// @file content/inotify/inotify_types.h
 
 #ifndef __INOTIFY_TYPES_H__
 #define __INOTIFY_TYPES_H__

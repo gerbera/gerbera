@@ -25,7 +25,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file cds_item.cc
+/// @file cds/cds_item.cc
 
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "cds_item.h" // API

@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file file_request_handler.h
-/// \brief Definition of the FileRequestHandler class.
+/// @file request_handler/file_request_handler.h
+/// @brief Definition of the FileRequestHandler class.
 #ifndef __FILE_REQUEST_HANDLER_H__
 #define __FILE_REQUEST_HANDLER_H__
 
@@ -54,11 +54,11 @@ public:
     /// \inherit
     bool getInfo(const char* filename, UpnpFileInfo* info) override;
 
-    /// \brief Prepares the output buffer and calls the process function.
-    /// \param filename Requested URL
-    /// \param quirks allows modifying the content of the response based on the client
-    /// \param mode either UPNP_READ or UPNP_WRITE
-    /// \return the appropriate IOHandler for the request.
+    /// @brief Prepares the output buffer and calls the process function.
+    /// @param filename Requested URL
+    /// @param quirks allows modifying the content of the response based on the client
+    /// @param mode either UPNP_READ or UPNP_WRITE
+    /// @return the appropriate IOHandler for the request.
     std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
 
 private:

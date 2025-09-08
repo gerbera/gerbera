@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file script_names.h
+/// @file content/scripting/script_names.h
 
 #ifndef __SCRIPTING_SCRIPT_NAMES_H__
 #define __SCRIPTING_SCRIPT_NAMES_H__

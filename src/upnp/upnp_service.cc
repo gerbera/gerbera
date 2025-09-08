@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file upnp_service.cc
+/// @file upnp/upnp_service.cc
 #define GRB_LOG_FAC GrbLogFacility::requests
 
 #include "upnp_service.h" // API

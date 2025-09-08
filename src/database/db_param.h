@@ -21,12 +21,12 @@
     $Id$
 */
 
-/// \file db_param.h
+/// @file database/db_param.h
 
 #ifndef __DB_PARAM_H__
 #define __DB_PARAM_H__
 
-/// \brief Base class for actions performed based on UPnP requests
+/// @brief Base class for actions performed based on UPnP requests
 class ActionParam {
 protected:
     std::string sortCrit;
@@ -63,9 +63,9 @@ public:
     const std::string& getSortCriteria() const { return sortCrit; }
     void setSortCriteria(const std::string& sortCrit) { this->sortCrit = sortCrit; }
 
-    /// \brief set forbidden directories
+    /// @brief set forbidden directories
     void setForbiddenDirectories(const std::vector<std::string>& directories) { forbiddenDirectories = directories; }
-    /// \brief get list of forbidden directories
+    /// @brief get list of forbidden directories
     const std::vector<std::string>& getForbiddenDirectories() const { return forbiddenDirectories; }
 
     const std::string& getGroup() const { return group; }
@@ -78,7 +78,7 @@ public:
     }
 };
 
-/// \brief Parameters for UPnP browse request
+/// @brief Parameters for UPnP browse request
 class BrowseParam : public ActionParam {
 protected:
     unsigned int flags;
@@ -108,7 +108,7 @@ public:
     bool getDynamicContainers() const { return showDynamicContainers; }
 };
 
-/// \brief Parameters for UPnP search request
+/// @brief Parameters for UPnP search request
 class SearchParam : public ActionParam {
 protected:
     std::string containerID;

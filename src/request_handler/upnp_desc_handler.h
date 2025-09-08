@@ -19,7 +19,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file upnp_desc_handler.h
+/// @file request_handler/upnp_desc_handler.h
 
 #ifndef GERBERA_UPNP_DESC_HANDLER_H
 #define GERBERA_UPNP_DESC_HANDLER_H

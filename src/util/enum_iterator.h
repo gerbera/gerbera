@@ -21,15 +21,15 @@
     $Id$
 */
 
-/// \file enum_iterator.h
-/// \brief EnumIterator template class
+/// @file util/enum_iterator.h
+/// @brief EnumIterator template class
 
 #ifndef __ENUM_ITERATOR_H__
 #define __ENUM_ITERATOR_H__
 
 #include <type_traits>
 
-/// \brief Iterator over values of a sequential enum between begin and end
+/// @brief Iterator over values of a sequential enum between begin and end
 template <typename En, En beginVal, En endVal>
 class EnumIterator {
 private:

@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file mime.h
+/// @file util/mime.h
 
 #ifndef __MIME_H__
 #define __MIME_H__
@@ -50,7 +50,7 @@ public:
     Mime(const Mime&) = delete;
     Mime& operator=(const Mime&) = delete;
 
-    /// \brief Extracts mimetype from a buffer using filemagic
+    /// @brief Extracts mimetype from a buffer using filemagic
     std::string bufferToMimeType(const void* buffer, std::size_t length);
     std::mutex mime_mutex;
 #endif // HAVE_MAGIC
@@ -67,7 +67,7 @@ private:
 #ifdef HAVE_MAGIC
     magic_t magicCookie;
 
-    /// \brief Extracts mimetype from a file using filemagic
+    /// @brief Extracts mimetype from a file using filemagic
     std::string fileToMimeType(const fs::path& path, const std::string& defval = "");
 #endif
 };

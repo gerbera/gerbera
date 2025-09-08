@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file url_request_handler.h
-/// \brief Definition of the URLRequestHandler class.
+/// @file request_handler/url_request_handler.h
+/// @brief Definition of the URLRequestHandler class.
 #ifndef __URL_REQUEST_HANDLER_H__
 #define __URL_REQUEST_HANDLER_H__
 

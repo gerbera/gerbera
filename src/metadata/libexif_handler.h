@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file libexif_handler.h
-/// \brief Definition of the LibExifHandler class.
+/// @file metadata/libexif_handler.h
+/// @brief Definition of the LibExifHandler class.
 #ifndef __METADATA_LIBEXIF_H__
 #define __METADATA_LIBEXIF_H__
 
@@ -46,13 +46,13 @@ class CdsItem;
 class LibExifObject;
 class StringConverter;
 
-/// \brief This class is responsible for reading exif header metadata via the
+/// @brief This class is responsible for reading exif header metadata via the
 /// libexif library
 class LibExifHandler : public MediaMetadataHandler {
 private:
     ExifLog* log = nullptr;
 
-    /// \brief read exif content values
+    /// @brief read exif content values
     void process_ifd(
         const ExifContent* content,
         const std::shared_ptr<CdsItem>& item,

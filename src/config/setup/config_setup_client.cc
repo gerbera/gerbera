@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_setup_client.cc
+/// @file config/setup/config_setup_client.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_setup_client.h" // API
@@ -43,8 +43,8 @@
 #include <iterator>
 #include <numeric>
 
-/// \brief Creates an array of ClientConfig objects from a XML nodeset.
-/// \param element starting element of the nodeset.
+/// @brief Creates an array of ClientConfig objects from a XML nodeset.
+/// @param element starting element of the nodeset.
 bool ConfigClientSetup::createOptionFromNode(
     const pugi::xml_node& element,
     const std::shared_ptr<ClientConfigList>& result) const

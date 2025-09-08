@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file io_handler.h
-/// \brief Definition for the IOHandler class.
+/// @file iohandler/io_handler.h
+/// @brief Definition for the IOHandler class.
 
 #ifndef __IO_HANDLER_H__
 #define __IO_HANDLER_H__
@@ -46,35 +46,35 @@ class IOHandler {
 public:
     virtual ~IOHandler() = default;
 
-    /// \brief Opens a data for the web server.
-    /// \param mode in which the data will be opened (we only support UPNP_READ)
+    /// @brief Opens a data for the web server.
+    /// @param mode in which the data will be opened (we only support UPNP_READ)
     virtual void open(enum UpnpOpenFileMode mode);
 
-    /// \brief Reads previously opened/initialized data sequentially.
-    /// \param buf This buffer will be filled by our read functions.
-    /// \param length Number of bytes to read.
+    /// @brief Reads previously opened/initialized data sequentially.
+    /// @param buf This buffer will be filled by our read functions.
+    /// @param length Number of bytes to read.
     virtual grb_read_t read(std::byte* buf, std::size_t length);
 
-    /// \brief Writes to previously opened/initialized data sequentially.
-    /// \param buf Data to be written.
-    /// \param length Number of bytes to write.
+    /// @brief Writes to previously opened/initialized data sequentially.
+    /// @param buf Data to be written.
+    /// @param length Number of bytes to write.
     virtual std::size_t write(std::byte* buf, std::size_t length);
 
-    /// \brief Performs a seek on an open/initialized data.
-    /// \param offset Number of bytes to move in the buffer.
+    /// @brief Performs a seek on an open/initialized data.
+    /// @param offset Number of bytes to move in the buffer.
 
     /// For seeking forwards
     /// positive values are used, for seeking backwards - negative. \b Offset must
     /// be positive if \b origin is set to \b SEEK_SET
-    /// \param whence The position to move relative to. SEEK_CUR to move relative
+    /// @param whence The position to move relative to. SEEK_CUR to move relative
     /// to current position, SEEK_END to move relative to the end of file,
     /// SEEK_SET to specify an absolute offset.
     virtual void seek(off_t offset, int whence);
 
-    /// \brief Return the current stream position.
+    /// @brief Return the current stream position.
     virtual off_t tell();
 
-    /// \brief Close/free previously opened/initialized data.
+    /// @brief Close/free previously opened/initialized data.
     virtual void close();
 };
 

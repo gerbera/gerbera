@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file mysql_database.h
+/// @file database/mysql/mysql_database.h
 
 #ifdef HAVE_MYSQL
 
@@ -43,7 +43,7 @@
 #include <mysql.h>
 #include <vector>
 
-/// \brief The Database class for using MySQL
+/// @brief The Database class for using MySQL
 class MySQLDatabase : public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
     explicit MySQLDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager);
@@ -86,7 +86,7 @@ private:
     const int mysql_init_val = 1;
 };
 
-/// \brief The Database class for using MySQL with transactions
+/// @brief The Database class for using MySQL with transactions
 class MySQLDatabaseWithTransactions : public SqlWithTransactions, public MySQLDatabase {
 public:
     MySQLDatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager);

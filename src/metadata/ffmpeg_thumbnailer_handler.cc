@@ -19,7 +19,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file ffmpeg_thumbnailer_handler.cc
+/// @file metadata/ffmpeg_thumbnailer_handler.cc
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
 #define GRB_LOG_FAC GrbLogFacility::thumbnailer
@@ -36,7 +36,7 @@ Gerbera - https://gerbera.io/
 #include <libffmpegthumbnailer/filmstripfilter.h>
 #include <libffmpegthumbnailer/videothumbnailer.h>
 
-/// @brief: logger function for thumbnailer issues
+/// @brief logger function for thumbnailer issues
 static void ffmpegThLogger(ThumbnailerLogLevel logLevel, const std::string& message)
 {
     switch (logLevel) {
@@ -55,7 +55,7 @@ class RotationFilter : public ffmpegthumbnailer::IFilter {
 protected:
     double degrees;
 
-    /// @brief: image size after rotation
+    /// @brief image size after rotation
     static std::pair<int, int> computeRotatedSize(int width, int height, double radians)
     {
         double abs_cos = std::abs(std::cos(radians));
@@ -66,14 +66,14 @@ protected:
     }
 
 public:
-    /// @brief: create filter
-    /// @param: rotation in degree
+    /// @brief create filter
+    /// @param degrees rotation in degree (0 to 360)
     RotationFilter(double degrees)
         : degrees(degrees)
     {
     }
 
-    /// @brief: implementation of filter logic
+    /// @brief implementation of filter logic
     void process(ffmpegthumbnailer::VideoFrame& videoFrame)
     {
         double radians = (degrees * M_PI) / 180;

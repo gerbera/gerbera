@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file conn_mgr_service.cc
+/// @file upnp/conn_mgr_service.cc
 #define GRB_LOG_FAC GrbLogFacility::connmgr
 
 #include "conn_mgr_service.h" // API
