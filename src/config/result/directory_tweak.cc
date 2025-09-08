@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file directory_tweak.cc
+/// @file config/result/directory_tweak.cc
 #define GRB_LOG_FAC GrbLogFacility::content
 
 #include "directory_tweak.h" // API

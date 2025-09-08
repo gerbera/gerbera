@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// @file inotify_manager.h
+/// @file content/inotify/inotify_manager.h
 #ifndef __INOTIFY_MANAGER_H__
 #define __INOTIFY_MANAGER_H__
 

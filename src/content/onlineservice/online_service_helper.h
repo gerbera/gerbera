@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file online_service_helper.h
-/// \brief Definition of the OnlineServiceHelper class.
+/// @file content/onlineservice/online_service_helper.h
+/// @brief Definition of the OnlineServiceHelper class.
 
 #ifndef __ONLINE_SERVICE_HELPER_H__
 #define __ONLINE_SERVICE_HELPER_H__
@@ -42,10 +42,10 @@
 // forward declaration
 class CdsItemExternalURL;
 
-/// \brief This class will handle things that are specific to various services
+/// @brief This class will handle things that are specific to various services
 class OnlineServiceHelper {
 public:
-    /// \brief this function will determine the final URL for services that
+    /// @brief this function will determine the final URL for services that
     /// need extra steps to do that
     static std::string resolveURL(const std::shared_ptr<CdsItemExternalURL>& item);
 };

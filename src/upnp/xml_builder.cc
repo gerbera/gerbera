@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file upnp/xml_builder.cc
+/// @file upnp/xml_builder.cc
 #define GRB_LOG_FAC GrbLogFacility::xml
 
 #include "xml_builder.h" // API
@@ -518,7 +518,7 @@ std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet() con
     return doc;
 }
 
-/// \brief: gerbera uses these resource attributes for internal mechanisms
+/// @brief gerbera uses these resource attributes for internal mechanisms
 static bool isPrivateAttribute(ResourceAttribute attribute)
 {
     switch (attribute) {
@@ -679,7 +679,7 @@ std::string UpnpXMLBuilder::renderResourceURL(
     return url;
 }
 
-/// \brief build path for first resource from item
+/// @brief build path for first resource from item
 /// depending on the item type it returns the url to the media
 std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>& item) const
 {

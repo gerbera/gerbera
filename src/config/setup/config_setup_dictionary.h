@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file config_setup_dictionary.h
-///\brief Definitions of the ConfigSetup classes.
+/// @file config/setup/config_setup_dictionary.h
+/// @brief Definitions of the ConfigSetup classes.
 
 #ifndef __CONFIG_SETUP_DICTIONARY_H__
 #define __CONFIG_SETUP_DICTIONARY_H__
@@ -40,9 +40,9 @@ protected:
     bool doExtend = false;
     std::map<std::string, std::string> defaultEntries;
 
-    /// \brief Creates a dictionary from an XML nodeset.
-    /// \param element starting element of the nodeset.
-    /// \param result contents of config.
+    /// @brief Creates a dictionary from an XML nodeset.
+    /// @param element starting element of the nodeset.
+    /// @param result contents of config.
     ///
     /// The basic idea is the following:
     /// You have a piece of XML that looks like this
@@ -57,7 +57,7 @@ protected:
         const pugi::xml_node& element,
         std::map<std::string, std::string>& result);
 
-    /// \brief Extracts the new value from the xpath key
+    /// @brief Extracts the new value from the xpath key
     bool updateItem(
         const std::vector<std::size_t>& indexList,
         const std::string& optItem,
@@ -68,11 +68,11 @@ protected:
         const std::string& status = "") const;
 
 public:
-    /// \brief name of each node in the set
+    /// @brief name of each node in the set
     ConfigVal nodeOption {};
-    /// \brief attribute name to be used as a key
+    /// @brief attribute name to be used as a key
     ConfigVal keyOption {};
-    /// \brief attribute name to be used as value
+    /// @brief attribute name to be used as value
     ConfigVal valOption {};
 
     explicit ConfigDictionarySetup(ConfigVal option, const char* xpath, const char* help, DictionaryInitFunction init = nullptr,
@@ -99,7 +99,7 @@ public:
     }
 
     std::string getTypeString() const override { return "List"; }
-    /// \brief Create the xml representation of the defaultEntries
+    /// @brief Create the xml representation of the defaultEntries
     bool createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const override;
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;

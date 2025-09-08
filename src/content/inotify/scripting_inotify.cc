@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// @file scripting_inotify.cc
+/// @file content/inotify/scripting_inotify.cc
 /// @brief Implement manager class for scripting directories with inotify
 #define GRB_LOG_FAC GrbLogFacility::inotify
 

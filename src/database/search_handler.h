@@ -20,8 +20,8 @@
   $Id$
 */
 
-/// \file search_handler.h
-/// \brief Definitions of classes supporting implementation of UPnP search
+/// @file database/search_handler.h
+/// @brief Definitions of classes supporting implementation of UPnP search
 /// Implements functionality defined in "standardizeddcps/MediaServer_4 and MediaRenderer_3/UPnP-av-ContentDirectory-v4-Service-20150630.pdf"
 /// Document available in upnpresources.zip, download from here:
 /// https://openconnectivity.org/developer/specifications/upnp-resources/upnp
@@ -194,7 +194,7 @@ protected:
     std::unique_ptr<ASTDQuote> closeQuote;
 };
 
-/// \brief Represents a comparison operator such as =, >=, <
+/// @brief Represents a comparison operator such as =, >=, <
 class ASTCompareOperator : public ASTNode {
 public:
     ASTCompareOperator(const SQLEmitter& sqlEmitter, std::string value);
@@ -206,7 +206,7 @@ protected:
     std::string value;
 };
 
-/// \brief Represents an expression using a comparison operator
+/// @brief Represents an expression using a comparison operator
 class ASTCompareExpression : public ASTNode {
 public:
     ASTCompareExpression(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTProperty> lhs,
@@ -219,7 +219,7 @@ protected:
     std::unique_ptr<ASTQuotedString> rhs;
 };
 
-/// \brief Represents an operator defined by a string such as contains, derivedFrom
+/// @brief Represents an operator defined by a string such as contains, derivedFrom
 class ASTStringOperator : public ASTNode {
 public:
     ASTStringOperator(const SQLEmitter& sqlEmitter, std::string value);
@@ -231,7 +231,7 @@ protected:
     std::string value;
 };
 
-/// \brief Represents an expression using an operator defined by a string
+/// @brief Represents an expression using an operator defined by a string
 class ASTStringExpression : public ASTNode {
 public:
     ASTStringExpression(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTProperty> lhs,
@@ -254,7 +254,7 @@ protected:
     std::string value;
 };
 
-/// \brief Represents an expression using the exists operator
+/// @brief Represents an expression using the exists operator
 class ASTExistsExpression : public ASTNode {
 public:
     ASTExistsExpression(const SQLEmitter& sqlEmitter, std::unique_ptr<ASTProperty> lhs,
@@ -320,26 +320,26 @@ enum class FieldType {
     Date,
 };
 
-/// \brief base interface for templated column mapping and quoting operations
+/// @brief base interface for templated column mapping and quoting operations
 class ColumnMapper {
 public:
     virtual ~ColumnMapper() = default;
-    /// \brief check whether tag is valid colum
+    /// @brief check whether tag is valid colum
     virtual bool hasEntry(const std::string& tag) const = 0;
-    /// \brief get the table name
+    /// @brief get the table name
     virtual std::string getTableName() const = 0;
-    /// \brief get the table name quoted
+    /// @brief get the table name quoted
     virtual std::string tableQuoted() const = 0;
-    /// \brief quote column for statement
-    /// \param tag column name
-    /// \param noAlias generate no alias
+    /// @brief quote column for statement
+    /// @param tag column name
+    /// @param noAlias generate no alias
     virtual std::string mapQuoted(const std::string& tag, bool noAlias = false) const = 0;
     virtual bool mapQuotedList(std::vector<std::string>& sort, const std::string& tag, const std::string& desc) const = 0;
-    /// \brief quote column for statement with lowercase
+    /// @brief quote column for statement with lowercase
     virtual std::string mapQuotedLower(const std::string& tag) const = 0;
-    /// \brief get type of column from tagMap
+    /// @brief get type of column from tagMap
     virtual FieldType getFieldType(const std::string& tag) const = 0;
-    /// \brief quote tag for statement
+    /// @brief quote tag for statement
     virtual std::string quote(const std::string& tag) const = 0;
 };
 

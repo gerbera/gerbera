@@ -19,7 +19,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file resolution.h
+/// @file metadata/resolution.h
 
 #ifndef GERBERA_RESOLUTION_H
 #define GERBERA_RESOLUTION_H

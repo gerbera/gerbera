@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file web/page_request.cc
+/// @file web/page_request.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "page_request.h" // API

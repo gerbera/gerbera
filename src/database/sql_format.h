@@ -20,7 +20,7 @@
   $Id$
 */
 
-/// \file sql_format.h
+/// @file database/sql_format.h
 
 #ifndef __SQL_FORMAT_H__
 #define __SQL_FORMAT_H__

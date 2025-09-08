@@ -18,8 +18,8 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file grb_time.h
-/// \brief time handling
+/// @file util/grb_time.h
+/// @brief time handling
 
 #ifndef __GRB_TIME_H__
 #define __GRB_TIME_H__
@@ -42,10 +42,10 @@ std::chrono::seconds toSeconds(TP tp)
     return std::chrono::duration_cast<std::chrono::seconds>(asSystemTime.time_since_epoch());
 }
 
-/// \brief Converts a number of milliseconds to "H*:MM:SS.F*" representation as required by the UPnP duration spec
+/// @brief Converts a number of milliseconds to "H*:MM:SS.F*" representation as required by the UPnP duration spec
 std::string millisecondsToHMSF(long long milliseconds);
 
-/// \brief converts a "H*:MM:SS.F*" representation to milliseconds
+/// @brief converts a "H*:MM:SS.F*" representation to milliseconds
 long long HMSFToMilliseconds(std::string_view time);
 std::string millisecondsToString(long long milliseconds, bool all = false);
 
@@ -59,7 +59,7 @@ bool parseSimpleDate(const std::string& s, std::chrono::seconds& date);
 bool parseTime(long long& value, std::string& timeValue, GrbTimeType type = GrbTimeType::Seconds);
 std::string makeSimpleDate(std::string& s);
 
-/// \brief Converts seconds to localtime and prints a formatted string
+/// @brief Converts seconds to localtime and prints a formatted string
 std::string grbLocaltime(const std::string& format, const std::chrono::seconds& t);
 
 #endif // __GRB_TIME_H__

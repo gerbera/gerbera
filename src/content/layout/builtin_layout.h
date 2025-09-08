@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file builtin_layout.h
+/// @file content/layout/builtin_layout.h
 
 #ifndef __BUILTIN_LAYOUT_H__
 #define __BUILTIN_LAYOUT_H__
@@ -44,7 +44,7 @@ class CdsContainer;
 class Config;
 class ConverterManager;
 
-/// \brief layout class implementation for simple virtual layout
+/// @brief layout class implementation for simple virtual layout
 class BuiltinLayout : public Layout {
 public:
     explicit BuiltinLayout(std::shared_ptr<Content> content);

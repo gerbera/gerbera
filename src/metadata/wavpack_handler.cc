@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file wavpack_handler.cc
+/// @file metadata/wavpack_handler.cc
 
 #ifdef HAVE_WAVPACK
 #define GRB_LOG_FAC GrbLogFacility::wavpack
@@ -255,7 +255,7 @@ bool WavPackHandler::getAttachments(
     return result;
 }
 
-/// \brief Wrapper class to interface with libwavpack
+/// @brief Wrapper class to interface with libwavpack
 class WavPackObject {
 private:
     char value[MAX_WV_TEXT_SIZE] { '\0' };
@@ -288,13 +288,13 @@ public:
         }
     }
 
-    /// \brief check if libexif information is available
+    /// @brief check if libexif information is available
     operator bool() const
     {
         return size != 0;
     }
 
-    /// \brief get date/time
+    /// @brief get date/time
     std::string getDate()
     {
         auto [dateValue, err] = sc->convert(value);
@@ -308,7 +308,7 @@ public:
         return "";
     }
 
-    /// \brief get key value from image
+    /// @brief get key value from image
     std::string getValue()
     {
         auto [val, err] = sc->convert(value);

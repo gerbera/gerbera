@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file js_functions.h
-/// \brief These functions can be called from scripts.
+/// @file content/scripting/js_functions.h
+/// @brief These functions can be called from scripts.
 
 #ifndef __SCRIPTING_JS_FUNCTIONS_H__
 #define __SCRIPTING_JS_FUNCTIONS_H__
@@ -39,18 +39,18 @@
 
 extern "C" {
 
-/// \brief Log output with log level.
+/// @brief Log output with log level.
 duk_ret_t js_print2(duk_context* ctx);
-/// \brief Log output.
+/// @brief Log output.
 duk_ret_t js_print(duk_context* ctx);
 
-/// \brief Adds an object to the database.
+/// @brief Adds an object to the database.
 duk_ret_t js_addCdsObject(duk_context* ctx);
 
-/// \brief Creates a tree of containers.
+/// @brief Creates a tree of containers.
 duk_ret_t js_addContainerTree(duk_context* ctx);
 
-/// \brief Makes a copy of an CDS object.
+/// @brief Makes a copy of an CDS object.
 duk_ret_t js_copyObject(duk_context* ctx);
 
 /// filesystem charset to internal

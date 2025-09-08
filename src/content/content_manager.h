@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file content_manager.h
+/// @file content/content_manager.h
 #ifndef __CONTENT_MANAGER_H__
 #define __CONTENT_MANAGER_H__
 
@@ -81,53 +81,53 @@ public:
 
     void timerNotify(const std::shared_ptr<Timer::Parameter>& parameter) override;
 
-    /// \brief Returns the task that is currently being executed.
+    /// @brief Returns the task that is currently being executed.
     std::shared_ptr<GenericTask> getCurrentTask() const override;
 
-    /// \brief Returns the list of all enqueued tasks, including the current or nullptr if no tasks are present.
+    /// @brief Returns the list of all enqueued tasks, including the current or nullptr if no tasks are present.
     std::deque<std::shared_ptr<GenericTask>> getTasklist() override;
 
-    /// \brief Find a task identified by the task ID and invalidate it.
+    /// @brief Find a task identified by the task ID and invalidate it.
     void invalidateTask(unsigned int taskID, TaskOwner taskOwner) override;
 
-    /// \brief Adds a file or directory to the database.
-    /// \param dirEnt absolute path to the file
-    /// \param asSetting Settings for import
-    /// \param lowPriority for immediate processing or in normal order
-    /// \param cancellable can be canceled
-    /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
+    /// @brief Adds a file or directory to the database.
+    /// @param dirEnt absolute path to the file
+    /// @param asSetting Settings for import
+    /// @param lowPriority for immediate processing or in normal order
+    /// @param cancellable can be canceled
+    /// @return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
     std::shared_ptr<CdsObject> addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting,
         bool lowPriority = false, bool cancellable = true) override;
 
-    /// \brief Adds a file or directory to the database.
-    /// \param dirEnt absolute path to the file
-    /// \param rootpath absolute path to the container root
-    /// \param asSetting Settings for import
-    /// \param lowPriority for immediate processing or in normal order
-    /// \param cancellable can be canceled
-    /// \return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
+    /// @brief Adds a file or directory to the database.
+    /// @param dirEnt absolute path to the file
+    /// @param rootpath absolute path to the container root
+    /// @param asSetting Settings for import
+    /// @param lowPriority for immediate processing or in normal order
+    /// @param cancellable can be canceled
+    /// @return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
     std::shared_ptr<CdsObject> addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
         bool lowPriority = false, bool cancellable = true) override;
 
-    /// \brief Ensures that a container given by it's location on disk is
+    /// @brief Ensures that a container given by it's location on disk is
     /// present in the database. If it does not exist it will be created, but
     /// it's content will not be added.
     ///
-    /// \param path location of the container to handle
-    /// \return objectID of the container given by path
+    /// @param path location of the container to handle
+    /// @return objectID of the container given by path
     int ensurePathExistence(const fs::path& path) const override;
     std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& path, bool rescanResource, bool async = true, bool all = false) override;
 
-    /// \brief Updates an object in the database using the given parameters.
-    /// \param objectID ID of the object to update
-    /// \param parameters key value pairs of fields to be updated
+    /// @brief Updates an object in the database using the given parameters.
+    /// @param objectID ID of the object to update
+    /// @param parameters key value pairs of fields to be updated
     std::shared_ptr<CdsObject> updateObject(int objectID, const std::map<std::string, std::string>& parameters) override;
 
     // returns nullptr if file does not exist or is ignored due to configuration
     std::shared_ptr<CdsObject> createObjectFromFile(const std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& dirEnt, bool followSymlinks, bool allowFifo = false) override;
 
 #ifdef ONLINE_SERVICES
-    /// \brief Creates a layout based from data that is obtained from an
+    /// @brief Creates a layout based from data that is obtained from an
     /// online service
     void fetchOnlineContent(OnlineServiceType serviceType, bool lowPriority = true,
         bool cancellable = true,
@@ -137,9 +137,9 @@ public:
 
 #endif // ONLINE_SERVICES
 
-    /// \brief Adds a virtual item.
-    /// \param obj item to add
-    /// \param allowFifo flag to indicate that it is ok to add a fifo,
+    /// @brief Adds a virtual item.
+    /// @param obj item to add
+    /// @param allowFifo flag to indicate that it is ok to add a fifo,
     /// otherwise only regular files or directories are allowed.
     ///
     /// This function makes sure that the file is first added to
@@ -147,74 +147,74 @@ public:
     /// It then adds the user defined virtual item to the database.
     void addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool allowFifo = false) override;
 
-    /// \brief Adds an object to the database.
-    /// \param obj object to add
-    /// \param firstChild indicate that this obj is the first child in parent container
+    /// @brief Adds an object to the database.
+    /// @param obj object to add
+    /// @param firstChild indicate that this obj is the first child in parent container
     ///
     /// parentID of the object must be set before this method.
     /// The ID of the object provided is ignored and generated by this method
     void addObject(const std::shared_ptr<CdsObject>& obj, bool firstChild) override;
 
-    /// \brief Adds a virtual container chain specified by path.
-    /// \param chain list of container objects to create
-    /// \param refItem object to take artwork from
-    /// \return ID of the last container in the chain.
+    /// @brief Adds a virtual container chain specified by path.
+    /// @param chain list of container objects to create
+    /// @param refItem object to take artwork from
+    /// @return ID of the last container in the chain.
     std::pair<int, bool> addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain, const std::shared_ptr<CdsObject>& refItem) override;
 
-    /// \brief Adds a virtual container specified by parentID and title
-    /// \param parentID the id of the parent.
-    /// \param title the title of the container.
-    /// \param upnpClass the upnp class of the container.
+    /// @brief Adds a virtual container specified by parentID and title
+    /// @param parentID the id of the parent.
+    /// @param title the title of the container.
+    /// @param upnpClass the upnp class of the container.
     std::shared_ptr<CdsContainer> addContainer(int parentID, const std::string& title, const std::string& upnpClass) override;
 
-    /// \brief Updates an object in the database.
-    /// \param obj the object to update
-    /// \param sendUpdates send updates to subscribed clients
+    /// @brief Updates an object in the database.
+    /// @param obj the object to update
+    /// @param sendUpdates send updates to subscribed clients
     void updateObject(const std::shared_ptr<CdsObject>& obj, bool sendUpdates = true) override;
 
-    /// \brief Gets an AutocsanDirectrory from the watch list.
+    /// @brief Gets an AutocsanDirectrory from the watch list.
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int scanID, AutoscanScanMode scanMode) const;
 
-    /// \brief Gets an AutoscanDirectory (by objectID) from the watch list.
+    /// @brief Gets an AutoscanDirectory (by objectID) from the watch list.
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) const override;
 
-    /// \brief Get an AutoscanDirectory given by location on disk from the watch list.
+    /// @brief Get an AutoscanDirectory given by location on disk from the watch list.
     std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(const fs::path& location) const override;
 
-    /// \brief returns an array of all autoscan directories
+    /// @brief returns an array of all autoscan directories
     std::vector<std::shared_ptr<AutoscanDirectory>> getAutoscanDirectories() const override;
 
     std::shared_ptr<AutoscanDirectory> findAutoscanDirectory(fs::path path) const override;
     bool isHiddenFile(const fs::directory_entry& dirEntry, bool isDirectory, const AutoScanSetting& settings) override;
 
-    /// \brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
+    /// @brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
     void removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) override;
 
-    /// \brief Update autoscan parameters for an existing autoscan directory
+    /// @brief Update autoscan parameters for an existing autoscan directory
     /// or add a new autoscan directory
     void setAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& dir) override;
 
-    /// \brief handles the removal of a persistent autoscan directory
+    /// @brief handles the removal of a persistent autoscan directory
     void handlePeristentAutoscanRemove(const std::shared_ptr<AutoscanDirectory>& adir) override;
 
-    /// \brief handles the recreation of a persistent autoscan directory
+    /// @brief handles the recreation of a persistent autoscan directory
     void handlePersistentAutoscanRecreate(const std::shared_ptr<AutoscanDirectory>& adir) override;
 
     void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath = {}, bool cancellable = true) override;
 
-    /// \brief instructs ContentManager to reload scripting environment
+    /// @brief instructs ContentManager to reload scripting environment
     void reloadLayout();
 
-    /// \brief register executor
+    /// @brief register executor
     ///
     /// When an external process is launched we will register the executor
     /// the content manager. This will ensure that we can kill all processes
     /// when we shutdown the server.
     ///
-    /// \param exec the Executor object of the process
+    /// @param exec the Executor object of the process
     void registerExecutor(const std::shared_ptr<Executor>& exec) override;
 
-    /// \brief unregister process
+    /// @brief unregister process
     ///
     /// When the the process io handler receives a close on a stream that is
     /// currently being processed by an external process, it will kill it.
@@ -223,7 +223,7 @@ public:
 
     void triggerPlayHook(const std::string& group, const std::shared_ptr<CdsObject>& obj) override;
 
-    /// \brief parse a file containing metadata for object
+    /// @brief parse a file containing metadata for object
     void parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const override;
 
     std::shared_ptr<Context> getContext() const override

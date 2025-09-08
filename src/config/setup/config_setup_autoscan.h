@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file config_setup_autoscan.h
-///\brief Definitions of the ConfigSetup classes.
+/// @file config/setup/config_setup_autoscan.h
+/// @brief Definitions of the ConfigSetup classes.
 
 #ifndef __CONFIG_SETUP_AUTOSCAN_H__
 #define __CONFIG_SETUP_AUTOSCAN_H__
@@ -35,14 +35,14 @@ enum class AutoscanScanMode;
 
 class ConfigAutoscanSetup : public ConfigSetup {
 protected:
-    /// \brief scanMode add only directories with the specified scanmode to the array
+    /// @brief scanMode add only directories with the specified scanmode to the array
     AutoscanScanMode scanMode;
     bool hiddenFiles = false;
     bool followSymlinks = false;
 
-    /// \brief Creates an array of AutoscanDirectory objects from a XML nodeset.
-    /// \param element starting element of the nodeset.
-    /// \param result vector with contents of array
+    /// @brief Creates an array of AutoscanDirectory objects from a XML nodeset.
+    /// @param element starting element of the nodeset.
+    /// @param result vector with contents of array
     bool createOptionFromNode(const pugi::xml_node& element, std::vector<std::shared_ptr<AutoscanDirectory>>& result);
 
     bool updateItem(const std::vector<std::size_t>& indexList, const std::string& optItem, const std::shared_ptr<Config>& config, const std::shared_ptr<AutoscanDirectory>& entry, std::string& optValue, const std::string& status = "") const;

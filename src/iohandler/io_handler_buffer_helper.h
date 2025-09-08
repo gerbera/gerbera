@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file io_handler_buffer_helper.h
+/// @file iohandler/io_handler_buffer_helper.h
 
 #ifndef __IO_HANDLER_BUFFER_HELPER_H__
 #define __IO_HANDLER_BUFFER_HELPER_H__
@@ -42,15 +42,15 @@
 
 class Config;
 
-/// \brief a IOHandler with buffer support
+/// @brief a IOHandler with buffer support
 /// the buffer is only for read(). write() is not supported
 /// the public functions of this class are *not* thread safe!
 class IOHandlerBufferHelper : public IOHandler {
 public:
-    /// \brief get an instance of a IOHandlerBufferHelper
-    /// \param config Access to the configuration
-    /// \param bufSize the size of the buffer in bytes
-    /// \param initialFillSize the number of bytes which have to be in the buffer
+    /// @brief get an instance of a IOHandlerBufferHelper
+    /// @param config Access to the configuration
+    /// @param bufSize the size of the buffer in bytes
+    /// @param initialFillSize the number of bytes which have to be in the buffer
     /// before the first read at the very beginning or after a seek returns;
     /// 0 disables the delay
     IOHandlerBufferHelper(std::shared_ptr<Config> config, std::size_t bufSize, std::size_t initialFillSize);

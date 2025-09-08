@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file matroska_handler.cc
+/// @file metadata/matroska_handler.cc
 
 #ifdef HAVE_MATROSKA
 #define GRB_LOG_FAC GrbLogFacility::matroska

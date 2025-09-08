@@ -21,15 +21,15 @@
     $Id$
 */
 
-/// \file upnp_common.h
+/// @file upnp/upnp_common.h
 #ifndef __UPNP_COMMON_H__
 #define __UPNP_COMMON_H__
 
 // ERROR CODES
-/// \brief UPnP specific error code.
+/// @brief UPnP specific error code.
 #define UPNP_E_ACTION_FAILED 501
 #define UPNP_E_SUBSCRIPTION_FAILED 503
-/// \brief UPnP specific error code.
+/// @brief UPnP specific error code.
 #define UPNP_E_NO_SUCH_ID 701
 #define UPNP_E_NOT_EXIST 706
 

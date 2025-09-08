@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_option_enum.h
+/// @file config/config_option_enum.h
 
 #ifndef __CONFIG_OPTION_ENUM_H__
 #define __CONFIG_OPTION_ENUM_H__

@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file web/tasks.cc
+/// @file web/tasks.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API

@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file curl_io_handler.h
-/// \brief Definition of the CurlIOHandler class.
+/// @file iohandler/curl_io_handler.h
+/// @brief Definition of the CurlIOHandler class.
 
 #ifndef __CURL_IO_HANDLER_H__
 #define __CURL_IO_HANDLER_H__
@@ -44,7 +44,7 @@
 
 class Config;
 
-/// \brief Allows the web server to read from a web site.
+/// @brief Allows the web server to read from a web site.
 class CurlIOHandler : public IOHandlerBufferHelper {
 public:
     CurlIOHandler(const std::shared_ptr<Config>& config, std::string url, std::size_t bufSize, std::size_t initialFillSize);

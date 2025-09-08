@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file config_setup_boxlayout.h
-/// \brief Definitions of the ConfigBoxLayoutSetup classes.
+/// @file config/setup/config_setup_boxlayout.h
+/// @brief Definitions of the ConfigBoxLayoutSetup classes.
 
 #ifndef __CONFIG_SETUP_BOXLAYOUT_H__
 #define __CONFIG_SETUP_BOXLAYOUT_H__

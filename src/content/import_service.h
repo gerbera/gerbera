@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file import_service.h
+/// @file content/import_service.h
 
 #ifndef __IMPORT_SERVICE_H__
 #define __IMPORT_SERVICE_H__
@@ -74,19 +74,19 @@ enum class ImportState : int {
 class ContentState {
 private:
     ImportState state;
-    /// \brief directory_entry to process
+    /// @brief directory_entry to process
     fs::directory_entry dirEntry;
-    /// \brief Last modification time in the file system.
+    /// @brief Last modification time in the file system.
     /// In seconds since UNIX epoch.
     std::chrono::seconds mtime = std::chrono::seconds::zero();
-    /// \brief CdsObject associated with the directory_entry
+    /// @brief CdsObject associated with the directory_entry
     std::shared_ptr<CdsObject> cdsObject;
-    /// \brief CdsObject associated with the container (if cdsObject is a container)
+    /// @brief CdsObject associated with the container (if cdsObject is a container)
     std::shared_ptr<CdsObject> firstObject;
-    /// \brief counters of child object types for container type
+    /// @brief counters of child object types for container type
     std::map<ObjectType, std::size_t> itemCounter;
 
-    /// \brief parent container (if cdsObject is a item)
+    /// @brief parent container (if cdsObject is a item)
     std::shared_ptr<CdsContainer> parentObject;
 
 public:
@@ -113,9 +113,9 @@ public:
     std::shared_ptr<CdsContainer> getParentObject() { return parentObject; }
     fs::directory_entry getDirEntry() { return dirEntry; }
 
-    /// \brief Set modification time of file.
+    /// @brief Set modification time of file.
     void setMTime(std::chrono::seconds mtime) { this->mtime = mtime; }
-    /// \brief Retrieve the file modification time (in seconds since UNIX epoch).
+    /// @brief Retrieve the file modification time (in seconds since UNIX epoch).
     std::chrono::seconds getMTime() const { return mtime; }
 
     ImportState getState() const { return state; }
@@ -131,14 +131,14 @@ public:
     using CacheAutoLock = std::scoped_lock<decltype(cacheMutex)>;
 
     mutable std::map<fs::path, std::shared_ptr<ContentState>> contentStateCache;
-    /// @brief: store entry in cache map
+    /// @brief store entry in cache map
     void cacheState(
         const fs::path& entryPath,
         const fs::directory_entry& dirEntry,
         ImportState state,
         std::chrono::seconds mtime = std::chrono::seconds::zero(),
         const std::shared_ptr<CdsObject>& cdsObject = nullptr);
-    /// @brief: get object if stored in cache map
+    /// @brief get object if stored in cache map
     std::shared_ptr<CdsObject> getObject(const fs::path& location) const;
 };
 
@@ -196,7 +196,7 @@ private:
 
     std::vector<std::vector<std::pair<std::string, std::string>>> virtualDirKeys;
 
-    /// \brief cache for containers while creating new layout
+    /// @brief cache for containers while creating new layout
     mutable std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
     mutable std::map<int, std::shared_ptr<CdsContainer>> containersWithFanArt;
 
@@ -221,9 +221,9 @@ private:
     void readDir(const std::shared_ptr<StateCache>& stateCache, const fs::path& location, AutoScanSetting settings);
     /// @brief read single file (triggered by autoscan)
     void readFile(const std::shared_ptr<StateCache>& stateCache, const fs::path& location);
-    /// \brief create containers for all discovered folders
+    /// @brief create containers for all discovered folders
     void createContainers(const std::shared_ptr<StateCache>& stateCache, int parentContainerId, AutoScanSetting& settings);
-    /// \brief create items for all discovered files
+    /// @brief create items for all discovered files
     void createItems(const std::shared_ptr<StateCache>& stateCache, AutoScanSetting& settings);
     void updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
     void fillLayout(const std::shared_ptr<StateCache>& stateCache, const std::shared_ptr<GenericTask>& task);
@@ -252,64 +252,64 @@ private:
 public:
     ImportService(std::shared_ptr<Context> context, std::shared_ptr<ConverterManager> converterManager);
 
-    /// @brief: initialise import service with runtime properties
+    /// @brief initialise import service with runtime properties
     void run(
         std::shared_ptr<ContentManager> content,
         std::shared_ptr<AutoscanDirectory> autoScan = {},
         fs::path path = "");
 
-    /// @brief: initialise layout generators
+    /// @brief initialise layout generators
 
     void initLayout(LayoutType layoutType);
-    /// @brief: destroy layout generators
+    /// @brief destroy layout generators
     void destroyLayout();
 
-    /// @brief: run import of one file or folder
+    /// @brief run import of one file or folder
     std::shared_ptr<CdsObject> doImport(
         const fs::path& location,
         AutoScanSetting& settings,
         std::unordered_set<int>& currentContent,
         const std::shared_ptr<GenericTask>& task);
 
-    /// @brief: clear caches from last import run
+    /// @brief clear caches from last import run
     void clearCache();
 
-    /// @brief: create item from directory entry
+    /// @brief create item from directory entry
     std::pair<bool, std::shared_ptr<CdsObject>> createSingleItem(const fs::directory_entry& dirEntry);
 
-    /// @brief: create child container from directory entry
+    /// @brief create child container from directory entry
     std::shared_ptr<CdsContainer> createSingleContainer(
         int parentContainerId,
         const fs::directory_entry& dirEntry,
         const std::string& upnpClass);
 
-    /// \brief create layout of a single itme
-    /// \param state item state
-    /// \param object object to create layout
-    /// \param parent parent container
-    /// \param task import task associated
+    /// @brief create layout of a single itme
+    /// @param state item state
+    /// @param object object to create layout
+    /// @param parent parent container
+    /// @param task import task associated
     void fillSingleLayout(
         const std::shared_ptr<ContentState>& state,
         std::shared_ptr<CdsObject> object,
         const std::shared_ptr<CdsContainer>& parent,
         const std::shared_ptr<GenericTask>& task);
 
-    /// @brief: check whether file is hiddem
+    /// @brief check whether file is hiddem
     bool isHiddenFile(
         const fs::path& entryPath,
         bool isDirectory,
         const fs::directory_entry& dirEntry,
         const AutoScanSetting& settings);
 
-    /// @brief: update properties of object
+    /// @brief update properties of object
     void updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
 
-    /// \brief Adds a virtual container chain specified by path.
-    /// \param parentContainerId id of the root container
-    /// \param chain list of container objects to create
-    /// \param refItem object to take artwork from
-    /// \param createdIds of the last container in the chain.
-    /// \return last id created
+    /// @brief Adds a virtual container chain specified by path.
+    /// @param parentContainerId id of the root container
+    /// @param chain list of container objects to create
+    /// @param refItem object to take artwork from
+    /// @param createdIds of the last container in the chain.
+    /// @return last id created
     std::pair<int, bool> addContainerTree(
         int parentContainerId,
         const std::vector<std::shared_ptr<CdsObject>>& chain,
@@ -326,7 +326,7 @@ public:
     std::shared_ptr<Layout> getLayout() const { return layout; }
     std::shared_ptr<MetadataService> getMetadataService() const { return metadataService; }
 
-    /// \brief parse a file containing metadata for object
+    /// @brief parse a file containing metadata for object
     void parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const;
 };
 

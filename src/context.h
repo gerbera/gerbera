@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file context.h
+/// @file context.h
 
 #ifndef __CONTEXT_H__
 #define __CONTEXT_H__

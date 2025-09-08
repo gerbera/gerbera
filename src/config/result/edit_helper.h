@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file edit_helper.h
-/// \brief Definitions of the EditHelper class.
+/// @file config/result/edit_helper.h
+/// @brief Definitions of the EditHelper class.
 
 #ifndef __GRB_EDIT_HELPER_H__
 #define __GRB_EDIT_HELPER_H__
@@ -37,13 +37,13 @@
 
 #define EDIT_CAST(tt, obj) std::dynamic_pointer_cast<tt>((obj))
 
-/// \brief base class editable objects
+/// @brief base class editable objects
 class Editable {
 public:
     virtual ~Editable() = default;
-    /// \brief make object valid
+    /// @brief make object valid
     virtual void setValid(bool newEntry, std::size_t index) { }
-    /// \brief make object invalid
+    /// @brief make object invalid
     virtual void setInvalid() { }
 
     void setOrig(bool orig) { this->isOrig = orig; }
@@ -53,14 +53,14 @@ protected:
     bool isOrig {};
 };
 
-/// \brief base class for lists of editable objects
+/// @brief base class for lists of editable objects
 template <class Editable>
 class EditHelper {
 public:
-    /// \brief Adds a new Editable to the list.
+    /// @brief Adds a new Editable to the list.
     ///
-    /// \param editable new item.
-    /// \param index position of new entry
+    /// @param editable new item.
+    /// @param index position of new entry
     void add(const std::shared_ptr<Editable>& editable, std::size_t index = std::numeric_limits<std::size_t>::max());
 
     std::shared_ptr<Editable> get(std::size_t id, bool edit = false) const;
@@ -69,11 +69,11 @@ public:
 
     std::size_t size() const { return list.size(); }
 
-    /// \brief removes the Editable given by its scan ID
+    /// @brief removes the Editable given by its scan ID
     void remove(std::size_t id, bool edit = false);
     void remove(const std::shared_ptr<Editable>& editable);
 
-    /// \brief returns a copy of the Editable list in the form of an array
+    /// @brief returns a copy of the Editable list in the form of an array
     std::vector<std::shared_ptr<Editable>> getArrayCopy() const;
 
 protected:

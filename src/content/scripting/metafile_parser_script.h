@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file metafile_parser_script.h
+/// @file content/scripting/metafile_parser_script.h
 
 #ifndef __METAFILE_PARSER_SCRIPT_H__
 #define __METAFILE_PARSER_SCRIPT_H__

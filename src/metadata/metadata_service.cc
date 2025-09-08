@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file metadata_service.cc
+/// @file metadata/metadata_service.cc
 #define GRB_LOG_FAC GrbLogFacility::metadata
 
 #include "metadata_service.h" // API

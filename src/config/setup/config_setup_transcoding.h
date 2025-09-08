@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file config_setup_transcoding.h
-///\brief Definitions of the ConfigTranscodingSetup classes.
+/// @file config/setup/config_setup_transcoding.h
+/// @brief Definitions of the ConfigTranscodingSetup classes.
 
 #ifndef __CONFIG_SETUP_TRANSCODING_H__
 #define __CONFIG_SETUP_TRANSCODING_H__
@@ -35,9 +35,9 @@ class ConfigTranscodingSetup : public ConfigSetup {
 protected:
     bool isEnabled = false;
 
-    /// \brief Creates an array of TranscodingProfile objects from an XML nodeset.
-    /// \param element starting element of the nodeset.
-    /// \param result contents of config.
+    /// @brief Creates an array of TranscodingProfile objects from an XML nodeset.
+    /// @param element starting element of the nodeset.
+    /// @param result contents of config.
     bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<TranscodingProfileList>& result) const;
 
 public:

@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// @file scripting_inotify.h
+/// @file content/inotify/scripting_inotify.h
 #ifndef __SCRIPTING_INOTIFY_H__
 #define __SCRIPTING_INOTIFY_H__
 

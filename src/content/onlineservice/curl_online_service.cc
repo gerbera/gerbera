@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file curl_online_service.cc
+/// @file content/onlineservice/curl_online_service.cc
 
 #ifdef HAVE_CURL
 #ifdef ONLINE_SERVICES

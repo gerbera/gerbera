@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file client_config.h
-/// \brief Definitions of the ClientConfig classes.
+/// @file config/result/client_config.h
+/// @brief Definitions of the ClientConfig classes.
 
 #ifndef __CLIENTCONFIG_H__
 #define __CLIENTCONFIG_H__
@@ -42,13 +42,13 @@ class ClientGroupConfig;
 using EditHelperClientConfig = EditHelper<ClientConfig>;
 using EditHelperClientGroupConfig = EditHelper<ClientGroupConfig>;
 
-/// \brief Store configuration of clients
+/// @brief Store configuration of clients
 class ClientConfigList : public EditHelperClientConfig, public EditHelperClientGroupConfig {
 public:
     std::shared_ptr<ClientGroupConfig> getGroup(const std::string& name) const;
 };
 
-/// \brief Provides information about client group settings.
+/// @brief Provides information about client group settings.
 class ClientGroupConfig : public Editable {
 public:
     ClientGroupConfig(std::string name = "")
@@ -58,7 +58,7 @@ public:
 
     bool equals(const std::shared_ptr<ClientGroupConfig>& other) { return this->groupName == other->groupName; }
 
-    /// \brief get list of forbidden directories
+    /// @brief get list of forbidden directories
     std::vector<std::string> getForbiddenDirectories(bool edit = false) const { return forbidden.getArrayOption(edit); }
     void setForbiddenDirectories(const std::vector<std::string>& forbidden) { this->forbidden = ArrayOption(forbidden); }
     void setForbiddenDirectory(std::size_t j, const std::string& value) { this->forbidden.setItem(j, value); }
@@ -70,21 +70,21 @@ private:
     ArrayOption forbidden = ArrayOption({});
 };
 
-/// \brief Provides information about one manual client.
+/// @brief Provides information about one manual client.
 class ClientConfig : public Editable {
 public:
     ClientConfig() = default;
 
-    /// \brief Creates a new ClientConfig object.
-    /// \param flags quirks flags
-    /// \param group client group
-    /// \param ip ip address
-    /// \param userAgent user agent
-    /// \param matchValues additional matches, last one wins
-    /// \param captionInfoCount max count if \<captionInfo\> tags
-    /// \param stringLimit maximum length of name strings
-    /// \param multiValue client support multi value attributes
-    /// \param isAllowed client is allowed to connect to server
+    /// @brief Creates a new ClientConfig object.
+    /// @param flags quirks flags
+    /// @param group client group
+    /// @param ip ip address
+    /// @param userAgent user agent
+    /// @param matchValues additional matches, last one wins
+    /// @param captionInfoCount max count if \<captionInfo\> tags
+    /// @param stringLimit maximum length of name strings
+    /// @param multiValue client support multi value attributes
+    /// @param isAllowed client is allowed to connect to server
     ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent,
         const std::map<ClientMatchType, std::string>& matchValues,
         int captionInfoCount, int stringLimit, bool multiValue, bool isAllowed);
@@ -95,19 +95,19 @@ public:
     int getFlags() const { return this->clientProfile.flags; }
     void setFlags(int flags) { this->clientProfile.flags = flags; }
 
-    /// \brief mimeMappings special mappings for client
+    /// @brief mimeMappings special mappings for client
     std::map<std::string, std::string> getMimeMappings(bool edit = false) const { return this->clientProfile.mimeMappings.getDictionaryOption(edit); }
     void setMimeMappings(const std::map<std::string, std::string>& mappings) { this->clientProfile.mimeMappings = DictionaryOption(mappings); }
     void setMimeMappingsFrom(std::size_t j, const std::string& from);
     void setMimeMappingsTo(std::size_t j, const std::string& to);
 
-    /// \brief headers additional headers from client
+    /// @brief headers additional headers from client
     std::map<std::string, std::string> getHeaders(bool edit = false) const { return this->clientProfile.headers.getDictionaryOption(edit); }
     void setHeaders(const std::map<std::string, std::string>& headers) { this->clientProfile.headers = DictionaryOption(headers); }
     void setHeadersKey(std::size_t j, const std::string& key);
     void setHeadersValue(std::size_t j, const std::string& value);
 
-    /// \brief dlnaMappings additional dlna profiles mappings from client
+    /// @brief dlnaMappings additional dlna profiles mappings from client
     std::vector<std::vector<std::pair<std::string, std::string>>> getDlnaMappings(bool edit = false) const { return this->clientProfile.dlnaMappings.getVectorOption(edit); }
     void setDlnaMappings(const std::vector<std::vector<std::pair<std::string, std::string>>>& dlnaMappings) { this->clientProfile.dlnaMappings = VectorOption(dlnaMappings); }
     void setDlnaMapping(std::size_t j, std::size_t k, const std::string& value);

@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file metacontent_handler.cc
+/// @file metadata/metacontent_handler.cc
 #define GRB_LOG_FAC GrbLogFacility::metadata
 
 #include "metacontent_handler.h" // API

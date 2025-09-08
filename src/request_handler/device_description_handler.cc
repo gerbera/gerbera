@@ -19,7 +19,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file device_description_handler.cc
+/// @file request_handler/device_description_handler.cc
 #define GRB_LOG_FAC GrbLogFacility::device
 
 #include "device_description_handler.h" // API

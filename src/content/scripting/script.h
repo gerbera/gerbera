@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file script.h
+/// @file content/scripting/script.h
 
 #ifndef __SCRIPTING_SCRIPT_H__
 #define __SCRIPTING_SCRIPT_H__
@@ -76,26 +76,26 @@ public:
     /// @brief initialise script variables and library
     void init();
 
-    /// \brief Write property with string value to object
-    /// \param name of property
-    /// \param value of property
-    /// \param doEmpty write if property value is empty
+    /// @brief Write property with string value to object
+    /// @param name of property
+    /// @param value of property
+    /// @param doEmpty write if property value is empty
     void setProperty(
         const std::string& name,
         const std::string& value,
         bool doEmpty = true);
-    /// \brief Write property with number value to object
-    /// \param name of property
-    /// \param value of property
+    /// @brief Write property with number value to object
+    /// @param name of property
+    /// @param value of property
     void setIntProperty(const std::string& name, int value);
-    /// \brief Write property with string value to object
-    /// \param name of property
-    /// \param value of property
-    /// \param checkValue write if property value is not equal checkValue
+    /// @brief Write property with string value to object
+    /// @param name of property
+    /// @param value of property
+    /// @param checkValue write if property value is not equal checkValue
     void setIntProperty(const std::string& name, int value, int checkValue);
-    /// \brief Write property with boolean value to object
-    /// \param name of property
-    /// \param value of property: write 1 if true 0 else
+    /// @brief Write property with boolean value to object
+    /// @param name of property
+    /// @param value of property: write 1 if true 0 else
     void setBoolProperty(const std::string& name, bool value);
 
     /// @brief add C function to js
@@ -110,15 +110,15 @@ public:
     /// @brief load all js files from folder
     void loadFolder(const fs::path& scriptFolder);
 
-    /// \brief Convert javascript object back to CdsObject
-    /// \param pcd Parent object that was added to the script context
+    /// @brief Convert javascript object back to CdsObject
+    /// @param pcd Parent object that was added to the script context
     std::shared_ptr<CdsObject> dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd);
 
-    /// \brief Convert CdsObject to javascript object
-    /// \param obj CdsObject to convert
+    /// @brief Convert CdsObject to javascript object
+    /// @param obj CdsObject to convert
     void cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj);
 
-    /// \brief get hidden file setting from content manager
+    /// @brief get hidden file setting from content manager
     bool isHiddenFile(const std::shared_ptr<CdsObject>& obj, const std::string& rootPath);
 
     std::string convertToCharset(const std::string& str, CharsetConversion chr);
@@ -183,7 +183,7 @@ protected:
     virtual std::shared_ptr<CdsObject> createObject(const std::shared_ptr<CdsObject>& pcd);
 
     int gc_counter {};
-    /// \brief object that is currently being processed by the script (set in import script)
+    /// @brief object that is currently being processed by the script (set in import script)
     std::shared_ptr<CdsObject> processed;
 
     duk_context* ctx;

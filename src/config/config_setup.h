@@ -20,8 +20,8 @@
     $Id$
 */
 
-/// \file config_setup.h
-///\brief Definitions of the ConfigSetup classes.
+/// @file config/config_setup.h
+/// @brief Definitions of the ConfigSetup classes.
 
 #ifndef __CONFIG_SETUP_H__
 #define __CONFIG_SETUP_H__

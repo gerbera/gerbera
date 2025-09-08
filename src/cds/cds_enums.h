@@ -25,7 +25,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file cds_enums.h
+/// @file cds/cds_enums.h
 
 #ifndef __CDS_TYPES_H__
 #define __CDS_TYPES_H__

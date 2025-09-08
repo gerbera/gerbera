@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file builtin_layout.cc
+/// @file content/layout/builtin_layout.cc
 #define GRB_LOG_FAC GrbLogFacility::layout
 
 #include "builtin_layout.h" // API

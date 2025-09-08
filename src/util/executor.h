@@ -29,27 +29,27 @@
     $Id$
 */
 
-/// \file executor.h
+/// @file util/executor.h
 
 #ifndef __EXECUTOR_H__
 #define __EXECUTOR_H__
 
-/// \brief wraps something executable e.g. a thread or a process
+/// @brief wraps something executable e.g. a thread or a process
 class Executor {
 public:
-    /// \brief destructor of the executor, has to make sure that the executor is dead
+    /// @brief destructor of the executor, has to make sure that the executor is dead
     virtual ~Executor() = default;
 
-    /// \brief method to check if the executor is still running
-    /// \return true if the executor is still running, false otherwise
+    /// @brief method to check if the executor is still running
+    /// @return true if the executor is still running, false otherwise
     virtual bool isAlive() = 0;
 
-    /// \brief kill the executor
-    /// \return true if the executor was killed successfully, false otherwise
+    /// @brief kill the executor
+    /// @return true if the executor was killed successfully, false otherwise
     virtual bool kill() = 0;
 
-    /// \brief get the status, exit or return code of the executor
-    /// \return the status, exit or return code. 0 for normal shutdown
+    /// @brief get the status, exit or return code of the executor
+    /// @return the status, exit or return code. 0 for normal shutdown
     virtual int getStatus() = 0;
 };
 

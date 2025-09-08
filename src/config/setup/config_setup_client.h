@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file config_setup_client.h
-/// \brief Definitions of the ConfigClientSetup classes.
+/// @file config/setup/config_setup_client.h
+/// @brief Definitions of the ConfigClientSetup classes.
 
 #ifndef __CONFIG_SETUP_CLIENT_H__
 #define __CONFIG_SETUP_CLIENT_H__
@@ -38,9 +38,9 @@ class ConfigClientSetup : public ConfigSetup {
 protected:
     bool isEnabled = false;
 
-    /// \brief Creates an array of ClientConfig objects from a XML nodeset.
-    /// \param element starting element of the nodeset.
-    /// \param result contents of config.
+    /// @brief Creates an array of ClientConfig objects from a XML nodeset.
+    /// @param element starting element of the nodeset.
+    /// @param result contents of config.
     bool createOptionFromNode(const pugi::xml_node& element, const std::shared_ptr<ClientConfigList>& result) const;
 
 public:

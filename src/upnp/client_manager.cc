@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file upnp/client_manager.cc
+/// @file upnp/client_manager.cc
 /// client info initially taken from https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.cc
 #define GRB_LOG_FAC GrbLogFacility::clients
 

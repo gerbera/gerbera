@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file directory_watch.cc
+/// @file content/inotify/directory_watch.cc
 #define GRB_LOG_FAC GrbLogFacility::autoscan
 
 #ifdef HAVE_INOTIFY

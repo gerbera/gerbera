@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_setup_dynamic.cc
+/// @file config/setup/config_setup_dynamic.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config/setup/config_setup_dynamic.h" // API
@@ -38,7 +38,7 @@
 
 #include <numeric>
 
-/// \brief Creates an array of DynamicContent objects from a XML nodeset.
+/// @brief Creates an array of DynamicContent objects from a XML nodeset.
 bool ConfigDynamicContentSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result) const
 {
     if (!element)

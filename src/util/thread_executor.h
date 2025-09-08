@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file thread_executor.h
+/// @file util/thread_executor.h
 
 #ifndef __THREAD_EXECUTOR_H__
 #define __THREAD_EXECUTOR_H__
@@ -40,7 +40,7 @@
 #include <mutex>
 #include <pthread.h>
 
-/// \brief an executor which runs a thread
+/// @brief an executor which runs a thread
 class ThreadExecutor : public Executor {
 public:
     ThreadExecutor() = default;
@@ -51,29 +51,29 @@ public:
 
     bool isAlive() override { return threadRunning; }
 
-    /// \brief kill the thread (pthread_join)
-    /// \return always true - this function only returns after the thread has died
+    /// @brief kill the thread (pthread_join)
+    /// @return always true - this function only returns after the thread has died
     bool kill() override;
 
-    /// \brief the exit status of the thread - needs to be overridden
+    /// @brief the exit status of the thread - needs to be overridden
     int getStatus() override = 0;
 
 protected:
     bool threadShutdown {};
-    /// \brief if the thread is currently running
+    /// @brief if the thread is currently running
     bool threadRunning {};
 
     std::condition_variable cond;
     mutable std::mutex mutex;
     pthread_t thread {};
 
-    /// \brief abstract thread method, which needs to be overridden
+    /// @brief abstract thread method, which needs to be overridden
     virtual void threadProc() = 0;
 
-    /// \brief start the thread
+    /// @brief start the thread
     virtual void startThread();
 
-    /// \brief check if the thread should shutdown
+    /// @brief check if the thread should shutdown
     /// should be called by the threadProc in short intervals
     bool threadShutdownCheck() const { return threadShutdown; }
 };

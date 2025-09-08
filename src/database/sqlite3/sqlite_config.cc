@@ -18,7 +18,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file sqlite_config.cc
+/// @file database/sqlite3/sqlite_config.cc
 
 #define GRB_LOG_FAC GrbLogFacility::sqlite3
 #include "sqlite_config.h" // API

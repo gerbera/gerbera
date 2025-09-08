@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file database.cc
+/// @file database/database.cc
 
 #define GRB_LOG_FAC GrbLogFacility::sqldatabase
 #include "database.h" // API

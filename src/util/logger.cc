@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file logger.cc
+/// @file util/logger.cc
 
 #include "util/logger.h" // API
 

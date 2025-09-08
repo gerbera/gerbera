@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file web/page_request.h
-/// \brief Defines the WebRequestHandler sub class with common page behaviour
+/// @file web/page_request.h
+/// @brief Defines the WebRequestHandler sub class with common page behaviour
 #ifndef __PAGE_REQUEST_H__
 #define __PAGE_REQUEST_H__
 
@@ -48,46 +48,46 @@ enum class ConfigVal;
 
 namespace Web {
 
-/// \brief WebRequestHandler sub class with common page behaviour
+/// @brief WebRequestHandler sub class with common page behaviour
 class PageRequest : public WebRequestHandler {
     using WebRequestHandler::WebRequestHandler;
 
 protected:
     void process() override;
-    /// \brief This method must be overridden by the subclasses that actually process the given request.
+    /// @brief This method must be overridden by the subclasses that actually process the given request.
     virtual bool processPageAction(Json::Value& element, const std::string& action) = 0;
 
-    /// \brief Checks if the incoming request is valid.
+    /// @brief Checks if the incoming request is valid.
     ///
     /// Each request going to the ui must at least have a valid session id,
     /// and a driver parameter. Also, there can only by a primary or a
     /// a decondary driver.
     void checkRequest(bool checkLogin = true);
 
-    /// \brief get int param from request
+    /// @brief get int param from request
     int intParam(const std::string& name, int invalid = 0) const;
-    /// \brief get boolean param from request
+    /// @brief get boolean param from request
     bool boolParam(const std::string& name) const;
 
-    /// \brief read resource information from web operation
-    /// \param object target object for the resources found
+    /// @brief read resource information from web operation
+    /// @param object target object for the resources found
     bool readResources(const std::shared_ptr<CdsObject>& object);
 
-    /// \brief check if ui update ids should be added to the response and add
+    /// @brief check if ui update ids should be added to the response and add
     /// them in that case.
     /// must only be called after checkRequest
     void handleUpdateIDs(Json::Value& element);
 
-    /// \brief add the content manager task to the given element as properties
-    /// \param task the task to add to the given element
-    /// \param taskEl the element to add the elements to
+    /// @brief add the content manager task to the given element as properties
+    /// @param task the task to add to the given element
+    /// @param taskEl the element to add the elements to
     static void appendTask(
         const std::shared_ptr<GenericTask>& task,
         Json::Value& taskEl);
 
-    /// \brief add the ui update ids from the given session as tags to the given root element
-    /// \param session the session from which the ui update ids should be taken
-    /// \param updateIDsEl the element to add the elements to
+    /// @brief add the ui update ids from the given session as tags to the given root element
+    /// @param session the session from which the ui update ids should be taken
+    /// @param updateIDsEl the element to add the elements to
     static void addUpdateIDs(
         const std::shared_ptr<Session>& session,
         Json::Value& updateIDsEl);

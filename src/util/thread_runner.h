@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file thread_runner.h
+/// @file util/thread_runner.h
 
 #ifndef __THREAD_RUNNER_H__
 #define __THREAD_RUNNER_H__
@@ -39,6 +39,7 @@
 
 using ThreadProc = std::function<void(void* target)>;
 
+/// @brief Base template class for tasks
 template <class Condition, class Mutex>
 class ThreadRunner : public ThreadExecutor {
 public:
@@ -80,7 +81,7 @@ public:
     using AutoLock = std::scoped_lock<Mutex>;
     using AutoLockU = std::unique_lock<Mutex>;
 
-    /// \brief the exit status of the thread - needs to be overridden
+    /// @brief the exit status of the thread - needs to be overridden
     int getStatus() override { return 0; }
 
     void setReady()
@@ -165,14 +166,14 @@ public:
     }
 
 protected:
-    /// \brief thread method is injected
+    /// @brief thread method is injected
     void threadProc() override
     {
         targetProc(target);
         log_threading("ThreadRunner: Terminating {}", threadName);
     }
 
-    /// \brief start the thread
+    /// @brief start the thread
     void startThread() override
     {
         int ret = pthread_create(

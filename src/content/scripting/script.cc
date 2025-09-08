@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file script.cc
+/// @file content/scripting/script.cc
 
 #ifdef HAVE_JS
 #define GRB_LOG_FAC GrbLogFacility::script

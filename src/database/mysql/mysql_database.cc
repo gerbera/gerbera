@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file mysql_database.cc
+/// @file database/mysql/mysql_database.cc
 #define GRB_LOG_FAC GrbLogFacility::mysql
 
 #ifdef HAVE_MYSQL

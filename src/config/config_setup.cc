@@ -20,7 +20,7 @@
     $Id$
 */
 
-/// \file config_setup.cc
+/// @file config/config_setup.cc
 
 #define GRB_LOG_FAC GrbLogFacility::config
 #include "config_setup.h" // API
@@ -59,7 +59,7 @@ std::string ConfigSetup::getDocs()
     return ", see documentation https://docs.gerbera.io/en/stable/config-overview.html";
 }
 
-/// \brief Returns a config option with the given xpath, if option does not exist a default value is returned.
+/// @brief Returns a config option with the given xpath, if option does not exist a default value is returned.
 std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
 {
     pugi::xpath_node xpathNode = root.select_node(cpath.c_str());

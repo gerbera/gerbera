@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file web/remove.cc
+/// @file web/remove.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API

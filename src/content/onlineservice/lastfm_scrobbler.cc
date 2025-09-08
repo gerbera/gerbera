@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file lastfm_scrobbler.cc
+/// @file content/onlineservice/lastfm_scrobbler.cc
 
 #ifdef HAVE_LASTFMLIB
 #define GRB_LOG_FAC GrbLogFacility::online

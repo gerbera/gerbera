@@ -18,7 +18,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file grb_runtime.h
+/// @file config/grb_runtime.h
 /// @brief Handling of command line arguments
 
 #ifndef __GRB_RUNTIME_H__
@@ -104,17 +104,17 @@ public:
     /// @brief terminate gerbera
     void exit(int status);
 
-    /// @brief: Initialise runtime static object
+    /// @brief Initialise runtime static object
     void init(
         const std::shared_ptr<ConfigDefinition>& definition,
         const cxxopts::Options* options);
-    /// @brief: Handle regular command line options
+    /// @brief Handle regular command line options
     void handleOptions(const cxxopts::ParseResult* results, bool startup = true);
-    /// @brief: Handle command line options that are linked with configuration values
+    /// @brief Handle command line options that are linked with configuration values
     void handleConfigOptions(const std::shared_ptr<Config>& configManager, const std::vector<ConfigOptionArgs>& additionalArgs);
-    /// @brief: Handle command line options that require a running server
+    /// @brief Handle command line options that require a running server
     void handleServerOptions(const std::shared_ptr<Server>& server);
-    /// @brief: Release all loggers
+    /// @brief Release all loggers
     void shutdown();
     /// @brief send status to systemd
     static void notifySystemd(ServiceStatus status, const std::vector<std::string>& messages = {});

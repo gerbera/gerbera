@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file cont_dir_service.cc
+/// @file upnp/cont_dir_service.cc
 #define GRB_LOG_FAC GrbLogFacility::cds
 
 #include "cont_dir_service.h" // API

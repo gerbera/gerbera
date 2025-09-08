@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// @file autoscan_inotify.h
+/// @file content/inotify/autoscan_inotify.h
 #ifndef __AUTOSCAN_INOTIFY_H__
 #define __AUTOSCAN_INOTIFY_H__
 

@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file parser_script.h
+/// @file content/scripting/parser_script.h
 
 #ifndef __PARSER_SCRIPT_H__
 #define __PARSER_SCRIPT_H__

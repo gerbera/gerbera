@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file metadata_enums.cc
+/// @file metadata/metadata_enums.cc
 
 #include "metadata_enums.h" // API
 

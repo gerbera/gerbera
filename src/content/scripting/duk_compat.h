@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file duk_compat.h
+/// @file content/scripting/duk_compat.h
 
 #ifndef __GRB_DUK_COMPAT_H__
 #define __GRB_DUK_COMPAT_H__

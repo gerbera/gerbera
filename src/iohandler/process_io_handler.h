@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file process_io_handler.h
-/// \brief Definition of the ProcessIOHandler class.
+/// @file iohandler/process_io_handler.h
+/// @brief Definition of the ProcessIOHandler class.
 #ifndef __PROCESS_IO_HANDLER_H__
 #define __PROCESS_IO_HANDLER_H__
 
@@ -55,16 +55,16 @@ protected:
     bool abort;
 };
 
-/// \brief Allows the web server to read from a fifo.
+/// @brief Allows the web server to read from a fifo.
 class ProcessIOHandler : public IOHandler {
 public:
-    /// \brief Sets the filename to work with.
-    /// \param content content handler instance
-    /// \param filename to read the data from
-    /// \param mainProc main process to observe
-    /// \param procList associated processes that will be terminated once
+    /// @brief Sets the filename to work with.
+    /// @param content content handler instance
+    /// @param filename to read the data from
+    /// @param mainProc main process to observe
+    /// @param procList associated processes that will be terminated once
     /// they are no longer needed
-    /// \param ignoreSeek don't throw exception when seek is called
+    /// @param ignoreSeek don't throw exception when seek is called
     ProcessIOHandler(const std::shared_ptr<Content>& content,
         fs::path filename, std::shared_ptr<Executor> mainProc,
         std::vector<std::unique_ptr<ProcListItem>> procList = {},
@@ -74,48 +74,48 @@ public:
     ProcessIOHandler(const ProcessIOHandler&) = delete;
     ProcessIOHandler& operator=(const ProcessIOHandler&) = delete;
 
-    /// \brief Opens file for reading (writing is not supported)
+    /// @brief Opens file for reading (writing is not supported)
     void open(enum UpnpOpenFileMode mode) override;
 
-    /// \brief Reads a previously opened file sequentially.
-    /// \param buf Data from the file will be copied into this buffer.
-    /// \param length Number of bytes to be copied into the buffer.
+    /// @brief Reads a previously opened file sequentially.
+    /// @param buf Data from the file will be copied into this buffer.
+    /// @param length Number of bytes to be copied into the buffer.
     grb_read_t read(std::byte* buf, std::size_t length) override;
 
-    /// \brief Writes to a previously opened file.
-    /// \param buf Data from the buffer will be written to the file.
-    /// \param length Number of bytes to be written from the buffer.
-    /// \return number of bytes written.
+    /// @brief Writes to a previously opened file.
+    /// @param buf Data from the buffer will be written to the file.
+    /// @param length Number of bytes to be written from the buffer.
+    /// @return number of bytes written.
     std::size_t write(std::byte* buf, std::size_t length) override;
 
-    /// \brief Performs seek on an open file.
-    /// \param offset Number of bytes to move in the file. For seeking forwards
+    /// @brief Performs seek on an open file.
+    /// @param offset Number of bytes to move in the file. For seeking forwards
     /// positive values are used, for seeking backwards - negative. Offset must
     /// be positive if origin is set to SEEK_SET
-    /// \param whence The position to move relative to. SEEK_CUR to move relative
+    /// @param whence The position to move relative to. SEEK_CUR to move relative
     /// to current position, SEEK_END to move relative to the end of file,
     /// SEEK_SET to specify an absolute offset.
     void seek(off_t offset, int whence) override;
 
-    /// \brief Close a previously opened file and kills the kill_pid process
+    /// @brief Close a previously opened file and kills the kill_pid process
     void close() override;
 
 protected:
     std::shared_ptr<Content> content;
 
-    /// \brief List of associated processes.
+    /// @brief List of associated processes.
     std::vector<std::unique_ptr<ProcListItem>> procList;
 
-    /// \brief Main process used for reading
+    /// @brief Main process used for reading
     std::shared_ptr<Executor> mainProc;
 
-    /// \brief name of the file or fifo to read the data from
+    /// @brief name of the file or fifo to read the data from
     fs::path path;
 
-    /// \brief file descriptor
+    /// @brief file descriptor
     int fd {};
 
-    /// \brief if this flag is set seek on a fifo will not return an error
+    /// @brief if this flag is set seek on a fifo will not return an error
     bool ignoreSeek;
 
     bool abort() const;

@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file jpeg_resolution.cc
+/// @file util/jpeg_resolution.cc
 #define GRB_LOG_FAC GrbLogFacility::taglib
 #include <climits>
 #include <cstddef>

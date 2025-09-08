@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file quirks.h
+/// @file upnp/quirks.h
 
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
@@ -88,12 +88,11 @@ public:
     // To be more compliant with original Samsung server we should check for getCaptionInfo.sec: 1 request header.
     void addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& headers);
 
-    /** \brief Add Samsung specific bookmark information to the request's result.
+    /** @brief Add Samsung specific bookmark information to the request's result.
      *
-     * \param item CdsItem which will be played and stores the bookmark information.
-     * \param result Answer content.
-     * \param offset number of seconds to jump
-     * \return void
+     * @param item CdsItem which will be played and stores the bookmark information.
+     * @param result Answer content.
+     * @param offset number of seconds to jump
      *
      */
     void restoreSamsungBookMarkedPosition(
@@ -101,185 +100,185 @@ public:
         pugi::xml_node& result,
         int offset = 10) const;
 
-    /** \brief Stored bookmark information into the database
+    /** @brief Stored bookmark information into the database
      *
-     * \param database storage to retrieve position from
-     * \param request request sent by Samsung client, which holds the position information which should be stored
-     * \return void
+     * @param database storage to retrieve position from
+     * @param request request sent by Samsung client, which holds the position information which should be stored
+     * @return void
      *
      */
     void saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& database, ActionRequest& request) const;
 
-    /** \brief get UPnP shortcut List
+    /** @brief get UPnP shortcut List
      *
-     * \param database DB interface
-     * \param features pugi::xml_node item in response
-     * \return void
+     * @param database DB interface
+     * @param features pugi::xml_node item in response
+     * @return void
      *
      */
     void getShortCutList(const std::shared_ptr<Database>& database, pugi::xml_node& features) const;
 
-    /** \brief get Samsung Feature List
+    /** @brief get Samsung Feature List
      *
-     * \param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
-     * \return void
+     * @param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
+     * @return void
      *
      */
     void getSamsungFeatureList(ActionRequest& request) const;
-    /// \brief find container matching the objId
-    /// \param database to search in
-    /// \param startIndex of search results
-    /// \param count number of search results
-    /// \param objId to search root container for
-    /// \return list of CdsObject matching the content class
+    /// @brief find container matching the objId
+    /// @param database to search in
+    /// @param startIndex of search results
+    /// @param count number of search results
+    /// @param objId to search root container for
+    /// @return list of CdsObject matching the content class
     std::vector<std::shared_ptr<CdsObject>> getSamsungFeatureRoot(
         const std::shared_ptr<Database>& database,
         int startIndex,
         int count,
         const std::string& objId) const;
 
-    /** \brief get Samsung ObjectID from Index
+    /** @brief get Samsung ObjectID from Index
      *
-     * \param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
-     * \return void
+     * @param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
+     * @return void
      *
      */
     void getSamsungObjectIDfromIndex(ActionRequest& request) const;
 
-    /** \brief get Samsung Index from RID
+    /** @brief get Samsung Index from RID
      *
-     * \param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
-     * \return void
+     * @param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
+     * @return void
      *
      */
     void getSamsungIndexfromRID(ActionRequest& request) const;
 
-    /** \brief Check whether clients support resource type
+    /** @brief Check whether clients support resource type
      *
-     * \return bool
+     * @return bool
      *
      */
     bool supportsResource(ResourcePurpose purpose) const;
 
-    /** \brief block XML header in response for broken clients
+    /** @brief block XML header in response for broken clients
      *
-     * \return bool
+     * @return bool
      *
      */
     bool blockXmlDeclaration() const;
 
-    /** \brief client need the filename in the uri to determine language or other detailes
+    /** @brief client need the filename in the uri to determine language or other detailes
      *
-     * \return bool
+     * @return bool
      *
      */
     bool needsFileNameUri() const;
 
-    /** \brief Check whether the supplied flags are set
+    /** @brief Check whether the supplied flags are set
      *
-     * \param flags bitset of the flags to check
-     * \return bitset of the flags
+     * @param flags bitset of the flags to check
+     * @return bitset of the flags
      *
      */
     QuirkFlags checkFlags(QuirkFlags flags) const;
 
-    /** \brief Get number of allow CaptionInfoEx entries
+    /** @brief Get number of allow CaptionInfoEx entries
      *
-     * \return number for client
+     * @return number for client
      *
      */
     int getCaptionInfoCount() const;
 
-    /** \brief Get max length of Upnp string
+    /** @brief Get max length of Upnp string
      *
-     * \return string limit for client
+     * @return string limit for client
      *
      */
     int getStringLimit() const;
 
-    /** \brief UPnP client needs everything escaped, esp. '
+    /** @brief UPnP client needs everything escaped, esp. '
      *
-     * \return bool
+     * @return bool
      *
      */
     bool needsStrictXml() const;
 
-    /** \brief UPnP client supports only ascii characters
+    /** @brief UPnP client supports only ascii characters
      *
-     * \return bool
+     * @return bool
      *
      */
     bool needsAsciiXml() const;
 
-    /** \brief UPnP client needs simple dates
+    /** @brief UPnP client needs simple dates
      *
-     * \return bool
+     * @return bool
      *
      */
     bool needsSimpleDate() const;
 
-    /** \brief UPnP client does not support conversion
+    /** @brief UPnP client does not support conversion
      *
-     * \return bool
+     * @return bool
      *
      */
     bool needsNoConversion() const;
 
-    /** \brief Get multi value upnp properties
+    /** @brief Get multi value upnp properties
      *
-     * \return true if multi-value is enabled for client
+     * @return true if multi-value is enabled for client
      *
      */
     bool getMultiValue() const;
 
-    /** \brief Get full upnp filter creation
+    /** @brief Get full upnp filter creation
      *
-     * \return true if full-filter is enabled for client
+     * @return true if full-filter is enabled for client
      *
      */
     bool getFullFilter() const;
 
-    /** \brief Get visibility if internal subtitles
+    /** @brief Get visibility if internal subtitles
      *
-     * \return true if internal subtitles are visible
+     * @return true if internal subtitles are visible
      *
      */
     bool showInternalSubtitles() const;
 
-    /** \brief Get group for ClientStatusDetail
+    /** @brief Get group for ClientStatusDetail
      *
-     * \return group for ClientStatusDetail
+     * @return group for ClientStatusDetail
      *
      */
     std::string getGroup() const;
 
-    /** \brief Get mime type mappings for client
+    /** @brief Get mime type mappings for client
      *
-     * \return mime type mappings
+     * @return mime type mappings
      *
      */
     std::map<std::string, std::string> getMimeMappings() const;
 
-    /** \brief Get dlna profile mappings for client
+    /** @brief Get dlna profile mappings for client
      *
-     * \return dlna profile mappings
+     * @return dlna profile mappings
      *
      */
     std::vector<std::vector<std::pair<std::string, std::string>>> getDlnaMappings() const;
 
-    /** \brief Update Headers with overwrites for client
+    /** @brief Update Headers with overwrites for client
      */
     void updateHeaders(Headers& headers) const;
 
-    /** \brief Client may connect to server
+    /** @brief Client may connect to server
      */
     bool isAllowed() const;
 
-    /** \brief Check for active flag
+    /** @brief Check for active flag
      */
     bool hasFlag(QuirkFlags flag) const;
 
-    /** \brief Get list of source folders to hide from client
+    /** @brief Get list of source folders to hide from client
      */
     std::vector<std::string> getForbiddenDirectories() const;
 

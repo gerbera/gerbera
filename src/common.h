@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file common.h
+/// @file common.h
 #ifndef __COMMON_H__
 #define __COMMON_H__
 

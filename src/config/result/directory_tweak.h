@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file directory_tweak.h
-/// \brief Definitions of the DirectoryTweak class.
+/// @file config/result/directory_tweak.h
+/// @brief Definitions of the DirectoryTweak class.
 
 #ifndef __DIRECTORYTWEAK_H__
 #define __DIRECTORYTWEAK_H__
@@ -51,7 +51,7 @@ public:
 #define SETTING_METAFILE "MetaFile"
 #define SETTING_RESOURCE "Resource"
 
-/// \brief Provides information about one directory.
+/// @brief Provides information about one directory.
 class DirectoryTweak : public Editable {
 public:
     DirectoryTweak() = default;

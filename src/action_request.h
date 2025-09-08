@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file action_request.h
-/// \brief Definition of the ActionRequest class.
+/// @file action_request.h
+/// @brief Definition of the ActionRequest class.
 
 #ifndef __ACTION_REQUEST_H__
 #define __ACTION_REQUEST_H__
@@ -44,7 +44,7 @@ class UpnpXMLBuilder;
 class Quirks;
 class ClientManager;
 
-/// \brief This class represents the Upnp_Action_Request type from the SDK.
+/// @brief This class represents the Upnp_Action_Request type from the SDK.
 ///
 /// When we get a Upnp_Action_Request from the SDK we convert it to our
 /// structure. The idea is to get the XML of the request, process it outside
@@ -52,70 +52,70 @@ class ClientManager;
 /// *upnp_request back to the SDK the update() function MUST be called.
 class ActionRequest {
 protected:
-    /// \brief Upnp_Action_Request that comes from the SDK.
+    /// @brief Upnp_Action_Request that comes from the SDK.
     UpnpActionRequest* upnp_request;
 
-    /// \brief Error code that is returned to the SDK.
+    /// @brief Error code that is returned to the SDK.
     int errCode { UPNP_E_SUCCESS };
 
-    /// \brief Name of the action.
+    /// @brief Name of the action.
     ////request///
     /// Returned by getActionName()
     std::string actionName;
 
-    /// \brief UDN of the recipient device (it should be our UDN)
+    /// @brief UDN of the recipient device (it should be our UDN)
     ///
     /// Returned by getUDN()
     std::string UDN;
 
-    /// \brief ID of the service.
+    /// @brief ID of the service.
     ///
     /// Returned by getServiceID()
     std::string serviceID;
 
-    /// \brief Client quirks
+    /// @brief Client quirks
     std::shared_ptr<Quirks> quirks;
 
-    /// \brief XML holding the response, we fill it in.
+    /// @brief XML holding the response, we fill it in.
     ///
     /// Set by setResponse()
     std::unique_ptr<pugi::xml_document> response;
 
 public:
-    /// \brief The Constructor takes the values from the upnp_request and fills in internal variables.
-    /// \param xmlBuilder builder for xml
-    /// \param clients list of all clients
-    /// \param upnpRequest Pointer to the Upnp_Action_Request structure.
+    /// @brief The Constructor takes the values from the upnp_request and fills in internal variables.
+    /// @param xmlBuilder builder for xml
+    /// @param clients list of all clients
+    /// @param upnpRequest Pointer to the Upnp_Action_Request structure.
     ActionRequest(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<ClientManager>& clients, UpnpActionRequest* upnpRequest);
     ~ActionRequest() = default;
 
-    /// \brief Returns the name of the action.
+    /// @brief Returns the name of the action.
     std::string getActionName() const;
 
-    /// \brief Returns the UDN of the recipient device (should be ours)
+    /// @brief Returns the UDN of the recipient device (should be ours)
     std::string getUDN() const;
 
-    /// \brief Returns the ID of the service (the action is for this service id)
+    /// @brief Returns the ID of the service (the action is for this service id)
     std::string getServiceID() const;
 
-    /// \brief Returns the XML representation of the request, that comes to us.
+    /// @brief Returns the XML representation of the request, that comes to us.
     std::unique_ptr<pugi::xml_document> getRequest() const;
 
-    /// \brief Returns the client quirks
+    /// @brief Returns the client quirks
     const std::shared_ptr<Quirks>& getQuirks() const;
 
-    /// \brief Sets the response (XML created outside as the answer to the request)
-    /// \param response XML holding the action response.
+    /// @brief Sets the response (XML created outside as the answer to the request)
+    /// @param response XML holding the action response.
     void setResponse(std::unique_ptr<pugi::xml_document> response);
 
-    /// \brief Set the error code for the SDK.
-    /// \param errCode UPnP error code.
+    /// @brief Set the error code for the SDK.
+    /// @param errCode UPnP error code.
     ///
     /// In case there was an error processing the request, we can return the
     /// appropriate error code to the SDK.
     void setErrorCode(int errCode);
 
-    /// \brief Updates the upnp_request structure.
+    /// @brief Updates the upnp_request structure.
     ///
     /// This function writes all changed values into the upnp_request structure, and
     /// must be called at the very end before giving *upnp_request back to the SDK.

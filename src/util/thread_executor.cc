@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file thread_executor.cc
+/// @file util/thread_executor.cc
 
 #include "thread_executor.h" // API
 

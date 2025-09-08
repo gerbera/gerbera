@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file online_service.h
-/// \brief Definition of the OnlineService class.
+/// @file content/onlineservice/online_service.h
+/// @brief Definition of the OnlineService class.
 
 #ifndef __ONLINE_SERVICE_H__
 #define __ONLINE_SERVICE_H__
@@ -70,14 +70,14 @@ enum class OnlineServiceType {
     Max
 };
 
-/// \brief This is an interface for all online services, the function
+/// @brief This is an interface for all online services, the function
 /// handles adding/refreshing content in the database.
 class OnlineService {
 public:
     explicit OnlineService(const std::shared_ptr<Content>& content);
     virtual ~OnlineService() = default;
 
-    /// \brief Retrieves user specified content from the service and adds
+    /// @brief Retrieves user specified content from the service and adds
     /// the items to the database.
     ///
     /// Depending on the service, the content may be retrieved in chunks,
@@ -90,19 +90,19 @@ public:
     /// the beginning.
     virtual bool refreshServiceData(const std::shared_ptr<Layout>& layout) = 0;
 
-    /// \brief Returns the service type
+    /// @brief Returns the service type
     virtual OnlineServiceType getServiceType() const = 0;
 
-    /// \brief Returns the service name
+    /// @brief Returns the service name
     virtual std::string getServiceName() const = 0;
 
-    /// \brief Get the database service prefix for a particular service
+    /// @brief Get the database service prefix for a particular service
     char getDatabasePrefix() const;
 
-    /// \brief Get the database prefix for a given service type
+    /// @brief Get the database prefix for a given service type
     static char getDatabasePrefix(OnlineServiceType service);
 
-    /// \brief Increments the task count.
+    /// @brief Increments the task count.
     ///
     /// When recursive autoscan is in progress, we only want to subcribe to
     /// a timer event when the scan is finished. However, recursive scans
@@ -124,16 +124,16 @@ public:
 
     std::shared_ptr<Timer::Parameter> getTimerParameter() const { return timer_parameter; }
 
-    /// \brief Sets the service refresh interval in seconds
+    /// @brief Sets the service refresh interval in seconds
     void setRefreshInterval(std::chrono::seconds interval) { refresh_interval = interval; }
 
-    /// \brief Retrieves the service refresh interval in seconds
+    /// @brief Retrieves the service refresh interval in seconds
     std::chrono::seconds getRefreshInterval() const { return refresh_interval; }
 
-    /// \brief Sets the "purge after" interval in seconds
+    /// @brief Sets the "purge after" interval in seconds
     void setItemPurgeInterval(std::chrono::seconds interval) { purge_interval = interval; }
 
-    /// \brief Retrieves the "purge after" interval in seconds
+    /// @brief Retrieves the "purge after" interval in seconds
     std::chrono::seconds getItemPurgeInterval() const { return purge_interval; }
 
 protected:
@@ -149,10 +149,10 @@ protected:
 
 class OnlineServiceList {
 public:
-    /// \brief Adds a service to the service list.
+    /// @brief Adds a service to the service list.
     void registerService(const std::shared_ptr<OnlineService>& service);
 
-    /// \brief Retrieves a service given by the service ID from the list
+    /// @brief Retrieves a service given by the service ID from the list
     std::shared_ptr<OnlineService> getService(OnlineServiceType service) const;
 
 protected:

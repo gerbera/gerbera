@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file timer.h
+/// @file util/timer.h
 
 #ifndef __TIMER_H__
 #define __TIMER_H__
@@ -41,6 +41,7 @@
 #include <atomic>
 #include <memory>
 
+/// @brief Class implementing time driven actions
 class Timer {
 public:
     enum class TimerParamType {
@@ -53,7 +54,7 @@ public:
 #endif
     };
 
-    /// \brief This is the parameter class for timerNotify
+    /// @brief This is the parameter class for timerNotify
     class Parameter {
     public:
         Parameter(TimerParamType param, int id)
@@ -83,16 +84,16 @@ public:
     void run();
     void shutdown();
 
-    /// \brief Add a subscriber
+    /// @brief Add a subscriber
     ///
-    /// \param timerSubscriber Caller must ensure that before this pointer is
+    /// @param timerSubscriber Caller must ensure that before this pointer is
     /// freed the subscriber is removed by calling removeTimerSubscriber() with
     /// the same parameter argument, unless the subscription is for a one-shot
     /// timer and the subscriber has already been notified (and removed from the
     /// subscribers list).
-    /// \param notifyInterval timespan between two notifications of the subscriber
-    /// \param parameter additional parameter to provide when raising
-    /// \param once only call once
+    /// @param notifyInterval timespan between two notifications of the subscriber
+    /// @param parameter additional parameter to provide when raising
+    /// @param once only call once
     void addTimerSubscriber(Subscriber* timerSubscriber, std::chrono::seconds notifyInterval, std::shared_ptr<Parameter> parameter, bool once = false);
     void removeTimerSubscriber(Subscriber* timerSubscriber, std::shared_ptr<Parameter> parameter, bool dontFail = false);
     void triggerWait();

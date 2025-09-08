@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file autoscan_setting.cc
-///\brief Implementation of the AutoScanSetting class.
+/// @file content/autoscan_setting.cc
+/// @brief Implementation of the AutoScanSetting class.
 
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "autoscan_setting.h" // API

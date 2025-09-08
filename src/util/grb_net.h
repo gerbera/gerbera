@@ -18,7 +18,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file grb_net.h
+/// @file util/grb_net.h
 
 #ifndef __GRB_NET_H__
 #define __GRB_NET_H__
@@ -47,12 +47,12 @@ public:
     bool equals(const std::shared_ptr<GrbNet>& other) const;
     std::string getNameInfo(bool withPort = true) const;
 
-    /// \brief Finds the Interface with the specified IP address.
-    /// \param ip i.e. 192.168.4.56.
-    /// \return Interface name or nullptr if IP was not found.
+    /// @brief Finds the Interface with the specified IP address.
+    /// @param ip i.e. 192.168.4.56.
+    /// @return Interface name or nullptr if IP was not found.
     static std::string ipToInterface(const std::string& ip);
 
-    /// \brief Render browser friendly uri (handle IPv6)
+    /// @brief Render browser friendly uri (handle IPv6)
     static std::string renderWebUri(const std::string& ip, in_port_t port);
 };
 

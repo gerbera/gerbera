@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file autoscan_setting.h
-///\brief Definitions of the AutoScanSetting class.
+/// @file content/autoscan_setting.h
+/// @brief Definitions of the AutoScanSetting class.
 
 #ifndef __AUTOSCANSETING_H__
 #define __AUTOSCANSETING_H__

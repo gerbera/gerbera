@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_setup_vector.cc
+/// @file config/setup/config_setup_vector.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_setup_vector.h" // API
@@ -34,7 +34,7 @@
 
 #include <numeric>
 
-/// \brief Creates a vector from an XML nodeset.
+/// @brief Creates a vector from an XML nodeset.
 bool ConfigVectorSetup::createOptionFromNode(
     const pugi::xml_node& element,
     std::vector<std::vector<std::pair<std::string, std::string>>>& result)

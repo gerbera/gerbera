@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file url.h
-/// \brief Definition of the URLL class.
+/// @file util/url.h
+/// @brief Definition of the URL class.
 
 #ifndef __URL_H__
 #define __URL_H__
@@ -41,18 +41,19 @@
 #include <memory>
 #include <string>
 
+/// @brief Handle urls for CURL
 class URL {
 public:
-    /// \brief This is a simplified version of the UpnpFileInfo class as used
+    /// @brief This is a simplified version of the UpnpFileInfo class as used
     /// in libupnp.
     class Stat {
     public:
-        /// \brief Initializes the class with given values, the values
+        /// @brief Initializes the class with given values, the values
         /// can not be changed afterwards.
         ///
-        /// \param url address of the web site
-        /// \param size size of the media in bytes
-        /// \param mimetype mime type of the media
+        /// @param url address of the web site
+        /// @param size size of the media in bytes
+        /// @param mimetype mime type of the media
         Stat(std::string url, curl_off_t size, std::string mimetype)
             : url(std::move(url))
             , size(size)
@@ -70,23 +71,23 @@ public:
         std::string mimetype;
     };
 
-    /// \brief create url wrapper object
-    /// \param url address to open
-    /// \param curlHandle an initialized and ready to use curl handle
+    /// @brief create url wrapper object
+    /// @param url address to open
+    /// @param curlHandle an initialized and ready to use curl handle
     URL(std::string url, CURL* curlHandle = nullptr);
     ~URL();
 
-    /// \brief downloads either the content or the headers to the buffer.
+    /// @brief downloads either the content or the headers to the buffer.
     ///
     /// This function uses an already initialized curl_handle, the reason
     /// is, that curl might keep the connection open if we do subsequent
     /// requests to the same server.
     ///
-    /// \param httpRetcode return code of the http call
-    /// \param onlyHeader set true if you only want the header and not the body
-    /// \param verbose enable curl verbose option
-    /// \param redirect allow redirection
-    /// \return downloaded header and content
+    /// @param httpRetcode return code of the http call
+    /// @param onlyHeader set true if you only want the header and not the body
+    /// @param verbose enable curl verbose option
+    /// @param redirect allow redirection
+    /// @return downloaded header and content
     std::pair<std::string, std::string> download(long* httpRetcode,
         bool onlyHeader = false,
         bool verbose = false,
@@ -95,9 +96,9 @@ public:
     Stat getInfo();
 
 protected:
-    /// \brief This function is installed as a callback for libcurl, when
+    /// @brief This function is installed as a callback for libcurl, when
     /// we download data from a remote site.
-    /// \return number of read bytes
+    /// @return number of read bytes
     static std::size_t dl(char* buf, std::size_t size, std::size_t nmemb, std::ostringstream* data);
 
     std::string url;

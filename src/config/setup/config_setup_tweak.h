@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file config_setup_tweak.h
-/// \brief Definitions of the ConfigDirectorySetup class.
+/// @file config/setup/config_setup_tweak.h
+/// @brief Definitions of the ConfigDirectorySetup class.
 
 #ifndef __CONFIG_SETUP_TWEAK_H__
 #define __CONFIG_SETUP_TWEAK_H__
@@ -35,9 +35,9 @@ class ConfigDirectorySetup : public ConfigSetup {
     using ConfigSetup::ConfigSetup;
 
 protected:
-    /// \brief Creates an array of DirectoryTweak objects from a XML nodeset.
-    /// \param element starting element of the nodeset.
-    /// \param result contents of config.
+    /// @brief Creates an array of DirectoryTweak objects from a XML nodeset.
+    /// @param element starting element of the nodeset.
+    /// @param result contents of config.
     bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result) const;
 
 public:

@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_setup.cc
+/// @file config/setup/config_setup_int.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_setup_int.h" // API

@@ -18,8 +18,8 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file sl_task.h
-///\brief Definitions of the SLTask classes.
+/// @file database/sqlite3/sl_task.h
+/// @brief Definitions of the SLTask classes.
 
 #ifndef __SQLITE3_TASK_H__
 #define __SQLITE3_TASK_H__
@@ -38,7 +38,7 @@ class Sqlite3Result;
 #define SQLITE3_BACKUP_FORMAT "{}.backup"
 #define SQLITE3_SET_VERSION "INSERT INTO \"mt_internal_setting\" VALUES('db_version', '{}')"
 
-/// \brief A virtual class that represents a task to be done by the sqlite3 thread.
+/// @brief A virtual class that represents a task to be done by the sqlite3 thread.
 class SLTask {
 public:
     SLTask(bool throwOnError = true)
@@ -48,17 +48,17 @@ public:
 
     virtual ~SLTask();
 
-    /// \brief run the sqlite3 task
-    /// \param db database api reference
-    /// \param sl The instance of Sqlite3Database to do the queries with.
-    /// \param throwOnError throw exception when error occurs
+    /// @brief run the sqlite3 task
+    /// @param db database api reference
+    /// @param sl The instance of Sqlite3Database to do the queries with.
+    /// @param throwOnError throw exception when error occurs
     virtual void run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError = true) = 0;
 
-    /// \brief returns true if the task is not completed
-    /// \return true if the task is not completed yet, false if the task is finished and the results are ready.
+    /// @brief returns true if the task is not completed
+    /// @return true if the task is not completed yet, false if the task is finished and the results are ready.
     bool is_running() const;
 
-    /// \brief notify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
+    /// @brief notify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
     void sendSignal();
 
     void sendSignal(std::string error);
@@ -76,16 +76,16 @@ public:
     virtual bool checkKey(const std::string& key) const { return true; }
 
 protected:
-    /// \brief true as long as the task is not finished
+    /// @brief true as long as the task is not finished
     ///
     /// The value is set by the constructor to true and then to false be sendSignal()
     bool running { true };
     bool throwOnError { false };
 
-    /// \brief true if this task has changed the db (in comparison to the backup)
+    /// @brief true if this task has changed the db (in comparison to the backup)
     bool contamination {};
 
-    /// \brief true if this task has backuped the db
+    /// @brief true if this task has backuped the db
     bool decontamination {};
 
     std::condition_variable cond;
@@ -94,10 +94,10 @@ protected:
     std::string error;
 };
 
-/// \brief A task for the sqlite3 thread to inititally create the database.
+/// @brief A task for the sqlite3 thread to inititally create the database.
 class SLInitTask : public SLTask {
 public:
-    /// \brief Constructor for the sqlite3 init task
+    /// @brief Constructor for the sqlite3 init task
     explicit SLInitTask(
         std::shared_ptr<Config> config,
         unsigned int hashie,
@@ -113,11 +113,11 @@ protected:
     unsigned int stringLimit;
 };
 
-/// \brief A task for the sqlite3 thread to do a SQL select.
+/// @brief A task for the sqlite3 thread to do a SQL select.
 class SLSelectTask : public SLTask {
 public:
-    /// \brief Constructor for the sqlite3 select task
-    /// \param query The SQL query string
+    /// @brief Constructor for the sqlite3 select task
+    /// @param query The SQL query string
     explicit SLSelectTask(const std::string& query);
 
     void run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError = true) override;
@@ -126,19 +126,19 @@ public:
     std::string_view taskType() const override { return "SelectTask"; }
 
 protected:
-    /// \brief The SQL query string
+    /// @brief The SQL query string
     const char* query;
-    /// \brief The Sqlite3Result
+    /// @brief The Sqlite3Result
     std::shared_ptr<Sqlite3Result> pres;
 };
 
-/// \brief A task for the sqlite3 thread to do a SQL exec.
+/// @brief A task for the sqlite3 thread to do a SQL exec.
 class SLExecTask : public SLTask {
 public:
-    /// \brief Constructor for the sqlite3 exec task
-    /// \param query The SQL query string
-    /// \param getLastInsertId return the last created object
-    /// \param warnOnly no not throw exceptions
+    /// @brief Constructor for the sqlite3 exec task
+    /// @param query The SQL query string
+    /// @param getLastInsertId return the last created object
+    /// @param warnOnly no not throw exceptions
     SLExecTask(const std::string& query, bool getLastInsertId, bool warnOnly = false);
     SLExecTask(const std::string& query, std::string eKey);
 
@@ -149,7 +149,7 @@ public:
     std::string_view taskType() const override { return "ExecTask"; }
 
 protected:
-    /// \brief The SQL query string
+    /// @brief The SQL query string
     const char* query;
 
     int lastInsertId {};
@@ -157,10 +157,10 @@ protected:
     std::string eKey;
 };
 
-/// \brief A task for the sqlite3 thread to do a SQLite backup.
+/// @brief A task for the sqlite3 thread to do a SQLite backup.
 class SLBackupTask : public SLTask {
 public:
-    /// \brief Constructor for the sqlite3 backup task
+    /// @brief Constructor for the sqlite3 backup task
     SLBackupTask(std::shared_ptr<Config> config, bool restore);
 
     void run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError = true) override;

@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// @file inotify_manager_cc.h
+/// @file content/inotify/inotify_manager_cc.h
 /// @brief Implement manager base class for inotify
 
 #ifndef __INOTIFY_MANAGER_CC_H__

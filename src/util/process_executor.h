@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file process_executor.h
+/// @file util/process_executor.h
 
 #ifndef __PROCESS_EXECUTOR_H__
 #define __PROCESS_EXECUTOR_H__

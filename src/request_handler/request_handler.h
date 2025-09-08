@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file request_handler.h
-/// \brief Definition of the RequestHandler class.
+/// @file request_handler/request_handler.h
+/// @brief Definition of the RequestHandler class.
 #ifndef __REQUEST_HANDLER_H__
 #define __REQUEST_HANDLER_H__
 
@@ -61,23 +61,23 @@ class UpnpXMLBuilder;
 #define URL_REQUEST_TYPE "req_type"
 #define URL_RESOURCE_ID "res_id"
 
-/// \brief base class for all handlers to answer request received via UPnP or web
+/// @brief base class for all handlers to answer request received via UPnP or web
 class RequestHandler {
 public:
     explicit RequestHandler(std::shared_ptr<Content> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, std::shared_ptr<Quirks> quirks);
     virtual ~RequestHandler();
 
-    /// \brief Returns header information about the requested content.
-    /// \param filename Requested URL
-    /// \param info \c UpnpFileInfo structure, quite similar to \c statbuf.
-    /// \return \c true if there was client info available
+    /// @brief Returns header information about the requested content.
+    /// @param filename Requested URL
+    /// @param info \c UpnpFileInfo structure, quite similar to \c statbuf.
+    /// @return \c true if there was client info available
     virtual bool getInfo(const char* filename, UpnpFileInfo* info) = 0;
 
-    /// \brief Prepares the output buffer and calls the process function.
-    /// \param filename Requested URL
-    /// \param quirks allows modifying the content of the response based on the client
-    /// \param mode either UPNP_READ or UPNP_WRITE
-    /// \return the appropriate IOHandler for the request.
+    /// @brief Prepares the output buffer and calls the process function.
+    /// @param filename Requested URL
+    /// @param quirks allows modifying the content of the response based on the client
+    /// @param mode either UPNP_READ or UPNP_WRITE
+    /// @return the appropriate IOHandler for the request.
     virtual std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) = 0;
 
     std::shared_ptr<CdsObject> loadObject(const std::map<std::string, std::string>& params) const;

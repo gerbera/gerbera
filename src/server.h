@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file server.h
-///\brief Definitions of the server class.
+/// @file server.h
+/// @brief Definitions of the server class.
 #ifndef __SERVER_H__
 #define __SERVER_H__
 
@@ -61,25 +61,25 @@ namespace Web {
 class SessionManager;
 }
 
-/// \brief Provides methods to initialize and shutdown
+/// @brief Provides methods to initialize and shutdown
 /// and to retrieve various information about the server.
 class Server : public std::enable_shared_from_this<Server> {
 public:
     explicit Server(std::shared_ptr<Config> config);
 
-    /// \brief Initializes the server.
+    /// @brief Initializes the server.
     ///
     /// This function reads information from the config and initializes
     /// various variables (like server UDN and so forth).
     void init(const std::shared_ptr<ConfigDefinition>& definition, bool offln);
 
-    /// \brief Cleanup routine to shutdown the server.
+    /// @brief Cleanup routine to shutdown the server.
     ///
     /// Unregisters the device with the SDK, shuts down the
     /// update manager task, database task, content manager.
     void shutdown();
 
-    /// \brief Initializes UPnP portion, only ip or interface can be given
+    /// @brief Initializes UPnP portion, only ip or interface can be given
     ///
     /// Reads information from the config and creates a
     /// device description document. Initializes the UPnP SDK,
@@ -87,7 +87,7 @@ public:
     /// web callbacks. Starts the update manager task.
     void run();
 
-    /// \brief Tells if the server is about to be terminated.
+    /// @brief Tells if the server is about to be terminated.
     ///
     /// This function returns true if the server is about to be
     /// terminated. This is the case when upnp_clean() was called.
@@ -121,22 +121,22 @@ protected:
     std::vector<std::string> validHosts;
     std::vector<std::string> corsHosts;
 
-    /// \brief This flag is set to true by the upnp_cleanup() function.
+    /// @brief This flag is set to true by the upnp_cleanup() function.
     bool server_shutdown_flag {};
 
     bool offline {};
 
-    /// \brief Handle for our upnp callbacks.
+    /// @brief Handle for our upnp callbacks.
     UpnpDevice_Handle rootDeviceHandle {};
     UpnpDevice_Handle clientHandle {};
 
-    /// \brief Unique Device Number of the server.
+    /// @brief Unique Device Number of the server.
     ///
     /// The UDN is read from the config, it must be unique and
     /// persistent over reboots.
     std::string serverUDN;
 
-    /// \brief Time interval to send ssdp:alive advertisements.
+    /// @brief Time interval to send ssdp:alive advertisements.
     ///
     /// The value is read from the configuration.
     int aliveAdvertisementInterval {};
@@ -150,8 +150,8 @@ protected:
     /// @brief get active port
     in_port_t getPort() const;
 
-    /// \brief Dispatched an ActionRequest between the services.
-    /// \param request Incoming ActionRequest.
+    /// @brief Dispatched an ActionRequest between the services.
+    /// @param request Incoming ActionRequest.
     ///
     /// Currently we only support two services (ContentDirectoryService
     /// and ConnectionManagerService), this function looks at the service id
@@ -159,8 +159,8 @@ protected:
     /// appropriate service.
     void routeActionRequest(ActionRequest& request);
 
-    /// \brief Dispatched a SubscriptionRequest between the services.
-    /// \param request Incoming SubscriptionRequest.
+    /// @brief Dispatched a SubscriptionRequest between the services.
+    /// @param request Incoming SubscriptionRequest.
     ///
     /// Currently we only support two services (ContentDirectoryService
     /// and ConnectionManagerService), this function looks at the service id
@@ -168,13 +168,13 @@ protected:
     /// appropriate service.
     void routeSubscriptionRequest(const SubscriptionRequest& request) const;
 
-    /// \brief Registers callback functions for the internal web server.
-    /// \param filename Incoming filename/url.
-    /// \param quirks Client specific handling.
+    /// @brief Registers callback functions for the internal web server.
+    /// @param filename Incoming filename/url.
+    /// @param quirks Client specific handling.
     ///
     std::unique_ptr<RequestHandler> createRequestHandler(const char* filename, const std::shared_ptr<Quirks>& quirks) const;
 
-    /// \brief Registers callback functions for the internal web server.
+    /// @brief Registers callback functions for the internal web server.
     ///
     /// This function registers callbacks for the internal web server.
     /// The callback functions are:
@@ -185,12 +185,12 @@ protected:
     /// \arg \c SeekCallback Perform a seek on a file.
     /// \arg \c CloseCallback Close file.
     ///
-    /// \return \c UPNP_E_SUCCESS Callbacks registered successfully, else error code.
+    /// @return \c UPNP_E_SUCCESS Callbacks registered successfully, else error code.
     static int registerVirtualDirCallbacks();
 
-    /// \brief Dispatch incoming UPnP root device events.
-    /// \param eventType identifying what kind of event came in.
-    /// \param event Pointer to the event.
+    /// @brief Dispatch incoming UPnP root device events.
+    /// @param eventType identifying what kind of event came in.
+    /// @param event Pointer to the event.
     ///
     /// This function is called when a UPnP root device event is received,
     /// it then looks at the event type (either an action invocation or
@@ -201,20 +201,20 @@ protected:
     /// upnp_subscriptions()
     int handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* event);
 
-    /// \brief Dispatch incoming UPnP client events.
-    /// \param eventType identifying what kind of event came in.
-    /// \param event Pointer to the event.
+    /// @brief Dispatch incoming UPnP client events.
+    /// @param eventType identifying what kind of event came in.
+    /// @param event Pointer to the event.
     ///
     int handleUpnpClientEvent(Upnp_EventType eventType, const void* event);
 
-    /// \brief Creates a html file that is a redirector to the current server i
+    /// @brief Creates a html file that is a redirector to the current server i
     /// instance
     void writeBookmark(const std::string& addr);
     void emptyBookmark();
 
     int startupInterface(const std::string& iface, in_port_t inPort);
 
-    /// \brief Returns the content url of the server.
+    /// @brief Returns the content url of the server.
     ///
     /// Returns a string representation of the server url. Although
     /// the port is also specified in the config, we can never be sure
@@ -224,7 +224,7 @@ protected:
     std::string getExternalUrl() const;
 
     std::shared_ptr<Quirks> getQuirks(const UpnpFileInfo* info, bool isWeb) const;
-    /// \brief Upnp callbacks
+    /// @brief Upnp callbacks
     static int HostValidateCallback(const char* host, void* cookie);
     static int GetInfoCallback(const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie);
     static UpnpWebFileHandle OpenCallback(const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie);

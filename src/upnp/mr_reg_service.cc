@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file mr_reg_service.cc
+/// @file upnp/mr_reg_service.cc
 #define GRB_LOG_FAC GrbLogFacility::mrregistrar
 
 #include "mr_reg_service.h" // API

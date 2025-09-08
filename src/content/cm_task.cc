@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file cm_task.cc
+/// @file content/cm_task.cc
 #define GRB_LOG_FAC GrbLogFacility::content
 
 #include "cm_task.h" // API

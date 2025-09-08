@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file database.h
+/// @file database/database.h
 
 #ifndef __GRB_DATABASE_H__
 #define __GRB_DATABASE_H__
@@ -78,17 +78,17 @@ public:
     virtual ~Database();
     virtual void init() = 0;
 
-    /// \brief shutdown the Database with its possible threads
+    /// @brief shutdown the Database with its possible threads
     virtual void shutdown() = 0;
 
     virtual void addObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) = 0;
 
-    /// \brief Adds a virtual container chain specified by path.
-    /// \param parentContainerId the id of the parent container
-    /// \param virtualPath container path separated by '/'
-    /// \param cont reference of the object to copy data from. Slashes in container
+    /// @brief Adds a virtual container chain specified by path.
+    /// @param parentContainerId the id of the parent container
+    /// @param virtualPath container path separated by '/'
+    /// @param cont reference of the object to copy data from. Slashes in container
     /// title must be escaped.
-    /// \param containerID will be filled in by the function
+    /// @param containerID will be filled in by the function
     ///
     /// The function gets a path (i.e. "/Audio/All Music/") and will create
     /// the container path if needed. The container ID will be filled in with
@@ -97,31 +97,31 @@ public:
     /// in case new containers were created during the operation.
     virtual bool addContainer(int parentContainerId, std::string virtualPath, const std::shared_ptr<CdsContainer>& cont, int* containerID) = 0;
 
-    /// \brief Builds the container path. Fetches the path of the
+    /// @brief Builds the container path. Fetches the path of the
     /// parent and adds the title
-    /// \param parentID the parent id of the parent container
-    /// \param title the title of the container to add to the path.
+    /// @param parentID the parent id of the parent container
+    /// @param title the title of the container to add to the path.
     /// It will be escaped.
     virtual fs::path buildContainerPath(int parentID, const std::string& title) = 0;
 
     virtual void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) = 0;
 
-    /// \brief Perform upnp browse on the database
-    /// \param param browse parameters as received via request
-    /// \return list of CdsObject matching the browse criteria
+    /// @brief Perform upnp browse on the database
+    /// @param param browse parameters as received via request
+    /// @return list of CdsObject matching the browse criteria
     virtual std::vector<std::shared_ptr<CdsObject>> browse(BrowseParam& param) = 0;
 
-    /// \brief Perform upnp search on the database
-    /// \param param search parameters as received via request
-    /// \return list of CdsObject matching the search criteria
+    /// @brief Perform upnp search on the database
+    /// @param param search parameters as received via request
+    /// @return list of CdsObject matching the search criteria
     virtual std::vector<std::shared_ptr<CdsObject>> search(SearchParam& param) = 0;
 
-    /// \brief find container matching the content class
-    /// \param contentClass to search for
-    /// \param startIndex of search results
-    /// \param count number of search results
-    /// \param group user group name
-    /// \return list of CdsObject matching the content class
+    /// @brief find container matching the content class
+    /// @param contentClass to search for
+    /// @param startIndex of search results
+    /// @param count number of search results
+    /// @param group user group name
+    /// @return list of CdsObject matching the content class
     virtual std::vector<std::shared_ptr<CdsObject>> findObjectByContentClass(
         const std::string& contentClass,
         int startIndex,
@@ -132,28 +132,28 @@ public:
     virtual std::vector<std::string> getMimeTypes() = 0;
     virtual std::map<std::string, std::shared_ptr<CdsContainer>> getShortcuts() = 0;
 
-    /// \brief Loads a given (pc directory) object, identified by the given path
+    /// @brief Loads a given (pc directory) object, identified by the given path
     /// from the database
-    /// \param path the path of the object; object is interpreted as directory
-    /// \param group user group name
-    /// \param fileType type of the database entry to search
-    /// \return the CdsObject
+    /// @param path the path of the object; object is interpreted as directory
+    /// @param group user group name
+    /// @param fileType type of the database entry to search
+    /// @return the CdsObject
     virtual std::shared_ptr<CdsObject> findObjectByPath(
         const fs::path& path,
         const std::string& group,
         DbFileType fileType = DbFileType::Auto)
         = 0;
 
-    /// \brief checks for a given (pc directory) object, identified by the given path
+    /// @brief checks for a given (pc directory) object, identified by the given path
     /// from the database
-    /// \param fullpath the path of the object; object is interpreted as directory
-    /// \param fileType type of the database entry to search
-    /// \return the obejectID
+    /// @param fullpath the path of the object; object is interpreted as directory
+    /// @param fileType type of the database entry to search
+    /// @return the obejectID
     virtual int findObjectIDByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) = 0;
 
-    /// \brief increments the updateIDs for the given objectIDs
-    /// \param ids pointer to the array of ids
-    /// \return a String for UPnP: a CSV list; for every existing object:
+    /// @brief increments the updateIDs for the given objectIDs
+    /// @param ids pointer to the array of ids
+    /// @return a String for UPnP: a CSV list; for every existing object:
     ///  "id,update_id"
     virtual std::string incrementUpdateIDs(const std::unordered_set<int>& ids) = 0;
 
@@ -169,37 +169,37 @@ public:
         std::vector<std::int32_t> ui;
     };
 
-    /// \brief Removes the object identified by the objectID from the database.
+    /// @brief Removes the object identified by the objectID from the database.
     /// all references will be automatically removed. If the object is
     /// a container, all children will be also removed automatically. If
     /// the object is a reference to another object, the "all" flag
     /// determines, if the main object will be removed too.
-    /// \param objectID the object id of the object to remove
-    /// \param path delete resource references to this path
-    /// \param all if true and the object to be removed is a reference
-    /// \return changed container ids
+    /// @param objectID the object id of the object to remove
+    /// @param path delete resource references to this path
+    /// @param all if true and the object to be removed is a reference
+    /// @return changed container ids
     virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, const fs::path& path, bool all) = 0;
 
-    /// \brief Get all objects under the given parentID.
-    /// \param parentID parent container
-    /// \param withoutContainer if false: all children are returned; if true: only items are returned
-    /// \param ret list of matching objects
-    /// \param full do full hierarchy search
-    /// \return number of objects found
+    /// @brief Get all objects under the given parentID.
+    /// @param parentID parent container
+    /// @param withoutContainer if false: all children are returned; if true: only items are returned
+    /// @param ret list of matching objects
+    /// @param full do full hierarchy search
+    /// @return number of objects found
     virtual std::size_t getObjects(int parentID, bool withoutContainer, std::unordered_set<int>& ret, bool full) = 0;
     virtual std::vector<int> getRefObjects(int objectId) = 0;
     virtual std::unordered_set<int> getUnreferencedObjects() = 0;
 
-    /// \brief Remove all objects found in list
-    /// \param list a DBHash containing objectIDs that have to be removed
-    /// \param all if true and the object to be removed is a reference
-    /// \return changed container ids
+    /// @brief Remove all objects found in list
+    /// @param list a DBHash containing objectIDs that have to be removed
+    /// @param all if true and the object to be removed is a reference
+    /// @return changed container ids
     virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) = 0;
 
-    /// \brief Loads an object given by the online service ID.
+    /// @brief Loads an object given by the online service ID.
     virtual std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID, const std::string& group) = 0;
 
-    /// \brief Return an array of object ID's for a particular service.
+    /// @brief Return an array of object ID's for a particular service.
     ///
     /// In the database, the service is identified by a service id prefix.
     virtual std::vector<int> getServiceObjectIDs(char servicePrefix) = 0;
@@ -229,10 +229,10 @@ public:
     virtual std::vector<std::shared_ptr<ClientStatusDetail>> getPlayStatusList(int objectId) = 0;
     virtual std::vector<std::map<std::string, std::string>> getClientGroupStats() = 0;
 
-    /// \brief returns the AutoscanDirectory for the given objectID or nullptr if
+    /// @brief returns the AutoscanDirectory for the given objectID or nullptr if
     /// it's not an autoscan start point - scan id will be invalid
-    /// \param objectID the object id to get the AutoscanDirectory for
-    /// \return nullptr if the given id is no autoscan start point,
+    /// @param objectID the object id to get the AutoscanDirectory for
+    /// @return nullptr if the given id is no autoscan start point,
     /// or the matching AutoscanDirectory
     virtual std::shared_ptr<AutoscanDirectory> getAutoscanDirectory(int objectID) = 0;
     virtual void addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) = 0;
@@ -242,13 +242,13 @@ public:
 
     virtual std::vector<int> getPathIDs(int objectID) = 0;
 
-    /// \brief Ensures that a container given by it's location on disk is
+    /// @brief Ensures that a container given by it's location on disk is
     /// present in the database. If it does not exist it will be created, but
     /// it's content will not be added.
     ///
-    /// \param path location of the container to handle
-    /// \param changedContainer returns the ID for the UpdateManager
-    /// \return objectID of the container given by path
+    /// @param path location of the container to handle
+    /// @param changedContainer returns the ID for the UpdateManager
+    /// @return objectID of the container given by path
     virtual int ensurePathExistence(const fs::path& path, int* changedContainer) = 0;
 
     virtual void threadCleanup() = 0;

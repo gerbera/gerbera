@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file matroska_handler.h
-/// \brief Definition of the MatroskaHandler class.
+/// @file metadata/matroska_handler.h
+/// @brief Definition of the MatroskaHandler class.
 
 #ifndef __METADATA_MATROSKA_H__
 #define __METADATA_MATROSKA_H__
@@ -45,7 +45,7 @@
 class CdsItem;
 class MemIOHandler;
 
-/// \brief This class is responsible for reading webm or mkv tags metadata
+/// @brief This class is responsible for reading webm or mkv tags metadata
 class MatroskaHandler : public MediaMetadataHandler {
 public:
     explicit MatroskaHandler(const std::shared_ptr<Context>& context);
@@ -60,39 +60,39 @@ public:
         const std::shared_ptr<CdsResource>& resource) override;
 
 private:
-    /// \brief indicate that search for item is still active
+    /// @brief indicate that search for item is still active
     int activeFlag {};
     std::map<std::string, std::string> mkvTags;
 
-    /// \brief Parse Matroska file data
+    /// @brief Parse Matroska file data
     void parseMKV(
         const std::shared_ptr<CdsItem>& item,
         std::unique_ptr<MemIOHandler>* pIoHandler);
-    /// \brief Parse head of Matroska metadata
+    /// @brief Parse head of Matroska metadata
     void parseHead(
         const std::shared_ptr<CdsItem>& item,
         libebml::IOCallback& ebmlFile,
         libebml::EbmlStream& ebmlStream,
         libebml::EbmlMaster* info,
         std::unique_ptr<MemIOHandler>* pIoHandler);
-    /// \brief Parse info of Matroska metadata
+    /// @brief Parse info of Matroska metadata
     void parseInfo(
         const std::shared_ptr<CdsItem>& item,
         libebml::EbmlStream& ebmlStream,
         libebml::EbmlMaster* info);
-    /// \brief Parse tags of Matroska metadata
+    /// @brief Parse tags of Matroska metadata
     void parseTags(
         const std::shared_ptr<CdsItem>& item,
         libebml::EbmlStream& ebmlStream,
         libebml::EbmlMaster* info);
-    /// \brief Parse level one of Matroska metadata (segment)
+    /// @brief Parse level one of Matroska metadata (segment)
     void parseSegmentContent(
         const std::shared_ptr<CdsItem>& item,
         libebml::IOCallback& ebmlFile,
         libebml::EbmlStream& ebmlStream,
         libebml::EbmlElement* elL1,
         std::unique_ptr<MemIOHandler>* pIoHandler);
-    /// \brief Parse attachment of Matroska metadata
+    /// @brief Parse attachment of Matroska metadata
     void parseAttachments(
         const std::shared_ptr<CdsItem>& item,
         libebml::EbmlStream& ebmlStream,

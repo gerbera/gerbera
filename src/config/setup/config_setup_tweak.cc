@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_setup_tweak.cc
+/// @file config/setup/config_setup_tweak.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_setup_tweak.h" // API
@@ -38,7 +38,7 @@
 
 #include <numeric>
 
-/// \brief Creates an array of DirectoryTweak objects from a XML nodeset.
+/// @brief Creates an array of DirectoryTweak objects from a XML nodeset.
 bool ConfigDirectorySetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result) const
 {
     if (!element)

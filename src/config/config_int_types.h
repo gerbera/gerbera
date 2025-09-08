@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_int_types.h
+/// @file config/config_int_types.h
 
 #ifndef __CONFIG_INT_TYPES_H__
 #define __CONFIG_INT_TYPES_H__

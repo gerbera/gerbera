@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file scripting_runtime.h
+/// @file content/scripting/scripting_runtime.h
 
 #ifndef __SCRIPTING_RUNTIME_H__
 #define __SCRIPTING_RUNTIME_H__
@@ -43,7 +43,7 @@
 // forward declarations
 class Script;
 
-/// \brief ScriptingRuntime class definition.
+/// @brief ScriptingRuntime class definition.
 class ScriptingRuntime {
 protected:
     duk_context* ctx;

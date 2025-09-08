@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file wavpack_handler.h
-/// \brief Definition of the WavPackHandler class.
+/// @file metadata/wavpack_handler.h
+/// @brief Definition of the WavPackHandler class.
 
 #ifndef __METADATA_WAVPACK_H__
 #define __METADATA_WAVPACK_H__
@@ -36,7 +36,7 @@
 // forward declarations
 class CdsItem;
 
-/// \brief This class is responsible for reading wavpack tags metadata
+/// @brief This class is responsible for reading wavpack tags metadata
 class WavPackHandler : public MediaMetadataHandler {
 public:
     explicit WavPackHandler(const std::shared_ptr<Context>& context);
@@ -54,16 +54,16 @@ public:
         const std::shared_ptr<CdsResource>& resource) override;
 
 private:
-    /// \brief read media attributes from stream
+    /// @brief read media attributes from stream
     static bool getAttributes(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
-    /// \brief get read meta data tags from file
+    /// @brief get read meta data tags from file
     bool getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
-    /// \brief get attachments like artwork
+    /// @brief get attachments like artwork
     bool getAttachments(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
-    /// \brief try to identify mime type from binary object
+    /// @brief try to identify mime type from binary object
     std::string getMimeTypeFromByteVector(const char* data, int size) const;
 
-    /// \brief reference to WavPack context
+    /// @brief reference to WavPack context
     WavpackContext* context = nullptr;
 };
 

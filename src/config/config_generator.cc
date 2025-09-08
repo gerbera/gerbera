@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_generator.cc
+/// @file config/config_generator.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_generator.h" // API
@@ -651,7 +651,7 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
     };
 
     if (level > ConfigLevel::Example) {
-        /// \brief default values for ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST
+        /// @brief default values for ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST
         static const std::vector<std::string> defaultFanArtFile {
             "%title%.jpg",
             "%filename%.jpg",
@@ -665,7 +665,7 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
         cs->setDefaultValue(defaultFanArtFile);
     }
     if (level > ConfigLevel::Example) {
-        /// \brief default values for ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST
+        /// @brief default values for ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST
         static const std::vector<std::string> defaultContainerArtFile {
             "folder.jpg",
             "poster.jpg",
@@ -676,7 +676,7 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
         cs->setDefaultValue(defaultContainerArtFile);
     }
     if (level > ConfigLevel::Example) {
-        /// \brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST
+        /// @brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST
         static const std::vector<std::string> defaultSubtitleFile {
             "%title%.srt",
             "%filename%.srt"
@@ -685,7 +685,7 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
         cs->setDefaultValue(defaultSubtitleFile);
     }
     if (level > ConfigLevel::Example) {
-        /// \brief default values for ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST
+        /// @brief default values for ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST
         static const std::vector<std::string> defaultResourceFile {
             "%filename%.srt",
             "cover.jpg",
@@ -695,7 +695,7 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
         cs->setDefaultValue(defaultResourceFile);
     }
     if (level > ConfigLevel::Example) {
-        /// \brief default values for ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST
+        /// @brief default values for ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST
         static const std::vector<std::string> defaultMetadataFile {
             "%filename%.nfo"
         };

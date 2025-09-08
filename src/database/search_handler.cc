@@ -20,7 +20,7 @@
   $Id$
 */
 
-/// \file search_handler.cc
+/// @file database/search_handler.cc
 
 #define GRB_LOG_FAC GrbLogFacility::sqldatabase
 #include "search_handler.h" // API

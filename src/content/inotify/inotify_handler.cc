@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file inotify_handler.cc
+/// @file content/inotify/inotify_handler.cc
 #define GRB_LOG_FAC GrbLogFacility::autoscan
 
 #ifdef HAVE_INOTIFY

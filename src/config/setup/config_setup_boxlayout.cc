@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file config_setup_boxlayout.cc
+/// @file config/setup/config_setup_boxlayout.cc
 #define GRB_LOG_FAC GrbLogFacility::config
 
 #include "config_setup_boxlayout.h" // API
@@ -43,8 +43,8 @@
 #include <algorithm>
 #include <numeric>
 
-/// \brief Creates an array of BoxLayout objects from a XML nodeset.
-/// \param element starting element of the nodeset.
+/// @brief Creates an array of BoxLayout objects from a XML nodeset.
+/// @param element starting element of the nodeset.
 bool ConfigBoxLayoutSetup::createOptionFromNode(
     const pugi::xml_node& element,
     const std::shared_ptr<BoxLayoutList>& result)

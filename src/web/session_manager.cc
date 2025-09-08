@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file web/session_manager.cc
+/// @file web/session_manager.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "session_manager.h" // API

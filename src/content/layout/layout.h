@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file layout.h
+/// @file content/layout/layout.h
 
 #ifndef __LAYOUT_H__
 #define __LAYOUT_H__
@@ -46,7 +46,7 @@ class CdsObject;
 class Content;
 enum class OnlineServiceType;
 
-/// \brief base class for virtual layout generation
+/// @brief base class for virtual layout generation
 class Layout {
 public:
     explicit Layout(std::shared_ptr<Content> content)
@@ -56,7 +56,7 @@ public:
 
     virtual ~Layout() = default;
 
-    /// \brief create virtual layout for single object
+    /// @brief create virtual layout for single object
     void processCdsObject(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
@@ -66,21 +66,21 @@ public:
         std::vector<int>& refObjects);
 
 protected:
-    /// \brief create virtual video layout
+    /// @brief create virtual video layout
     virtual std::vector<int> addVideo(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
         const fs::path& rootpath,
         const std::map<AutoscanMediaMode, std::string>& containerMap)
         = 0;
-    /// \brief execute virtual image layout
+    /// @brief execute virtual image layout
     virtual std::vector<int> addImage(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
         const fs::path& rootpath,
         const std::map<AutoscanMediaMode, std::string>& containerMap)
         = 0;
-    /// \brief execute virtual audio layout
+    /// @brief execute virtual audio layout
     virtual std::vector<int> addAudio(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsContainer>& parent,
@@ -89,7 +89,7 @@ protected:
         = 0;
 
 #ifdef ONLINE_SERVICES
-    /// \brief execute virtual online item layout
+    /// @brief execute virtual online item layout
     virtual std::vector<int> addOnlineItem(const std::shared_ptr<CdsObject>& obj,
         OnlineServiceType serviceType,
         const fs::path& rootpath,

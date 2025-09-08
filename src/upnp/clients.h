@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file upnp/clients.h
-/// \brief Definition of the Clients class.
+/// @file upnp/clients.h
+/// @brief Definition of the Clients class.
 /// inspired by https://sourceforge.net/p/minidlna/git/ci/master/tree/clients.h
 
 #ifndef __UPNP_CLIENTS_H__

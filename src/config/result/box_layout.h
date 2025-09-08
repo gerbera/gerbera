@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// @file box_layout.h
+/// @file config/result/box_layout.h
 /// @brief Definition of the BoxLayout class.
 
 #ifndef __BOXLAYOUT_H_
@@ -158,21 +158,21 @@ public:
     std::string getSortKey() const { return sortKey; }
 
 protected:
-    /// \brief key for the box to be referenced in layouts
+    /// @brief key for the box to be referenced in layouts
     std::string key;
-    /// \brief title string for the box
+    /// @brief title string for the box
     std::string title;
-    /// \brief object class to be used for new containers
+    /// @brief object class to be used for new containers
     std::string objClass;
-    /// \brief shortcut name for upnp shortcuts list
+    /// @brief shortcut name for upnp shortcuts list
     std::string upnpShortcut;
-    /// \brief sorting key for directory listing
+    /// @brief sorting key for directory listing
     std::string sortKey;
-    /// \brief allow to disable boxes
+    /// @brief allow to disable boxes
     bool enabled { true };
-    /// \brief size value for the box, esp. in structured layout
+    /// @brief size value for the box, esp. in structured layout
     int size { 1 };
-    /// \brief objectId of the box when existing
+    /// @brief objectId of the box when existing
     int id { INVALID_OBJECT_ID };
 };
 
@@ -195,10 +195,10 @@ public:
     AutoscanMediaMode getType() const { return type; }
     void setType(AutoscanMediaMode type) { this->type = type; }
 
-    /// \brief comparison of chains
+    /// @brief comparison of chains
     bool equals(const std::shared_ptr<BoxChain>& other) { return this->type == other->type && this->index == other->index; }
 
-    /// \brief links for chain
+    /// @brief links for chain
     std::vector<std::vector<std::pair<std::string, std::string>>> getLinks(bool edit = false) const { return this->links.getVectorOption(edit); }
     std::size_t getLinksSize(bool edit = false) const { return this->links.getVectorOption(edit).size(); }
     void setLinks(const std::vector<std::vector<std::pair<std::string, std::string>>>& links) { this->links = VectorOption(links); }
@@ -208,9 +208,9 @@ public:
 protected:
     /// @brief identification of chains
     std::size_t index = { 0 };
-    /// \brief media type chain applies to
+    /// @brief media type chain applies to
     AutoscanMediaMode type;
-    /// \brief list of chain links making up the virtual tree
+    /// @brief list of chain links making up the virtual tree
     VectorOption links;
 };
 

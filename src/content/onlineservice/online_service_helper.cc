@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file online_service_helper.cc
+/// @file content/onlineservice/online_service_helper.cc
 
 #ifdef ONLINE_SERVICES
 #define GRB_LOG_FAC GrbLogFacility::online

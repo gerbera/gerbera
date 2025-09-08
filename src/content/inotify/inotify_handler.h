@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file inotify_handler.h
+/// @file content/inotify/inotify_handler.h
 
 #ifndef __INOTIFY_HANDLER_H__
 #define __INOTIFY_HANDLER_H__

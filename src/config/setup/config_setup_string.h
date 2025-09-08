@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file config_setup_string.h
-///\brief Definitions of the ConfigStringSetup classes.
+/// @file config/setup/config_setup_string.h
+/// @brief Definitions of the ConfigStringSetup classes.
 
 #ifndef __CONFIG_SETUP_STRING_H__
 #define __CONFIG_SETUP_STRING_H__

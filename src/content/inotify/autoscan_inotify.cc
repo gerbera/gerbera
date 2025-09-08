@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// @file autoscan_inotify.cc
+/// @file content/inotify/autoscan_inotify.cc
 /// @brief Implement manager class for autoscan directories with inotify
 #define GRB_LOG_FAC GrbLogFacility::autoscan
 

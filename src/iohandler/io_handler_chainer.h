@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file io_handler_chainer.h
+/// @file iohandler/io_handler_chainer.h
 
 #ifndef __IO_HANDLER_CHAINER_H__
 #define __IO_HANDLER_CHAINER_H__
@@ -44,14 +44,14 @@
 
 #include "util/thread_executor.h"
 
-/// \brief gets two IOHandler, starts a thread which reads from one IOHandler
+/// @brief gets two IOHandler, starts a thread which reads from one IOHandler
 /// and writes the data to the other IOHandler
 class IOHandlerChainer : public ThreadExecutor {
 public:
-    /// \brief initialize the IOHandlerChainer
-    /// \param readFrom the IOHandler to read from
-    /// \param writeTo the IOHandler to write to
-    /// \param chunkSize the amount of bytes to read/write at once. a buffer of
+    /// @brief initialize the IOHandlerChainer
+    /// @param readFrom the IOHandler to read from
+    /// @param writeTo the IOHandler to write to
+    /// @param chunkSize the amount of bytes to read/write at once. a buffer of
     /// this size will be allocated
     IOHandlerChainer(std::unique_ptr<IOHandler> readFrom, std::unique_ptr<IOHandler> writeTo, int chunkSize);
     ~IOHandlerChainer() override

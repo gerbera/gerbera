@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file metafile_parser_script.cc
+/// @file content/scripting/metafile_parser_script.cc
 
 #ifdef HAVE_JS
 #define GRB_LOG_FAC GrbLogFacility::script

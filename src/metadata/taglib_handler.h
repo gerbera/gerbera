@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// @file taglib_handler.h
+/// @file metadata/taglib_handler.h
 /// @brief Definition of the TagHandler class.
 
 #ifndef __METADATA_TAGLIB_H__

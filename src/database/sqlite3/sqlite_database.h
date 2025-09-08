@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file sqlite_database.h
-/// \brief Definitions of the Sqlite3Database, Sqlite3Result and Sqlite3Row classes.
+/// @file database/sqlite3/sqlite_database.h
+/// @brief Definitions of the Sqlite3Database, Sqlite3Result and Sqlite3Row classes.
 
 #ifndef __SQLITE3_STORAGE_H__
 #define __SQLITE3_STORAGE_H__
@@ -49,7 +49,7 @@ class SLTask;
 
 #define DELETE_CACHE_MAX_SIZE 500 // remove entries, if cache has more than 500 (default)
 
-/// \brief The Database class for using SQLite3
+/// @brief The Database class for using SQLite3
 class Sqlite3Database : public Timer::Subscriber, public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
 public:
     Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager, std::shared_ptr<Timer> timer);
@@ -75,7 +75,7 @@ private:
     int exec(const std::string& query, bool getLastInsertId = false) override;
     void execOnly(const std::string& query) override;
 
-    /// \brief Implement common behaviour on exceptions while calling the database
+    /// @brief Implement common behaviour on exceptions while calling the database
     void handleException(const std::exception& exc, const std::string& lineMessage);
 
     void storeInternalSetting(const std::string& key, const std::string& value) override;
@@ -89,10 +89,10 @@ private:
 
     std::shared_ptr<Timer> timer;
 
-    /// \brief increased by shutdown attempt if the sqlite3 thread should terminate
+    /// @brief increased by shutdown attempt if the sqlite3 thread should terminate
     int shutdownFlag { 0 };
 
-    /// \brief the tasks to be done by the sqlite3 thread
+    /// @brief the tasks to be done by the sqlite3 thread
     std::queue<std::shared_ptr<SLTask>> taskQueue;
     bool taskQueueOpen {};
 
@@ -109,11 +109,11 @@ private:
     bool dbInitDone {};
     bool hasBackupTimer {};
     int sqliteStatus {};
-    /// \brief maximum number of attempts to terminate gracefully
+    /// @brief maximum number of attempts to terminate gracefully
     int shutdownAttempts { 5 };
 };
 
-/// \brief The Database class for using SQLite3 with transactions
+/// @brief The Database class for using SQLite3 with transactions
 class Sqlite3DatabaseWithTransactions : public SqlWithTransactions, public Sqlite3Database {
 public:
     Sqlite3DatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager, const std::shared_ptr<Timer>& timer);
@@ -123,7 +123,7 @@ public:
     void commit(std::string_view tName) override;
 };
 
-/// \brief Represents a result of a sqlite3 select
+/// @brief Represents a result of a sqlite3 select
 class Sqlite3Result : public SQLResult {
 public:
     Sqlite3Result() = default;
@@ -148,7 +148,7 @@ private:
     friend class Sqlite3Row;
 };
 
-/// \brief Represents a row of a result of a sqlite3 select
+/// @brief Represents a row of a result of a sqlite3 select
 class Sqlite3Row : public SQLRow {
 public:
     explicit Sqlite3Row(char** row);

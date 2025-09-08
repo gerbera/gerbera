@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file transcoding.cc
+/// @file config/result/transcoding.cc
 #define GRB_LOG_FAC GrbLogFacility::transcoding
 
 #include "transcoding.h" // API

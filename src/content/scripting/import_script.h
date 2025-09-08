@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file import_script.h
+/// @file content/scripting/import_script.h
 
 #ifndef __SCRIPTING_IMPORT_SCRIPT_H__
 #define __SCRIPTING_IMPORT_SCRIPT_H__

@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file transcode_ext_handler.h
-/// \brief Definition of the TranscodeRequest class.
+/// @file transcoding/transcode_ext_handler.h
+/// @brief Definition of the TranscodeRequest class.
 #ifndef __TRANSCODE_EXTERNAL_HANDLER_H__
 #define __TRANSCODE_EXTERNAL_HANDLER_H__
 

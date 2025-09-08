@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file js_layout.cc
+/// @file content/layout/js_layout.cc
 #define GRB_LOG_FAC GrbLogFacility::layout
 
 #ifdef HAVE_JS

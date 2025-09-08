@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file libexif_handler.cc
+/// @file metadata/libexif_handler.cc
 
 #ifdef HAVE_LIBEXIF
 #define GRB_LOG_FAC GrbLogFacility::exif
@@ -46,7 +46,7 @@
 
 #include <array>
 
-/// \brief Sets resolution for a given resource index, item must be a JPEG image
+/// @brief Sets resolution for a given resource index, item must be a JPEG image
 static void setJpegResolutionResource(
     const std::shared_ptr<CdsItem>& item,
     std::size_t resNum = 0)
@@ -211,7 +211,7 @@ LibExifHandler::~LibExifHandler()
     exif_log_free(log);
 }
 
-/// \brief Wrapper class to interface with LibExif
+/// @brief Wrapper class to interface with LibExif
 class LibExifObject {
 private:
     static constexpr std::size_t BUFLEN = 4096;
@@ -237,12 +237,12 @@ public:
             exif_data_unref(exifData);
     }
 
-    /// \brief check if libexif information is available
+    /// @brief check if libexif information is available
     operator bool() const
     {
         return exifData;
     }
-    /// \brief check if thumbnail information is available
+    /// @brief check if thumbnail information is available
     bool hasThumb() const
     {
         return exifData && exifData->size > 0U;
@@ -261,7 +261,7 @@ public:
         return std::make_unique<MemIOHandler>(exifData->data, exifData->size);
     }
 
-    /// \brief get date/time
+    /// @brief get date/time
     std::string getDate(ExifEntry* entry)
     {
         auto value = trimString(exif_egv(entry));
@@ -283,7 +283,7 @@ public:
         return "";
     }
 
-    /// \brief get key value from image
+    /// @brief get key value from image
     std::string getKey(ExifEntry* entry)
     {
         auto value = trimString(exif_egv(entry));
@@ -298,7 +298,7 @@ public:
         return "";
     }
 
-    /// \brief get resolution for thumbnail
+    /// @brief get resolution for thumbnail
     std::string getThumbResolution()
     {
         try {

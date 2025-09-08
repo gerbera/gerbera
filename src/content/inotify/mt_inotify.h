@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file mt_inotify.h
+/// @file content/inotify/mt_inotify.h
 
 #ifndef __MT_INOTIFY_H__
 #define __MT_INOTIFY_H__
@@ -39,7 +39,7 @@
 #include "inotify_types.h"
 #include "util/grb_fs.h"
 
-/// \brief Inotify interface.
+/// @brief Inotify interface.
 class Inotify {
 public:
     Inotify();
@@ -48,28 +48,28 @@ public:
     Inotify(const Inotify&) = delete;
     Inotify& operator=(const Inotify&) = delete;
 
-    /// \brief Puts a file or directory on the inotify watch list.
-    /// \param path file or directory to monitor.
-    /// \param events inotify event mask
-    /// \param retryCount number of retries to acquire the watch before failing
-    /// \return watch descriptor or a negative value on error
+    /// @brief Puts a file or directory on the inotify watch list.
+    /// @param path file or directory to monitor.
+    /// @param events inotify event mask
+    /// @param retryCount number of retries to acquire the watch before failing
+    /// @return watch descriptor or a negative value on error
     int addWatch(const fs::path& path, InotifyFlags events, unsigned int retryCount = 0) const;
 
-    /// \brief Removes a previously added file or directory from the watch list
-    /// \param wd watch descriptor that was returned by the add_watch function
+    /// @brief Removes a previously added file or directory from the watch list
+    /// @param wd watch descriptor that was returned by the add_watch function
     void removeWatch(int wd) const;
 
-    /// \brief Returns the next inotify event.
+    /// @brief Returns the next inotify event.
     ///
     /// This function will return the next inotify event that occurs, in case
     /// that there are no events the function will block indefinetely. It can
     /// be unblocked by the stop function.
     struct inotify_event* nextEvent();
 
-    /// \brief Unblock the next_event function.
+    /// @brief Unblock the next_event function.
     void stop() const;
 
-    /// \brief Checks if inotify is supported on the system.
+    /// @brief Checks if inotify is supported on the system.
     static bool supported();
 
 private:

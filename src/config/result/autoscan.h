@@ -29,8 +29,8 @@
     $Id$
 */
 
-/// \file autoscan.h
-///\brief Definitions of the Autoscan classes.
+/// @file config/result/autoscan.h
+/// @brief Definitions of the Autoscan classes.
 
 #ifndef __AUTOSCAN_H__
 #define __AUTOSCAN_H__
@@ -52,14 +52,14 @@ class ImportService;
 #define AUTOSCAN_TIMED "timed"
 #define AUTOSCAN_MANUAL "manual"
 
-///\brief Scan mode - type of scan (timed, inotify, etc.)
+/// @brief Scan mode - type of scan (timed, inotify, etc.)
 enum class AutoscanScanMode : int {
     Timed,
     INotify,
     Manual,
 };
 
-///\brief Media mode - media handling mode (timed, inotify, etc.)
+/// @brief Media mode - media handling mode (timed, inotify, etc.)
 enum class AutoscanMediaMode {
     Audio,
     Image,
@@ -67,7 +67,7 @@ enum class AutoscanMediaMode {
     Mixed,
 };
 
-/// \brief Provides information about one autoscan directory.
+/// @brief Provides information about one autoscan directory.
 class AutoscanDirectory : public Editable {
 public:
     enum class MediaType : int {
@@ -97,16 +97,16 @@ public:
 
     AutoscanDirectory() = default;
 
-    /// \brief Creates a new AutoscanDirectory object.
-    /// \param location autoscan path
-    /// \param mode scan mode
-    /// \param recursive process directories recursively
-    /// \param persistent entry is from config file
-    /// \param interval rescan interval in seconds (only for timed scan mode)
-    /// \param hidden include hidden files
-    /// \param followSymlinks follow symbolic links
-    /// \param mediaType type of media to load from directory zero means none.
-    /// \param containerMap mapping of media types to container types
+    /// @brief Creates a new AutoscanDirectory object.
+    /// @param location autoscan path
+    /// @param mode scan mode
+    /// @param recursive process directories recursively
+    /// @param persistent entry is from config file
+    /// @param interval rescan interval in seconds (only for timed scan mode)
+    /// @param hidden include hidden files
+    /// @param followSymlinks follow symbolic links
+    /// @param mediaType type of media to load from directory zero means none.
+    /// @param containerMap mapping of media types to container types
     AutoscanDirectory(
         fs::path location,
         AutoscanScanMode mode,
@@ -124,7 +124,7 @@ public:
     void setDatabaseID(int databaseID) { this->databaseID = databaseID; }
     int getDatabaseID() const { return databaseID; }
 
-    /// \brief The location can only be set once!
+    /// @brief The location can only be set once!
     void setLocation(const fs::path& location);
     const fs::path& getLocation() const { return location; }
 
@@ -155,7 +155,7 @@ public:
     void setInterval(std::chrono::seconds interval) { this->interval = interval; }
     std::chrono::seconds getInterval() const { return interval; }
 
-    /// \brief Increments the task count.
+    /// @brief Increments the task count.
     ///
     /// When recursive autoscan is in progress, we only want to subscribe to
     /// a timer event when the scan is finished. However, recursive scans
@@ -168,7 +168,7 @@ public:
     int getTaskCount() const { return taskCount; }
     void setTaskCount(int taskCount) { this->taskCount = taskCount; }
 
-    /// \brief Sets the task ID.
+    /// @brief Sets the task ID.
     ///
     /// The task ID helps us to identify to which scan a particular task
     /// belongs. Recursive scans spawn new tasks - they all should have
@@ -186,7 +186,7 @@ public:
     void setForceRescan(bool forceRescan) { this->forceRescan = forceRescan; }
     bool getForceRescan() const { return forceRescan; }
 
-    /// \brief Sets the last modification time of the current ongoing scan.
+    /// @brief Sets the last modification time of the current ongoing scan.
     ///
     /// When doing a FullScan we look at modification times of the files.
     /// During the recursion of one AutoscanDirectory (which will be the
@@ -206,13 +206,13 @@ public:
     }
     unsigned int getActiveScanCount() const { return activeScanCount; }
 
-    /// \brief copies all properties to another object
+    /// @brief copies all properties to another object
     void copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const;
 
-    /// \brief Get the timer notify parameter associated with this directory.
+    /// @brief Get the timer notify parameter associated with this directory.
     std::shared_ptr<Timer::Parameter> getTimerParameter() const;
 
-    /// \brief Get the container types dictionary
+    /// @brief Get the container types dictionary
     const std::map<AutoscanMediaMode, std::string>& getContainerTypes()
     {
         return containerMap;

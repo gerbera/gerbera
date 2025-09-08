@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file quirks.cc
+/// @file upnp/quirks.cc
 #define GRB_LOG_FAC GrbLogFacility::clients
 
 #include "quirks.h" // API

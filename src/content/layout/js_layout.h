@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file js_layout.h
+/// @file content/layout/js_layout.h
 
 #ifndef __JS_LAYOUT_H__
 #define __JS_LAYOUT_H__
@@ -41,7 +41,7 @@
 class ImportScript;
 class ScriptingRuntime;
 
-/// \brief layout class implementation for flexible java script implemented virtual layout
+/// @brief layout class implementation for flexible java script implemented virtual layout
 class JSLayout : public Layout {
 public:
     JSLayout(const std::shared_ptr<Content>& content, const std::string& parent);

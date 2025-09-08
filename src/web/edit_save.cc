@@ -29,7 +29,7 @@
     $Id$
 */
 
-/// \file web/edit_save.cc
+/// @file web/edit_save.cc
 #define GRB_LOG_FAC GrbLogFacility::web
 
 #include "pages.h" // API

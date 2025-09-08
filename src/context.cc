@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file context.cc
+/// @file context.cc
 #define GRB_LOG_FAC GrbLogFacility::content
 #include "context.h" // API
 

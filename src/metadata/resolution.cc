@@ -19,7 +19,7 @@ Gerbera - https://gerbera.io/
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-/// \file resolution.cc
+/// @file metadata/resolution.cc
 #define GRB_LOG_FAC GrbLogFacility::metadata
 
 #include "resolution.h" // API

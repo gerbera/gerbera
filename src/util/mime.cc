@@ -21,7 +21,7 @@
     $Id$
 */
 
-/// \file mime.cc
+/// @file util/mime.cc
 #define GRB_LOG_FAC GrbLogFacility::util
 #include "mime.h" // API
 

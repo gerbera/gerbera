@@ -21,8 +21,8 @@
     $Id$
 */
 
-/// \file dynamic_content.h
-/// \brief Definitions of the DynamicContent class.
+/// @file config/result/dynamic_content.h
+/// @brief Definitions of the DynamicContent class.
 
 #ifndef __DYNAMICCONTENT_H__
 #define __DYNAMICCONTENT_H__
@@ -44,7 +44,7 @@ public:
     std::shared_ptr<DynamicContent> getKey(const fs::path& location) const;
 };
 
-/// \brief dynamic content reader
+/// @brief dynamic content reader
 class DynamicContent : public Editable {
 public:
     DynamicContent() = default;
@@ -82,25 +82,25 @@ public:
     int getMaxCount() const { return maxCount; }
 
 private:
-    /// \brief virtual tree location
+    /// @brief virtual tree location
     fs::path location { "/Auto" };
 
-    /// \brief title
+    /// @brief title
     std::string title;
 
-    /// \brief search filter
+    /// @brief search filter
     std::string filter;
 
-    /// \brief sort criteria
+    /// @brief sort criteria
     std::string sort;
 
-    /// \brief shortcut name for upnp shortcuts list
+    /// @brief shortcut name for upnp shortcuts list
     std::string upnpShortcut;
 
-    /// \brief maximum request count
+    /// @brief maximum request count
     int maxCount {};
 
-    /// \brief folder image
+    /// @brief folder image
     fs::path image;
 };
 
