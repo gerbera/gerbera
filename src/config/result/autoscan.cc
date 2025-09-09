@@ -111,7 +111,7 @@ static std::map<AutoscanDirectory::MediaType, std::string> upnpClasses = {
 
 int AutoscanDirectory::makeMediaType(const std::string& optValue)
 {
-    std::vector<std::string> flagsVector = splitString(optValue, '|', false);
+    std::vector<std::string> flagsVector = splitString(optValue, '|');
     return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | AutoscanDirectory::remapMediaType(trimString(i)); });
 }
 

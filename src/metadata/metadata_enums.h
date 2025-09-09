@@ -65,44 +65,71 @@
 #define DC_DATE "dc:date"
 #define DC_TITLE "dc:title"
 
+/// @brief Known metadata fields
 enum class MetadataFields {
+    /// @brief dc:title
     M_TITLE = 0,
+    /// @brief upnp:artist
     M_ARTIST,
+    /// @brief upnp:album
     M_ALBUM,
+    /// @brief dc:date
     M_DATE,
+    /// @brief dc:created
     M_CREATION_DATE,
+    /// @brief upnp:date
     M_UPNP_DATE,
+    /// @brief upnp:genre
     M_GENRE,
+    /// @brief dc:description
     M_DESCRIPTION,
+    /// @brief upnp:longDescription
     M_LONGDESCRIPTION,
+    /// @brief upnp:episodeSeason
     M_PARTNUMBER,
+    /// @brief upnp:originalTrackNumber
     M_TRACKNUMBER,
+    /// @brief upnp:albumArtURI
     M_ALBUMARTURI,
+    /// @brief upnp:region
     M_REGION,
-    /// \todo make sure that those are only used with appropriate upnp classes
+    /// @brief dc:creator
     M_CREATOR,
+    /// @brief upnp:author
     M_AUTHOR,
+    /// @brief upnp:director
     M_DIRECTOR,
+    /// @brief dc:publisher
     M_PUBLISHER,
+    /// @brief upnp:rating
     M_RATING,
+    /// @brief upnp:actor
     M_ACTOR,
+    /// @brief upnp:producer
     M_PRODUCER,
+    /// @brief upnp:artist\@role[AlbumArtist]
     M_ALBUMARTIST,
 
     // Classical Music Related Fields
+    /// @brief upnp:composer
     M_COMPOSER,
+    /// @brief upnp:conductor
     M_CONDUCTOR,
+    /// @brief upnp:orchestra
     M_ORCHESTRA,
 
-    // For containers
+    /// @brief For containers on Samsung
     M_CONTENT_CLASS,
+    /// @brief For shortcut feature
     M_UPNP_SHORTCUT,
 
+    /// @brief End of enum
     M_MAX
 };
 
 using MetadataIterator = EnumIterator<MetadataFields, MetadataFields::M_TITLE, MetadataFields::M_MAX>;
 
+/// @brief Define single valued metadata
 const static auto mt_single = std::map<MetadataFields, bool> {
     std::pair(MetadataFields::M_TITLE, true),
     std::pair(MetadataFields::M_ARTIST, false),

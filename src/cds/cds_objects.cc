@@ -213,6 +213,6 @@ std::string CdsObject::getAuxData(const std::string& key) const
 
 int CdsObject::makeFlag(const std::string& optValue)
 {
-    std::vector<std::string> flagsVector = splitString(optValue, '|', false);
+    std::vector<std::string> flagsVector = splitString(optValue, '|');
     return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | CdsObject::remapFlags(trimString(i)); });
 }
