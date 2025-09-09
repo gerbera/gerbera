@@ -94,7 +94,7 @@ TEST_F(ServerTest, ServerOutputsHelpInformation)
         ".*--debug-mode FACILITY.*Set debugging mode to FACILITY.*",
 #endif
     };
-    for (auto&& line : splitString(expectedOutput, '\n', true)) {
+    for (auto&& line : splitString(expectedOutput, '\n', '\0', true)) {
         bool found = false;
         for (auto&& pattern : patternList) {
             if (std::regex_match(line, base_match, std::regex(pattern)))

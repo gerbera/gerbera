@@ -81,7 +81,7 @@ InotifyFlags InotifyUtil::remapFlag(const std::string& flag)
 
 InotifyFlags InotifyUtil::makeFlags(const std::string& optValue)
 {
-    std::vector<std::string> flagsVector = splitString(optValue, '|', false);
+    std::vector<std::string> flagsVector = splitString(optValue, '|');
     return std::accumulate(flagsVector.begin(), flagsVector.end(), static_cast<InotifyFlags>(0), [](auto flg, auto&& i) { return flg | InotifyUtil::remapFlag(trimString(i)); });
 }
 

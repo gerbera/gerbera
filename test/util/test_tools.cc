@@ -143,23 +143,23 @@ TEST(ToolsTest, splitStringTest)
     auto parts = splitString("", ',');
     EXPECT_EQ(parts.size(), 0);
 
-    parts = splitString("", ',', true);
+    parts = splitString("", ',', '\0', true);
     EXPECT_EQ(parts.size(), 1);
 
     parts = splitString("A", ',');
     ASSERT_EQ(parts.size(), 1);
     EXPECT_EQ(parts[0], "A");
 
-    parts = splitString("A,", ',', false);
+    parts = splitString("A,", ',', '\0', false);
     ASSERT_EQ(parts.size(), 1);
     EXPECT_EQ(parts[0], "A");
 
-    parts = splitString("A,", ',', true);
+    parts = splitString("A,", ',', '\0', true);
     ASSERT_EQ(parts.size(), 2);
     EXPECT_EQ(parts[0], "A");
     EXPECT_EQ(parts[1], "");
 
-    parts = splitString(",A", ',', true);
+    parts = splitString(",A", ',', '\0', true);
     ASSERT_EQ(parts.size(), 2);
     EXPECT_EQ(parts[0], "");
     EXPECT_EQ(parts[1], "A");
@@ -170,12 +170,12 @@ TEST(ToolsTest, splitStringTest)
     EXPECT_EQ(parts[1], "B");
     EXPECT_EQ(parts[2], "C");
 
-    parts = splitString("A,,C", ',', false);
+    parts = splitString("A,,C", ',', '\0', false);
     ASSERT_EQ(parts.size(), 2);
     EXPECT_EQ(parts[0], "A");
     EXPECT_EQ(parts[1], "C");
 
-    parts = splitString("A,,C", ',', true);
+    parts = splitString("A,,C", ',', '\0', true);
     ASSERT_EQ(parts.size(), 3);
     EXPECT_EQ(parts[0], "A");
     EXPECT_EQ(parts[1], "");
@@ -185,10 +185,43 @@ TEST(ToolsTest, splitStringTest)
     auto resourceString = "0~protocolInfo=http-get%3A%2A%3Aimage%2Fjpeg%3A%2A&resolution=3327x2039&size=732150~~|1~protocolInfo=http-get%3A%2A%3Aimage%2Fjpeg%3A%2A&resolution=170x256~rct=EX_TH~";
     auto resourceParts = splitString(resourceString, '|');
     ASSERT_EQ(resourceParts.size(), 2);
-    auto parts0 = splitString(resourceParts[0], '~', true);
-    auto parts1 = splitString(resourceParts[1], '~', true);
+    auto parts0 = splitString(resourceParts[0], '~', '\0', true);
+    auto parts1 = splitString(resourceParts[1], '~', '\0', true);
     ASSERT_EQ(parts0.size(), 4);
     ASSERT_EQ(parts1.size(), 4);
+
+    // Test splitString on usecase where 'empty' and 'quote' is in use
+    auto commandString = R"(-I dummy %in --sout "#transcode{ venc=ffmpeg, vcodec=mp2v, vb=4096, fps=25, aenc=ffmpeg, acodec=mpga, ab=192, samplerate=44100, channels=2 }:standard{ access=file, mux=ps, dst=%out }" vlc:quit)";
+    auto commandParts = splitString(commandString, ' ', '"');
+    ASSERT_EQ(commandParts.size(), 6);
+    auto cmd0 = splitString(commandParts[4], ':', '\0', true);
+    ASSERT_EQ(cmd0.size(), 2);
+    auto cmd1 = splitString(cmd0[1], ' ', '\0', true);
+    EXPECT_EQ(cmd1.size(), 5);
+    EXPECT_EQ(cmd1[0], "standard{");
+}
+
+TEST(ToolsTest, populateCommandLineTest)
+{
+    {
+        auto commandString = R"(-I dummy %in --sout "#transcode{ venc=ffmpeg, vcodec=mp2v, vb=4096, fps=25, aenc=ffmpeg, acodec=mpga, ab=192, samplerate=44100, channels=2 }:standard{ access=file, mux=ps, dst=%out }" vlc:quit)";
+        auto commandParts = populateCommandLine(commandString, "IN", "OUT", "RANGE", "TITLE");
+        ASSERT_EQ(commandParts.size(), 6);
+        EXPECT_EQ(commandParts[2], "IN");
+        auto cmd0 = splitString(commandParts[4], ':', '\0', true);
+        ASSERT_EQ(cmd0.size(), 2);
+        auto cmd1 = splitString(cmd0[1], ' ', '\0', true);
+        ASSERT_EQ(cmd1.size(), 5);
+        EXPECT_EQ(cmd1[3], "dst=OUT");
+    }
+    {
+        auto commandString = R"(-I dummy %in --sout=%out --range %range --title %title)";
+        auto commandParts = populateCommandLine(commandString, "IN", "OUT", "RANGE", "TITLE");
+        ASSERT_EQ(commandParts.size(), 8);
+        EXPECT_EQ(commandParts[2], "IN");
+        EXPECT_EQ(commandParts[3], "--sout=OUT");
+        EXPECT_EQ(commandParts[7], "TITLE");
+    }
 }
 
 TEST(ToolsTest, replaceAllStringTest)

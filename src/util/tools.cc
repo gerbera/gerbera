@@ -60,13 +60,17 @@
 
 static constexpr auto hexChars = "0123456789abcdef";
 
-std::vector<std::string> splitString(std::string_view str, char sep, bool empty)
+std::vector<std::string> splitString(std::string_view str, char sep, char quote, bool empty)
 {
     std::vector<std::string> ret;
 
     std::size_t pos = 0;
+    bool inQuote = false;
     while (pos < str.size()) {
-        if (str[pos] == sep) {
+        if (str[pos] == quote) {
+            inQuote = !inQuote;
+        }
+        if (str[pos] == sep && !inQuote) {
             if (pos > 0 || empty)
                 ret.emplace_back(str.substr(0, pos));
             str = str.substr(pos + 1);
@@ -417,14 +421,15 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
     return getValueOrDefault<std::string, std::string>(m, key, defval);
 }
 
-std::vector<std::string> populateCommandLine(const std::string& line,
+std::vector<std::string> populateCommandLine(
+    const std::string& line,
     const std::string& in,
     const std::string& out,
     const std::string& range,
     const std::string& title)
 {
     log_debug("Template: '{}', in: '{}', out: '{}', range: '{}', title: '{}'", line, in, out, range, title);
-    std::vector<std::string> params = splitString(line, ' ');
+    std::vector<std::string> params = splitString(line, ' ', '"');
     if (in.empty() && out.empty())
         return params;
 

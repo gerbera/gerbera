@@ -85,7 +85,7 @@ std::string GrbLogger::printFacility(unsigned long long facility)
 
 unsigned long long GrbLogger::makeFacility(const std::string& optValue)
 {
-    std::vector<std::string> flagsVector = splitString(optValue, '|', false);
+    std::vector<std::string> flagsVector = splitString(optValue, '|');
     return std::accumulate(flagsVector.begin(), flagsVector.end(), 0ULL, [](unsigned long long flg, auto&& i) { return flg | GrbLogger::remapFacility(trimString(i)); });
 }
 

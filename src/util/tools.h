@@ -49,9 +49,10 @@ constexpr auto PROTOCOL = std::string_view("http-get");
 /// @brief splits the given string into array of strings using a separator character.
 /// @param str String to split
 /// @param sep separator character
+/// @param quote masking character encapsulating separators
 /// @param empty treat subsequent separators as empty array elements
 /// @return array of strings
-std::vector<std::string> splitString(std::string_view str, char sep, bool empty = false);
+std::vector<std::string> splitString(std::string_view str, char sep, char quote = '\0', bool empty = false);
 
 /// @brief remove leading and trailing whitespace (in place)
 void trimStringInPlace(std::string& str);
@@ -161,6 +162,12 @@ std::string getMTFromProtocolInfo(std::string_view protocol);
 /// @return Protocol (i.e. http-get).
 std::string_view getProtocol(std::string_view protocolInfo);
 
+/// @brief Adds escaping to special characters
+///
+/// @param string input text with characters to escape
+/// @param escapeChar special character used for escaping, e.g., '\'
+/// @param toEscape character in need for escaping, e.g., "
+/// @return escaped string
 std::string escape(std::string_view string, char escapeChar, char toEscape);
 
 /// @brief Returns the first string if it isn't "nullptr", otherwise the fallback string.
@@ -200,7 +207,12 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
 /// This function splits a string into array parts, where space is used as the
 /// separator. In addition special %in and %out tokens are replaced by given
 /// strings.
-/// \todo add escaping
+/// @param line configured command with tokens
+/// @param in replacement for %in
+/// @param out replacement for %out
+/// @param range replacement for %range
+/// @param title replacement for %title
+/// @return vector of strings containing command line items
 std::vector<std::string> populateCommandLine(const std::string& line,
     const std::string& in = "",
     const std::string& out = "",

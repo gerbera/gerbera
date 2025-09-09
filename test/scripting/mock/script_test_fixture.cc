@@ -144,7 +144,7 @@ void ScriptTestFixture::mockPlaylistFile(const std::string& mockFile)
 {
     std::ifstream t(mockFile);
     std::string str((std::istreambuf_iterator<char>(t)), std::istreambuf_iterator<char>());
-    lines = splitString(str, '\n', true);
+    lines = splitString(str, '\n', '\0', true);
     lines.push_back("-EOF-"); // used to stop processing
     readLineCnt = 0;
 }
