@@ -22,6 +22,7 @@
 - Update CMakeLists.txt for ICU on APPLE
 - Update to exiv2 v0.28.6
 - Update to exiv2 v0.28.7
+- Update to fmt 12.0.0
 - WavPack under MacOS
 - WebUI: Show referenced items in details
 - WebUI: Show spinner on loading

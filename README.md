@@ -60,7 +60,7 @@ sudo make install
 | libiconv            |             |             |                      | Required      | Charset conversion         |          |
 | sqlite3             | 3.7.0       | 3.35.5      | 3.49.1               | Required      | Database storage           |          |
 | zlib                |             |             |                      | Required      | Data compression           |          |
-| [fmtlib]            | 7.1.3       | 9.1.0       | 11.2.0               | Required      | Fast string formatting     |          |
+| [fmtlib]            | 7.1.3       | 11.2.0      | 12.0.0               | Required      | Fast string formatting     |          |
 | [spdlog]            | 1.8.1       | 1.11.0      | 1.15.3               | Required      | Runtime logging            |          |
 | [icu4c]             | 65.1        | 65.1        | 65.1                 | Required      | Transliteration            | Enabled  |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0                | Optional      | Scripting Support          | Enabled  |
@@ -85,7 +85,7 @@ sudo make install
 |---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
 | [googletest]        | 1.10.0      | 1.10.0      | 1.17.0        | Optional      | Running tests                  | Disabled |
 | [doxygen]           |             | 1.8.14      | 1.8.14        | Optional      | Building source documentation  | Disabled |
-| [cmake]             | 3.25.0      | 3.31.38     | 4.0.3         | Optional      | Build processing               | Disabled |
+| [cmake]             | 3.25.0      | 3.31.38     | 4.1.1         | Mandatory     | Build processing               | Enabled  |
 
 ## License
 
