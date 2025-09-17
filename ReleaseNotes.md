@@ -18,12 +18,13 @@
 - Integer conversion on 32 bit system
 - Search for contentClass (Samsung TV)
 - Title from NFO files
+- Drop Build for Ubuntu 24.10
 
 ### Code Improvements
 
 - MacOS build with ICU and WavPack
 - Documentation is using special tags for config variables
-- Update maximum library versions of exiv2 (0.28.7)
+- Update maximum library versions of exiv2 (0.28.7), fmt (12.0.0)
 - Cleanup of cmake modules
 
 

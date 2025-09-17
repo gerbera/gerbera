@@ -45,7 +45,7 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
     EXIV2="v0.27.7"
     EXIF="v0.6.24"
     FFMPEGTHUMBNAILER="2.2.2"
-    FMT="9.1.0"
+    FMT="11.2.0"
     GOOGLETEST="1.10.0"
     LASTFM="0.4.0"
     MATROSKA="1.5.2"
@@ -65,7 +65,7 @@ else
     EXIV2="v0.28.7"
     EXIF="v0.6.25"
     FFMPEGTHUMBNAILER="2.2.3"
-    FMT="11.2.0"
+    FMT="12.0.0"
     GOOGLETEST="1.17.0"
     LASTFM="0.4.0"
     MATROSKA="1.7.1"
@@ -76,6 +76,6 @@ else
     WAVPACK="5.8.1"
     TAGLIB="2.1.1"
     JSONCPP="1.9.6"
-    CMAKE="4.0.3"
+    CMAKE="4.1.1"
 
 fi
