@@ -24,7 +24,7 @@
 
 - MacOS build with ICU and WavPack
 - Documentation is using special tags for config variables
-- Update maximum library versions of exiv2 (0.28.7), fmt (12.0.0)
+- Update maximum library versions of exiv2 (0.28.7), fmt (12.0.0), pupnp (1.14.25)
 - Cleanup of cmake modules
 
 
