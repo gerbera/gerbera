@@ -238,7 +238,10 @@ static constexpr std::array matchTypes {
     std::pair(ClientMatchType::Manufacturer, "manufacturer"),
 };
 
-void ClientManager::addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const std::string& descLocation)
+void ClientManager::addClientByDiscovery(
+    const std::shared_ptr<GrbNet>& addr,
+    const std::string& userAgent,
+    const std::string& descLocation)
 {
     const ClientObservation* client = getInfo(addr, userAgent);
     if (!client || (client->pInfo && client->pInfo->matchType == ClientMatchType::None)) {
@@ -263,7 +266,9 @@ void ClientManager::addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, co
     }
 }
 
-const ClientObservation* ClientManager::getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent) const
+const ClientObservation* ClientManager::getInfo(
+    const std::shared_ptr<GrbNet>& addr,
+    const std::string& userAgent) const
 {
     // 1. by IP address
     auto info = getInfoByAddr(addr);
@@ -347,7 +352,10 @@ void ClientManager::removeClient(const std::string& clientIp)
         this->database->saveClients(cache);
 }
 
-const ClientObservation* ClientManager::updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientProfile* pInfo) const
+const ClientObservation* ClientManager::updateCache(
+    const std::shared_ptr<GrbNet>& addr,
+    const std::string& userAgent,
+    const ClientProfile* pInfo) const
 {
     AutoLock lock(mutex);
 

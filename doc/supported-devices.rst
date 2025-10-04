@@ -106,6 +106,8 @@ The device flags have the following meaning
 |                                |         | This quirk might help if your client sends hardcoded SortCriteria,             |
 |                                |         | e.g. old Panasonic TV sets                                                     |
 +--------------------------------+---------+--------------------------------------------------------------------------------+
+| ``CAPTION_PROTOCOL``           | 0x80000 | Add protocolInfo to ``sec:CaoptionInfoEx`` for Samsung                         |
++--------------------------------+---------+--------------------------------------------------------------------------------+
 
 
 Manual Overrides
