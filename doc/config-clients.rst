@@ -24,9 +24,9 @@ Clients
 
    .. code-block:: xml
 
-      <clients> ... </clients>
+      <clients enabled="yes"> ... </clients>
 
-This section defines the client behaviour additions.
+This section defines the client behaviour additions. It has to be explicitly enabled.
 
 Clients Attributes
 ==================
@@ -41,7 +41,7 @@ Clients Attributes
 
         enabled="yes"
 
-This attribute defines if client overriding is enabled as a whole, possible values are ”yes” or ”no”.
+This attribute defines if client overriding is enabled as a whole.
 
 .. confval:: cache-threshold
    :type: :confval:`Time`
@@ -53,7 +53,7 @@ This attribute defines if client overriding is enabled as a whole, possible valu
 
         cache-threshold="24"
 
-This attribute sets the amount of hours a client entry is kept in the cache.
+This attribute sets the amount of hours a client entry is kept in the cache after its last contact.
 
 .. confval:: bookmark-offset
    :type: :confval:`Time`
@@ -96,7 +96,7 @@ Client Attributes
 
 This allows to select clients by IP address. Allowed values are ip addresses (v4 or v6) which can be followed by ``/pref`` where pref is any allowed prefix length for the protocol.
 
-.. confval:: userAgent
+.. confval:: client userAgent
    :type: :confval:`String`
    :required: false
    :default: `empty`
@@ -104,11 +104,13 @@ This allows to select clients by IP address. Allowed values are ip addresses (v4
 
    .. code:: xml
   
-       userAgent="..."
+       userAgent="DLNADOC/1.50"
 
-This allows to filter clients by userAgent signature. It contains a part of the UserAgent http-signature of your client.
-Run a network sniffer like wireshark or some UPnP utility to discover the signature.
-If :confval:`client ip` is set :confval:`userAgent` is ignored.
+This allows to filter clients by ``userAgent`` signature. It contains a part of the UserAgent http-signature of your client.
+It can be found on the clients page of the web ui.
+In some cases it can help to run a network sniffer like wireshark or some UPnP utility to discover the signature.
+Most clients do not report exactly the same User-Agent for UPnP services and file request.
+If :confval:`client ip` is set :confval:`client userAgent` is ignored.
 
 .. confval:: client friendlyName
    :type: :confval:`String`
@@ -129,15 +131,16 @@ If :confval:`client ip` is set :confval:`userAgent` is ignored.
    :required: false
    :default: `empty`
 ..
+.. versionadded:: 2.3.0
+..
 
-   .. versionadded:: 2.3.0
    .. code:: xml
 
        friendlyName="..." modelName="..." manufacturer="..."
 
-This allows to filter clients by their UPnP description. It contains a properties in the device section of the xml.
+This allows to filter clients by their UPnP description. It contains a property which can be found in the device section of the description xml.
 UPnP network tools will provide you with the link to the xml document.
-It is only used if ip and userAgent are not set. friendlyName overwrite modelName which overwrites manufacturer.
+It is only used if :confval:`client ip` and :confval:`client userAgent` are not set. ``friendlyName`` overwrites ``modelName`` which overwrites ``manufacturer``.
 
 .. confval:: client group
    :type: :confval:`String`

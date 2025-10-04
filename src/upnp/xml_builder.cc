@@ -1082,7 +1082,8 @@ void UpnpXMLBuilder::addResources(
             for (auto&& [from, to] : mimeMappings) {
                 replaceAllString(protocolInfo, from, to);
             }
-            captionInfo[EnumMapper::getAttributeName(ResourceAttribute::PROTOCOLINFO)] = protocolInfo;
+            if (quirks && quirks->hasFlag(QUIRK_FLAG_CAPTION_PROTOCOL))
+                captionInfo[EnumMapper::getAttributeName(ResourceAttribute::PROTOCOLINFO)] = protocolInfo;
 
             captionInfoEx.push_back(std::move(captionInfo));
             continue;

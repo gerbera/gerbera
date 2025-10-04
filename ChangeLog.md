@@ -16,6 +16,7 @@
 - Improve MacOS build
 - Introduce sphinx toolbox
 - nproc missing on MacOS
+- Quirk to block protocolInfo in CaptionInfoEx
 - Remove loading complete scripts to create virutal layout
 - Rotation of thumbnails by ffmpegthumbnailer
 - Unify doxygen tags
