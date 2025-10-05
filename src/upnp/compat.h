@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    compat.h - this file is part of Gerbera.
+    upnp/compat.h - this file is part of Gerbera.
 
     Copyright (C) 2024-2025 Gerbera Contributors
 

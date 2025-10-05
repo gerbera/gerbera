@@ -32,6 +32,7 @@
 #include "database/database.h"
 #include "upnp/client_manager.h"
 #include "upnp/clients.h"
+#include "upnp/headers.h"
 #include "util/grb_net.h"
 
 static std::string secondsToString(const std::chrono::seconds& t)
@@ -73,6 +74,16 @@ bool Web::Clients::processPageAction(Json::Value& element, const std::string& ac
         item["flags"] = flags;
         item["matchType"] = ClientConfig::mapMatchType(obj.pInfo->matchType).data();
         item["clientType"] = ClientConfig::mapClientType(obj.pInfo->type).data();
+        if (obj.headers) {
+            Json::Value headers(Json::arrayValue);
+            for (auto&& [key, value] : obj.headers->getHeaders()) {
+                Json::Value header;
+                header["key"] = key;
+                header["value"] = value;
+                headers.append(header);
+            }
+            item["headers"] = headers;
+        }
         clients.append(item);
     }
     element["clients"] = clients;

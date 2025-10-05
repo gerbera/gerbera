@@ -42,11 +42,16 @@
 #include <array>
 #include <utility>
 
-Quirks::Quirks(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const std::shared_ptr<ClientManager>& clientManager, const std::shared_ptr<GrbNet>& addr, const std::string& userAgent)
+Quirks::Quirks(
+    std::shared_ptr<UpnpXMLBuilder> xmlBuilder,
+    const std::shared_ptr<ClientManager>& clientManager,
+    const std::shared_ptr<GrbNet>& addr,
+    const std::string& userAgent,
+    const std::shared_ptr<Headers>& headers)
     : xmlBuilder(std::move(xmlBuilder))
 {
     if (addr || !userAgent.empty()) {
-        pClient = clientManager->getInfo(addr, userAgent);
+        pClient = clientManager->getInfo(addr, userAgent, headers);
         pClientProfile = pClient->pInfo;
     }
 }
@@ -67,6 +72,11 @@ bool Quirks::hasFlag(QuirkFlags flag) const
     return pClientProfile && (pClientProfile->flags & flag) == flag;
 }
 
+bool Quirks::hasHeader(const std::string& key, const std::string& value) const
+{
+    return pClient && pClient->headers && pClient->headers->hasHeader(key) && pClient->headers->getHeader(key) == value;
+}
+
 std::string Quirks::getGroup() const
 {
     return pClientProfile ? pClientProfile->group : DEFAULT_CLIENT_GROUP;
@@ -84,11 +94,15 @@ void Quirks::addCaptionInfo(const std::shared_ptr<CdsItem>& item, Headers& heade
         return;
     }
 
+    if (!hasHeader("getCaptionInfo.sec", "1")) {
+        log_debug("CaptionInfo.sec not requested by this client");
+        return;
+    }
+
     auto subAdded = xmlBuilder->renderSubtitleURL(item, pClientProfile->mimeMappings.getDictionaryOption());
     if (subAdded) {
         log_debug("Call for Samsung CaptionInfo.sec: {}", subAdded.value());
         headers.addHeader("CaptionInfo.sec", subAdded.value());
-        headers.addHeader("getCaptionInfo.sec", "1");
     }
 }
 

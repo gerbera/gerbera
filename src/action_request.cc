@@ -49,7 +49,7 @@ ActionRequest::ActionRequest(std::shared_ptr<UpnpXMLBuilder> xmlBuilder, const s
 {
     auto ctrlPtIPAddr = std::make_shared<GrbNet>(UpnpActionRequest_get_CtrlPtIPAddr(upnpRequest));
     std::string userAgent = UpnpActionRequest_get_Os_cstr(upnpRequest);
-    quirks = std::make_shared<Quirks>(std::move(xmlBuilder), clients, ctrlPtIPAddr, userAgent);
+    quirks = std::make_shared<Quirks>(std::move(xmlBuilder), clients, ctrlPtIPAddr, userAgent, nullptr);
 }
 
 std::string ActionRequest::getActionName() const

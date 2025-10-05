@@ -75,13 +75,15 @@ enum class ResourcePurpose;
 struct ClientProfile;
 struct ClientObservation;
 
+/// @brief class to handle client specific behaviour and details
 class Quirks {
 public:
     Quirks(
         std::shared_ptr<UpnpXMLBuilder> xmlBuilder,
         const std::shared_ptr<ClientManager>& clientManager,
         const std::shared_ptr<GrbNet>& addr,
-        const std::string& userAgent);
+        const std::string& userAgent,
+        const std::shared_ptr<Headers>& headers);
 
     Quirks(const ClientObservation* client);
 
@@ -278,6 +280,10 @@ public:
     /** @brief Check for active flag
      */
     bool hasFlag(QuirkFlags flag) const;
+
+    /** @brief Check for header entry
+     */
+    bool hasHeader(const std::string& key, const std::string& value) const;
 
     /** @brief Get list of source folders to hide from client
      */

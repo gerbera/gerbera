@@ -2620,6 +2620,7 @@ std::vector<ClientObservation> SQLDatabase::getClients()
             getCol(row, ClientColumn::UserAgent),
             std::chrono::seconds(getColInt(row, ClientColumn::Last, 0)),
             std::chrono::seconds(getColInt(row, ClientColumn::Age, 0)),
+            nullptr,
             nullptr);
     }
 

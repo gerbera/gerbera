@@ -29,6 +29,11 @@
 #include "upnp/compat.h"
 #include "util/logger.h"
 
+Headers::Headers(const UpnpFileInfo* fileInfo)
+    : headers(GrbUpnpGetHeaders(fileInfo))
+{
+}
+
 std::string Headers::stripInvalid(const std::string& value)
 {
     std::string result = value;
@@ -80,7 +85,12 @@ void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
     GrbUpnpSetHeaders(fileInfo, headers);
 }
 
-std::map<std::string, std::string> Headers::readHeaders(const UpnpFileInfo* fileInfo)
+bool Headers::hasHeader(const std::string& key) const
 {
-    return GrbUpnpGetHeaders(fileInfo);
+    return headers.find(key) != headers.end();
+}
+
+std::string Headers::getHeader(const std::string& key) const
+{
+    return headers.find(key)->second;
 }

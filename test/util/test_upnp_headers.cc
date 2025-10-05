@@ -62,7 +62,7 @@ TEST_F(HeadersHelperTest, TerminatesTheHeaderWithCarriageNewLine)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -79,7 +79,7 @@ TEST_F(HeadersHelperTest, DoesNotAddTerminationCarriageNewLineWhenAlreadyExists)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -97,7 +97,7 @@ TEST_F(HeadersHelperTest, MultipleHeaders)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -118,7 +118,7 @@ TEST_F(HeadersHelperTest, MultipleHeadersSingleCarriageNewLine)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -139,7 +139,7 @@ TEST_F(HeadersHelperTest, MultiBothCarriageNewLine)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -156,7 +156,7 @@ TEST_F(HeadersHelperTest, IgnoresDataAfterFirstCarriageNewLine)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -171,7 +171,7 @@ TEST_F(HeadersHelperTest, HeaderIsOnlyLinebreakReturnsEmpty)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -186,7 +186,7 @@ TEST_F(HeadersHelperTest, HeaderIsEmptyReturnsEmpty)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -203,7 +203,7 @@ TEST_F(HeadersHelperTest, HandlesSingleCarriageReturn)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -220,7 +220,7 @@ TEST_F(HeadersHelperTest, HandlesSingleNewLine)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -235,7 +235,7 @@ TEST_F(HeadersHelperTest, EmptyValueNotAdded)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -250,7 +250,7 @@ TEST_F(HeadersHelperTest, HandlesEmptyString)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -267,7 +267,7 @@ TEST_F(HeadersHelperTest, HandlesExtraContent)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -284,7 +284,7 @@ TEST_F(HeadersHelperTest, HandlesExtraContentTwo)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -303,7 +303,7 @@ TEST_F(HeadersHelperTest, DoesNotOverwriteWithAdd)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 
@@ -322,7 +322,7 @@ TEST_F(HeadersHelperTest, DoesOverwriteWithUpdate)
     subject.writeHeaders(info);
 
     // assert
-    auto actual = Headers::readHeaders(info);
+    auto actual = Headers(info).getHeaders();
     EXPECT_EQ(actual, expected);
 }
 #endif

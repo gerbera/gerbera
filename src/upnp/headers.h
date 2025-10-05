@@ -2,7 +2,7 @@
 
     Gerbera - https://gerbera.io/
 
-    headers.h - this file is part of Gerbera.
+    upnp/headers.h - this file is part of Gerbera.
 
     Copyright (C) 2016-2025 Gerbera Contributors
 
@@ -31,15 +31,27 @@
 #include <upnp.h>
 #include <vector>
 
+/// @brief Utility class for HTTP headers in UPnP requests
 class Headers {
 public:
-    void updateHeader(const std::string& key, const std::string& value);
-    void addHeader(const std::string& key, const std::string& value);
-    void writeHeaders(UpnpFileInfo* fileInfo) const;
+    Headers(const UpnpFileInfo* fileInfo);
+    Headers() { }
 
-    static std::map<std::string, std::string> readHeaders(const UpnpFileInfo* fileInfo);
+    /// @brief update header value
+    void updateHeader(const std::string& key, const std::string& value);
+    /// @brief add header value
+    void addHeader(const std::string& key, const std::string& value);
+    /// @brief transfer headers to UPnP file info
+    void writeHeaders(UpnpFileInfo* fileInfo) const;
+    /// @brief Is header value set
+    bool hasHeader(const std::string& key) const;
+    /// @brief get header value
+    std::string getHeader(const std::string& key) const;
+    /// @brief get stored header values
+    std::map<std::string, std::string> getHeaders() const { return headers; }
 
 private:
+    /// @brief strip end of line characters
     static std::string stripInvalid(const std::string& value);
 
     std::map<std::string, std::string> headers;

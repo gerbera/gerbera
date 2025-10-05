@@ -72,11 +72,11 @@ TEST_F(UpnpClientsTest, bubbleUPnPV3_4_4)
     auto addr = std::make_shared<GrbNet>("192.168.1.42");
 
     // 1. via actionReq (e.g. doBrowse)
-    pClient = subject->getInfo(addr, "Android/8.0.0 UPnP/1.0 BubbleUPnP/3.4.4");
+    pClient = subject->getInfo(addr, "Android/8.0.0 UPnP/1.0 BubbleUPnP/3.4.4", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::BubbleUPnP);
 
     // 2. via fileInfo (e.g. info/open/read video)
-    pClient = subject->getInfo(addr, "BubbleUPnP UPnP/1.1");
+    pClient = subject->getInfo(addr, "BubbleUPnP UPnP/1.1", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::BubbleUPnP);
 }
 
@@ -86,11 +86,11 @@ TEST_F(UpnpClientsTest, foobar2000V1_6_2)
     auto addr = std::make_shared<GrbNet>("192.168.1.42");
 
     // 1. via actionReq (e.g. doBrowse)
-    pClient = subject->getInfo(addr, "UPnP/1.0 DLNADOC/1.50 Platinum/1.0.4.2-bb / foobar2000");
+    pClient = subject->getInfo(addr, "UPnP/1.0 DLNADOC/1.50 Platinum/1.0.4.2-bb / foobar2000", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 
     // 2. via fileInfo (e.g. info/open/read video)
-    pClient = subject->getInfo(addr, "foobar2000/1.6.2");
+    pClient = subject->getInfo(addr, "foobar2000/1.6.2", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 }
 
@@ -100,11 +100,11 @@ TEST_F(UpnpClientsTest, kodiV18_9)
     auto addr = std::make_shared<GrbNet>("192.168.1.42");
 
     // 1. via actionReq (e.g. doBrowse)
-    pClient = subject->getInfo(addr, "UPnP/1.0 DLNADOC/1.50 Kodi");
+    pClient = subject->getInfo(addr, "UPnP/1.0 DLNADOC/1.50 Kodi", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 
     // 2. via fileInfo (e.g. info/open/read video)
-    pClient = subject->getInfo(addr, "Kodi/18.9 (Windows NT 10.0.19041; Win64; x64) App_Bitness/64 Version/18.9-(18.9.0)-Git:20201023-0655c2c718");
+    pClient = subject->getInfo(addr, "Kodi/18.9 (Windows NT 10.0.19041; Win64; x64) App_Bitness/64 Version/18.9-(18.9.0)-Git:20201023-0655c2c718", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 }
 
@@ -114,11 +114,11 @@ TEST_F(UpnpClientsTest, samsungTVQ70)
     auto addr = std::make_shared<GrbNet>("192.168.1.42");
 
     // 1. via actionReq (e.g. doBrowse)
-    pClient = subject->getInfo(addr, "DLNADOC/1.50 SEC_HHP_[TV] Samsung Q70 Series/1.0 UPnP/1.0");
+    pClient = subject->getInfo(addr, "DLNADOC/1.50 SEC_HHP_[TV] Samsung Q70 Series/1.0 UPnP/1.0", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::SamsungSeriesQ);
 
     // 2. via fileInfo (e.g. info/open/read video)
-    pClient = subject->getInfo(addr, "samsung-agent/1.1");
+    pClient = subject->getInfo(addr, "samsung-agent/1.1", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::SamsungSeriesQ);
 }
 
@@ -128,11 +128,11 @@ TEST_F(UpnpClientsTest, vlcV3_0_11_1)
     auto addr = std::make_shared<GrbNet>("192.168.1.42");
 
     // 1. via actionReq (e.g. doBrowse)
-    pClient = subject->getInfo(addr, "Linux/5.9.0-5-amd64, UPnP/1.0, Portable SDK for UPnP devices/1.8.4");
+    pClient = subject->getInfo(addr, "Linux/5.9.0-5-amd64, UPnP/1.0, Portable SDK for UPnP devices/1.8.4", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 
     // 2. via fileInfo (e.g. info/open/read video)
-    pClient = subject->getInfo(addr, "VLC/3.0.11.1 LibVLC/3.0.11.1");
+    pClient = subject->getInfo(addr, "VLC/3.0.11.1 LibVLC/3.0.11.1", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 }
 
@@ -141,7 +141,7 @@ TEST_F(UpnpClientsTest, windows10)
     auto addr = std::make_shared<GrbNet>("192.168.1.42");
 
     // via actionReq (e.g. doBrowse)
-    const ClientObservation* pClient = subject->getInfo(addr, "Microsoft-Windows/10.0 UPnP/1.0 Microsoft-DLNA DLNADOC/1.50");
+    const ClientObservation* pClient = subject->getInfo(addr, "Microsoft-Windows/10.0 UPnP/1.0 Microsoft-DLNA DLNADOC/1.50", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 }
 
@@ -151,19 +151,19 @@ TEST_F(UpnpClientsTest, multipleClientsOnSameIP)
     auto addr = std::make_shared<GrbNet>("192.168.1.42");
 
     // 1. Foobar2000 via actionReq (e.g. doBrowse)
-    pClient = subject->getInfo(addr, "UPnP/1.0 DLNADOC/1.50 Platinum/1.0.4.2-bb / foobar2000");
+    pClient = subject->getInfo(addr, "UPnP/1.0 DLNADOC/1.50 Platinum/1.0.4.2-bb / foobar2000", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 
     // 2. Kodi via actionReq (e.g. doBrowse)
-    pClient = subject->getInfo(addr, "UPnP/1.0 DLNADOC/1.50 Kodi");
+    pClient = subject->getInfo(addr, "UPnP/1.0 DLNADOC/1.50 Kodi", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 
     // 3. Foobar2000 via fileInfo (e.g. info/open/read video)
-    pClient = subject->getInfo(addr, "foobar2000/1.6.2");
+    pClient = subject->getInfo(addr, "foobar2000/1.6.2", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 
     // 4. Kodi via fileInfo (e.g. info/open/read video)
-    pClient = subject->getInfo(addr, "Kodi/18.9 (Windows NT 10.0.19041; Win64; x64) App_Bitness/64 Version/18.9-(18.9.0)-Git:20201023-0655c2c718");
+    pClient = subject->getInfo(addr, "Kodi/18.9 (Windows NT 10.0.19041; Win64; x64) App_Bitness/64 Version/18.9-(18.9.0)-Git:20201023-0655c2c718", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 }
 
@@ -173,7 +173,7 @@ TEST_F(UpnpClientsTest, configuredIP)
     auto addr = std::make_shared<GrbNet>("192.168.1.100");
 
     // act
-    const ClientObservation* pClient = subject->getInfo(addr, "any unknown user-agent info");
+    const ClientObservation* pClient = subject->getInfo(addr, "any unknown user-agent info", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::Custom);
     EXPECT_EQ(pClient->pInfo->flags, 123);
 }
@@ -183,7 +183,7 @@ TEST_F(UpnpClientsTest, configuredIPRange)
     auto addr = std::make_shared<GrbNet>("192.168.2.100");
 
     // act
-    const ClientObservation* pClient = subject->getInfo(addr, "any unknown user-agent info");
+    const ClientObservation* pClient = subject->getInfo(addr, "any unknown user-agent info", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::Custom);
     EXPECT_EQ(pClient->pInfo->flags, 456);
 }

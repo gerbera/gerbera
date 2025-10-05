@@ -139,7 +139,7 @@ void ClientManager::refresh()
             "Samsung Blu-ray Player BD-D5100",
             DEFAULT_CLIENT_GROUP,
             ClientType::SamsungBDP,
-            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES | QUIRK_FLAG_CAPTION_PROTOCOL,
             ClientMatchType::UserAgent,
             "SEC_HHP_BD",
         },
@@ -149,7 +149,7 @@ void ClientManager::refresh()
             "Samsung Blu-ray Player J5500",
             DEFAULT_CLIENT_GROUP,
             ClientType::SamsungBDJ5500,
-            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES,
+            QUIRK_FLAG_SAMSUNG | QUIRK_FLAG_SAMSUNG_FEATURES | QUIRK_FLAG_CAPTION_PROTOCOL,
             ClientMatchType::UserAgent,
             "[BD]J5500",
         },
@@ -243,7 +243,7 @@ void ClientManager::addClientByDiscovery(
     const std::string& userAgent,
     const std::string& descLocation)
 {
-    const ClientObservation* client = getInfo(addr, userAgent);
+    const ClientObservation* client = getInfo(addr, userAgent, nullptr);
     if (!client || (client->pInfo && client->pInfo->matchType == ClientMatchType::None)) {
         auto descXml = downloadDescription(descLocation);
         if (descXml) {
@@ -256,7 +256,7 @@ void ClientManager::addClientByDiscovery(
                         if (deviceProp && deviceProp.node()) {
                             auto info = getInfoByType(deviceProp.node().text().as_string(), mType);
                             if (info) {
-                                updateCache(addr, userAgent, info);
+                                updateCache(addr, userAgent, nullptr, info);
                             }
                         }
                     }
@@ -268,7 +268,8 @@ void ClientManager::addClientByDiscovery(
 
 const ClientObservation* ClientManager::getInfo(
     const std::shared_ptr<GrbNet>& addr,
-    const std::string& userAgent) const
+    const std::string& userAgent,
+    const std::shared_ptr<Headers>& headers) const
 {
     // 1. by IP address
     auto info = getInfoByAddr(addr);
@@ -279,7 +280,7 @@ const ClientObservation* ClientManager::getInfo(
 
     // update IP or User-Agent match in cache
     if (info) {
-        return updateCache(addr, userAgent, info);
+        return updateCache(addr, userAgent, headers, info);
     }
     // 3. by cache
     // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
@@ -294,7 +295,7 @@ const ClientObservation* ClientManager::getInfo(
     info = clientProfile.data();
 
     // also add to cache, for web-ui proposes only
-    return updateCache(addr, userAgent, info);
+    return updateCache(addr, userAgent, headers, info);
 }
 
 const ClientProfile* ClientManager::getInfoByAddr(const std::shared_ptr<GrbNet>& addr) const
@@ -355,6 +356,7 @@ void ClientManager::removeClient(const std::string& clientIp)
 const ClientObservation* ClientManager::updateCache(
     const std::shared_ptr<GrbNet>& addr,
     const std::string& userAgent,
+    const std::shared_ptr<Headers>& headers,
     const ClientProfile* pInfo) const
 {
     AutoLock lock(mutex);
@@ -374,11 +376,13 @@ const ClientObservation* ClientManager::updateCache(
             // client info changed, update all
             it->age = now;
             it->userAgent = userAgent;
+            if (headers)
+                it->headers = headers;
             it->pInfo = pInfo;
         }
     } else {
         // add new client
-        cache.emplace_back(addr, userAgent, now, now, pInfo);
+        cache.emplace_back(addr, userAgent, now, now, headers, pInfo);
         it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
             { return entry.addr->equals(addr); });
     }

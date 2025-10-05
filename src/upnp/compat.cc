@@ -113,10 +113,15 @@ std::map<std::string, std::string> UpnpGetHeadersCompat(const UpnpFileInfo* file
 {
     std::map<std::string, std::string> ret;
 
+    if (!fileInfo)
+        return ret;
     auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(fileInfo));
+    if (!head)
+        return ret;
     for (auto pos = UpnpListBegin(head); pos != UpnpListEnd(head); pos = UpnpListNext(head, pos)) {
         auto extra = reinterpret_cast<UpnpExtraHeaders*>(pos);
-        std::string header = UpnpExtraHeaders_get_resp(extra);
+        auto value = UpnpExtraHeaders_get_resp(extra);
+        std::string header = value ? value : "";
         ret.insert(parseHeader(header));
     }
 
