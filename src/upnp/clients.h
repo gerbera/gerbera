@@ -40,7 +40,7 @@
 class ClientGroupConfig;
 class GrbNet;
 
-// specific customer products
+/// @brief specific customer products
 enum class ClientType {
     Unknown = 0, // if not listed otherwise
     BubbleUPnP,
@@ -59,7 +59,7 @@ enum class ClientType {
     Custom
 };
 
-// specify what must match
+/// @brief specify what property must match in profile
 enum class ClientMatchType {
     None,
     UserAgent, // received via UpnpActionRequest, UpnpFileInfo and UpnpDiscovery (all might be slitely different)
@@ -69,6 +69,7 @@ enum class ClientMatchType {
     IP, // use client's network address
 };
 
+/// @brief container for profiles
 struct ClientProfile {
     std::string name { "Unknown" }; // used for logging/debugging proposes only
     std::string group { DEFAULT_CLIENT_GROUP };
@@ -90,12 +91,20 @@ struct ClientProfile {
     std::shared_ptr<ClientGroupConfig> groupConfig;
 };
 
+/// @brief container for a client with discovered details
 struct ClientObservation {
-    ClientObservation(std::shared_ptr<GrbNet> addr, std::string userAgent, std::chrono::seconds last, std::chrono::seconds age, const ClientProfile* pInfo)
+    ClientObservation(
+        std::shared_ptr<GrbNet> addr,
+        std::string userAgent,
+        std::chrono::seconds last,
+        std::chrono::seconds age,
+        std::shared_ptr<Headers> headers,
+        const ClientProfile* pInfo)
         : addr(std::move(addr))
         , userAgent(std::move(userAgent))
         , last(last)
         , age(age)
+        , headers(headers)
         , pInfo(pInfo)
     {
     }
@@ -104,9 +113,11 @@ struct ClientObservation {
     std::string userAgent;
     std::chrono::seconds last;
     std::chrono::seconds age;
+    std::shared_ptr<Headers> headers;
     const ClientProfile* pInfo;
 };
 
+/// @brief store details for a client with relation to a CdsObject
 class ClientStatusDetail {
 public:
     ClientStatusDetail(std::string group, int itemId, int playCount, int lastPlayed, int lastPlayedPosition, int bookMarkPos)

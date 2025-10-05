@@ -38,20 +38,37 @@
 class Config;
 class Database;
 class GrbNet;
+class Headers;
 enum class ClientMatchType;
 struct ClientProfile;
 struct ClientObservation;
 
+/// @brief class to manage all known clients and profile information
 class ClientManager {
 public:
-    explicit ClientManager(std::shared_ptr<Config> config, std::shared_ptr<Database> database);
+    explicit ClientManager(
+        std::shared_ptr<Config> config,
+        std::shared_ptr<Database> database);
+
+    /// @brief reload predefined profiles and configuration values
     void refresh();
 
-    // always return something, 'Unknown' if we do not know better
-    const ClientObservation* getInfo(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent) const;
+    /// @brief get stored client information for client with addr and userAgent
+    /// @return always return something, 'Unknown' if we do not know better
+    const ClientObservation* getInfo(
+        const std::shared_ptr<GrbNet>& addr,
+        const std::string& userAgent,
+        const std::shared_ptr<Headers>& headers) const;
 
-    void addClientByDiscovery(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const std::string& descLocation);
+    /// @brief store client found by UPnP discovery messages
+    void addClientByDiscovery(
+        const std::shared_ptr<GrbNet>& addr,
+        const std::string& userAgent,
+        const std::string& descLocation);
+
+    /// @brief get current cache content
     const std::vector<ClientObservation>& getClientList() const { return cache; }
+
     /// @brief Remove single client from cache and database
     void removeClient(const std::string& clientIp);
 
@@ -60,7 +77,11 @@ private:
     const ClientProfile* getInfoByType(const std::string& match, ClientMatchType type) const;
 
     const ClientObservation* getInfoByCache(const std::shared_ptr<GrbNet>& addr) const;
-    const ClientObservation* updateCache(const std::shared_ptr<GrbNet>& addr, const std::string& userAgent, const ClientProfile* pInfo) const;
+    const ClientObservation* updateCache(
+        const std::shared_ptr<GrbNet>& addr,
+        const std::string& userAgent,
+        const std::shared_ptr<Headers>& headers,
+        const ClientProfile* pInfo) const;
 
     static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
 

@@ -56,6 +56,7 @@
 #include "upnp/compat.h"
 #include "upnp/conn_mgr_service.h"
 #include "upnp/cont_dir_service.h"
+#include "upnp/headers.h"
 #include "upnp/mr_reg_service.h"
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
@@ -616,7 +617,9 @@ void Server::sendSubscriptionUpdate(const std::string& updateString, const std::
     }
 }
 
-std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filename, const std::shared_ptr<Quirks>& quirks) const
+std::unique_ptr<RequestHandler> Server::createRequestHandler(
+    const char* filename,
+    const std::shared_ptr<Quirks>& quirks) const
 {
     std::string link = URLUtils::urlUnescape(filename);
     log_debug("Filename: {}", filename);
@@ -667,9 +670,10 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(const char* filenam
 std::shared_ptr<Quirks> Server::getQuirks(const UpnpFileInfo* info, bool isWeb) const
 {
     auto ctrlPtIPAddr = std::make_shared<GrbNet>(UpnpFileInfo_get_CtrlPtIPAddr(info));
+    auto headers = std::make_shared<Headers>(info);
     // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
     std::string userAgent = UpnpFileInfo_get_Os_cstr(info);
-    return std::make_shared<Quirks>(isWeb ? webXmlBuilder : upnpXmlBuilder, context->getClients(), ctrlPtIPAddr, std::move(userAgent));
+    return std::make_shared<Quirks>(isWeb ? webXmlBuilder : upnpXmlBuilder, context->getClients(), ctrlPtIPAddr, std::move(userAgent), headers);
 }
 
 int Server::HostValidateCallback(const char* host, void* cookie)
