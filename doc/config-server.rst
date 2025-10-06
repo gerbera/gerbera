@@ -1717,6 +1717,9 @@ Dynamic Containers Content
        <container location="/New" title="Recently added" sort="-last_updated" max-count="500">
            <filter>upnp:class derivedfrom "object.item" and last_updated &gt; "@last7"</filter>
        </container>
+       <container location="/NeverPlayed" title="Music Never Played" sort="upnp:album" upnp-shortcut="MUSIC_NEVER_PLAYED" max-count="100">
+           <filter>upnp:class derivedfrom "object.item.audioItem" and (upnp:playbackCount exists false or upnp:playbackCount = "0")</filter>
+       </container>
 
 Defines the properties of the dynamic container.
 

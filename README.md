@@ -85,7 +85,7 @@ sudo make install
 |---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
 | [googletest]        | 1.10.0      | 1.10.0      | 1.17.0        | Optional      | Running tests                  | Disabled |
 | [doxygen]           |             | 1.8.14      | 1.8.14        | Optional      | Building source documentation  | Disabled |
-| [cmake]             | 3.25.0      | 3.31.38     | 4.1.1         | Required      | Build processing               | Enabled  |
+| [cmake]             | 3.25.0      | 3.31.38     | 4.1.2         | Required      | Build processing               | Enabled  |
 
 ## License
 

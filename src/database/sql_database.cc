@@ -1277,6 +1277,7 @@ void SQLDatabase::initDynContainers(const std::shared_ptr<CdsObject>& sParent)
                 location = dynConfig->getLocation();
                 if (!hasCaseSensitiveNames) {
                     location = toLower(location);
+                    dynConfig->setLocation(location); // use lowercase for current run
                 }
                 dynFolder->setLocation(location);
                 dynFolder->setClass(UPNP_CLASS_DYNAMIC_CONTAINER);

@@ -12,6 +12,7 @@
 - Enable ICU for MacOS
 - Fix derivedFrom search handling
 - Fix formatSizeValue on 32-bit systems
+- Fix dynamic folders for lowercase trees
 - Handle title from nfo correctly
 - Implement new Client Quirk to force SortCriteria 'title'
 - Improve MacOS build
