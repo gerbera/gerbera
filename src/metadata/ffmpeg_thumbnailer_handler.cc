@@ -96,11 +96,16 @@ public:
             for (int x = 0; x < width; ++x) {
                 long double x1 = x - centerX;
                 long double y1 = y - centerY;
-                int xx = static_cast<int>(std::round(x1 * cosf - y1 * sinf + centerXOrig));
-                int yy = static_cast<int>(std::round(x1 * sinf + y1 * cosf + centerYOrig));
+                long long xx = static_cast<long long>(std::round(x1 * cosf - y1 * sinf + centerXOrig));
+                long long yy = static_cast<long long>(std::round(x1 * sinf + y1 * cosf + centerYOrig));
 
-                int pixelIndexOrig = yy * videoFrame.lineSize + xx * 3;
-                int pixelIndex = y * lineSize + x * 3;
+                long long pixelIndexOrig = yy * videoFrame.lineSize + xx * 3;
+                long long pixelIndex = y * lineSize + x * 3;
+
+                if (pixelIndex < 0 || pixelIndex > static_cast<long long>(frameData.size())) {
+                    log_debug("rotate out of sight {}", pixelIndex);
+                    continue;
+                }
 
                 if (xx >= 0 && xx < videoFrame.width && yy >= 0 && yy < videoFrame.height) {
                     frameData[pixelIndex + 0] = videoFrame.frameData.at(pixelIndexOrig + 0);
