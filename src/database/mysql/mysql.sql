@@ -45,7 +45,7 @@ CREATE TABLE `mt_internal_setting` (
 CREATE TABLE `mt_autoscan` (
   `id` int(11) NOT NULL auto_increment,
   `obj_id` int(11) default NULL,
-  `scan_mode` enum('timed','inotify') NOT NULL,
+  `scan_mode` enum('timed','inotify','manual') NOT NULL,
   `recursive` tinyint(4) unsigned NOT NULL,
   `media_type` int(11) NOT NULL,
   `hidden` tinyint(4) unsigned NOT NULL,

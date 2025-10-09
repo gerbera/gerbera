@@ -173,6 +173,16 @@
                 <charset>utf8</charset>
                 <collation>utf8_general_ci</collation>
             </mysql>
+            <postgres enabled="no">
+                <host>localhost</host>
+                <port>0</port>
+                <database>gerbera</database>
+                <username>gerbera</username>
+                <password/>
+                <socket/>
+                <init-sql-file>/home/family/Source/gerbera/src/database/postgres/postgres.sql</init-sql-file>
+                <upgrade-file>/home/family/Source/gerbera/src/database/postgres/postgres-upgrade.xml</upgrade-file>
+            </postgres>
         </storage>
         <containers enabled="yes">
             <container location="/LastAdded" title="Recently Added" sort="-last_updated">

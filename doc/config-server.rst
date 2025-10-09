@@ -36,7 +36,8 @@ Server Attributes
          :default: unset
       .. versionadded:: 2.0.0
       .. versionchanged:: 2.6.1 new option ``inotify``
-      .. versionchanged:: 2.6.2 new option ``thumbnailer``
+      .. versionchanged:: HEAD new option ``thumbnailer``
+      .. versionchanged:: HEAD new option ``postgres``
 
       Activate debugging messages only for certain subsystems.
       The following subsystems are available:
@@ -46,7 +47,7 @@ Server Attributes
       ``exif``, ``exiv2``, ``transcoding``, ``taglib``, ``ffmpeg``, ``wavpack``,
       ``requests``, ``device``, ``connmgr``, ``mrregistrar``, ``xml``,
       ``clients``, ``iohandler``, ``online``, ``metadata``, ``matroska``,
-      ``curl``, ``util``, ``inotify``, ``thumbnailer`` and ``verbose``.
+      ``curl``, ``util``, ``inotify``, ``thumbnailer``, ``postgres`` and ``verbose``.
       Multiple subsystems can be combined with a ``|``. Names are not case
       sensitive. ``verbose`` turns on even more messages for the subsystem.
       This is for developers and testers mostly and has to be
@@ -842,10 +843,10 @@ Storage
 
        <storage use-transactions="yes">
 
-Defines the storage section - database selection is done here. Currently SQLite3 and MySQL are supported.
+Defines the storage section - database selection is done here. Currently SQLite3, MySQL and PostgreSQL are supported.
 Each storage driver has it's own configuration parameters.
 
-Exactly one driver must be enabled: ``sqlite3`` or ``mysql``. The available options depend on the selected driver.
+Exactly one driver must be enabled: ``sqlite3``, ``mysql`` or ``postgres``. The available options depend on the selected driver.
 
 Storage Attributes
 ==================
@@ -1067,8 +1068,8 @@ Attributes:
      Defines the backup interval in seconds. The value can be given in a valid time format.
 
 
-MySQL
-=====
+MySQL and MariaDB
+=================
 
 .. confval:: mysql
    :type: :confval:`Section`
@@ -1155,7 +1156,7 @@ no password and an empty password.
 Database Name
 -------------
 
-.. confval:: database
+.. confval:: mysql database
    :type: :confval:`String`
    :required: false
    :default: ``gerbera``
@@ -1186,7 +1187,7 @@ Upgrade Statement File
 .. confval:: mysql upgrade-file
    :type: :confval:`String`
    :required: false
-   :default: ``${datadir/mysql-upgrade.xml``
+   :default: ``${datadir}/mysql-upgrade.xml``
 
    .. code-block:: xml
 
@@ -1241,6 +1242,134 @@ Collation
 
 Select the collation for the string columns. Only effective if database has to be created on first start.
 The collations for MariaDB can be found here https://mariadb.com/kb/en/supported-character-sets-and-collations/#collations but may depend on your actual version.
+
+
+Postgres
+========
+
+.. confval:: postgres
+   :type: :confval:`Section`
+   :required: false
+
+   .. versionadded:: HEAD
+
+   .. code-block:: xml
+
+       <postgres enabled="no"/>
+
+Defines the PostgreSQL storage driver section.
+
+Postgres Attributes
+-------------------
+
+.. confval:: postgres enabled
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``no``
+
+   .. code-block:: xml
+
+       enabled="yes"
+
+Enables PostgreSQL database storage. If PostgreSQL is enabled SQLite must be disabled.
+
+Server Host
+-----------
+
+.. confval:: postgres host
+   :type: :confval:`String`
+   :required: false
+   :default: ``localhost``
+
+   .. code-block:: xml
+
+      <host>localhost</host>
+
+This specifies the host where your PostgreSQL database is running.
+
+Server Port
+-----------
+
+.. confval:: postgres port
+   :type: :confval:`Integer`
+   :required: false
+   :default: ``0``
+
+   .. code-block:: xml
+
+      <port>0</port>
+
+This specifies the port where your PostgreSQL database is running.
+
+Server User
+-----------
+
+.. confval:: postgres username
+   :type: :confval:`String`
+   :required: false
+   :default: ``gerbera``
+
+   .. code-block:: xml
+
+      <username>root</username>
+
+This option sets the user name that will be used to connect to the database.
+
+Server Password
+---------------
+
+.. confval:: postgres password
+   :type: :confval:`String`
+   :required: false
+   :default: `no password`
+
+   .. code-block:: xml
+
+      <password>5eryS€cre!</password>
+
+Defines the password for the PostgreSQL user. If the tag doesn't exist or is empty Gerbera will use no password.
+
+Database Name
+-------------
+
+.. confval:: postgres database
+   :type: :confval:`String`
+   :required: false
+   :default: ``gerbera``
+
+   .. code-block:: xml
+
+      <database>gerbera</database>
+
+Name of the database that will be used by Gerbera.
+
+Init SQL File
+-------------
+
+.. confval:: postgres init-sql-file
+   :type: :confval:`String`
+   :required: false
+   :default: ``${datadir}/postgres.sql``
+
+   .. code-block:: xml
+
+      <init-sql-file>/etc/gerbera/postgres.sql</init-sql-file>
+
+The full path to the init script for the database.
+
+Upgrade Statement File
+----------------------
+
+.. confval:: postgres upgrade-file
+   :type: :confval:`String`
+   :required: false
+   :default: ``${datadir}/postgres-upgrade.xml``
+
+   .. code-block:: xml
+
+       <upgrade-file>/etc/gerbera/postgres-upgrade.xml</upgrade-file>
+
+The full path to the upgrade settings for the database
 
 .. _upnp:
 

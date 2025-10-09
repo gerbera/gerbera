@@ -54,6 +54,13 @@ Gerbera - https://gerbera.io/
 #include <mysql.h>
 #endif
 
+#ifdef HAVE_PGSQL
+extern "C" {
+#include <libpq-fe.h>
+}
+#include <pqxx/version>
+#endif
+
 #ifdef HAVE_FFMPEG
 extern "C" {
 
@@ -137,6 +144,10 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
 #endif
 #ifdef HAVE_MYSQL
         { "HAVE_MYSQL", MYSQL_SERVER_VERSION },
+#endif
+#ifdef HAVE_PGSQL
+        { "HAVE_PGSQL", PQXX_VERSION },
+        { "", fmt::to_string(PQlibVersion()) },
 #endif
 #ifdef HAVE_CURL
         { "HAVE_CURL", LIBCURL_VERSION },

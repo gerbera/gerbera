@@ -65,18 +65,20 @@ sudo make install
 | [icu4c]             | 65.1        | 65.1        | 65.1                 | Required      | Transliteration            | Enabled  |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0                | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |                      | Optional      | Alternate database storage | Disabled |
+| [libpqxx]           |             |             | 7.10.1               | Optional      | Alternate database storage | Disabled |
+| [libpq]             | 12.22       |             | 17.0.6               | Optional      | Alternate database storage | Disabled |
 | curl                |             |             |                      | Optional      | Enables web services       | Enabled  |
 | [taglib]            | 1.12        | 1.12        | 2.1.1                | Optional      | Audio tag support          | Enabled  |
 | libmagic            |             |             |                      | Optional      | File type detection        | Enabled  |
 | [wavpack]           | 5.1.0       | 5.4.0       | 5.8.1                | Optional      | WavPack metadata support   | Disabled |
-| [libmatroska]       |             | 1.6.3       | 1.7.1                | Optional      | MKV metadata               | Enabled  |
-| [libebml]           |             | 1.4.2       | 1.4.5                | Optional      | requird by [libmatroska]   | Enabled  |
-| ffmpeg/libav        |             |             | 7.1                  | Optional      | File metadata              | Disabled |
-| [libexif]           |             | v0.6.24     | v0.6.25              | Optional      | JPEG Exif metadata         | Enabled  |
+| [libmatroska]       | 1.4.8       | 1.6.3       | 1.7.1                | Optional      | MKV metadata               | Enabled  |
+| [libebml]           | 1.3.5       | 1.4.2       | 1.4.5                | Optional      | requird by [libmatroska]   | Enabled  |
+| ffmpeg/libav        |             |             | 7.1.2                | Optional      | File metadata              | Disabled |
+| [libexif]           | v0.6.21     | v0.6.24     | v0.6.25              | Optional      | JPEG Exif metadata         | Enabled  |
 | [libexiv2]          | v0.26       | v0.27.7     | v0.28.7              | Optional      | Exif, IPTC, XMP metadata   | Disabled |
 | [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0                | Optional      | Enables scrobbling         | Disabled |
-| [ffmpegthumbnailer] |             | 2.2.2       | 2.2.3                | Optional      | Generate video thumbnails  | Disabled |
-| [libsystemd]        |             | 254         | 257                  | Optional      | Generate video thumbnails  | Disabled |
+| [ffmpegthumbnailer] | 2.1.1       | 2.2.2       | 2.2.3                | Optional      | Generate video thumbnails  | Disabled |
+| [libsystemd]        | 237         | 254         | 257                  | Optional      | Generate video thumbnails  | Disabled |
 | inotify             |             |             |                      | Optional      | Efficient file monitoring  | Enabled  |
 
 ## Development Dependencies
@@ -117,6 +119,8 @@ sudo make install
 [libexif]: https://github.com/libexif/libexif
 [libexiv2]: https://github.com/Exiv2/exiv2
 [libmatroska]: https://github.com/Matroska-Org/libmatroska
+[libpqxx]: https://github.com/jtv/libpqxx
+[libpq]: https://www.postgresql.org/download
 [libsystemd]: https://github.com/systemd/systemd
 [npupnp]: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
 [pugixml]: https://github.com/zeux/pugixml

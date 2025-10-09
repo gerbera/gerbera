@@ -53,7 +53,7 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
     table_quote_end = '`';
 
     // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated
-    hashies = { 2551697181, // index 0 is used for create script mysql.sql = Version 1
+    hashies = { 3747425931, // index 0 is used for create script mysql.sql = Version 1
         928913698, 1984244483, 742641207, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, // upgrade 2-11
         1512596496, 507706380, 3545156190, 31528140, 372163748, 2233365597, 751952276, 3893982139, 798767550, 2305803926, // upgrade 12-21
         3643149536, 4280737637, 991351280 };
@@ -374,7 +374,7 @@ void MySQLDatabase::exec(std::string_view tableName, const std::string& query, i
     }
 }
 
-int MySQLDatabase::exec(const std::string& query, bool getLastInsertId)
+int MySQLDatabase::exec(const std::string& query, const std::string& getLastInsertId)
 {
     log_debug("{}", query);
 
@@ -387,7 +387,7 @@ int MySQLDatabase::exec(const std::string& query, bool getLastInsertId)
         throw DatabaseException(myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
     }
     int insertId = -1;
-    if (getLastInsertId)
+    if (!getLastInsertId.empty())
         insertId = mysql_insert_id(&db);
     return insertId;
 }

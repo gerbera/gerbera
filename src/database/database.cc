@@ -35,7 +35,12 @@
 #include "database.h" // API
 
 #include "config/config_val.h"
+#ifdef HAVE_MYSQL
 #include "database/mysql/mysql_database.h"
+#endif
+#ifdef HAVE_PGSQL
+#include "database/postgres/postgres_database.h"
+#endif
 #include "database/sqlite3/sqlite_database.h"
 #include "exceptions.h"
 
@@ -55,18 +60,26 @@ std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>
         std::string type = config->getOption(ConfigVal::SERVER_STORAGE_DRIVER);
         bool useTransaction = config->getBoolOption(ConfigVal::SERVER_STORAGE_USE_TRANSACTIONS);
 
-        if (type == "sqlite3" && useTransaction) {
+        if (type == DB_DRIVER_SQLITE && useTransaction) {
             return std::make_shared<Sqlite3DatabaseWithTransactions>(config, mime, converterManager, timer);
         }
-        if (type == "sqlite3") {
+        if (type == DB_DRIVER_SQLITE) {
             return std::make_shared<Sqlite3Database>(config, mime, converterManager, timer);
         }
 #ifdef HAVE_MYSQL
-        if (type == "mysql" && useTransaction) {
+        if (type == DB_DRIVER_MYSQL && useTransaction) {
             return std::make_shared<MySQLDatabaseWithTransactions>(config, mime, converterManager);
         }
-        if (type == "mysql") {
+        if (type == DB_DRIVER_MYSQL) {
             return std::make_shared<MySQLDatabase>(config, mime, converterManager);
+        }
+#endif
+#ifdef HAVE_PGSQL
+        if (type == DB_DRIVER_POSTGRES && useTransaction) {
+            return std::make_shared<PostgresDatabaseWithTransactions>(config, mime, converterManager);
+        }
+        if (type == DB_DRIVER_POSTGRES) {
+            return std::make_shared<PostgresDatabase>(config, mime, converterManager);
         }
 #endif
         // other database types...

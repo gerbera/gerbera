@@ -34,6 +34,7 @@ RUN zypper install --no-confirm \
     sqlite3-devel \
     libuuid-devel \
     libicu-devel \
+    postgres-devel \
     # libexecinfo-devel \
     # libexecinfo \
     autoconf \
@@ -143,6 +144,13 @@ COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
 COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
 RUN ./install-jsoncpp.sh
 
+# Build libpqxx
+WORKDIR /libpqxx_build
+COPY scripts/install-libpqxx.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/opensuse/deps/*.sh ./opensuse/deps/
+COPY scripts/opensuse/releases/*.sh ./opensuse/releases/
+RUN ./install-libpqxx.sh
+
 # Build Gerbera
 WORKDIR /gerbera_build
 COPY . .
@@ -164,6 +172,7 @@ RUN zypper install --no-confirm \
     file \
     expat brotli libinih0 \
     libmariadb3 \
+    libpq5 \
     sqlite3 \
     timezone \
     icu \
@@ -195,7 +204,7 @@ COPY --from=builder /usr/local/lib64/libebml.so* /usr/lib64/
 # COPY --from=builder /usr/local/lib/libmatroska.so* /usr/lib/
 COPY --from=builder /usr/local/lib64/libmatroska.so* /usr/lib64/
 # Copy wavpack
-COPY --from=builder /usr/local/lib/libwavpack.so* /usr/lib64/
+COPY --from=builder /usr/local/lib/libwavpack.so* /usr/lib/
 COPY --from=builder /usr/local/lib64/libwavpack.so* /usr/lib64/
 # Copy fmt
 # COPY --from=builder /usr/local/lib/libfmt.so* /usr/lib/
@@ -204,11 +213,14 @@ COPY --from=builder /usr/local/lib64/libfmt.so* /usr/lib64/
 # COPY --from=builder /usr/local/lib/libspdlog.so* /usr/lib/
 COPY --from=builder /usr/local/lib64/libspdlog.so* /usr/lib64/
 # Copy duktape
-COPY --from=builder /usr/local/lib/libduktape.so* /usr/lib64/
+COPY --from=builder /usr/local/lib/libduktape.so* /usr/lib/
 COPY --from=builder /usr/local/lib64/libduktape.so* /usr/lib64/
 # Copy jsoncpp
-COPY --from=builder /usr/local/lib/libjsoncpp.so* /usr/lib64/
+COPY --from=builder /usr/local/lib/libjsoncpp.so* /usr/lib/
 COPY --from=builder /usr/local/lib64/libjsoncpp.so* /usr/lib64/
+# Copy libpqxx
+COPY --from=builder /usr/local/lib/libpqxx.so* /usr/lib/
+COPY --from=builder /usr/local/lib64/libpqxx.so* /usr/lib64/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera

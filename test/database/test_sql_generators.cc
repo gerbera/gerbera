@@ -73,7 +73,7 @@ public:
         lastStatement = query;
     }
 
-    int exec(const std::string& query, bool) override
+    int exec(const std::string& query, const std::string& getLastInsertId = "") override
     {
         lastStatement = query;
         return 0;

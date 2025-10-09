@@ -153,7 +153,7 @@ Creates a filmstrip like border around the image, turn this option off if you wa
 
       <rotate>yes</rotate>
 
-.. versionadded:: 2.6.2
+.. versionadded:: HEAD
 
 Rotates the thumbnail depending on orientation of the movie/picture.
 
