@@ -30,9 +30,14 @@
 #include "upnp/xml_builder.h"
 #include "util/tools.h"
 
-#if HAVE_MYSQL
+#ifdef HAVE_MYSQL
 #include "database/mysql/mysql_database.h"
 #include "mysql_config_fake.h"
+#endif
+
+#ifdef HAVE_PGSQL
+#include "database/postgres/postgres_database.h"
+#include "postgres_config_fake.h"
 #endif
 
 #include <gtest/gtest.h>
@@ -163,6 +168,40 @@ TEST_F(MysqlDatabaseTest, CheckUpgradeCommands)
 TEST_F(MysqlDatabaseTest, CheckInitScript)
 {
     auto sqlFilePath = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
+    auto sql = GrbFile(sqlFilePath).readTextFile();
+    auto&& myHash = stringHash(sql);
+
+    EXPECT_EQ(myHash, std::dynamic_pointer_cast<SQLDatabase>(subject)->getHash(0));
+}
+#endif
+
+#ifdef HAVE_PGSQL
+
+class PostgresDatabaseTest : public DatabaseTestBase {
+
+public:
+    PostgresDatabaseTest() = default;
+    ~PostgresDatabaseTest() override = default;
+
+    void SetUp() override
+    {
+        config = std::make_shared<PostgresConfigFake>();
+        subject = std::make_shared<PostgresDatabase>(config, nullptr, nullptr);
+    }
+
+    void TearDown() override
+    {
+    }
+};
+
+TEST_F(PostgresDatabaseTest, CheckUpgradeCommands)
+{
+    testUpgrade(ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE);
+}
+
+TEST_F(PostgresDatabaseTest, CheckInitScript)
+{
+    auto sqlFilePath = config->getOption(ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE);
     auto sql = GrbFile(sqlFilePath).readTextFile();
     auto&& myHash = stringHash(sql);
 

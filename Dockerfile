@@ -23,6 +23,7 @@ RUN apk add --no-cache  \
     lsb-release \
     mariadb-connector-c-dev \
     pkgconf \
+    libpq-dev \
     pugixml-dev \
     spdlog-dev \
     sqlite-dev \
@@ -71,6 +72,13 @@ COPY scripts/alpine/*.* ./alpine/
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-libexif.sh
 
+# Build libpqxx
+WORKDIR /libpqxx_build
+COPY scripts/install-libpqxx.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/alpine/*.* ./alpine/
+COPY scripts/alpine/deps/*.sh ./alpine/deps/
+RUN ./install-libpqxx.sh
+
 # Build Gerbera
 WORKDIR /gerbera_build
 COPY . .
@@ -97,6 +105,7 @@ RUN apk add --no-cache \
     fmt \
     libebml \
     libexif \
+    libpq \
     expat brotli inih inih-inireader \
     libmatroska \
     wavpack \
@@ -121,6 +130,8 @@ COPY --from=builder /usr/local/lib/libexiv2.so* /usr/lib/
 COPY --from=builder /usr/local/lib/libexif.so* /usr/lib/
 # Copy ffmpegthumbnailer
 COPY --from=builder /usr/local/lib/libffmpegthumbnailer.so* /usr/lib/
+# Copy libpqxx
+COPY --from=builder /usr/local/lib/libpqxx.so* /usr/lib/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera

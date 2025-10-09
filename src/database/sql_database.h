@@ -127,7 +127,7 @@ public:
 
     virtual void del(std::string_view tableName, const std::string& clause, const std::vector<int>& ids) = 0;
     virtual void exec(std::string_view tableName, const std::string& query, int objId) = 0;
-    virtual int exec(const std::string& query, bool getLastInsertId = false) = 0;
+    virtual int exec(const std::string& query, const std::string& getLastInsertId = "") = 0;
     virtual void execOnly(const std::string& query) = 0;
     virtual std::shared_ptr<SQLResult> select(const std::string& query) = 0;
 
@@ -237,6 +237,8 @@ protected:
     char table_quote_end { '\0' };
     std::array<unsigned int, DBVERSION> hashies;
 
+    /// @brief Initial db version with gerbera
+    std::size_t firstDBVersion = 1;
     /// @brief Maximum length designated as GRBMAX in ddl statement
     unsigned int stringLimit;
     mutable std::recursive_mutex sqlMutex;

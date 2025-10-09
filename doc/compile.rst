@@ -90,6 +90,9 @@ Optional Packages
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | libmatroska_        | MKV metadata               | WITH\_MATROSKA          | Enabled  | install-matroska.sh          |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
+| libpqxx_            | Alternate database storage | WITH\_PGSQL             | Disabled | install-libpqxx.sh           |
+| libpq               |                            |                         |          |                              |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
 | libsystemd_         | Systemd support and        | WITH\_SYSTEMD           | Enabled  |                              |
 |                     |                            |                         |          |                              |
 |                     | Install Systemd unit file  |                         |          |                              |
@@ -116,6 +119,7 @@ Optional Packages
 .. _libmatroska: https://github.com/Matroska-Org/libmatroska
 .. _libnpupnp: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
 .. _libpupnp: https://github.com/pupnp/pupnp
+.. _libpqxx: https://github.com/jtv/libpqxx
 .. _libsystemd: https://github.com/systemd/systemd
 .. _pugixml: https://github.com/zeux/pugixml
 .. _spdlog: https://github.com/gabime/spdlog

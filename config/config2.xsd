@@ -364,6 +364,7 @@
             <xs:all>
                 <xs:element ref="sqlite3" minOccurs="0"/>
                 <xs:element ref="mysql" minOccurs="0"/>
+                <xs:element ref="postgres" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="use-transactions" type="boolean" default="no"/>
             <xs:attribute name="enable-sort-key" type="boolean" default="yes"/>
@@ -447,6 +448,22 @@
             <xs:attribute name="enabled" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
+    <xs:element name="postgres">
+        <xs:complexType>
+            <xs:all>
+                <xs:element ref="host" minOccurs="0"/>
+                <xs:element ref="port" minOccurs="0"/>
+                <xs:element ref="username" minOccurs="0"/>
+                <xs:element ref="password" minOccurs="0"/>
+                <xs:element ref="database" minOccurs="0"/>
+                <xs:element ref="socket" minOccurs="0"/>
+                <xs:element ref="init-sql-file" minOccurs="0"/>
+                <xs:element ref="upgrade-file" minOccurs="0"/>
+            </xs:all>
+            <xs:attribute name="enabled" type="boolean" default="yes"/>
+        </xs:complexType>
+    </xs:element>
+
 
     <xs:element name="host" type="xs:string" default="localhost"/>
     <xs:element name="username" type="xs:string" default="gerbera"/>

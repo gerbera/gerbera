@@ -584,8 +584,8 @@ void SQLDatabase::fillDatabase()
                 auto qb = table->sqlForInsert(nullptr);
                 log_debug("Generated insert: {}", qb);
 
-                auto id = exec(qb, true);
-                if (id != obj->getID()) {
+                auto id = exec(qb, browseColumnMapper->mapQuoted(BrowseColumn::Id, true));
+                if (id != obj->getID() && obj->getID() <= 0) {
                     // work around autoincrement columns not accepting value
                     auto upd = fmt::format("UPDATE {0} SET {1} = {2} WHERE {1} = {3}", CDS_OBJECT_TABLE, identifier("id"), quote(obj->getID()), quote(id));
                     log_debug("Generated update: {}", upd);
@@ -621,7 +621,7 @@ void SQLDatabase::upgradeDatabase(
     if (std::string_view(root.name()) != "upgrade")
         throw std::runtime_error("Error in upgrade file: <upgrade> tag not found");
 
-    std::size_t version = 1;
+    std::size_t version = firstDBVersion;
     for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
         const pugi::xml_node& versionNode = versionElement.node();
         std::vector<std::pair<std::string, std::string>> versionCmds;
@@ -640,7 +640,10 @@ void SQLDatabase::upgradeDatabase(
     }
 
     if (version != DBVERSION)
-        throw DatabaseException(fmt::format("The database upgrade file {} seems to be from another Gerbera version. Expected {}, actual {}", upgradeFile.c_str(), DBVERSION, dbVersion), LINE_MESSAGE);
+        throw DatabaseException(
+            fmt::format("The database upgrade file {} seems to be from another Gerbera version. Expected {}, actual {}, found {}",
+                upgradeFile.c_str(), DBVERSION, dbVersion, version),
+            LINE_MESSAGE);
 
     version = 1;
     static const std::map<std::string, bool (SQLDatabase::*)()> migActions {
@@ -930,8 +933,8 @@ void SQLDatabase::addObject(const std::shared_ptr<CdsObject>& obj, int* changedC
         auto qb = addUpdateTable->sqlForInsert(obj);
         log_debug("Generated insert: {}", qb);
 
-        if (addUpdateTable->hasInsertResult()) {
-            int newId = exec(qb, true);
+        if (!addUpdateTable->hasInsertResult().empty()) {
+            int newId = exec(qb, addUpdateTable->hasInsertResult());
             obj->setID(newId);
         } else {
             exec(CDS_OBJECT_TABLE, qb, obj->getID());
@@ -1640,7 +1643,7 @@ int SQLDatabase::createContainer(
     };
     beginTransaction("createContainer");
     Object2Table ot(std::move(dict), Operation::Insert, browseColumnMapper);
-    int newId = exec(ot.sqlForInsert(nullptr), true); // true = get last id#
+    int newId = exec(ot.sqlForInsert(nullptr), browseColumnMapper->mapQuoted(BrowseColumn::Id, true)); // get last id#
     log_debug("Created object row, id: {}", newId);
 
     const std::string newIdStr = quote(newId);
@@ -1989,7 +1992,7 @@ long long SQLDatabase::getFileStats(const StatsParam& stats)
         break;
     }
     }
-    auto query = fmt::format("SELECT {} FROM {}{} WHERE {}", mode, searchColumnMapper->tableQuoted(), join, fmt::join(where, " AND "));
+    auto query = fmt::format("SELECT {} FROM {} {} WHERE {}", mode, searchColumnMapper->tableQuoted(), join, fmt::join(where, " AND "));
     auto res = select(query);
     std::unique_ptr<SQLRow> row;
     if (res && (row = res->nextRow())) {
@@ -2974,7 +2977,7 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
         fields[AutoscanColumn::LastModified] = quote(adir->getPreviousLMT().count());
     }
     Autoscan2Table at(fields, Operation::Insert, autoscanColumnMapper);
-    adir->setDatabaseID(exec(at.sqlForInsert(adir), true));
+    adir->setDatabaseID(exec(at.sqlForInsert(adir), autoscanColumnMapper->mapQuoted(AutoscanColumn::ObjId, false)));
 }
 
 void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)

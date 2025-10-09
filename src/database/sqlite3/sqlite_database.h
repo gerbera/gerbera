@@ -72,7 +72,7 @@ private:
     std::shared_ptr<SQLResult> select(const std::string& query) override;
     void del(std::string_view tableName, const std::string& clause, const std::vector<int>& ids) override;
     void exec(std::string_view tableName, const std::string& query, int objId) override;
-    int exec(const std::string& query, bool getLastInsertId = false) override;
+    int exec(const std::string& query, const std::string& getLastInsertId = "") override;
     void execOnly(const std::string& query) override;
 
     /// @brief Implement common behaviour on exceptions while calling the database
@@ -145,7 +145,6 @@ private:
     int ncolumn;
 
     friend class SLSelectTask;
-    friend class Sqlite3Row;
 };
 
 /// @brief Represents a row of a result of a sqlite3 select

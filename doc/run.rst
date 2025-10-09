@@ -124,26 +124,30 @@ The example only works in conjunction with the respective gerbera configuration 
     .. literalinclude:: ../scripts/nginx/gerbera-transcode.conf
 
 
+Database Setup
+~~~~~~~~~~~~~~
+
+Gerbera can be compiled with additional support for MySQL/MariaDB and PostgreSQL databases. By default Gerbera will use an SQLite database,
+it requires no configuration - you are ready to go! In order to switch to another database you need to modify the ``config.xml`` section :confval:`storage`.
+
 .. index:: Sqlite
 
-Using Sqlite Database (Default)
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Using Sqlite Database
+---------------------
 
-By default Gerbera will use an SQLite database, it requires no configuration - you are ready to go! The database file will be created
-automatically and will be located ``~/.config/gerbera/gerbera.db`` If needed you can adjust the database file name and location in the
-server configuration file.
+The database file will be created automatically and will be located ``~/.config/gerbera/gerbera.db``.
+If needed you can adjust the database file name and location in the configuration :confval:`database-file`.
 
 .. index:: MySQL
 
 Using MySQL Database
-~~~~~~~~~~~~~~~~~~~~
+--------------------
 
-If Gerbera was compiled with support for both databases, sqlite will be chosen as default because the initial database
-can be created and used without any user interaction. If Gerbera was compiled only with MySQL support,
-the appropriate config.xml file will be created in the ``~/.config/gerbera`` directory, but the server will
-then terminate, because user interaction is required.
+If Gerbera was compiled with support for MySQL/MariaDB databases, sqlite will still be chosen as default because the initial database
+can be created and used without any user interaction. In order to use MySQL it has to be enabled with :confval:`mysql enabled`.
+All other databases have to be disabled.
 
-Gerbera has to be able to connect to the MySQL server and at least the (empty) database has to exist.
+Gerbera has to be able to connect to the MySQL server and at least the empty database has to exist.
 To create the database and provide Gerbera with the ability to connect to the MySQL server you need to have
 the appropriate permissions. Note that user names and passwords in MySQL have nothing to do with UNIX accounts,
 MySQL has it's own user names/passwords. Connect to the MySQL database as ”root” or any other user with the
@@ -182,20 +186,44 @@ password (the defaults) use:
     mysql> CREATE DATABASE gerbera;
     mysql> GRANT ALL ON gerbera.* TO 'gerbera'@'localhost';
 
-If Gerbera was compiled with database auto creation the tables will be created automatically during the first startup.
+The tables will be created automatically during the first startup.
 All table names have a ``mt_`` or ``grb_`` prefix, so you can theoretically share the database with a different application.
 However, this is not recommended.
 
-If database auto creation was not compiled in you have to create the tables manually:
+.. index:: PostgreSQL
+
+Using PostgreSQL Database
+-------------------------
+
+If Gerbera was compiled with support for PostgreSQL databases, sqlite will still be chosen as default because the initial database
+can be created and used without any user interaction. In order to use PostgreSQL it has to be enabled with :confval:`postgres enabled`.
+All other databases have to be disabled.
+
+Gerbera has to be able to connect to the PostgreSQL server and at least the empty database has to exist.
+To create the database and provide Gerbera with the ability to connect to the PostgreSQL server you need to have
+the appropriate permissions. Note that user names and passwords in PostgreSQL have nothing to do with UNIX accounts,
+PostgreSQL has it's own user names/passwords. Connect to the PostgreSQL database as ”postgres” or any other user with the
+appropriate permissions.
 
 .. code-block:: sh
 
-    $ mysql [-u <username>] [-p] \
-      <database name> < \
-      <install prefix>/share/gerbera/mysql.sql
+    $ psql
 
-After creating the database and making the appropriate changes in your Gerbera config file you are ready to go -
-launch the server, and everything should work.
+Create the empty database and give the use the appropriate permissions.
+
+.. code:: sql
+
+    postgres=# CREATE USER "gerbera";
+    postgres=# CREATE DATABASE "gerbera" WITH OWNER "gerbera" ENCODING = 'UTF8' LC_COLLATE = 'de_DE.UTF-8' LC_CTYPE = 'de_DE.UTF-8';
+    postgres=# GRANT connect ON DATABASE "gerbera" TO "gerbera";
+    postgres=# GRANT pg_read_all_data TO "gerbera";
+    postgres=# GRANT pg_write_all_data TO "gerbera";
+
+The names you choose for database and user must match with the values used in the ``config.xml`` section :confval:`postgres`.
+
+The tables will be created automatically during the first startup.
+All table names have a ``mt_`` or ``grb_`` prefix, so you can theoretically share the database with a different application.
+However, this is not recommended.
 
 Command Line Options
 ~~~~~~~~~~~~~~~~~~~~
