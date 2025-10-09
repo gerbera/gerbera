@@ -77,7 +77,7 @@ SLInitTask::SLInitTask(
 {
 }
 
-void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
+void SLInitTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
 {
     log_debug("Running: init");
     std::string dbFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
@@ -110,7 +110,7 @@ void SLInitTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
             sqlite3_free(err);
         }
         if (ret != SQLITE_OK) {
-            throw DatabaseException("", sl->handleError(sql, error, db, ret));
+            throw DatabaseException("", sl.handleError(sql, error, db, ret));
         }
         contamination = true;
     } else {
@@ -124,7 +124,7 @@ SLSelectTask::SLSelectTask(const std::string& query)
 {
 }
 
-void SLSelectTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
+void SLSelectTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
 {
     log_debug("Running: {}", query);
     pres = std::make_shared<Sqlite3Result>();
@@ -144,7 +144,7 @@ void SLSelectTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
         sqlite3_free(err);
     }
     if (ret != SQLITE_OK) {
-        throw DatabaseException("", sl->handleError(query, error, db, ret));
+        throw DatabaseException("", sl.handleError(query, error, db, ret));
     }
 
     pres->row = pres->table;
@@ -153,21 +153,20 @@ void SLSelectTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
 
 /* SLExecTask */
 
-SLExecTask::SLExecTask(const std::string& query, bool getLastInsertId, bool warnOnly)
+SLExecTask::SLExecTask(const std::string& query, const std::string& getLastInsertId, bool warnOnly)
     : SLTask(!warnOnly)
     , query(query.c_str())
-    , getLastInsertIdFlag(getLastInsertId)
+    , lastInsertColumn(getLastInsertId)
 {
 }
 
 SLExecTask::SLExecTask(const std::string& query, std::string eKey)
     : query(query.c_str())
-    , getLastInsertIdFlag(false)
     , eKey(std::move(eKey))
 {
 }
 
-void SLExecTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
+void SLExecTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
 {
     log_debug("Running: {}", query);
     char* err;
@@ -184,10 +183,10 @@ void SLExecTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
     }
     if (ret != SQLITE_OK) {
         if (throwOnError)
-            throw DatabaseException("", sl->handleError(query, error, db, ret));
-        log_debug("Error in sqlite3_exec: {}", sl->handleError(query, error, db, ret));
+            throw DatabaseException("", sl.handleError(query, error, db, ret));
+        log_debug("Error in sqlite3_exec: {}", sl.handleError(query, error, db, ret));
     }
-    if (getLastInsertIdFlag)
+    if (!lastInsertColumn.empty())
         lastInsertId = sqlite3_last_insert_rowid(db);
     contamination = true;
 }
@@ -201,7 +200,7 @@ SLBackupTask::SLBackupTask(std::shared_ptr<Config> config, bool restore)
 {
 }
 
-void SLBackupTask::run(sqlite3*& db, Sqlite3Database* sl, bool throwOnError)
+void SLBackupTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
 {
     log_debug("Running: backup");
 

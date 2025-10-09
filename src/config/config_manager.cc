@@ -155,6 +155,7 @@ void ConfigManager::load(const fs::path& userHome)
 
     // checking database driver options
     [[maybe_unused]] bool mysqlEn = false;
+    [[maybe_unused]] bool pgsqlEn = false;
     bool sqlite3En = false;
 
     co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE);
@@ -164,6 +165,11 @@ void ConfigManager::load(const fs::path& userHome)
     co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL);
     if (co->hasXmlElement(root)) {
         mysqlEn = setOption(root, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED)->getBoolOption();
+    }
+
+    co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL);
+    if (co->hasXmlElement(root)) {
+        pgsqlEn = setOption(root, ConfigVal::SERVER_STORAGE_PGSQL_ENABLED)->getBoolOption();
     }
 
     co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE);
@@ -185,9 +191,25 @@ void ConfigManager::load(const fs::path& userHome)
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE);
         co->setDefaultValue(dataDir / "mysql-upgrade.xml");
         co->makeOption(root, self);
-        dbDriver = "mysql";
+        dbDriver = DB_DRIVER_MYSQL;
     }
 #endif // HAVE_MYSQL
+
+#ifdef HAVE_PGSQL
+    if (pgsqlEn) {
+        // read pgsql options
+        for (auto&& option : definition->getDependencies(ConfigVal::SERVER_STORAGE_PGSQL_ENABLED))
+            setOption(root, option);
+
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE);
+        co->setDefaultValue(dataDir / "pgsql.sql");
+        co->makeOption(root, self);
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE);
+        co->setDefaultValue(dataDir / "pgsql-upgrade.xml");
+        co->makeOption(root, self);
+        dbDriver = DB_DRIVER_POSTGRES;
+    }
+#endif // HAVE_PGSQL
 
     if (sqlite3En) {
         // read sqlite options
@@ -200,7 +222,7 @@ void ConfigManager::load(const fs::path& userHome)
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE);
         co->setDefaultValue(dataDir / "sqlite3-upgrade.xml");
         co->makeOption(root, self);
-        dbDriver = "sqlite3";
+        dbDriver = DB_DRIVER_SQLITE;
     }
 
     co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_DRIVER);
@@ -340,14 +362,30 @@ bool ConfigManager::validate()
 
     // checking database driver options
     bool mysqlEn = getBoolOption(ConfigVal::SERVER_STORAGE_MYSQL_ENABLED);
+    bool pgsqlEn = getBoolOption(ConfigVal::SERVER_STORAGE_PGSQL_ENABLED);
     bool sqlite3En = getBoolOption(ConfigVal::SERVER_STORAGE_SQLITE_ENABLED);
+    int dbCnt = 0;
+    std::vector<std::string> dbList;
+    if (mysqlEn) {
+        dbCnt++;
+        dbList.emplace_back(DB_DRIVER_MYSQL);
+    }
+    if (pgsqlEn) {
+        dbCnt++;
+        dbList.emplace_back(DB_DRIVER_POSTGRES);
+    }
+    if (sqlite3En) {
+        dbCnt++;
+        dbList.emplace_back(DB_DRIVER_SQLITE);
+    }
 
-    if (sqlite3En && mysqlEn)
-        throw_std_runtime_error("You enabled both, sqlite3 and mysql but "
-                                "only one database driver may be active at a time");
+    if (dbCnt > 1)
+        throw_std_runtime_error("You enabled {} but "
+                                "only one database driver may be active at a time",
+            fmt::join(dbList, ", "));
 
-    if (!sqlite3En && !mysqlEn)
-        throw_std_runtime_error("You disabled both sqlite3 and mysql but "
+    if (dbCnt == 0)
+        throw_std_runtime_error("You disabled sqlite3, mysql and postgres but "
                                 "one database driver must be active");
 
 #ifndef HAVE_MYSQL
@@ -356,7 +394,15 @@ bool ConfigManager::validate()
                                 "however this version of Gerbera was compiled "
                                 "without MySQL support!");
     }
-#endif // HAVE_MYSQL
+#endif
+
+#ifndef HAVE_PGSQL
+    if (pgsqlEn) {
+        throw_std_runtime_error("You enabled PostgreSQL database in configuration, "
+                                "however this version of Gerbera was compiled "
+                                "without PostgreSQL support!");
+    }
+#endif
 
     auto appendto = EnumOption<UrlAppendMode>::getEnumOption(self, ConfigVal::SERVER_APPEND_PRESENTATION_URL_TO);
     if ((appendto == UrlAppendMode::ip || appendto == UrlAppendMode::port) && getOption(ConfigVal::SERVER_PRESENTATION_URL).empty()) {

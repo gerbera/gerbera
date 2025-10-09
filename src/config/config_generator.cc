@@ -482,6 +482,16 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
         { ConfigVal::SERVER_STORAGE_MYSQL_CHARSET, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_MYSQL_COLLATION, ConfigLevel::Example },
 #endif
+#ifdef HAVE_PGSQL
+        { ConfigVal::SERVER_STORAGE_PGSQL_ENABLED, ConfigLevel::Base },
+        { ConfigVal::SERVER_STORAGE_PGSQL_HOST, ConfigLevel::Base },
+        { ConfigVal::SERVER_STORAGE_PGSQL_USERNAME, ConfigLevel::Base },
+        { ConfigVal::SERVER_STORAGE_PGSQL_DATABASE, ConfigLevel::Base },
+        { ConfigVal::SERVER_STORAGE_PGSQL_PORT, ConfigLevel::Example },
+        { ConfigVal::SERVER_STORAGE_PGSQL_PASSWORD, ConfigLevel::Example },
+        { ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE, ConfigLevel::Example },
+        { ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE, ConfigLevel::Example },
+#endif
     };
     {
         auto co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
@@ -496,6 +506,15 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
         co->setDefaultValue(prefixDir / "mysql.sql");
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE);
         co->setDefaultValue(prefixDir / "mysql-upgrade.xml");
+    }
+#endif
+
+#ifdef HAVE_PGSQL
+    {
+        auto co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE);
+        co->setDefaultValue(prefixDir / "postgres.sql");
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE);
+        co->setDefaultValue(prefixDir / "postgres-upgrade.xml");
     }
 #endif
 

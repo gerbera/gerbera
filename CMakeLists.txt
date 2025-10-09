@@ -50,6 +50,7 @@ set(CMAKE_INSTALL_MANDIR share/man/man1)
 option(WITH_NPUPNP            "Use npupnp instead of libupnp" OFF)
 option(WITH_MAGIC             "Use libmagic to identify file mime types" ON)
 option(WITH_MYSQL             "Store media information in MySQL DB" OFF)
+option(WITH_PGSQL             "Store media information in PostgreSQL DB" OFF)
 option(WITH_CURL              "CURL required for online services" ON)
 option(WITH_INOTIFY           "Enable Inotify file monitoring support" ON)
 option(WITH_JS                "Enable JavaScript for scripting" ON)
@@ -230,6 +231,10 @@ add_library(libgerbera STATIC
         src/database/db_param.h
         src/database/mysql/mysql_database.cc
         src/database/mysql/mysql_database.h
+        src/database/postgres/postgres_database.cc
+        src/database/postgres/postgres_database.h
+        src/database/postgres/pg_task.cc
+        src/database/postgres/pg_task.h
         src/database/search_handler.cc
         src/database/search_handler.h
         src/database/sql_database.cc
@@ -667,6 +672,20 @@ if(WITH_MYSQL)
     endif()
 endif()
 
+if(WITH_PGSQL)
+    find_package(libpqxx REQUIRED)
+    if(libpqxx_FOUND)
+        target_include_directories(libgerbera PUBLIC ${libpqxx_INCLUDE_DIRS})
+        target_link_libraries(libgerbera PUBLIC ${libpqxx_LIBS} ${libpqxx_LIBRARIES})
+        target_link_libraries(libgerbera PUBLIC libpqxx::pqxx)
+        target_compile_definitions(libgerbera PUBLIC HAVE_PGSQL)
+    endif()
+    find_package(PostgreSQL REQUIRED)
+    if(PostgreSQL_FOUND)
+        target_link_libraries(libgerbera PUBLIC PostgreSQL::PostgreSQL)
+    endif()
+endif()
+
 if(WITH_CURL)
     find_package(CURL REQUIRED)
     target_link_libraries(libgerbera PUBLIC CURL::libcurl)
@@ -804,12 +823,15 @@ target_link_libraries (libgerbera PUBLIC ZLIB::ZLIB)
 if(WITH_SYSTEMD AND (${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
     find_package(Systemd)
     if(SYSTEMD_FOUND)
+        set (SYSTEMD_DESCRIPTION "Gerbera Media Server with SQLite3")
+        set (SYSTEMD_AFTER_TARGET "network.target network-online.target")
         if(WITH_MYSQL AND MYSQL_FOUND)
-            set (SYSTEMD_AFTER_TARGET "mysql.target network-online.target")
-            set (SYSTEMD_DESCRIPTION "Gerbera Media Server with MySQL")
-        else()
-            set (SYSTEMD_AFTER_TARGET "network.target network-online.target")
-            set (SYSTEMD_DESCRIPTION "Gerbera Media Server")
+            set (SYSTEMD_AFTER_TARGET "mysql.target ${SYSTEMD_AFTER_TARGET}")
+            set (SYSTEMD_DESCRIPTION "${SYSTEMD_DESCRIPTION} and MySQL")
+        endif()
+        if(WITH_PGSQL AND PostgreSQL_FOUND)
+            set (SYSTEMD_AFTER_TARGET "postgresql.service ${SYSTEMD_AFTER_TARGET}")
+            set (SYSTEMD_DESCRIPTION "${SYSTEMD_DESCRIPTION} and PostgreSQL")
         endif()
         set (SYSTEMD_WANTS_TARGET "network-online.target")
 
@@ -890,6 +912,9 @@ INSTALL(FILES
         src/database/mysql/mysql-upgrade.xml
         src/database/sqlite3/sqlite3.sql
         src/database/sqlite3/sqlite3-upgrade.xml
+        src/database/postgres/postgres.sql
+        src/database/postgres/postgres-drop.sql
+        src/database/postgres/postgres-upgrade.xml
         DESTINATION ${CMAKE_INSTALL_DATADIR})
 INSTALL(FILES ${PROJECT_SOURCE_DIR}/doc/gerbera.1 DESTINATION ${CMAKE_INSTALL_MANDIR})
 

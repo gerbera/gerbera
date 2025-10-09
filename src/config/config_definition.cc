@@ -543,12 +543,13 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         std::make_shared<ConfigUIntSetup>(ConfigVal::SERVER_STORAGE_STRING_LIMIT,
             "/server/storage/attribute::string-limit", "config-server.html#storage",
             255),
+
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_MYSQL,
             "/server/storage/mysql", "config-server.html#storage"),
-#ifdef HAVE_MYSQL
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_STORAGE_MYSQL_ENABLED,
             "/server/storage/mysql/attribute::enabled", "config-server.html#storage",
             NO),
+#ifdef HAVE_MYSQL
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_MYSQL_HOST,
             "/server/storage/mysql/host", "config-server.html#storage",
             "localhost"),
@@ -582,11 +583,40 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_MYSQL_COLLATION,
             "/server/storage/mysql/collation", "config-server.html#storage",
             "utf8_general_ci"),
-#else
-        std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_STORAGE_MYSQL_ENABLED,
-            "/server/storage/mysql/attribute::enabled", "config-server.html#storage",
-            NO),
 #endif
+
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_PGSQL,
+            "/server/storage/postgres", "config-server.html#storage"),
+        std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_STORAGE_PGSQL_ENABLED,
+            "/server/storage/postgres/attribute::enabled", "config-server.html#storage",
+            NO),
+#ifdef HAVE_PGSQL
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_PGSQL_HOST,
+            "/server/storage/postgres/host", "config-server.html#storage",
+            "localhost"),
+        std::make_shared<ConfigIntSetup>(ConfigVal::SERVER_STORAGE_PGSQL_PORT,
+            "/server/storage/postgres/port", "config-server.html#storage",
+            0, CheckPortValue),
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_PGSQL_USERNAME,
+            "/server/storage/postgres/username", "config-server.html#storage",
+            "gerbera"),
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_PGSQL_SOCKET,
+            "/server/storage/postgres/socket", "config-server.html#storage",
+            ""),
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_PGSQL_PASSWORD,
+            "/server/storage/postgres/password", "config-server.html#storage",
+            ""),
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_PGSQL_DATABASE,
+            "/server/storage/postgres/database", "config-server.html#storage",
+            "gerbera"),
+        std::make_shared<ConfigPathSetup>(ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE,
+            "/server/storage/postgres/init-sql-file", "config-server.html#storage",
+            "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty), // This should really be "dataDir / postgres.sql"
+        std::make_shared<ConfigPathSetup>(ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE,
+            "/server/storage/postgres/upgrade-file", "config-server.html#storage",
+            "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
+#endif
+
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_SQLITE,
             "/server/storage/sqlite3", "config-server.html#storage"),
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_DRIVER,
@@ -2110,6 +2140,16 @@ void ConfigDefinition::initDependencies()
         { ConfigVal::SERVER_STORAGE_MYSQL_COLLATION, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
         { ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE, ConfigVal::SERVER_STORAGE_MYSQL_DATABASE },
         { ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, ConfigVal::SERVER_STORAGE_MYSQL_DATABASE },
+#endif
+#ifdef HAVE_PGSQL
+        { ConfigVal::SERVER_STORAGE_PGSQL_HOST, ConfigVal::SERVER_STORAGE_PGSQL_ENABLED },
+        { ConfigVal::SERVER_STORAGE_PGSQL_DATABASE, ConfigVal::SERVER_STORAGE_PGSQL_ENABLED },
+        { ConfigVal::SERVER_STORAGE_PGSQL_USERNAME, ConfigVal::SERVER_STORAGE_PGSQL_ENABLED },
+        { ConfigVal::SERVER_STORAGE_PGSQL_PORT, ConfigVal::SERVER_STORAGE_PGSQL_ENABLED },
+        { ConfigVal::SERVER_STORAGE_PGSQL_SOCKET, ConfigVal::SERVER_STORAGE_PGSQL_ENABLED },
+        { ConfigVal::SERVER_STORAGE_PGSQL_PASSWORD, ConfigVal::SERVER_STORAGE_PGSQL_ENABLED },
+        { ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE, ConfigVal::SERVER_STORAGE_PGSQL_DATABASE },
+        { ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE, ConfigVal::SERVER_STORAGE_PGSQL_DATABASE },
 #endif
 #ifdef HAVE_CURL
         { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE, ConfigVal::TRANSCODING_TRANSCODING_ENABLED },

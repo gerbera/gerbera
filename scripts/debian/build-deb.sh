@@ -207,10 +207,14 @@ if [[ ! -d "${BUILD_DIR}" ]]; then
       uuid-dev
   sudo apt-get clean
 
+  WITH_POSTGRES="ON"
   if [[ "${lsb_codename}" == "bionic" ]]; then
     # dpkg-dev pulls g++ which changes your GCC symlinks because ubuntu knows better than you
     sudo update-alternatives --set gcc /usr/bin/gcc-8
     sudo update-alternatives --set cpp /usr/bin/cpp-8
+    WITH_POSTGRES="OFF"
+  else
+    install-libpqxx
   fi
   echo "::endgroup::"
 
@@ -286,6 +290,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   echo "::group::Building gerbera"
   cmake "${ROOT_DIR}" --preset="${cmake_preset}" \
     -DWITH_SYSTEMD=${WITH_SYSTEMD} \
+    -DWITH_PGSQL=${WITH_POSTGRES} \
     -DBUILD_CHANGELOG=ON \
     -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"

@@ -22,6 +22,7 @@ RUN apk add --no-cache  \
     pkgconf \
     sqlite-dev \
     jsoncpp-dev \
+    libpq-dev \
     icu-dev \
     tini \
     util-linux-dev \
@@ -122,6 +123,13 @@ COPY scripts/alpine/*.* ./alpine/
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-libexif.sh
 
+# Build libpqxx
+WORKDIR /libpqxx_build
+COPY scripts/install-libpqxx.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/alpine/*.* ./alpine/
+COPY scripts/alpine/deps/*.sh ./alpine/deps/
+RUN ./install-libpqxx.sh
+
 # Build Gerbera
 WORKDIR /gerbera_build
 COPY . .
@@ -188,6 +196,8 @@ COPY --from=builder /usr/local/lib/libfmt.so* /usr/lib/
 COPY --from=builder /usr/local/lib/libspdlog.so* /usr/lib/
 # Copy duktape
 COPY --from=builder /usr/local/lib/libduktape.so* /usr/lib/
+# Copy libpqxx
+COPY --from=builder /usr/local/lib/libpqxx.so* /usr/lib/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera

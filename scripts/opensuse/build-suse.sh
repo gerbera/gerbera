@@ -160,6 +160,8 @@ if [[ ! -d ${BUILD_DIR} ]]; then
       ${libmysqlclient} \
       ${libpugixml} \
       ${jsoncpp} \
+      libpq-devel \
+      libpq5 postgresql-devel \
       systemd-devel \
       libicu-devel \
       sqlite3-devel \
@@ -179,6 +181,7 @@ if [[ ! -d ${BUILD_DIR} ]]; then
   install-fmt
   install-spdlog
   install-taglib
+  install-libpqxx
   if [[ "${my_upnp}" == "npupnp" ]]; then
     install-npupnp
   else

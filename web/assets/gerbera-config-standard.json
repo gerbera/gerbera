@@ -213,19 +213,41 @@
               "editable": false
             },
             {
-              "item": "/server/storage/mysql/password",
-              "caption": "MySQL password",
-              "type": "Password",
-              "editable": false
-            },
-            {
-              "item": "/server/storage/mysql/socket",
-              "caption": "MySQL socket",
-              "editable": false
-            },
-            {
               "item": "/server/storage/mysql/database",
               "caption": "MySQL database",
+              "editable": false
+            }
+          ]
+        },
+        {
+          "item": "/server/storage/postgres",
+          "caption": "PostgreSQL",
+          "type": "Element",
+          "editable": true,
+          "children": [
+            {
+              "item": "/server/storage/postgres/attribute::enabled",
+              "caption": "PostgreSQL enabled",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/postgres/host",
+              "caption": "PostgreSQL host",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/postgres/port",
+              "caption": "PostgreSQL port",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/postgres/username",
+              "caption": "PostgreSQL username",
+              "editable": false
+            },
+            {
+              "item": "/server/storage/postgres/database",
+              "caption": "PostgreSQL database",
               "editable": false
             }
           ]

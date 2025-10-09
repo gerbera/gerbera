@@ -17,6 +17,7 @@
 - Implement new Client Quirk to force SortCriteria 'title'
 - Improve MacOS build
 - Introduce sphinx toolbox
+- New PostgreSQL database backend
 - nproc missing on MacOS
 - Quirk to block protocolInfo in CaptionInfoEx
 - Remove loading complete scripts to create virutal layout

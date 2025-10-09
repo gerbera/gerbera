@@ -41,6 +41,12 @@ function install-spdlog() {
   echo "::endgroup::"
 }
 
+function install-libpqxx() {
+  echo "::group::Installing libpqxx"
+  sudo bash "${GRB_SH_DIR}install-libpqxx.sh"
+  echo "::endgroup::"
+}
+
 function install-pupnp() {
   echo "::group::Installing libupnp"
   sudo bash "${GRB_SH_DIR}install-pupnp.sh"

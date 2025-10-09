@@ -2,12 +2,16 @@
 
 ## HEAD
 
+This release is two ways disconnecting Gerbera from it's MediaTomb past: The way JavaScript is integrated is finally changed from script to function
+and there is a new database: **PostgreSQL**.
+
 ### Removed Features
 
 **Support for loading layout scripts has been removed now. The javascript interface must be used by calling functions depending on the media type.**
 
 ### NEW Features
 
+- PostgreSQL database support
 - WebUI shows referenced items in other parts of layout in details
 - Spinner on WebUI while loading
 - New command line option for even more data in the config example

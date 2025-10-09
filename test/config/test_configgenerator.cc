@@ -69,7 +69,7 @@ public:
     std::string magicFile;
 };
 
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS)
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(HAVE_PGSQL)
 TEST_F(ConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 {
 #ifdef ONLINE_SERVICES
@@ -89,7 +89,7 @@ TEST_F(ConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 }
 #endif
 
-#if !defined(HAVE_FFMPEG) && !defined(HAVE_FFMPEGTHUMBNAILER) && !defined(HAVE_MYSQL) && !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
+#if !defined(HAVE_FFMPEG) && !defined(HAVE_FFMPEGTHUMBNAILER) && !defined(HAVE_MYSQL) && !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES) && !defined(HAVE_PGSQL)
 TEST_F(ConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions)
 {
     const std::string fileName = "fixtures/mock-config-minimal.xml";
@@ -106,7 +106,7 @@ TEST_F(ConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions)
 }
 #endif
 
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL)
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_PGSQL)
 TEST_F(ConfigGeneratorTest, GeneratesFullServerXmlWithAllDefinitions)
 {
     const std::string fileName = "fixtures/mock-server-all.xml";
@@ -190,7 +190,7 @@ TEST_F(ConfigGeneratorTest, GeneratesExtendedRuntimeXmlWithoutFFMPEG)
 }
 #endif
 
-#if defined(HAVE_MYSQL)
+#if defined(HAVE_MYSQL) && !defined(HAVE_PGSQL)
 TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithMySQLAndSqlLite)
 {
     const std::string fileName = "fixtures/mock-database-mysql.xml";
@@ -207,7 +207,7 @@ TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithMySQLAndSqlLite)
 }
 #endif
 
-#if !defined(HAVE_MYSQL)
+#if !defined(HAVE_MYSQL) && !defined(HAVE_PGSQL)
 TEST_F(ConfigGeneratorTest, GeneratesDatabaseXmlWithSqlLiteOnly)
 {
     const std::string fileName = "fixtures/mock-database-sqlite.xml";
@@ -366,7 +366,7 @@ public:
     std::string magicFile;
 };
 
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(HAVE_EXIV2)
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(HAVE_EXIV2) && defined(HAVE_PGSQL)
 TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithExiv2AllDefinitions)
 {
 #ifdef ONLINE_SERVICES
@@ -387,7 +387,7 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithExiv2AllDefinitions
 }
 #endif
 
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && !defined(HAVE_EXIV2)
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && !defined(HAVE_EXIV2) && defined(HAVE_PGSQL)
 TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 {
 #ifdef ONLINE_SERVICES
@@ -408,7 +408,7 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 }
 #endif
 
-#if !defined(HAVE_FFMPEG) && !defined(HAVE_FFMPEGTHUMBNAILER) && !defined(HAVE_MYSQL) && !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES)
+#if !defined(HAVE_FFMPEG) && !defined(HAVE_FFMPEGTHUMBNAILER) && !defined(HAVE_MYSQL) && !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES) && !defined(HAVE_PGSQL)
 TEST_F(ExampleConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-example-minimal.xml");
