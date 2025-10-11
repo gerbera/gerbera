@@ -108,6 +108,11 @@ enum class ResourceAttribute : int {
     MAX
 };
 
+enum class ResourceDataType {
+    String,
+    Number
+};
+
 // content handler Id's
 enum class ContentHandler : int {
     DEFAULT = 0,
@@ -179,6 +184,28 @@ private:
         { ResourceAttribute::PIXELFORMAT, "pixelFormat" },
         { ResourceAttribute::MAX, "unknown" },
     };
+    inline static const std::map<ResourceAttribute, ResourceDataType> attrToType {
+        { ResourceAttribute::SIZE, ResourceDataType::Number },
+        { ResourceAttribute::DURATION, ResourceDataType::String },
+        { ResourceAttribute::BITRATE, ResourceDataType::Number },
+        { ResourceAttribute::SAMPLEFREQUENCY, ResourceDataType::Number },
+        { ResourceAttribute::NRAUDIOCHANNELS, ResourceDataType::Number },
+        { ResourceAttribute::RESOLUTION, ResourceDataType::String },
+        { ResourceAttribute::COLORDEPTH, ResourceDataType::String },
+        { ResourceAttribute::PROTOCOLINFO, ResourceDataType::String },
+        { ResourceAttribute::RESOURCE_FILE, ResourceDataType::String },
+        { ResourceAttribute::FANART_OBJ_ID, ResourceDataType::Number },
+        { ResourceAttribute::FANART_RES_ID, ResourceDataType::Number },
+        { ResourceAttribute::BITS_PER_SAMPLE, ResourceDataType::Number },
+        { ResourceAttribute::LANGUAGE, ResourceDataType::String },
+        { ResourceAttribute::AUDIOCODEC, ResourceDataType::String },
+        { ResourceAttribute::VIDEOCODEC, ResourceDataType::String },
+        { ResourceAttribute::FORMAT, ResourceDataType::String },
+        { ResourceAttribute::TYPE, ResourceDataType::String },
+        { ResourceAttribute::ORIENTATION, ResourceDataType::Number },
+        { ResourceAttribute::PIXELFORMAT, ResourceDataType::String },
+        { ResourceAttribute::MAX, ResourceDataType::String },
+    };
 
 public:
     static std::string mapObjectType(ObjectType ot);
@@ -194,6 +221,7 @@ public:
 
     static std::string getAttributeName(ResourceAttribute attr);
     static std::string getAttributeDisplay(ResourceAttribute attr);
+    static ResourceDataType getAttributeType(ResourceAttribute attr);
     static ResourceAttribute mapAttributeName(const std::string& name);
 };
 

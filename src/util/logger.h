@@ -87,6 +87,7 @@ enum class GrbLogFacility : unsigned int {
     util,
     inotify,
     thumbnailer,
+    postgres,
     verbose,
 
     log_MAX,

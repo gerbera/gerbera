@@ -51,9 +51,10 @@ class CdsContainer;
 class CdsResource;
 class SQLResult;
 class SQLEmitter;
+enum class ResourceDataType;
 enum class Operation;
 
-#define DBVERSION 24
+#define DBVERSION 25
 #define STRING_LIMIT "GRBMAX"
 
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
@@ -127,7 +128,7 @@ public:
 
     virtual void del(std::string_view tableName, const std::string& clause, const std::vector<int>& ids) = 0;
     virtual void exec(std::string_view tableName, const std::string& query, int objId) = 0;
-    virtual int exec(const std::string& query, bool getLastInsertId = false) = 0;
+    virtual int exec(const std::string& query, const std::string& getLastInsertId = "") = 0;
     virtual void execOnly(const std::string& query) = 0;
     virtual std::shared_ptr<SQLResult> select(const std::string& query) = 0;
 
@@ -224,7 +225,7 @@ protected:
     void migrateMetadata(int objectId, const std::string& metadataStr);
 
     /// @brief Add a column to resource table for each defined resource attribute
-    void prepareResourceTable(std::string_view addColumnCmd);
+    void prepareResourceTable(const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd);
 
     /// @brief migrate resources from mt_cds_objects to grb_resource before removing the column (DBVERSION 13)
     bool doResourceMigration();
@@ -237,13 +238,20 @@ protected:
     char table_quote_end { '\0' };
     std::array<unsigned int, DBVERSION> hashies;
 
+    /// @brief Initial db version with gerbera
+    std::size_t firstDBVersion = 1;
     /// @brief Maximum length designated as GRBMAX in ddl statement
     unsigned int stringLimit;
     mutable std::recursive_mutex sqlMutex;
     using SqlAutoLock = std::scoped_lock<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
-    void upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, ConfigVal upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd);
+    void upgradeDatabase(
+        unsigned int dbVersion,
+        const std::array<unsigned int, DBVERSION>& hashies,
+        ConfigVal upgradeOption,
+        std::string_view updateVersionCommand,
+        const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd);
     virtual void _exec(const std::string& query) = 0;
 
 private:
@@ -255,7 +263,7 @@ private:
     std::string sql_meta_query;
     std::string sql_autoscan_query;
     std::string sql_resource_query;
-    std::string addResourceColumnCmd;
+    std::map<ResourceDataType, std::string_view> addResourceColumnCmd;
 
     /// @brief Configuration content for dynamic folders
     std::shared_ptr<DynamicContentList> dynamicContentList;

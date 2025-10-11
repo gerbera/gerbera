@@ -34,13 +34,17 @@
 
 #include "sqlite_database.h" // API
 
+#include "cds/cds_enums.h"
 #include "config/config.h"
 #include "config/config_val.h"
 #include "exceptions.h"
 #include "sl_task.h"
 
 static constexpr auto sqlite3UpdateVersion = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");
-static constexpr auto sqlite3AddResourceAttr = std::string_view(R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)");
+static const auto sqlite3AddResourceAttr = std::map<ResourceDataType, std::string_view> {
+    { ResourceDataType::String, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)" },
+    { ResourceDataType::Number, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" bigint NOT NULL default 0)" }
+};
 
 #define DELETE_CACHE_MAX_TIME 60 // drop cache if last delete was more than 60 secs ago
 #define DELETE_CACHE_RED_SIZE 0.2 // reduce cache to 80% of max entries
@@ -57,7 +61,7 @@ Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const st
     hashies = { 2771697970, // index 0 is used for create script sqlite3.sql = Version 1
         778996897, 3362507034, 853149842, 2776802417, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, // upgrade 2-11
         3908767237, 509765404, 2512852146, 1273710965, 319062951, 2316641127, 1028160353, 881071639, 1989518047, 782849313, // upgrade 12-21
-        3135921396, 3108208, 2156790525 };
+        3135921396, 3108208, 2156790525, 686068117 };
 }
 
 void Sqlite3Database::prepare()
@@ -209,7 +213,7 @@ std::shared_ptr<Database> Sqlite3Database::getSelf()
 
 void Sqlite3Database::_exec(const std::string& query)
 {
-    exec(query, false);
+    exec(query, "", false);
 }
 
 std::string Sqlite3Database::quote(const std::string& value) const
@@ -229,7 +233,11 @@ std::string Sqlite3Database::handleError(const std::string& query, const std::st
     return fmt::format("SQLITE3 ({}: {}): {}\n       Query: {}\n       Error: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
 }
 
-Sqlite3DatabaseWithTransactions::Sqlite3DatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager, const std::shared_ptr<Timer>& timer)
+Sqlite3DatabaseWithTransactions::Sqlite3DatabaseWithTransactions(
+    const std::shared_ptr<Config>& config,
+    const std::shared_ptr<Mime>& mime,
+    const std::shared_ptr<ConverterManager>& converterManager,
+    const std::shared_ptr<Timer>& timer)
     : SqlWithTransactions(config)
     , Sqlite3Database(config, mime, converterManager, timer)
 {
@@ -311,7 +319,7 @@ void Sqlite3Database::del(std::string_view tableName, const std::string& clause,
             }
             lastDelete = currentTime();
         }
-        auto etask = std::make_shared<SLExecTask>(query, false);
+        auto etask = std::make_shared<SLExecTask>(query, "", false);
         addTask(etask);
         etask->waitForTask();
     } catch (const std::runtime_error& e) {
@@ -332,14 +340,14 @@ void Sqlite3Database::exec(std::string_view tableName, const std::string& query,
     }
 }
 
-int Sqlite3Database::exec(const std::string& query, bool getLastInsertId)
+int Sqlite3Database::exec(const std::string& query, const std::string& getLastInsertId)
 {
     try {
         log_debug("Adding query to Queue: {}", query);
-        auto etask = std::make_shared<SLExecTask>(query, getLastInsertId);
+        auto etask = std::make_shared<SLExecTask>(query, getLastInsertId, false);
         addTask(etask);
         etask->waitForTask();
-        return getLastInsertId ? etask->getLastInsertId() : -1;
+        return getLastInsertId.empty() ? -1 : etask->getLastInsertId();
     } catch (const std::runtime_error& e) {
         handleException(e, LINE_MESSAGE);
         return -1;
@@ -350,7 +358,7 @@ void Sqlite3Database::execOnly(const std::string& query)
 {
     try {
         log_debug("Adding query to Queue: {}", query);
-        auto etask = std::make_shared<SLExecTask>(query, false, false);
+        auto etask = std::make_shared<SLExecTask>(query, "", false);
         addTask(etask);
         etask->waitForTask();
     } catch (const std::runtime_error& e) {
@@ -392,7 +400,7 @@ void Sqlite3Database::threadProc()
 
                 lock.unlock();
                 try {
-                    task->run(db, this, throwOnError(task));
+                    task->run(db, *this, throwOnError(task));
                     if (task->didContamination())
                         dirty = true;
                     else if (task->didDecontamination())
@@ -512,6 +520,7 @@ Sqlite3Result::~Sqlite3Result()
         table = nullptr;
     }
 }
+
 std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
 {
     if (nrow) {

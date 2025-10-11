@@ -177,7 +177,7 @@ public:
     }
     virtual ~AddUpdateTable() = default;
     /// @brief does the insert statement return an object id to retrieve
-    virtual bool hasInsertResult() { return false; }
+    virtual std::string hasInsertResult() { return ""; }
     /// @brief get the table name
     [[nodiscard]] const std::string& getTableName() const noexcept { return tableName; }
     /// @brief get the required table operation
@@ -268,7 +268,7 @@ public:
         : TableAdaptor(CDS_OBJECT_TABLE, std::move(dict), operation, std::move(columnMapper))
     {
     }
-    bool hasInsertResult() override { return true; }
+    std::string hasInsertResult() override { return columnMapper->mapQuoted(BrowseColumn::Id, true); }
 
 protected:
     const std::vector<BrowseColumn>& getTableColumnOrder() const override

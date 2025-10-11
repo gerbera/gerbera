@@ -24,6 +24,7 @@ add_executable(testdb
     main.cc
     test_database.cc
     test_sql_generators.cc
+    postgres_config_fake.h
     mysql_config_fake.h
     sqlite_config_fake.h)
 
@@ -59,7 +60,15 @@ add_test(NAME dbFixtureMySqlUpgrade
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/mysql/mysql-upgrade.xml ${CMAKE_CURRENT_BINARY_DIR}
     # DEPENDS fixtures/*
 )
-set_tests_properties(dbFixturesSqLite dbFixturesSqliteUpgrade dbFixturesMySql dbFixtureMySqlUpgrade PROPERTIES FIXTURES_SETUP GrbDb)
+add_test(NAME dbFixturesPostgres
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/postgres/postgres.sql ${CMAKE_CURRENT_BINARY_DIR}
+    # DEPENDS fixtures/*
+)
+add_test(NAME dbFixturePostgresUpgrade
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/postgres/postgres-upgrade.xml ${CMAKE_CURRENT_BINARY_DIR}
+    # DEPENDS fixtures/*
+)
+set_tests_properties(dbFixturesSqLite dbFixturesSqliteUpgrade dbFixturesMySql dbFixtureMySqlUpgrade dbFixturesPostgres dbFixturePostgresUpgrade PROPERTIES FIXTURES_SETUP GrbDb)
 
 set_property(DIRECTORY APPEND PROPERTY
     TEST_INCLUDE_FILES ${CMAKE_CURRENT_LIST_DIR}/CTestManip.cmake

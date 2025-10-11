@@ -35,6 +35,11 @@
         <username>gerbera</username>
         <database>gerbera</database>
       </mysql>
+      <postgres enabled="no">
+        <host>localhost</host>
+        <username>gerbera</username>
+        <database>gerbera</database>
+      </postgres>
     </storage>
     <containers enabled="yes">
       <container location="/LastAdded" title="Recently Added" sort="-last_updated">
