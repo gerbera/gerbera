@@ -34,13 +34,17 @@
 
 #include "sqlite_database.h" // API
 
+#include "cds/cds_enums.h"
 #include "config/config.h"
 #include "config/config_val.h"
 #include "exceptions.h"
 #include "sl_task.h"
 
 static constexpr auto sqlite3UpdateVersion = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");
-static constexpr auto sqlite3AddResourceAttr = std::string_view(R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)");
+static const auto sqlite3AddResourceAttr = std::map<ResourceDataType, std::string_view> {
+    { ResourceDataType::String, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)" },
+    { ResourceDataType::Number, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" bigint NOT NULL default 0)" }
+};
 
 #define DELETE_CACHE_MAX_TIME 60 // drop cache if last delete was more than 60 secs ago
 #define DELETE_CACHE_RED_SIZE 0.2 // reduce cache to 80% of max entries
@@ -57,7 +61,7 @@ Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const st
     hashies = { 2771697970, // index 0 is used for create script sqlite3.sql = Version 1
         778996897, 3362507034, 853149842, 2776802417, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, // upgrade 2-11
         3908767237, 509765404, 2512852146, 1273710965, 319062951, 2316641127, 1028160353, 881071639, 1989518047, 782849313, // upgrade 12-21
-        3135921396, 3108208, 2156790525 };
+        3135921396, 3108208, 2156790525, 686068117 };
 }
 
 void Sqlite3Database::prepare()

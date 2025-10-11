@@ -35,6 +35,7 @@
 #ifdef HAVE_MYSQL
 #include "mysql_database.h"
 
+#include "cds/cds_enums.h"
 #include "config/config_val.h"
 #include "exceptions.h"
 #include "util/thread_runner.h"
@@ -44,7 +45,10 @@
 
 #define MYSQL_SET_VERSION "INSERT INTO `mt_internal_setting` VALUES ('db_version','{}')"
 static constexpr auto mysqlUpdateVersion = std::string_view("UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'");
-static constexpr auto mysqlAddResourceAttr = std::string_view("ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` varchar(255) default NULL");
+static const auto mysqlAddResourceAttr = std::map<ResourceDataType, std::string_view> {
+    { ResourceDataType::String, R"(ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` varchar(255) default NULL)" },
+    { ResourceDataType::Number, R"(ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` bigint(20) default NULL)" }
+};
 
 MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager)
     : SQLDatabase(config, mime, converterManager)
@@ -56,7 +60,7 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
     hashies = { 3747425931, // index 0 is used for create script mysql.sql = Version 1
         928913698, 1984244483, 742641207, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, // upgrade 2-11
         1512596496, 507706380, 3545156190, 31528140, 372163748, 2233365597, 751952276, 3893982139, 798767550, 2305803926, // upgrade 12-21
-        3643149536, 4280737637, 991351280 };
+        3643149536, 4280737637, 991351280, 2893426574 };
 }
 
 MySQLDatabase::~MySQLDatabase()

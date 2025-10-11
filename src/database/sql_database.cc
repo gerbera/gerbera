@@ -605,7 +605,7 @@ void SQLDatabase::upgradeDatabase(
     const std::array<unsigned int, DBVERSION>& hashies,
     ConfigVal upgradeOption,
     std::string_view updateVersionCommand,
-    std::string_view addResourceColumnCmd)
+    const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd)
 {
     /* --- load database upgrades from config file --- */
     const fs::path& upgradeFile = config->getOption(upgradeOption);
@@ -3386,13 +3386,14 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
     }
 }
 
-void SQLDatabase::prepareResourceTable(std::string_view addColumnCmd)
+void SQLDatabase::prepareResourceTable(const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd)
 {
     auto resourceAttributes = splitString(getInternalSetting("resource_attribute"), ',');
     bool addedAttribute = false;
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto&& resAttrib = EnumMapper::getAttributeName(resAttrId);
         if (std::find(resourceAttributes.begin(), resourceAttributes.end(), resAttrib) == resourceAttributes.end()) {
+            auto addColumnCmd = addResourceColumnCmd.at(EnumMapper::getAttributeType(resAttrId));
             _exec(fmt::format(addColumnCmd, resAttrib));
             log_info("'{}': Adding column '{}'", RESOURCE_TABLE, resAttrib);
             resourceAttributes.push_back(resAttrib);

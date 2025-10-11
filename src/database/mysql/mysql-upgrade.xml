@@ -151,4 +151,45 @@
         <script>ALTER TABLE `mt_cds_object` ADD KEY `mt_cds_object_title` (`dc_title`)</script>
         <script>ALTER TABLE `mt_cds_object` ADD KEY `mt_cds_object_sort_key` (`sort_key`)</script>
     </version>
+    <version number="25" remark="resource data type">
+        <script>ALTER TABLE `grb_cds_resource` ADD `size2` bigint(20) NOT NULL default 0</script>
+        <script>UPDATE `grb_cds_resource` SET `size2`=`size`</script>
+        <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `size`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `size2` `size`</script>
+
+        <script>ALTER TABLE `grb_cds_resource` ADD `bitrate2` bigint(20) NOT NULL default 0</script>
+        <script>UPDATE `grb_cds_resource` SET `bitrate2`=`bitrate`</script>
+        <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `bitrate`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `bitrate2` `bitrate`</script>
+
+        <script>ALTER TABLE `grb_cds_resource` ADD `sampleFrequency2` bigint(20) NOT NULL default 0</script>
+        <script>UPDATE `grb_cds_resource` SET `sampleFrequency2`=`sampleFrequency`</script>
+        <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `sampleFrequency`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `sampleFrequency2` `sampleFrequency`</script>
+
+        <script>ALTER TABLE `grb_cds_resource` ADD `nrAudioChannels2` bigint(20) NOT NULL default 0</script>
+        <script>UPDATE `grb_cds_resource` SET `nrAudioChannels2`=`nrAudioChannels`</script>
+        <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `nrAudioChannels`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `nrAudioChannels2` `nrAudioChannels`</script>
+
+        <script>ALTER TABLE `grb_cds_resource` ADD `fanArtObject2` bigint(20) NOT NULL default 0</script>
+        <script>UPDATE `grb_cds_resource` SET `fanArtObject2`=`fanArtObject`</script>
+        <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `fanArtObject`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `fanArtObject2` `fanArtObject`</script>
+
+        <script>ALTER TABLE `grb_cds_resource` ADD `fanArtResource2` bigint(20) NOT NULL default 0</script>
+        <script>UPDATE `grb_cds_resource` SET `fanArtResource2`=`fanArtResource`</script>
+        <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `fanArtResource`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `fanArtResource2` `fanArtResource`</script>
+
+        <script>ALTER TABLE `grb_cds_resource` ADD `bitsPerSample2` bigint(20) NOT NULL default 0</script>
+        <script>UPDATE `grb_cds_resource` SET `bitsPerSample2`=`bitsPerSample`</script>
+        <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `bitsPerSample`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `bitsPerSample2` `bitsPerSample`</script>
+
+        <script>ALTER TABLE `grb_cds_resource` ADD `orientation2` bigint(20) NOT NULL default 0</script>
+        <script>UPDATE `grb_cds_resource` SET `orientation2`=`orientation`</script>
+        <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `orientation`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `orientation2` `orientation`</script>
+    </version>
 </upgrade>

@@ -704,7 +704,9 @@ std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
         } else {
             log_warning("Unknown sort direction '{}' in '{}'", seg, sortCrit);
         }
-        if (!colMapper->mapQuotedList(sort, seg, (desc ? "DESC" : "ASC")) && !plyMapper->mapQuotedList(sort, seg, (desc ? "DESC" : "ASC"))) {
+        auto isCol = colMapper->mapQuotedList(sort, seg, (desc ? "DESC" : "ASC"));
+        auto isPly = plyMapper->mapQuotedList(sort, seg, (desc ? "DESC" : "ASC"));
+        if (!isCol && !isPly) {
             std::string sortSql;
             for (auto&& metaId : MetadataIterator()) {
                 auto&& metaName = MetaEnumMapper::getMetaFieldName(metaId);
@@ -728,6 +730,8 @@ std::string SortParser::parse(std::string& addColumns, std::string& addJoin)
             } else {
                 log_warning("Unknown sort key '{}' in '{}'", seg, sortCrit);
             }
+        } else if (isPly) {
+            colBuf.push_back(plyMapper->mapQuoted(seg));
         }
     }
     if (!colBuf.empty()) {

@@ -26,6 +26,7 @@
 #ifdef HAVE_PGSQL
 #include "postgres_database.h" // API
 
+#include "cds/cds_enums.h"
 #include "config/config.h"
 #include "config/config_val.h"
 #include "exceptions.h"
@@ -36,7 +37,10 @@
 #include <netinet/in.h>
 
 static constexpr auto postgresUpdateVersion = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");
-static constexpr auto postgresAddResourceAttr = std::string_view(R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)");
+static const auto postgresAddResourceAttr = std::map<ResourceDataType, std::string_view> {
+    { ResourceDataType::String, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)" },
+    { ResourceDataType::Number, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" bigint NOT NULL default 0)" }
+};
 
 PostgresDatabase::PostgresDatabase(std::shared_ptr<Config> config,
     std::shared_ptr<Mime> mime,
@@ -45,12 +49,12 @@ PostgresDatabase::PostgresDatabase(std::shared_ptr<Config> config,
 {
     table_quote_begin = '"';
     table_quote_end = '"';
-    firstDBVersion = 24; // no need to migrate from older version
+    firstDBVersion = 25; // no need to migrate from older version
     // if postgres.sql or postgres-upgrade.xml is changed hashies have to be updated
     hashies = { 2941883853, // index 0 is used for create script postgres.sql = Version 1
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // upgrade 2-11
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // upgrade 12-21
-        0, 0, 0 };
+        0, 0, 0, 0 };
 }
 
 PostgresDatabase::~PostgresDatabase()
