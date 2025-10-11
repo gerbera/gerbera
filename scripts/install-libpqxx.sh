@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# install-jsoncpp.sh - this file is part of Gerbera.
+# install-libpqxx.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2025 Gerbera Contributors
 #

@@ -65,7 +65,7 @@ sudo make install
 | [icu4c]             | 65.1        | 65.1        | 65.1                 | Required      | Transliteration            | Enabled  |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0                | Optional      | Scripting Support          | Enabled  |
 | mysql               |             |             |                      | Optional      | Alternate database storage | Disabled |
-| [libpqxx]           |             |             | 7.10.1               | Optional      | Alternate database storage | Disabled |
+| [libpqxx]           | 7.10.1      | 7.10.3      | 7.10.3               | Optional      | Alternate database storage | Disabled |
 | [libpq]             | 12.22       |             | 17.0.6               | Optional      | Alternate database storage | Disabled |
 | curl                |             |             |                      | Optional      | Enables web services       | Enabled  |
 | [taglib]            | 1.12        | 1.12        | 2.1.1                | Optional      | Audio tag support          | Enabled  |

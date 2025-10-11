@@ -51,9 +51,10 @@ class CdsContainer;
 class CdsResource;
 class SQLResult;
 class SQLEmitter;
+enum class ResourceDataType;
 enum class Operation;
 
-#define DBVERSION 24
+#define DBVERSION 25
 #define STRING_LIMIT "GRBMAX"
 
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
@@ -224,7 +225,7 @@ protected:
     void migrateMetadata(int objectId, const std::string& metadataStr);
 
     /// @brief Add a column to resource table for each defined resource attribute
-    void prepareResourceTable(std::string_view addColumnCmd);
+    void prepareResourceTable(const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd);
 
     /// @brief migrate resources from mt_cds_objects to grb_resource before removing the column (DBVERSION 13)
     bool doResourceMigration();
@@ -245,7 +246,12 @@ protected:
     using SqlAutoLock = std::scoped_lock<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
-    void upgradeDatabase(unsigned int dbVersion, const std::array<unsigned int, DBVERSION>& hashies, ConfigVal upgradeOption, std::string_view updateVersionCommand, std::string_view addResourceColumnCmd);
+    void upgradeDatabase(
+        unsigned int dbVersion,
+        const std::array<unsigned int, DBVERSION>& hashies,
+        ConfigVal upgradeOption,
+        std::string_view updateVersionCommand,
+        const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd);
     virtual void _exec(const std::string& query) = 0;
 
 private:
@@ -257,7 +263,7 @@ private:
     std::string sql_meta_query;
     std::string sql_autoscan_query;
     std::string sql_resource_query;
-    std::string addResourceColumnCmd;
+    std::map<ResourceDataType, std::string_view> addResourceColumnCmd;
 
     /// @brief Configuration content for dynamic folders
     std::shared_ptr<DynamicContentList> dynamicContentList;

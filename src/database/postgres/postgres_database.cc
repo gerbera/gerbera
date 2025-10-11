@@ -26,6 +26,7 @@
 #ifdef HAVE_PGSQL
 #include "postgres_database.h" // API
 
+#include "cds/cds_enums.h"
 #include "config/config.h"
 #include "config/config_val.h"
 #include "exceptions.h"
@@ -34,9 +35,13 @@
 #include "util/tools.h"
 
 #include <netinet/in.h>
+#include <regex>
 
 static constexpr auto postgresUpdateVersion = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");
-static constexpr auto postgresAddResourceAttr = std::string_view(R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)");
+static const auto postgresAddResourceAttr = std::map<ResourceDataType, std::string_view> {
+    { ResourceDataType::String, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)" },
+    { ResourceDataType::Number, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" bigint NOT NULL default 0)" }
+};
 
 PostgresDatabase::PostgresDatabase(std::shared_ptr<Config> config,
     std::shared_ptr<Mime> mime,
@@ -45,12 +50,12 @@ PostgresDatabase::PostgresDatabase(std::shared_ptr<Config> config,
 {
     table_quote_begin = '"';
     table_quote_end = '"';
-    firstDBVersion = 24; // no need to migrate from older version
+    firstDBVersion = 25; // no need to migrate from older version
     // if postgres.sql or postgres-upgrade.xml is changed hashies have to be updated
     hashies = { 2941883853, // index 0 is used for create script postgres.sql = Version 1
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // upgrade 2-11
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // upgrade 12-21
-        0, 0, 0 };
+        0, 0, 0, 0 };
 }
 
 PostgresDatabase::~PostgresDatabase()
@@ -140,6 +145,11 @@ void PostgresDatabase::init()
     }
 }
 
+static void handlePqxxNotice(pqxx::zview v)
+{
+    log_debug("Error {}", v.data());
+}
+
 void PostgresDatabase::threadProc()
 {
     log_debug("Running thread");
@@ -158,7 +168,9 @@ void PostgresDatabase::threadProc()
         log_debug("connecting to postgresql://{}@{}{}/{}", dbUser, dbHost, dbPort, dbName);
         conn = std::make_unique<pqxx::connection>(connString);
 
-        log_info("Connected to PostgreSQL {}/{} on server version {}", dbHost, dbName, conn->server_version());
+        log_info("Connected to PostgreSQL {}/{} on server version {} {}", dbHost, dbName, conn->server_version(), conn->get_client_encoding());
+        conn->set_client_encoding("utf8");
+        conn->set_notice_handler(handlePqxxNotice);
         StdThreadRunner::waitFor("PostgresDatabase", [this] { return threadRunner != nullptr; });
         auto lock = threadRunner->uniqueLockS("threadProc");
         // tell init() that we are ready
@@ -181,6 +193,9 @@ void PostgresDatabase::threadProc()
                     else if (task->didDecontamination())
                         dirty = false;
                     task->sendSignal();
+                } catch (const pqxx::argument_error& e) {
+                    log_debug(e.what());
+                    task->sendSignal(e.what());
                 } catch (const std::runtime_error& e) {
                     task->sendSignal(e.what());
                 } catch (const std::logic_error& e) {
@@ -207,6 +222,8 @@ void PostgresDatabase::threadProc()
             conn = nullptr;
         }
     } catch (const std::runtime_error& e) {
+        log_error("Aborting thread {}", e.what());
+    } catch (const std::exception& e) {
         log_error("Aborting thread {}", e.what());
     }
 }
@@ -327,7 +344,14 @@ std::string PostgresDatabase::quote(const std::string& value) const
 {
     if (!conn)
         throw DatabaseException("", "No PostgreSQL connection for quoting");
-    return conn->quote(value);
+    try {
+        return conn->quote(value);
+    } catch (const pqxx::argument_error& e) {
+        log_error("Argument Error.\n{}\n{}: {}", LINE_MESSAGE, value, e.what());
+        std::regex char_re("[^_ [:alnum:]");
+        auto nval = std::regex_replace(value, char_re, "");
+        return conn->quote(nval);
+    }
 }
 
 std::shared_ptr<Database> PostgresDatabase::getSelf()

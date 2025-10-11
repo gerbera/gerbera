@@ -605,7 +605,7 @@ void SQLDatabase::upgradeDatabase(
     const std::array<unsigned int, DBVERSION>& hashies,
     ConfigVal upgradeOption,
     std::string_view updateVersionCommand,
-    std::string_view addResourceColumnCmd)
+    const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd)
 {
     /* --- load database upgrades from config file --- */
     const fs::path& upgradeFile = config->getOption(upgradeOption);
@@ -1331,7 +1331,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
         for (auto&& forbDir : forbiddenDirectories) {
             forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
         }
-        searchSQL.append(fmt::format("AND (NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
+        searchSQL.append(fmt::format(" AND (NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
     }
     log_debug("Search query resolves to SQL [\n{}\n]", searchSQL);
 
@@ -3386,13 +3386,14 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
     }
 }
 
-void SQLDatabase::prepareResourceTable(std::string_view addColumnCmd)
+void SQLDatabase::prepareResourceTable(const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd)
 {
     auto resourceAttributes = splitString(getInternalSetting("resource_attribute"), ',');
     bool addedAttribute = false;
     for (auto&& resAttrId : ResourceAttributeIterator()) {
         auto&& resAttrib = EnumMapper::getAttributeName(resAttrId);
         if (std::find(resourceAttributes.begin(), resourceAttributes.end(), resAttrib) == resourceAttributes.end()) {
+            auto addColumnCmd = addResourceColumnCmd.at(EnumMapper::getAttributeType(resAttrId));
             _exec(fmt::format(addColumnCmd, resAttrib));
             log_info("'{}': Adding column '{}'", RESOURCE_TABLE, resAttrib);
             resourceAttributes.push_back(resAttrib);
