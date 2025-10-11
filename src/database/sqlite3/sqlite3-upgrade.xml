@@ -372,4 +372,41 @@
             CREATE INDEX "mt_cds_object_sort_key" ON mt_cds_object(sort_key);
         </script>
     </version>
+    <version number="25" remark="resource data type">
+        <script>
+        CREATE TABLE "grb_cds_resource_new" (
+            "item_id" integer NOT NULL,
+            "res_id" integer NOT NULL,
+            "handlerType" integer NOT NULL,
+            "purpose" integer NOT NULL,
+            "options" text default NULL,
+            "parameters" text default NULL,
+            "size" bigint default 0,
+            "duration" varchar(255) default NULL,
+            "bitrate" bigint default 0,
+            "sampleFrequency" bigint default 0,
+            "nrAudioChannels" bigint default 0,
+            "resolution" varchar(255) default NULL,
+            "colorDepth" varchar(255) default NULL,
+            "protocolInfo" varchar(255) default NULL,
+            "resFile" varchar(255) default NULL,
+            "fanArtObject" bigint default 0,
+            "fanArtResource" bigint default 0,
+            "bitsPerSample" bigint default 0,
+            "language" varchar(255) default NULL,
+            "audioCodec" varchar(255) default NULL,
+            "videoCodec" varchar(255) default NULL,
+            "format" varchar(255) default NULL,
+            "type" varchar(255) default NULL,
+            "orientation" bigint default 0,
+            "pixelFormat" varchar(255) default NULL,
+            PRIMARY KEY ("item_id", "res_id"),
+            CONSTRAINT "grb_cds_resource_fk" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        );
+        INSERT INTO grb_cds_resource_new SELECT * FROM grb_cds_resource;
+        DROP TABLE grb_cds_resource;
+        ALTER TABLE grb_cds_resource_new RENAME TO grb_cds_resource;
+        CREATE INDEX grb_cds_resource_id ON grb_cds_resource(item_id,res_id);
+        </script>
+    </version>
 </upgrade>

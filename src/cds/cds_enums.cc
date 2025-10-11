@@ -138,6 +138,11 @@ std::string EnumMapper::getAttributeDisplay(ResourceAttribute attr)
     return attrToDisplay.at(attr);
 }
 
+ResourceDataType EnumMapper::getAttributeType(ResourceAttribute attr)
+{
+    return attrToType.at(attr);
+}
+
 ResourceAttribute EnumMapper::mapAttributeName(const std::string& name)
 {
     for (auto&& [attr, n] : attrToName) {

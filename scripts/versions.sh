@@ -58,7 +58,7 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
     TAGLIB="1.12"
     JSONCPP="1.9.6"
     CMAKE="3.31.8"
-    PQXX="7.10.1"
+    PQXX="7.10.3"
 
 else
 
@@ -79,6 +79,6 @@ else
     TAGLIB="2.1.1"
     JSONCPP="1.9.6"
     CMAKE="4.1.2"
-    PQXX="7.10.1"
+    PQXX="7.10.3"
 
 fi

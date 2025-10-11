@@ -47,8 +47,8 @@ public:
     virtual ~PGTask();
 
     /// @brief run the postgres task
-    /// @param db database api reference
-    /// @param sl The instance of PostgresDatabase to do the queries with.
+    /// @param conn database connection
+    /// @param pg The instance of PostgresDatabase to do the queries with.
     /// @param throwOnError throw exception when error occurs
     virtual void run(const std::unique_ptr<pqxx::connection>& conn, PostgresDatabase& pg, bool throwOnError = true) = 0;
 
@@ -59,8 +59,10 @@ public:
     /// @brief notify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
     void sendSignal();
 
+    /// @brief notify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
     void sendSignal(std::string error);
 
+    /// @brief wait until task is finished
     void waitForTask();
 
     bool getThrowOnError() const { return throwOnError; }
