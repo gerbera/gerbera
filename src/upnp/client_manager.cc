@@ -32,6 +32,7 @@
 #include "config/config_val.h"
 #include "config/result/client_config.h"
 #include "database/database.h"
+#include "server.h"
 #include "util/grb_net.h"
 #include "util/logger.h"
 
@@ -39,9 +40,13 @@
 #include <sys/socket.h>
 #include <upnp.h>
 
-ClientManager::ClientManager(std::shared_ptr<Config> config, std::shared_ptr<Database> database)
+ClientManager::ClientManager(
+    std::shared_ptr<Config> config,
+    std::shared_ptr<Database> database,
+    std::shared_ptr<Server> server)
     : database(std::move(database))
     , config(std::move(config))
+    , server(std::move(server))
     , cacheThreshold(this->config->getLongOption(ConfigVal::CLIENTS_CACHE_THRESHOLD))
 {
     refresh();
@@ -336,7 +341,7 @@ const ClientObservation* ClientManager::getInfoByCache(const std::shared_ptr<Grb
         { return entry.addr->equals(addr); });
 
     if (it != cache.end()) {
-        log_debug("found client by cache (hostname='{}')", it->addr->getHostName());
+        log_debug("found client by cache (hostname='{}')", it->addr ? it->addr->getHostName() : "");
         return &(*it);
     }
 
@@ -349,7 +354,7 @@ void ClientManager::removeClient(const std::string& clientIp)
     cache.erase(std::remove_if(cache.begin(), cache.end(),
                     [clientIp](auto&& entry) { return entry.addr && entry.addr->equals(clientIp); }),
         cache.end());
-    if (this->database)
+    if (this->database && (!this->server || this->server->isRunning()))
         this->database->saveClients(cache);
 }
 
@@ -361,6 +366,7 @@ const ClientObservation* ClientManager::updateCache(
 {
     AutoLock lock(mutex);
 
+    log_debug("Start {}", this->database && (!this->server || this->server->isRunning()));
     // house cleaning, remove old entries
     auto now = currentTime();
     cache.erase(std::remove_if(cache.begin(), cache.end(),
@@ -386,9 +392,9 @@ const ClientObservation* ClientManager::updateCache(
         it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
             { return entry.addr->equals(addr); });
     }
-    if (this->database)
+    if (this->database && (!this->server || this->server->isRunning()))
         this->database->saveClients(cache);
-    log_debug("client info: {} '{}' -> '{}' as {} with {}", addr->getNameInfo(), userAgent, pInfo->name, ClientConfig::mapClientType(pInfo->type), ClientConfig::mapFlags(pInfo->flags));
+    log_debug("client info: {} '{}' -> '{}' as {} with {}", addr ? addr->getNameInfo() : "", userAgent, pInfo ? pInfo->name : "", ClientConfig::mapClientType(pInfo->type), pInfo ? ClientConfig::mapFlags(pInfo->flags) : "");
     return &(*it);
 }
 

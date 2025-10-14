@@ -123,7 +123,7 @@ void Server::init(const std::shared_ptr<ConfigDefinition>& definition, bool offl
     }
     aliveAdvertisementInterval = config->getIntOption(ConfigVal::SERVER_ALIVE_INTERVAL);
 
-    clientManager = std::make_shared<ClientManager>(config, database);
+    clientManager = std::make_shared<ClientManager>(config, database, self);
     sessionManager = std::make_shared<Web::SessionManager>(config, timer);
     context = std::make_shared<Context>(definition, config, clientManager, mime, database, sessionManager, converterManager);
 
@@ -290,6 +290,8 @@ void Server::run()
     }
 
     UpnpSetHostValidateCallback(HostValidateCallback, this);
+
+    running = true;
 }
 
 std::string Server::getIp() const

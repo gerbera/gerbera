@@ -381,24 +381,24 @@
             "purpose" integer NOT NULL,
             "options" text default NULL,
             "parameters" text default NULL,
-            "size" bigint default 0,
+            "size" bigint default NULL,
             "duration" varchar(255) default NULL,
-            "bitrate" bigint default 0,
-            "sampleFrequency" bigint default 0,
-            "nrAudioChannels" bigint default 0,
+            "bitrate" bigint default NULL,
+            "sampleFrequency" bigint default NULL,
+            "nrAudioChannels" bigint default NULL,
             "resolution" varchar(255) default NULL,
             "colorDepth" varchar(255) default NULL,
             "protocolInfo" varchar(255) default NULL,
             "resFile" varchar(255) default NULL,
-            "fanArtObject" bigint default 0,
-            "fanArtResource" bigint default 0,
-            "bitsPerSample" bigint default 0,
-            "language" varchar(255) default NULL,
-            "audioCodec" varchar(255) default NULL,
-            "videoCodec" varchar(255) default NULL,
+            "fanArtObject" bigint default NULL,
+            "fanArtResource" bigint default NULL,
+            "bitsPerSample" bigint default NULL,
+            "dc:language" varchar(255) default NULL,
+            "sec:acodec" varchar(255) default NULL,
+            "sec:vcodec" varchar(255) default NULL,
             "format" varchar(255) default NULL,
             "type" varchar(255) default NULL,
-            "orientation" bigint default 0,
+            "orientation" bigint default NULL,
             "pixelFormat" varchar(255) default NULL,
             PRIMARY KEY ("item_id", "res_id"),
             CONSTRAINT "grb_cds_resource_fk" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
@@ -407,6 +407,7 @@
         DROP TABLE grb_cds_resource;
         ALTER TABLE grb_cds_resource_new RENAME TO grb_cds_resource;
         CREATE INDEX grb_cds_resource_id ON grb_cds_resource(item_id,res_id);
+        VACUUM;
         </script>
     </version>
 </upgrade>

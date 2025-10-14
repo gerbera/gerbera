@@ -339,7 +339,6 @@ SELECT {{}} FROM items AS {3})";
 #define getColInt(rw, idx, def) (rw)->col_int(to_underlying((idx)), (def))
 #define setCol(dict, key, val, map) (dict).emplace((key), quote((val), (map).at((key)).length))
 
-static std::shared_ptr<EnumColumnMapper<BrowseColumn>> browseColumnMapper;
 static std::shared_ptr<EnumColumnMapper<SearchColumn>> searchColumnMapper;
 static std::shared_ptr<EnumColumnMapper<MetadataColumn>> metaColumnMapper;
 static std::shared_ptr<EnumColumnMapper<ASColumn>> asColumnMapper;
@@ -664,6 +663,7 @@ void SQLDatabase::upgradeDatabase(
                 if (actionResult && !upgradeCmd.empty())
                     _exec(upgradeCmd);
             }
+            log_debug("upgrade {}", fmt::format(updateVersionCommand, version + 1, version));
             _exec(fmt::format(updateVersionCommand, version + 1, version));
             dbVersion = version + 1;
             log_info("Database upgrade to version {} successful.", dbVersion);
@@ -937,7 +937,7 @@ void SQLDatabase::addObject(const std::shared_ptr<CdsObject>& obj, int* changedC
             int newId = exec(qb, addUpdateTable->hasInsertResult());
             obj->setID(newId);
         } else {
-            exec(CDS_OBJECT_TABLE, qb, obj->getID());
+            execOnTable(CDS_OBJECT_TABLE, qb, obj->getID());
         }
     }
     commit("addObject");
@@ -982,7 +982,7 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
         case Operation::Insert:
         case Operation::InsertMulti:
         case Operation::Update:
-            exec(CDS_OBJECT_TABLE, qb, obj->getID());
+            execOnTable(CDS_OBJECT_TABLE, qb, obj->getID());
             break;
         case Operation::Delete:
             del(addUpdateTable->getTableName(), qb, { obj->getID() });
@@ -1659,7 +1659,7 @@ int SQLDatabase::createContainer(
             multiDict.push_back(std::move(mDict));
         }
         Metadata2Table mt(std::move(multiDict), metaColumnMapper);
-        exec(METADATA_TABLE, mt.sqlForMultiInsert(nullptr), newId);
+        execOnTable(METADATA_TABLE, mt.sqlForMultiInsert(nullptr), newId);
         log_debug("Wrote metadata for cds_object {}", newId);
     }
 
@@ -1685,7 +1685,7 @@ int SQLDatabase::createContainer(
                 rAttr[key] = quote(val);
             }
             Resource2Table rt(std::move(rDict), std::move(rAttr), Operation::Insert, resColumnMapper);
-            exec(RESOURCE_TABLE, rt.sqlForInsert(nullptr), newId);
+            execOnTable(RESOURCE_TABLE, rt.sqlForInsert(nullptr), newId);
             resId++;
         }
         log_debug("Wrote resources for cds_object {}", newId);
@@ -2126,13 +2126,18 @@ std::vector<int> SQLDatabase::getRefObjects(int objectId)
     return result;
 }
 
-std::unordered_set<int> SQLDatabase::getUnreferencedObjects()
+std::string SQLDatabase::getUnreferencedQuery(const std::string& table)
 {
     auto colId = browseColumnMapper->mapQuoted(BrowseColumn::Id, true);
-    auto table = browseColumnMapper->getTableName();
     auto colRefId = browseColumnMapper->mapQuoted(BrowseColumn::RefId, true);
+    return fmt::format("SELECT {} FROM {} WHERE {} IS NOT NULL AND {} NOT IN (SELECT {} FROM {})", colId, table, colRefId, colRefId, colId, table);
+}
 
-    auto getSql = fmt::format("SELECT {} FROM {} WHERE {} IS NOT NULL AND {} NOT IN (SELECT {} FROM {})", colId, table, colRefId, colRefId, colId, table);
+std::unordered_set<int> SQLDatabase::getUnreferencedObjects()
+{
+    auto table = browseColumnMapper->getTableName();
+    auto getSql = getUnreferencedQuery(table);
+    log_debug("getSql {}", getSql);
     auto res = select(getSql);
     if (!res)
         throw DatabaseException(fmt::format("error selecting form {}", table), LINE_MESSAGE);
@@ -2214,7 +2219,7 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
                     { AutoscanColumn::Location, quote(location.string()) },
                 };
                 Autoscan2Table at(fields, Operation::Update, autoscanColumnMapper);
-                exec(AUTOSCAN_TABLE, at.sqlForUpdate(nullptr), colId);
+                execOnTable(AUTOSCAN_TABLE, at.sqlForUpdate(nullptr), colId);
             } else {
                 deleteAs.push_back(colId);
             }
@@ -3019,7 +3024,7 @@ void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         fields[AutoscanColumn::LastModified] = quote(adir->getPreviousLMT().count());
     }
     Autoscan2Table at(fields, Operation::Update, autoscanColumnMapper);
-    exec(AUTOSCAN_TABLE, at.sqlForUpdate(adir), adir->getDatabaseID());
+    execOnTable(AUTOSCAN_TABLE, at.sqlForUpdate(adir), adir->getDatabaseID());
 }
 
 void SQLDatabase::removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
@@ -3380,7 +3385,7 @@ void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
             multiDict.push_back(std::move(mDict));
         }
         Metadata2Table mt(std::move(multiDict), metaColumnMapper);
-        exec(METADATA_TABLE, mt.sqlForMultiInsert(nullptr), objectId);
+        execOnTable(METADATA_TABLE, mt.sqlForMultiInsert(nullptr), objectId);
     } else {
         log_debug("Skipping migration - no metadata for cds object {}", objectId);
     }
@@ -3473,7 +3478,7 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
                 dict[ResourceColumn::Parameters] = quote(URLUtils::dictEncode(parameters));
             }
             Resource2Table rt(std::move(dict), std::move(resourceVals), Operation::Insert, resColumnMapper);
-            exec(RESOURCE_TABLE, rt.sqlForInsert(nullptr), objectId);
+            execOnTable(RESOURCE_TABLE, rt.sqlForInsert(nullptr), objectId);
             resId++;
         }
     } else {

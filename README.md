@@ -58,7 +58,7 @@ sudo make install
 | [pugixml]           |             | 1.10        | 1.15                 | Required      | XML file and data support  |          |
 | [jsoncpp]           | 1.7.4       | 1.9.6       | 1.9.6                | Required      | JSON data support          |          |
 | libiconv            |             |             |                      | Required      | Charset conversion         |          |
-| sqlite3             | 3.7.0       | 3.35.5      | 3.49.1               | Required      | Database storage           |          |
+| sqlite3             | 3.7.0       | 3.35.5      | 3.50.2               | Required      | Database storage           |          |
 | zlib                |             |             |                      | Required      | Data compression           |          |
 | [fmtlib]            | 7.1.3       | 11.2.0      | 12.0.0               | Required      | Fast string formatting     |          |
 | [spdlog]            | 1.8.1       | 1.11.0      | 1.15.3               | Required      | Runtime logging            |          |

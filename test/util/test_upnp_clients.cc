@@ -54,7 +54,7 @@ public:
             std::map<ClientMatchType, std::string>(), 1, -1, false, true);
         EDIT_CAST(EditHelperClientConfig, config->list)->add(rangeConfig, 1);
 
-        subject = new ClientManager(config, nullptr);
+        subject = new ClientManager(config, nullptr, nullptr);
     }
 
     void TearDown() override

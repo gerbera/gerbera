@@ -51,6 +51,9 @@ class CdsContainer;
 class CdsResource;
 class SQLResult;
 class SQLEmitter;
+template <class Col>
+class EnumColumnMapper;
+enum class BrowseColumn;
 enum class ResourceDataType;
 enum class Operation;
 
@@ -127,7 +130,7 @@ public:
     virtual void commit(std::string_view tName) { }
 
     virtual void del(std::string_view tableName, const std::string& clause, const std::vector<int>& ids) = 0;
-    virtual void exec(std::string_view tableName, const std::string& query, int objId) = 0;
+    virtual void execOnTable(std::string_view tableName, const std::string& query, int objId) = 0;
     virtual int exec(const std::string& query, const std::string& getLastInsertId = "") = 0;
     virtual void execOnly(const std::string& query) = 0;
     virtual std::shared_ptr<SQLResult> select(const std::string& query) = 0;
@@ -214,23 +217,6 @@ public:
     void deleteRows(std::string_view tableName, const std::string& key, const std::vector<int>& values);
 
 protected:
-    explicit SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, std::shared_ptr<ConverterManager> converterManager);
-    void init() override;
-    void initDynContainers(const std::shared_ptr<CdsObject>& sParent = {});
-    /// @brief create core entries in fresh database
-    void fillDatabase();
-
-    /// @brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
-    bool doMetadataMigration();
-    void migrateMetadata(int objectId, const std::string& metadataStr);
-
-    /// @brief Add a column to resource table for each defined resource attribute
-    void prepareResourceTable(const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd);
-
-    /// @brief migrate resources from mt_cds_objects to grb_resource before removing the column (DBVERSION 13)
-    bool doResourceMigration();
-    void migrateResources(int objectId, const std::string& resourcesStr);
-
     std::shared_ptr<Mime> mime;
     std::shared_ptr<ConverterManager> converterManager;
 
@@ -242,17 +228,48 @@ protected:
     std::size_t firstDBVersion = 1;
     /// @brief Maximum length designated as GRBMAX in ddl statement
     unsigned int stringLimit;
+    /// @brief lock for special sql commands
     mutable std::recursive_mutex sqlMutex;
     using SqlAutoLock = std::scoped_lock<decltype(sqlMutex)>;
     std::map<int, std::shared_ptr<CdsContainer>> dynamicContainers;
 
+    std::shared_ptr<EnumColumnMapper<BrowseColumn>> browseColumnMapper;
+
+    /// @brief constructor for derived classes
+    explicit SQLDatabase(const std::shared_ptr<Config>& config, std::shared_ptr<Mime> mime, std::shared_ptr<ConverterManager> converterManager);
+
+    void init() override;
+
+    /// @brief build up runtime data for dynamic (search based) containers
+    void initDynContainers(const std::shared_ptr<CdsObject>& sParent = {});
+    /// @brief create core entries in fresh database
+    void fillDatabase();
+
+    /// @brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
+    bool doMetadataMigration();
+    /// @brief migrate metadata for cdsObject
+    void migrateMetadata(int objectId, const std::string& metadataStr);
+
+    /// @brief Add a column to resource table for each defined resource attribute
+    void prepareResourceTable(const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd);
+    /// @brief migrate resources from mt_cds_objects to grb_resource before removing the column (DBVERSION 13)
+    bool doResourceMigration();
+    /// @brief migrate resource data for cdsObject
+    void migrateResources(int objectId, const std::string& resourcesStr);
+
+    /// @brief upgrade database version by applying migration commands
     void upgradeDatabase(
         unsigned int dbVersion,
         const std::array<unsigned int, DBVERSION>& hashies,
         ConfigVal upgradeOption,
         std::string_view updateVersionCommand,
         const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd);
+
+    /// @brief internal version of sql exec command
     virtual void _exec(const std::string& query) = 0;
+
+    /// @brief Get query for unreferenced objects depending on database
+    virtual std::string getUnreferencedQuery(const std::string& table);
 
 private:
     std::string sql_browse_columns;

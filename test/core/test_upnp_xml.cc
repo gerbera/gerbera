@@ -236,7 +236,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithEscapes)
     obj->addMetaData(MetadataFields::M_DATE, "2022-04-01T00:00:00");
 
     auto clientConfig = std::make_shared<MyConfigMock>();
-    auto clientManager = std::make_shared<ClientManager>(clientConfig, database);
+    auto clientManager = std::make_shared<ClientManager>(clientConfig, database, nullptr);
     auto addr = std::make_shared<GrbNet>("192.168.99.100");
     auto quirks = std::make_shared<Quirks>(subject, clientManager, addr, "DLNADOC/1.50", nullptr);
 
@@ -283,7 +283,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithStrictXmlQuirks)
     obj->addMetaData(MetadataFields::M_DATE, "2022-04-01T00:00:00");
 
     auto clientConfig = std::make_shared<MyConfigMock>();
-    auto clientManager = std::make_shared<ClientManager>(clientConfig, database);
+    auto clientManager = std::make_shared<ClientManager>(clientConfig, database, nullptr);
     auto addr = std::make_shared<GrbNet>("192.168.99.100");
     auto quirks = std::make_shared<Quirks>(subject, clientManager, addr, "Allegro-Software-WebClient/5.40b1 DLNADOC/1.50", nullptr);
 
