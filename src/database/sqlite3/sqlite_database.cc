@@ -43,7 +43,7 @@
 static constexpr auto sqlite3UpdateVersion = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");
 static const auto sqlite3AddResourceAttr = std::map<ResourceDataType, std::string_view> {
     { ResourceDataType::String, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)" },
-    { ResourceDataType::Number, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" bigint NOT NULL default 0)" }
+    { ResourceDataType::Number, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" bigint default NULL)" }
 };
 
 #define DELETE_CACHE_MAX_TIME 60 // drop cache if last delete was more than 60 secs ago
@@ -61,7 +61,7 @@ Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const st
     hashies = { 2771697970, // index 0 is used for create script sqlite3.sql = Version 1
         778996897, 3362507034, 853149842, 2776802417, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, // upgrade 2-11
         3908767237, 509765404, 2512852146, 1273710965, 319062951, 2316641127, 1028160353, 881071639, 1989518047, 782849313, // upgrade 12-21
-        3135921396, 3108208, 2156790525, 686068117 };
+        3135921396, 3108208, 2156790525, 2004941040 };
 }
 
 void Sqlite3Database::prepare()
@@ -213,7 +213,7 @@ std::shared_ptr<Database> Sqlite3Database::getSelf()
 
 void Sqlite3Database::_exec(const std::string& query)
 {
-    exec(query, "", false);
+    execOnly(query);
 }
 
 std::string Sqlite3Database::quote(const std::string& value) const
@@ -248,6 +248,7 @@ void Sqlite3DatabaseWithTransactions::beginTransaction(std::string_view tName)
     if (use_transaction) {
         log_debug("BEGIN TRANSACTION {} {}", tName, inTransaction);
         SqlAutoLock lock(sqlMutex);
+        log_debug("BEGIN TRANSACTION LOCK {} {}", tName, inTransaction);
         StdThreadRunner::waitFor(
             fmt::format("SqliteDatabase.begin {}", tName), [this] { return !inTransaction; }, 100);
         inTransaction = true;
@@ -327,7 +328,7 @@ void Sqlite3Database::del(std::string_view tableName, const std::string& clause,
     }
 }
 
-void Sqlite3Database::exec(std::string_view tableName, const std::string& query, int objId)
+void Sqlite3Database::execOnTable(std::string_view tableName, const std::string& query, int objId)
 {
     try {
         log_debug("Adding query to Queue: {}", query);
@@ -496,7 +497,7 @@ void Sqlite3Database::storeInternalSetting(const std::string& key, const std::st
 {
     auto command = fmt::format("INSERT OR REPLACE INTO {} ({}, {}) VALUES ({}, {})",
         identifier(INTERNAL_SETTINGS_TABLE), identifier("key"), identifier("value"), quote(key), quote(value));
-    exec(command);
+    execOnly(command);
 }
 
 /* Sqlite3Row */

@@ -59,6 +59,7 @@ public:
 protected:
     void _exec(const std::string& query) override;
     std::string prepareDatabase();
+    std::string getUnreferencedQuery(const std::string& table) override;
 
 private:
     void init() override;
@@ -69,7 +70,7 @@ private:
 
     std::shared_ptr<SQLResult> select(const std::string& query) override;
     void del(std::string_view tableName, const std::string& clause, const std::vector<int>& ids) override;
-    void exec(std::string_view tableName, const std::string& query, int objId) override;
+    void execOnTable(std::string_view tableName, const std::string& query, int objId) override;
     int exec(const std::string& query, const std::string& getLastInsertId = "") override;
     void execOnly(const std::string& query) override;
 

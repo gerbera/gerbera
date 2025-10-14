@@ -51,7 +51,8 @@ Database::Database(std::shared_ptr<Config> config)
 
 Database::~Database() = default;
 
-std::shared_ptr<Database> Database::createInstance(const std::shared_ptr<Config>& config,
+std::shared_ptr<Database> Database::createInstance(
+    const std::shared_ptr<Config>& config,
     const std::shared_ptr<Mime>& mime,
     const std::shared_ptr<ConverterManager>& converterManager,
     const std::shared_ptr<Timer>& timer)

@@ -5,6 +5,7 @@
 - Add support for libsystemd
 - Add Test for formatSizeValue
 - Allow masking arguments
+- Bump github/codeql-action from 3 to 4
 - Check Headers in Quirks
 - CI Tests: Try more alpine versions
 - Command line option for even more config details

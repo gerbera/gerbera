@@ -29,6 +29,7 @@
 #include "cds/cds_enums.h"
 #include "config/config.h"
 #include "config/config_val.h"
+#include "database/sql_table.h"
 #include "exceptions.h"
 #include "pg_task.h"
 #include "util/thread_runner.h"
@@ -40,7 +41,7 @@
 static constexpr auto postgresUpdateVersion = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");
 static const auto postgresAddResourceAttr = std::map<ResourceDataType, std::string_view> {
     { ResourceDataType::String, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)" },
-    { ResourceDataType::Number, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" bigint NOT NULL default 0)" }
+    { ResourceDataType::Number, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" bigint default NULL)" }
 };
 
 PostgresDatabase::PostgresDatabase(std::shared_ptr<Config> config,
@@ -272,19 +273,19 @@ void PostgresDatabase::del(std::string_view tableName, const std::string& clause
         auto etask = std::make_shared<PGExecTask>(query, "");
         addTask(etask);
         etask->waitForTask();
-    } catch (const std::runtime_error& e) {
+    } catch (const std::exception& e) {
         handleException(e, LINE_MESSAGE);
     }
 }
 
-void PostgresDatabase::exec(std::string_view tableName, const std::string& query, int objId)
+void PostgresDatabase::execOnTable(std::string_view tableName, const std::string& query, int objId)
 {
     try {
         log_debug("Adding query to Queue: {}", query);
         auto etask = std::make_shared<PGExecTask>(query);
         addTask(etask);
         etask->waitForTask();
-    } catch (const std::runtime_error& e) {
+    } catch (const std::exception& e) {
         handleException(e, LINE_MESSAGE);
     }
 }
@@ -297,7 +298,7 @@ int PostgresDatabase::exec(const std::string& query, const std::string& getLastI
         addTask(etask);
         etask->waitForTask();
         return getLastInsertId.empty() ? -1 : etask->getLastInsertId();
-    } catch (const std::runtime_error& e) {
+    } catch (const std::exception& e) {
         handleException(e, LINE_MESSAGE);
         return -1;
     }
@@ -310,7 +311,7 @@ void PostgresDatabase::execOnly(const std::string& query)
         auto etask = std::make_shared<PGExecTask>(query, "", false);
         addTask(etask);
         etask->waitForTask();
-    } catch (const std::runtime_error& e) {
+    } catch (const std::exception& e) {
         log_error("Failed to execute {}\n{}", query, e.what());
     }
 }
@@ -323,7 +324,7 @@ std::shared_ptr<SQLResult> PostgresDatabase::select(const std::string& query)
         addTask(stask);
         stask->waitForTask();
         return stask->getResult();
-    } catch (const std::runtime_error& e) {
+    } catch (const std::exception& e) {
         handleException(e, LINE_MESSAGE);
         return {};
     }
@@ -352,6 +353,14 @@ std::string PostgresDatabase::quote(const std::string& value) const
         auto nval = std::regex_replace(value, char_re, "");
         return conn->quote(nval);
     }
+}
+
+std::string PostgresDatabase::getUnreferencedQuery(const std::string& table)
+{
+    auto colId = browseColumnMapper->mapQuoted(BrowseColumn::Id, true);
+    auto colRefId = browseColumnMapper->mapQuoted(BrowseColumn::RefId, true);
+    return fmt::format("SELECT {} FROM {} \"cds1\" where {} IS NOT NULL AND NOT EXISTS (SELECT * FROM {} \"cds2\" WHERE \"cds1\".{} = \"cds2\".{})",
+        colId, table, colRefId, table, colRefId, colId);
 }
 
 std::shared_ptr<Database> PostgresDatabase::getSelf()

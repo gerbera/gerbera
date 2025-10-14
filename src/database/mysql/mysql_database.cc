@@ -60,7 +60,7 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
     hashies = { 3747425931, // index 0 is used for create script mysql.sql = Version 1
         928913698, 1984244483, 742641207, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, // upgrade 2-11
         1512596496, 507706380, 3545156190, 31528140, 372163748, 2233365597, 751952276, 3893982139, 798767550, 2305803926, // upgrade 12-21
-        3643149536, 4280737637, 991351280, 2893426574 };
+        3643149536, 4280737637, 991351280, 4129183594 };
 }
 
 MySQLDatabase::~MySQLDatabase()
@@ -364,7 +364,7 @@ void MySQLDatabase::del(std::string_view tableName, const std::string& clause, c
     }
 }
 
-void MySQLDatabase::exec(std::string_view tableName, const std::string& query, int objId)
+void MySQLDatabase::execOnTable(std::string_view tableName, const std::string& query, int objId)
 {
     log_debug("{}", query);
 

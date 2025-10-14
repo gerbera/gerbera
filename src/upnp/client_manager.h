@@ -39,6 +39,7 @@ class Config;
 class Database;
 class GrbNet;
 class Headers;
+class Server;
 enum class ClientMatchType;
 struct ClientProfile;
 struct ClientObservation;
@@ -48,7 +49,8 @@ class ClientManager {
 public:
     explicit ClientManager(
         std::shared_ptr<Config> config,
-        std::shared_ptr<Database> database);
+        std::shared_ptr<Database> database,
+        std::shared_ptr<Server> server);
 
     /// @brief reload predefined profiles and configuration values
     void refresh();
@@ -92,6 +94,7 @@ private:
     std::vector<ClientProfile> clientProfile;
     std::shared_ptr<Database> database;
     std::shared_ptr<Config> config;
+    std::shared_ptr<Server> server;
     std::chrono::hours cacheThreshold;
 };
 

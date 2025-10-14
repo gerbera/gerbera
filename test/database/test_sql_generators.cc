@@ -68,7 +68,7 @@ public:
         lastStatement = query;
     }
 
-    void exec(std::string_view tableName, const std::string& query, int objId) override
+    void execOnTable(std::string_view tableName, const std::string& query, int objId) override
     {
         lastStatement = query;
     }

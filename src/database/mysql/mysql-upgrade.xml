@@ -152,44 +152,52 @@
         <script>ALTER TABLE `mt_cds_object` ADD KEY `mt_cds_object_sort_key` (`sort_key`)</script>
     </version>
     <version number="25" remark="resource data type">
-        <script>ALTER TABLE `grb_cds_resource` ADD `size2` bigint(20) NOT NULL default 0</script>
-        <script>UPDATE `grb_cds_resource` SET `size2`=`size`</script>
+        <script>ALTER TABLE `grb_cds_resource` ADD `size2` bigint(20) default NULL</script>
+        <script>UPDATE `grb_cds_resource` SET `size2`=`size` WHERE `size` is not null AND `size` != ''</script>
+        <script>UPDATE `grb_cds_resource` SET `size2`=NULL WHERE size is null OR size = ''</script>
         <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `size`</script>
-        <script>ALTER TABLE `grb_cds_resource` CHANGE `size2` `size`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `size2` `size` bigint(20) default NULL</script>
 
-        <script>ALTER TABLE `grb_cds_resource` ADD `bitrate2` bigint(20) NOT NULL default 0</script>
-        <script>UPDATE `grb_cds_resource` SET `bitrate2`=`bitrate`</script>
+        <script>ALTER TABLE `grb_cds_resource` ADD `bitrate2` bigint(20) default NULL</script>
+        <script>UPDATE `grb_cds_resource` SET `bitrate2`=`bitrate` WHERE `bitrate` is not null AND `bitrate` != ''</script>
+        <script>UPDATE `grb_cds_resource` SET `bitrate2`=NULL WHERE `bitrate` is null OR `bitrate` = ''</script>
         <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `bitrate`</script>
-        <script>ALTER TABLE `grb_cds_resource` CHANGE `bitrate2` `bitrate`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `bitrate2` `bitrate` bigint(20) default NULL</script>
 
-        <script>ALTER TABLE `grb_cds_resource` ADD `sampleFrequency2` bigint(20) NOT NULL default 0</script>
-        <script>UPDATE `grb_cds_resource` SET `sampleFrequency2`=`sampleFrequency`</script>
+        <script>ALTER TABLE `grb_cds_resource` ADD `sampleFrequency2` bigint(20) default NULL</script>
+        <script>UPDATE `grb_cds_resource` SET `sampleFrequency2`=`sampleFrequency` WHERE `sampleFrequency` is not null AND `sampleFrequency` != ''</script>
+        <script>UPDATE `grb_cds_resource` SET `sampleFrequency2`=NULL WHERE `sampleFrequency` is null OR `sampleFrequency` = ''</script>
         <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `sampleFrequency`</script>
-        <script>ALTER TABLE `grb_cds_resource` CHANGE `sampleFrequency2` `sampleFrequency`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `sampleFrequency2` `sampleFrequency` bigint(20) default NULL</script>
 
-        <script>ALTER TABLE `grb_cds_resource` ADD `nrAudioChannels2` bigint(20) NOT NULL default 0</script>
-        <script>UPDATE `grb_cds_resource` SET `nrAudioChannels2`=`nrAudioChannels`</script>
+        <script>ALTER TABLE `grb_cds_resource` ADD `nrAudioChannels2` bigint(20) default NULL</script>
+        <script>UPDATE `grb_cds_resource` SET `nrAudioChannels2`=`nrAudioChannels` WHERE `nrAudioChannels` is not null AND `nrAudioChannels` != ''</script>
+        <script>UPDATE `grb_cds_resource` SET `nrAudioChannels2`=NULL WHERE `nrAudioChannels` is null OR `nrAudioChannels` = ''</script>
         <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `nrAudioChannels`</script>
-        <script>ALTER TABLE `grb_cds_resource` CHANGE `nrAudioChannels2` `nrAudioChannels`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `nrAudioChannels2` `nrAudioChannels` bigint(20) default NULL</script>
 
-        <script>ALTER TABLE `grb_cds_resource` ADD `fanArtObject2` bigint(20) NOT NULL default 0</script>
-        <script>UPDATE `grb_cds_resource` SET `fanArtObject2`=`fanArtObject`</script>
+        <script>ALTER TABLE `grb_cds_resource` ADD `fanArtObject2` bigint(20) default NULL</script>
+        <script>UPDATE `grb_cds_resource` SET `fanArtObject2`=`fanArtObject` WHERE `fanArtObject` is not null AND `fanArtObject` != ''</script>
+        <script>UPDATE `grb_cds_resource` SET `fanArtObject2`=NULL WHERE `fanArtObject` is null OR `fanArtObject` = ''</script>
         <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `fanArtObject`</script>
-        <script>ALTER TABLE `grb_cds_resource` CHANGE `fanArtObject2` `fanArtObject`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `fanArtObject2` `fanArtObject` bigint(20) default NULL</script>
 
-        <script>ALTER TABLE `grb_cds_resource` ADD `fanArtResource2` bigint(20) NOT NULL default 0</script>
-        <script>UPDATE `grb_cds_resource` SET `fanArtResource2`=`fanArtResource`</script>
+        <script>ALTER TABLE `grb_cds_resource` ADD `fanArtResource2` bigint(20) default NULL</script>
+        <script>UPDATE `grb_cds_resource` SET `fanArtResource2`=`fanArtResource` WHERE `fanArtResource` is not null AND `fanArtResource` != ''</script>
+        <script>UPDATE `grb_cds_resource` SET `fanArtResource2`=NULL WHERE `fanArtResource` is null OR `fanArtResource` = ''</script>
         <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `fanArtResource`</script>
-        <script>ALTER TABLE `grb_cds_resource` CHANGE `fanArtResource2` `fanArtResource`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `fanArtResource2` `fanArtResource` bigint(20) default NULL</script>
 
-        <script>ALTER TABLE `grb_cds_resource` ADD `bitsPerSample2` bigint(20) NOT NULL default 0</script>
-        <script>UPDATE `grb_cds_resource` SET `bitsPerSample2`=`bitsPerSample`</script>
+        <script>ALTER TABLE `grb_cds_resource` ADD `bitsPerSample2` bigint(20) default NULL</script>
+        <script>UPDATE `grb_cds_resource` SET `bitsPerSample2`=`bitsPerSample` WHERE `bitsPerSample` is not null AND `bitsPerSample` != ''</script>
+        <script>UPDATE `grb_cds_resource` SET `bitsPerSample2`=NULL WHERE `bitsPerSample` is null OR `bitsPerSample` = ''</script>
         <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `bitsPerSample`</script>
-        <script>ALTER TABLE `grb_cds_resource` CHANGE `bitsPerSample2` `bitsPerSample`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `bitsPerSample2` `bitsPerSample` bigint(20) default NULL</script>
 
-        <script>ALTER TABLE `grb_cds_resource` ADD `orientation2` bigint(20) NOT NULL default 0</script>
-        <script>UPDATE `grb_cds_resource` SET `orientation2`=`orientation`</script>
+        <script>ALTER TABLE `grb_cds_resource` ADD `orientation2` bigint(20) default NULL</script>
+        <script>UPDATE `grb_cds_resource` SET `orientation2`=`orientation` WHERE `orientation` is not null AND `orientation` != ''</script>
+        <script>UPDATE `grb_cds_resource` SET `orientation2`=NULL WHERE `orientation` is null OR `orientation` = ''</script>
         <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `orientation`</script>
-        <script>ALTER TABLE `grb_cds_resource` CHANGE `orientation2` `orientation`</script>
+        <script>ALTER TABLE `grb_cds_resource` CHANGE `orientation2` `orientation` bigint(20) default NULL</script>
     </version>
 </upgrade>

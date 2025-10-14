@@ -92,6 +92,7 @@ public:
     /// This function returns true if the server is about to be
     /// terminated. This is the case when upnp_clean() was called.
     bool getShutdownStatus() const;
+    bool isRunning() const { return running; }
 
     void sendSubscriptionUpdate(const std::string& updateString, const std::string& serviceId);
 
@@ -125,6 +126,7 @@ protected:
     bool server_shutdown_flag {};
 
     bool offline {};
+    bool running { false };
 
     /// @brief Handle for our upnp callbacks.
     UpnpDevice_Handle rootDeviceHandle {};
