@@ -37,7 +37,7 @@ if [[ "${GERBERA_ENV-head}" == "minimum" ]]; then
     TAGLIB="1.12"
     JSONCPP="1.7.4"
     CMAKE="3.31.8"
-    PQXX="7.10.1"
+    PQXX="7.10.3"
 
 elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
 
@@ -74,7 +74,7 @@ else
     NPUPNP="6.2.1"
     PUGIXML="1.15"
     PUPNP="1.14.25"
-    SPDLOG="1.15.3"
+    SPDLOG="1.16.0"
     WAVPACK="5.8.1"
     TAGLIB="2.1.1"
     JSONCPP="1.9.6"

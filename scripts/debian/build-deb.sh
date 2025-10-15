@@ -207,16 +207,19 @@ if [[ ! -d "${BUILD_DIR}" ]]; then
       uuid-dev
   sudo apt-get clean
 
-  WITH_POSTGRES="ON"
   if [[ "${lsb_codename}" == "bionic" ]]; then
     # dpkg-dev pulls g++ which changes your GCC symlinks because ubuntu knows better than you
     sudo update-alternatives --set gcc /usr/bin/gcc-8
     sudo update-alternatives --set cpp /usr/bin/cpp-8
-    WITH_POSTGRES="OFF"
-  else
-    install-libpqxx
   fi
   echo "::endgroup::"
+
+  WITH_POSTGRES="ON"
+  if [[ "${lsb_codename}" != "bionic" ]]; then
+    install-libpqxx
+  else
+    WITH_POSTGRES="OFF"
+  fi
 
   if [[ "${my_sys}" == "HEAD" ]]; then
     install-googletest
