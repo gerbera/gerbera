@@ -28,7 +28,7 @@ and there is a new database: **PostgreSQL**.
 
 - MacOS build with ICU and WavPack
 - Documentation is using special tags for config variables
-- Update maximum library versions of exiv2 (0.28.7), fmt (12.0.0), pupnp (1.14.25)
+- Update maximum library versions of exiv2 (0.28.7), fmt (12.0.0), pupnp (1.14.25), spdlog (1.16.0)
 - Cleanup of cmake modules
 
 
