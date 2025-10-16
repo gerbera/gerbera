@@ -57,7 +57,8 @@ bool ConfigClientSetup::createOptionFromNode(
     for (auto&& it : gcs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
         auto name = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_GROUP_NAME)->getXmlContent(child);
-        auto group = std::make_shared<ClientGroupConfig>(name);
+        auto isAllowed = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_GROUP_ALLOWED)->getXmlContent(child);
+        auto group = std::make_shared<ClientGroupConfig>(name, isAllowed);
         auto forbiddenDirectories = definition->findConfigSetup<ConfigArraySetup>(ConfigVal::A_CLIENTS_GROUP_HIDDEN_LIST)->getXmlContent(child);
         group->setForbiddenDirectories(forbiddenDirectories);
         EDIT_CAST(EditHelperClientGroupConfig, result)->add(group);
@@ -76,7 +77,8 @@ bool ConfigClientSetup::createOptionFromNode(
         auto stringLimit = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->getXmlContent(child);
         auto multiValue = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->getXmlContent(child);
         auto fullFilter = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL)->getXmlContent(child);
-        auto isAllowed = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED)->getXmlContent(child);
+        auto allowCS = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED);
+        auto isAllowed = allowCS->getXmlContent(child);
         auto mappings = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child);
         auto headers = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS)->getXmlContent(child);
         auto profiles = definition->findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE)->getXmlContent(child);
@@ -90,8 +92,12 @@ bool ConfigClientSetup::createOptionFromNode(
 
         auto client = std::make_shared<ClientConfig>(flags, group, ip, userAgent, matchValues, captionInfoCount, stringLimit, multiValue, isAllowed);
         try {
-            if (groupCache.find(group) != groupCache.end())
+            if (groupCache.find(group) != groupCache.end()) {
                 client->setGroup(group, groupCache.at(group));
+                if (!allowCS->hasXmlElement(child)) {
+                    client->setAllowed(groupCache.at(group)->getAllowed());
+                }
+            }
             client->setFullFilter(fullFilter);
             if (!mappings.empty())
                 client->setMimeMappings(mappings);
@@ -213,10 +219,10 @@ bool ConfigClientSetup::updateItem(
                 return true;
             },
         },
-        // upnp multi value
+        // Allowed
         {
             { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_ALLOWED },
-            "upnp multi value",
+            "Allowed",
             [&](const std::shared_ptr<ClientConfig>& entry) { return fmt::to_string(entry->getAllowed()); },
             [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
                 entry->setAllowed(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
@@ -411,6 +417,32 @@ bool ConfigClientSetup::updateItem(
             return true;
         }
     }
+    static auto resultProperties = std::vector<ConfigResultProperty<ClientGroupConfig>> {
+        // Allowed
+        {
+            { ConfigVal::A_CLIENTS_GROUP, ConfigVal::A_CLIENTS_GROUP_ALLOWED },
+            "Allowed",
+            [&](const std::shared_ptr<ClientGroupConfig>& entry) { return fmt::to_string(entry->getAllowed()); },
+            [&](const std::shared_ptr<ClientGroupConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setAllowed(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+    };
+
+    auto i = indexList.at(0);
+    for (auto&& [cfg, label, getProperty, setProperty] : resultProperties) {
+        auto index = getItemPath(indexList, cfg);
+        if (optItem == index) {
+            if (entry->getOrig())
+                config->setOrigValue(index, getProperty(entry));
+            if (setProperty(entry, definition, cfg.at(0), optValue)) {
+                auto nEntry = EDIT_CAST(EditHelperClientGroupConfig, config->getClientConfigListOption(option))->get(i);
+                log_debug("New value for Group {} {} = {}", label.data(), index, getProperty(nEntry));
+                return true;
+            }
+        }
+    }
     {
         // set forbidden directory
         auto keyIndex = getItemPath(indexList, { ConfigVal::A_CLIENTS_GROUP, ConfigVal::A_CLIENTS_GROUP_HIDE, ConfigVal::A_CLIENTS_GROUP_LOCATION });
@@ -424,7 +456,7 @@ bool ConfigClientSetup::updateItem(
             } else {
                 config->setOrigValue(keyIndex, profiles);
                 entry->setForbiddenDirectory(j, optValue);
-                log_debug("location dlna value {} {}", keyIndex, optValue);
+                log_debug("location forbidden value {} {}", keyIndex, optValue);
             }
             return true;
         }

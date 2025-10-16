@@ -69,6 +69,7 @@ bool Web::Clients::processPageAction(Json::Value& element, const std::string& ac
         item["name"] = obj.pInfo->name;
         item["group"] = obj.pInfo->group;
         item["match"] = obj.pInfo->match;
+        item["allowed"] = obj.pInfo->isAllowed;
         auto flags = ClientConfig::mapFlags(obj.pInfo->flags);
         replaceAllString(flags, "|", " | ");
         item["flags"] = flags;

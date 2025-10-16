@@ -51,11 +51,16 @@ public:
 /// @brief Provides information about client group settings.
 class ClientGroupConfig : public Editable {
 public:
-    ClientGroupConfig(std::string name = "")
-        : groupName(std::move(name))
+    /// @param name client group name
+    /// @param isAllowed client in group is allowed to connect to server
+    ClientGroupConfig(std::string name = "", bool isAllowed = true)
+        : isAllowed(isAllowed)
     {
+        if (!name.empty())
+            groupName = std::move(name);
     }
 
+    /// @brief compare two configs by group name
     bool equals(const std::shared_ptr<ClientGroupConfig>& other) { return this->groupName == other->groupName; }
 
     /// @brief get list of forbidden directories
@@ -63,10 +68,19 @@ public:
     void setForbiddenDirectories(const std::vector<std::string>& forbidden) { this->forbidden = ArrayOption(forbidden); }
     void setForbiddenDirectory(std::size_t j, const std::string& value) { this->forbidden.setItem(j, value); }
 
+    /// @brief get group name
     std::string getGroupName() { return groupName; }
+
+    /// @brief client in group is allowed to connect to server
+    bool getAllowed() const { return this->isAllowed; }
+    void setAllowed(bool isAllowed)
+    {
+        this->isAllowed = isAllowed;
+    }
 
 private:
     std::string groupName { DEFAULT_CLIENT_GROUP };
+    bool isAllowed { true };
     ArrayOption forbidden = ArrayOption({});
 };
 
@@ -89,19 +103,22 @@ public:
         const std::map<ClientMatchType, std::string>& matchValues,
         int captionInfoCount, int stringLimit, bool multiValue, bool isAllowed);
 
+    /// @brief compare two configs by ip and userAgent
     bool equals(const std::shared_ptr<ClientConfig>& other) const { return this->getIp() == other->getIp() && this->getUserAgent() == other->getUserAgent(); }
+
+    /// @brief get client profile associated with configuration
     const ClientProfile& getClientProfile() const { return clientProfile; }
 
     int getFlags() const { return this->clientProfile.flags; }
     void setFlags(int flags) { this->clientProfile.flags = flags; }
 
-    /// @brief mimeMappings special mappings for client
+    /// @brief special mappings for client
     std::map<std::string, std::string> getMimeMappings(bool edit = false) const { return this->clientProfile.mimeMappings.getDictionaryOption(edit); }
     void setMimeMappings(const std::map<std::string, std::string>& mappings) { this->clientProfile.mimeMappings = DictionaryOption(mappings); }
     void setMimeMappingsFrom(std::size_t j, const std::string& from);
     void setMimeMappingsTo(std::size_t j, const std::string& to);
 
-    /// @brief headers additional headers from client
+    /// @brief get additional headers for client
     std::map<std::string, std::string> getHeaders(bool edit = false) const { return this->clientProfile.headers.getDictionaryOption(edit); }
     void setHeaders(const std::map<std::string, std::string>& headers) { this->clientProfile.headers = DictionaryOption(headers); }
     void setHeadersKey(std::size_t j, const std::string& key);
@@ -112,36 +129,42 @@ public:
     void setDlnaMappings(const std::vector<std::vector<std::pair<std::string, std::string>>>& dlnaMappings) { this->clientProfile.dlnaMappings = VectorOption(dlnaMappings); }
     void setDlnaMapping(std::size_t j, std::size_t k, const std::string& value);
 
+    /// @brief number of captionInfo entries allowed in response
     int getCaptionInfoCount() const { return this->clientProfile.captionInfoCount; }
     void setCaptionInfoCount(int captionInfoCount)
     {
         this->clientProfile.captionInfoCount = captionInfoCount;
     }
 
+    /// @brief maximum lenght of strings accepted by client
     int getStringLimit() const { return this->clientProfile.stringLimit; }
     void setStringLimit(int stringLimit)
     {
         this->clientProfile.stringLimit = stringLimit;
     }
 
+    /// @brief client support multiple appearances of entries (as defined by UPnP)
     bool getMultiValue() const { return this->clientProfile.multiValue; }
     void setMultiValue(bool multiValue)
     {
         this->clientProfile.multiValue = multiValue;
     }
 
+    /// @brief client filters are enforced
     bool getFullFilter() const { return this->clientProfile.fullFilter; }
     void setFullFilter(bool fullFilter)
     {
         this->clientProfile.fullFilter = fullFilter;
     }
 
+    /// @brief client is allowed to connect to server
     bool getAllowed() const { return this->clientProfile.isAllowed; }
     void setAllowed(bool isAllowed)
     {
         this->clientProfile.isAllowed = isAllowed;
     }
 
+    /// @brief client ip address if used for identification
     std::string getIp() const { return (this->clientProfile.matchType == ClientMatchType::IP) ? this->clientProfile.match : ""; }
     void setIp(std::string_view ip)
     {
@@ -149,6 +172,7 @@ public:
         this->clientProfile.match = ip;
     }
 
+    /// @brief client group name
     std::string getGroup() const { return this->clientProfile.groupConfig ? this->clientProfile.groupConfig->getGroupName() : this->clientProfile.group; }
     void setGroup(std::string_view group, const std::shared_ptr<ClientGroupConfig>& groupConfig = {})
     {
@@ -157,6 +181,7 @@ public:
             this->clientProfile.group = groupConfig->getGroupName();
     }
 
+    /// @brief client userAgent address if used for identification
     std::string getUserAgent() const { return (this->clientProfile.matchType == ClientMatchType::UserAgent) ? this->clientProfile.match : ""; }
     void setUserAgent(std::string_view userAgent)
     {

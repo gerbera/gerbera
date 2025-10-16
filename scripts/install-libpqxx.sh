@@ -43,10 +43,8 @@ downloadSource
 installDeps ${main_dir} pqxx
 
 cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED} \
-         -DBUILD_DOC=ON \
-         -DSKIP_BUILD_TEST=ON \
          -DBUILD_DOC=OFF \
-         -DINSTALL_TEST=OFF
+         -DSKIP_BUILD_TEST=ON
 
 makeInstall
 

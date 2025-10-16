@@ -43,7 +43,7 @@ function install-spdlog() {
 
 function install-libpqxx() {
   echo "::group::Installing libpqxx"
-  sudo bash "${GRB_SH_DIR}install-libpqxx.sh"
+  sudo bash "${GRB_SH_DIR}install-libpqxx.sh" $*
   echo "::endgroup::"
 }
 

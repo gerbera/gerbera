@@ -986,6 +986,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getClientOptions()
         std::make_shared<ConfigPathSetup>(ConfigVal::A_CLIENTS_GROUP_LOCATION,
             "attribute::location", "config-clients.html#group",
             ""),
+        std::make_shared<ConfigBoolSetup>(ConfigVal::A_CLIENTS_GROUP_ALLOWED,
+            "attribute::allowed", "config-clients.html#group",
+            YES),
 
         std::make_shared<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE,
             "/clients/client", "config-import.html#map",
