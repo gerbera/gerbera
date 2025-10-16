@@ -228,6 +228,7 @@ void ClientManager::refresh()
     if (defaultGroup) {
         for (auto&& cp : clientProfile) {
             cp.groupConfig = defaultGroup;
+            cp.isAllowed = defaultGroup->getAllowed();
         }
     }
     auto clientConfigList = EDIT_CAST(EditHelperClientConfig, configList);

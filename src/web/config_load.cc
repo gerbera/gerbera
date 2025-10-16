@@ -475,6 +475,11 @@ void Web::ConfigLoad::writeClientConfig(Json::Value& values)
                 cs->getItemPath(indexList, { ConfigVal::A_CLIENTS_GROUP, ConfigVal::A_CLIENTS_GROUP_NAME }),
                 cs->option, ConfigVal::A_CLIENTS_GROUP_NAME, group->getGroupName(), cs);
         }
+        {
+            addValue(values,
+                cs->getItemPath(indexList, { ConfigVal::A_CLIENTS_GROUP, ConfigVal::A_CLIENTS_GROUP_ALLOWED }),
+                cs->option, ConfigVal::A_CLIENTS_GROUP_ALLOWED, group->getAllowed(), cs);
+        }
         auto forbiddenDirs = group->getForbiddenDirectories();
         for (std::size_t j = 0; j < forbiddenDirs.size(); j++) {
             std::vector<std::size_t> subIndexList = { i, j };
@@ -487,6 +492,9 @@ void Web::ConfigLoad::writeClientConfig(Json::Value& values)
     addNewValue(values,
         cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_GROUP, ConfigVal::A_CLIENTS_GROUP_NAME }),
         cs->option, ConfigVal::A_CLIENTS_GROUP_NAME, definition->findConfigSetup(ConfigVal::A_CLIENTS_GROUP_NAME));
+    addNewValue(values,
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_GROUP, ConfigVal::A_CLIENTS_GROUP_ALLOWED }),
+        cs->option, ConfigVal::A_CLIENTS_GROUP_ALLOWED, definition->findConfigSetup(ConfigVal::A_CLIENTS_GROUP_ALLOWED));
     addNewValue(values,
         cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_GROUP, ConfigVal::A_CLIENTS_GROUP_LOCATION }),
         cs->option, ConfigVal::A_CLIENTS_GROUP_LOCATION, definition->findConfigSetup(ConfigVal::A_CLIENTS_GROUP_LOCATION));

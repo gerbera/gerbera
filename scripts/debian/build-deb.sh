@@ -216,7 +216,7 @@ if [[ ! -d "${BUILD_DIR}" ]]; then
 
   WITH_POSTGRES="ON"
   if [[ "${lsb_codename}" != "bionic" ]]; then
-    install-libpqxx
+    install-libpqxx static
   else
     WITH_POSTGRES="OFF"
   fi

@@ -376,6 +376,20 @@ Group Attributes
 
 Name of the group. Should correspond to one of the group names in client settings or ``default``
 
+.. confval:: group allowed
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``yes``
+..
+
+   .. versionadded:: HEAD
+   .. code:: xml
+
+       allowed="no"
+
+If set to ``no`` all requests from a client assigned to this group are blocked.
+If group ``default`` is not allowed, each allowed client must be configured or assigned an allowed group.
+
 Group Details
 -------------
 

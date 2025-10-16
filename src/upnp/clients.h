@@ -71,23 +71,37 @@ enum class ClientMatchType {
 
 /// @brief container for profiles
 struct ClientProfile {
-    std::string name { "Unknown" }; // used for logging/debugging proposes only
+    /// @brief profile name used for logging/debugging proposes only
+    std::string name { "Unknown" };
+    /// @brief name of the client group
     std::string group { DEFAULT_CLIENT_GROUP };
+    /// @brief client type is predefined
     ClientType type { ClientType::Unknown };
+    /// @brief active flags for client
     QuirkFlags flags { QUIRK_FLAG_NONE };
-
-    // to match the client
+    /// @brief type of match applied to match the client
     ClientMatchType matchType { ClientMatchType::None };
+    /// @brief value of match applied to match the client
     std::string match;
+    /// @brief special mappings for client
     DictionaryOption mimeMappings = DictionaryOption();
+    /// @brief additional headers for client
     DictionaryOption headers = DictionaryOption();
+    /// @brief dlnaMappings additional dlna profiles mappings from client
     VectorOption dlnaMappings = VectorOption();
+    /// @brief number of captionInfo entries allowed in response
     int captionInfoCount { -1 };
+    /// @brief maximum lenght of strings accepted by client
     int stringLimit { -1 };
+    /// @brief client support multiple appearances of entries (as defined by UPnP)
     bool multiValue { true };
+    /// @brief client filters are enforced
     bool fullFilter { false };
+    /// @brief client is allowed to connect to server
     bool isAllowed { true };
+    /// @brief support resource types by client
     std::vector<ResourcePurpose> supportedResources { ResourcePurpose::Content, ResourcePurpose::Thumbnail, ResourcePurpose::Subtitle, ResourcePurpose::Transcode };
+    /// @brief reference to group configuration
     std::shared_ptr<ClientGroupConfig> groupConfig;
 };
 

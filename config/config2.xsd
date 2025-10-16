@@ -599,6 +599,7 @@
                 <xs:element ref="hide" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
             <xs:attribute name="name" type="xs:string" use="required"/>
+            <xs:attribute name="allowed" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 
