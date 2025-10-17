@@ -7,6 +7,7 @@
 - Allow masking arguments
 - Block client group
 - Bump github/codeql-action from 3 to 4
+- Build for ubuntu-25.10
 - Check Headers in Quirks
 - CI Tests: Try more alpine versions
 - Command line option for even more config details

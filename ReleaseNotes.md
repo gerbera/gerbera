@@ -16,6 +16,7 @@ and there is a new database: **PostgreSQL**.
 - Spinner on WebUI while loading
 - New command line option for even more data in the config example
 - Integration with systemd
+- Add Build for Ubuntu 25.10
 
 ### FIXES
 
