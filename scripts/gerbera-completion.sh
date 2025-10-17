@@ -29,7 +29,7 @@ _gerbera_completions() {
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     
     commands="-D -c -d -h -v -u -P -f -p -i -e -m"
-    commands="${commands} --help --debug --version --compile-info --create-config --create-example-config --create-advanced-config --check-config --print-options --offline --daemon --user --pidfile --config --cfgdir --logfile --rotatelog --syslog --add-file --set-option --port --ip --interface --home --magic --import-mode --debug-mode"
+    commands="${commands} --help --debug --version --compile-info --create-config --create-example-config --create-advanced-config --check-config --print-options --offline --drop-tables --daemon --user --pidfile --config --cfgdir --logfile --rotatelog --syslog --add-file --set-option --port --ip --interface --home --magic --import-mode --debug-mode"
     
     if [[ ${COMP_CWORD} -eq 1 ]]; then
         COMPREPLY=( $(compgen -W "${commands}" -- ${cur}) )

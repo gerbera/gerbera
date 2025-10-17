@@ -38,6 +38,7 @@
 #include "cds/cds_enums.h"
 #include "config/config_val.h"
 #include "exceptions.h"
+#include "mysql_result.h"
 #include "util/thread_runner.h"
 #include "util/tools.h"
 
@@ -57,10 +58,13 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
     table_quote_end = '`';
 
     // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated
-    hashies = { 3747425931, // index 0 is used for create script mysql.sql = Version 1
+    hashies = {
+        3747425931, // index 0 is used for create script mysql.sql = Version 1
         928913698, 1984244483, 742641207, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, // upgrade 2-11
         1512596496, 507706380, 3545156190, 31528140, 372163748, 2233365597, 751952276, 3893982139, 798767550, 2305803926, // upgrade 12-21
-        3643149536, 4280737637, 991351280, 4129183594 };
+        3643149536, 4280737637, 991351280, 4129183594,
+        2131653758 // index DBVERSION is used for drop script mysql-drop.sql = Version -1
+    };
 }
 
 MySQLDatabase::~MySQLDatabase()
@@ -96,7 +100,7 @@ void MySQLDatabase::threadCleanup()
     }
 }
 
-void MySQLDatabase::connect()
+void MySQLDatabase::run()
 {
     if (!mysql_thread_safe()) {
         throw_std_runtime_error("mysql library is not thread safe");
@@ -162,7 +166,7 @@ std::string MySQLDatabase::prepareDatabase()
         auto sql = GrbFile(std::move(sqlFilePath)).readTextFile();
         auto&& myHash = stringHash(sql);
 
-        if (myHash == hashies[0]) {
+        if (myHash == hashies.at(0)) {
             auto engine = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_ENGINE);
             auto charset = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_CHARSET);
             auto collation = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_COLLATION);
@@ -190,7 +194,7 @@ std::string MySQLDatabase::prepareDatabase()
             storeInternalSetting("charset", charset);
             storeInternalSetting("collation", collation);
         } else {
-            log_warning("Wrong hash for create script {}: {} != {}", DBVERSION, myHash, hashies[0]);
+            log_warning("Wrong hash for create script {}: {} != {}", DBVERSION, myHash, hashies.at(0));
             throw_std_runtime_error("Wrong hash for create script {}", DBVERSION);
         }
         dbVersion = getInternalSetting("db_version");
@@ -210,7 +214,6 @@ void MySQLDatabase::init()
 
     std::unique_lock<decltype(sqlMutex)> lock(sqlMutex);
 
-    connect();
     auto dbVersion = prepareDatabase();
     upgradeDatabase(std::stoul(dbVersion), hashies, ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, mysqlUpdateVersion, mysqlAddResourceAttr);
 
@@ -226,6 +229,32 @@ void MySQLDatabase::init()
     lock.unlock();
 
     log_debug("end");
+}
+
+void MySQLDatabase::dropTables()
+{
+    auto sqlFilePath = fs::path(config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_DROP_FILE));
+    log_info("Dropping tables with {}", sqlFilePath.c_str());
+    auto sql = GrbFile(std::move(sqlFilePath)).readTextFile();
+    auto&& myHash = stringHash(sql);
+    if (myHash == hashies.at(DBVERSION)) {
+        for (auto&& statement : splitString(sql, ';')) {
+            trimStringInPlace(statement);
+            if (statement.empty()) {
+                continue;
+            }
+            log_debug("executing statement: '{}'", statement);
+            int ret = mysql_real_query(&db, statement.c_str(), statement.size());
+            if (ret) {
+                std::string myError = getError(&db);
+                throw DatabaseException(myError, fmt::format("Mysql: error while dropping tables: {}", myError));
+            }
+        }
+    } else {
+        log_warning("Wrong hash for drop script {}: {} != {}", DBVERSION, myHash, hashies.at(DBVERSION));
+        throw_std_runtime_error("Wrong hash for drop script {}", DBVERSION);
+    }
+    log_info("Database tables dropped successfully.");
 }
 
 std::shared_ptr<Database> MySQLDatabase::getSelf()
@@ -425,48 +454,6 @@ void MySQLDatabase::_exec(const std::string& query)
         std::string myError = getError(&db);
         throw DatabaseException(myError, fmt::format("Mysql: error while updating db: {}; query: {}", myError, query));
     }
-}
-
-/* MysqlResult */
-
-MysqlResult::MysqlResult(MYSQL_RES* mysqlRes)
-    : mysqlRes(mysqlRes)
-{
-}
-
-MysqlResult::~MysqlResult()
-{
-    if (mysqlRes) {
-        if (!nullRead) {
-            while (mysql_fetch_row(mysqlRes))
-                ; // read out data
-        }
-        mysql_free_result(mysqlRes);
-        mysqlRes = nullptr;
-    }
-}
-
-std::unique_ptr<SQLRow> MysqlResult::nextRow()
-{
-    if (auto m = mysql_fetch_row(mysqlRes)) {
-        return std::make_unique<MysqlRow>(m);
-    }
-    nullRead = true;
-    mysql_free_result(mysqlRes);
-    mysqlRes = nullptr;
-    return nullptr;
-}
-
-/* MysqlRow */
-
-MysqlRow::MysqlRow(MYSQL_ROW mysqlRow)
-    : mysqlRow(mysqlRow)
-{
-}
-
-char* MysqlRow::col_c_str(int index) const
-{
-    return mysqlRow[index];
 }
 
 #endif // HAVE_MYSQL

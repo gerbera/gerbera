@@ -87,7 +87,7 @@ std::shared_ptr<Database> Database::createInstance(
         throw_std_runtime_error("Unknown database type: {}", type);
     }();
 
-    database->init();
+    database->run();
 
     return database;
 }

@@ -68,10 +68,15 @@ public:
     explicit Server(std::shared_ptr<Config> config);
 
     /// @brief Initializes the server.
-    ///
     /// This function reads information from the config and initializes
     /// various variables (like server UDN and so forth).
-    void init(const std::shared_ptr<ConfigDefinition>& definition, bool offln);
+    /// @param definition reference to configuration definitions
+    /// @param offln start server in offline (without UPnP) mode to import
+    /// @param dropDatabase start server to drop database (without any content operation)
+    void init(
+        const std::shared_ptr<ConfigDefinition>& definition,
+        bool offln,
+        bool dropDatabase);
 
     /// @brief Cleanup routine to shutdown the server.
     ///

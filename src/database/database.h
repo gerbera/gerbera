@@ -80,10 +80,20 @@ class Database {
 public:
     explicit Database(std::shared_ptr<Config> config);
     virtual ~Database();
+
+    /// @brief run the database
+    /// open connection to database
+    virtual void run() { }
+
+    /// @brief initialise the database
+    /// create tables and upgrade to current version
     virtual void init() = 0;
 
     /// @brief shutdown the Database with its possible threads
     virtual void shutdown() = 0;
+
+    /// @brief run drop-table script to clear the database
+    virtual void dropTables() = 0;
 
     virtual void addObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) = 0;
 

@@ -947,6 +947,21 @@ Below are the sqlite driver options:
 
 The full path to the init script for the database.
 
+Drop SQL File
+-------------
+
+.. confval:: sqlite3 drop-file
+   :type: :confval:`Path`
+   :required: false
+   :default: ``${datadir}/sqlite3-drop.sql``
+
+   .. versionadded:: HEAD
+   .. code-block:: xml
+
+      <drop-file>/etc/gerbera/sqlite3-drop.sql</drop-file>
+
+The full path to the drop script for the database.
+
 Upgrade Statement File
 ----------------------
 
@@ -1171,7 +1186,7 @@ Init SQL File
 -------------
 
 .. confval:: mysql init-sql-file
-   :type: :confval:`String`
+   :type: :confval:`Path`
    :required: false
    :default: ``${datadir}/mysql.sql``
 
@@ -1181,11 +1196,26 @@ Init SQL File
 
 The full path to the init script for the database.
 
+Drop SQL File
+-------------
+
+.. confval:: mysql drop-file
+   :type: :confval:`Path`
+   :required: false
+   :default: ``${datadir}/mysql-drop.sql``
+
+   .. versionadded:: HEAD
+   .. code-block:: xml
+
+      <drop-file>/etc/gerbera/mysql-drop.sql</drop-file>
+
+The full path to the drop script for the database.
+
 Upgrade Statement File
 ----------------------
 
 .. confval:: mysql upgrade-file
-   :type: :confval:`String`
+   :type: :confval:`Path`
    :required: false
    :default: ``${datadir}/mysql-upgrade.xml``
 
@@ -1252,7 +1282,6 @@ Postgres
    :required: false
 
    .. versionadded:: HEAD
-
    .. code-block:: xml
 
        <postgres enabled="no"/>
@@ -1347,7 +1376,7 @@ Init SQL File
 -------------
 
 .. confval:: postgres init-sql-file
-   :type: :confval:`String`
+   :type: :confval:`Path`
    :required: false
    :default: ``${datadir}/postgres.sql``
 
@@ -1357,11 +1386,25 @@ Init SQL File
 
 The full path to the init script for the database.
 
+Drop SQL File
+-------------
+
+.. confval:: postgres drop-file
+   :type: :confval:`Path`
+   :required: false
+   :default: ``${datadir}/postgres-drop.sql``
+
+   .. code-block:: xml
+
+      <drop-file>/etc/gerbera/postgres-drop.sql</drop-file>
+
+The full path to the drop script for the database.
+
 Upgrade Statement File
 ----------------------
 
 .. confval:: postgres upgrade-file
-   :type: :confval:`String`
+   :type: :confval:`Path`
    :required: false
    :default: ``${datadir}/postgres-upgrade.xml``
 

@@ -50,6 +50,8 @@ public:
 
     void shutdownDriver() override { }
 
+    void dropTables() override { }
+
     std::string quote(const std::string& str) const override
     {
         return fmt::format("\"{}\"", str);

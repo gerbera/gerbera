@@ -5,7 +5,7 @@
 \\$2 \(la\\$1\(ra\\$3
 ..
 .if \n(.g .mso www.tmac
-.TH gerbera 1 2025-08-28 "" ""
+.TH gerbera 1 2025-10-17 "" ""
 .SH NAME
 gerbera \- UPnP MediaServer
 .SH SYNOPSIS
@@ -35,6 +35,8 @@ gerbera \- UPnP MediaServer
 \fB--print-options\fR
 ] [
 \fB--offline\fR
+] [
+\fB--drop-tables\fR
 ] [
 \fB-d|-daemon\fR
 ] [
@@ -175,6 +177,9 @@ Check the current configuration before running the service and exit. Helpful in 
 \*(T<\fB\-\-offline\fR\*(T>
 Do not answer UPnP requests like browse. This is helpful when running a large scan to initialize
 the database so no client can slow down the import by accessing the database.
+.TP
+\*(T<\fB\-\-drop\-tables\fR\*(T>
+Drop all database tables and exit
 .TP
 \*(T<\fB\-\-version\fR\*(T>
 Print version information and exit.

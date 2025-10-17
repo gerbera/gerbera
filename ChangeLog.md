@@ -11,6 +11,7 @@
 - Check Headers in Quirks
 - CI Tests: Try more alpine versions
 - Command line option for even more config details
+- Command line option to drop database tables
 - Documentation on Return Path Filtering
 - Enable ICU for MacOS
 - Fix derivedFrom search handling
