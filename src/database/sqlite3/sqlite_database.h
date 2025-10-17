@@ -41,21 +41,33 @@
 
 #include <mutex>
 #include <queue>
-#include <sqlite3.h>
 
 class Sqlite3Database;
 class Sqlite3Result;
 class SLTask;
 
+extern "C" {
+struct sqlite3;
+}
+
 #define DELETE_CACHE_MAX_SIZE 500 // remove entries, if cache has more than 500 (default)
 
 /// @brief The Database class for using SQLite3
-class Sqlite3Database : public Timer::Subscriber, public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
+class Sqlite3Database
+    : public Timer::Subscriber,
+      public SQLDatabase,
+      public std::enable_shared_from_this<SQLDatabase> {
 public:
-    Sqlite3Database(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager, std::shared_ptr<Timer> timer);
+    Sqlite3Database(
+        const std::shared_ptr<Config>& config,
+        const std::shared_ptr<Mime>& mime,
+        const std::shared_ptr<ConverterManager>& converterManager,
+        std::shared_ptr<Timer> timer);
 
     std::string handleError(const std::string& query, const std::string& error, sqlite3* db, int errorCode);
     void timerNotify(const std::shared_ptr<Timer::Parameter>& param) override;
+
+    void dropTables() override;
 
 protected:
     void _exec(const std::string& query) override;
@@ -63,6 +75,7 @@ protected:
 
 private:
     void prepare();
+    void run() override;
     void init() override;
     void shutdownDriver() override;
     std::shared_ptr<Database> getSelf() override;
@@ -111,50 +124,21 @@ private:
     int sqliteStatus {};
     /// @brief maximum number of attempts to terminate gracefully
     int shutdownAttempts { 5 };
+    fs::path dbFilePath;
 };
 
 /// @brief The Database class for using SQLite3 with transactions
 class Sqlite3DatabaseWithTransactions : public SqlWithTransactions, public Sqlite3Database {
 public:
-    Sqlite3DatabaseWithTransactions(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager, const std::shared_ptr<Timer>& timer);
+    Sqlite3DatabaseWithTransactions(
+        const std::shared_ptr<Config>& config,
+        const std::shared_ptr<Mime>& mime,
+        const std::shared_ptr<ConverterManager>& converterManager,
+        const std::shared_ptr<Timer>& timer);
 
     void beginTransaction(std::string_view tName) override;
     void rollback(std::string_view tName) override;
     void commit(std::string_view tName) override;
-};
-
-/// @brief Represents a result of a sqlite3 select
-class Sqlite3Result : public SQLResult {
-public:
-    Sqlite3Result() = default;
-    ~Sqlite3Result() override;
-
-    Sqlite3Result(const Sqlite3Result&) = delete;
-    Sqlite3Result& operator=(const Sqlite3Result&) = delete;
-
-private:
-    std::unique_ptr<SQLRow> nextRow() override;
-    [[nodiscard]] unsigned long long getNumRows() const override { return nrow; }
-
-    char** table { nullptr };
-    char** row;
-
-    int cur_row;
-
-    int nrow;
-    int ncolumn;
-
-    friend class SLSelectTask;
-};
-
-/// @brief Represents a row of a result of a sqlite3 select
-class Sqlite3Row : public SQLRow {
-public:
-    explicit Sqlite3Row(char** row);
-
-private:
-    char* col_c_str(int index) const override;
-    char** row;
 };
 
 #endif // __SQLITE3_STORAGE_H__

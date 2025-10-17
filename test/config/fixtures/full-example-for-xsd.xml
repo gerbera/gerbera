@@ -158,6 +158,7 @@
                 <on-error>restore</on-error>
                 <init-sql-file>/usr/local/share/gerbera/sqlite3.sql</init-sql-file>
                 <upgrade-file>/usr/local/share/gerbera/sqlite3-upgrade.xml</upgrade-file>
+                <drop-file>/usr/local/share/gerbera/sqlite3-drop.sql</drop-file>
                 <backup enabled="yes" interval="600" />
             </sqlite3>
             <mysql enabled="no">
@@ -169,6 +170,7 @@
                 <password/>
                 <init-sql-file>/usr/local/share/gerbera/mysql.sql</init-sql-file>
                 <upgrade-file>/usr/local/share/gerbera/mysql-upgrade.xml</upgrade-file>
+                <drop-file>/usr/local/share/gerbera/mysql-drop.sql</drop-file>
                 <engine>MyISAM</engine>
                 <charset>utf8</charset>
                 <collation>utf8_general_ci</collation>
@@ -182,6 +184,7 @@
                 <socket/>
                 <init-sql-file>/home/family/Source/gerbera/src/database/postgres/postgres.sql</init-sql-file>
                 <upgrade-file>/home/family/Source/gerbera/src/database/postgres/postgres-upgrade.xml</upgrade-file>
+                <drop-file>/usr/local/share/gerbera/postgres-drop.sql</drop-file>
             </postgres>
         </storage>
         <containers enabled="yes">

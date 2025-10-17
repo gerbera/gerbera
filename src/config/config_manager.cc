@@ -191,6 +191,9 @@ void ConfigManager::load(const fs::path& userHome)
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE);
         co->setDefaultValue(dataDir / "mysql-upgrade.xml");
         co->makeOption(root, self);
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_DROP_FILE);
+        co->setDefaultValue(dataDir / "mysql-drop.sql");
+        co->makeOption(root, self);
         dbDriver = DB_DRIVER_MYSQL;
     }
 #endif // HAVE_MYSQL
@@ -202,10 +205,13 @@ void ConfigManager::load(const fs::path& userHome)
             setOption(root, option);
 
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE);
-        co->setDefaultValue(dataDir / "pgsql.sql");
+        co->setDefaultValue(dataDir / "postgres.sql");
         co->makeOption(root, self);
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE);
-        co->setDefaultValue(dataDir / "pgsql-upgrade.xml");
+        co->setDefaultValue(dataDir / "postgres-upgrade.xml");
+        co->makeOption(root, self);
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE);
+        co->setDefaultValue(dataDir / "postgres-drop.sql");
         co->makeOption(root, self);
         dbDriver = DB_DRIVER_POSTGRES;
     }
@@ -221,6 +227,9 @@ void ConfigManager::load(const fs::path& userHome)
         co->makeOption(root, self);
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE);
         co->setDefaultValue(dataDir / "sqlite3-upgrade.xml");
+        co->makeOption(root, self);
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE);
+        co->setDefaultValue(dataDir / "sqlite3-drop.sql");
         co->makeOption(root, self);
         dbDriver = DB_DRIVER_SQLITE;
     }

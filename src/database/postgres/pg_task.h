@@ -28,11 +28,16 @@
 
 #include <condition_variable>
 #include <mutex>
-#include <pqxx/pqxx>
 
 class Config;
+enum class ConfigVal;
 class PostgresDatabase;
 class PostgresSQLResult;
+
+namespace pqxx {
+class connection;
+class result;
+}
 
 #define POSTGRES_SET_VERSION "INSERT INTO \"mt_internal_setting\" VALUES('db_version', '{}')"
 
@@ -94,22 +99,27 @@ protected:
 };
 
 /// @brief A task for the postgres thread to inititally create the database.
-class PGInitTask : public PGTask {
+class PGScriptTask : public PGTask {
 public:
     /// @brief Constructor for the postgres init task
-    explicit PGInitTask(
+    explicit PGScriptTask(
         std::shared_ptr<Config> config,
         unsigned int hashie,
-        unsigned int stringLimit);
+        unsigned int stringLimit,
+        ConfigVal scriptFile);
 
-    void run(const std::unique_ptr<pqxx::connection>& conn, PostgresDatabase& pg, bool throwOnError = true) override;
+    void run(
+        const std::unique_ptr<pqxx::connection>& conn,
+        PostgresDatabase& pg,
+        bool throwOnError = true) override;
 
-    std::string_view taskType() const override { return "PGInitTask"; }
+    std::string_view taskType() const override { return "PGScriptTask"; }
 
 protected:
     std::shared_ptr<Config> config;
     unsigned int hashie;
     unsigned int stringLimit;
+    ConfigVal scriptFile;
 };
 
 /// @brief A task for the postgres thread to do a SQL select.
@@ -119,7 +129,10 @@ public:
     /// @param query The SQL query string
     explicit PGSelectTask(const std::string& query);
 
-    void run(const std::unique_ptr<pqxx::connection>& conn, PostgresDatabase& pg, bool throwOnError = true) override;
+    void run(
+        const std::unique_ptr<pqxx::connection>& conn,
+        PostgresDatabase& pg,
+        bool throwOnError = true) override;
     [[nodiscard]] std::shared_ptr<PostgresSQLResult> getResult() const { return pres; }
 
     std::string_view taskType() const override { return "PGSelectTask"; }
@@ -141,7 +154,10 @@ public:
     PGExecTask(const std::string& query, const std::string& getLastInsertId, bool warnOnly = false);
     PGExecTask(const std::string& query);
 
-    void run(const std::unique_ptr<pqxx::connection>& conn, PostgresDatabase& pg, bool throwOnError = true) override;
+    void run(
+        const std::unique_ptr<pqxx::connection>& conn,
+        PostgresDatabase& pg,
+        bool throwOnError = true) override;
     int getLastInsertId() const { return lastInsertId; }
 
     std::string_view taskType() const override { return "PGExecTask"; }

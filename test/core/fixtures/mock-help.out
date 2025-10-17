@@ -16,6 +16,7 @@ Usage:
       --check-config            Check config.xml file and exit
       --print-options           Print simple config options and exit
       --offline                 Do not answer UPnP content requests
+      --drop-tables             Drop all database tables and exit
   -d, --daemon                  Daemonize after startup
   -u, --user UID                Drop privs to user UID
   -P, --pidfile FILE            Write a pidfile to the specified location, 

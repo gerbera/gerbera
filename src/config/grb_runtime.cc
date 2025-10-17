@@ -115,6 +115,7 @@ void GerberaRuntime::init(
         { GRB_OPTION_PIDFILE, [=](const std::string& arg) { return this->createPidFile(arg); } },
         { GRB_OPTION_CONFIG, [=](const std::string& arg) { return this->setConfigFile(arg); } },
         { GRB_OPTION_CFGDIR, [=](const std::string& arg) { return this->setConfigDir(arg); } },
+        { GRB_OPTION_DROPTABLES, [=](const std::string& arg) { return this->dropTables(arg); } },
     };
 
     argumentOptionCallbacks = std::vector<ArgumentHandler> {
@@ -497,7 +498,16 @@ bool GerberaRuntime::setOfflineMode(const std::string& arg)
     if (offline)
         log_info("Running in offline mode");
 
-    return offline;
+    return true;
+}
+
+bool GerberaRuntime::dropTables(const std::string& arg)
+{
+    dropDatabase = (*results)[arg].as<bool>();
+    if (dropDatabase)
+        log_info("Dropping database tables");
+
+    return true;
 }
 
 bool GerberaRuntime::checkDirs()

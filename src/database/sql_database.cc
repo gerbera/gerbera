@@ -46,6 +46,7 @@
 #include "exceptions.h"
 #include "metadata/metadata_enums.h"
 #include "search_handler.h"
+#include "sql_result.h"
 #include "sql_table.h"
 #include "upnp/clients.h"
 #include "upnp/xml_builder.h"
@@ -601,7 +602,7 @@ void SQLDatabase::fillDatabase()
 
 void SQLDatabase::upgradeDatabase(
     unsigned int dbVersion,
-    const std::array<unsigned int, DBVERSION>& hashies,
+    const std::array<unsigned int, DBVERSION + 1>& hashies,
     ConfigVal upgradeOption,
     std::string_view updateVersionCommand,
     const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd)

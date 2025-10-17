@@ -56,12 +56,15 @@ public:
         return "";
     }
 
+    void dropTables() override;
+
 protected:
     void _exec(const std::string& query) override;
     std::string prepareDatabase();
     std::string getUnreferencedQuery(const std::string& table) override;
 
 private:
+    void run() override;
     void init() override;
     void shutdownDriver() override;
     std::shared_ptr<Database> getSelf() override;
@@ -116,46 +119,6 @@ public:
     void beginTransaction(std::string_view tName) override;
     void rollback(std::string_view tName) override;
     void commit(std::string_view tName) override;
-};
-
-/// @brief Represents a result of a Postgres select
-class PostgresSQLResult : public SQLResult {
-public:
-    explicit PostgresSQLResult(const pqxx::result& r)
-        : result(r)
-        , row(0)
-    {
-    }
-    PostgresSQLResult() = default;
-    ~PostgresSQLResult() override;
-
-    PostgresSQLResult(const PostgresSQLResult&) = delete;
-    PostgresSQLResult& operator=(const PostgresSQLResult&) = delete;
-
-private:
-    std::unique_ptr<SQLRow> nextRow() override;
-    unsigned long long getNumRows() const override { return result.size(); }
-
-    pqxx::result result;
-    pqxx::result::size_type row;
-};
-
-/// @brief Represents a row of a result of a Postgres select
-class PostgresSQLRow : public SQLRow {
-public:
-    explicit PostgresSQLRow(const pqxx::row& r)
-        : row(r)
-    {
-    }
-
-private:
-    char* col_c_str(int index) const override
-    {
-        return (index < row.size() && !row.at(index).is_null())
-            ? const_cast<char*>(row.at(index).c_str())
-            : nullptr;
-    }
-    pqxx::row row;
 };
 
 #endif // __POSTGRES_DATABASE_H__

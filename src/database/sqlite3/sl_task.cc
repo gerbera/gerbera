@@ -26,8 +26,11 @@
 #include "config/config.h"
 #include "config/config_val.h"
 #include "exceptions.h"
+#include "sl_result.h"
 #include "sqlite_database.h"
 #include "util/tools.h"
+
+#include <sqlite3.h>
 
 SLTask::~SLTask() = default;
 
@@ -66,18 +69,25 @@ void SLTask::waitForTask()
     }
 }
 
-/* SLInitTask */
-SLInitTask::SLInitTask(
+/* SLScriptTask */
+SLScriptTask::SLScriptTask(
     std::shared_ptr<Config> config,
     unsigned int hashie,
-    unsigned int stringLimit)
+    unsigned int stringLimit,
+    ConfigVal scriptFile)
     : config(std::move(config))
     , hashie(hashie)
     , stringLimit(stringLimit)
+    , scriptFile(scriptFile)
 {
 }
 
-void SLInitTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
+static const std::map<ConfigVal, std::string> commandExtensions {
+    { ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE, "" },
+    { ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE, fmt::format("\n" SQLITE3_SET_VERSION ";", DBVERSION) },
+};
+
+void SLScriptTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
 {
     log_debug("Running: init");
     std::string dbFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
@@ -86,16 +96,16 @@ void SLInitTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
 
     int res = sqlite3_open(dbFilePath.c_str(), &db);
     if (res != SQLITE_OK)
-        throw DatabaseException("", "SQLite: Failed to create new database");
+        throw DatabaseException("", "SQLite: Failed to open database");
 
-    auto sqlFilePath = fs::path(config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE));
-    log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
+    auto sqlFilePath = fs::path(config->getOption(scriptFile));
+    log_debug("Loading SQL script from: {}", sqlFilePath.c_str());
     auto sql = GrbFile(std::move(sqlFilePath)).readTextFile();
     auto&& myHash = stringHash(sql);
     replaceAllString(sql, STRING_LIMIT, fmt::to_string(stringLimit));
 
     if (myHash == hashie) {
-        sql += fmt::format("\n" SQLITE3_SET_VERSION ";", DBVERSION);
+        sql += commandExtensions.at(scriptFile);
 
         char* err = nullptr;
         int ret = sqlite3_exec(
@@ -114,7 +124,7 @@ void SLInitTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
         }
         contamination = true;
     } else {
-        log_warning("Wrong hash for create script {}: {} != {}", DBVERSION, myHash, hashie);
+        log_warning("Wrong hash for script {} in version {}: {} != {}", dbFilePath, DBVERSION, myHash, hashie);
     }
 }
 

@@ -574,6 +574,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         std::make_shared<ConfigPathSetup>(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE,
             "/server/storage/mysql/upgrade-file", "config-server.html#storage",
             "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
+        std::make_shared<ConfigPathSetup>(ConfigVal::SERVER_STORAGE_MYSQL_DROP_FILE,
+            "/server/storage/mysql/drop-file", "config-server.html#storage",
+            "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_MYSQL_ENGINE,
             "/server/storage/mysql/engine", "config-server.html#storage",
             "MyISAM"),
@@ -615,6 +618,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         std::make_shared<ConfigPathSetup>(ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE,
             "/server/storage/postgres/upgrade-file", "config-server.html#storage",
             "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
+        std::make_shared<ConfigPathSetup>(ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE,
+            "/server/storage/postgres/drop-file", "config-server.html#storage",
+            "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
 #endif
 
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_SQLITE,
@@ -648,6 +654,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
             "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty), // This should really be "dataDir / sqlite3.sql"
         std::make_shared<ConfigPathSetup>(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE,
             "/server/storage/sqlite3/upgrade-file", "config-server.html#storage",
+            "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
+        std::make_shared<ConfigPathSetup>(ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE,
+            "/server/storage/sqlite3/drop-file", "config-server.html#storage",
             "", ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty),
         std::make_shared<ConfigIntSetup>(ConfigVal::SERVER_STORAGE_SQLITE_SHUTDOWN_ATTEMPTS,
             "/server/storage/sqlite3/attribute::shutdown-attempts", "config-server.html#storage",
@@ -2131,6 +2140,7 @@ void ConfigDefinition::initDependencies()
         { ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL, ConfigVal::SERVER_STORAGE_SQLITE_ENABLED },
         { ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE, ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE },
         { ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE, ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE },
+        { ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE, ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE },
 #ifdef HAVE_MYSQL
         { ConfigVal::SERVER_STORAGE_MYSQL_HOST, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
         { ConfigVal::SERVER_STORAGE_MYSQL_DATABASE, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
@@ -2143,6 +2153,7 @@ void ConfigDefinition::initDependencies()
         { ConfigVal::SERVER_STORAGE_MYSQL_COLLATION, ConfigVal::SERVER_STORAGE_MYSQL_ENABLED },
         { ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE, ConfigVal::SERVER_STORAGE_MYSQL_DATABASE },
         { ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, ConfigVal::SERVER_STORAGE_MYSQL_DATABASE },
+        { ConfigVal::SERVER_STORAGE_MYSQL_DROP_FILE, ConfigVal::SERVER_STORAGE_MYSQL_DATABASE },
 #endif
 #ifdef HAVE_PGSQL
         { ConfigVal::SERVER_STORAGE_PGSQL_HOST, ConfigVal::SERVER_STORAGE_PGSQL_ENABLED },
@@ -2153,6 +2164,7 @@ void ConfigDefinition::initDependencies()
         { ConfigVal::SERVER_STORAGE_PGSQL_PASSWORD, ConfigVal::SERVER_STORAGE_PGSQL_ENABLED },
         { ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE, ConfigVal::SERVER_STORAGE_PGSQL_DATABASE },
         { ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE, ConfigVal::SERVER_STORAGE_PGSQL_DATABASE },
+        { ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE, ConfigVal::SERVER_STORAGE_PGSQL_DATABASE },
 #endif
 #ifdef HAVE_CURL
         { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE, ConfigVal::TRANSCODING_TRANSCODING_ENABLED },
