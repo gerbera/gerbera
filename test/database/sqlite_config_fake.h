@@ -40,6 +40,9 @@ public:
         if (option == ConfigVal::SERVER_STORAGE_SQLITE_RESTORE) {
             return "true";
         }
+        if (option == ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE) {
+            return "sqlite3-drop.sql";
+        }
         if (option == ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE) {
             return "sqlite3-upgrade.xml";
         }

@@ -65,6 +65,7 @@ using HandleCallback = std::function<bool()>;
 #define GRB_OPTION_CFGDIR "cfgdir"
 #define GRB_OPTION_SETOPTION "set-option"
 #define GRB_OPTION_ADDFILE "add-file"
+#define GRB_OPTION_DROPTABLES "drop-tables"
 
 #define DEFAULT_CONFIG_HOME ".config/gerbera"
 
@@ -135,6 +136,8 @@ public:
     bool getDebug() const { return debug; }
     /// @brief access property for active offline flag
     bool getOffline() const { return offline; }
+    /// @brief access property for active drop database flag
+    bool getDropDatabase() const { return dropDatabase; }
 
     /// @brief Name of the appilcation from command line
     static const std::string ProgramName;
@@ -159,6 +162,7 @@ private:
     bool startup = false;
     bool debug = false;
     bool offline = false;
+    bool dropDatabase = false;
     ConfigLevel exampleConfigSet;
     int sections;
     bool createConfigSet = false;
@@ -207,6 +211,8 @@ private:
     bool setConfigFile(const std::string& arg);
     /// @brief handler for config directory
     bool setConfigDir(const std::string& arg);
+    /// @brief handler to drop database tables
+    bool dropTables(const std::string& arg);
 
     /// @brief handle command line arguments in configuration
     bool handleOptionArgs(const std::string& arg);

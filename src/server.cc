@@ -99,7 +99,10 @@ Server::Server(std::shared_ptr<Config> config)
 {
 }
 
-void Server::init(const std::shared_ptr<ConfigDefinition>& definition, bool offln)
+void Server::init(
+    const std::shared_ptr<ConfigDefinition>& definition,
+    bool offln,
+    bool dropDatabase)
 {
     offline = offln;
 
@@ -115,20 +118,26 @@ void Server::init(const std::shared_ptr<ConfigDefinition>& definition, bool offl
     mime = std::make_shared<Mime>(config);
     converterManager = std::make_shared<ConverterManager>(config);
     database = Database::createInstance(config, mime, converterManager, timer);
-    config->updateConfigFromDatabase(database);
+    if (dropDatabase) {
+        database->dropTables();
+    } else {
+        database->init();
 
-    serverUDN = config->getOption(ConfigVal::SERVER_UDN);
-    if (serverUDN == GRB_UDN_AUTO) {
-        serverUDN = config->generateUDN(database);
+        config->updateConfigFromDatabase(database);
+
+        serverUDN = config->getOption(ConfigVal::SERVER_UDN);
+        if (serverUDN == GRB_UDN_AUTO) {
+            serverUDN = config->generateUDN(database);
+        }
+        aliveAdvertisementInterval = config->getIntOption(ConfigVal::SERVER_ALIVE_INTERVAL);
+
+        clientManager = std::make_shared<ClientManager>(config, database, self);
+        sessionManager = std::make_shared<Web::SessionManager>(config, timer);
+        context = std::make_shared<Context>(definition, config, clientManager, mime, database, sessionManager, converterManager);
+
+        content = std::make_shared<ContentManager>(context, self, timer);
+        metadataService = std::make_shared<MetadataService>(context, content);
     }
-    aliveAdvertisementInterval = config->getIntOption(ConfigVal::SERVER_ALIVE_INTERVAL);
-
-    clientManager = std::make_shared<ClientManager>(config, database, self);
-    sessionManager = std::make_shared<Web::SessionManager>(config, timer);
-    context = std::make_shared<Context>(definition, config, clientManager, mime, database, sessionManager, converterManager);
-
-    content = std::make_shared<ContentManager>(context, self, timer);
-    metadataService = std::make_shared<MetadataService>(context, content);
 }
 
 struct UpnpDesc {
@@ -697,7 +706,11 @@ int Server::HostValidateCallback(const char* host, void* cookie)
     return UPNP_E_BAD_HTTPMSG;
 }
 
-int Server::GetInfoCallback(const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie)
+int Server::GetInfoCallback(
+    const char* filename,
+    UpnpFileInfo* info,
+    const void* cookie,
+    const void** requestCookie)
 {
     try {
         log_debug("getInfo({})", filename);
@@ -725,7 +738,11 @@ int Server::GetInfoCallback(const char* filename, UpnpFileInfo* info, const void
     }
 }
 
-UpnpWebFileHandle Server::OpenCallback(const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie)
+UpnpWebFileHandle Server::OpenCallback(
+    const char* filename,
+    enum UpnpOpenFileMode mode,
+    const void* cookie,
+    const void* requestCookie)
 {
     try {
         log_debug("open({})", filename);
@@ -759,7 +776,12 @@ UpnpWebFileHandle Server::OpenCallback(const char* filename, enum UpnpOpenFileMo
     }
 }
 
-int Server::ReadCallback(UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie)
+int Server::ReadCallback(
+    UpnpWebFileHandle f,
+    char* buf,
+    std::size_t length,
+    const void* cookie,
+    const void* requestCookie)
 {
     log_debug("{} read({})", f, length);
     if (static_cast<const Server*>(cookie)->getShutdownStatus())
@@ -776,13 +798,23 @@ int Server::ReadCallback(UpnpWebFileHandle f, char* buf, std::size_t length, con
     return ioHandler ? ioHandler->read(reinterpret_cast<std::byte*>(buf), length) : 0;
 }
 
-int Server::WriteCallback(UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie)
+int Server::WriteCallback(
+    UpnpWebFileHandle f,
+    char* buf,
+    std::size_t length,
+    const void* cookie,
+    const void* requestCookie)
 {
     log_debug("{} write not implemented({})", f, length);
     return 0;
 }
 
-int Server::SeekCallback(UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie)
+int Server::SeekCallback(
+    UpnpWebFileHandle f,
+    off_t offset,
+    int whence,
+    const void* cookie,
+    const void* requestCookie)
 {
     log_debug("{} seek({}, {})", f, offset, whence);
     try {
@@ -803,7 +835,10 @@ int Server::SeekCallback(UpnpWebFileHandle f, off_t offset, int whence, const vo
     }
 }
 
-int Server::CloseCallback(UpnpWebFileHandle f, const void* cookie, const void* requestCookie)
+int Server::CloseCallback(
+    UpnpWebFileHandle f,
+    const void* cookie,
+    const void* requestCookie)
 {
     log_debug("{} close()", f);
     int retClose = 0;

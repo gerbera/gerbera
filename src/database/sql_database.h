@@ -49,8 +49,9 @@ template <class Item>
 class AddUpdateTable;
 class CdsContainer;
 class CdsResource;
-class SQLResult;
 class SQLEmitter;
+class SQLResult;
+class SQLRow;
 template <class Col>
 class EnumColumnMapper;
 enum class BrowseColumn;
@@ -61,49 +62,6 @@ enum class Operation;
 #define STRING_LIMIT "GRBMAX"
 
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
-
-class SQLRow {
-public:
-    virtual ~SQLRow() = default;
-    /// @brief Returns true if the column index contains the value NULL
-    bool isNullOrEmpty(int index) const
-    {
-        const char* c = col_c_str(index);
-        return c == nullptr || *c == '\0';
-    }
-    /// @brief Return the value of column index as a string value
-    std::string col(int index) const
-    {
-        const char* c = col_c_str(index);
-        if (!c)
-            return {};
-        return { c };
-    }
-    /// @brief Return the value of column index as an integer value
-    int col_int(int index, int null_value) const
-    {
-        const char* c = col_c_str(index);
-        if (!c || *c == '\0')
-            return null_value;
-        return std::atoi(c);
-    }
-    /// @brief Return the value of column index as an integer value
-    long long col_long(int index, long long null_value) const
-    {
-        const char* c = col_c_str(index);
-        if (!c || *c == '\0')
-            return null_value;
-        return std::atoll(c);
-    }
-    virtual char* col_c_str(int index) const = 0;
-};
-
-class SQLResult {
-public:
-    virtual ~SQLResult() = default;
-    virtual std::unique_ptr<SQLRow> nextRow() = 0;
-    virtual unsigned long long getNumRows() const = 0;
-};
 
 class SQLDatabase : public Database {
 public:
@@ -209,7 +167,7 @@ public:
     static std::string getSortCapabilities();
     static std::string getSearchCapabilities();
 
-    unsigned int getHash(std::size_t index) const { return index < DBVERSION ? hashies.at(index) : 0; }
+    unsigned int getHash(int index) const { return index == -1 ? hashies.at(DBVERSION) : (index < DBVERSION ? hashies.at(index) : 0); }
 
     void deleteAll(std::string_view tableName);
     template <typename T>
@@ -222,7 +180,7 @@ protected:
 
     char table_quote_begin { '\0' };
     char table_quote_end { '\0' };
-    std::array<unsigned int, DBVERSION> hashies;
+    std::array<unsigned int, DBVERSION + 1> hashies;
 
     /// @brief Initial db version with gerbera
     std::size_t firstDBVersion = 1;
@@ -260,7 +218,7 @@ protected:
     /// @brief upgrade database version by applying migration commands
     void upgradeDatabase(
         unsigned int dbVersion,
-        const std::array<unsigned int, DBVERSION>& hashies,
+        const std::array<unsigned int, DBVERSION + 1>& hashies,
         ConfigVal upgradeOption,
         std::string_view updateVersionCommand,
         const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd);

@@ -378,6 +378,7 @@
                 <xs:element ref="database-file" minOccurs="0"/>
                 <xs:element ref="init-sql-file" minOccurs="0"/>
                 <xs:element ref="upgrade-file" minOccurs="0"/>
+                <xs:element ref="drop-file" minOccurs="0"/>
                 <xs:element ref="synchronous" minOccurs="0"/>
                 <xs:element ref="journal-mode" minOccurs="0"/>
                 <xs:element ref="on-error" minOccurs="0"/>
@@ -441,6 +442,7 @@
                 <xs:element ref="socket" minOccurs="0"/>
                 <xs:element ref="init-sql-file" minOccurs="0"/>
                 <xs:element ref="upgrade-file" minOccurs="0"/>
+                <xs:element ref="drop-file" minOccurs="0"/>
                 <xs:element ref="engine" minOccurs="0"/>
                 <xs:element ref="charset" minOccurs="0"/>
                 <xs:element ref="collation" minOccurs="0"/>
@@ -459,6 +461,7 @@
                 <xs:element ref="socket" minOccurs="0"/>
                 <xs:element ref="init-sql-file" minOccurs="0"/>
                 <xs:element ref="upgrade-file" minOccurs="0"/>
+                <xs:element ref="drop-file" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
         </xs:complexType>
@@ -472,6 +475,7 @@
     <xs:element name="init-sql-file" type="xs:string"/>
     <xs:element name="socket" type="xs:string"/>
     <xs:element name="upgrade-file" type="xs:string"/>
+    <xs:element name="drop-file" type="xs:string"/>
     <xs:element name="engine" type="xs:string" default="MyISAM"/>
     <xs:element name="charset" type="xs:string" default="utf8"/>
     <xs:element name="collation" type="xs:string" default="utf8_general_ci"/>

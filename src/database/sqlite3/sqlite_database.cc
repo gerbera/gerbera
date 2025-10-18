@@ -38,7 +38,10 @@
 #include "config/config.h"
 #include "config/config_val.h"
 #include "exceptions.h"
+#include "sl_result.h"
 #include "sl_task.h"
+
+#include <sqlite3.h>
 
 static constexpr auto sqlite3UpdateVersion = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");
 static const auto sqlite3AddResourceAttr = std::map<ResourceDataType, std::string_view> {
@@ -54,14 +57,18 @@ Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const st
     , timer(std::move(timer))
     , shutdownAttempts(this->config->getIntOption(ConfigVal::SERVER_STORAGE_SQLITE_SHUTDOWN_ATTEMPTS))
 {
+    dbFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
     table_quote_begin = '"';
     table_quote_end = '"';
 
     // if sqlite3.sql or sqlite3-upgrade.xml is changed hashies have to be updated
-    hashies = { 2771697970, // index 0 is used for create script sqlite3.sql = Version 1
+    hashies = {
+        3418613970, // index 0 is used for create script sqlite3.sql = Version 1
         778996897, 3362507034, 853149842, 2776802417, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, // upgrade 2-11
         3908767237, 509765404, 2512852146, 1273710965, 319062951, 2316641127, 1028160353, 881071639, 1989518047, 782849313, // upgrade 12-21
-        3135921396, 3108208, 2156790525, 2004941040 };
+        3135921396, 3108208, 2156790525, 2004941040,
+        459854332 // index DBVERSION is used for drop script sqlite3-drop.sql = Version -1
+    };
 }
 
 void Sqlite3Database::prepare()
@@ -80,7 +87,7 @@ std::string Sqlite3Database::prepareDatabase(const fs::path& dbFilePath, GrbFile
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (const std::runtime_error&) {
-        log_warning("Sqlite3 database seems to be corrupt or doesn't exist yet.");
+        log_warning("SQLite3 database seems to be corrupt or doesn't exist yet.");
         // database seems to be corrupt or nonexistent
         if (config->getBoolOption(ConfigVal::SERVER_STORAGE_SQLITE_RESTORE) && sqliteStatus == SQLITE_OK) {
             // try to restore database
@@ -100,13 +107,13 @@ std::string Sqlite3Database::prepareDatabase(const fs::path& dbFilePath, GrbFile
         } else {
             // fail because restore option is false
             shutdown();
-            throw_std_runtime_error("sqlite3 database seems to be corrupt and the 'on-error' option is set to 'fail'");
+            throw_std_runtime_error("SQLite3 database seems to be corrupt and the 'on-error' option is set to 'fail'");
         }
     }
 
     if (dbVersion.empty() && !dbBackupFile.isReadable()) {
-        log_info("No sqlite3 backup is available or backup is corrupt. Automatically creating new database file...");
-        auto itask = std::make_shared<SLInitTask>(config, hashies[0], stringLimit);
+        log_info("No SQLite3 backup is available or backup is corrupt. Automatically creating new database file...");
+        auto itask = std::make_shared<SLScriptTask>(config, hashies.at(0), stringLimit, ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
         addTask(itask);
         try {
             itask->waitForTask();
@@ -120,25 +127,55 @@ std::string Sqlite3Database::prepareDatabase(const fs::path& dbFilePath, GrbFile
             shutdown();
             throw_std_runtime_error("Error while creating database: {}", e.what());
         }
-        log_info("Database {} created successfully.", dbFilePath.c_str());
+        log_info("Database tables {} created successfully.", dbFilePath.c_str());
     }
 
     if (dbVersion.empty()) {
         shutdown();
-        throw_std_runtime_error("sqlite3 database seems to be corrupt and restoring from backup failed");
+        throw_std_runtime_error("SQLite3 database seems to be corrupt and restoring from backup failed");
     }
 
     return dbVersion;
 }
 
-void Sqlite3Database::init()
+void Sqlite3Database::dropTables()
 {
-    dbInitDone = false;
-    SQLDatabase::init();
+    auto file = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE);
+    log_info("Dropping tables with {}", file);
+    auto dtask = std::make_shared<SLScriptTask>(config, hashies.at(DBVERSION), stringLimit, ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE);
+    addTask(dtask);
+    try {
+        dtask->waitForTask();
+    } catch (const std::runtime_error& e) {
+        shutdown();
+        throw_std_runtime_error("Error while dropping database: {}", e.what());
+    }
 
-    fs::path dbFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
+    // back up file to make sure the tables are dropped from backup as well
+    if (config->getBoolOption(ConfigVal::SERVER_STORAGE_SQLITE_RESTORE) && config->getBoolOption(ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED)) {
+        fs::path dbFilePathbackup = fmt::format(SQLITE3_BACKUP_FORMAT, dbFilePath.c_str());
+        auto dbBackupFile = GrbFile(dbFilePathbackup);
+
+        // checking for backup file
+        if (dbBackupFile.isReadable()) {
+            try {
+                auto btask = std::make_shared<SLBackupTask>(config, false);
+                this->addTask(btask);
+                btask->waitForTask();
+            } catch (const std::runtime_error& e) {
+                shutdown();
+                throw_std_runtime_error("Error while backing up database: {}", e.what());
+            }
+        }
+    }
+
+    log_info("Database tables {} dropped successfully.", dbFilePath.c_str());
+}
+
+void Sqlite3Database::run()
+{
     auto dbFile = GrbFile(dbFilePath);
-    log_debug("SQLite path: {}", dbFilePath.c_str());
+    log_debug("SQLite3 path: {}", dbFilePath.c_str());
 
     // check for db-file
     if (!dbFile.isWritable())
@@ -164,9 +201,16 @@ void Sqlite3Database::init()
         prepare();
     } catch (const std::runtime_error&) {
         shutdown();
-        throw_std_runtime_error("Sqlite3Database.init: could not open '{}' exclusively", dbFilePath.c_str());
+        throw_std_runtime_error("Sqlite3Database.run: could not open '{}' exclusively", dbFilePath.c_str());
     }
+}
 
+void Sqlite3Database::init()
+{
+    dbInitDone = false;
+    SQLDatabase::init();
+
+    auto dbFile = GrbFile(dbFilePath);
     std::string dbVersion = prepareDatabase(dbFilePath, dbFile);
 
     try {
@@ -230,48 +274,7 @@ std::string Sqlite3Database::quote(const std::string& value) const
 std::string Sqlite3Database::handleError(const std::string& query, const std::string& error, sqlite3* db, int errorCode)
 {
     sqliteStatus = (errorCode == SQLITE_BUSY || errorCode == SQLITE_LOCKED) ? SQLITE_LOCKED : SQLITE_OK;
-    return fmt::format("SQLITE3 ({}: {}): {}\n       Query: {}\n       Error: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
-}
-
-Sqlite3DatabaseWithTransactions::Sqlite3DatabaseWithTransactions(
-    const std::shared_ptr<Config>& config,
-    const std::shared_ptr<Mime>& mime,
-    const std::shared_ptr<ConverterManager>& converterManager,
-    const std::shared_ptr<Timer>& timer)
-    : SqlWithTransactions(config)
-    , Sqlite3Database(config, mime, converterManager, timer)
-{
-}
-
-void Sqlite3DatabaseWithTransactions::beginTransaction(std::string_view tName)
-{
-    if (use_transaction) {
-        log_debug("BEGIN TRANSACTION {} {}", tName, inTransaction);
-        SqlAutoLock lock(sqlMutex);
-        log_debug("BEGIN TRANSACTION LOCK {} {}", tName, inTransaction);
-        StdThreadRunner::waitFor(
-            fmt::format("SqliteDatabase.begin {}", tName), [this] { return !inTransaction; }, 100);
-        inTransaction = true;
-        _exec("BEGIN TRANSACTION");
-    }
-}
-
-void Sqlite3DatabaseWithTransactions::rollback(std::string_view tName)
-{
-    if (use_transaction && inTransaction) {
-        log_debug("ROLLBACK {} {}", tName, inTransaction);
-        _exec("ROLLBACK");
-        inTransaction = false;
-    }
-}
-
-void Sqlite3DatabaseWithTransactions::commit(std::string_view tName)
-{
-    if (use_transaction && inTransaction) {
-        log_debug("COMMIT {} {}", tName, inTransaction);
-        _exec("COMMIT");
-        inTransaction = false;
-    }
+    return fmt::format("SQLite3 ({}: {}): {}\n       Query: {}\n       Error: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
 }
 
 void Sqlite3Database::handleException(const std::exception& exc, const std::string& lineMessage)
@@ -373,11 +376,9 @@ void Sqlite3Database::threadProc()
     try {
         sqlite3* db;
 
-        std::string dbFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE);
-
         int res = sqlite3_open(dbFilePath.c_str(), &db);
         if (res != SQLITE_OK) {
-            startupError = fmt::format("Sqlite3Database.init: could not open '{}'", dbFilePath);
+            startupError = fmt::format("Sqlite3Database.threadProc: could not open '{}'", dbFilePath.c_str());
             return;
         }
 
@@ -433,7 +434,7 @@ void Sqlite3Database::threadProc()
         while (!taskQueue.empty()) {
             auto task = std::move(taskQueue.front());
             taskQueue.pop();
-            task->sendSignal("Sorry, sqlite3 thread is shutting down");
+            task->sendSignal("Sorry, SQLite3 thread is shutting down");
         }
 
         if (db) {
@@ -461,13 +462,13 @@ void Sqlite3Database::timerNotify(const std::shared_ptr<Timer::Parameter>& param
 void Sqlite3Database::addTask(const std::shared_ptr<SLTask>& task, bool onlyIfDirty)
 {
     if (!taskQueueOpen) {
-        throw_std_runtime_error("sqlite3 task queue is already closed");
+        throw_std_runtime_error("SQLite3 task queue is already closed");
     }
 
     auto lock = threadRunner->lockGuard(fmt::format("addTask {}", task->taskType()));
 
     if (!taskQueueOpen) {
-        throw_std_runtime_error("sqlite3 task queue is already closed");
+        throw_std_runtime_error("SQLite3 task queue is already closed");
     }
     if (!onlyIfDirty || dirty) {
         taskQueue.push(task);
@@ -500,37 +501,45 @@ void Sqlite3Database::storeInternalSetting(const std::string& key, const std::st
     execOnly(command);
 }
 
-/* Sqlite3Row */
+/* Sqlite3DatabaseWithTransactions */
 
-Sqlite3Row::Sqlite3Row(char** row)
-    : row(row)
+Sqlite3DatabaseWithTransactions::Sqlite3DatabaseWithTransactions(
+    const std::shared_ptr<Config>& config,
+    const std::shared_ptr<Mime>& mime,
+    const std::shared_ptr<ConverterManager>& converterManager,
+    const std::shared_ptr<Timer>& timer)
+    : SqlWithTransactions(config)
+    , Sqlite3Database(config, mime, converterManager, timer)
 {
 }
 
-char* Sqlite3Row::col_c_str(int index) const
+void Sqlite3DatabaseWithTransactions::beginTransaction(std::string_view tName)
 {
-    return row[index];
-}
-
-/* Sqlite3Result */
-
-Sqlite3Result::~Sqlite3Result()
-{
-    if (table) {
-        sqlite3_free_table(table);
-        table = nullptr;
+    if (use_transaction) {
+        log_debug("BEGIN TRANSACTION {} {}", tName, inTransaction);
+        SqlAutoLock lock(sqlMutex);
+        log_debug("BEGIN TRANSACTION LOCK {} {}", tName, inTransaction);
+        StdThreadRunner::waitFor(
+            fmt::format("SqliteDatabase.begin {}", tName), [this] { return !inTransaction; }, 100);
+        inTransaction = true;
+        _exec("BEGIN TRANSACTION");
     }
 }
 
-std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
+void Sqlite3DatabaseWithTransactions::rollback(std::string_view tName)
 {
-    if (nrow) {
-        row += ncolumn;
-        cur_row++;
-        if (cur_row <= nrow) {
-            return std::make_unique<Sqlite3Row>(row);
-        }
-        return nullptr;
+    if (use_transaction && inTransaction) {
+        log_debug("ROLLBACK {} {}", tName, inTransaction);
+        _exec("ROLLBACK");
+        inTransaction = false;
     }
-    return nullptr;
+}
+
+void Sqlite3DatabaseWithTransactions::commit(std::string_view tName)
+{
+    if (use_transaction && inTransaction) {
+        log_debug("COMMIT {} {}", tName, inTransaction);
+        _exec("COMMIT");
+        inTransaction = false;
+    }
 }

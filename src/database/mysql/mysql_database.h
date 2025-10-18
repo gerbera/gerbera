@@ -54,10 +54,11 @@ public:
     MySQLDatabase(const MySQLDatabase&) = delete;
     MySQLDatabase& operator=(const MySQLDatabase&) = delete;
 
+    void dropTables() override;
+
 protected:
     void _exec(const std::string& query) override;
     void checkMysqlThreadInit() const;
-    void connect();
     std::string prepareDatabase();
 
     static std::string getError(MYSQL* db);
@@ -65,6 +66,7 @@ protected:
     MYSQL db {};
 
 private:
+    void run() override;
     void init() override;
     void shutdownDriver() override;
     std::shared_ptr<Database> getSelf() override;
@@ -100,34 +102,6 @@ public:
     std::shared_ptr<SQLResult> select(const std::string& query) override;
 };
 
-class MysqlResult : public SQLResult {
-public:
-    explicit MysqlResult(MYSQL_RES* mysqlRes);
-    ~MysqlResult() override;
-
-    MysqlResult(const MysqlResult&) = delete;
-    MysqlResult& operator=(const MysqlResult&) = delete;
-
-private:
-    int nullRead {};
-    std::unique_ptr<SQLRow> nextRow() override;
-    unsigned long long getNumRows() const override { return mysql_num_rows(mysqlRes); }
-    MYSQL_RES* mysqlRes;
-
-    friend class MysqlRow;
-    friend class MySQLDatabase;
-};
-
-class MysqlRow : public SQLRow {
-public:
-    explicit MysqlRow(MYSQL_ROW mysqlRow);
-
-private:
-    char* col_c_str(int index) const override;
-
-    MYSQL_ROW mysqlRow;
-};
-
-#endif // __mysql_database_H__
+#endif // __MYSQL_DATABASE_H__
 
 #endif // HAVE_MYSQL

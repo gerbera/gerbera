@@ -35,6 +35,7 @@ public:
 
     void init() override { }
     void shutdown() override { }
+    void dropTables() override { }
 
     void addObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override { }
     bool addContainer(int parentContainerId, std::string virtualPath, const std::shared_ptr<CdsContainer>& cont, int* containerID) override { return true; }

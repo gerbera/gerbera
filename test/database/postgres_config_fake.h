@@ -43,6 +43,9 @@ public:
         if (option == ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE) {
             return "postgres.sql";
         }
+        if (option == ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE) {
+            return "postgres-drop.sql";
+        }
         if (option == ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE) {
             return "postgres-upgrade.xml";
         }

@@ -207,7 +207,8 @@ int main(int argc, char** argv, char** envp)
         (GRB_OPTION_CREATEADVANCEDCONFIG, "Print a advanced example config.xml file and exit", cxxopts::value<std::string>()->implicit_value("All"), "Section") //
         (GRB_OPTION_CHECKCONFIG, "Check config.xml file and exit") //
         (GRB_OPTION_PRINTOPTIONS, "Print simple config options and exit") //
-        (GRB_OPTION_OFFLINE, "Do not answer UPnP content requests") // good for initial scans
+        (GRB_OPTION_OFFLINE, "Do not answer UPnP content requests", cxxopts::value<bool>()->default_value("false")) // good for initial scans
+        (GRB_OPTION_DROPTABLES, "Drop all database tables and exit", cxxopts::value<bool>()->default_value("false")) //
         ("d," GRB_OPTION_DAEMON, "Daemonize after startup", cxxopts::value<bool>()->default_value("false")) //
         ("u," GRB_OPTION_USER, "Drop privs to user UID", cxxopts::value<std::string>(), "UID") //
         ("P," GRB_OPTION_PIDFILE, "Write a pidfile to the specified location, e.g. /run/gerbera.pid", cxxopts::value<fs::path>(), "FILE") //
@@ -268,8 +269,15 @@ int main(int argc, char** argv, char** envp)
         auto server = std::make_shared<Server>(configManager);
 
         try {
-            server->init(definition, runtime.getOffline());
-            server->run();
+            auto dropDatabase = runtime.getDropDatabase();
+
+            server->init(definition, runtime.getOffline(), dropDatabase);
+
+            if (!dropDatabase)
+                server->run();
+            else
+                runtime.exit(EXIT_SUCCESS);
+
             runtime.notifySystemd(ServiceStatus::Ready);
         } catch (const UpnpException& ue) {
             log_error("{}", ue.what());
@@ -367,7 +375,7 @@ int main(int argc, char** argv, char** envp)
                     installSignalHandler();
 
                     server = std::make_shared<Server>(configManager);
-                    server->init(definition, runtimeChild.getOffline());
+                    server->init(definition, runtimeChild.getOffline(), runtimeChild.getDropDatabase());
                     server->run();
                     runtime.notifySystemd(ServiceStatus::Ready);
 

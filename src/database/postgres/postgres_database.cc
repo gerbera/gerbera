@@ -31,6 +31,7 @@
 #include "config/config_val.h"
 #include "database/sql_table.h"
 #include "exceptions.h"
+#include "pg_result.h"
 #include "pg_task.h"
 #include "util/thread_runner.h"
 #include "util/tools.h"
@@ -53,10 +54,13 @@ PostgresDatabase::PostgresDatabase(std::shared_ptr<Config> config,
     table_quote_end = '"';
     firstDBVersion = 25; // no need to migrate from older version
     // if postgres.sql or postgres-upgrade.xml is changed hashies have to be updated
-    hashies = { 2941883853, // index 0 is used for create script postgres.sql = Version 1
+    hashies = {
+        2694248237, // index 0 is used for create script postgres.sql = Version 1
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // upgrade 2-11
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // upgrade 12-21
-        0, 0, 0, 0 };
+        0, 0, 0, 0,
+        2796031870 // index DBVERSION is used for drop script postgres-drop.sql = Version -1
+    };
 }
 
 PostgresDatabase::~PostgresDatabase()
@@ -75,7 +79,7 @@ std::string PostgresDatabase::prepareDatabase()
 
     if (dbVersion.empty()) {
         log_info("Database doesn't seem to exist. Creating database...");
-        auto itask = std::make_shared<PGInitTask>(config, hashies[0], stringLimit);
+        auto itask = std::make_shared<PGScriptTask>(config, hashies[0], stringLimit, ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE);
         addTask(itask);
         try {
             itask->waitForTask();
@@ -98,11 +102,8 @@ std::string PostgresDatabase::prepareDatabase()
     return dbVersion;
 }
 
-void PostgresDatabase::init()
+void PostgresDatabase::run()
 {
-    dbInitDone = false;
-    SQLDatabase::init();
-
     taskQueueOpen = true;
     threadRunner = std::make_unique<StdThreadRunner>(
         "PGLiteThread", [](void* arg) {
@@ -117,6 +118,12 @@ void PostgresDatabase::init()
     threadRunner->waitForReady();
     if (!startupError.empty())
         throw DatabaseException("", startupError);
+}
+
+void PostgresDatabase::init()
+{
+    dbInitDone = false;
+    SQLDatabase::init();
 
     std::string dbVersion = prepareDatabase();
 
@@ -144,6 +151,21 @@ void PostgresDatabase::init()
         shutdown();
         throw_std_runtime_error(e.what());
     }
+}
+
+void PostgresDatabase::dropTables()
+{
+    auto file = config->getOption(ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE);
+    log_info("Dropping tables with {}", file);
+    auto dtask = std::make_shared<PGScriptTask>(config, hashies[0], stringLimit, ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE);
+    addTask(dtask);
+    try {
+        dtask->waitForTask();
+    } catch (const std::runtime_error& e) {
+        shutdown();
+        throw_std_runtime_error("Error while dropping database: {}", e.what());
+    }
+    log_info("Database tables dropped successfully.");
 }
 
 static void handlePqxxNotice(pqxx::zview v)
@@ -416,18 +438,4 @@ void PostgresDatabaseWithTransactions::commit(std::string_view tName)
     }
 }
 
-/* PostgresSQLResult */
-
-PostgresSQLResult::~PostgresSQLResult()
-{
-    result.clear();
-}
-
-std::unique_ptr<SQLRow> PostgresSQLResult::nextRow()
-{
-    if (result.size() == 0 || row >= result.size())
-        return nullptr;
-    row++;
-    return std::make_unique<PostgresSQLRow>(result.at(row - 1));
-}
 #endif

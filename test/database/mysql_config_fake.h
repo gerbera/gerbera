@@ -43,6 +43,9 @@ public:
         if (option == ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE) {
             return "mysql.sql";
         }
+        if (option == ConfigVal::SERVER_STORAGE_MYSQL_DROP_FILE) {
+            return "mysql-drop.sql";
+        }
         if (option == ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE) {
             return "mysql-upgrade.xml";
         }

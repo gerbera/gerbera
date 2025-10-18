@@ -48,12 +48,20 @@ add_test(NAME dbFixturesSqLite
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/sqlite3/sqlite3.sql ${CMAKE_CURRENT_BINARY_DIR}
     # DEPENDS fixtures/*
 )
+add_test(NAME dbFixturesSqLiteDrop
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/sqlite3/sqlite3-drop.sql ${CMAKE_CURRENT_BINARY_DIR}
+    # DEPENDS fixtures/*
+)
 add_test(NAME dbFixturesSqliteUpgrade
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/sqlite3/sqlite3-upgrade.xml ${CMAKE_CURRENT_BINARY_DIR}
     # DEPENDS fixtures/*
 )
 add_test(NAME dbFixturesMySql
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/mysql/mysql.sql ${CMAKE_CURRENT_BINARY_DIR}
+    # DEPENDS fixtures/*
+)
+add_test(NAME dbFixturesMySqlDrop
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/mysql/mysql-drop.sql ${CMAKE_CURRENT_BINARY_DIR}
     # DEPENDS fixtures/*
 )
 add_test(NAME dbFixtureMySqlUpgrade
@@ -64,11 +72,19 @@ add_test(NAME dbFixturesPostgres
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/postgres/postgres.sql ${CMAKE_CURRENT_BINARY_DIR}
     # DEPENDS fixtures/*
 )
+add_test(NAME dbFixturesPostgresDrop
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/postgres/postgres-drop.sql ${CMAKE_CURRENT_BINARY_DIR}
+    # DEPENDS fixtures/*
+)
 add_test(NAME dbFixturePostgresUpgrade
     COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/postgres/postgres-upgrade.xml ${CMAKE_CURRENT_BINARY_DIR}
     # DEPENDS fixtures/*
 )
-set_tests_properties(dbFixturesSqLite dbFixturesSqliteUpgrade dbFixturesMySql dbFixtureMySqlUpgrade dbFixturesPostgres dbFixturePostgresUpgrade PROPERTIES FIXTURES_SETUP GrbDb)
+set_tests_properties(
+    dbFixturesSqLite dbFixturesSqliteUpgrade dbFixturesSqLiteDrop
+    dbFixturesMySql dbFixtureMySqlUpgrade dbFixturesMySqlDrop
+    dbFixturesPostgres dbFixturePostgresUpgrade dbFixturesPostgresDrop
+    PROPERTIES FIXTURES_SETUP GrbDb)
 
 set_property(DIRECTORY APPEND PROPERTY
     TEST_INCLUDE_FILES ${CMAKE_CURRENT_LIST_DIR}/CTestManip.cmake

@@ -28,11 +28,15 @@
 
 #include <condition_variable>
 #include <mutex>
-#include <sqlite3.h>
 
 class Config;
+enum class ConfigVal;
 class Sqlite3Database;
 class Sqlite3Result;
+
+extern "C" {
+struct sqlite3;
+}
 
 #define SQLITE3_BACKUP_FORMAT "{}.backup"
 #define SQLITE3_SET_VERSION "INSERT INTO \"mt_internal_setting\" VALUES('db_version', '{}')"
@@ -94,22 +98,24 @@ protected:
 };
 
 /// @brief A task for the sqlite3 thread to inititally create the database.
-class SLInitTask : public SLTask {
+class SLScriptTask : public SLTask {
 public:
     /// @brief Constructor for the sqlite3 init task
-    explicit SLInitTask(
+    explicit SLScriptTask(
         std::shared_ptr<Config> config,
         unsigned int hashie,
-        unsigned int stringLimit);
+        unsigned int stringLimit,
+        ConfigVal scriptFile);
 
     void run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError = true) override;
 
-    std::string_view taskType() const override { return "InitTask"; }
+    std::string_view taskType() const override { return "ScriptTask"; }
 
 protected:
     std::shared_ptr<Config> config;
     unsigned int hashie;
     unsigned int stringLimit;
+    ConfigVal scriptFile;
 };
 
 /// @brief A task for the sqlite3 thread to do a SQL select.

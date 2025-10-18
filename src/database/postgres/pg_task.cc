@@ -27,8 +27,11 @@
 #include "config/config.h"
 #include "config/config_val.h"
 #include "exceptions.h"
+#include "pg_result.h"
 #include "postgres_database.h"
 #include "util/tools.h"
+
+#include <pqxx/pqxx>
 
 PGTask::~PGTask() = default;
 
@@ -67,32 +70,39 @@ void PGTask::waitForTask()
     }
 }
 
-/* PGInitTask */
-PGInitTask::PGInitTask(
+static const std::map<ConfigVal, std::string> commandExtensions {
+    { ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE, "" },
+    { ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE, fmt::format("\n" POSTGRES_SET_VERSION ";", DBVERSION) },
+};
+
+/* PGScriptTask */
+PGScriptTask::PGScriptTask(
     std::shared_ptr<Config> config,
     unsigned int hashie,
-    unsigned int stringLimit)
+    unsigned int stringLimit,
+    ConfigVal scriptFile)
     : config(std::move(config))
     , hashie(hashie)
     , stringLimit(stringLimit)
+    , scriptFile(scriptFile)
 {
 }
 
-void PGInitTask::run(
+void PGScriptTask::run(
     const std::unique_ptr<pqxx::connection>& conn,
     PostgresDatabase& pg,
     bool throwOnError)
 {
     log_debug("Running: init");
 
-    auto sqlFilePath = fs::path(config->getOption(ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE));
+    auto sqlFilePath = fs::path(config->getOption(scriptFile));
     log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
     auto sql = GrbFile(std::move(sqlFilePath)).readTextFile();
     auto&& myHash = stringHash(sql);
     replaceAllString(sql, STRING_LIMIT, fmt::to_string(stringLimit));
 
     if (myHash == hashie) {
-        sql += fmt::format(";\n" POSTGRES_SET_VERSION ";", DBVERSION);
+        sql += commandExtensions.at(scriptFile);
 
         for (auto&& statement : splitString(sql, ';')) {
             trimStringInPlace(statement);
@@ -107,7 +117,7 @@ void PGInitTask::run(
         }
         contamination = true;
     } else {
-        log_warning("Wrong hash for create script {}: {} != {}", DBVERSION, myHash, hashie);
+        log_warning("Wrong hash for script {} version {}: {} != {}", sqlFilePath.c_str(), DBVERSION, myHash, hashie);
     }
 }
 

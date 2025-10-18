@@ -102,6 +102,15 @@ TEST_F(Sqlite3DatabaseTest, CheckInitScript)
     EXPECT_EQ(myHash, std::dynamic_pointer_cast<SQLDatabase>(subject)->getHash(0));
 }
 
+TEST_F(Sqlite3DatabaseTest, CheckDropScript)
+{
+    auto sqlFilePath = config->getOption(ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE);
+    auto sql = GrbFile(sqlFilePath).readTextFile();
+    auto&& myHash = stringHash(sql);
+
+    EXPECT_EQ(myHash, std::dynamic_pointer_cast<SQLDatabase>(subject)->getHash(-1));
+}
+
 TEST_F(Sqlite3DatabaseTest, CheckUpgradeCommands)
 {
     testUpgrade(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE);
@@ -173,6 +182,15 @@ TEST_F(MysqlDatabaseTest, CheckInitScript)
 
     EXPECT_EQ(myHash, std::dynamic_pointer_cast<SQLDatabase>(subject)->getHash(0));
 }
+
+TEST_F(MysqlDatabaseTest, CheckDropScript)
+{
+    auto sqlFilePath = config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_DROP_FILE);
+    auto sql = GrbFile(sqlFilePath).readTextFile();
+    auto&& myHash = stringHash(sql);
+
+    EXPECT_EQ(myHash, std::dynamic_pointer_cast<SQLDatabase>(subject)->getHash(-1));
+}
 #endif
 
 #ifdef HAVE_PGSQL
@@ -206,5 +224,14 @@ TEST_F(PostgresDatabaseTest, CheckInitScript)
     auto&& myHash = stringHash(sql);
 
     EXPECT_EQ(myHash, std::dynamic_pointer_cast<SQLDatabase>(subject)->getHash(0));
+}
+
+TEST_F(PostgresDatabaseTest, CheckDropScript)
+{
+    auto sqlFilePath = config->getOption(ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE);
+    auto sql = GrbFile(sqlFilePath).readTextFile();
+    auto&& myHash = stringHash(sql);
+
+    EXPECT_EQ(myHash, std::dynamic_pointer_cast<SQLDatabase>(subject)->getHash(-1));
 }
 #endif

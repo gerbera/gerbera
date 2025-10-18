@@ -466,6 +466,7 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
         { ConfigVal::SERVER_STORAGE_SQLITE_RESTORE, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE, ConfigLevel::Example },
+        { ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_ENABLED, ConfigLevel::Base },
         { ConfigVal::SERVER_STORAGE_SQLITE_BACKUP_INTERVAL, ConfigLevel::Base },
 #ifdef HAVE_MYSQL
@@ -478,6 +479,7 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
         { ConfigVal::SERVER_STORAGE_MYSQL_PASSWORD, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, ConfigLevel::Example },
+        { ConfigVal::SERVER_STORAGE_MYSQL_DROP_FILE, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_MYSQL_ENGINE, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_MYSQL_CHARSET, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_MYSQL_COLLATION, ConfigLevel::Example },
@@ -491,6 +493,7 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
         { ConfigVal::SERVER_STORAGE_PGSQL_PASSWORD, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE, ConfigLevel::Example },
+        { ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE, ConfigLevel::Example },
 #endif
     };
     {
@@ -498,6 +501,8 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
         co->setDefaultValue(prefixDir / "sqlite3.sql");
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE);
         co->setDefaultValue(prefixDir / "sqlite3-upgrade.xml");
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE);
+        co->setDefaultValue(prefixDir / "sqlite3-drop.sql");
     }
 
 #ifdef HAVE_MYSQL
@@ -506,6 +511,8 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
         co->setDefaultValue(prefixDir / "mysql.sql");
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE);
         co->setDefaultValue(prefixDir / "mysql-upgrade.xml");
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_DROP_FILE);
+        co->setDefaultValue(prefixDir / "mysql-drop.sql");
     }
 #endif
 
@@ -515,6 +522,8 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
         co->setDefaultValue(prefixDir / "postgres.sql");
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE);
         co->setDefaultValue(prefixDir / "postgres-upgrade.xml");
+        co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE);
+        co->setDefaultValue(prefixDir / "postgres-drop.sql");
     }
 #endif
 
