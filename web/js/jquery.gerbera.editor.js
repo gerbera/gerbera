@@ -41,6 +41,7 @@
     external_url: { oclass: 'object.item', type: 'external_url', protocol: 'http-get' },
     image: { oclass: 'object.item.imageItem', type: 'item' },
     imagePhoto: { oclass: 'object.item.imageItem.photo', type: 'item' },
+    imageLink: { oclass: 'object.item.imageItem', type: 'external_url', protocol: 'http-get' },
     audio: { oclass: 'object.item.audioItem', type: 'item' },
     audioBroadcast: { oclass: 'object.item.audioItem.audioBroadcast', type: 'external_url', protocol: 'http-get' },
     video: { oclass: 'object.item.videoItem', type: 'item' },
@@ -110,7 +111,7 @@
     editObjectType.prop('disabled', false);
     editObjectType.prop('readonly', false);
     editObjectType.val(itemType);
-    let hiddenFields = [editLmt, editLut];
+    let hiddenFields = [editLmt, editLut, editFlags];
     objectFlags.forEach((flag) => {
       hiddenFields.push(editFlagBox[flag]);
     });
@@ -128,7 +129,12 @@
       showFields([editObjectType, editTitle, editClass, editFlags, editFlagBox['Searchable']]);
       hideFields([editLocation, editDesc, editMime, editProtocol]);
     } else if (defaultClasses[itemType].type === 'item') {
-      showFields([editObjectType, editTitle, editLocation, editClass, editDesc, editMime, editFlags, editFlagBox['OggTheora']]);
+      var allowedFields = [editObjectType, editTitle, editLocation, editClass, editDesc, editMime];
+      if (!defaultClasses[itemType].oclass.startsWith('object.item.imageItem')) {
+        allowedFields.push(editFlags);
+        allowedFields.push(editFlagBox['OggTheora']);
+      }
+      showFields(allowedFields);
       hideFields([editProtocol]);
     } else if (defaultClasses[itemType].type === 'external_url') {
       editProtocol.val(defaultClasses[itemType].protocol);
@@ -354,14 +360,15 @@
         modal.find('#mediaimage').show();
       }
       let obj_type = item.obj_type;
+      let obj_cls = item.obj_type;
       if (item.class.value !== 'object.item') {
         Object.getOwnPropertyNames(defaultClasses).forEach((cls) => {
-          if (item.class.value.startsWith(defaultClasses[cls].oclass)) {
-            obj_type = defaultClasses[cls].type;
+          if (item.class.value.startsWith(defaultClasses[cls].oclass) && obj_type === defaultClasses[cls].type) {
+            obj_cls = cls;
           }
         });
       }
-      modal.find('#editObjectType').val(obj_type);
+      modal.find('#editObjectType').val(obj_cls);
       modal.find('#editObjectType').prop('disabled', true);
       modal.find('#editObjectType').prop('readonly', true);
       modal.find('#editdObjectIdTxt').text(item.object_id).closest('.form-group').show();

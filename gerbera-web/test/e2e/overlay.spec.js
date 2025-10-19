@@ -64,7 +64,7 @@ describe('Edit Overlay Suite', () => {
       expect(isDisplayed).to.be.true;
 
       let value = await homePage.editOverlayFieldValue('editObjectType');
-      expect(value).to.equal('item');
+      expect(value).to.equal('video');
 
       value = await homePage.editOverlayFieldValue('editLocation');
       expect(value).to.equal('/folder/location/Test.mp4');
@@ -237,7 +237,7 @@ describe('Edit Overlay Suite', () => {
 
     it('loads an simple item to edit with correct fields populated', async () => {
       await itemLoadTest(0, [
-        { id: 'editObjectType', visible: true, value: 'item' },
+        { id: 'editObjectType', visible: true, value: 'video' },
         { id: 'editTitle', visible: true, value: 'My Title' },
         { id: 'editClass', visible: true, value: 'object.item.videoItem' },
         { id: 'editLocation', visible: true, value: '/folder/location/Test.mp4' },

@@ -166,7 +166,7 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
     assert(wantWrite <= ego->bufSize);
     auto&& threadRunner = ego->threadRunner;
 
-    // log_debug "URL: {}; size: {}; nmemb: {}; wantWrite: {}", ego->URL.c_str(), size, nmemb, wantWrite
+    log_debug("URL: {}; size: {}; nmemb: {}; wantWrite: {}", ego->URL.c_str(), size, nmemb, wantWrite);
 
     auto lock = threadRunner->uniqueLock();
 

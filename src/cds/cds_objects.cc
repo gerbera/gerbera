@@ -116,7 +116,7 @@ bool CdsObject::isSubClass(const std::string& cls) const
 ObjectType CdsObject::getMediaType(const std::string& contentType) const
 {
 #ifdef ONLINE_SERVICES
-    if (getFlag(OBJECT_FLAG_ONLINE_SERVICE))
+    if (getFlag(OBJECT_FLAG_ONLINE_SERVICE) && isExternalItem())
         return ObjectType::OnlineService;
 #endif
     if (contentType == CONTENT_TYPE_OGG) {

@@ -623,7 +623,7 @@ std::string UpnpXMLBuilder::renderResourceURL(
             }
 
             // Proxied remote URL
-            if (item.getFlag(OBJECT_FLAG_ONLINE_SERVICE) && item.getFlag(OBJECT_FLAG_PROXY_URL)) {
+            if (item.getFlag(OBJECT_FLAG_PROXY_URL)) {
                 url = virtualURL + URLUtils::joinUrl({ CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
             }
         } else if (purpose == ResourcePurpose::Transcode) {
