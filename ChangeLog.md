@@ -17,6 +17,7 @@
 - Fix derivedFrom search handling
 - Fix formatSizeValue on 32-bit systems
 - Fix dynamic folders for lowercase trees
+- Fix ProxyUrl for external items
 - Handle title from nfo correctly
 - Implement new Client Quirk to force SortCriteria 'title'
 - Improve MacOS build

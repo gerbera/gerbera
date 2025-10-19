@@ -23,6 +23,7 @@
 /* global fixture */
 import container from './fixtures/container';
 import externalUrl from './fixtures/external-url';
+import externalVideo from './fixtures/external-video';
 import itemJson from './fixtures/item';
 
 describe('The jQuery Gerbera Editor Overlay', () => {
@@ -34,6 +35,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
   let editDesc;
   let editMime;
   let editProtocol;
+  let editFlag;
   let editSaveButton;
   let addParentId;
   let addParentIdTxt;
@@ -57,6 +59,8 @@ describe('The jQuery Gerbera Editor Overlay', () => {
     editMime.val('TEST');
     editProtocol = $('#editProtocol');
     editProtocol.val('TEST');
+    editFlag = $('#editFlag-ProxyUrl');
+    editFlag.prop('checked', false);
     editSaveButton = $('#editSave');
     addParentId = $('#addParentId');
     addParentIdTxt = $('#addParentIdTxt');
@@ -147,6 +151,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(editSaveButton.text()).toEqual('Save Item');
       expect(addParentId.val()).toBe('');
       expect(addParentIdTxt.text()).toBe('');
+      expect(editFlag.prop('checked')).toBe(false);
       expect(objectId.val()).toBe('');
       expect(objectIdTxt.text()).toBe('');
     });
@@ -198,7 +203,7 @@ describe('The jQuery Gerbera Editor Overlay', () => {
 
       editModal.editmodal('loadItem', itemData);
 
-      expect(editObjectType.val()).toEqual('item');
+      expect(editObjectType.val()).toEqual('video');
       expect(editTitle.val()).toEqual('Test.mp4');
       expect(editLocation.val()).toEqual('/folder/location/Test.mp4');
       expect(editClass.val()).toEqual('object.item.videoItem');
@@ -232,6 +237,29 @@ describe('The jQuery Gerbera Editor Overlay', () => {
       expect(addParentIdTxt.text()).toBe('');
       expect(objectId.val()).toBe('1469');
       expect(objectIdTxt.text()).toBe('1469');
+    });
+
+    it('should set fields in editor for `external_url` video broadcast', () => {
+      const itemData = {
+        item: externalVideo,
+        serverConfig: { editSortKey: true }
+      };
+
+      editModal.editmodal('loadItem', itemData);
+
+      expect(editObjectType.val()).toEqual('videoBroadcast');
+      expect(editTitle.val()).toEqual('title');
+      expect(editLocation.val()).toEqual('http://localhost');
+      expect(editClass.val()).toEqual('object.item.videoItem.videoBroadcast');
+      expect(editDesc.val()).toEqual('description');
+      expect(editMime.val()).toEqual('video/ts');
+      expect(editProtocol.val()).toEqual('http-get');
+      expect(editSaveButton.text()).toEqual('Save Item');
+      expect(editFlag.prop('checked')).toBe(true);
+      expect(addParentId.val()).toBe('');
+      expect(addParentIdTxt.text()).toBe('');
+      expect(objectId.val()).toBe('14691');
+      expect(objectIdTxt.text()).toBe('14691');
     });
 
     it('binds the onSave event to the save button', () => {
