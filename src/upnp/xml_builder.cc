@@ -575,6 +575,24 @@ void UpnpXMLBuilder::renderResource(const CdsObject& object,
     }
 }
 
+class UrlBuilder {
+private:
+    std::string handler;
+
+public:
+    UrlBuilder(std::string hdlr)
+        : handler(std::move(hdlr))
+    {
+    }
+    std::string buildUrl(const std::string& root, int id, int resId = -1) const
+    {
+        return root + URLUtils::joinUrl({ handler, URL_OBJECT_ID, fmt::to_string(id), URL_RESOURCE_ID, resId >= 0 ? fmt::to_string(resId) : URL_VALUE_TRANSCODE_NO_RES_ID });
+    }
+};
+
+static auto mediaContentBuilder = UrlBuilder(CONTENT_MEDIA_HANDLER);
+static auto onlineContentBuilder = UrlBuilder(CONTENT_ONLINE_HANDLER);
+
 std::string UpnpXMLBuilder::renderResourceURL(
     const CdsObject& item,
     const CdsResource& res,
@@ -587,7 +605,7 @@ std::string UpnpXMLBuilder::renderResourceURL(
     if (item.isContainer()) {
         auto resFile = res.getAttribute(ResourceAttribute::RESOURCE_FILE);
         if (!resFile.empty()) {
-            url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
+            url = mediaContentBuilder.buildUrl(virtualURL, item.getID(), res.getResId());
         }
 
         auto resObjID = res.getAttribute(ResourceAttribute::FANART_OBJ_ID);
@@ -601,6 +619,7 @@ std::string UpnpXMLBuilder::renderResourceURL(
                     auto subObjID = stoiString(resRes->getAttribute(ResourceAttribute::FANART_OBJ_ID));
                     if (subObjID > CDS_ID_ROOT && subObjID != resObj->getID() && resRes->getAttribute(ResourceAttribute::RESOURCE_FILE).empty()) {
                         resObj = database->loadObject(subObjID);
+                        log_debug("FANART_OBJ_ID {} -> {}", objID, subObjID);
                         objID = subObjID;
                         resID = stoiString(resRes->getAttribute(ResourceAttribute::FANART_RES_ID));
                     } else {
@@ -612,7 +631,7 @@ std::string UpnpXMLBuilder::renderResourceURL(
             }
             if (objID <= CDS_ID_ROOT)
                 objID = item.getID();
-            url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(objID), URL_RESOURCE_ID, fmt::to_string(resID) });
+            url = mediaContentBuilder.buildUrl(virtualURL, objID, resID);
         }
     } else if (item.isExternalItem()) {
         if (purpose == ResourcePurpose::Content) {
@@ -624,11 +643,11 @@ std::string UpnpXMLBuilder::renderResourceURL(
 
             // Proxied remote URL
             if (item.getFlag(OBJECT_FLAG_PROXY_URL)) {
-                url = virtualURL + URLUtils::joinUrl({ CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
+                url = onlineContentBuilder.buildUrl(virtualURL, item.getID(), res.getResId());
             }
         } else if (purpose == ResourcePurpose::Transcode) {
             // Transcoded resources dont set a resId, uses pr_name from params instead.
-            url = virtualURL + URLUtils::joinUrl({ CONTENT_ONLINE_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, URL_VALUE_TRANSCODE_NO_RES_ID });
+            url = onlineContentBuilder.buildUrl(virtualURL, item.getID());
         } else if (purpose == ResourcePurpose::Thumbnail && res.getHandlerType() == ContentHandler::EXTURL && !item.getFlag(OBJECT_FLAG_PROXY_URL)) {
             url = res.getAttribute(ResourceAttribute::RESOURCE_FILE);
             if (url.empty())
@@ -645,9 +664,9 @@ std::string UpnpXMLBuilder::renderResourceURL(
     if (url.empty()) {
         if (purpose == ResourcePurpose::Transcode) {
             // Transcoded resources dont set a resId, uses pr_name from params instead.
-            url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, URL_VALUE_TRANSCODE_NO_RES_ID });
+            url = mediaContentBuilder.buildUrl(virtualURL, item.getID());
         } else {
-            url = virtualURL + URLUtils::joinUrl({ CONTENT_MEDIA_HANDLER, URL_OBJECT_ID, fmt::to_string(item.getID()), URL_RESOURCE_ID, fmt::to_string(res.getResId()) });
+            url = mediaContentBuilder.buildUrl(virtualURL, item.getID(), res.getResId());
         }
     }
 

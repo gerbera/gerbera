@@ -451,12 +451,11 @@ TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl)
     EXPECT_STREQ(result.c_str(), "http://localhost/external/url");
 }
 
-TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenOnlineWithProxy)
+TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenWithProxy)
 {
     auto obj = std::make_shared<CdsItemExternalURL>();
     obj->setLocation("http://localhost/external/url");
     obj->setID(12345);
-    obj->setFlag(OBJECT_FLAG_ONLINE_SERVICE);
     obj->setFlag(OBJECT_FLAG_PROXY_URL);
 
     auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
