@@ -6,6 +6,7 @@
 - Add Test for formatSizeValue
 - Allow masking arguments
 - Block client group
+- Bump actions/setup-node from 5 to 6
 - Bump github/codeql-action from 3 to 4
 - Build for ubuntu-25.10
 - Check Headers in Quirks
@@ -25,6 +26,7 @@
 - New PostgreSQL database backend
 - nproc missing on MacOS
 - Quirk to block protocolInfo in CaptionInfoEx
+- Reduce code duplication in XmlBuilder
 - Remove loading complete scripts to create virutal layout
 - Rotation of thumbnails by ffmpegthumbnailer
 - Unify doxygen tags
