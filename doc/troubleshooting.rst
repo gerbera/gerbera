@@ -258,8 +258,10 @@ Migration
 Normally, the database is migrated by gerbera automatically. In case migration
 fails or for new layout features you need to clear the database:
 
-- remove all sqlite db files incl. backup if using sqlite3
-  drop all tables from gerbera mysql database with ``mysql-drop.sql``
+- manually remove all sqlite db files incl. backup if using sqlite3
+  drop all tables from gerbera MySQL/MariaDB database with ``mysql-drop.sql`` or PostgreSQL with ``postgres-drop.sql``
+
+- run ``gerbera --drop-tables -c <your-config>`` to let Gerbera do the task.
 
 Storage size
 ~~~~~~~~~~~~

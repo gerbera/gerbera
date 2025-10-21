@@ -334,7 +334,7 @@ void ConfigManager::load(const fs::path& userHome)
     }
 #endif
 
-#ifdef HAVE_LASTFMLIB
+#ifdef HAVE_LASTFM
     auto lfmEn = setOption(root, ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED)->getBoolOption();
     if (lfmEn) {
         for (auto&& option : definition->getDependencies(ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED)) {

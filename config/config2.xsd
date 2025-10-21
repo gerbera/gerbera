@@ -247,6 +247,9 @@
             <xs:all>
                 <xs:element name="username" type="xs:string" minOccurs="0"/>
                 <xs:element name="password" type="xs:string" minOccurs="0"/>
+                <xs:element name="sessionkey" type="xs:string" minOccurs="0"/>
+                <xs:element name="auth-url" type="xs:string" minOccurs="0"/>
+                <xs:element name="scrobble-url" type="xs:string" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="enabled" type="boolean" default="no"/>
         </xs:complexType>

@@ -209,6 +209,11 @@ int main(int argc, char** argv, char** envp)
         (GRB_OPTION_PRINTOPTIONS, "Print simple config options and exit") //
         (GRB_OPTION_OFFLINE, "Do not answer UPnP content requests", cxxopts::value<bool>()->default_value("false")) // good for initial scans
         (GRB_OPTION_DROPTABLES, "Drop all database tables and exit", cxxopts::value<bool>()->default_value("false")) //
+#ifdef HAVE_LASTFM
+#ifndef HAVE_LASTFMLIB
+        (GRB_OPTION_INITLASTFM, "Get Last.FM session key", cxxopts::value<bool>()->default_value("false")) //
+#endif
+#endif
         ("d," GRB_OPTION_DAEMON, "Daemonize after startup", cxxopts::value<bool>()->default_value("false")) //
         ("u," GRB_OPTION_USER, "Drop privs to user UID", cxxopts::value<std::string>(), "UID") //
         ("P," GRB_OPTION_PIDFILE, "Write a pidfile to the specified location, e.g. /run/gerbera.pid", cxxopts::value<fs::path>(), "FILE") //
@@ -270,10 +275,11 @@ int main(int argc, char** argv, char** envp)
 
         try {
             auto dropDatabase = runtime.getDropDatabase();
+            auto initLastFM = runtime.getLastFM();
 
-            server->init(definition, runtime.getOffline(), dropDatabase);
+            server->init(definition, runtime.getOffline(), dropDatabase, initLastFM);
 
-            if (!dropDatabase)
+            if (!dropDatabase && !initLastFM)
                 server->run();
             else
                 runtime.exit(EXIT_SUCCESS);
@@ -375,7 +381,7 @@ int main(int argc, char** argv, char** envp)
                     installSignalHandler();
 
                     server = std::make_shared<Server>(configManager);
-                    server->init(definition, runtimeChild.getOffline(), runtimeChild.getDropDatabase());
+                    server->init(definition, runtimeChild.getOffline(), runtimeChild.getDropDatabase(), runtimeChild.getLastFM());
                     server->run();
                     runtime.notifySystemd(ServiceStatus::Ready);
 

@@ -53,8 +53,18 @@ enum class ImportMode {
 class Content : public Timer::Subscriber {
 public:
     ~Content() override = default;
+    /// @brief start content server
     virtual void run() = 0;
+    /// @brief stop content server
     virtual void shutdown() = 0;
+
+#ifdef HAVE_LASTFM
+#ifndef HAVE_LASTFMLIB
+    /// @brief get Last.FM session key
+    virtual void initLastFM() = 0;
+#endif
+#endif
+
     virtual std::shared_ptr<Context> getContext() const = 0;
 
     virtual std::shared_ptr<ScriptingRuntime> getScriptingRuntime() const = 0;

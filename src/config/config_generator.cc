@@ -552,10 +552,15 @@ void ConfigGenerator::generateExtendedRuntime()
         { ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES, ConfigLevel::Base },
         { ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING_MODE_PREPEND, ConfigLevel::Base },
         { ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING, ConfigLevel::Base },
-#ifdef HAVE_LASTFMLIB
+#ifdef HAVE_LASTFM
         { ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED, ConfigLevel::Example },
         { ConfigVal::SERVER_EXTOPTS_LASTFM_USERNAME, ConfigLevel::Example },
         { ConfigVal::SERVER_EXTOPTS_LASTFM_PASSWORD, ConfigLevel::Example },
+#ifndef HAVE_LASTFMLIB
+        { ConfigVal::SERVER_EXTOPTS_LASTFM_SESSIONKEY, ConfigLevel::Example },
+        { ConfigVal::SERVER_EXTOPTS_LASTFM_AUTHURL, ConfigLevel::Advanced },
+        { ConfigVal::SERVER_EXTOPTS_LASTFM_SCROBBLEURL, ConfigLevel::Advanced },
+#endif
 #endif
     };
     generateOptions(options);

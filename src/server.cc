@@ -102,7 +102,8 @@ Server::Server(std::shared_ptr<Config> config)
 void Server::init(
     const std::shared_ptr<ConfigDefinition>& definition,
     bool offln,
-    bool dropDatabase)
+    bool dropDatabase,
+    bool initLastFM)
 {
     offline = offln;
 
@@ -118,26 +119,40 @@ void Server::init(
     mime = std::make_shared<Mime>(config);
     converterManager = std::make_shared<ConverterManager>(config);
     database = Database::createInstance(config, mime, converterManager, timer);
+
+    // special start mode
     if (dropDatabase) {
         database->dropTables();
-    } else {
-        database->init();
-
-        config->updateConfigFromDatabase(database);
-
-        serverUDN = config->getOption(ConfigVal::SERVER_UDN);
-        if (serverUDN == GRB_UDN_AUTO) {
-            serverUDN = config->generateUDN(database);
-        }
-        aliveAdvertisementInterval = config->getIntOption(ConfigVal::SERVER_ALIVE_INTERVAL);
-
-        clientManager = std::make_shared<ClientManager>(config, database, self);
-        sessionManager = std::make_shared<Web::SessionManager>(config, timer);
-        context = std::make_shared<Context>(definition, config, clientManager, mime, database, sessionManager, converterManager);
-
-        content = std::make_shared<ContentManager>(context, self, timer);
-        metadataService = std::make_shared<MetadataService>(context, content);
+        return;
     }
+
+    database->init();
+
+    config->updateConfigFromDatabase(database);
+
+    serverUDN = config->getOption(ConfigVal::SERVER_UDN);
+    if (serverUDN == GRB_UDN_AUTO) {
+        serverUDN = config->generateUDN(database);
+    }
+    aliveAdvertisementInterval = config->getIntOption(ConfigVal::SERVER_ALIVE_INTERVAL);
+
+    clientManager = std::make_shared<ClientManager>(config, database, self);
+    sessionManager = std::make_shared<Web::SessionManager>(config, timer);
+    context = std::make_shared<Context>(definition, config, clientManager, mime, database, sessionManager, converterManager);
+
+    content = std::make_shared<ContentManager>(context, self, timer);
+
+#ifdef HAVE_LASTFM
+#ifndef HAVE_LASTFMLIB
+    // special start mode
+    if (initLastFM) {
+        content->initLastFM();
+        return;
+    }
+#endif
+#endif
+
+    metadataService = std::make_shared<MetadataService>(context, content);
 }
 
 struct UpnpDesc {
@@ -669,7 +684,7 @@ std::unique_ptr<RequestHandler> Server::createRequestHandler(
         return std::make_unique<UIHandler>(content, upnpXmlBuilder, quirks, self);
     }
 
-#if defined(HAVE_CURL)
+#ifdef HAVE_CURL
     if (startswith(link, fmt::format("/{}", CONTENT_ONLINE_HANDLER))) {
         return std::make_unique<URLRequestHandler>(content, upnpXmlBuilder, quirks);
     }

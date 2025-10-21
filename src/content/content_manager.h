@@ -79,6 +79,12 @@ public:
     void run() override;
     void shutdown() override;
 
+#ifdef HAVE_LASTFM
+#ifndef HAVE_LASTFMLIB
+    void initLastFM() override;
+#endif
+#endif
+
     void timerNotify(const std::shared_ptr<Timer::Parameter>& parameter) override;
 
     /// @brief Returns the task that is currently being executed.
@@ -248,7 +254,9 @@ protected:
     std::shared_ptr<Timer> timer;
     std::shared_ptr<TaskProcessor> task_processor;
     std::shared_ptr<ScriptingRuntime> scriptingRuntime;
+#ifdef HAVE_LASTFM
     std::shared_ptr<LastFm> last_fm;
+#endif
 
     std::shared_ptr<AutoscanList> autoscanList;
 #ifdef HAVE_INOTIFY

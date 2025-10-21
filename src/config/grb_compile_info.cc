@@ -182,8 +182,14 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
 #ifdef ONLINE_SERVICES
         { "ONLINE_SERVICES", "" },
 #endif
+#ifdef HAVE_LASTFM
+        { "HAVE_LASTFM",
 #ifdef HAVE_LASTFMLIB
-        { "HAVE_LASTFMLIB", "" },
+            "HAVE_LASTFMLIB"
+#else
+            ""
+#endif
+        },
 #endif
 #ifdef ICONV_CONST
         { "ICONV_CONST", "" },

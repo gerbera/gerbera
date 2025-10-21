@@ -116,6 +116,11 @@ void GerberaRuntime::init(
         { GRB_OPTION_CONFIG, [=](const std::string& arg) { return this->setConfigFile(arg); } },
         { GRB_OPTION_CFGDIR, [=](const std::string& arg) { return this->setConfigDir(arg); } },
         { GRB_OPTION_DROPTABLES, [=](const std::string& arg) { return this->dropTables(arg); } },
+#ifdef HAVE_LASTFM
+#ifndef HAVE_LASTFMLIB
+        { GRB_OPTION_INITLASTFM, [=](const std::string& arg) { return this->initLastFM(arg); } },
+#endif
+#endif
     };
 
     argumentOptionCallbacks = std::vector<ArgumentHandler> {
@@ -509,6 +514,19 @@ bool GerberaRuntime::dropTables(const std::string& arg)
 
     return true;
 }
+
+#ifdef HAVE_LASTFM
+#ifndef HAVE_LASTFMLIB
+bool GerberaRuntime::initLastFM(const std::string& arg)
+{
+    lastFM = (*results)[arg].as<bool>();
+    if (lastFM)
+        log_info("Setting up Last.FM");
+
+    return true;
+}
+#endif
+#endif
 
 bool GerberaRuntime::checkDirs()
 {

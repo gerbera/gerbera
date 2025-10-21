@@ -366,7 +366,7 @@ public:
     std::string magicFile;
 };
 
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(HAVE_EXIV2) && defined(HAVE_PGSQL)
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(HAVE_EXIV2) && defined(HAVE_PGSQL) && !defined(HAVE_LASTFM)
 TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithExiv2AllDefinitions)
 {
 #ifdef ONLINE_SERVICES
@@ -387,7 +387,28 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithExiv2AllDefinitions
 }
 #endif
 
-#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && !defined(HAVE_EXIV2) && defined(HAVE_PGSQL)
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(HAVE_EXIV2) && defined(HAVE_PGSQL) && defined(HAVE_LASTFM)
+TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithExiv2AndLastfmAllDefinitions)
+{
+#ifdef ONLINE_SERVICES
+    std::string mockXml = mockConfigXml("fixtures/mock-example-lastfm-all-os.xml");
+#else
+    std::string mockXml = mockConfigXml("fixtures/mock-example-lastfm-all.xml");
+#endif
+    std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
+#ifdef GERBERA_RELEASE
+    replaceAllString(mockXml, "https://docs.gerbera.io/en/latest/", "https://docs.gerbera.io/en/stable/");
+#endif
+
+    // remove UUID, for simple compare...TODO: mock UUID?
+    std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
+    result = std::regex_replace(result, reg, "<udn/>");
+
+    EXPECT_STREQ(mockXml.c_str(), result.c_str());
+}
+#endif
+
+#if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && !defined(HAVE_EXIV2) && defined(HAVE_PGSQL) && !defined(HAVE_LASTFM)
 TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 {
 #ifdef ONLINE_SERVICES
@@ -408,7 +429,7 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 }
 #endif
 
-#if !defined(HAVE_FFMPEG) && !defined(HAVE_FFMPEGTHUMBNAILER) && !defined(HAVE_MYSQL) && !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES) && !defined(HAVE_PGSQL)
+#if !defined(HAVE_FFMPEG) && !defined(HAVE_FFMPEGTHUMBNAILER) && !defined(HAVE_MYSQL) && !defined(HAVE_MAGIC) && !defined(HAVE_JS) && !defined(ONLINE_SERVICES) && !defined(HAVE_PGSQL) && !defined(HAVE_LASTFM)
 TEST_F(ExampleConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions)
 {
     std::string mockXml = mockConfigXml("fixtures/mock-example-minimal.xml");

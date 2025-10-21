@@ -32,21 +32,25 @@
 /// @file content/onlineservice/lastfm_scrobbler.h
 /// @brief Last.fm scrobbler.
 
-#ifdef HAVE_LASTFMLIB
+#ifdef HAVE_LASTFM
 
 #ifndef __LASTFM_H__
 #define __LASTFM_H__
 
-#include <lastfmlib/lastfmscrobbler.h>
 #include <memory>
+#include <string>
 
 class Config;
 class Context;
 class CdsItem;
+class LastFmScrobbler;
 
 class LastFm {
 public:
     explicit LastFm(const std::shared_ptr<Context>& context);
+
+    /// @brief get session key after activation
+    int setup();
 
     /// @brief Initializes the LastFm client.
     ///
@@ -70,7 +74,10 @@ public:
 
 private:
     std::shared_ptr<Config> config;
+    bool enabled { false };
 
+    std::string username;
+    std::string password;
     std::unique_ptr<LastFmScrobbler> scrobbler;
     int currentTrackId { -1 };
 };
