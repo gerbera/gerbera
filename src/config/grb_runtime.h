@@ -66,6 +66,7 @@ using HandleCallback = std::function<bool()>;
 #define GRB_OPTION_SETOPTION "set-option"
 #define GRB_OPTION_ADDFILE "add-file"
 #define GRB_OPTION_DROPTABLES "drop-tables"
+#define GRB_OPTION_INITLASTFM "init-lastfm"
 
 #define DEFAULT_CONFIG_HOME ".config/gerbera"
 
@@ -138,6 +139,8 @@ public:
     bool getOffline() const { return offline; }
     /// @brief access property for active drop database flag
     bool getDropDatabase() const { return dropDatabase; }
+    /// @brief access property for active init Last.FM flag
+    bool getLastFM() const { return lastFM; }
 
     /// @brief Name of the appilcation from command line
     static const std::string ProgramName;
@@ -163,6 +166,7 @@ private:
     bool debug = false;
     bool offline = false;
     bool dropDatabase = false;
+    bool lastFM = false;
     ConfigLevel exampleConfigSet;
     int sections;
     bool createConfigSet = false;
@@ -213,6 +217,12 @@ private:
     bool setConfigDir(const std::string& arg);
     /// @brief handler to drop database tables
     bool dropTables(const std::string& arg);
+#ifdef HAVE_LASTFM
+#ifndef HAVE_LASTFMLIB
+    /// @brief handler to get Last.FM session key
+    bool initLastFM(const std::string& arg);
+#endif
+#endif
 
     /// @brief handle command line arguments in configuration
     bool handleOptionArgs(const std::string& arg);

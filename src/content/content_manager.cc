@@ -62,8 +62,13 @@
 #include "scripting/scripting_runtime.h"
 #endif
 
-#ifdef HAVE_LASTFMLIB
+#ifdef HAVE_LASTFM
 #include "onlineservice/lastfm_scrobbler.h"
+#ifdef HAVE_LASTFMLIB
+#include <lastfmlib/lastfmscrobbler.h>
+#else
+#include "onlineservice/lastfmlib.h"
+#endif
 #endif
 
 #ifdef ONLINE_SERVICES
@@ -90,7 +95,7 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 #ifdef HAVE_JS
     , scriptingRuntime(std::make_shared<ScriptingRuntime>())
 #endif
-#ifdef HAVE_LASTFMLIB
+#ifdef HAVE_LASTFM
     , last_fm(std::make_shared<LastFm>(context))
 #endif
 {
@@ -108,6 +113,15 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 #endif
 }
 
+#ifdef HAVE_LASTFM
+#ifndef HAVE_LASTFMLIB
+void ContentManager::initLastFM()
+{
+    last_fm->setup();
+}
+#endif
+#endif
+
 void ContentManager::run()
 {
     auto self = shared_from_this();
@@ -117,7 +131,7 @@ void ContentManager::run()
 #ifdef ONLINE_SERVICES
     task_processor->run();
 #endif
-#ifdef HAVE_LASTFMLIB
+#ifdef HAVE_LASTFM
     last_fm->run();
 #endif
     threadRunner = std::make_unique<ThreadRunner<std::condition_variable_any, std::recursive_mutex>>(
@@ -333,7 +347,7 @@ void ContentManager::shutdown()
 
     threadRunner->join();
 
-#ifdef HAVE_LASTFMLIB
+#ifdef HAVE_LASTFM
     last_fm->shutdown();
     last_fm.reset();
 #endif
@@ -1719,7 +1733,7 @@ void ContentManager::triggerPlayHook(const std::string& group, const std::shared
     if (!suppress)
         updateObject(obj, true);
 
-#ifdef HAVE_LASTFMLIB
+#ifdef HAVE_LASTFM
     if (config->getBoolOption(ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED) && item->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {
         last_fm->startedPlaying(item);
     }

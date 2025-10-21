@@ -22,6 +22,8 @@ jobs:
           - "mock-config-all.xml"
           - "mock-example-exiv2-all-os.xml"
           - "mock-example-exiv2-all.xml"
+          - "mock-example-lastfm-all-os.xml"
+          - "mock-example-lastfm-all.xml"
           - "mock-example-all-os.xml"
           - "mock-example-all.xml"
           - "full-example-for-xsd.xml"

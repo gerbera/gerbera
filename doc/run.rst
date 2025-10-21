@@ -225,6 +225,16 @@ The tables will be created automatically during the first startup.
 All table names have a ``mt_`` or ``grb_`` prefix, so you can theoretically share the database with a different application.
 However, this is not recommended.
 
+
+Last.FM Setup
+~~~~~~~~~~~~~~
+
+In order to use the Last.fm integration of Gerbera you need an account and enable LastFM support with :confval:`lastfm enabled`.
+If your Gerbera build is still on the old API using LastFMLib username and password have to be set in config.xml.
+For API 2.0 you need to create an apiKey with apiSecret which you set in config.xml. After that you need to run
+``gerbera --init-lastfm`` which prints out the session key. Copy the session key to :confval:`lastfm sessionkey` and start gerbera normally.
+
+
 Command Line Options
 ~~~~~~~~~~~~~~~~~~~~
 
@@ -380,6 +390,26 @@ Offline
 
 Do not answer UPnP requests like browse. This is helpful when running a large scan to initialize
 the database so no client can slow down the import by accessing the database.
+
+Drop tables
+------------
+
+::
+
+    --drop-tables
+
+Remove tables from database to trigger a new import.
+
+Init Last.FM
+------------
+
+::
+
+    --init-lastfm
+
+Get the Last.FM session key. You need to set the apiKey in the :confval:`lastfm username` and the apiSecret in the :confval:`lastfm password`.
+Follow the instrutions on the screen and copy the printed sessionKey to :confval:`lastfm sessionkey`.
+
 
 Version Information
 -------------------

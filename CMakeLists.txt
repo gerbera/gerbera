@@ -196,6 +196,8 @@ add_library(libgerbera STATIC
         src/content/onlineservice/curl_online_service.h
         src/content/onlineservice/lastfm_scrobbler.cc
         src/content/onlineservice/lastfm_scrobbler.h
+        src/content/onlineservice/lastfmlib.cc
+        src/content/onlineservice/lastfmlib.h
         src/content/onlineservice/online_service.cc
         src/content/onlineservice/online_service.h
         src/content/onlineservice/online_service_helper.cc
@@ -697,8 +699,7 @@ if(WITH_CURL)
     find_package(CURL REQUIRED)
     target_link_libraries(libgerbera PUBLIC CURL::libcurl)
 
-    target_compile_definitions(libgerbera PUBLIC
-        HAVE_CURL)
+    target_compile_definitions(libgerbera PUBLIC HAVE_CURL)
 
     if(WITH_ONLINE_SERVICES)
         target_compile_definitions(libgerbera PUBLIC
@@ -796,10 +797,22 @@ if(WITH_MATROSKA)
 endif()
 
 if(WITH_LASTFM)
-    find_package (LastFMLib REQUIRED)
-    target_include_directories(libgerbera PUBLIC ${LASTFMLIB_INCLUDE_DIRS})
-    target_link_libraries(libgerbera PUBLIC ${LASTFMLIB_LIBRARIES})
-    target_compile_definitions(libgerbera PUBLIC HAVE_LASTFMLIB)
+    find_package (LastFMLib QUIET)
+    if(LastFMLib_FOUND)
+        target_include_directories(libgerbera PUBLIC ${LastFMLib_INCLUDE_DIRS})
+        target_link_libraries(libgerbera PUBLIC ${LastFMLib_LIBRARIES})
+        target_compile_definitions(libgerbera PUBLIC HAVE_LASTFMLIB)
+        target_compile_definitions(libgerbera PUBLIC HAVE_LASTFM)
+        message("-- Found LastFMLib ${LastFMLib_LIBRARIES}")
+    else()
+        if(WITH_CURL)
+            message( "-- Using GrbLastFMLib")
+            target_compile_definitions(libgerbera PUBLIC HAVE_LASTFM)
+        else()
+            message(SEND_ERROR "-- GrbLastFMLib needs CURL")
+            return()
+        endif()
+    endif()
 endif()
 
 #

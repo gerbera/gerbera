@@ -196,24 +196,65 @@ Support for the last.fm service. Gerbera has to be built with LastFM support.
 .. confval:: lastfm username
    :type: :confval:`String`
    :required: true
-   :default: `empty`
+   :default: `lastfmuser`
 
+   .. versionchanged:: HEAD Used as apiKey for API 2.0
    .. code:: xml
 
         <username>login</username>
 
-Your last.fm user name.
+Your last.fm user name or the ``apiKey`` for API version 2.0.
 
 .. confval:: lastfm password
    :type: :confval:`String`
    :required: true
-   :default: `empty`
+   :default: `lastfmpass`
 
+   .. versionchanged:: HEAD Used as apiSecret for API 2.0
    .. code:: xml
 
         <password>pass</password>
 
-Your last.fm password.
+Your last.fm password or the ``apiSecret`` for API version 2.0.
+
+.. confval:: lastfm sessionkey
+   :type: :confval:`String`
+   :required: true
+   :default: `sessionKey`
+
+   .. versionadded:: HEAD Support for API 2.0
+   .. code:: xml
+
+        <sessionkey>sessionKeyFromWeb</sessionkey>
+
+After the user has authorized on last.fm web page, the session key can be retrieved from the console under ``gerbera --init-lastfm``.
+
+Your last.fm password or the ``apiSecret`` for API version 2.0.
+
+.. confval:: lastfm authUrl
+   :type: :confval:`String`
+   :required: true
+   :default: `https://www.last.fm/api/auth/`
+
+   .. versionadded:: HEAD Support for API 2.0
+   .. code:: xml
+
+        <sessionkey>https://www.libre.fm/api/auth/</sessionkey>
+
+URL to redirect the user to for login.
+
+.. confval:: lastfm scrobbleUrl
+   :type: :confval:`String`
+   :required: true
+   :default: `https://ws.audioscrobbler.com/2.0/`
+
+   .. versionadded:: HEAD Support for API 2.0
+   .. code:: xml
+
+        <sessionkey>https://ws.audioscrobbler.com/2.1/</sessionkey>
+
+URL to send the scrobbles to.
+
 
 *****************
 Mark Played Items

@@ -12,6 +12,7 @@ and there is a new database: **PostgreSQL**.
 ### NEW Features
 
 - PostgreSQL database support
+- Integrated Last.FM support for API 2.0
 - WebUI shows referenced items in other parts of layout in details
 - Spinner on WebUI while loading
 - New command line option for even more data in the config example

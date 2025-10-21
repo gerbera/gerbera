@@ -73,10 +73,12 @@ public:
     /// @param definition reference to configuration definitions
     /// @param offln start server in offline (without UPnP) mode to import
     /// @param dropDatabase start server to drop database (without any content operation)
+    /// @param initLastFM get Last.FM session key
     void init(
         const std::shared_ptr<ConfigDefinition>& definition,
         bool offln,
-        bool dropDatabase);
+        bool dropDatabase,
+        bool initLastFM);
 
     /// @brief Cleanup routine to shutdown the server.
     ///

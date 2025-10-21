@@ -797,7 +797,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         std::make_shared<ConfigArraySetup>(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST,
             "/server/extended-runtime-options/mark-played-items/mark", "config-extended.html#extended-runtime-options",
             ConfigVal::A_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT, ConfigArraySetup::InitPlayedItemsMark),
-#ifdef HAVE_LASTFMLIB
+
+#ifdef HAVE_LASTFM
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED,
             "/server/extended-runtime-options/lastfm/attribute::enabled", "config-extended.html#lastfm",
             NO),
@@ -807,7 +808,19 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_EXTOPTS_LASTFM_PASSWORD,
             "/server/extended-runtime-options/lastfm/password", "config-extended.html#lastfm",
             false, "lastfmpass", true),
+#ifndef HAVE_LASTFMLIB
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_EXTOPTS_LASTFM_SESSIONKEY,
+            "/server/extended-runtime-options/lastfm/sessionkey", "config-extended.html#lastfm",
+            false, "sessionKey", true),
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_EXTOPTS_LASTFM_AUTHURL,
+            "/server/extended-runtime-options/lastfm/auth-url", "config-extended.html#lastfm",
+            false, "https://www.last.fm/api/auth/", true),
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_EXTOPTS_LASTFM_SCROBBLEURL,
+            "/server/extended-runtime-options/lastfm/scrobble-url", "config-extended.html#lastfm",
+            false, "https://ws.audioscrobbler.com/2.0/", true),
 #endif
+#endif
+
 #ifdef HAVE_CURL
         std::make_shared<ConfigIntSetup>(ConfigVal::URL_REQUEST_CURL_BUFFER_SIZE,
             "/server/online-content/attribute::fetch-buffer-size", "config-online.html#online-content",
@@ -2178,9 +2191,14 @@ void ConfigDefinition::initDependencies()
         { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED },
         { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED },
 #endif
-#ifdef HAVE_LASTFMLIB
+#ifdef HAVE_LASTFM
         { ConfigVal::SERVER_EXTOPTS_LASTFM_USERNAME, ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED },
         { ConfigVal::SERVER_EXTOPTS_LASTFM_PASSWORD, ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED },
+#ifndef HAVE_LASTFMLIB
+        { ConfigVal::SERVER_EXTOPTS_LASTFM_SESSIONKEY, ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED },
+        { ConfigVal::SERVER_EXTOPTS_LASTFM_AUTHURL, ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED },
+        { ConfigVal::SERVER_EXTOPTS_LASTFM_SCROBBLEURL, ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED },
+#endif
 #endif
     };
 }

@@ -38,6 +38,8 @@ gerbera \- UPnP MediaServer
 ] [
 \fB--drop-tables\fR
 ] [
+\fB--init-lastfm\fR
+] [
 \fB-d|-daemon\fR
 ] [
 \fB-u|--user \fIusername\fB
@@ -180,6 +182,10 @@ the database so no client can slow down the import by accessing the database.
 .TP
 \*(T<\fB\-\-drop\-tables\fR\*(T>
 Drop all database tables and exit
+.TP
+\*(T<\fB\-\-init\-lastfm\fR\*(T>
+Get Last.FM session key based on apiKey and apiSecret in config.
+Requires Gerbera to be build with support for Last.FM API 2.0.
 .TP
 \*(T<\fB\-\-version\fR\*(T>
 Print version information and exit.
