@@ -197,7 +197,7 @@ COPY --from=builder /usr/local/lib/libspdlog.so* /usr/lib/
 # Copy duktape
 COPY --from=builder /usr/local/lib/libduktape.so* /usr/lib/
 # Copy libpqxx
-COPY --from=builder /usr/local/lib/libpqxx.so* /usr/lib/
+COPY --from=builder /usr/local/lib/libpqxx*.so* /usr/lib/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera

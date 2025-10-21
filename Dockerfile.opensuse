@@ -219,8 +219,8 @@ COPY --from=builder /usr/local/lib64/libduktape.so* /usr/lib64/
 COPY --from=builder /usr/local/lib/libjsoncpp.so* /usr/lib/
 COPY --from=builder /usr/local/lib64/libjsoncpp.so* /usr/lib64/
 # Copy libpqxx
-COPY --from=builder /usr/local/lib/libpqxx.so* /usr/lib/
-COPY --from=builder /usr/local/lib64/libpqxx.so* /usr/lib64/
+COPY --from=builder /usr/local/lib/libpqxx*.so* /usr/lib/
+COPY --from=builder /usr/local/lib64/libpqxx*.so* /usr/lib64/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
