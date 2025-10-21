@@ -131,7 +131,7 @@ COPY --from=builder /usr/local/lib/libexif.so* /usr/lib/
 # Copy ffmpegthumbnailer
 COPY --from=builder /usr/local/lib/libffmpegthumbnailer.so* /usr/lib/
 # Copy libpqxx
-COPY --from=builder /usr/local/lib/libpqxx.so* /usr/lib/
+COPY --from=builder /usr/local/lib/libpqxx*.so* /usr/lib/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
