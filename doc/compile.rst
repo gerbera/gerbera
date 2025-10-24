@@ -147,6 +147,9 @@ Additional cmake Options
 +------------------------+-----------------------------------------------------+----------+
 | WITH\_DEBUG\_OPTIONS   | Enables dedicated debug messages                    | Enabled  |
 +------------------------+-----------------------------------------------------+----------+
+| WITH\_LASTFM           | If enabled without lastfmlib_ installed Last.FM     | Disabled |
+|                        | API 2.0 is used by builtin code which requires curl |          |
++------------------------+-----------------------------------------------------+----------+
 | STATIC\_LIBUPNP        | Link to libupnp statically                          | Disabled |
 +------------------------+-----------------------------------------------------+----------+
 | BUILD\_DOC             | Add ``doc`` target to generate source documentation | Disabled |

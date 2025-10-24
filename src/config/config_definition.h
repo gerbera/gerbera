@@ -149,6 +149,7 @@ private:
     /// @brief configure all known options
     void initOptions(const std::shared_ptr<ConfigDefinition>& self);
     static std::vector<std::shared_ptr<ConfigSetup>> getServerOptions();
+    static std::vector<std::shared_ptr<ConfigSetup>> getServerExtendedOptions();
     static std::vector<std::shared_ptr<ConfigSetup>> getClientOptions();
     static std::vector<std::shared_ptr<ConfigSetup>> getImportOptions();
     static std::vector<std::shared_ptr<ConfigSetup>> getLibraryOptions();

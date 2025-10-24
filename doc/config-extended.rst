@@ -231,7 +231,7 @@ After the user has authorized on last.fm web page, the session key can be retrie
 
 Your last.fm password or the ``apiSecret`` for API version 2.0.
 
-.. confval:: lastfm authUrl
+.. confval:: lastfm auth-url
    :type: :confval:`String`
    :required: true
    :default: `https://www.last.fm/api/auth/`
@@ -239,11 +239,11 @@ Your last.fm password or the ``apiSecret`` for API version 2.0.
    .. versionadded:: HEAD Support for API 2.0
    .. code:: xml
 
-        <sessionkey>https://www.libre.fm/api/auth/</sessionkey>
+        <auth-url>https://www.libre.fm/api/auth/</auth-url>
 
 URL to redirect the user to for login.
 
-.. confval:: lastfm scrobbleUrl
+.. confval:: lastfm scrobble-url
    :type: :confval:`String`
    :required: true
    :default: `https://ws.audioscrobbler.com/2.0/`
@@ -251,7 +251,7 @@ URL to redirect the user to for login.
    .. versionadded:: HEAD Support for API 2.0
    .. code:: xml
 
-        <sessionkey>https://ws.audioscrobbler.com/2.1/</sessionkey>
+        <scrobble-url>https://ws.audioscrobbler.com/2.1/</scrobble-url>
 
 URL to send the scrobbles to.
 

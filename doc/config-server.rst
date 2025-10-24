@@ -583,6 +583,17 @@ Web Interface Attributes
 
     This setting specifies if thumbnails or cover art should be shown in the web UI.
 
+    .. confval:: enable-video
+       :type: :confval:`Boolean`
+       :required: false
+       :default: ``no``
+
+       .. code-block:: xml
+
+           enable-video="no"
+
+    Enable video preview in web ui.
+
     .. confval:: poll-interval
        :type: :confval:`Integer`
        :required: false
@@ -726,7 +737,7 @@ For description see :ref:`Import Extension Mimetype Mapping <extension-mimetype>
 
 Attributes
 
-    .. confval:: extension-mimetype default
+    .. confval:: ui extension-mimetype default
        :type: :confval:`String`
        :required: false
        :default: ``application/octet-stream``
@@ -744,11 +755,15 @@ Accounts
 
    .. code-block:: xml
 
-      <accounts enabled="yes" session-timeout="30"/>
+      <accounts enabled="yes" session-timeout="30">
+        <account user="admin" password="password"/>
+        <account user="reader" password="secret"/>
+      </account>
 
 This section holds various account settings.
 
 Attributes
+----------
 
     .. confval:: accounts enabled
        :type: :confval:`Boolean`
@@ -774,16 +789,39 @@ Attributes
     five minutes for sessions that have timed out, therefore in the worst case the session times out
     after session-timeout + 5 minutes. The value can be given in a valid time format.
 
-Example:
-    Accounts can be defined as shown below:
 
-    .. code-block:: xml
+Account Settings
+----------------
 
-        <account user="name" password="password"/>
-        <account user="name" password="password"/>
+There can be multiple users, however this is mainly a feature for the future. Right now there are
+no per-user permissions.
 
-    There can be multiple users, however this is mainly a feature for the future. Right now there are
-    no per-user permissions.
+
+    .. confval:: account
+       :type: :confval:`Section`
+       :required: false
+
+       .. code-block:: xml
+
+          <account user="admin" password="secret"/>
+
+    .. confval:: account user
+       :type: :confval:`String`
+       :required: false
+       :default: `empty`
+
+       .. code-block:: xml
+
+           user="admin"
+
+    .. confval:: account password
+       :type: :confval:`String`
+       :required: false
+       :default: `empty`
+
+       .. code-block:: xml
+
+           password="secret"
 
 Items Per Page
 ==============
@@ -797,6 +835,7 @@ Items Per Page
        <items-per-page default="25">
 
 Attributes
+----------
 
     .. confval:: items-per-page default
        :type: :confval:`Integer`
@@ -811,6 +850,7 @@ Attributes
     The values for the items per page drop down menu can be defined in the following manner:
 
 Items
+-----
 
     .. confval:: items-per-page option
        :type: :confval:`Integer`
@@ -1228,7 +1268,7 @@ The full path to the upgrade settings for the database
 Database Engine
 ---------------
 
-.. confval:: engine
+.. confval:: mysql engine
    :type: :confval:`String`
    :required: false
    :default: ``MyISAM``
@@ -1922,7 +1962,7 @@ Containers Attributes
 
     Text to display as title of the container. If it is empty the last section of the location is used.
 
-    .. confval:: containers ontainer sort
+    .. confval:: containers container sort
        :type: :confval:`String`
        :required: false
        :default: `empty`
@@ -1933,7 +1973,7 @@ Containers Attributes
 
     UPnP sort statement to use as sorting criteria for the container.
 
-    .. confval:: containers ontainer upnp-shortcut
+    .. confval:: containers container upnp-shortcut
        :type: :confval:`String`
        :required: false
        :default: `empty`

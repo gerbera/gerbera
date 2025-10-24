@@ -37,6 +37,7 @@
 - Update to fmt 12.0.0
 - Update to pupnp 1.14.25
 - Update to spdlog 1.16.0
+- Use new confval links in help
 - WavPack under MacOS
 - WebUI: Show referenced items in details
 - WebUI: Show spinner on loading

@@ -301,6 +301,12 @@ class ParentTreeItem extends TreeItem {
     }
 
     text.text(caption).appendTo(line);
+    if (this.help) {
+      const link = $('<a>', { "title": "help", "target": "_blank", "style": "margin-left: 20px", "class": "", "href": TreeItem.userDocs + this.help });
+      const icon = $('<i></i>', { "class": "fa " + "fa-info" });
+      link.append(icon);
+      link.appendTo(line);
+    }
   }
 
   hideChild(event) {

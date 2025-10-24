@@ -5,6 +5,10 @@
 This release is two ways disconnecting Gerbera from it's MediaTomb past: The way JavaScript is integrated is finally changed from script to function
 and there is a new database: **PostgreSQL**.
 
+Layout of documentation for configuration was improved by headings, versioning details and a confval layout.
+
+Last.FM integration is working without old lastfmlib and using Last.FM API 2.0.
+
 ### Removed Features
 
 **Support for loading layout scripts has been removed now. The javascript interface must be used by calling functions depending on the media type.**
