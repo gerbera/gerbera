@@ -33,7 +33,6 @@
 
 #include <algorithm>
 #include <array>
-#include <numeric>
 
 std::shared_ptr<ClientGroupConfig> ClientConfigList::getGroup(const std::string& name) const
 {
@@ -207,8 +206,10 @@ int ClientConfig::remapFlag(const std::string& flag)
 
 int ClientConfig::makeFlags(const std::string& optValue)
 {
-    std::vector<std::string> flagsVector = splitString(optValue, '|');
-    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ClientConfig::remapFlag(trimString(i)); });
+    int ret = 0;
+    for (const auto& str : splitString(optValue, '|'))
+        ret |= ClientConfig::remapFlag(trimString(str));
+    return ret;
 }
 
 std::string ClientConfig::mapFlags(QuirkFlags flags)

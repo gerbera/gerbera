@@ -32,8 +32,6 @@
 #include "config_setup_bool.h"
 #include "util/logger.h"
 
-#include <numeric>
-
 /// @brief Creates a vector from an XML nodeset.
 bool ConfigVectorSetup::createOptionFromNode(
     const pugi::xml_node& element,

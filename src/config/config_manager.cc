@@ -49,9 +49,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-#include <numeric>
-#include <sstream>
-
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
 #include <langinfo.h>
 #endif

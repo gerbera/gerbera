@@ -40,7 +40,6 @@
 #include "util/tools.h"
 
 #include <array>
-#include <numeric>
 #include <sys/inotify.h>
 #include <utility>
 

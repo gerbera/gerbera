@@ -39,8 +39,6 @@
 #include "util/enum_iterator.h"
 #include "util/tools.h"
 
-#include <numeric>
-
 const std::map<AutoscanMediaMode, std::string> AutoscanDirectory::ContainerTypesDefaults = {
     { AutoscanMediaMode::Audio, UPNP_CLASS_MUSIC_ALBUM },
     { AutoscanMediaMode::Image, UPNP_CLASS_PHOTO_ALBUM },
@@ -111,8 +109,10 @@ static std::map<AutoscanDirectory::MediaType, std::string> upnpClasses = {
 
 int AutoscanDirectory::makeMediaType(const std::string& optValue)
 {
-    std::vector<std::string> flagsVector = splitString(optValue, '|');
-    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | AutoscanDirectory::remapMediaType(trimString(i)); });
+    int ret = 0;
+    for (const auto& str : splitString(optValue, '|'))
+        ret |= AutoscanDirectory::remapMediaType(trimString(str));
+    return ret;
 }
 
 std::string_view AutoscanDirectory::mapMediaType(AutoscanDirectory::MediaType mt)

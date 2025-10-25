@@ -40,7 +40,6 @@
 #include "util/tools.h"
 
 #include <array>
-#include <numeric>
 
 static constexpr bool isCdsItem(unsigned int type) { return type & OBJECT_TYPE_ITEM; }
 static constexpr bool isCdsPureItem(unsigned int type) { return type == OBJECT_TYPE_ITEM; }
@@ -213,6 +212,8 @@ std::string CdsObject::getAuxData(const std::string& key) const
 
 int CdsObject::makeFlag(const std::string& optValue)
 {
-    std::vector<std::string> flagsVector = splitString(optValue, '|');
-    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | CdsObject::remapFlags(trimString(i)); });
+    int ret = 0;
+    for (const auto& str : splitString(optValue, '|'))
+        ret |= CdsObject::remapFlags(trimString(str));
+    return ret;
 }

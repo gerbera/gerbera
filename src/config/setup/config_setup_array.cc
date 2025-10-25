@@ -33,8 +33,6 @@
 #include "config_setup_int.h"
 #include "util/logger.h"
 
-#include <numeric>
-
 /// @brief Creates an array of strings from an XML nodeset.
 bool ConfigArraySetup::createOptionFromNode(
     const pugi::xml_node& element,

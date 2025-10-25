@@ -34,8 +34,6 @@
 #include "util/logger.h"
 #include "util/tools.h"
 
-#include <numeric>
-
 /// @brief Creates a dictionary from an XML nodeset.
 bool ConfigDictionarySetup::createOptionFromNode(
     const pugi::xml_node& element,

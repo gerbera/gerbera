@@ -36,8 +36,6 @@
 #include "setup_util.h"
 #include "util/logger.h"
 
-#include <numeric>
-
 /// @brief Creates an array of DynamicContent objects from a XML nodeset.
 bool ConfigDynamicContentSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result) const
 {

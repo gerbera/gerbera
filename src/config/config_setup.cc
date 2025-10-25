@@ -30,8 +30,6 @@
 #include "exceptions.h"
 #include "util/logger.h"
 
-#include <numeric>
-
 pugi::xml_node ConfigSetup::getXmlElement(const pugi::xml_node& root) const
 {
     pugi::xpath_node xpathNode = root.select_node(cpath.c_str());

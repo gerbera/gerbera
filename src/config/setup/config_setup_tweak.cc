@@ -36,8 +36,6 @@
 #include "setup_util.h"
 #include "util/logger.h"
 
-#include <numeric>
-
 /// @brief Creates an array of DirectoryTweak objects from a XML nodeset.
 bool ConfigDirectorySetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result) const
 {

@@ -40,8 +40,6 @@
 #include "content/autoscan_list.h"
 #include "setup_util.h"
 
-#include <numeric>
-
 std::string ConfigAutoscanSetup::getUniquePath() const
 {
     return fmt::format("{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode));

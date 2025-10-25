@@ -36,7 +36,6 @@
 #include "config_val.h"
 #include "util/tools.h"
 
-#include <numeric>
 #include <sstream>
 
 #define XML_XMLNS_XSI "http://www.w3.org/2001/XMLSchema-instance"
@@ -73,8 +72,10 @@ std::string ConfigGenerator::printSections(int section)
 
 int ConfigGenerator::makeSections(const std::string& optValue)
 {
-    std::vector<std::string> flagsVector = splitString(optValue, '|');
-    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ConfigGenerator::remapGeneratorSections(trimString(i)); });
+    int ret = 0;
+    for (const auto& str : splitString(optValue, '|'))
+        ret |= ConfigGenerator::remapGeneratorSections(trimString(str));
+    return ret;
 }
 
 std::map<GeneratorSections, std::string_view> ConfigGenerator::sections = {

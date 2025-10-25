@@ -41,7 +41,6 @@
 #include "util/logger.h"
 
 #include <iterator>
-#include <numeric>
 
 /// @brief Creates an array of ClientConfig objects from a XML nodeset.
 /// @param element starting element of the nodeset.

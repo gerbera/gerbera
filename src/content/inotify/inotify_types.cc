@@ -33,7 +33,6 @@
 #if FMT_VERSION >= 100202
 #include <fmt/ranges.h>
 #endif
-#include <numeric>
 #include <sys/inotify.h>
 #include <vector>
 
@@ -81,8 +80,10 @@ InotifyFlags InotifyUtil::remapFlag(const std::string& flag)
 
 InotifyFlags InotifyUtil::makeFlags(const std::string& optValue)
 {
-    std::vector<std::string> flagsVector = splitString(optValue, '|');
-    return std::accumulate(flagsVector.begin(), flagsVector.end(), static_cast<InotifyFlags>(0), [](auto flg, auto&& i) { return flg | InotifyUtil::remapFlag(trimString(i)); });
+    InotifyFlags ret = {};
+    for (const auto& str : splitString(optValue, '|'))
+        ret |= InotifyUtil::remapFlag(trimString(str));
+    return ret;
 }
 
 std::string InotifyUtil::mapFlags(InotifyFlags flags)

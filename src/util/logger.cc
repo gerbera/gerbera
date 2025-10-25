@@ -30,8 +30,6 @@
 #include "util/enum_iterator.h"
 #include "util/tools.h"
 
-#include <numeric>
-
 using LogFacilityIterator = EnumIterator<GrbLogFacility, GrbLogFacility::thread, GrbLogFacility::log_MAX>;
 
 void GrbLogger::init(unsigned long long debugMode)
@@ -85,8 +83,10 @@ std::string GrbLogger::printFacility(unsigned long long facility)
 
 unsigned long long GrbLogger::makeFacility(const std::string& optValue)
 {
-    std::vector<std::string> flagsVector = splitString(optValue, '|');
-    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0ULL, [](unsigned long long flg, auto&& i) { return flg | GrbLogger::remapFacility(trimString(i)); });
+    unsigned long long ret = 0;
+    for (const auto& str : splitString(optValue, '|'))
+        ret |= GrbLogger::remapFacility(trimString(str));
+    return ret;
 }
 
 std::map<GrbLogFacility, std::string_view> GrbLogger::facilities = {
