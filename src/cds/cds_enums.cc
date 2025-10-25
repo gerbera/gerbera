@@ -86,8 +86,7 @@ std::string EnumMapper::mapObjectType(ObjectType ot)
 
 bool EnumMapper::checkContentHandler(const std::string& contHandler)
 {
-    auto chEntry = std::find_if(chKeys.begin(), chKeys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
-    return chEntry != chKeys.end();
+    return std::any_of(chKeys.begin(), chKeys.end(), [contHandler](auto&& entry) { return contHandler == entry.second; });
 }
 
 ContentHandler EnumMapper::remapContentHandler(const std::string& contHandler)
