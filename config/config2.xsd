@@ -2,35 +2,31 @@
 <!-- <!DOCTYPE xs:schema PUBLIC
         "-//W3C//DTD XMLSCHEMA 200102//EN"
         "http://www.w3.org/2001/XMLSchema.dtd">  -->
-<!--*MT*
+<!--*GRB*
 
-    MediaTomb - http://www.mediatomb.cc/
+    Gerbera - https://gerbera.io/
 
-    config.xsd - this file is part of MediaTomb.
+    config2.xsd - this file is part of Gerbera.
 
-    Copyright (C) 2005 Gena Batyan <bgeradz@mediatomb.cc>,
-                       Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>
+    Copyright (C) 2016-2025 Gerbera Contributors
 
-    Copyright (C) 2006-2010 Gena Batyan <bgeradz@mediatomb.cc>,
-                            Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
-                            Leonhard Wimmer <leo@mediatomb.cc>
-
-    MediaTomb is free software; you can redistribute it and/or modify
+    Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
 
-    MediaTomb is distributed in the hope that it will be useful,
+    Gerbera is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    version 2 along with MediaTomb; if not, write to the Free Software
-    Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA.
+    along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+
 
     $Id$
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://mediatomb.cc/config/2" xmlns="http://mediatomb.cc/config/2" elementFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://https://gerbera.io/config/2"
+           xmlns="http://https://gerbera.io/config/2" elementFormDefault="qualified">
 
     <xs:simpleType name="boolean">
         <xs:restriction base="xs:string">
@@ -555,8 +551,8 @@
     <xs:element name="clients">
         <xs:complexType>
             <xs:choice maxOccurs="unbounded">
-                <xs:element ref="client" />
-                <xs:element ref="group" />
+                <xs:element ref="client"/>
+                <xs:element ref="group"/>
             </xs:choice>
             <xs:attribute name="enabled" type="boolean" default="no"/>
             <xs:attribute name="cache-threshold" type="xs:positiveInteger" default="6"/>
@@ -814,8 +810,8 @@
     <xs:element name="boxlayout">
         <xs:complexType>
             <xs:choice maxOccurs="unbounded">
-                <xs:element ref="box" />
-                <xs:element ref="chain" />
+                <xs:element ref="box"/>
+                <xs:element ref="chain"/>
             </xs:choice>
             <xs:attribute name="extend" type="boolean" default="no"/>
         </xs:complexType>
