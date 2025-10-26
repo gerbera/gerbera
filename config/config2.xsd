@@ -109,7 +109,7 @@
 
     <xs:element name="manufacturer" type="xs:string"/>
 
-    <xs:element name="manufacturerURL" type="xs:string" default="http://mediatomb.cc/"/>
+    <xs:element name="manufacturerURL" type="xs:string" default="http://gerbera.io/"/>
 
     <xs:element name="virtualURL" type="xs:string"/>
     <xs:element name="externalURL" type="xs:string"/>
