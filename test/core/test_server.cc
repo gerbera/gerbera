@@ -172,7 +172,7 @@ TEST_F(ServerTest, GeneratesFullConfigFromServerCommand)
 {
     // simple check to ensure complete generation from server
     // rely on ConfigGeneratorTest for validation.
-    std::string topOutput = R"(<config version="2" xmlns="http://mediatomb.cc/config/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://mediatomb.cc/config/2 http://mediatomb.cc/config/2.xsd">)";
+    std::string topOutput = R"(<config version="2" xmlns="http://gerbera.io/config/2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://gerbera.io/config/2 http://gerbera.io/config/2.xsd">)";
     std::string bottomOutput = "</profile>\n    </profiles>\n  </transcoding>\n</config>";
 
     fs::path cmd = fs::path(CMAKE_BINARY_DIR) / "gerbera --create-config 2>&1";
