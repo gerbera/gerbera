@@ -19,6 +19,7 @@
 - Fix formatSizeValue on 32-bit systems
 - Fix docker libqxx library pattern
 - Fix dynamic folders for lowercase trees
+- Fix help test
 - Fix ProxyUrl for external items
 - Handle title from nfo correctly
 - Implement new Client Quirk to force SortCriteria 'title'
