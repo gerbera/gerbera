@@ -40,7 +40,7 @@
 #include <sstream>
 
 #define XML_XMLNS_XSI "http://www.w3.org/2001/XMLSchema-instance"
-#define XML_XMLNS "http://mediatomb.cc/config/"
+#define XML_XMLNS "http://gerbera.io/config/"
 
 using GeneratorSectionsIterator = EnumIterator<GeneratorSections, GeneratorSections::Server, GeneratorSections::All>;
 
