@@ -25,8 +25,8 @@
 
     $Id$
 -->
-<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://https://gerbera.io/config/2"
-           xmlns="http://https://gerbera.io/config/2" elementFormDefault="qualified">
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" targetNamespace="http://gerbera.io/config/2"
+           xmlns="http://gerbera.io/config/2" elementFormDefault="qualified">
 
     <xs:simpleType name="boolean">
         <xs:restriction base="xs:string">
