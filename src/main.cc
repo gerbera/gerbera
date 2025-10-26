@@ -217,7 +217,7 @@ int main(int argc, char** argv, char** envp)
         ("d," GRB_OPTION_DAEMON, "Daemonize after startup", cxxopts::value<bool>()->default_value("false")) //
         ("u," GRB_OPTION_USER, "Drop privs to user UID", cxxopts::value<std::string>(), "UID") //
         ("P," GRB_OPTION_PIDFILE, "Write a pidfile to the specified location, e.g. /run/gerbera.pid", cxxopts::value<fs::path>(), "FILE") //
-        ("c," GRB_OPTION_CONFIG, "Path to config file", cxxopts::value<fs::path>(), "DIR") //
+        ("c," GRB_OPTION_CONFIG, "Path to config file", cxxopts::value<fs::path>(), "FILE") //
         ("f," GRB_OPTION_CFGDIR, "Override name of config folder (.config/gerbera) in home folder", cxxopts::value<fs::path>(), "DIR") //
         ("l," GRB_OPTION_LOGFILE, "Set log location", cxxopts::value<fs::path>(), "FILE") //
         (GRB_OPTION_ROTATELOG, "Set rotating log location", cxxopts::value<fs::path>(), "FILE") //
