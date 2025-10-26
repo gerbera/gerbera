@@ -254,7 +254,7 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
       result.push(addCdsObject(obj, container, rootPath));
     }
 
-    chain.genre.searchable = false
+    chain.genre.searchable = false;
   }
 
   if (boxSetup[BK_audioAllYears].enabled) {
@@ -436,6 +436,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
   // Artist
   const artCnt = audio.artists.length;
   var i;
+
   // A track may be interpreted by more than one artist 
   for (i = 0; i < artCnt; i++) {
     obj.title = audio.title + ' (' + audio.album + ', ' + audio.date + ')';
