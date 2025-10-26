@@ -87,9 +87,9 @@ The root tag of Gerbera configuration is:
 
     <?xml version="1.0" encoding="UTF-8"?>
     <config version="2"
-        xmlns="http://mediatomb.cc/config/2"
+        xmlns="http://gerbera.io/config/2"
         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-        xsi:schemaLocation="http://mediatomb.cc/config/2 http://mediatomb.cc/config/2.xsd">
+        xsi:schemaLocation="http://gerbera.io/config/2 http://gerbera.io/config/2.xsd">
         <server>...</server>
         <import>...</import>
         <clients>...</clients>
