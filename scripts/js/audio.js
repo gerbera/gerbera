@@ -86,7 +86,7 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
     artistChronology: _Chain[BK_audioArtistChronology],
 
     artist: {
-      searchable: false,
+      searchable: true,
       title: audio.artists[0],
       location: audio.artists[0],
       objectType: OBJECT_TYPE_CONTAINER,
@@ -158,13 +158,19 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
     result.push(addCdsObject(obj, container, rootPath));
   }
 
+  const artCnt = audio.artists.length;
   if (boxSetup[BK_audioAllSongs].enabled && boxSetup[BK_audioAllArtists].enabled) {
-    container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
-    result.push(addCdsObject(obj, container, rootPath));
+
+    for (var i = 0; i < artCnt; i++) {
+      chain.artist.title = audio.artists[i];
+
+      container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
+      result.push(addCdsObject(obj, container, rootPath));
+    }
   }
 
   if (boxSetup[BK_audioAllTracks].enabled) {
-    var temp = obj.title; // Backup the object title
+    const titleBackup = obj.title;
     var prefix = '';
     if (audio.artistFull) {
       prefix = audio.artistFull;
@@ -181,35 +187,51 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
     result.push(addCdsObject(obj, container, rootPath));
 
     if (boxSetup[BK_audioAllArtists].enabled) {
-      const artCnt = audio.artists.length;
       for (var i = 0; i < artCnt; i++) {
         chain.artist.title = audio.artists[i];
+
         container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFullArtist]);
         result.push(addCdsObject(obj, container, rootPath));
       }
     }
 
-    obj.title = temp; // Restore the title
+    obj.title = titleBackup; // Restore the title
   }
 
-  if (boxSetup[BK_audioAllArtists].enabled) {
-    var temp = obj.title; // Backup the object title
-    obj.title = audio.track + audio.title;
 
-    const artCnt = audio.artists.length;
+  // 'chain.album' is NOT searchable by default.
+  // it shall be enabled at least in one of the following trees:
+  //  - chain.audio/chain.allArtists/chain.artist/chain.album (boxSetup[BK_audioAllArtists].enabled)
+  //  - chain.audio/chain.allAlbums/chain.album (boxSetup[BK_audioAllAlbums].enabled)
+  //
+  // If you change the sequence of if's below, you might get into issues!
+
+  if (boxSetup[BK_audioAllArtists].enabled) {
+    const titleBackup = obj.title;
+
+    if (!boxSetup[BK_audioAllAlbums].enabled) {
+      chain.album.searchable = true;
+    }
+
+    obj.title = audio.track + audio.title;
     for (var i = 0; i < artCnt; i++) {
       chain.artist.title = audio.artists[i];
-      chain.artist.searchable = true;
+
       container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.album]);
       result.push(addCdsObject(obj, container, rootPath));
     }
 
-    obj.title = temp; // Restore the title
+    if (!boxSetup[BK_audioAllAlbums].enabled) {
+      chain.album.searchable = false;
+    }
+
+    obj.title = titleBackup; // Restore the title
   }
 
   if (boxSetup[BK_audioAllAlbums].enabled) {
+    const titleBackup = obj.title;
+    
     chain.album.searchable = true;
-    var temp = obj.title; // Backup the object title
     obj.title = audio.track + audio.title;
 
     chain.album.location = getRootPath(rootPath, obj.location).join('_');
@@ -217,11 +239,13 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
     chain.album.location = '';
     result.push(addCdsObject(obj, container, rootPath));
 
-    obj.title = temp; // Restore the title
+    chain.album.searchable = false;
+    obj.title = titleBackup; // Restore the title
   }
 
   if (boxSetup[BK_audioAllGenres].enabled) {
     chain.genre.searchable = true;
+
     const genCnt = audio.genres.length;
     for (var j = 0; j < genCnt; j++) {
       chain.genre.title = audio.genres[j];
@@ -229,6 +253,8 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
       container = addContainerTree([chain.audio, chain.allGenres, chain.genre]);
       result.push(addCdsObject(obj, container, rootPath));
     }
+
+    chain.genre.searchable = false
   }
 
   if (boxSetup[BK_audioAllYears].enabled) {
@@ -242,11 +268,16 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
   }
 
   if (boxSetup[BK_audioArtistChronology].enabled && boxSetup[BK_audioAllArtists].enabled) {
+    // NOT searchable here, because it shall be already if boxSetup[BK_audioAllAlbums].enabled or worstcase if boxSetup[BK_audioAllArtists].enabled
     chain.album.searchable = false;
-    chain.artist.searchable = false;
+
     chain.album.title = audio.date + " - " + audio.album;
-    container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.artistChronology, chain.album]);
-    result.push(addCdsObject(obj, container, rootPath));
+
+    for (var i = 0; i < artCnt; i++) {
+      chain.artist.title = audio.artists[i];
+      container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.artistChronology, chain.album]);
+      result.push(addCdsObject(obj, container, rootPath));
+    }
 
     chain.album.title = audio.album; // Restore the title;
   }
@@ -329,6 +360,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
     },
     artist: {
       title: audio.artists[0],
+      searchable: false,
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST,
       metaData: [],
@@ -402,37 +434,34 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
   result.push(addCdsObject(obj, container, rootPath));
 
   // Artist
-  obj.title = audio.title + ' (' + audio.album + ', ' + audio.date + ')';
   const artCnt = audio.artists.length;
   var i;
+  // A track may be interpreted by more than one artist 
   for (i = 0; i < artCnt; i++) {
+    obj.title = audio.title + ' (' + audio.album + ', ' + audio.date + ')';
+
     chain.artist.title = audio.artists[i];
+    
+    // Ensure the ARTIST entries in entryAllLevel1 are searchable and nowhere else
     chain.artist.searchable = true;
     container = addContainerTree([chain.allArtists, chain.entryAllLevel1, chain.artist]);
     result.push(addCdsObject(obj, container, rootPath));
-  }
-  chain.artist.searchable = false;
+    chain.artist.searchable = false;
 
-  for (i = 0; i < artCnt; i++) {
     chain.abc.title = abcbox(audio.artists[i], boxSetup[BK_audioStructuredAllArtists].size, boxConfig.divChar);
     isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
     container = addContainerTree([chain.allArtists, chain.abc, chain.entryAllLevel2, chain.artist]);
     result.push(addCdsObject(obj, container, rootPath));
-  }
 
-  obj.title = audio.title + ' (' + audio.album + ', ' + audio.date + ')';
-  for (i = 0; i < artCnt; i++) {
     chain.init.title = mapInitial(audio.artists[i].charAt(0));
     container = addContainerTree(isSingleCharBox ? [chain.allArtists, chain.abc, chain.artist, chain.entryAllLevel3] : [chain.allArtists, chain.abc, chain.init, chain.artist, chain.entryAllLevel3]);
     result.push(addCdsObject(obj, container, rootPath));
-  }
 
-  obj.title = tracktitle;
-  chain.album.title = audio.album + ' (' + audio.date + ')';
-  chain.album.searchable = true;
-  container = addContainerTree(isSingleCharBox ? [chain.allArtists, chain.abc, chain.artist, chain.album] : [chain.allArtists, chain.abc, chain.init, chain.artist, chain.album]);
-  result.push(addCdsObject(obj, container, rootPath));
-  chain.album.searchable = false;
+    obj.title = tracktitle;
+    chain.album.title = audio.album + ' (' + audio.date + ')';
+    container = addContainerTree(isSingleCharBox ? [chain.allArtists, chain.abc, chain.artist, chain.album] : [chain.allArtists, chain.abc, chain.init, chain.artist, chain.album]);
+    result.push(addCdsObject(obj, container, rootPath));
+  }
 
   // Genre
   if (boxSetup[BK_audioStructuredAllGenres].enabled) {
@@ -487,7 +516,6 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
 
     obj.title = tracktitle;
     chain.album.title = audio.album;
-    chain.album.searchable = true;
     container = addContainerTree([chain.allYears, chain.decade, chain.date, chain.artist, chain.album]);
     result.push(addCdsObject(obj, container, rootPath));
   }
