@@ -167,16 +167,36 @@ bool FfmpegHandler::isSupported(
     return mediaType == ObjectType::Audio || mediaType == ObjectType::Video;
 }
 
+static ObjectType getStreamType(const AVStream* st)
+{
+    switch (as_codecpar(st)->codec_type) {
+    case AVMEDIA_TYPE_VIDEO:
+        return ObjectType::Video;
+    case AVMEDIA_TYPE_AUDIO:
+        return ObjectType::Audio;
+    case AVMEDIA_TYPE_SUBTITLE:
+    case AVMEDIA_TYPE_DATA:
+    case AVMEDIA_TYPE_ATTACHMENT:
+    case AVMEDIA_TYPE_NB:
+        return ObjectType::Unknown;
+    case AVMEDIA_TYPE_UNKNOWN:
+    default:
+        return ObjectType::Unknown;
+    }
+}
+
 /// @brief Wrapper class to interface with FFMpeg
 class FfmpegObject {
 public:
     std::string location;
     std::shared_ptr<StringConverter> sc;
+    ObjectType objType;
     AVFormatContext* pFormatCtx = nullptr;
 
     FfmpegObject(const std::shared_ptr<ConverterManager>& converterManager, const std::shared_ptr<CdsItem>& item)
         : location(item->getLocation())
         , sc(converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET, location))
+        , objType(item->getMediaType())
     {
         // ffmpeg library context
         pFormatCtx = avformat_alloc_context();
@@ -324,12 +344,14 @@ bool FfmpegHandler::addFfmpegMetadataFields(
     AVDictionaryEntry* avEntry = nullptr;
     if (ffmpegObject.pFormatCtx->metadata)
         while ((avEntry = av_dict_get(ffmpegObject.pFormatCtx->metadata, "", avEntry, AV_DICT_IGNORE_SUFFIX))) {
-            result = getFfmpegMetadataField(item, ffmpegObject, avEntry, emptyProperties, emptySpecProperties) || result;
+            result = getFfmpegMetadataField(item, ffmpegObject, avEntry, item->getMediaType(), emptyProperties, emptySpecProperties) || result;
         }
     for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
-        if (ffmpegObject.pFormatCtx->streams[stream_number]->metadata) {
-            while ((avEntry = av_dict_get(ffmpegObject.pFormatCtx->streams[stream_number]->metadata, "", avEntry, AV_DICT_IGNORE_SUFFIX))) {
-                result = getFfmpegMetadataField(item, ffmpegObject, avEntry, emptyProperties, emptySpecProperties) || result;
+        auto st = ffmpegObject.pFormatCtx->streams[stream_number];
+        if (st->metadata) {
+            auto streamType = getStreamType(st);
+            while ((avEntry = av_dict_get(st->metadata, "", avEntry, AV_DICT_IGNORE_SUFFIX))) {
+                result = getFfmpegMetadataField(item, ffmpegObject, avEntry, streamType, emptyProperties, emptySpecProperties) || result;
             }
         }
     }
@@ -340,6 +362,7 @@ bool FfmpegHandler::getFfmpegMetadataField(
     const std::shared_ptr<CdsItem>& item,
     const FfmpegObject& ffmpegObject,
     AVDictionaryEntry* avEntry,
+    ObjectType streamType,
     std::map<MetadataFields, bool>& emptyProperties,
     std::map<std::string, bool>& emptySpecProperties) const
 {
@@ -370,6 +393,8 @@ bool FfmpegHandler::getFfmpegMetadataField(
     if (pIt != propertyMap.end()) {
         log_debug("Identified default metadata '{}': {}", pIt->second, value);
         const auto field = pIt->first;
+        if (field == MetadataFields::M_TITLE && streamType != item->getMediaType())
+            return result;
         if (emptyProperties[field]) {
             if (field == MetadataFields::M_DATE || field == MetadataFields::M_CREATION_DATE) {
                 std::tm tmWork {};
