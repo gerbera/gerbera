@@ -80,6 +80,9 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
             auto upnpShortcut = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->getXmlContent(child);
             auto size = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
             auto enabled = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
+            auto searchable = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_SEARCHABLE)->getXmlContent(child);
+            if (!enabled) // disabled boxes connot be searched
+                searchable = false;
             auto sortKey = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY)->getXmlContent(child);
 
             if (!enabled && std::find(rootKeys.begin(), rootKeys.end(), key) != rootKeys.end()) {
@@ -87,7 +90,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
                 enabled = true;
             }
 
-            auto box = std::make_shared<BoxLayout>(key, title, objClass, upnpShortcut, sortKey, enabled, size);
+            auto box = std::make_shared<BoxLayout>(key, title, objClass, upnpShortcut, sortKey, enabled, searchable, size);
             try {
                 EDIT_CAST(EditHelperBoxLayout, result)->add(box);
                 allKeys.push_back(key);
@@ -108,7 +111,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
     }
     for (auto&& defEntry : defaultEntries) {
         if (std::find(allKeys.begin(), allKeys.end(), defEntry.getKey()) == allKeys.end()) {
-            auto box = std::make_shared<BoxLayout>(defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getUpnpShortcut(), defEntry.getSortKey(), defEntry.getEnabled(), defEntry.getSize());
+            auto box = std::make_shared<BoxLayout>(defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getUpnpShortcut(), defEntry.getSortKey(), defEntry.getEnabled(), defEntry.getSearchable(), defEntry.getSize());
             if (doExtend)
                 log_debug("Automatically added default BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", defEntry.getKey(), defEntry.getTitle(), defEntry.getClass(), defEntry.getEnabled(), defEntry.getSize());
             else
@@ -231,6 +234,16 @@ bool ConfigBoxLayoutSetup::updateItem(
             [&](const std::shared_ptr<BoxLayout>& entry) { return fmt::to_string(entry->getEnabled()); },
             [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
                 entry->setEnabled(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // searchable
+        {
+            { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_SEARCHABLE },
+            "Searchable",
+            [&](const std::shared_ptr<BoxLayout>& entry) { return fmt::to_string(entry->getSearchable()); },
+            [&](const std::shared_ptr<BoxLayout>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setSearchable(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
                 return true;
             },
         },

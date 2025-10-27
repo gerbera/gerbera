@@ -13,6 +13,10 @@ Last.FM integration is working without old lastfmlib and using Last.FM API 2.0.
 
 **Support for loading layout scripts has been removed now. The javascript interface must be used by calling functions depending on the media type.**
 
+If you added or changed javascript files, make sure the modified files are in a separate folder and the config entry `import/scripting/script-folder/custom`
+is pointing to that directory.
+Also make sure that backup files do not have extension `.js` otherwise they are loaded!
+
 ### NEW Features
 
 - PostgreSQL database support

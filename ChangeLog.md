@@ -6,21 +6,26 @@
 - Add Test for formatSizeValue
 - Allow masking arguments
 - Block client group
-- Bump actions/setup-node from 5 to 6
-- Bump github/codeql-action from 3 to 4
 - Build for ubuntu-25.10
+- Bump actions/setup-node from 5 to 6
+- Bump actions/upload-artifact from 4 to 5
+- Bump github/codeql-action from 3 to 4
 - Check Headers in Quirks
 - CI Tests: Try more alpine versions
 - Command line option for even more config details
 - Command line option to drop database tables
+- Config XML Schemas
+- Configure searchable flags via BoxLayout
 - Documentation on Return Path Filtering
 - Enable ICU for MacOS
 - Fix derivedFrom search handling
-- Fix formatSizeValue on 32-bit systems
 - Fix docker libqxx library pattern
 - Fix dynamic folders for lowercase trees
+- Fix formatSizeValue on 32-bit systems
+- Fix help message for option "-c"
 - Fix help test
 - Fix ProxyUrl for external items
+- Fixing Searchable flag in import script
 - Handle title from nfo correctly
 - Implement new Client Quirk to force SortCriteria 'title'
 - Improve MacOS build

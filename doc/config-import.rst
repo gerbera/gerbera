@@ -896,7 +896,22 @@ Set properties for box.
 
          enabled="no"
 
-   Disable the respective box. Not all boxes can be disabled.
+   Disable the respective box. Disabling boxes depends on support by the respective layout.
+
+   .. confval:: box searchable
+      :type: :confval:`Boolean`
+      :required: false
+      :default: ``yes``
+   ..
+
+      .. versionadded:: HEAD
+      .. code:: xml
+
+         searchable="no"
+
+   Activate/deactivate box content for search. Especially relevant for artists, albums and genres.
+   To avoid duplicate results in search only one box of each type should be searchable.
+   The respective layout may overwrite the setting to enforce this rule.
 
    .. confval:: box size
       :type: :confval:`Interval`

@@ -384,6 +384,11 @@
               "editable": true
             },
             {
+              "item": "/import/scripting/virtual-layout/boxlayout/box/attribute::enabled",
+              "caption": "Enabled",
+              "editable": true
+            },
+            {
               "item": "/import/scripting/virtual-layout/boxlayout/box/attribute::title",
               "caption": "Title",
               "editable": true

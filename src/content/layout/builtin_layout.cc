@@ -392,7 +392,7 @@ std::vector<int> BuiltinLayout::addAudio(
     if (parent && parent->getResourceCount() > 0)
         albumContainer->setResources(parent->getResources());
     albumContainer->setRefID(obj->getID());
-    artistContainer->setSearchable(true);
+    artistContainer->setSearchable(blOption->getKey(BoxKeys::audioAllArtists)->getSearchable());
 
     if (blOption->getKey(BoxKeys::audioAllArtists)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> alc;
@@ -404,7 +404,7 @@ std::vector<int> BuiltinLayout::addAudio(
         result.push_back(add(obj, id));
     }
 
-    albumContainer->setSearchable(true);
+    albumContainer->setSearchable(blOption->getKey(BoxKeys::audioAllAlbums)->getSearchable());
     if (blOption->getKey(BoxKeys::audioAllAlbums)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> allc;
         allc.push_back(containerAt(BoxKeys::audioRoot));
@@ -417,6 +417,7 @@ std::vector<int> BuiltinLayout::addAudio(
     if (blOption->getKey(BoxKeys::audioAllGenres)->getEnabled()) {
         auto genreContainer = std::make_shared<CdsContainer>(genre, UPNP_CLASS_MUSIC_GENRE);
         genreContainer->addMetaData(MetadataFields::M_GENRE, genre);
+        genreContainer->setSearchable(blOption->getKey(BoxKeys::audioAllGenres)->getSearchable());
         std::vector<std::shared_ptr<CdsObject>> ct;
         ct.push_back(containerAt(BoxKeys::audioRoot));
         ct.push_back(containerAt(BoxKeys::audioAllGenres));

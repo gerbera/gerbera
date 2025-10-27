@@ -876,6 +876,8 @@ void ConfigGenerator::generateBoxlayout(ConfigVal option)
             setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_SIZE, fmt::to_string(bl.getSize()));
         if (!bl.getEnabled())
             setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, fmt::to_string(bl.getEnabled()));
+        if (!bl.getSearchable())
+            setXmlValue(box, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, fmt::to_string(bl.getSearchable()));
     }
 }
 

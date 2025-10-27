@@ -120,6 +120,7 @@ public:
         std::string upnpShortcut = "",
         std::string sortKey = "",
         bool enabled = true,
+        bool searchable = true,
         int size = 1)
         : key(key)
         , title(std::move(title))
@@ -127,33 +128,46 @@ public:
         , upnpShortcut(std::move(upnpShortcut))
         , sortKey(std::move(sortKey))
         , enabled(enabled)
+        , searchable(searchable)
         , size(size)
     {
     }
 
     bool equals(const std::shared_ptr<BoxLayout>& other) { return this->key == other->key; }
 
+    /// @brief key for the box to be referenced in layouts
     void setKey(std::string key) { this->key = std::move(key); }
     std::string getKey() const { return key; }
 
+    /// @brief title string for the box
     void setTitle(std::string title) { this->title = std::move(title); }
     std::string getTitle() const { return title; }
 
+    /// @brief shortcut name for upnp shortcuts list
     void setUpnpShortcut(std::string upnpShortcut) { this->upnpShortcut = std::move(upnpShortcut); }
     std::string getUpnpShortcut() const { return upnpShortcut; }
 
+    /// @brief object class to be used for new containers
     void setClass(std::string objClass) { this->objClass = std::move(objClass); }
     std::string getClass() const { return objClass; }
 
+    /// @brief allow to disable boxes
     void setEnabled(bool enabled) { this->enabled = enabled; }
     bool getEnabled() const { return enabled; }
 
+    /// @brief allow to search for boxes
+    void setSearchable(bool searchable) { this->searchable = searchable; }
+    bool getSearchable() const { return searchable; }
+
+    /// @brief size value for the box, esp. in structured layout
     void setSize(int size) { this->size = size; }
     int getSize() const { return size; }
 
+    /// @brief objectId of the box when existing
     void setId(int id) { this->id = id; }
     int getId() const { return id; }
 
+    /// @brief sorting key for directory listing
     void setSortKey(std::string sortKey) { this->sortKey = std::move(sortKey); }
     std::string getSortKey() const { return sortKey; }
 
@@ -170,6 +184,8 @@ protected:
     std::string sortKey;
     /// @brief allow to disable boxes
     bool enabled { true };
+    /// @brief allow to search for boxes
+    bool searchable { true };
     /// @brief size value for the box, esp. in structured layout
     int size { 1 };
     /// @brief objectId of the box when existing

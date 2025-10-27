@@ -328,11 +328,11 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
     BoxLayout(BoxKeys::audioInitialAllBooks, "Books"),
     BoxLayout(BoxKeys::audioInitialAudioBookRoot, "AudioBooks", UPNP_CLASS_CONTAINER, "MUSIC_AUDIOBOOKS"),
 
-    BoxLayout(BoxKeys::audioStructuredAllAlbums, "-Album-", UPNP_CLASS_CONTAINER, "MUSIC_ALBUMS", "", true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllAlbums, "-Album-", UPNP_CLASS_CONTAINER, "MUSIC_ALBUMS", "", true, true, 6),
     BoxLayout(BoxKeys::audioStructuredAllArtistTracks, "all"),
-    BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS", "", true, 9),
-    BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", UPNP_CLASS_CONTAINER, "MUSIC_GENRES", "", true, 6),
-    BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", UPNP_CLASS_CONTAINER, "MUSIC_ALL", "", true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS", "", true, true, 9),
+    BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", UPNP_CLASS_CONTAINER, "MUSIC_GENRES", "", true, true, 6),
+    BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", UPNP_CLASS_CONTAINER, "MUSIC_ALL", "", true, true, 6),
     BoxLayout(BoxKeys::audioStructuredAllYears, "-Year-"),
 
     BoxLayout(BoxKeys::videoAllDates, "Date", UPNP_CLASS_CONTAINER, "VIDEOS_YEARS_MONTH"),
@@ -369,7 +369,7 @@ static const std::vector<BoxLayout> boxLayoutDefaults {
 #ifdef HAVE_JS
     BoxLayout(BoxKeys::playlistRoot, "Playlists"),
     BoxLayout(BoxKeys::playlistAll, "All Playlists"),
-    BoxLayout(BoxKeys::playlistAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_PLAYLISTS", "", true, 1),
+    BoxLayout(BoxKeys::playlistAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_PLAYLISTS", "", true, true, 1),
 #endif
 };
 
@@ -1107,6 +1107,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY,
             "attribute::sort-key", "config-import.html#confval-sort-key",
             ""),
+        std::make_shared<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_SEARCHABLE,
+            "attribute::searchable", "config-import.html#confval-box-searchable",
+            YES),
 
         // default file settings, can be overwritten in autoscan
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_HIDDEN_FILES,

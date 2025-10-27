@@ -270,6 +270,7 @@ void Script::init()
             setIntProperty("id", boxLayout->getId());
             setIntProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_SIZE), boxLayout->getSize());
             setBoolProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_ENABLED), boxLayout->getEnabled());
+            setBoolProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_SEARCHABLE), boxLayout->getSearchable());
             setProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_TITLE), boxLayout->getTitle());
             setProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_CLASS), boxLayout->getClass());
             setProperty(definition->removeAttribute(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT), boxLayout->getUpnpShortcut());
