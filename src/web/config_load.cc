@@ -660,6 +660,9 @@ void Web::ConfigLoad::writeBoxLayout(Json::Value& values)
             cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_ENABLED }),
             cs->option, ConfigVal::A_BOXLAYOUT_BOX_ENABLED, cont->getEnabled());
         addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_SEARCHABLE }),
+            cs->option, ConfigVal::A_BOXLAYOUT_BOX_SEARCHABLE, cont->getSearchable());
+        addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_BOX, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT }),
             cs->option, ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT, cont->getUpnpShortcut());
         addValue(values,

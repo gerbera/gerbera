@@ -11,6 +11,8 @@ Be aware that this page may not fully reflect latest changes in the respective d
 Team Gerbera is not responsible for the way the packages are built by others.
 When installing older versions it is likely that options described in this documentation may not exist.
 
+**For updating your gerbera installation please refer to** :ref:`Update Instructions <Update>` !
+
 Docker
 ~~~~~~~~~~~~~~~~~
 .. index:: Docker
@@ -30,7 +32,7 @@ Ubuntu/Mint
 .. index:: Ubuntu Linux
 .. index:: Mint
 
-We maintain a `Ubuntu Repository <https://pkg.gerbera.io/>`__.
+We maintain a `Ubuntu Repository <https://pkg.gerbera.io/>`__ (there is no landing page but the repo can be added following the below instructions).
 
 To install the latest tagged release (>=2.1.0):
 
@@ -128,7 +130,7 @@ Debian
 ~~~~~~
 .. index:: Debian Linux
 
-Gerbera is included in Buster_ and Sid_.
+Gerbera is included in Debian by most likely outdated.
 
 .. code-block:: sh
 
@@ -136,7 +138,7 @@ Gerbera is included in Buster_ and Sid_.
 
 Due to the stable nature of Debian, these packages are likely to be some versions behind the current Gerbera release.
 
-We maintain a `Debian Repository <https://pkg.gerbera.io/>`__.
+We maintain a `Debian Repository <https://pkg.gerbera.io/>`__ (there is no landing page but the repo can be added following the below instructions).
 
 To install the latest tagged release (>=2.1.0):
 
@@ -157,10 +159,7 @@ Or for the latest code install git builds:
     sudo apt-get install gerbera
 
 
-`Deb-Multimedia.org <https://www.deb-multimedia.org/>`__ also provide builds for Buster_ and Sid_.
-
-.. _Buster: http://www.deb-multimedia.org/dists/buster/main/binary-amd64/package/gerbera
-.. _Sid: http://www.deb-multimedia.org/dists/sid/main/binary-amd64/package/gerbera
+`Deb-Multimedia.org <https://www.deb-multimedia.org/>`__ also provide builds. Check out `Repology <https://repology.org/metapackage/gerbera/versions>` for an overview of the available versions.
 
 openSUSE
 ~~~~~~~~

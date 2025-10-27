@@ -848,6 +848,7 @@
             <xs:attribute name="upnp-shortcut" type="xs:string"/>
             <xs:attribute name="sort-key" type="xs:string"/>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
+            <xs:attribute name="searchable" type="boolean" default="yes"/>
             <xs:attribute name="size" type="xs:integer" default="1"/>
         </xs:complexType>
     </xs:element>

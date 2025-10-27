@@ -44,22 +44,22 @@ static duk_ret_t addContainerTree(duk_context* ctx)
 {
     std::map<std::string, std::string> map {
         { "", "0" },
-        { "/-Album-/-ABCD-/A/Album - Artist", "42" },
-        { "/-Album-/-ABCD-/-all-/Album - Artist", "43" },
-        { "/-Album-/--all--/Album - Artist", "44" },
-        { "/-Artist-/--all--/Artist", "45" },
-        { "/-Artist-/-ABCD-/-all-/Artist", "46" },
-        { "/-Artist-/-ABCD-/A/Artist/-all-", "47" },
-        { "/-Artist-/-ABCD-/A/Artist/Album (2018)", "48" },
+        { "/-Album-/-ABCD-/A/Album - TheArtist", "42" },
+        { "/-Album-/-ABCD-/-all-/Album - TheArtist", "43" },
+        { "/-Album-/--all--/Album - TheArtist", "44" },
+        { "/-Artist-/--all--/TheArtist", "45" },
+        { "/-Artist-/-TUV-/-all-/TheArtist", "46" },
+        { "/-Artist-/-TUV-/T/TheArtist/-all-", "47" },
+        { "/-Artist-/-TUV-/T/TheArtist/Album (2018)", "48" },
         { "/-Genre-/Genre/--all--", "491" },
         { "/-Genre-/Genre2/--all--", "492" },
-        { "/-Genre-/Genre/-A-/Album - Artist", "501" },
-        { "/-Genre-/Genre2/-A-/Album - Artist", "502" },
+        { "/-Genre-/Genre/-A-/Album - TheArtist", "501" },
+        { "/-Genre-/Genre2/-A-/Album - TheArtist", "502" },
         { "/-Track-/-ABCD-/A", "51" },
         { "/-Track-/--all--", "52" },
         { "/-Year-/2010 - 2019/-all-", "53" },
         { "/-Year-/2010 - 2019/2018/-all-", "54" },
-        { "/-Year-/2010 - 2019/2018/Artist/Album", "55" },
+        { "/-Year-/2010 - 2019/2018/TheArtist/Album", "55" },
     };
     std::vector<std::string> tree = ScriptTestFixture::addContainerTree(ctx, map);
     return ImportStructuredScriptTest::commonScriptMock->addContainerTree(tree);
@@ -145,7 +145,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
 {
     std::string title = "Audio Title";
     std::string mimetype = "audio/mpeg";
-    std::string artist = "Artist";
+    std::string artist = "TheArtist";
     std::string album = "Album";
     std::string date = "2018-01-01";
     std::string year = "2018";
@@ -184,7 +184,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
 
     std::map<std::string, std::string> asAudioAllFullName;
     asAudioAllFullName.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
-    asAudioAllFullName["title"] = "Artist - Album - Audio Title";
+    asAudioAllFullName["title"] = "TheArtist - Album - Audio Title";
 
     std::map<std::string, std::string> asAudioAllArtistTitle;
     asAudioAllArtistTitle.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
@@ -192,11 +192,11 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
 
     std::map<std::string, std::string> asAudioAllAudioTitleArtist;
     asAudioAllAudioTitleArtist.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
-    asAudioAllAudioTitleArtist["title"] = "Audio Title - Artist";
+    asAudioAllAudioTitleArtist["title"] = "Audio Title - TheArtist";
 
     std::map<std::string, std::string> asAudioTrackArtistTitle;
     asAudioTrackArtistTitle.insert(asAudioAllAudio.begin(), asAudioAllAudio.end());
-    asAudioTrackArtistTitle["title"] = "Audio Title - Artist (Album, 2018)";
+    asAudioTrackArtistTitle["title"] = "Audio Title - TheArtist (Album, 2018)";
 
     // Expecting the common script calls
     // and will proxy through the mock objects
@@ -204,27 +204,27 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     EXPECT_CALL(*commonScriptMock, getYear(Eq("2018-01-01"))).WillOnce(Return(1));
 
     EXPECT_CALL(*commonScriptMock, abcBox(Eq("Album"), Eq(6), Eq("-"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Album-", "-ABCD-", "A", "Album - Artist"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Album-", "-ABCD-", "A", "Album - TheArtist"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "42", "/home/gerbera")).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Album-", "-ABCD-", "-all-", "Album - Artist"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Album-", "-ABCD-", "-all-", "Album - TheArtist"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "43", "/home/gerbera")).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Album-", "--all--", "Album - Artist"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Album-", "--all--", "Album - TheArtist"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "44", "/home/gerbera")).WillOnce(Return(1));
 
     // ARTIST //
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Artist-", "--all--", "Artist"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Artist-", "--all--", "TheArtist"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllArtistTitle), "45", "/home/gerbera")).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Artist-", "-ABCD-", "-all-", "Artist"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Artist-", "-TUV-", "-all-", "TheArtist"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllArtistTitle), "46", "/home/gerbera")).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, abcBox(Eq("Artist"), Eq(9), Eq("-"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Artist-", "-ABCD-", "A", "Artist", "-all-"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, abcBox(Eq("TheArtist"), Eq(9), Eq("-"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Artist-", "-TUV-", "T", "TheArtist", "-all-"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllArtistTitle), "47", "/home/gerbera")).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Artist-", "-ABCD-", "A", "Artist", "Album (2018)"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Artist-", "-TUV-", "T", "TheArtist", "Album (2018)"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "48", "/home/gerbera")).WillOnce(Return(1));
 
     // GENRE //
@@ -233,9 +233,9 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "491", "/home/gerbera")).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "492", "/home/gerbera")).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, abcBox(Eq("Artist"), Eq(26), Eq("-"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Genre-", "Genre", "-A-", "Album - Artist"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Genre-", "Genre2", "-A-", "Album - Artist"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, abcBox(Eq("Album"), Eq(26), Eq("-"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Genre-", "Genre", "-A-", "Album - TheArtist"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Genre-", "Genre2", "-A-", "Album - TheArtist"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "501", "/home/gerbera")).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "502", "/home/gerbera")).WillOnce(Return(1));
 
@@ -254,7 +254,7 @@ TEST_F(ImportStructuredScriptTest, AddsAudioItemWithABCBoxFormat)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Year-", "2010 - 2019", "2018", "-all-"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudioTitleArtist), "54", "/home/gerbera")).WillOnce(Return(1));
 
-    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Year-", "2010 - 2019", "2018", "Artist", "Album"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("-Year-", "2010 - 2019", "2018", "TheArtist", "Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "55", "/home/gerbera")).WillOnce(Return(1));
 
     addGlobalFunctions(ctx, js_global_functions, {},

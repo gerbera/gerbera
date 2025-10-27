@@ -545,8 +545,12 @@ abcBoxParams ScriptTestFixture::abcBox(duk_context* ctx)
     params.inputValue = inputValue;
     params.boxType = boxType;
     params.divChar = divChar;
-
-    duk_push_string(ctx, boxType == 26 ? "-A-" : "-ABCD-");
+    if (inputValue.at(0) == 'A')
+        duk_push_string(ctx, boxType == 26 ? "-A-" : "-ABCD-");
+    else if (inputValue.at(0) == 'T')
+        duk_push_string(ctx, boxType == 26 ? "-T-" : "-TUV-");
+    else
+        duk_push_string(ctx, boxType == 26 ? "-?-" : "-----");
     return params;
 }
 

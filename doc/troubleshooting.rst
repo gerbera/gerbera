@@ -11,8 +11,10 @@ and try to apply your settings in the new version. For each setting you cannot f
 documentation to make sure you (still) have the correct understanding of the setting.
 
 
-Installation
-~~~~~~~~~~~~
+.. _Update:
+
+Installation/Update
+~~~~~~~~~~~~~~~~~~~
 
 If you want to update from a version that was provided by another package source (like ubuntu main -> pkg.gerbera.io) perform the following steps
 
@@ -27,6 +29,8 @@ If you want to update from a version that was provided by another package source
 - generate config file with ``--create-config``
 
 - merge your old settings into the new file and copy it into the right place
+
+- run ``xmllint --noout --schema /usr/local/share/gerbera/config2.xsd config.xml`` to make sure your config files is valid
 
 - copy the database file to the right place (depending on version differences it is even recommended to create a new database)
 

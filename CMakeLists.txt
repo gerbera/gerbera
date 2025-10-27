@@ -927,6 +927,7 @@ INSTALL(DIRECTORY ${PROJECT_SOURCE_DIR}/web
 )
 
 INSTALL(FILES
+        config/config2.xsd
         src/database/mysql/mysql.sql
         src/database/mysql/mysql-drop.sql
         src/database/mysql/mysql-upgrade.xml
