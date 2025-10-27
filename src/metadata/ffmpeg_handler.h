@@ -83,6 +83,7 @@ private:
         const std::shared_ptr<CdsItem>& item,
         const FfmpegObject& ffmpegObject,
         AVDictionaryEntry* avEntry,
+        ObjectType streamType,
         std::map<MetadataFields, bool>& emptyProperties,
         std::map<std::string, bool>& emptySpecProperties) const;
     /// @brief get additional resource fields

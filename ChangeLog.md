@@ -25,6 +25,7 @@
 - Fix help message for option "-c"
 - Fix help test
 - Fix ProxyUrl for external items
+- Fix title from wrong stream
 - Fixing Searchable flag in import script
 - Handle title from nfo correctly
 - Implement new Client Quirk to force SortCriteria 'title'
