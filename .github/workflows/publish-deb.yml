@@ -95,7 +95,7 @@ jobs:
           string: '${{ matrix.os-ver }}:${{ matrix.arch }}'
           replace-with: $1-$2-$3$4.deb
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         if: ${{github.event_name != 'pull_request'}}
         with:
           name: ${{ steps.replace.outputs.replaced }}
