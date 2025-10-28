@@ -2599,6 +2599,18 @@ documents all of the metadata keys that FFmpeg honors, depending on the format b
 Create a separate resource for the artwork if detected by ffmpeg instead of merging
 the attributes into the existing thumbnail resource (e.g. created by taglib)
 
+   .. confval:: subtitle-seek-size
+      :type: :confval:`Integer`
+      :required: false
+      :default: ``2048``
+
+      .. versionadded:: HEAD
+      .. code-block:: xml
+
+         subtitle-seek-size="4096"
+
+Number of bytes to read from a subtitle stream to identify the mime-type of an internal subtitle.
+
 A sample configuration for the example described above would be:
 
 .. code-block:: xml
