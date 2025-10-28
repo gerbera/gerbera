@@ -151,6 +151,7 @@ FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_ENABLED,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_LIST)
     , artWorkEnabled(config->getBoolOption(ConfigVal::IMPORT_LIBOPTS_FFMPEG_ARTWORK_ENABLED))
+    , subtitleSeekSize(config->getUIntOption(ConfigVal::IMPORT_LIBOPTS_FFMPEG_SUBTITLE_SEEK_SIZE))
 {
 #if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100))
     // Register all formats and codecs
@@ -493,7 +494,8 @@ static std::vector<std::uint8_t> extractArtImage(
 /// @brief Extract Subtitle from media file
 static std::vector<std::uint8_t> extractSubtitle(
     const FfmpegObject& ffmpegObject,
-    long long subtitleStreamIndex)
+    long long subtitleStreamIndex,
+    std::size_t maxBytes = 0)
 {
 #if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(60, 0, 0))
     log_debug("extractSubtitle disabled - ffmpeg seems broken");
@@ -514,7 +516,7 @@ static std::vector<std::uint8_t> extractSubtitle(
 
     std::vector<std::uint8_t> result;
     // Store subtitle packets
-    while (av_read_frame(ffmpegObject.pFormatCtx, packet) >= 0) {
+    while (av_read_frame(ffmpegObject.pFormatCtx, packet) >= 0 && (maxBytes == 0 || result.size() < maxBytes)) {
         log_vdebug("checking {} vs {}", packet->stream_index, subtitleStreamIndex);
         if (packet->stream_index == subtitleStreamIndex) {
             auto chunk = std::vector<uint8_t>(packet->data, packet->data + packet->size);
@@ -714,7 +716,7 @@ bool FfmpegHandler::addFfmpegResourceFields(
             stResource->addAttribute(ResourceAttribute::TYPE, avcodec_get_name(codecId));
             stResource->addOption(STREAM_NUMBER_OPTION, fmt::to_string(stream_number));
 
-            auto subtitle = extractSubtitle(ffmpegObject, stream_number);
+            auto subtitle = extractSubtitle(ffmpegObject, stream_number, subtitleSeekSize);
             if (!subtitle.empty()) {
                 auto subMimetype = getContentTypeFromByteVector(subtitle);
                 log_debug("subtitle {} {}", subtitle.size(), subMimetype);

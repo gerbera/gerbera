@@ -1648,6 +1648,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
             ConfigVal::A_IMPORT_LIBOPTS_COMMENT_LABEL,
             ConfigVal::A_IMPORT_LIBOPTS_COMMENT_TAG,
             false, false, false),
+        std::make_shared<ConfigUIntSetup>(ConfigVal::IMPORT_LIBOPTS_FFMPEG_SUBTITLE_SEEK_SIZE,
+            "import/library-options/ffmpeg/attribute::subtitle-seek-size", "config-import.html#confval-subtitle-seek-size",
+            2048),
 #endif
 #ifdef HAVE_MATROSKA
         // options for matroska (mkv)

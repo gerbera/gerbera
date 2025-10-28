@@ -36,6 +36,7 @@
 - Quirk to block protocolInfo in CaptionInfoEx
 - Reduce code duplication in XmlBuilder
 - Remove loading complete scripts to create virutal layout
+- Restrict number of subtitle bytes to read
 - Rotation of thumbnails by ffmpegthumbnailer
 - Unify doxygen tags
 - Update CMakeLists.txt for ICU on APPLE

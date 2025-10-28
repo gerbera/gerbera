@@ -1189,6 +1189,7 @@
             </xs:sequence>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="artwork-enabled" type="boolean" default="no"/>
+            <xs:attribute name="subtitle-seek-size" type="xs:nonNegativeInteger"/>
             <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>
     </xs:element>
