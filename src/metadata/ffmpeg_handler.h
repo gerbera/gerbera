@@ -112,6 +112,7 @@ private:
     };
     /// @brief activate separation of artwork found by handler
     bool artWorkEnabled;
+    unsigned int subtitleSeekSize;
 };
 
 #endif // HAVE_FFMPEG

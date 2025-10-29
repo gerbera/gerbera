@@ -304,7 +304,7 @@
         </metadata>
         <comment enabled="no"></comment>
       </id3>
-      <ffmpeg charset="UTF-8" enabled="yes" artwork-enabled="no">
+      <ffmpeg charset="UTF-8" enabled="yes" artwork-enabled="no" subtitle-seek-size="2048">
         <auxdata></auxdata>
         <metadata>
           <add-data tag="performer" key="upnp:artist@role[Performer]" />
