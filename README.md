@@ -60,7 +60,7 @@ sudo make install
 | libiconv            |             |             |                      | Required      | Charset conversion         |          |
 | sqlite3             | 3.7.0       | 3.35.5      | 3.50.2               | Required      | Database storage           |          |
 | zlib                |             |             |                      | Required      | Data compression           |          |
-| [fmtlib]            | 7.1.3       | 11.2.0      | 12.0.0               | Required      | Fast string formatting     |          |
+| [fmtlib]            | 7.1.3       | 11.2.0      | 12.1.0               | Required      | Fast string formatting     |          |
 | [spdlog]            | 1.8.1       | 1.11.0      | 1.16.0               | Required      | Runtime logging            |          |
 | [icu4c]             | 65.1        | 65.1        | 65.1                 | Required      | Transliteration            | Enabled  |
 | [duktape]           | 2.1.0       | 2.6.0       | 2.7.0                | Optional      | Scripting Support          | Enabled  |

@@ -765,7 +765,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
             YES),
         std::make_shared<ConfigBoolSetup>(ConfigVal::UPNP_SEARCH_CONTAINER_FLAG,
             "/server/upnp/attribute::searchable-container-flag", "config-server.html#confval-searchable-container-flag",
-            NO),
+            YES),
         std::make_shared<ConfigStringSetup>(ConfigVal::UPNP_SEARCH_SEPARATOR,
             "/server/upnp/attribute::search-result-separator", "config-server.html#confval-search-result-separator",
             " - "),
