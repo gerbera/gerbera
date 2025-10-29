@@ -56,7 +56,7 @@
         <upnp-string-limit>-1</upnp-string-limit>
         <virtualURL>https://gerbera.io:50600</virtualURL>
         <externalURL>https://gerbera.io</externalURL>
-        <upnp literal-host-redirection="no" multi-value="yes" search-result-separator=" - " search-filename="no" searchable-container-flag="no" caption-info-count="1">
+        <upnp literal-host-redirection="no" multi-value="yes" search-result-separator=" - " search-filename="no" searchable-container-flag="yes" caption-info-count="1">
             <search-item-result>
                 <add-data tag="M_ARTIST"/>
                 <add-data tag="M_TITLE"/>
