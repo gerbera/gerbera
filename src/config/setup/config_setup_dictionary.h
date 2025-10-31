@@ -31,6 +31,19 @@
 
 using DictionaryInitFunction = std::function<bool(const pugi::xml_node& value, std::map<std::string, std::string>& result)>;
 
+/// @brief Configuration parser to load dictionaries
+///
+/// The basic idea is the following:
+/// You have a piece of XML that looks like this
+/// @code{xml}
+/// <some-section>
+///    <map from="1" to="2"/>
+///    <map from="3" to="4"/>
+/// </some-section>
+/// @endcode
+///
+/// It will create a dictionary with the following
+/// key:value pairs: "1":"2", "3":"4"
 class ConfigDictionarySetup : public ConfigSetup {
 protected:
     bool notEmpty = false;
@@ -41,19 +54,12 @@ protected:
     std::map<std::string, std::string> defaultEntries;
 
     /// @brief Creates a dictionary from an XML nodeset.
+    /// @param config manager for registration
     /// @param element starting element of the nodeset.
     /// @param result contents of config.
     ///
-    /// The basic idea is the following:
-    /// You have a piece of XML that looks like this
-    /// \<some-section\>
-    ///    \<map from="1" to="2"/\>
-    ///    \<map from="3" to="4"/\>
-    /// \</some-section\>
-    ///
-    /// This function will create a dictionary with the following
-    /// key:value pairs: "1":"2", "3":"4"
     bool createOptionFromNode(
+        const std::shared_ptr<Config>& config,
         const pugi::xml_node& element,
         std::map<std::string, std::string>& result);
 
@@ -102,17 +108,29 @@ public:
     /// @brief Create the xml representation of the defaultEntries
     bool createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const override;
 
-    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    bool updateDetail(
+        const std::string& optItem, std::string& optValue,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText = "") const override;
+    std::string getItemPath(
+        const std::vector<std::size_t>& indexList,
+        const std::vector<ConfigVal>& propOptions,
+        const std::string& propText = "") const override;
     std::string getItemPathRoot(bool prefix = false) const override;
     std::string getUniquePath() const override;
 
-    std::map<std::string, std::string> getXmlContent(const pugi::xml_node& optValue);
+    std::map<std::string, std::string> getXmlContent(
+        const pugi::xml_node& optValue,
+        const std::shared_ptr<Config>& config);
 
-    std::shared_ptr<ConfigOption> newOption(const std::map<std::string, std::string>& optValue);
+    std::shared_ptr<ConfigOption> newOption(
+        const std::map<std::string, std::string>& optValue);
 
     std::string getCurrentValue() const override { return {}; }
 };

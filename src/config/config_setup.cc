@@ -60,7 +60,10 @@ std::string ConfigSetup::getDocs()
 }
 
 /// @brief Returns a config option with the given xpath, if option does not exist a default value is returned.
-std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
+std::string ConfigSetup::getXmlContent(
+    const pugi::xml_node& root,
+    const std::shared_ptr<Config>& config,
+    bool trim)
 {
     pugi::xpath_node xpathNode = root.select_node(cpath.c_str());
 
@@ -69,6 +72,10 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
         if (!checkValue(optValue)) {
             throw_std_runtime_error("\nInvalid {}/{} value '{}'{}", root.path(), xpath, optValue.c_str(), getDocs());
         }
+        if (config) {
+            config->registerNode(xpathNode.parent().path());
+            config->registerNode(xpathNode.node().path());
+        }
         return optValue;
     }
 
@@ -76,6 +83,11 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
         std::string optValue = trim ? trimString(xpathNode.attribute().value()) : xpathNode.attribute().value();
         if (!checkValue(optValue)) {
             throw_std_runtime_error("\nInvalid {}/attribute::{} value '{}'{}", root.path(), xpath, optValue.c_str(), getDocs());
+        }
+        if (config) {
+            config->registerNode(root.path());
+            config->registerNode(xpathNode.parent().path());
+            config->registerNode(fmt::format("{}{}", root.path(), xpath));
         }
         return optValue;
     }
@@ -87,6 +99,10 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
         if (!checkValue(optValue)) {
             throw_std_runtime_error("\nInvalid {}/attribute::{} value '{}'{}", root.path(), xAttr, optValue, getDocs());
         }
+        if (config) {
+            config->registerNode(root.path());
+            config->registerNode(fmt::format("{}/attribute::{}", root.path(), xAttr));
+        }
         return optValue;
     }
 
@@ -94,6 +110,10 @@ std::string ConfigSetup::getXmlContent(const pugi::xml_node& root, bool trim)
         std::string optValue = trim ? trimString(root.child(xpath).text().as_string()) : root.child(xpath).text().as_string();
         if (!checkValue(optValue)) {
             throw_std_runtime_error("\nInvalid {}/{} value '{}'{}", root.path(), xpath, optValue, getDocs());
+        }
+        if (config) {
+            config->registerNode(root.child(xpath).parent().path());
+            config->registerNode(root.child(xpath).path());
         }
         return optValue;
     }

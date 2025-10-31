@@ -154,6 +154,7 @@ public:
     void setOrigValue(const std::string& item, UIntOptionType value) override;
     void setOrigValue(const std::string& item, LongOptionType value) override;
     void setOrigValue(const std::string& item, ULongOptionType value) override;
+    void registerNode(const std::string& xmlPath) override;
 
 protected:
     std::shared_ptr<ConfigDefinition> definition;
@@ -163,8 +164,11 @@ protected:
     std::map<std::string, std::string> origValues;
     std::unique_ptr<pugi::xml_document> xmlDoc { std::make_unique<pugi::xml_document>() };
     std::vector<std::shared_ptr<ConfigOption>> options;
+    std::map<std::string, bool> knownNodes;
 
     std::shared_ptr<ConfigOption> setOption(const pugi::xml_node& root, ConfigVal option, const std::map<std::string, std::string>* arguments = nullptr);
+    /// @brief cache all nodes from config file
+    void getAllNodes(const pugi::xml_node& parent, bool getAttributes = true);
 
     std::shared_ptr<Config> getSelf();
 };

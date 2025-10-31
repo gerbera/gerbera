@@ -37,9 +37,12 @@
 #define B_TRUE "true"
 #define B_FALSE "false"
 
-void ConfigBoolSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+void ConfigBoolSetup::makeOption(
+    const pugi::xml_node& root,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
-    newOption(getXmlContent(root));
+    newOption(getXmlContent(root, config));
     setOption(config);
 }
 
@@ -53,7 +56,10 @@ static bool validateYesNo(std::string_view value)
     return value == YES || value == NO;
 }
 
-void ConfigBoolSetup::makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+void ConfigBoolSetup::makeOption(
+    std::string optValue,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
         throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
@@ -61,9 +67,11 @@ void ConfigBoolSetup::makeOption(std::string optValue, const std::shared_ptr<Con
     setOption(config);
 }
 
-bool ConfigBoolSetup::getXmlContent(const pugi::xml_node& root)
+bool ConfigBoolSetup::getXmlContent(
+    const pugi::xml_node& root,
+    const std::shared_ptr<Config>& config)
 {
-    std::string optValue = ConfigSetup::getXmlContent(root, true);
+    std::string optValue = ConfigSetup::getXmlContent(root, config, true);
     return checkValue(optValue, root.path());
 }
 

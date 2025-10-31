@@ -475,7 +475,7 @@
         <agent command="ffmpeg" arguments="-y -i %in -f mp3 %out" />
         <buffer size="1048576" chunk-size="131072" fill-size="262144" />
       </profile>
-      <profile name="vlcmpeg" enabled="no" type="external" no-transcoding="" dlna-profile="MP4">
+      <profile name="vlcmpeg" enabled="no" type="external" no-transcoding="">
         <mimetype>video/mpeg</mimetype>
         <accept-url>yes</accept-url>
         <first-resource>yes</first-resource>
@@ -484,6 +484,7 @@
         <audio-channels>-1</audio-channels>
         <thumbnail>no</thumbnail>
         <hide-original-resource>no</hide-original-resource>
+        <dlna-profile>MP4</dlna-profile>
         <avi-fourcc-list mode="Ignore">
           <fourcc>XVID</fourcc>
           <fourcc>DX50</fourcc>

@@ -46,6 +46,7 @@
 /// @brief Creates an array of ClientConfig objects from a XML nodeset.
 /// @param element starting element of the nodeset.
 bool ConfigClientSetup::createOptionFromNode(
+    const std::shared_ptr<Config>& config,
     const pugi::xml_node& element,
     const std::shared_ptr<ClientConfigList>& result) const
 {
@@ -56,10 +57,13 @@ bool ConfigClientSetup::createOptionFromNode(
     std::map<std::string, std::shared_ptr<ClientGroupConfig>> groupCache;
     for (auto&& it : gcs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
-        auto name = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_GROUP_NAME)->getXmlContent(child);
-        auto isAllowed = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_GROUP_ALLOWED)->getXmlContent(child);
+        if (config) {
+            config->registerNode(child.path());
+        }
+        auto name = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_GROUP_NAME)->getXmlContent(child, config);
+        auto isAllowed = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_GROUP_ALLOWED)->getXmlContent(child, config);
         auto group = std::make_shared<ClientGroupConfig>(name, isAllowed);
-        auto forbiddenDirectories = definition->findConfigSetup<ConfigArraySetup>(ConfigVal::A_CLIENTS_GROUP_HIDDEN_LIST)->getXmlContent(child);
+        auto forbiddenDirectories = definition->findConfigSetup<ConfigArraySetup>(ConfigVal::A_CLIENTS_GROUP_HIDDEN_LIST)->getXmlContent(child, config);
         group->setForbiddenDirectories(forbiddenDirectories);
         EDIT_CAST(EditHelperClientGroupConfig, result)->add(group);
         groupCache[name] = group;
@@ -68,22 +72,28 @@ bool ConfigClientSetup::createOptionFromNode(
     auto&& ccs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_CLIENTS_CLIENT);
     for (auto&& it : ccs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
+        if (config) {
+            config->registerNode(child.path());
+        }
 
-        auto flags = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->getXmlContent(child);
-        auto group = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->getXmlContent(child);
-        auto ip = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->getXmlContent(child);
-        auto userAgent = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child);
-        auto captionInfoCount = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child);
-        auto stringLimit = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->getXmlContent(child);
-        auto multiValue = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->getXmlContent(child);
-        auto fullFilter = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL)->getXmlContent(child);
+        auto flags = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->getXmlContent(child, config);
+        auto group = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->getXmlContent(child, config);
+        auto ip = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->getXmlContent(child, config);
+        auto userAgent = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child, config);
+        auto captionInfoCount = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT)->getXmlContent(child, config);
+        auto stringLimit = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_UPNP_STRING_LIMIT)->getXmlContent(child, config);
+        auto multiValue = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE)->getXmlContent(child, config);
+        auto fullFilter = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL)->getXmlContent(child, config);
         auto allowCS = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED);
-        auto isAllowed = allowCS->getXmlContent(child);
-        auto mappings = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child);
-        auto headers = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS)->getXmlContent(child);
-        auto profiles = definition->findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE)->getXmlContent(child);
+        auto isAllowed = allowCS->getXmlContent(child, config);
+        auto mappings = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child, config);
+        auto headers = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS)->getXmlContent(child, config);
+        auto profiles = definition->findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE)->getXmlContent(child, config);
         auto matchValues = std::map<ClientMatchType, std::string>();
         for (auto&& attr : child.attributes()) {
+            if (config) {
+                config->registerNode(fmt::format("{}/attribute::{}", child.path(), attr.name()));
+            }
             auto matchType = ClientConfig::remapMatchType(attr.name());
             if (matchType != ClientMatchType::None && matchType != ClientMatchType::IP && matchType != ClientMatchType::UserAgent) {
                 matchValues[matchType] = attr.value();
@@ -122,7 +132,7 @@ void ConfigClientSetup::makeOption(
     if (arguments && arguments->find("isEnabled") != arguments->end()) {
         isEnabled = arguments->at("isEnabled") == "true";
     }
-    newOption(getXmlElement(root));
+    newOption(config, getXmlElement(root));
     setOption(config);
 }
 
@@ -491,11 +501,13 @@ bool ConfigClientSetup::updateDetail(
     return false;
 }
 
-std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(const pugi::xml_node& optValue)
+std::shared_ptr<ConfigOption> ConfigClientSetup::newOption(
+    const std::shared_ptr<Config>& config,
+    const pugi::xml_node& optValue)
 {
     auto result = std::make_shared<ClientConfigList>();
 
-    if (!createOptionFromNode(isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
+    if (!createOptionFromNode(config, isEnabled ? optValue : pugi::xml_node(nullptr), result)) {
         throw_std_runtime_error("Init {} client config failed '{}'", xpath, optValue.name());
     }
     optionValue = std::make_shared<ClientConfigListOption>(result);

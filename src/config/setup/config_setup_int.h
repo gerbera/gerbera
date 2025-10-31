@@ -50,26 +50,43 @@ protected:
     T minValue {};
 
 public:
-    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help)
+    ConfigIntegerSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help)
         : ConfigSetup(option, xpath, help)
     {
         this->defaultValue = fmt::to_string(0);
     }
 
-    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, T defaultValue)
+    ConfigIntegerSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        T defaultValue)
         : ConfigSetup(option, xpath, help)
     {
         this->defaultValue = fmt::to_string(defaultValue);
     }
 
-    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, IntCheckFunction check)
+    ConfigIntegerSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        IntCheckFunction check)
         : ConfigSetup(option, xpath, help)
         , valueCheck(std::move(check))
     {
         this->defaultValue = fmt::to_string(0);
     }
 
-    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, T defaultValue, IntParseFunction parseValue, IntPrintFunction printValue = nullptr)
+    ConfigIntegerSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        T defaultValue,
+        IntParseFunction parseValue,
+        IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help)
         , parseValue(std::move(parseValue))
         , printValue(std::move(printValue))
@@ -77,7 +94,13 @@ public:
         this->defaultValue = fmt::to_string(defaultValue);
     }
 
-    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, T defaultValue, IntCheckFunction check, IntPrintFunction printValue = nullptr)
+    ConfigIntegerSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        T defaultValue,
+        IntCheckFunction check,
+        IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help)
         , valueCheck(std::move(check))
         , printValue(std::move(printValue))
@@ -85,7 +108,13 @@ public:
         this->defaultValue = fmt::to_string(defaultValue);
     }
 
-    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, T defaultValue, T minValue, IntMinFunction check)
+    ConfigIntegerSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        T defaultValue,
+        T minValue,
+        IntMinFunction check)
         : ConfigSetup(option, xpath, help)
         , minCheck(std::move(check))
         , minValue(minValue)
@@ -93,7 +122,13 @@ public:
         this->defaultValue = fmt::to_string(defaultValue);
     }
 
-    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, const char* defaultValue, IntCheckFunction check = nullptr, IntPrintFunction printValue = nullptr)
+    ConfigIntegerSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        const char* defaultValue,
+        IntCheckFunction check = nullptr,
+        IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help)
         , valueCheck(std::move(check))
         , printValue(std::move(printValue))
@@ -101,7 +136,13 @@ public:
         this->defaultValue = defaultValue;
     }
 
-    ConfigIntegerSetup(ConfigVal option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check, IntPrintFunction printValue = nullptr)
+    ConfigIntegerSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        const char* defaultValue,
+        StringCheckFunction check,
+        IntPrintFunction printValue = nullptr)
         : ConfigSetup(option, xpath, help, std::move(check), defaultValue)
         , printValue(std::move(printValue))
     {
@@ -109,11 +150,19 @@ public:
 
     std::string getTypeString() const override { return parseValue ? "String" : "Number"; }
 
-    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    void makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        std::string optValue,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    T getXmlContent(const pugi::xml_node& root);
+    T getXmlContent(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config);
 
     std::shared_ptr<ConfigOption> newOption(T optValue);
 

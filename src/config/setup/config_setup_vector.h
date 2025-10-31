@@ -38,6 +38,7 @@ protected:
     std::vector<std::vector<std::pair<std::string, std::string>>> defaultEntries;
 
     /// @brief Creates a vector from an XML nodeset.
+    /// @param config manager for registration
     /// @param element starting element of the nodeset.
     /// @param result contents of config.
     ///
@@ -51,6 +52,7 @@ protected:
     /// This function will create a vector with the following
     /// list: { { "1", "3", "2" }, {"3", "", "4"}
     bool createOptionFromNode(
+        const std::shared_ptr<Config>& config,
         const pugi::xml_node& element,
         std::vector<std::vector<std::pair<std::string, std::string>>>& result);
 
@@ -95,12 +97,18 @@ public:
         const std::shared_ptr<Config>& config,
         const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText = "") const override;
+    std::string getItemPath(
+        const std::vector<std::size_t>& indexList,
+        const std::vector<ConfigVal>& propOptions,
+        const std::string& propText = "") const override;
     std::string getItemPathRoot(bool prefix = false) const override;
 
-    std::vector<std::vector<std::pair<std::string, std::string>>> getXmlContent(const pugi::xml_node& optValue);
+    std::vector<std::vector<std::pair<std::string, std::string>>> getXmlContent(
+        const pugi::xml_node& optValue,
+        const std::shared_ptr<Config>& config);
 
-    std::shared_ptr<ConfigOption> newOption(const std::vector<std::vector<std::pair<std::string, std::string>>>& optValue);
+    std::shared_ptr<ConfigOption> newOption(
+        const std::vector<std::vector<std::pair<std::string, std::string>>>& optValue);
 
     std::string getCurrentValue() const override { return {}; }
 };

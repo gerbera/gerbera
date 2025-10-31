@@ -37,12 +37,17 @@ class ConfigDynamicContentSetup : public ConfigSetup {
 
 protected:
     /// @brief Creates an array of DynamicContent objects from a XML nodeset.
+    /// @param config manager for registration
     /// @param element starting element of the nodeset.
     /// @param result contents of config.
-    bool createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result) const;
+    bool createOptionFromNode(
+        const std::shared_ptr<Config>& config,
+        const pugi::xml_node& element,
+        std::shared_ptr<DynamicContentList>& result) const;
 
 public:
-    bool updateItem(const std::vector<std::size_t>& indexList,
+    bool updateItem(
+        const std::vector<std::size_t>& indexList,
         const std::string& optItem,
         const std::shared_ptr<Config>& config,
         std::shared_ptr<DynamicContent>& entry,
@@ -51,14 +56,26 @@ public:
 
     std::string getTypeString() const override { return "List"; }
 
-    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    bool updateDetail(const std::string& optItem, std::string& optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    bool updateDetail(
+        const std::string& optItem,
+        std::string& optValue,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText = "") const override;
+    std::string getItemPath(
+        const std::vector<std::size_t>& indexList,
+        const std::vector<ConfigVal>& propOptions,
+        const std::string& propText = "") const override;
     std::string getItemPathRoot(bool prefix = false) const override;
 
-    std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
+    std::shared_ptr<ConfigOption> newOption(
+        const std::shared_ptr<Config>& config,
+        const pugi::xml_node& optValue);
 
     std::string getCurrentValue() const override { return {}; }
 };

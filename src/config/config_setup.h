@@ -205,7 +205,10 @@ public:
     bool hasXmlElement(const pugi::xml_node& root) const;
 
     /// @brief Returns a config option with the given xpath, if option does not exist a default value is returned.
-    std::string getXmlContent(const pugi::xml_node& root, bool trim = true);
+    std::string getXmlContent(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        bool trim = true);
 
     /// @brief Gererate Option from config file entry
     virtual void makeOption(

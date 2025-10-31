@@ -30,9 +30,11 @@
 #include "exceptions.h"
 #include "util/grb_time.h"
 
-LongOptionType ConfigTimeSetup::getXmlContent(const pugi::xml_node& root)
+LongOptionType ConfigTimeSetup::getXmlContent(
+    const pugi::xml_node& root,
+    const std::shared_ptr<Config>& config)
 {
-    auto optValue = ConfigSetup::getXmlContent(root, true);
+    auto optValue = ConfigSetup::getXmlContent(root, config, true);
     LongOptionType result;
     if (!parseTime(result, optValue, type)) {
         throw_std_runtime_error("Invalid {} time format '{}'", xpath, optValue);
@@ -40,9 +42,12 @@ LongOptionType ConfigTimeSetup::getXmlContent(const pugi::xml_node& root)
     return result;
 }
 
-void ConfigTimeSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+void ConfigTimeSetup::makeOption(
+    const pugi::xml_node& root,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
-    auto optValue = ConfigSetup::getXmlContent(root, true);
+    auto optValue = ConfigSetup::getXmlContent(root, config, true);
     newOption(optValue);
     setOption(config);
 }

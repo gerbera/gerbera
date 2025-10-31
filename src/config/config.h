@@ -131,6 +131,9 @@ public:
     /// @brief returns a config option of type DynamicContentList
     /// @param option to retrieve
     virtual std::shared_ptr<DynamicContentList> getDynamicContentListOption(ConfigVal option) const = 0;
+
+    /// @brief mark node as present
+    virtual void registerNode(const std::string& xmlPath) = 0;
 };
 
 #endif // __CONFIG_H__

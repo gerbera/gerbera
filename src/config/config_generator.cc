@@ -217,7 +217,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setDictionary(ConfigVal option)
         return nullptr;
 
     auto nodeKey = definition->mapConfigOption(cs->nodeOption);
-    for (auto&& [key, value] : cs->getXmlContent({})) {
+    for (auto&& [key, value] : cs->getXmlContent({}, nullptr)) {
         setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), {}, "", true);
         setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, definition->ensureAttribute(cs->keyOption)), {}, key);
         setValue(fmt::format("{}/{}/{}", cs->xpath, nodeKey, definition->ensureAttribute(cs->valOption)), {}, value);
@@ -232,7 +232,7 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setVector(ConfigVal option)
         return nullptr;
 
     auto nodeKey = definition->mapConfigOption(cs->nodeOption);
-    for (auto&& value : cs->getXmlContent({})) {
+    for (auto&& value : cs->getXmlContent({}, nullptr)) {
         setValue(fmt::format("{}/{}/", cs->xpath, nodeKey), {}, "", true);
         for (auto&& [key, val] : value)
             setValue(fmt::format("{}/{}/attribute::{}", cs->xpath, nodeKey, key), {}, val);

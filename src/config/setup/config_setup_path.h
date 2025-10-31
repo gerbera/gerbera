@@ -68,7 +68,12 @@ protected:
 public:
     static fs::path Home;
 
-    ConfigPathSetup(ConfigVal option, const char* xpath, const char* help, const char* defaultValue = "", ConfigPathArguments arguments = ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty)
+    ConfigPathSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        const char* defaultValue = "",
+        ConfigPathArguments arguments = ConfigPathArguments::mustExist | ConfigPathArguments::resolveEmpty)
         : ConfigSetup(option, xpath, help, false, defaultValue)
         , arguments(arguments)
     {
@@ -76,12 +81,21 @@ public:
 
     std::string getTypeString() const override { return "Path"; }
 
-    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    void makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        std::string optValue,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
     std::shared_ptr<ConfigOption> newOption(std::string& optValue);
-    fs::path getXmlContent(const pugi::xml_node& root, bool doResolve = false);
+    fs::path getXmlContent(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        bool doResolve = false);
 
     bool checkPathValue(std::string& optValue, std::string& pathValue) const;
 

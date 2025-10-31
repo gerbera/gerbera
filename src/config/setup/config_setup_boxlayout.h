@@ -39,9 +39,11 @@ protected:
     std::vector<BoxLayout> defaultEntries;
 
     /// @brief Creates an array of BoxLayout objects from a XML nodeset.
+    /// @param config manager for registration
     /// @param element starting element of the nodeset.
     /// @param result contents of config.
     bool createOptionFromNode(
+        const std::shared_ptr<Config>& config,
         const pugi::xml_node& element,
         const std::shared_ptr<BoxLayoutList>& result);
 
@@ -74,8 +76,10 @@ public:
         std::string& optValue,
         const std::string& status = "") const;
 
-    // @brief make config option from xml content
-    std::shared_ptr<ConfigOption> newOption(const pugi::xml_node& optValue);
+    /// @brief make config option from xml content
+    std::shared_ptr<ConfigOption> newOption(
+        const std::shared_ptr<Config>& config,
+        const pugi::xml_node& optValue);
 
     /// @brief get default value
     const std::vector<BoxLayout>& getDefault() const { return defaultEntries; }

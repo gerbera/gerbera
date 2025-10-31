@@ -9,9 +9,12 @@ Layout of documentation for configuration was improved by headings, versioning d
 
 Last.FM integration is working without old lastfmlib and using Last.FM API 2.0.
 
+The configuration verification now warns as soon as there are entries that do not have any effect. This is the case for some disabled features (e.g., transcoding, databases)
+as well as for legacy entries.
+
 ### Removed Features
 
-**Support for loading layout scripts has been removed now. The javascript interface must be used by calling functions depending on the media type.**
+**Support for loading and running layout scripts has been removed now. The javascript interface must be used by calling functions depending on the media type.**
 
 If you added or changed javascript files, make sure the modified files are in a separate folder and the config entry `import/scripting/script-folder/custom`
 is pointing to that directory.

@@ -1773,7 +1773,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             "fourcc", "config-transcode.html#confval-4cc-fourcc",
             ""),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_DLNAPROF,
-            "attribute::dlna-profile", "config-transcode.html#confval-profile-dlna-profile",
+            "dlna-profile", "config-transcode.html#confval-profile-dlna-profile",
             ""),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING,
             "attribute::no-transcoding", "config-transcode.html#confval-no-transcoding",

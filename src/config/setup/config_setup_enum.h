@@ -41,14 +41,25 @@ protected:
     EnumPrintingFunction printingFunction = nullptr;
 
 public:
-    ConfigEnumSetup(ConfigVal option, const char* xpath, const char* help, std::map<std::string, En> valueMap, bool notEmpty = false)
+    ConfigEnumSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        std::map<std::string, En> valueMap,
+        bool notEmpty = false)
         : ConfigSetup(option, xpath, help, false, "")
         , notEmpty(notEmpty)
         , valueMap(std::move(valueMap))
     {
     }
 
-    ConfigEnumSetup(ConfigVal option, const char* xpath, const char* help, En defaultValue, std::map<std::string, En> valueMap, bool notEmpty = false)
+    ConfigEnumSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        En defaultValue,
+        std::map<std::string, En> valueMap,
+        bool notEmpty = false)
         : ConfigSetup(option, xpath, help, false, "")
         , notEmpty(notEmpty)
         , valueMap(std::move(valueMap))
@@ -56,7 +67,14 @@ public:
         this->defaultValue = mapEnumValue(defaultValue);
     }
 
-    ConfigEnumSetup(ConfigVal option, const char* xpath, const char* help, En defaultValue, EnumParsingFunction parsingFunction, EnumPrintingFunction printingFunction, bool notEmpty = false)
+    ConfigEnumSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        En defaultValue,
+        EnumParsingFunction parsingFunction,
+        EnumPrintingFunction printingFunction,
+        bool notEmpty = false)
         : ConfigSetup(option, xpath, help, false, "")
         , notEmpty(notEmpty)
         , parsingFunction(parsingFunction)
@@ -67,16 +85,22 @@ public:
 
     std::string getTypeString() const override { return "Enum"; }
 
-    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override
+    void makeOption(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override
     {
         if (arguments && arguments->find("notEmpty") != arguments->end()) {
             notEmpty = arguments->find("notEmpty")->second == "true";
         }
-        newOption(ConfigSetup::getXmlContent(root, true));
+        newOption(ConfigSetup::getXmlContent(root, config, true));
         setOption(config);
     }
 
-    void makeOption(std::string optValue, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override
+    void makeOption(
+        std::string optValue,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override
     {
         if (arguments && arguments->find("notEmpty") != arguments->end()) {
             notEmpty = arguments->find("notEmpty")->second == "true";
@@ -122,9 +146,11 @@ public:
         return "";
     }
 
-    En getXmlContent(const pugi::xml_node& root)
+    En getXmlContent(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config)
     {
-        std::string optValue = ConfigSetup::getXmlContent(root, true);
+        std::string optValue = ConfigSetup::getXmlContent(root, config, true);
         log_debug("Config: option: '{}' value: '{}'", xpath, optValue);
         if (notEmpty && optValue.empty()) {
             throw_std_runtime_error("Error in config file: Invalid {}/{} empty value '{}'", root.path(), xpath, optValue);
