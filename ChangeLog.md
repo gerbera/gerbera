@@ -38,6 +38,7 @@
 - Remove loading complete scripts to create virutal layout
 - Restrict number of subtitle bytes to read
 - Rotation of thumbnails by ffmpegthumbnailer
+- Track unused config file entries
 - Unify doxygen tags
 - Update CMakeLists.txt for ICU on APPLE
 - Update to exiv2 v0.28.6

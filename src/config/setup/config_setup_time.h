@@ -67,7 +67,9 @@ public:
         const std::map<std::string, std::string>* arguments = nullptr) override;
 
     std::shared_ptr<ConfigOption> newOption(std::string& optValue);
-    LongOptionType getXmlContent(const pugi::xml_node& root);
+    LongOptionType getXmlContent(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config);
     LongOptionType checkTimeValue(std::string& optValue);
 };
 

@@ -80,6 +80,7 @@ public:
     bool hasOrigValue(const std::string& item) const override { return false; }
     std::shared_ptr<TranscodingProfileList> getTranscodingProfileListOption(ConfigVal option) const override { return nullptr; }
     std::shared_ptr<DynamicContentList> getDynamicContentListOption(ConfigVal option) const override { return nullptr; }
+    void registerNode(const std::string& xmlPath) override {};
 };
 
 #endif //GERBERA_PGSQL_CONFIG_FAKE_H

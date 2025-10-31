@@ -46,15 +46,19 @@
 /// @brief Creates an array of BoxLayout objects from a XML nodeset.
 /// @param element starting element of the nodeset.
 bool ConfigBoxLayoutSetup::createOptionFromNode(
+    const std::shared_ptr<Config>& config,
     const pugi::xml_node& element,
     const std::shared_ptr<BoxLayoutList>& result)
 {
     if (!element)
         return true;
 
+    if (config) {
+        config->registerNode(element.path());
+    }
     std::vector<std::string> allKeys;
     auto&& listcs = definition->findConfigSetup<ConfigSetup>(option);
-    auto doExtend = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element);
+    auto doExtend = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_LIST_EXTEND)->getXmlContent(element, config);
     log_debug("is {} extensible {}", element.path(), doExtend);
     static constexpr auto rootKeys = std::array {
         BoxKeys::root,
@@ -71,19 +75,25 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
     auto&& chaincs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_BOXLAYOUT_CHAIN);
     for (auto&& itBox : listcs->getXmlTree(element)) {
         const pugi::xml_node& childBox = itBox.node();
+        if (config) {
+            config->registerNode(childBox.path());
+        }
         for (auto&& it : boxcs->getXmlTree(childBox)) {
             const pugi::xml_node& child = it.node();
+            if (config) {
+                config->registerNode(child.path());
+            }
 
-            auto key = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->getXmlContent(child);
-            auto title = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->getXmlContent(child);
-            auto objClass = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->getXmlContent(child);
-            auto upnpShortcut = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->getXmlContent(child);
-            auto size = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->getXmlContent(child);
-            auto enabled = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child);
-            auto searchable = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_SEARCHABLE)->getXmlContent(child);
+            auto key = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_KEY)->getXmlContent(child, config);
+            auto title = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_TITLE)->getXmlContent(child, config);
+            auto objClass = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_CLASS)->getXmlContent(child, config);
+            auto upnpShortcut = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_UPNP_SHORTCUT)->getXmlContent(child, config);
+            auto size = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_BOXLAYOUT_BOX_SIZE)->getXmlContent(child, config);
+            auto enabled = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_ENABLED)->getXmlContent(child, config);
+            auto searchable = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_BOXLAYOUT_BOX_SEARCHABLE)->getXmlContent(child, config);
             if (!enabled) // disabled boxes connot be searched
                 searchable = false;
-            auto sortKey = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY)->getXmlContent(child);
+            auto sortKey = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY)->getXmlContent(child, config);
 
             if (!enabled && std::find(rootKeys.begin(), rootKeys.end(), key) != rootKeys.end()) {
                 log_warning("Box '{}' cannot be disabled", key);
@@ -102,8 +112,11 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
         std::size_t index = 0;
         for (auto&& it : chaincs->getXmlTree(childBox)) {
             const pugi::xml_node& child = it.node();
-            AutoscanMediaMode type = definition->findConfigSetup<ConfigEnumSetup<AutoscanMediaMode>>(ConfigVal::A_BOXLAYOUT_CHAIN_TYPE)->getXmlContent(child);
-            auto links = definition->findConfigSetup<ConfigVectorSetup>(ConfigVal::A_BOXLAYOUT_CHAIN_LINKS)->getXmlContent(child);
+            if (config) {
+                config->registerNode(child.path());
+            }
+            AutoscanMediaMode type = definition->findConfigSetup<ConfigEnumSetup<AutoscanMediaMode>>(ConfigVal::A_BOXLAYOUT_CHAIN_TYPE)->getXmlContent(child, config);
+            auto links = definition->findConfigSetup<ConfigVectorSetup>(ConfigVal::A_BOXLAYOUT_CHAIN_LINKS)->getXmlContent(child, config);
             auto chain = std::make_shared<BoxChain>(index, type, links);
             EDIT_CAST(EditHelperBoxChain, result)->add(chain);
             ++index;
@@ -148,7 +161,7 @@ void ConfigBoxLayoutSetup::makeOption(
     const std::shared_ptr<Config>& config,
     const std::map<std::string, std::string>* arguments)
 {
-    newOption(getXmlElement(root));
+    newOption(config, getXmlElement(root));
     setOption(config);
 }
 
@@ -378,11 +391,13 @@ bool ConfigBoxLayoutSetup::updateDetail(const std::string& optItem,
     return false;
 }
 
-std::shared_ptr<ConfigOption> ConfigBoxLayoutSetup::newOption(const pugi::xml_node& optValue)
+std::shared_ptr<ConfigOption> ConfigBoxLayoutSetup::newOption(
+    const std::shared_ptr<Config>& config,
+    const pugi::xml_node& optValue)
 {
     auto result = std::make_shared<BoxLayoutList>();
 
-    if (!createOptionFromNode(optValue, result)) {
+    if (!createOptionFromNode(config, optValue, result)) {
         throw_std_runtime_error("Init {} BoxLayout config failed '{}'", xpath, optValue.name());
     }
     if (EDIT_CAST(EditHelperBoxLayout, result)->size() == 0) {

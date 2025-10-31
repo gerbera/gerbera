@@ -39,38 +39,47 @@
 #include <numeric>
 
 /// @brief Creates an array of DynamicContent objects from a XML nodeset.
-bool ConfigDynamicContentSetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DynamicContentList>& result) const
+bool ConfigDynamicContentSetup::createOptionFromNode(
+    const std::shared_ptr<Config>& config,
+    const pugi::xml_node& element,
+    std::shared_ptr<DynamicContentList>& result) const
 {
     if (!element)
         return true;
 
+    if (config) {
+        config->registerNode(element.path());
+    }
     auto&& ccs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_DYNAMIC_CONTAINER);
     for (auto&& it : ccs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
-        fs::path location = definition->findConfigSetup<ConfigPathSetup>(ConfigVal::A_DYNAMIC_CONTAINER_LOCATION)->getXmlContent(child);
+        fs::path location = definition->findConfigSetup<ConfigPathSetup>(ConfigVal::A_DYNAMIC_CONTAINER_LOCATION)->getXmlContent(child, config);
+        if (config) {
+            config->registerNode(child.path());
+        }
 
         auto cont = std::make_shared<DynamicContent>(location);
 
         {
             auto cs = definition->findConfigSetup<ConfigPathSetup>(ConfigVal::A_DYNAMIC_CONTAINER_IMAGE);
-            cont->setImage(cs->getXmlContent(child));
+            cont->setImage(cs->getXmlContent(child, config));
         }
         {
             auto cs = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_TITLE);
-            cont->setTitle(cs->getXmlContent(child));
+            cont->setTitle(cs->getXmlContent(child, config));
             if (cont->getTitle().empty()) {
                 cont->setTitle(location.filename());
             }
             cs = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_SORT);
-            cont->setSort(cs->getXmlContent(child));
+            cont->setSort(cs->getXmlContent(child, config));
             cs = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_FILTER);
-            cont->setFilter(cs->getXmlContent(child));
+            cont->setFilter(cs->getXmlContent(child, config));
             cs = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT);
-            cont->setUpnpShortcut(cs->getXmlContent(child));
+            cont->setUpnpShortcut(cs->getXmlContent(child, config));
         }
         {
             auto cs = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_DYNAMIC_CONTAINER_MAXCOUNT);
-            cont->setMaxCount(cs->getXmlContent(child));
+            cont->setMaxCount(cs->getXmlContent(child, config));
         }
         try {
             result->add(cont);
@@ -82,9 +91,12 @@ bool ConfigDynamicContentSetup::createOptionFromNode(const pugi::xml_node& eleme
     return true;
 }
 
-void ConfigDynamicContentSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+void ConfigDynamicContentSetup::makeOption(
+    const pugi::xml_node& root,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
-    newOption(getXmlElement(root));
+    newOption(config, getXmlElement(root));
     setOption(config);
 }
 
@@ -209,7 +221,8 @@ bool ConfigDynamicContentSetup::updateItem(
     return false;
 }
 
-bool ConfigDynamicContentSetup::updateDetail(const std::string& optItem,
+bool ConfigDynamicContentSetup::updateDetail(
+    const std::string& optItem,
     std::string& optValue,
     const std::shared_ptr<Config>& config,
     const std::map<std::string, std::string>* arguments)
@@ -226,18 +239,23 @@ bool ConfigDynamicContentSetup::updateDetail(const std::string& optItem,
     return false;
 }
 
-std::shared_ptr<ConfigOption> ConfigDynamicContentSetup::newOption(const pugi::xml_node& optValue)
+std::shared_ptr<ConfigOption> ConfigDynamicContentSetup::newOption(
+    const std::shared_ptr<Config>& config,
+    const pugi::xml_node& optValue)
 {
     auto result = std::make_shared<DynamicContentList>();
 
-    if (!createOptionFromNode(optValue, result)) {
+    if (!createOptionFromNode(config, optValue, result)) {
         throw_std_runtime_error("Init {} DynamicContentList failed '{}'", xpath, optValue.name());
     }
     optionValue = std::make_shared<DynamicContentListOption>(result);
     return optionValue;
 }
 
-std::string ConfigDynamicContentSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
+std::string ConfigDynamicContentSetup::getItemPath(
+    const std::vector<std::size_t>& indexList,
+    const std::vector<ConfigVal>& propOptions,
+    const std::string& propText) const
 {
     if (indexList.empty()) {
         if (!propOptions.empty()) {

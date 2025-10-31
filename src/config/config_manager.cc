@@ -108,6 +108,26 @@ void ConfigManager::addOption(ConfigVal option, const std::shared_ptr<ConfigOpti
     options.at(to_underlying(option)) = optionValue;
 }
 
+void ConfigManager::getAllNodes(const pugi::xml_node& parent, bool getAttributes)
+{
+    for (auto&& node : parent.children()) {
+        if (node.type() == pugi::xml_node_type::node_element) {
+            if (!node.first_child() || node.first_child().type() != pugi::xml_node_type::node_element)
+                knownNodes[node.path()] = false;
+            getAllNodes(node);
+        }
+    }
+    if (getAttributes)
+        for (pugi::xml_attribute attr : parent.attributes()) {
+            knownNodes[fmt::format("{}/attribute::{}", parent.path(), attr.name())] = false;
+        }
+}
+
+void ConfigManager::registerNode(const std::string& xmlPath)
+{
+    knownNodes[xmlPath] = true;
+}
+
 void ConfigManager::load(const fs::path& userHome)
 {
     std::map<std::string, std::string> args;
@@ -122,6 +142,8 @@ void ConfigManager::load(const fs::path& userHome)
     log_info("Parsing configuration...");
 
     auto root = xmlDoc->document_element();
+
+    getAllNodes(root, false);
 
     // first check if the config file itself looks ok,
     // it must have a config and a server tag
@@ -143,7 +165,7 @@ void ConfigManager::load(const fs::path& userHome)
         std::string activeHome = userHome.string();
         bool homeOverride = setOption(root, ConfigVal::SERVER_HOME_OVERRIDE)->getBoolOption();
         if (userHome.empty() || homeOverride) {
-            activeHome = co->getXmlContent(root);
+            activeHome = co->getXmlContent(root, self);
         } else {
             if (!fs::is_directory(activeHome))
                 throw_std_runtime_error("Directory '{}' does not exist", activeHome);
@@ -364,6 +386,10 @@ void ConfigManager::load(const fs::path& userHome)
 bool ConfigManager::validate()
 {
     log_info("Validating configuration...");
+    for (auto&& [path, found] : knownNodes) {
+        if (!found)
+            log_warning("Found extra config file entry '{}'", path);
+    }
     auto self = getSelf();
 
     if (!getOption(ConfigVal::SERVER_NETWORK_INTERFACE).empty() && !getOption(ConfigVal::SERVER_IP).empty())

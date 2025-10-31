@@ -147,6 +147,7 @@ public:
     bool hasOrigValue(const std::string& item) const override { return false; }
     MOCK_METHOD(std::shared_ptr<TranscodingProfileList>, getTranscodingProfileListOption, (ConfigVal option), (const override));
     MOCK_METHOD(std::shared_ptr<DynamicContentList>, getDynamicContentListOption, (ConfigVal option), (const override));
+    void registerNode(const std::string& xmlPath) override {};
 };
 
 #endif // __CONFIG_MOCK_H__

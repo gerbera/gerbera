@@ -33,6 +33,18 @@
 using ArrayInitFunction = std::function<bool(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)>;
 using ArrayItemCheckFunction = std::function<bool(const std::string& value)>;
 
+/// @brief Configuration parser to load arrays
+///
+/// Similar to @ref ConfigDictionarySetup this one extracts
+/// data from the following XML:
+///  \code{xml}
+///  <some-section>
+///      <tag attr="data"/>
+///      <tag attr="otherdata"/>
+///  </some-section>
+///  \endcode
+///
+/// This class represents an array like that: ["data", "otherdata"]
 class ConfigArraySetup : public ConfigSetup {
 protected:
     bool notEmpty = false;
@@ -43,21 +55,15 @@ protected:
     bool doExtend = false;
 
     /// @brief Creates an array of strings from an XML nodeset.
+    /// @param config manager for registration
     /// @param element starting element of the nodeset.
     /// @param result vector with contents of array
-    ///
-    /// Similar to \fn ConfigDictionarySetup#createOptionFromNode() this one extracts
-    /// data from the following XML:
-    /// \<some-section\>
-    ///     \<tag attr="data"/\>
-    ///     \<tag attr="otherdata"/\>
-    /// \</some-section\>
-    ///
-    /// This function will create an array like that: ["data", "otherdata"]
     bool createOptionFromNode(
+        const std::shared_ptr<Config>& config,
         const pugi::xml_node& element,
         std::vector<std::string>& result);
 
+    /// @brief entry point for config ui
     bool updateItem(
         const std::vector<std::size_t>& indexList,
         const std::string& optItem,
@@ -70,8 +76,14 @@ public:
     ConfigVal nodeOption;
     ConfigVal attrOption = ConfigVal::MAX;
 
-    ConfigArraySetup(ConfigVal option, const char* xpath, const char* help, ConfigVal nodeOption,
-        ArrayInitFunction init = nullptr, bool notEmpty = false, std::vector<std::string> defaultEntries = {})
+    ConfigArraySetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        ConfigVal nodeOption,
+        ArrayInitFunction init = nullptr,
+        bool notEmpty = false,
+        std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , initArray(std::move(init))
@@ -80,8 +92,15 @@ public:
     {
     }
 
-    ConfigArraySetup(ConfigVal option, const char* xpath, const char* help, ConfigVal nodeOption, ConfigVal attrOption,
-        bool notEmpty, bool itemNotEmpty, std::vector<std::string> defaultEntries = {})
+    ConfigArraySetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        ConfigVal nodeOption,
+        ConfigVal attrOption,
+        bool notEmpty,
+        bool itemNotEmpty,
+        std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , notEmpty(notEmpty)
         , itemNotEmpty(itemNotEmpty)
@@ -91,8 +110,14 @@ public:
     {
     }
 
-    ConfigArraySetup(ConfigVal option, const char* xpath, const char* help, ConfigVal nodeOption, ConfigVal attrOption,
-        ArrayItemCheckFunction itemCheck, std::vector<std::string> defaultEntries = {})
+    ConfigArraySetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        ConfigVal nodeOption,
+        ConfigVal attrOption,
+        ArrayItemCheckFunction itemCheck,
+        std::vector<std::string> defaultEntries = {})
         : ConfigSetup(option, xpath, help)
         , itemCheck(std::move(itemCheck))
         , defaultEntries(std::move(defaultEntries))
@@ -104,29 +129,46 @@ public:
     void setDefaultValue(std::vector<std::string> defaultEntries) { this->defaultEntries = std::move(defaultEntries); }
     std::string getTypeString() const override { return "List"; }
 
-    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
     bool createNodeFromDefaults(const std::shared_ptr<pugi::xml_node>& result) const override;
+    /// @brief entry point for config ui
     bool updateDetail(
         const std::string& optItem,
         std::string& optValue,
         const std::shared_ptr<Config>& config,
         const std::map<std::string, std::string>* arguments = nullptr) override;
 
-    std::string getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText = "") const override;
+    std::string getItemPath(
+        const std::vector<std::size_t>& indexList,
+        const std::vector<ConfigVal>& propOptions,
+        const std::string& propText = "") const override;
     std::string getItemPathRoot(bool prefix = false) const override;
 
-    std::vector<std::string> getXmlContent(const pugi::xml_node& optValue);
+    std::vector<std::string> getXmlContent(
+        const pugi::xml_node& optValue,
+        const std::shared_ptr<Config>& config);
 
     bool checkArrayValue(const std::string& value, std::vector<std::string>& result) const;
 
     std::shared_ptr<ConfigOption> newOption(const std::vector<std::string>& optValue);
 
-    std::string getCurrentValue() const override { return {}; }
+    std::string getCurrentValue() const override;
 
-    static bool InitPlayedItemsMark(const pugi::xml_node& value, std::vector<std::string>& result, const char* nodeName);
+    /// @brief parse played-items-mark values
+    static bool InitPlayedItemsMark(
+        const pugi::xml_node& value,
+        std::vector<std::string>& result,
+        const char* nodeName);
 
-    static bool InitItemsPerPage(const pugi::xml_node& value, std::vector<std::string>& result, const char* nodeName);
+    /// @brief parse items-per-page values
+    static bool InitItemsPerPage(
+        const pugi::xml_node& value,
+        std::vector<std::string>& result,
+        const char* nodeName);
 };
 
 #endif // __CONFIG_SETUP_ARRAY_H__

@@ -33,13 +33,16 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-void ConfigStringSetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+void ConfigStringSetup::makeOption(
+    const pugi::xml_node& root,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
     bool trim = true;
     if (arguments && arguments->find("trim") != arguments->end()) {
         trim = arguments->at("trim") == "true";
     }
-    newOption(getXmlContent(root, trim));
+    newOption(getXmlContent(root, config, trim));
     setOption(config);
 }
 

@@ -39,58 +39,68 @@
 #include <numeric>
 
 /// @brief Creates an array of DirectoryTweak objects from a XML nodeset.
-bool ConfigDirectorySetup::createOptionFromNode(const pugi::xml_node& element, std::shared_ptr<DirectoryConfigList>& result) const
+bool ConfigDirectorySetup::createOptionFromNode(
+    const std::shared_ptr<Config>& config,
+    const pugi::xml_node& element,
+    std::shared_ptr<DirectoryConfigList>& result) const
 {
     if (!element)
         return true;
 
+    if (config) {
+        config->registerNode(element.path());
+    }
+
     auto&& tcs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_DIRECTORIES_TWEAK);
     for (auto&& it : tcs->getXmlTree(element)) {
         const pugi::xml_node& child = it.node();
-        fs::path location = definition->findConfigSetup<ConfigPathSetup>(ConfigVal::A_DIRECTORIES_TWEAK_LOCATION)->getXmlContent(child);
+        if (config) {
+            config->registerNode(child.path());
+        }
+        fs::path location = definition->findConfigSetup<ConfigPathSetup>(ConfigVal::A_DIRECTORIES_TWEAK_LOCATION)->getXmlContent(child, config);
 
-        auto inherit = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_DIRECTORIES_TWEAK_INHERIT)->getXmlContent(child);
+        auto inherit = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_DIRECTORIES_TWEAK_INHERIT)->getXmlContent(child, config);
 
         auto dir = std::make_shared<DirectoryTweak>(location, inherit);
 
         {
             auto cs = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE);
             if (cs->hasXmlElement(child)) {
-                dir->setRecursive(cs->getXmlContent(child));
+                dir->setRecursive(cs->getXmlContent(child, config));
             }
             cs = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN);
             if (cs->hasXmlElement(child)) {
-                dir->setHidden(cs->getXmlContent(child));
+                dir->setHidden(cs->getXmlContent(child, config));
             }
             cs = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE);
             if (cs->hasXmlElement(child)) {
-                dir->setCaseSensitive(cs->getXmlContent(child));
+                dir->setCaseSensitive(cs->getXmlContent(child, config));
             }
             cs = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS);
             if (cs->hasXmlElement(child)) {
-                dir->setFollowSymlinks(cs->getXmlContent(child));
+                dir->setFollowSymlinks(cs->getXmlContent(child, config));
             }
         }
         {
             auto cs = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DIRECTORIES_TWEAK_META_CHARSET);
             if (cs->hasXmlElement(child)) {
-                dir->setMetaCharset(cs->getXmlContent(child));
+                dir->setMetaCharset(cs->getXmlContent(child, config));
             }
             cs = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DIRECTORIES_TWEAK_FANART_FILE);
             if (cs->hasXmlElement(child)) {
-                dir->setFanArtFile(cs->getXmlContent(child));
+                dir->setFanArtFile(cs->getXmlContent(child, config));
             }
             cs = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DIRECTORIES_TWEAK_SUBTITLE_FILE);
             if (cs->hasXmlElement(child)) {
-                dir->setSubTitleFile(cs->getXmlContent(child));
+                dir->setSubTitleFile(cs->getXmlContent(child, config));
             }
             cs = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DIRECTORIES_TWEAK_METAFILE_FILE);
             if (cs->hasXmlElement(child)) {
-                dir->setMetafile(cs->getXmlContent(child));
+                dir->setMetafile(cs->getXmlContent(child, config));
             }
             cs = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_DIRECTORIES_TWEAK_RESOURCE_FILE);
             if (cs->hasXmlElement(child)) {
-                dir->setResourceFile(cs->getXmlContent(child));
+                dir->setResourceFile(cs->getXmlContent(child, config));
             }
         }
         try {
@@ -103,9 +113,12 @@ bool ConfigDirectorySetup::createOptionFromNode(const pugi::xml_node& element, s
     return true;
 }
 
-void ConfigDirectorySetup::makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments)
+void ConfigDirectorySetup::makeOption(
+    const pugi::xml_node& root,
+    const std::shared_ptr<Config>& config,
+    const std::map<std::string, std::string>* arguments)
 {
-    newOption(getXmlElement(root));
+    newOption(config, getXmlElement(root));
     setOption(config);
 }
 
@@ -287,11 +300,13 @@ bool ConfigDirectorySetup::updateDetail(const std::string& optItem,
     return false;
 }
 
-std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(const pugi::xml_node& optValue)
+std::shared_ptr<ConfigOption> ConfigDirectorySetup::newOption(
+    const std::shared_ptr<Config>& config,
+    const pugi::xml_node& optValue)
 {
     auto result = std::make_shared<DirectoryConfigList>();
 
-    if (!createOptionFromNode(optValue, result)) {
+    if (!createOptionFromNode(config, optValue, result)) {
         throw_std_runtime_error("Init {} DirectoryConfigList failed '{}'", xpath, optValue.name());
     }
     optionValue = std::make_shared<DirectoryTweakOption>(result);
