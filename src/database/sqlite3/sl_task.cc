@@ -32,6 +32,8 @@
 
 #include <sqlite3.h>
 
+#include <utility>
+
 SLTask::~SLTask() = default;
 
 bool SLTask::is_running() const
@@ -163,10 +165,10 @@ void SLSelectTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
 
 /* SLExecTask */
 
-SLExecTask::SLExecTask(const std::string& query, const std::string& getLastInsertId, bool warnOnly)
+SLExecTask::SLExecTask(const std::string& query, std::string getLastInsertId, bool warnOnly)
     : SLTask(!warnOnly)
     , query(query.c_str())
-    , lastInsertColumn(getLastInsertId)
+    , lastInsertColumn(std::move(getLastInsertId))
 {
 }
 
