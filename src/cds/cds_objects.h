@@ -96,7 +96,11 @@ protected:
     std::shared_ptr<CdsObject> parent;
 
 public:
+    CdsObject() = default;
     virtual ~CdsObject() = default;
+
+    CdsObject(const CdsObject&) = delete;
+    CdsObject& operator=(const CdsObject&) = delete;
 
     /// @brief Set the object ID.
     ///

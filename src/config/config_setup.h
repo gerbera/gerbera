@@ -138,6 +138,9 @@ public:
 
     virtual ~ConfigSetup() = default;
 
+    ConfigSetup(const ConfigSetup&) = delete;
+    ConfigSetup& operator=(const ConfigSetup&) = delete;
+
     /// @brief get xml tree based on config item
     pugi::xpath_node_set getXmlTree(const pugi::xml_node& element) const;
 

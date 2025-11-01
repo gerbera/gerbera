@@ -175,7 +175,14 @@ public:
         , operation(operation)
     {
     }
+    AddUpdateTable() = default;
     virtual ~AddUpdateTable() = default;
+
+    AddUpdateTable(const AddUpdateTable&) = delete;
+    AddUpdateTable& operator=(const AddUpdateTable&) = delete;
+    AddUpdateTable(AddUpdateTable&&) = default;
+    AddUpdateTable& operator=(AddUpdateTable&&) = default;
+
     /// @brief does the insert statement return an object id to retrieve
     virtual std::string hasInsertResult() { return ""; }
     /// @brief get the table name

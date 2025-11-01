@@ -65,6 +65,10 @@ protected:
 public:
     explicit GenericTask(TaskOwner taskOwner);
     virtual ~GenericTask();
+
+    GenericTask(const GenericTask&) = delete;
+    GenericTask& operator=(const GenericTask&) = delete;
+
     virtual void run() = 0;
     void setDescription(const std::string& description) { this->description = description; }
     std::string getDescription() const { return description; }

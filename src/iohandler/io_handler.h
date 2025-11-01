@@ -44,7 +44,11 @@ static constexpr grb_read_t CHECK_SOCKET = -666;
 
 class IOHandler {
 public:
+    IOHandler() = default;
     virtual ~IOHandler() = default;
+
+    IOHandler(const IOHandler&) = delete;
+    IOHandler& operator=(const IOHandler&) = delete;
 
     /// @brief Opens a data for the web server.
     /// @param mode in which the data will be opened (we only support UPNP_READ)

@@ -81,6 +81,9 @@ public:
     explicit Database(std::shared_ptr<Config> config);
     virtual ~Database();
 
+    Database(const Database&) = delete;
+    Database& operator=(const Database&) = delete;
+
     /// @brief run the database
     /// open connection to database
     virtual void run() { }

@@ -69,6 +69,9 @@ public:
     explicit MetadataHandler(const std::shared_ptr<Context>& context);
     virtual ~MetadataHandler();
 
+    MetadataHandler(const MetadataHandler&) = delete;
+    MetadataHandler& operator=(const MetadataHandler&) = delete;
+
     /// @brief check whether file type is supported by handler
     virtual bool isSupported(const std::string& contentType,
         bool isOggTheora,

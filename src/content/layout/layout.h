@@ -56,6 +56,9 @@ public:
 
     virtual ~Layout() = default;
 
+    Layout(const Layout&) = delete;
+    Layout& operator=(const Layout&) = delete;
+
     /// @brief create virtual layout for single object
     void processCdsObject(
         const std::shared_ptr<CdsObject>& obj,

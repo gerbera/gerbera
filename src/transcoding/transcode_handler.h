@@ -50,6 +50,9 @@ public:
     explicit TranscodeHandler(const std::shared_ptr<Content>& content);
     virtual ~TranscodeHandler();
 
+    TranscodeHandler(const TranscodeHandler&) = delete;
+    TranscodeHandler& operator=(const TranscodeHandler&) = delete;
+
     virtual std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<TranscodingProfile>& profile,
         const fs::path& location,
         const std::shared_ptr<CdsObject>& obj,
