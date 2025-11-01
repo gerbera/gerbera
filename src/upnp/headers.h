@@ -35,7 +35,7 @@
 class Headers {
 public:
     Headers(const UpnpFileInfo* fileInfo);
-    Headers() { }
+    Headers() = default;
 
     /// @brief update header value
     void updateHeader(const std::string& key, const std::string& value);
