@@ -230,7 +230,7 @@ private:
 /// @brief Implementation of option value for dictionaries
 class DictionaryOption : public ConfigOption {
 public:
-    explicit DictionaryOption() { }
+    explicit DictionaryOption() = default;
     explicit DictionaryOption(const std::map<std::string, std::string>& option)
         : option(option)
         , origSize(option.size())
@@ -264,7 +264,7 @@ private:
 /// @brief Implementation of option value for vectors
 class VectorOption : public ConfigOption {
 public:
-    explicit VectorOption() { }
+    explicit VectorOption() = default;
     explicit VectorOption(const std::vector<std::vector<std::pair<std::string, std::string>>>& option)
         : option(option)
         , origSize(option.size())
