@@ -34,6 +34,7 @@
 #include "upnp/quirks.h"
 #include "util/grb_time.h"
 
+#include <utility>
 #include <vector>
 
 // forward declarations
@@ -118,7 +119,7 @@ struct ClientObservation {
         , userAgent(std::move(userAgent))
         , last(last)
         , age(age)
-        , headers(headers)
+        , headers(std::move(headers))
         , pInfo(pInfo)
     {
     }
