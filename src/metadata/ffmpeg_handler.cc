@@ -224,6 +224,9 @@ public:
             avformat_close_input(&pFormatCtx);
     }
 
+    FfmpegObject(const FfmpegObject&) = delete;
+    FfmpegObject& operator=(const FfmpegObject&) = delete;
+
     /// @brief check if FFMpeg information is available
     operator bool() const
     {

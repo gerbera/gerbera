@@ -77,6 +77,9 @@ public:
     explicit OnlineService(const std::shared_ptr<Content>& content);
     virtual ~OnlineService() = default;
 
+    OnlineService(const OnlineService&) = delete;
+    OnlineService& operator=(const OnlineService&) = delete;
+
     /// @brief Retrieves user specified content from the service and adds
     /// the items to the database.
     ///

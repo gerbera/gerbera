@@ -42,6 +42,9 @@ public:
 
     virtual ~ScriptProperty();
 
+    ScriptProperty(const ScriptProperty&) = delete;
+    ScriptProperty& operator=(const ScriptProperty&) = delete;
+
     std::vector<std::string> getStringArrayValue() const;
     std::vector<int> getIntArrayValue() const;
     std::string getStringValue() const;

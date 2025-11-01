@@ -50,7 +50,11 @@ enum class LayoutType;
 /// @brief Definition of interface for configuration manager
 class Config {
 public:
+    Config() = default;
     virtual ~Config() = default;
+
+    Config(const Config&) = delete;
+    Config& operator=(const Config&) = delete;
 
     /// @brief load configuration from database
     virtual void updateConfigFromDatabase(const std::shared_ptr<Database>& database) = 0;

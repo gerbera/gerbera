@@ -77,6 +77,7 @@ public:
         : _flags(flag)
     {
     }
+    ~FlagEnum() = default;
     FlagEnum(const FlagEnum& original)
         : _flags(original._flags)
     {

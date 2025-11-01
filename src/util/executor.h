@@ -37,8 +37,12 @@
 /// @brief wraps something executable e.g. a thread or a process
 class Executor {
 public:
+    Executor() = default;
     /// @brief destructor of the executor, has to make sure that the executor is dead
     virtual ~Executor() = default;
+
+    Executor(const Executor&) = delete;
+    Executor& operator=(const Executor&) = delete;
 
     /// @brief method to check if the executor is still running
     /// @return true if the executor is still running, false otherwise

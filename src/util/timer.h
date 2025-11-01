@@ -76,6 +76,10 @@ public:
     public:
         Subscriber() = default;
         virtual ~Subscriber() = default;
+
+        Subscriber(const Subscriber&) = delete;
+        Subscriber& operator=(const Subscriber&) = delete;
+
         virtual void timerNotify(const std::shared_ptr<Parameter>& parameter) = 0;
     };
 

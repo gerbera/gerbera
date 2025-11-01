@@ -73,6 +73,9 @@ public:
     {
     }
 
+    RotationFilter(const RotationFilter&) = delete;
+    RotationFilter& operator=(const RotationFilter&) = delete;
+
     /// @brief implementation of filter logic
     void process(ffmpegthumbnailer::VideoFrame& videoFrame)
     {

@@ -82,6 +82,9 @@ public:
     ConverterManager(const std::shared_ptr<Config>& cm);
     virtual ~ConverterManager();
 
+    ConverterManager(const ConverterManager&) = delete;
+    ConverterManager& operator=(const ConverterManager&) = delete;
+
     /// @brief metadata to internal
     const std::shared_ptr<StringConverter>& m2i(ConfigVal option, const fs::path& location);
     /// @brief filesystem to internal

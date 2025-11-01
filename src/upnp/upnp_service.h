@@ -64,6 +64,9 @@ public:
         bool offline = false);
     virtual ~UpnpService();
 
+    UpnpService(const UpnpService&) = delete;
+    UpnpService& operator=(const UpnpService&) = delete;
+
     std::string getServiceId() const { return serviceID; }
     bool isActiveMatch(const std::string& id) const { return !offline && id == serviceID; }
     /// @brief Dispatches the ActionRequest between the available actions.

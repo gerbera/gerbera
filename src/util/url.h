@@ -77,6 +77,9 @@ public:
     URL(std::string url, CURL* curlHandle = nullptr);
     ~URL();
 
+    URL(const URL&) = delete;
+    URL& operator=(const URL&) = delete;
+
     /// @brief downloads either the content or the headers to the buffer.
     ///
     /// This function uses an already initialized curl_handle, the reason

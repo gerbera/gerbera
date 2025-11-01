@@ -237,6 +237,9 @@ public:
             exif_data_unref(exifData);
     }
 
+    LibExifObject(const LibExifObject&) = delete;
+    LibExifObject& operator=(const LibExifObject&) = delete;
+
     /// @brief check if libexif information is available
     operator bool() const
     {
