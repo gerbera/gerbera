@@ -67,7 +67,6 @@ ConfigManager::ConfigManager(
     : definition(std::move(definition))
     , filename(std::move(filename))
     , dataDir(std::move(dataDir))
-    , xmlDoc(std::make_unique<pugi::xml_document>())
 {
     options = std::vector<std::shared_ptr<ConfigOption>>(to_underlying(ConfigVal::MAX));
     GrbLogger::Logger.setDebugLogging(debug);
@@ -138,14 +137,14 @@ void ConfigManager::load(const fs::path& userHome)
     auto self = getSelf();
 
     log_info("Loading configuration from: {}", filename.string());
-    pugi::xml_parse_result result = xmlDoc->load_file(filename.c_str());
+    pugi::xml_parse_result result = xmlDoc.load_file(filename.c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
         throw ConfigParseException(result.description());
     }
 
     log_info("Parsing configuration...");
 
-    auto root = xmlDoc->document_element();
+    auto root = xmlDoc.document_element();
 
     getAllNodes(root, false);
 
@@ -379,11 +378,11 @@ void ConfigManager::load(const fs::path& userHome)
     log_info("Configuration load succeeded.");
 
     std::ostringstream buf;
-    xmlDoc->print(buf, "  ");
+    xmlDoc.print(buf, "  ");
     log_debug("Config file dump after loading: {}", buf.str());
 
     // now the XML is no longer needed we can destroy it
-    xmlDoc = nullptr;
+    xmlDoc.reset();
 }
 
 /// @brief Validate that correlated options have correct values
