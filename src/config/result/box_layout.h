@@ -45,76 +45,81 @@ enum class AutoscanMediaMode;
 using EditHelperBoxLayout = EditHelper<BoxLayout>;
 using EditHelperBoxChain = EditHelper<BoxChain>;
 
-/// @brief Predefined box keys
-class BoxKeys {
-public:
-    static constexpr std::string_view root = "Root";
-    static constexpr std::string_view pcDirectory = "PCDirectory";
-    static constexpr std::string_view audioAllAlbums = "Audio/allAlbums";
-    static constexpr std::string_view audioAllArtists = "Audio/allArtists";
-    static constexpr std::string_view audioAll = "Audio/allAudio";
-    static constexpr std::string_view audioAllComposers = "Audio/allComposers";
-    static constexpr std::string_view audioAllDirectories = "Audio/allDirectories";
-    static constexpr std::string_view audioAllGenres = "Audio/allGenres";
-    static constexpr std::string_view audioAllSongs = "Audio/allSongs";
-    static constexpr std::string_view audioAllTracks = "Audio/allTracks";
-    static constexpr std::string_view audioAllYears = "Audio/allYears";
-    static constexpr std::string_view audioArtistChronology = "Audio/artistChronology";
-    static constexpr std::string_view audioRoot = "Audio/audioRoot";
+enum class BoxKeys {
+    root,
+    pcDirectory,
+    audioAllAlbums,
+    audioAllArtists,
+    audioAll,
+    audioAllComposers,
+    audioAllDirectories,
+    audioAllGenres,
+    audioAllSongs,
+    audioAllTracks,
+    audioAllYears,
+    audioArtistChronology,
+    audioRoot,
 
-    static constexpr std::string_view audioInitialAbc = "AudioInitial/abc";
-    static constexpr std::string_view audioInitialAllArtistTracks = "AudioInitial/allArtistTracks";
-    static constexpr std::string_view audioInitialAllBooks = "AudioInitial/allBooks";
-    static constexpr std::string_view audioInitialAudioBookRoot = "AudioInitial/audioBookRoot";
+    audioInitialAbc,
+    audioInitialAllArtistTracks,
+    audioInitialAllBooks,
+    audioInitialAudioBookRoot,
 
-    static constexpr std::string_view audioStructuredAllAlbums = "AudioStructured/allAlbums";
-    static constexpr std::string_view audioStructuredAllArtistTracks = "AudioStructured/allArtistTracks";
-    static constexpr std::string_view audioStructuredAllArtists = "AudioStructured/allArtists";
-    static constexpr std::string_view audioStructuredAllGenres = "AudioStructured/allGenres";
-    static constexpr std::string_view audioStructuredAllTracks = "AudioStructured/allTracks";
-    static constexpr std::string_view audioStructuredAllYears = "AudioStructured/allYears";
+    audioStructuredAllAlbums,
+    audioStructuredAllArtistTracks,
+    audioStructuredAllArtists,
+    audioStructuredAllGenres,
+    audioStructuredAllTracks,
+    audioStructuredAllYears,
 
-    static constexpr std::string_view videoAllDates = "Video/allDates";
-    static constexpr std::string_view videoAllDirectories = "Video/allDirectories";
-    static constexpr std::string_view videoAll = "Video/allVideo";
-    static constexpr std::string_view videoAllYears = "Video/allYears";
-    static constexpr std::string_view videoRoot = "Video/videoRoot";
-    static constexpr std::string_view videoUnknown = "Video/unknown";
+    videoAllDates,
+    videoAllDirectories,
+    videoAll,
+    videoAllYears,
+    videoRoot,
+    videoUnknown,
 
-    static constexpr std::string_view imageAllDates = "Image/allDates";
-    static constexpr std::string_view imageAllDirectories = "Image/allDirectories";
-    static constexpr std::string_view imageAll = "Image/allImages";
-    static constexpr std::string_view imageAllYears = "Image/allYears";
-    static constexpr std::string_view imageRoot = "Image/imageRoot";
-    static constexpr std::string_view imageUnknown = "Image/unknown";
+    imageAllDates,
+    imageAllDirectories,
+    imageAll,
+    imageAllYears,
+    imageRoot,
+    imageUnknown,
 
 #ifdef ONLINE_SERVICES
-    static constexpr std::string_view trailerAllGenres = "Trailer/allGenres";
-    static constexpr std::string_view trailerAll = "Trailer/allTrailers";
-    static constexpr std::string_view trailerPostDate = "Trailer/postDate";
-    static constexpr std::string_view trailerRelDate = "Trailer/relDate";
-    static constexpr std::string_view trailerRoot = "Trailer/trailerRoot";
-    static constexpr std::string_view trailerUnknown = "Trailer/unknown";
+    trailerAllGenres,
+    trailerAll,
+    trailerPostDate,
+    trailerRelDate,
+    trailerRoot,
+    trailerUnknown,
 #endif
 
-    static constexpr std::string_view playlistAll = "Playlist/allPlaylists";
-    static constexpr std::string_view playlistAllDirectories = "Playlist/allDirectories";
-    static constexpr std::string_view playlistRoot = "Playlist/playlistRoot";
+    playlistAll,
+    playlistAllDirectories,
+    playlistRoot,
+
+    Custom,
 };
 
 /// @brief Manager class for BoxLayout and BoxChain
 class BoxLayoutList : public EditHelperBoxLayout, public EditHelperBoxChain {
 public:
-    std::shared_ptr<BoxLayout> getKey(const std::string_view& key) const;
+    std::shared_ptr<BoxLayout> getKey(BoxKeys key) const;
 };
 
 /// @brief Define properties of a tree entry in virtual layout
 class BoxLayout : public Editable {
+    static const std::map<BoxKeys, std::string_view> boxKeys;
+
 public:
+    static std::string getBoxKey(BoxKeys bkey);
+    static BoxKeys getBoxKey(const std::string& key);
+
     BoxLayout() = default;
     ~BoxLayout() override = default;
     explicit BoxLayout(
-        const std::string_view& key,
+        BoxKeys bkey,
         std::string title,
         std::string objClass = UPNP_CLASS_CONTAINER,
         std::string upnpShortcut = "",
@@ -122,7 +127,26 @@ public:
         bool enabled = true,
         bool searchable = true,
         int size = 1)
-        : key(key)
+        : key(BoxLayout::getBoxKey(bkey))
+        , title(std::move(title))
+        , objClass(std::move(objClass))
+        , upnpShortcut(std::move(upnpShortcut))
+        , sortKey(std::move(sortKey))
+        , enabled(enabled)
+        , searchable(searchable)
+        , size(size)
+    {
+    }
+    explicit BoxLayout(
+        std::string key,
+        std::string title,
+        std::string objClass = UPNP_CLASS_CONTAINER,
+        std::string upnpShortcut = "",
+        std::string sortKey = "",
+        bool enabled = true,
+        bool searchable = true,
+        int size = 1)
+        : key(std::move(key))
         , title(std::move(title))
         , objClass(std::move(objClass))
         , upnpShortcut(std::move(upnpShortcut))

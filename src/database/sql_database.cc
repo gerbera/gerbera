@@ -80,6 +80,8 @@
 #define LOC_VIRT_PREFIX 'V'
 #define LOC_ILLEGAL_PREFIX 'X'
 
+#define WILDCARD "%"
+
 /// @brief search column ids
 enum class SearchColumn {
     Id = 0,
@@ -1077,7 +1079,7 @@ std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
     auto getSql = fmt::format("SELECT {} FROM {} WHERE {} LIKE {}",
         browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
         browseColumnMapper->getTableName(),
-        browseColumnMapper->mapQuoted(BrowseColumn::ServiceId, true), quote(std::string(1, servicePrefix) + '%'));
+        browseColumnMapper->mapQuoted(BrowseColumn::ServiceId, true), quote(std::string(1, servicePrefix) + WILDCARD));
 
     beginTransaction("getServiceObjectIDs");
     auto res = select(getSql);
@@ -1146,8 +1148,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         if (getItems && !forbiddenDirectories.empty()) {
             std::vector<std::string> forbiddenList;
             for (auto&& forbDir : forbiddenDirectories) {
-                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseColumn::RefLocation), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
-                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseColumn::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
+                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseColumn::RefLocation), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, WILDCARD))));
+                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseColumn::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, WILDCARD))));
             }
             where.push_back(fmt::format("(NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
         }
@@ -1330,7 +1332,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
     if (getItems && !forbiddenDirectories.empty()) {
         std::vector<std::string> forbiddenList;
         for (auto&& forbDir : forbiddenDirectories) {
-            forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, "%"))));
+            forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, WILDCARD))));
         }
         searchSQL.append(fmt::format(" AND (NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
     }
@@ -1773,7 +1775,10 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     return true;
 }
 
-std::string SQLDatabase::addLocationPrefix(char prefix, const fs::path& path, const std::string_view& suffix)
+std::string SQLDatabase::addLocationPrefix(
+    char prefix,
+    const fs::path& path,
+    std::string_view suffix)
 {
     return fmt::format("{}{}{}", prefix, path.string(), suffix);
 }
@@ -1974,12 +1979,12 @@ long long SQLDatabase::getFileStats(const StatsParam& stats)
         fmt::format("{} != {:d}", searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_CONTAINER),
     };
     if (!stats.getMimeType().empty()) {
-        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::MimeType), quote(fmt::format("{}%", stats.getMimeType()))));
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::MimeType), quote(fmt::format("{}" WILDCARD, stats.getMimeType()))));
     }
     if (!stats.getUpnpClass().empty()) {
-        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::UpnpClass), quote(fmt::format("{}%", stats.getUpnpClass()))));
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::UpnpClass), quote(fmt::format("{}" WILDCARD, stats.getUpnpClass()))));
     }
-    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(fmt::format("{}%", stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
+    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(fmt::format("{}" WILDCARD, stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
 
     std::string mode;
     std::string join;
@@ -2008,12 +2013,12 @@ std::map<std::string, long long> SQLDatabase::getGroupStats(const StatsParam& st
         fmt::format("{} != {:d}", searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_CONTAINER),
     };
     if (!stats.getMimeType().empty()) {
-        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::MimeType), quote(fmt::format("{}%", stats.getMimeType()))));
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::MimeType), quote(fmt::format("{}" WILDCARD, stats.getMimeType()))));
     }
     if (!stats.getUpnpClass().empty()) {
-        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::UpnpClass), quote(fmt::format("{}%", stats.getUpnpClass()))));
+        where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::UpnpClass), quote(fmt::format("{}" WILDCARD, stats.getUpnpClass()))));
     }
-    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(fmt::format("{}%", stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
+    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(fmt::format("{}" WILDCARD, stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
 
     std::string mode;
     std::string join;
@@ -3117,7 +3122,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
 
     if (adir->getRecursive()) {
         auto where = std::vector {
-            fmt::format("{} LIKE {}", autoscanColumnMapper->mapQuoted(AutoscanColumn::PathIds, true), quote(fmt::format("%,{},%", checkObjectID))),
+            fmt::format("{} LIKE {}", autoscanColumnMapper->mapQuoted(AutoscanColumn::PathIds, true), quote(fmt::format(WILDCARD ",{}," WILDCARD, checkObjectID))),
         };
         if (databaseID >= 0)
             where.push_back(fmt::format("{} != {}", autoscanColumnMapper->mapQuoted(AutoscanColumn::Id, true), databaseID));

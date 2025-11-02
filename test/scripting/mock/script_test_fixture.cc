@@ -229,7 +229,8 @@ void ScriptTestFixture::addGlobalFunctions(
         duk_put_global_lstring(ctx, sym.data(), sym.size());
     }
 
-    for (auto&& [field, sym] : boxKeyNames) {
+    for (auto&& [field, bkey] : boxKeyNames) {
+        auto&& sym = BoxLayout::getBoxKey(bkey);
         duk_push_lstring(ctx, sym.data(), sym.length());
         duk_put_global_lstring(ctx, field.data(), field.length());
     }

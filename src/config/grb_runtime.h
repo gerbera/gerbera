@@ -247,7 +247,7 @@ private:
     /// @brief handle list of command line arguments
     std::vector<std::pair<bool, HandleCallback>> executeOptions(const std::vector<ArgumentHandler>& callbacks);
     /// @brief run handlers after parsing all arguments
-    void finalizeOptions(std::vector<std::pair<bool, HandleCallback>> finalHandlers);
+    void finalizeOptions(const std::vector<std::pair<bool, HandleCallback>>& finalHandlers);
     /// @brief run handlers additional arguments as config options
     void handleAdditionalArgs(const std::vector<ConfigOptionArgs>& additionalArgs);
 };

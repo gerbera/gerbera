@@ -119,7 +119,7 @@ const static auto upnp_classes = std::map<const std::string_view, const std::str
     { UPNP_CLASS_DYNAMIC_CONTAINER, "UPNP_CLASS_DYNAMIC_CONTAINER" },
 };
 
-const static auto boxKeyNames = std::map<const std::string_view, const std::string_view> {
+const static auto boxKeyNames = std::map<const std::string_view, BoxKeys> {
     { "BK_audioAllAlbums", BoxKeys::audioAllAlbums },
     { "BK_audioAllArtists", BoxKeys::audioAllArtists },
     { "BK_audioAll", BoxKeys::audioAll },

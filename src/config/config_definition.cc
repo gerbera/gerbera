@@ -70,391 +70,135 @@
 
 #define DEFAULT_LIBOPTS_ENTRY_SEPARATOR "; "
 
-/// @brief default values for ConfigVal::IMPORT_SYSTEM_DIRECTORIES
-static const std::vector<std::string> excludesFullpath {
-    "/bin",
-    "/boot",
-    "/dev",
-    "/etc",
-    "/lib",
-    "/lib32",
-    "/lib64",
-    "/libx32",
-    "/proc",
-    "/run",
-    "/sbin",
-    "/sys",
-    "/tmp",
-    "/usr",
-    "/var",
-};
-
-/// @brief default values for ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST
-static const std::vector<std::string> defaultFanArtFile {
-    // "%title%.jpg",
-    // "%filename%.jpg",
-    // "folder.jpg",
-    // "poster.jpg",
-    // "cover.jpg",
-    // "albumartsmall.jpg",
-    // "%album%.jpg",
-};
-
-/// @brief default values for ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST
-static const std::vector<std::vector<std::pair<std::string, std::string>>> defaultFanArtDirectory {
-    { { "name", "." }, { "pattern", "%filename%" }, { "mime", "image/*" } },
-};
-
-/// @brief default values for ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST
-static const std::vector<std::string> defaultContainerArtFile {};
-
-/// @brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST
-static const std::vector<std::string> defaultSubtitleFile {};
-
-/// @brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST
-static const std::vector<std::vector<std::pair<std::string, std::string>>> defaultSubtitleDirectory {
-    { { "name", "." }, { "pattern", "%filename%" }, { "mime", MIME_TYPE_SRT_SUBTITLE } },
-};
-
-/// @brief default values for ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST
-static const std::vector<std::string> defaultMetadataFile {};
-
-/// @brief default values for ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST
-static const std::vector<std::string> defaultResourceFile {};
-
-/// @brief default values for ConfigVal::SERVER_UI_ITEMS_PER_PAGE_DROPDOWN
-static const std::vector<std::string> defaultItemsPerPage {
-    "10",
-    "25",
-    "50",
-    "100",
-};
-
-/// @brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST
-static const std::map<std::string, std::string> mtCtDefaults {
-    { "application/ogg", CONTENT_TYPE_OGG },
-    { "audio/L16", CONTENT_TYPE_PCM },
-    { "audio/flac", CONTENT_TYPE_FLAC },
-    { "audio/mp4", CONTENT_TYPE_MP4 },
-    { "audio/mpeg", CONTENT_TYPE_MP3 },
-    { "audio/ogg", CONTENT_TYPE_OGG },
-    { "audio/x-dsd", CONTENT_TYPE_DSD },
-    { "audio/x-flac", CONTENT_TYPE_FLAC },
-    { "audio/x-matroska", CONTENT_TYPE_MKA },
-    { "audio/x-mpegurl", CONTENT_TYPE_PLAYLIST },
-    { "audio/x-ms-wma", CONTENT_TYPE_WMA },
-    { "audio/x-scpls", CONTENT_TYPE_PLAYLIST },
-    { "audio/x-wav", CONTENT_TYPE_PCM },
-    { "audio/x-wavpack", CONTENT_TYPE_WAVPACK },
-    { "image/jpeg", CONTENT_TYPE_JPG },
-    { "image/png", CONTENT_TYPE_PNG },
-    { "video/mkv", CONTENT_TYPE_MKV },
-    { "video/mp4", CONTENT_TYPE_MP4 },
-    { "video/mpeg", CONTENT_TYPE_MPEG },
-    { "video/x-matroska", CONTENT_TYPE_MKV },
-    { "video/x-mkv", CONTENT_TYPE_MKV },
-    { "video/x-ms-asf", CONTENT_TYPE_ASF },
-    { MIME_TYPE_ASX_PLAYLIST, CONTENT_TYPE_PLAYLIST },
-    { "video/x-msvideo", CONTENT_TYPE_AVI },
-};
-
-/// @brief default values for ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST
-static const std::vector<std::vector<std::pair<std::string, std::string>>> ctDlnaDefaults {
-    { { "from", CONTENT_TYPE_ASF }, { "to", "VC_ASF_AP_L2_WMA" } },
-    { { "from", CONTENT_TYPE_AVI }, { "to", "AVI" } },
-    { { "from", CONTENT_TYPE_DSD }, { "to", "DSF" } },
-    { { "from", CONTENT_TYPE_FLAC }, { "to", "FLAC" } },
-    { { "from", CONTENT_TYPE_JPG }, { "to", "JPEG_LRG" } },
-    { { "from", CONTENT_TYPE_MKA }, { "to", "MKV" } },
-    { { "from", CONTENT_TYPE_MKV }, { "to", "MKV" } },
-    { { "from", CONTENT_TYPE_MP3 }, { "to", "MP3" } },
-    { { "from", CONTENT_TYPE_MP4 }, { "to", "AVC_MP4_EU" } },
-    { { "from", CONTENT_TYPE_MPEG }, { "to", "MPEG_PS_PAL" } },
-    { { "from", CONTENT_TYPE_OGG }, { "to", "OGG" } },
-    { { "from", CONTENT_TYPE_PCM }, { "to", "LPCM" } },
-    { { "from", CONTENT_TYPE_PNG }, { "to", "PNG_LRG" } },
-    { { "from", CONTENT_TYPE_WMA }, { "to", "WMAFULL" } },
-};
-
-/// @brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
-static const std::map<std::string, std::string> mtUpnpDefaults {
-    { "application/ogg", UPNP_CLASS_MUSIC_TRACK },
-    { "audio/*", UPNP_CLASS_MUSIC_TRACK },
-    { "image/*", UPNP_CLASS_IMAGE_ITEM },
-    { "video/*", UPNP_CLASS_VIDEO_ITEM },
-};
-
-/// @brief default values for ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST
-static const std::map<std::string, std::string> mtTransferDefaults {
-    { "application/ogg", UPNP_DLNA_TRANSFER_MODE_STREAMING },
-    { "audio/*", UPNP_DLNA_TRANSFER_MODE_STREAMING },
-    { "image/*", UPNP_DLNA_TRANSFER_MODE_INTERACTIVE },
-    { "video/*", UPNP_DLNA_TRANSFER_MODE_STREAMING },
-    { "text/*", UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
-    { MIME_TYPE_SRT_SUBTITLE, UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
-    { "srt", UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
-};
-
-/// @brief default values for ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST
-static const std::map<std::string, std::string> extMtDefaults {
-    { "asf", "video/x-ms-asf" },
-    { "asx", MIME_TYPE_ASX_PLAYLIST }, // tweak to handle asx as playlist
-    { "dff", "audio/x-dff" },
-    { "dsd", "audio/x-dsd" },
-    { "dsf", "audio/x-dsf" },
-    { "flv", "video/x-flv" },
-    { "m2ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
-    { "m3u", "audio/x-mpegurl" },
-    { "m3u8", "audio/x-mpegurl" },
-    { "m4a", "audio/mp4" }, // LibMagic identifies this as audio/x-m4a, preventing TagLib from parsing it
-    { "mka", "audio/x-matroska" },
-    { "mkv", "video/x-matroska" },
-    { "mp3", "audio/mpeg" },
-    { "mts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
-    { "oga", "audio/ogg" },
-    { "ogg", "audio/ogg" },
-    { "ogm", "video/ogg" },
-    { "ogv", "video/ogg" },
-    { "ogx", "application/ogg" },
-    { "pls", "audio/x-scpls" },
-    { "srt", MIME_TYPE_SRT_SUBTITLE },
-    { "ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
-    { "tsa", "audio/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
-    { "tsv", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
-    { "wax", "audio/x-ms-wax" },
-    { "wm", "video/x-ms-wm" },
-    { "wma", "audio/x-ms-wma" },
-    { "wmv", "video/x-ms-wmv" },
-    { "wmx", "video/x-ms-wmx" },
-    { "wv", "audio/x-wavpack" },
-    { "wvx", "video/x-ms-wvx" },
-};
-
-/// @brief default values for ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_MAPPING
-static const std::map<std::string, std::string> uiExtMtDefaults {
-    { "css", "text/css" },
-    { "html", "text/html" },
-    { "js", "application/javascript" },
-    { "json", "application/json" },
-};
-
-/// @brief default values for ConfigVal::IMPORT_MAPPINGS_IGNORED_EXTENSIONS
-static const std::vector<std::string> ignoreDefaults {
-    "part",
-    "tmp",
-};
-
-/// @brief default values for ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP
-static const std::map<std::string, std::string> trMtDefaults {
-    { "video/x-flv", "vlcmpeg" },
-    { "application/ogg", "vlcmpeg" },
-    { "audio/ogg", "ogg2mp3" },
-};
-
-/// @brief default values for ConfigVal::UPNP_SEARCH_SEGMENTS
-static const std::vector<std::string> upnpSearchSegmentDefaults {
-    "M_ARTIST",
-    "M_TITLE",
-};
-
-/// @brief default values for ConfigVal::UPNP_ALBUM_PROPERTIES
-static const std::map<std::string, std::string> upnpAlbumPropDefaults {
-    { "dc:creator", "M_ALBUMARTIST" },
-    { UPNP_SEARCH_ARTIST, "M_ALBUMARTIST" },
-    { "upnp:albumArtist", "M_ALBUMARTIST" },
-    { "upnp:composer", "M_COMPOSER" },
-    { "upnp:conductor", "M_CONDUCTOR" },
-    { "upnp:orchestra", "M_ORCHESTRA" },
-    { "upnp:date", "M_UPNP_DATE" },
-    { DC_DATE, "M_UPNP_DATE" },
-    { "upnp:producer", "M_PRODUCER" },
-    { "dc:publisher", "M_PUBLISHER" },
-    { UPNP_SEARCH_GENRE, "M_GENRE" },
-};
-
-/// @brief default values for ConfigVal::UPNP_ARTIST_PROPERTIES
-static const std::map<std::string, std::string> upnpArtistPropDefaults {
-    { UPNP_SEARCH_ARTIST, "M_ALBUMARTIST" },
-    { "upnp:albumArtist", "M_ALBUMARTIST" },
-    { UPNP_SEARCH_GENRE, "M_GENRE" },
-};
-
-/// @brief default values for ConfigVal::UPNP_GENRE_PROPERTIES
-static const std::map<std::string, std::string> upnpGenrePropDefaults {
-    { UPNP_SEARCH_GENRE, "M_GENRE" },
-};
-
-/// @brief default values for ConfigVal::UPNP_PLAYLIST_PROPERTIES
-static const std::map<std::string, std::string> upnpPlaylistPropDefaults {
-    { DC_DATE, "M_UPNP_DATE" },
-};
-
-/// @brief default values for ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST
-static const std::map<std::string, std::string> id3SpecialPropertyMap {
-    { "PERFORMER", UPNP_SEARCH_ARTIST "@role[Performer]" },
-};
-
-/// @brief default values for ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST
-static const std::map<std::string, std::string> ffmpegSpecialPropertyMap {
-    { "performer", UPNP_SEARCH_ARTIST "@role[Performer]" },
-};
-
-/// @brief default values for ConfigVal::IMPORT_VIRTUAL_DIRECTORY_KEYS
-static const std::vector<std::vector<std::pair<std::string, std::string>>> virtualDirectoryKeys {
-    { { "metadata", "M_ALBUMARTIST" }, { "class", UPNP_CLASS_MUSIC_ALBUM } },
-    { { "metadata", "M_UPNP_DATE" }, { "class", UPNP_CLASS_MUSIC_ALBUM } },
-};
-
-/// @brief default values for ConfigVal::BOXLAYOUT_BOX
-static const std::vector<BoxLayout> boxLayoutDefaults {
-    BoxLayout(BoxKeys::root, "Root", UPNP_CLASS_CONTAINER, "", "00000"),
-    BoxLayout(BoxKeys::pcDirectory, "PC Directory", UPNP_CLASS_CONTAINER, "", "00000"),
-    // FOLDER_STRUCTURE
-
-    BoxLayout(BoxKeys::audioAllAlbums, "Albums", UPNP_CLASS_CONTAINER, "MUSIC_ALBUMS"),
-    BoxLayout(BoxKeys::audioAllArtists, "Artists", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS"),
-    BoxLayout(BoxKeys::audioAll, "All Audio"),
-    BoxLayout(BoxKeys::audioAllComposers, "Composers"),
-    BoxLayout(BoxKeys::audioAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_FOLDER_STRUCTURE"),
-    BoxLayout(BoxKeys::audioAllGenres, "Genres", UPNP_CLASS_CONTAINER, "MUSIC_GENRES"),
-    BoxLayout(BoxKeys::audioAllSongs, "All Songs"),
-    BoxLayout(BoxKeys::audioAllTracks, "All - full name", UPNP_CLASS_CONTAINER, "MUSIC_ALL"),
-    BoxLayout(BoxKeys::audioAllYears, "Year"),
-    BoxLayout(BoxKeys::audioRoot, "Audio"),
-    BoxLayout(BoxKeys::audioArtistChronology, "Album Chronology"),
-
-    BoxLayout(BoxKeys::audioInitialAbc, "ABC"),
-    BoxLayout(BoxKeys::audioInitialAllArtistTracks, "000 All"),
-    BoxLayout(BoxKeys::audioInitialAllBooks, "Books"),
-    BoxLayout(BoxKeys::audioInitialAudioBookRoot, "AudioBooks", UPNP_CLASS_CONTAINER, "MUSIC_AUDIOBOOKS"),
-
-    BoxLayout(BoxKeys::audioStructuredAllAlbums, "-Album-", UPNP_CLASS_CONTAINER, "MUSIC_ALBUMS", "", true, true, 6),
-    BoxLayout(BoxKeys::audioStructuredAllArtistTracks, "all"),
-    BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS", "", true, true, 9),
-    BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", UPNP_CLASS_CONTAINER, "MUSIC_GENRES", "", true, true, 6),
-    BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", UPNP_CLASS_CONTAINER, "MUSIC_ALL", "", true, true, 6),
-    BoxLayout(BoxKeys::audioStructuredAllYears, "-Year-"),
-
-    BoxLayout(BoxKeys::videoAllDates, "Date", UPNP_CLASS_CONTAINER, "VIDEOS_YEARS_MONTH"),
-    BoxLayout(BoxKeys::videoAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "VIDEOS_FOLDER_STRUCTURE"),
-    BoxLayout(BoxKeys::videoAll, "All Video", UPNP_CLASS_CONTAINER, "VIDEOS_ALL"),
-    BoxLayout(BoxKeys::videoAllYears, "Year", UPNP_CLASS_CONTAINER, "VIDEOS_YEARS"),
-    BoxLayout(BoxKeys::videoUnknown, "Unknown"),
-    BoxLayout(BoxKeys::videoRoot, "Video", UPNP_CLASS_CONTAINER, "VIDEOS"),
-    // VIDEOS_GENRES
-    // VIDEOS_ALBUM
-    // VIDEOS_RECENTLY_ADDED
-    // VIDEOS_LAST_PLAYED
-    // VIDEOS_RECORDINGS
-
-    // IMAGES_ALBUM
-    // IMAGES_SLIDESHOWS
-    // IMAGES_RECENTLY_ADDED
-    // IMAGES_LAST_WATCHED
-    BoxLayout(BoxKeys::imageAllDates, "Date", UPNP_CLASS_CONTAINER, "IMAGES_YEARS_MONTH"),
-    BoxLayout(BoxKeys::imageAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "IMAGES_FOLDER_STRUCTURE"),
-    BoxLayout(BoxKeys::imageAll, "All Photos", UPNP_CLASS_CONTAINER, "IMAGES_ALL"),
-    BoxLayout(BoxKeys::imageAllYears, "Year", UPNP_CLASS_CONTAINER, "IMAGES_YEARS"),
-    BoxLayout(BoxKeys::imageRoot, "Photos", UPNP_CLASS_CONTAINER, "IMAGES"),
-    BoxLayout(BoxKeys::imageUnknown, "Unknown"),
-
-#ifdef ONLINE_SERVICES
-    BoxLayout(BoxKeys::trailerRoot, "Online Services"),
-    BoxLayout(BoxKeys::trailerAll, "All Trailers"),
-    BoxLayout(BoxKeys::trailerAllGenres, "Genres"),
-    BoxLayout(BoxKeys::trailerRelDate, "Release Date"),
-    BoxLayout(BoxKeys::trailerPostDate, "Post Date"),
-    BoxLayout(BoxKeys::trailerUnknown, "Unknown"),
-#endif
-#ifdef HAVE_JS
-    BoxLayout(BoxKeys::playlistRoot, "Playlists"),
-    BoxLayout(BoxKeys::playlistAll, "All Playlists"),
-    BoxLayout(BoxKeys::playlistAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_PLAYLISTS", "", true, true, 1),
-#endif
-};
-
-/// @brief default values for ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS
-static const std::map<std::string, std::string> upnpResourceDefaultPropDefaults {
-    { "@allowedUse", "UNKNOWN" },
-    { "@bitrate", "0" },
-    { "@bitsPerSample", "0" },
-    { "@colorDepth", "1" },
-    { "@contentInfoURI", "" },
-    { "@daylightSaving", "UNKNOWN" },
-    { "@duration", "0" },
-    { "@framerate", "30p" },
-    { "@importUri", "" },
-    { "@nrAudioChannels", "0" },
-    { "@protection", "UNKNOWN" },
-    { "@protocolInfo", "http:*:*:*" },
-    { "@recordQuality", "" },
-    { "@reliability", "100" },
-    { "@remainingTime", "" },
-    { "@resolution", "1x1" },
-    { "@rightsInfoURI", "" },
-    { "@sampleFrequency", "0" },
-    { "@size", "0" },
-    { "@tspec", "UNKNOWN" },
-    { "@usageInfo", "This file is hosted by Gerbera" },
-    { "@validityEnd", "1900-01-01T00:00:00" },
-    { "@validityStart", "1900-01-01T00:00:00" },
-};
-
-/// @brief default values for ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS
-static const std::map<std::string, std::string> upnpObjectDefaultPropDefaults {
-    { "@id", "0" },
-    { "@parentID", "0" },
-    { "dc:creator", "UNKNOWN" },
-    { "dc:date", "1900-01-01T00:00:00" },
-    { "upnp:actor", "UNKNOWN" },
-    { "upnp:album", "UNKNOWN" },
-    { "upnp:artist", "UNKNOWN" },
-    { "upnp:artistDiscographyURI", "" },
-    { "upnp:author", "UNKNOWN" },
-    { "upnp:contributor", "UNKNOWN" },
-    { "upnp:director", "UNKNOWN" },
-    { "upnp:genre", "UNKNOWN" },
-    { "upnp:language", "en-US" },
-    { "upnp:lastPlaybackPosition", "0" },
-    { "upnp:lastPlaybackTime", "1900-01-01T00:00:00" },
-    { "upnp:lyricsURI", "" },
-    { "upnp:originalTrackNumber", "0" },
-    { "upnp:playbackCount", "0" },
-    { "upnp:playlist", "UNKNOWN" },
-    { "upnp:producer", "UNKNOWN" },
-    { "upnp:publisher", "UNKNOWN" },
-    { "upnp:rating", "0" },
-    { "upnp:recordable", "1" },
-    { "upnp:relation", "UNKNOWN" },
-};
-
-/// @brief default values for ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS
-static const std::map<std::string, std::string> upnpContainerDefaultPropDefaults {
-    { "@childContainerCount", "0" },
-    { "@childCount", "0" },
-    { "@id", "0" },
-    { "@parentID", "0" },
-    { "@restricted", "1" },
-    { "@searchable", "1" },
-    { "upnp:storageFree", "0" },
-    { "upnp:storageMaxPartition", "0" },
-    { "upnp:storageMedium", "UNKNOWN" },
-    { "upnp:storageTotal", "0" },
-    { "upnp:storageUsed", "0" },
-};
-
-/// @brief default values for ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_LIST
-static const std::map<std::string, std::string> exiv2CommentDefaults {
-    { "Taken with", "Exif.Image.Model" },
-    { "Flash setting", "Exif.Photo.Flash" },
-    { "Focal length", "Exif.Photo.FocalLength" },
-    { "Focal length 35 mm equivalent", "Exif.Photo.FocalLengthIn35mmFilm" },
-};
-
+/// @brief Options listed here will be reported as deprecated when used
 static const std::vector<ConfigVal> deprecatedOptions {};
 
 std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
 {
+    /// @brief default values for ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS
+    static const std::map<std::string, std::string> upnpContainerDefaultPropDefaults {
+        { "@childContainerCount", "0" },
+        { "@childCount", "0" },
+        { "@id", "0" },
+        { "@parentID", "0" },
+        { "@restricted", "1" },
+        { "@searchable", "1" },
+        { "upnp:storageFree", "0" },
+        { "upnp:storageMaxPartition", "0" },
+        { "upnp:storageMedium", "UNKNOWN" },
+        { "upnp:storageTotal", "0" },
+        { "upnp:storageUsed", "0" },
+    };
+
+    /// @brief default values for ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS
+    static const std::map<std::string, std::string> upnpObjectDefaultPropDefaults {
+        { "@id", "0" },
+        { "@parentID", "0" },
+        { "dc:creator", "UNKNOWN" },
+        { "dc:date", "1900-01-01T00:00:00" },
+        { "upnp:actor", "UNKNOWN" },
+        { "upnp:album", "UNKNOWN" },
+        { "upnp:artist", "UNKNOWN" },
+        { "upnp:artistDiscographyURI", "" },
+        { "upnp:author", "UNKNOWN" },
+        { "upnp:contributor", "UNKNOWN" },
+        { "upnp:director", "UNKNOWN" },
+        { "upnp:genre", "UNKNOWN" },
+        { "upnp:language", "en-US" },
+        { "upnp:lastPlaybackPosition", "0" },
+        { "upnp:lastPlaybackTime", "1900-01-01T00:00:00" },
+        { "upnp:lyricsURI", "" },
+        { "upnp:originalTrackNumber", "0" },
+        { "upnp:playbackCount", "0" },
+        { "upnp:playlist", "UNKNOWN" },
+        { "upnp:producer", "UNKNOWN" },
+        { "upnp:publisher", "UNKNOWN" },
+        { "upnp:rating", "0" },
+        { "upnp:recordable", "1" },
+        { "upnp:relation", "UNKNOWN" },
+    };
+
+    /// @brief default values for ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS
+    static const std::map<std::string, std::string> upnpResourceDefaultPropDefaults {
+        { "@allowedUse", "UNKNOWN" },
+        { "@bitrate", "0" },
+        { "@bitsPerSample", "0" },
+        { "@colorDepth", "1" },
+        { "@contentInfoURI", "" },
+        { "@daylightSaving", "UNKNOWN" },
+        { "@duration", "0" },
+        { "@framerate", "30p" },
+        { "@importUri", "" },
+        { "@nrAudioChannels", "0" },
+        { "@protection", "UNKNOWN" },
+        { "@protocolInfo", "http:*:*:*" },
+        { "@recordQuality", "" },
+        { "@reliability", "100" },
+        { "@remainingTime", "" },
+        { "@resolution", "1x1" },
+        { "@rightsInfoURI", "" },
+        { "@sampleFrequency", "0" },
+        { "@size", "0" },
+        { "@tspec", "UNKNOWN" },
+        { "@usageInfo", "This file is hosted by Gerbera" },
+        { "@validityEnd", "1900-01-01T00:00:00" },
+        { "@validityStart", "1900-01-01T00:00:00" },
+    };
+
+    /// @brief default values for ConfigVal::UPNP_SEARCH_SEGMENTS
+    static const std::vector<std::string> upnpSearchSegmentDefaults {
+        "M_ARTIST",
+        "M_TITLE",
+    };
+
+    /// @brief default values for ConfigVal::UPNP_ALBUM_PROPERTIES
+    static const std::map<std::string, std::string> upnpAlbumPropDefaults {
+        { "dc:creator", "M_ALBUMARTIST" },
+        { UPNP_SEARCH_ARTIST, "M_ALBUMARTIST" },
+        { "upnp:albumArtist", "M_ALBUMARTIST" },
+        { "upnp:composer", "M_COMPOSER" },
+        { "upnp:conductor", "M_CONDUCTOR" },
+        { "upnp:orchestra", "M_ORCHESTRA" },
+        { "upnp:date", "M_UPNP_DATE" },
+        { DC_DATE, "M_UPNP_DATE" },
+        { "upnp:producer", "M_PRODUCER" },
+        { "dc:publisher", "M_PUBLISHER" },
+        { UPNP_SEARCH_GENRE, "M_GENRE" },
+    };
+
+    /// @brief default values for ConfigVal::UPNP_ARTIST_PROPERTIES
+    static const std::map<std::string, std::string> upnpArtistPropDefaults {
+        { UPNP_SEARCH_ARTIST, "M_ALBUMARTIST" },
+        { "upnp:albumArtist", "M_ALBUMARTIST" },
+        { UPNP_SEARCH_GENRE, "M_GENRE" },
+    };
+
+    /// @brief default values for ConfigVal::UPNP_GENRE_PROPERTIES
+    static const std::map<std::string, std::string> upnpGenrePropDefaults {
+        { UPNP_SEARCH_GENRE, "M_GENRE" },
+    };
+
+    /// @brief default values for ConfigVal::UPNP_PLAYLIST_PROPERTIES
+    static const std::map<std::string, std::string> upnpPlaylistPropDefaults {
+        { DC_DATE, "M_UPNP_DATE" },
+    };
+
+    /// @brief default values for ConfigVal::SERVER_UI_EXTENSION_MIMETYPE_MAPPING
+    static const std::map<std::string, std::string> uiExtMtDefaults {
+        { "css", "text/css" },
+        { "html", "text/html" },
+        { "js", "application/javascript" },
+        { "json", "application/json" },
+    };
+
+    /// @brief default values for ConfigVal::SERVER_UI_ITEMS_PER_PAGE_DROPDOWN
+    static const std::vector<std::string> defaultItemsPerPage {
+        "10",
+        "25",
+        "50",
+        "100",
+    };
+
     return {
         // Core Server options
         std::make_shared<ConfigUIntSetup>(ConfigVal::SERVER_PORT,
@@ -1064,6 +808,238 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getClientOptions()
 
 std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
 {
+    /// @brief default values for ConfigVal::BOXLAYOUT_BOX
+    static const std::vector<BoxLayout> boxLayoutDefaults {
+        BoxLayout(BoxKeys::root, "Root", UPNP_CLASS_CONTAINER, "", "00000"),
+        BoxLayout(BoxKeys::pcDirectory, "PC Directory", UPNP_CLASS_CONTAINER, "", "00000"),
+        // FOLDER_STRUCTURE
+
+        BoxLayout(BoxKeys::audioAllAlbums, "Albums", UPNP_CLASS_CONTAINER, "MUSIC_ALBUMS"),
+        BoxLayout(BoxKeys::audioAllArtists, "Artists", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS"),
+        BoxLayout(BoxKeys::audioAll, "All Audio"),
+        BoxLayout(BoxKeys::audioAllComposers, "Composers"),
+        BoxLayout(BoxKeys::audioAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_FOLDER_STRUCTURE"),
+        BoxLayout(BoxKeys::audioAllGenres, "Genres", UPNP_CLASS_CONTAINER, "MUSIC_GENRES"),
+        BoxLayout(BoxKeys::audioAllSongs, "All Songs"),
+        BoxLayout(BoxKeys::audioAllTracks, "All - full name", UPNP_CLASS_CONTAINER, "MUSIC_ALL"),
+        BoxLayout(BoxKeys::audioAllYears, "Year"),
+        BoxLayout(BoxKeys::audioRoot, "Audio"),
+        BoxLayout(BoxKeys::audioArtistChronology, "Album Chronology"),
+
+        BoxLayout(BoxKeys::audioInitialAbc, "ABC"),
+        BoxLayout(BoxKeys::audioInitialAllArtistTracks, "000 All"),
+        BoxLayout(BoxKeys::audioInitialAllBooks, "Books"),
+        BoxLayout(BoxKeys::audioInitialAudioBookRoot, "AudioBooks", UPNP_CLASS_CONTAINER, "MUSIC_AUDIOBOOKS"),
+
+        BoxLayout(BoxKeys::audioStructuredAllAlbums, "-Album-", UPNP_CLASS_CONTAINER, "MUSIC_ALBUMS", "", true, true, 6),
+        BoxLayout(BoxKeys::audioStructuredAllArtistTracks, "all"),
+        BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS", "", true, true, 9),
+        BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", UPNP_CLASS_CONTAINER, "MUSIC_GENRES", "", true, true, 6),
+        BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", UPNP_CLASS_CONTAINER, "MUSIC_ALL", "", true, true, 6),
+        BoxLayout(BoxKeys::audioStructuredAllYears, "-Year-"),
+
+        BoxLayout(BoxKeys::videoAllDates, "Date", UPNP_CLASS_CONTAINER, "VIDEOS_YEARS_MONTH"),
+        BoxLayout(BoxKeys::videoAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "VIDEOS_FOLDER_STRUCTURE"),
+        BoxLayout(BoxKeys::videoAll, "All Video", UPNP_CLASS_CONTAINER, "VIDEOS_ALL"),
+        BoxLayout(BoxKeys::videoAllYears, "Year", UPNP_CLASS_CONTAINER, "VIDEOS_YEARS"),
+        BoxLayout(BoxKeys::videoUnknown, "Unknown"),
+        BoxLayout(BoxKeys::videoRoot, "Video", UPNP_CLASS_CONTAINER, "VIDEOS"),
+        // VIDEOS_GENRES
+        // VIDEOS_ALBUM
+        // VIDEOS_RECENTLY_ADDED
+        // VIDEOS_LAST_PLAYED
+        // VIDEOS_RECORDINGS
+
+        // IMAGES_ALBUM
+        // IMAGES_SLIDESHOWS
+        // IMAGES_RECENTLY_ADDED
+        // IMAGES_LAST_WATCHED
+        BoxLayout(BoxKeys::imageAllDates, "Date", UPNP_CLASS_CONTAINER, "IMAGES_YEARS_MONTH"),
+        BoxLayout(BoxKeys::imageAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "IMAGES_FOLDER_STRUCTURE"),
+        BoxLayout(BoxKeys::imageAll, "All Photos", UPNP_CLASS_CONTAINER, "IMAGES_ALL"),
+        BoxLayout(BoxKeys::imageAllYears, "Year", UPNP_CLASS_CONTAINER, "IMAGES_YEARS"),
+        BoxLayout(BoxKeys::imageRoot, "Photos", UPNP_CLASS_CONTAINER, "IMAGES"),
+        BoxLayout(BoxKeys::imageUnknown, "Unknown"),
+
+#ifdef ONLINE_SERVICES
+        BoxLayout(BoxKeys::trailerRoot, "Online Services"),
+        BoxLayout(BoxKeys::trailerAll, "All Trailers"),
+        BoxLayout(BoxKeys::trailerAllGenres, "Genres"),
+        BoxLayout(BoxKeys::trailerRelDate, "Release Date"),
+        BoxLayout(BoxKeys::trailerPostDate, "Post Date"),
+        BoxLayout(BoxKeys::trailerUnknown, "Unknown"),
+#endif
+#ifdef HAVE_JS
+        BoxLayout(BoxKeys::playlistRoot, "Playlists"),
+        BoxLayout(BoxKeys::playlistAll, "All Playlists"),
+        BoxLayout(BoxKeys::playlistAllDirectories, "Directories", UPNP_CLASS_CONTAINER, "MUSIC_PLAYLISTS", "", true, true, 1),
+#endif
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_VIRTUAL_DIRECTORY_KEYS
+    static const std::vector<std::vector<std::pair<std::string, std::string>>> virtualDirectoryKeys {
+        { { "metadata", "M_ALBUMARTIST" }, { "class", UPNP_CLASS_MUSIC_ALBUM } },
+        { { "metadata", "M_UPNP_DATE" }, { "class", UPNP_CLASS_MUSIC_ALBUM } },
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_MAPPINGS_IGNORED_EXTENSIONS
+    static const std::vector<std::string> ignoreDefaults {
+        "part",
+        "tmp",
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST
+    static const std::map<std::string, std::string> mtCtDefaults {
+        { "application/ogg", CONTENT_TYPE_OGG },
+        { "audio/L16", CONTENT_TYPE_PCM },
+        { "audio/flac", CONTENT_TYPE_FLAC },
+        { "audio/mp4", CONTENT_TYPE_MP4 },
+        { "audio/mpeg", CONTENT_TYPE_MP3 },
+        { "audio/ogg", CONTENT_TYPE_OGG },
+        { "audio/x-dsd", CONTENT_TYPE_DSD },
+        { "audio/x-flac", CONTENT_TYPE_FLAC },
+        { "audio/x-matroska", CONTENT_TYPE_MKA },
+        { "audio/x-mpegurl", CONTENT_TYPE_PLAYLIST },
+        { "audio/x-ms-wma", CONTENT_TYPE_WMA },
+        { "audio/x-scpls", CONTENT_TYPE_PLAYLIST },
+        { "audio/x-wav", CONTENT_TYPE_PCM },
+        { "audio/x-wavpack", CONTENT_TYPE_WAVPACK },
+        { "image/jpeg", CONTENT_TYPE_JPG },
+        { "image/png", CONTENT_TYPE_PNG },
+        { "video/mkv", CONTENT_TYPE_MKV },
+        { "video/mp4", CONTENT_TYPE_MP4 },
+        { "video/mpeg", CONTENT_TYPE_MPEG },
+        { "video/x-matroska", CONTENT_TYPE_MKV },
+        { "video/x-mkv", CONTENT_TYPE_MKV },
+        { "video/x-ms-asf", CONTENT_TYPE_ASF },
+        { MIME_TYPE_ASX_PLAYLIST, CONTENT_TYPE_PLAYLIST },
+        { "video/x-msvideo", CONTENT_TYPE_AVI },
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST
+    static const std::vector<std::vector<std::pair<std::string, std::string>>> ctDlnaDefaults {
+        { { "from", CONTENT_TYPE_ASF }, { "to", "VC_ASF_AP_L2_WMA" } },
+        { { "from", CONTENT_TYPE_AVI }, { "to", "AVI" } },
+        { { "from", CONTENT_TYPE_DSD }, { "to", "DSF" } },
+        { { "from", CONTENT_TYPE_FLAC }, { "to", "FLAC" } },
+        { { "from", CONTENT_TYPE_JPG }, { "to", "JPEG_LRG" } },
+        { { "from", CONTENT_TYPE_MKA }, { "to", "MKV" } },
+        { { "from", CONTENT_TYPE_MKV }, { "to", "MKV" } },
+        { { "from", CONTENT_TYPE_MP3 }, { "to", "MP3" } },
+        { { "from", CONTENT_TYPE_MP4 }, { "to", "AVC_MP4_EU" } },
+        { { "from", CONTENT_TYPE_MPEG }, { "to", "MPEG_PS_PAL" } },
+        { { "from", CONTENT_TYPE_OGG }, { "to", "OGG" } },
+        { { "from", CONTENT_TYPE_PCM }, { "to", "LPCM" } },
+        { { "from", CONTENT_TYPE_PNG }, { "to", "PNG_LRG" } },
+        { { "from", CONTENT_TYPE_WMA }, { "to", "WMAFULL" } },
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
+    static const std::map<std::string, std::string> mtUpnpDefaults {
+        { "application/ogg", UPNP_CLASS_MUSIC_TRACK },
+        { "audio/*", UPNP_CLASS_MUSIC_TRACK },
+        { "image/*", UPNP_CLASS_IMAGE_ITEM },
+        { "video/*", UPNP_CLASS_VIDEO_ITEM },
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST
+    static const std::map<std::string, std::string> mtTransferDefaults {
+        { "application/ogg", UPNP_DLNA_TRANSFER_MODE_STREAMING },
+        { "audio/*", UPNP_DLNA_TRANSFER_MODE_STREAMING },
+        { "image/*", UPNP_DLNA_TRANSFER_MODE_INTERACTIVE },
+        { "video/*", UPNP_DLNA_TRANSFER_MODE_STREAMING },
+        { "text/*", UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
+        { MIME_TYPE_SRT_SUBTITLE, UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
+        { "srt", UPNP_DLNA_TRANSFER_MODE_BACKGROUND },
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST
+    static const std::map<std::string, std::string> extMtDefaults {
+        { "asf", "video/x-ms-asf" },
+        { "asx", MIME_TYPE_ASX_PLAYLIST }, // tweak to handle asx as playlist
+        { "dff", "audio/x-dff" },
+        { "dsd", "audio/x-dsd" },
+        { "dsf", "audio/x-dsf" },
+        { "flv", "video/x-flv" },
+        { "m2ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
+        { "m3u", "audio/x-mpegurl" },
+        { "m3u8", "audio/x-mpegurl" },
+        { "m4a", "audio/mp4" }, // LibMagic identifies this as audio/x-m4a, preventing TagLib from parsing it
+        { "mka", "audio/x-matroska" },
+        { "mkv", "video/x-matroska" },
+        { "mp3", "audio/mpeg" },
+        { "mts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
+        { "oga", "audio/ogg" },
+        { "ogg", "audio/ogg" },
+        { "ogm", "video/ogg" },
+        { "ogv", "video/ogg" },
+        { "ogx", "application/ogg" },
+        { "pls", "audio/x-scpls" },
+        { "srt", MIME_TYPE_SRT_SUBTITLE },
+        { "ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
+        { "tsa", "audio/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
+        { "tsv", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
+        { "wax", "audio/x-ms-wax" },
+        { "wm", "video/x-ms-wm" },
+        { "wma", "audio/x-ms-wma" },
+        { "wmv", "video/x-ms-wmv" },
+        { "wmx", "video/x-ms-wmx" },
+        { "wv", "audio/x-wavpack" },
+        { "wvx", "video/x-ms-wvx" },
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_SYSTEM_DIRECTORIES
+    static const std::vector<std::string> excludesFullpath {
+        "/bin",
+        "/boot",
+        "/dev",
+        "/etc",
+        "/lib",
+        "/lib32",
+        "/lib64",
+        "/libx32",
+        "/proc",
+        "/run",
+        "/sbin",
+        "/sys",
+        "/tmp",
+        "/usr",
+        "/var",
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST
+    static const std::vector<std::string> defaultFanArtFile {
+        // "%title%.jpg",
+        // "%filename%.jpg",
+        // "folder.jpg",
+        // "poster.jpg",
+        // "cover.jpg",
+        // "albumartsmall.jpg",
+        // "%album%.jpg",
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST
+    static const std::vector<std::vector<std::pair<std::string, std::string>>> defaultFanArtDirectory {
+        { { "name", "." }, { "pattern", "%filename%" }, { "mime", "image/*" } },
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST
+    static const std::vector<std::string> defaultContainerArtFile {};
+
+    /// @brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST
+    static const std::vector<std::string> defaultSubtitleFile {};
+
+    /// @brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST
+    static const std::vector<std::vector<std::pair<std::string, std::string>>> defaultSubtitleDirectory {
+        { { "name", "." }, { "pattern", "%filename%" }, { "mime", MIME_TYPE_SRT_SUBTITLE } },
+    };
+
+    /// @brief default values for ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST
+    static const std::vector<std::string> defaultMetadataFile {};
+
+    /// @brief default values for ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST
+    static const std::vector<std::string> defaultResourceFile {};
+
     return {
         // boxlayout provides modification options like translation of tree items
         std::make_shared<ConfigBoxLayoutSetup>(ConfigVal::BOXLAYOUT_LIST,
@@ -1529,6 +1505,30 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
 
 std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
 {
+#ifdef HAVE_EXIV2
+    /// @brief default values for ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_LIST
+    static const std::map<std::string, std::string> exiv2CommentDefaults {
+        { "Taken with", "Exif.Image.Model" },
+        { "Flash setting", "Exif.Photo.Flash" },
+        { "Focal length", "Exif.Photo.FocalLength" },
+        { "Focal length 35 mm equivalent", "Exif.Photo.FocalLengthIn35mmFilm" },
+    };
+#endif
+
+#ifdef HAVE_TAGLIB
+    /// @brief default values for ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST
+    static const std::map<std::string, std::string> id3SpecialPropertyMap {
+        { "PERFORMER", UPNP_SEARCH_ARTIST "@role[Performer]" },
+    };
+#endif
+
+#ifdef HAVE_FFMPEG
+    /// @brief default values for ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST
+    static const std::map<std::string, std::string> ffmpegSpecialPropertyMap {
+        { "performer", UPNP_SEARCH_ARTIST "@role[Performer]" },
+    };
+#endif
+
     return {
 #ifdef HAVE_LIBEXIF
         // options for libexif
@@ -1720,6 +1720,13 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
 
 std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOptions()
 {
+    /// @brief default values for ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP
+    static const std::map<std::string, std::string> trMtDefaults {
+        { "video/x-flv", "vlcmpeg" },
+        { "application/ogg", "vlcmpeg" },
+        { "audio/ogg", "ogg2mp3" },
+    };
+
     return {
         std::make_shared<ConfigTranscodingSetup>(ConfigVal::TRANSCODING_PROFILE_LIST,
             "/transcoding", "config-transcode.html#transcoding"),
@@ -1765,7 +1772,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             NO),
         std::make_shared<ConfigEnumSetup<TranscodingType>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE,
             "attribute::type", "config-transcode.html#confval-profile-type",
-            std::map<std::string, TranscodingType>({ { "none", TranscodingType::None }, { "external", TranscodingType::External }, /* for the future...{"remote", TranscodingType::Remote}*/ })),
+            std::map<std::string, TranscodingType>({ { "none", TranscodingType::None },
+                { "external", TranscodingType::External },
+                /* for the future...{"remote", TranscodingType::Remote}*/ })),
         std::make_shared<ConfigEnumSetup<AviFourccListmode>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE,
             "attribute::mode", "config-transcode.html#confval-avi-fourcc-list-mode",
             std::map<std::string, AviFourccListmode>({ { "ignore", AviFourccListmode::Ignore }, { "process", AviFourccListmode::Process }, { "disabled", AviFourccListmode::None } })),

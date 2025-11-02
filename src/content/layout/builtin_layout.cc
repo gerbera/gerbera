@@ -102,8 +102,8 @@ int BuiltinLayout::add(
 int BuiltinLayout::getDir(
     const std::shared_ptr<CdsObject>& obj,
     const fs::path& rootPath,
-    const std::string_view& c1,
-    const std::string_view& c2,
+    BoxKeys c1,
+    BoxKeys c2,
     const std::string& upnpClass)
 {
     fs::path dir;
@@ -511,4 +511,9 @@ std::string BuiltinLayout::mapGenre(const std::string& genre)
         }
     }
     return genre;
+}
+
+std::shared_ptr<CdsContainer> BuiltinLayout::containerAt(BoxKeys boxKey)
+{
+    return container.at(BoxLayout::getBoxKey(boxKey));
 }

@@ -95,7 +95,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
                 searchable = false;
             auto sortKey = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_BOXLAYOUT_BOX_SORT_KEY)->getXmlContent(child, config);
 
-            if (!enabled && std::find(rootKeys.begin(), rootKeys.end(), key) != rootKeys.end()) {
+            if (!enabled && std::find(rootKeys.begin(), rootKeys.end(), BoxLayout::getBoxKey(key)) != rootKeys.end()) {
                 log_warning("Box '{}' cannot be disabled", key);
                 enabled = true;
             }
