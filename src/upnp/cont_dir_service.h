@@ -141,7 +141,7 @@ public:
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    bool processSubscriptionRequest(const SubscriptionRequest& request) override;
+    bool processSubscriptionRequest(const SubscriptionRequest& request) const override;
 
     /// @brief Sends out an event to all subscribed devices.
     /// @param containerUpdateIDsCsv Comma Separated Value list of container update ID's (as defined in the UPnP CDS specs)

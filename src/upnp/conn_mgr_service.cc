@@ -99,7 +99,7 @@ void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request) const
     log_debug("end");
 }
 
-bool ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequest& request)
+bool ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequest& request) const
 {
     auto csv = mimeTypesToCsv(database->getMimeTypes());
     auto propset = xmlBuilder->createEventPropertySet();

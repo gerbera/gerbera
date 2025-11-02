@@ -81,7 +81,7 @@ public:
     ///
     /// Looks at the incoming SubscriptionRequest and accepts the subscription
     /// if everything is ok.
-    virtual bool processSubscriptionRequest(const SubscriptionRequest& request)
+    virtual bool processSubscriptionRequest(const SubscriptionRequest& request) const
     {
         return false;
     }

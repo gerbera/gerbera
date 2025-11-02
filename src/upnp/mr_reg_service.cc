@@ -92,7 +92,7 @@ void MRRegistrarService::doIsValidated(ActionRequest& request) const
     log_debug("end");
 }
 
-bool MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& request)
+bool MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& request) const
 {
     auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
