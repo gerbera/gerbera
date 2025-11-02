@@ -64,7 +64,7 @@ void ConnectionManagerService::doGetCurrentConnectionIDs(ActionRequest& request)
     log_debug("start");
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
-    auto root = response->document_element();
+    auto root = response.document_element();
     root.append_child("ConnectionID").append_child(pugi::node_pcdata).set_value("0");
 
     request.setResponse(std::move(response));
@@ -88,7 +88,7 @@ void ConnectionManagerService::doGetProtocolInfo(ActionRequest& request) const
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CM_SERVICE_TYPE);
     auto csv = mimeTypesToCsv(database->getMimeTypes());
-    auto root = response->document_element();
+    auto root = response.document_element();
 
     root.append_child("Source").append_child(pugi::node_pcdata).set_value(csv.c_str());
     root.append_child("Sink").append_child(pugi::node_pcdata).set_value("");
@@ -103,13 +103,13 @@ bool ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequ
 {
     auto csv = mimeTypesToCsv(database->getMimeTypes());
     auto propset = xmlBuilder->createEventPropertySet();
-    auto property = propset->document_element().first_child();
+    auto property = propset.document_element().first_child();
 
     property.append_child("CurrentConnectionIDs").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("SinkProtocolInfo").append_child(pugi::node_pcdata).set_value("");
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(csv.c_str());
 
-    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
+    std::string xml = UpnpXMLBuilder::printXml(propset, "", 0);
 
     return UPNP_E_SUCCESS == GrbUpnpAcceptSubscription( //
                deviceHandle, config->getOption(ConfigVal::SERVER_UDN), //
@@ -119,10 +119,10 @@ bool ConnectionManagerService::processSubscriptionRequest(const SubscriptionRequ
 bool ConnectionManagerService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
 {
     auto propset = xmlBuilder->createEventPropertySet();
-    auto property = propset->document_element().first_child();
+    auto property = propset.document_element().first_child();
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocolCsv.c_str());
 
-    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
+    std::string xml = UpnpXMLBuilder::printXml(propset, "", 0);
     return UPNP_E_SUCCESS == GrbUpnpNotify( //
                deviceHandle, //
                config->getOption(ConfigVal::SERVER_UDN), serviceID, xml);

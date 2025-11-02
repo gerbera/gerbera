@@ -253,7 +253,7 @@ void ClientManager::addClientByDiscovery(
     if (!client || (client->pInfo && client->pInfo->matchType == ClientMatchType::None)) {
         auto descXml = downloadDescription(descLocation);
         if (descXml) {
-            pugi::xpath_node rootNode = descXml->document_element();
+            pugi::xpath_node rootNode = descXml.document_element();
             if (rootNode.node() && std::string(rootNode.node().name()) == "root") {
                 pugi::xpath_node deviceNode = rootNode.node().select_node("device");
                 if (deviceNode && deviceNode.node()) {
@@ -399,9 +399,9 @@ const ClientObservation* ClientManager::updateCache(
     return &(*it);
 }
 
-std::unique_ptr<pugi::xml_document> ClientManager::downloadDescription(const std::string& location)
+pugi::xml_document ClientManager::downloadDescription(const std::string& location)
 {
-    auto xml = std::make_unique<pugi::xml_document>();
+    pugi::xml_document xml;
 #if defined(USING_NPUPNP)
     std::string description, ct;
     int errCode = UpnpDownloadUrlItem(location, description, ct);
@@ -409,7 +409,7 @@ std::unique_ptr<pugi::xml_document> ClientManager::downloadDescription(const std
         log_debug("Error obtaining client description from {} -- error = {}", location, errCode);
         return xml;
     }
-    auto ret = xml->load_string(description.c_str());
+    auto ret = xml.load_string(description.c_str());
 #else
     IXML_Document* descDoc = nullptr;
     int errCode = UpnpDownloadXmlDoc(location.c_str(), &descDoc);
@@ -419,7 +419,7 @@ std::unique_ptr<pugi::xml_document> ClientManager::downloadDescription(const std
     }
 
     DOMString cxml = ixmlPrintDocument(descDoc);
-    auto ret = xml->load_string(cxml);
+    auto ret = xml.load_string(cxml);
 
     ixmlFreeDOMString(cxml);
     ixmlDocument_free(descDoc);

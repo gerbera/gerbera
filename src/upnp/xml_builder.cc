@@ -137,10 +137,10 @@ UpnpXMLBuilder::UpnpXMLBuilder(
     containerPropertyDefaults = config->getDictionaryOption(ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS);
 }
 
-std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType) const
+pugi::xml_document UpnpXMLBuilder::createResponse(const std::string& actionName, const std::string& serviceType) const
 {
-    auto response = std::make_unique<pugi::xml_document>();
-    auto root = response->append_child(fmt::format("u:{}Response", actionName).c_str());
+    pugi::xml_document response;
+    auto root = response.append_child(fmt::format("u:{}Response", actionName).c_str());
     root.append_attribute("xmlns:u") = serviceType.c_str();
 
     return response;
@@ -506,11 +506,11 @@ void UpnpXMLBuilder::renderObject(
     log_debug("Rendered DIDL: {}", printXml(result, "  "));
 }
 
-std::unique_ptr<pugi::xml_document> UpnpXMLBuilder::createEventPropertySet() const
+pugi::xml_document UpnpXMLBuilder::createEventPropertySet() const
 {
-    auto doc = std::make_unique<pugi::xml_document>();
+    pugi::xml_document doc;
 
-    auto propset = doc->append_child("e:propertyset");
+    auto propset = doc.append_child("e:propertyset");
     propset.append_attribute("xmlns:e") = "urn:schemas-upnp-org:event-1-0";
 
     propset.append_child("e:property");

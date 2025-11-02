@@ -31,6 +31,7 @@
 #include <chrono>
 #include <memory>
 #include <mutex>
+#include <optional>
 #include <pugixml.hpp>
 #include <vector>
 
@@ -85,7 +86,7 @@ private:
         const std::shared_ptr<Headers>& headers,
         const ClientProfile* pInfo) const;
 
-    static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
+    static pugi::xml_document downloadDescription(const std::string& location);
 
     mutable std::mutex mutex;
     using AutoLock = std::scoped_lock<std::mutex>;

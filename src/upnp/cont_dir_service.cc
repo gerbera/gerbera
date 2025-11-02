@@ -83,7 +83,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     log_debug("start");
 
     auto req = request.getRequest();
-    auto reqRoot = req->document_element();
+    auto reqRoot = req.document_element();
 
 #ifdef GRBDEBUG
     if (GrbLogger::Logger.isDebugging(GRB_LOG_FAC))
@@ -184,7 +184,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     log_debug("didl {}", didlLiteXml);
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto respRoot = response->document_element();
+    auto respRoot = response.document_element();
     respRoot.append_child("Result").append_child(pugi::node_pcdata).set_value(didlLiteXml.c_str());
     respRoot.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(arr.size()).c_str());
     respRoot.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(param.getTotalMatches()).c_str());
@@ -199,7 +199,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     log_debug("start");
 
     auto req = request.getRequest();
-    auto reqRoot = req->document_element();
+    auto reqRoot = req.document_element();
 
 #ifdef GRBDEBUG
     if (GrbLogger::Logger.isDebugging(GRB_LOG_FAC))
@@ -292,7 +292,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     log_debug("didl {}", didlLiteXml);
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto respRoot = response->document_element();
+    auto respRoot = response.document_element();
     respRoot.append_child("Result").append_child(pugi::node_pcdata).set_value(didlLiteXml.c_str());
     respRoot.append_child("NumberReturned").append_child(pugi::node_pcdata).set_value(fmt::to_string(results.size()).c_str());
     respRoot.append_child("TotalMatches").append_child(pugi::node_pcdata).set_value(fmt::to_string(searchParam.getTotalMatches()).c_str());
@@ -336,7 +336,7 @@ void ContentDirectoryService::doGetSearchCapabilities(ActionRequest& request) co
     log_debug("start");
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto root = response->document_element();
+    auto root = response.document_element();
     root.append_child("SearchCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSearchCapabilities().c_str());
     request.setResponse(std::move(response));
 
@@ -348,7 +348,7 @@ void ContentDirectoryService::doGetSortCapabilities(ActionRequest& request) cons
     log_debug("start");
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto root = response->document_element();
+    auto root = response.document_element();
     root.append_child("SortCaps").append_child(pugi::node_pcdata).set_value(SQLDatabase::getSortCapabilities().c_str());
     request.setResponse(std::move(response));
 
@@ -360,7 +360,7 @@ void ContentDirectoryService::doGetFeatureList(ActionRequest& request) const
     log_debug("start");
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto root = response->document_element();
+    auto root = response.document_element();
     pugi::xml_document respRoot;
     auto features = respRoot.append_child("Features");
     features.append_attribute("xmlns") = "urn:schemas-upnp-org:av:avs";
@@ -380,7 +380,7 @@ void ContentDirectoryService::doGetSortExtensionCapabilities(ActionRequest& requ
     log_debug("start");
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto root = response->document_element();
+    auto root = response.document_element();
     root.append_child("SortExtensionCaps").append_child(pugi::node_pcdata).set_value("+,-"); // TIME+, TIME-
     request.setResponse(std::move(response));
 
@@ -392,7 +392,7 @@ void ContentDirectoryService::doGetSystemUpdateID(ActionRequest& request) const
     log_debug("start");
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    auto root = response->document_element();
+    auto root = response.document_element();
     root.append_child("Id").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
     request.setResponse(std::move(response));
 
@@ -440,13 +440,13 @@ bool ContentDirectoryService::processSubscriptionRequest(const SubscriptionReque
     log_debug("start");
 
     auto propset = xmlBuilder->createEventPropertySet();
-    auto property = propset->document_element().first_child();
+    auto property = propset.document_element().first_child();
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
     auto obj = database->loadObject(DEFAULT_CLIENT_GROUP, 0);
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(fmt::format("0,{}", cont->getUpdateID()).c_str());
 
-    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
+    std::string xml = UpnpXMLBuilder::printXml(propset, "", 0);
 
     return UPNP_E_SUCCESS == GrbUpnpAcceptSubscription( //
                deviceHandle, config->getOption(ConfigVal::SERVER_UDN), //
@@ -460,11 +460,11 @@ bool ContentDirectoryService::sendSubscriptionUpdate(const std::string& containe
     systemUpdateID++;
 
     auto propset = xmlBuilder->createEventPropertySet();
-    auto property = propset->document_element().first_child();
+    auto property = propset.document_element().first_child();
     property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(containerUpdateIDsCsv.c_str());
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
 
-    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
+    std::string xml = UpnpXMLBuilder::printXml(propset, "", 0);
     return UPNP_E_SUCCESS == GrbUpnpNotify( //
                deviceHandle, config->getOption(ConfigVal::SERVER_UDN), //
                serviceID, xml);

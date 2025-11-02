@@ -72,14 +72,14 @@ const std::shared_ptr<Quirks>& ActionRequest::getQuirks() const
     return quirks;
 }
 
-std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const
+pugi::xml_document ActionRequest::getRequest() const
 {
-    auto request = std::make_unique<pugi::xml_document>();
+    pugi::xml_document request;
 #if defined(USING_NPUPNP)
-    auto ret = request->load_string(upnp_request->xmlAction.c_str());
+    auto ret = request.load_string(upnp_request->xmlAction.c_str());
 #else
     DOMString cxml = ixmlPrintDocument(UpnpActionRequest_get_ActionRequest(upnp_request));
-    auto ret = request->load_string(cxml);
+    auto ret = request.load_string(cxml);
     ixmlFreeDOMString(cxml);
 #endif
 
@@ -89,7 +89,7 @@ std::unique_ptr<pugi::xml_document> ActionRequest::getRequest() const
     return request;
 }
 
-void ActionRequest::setResponse(std::unique_ptr<pugi::xml_document> response)
+void ActionRequest::setResponse(pugi::xml_document response)
 {
     this->response = std::move(response);
 }
@@ -102,7 +102,7 @@ void ActionRequest::setErrorCode(int errCode)
 void ActionRequest::update()
 {
     if (response) {
-        std::string xml = UpnpXMLBuilder::printXml(*response, "", 0);
+        std::string xml = UpnpXMLBuilder::printXml(response, "", 0);
         log_debug("xml: {}", xml);
 
 #if defined(USING_NPUPNP)

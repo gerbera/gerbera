@@ -60,7 +60,7 @@ void MRRegistrarService::doIsAuthorized(ActionRequest& request) const
     log_debug("start");
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
-    auto root = response->document_element();
+    auto root = response.document_element();
     root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
     request.setResponse(std::move(response));
@@ -83,7 +83,7 @@ void MRRegistrarService::doIsValidated(ActionRequest& request) const
     log_debug("start");
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_MRREG_SERVICE_TYPE);
-    auto root = response->document_element();
+    auto root = response.document_element();
     root.append_child("Result").append_child(pugi::node_pcdata).set_value("1");
 
     request.setResponse(std::move(response));
@@ -95,13 +95,13 @@ void MRRegistrarService::doIsValidated(ActionRequest& request) const
 bool MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& request)
 {
     auto propset = xmlBuilder->createEventPropertySet();
-    auto property = propset->document_element().first_child();
+    auto property = propset.document_element().first_child();
     property.append_child("ValidationRevokedUpdateID").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("ValidationSucceededUpdateID").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("AuthorizationDeniedUpdateID").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("AuthorizationGrantedUpdateID").append_child(pugi::node_pcdata).set_value("0");
 
-    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
+    std::string xml = UpnpXMLBuilder::printXml(propset, "", 0);
 
     return UPNP_E_SUCCESS == GrbUpnpAcceptSubscription( //
                deviceHandle, config->getOption(ConfigVal::SERVER_UDN), //
@@ -111,14 +111,14 @@ bool MRRegistrarService::processSubscriptionRequest(const SubscriptionRequest& r
 bool MRRegistrarService::sendSubscriptionUpdate(const std::string& sourceProtocolCsv)
 {
     auto propset = xmlBuilder->createEventPropertySet();
-    auto property = propset->document_element().first_child();
+    auto property = propset.document_element().first_child();
     property.append_child("ValidationRevokedUpdateID").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("ValidationSucceededUpdateID").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("AuthorizationDeniedUpdateID").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("AuthorizationGrantedUpdateID").append_child(pugi::node_pcdata).set_value("0");
     property.append_child("SourceProtocolInfo").append_child(pugi::node_pcdata).set_value(sourceProtocolCsv.c_str());
 
-    std::string xml = UpnpXMLBuilder::printXml(*propset, "", 0);
+    std::string xml = UpnpXMLBuilder::printXml(propset, "", 0);
     return UPNP_E_SUCCESS == GrbUpnpNotify( //
                deviceHandle, config->getOption(ConfigVal::SERVER_UDN), //
                serviceID, xml);

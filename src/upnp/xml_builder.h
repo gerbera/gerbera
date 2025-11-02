@@ -39,6 +39,7 @@
 #include <deque>
 #include <map>
 #include <memory>
+#include <optional>
 #include <pugixml.hpp>
 #include <vector>
 
@@ -71,7 +72,7 @@ public:
     /// \<u:actionNameResponse xmlns:u="serviceType"/\>
     /// Further response information (various parameters, DIDL-Lite or
     /// whatever can then be adapted to it.
-    std::unique_ptr<pugi::xml_document> createResponse(const std::string& actionName, const std::string& serviceType) const;
+    pugi::xml_document createResponse(const std::string& actionName, const std::string& serviceType) const;
 
     /// @brief Renders the DIDL-Lite representation of an object in the content directory.
     /// @param obj Object to be rendered as XML.
@@ -91,7 +92,7 @@ public:
 
     /// @brief Renders XML for the event property set.
     /// @return pugi::xml_document representing the newly created XML.
-    std::unique_ptr<pugi::xml_document> createEventPropertySet() const;
+    pugi::xml_document createEventPropertySet() const;
 
     /// @brief Renders a resource tag (part of DIDL-Lite XML)
     /// @param obj Object containing this resource

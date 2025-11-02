@@ -399,7 +399,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResourcesWithQuirks)
 TEST_F(UpnpXmlTest, CreatesEventPropertySet)
 {
     auto result = subject->createEventPropertySet();
-    auto root = result->document_element();
+    auto root = result.document_element();
 
     EXPECT_NE(root, nullptr);
     EXPECT_STREQ(root.name(), "e:propertyset");
@@ -415,7 +415,7 @@ TEST_F(UpnpXmlTest, CreateResponse)
     auto result = subject->createResponse(actionName, serviceType);
     EXPECT_NE(result, nullptr);
 
-    auto root = result->document_element();
+    auto root = result.document_element();
     EXPECT_STREQ(root.name(), "u:actionResponse");
     EXPECT_STREQ(root.attribute("xmlns:u").value(), "urn:schemas-upnp-org:service:ContentDirectory:1");
 }

@@ -51,7 +51,7 @@ public:
 
     /// @brief Sets the service XML from which we will extract the objects.
     /// @return \c false if service XML contained an error status.
-    virtual void setServiceContent(std::unique_ptr<pugi::xml_document> service) = 0;
+    virtual void setServiceContent(std::optional<pugi::xml_document> service) = 0;
 
     /// @brief retrieves an object from the service.
     ///
@@ -69,7 +69,7 @@ protected:
     std::shared_ptr<Config> config;
     std::shared_ptr<Database> database;
 
-    std::unique_ptr<pugi::xml_document> service_xml;
+    std::optional<pugi::xml_document> service_xml;
 };
 
 /// @brief This is an interface for all online services, the function
@@ -92,7 +92,7 @@ public:
 protected:
     virtual std::unique_ptr<CurlContentHandler> getContentHandler() const = 0;
 
-    std::unique_ptr<pugi::xml_document> getData();
+    std::optional<pugi::xml_document> getData();
 
     // the handle *must never be used from multiple threads*
     CURL* curl_handle;

@@ -66,6 +66,7 @@ ConfigManager::ConfigManager(
     : definition(std::move(definition))
     , filename(std::move(filename))
     , dataDir(std::move(dataDir))
+    , xmlDoc(std::in_place)
 {
     options = std::vector<std::shared_ptr<ConfigOption>>(to_underlying(ConfigVal::MAX));
     GrbLogger::Logger.setDebugLogging(debug);
@@ -88,6 +89,8 @@ ConfigManager::ConfigManager(
         throw std::runtime_error(expErrMsg.str());
     }
 }
+
+ConfigManager::~ConfigManager() = default;
 
 std::shared_ptr<Config> ConfigManager::getSelf()
 {
@@ -379,7 +382,7 @@ void ConfigManager::load(const fs::path& userHome)
     log_debug("Config file dump after loading: {}", buf.str());
 
     // now the XML is no longer needed we can destroy it
-    xmlDoc = nullptr;
+    xmlDoc.reset();
 }
 
 /// @brief Validate that correlated options have correct values

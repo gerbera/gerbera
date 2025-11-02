@@ -68,7 +68,7 @@ std::string CurlOnlineService::getServiceName() const
     return serviceName;
 }
 
-std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
+std::optional<pugi::xml_document> CurlOnlineService::getData()
 {
     long retcode;
     auto sc = converterManager->i2i();
@@ -85,17 +85,17 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
         buffer = URL(service_url, curl_handle).download(&retcode, false, verbose, true).second;
     } catch (const std::runtime_error& ex) {
         log_error("Failed to download {} XML data: {}", serviceName, ex.what());
-        return nullptr;
+        return std::nullopt;
     }
 
     if (buffer.empty())
-        return nullptr;
+        return std::nullopt;
 
     if (retcode != 200)
-        return nullptr;
+        return std::nullopt;
 
     log_debug("GOT BUFFER {}", buffer);
-    auto doc = std::make_unique<pugi::xml_document>();
+    std::optional<pugi::xml_document> doc(std::in_place);
     auto [mval, err] = sc->convert(buffer);
     if (!err.empty()) {
         log_warning("{}: {}", service_url, err);
@@ -103,7 +103,7 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
     pugi::xml_parse_result result = doc->load_string(mval.c_str());
     if (result.status != pugi::xml_parse_status::status_ok) {
         log_error("Error parsing {} XML: {}", serviceName, result.description());
-        return nullptr;
+        return std::nullopt;
     }
 
     return doc;

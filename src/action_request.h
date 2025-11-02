@@ -79,7 +79,7 @@ protected:
     /// @brief XML holding the response, we fill it in.
     ///
     /// Set by setResponse()
-    std::unique_ptr<pugi::xml_document> response;
+    pugi::xml_document response;
 
 public:
     /// @brief The Constructor takes the values from the upnp_request and fills in internal variables.
@@ -99,14 +99,14 @@ public:
     std::string getServiceID() const;
 
     /// @brief Returns the XML representation of the request, that comes to us.
-    std::unique_ptr<pugi::xml_document> getRequest() const;
+    pugi::xml_document getRequest() const;
 
     /// @brief Returns the client quirks
     const std::shared_ptr<Quirks>& getQuirks() const;
 
     /// @brief Sets the response (XML created outside as the answer to the request)
     /// @param response XML holding the action response.
-    void setResponse(std::unique_ptr<pugi::xml_document> response);
+    void setResponse(pugi::xml_document response);
 
     /// @brief Set the error code for the SDK.
     /// @param errCode UPnP error code.

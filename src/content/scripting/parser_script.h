@@ -73,7 +73,7 @@ protected:
     int currentObjectID { INVALID_OBJECT_ID };
     char* currentLine {};
     std::shared_ptr<GenericTask> currentTask;
-    std::unique_ptr<pugi::xml_document> xmlDoc { std::make_unique<pugi::xml_document>() };
+    pugi::xml_document xmlDoc;
     pugi::xml_node root;
 };
 

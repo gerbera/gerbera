@@ -140,7 +140,7 @@ void Quirks::getSamsungFeatureList(ActionRequest& request) const
         container.append_attribute("type") = type;
     }
 
-    response->document_element().append_child("FeatureList").append_child(pugi::node_pcdata).set_value(UpnpXMLBuilder::printXml(respRoot, "", 0).c_str());
+    response.document_element().append_child("FeatureList").append_child(pugi::node_pcdata).set_value(UpnpXMLBuilder::printXml(respRoot, "", 0).c_str());
     request.setResponse(std::move(response));
 }
 
@@ -271,7 +271,7 @@ void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request) const
     log_debug("Call for Samsung extension: X_GetObjectIDfromIndex");
 
     auto doc = request.getRequest();
-    auto reqRoot = doc->document_element();
+    auto reqRoot = doc.document_element();
     if (reqRoot) {
         log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
@@ -283,7 +283,7 @@ void Quirks::getSamsungObjectIDfromIndex(ActionRequest& request) const
         log_warning("X_GetObjectIDfromIndex called without correct content");
     }
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    response->document_element().append_child("ObjectID").append_child(pugi::node_pcdata).set_value("0");
+    response.document_element().append_child("ObjectID").append_child(pugi::node_pcdata).set_value("0");
     request.setResponse(std::move(response));
 }
 
@@ -296,7 +296,7 @@ void Quirks::getSamsungIndexfromRID(ActionRequest& request) const
 
     log_debug("Call for Samsung extension: X_GetIndexfromRID");
     auto doc = request.getRequest();
-    auto reqRoot = doc->document_element();
+    auto reqRoot = doc.document_element();
     if (reqRoot) {
         log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
@@ -308,7 +308,7 @@ void Quirks::getSamsungIndexfromRID(ActionRequest& request) const
         log_warning("X_GetIndexfromRID called without correct content");
     }
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
-    response->document_element().append_child("Index").append_child(pugi::node_pcdata).set_value("0");
+    response.document_element().append_child("Index").append_child(pugi::node_pcdata).set_value("0");
     request.setResponse(std::move(response));
 }
 
@@ -338,7 +338,7 @@ void Quirks::saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& data
     } else {
         auto divider = hasFlag(QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC) ? 1 : 1000;
         auto doc = request.getRequest();
-        auto reqRoot = doc->document_element();
+        auto reqRoot = doc.document_element();
         if (reqRoot) {
             log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
