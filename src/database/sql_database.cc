@@ -1331,6 +1331,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
     log_vdebug("search forbiddenDirectories {}", fmt::join(forbiddenDirectories, ","));
     if (getItems && !forbiddenDirectories.empty()) {
         std::vector<std::string> forbiddenList;
+        forbiddenList.reserve(forbiddenDirectories.size());
         for (auto&& forbDir : forbiddenDirectories) {
             forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, WILDCARD))));
         }
