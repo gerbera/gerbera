@@ -435,7 +435,7 @@ void ContentDirectoryService::doSamsungGetIndexfromRID(ActionRequest& request)
     log_debug("end");
 }
 
-bool ContentDirectoryService::processSubscriptionRequest(const SubscriptionRequest& request)
+bool ContentDirectoryService::processSubscriptionRequest(const SubscriptionRequest& request) const
 {
     log_debug("start");
 
