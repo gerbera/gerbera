@@ -53,7 +53,7 @@ private:
     fs::path makeFifo();
     static void checkTranscoder(const std::shared_ptr<TranscodingProfile>& profile);
 #ifdef HAVE_CURL
-    fs::path openCurlFifo(const fs::path& location, std::vector<std::unique_ptr<ProcListItem>>& procList);
+    fs::path openCurlFifo(const fs::path& location, std::vector<ProcListItem>& procList);
 #endif
 };
 
