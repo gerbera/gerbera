@@ -653,7 +653,7 @@ std::vector<std::pair<bool, HandleCallback>> GerberaRuntime::executeOptions(cons
     return finalHandlers;
 }
 
-void GerberaRuntime::finalizeOptions(std::vector<std::pair<bool, HandleCallback>> finalHandlers)
+void GerberaRuntime::finalizeOptions(const std::vector<std::pair<bool, HandleCallback>>& finalHandlers)
 {
     for (auto&& [terminate, handler] : finalHandlers) {
         bool handled = handler();

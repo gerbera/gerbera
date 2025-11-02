@@ -81,7 +81,7 @@ constexpr bool endswith(std::string_view str, std::string_view suffix)
 }
 
 /// @brief removes "-" and make following character uppercase
-std::string camelCaseString(const std::string_view& str);
+std::string camelCaseString(const std::string& str);
 
 /// @brief returns uppercase of str
 std::string toUpper(std::string str);

@@ -86,7 +86,7 @@ std::vector<std::string> splitString(std::string_view str, char sep, char quote,
     return ret;
 }
 
-std::string camelCaseString(const std::string_view& str)
+std::string camelCaseString(const std::string& str)
 {
     std::string ret;
 

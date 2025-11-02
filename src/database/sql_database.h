@@ -283,7 +283,10 @@ private:
     std::vector<int> _checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir);
 
     /* location helper: filesystem path or virtual path to db location*/
-    static std::string addLocationPrefix(char prefix, const fs::path& path, const std::string_view& suffix = "");
+    static std::string addLocationPrefix(
+        char prefix,
+        const fs::path& path,
+        std::string_view suffix = "");
     /* location helpers: db location to filesystem path */
     static std::pair<fs::path, char> stripLocationPrefix(std::string_view dbLocation);
 

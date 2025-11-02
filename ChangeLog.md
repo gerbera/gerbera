@@ -12,6 +12,7 @@
 - Bump github/codeql-action from 3 to 4
 - Check Headers in Quirks
 - CI Tests: Try more alpine versions
+- clazy fixes
 - Command line option for even more config details
 - Command line option to drop database tables
 - Config XML Schemas
@@ -28,6 +29,7 @@
 - Fix title from wrong stream
 - Fixing Searchable flag in import script
 - Handle title from nfo correctly
+- Hide boxkey values
 - Implement new Client Quirk to force SortCriteria 'title'
 - Improve MacOS build
 - Introduce sphinx toolbox
@@ -36,6 +38,7 @@
 - Quirk to block protocolInfo in CaptionInfoEx
 - Reduce code duplication in XmlBuilder
 - Remove loading complete scripts to create virutal layout
+- remove unique_ptr from ProcListItem vector
 - Restrict number of subtitle bytes to read
 - Rotation of thumbnails by ffmpegthumbnailer
 - Track unused config file entries

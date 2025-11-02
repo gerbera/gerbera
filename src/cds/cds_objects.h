@@ -219,7 +219,7 @@ public:
     void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
 
     /// @brief Query single metadata value.
-    std::string getMetaData(const MetadataFields& key) const
+    std::string getMetaData(MetadataFields key) const
     {
         auto field = MetaEnumMapper::getMetaFieldName(key);
         return this->getMetaData(field);
@@ -231,7 +231,7 @@ public:
         return it != metaData.end() ? it->second : std::string();
     }
     /// @brief Query multivalue metadata.
-    std::vector<std::string> getMetaGroup(const MetadataFields& key) const
+    std::vector<std::string> getMetaGroup(MetadataFields key) const
     {
         auto field = MetaEnumMapper::getMetaFieldName(key);
         return this->getMetaGroup(field);
@@ -269,7 +269,7 @@ public:
     }
 
     /// @brief Add a single metadata value.
-    void addMetaData(const MetadataFields key, const std::string& value)
+    void addMetaData(MetadataFields key, const std::string& value)
     {
         if (mt_single.at(key))
             removeMetaData(key);
@@ -282,7 +282,7 @@ public:
     }
 
     /// @brief Removes metadata with the given key
-    void removeMetaData(const MetadataFields key)
+    void removeMetaData(MetadataFields key)
     {
         metaData.erase(std::remove_if(metaData.begin(), metaData.end(), [field = MetaEnumMapper::getMetaFieldName(key)](auto&& md) { return md.first == field; }), metaData.end());
     }

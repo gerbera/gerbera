@@ -151,8 +151,12 @@ public:
         log_threading("ThreadRunner: Lock with tag {}", threadName);
         return AutoLockU(mutex, tag);
     }
+    /// @brief Sync with other thread
     template <class Predicate>
-    static void waitFor(const std::string_view& threadName, Predicate pred, int max_count = 10)
+    static void waitFor(
+        std::string_view threadName,
+        Predicate pred,
+        int max_count = 10)
     {
         int count = 0;
         while (!(pred()) && count < max_count) {
