@@ -177,11 +177,11 @@ void PlaylistParserScript::processPlaylistObject(
     if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
         currentHandle = file.open("r");
     } else {
-        pugi::xml_parse_result result = xmlDoc->load_file(item->getLocation().c_str());
+        pugi::xml_parse_result result = xmlDoc.load_file(item->getLocation().c_str());
         if (result.status != pugi::xml_parse_status::status_ok) {
             throw ConfigParseException(result.description());
         }
-        root = xmlDoc->document_element();
+        root = xmlDoc.document_element();
     }
 
     currentTask = std::move(task);
@@ -210,7 +210,7 @@ void PlaylistParserScript::processPlaylistObject(
 
     delete[] currentLine;
     currentLine = nullptr;
-    xmlDoc->reset();
+    xmlDoc.reset();
     root = nullNode;
 
     currentObjectID = INVALID_OBJECT_ID;

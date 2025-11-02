@@ -64,9 +64,9 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
 
     log_debug("Checking metafile {} for {}...", path.string(), obj->getLocation().string());
     GrbFile file(path);
-    pugi::xml_parse_result result = xmlDoc->load_file(path.c_str());
+    pugi::xml_parse_result result = xmlDoc.load_file(path.c_str());
     if (result.status == pugi::xml_parse_status::status_ok) {
-        root = xmlDoc->document_element();
+        root = xmlDoc.document_element();
     }
     currentHandle = file.open("r");
     processed = obj;
@@ -95,7 +95,7 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
 
     delete[] currentLine;
     currentLine = nullptr;
-    xmlDoc->reset();
+    xmlDoc.reset();
     root = nullNode;
 
     currentObjectID = INVALID_OBJECT_ID;
