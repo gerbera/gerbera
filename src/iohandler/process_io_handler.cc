@@ -69,14 +69,14 @@ bool ProcListItem::abortOnDeath() const
 bool ProcessIOHandler::abort() const
 {
     return std::any_of(procList.begin(), procList.end(),
-        [=](auto&& proc) { auto exec = proc->getExecutor();
-            return exec && !exec->isAlive() && proc->abortOnDeath(); });
+        [=](auto&& proc) { auto exec = proc.getExecutor();
+            return exec && !exec->isAlive() && proc.abortOnDeath(); });
 }
 
 void ProcessIOHandler::killAll() const
 {
     for (auto&& i : procList) {
-        auto exec = i->getExecutor();
+        auto exec = i.getExecutor();
         if (exec)
             exec->kill();
     }
@@ -88,7 +88,7 @@ void ProcessIOHandler::registerAll()
         content->registerExecutor(mainProc);
 
     for (auto&& i : procList) {
-        auto exec = i->getExecutor();
+        auto exec = i.getExecutor();
         if (exec)
             content->registerExecutor(exec);
     }
@@ -100,7 +100,7 @@ void ProcessIOHandler::unregisterAll()
         content->unregisterExecutor(mainProc);
 
     for (auto&& i : procList) {
-        auto exec = i->getExecutor();
+        auto exec = i.getExecutor();
         if (exec)
             content->unregisterExecutor(exec);
     }
@@ -109,7 +109,7 @@ void ProcessIOHandler::unregisterAll()
 ProcessIOHandler::ProcessIOHandler(const std::shared_ptr<Content>& content,
     fs::path filename,
     std::shared_ptr<Executor> mainProc,
-    std::vector<std::unique_ptr<ProcListItem>> procList,
+    std::vector<ProcListItem> procList,
     bool ignoreSeek)
     : content(content)
     , procList(std::move(procList))
