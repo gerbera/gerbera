@@ -34,13 +34,16 @@
 #include "online_service.h"
 
 #include <curl/curl.h>
-#include <pugixml.hpp>
 
 // forward declaration
 class Content;
 class Context;
 class ConverterManager;
 class CdsObject;
+
+namespace pugi {
+class xml_document;
+} // namespace pugi
 
 /// @brief this class is responsible for creating objects from the CurlContentHandler
 /// metadata XML.

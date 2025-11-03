@@ -36,13 +36,17 @@
 #define __ACTION_REQUEST_H__
 
 #include <memory>
-#include <pugixml.hpp>
+#include <string>
 #include <upnp.h>
 
 // forward declaration
 class UpnpXMLBuilder;
 class Quirks;
 class ClientManager;
+
+namespace pugi {
+class xml_document;
+} // namespace pugi
 
 /// @brief This class represents the Upnp_Action_Request type from the SDK.
 ///

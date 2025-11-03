@@ -31,8 +31,11 @@
 #include <cinttypes>
 #include <map>
 #include <memory>
-#include <pugixml.hpp>
 #include <vector>
+
+namespace pugi {
+class xml_node;
+} // namespace pugi
 
 using QuirkFlags = std::uint32_t;
 
