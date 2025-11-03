@@ -66,6 +66,7 @@ ConfigManager::ConfigManager(
     : definition(std::move(definition))
     , filename(std::move(filename))
     , dataDir(std::move(dataDir))
+    , xmlDoc(std::make_unique<pugi::xml_document>())
 {
     options = std::vector<std::shared_ptr<ConfigOption>>(to_underlying(ConfigVal::MAX));
     GrbLogger::Logger.setDebugLogging(debug);
@@ -88,6 +89,8 @@ ConfigManager::ConfigManager(
         throw std::runtime_error(expErrMsg.str());
     }
 }
+
+ConfigManager::~ConfigManager() = default;
 
 std::shared_ptr<Config> ConfigManager::getSelf()
 {

@@ -40,7 +40,11 @@
 #include <map>
 #include <memory>
 #include <netinet/in.h>
-#include <pugixml.hpp>
+
+namespace pugi {
+class xml_document;
+class xml_node;
+} // namespace pugi
 
 // forward declaration
 class AutoscanDirectory;
@@ -65,6 +69,8 @@ public:
         const fs::path& configDir,
         fs::path dataDir,
         bool debug);
+
+    ~ConfigManager() override;
 
     /// @brief Returns the name of the config file that was used to launch the server.
     fs::path getConfigFilename() const override { return filename; }
@@ -162,7 +168,7 @@ protected:
     fs::path dataDir;
     fs::path magicFile;
     std::map<std::string, std::string> origValues;
-    std::unique_ptr<pugi::xml_document> xmlDoc { std::make_unique<pugi::xml_document>() };
+    std::unique_ptr<pugi::xml_document> xmlDoc;
     std::vector<std::shared_ptr<ConfigOption>> options;
     std::map<std::string, bool> knownNodes;
 

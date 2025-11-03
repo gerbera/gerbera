@@ -31,7 +31,6 @@
 #include <chrono>
 #include <memory>
 #include <mutex>
-#include <pugixml.hpp>
 #include <vector>
 
 // forward declarations
@@ -43,6 +42,10 @@ class Server;
 enum class ClientMatchType;
 struct ClientProfile;
 struct ClientObservation;
+
+namespace pugi {
+class xml_document;
+} // namespace pugi
 
 /// @brief class to manage all known clients and profile information
 class ClientManager {

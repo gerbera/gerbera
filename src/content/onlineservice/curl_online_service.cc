@@ -41,6 +41,8 @@
 #include "util/tools.h"
 #include "util/url.h"
 
+#include <pugixml.hpp>
+
 CurlContentHandler::CurlContentHandler(const std::shared_ptr<Context>& context)
     : config(context->getConfig())
     , database(context->getDatabase())
