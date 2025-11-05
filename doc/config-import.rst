@@ -527,7 +527,7 @@ Specifies the virtual layout to be created:
    :type: :confval:`String`
    :required: false
    :default: ``Default``
-.. versionremoved:: HEAD Migrate your configuration to use :ref:`import-function`.
+.. versionremoved:: 3.0.0 Migrate your configuration to use :ref:`import-function`.
 
 -  **Default**: ``addAudio`` is used to create the virtual layout
 -  **Structured**: ``addAudioStructured`` is used to create the virtual layout (only in combination with javascript)
@@ -536,13 +536,13 @@ Specifies the virtual layout to be created:
    :type: :confval:`String`
    :required: false
    :default: ``Default``
-.. versionremoved:: HEAD Migrate your configuration to use :ref:`import-function`.
+.. versionremoved:: 3.0.0 Migrate your configuration to use :ref:`import-function`.
 
 .. confval:: image-layout
    :type: :confval:`String`
    :required: false
    :default: ``Default``
-.. versionremoved:: HEAD Migrate your configuration to use :ref:`import-function`.
+.. versionremoved:: 3.0.0 Migrate your configuration to use :ref:`import-function`.
 
 The virtual layout can be adjusted using an import script which is defined as follows:
 
@@ -559,7 +559,7 @@ Layout Scripts (deprecated)
    :type: :confval:`Path`
    :required: false
    :default: ``${prefix}/share/gerbera/js/common.js``, `where ${prefix} is your installation prefix directory.`
-.. versionremoved:: HEAD Migrate your configuration to use :ref:`import-function`.
+.. versionremoved:: 3.0.0 Migrate your configuration to use :ref:`import-function`.
 .. versionchanged:: 2.0 Was required until 2.0, if virtual layout type is "js".
 ..
 
@@ -574,7 +574,7 @@ For more details read :ref:`scripting <scripting>`
    :type: :confval:`Path`
    :required: false
    :default: empty
-.. versionremoved:: HEAD Migrate your configuration to use :ref:`import-function`.
+.. versionremoved:: 3.0.0 Migrate your configuration to use :ref:`import-function`.
 ..
 
    .. code:: xml
@@ -589,7 +589,7 @@ For more details read :ref:`scripting <scripting>`
    :type: :confval:`Path`
    :required: false
    :default: ``${prefix}/share/gerbera/js/import.js``, `where ${prefix} is your installation prefix directory.`
-.. versionremoved:: HEAD Migrate your configuration to use :ref:`import-function`.
+.. versionremoved:: 3.0.0 Migrate your configuration to use :ref:`import-function`.
 .. versionchanged:: 2.0 Was required until 2.0, if virtual layout type is "js".
 ..
 
@@ -603,7 +603,7 @@ Points to the script invoked upon media import. For more details read about :ref
    :type: :confval:`Path`
    :required: false
    :default:  ``${prefix}/share/gerbera/js/playlists.js``, `where ${prefix} is your installation prefix directory.`
-.. versionremoved:: HEAD Migrate your configuration to use :ref:`import-function`.
+.. versionremoved:: 3.0.0 Migrate your configuration to use :ref:`import-function`.
 .. versionchanged:: 2.0 Was required until 2.0, if virtual layout type is "js".
 ..
 
@@ -633,7 +633,7 @@ however the script can be adapted to parse almost any kind of text based playlis
    :type: :confval:`Path`
    :required: false
    :default:  ``${prefix}/share/gerbera/js/metadata.js``, `where ${prefix} is your installation prefix directory.`
-.. versionremoved:: HEAD Migrate your configuration to use :ref:`import-function`.
+.. versionremoved:: 3.0.0 Migrate your configuration to use :ref:`import-function`.
 .. versionchanged:: 2.0 Was required until 2.0, if virtual layout type is "js".
 ..
 
@@ -904,7 +904,7 @@ Set properties for box.
       :default: ``yes``
    ..
 
-      .. versionadded:: HEAD
+      .. versionadded:: 3.0.0
       .. code:: xml
 
          searchable="no"
@@ -2604,7 +2604,7 @@ the attributes into the existing thumbnail resource (e.g. created by taglib)
       :required: false
       :default: ``2048``
 
-      .. versionadded:: HEAD
+      .. versionadded:: 3.0.0
       .. code-block:: xml
 
          subtitle-seek-size="4096"

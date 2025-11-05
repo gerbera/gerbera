@@ -1,20 +1,23 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v3.0.0
 
-This release is two ways disconnecting Gerbera from it's MediaTomb past: The way JavaScript is integrated is finally changed from script to function
+This release is in two ways disconnecting Gerbera from it's MediaTomb past: The way JavaScript is integrated is finally changed from script to function
 and there is a new database: **PostgreSQL**.
 
-Layout of documentation for configuration was improved by headings, versioning details and a confval layout.
+Furthermore, the layout of documentation for configuration file entries was improved by headings, versioning details and a confval layout.
+So, it becomes obvious which setting is available in the respective version.
 
-Last.FM integration is working without old lastfmlib and using Last.FM API 2.0.
+The Last.FM integration was improved to be working without old lastfmlib by using HTTP based Last.FM API 2.0.
+The old lastfmlib based integration can still be used if you get hold of a compiled version and an API key.
 
-The configuration verification now warns as soon as there are entries that do not have any effect. This is the case for some disabled features (e.g., transcoding, databases)
+Many configuration file entries already got removed or changed, leading to clogged config files. Therefore, the configuration verification on startup
+now warns as soon as there are entries that do not have any effect. This is the case for some disabled features (e.g., transcoding, databases)
 as well as for legacy entries.
 
 ### Removed Features
 
-**Support for loading and running layout scripts has been removed now. The javascript interface must be used by calling functions depending on the media type.**
+**Support for loading and running layout scripts has been removed now. Now, the JavaScript interface is calling import functions depending on the media type.**
 
 If you added or changed javascript files, make sure the modified files are in a separate folder and the config entry `import/scripting/script-folder/custom`
 is pointing to that directory.
@@ -22,11 +25,13 @@ Also make sure that backup files do not have extension `.js` otherwise they are 
 
 ### NEW Features
 
-- PostgreSQL database support
+- Added (experimental) PostgreSQL database support
 - Integrated Last.FM support for API 2.0
-- WebUI shows referenced items in other parts of layout in details
+- WebUI shows referenced items in other parts of layout in _details_
 - Spinner on WebUI while loading
 - New command line option for even more data in the config example
+- New command line option to drop database
+- Allow blocking a group of clients
 - Integration with systemd
 - Add Build for Ubuntu 25.10
 
@@ -36,6 +41,8 @@ Also make sure that backup files do not have extension `.js` otherwise they are 
 - Search for contentClass (Samsung TV)
 - Title from NFO files
 - Drop Build for Ubuntu 24.10
+- Search folders in lowercase mode
+- Several Libraries for build on MacOS
 
 ### Code Improvements
 

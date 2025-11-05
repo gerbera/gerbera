@@ -55,7 +55,7 @@
 using namespace libebml;
 using namespace libmatroska;
 
-// file managment
+/// @brief file management for matroska
 class FileIOCallback : public IOCallback {
 private:
     GrbFile file;
@@ -333,6 +333,7 @@ void MatroskaHandler::parseHead(
     delete ebmlHead;
 }
 
+/// @brief wrapper object for matroska files
 class MkvObject {
 public:
     std::string location;

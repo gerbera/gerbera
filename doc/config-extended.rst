@@ -153,7 +153,7 @@ Creates a filmstrip like border around the image, turn this option off if you wa
 
       <rotate>yes</rotate>
 
-.. versionadded:: HEAD
+.. versionadded:: 3.0.0
 
 Rotates the thumbnail depending on orientation of the movie/picture.
 
@@ -198,7 +198,7 @@ Support for the last.fm service. Gerbera has to be built with LastFM support.
    :required: true
    :default: `lastfmuser`
 
-   .. versionchanged:: HEAD Used as apiKey for API 2.0
+   .. versionchanged:: 3.0.0 Used as apiKey for API 2.0
    .. code:: xml
 
         <username>login</username>
@@ -210,7 +210,7 @@ Your last.fm user name or the ``apiKey`` for API version 2.0.
    :required: true
    :default: `lastfmpass`
 
-   .. versionchanged:: HEAD Used as apiSecret for API 2.0
+   .. versionchanged:: 3.0.0 Used as apiSecret for API 2.0
    .. code:: xml
 
         <password>pass</password>
@@ -222,7 +222,7 @@ Your last.fm password or the ``apiSecret`` for API version 2.0.
    :required: true
    :default: `sessionKey`
 
-   .. versionadded:: HEAD Support for API 2.0
+   .. versionadded:: 3.0.0 Support for API 2.0
    .. code:: xml
 
         <sessionkey>sessionKeyFromWeb</sessionkey>
@@ -236,7 +236,7 @@ Your last.fm password or the ``apiSecret`` for API version 2.0.
    :required: true
    :default: `https://www.last.fm/api/auth/`
 
-   .. versionadded:: HEAD Support for API 2.0
+   .. versionadded:: 3.0.0 Support for API 2.0
    .. code:: xml
 
         <auth-url>https://www.libre.fm/api/auth/</auth-url>
@@ -248,7 +248,7 @@ URL to redirect the user to for login.
    :required: true
    :default: `https://ws.audioscrobbler.com/2.0/`
 
-   .. versionadded:: HEAD Support for API 2.0
+   .. versionadded:: 3.0.0 Support for API 2.0
    .. code:: xml
 
         <scrobble-url>https://ws.audioscrobbler.com/2.1/</scrobble-url>
