@@ -583,7 +583,7 @@ Defines the transcoding agent and the parameters, in the example above we use og
 
           arguments="-I dummy %in --sout %out &quot;#transcode{...}:standard{...}&quot; vlc:quit"
 
-   .. versionchanged:: HEAD Arguments containing spaces ' ' can be enclosed in double quotes ``" = &quot;``
+   .. versionchanged:: 3.0.0 Arguments containing spaces ' ' can be enclosed in double quotes ``" = &quot;``
 
    Specifies the command line arguments that will be given to the transcoder application upon execution.
    There are two special tokens: ``%in`` and ``%out``. Those tokens get substituted by the input file name 

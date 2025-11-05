@@ -1,6 +1,6 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v3.0.0
 
 - Add support for libsystemd
 - Add Test for formatSizeValue
@@ -28,6 +28,7 @@
 - Fix ProxyUrl for external items
 - Fix title from wrong stream
 - Fixing Searchable flag in import script
+- forward declare pugixml classes
 - Handle title from nfo correctly
 - Hide boxkey values
 - Implement new Client Quirk to force SortCriteria 'title'
@@ -51,6 +52,7 @@
 - Update to pupnp 1.14.25
 - Update to spdlog 1.16.0
 - Use new confval links in help
+- various small cleanups
 - WavPack under MacOS
 - WebUI: Show referenced items in details
 - WebUI: Show spinner on loading

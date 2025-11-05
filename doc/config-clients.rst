@@ -382,7 +382,7 @@ Name of the group. Should correspond to one of the group names in client setting
    :default: ``yes``
 ..
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.0.0
    .. code:: xml
 
        allowed="no"

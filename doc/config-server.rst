@@ -36,8 +36,8 @@ Server Attributes
          :default: unset
       .. versionadded:: 2.0.0
       .. versionchanged:: 2.6.1 new option ``inotify``
-      .. versionchanged:: HEAD new option ``thumbnailer``
-      .. versionchanged:: HEAD new option ``postgres``
+      .. versionchanged:: 3.0.0 new option ``thumbnailer``
+      .. versionchanged:: 3.0.0 new option ``postgres``
 
       Activate debugging messages only for certain subsystems.
       The following subsystems are available:
@@ -995,7 +995,7 @@ Drop SQL File
    :required: false
    :default: ``${datadir}/sqlite3-drop.sql``
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.0.0
    .. code-block:: xml
 
       <drop-file>/etc/gerbera/sqlite3-drop.sql</drop-file>
@@ -1244,7 +1244,7 @@ Drop SQL File
    :required: false
    :default: ``${datadir}/mysql-drop.sql``
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.0.0
    .. code-block:: xml
 
       <drop-file>/etc/gerbera/mysql-drop.sql</drop-file>
@@ -1321,7 +1321,7 @@ Postgres
    :type: :confval:`Section`
    :required: false
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.0.0
    .. code-block:: xml
 
        <postgres enabled="no"/>
