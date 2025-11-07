@@ -161,12 +161,18 @@ profile which is defined below.
       :default: `empty`
    ..
 
+      .. versionchanged:: HEAD allow negation with ``~``
       .. code:: xml
 
          client-flags="TRANSCODE1"
+         client-flags="~TRANSCODE1"
 
    If the flags match the ones defined in :ref:`Supported Devices <supported-devices>`, the profile is selected for that client.
-   Choose ``TRANSCODE1``, ``TRANSCODE2``, ``TRANSCODE3`` or an unused flag, e.g. "0x100000", to avoid collisions with other features.
+   Choose ``TRANSCODE1``, ``TRANSCODE2``, ``TRANSCODE3`` or an unused flag, e.g. "0x10000000", to avoid collisions with other features.
+
+   Multiple flags can be separated by ``|``. The profile is selected if at least one flag is present for the client.
+
+   If the value starts with ``~`` (negation), the profile will be active for all clients that do not have the respective flag.
 
    .. confval:: using
       :type: :confval:`String`
@@ -269,13 +275,19 @@ Profile Attributes
       :default: `empty`
    ..
 
+      .. versionchanged:: HEAD allow negation with ``~``
       .. code:: xml
 
-          client-flags="TRANSCODE1"
+         client-flags="TRANSCODE1"
+         client-flags="~TRANSCODE1"
 
    If the flags match the ones defined in clients, the profile is selected for that client.
    There are are ``TRANSCODE1``, ``TRANSCODE2``, ``TRANSCODE3`` or choose an unused flag,
-   e.g. ``0x1000000``, to avoid collisions with other features.
+   e.g. ``0x100000000``, to avoid collisions with other features.
+
+   Multiple flags can be separated by ``|``. The profile is selected if at least one flag is present for the client.
+
+   If the value starts with ``~`` (negation), the profile will be active for all clients that do not have the respective flag.
 
    .. confval:: profile type
       :type: :confval:`Enum` (``external``)
