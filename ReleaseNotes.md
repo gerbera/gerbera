@@ -1,5 +1,15 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
+### NEW Features
+
+- Negation of `client-flags` in transcoding
+
+### FIXES
+
+### Code Improvements
+
 ## v3.0.0
 
 This release is in two ways disconnecting Gerbera from it's MediaTomb past: The way JavaScript is integrated is finally changed from script to function

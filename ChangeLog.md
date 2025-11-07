@@ -1,5 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### HEAD
+
+- Negation of client-flags
+
 ### v3.0.0
 
 - Add support for libsystemd

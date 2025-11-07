@@ -207,8 +207,13 @@ int ClientConfig::remapFlag(const std::string& flag)
 
 int ClientConfig::makeFlags(const std::string& optValue)
 {
-    std::vector<std::string> flagsVector = splitString(optValue, '|');
-    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ClientConfig::remapFlag(trimString(i)); });
+    auto val = trimString(optValue);
+    auto negate = startswith(val, "~");
+    if (negate)
+        val = val.substr(1);
+    std::vector<std::string> flagsVector = splitString(val, '|');
+    auto flags = std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ClientConfig::remapFlag(trimString(i)); });
+    return negate ? ~flags : flags;
 }
 
 std::string ClientConfig::mapFlags(QuirkFlags flags)
