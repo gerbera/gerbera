@@ -35,6 +35,8 @@
 #include <array>
 #include <numeric>
 
+static constexpr QuirkFlags QUIRKBASE = 1;
+
 std::shared_ptr<ClientGroupConfig> ClientConfigList::getGroup(const std::string& name) const
 {
     EditHelperClientGroupConfig::AutoLock lock(EditHelperClientGroupConfig::mutex);
@@ -45,9 +47,16 @@ std::shared_ptr<ClientGroupConfig> ClientConfigList::getGroup(const std::string&
     return {};
 }
 
-ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view ip, std::string_view userAgent,
+ClientConfig::ClientConfig(
+    QuirkFlags flags,
+    std::string_view group,
+    std::string_view ip,
+    std::string_view userAgent,
     const std::map<ClientMatchType, std::string>& matchValues,
-    int captionInfoCount, int stringLimit, bool multiValue, bool isAllowed)
+    int captionInfoCount,
+    int stringLimit,
+    bool multiValue,
+    bool isAllowed)
 {
     clientProfile.type = ClientType::Custom;
     if (!ip.empty()) {
@@ -72,19 +81,38 @@ ClientConfig::ClientConfig(int flags, std::string_view group, std::string_view i
     clientProfile.stringLimit = stringLimit;
     clientProfile.multiValue = multiValue;
     clientProfile.isAllowed = isAllowed;
-    if (flags & QUIRK_FLAG_HIDE_RES_THUMBNAIL) {
+    if (hasFlag(flags, Quirk::HideResourceThumbnail)) {
         auto res = std::find(clientProfile.supportedResources.begin(), clientProfile.supportedResources.end(), ResourcePurpose::Thumbnail);
         clientProfile.supportedResources.erase(res);
     }
-    if (flags & QUIRK_FLAG_HIDE_RES_SUBTITLE) {
+    if (hasFlag(flags, Quirk::HideResourceSubtitle)) {
         auto res = std::find(clientProfile.supportedResources.begin(), clientProfile.supportedResources.end(), ResourcePurpose::Subtitle);
         clientProfile.supportedResources.erase(res);
     }
-    if (flags & QUIRK_FLAG_HIDE_RES_TRANSCODE) {
+    if (hasFlag(flags, Quirk::HideResourceTranscode)) {
         auto res = std::find(clientProfile.supportedResources.begin(), clientProfile.supportedResources.end(), ResourcePurpose::Transcode);
         clientProfile.supportedResources.erase(res);
     }
     clientProfile.name = fmt::format("{} Setup for {} {}", mapClientType(clientProfile.type), mapMatchType(clientProfile.matchType), clientProfile.match);
+}
+
+QuirkFlags ClientConfig::getFlag(Quirk quirkFlag)
+{
+    return (quirkFlag == Quirk::None) ? QUIRK_FLAG_NONE : (QUIRKBASE << to_underlying(quirkFlag));
+}
+
+QuirkFlags ClientConfig::getFlags(const std::vector<Quirk> quirkFlags)
+{
+    QuirkFlags result = QUIRK_FLAG_NONE;
+    for (auto&& flag : quirkFlags)
+        if (flag != Quirk::None)
+            result |= QUIRKBASE << to_underlying(flag);
+    return result;
+}
+
+bool ClientConfig::hasFlag(QuirkFlags flag, Quirk quirkFlag)
+{
+    return (quirkFlag != Quirk::None) && (flag & (QUIRKBASE << to_underlying(quirkFlag)));
 }
 
 void ClientConfig::setMimeMappingsFrom(std::size_t j, const std::string& from)
@@ -169,43 +197,62 @@ ClientMatchType ClientConfig::remapMatchType(const std::string& matchType)
     return ClientMatchType::None;
 }
 
-static constexpr std::array quirkFlags {
-    std::pair("SAMSUNG", QUIRK_FLAG_SAMSUNG),
-    std::pair("SAMSUNG_BOOKMARK_SEC", QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC),
-    std::pair("SAMSUNG_BOOKMARK_MSEC", QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC),
-    std::pair("SAMSUNG_FEATURES", QUIRK_FLAG_SAMSUNG_FEATURES),
-    std::pair("SAMSUNG_HIDE_DYNAMIC", QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC),
-    std::pair("IRADIO", QUIRK_FLAG_IRADIO),
-    std::pair("PV_SUBTITLES", QUIRK_FLAG_PV_SUBTITLES),
-    std::pair("PANASONIC", QUIRK_FLAG_PANASONIC),
-    std::pair("STRICTXML", QUIRK_FLAG_STRICTXML),
-    std::pair("HIDE_THUMBNAIL_RESOURCE", QUIRK_FLAG_HIDE_RES_THUMBNAIL),
-    std::pair("HIDE_SUBTITLE_RESOURCE", QUIRK_FLAG_HIDE_RES_SUBTITLE),
-    std::pair("HIDE_TRANSCODE_RESOURCE", QUIRK_FLAG_HIDE_RES_TRANSCODE),
-    std::pair("SIMPLE_DATE", QUIRK_FLAG_SIMPLE_DATE),
-    std::pair("DCM10", QUIRK_FLAG_DCM10),
-    std::pair("HIDE_CONTAINER_SHORTCUTS", QUIRK_FLAG_HIDE_CONTAINER_SHORTCUTS),
-    std::pair("ASCIIXML", QUIRK_FLAG_ASCIIXML),
-    std::pair("NO_CONVERSION", QUIRK_FLAG_FORCE_NO_CONVERSION),
-    std::pair("SHOW_INTERNAL_SUBTITLES", QUIRK_FLAG_SHOW_INTERNAL_SUBTITLES),
-    std::pair("FORCE_SORT_CRITERIA_TITLE", QUIRK_FLAG_FORCE_SORT_CRITERIA_TITLE),
-    std::pair("CAPTION_PROTOCOL", QUIRK_FLAG_CAPTION_PROTOCOL),
-    std::pair("TRANSCODING1", QUIRK_FLAG_TRANSCODING1),
-    std::pair("TRANSCODING2", QUIRK_FLAG_TRANSCODING2),
-    std::pair("TRANSCODING3", QUIRK_FLAG_TRANSCODING3),
+std::vector<std::pair<std::string_view, Quirk>> ClientConfig::quirkFlags {
+    { "None", Quirk::None },
+    { "Samsung", Quirk::Samsung },
+    { "SamsungBookmarkSeconds", Quirk::SamsungBookmarkSeconds },
+    { "SAMSUNG_BOOKMARK_SEC", Quirk::SamsungBookmarkSeconds },
+    { "SamsungBookmarkMilliSeconds", Quirk::SamsungBookmarkMilliSeconds },
+    { "SAMSUNG_BOOKMARK_MSEC", Quirk::SamsungBookmarkMilliSeconds },
+    { "SamsungFeatures", Quirk::SamsungFeatures },
+    { "SAMSUNG_FEATURES", Quirk::SamsungFeatures },
+    { "SamsungHideDynamic", Quirk::SamsungHideDynamic },
+    { "SAMSUNG_HIDE_DYNAMIC", Quirk::SamsungHideDynamic },
+    { "IRadio", Quirk::IRadio },
+    { "PvSubtitles", Quirk::PvSubtitles },
+    { "PV_SUBTITLES", Quirk::PvSubtitles },
+    { "Panasonic", Quirk::Panasonic },
+    { "StrictXML", Quirk::StrictXML },
+    { "HideThumbnailResource", Quirk::HideResourceThumbnail },
+    { "HideResourceThumbnail", Quirk::HideResourceThumbnail },
+    { "HIDE_THUMBNAIL_RESOURCE", Quirk::HideResourceThumbnail },
+    { "HideSubtitleResource", Quirk::HideResourceSubtitle },
+    { "HideResourceSubtitle", Quirk::HideResourceSubtitle },
+    { "HIDE_SUBTITLE_RESOURCE", Quirk::HideResourceSubtitle },
+    { "HideTranscodeResource", Quirk::HideResourceTranscode },
+    { "HideResourceTranscode", Quirk::HideResourceTranscode },
+    { "HIDE_TRANSCODE_RESOURCE", Quirk::HideResourceTranscode },
+    { "SimpleDate", Quirk::SimpleDate },
+    { "SIMPLE_DATE", Quirk::SimpleDate },
+    { "DCM10", Quirk::DCM10 },
+    { "HideContainerShortcuts", Quirk::HideContainerShortcuts },
+    { "HIDE_CONTAINER_SHORTCUTS", Quirk::HideContainerShortcuts },
+    { "AsciiXML", Quirk::AsciiXML },
+    { "ForceNoConversion", Quirk::ForceNoConversion },
+    { "NoConversion", Quirk::ForceNoConversion },
+    { "NO_CONVERSION", Quirk::ForceNoConversion },
+    { "ShowInternalSubtitles", Quirk::ShowInternalSubtitles },
+    { "SHOW_INTERNAL_SUBTITLES", Quirk::ShowInternalSubtitles },
+    { "ForceSortCriteriaTitle", Quirk::ForceSortCriteriaTitle },
+    { "FORCE_SORT_CRITERIA_TITLE", Quirk::ForceSortCriteriaTitle },
+    { "CaptionProtocol", Quirk::CaptionProtocol },
+    { "CAPTION_PROTOCOL", Quirk::CaptionProtocol },
+    { "Transcoding1", Quirk::Transcoding1 },
+    { "Transcoding2", Quirk::Transcoding2 },
+    { "Transcoding3", Quirk::Transcoding3 },
 };
 
-int ClientConfig::remapFlag(const std::string& flag)
+QuirkFlags ClientConfig::remapFlag(const std::string& flag)
 {
     for (auto [qLabel, qFlag] : quirkFlags) {
-        if (flag == qLabel) {
-            return qFlag;
+        if (toLower(flag) == toLower(qLabel.data())) {
+            return getFlag(qFlag);
         }
     }
     return stoiString(flag, 0, 0);
 }
 
-int ClientConfig::makeFlags(const std::string& optValue)
+QuirkFlags ClientConfig::makeFlags(const std::string& optValue)
 {
     auto val = trimString(optValue);
     auto negate = startswith(val, "~");
@@ -224,9 +271,9 @@ std::string ClientConfig::mapFlags(QuirkFlags flags)
     std::vector<std::string> myFlags;
 
     for (auto [qLabel, qFlag] : quirkFlags) {
-        if (flags & qFlag) {
+        if (flags & getFlag(qFlag)) {
             myFlags.emplace_back(qLabel);
-            flags &= ~qFlag;
+            flags &= ~getFlag(qFlag);
         }
     }
 

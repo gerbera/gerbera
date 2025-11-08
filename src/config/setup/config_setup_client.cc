@@ -76,7 +76,7 @@ bool ConfigClientSetup::createOptionFromNode(
             config->registerNode(child.path());
         }
 
-        auto flags = definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->getXmlContent(child, config);
+        auto flags = definition->findConfigSetup<ConfigUIntSetup>(ConfigVal::A_CLIENTS_CLIENT_FLAGS)->getXmlContent(child, config);
         auto group = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_GROUP)->getXmlContent(child, config);
         auto ip = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_IP)->getXmlContent(child, config);
         auto userAgent = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_CLIENTS_CLIENT_USERAGENT)->getXmlContent(child, config);

@@ -109,34 +109,34 @@ std::string UpnpDescHandler::getServiceDescription(const std::string& path, cons
     auto root = doc->document_element();
     pugi::xpath_node actionListNode = root.select_node("/scpd/actionList");
     if (actionListNode.node()) {
-        const static std::map<std::string_view, QuirkFlags> actionFlags {
+        const static std::map<std::string_view, Quirk> actionFlags {
             // cm.xml
-            std::pair("GetCurrentConnectionIDs", QUIRK_FLAG_NONE),
-            std::pair("GetCurrentConnectionInfo", QUIRK_FLAG_NONE),
-            std::pair("GetProtocolInfo", QUIRK_FLAG_NONE),
+            { "GetCurrentConnectionIDs", Quirk::None },
+            { "GetCurrentConnectionInfo", Quirk::None },
+            { "GetProtocolInfo", Quirk::None },
             // cds.xml
-            std::pair("Browse", QUIRK_FLAG_NONE),
-            std::pair("Search", QUIRK_FLAG_NONE),
-            std::pair("GetSearchCapabilities", QUIRK_FLAG_NONE),
-            std::pair("GetSortCapabilities", QUIRK_FLAG_NONE),
-            std::pair("GetSystemUpdateID", QUIRK_FLAG_NONE),
-            std::pair("GetFeatureList", QUIRK_FLAG_NONE),
-            std::pair("GetSortExtensionCapabilities", QUIRK_FLAG_NONE),
-            std::pair("X_GetFeatureList", QUIRK_FLAG_SAMSUNG),
-            std::pair("X_GetObjectIDfromIndex", QUIRK_FLAG_SAMSUNG),
-            std::pair("X_GetIndexfromRID", QUIRK_FLAG_SAMSUNG),
-            std::pair("X_SetBookmark", QUIRK_FLAG_SAMSUNG),
+            { "Browse", Quirk::None },
+            { "Search", Quirk::None },
+            { "GetSearchCapabilities", Quirk::None },
+            { "GetSortCapabilities", Quirk::None },
+            { "GetSystemUpdateID", Quirk::None },
+            { "GetFeatureList", Quirk::None },
+            { "GetSortExtensionCapabilities", Quirk::None },
+            { "X_GetFeatureList", Quirk::Samsung },
+            { "X_GetObjectIDfromIndex", Quirk::Samsung },
+            { "X_GetIndexfromRID", Quirk::Samsung },
+            { "X_SetBookmark", Quirk::Samsung },
             // mr_reg.xml
-            std::pair("IsAuthorized", QUIRK_FLAG_NONE),
-            std::pair("RegisterDevice", QUIRK_FLAG_NONE),
-            std::pair("IsValidated", QUIRK_FLAG_NONE),
+            { "IsAuthorized", Quirk::None },
+            { "RegisterDevice", Quirk::None },
+            { "IsValidated", Quirk::None },
         };
         for (auto&& it : root.select_nodes("/scpd/actionList/action")) {
             pugi::xml_node actionNode = it.node();
             auto nameNode = actionNode.child("name");
             std::string_view name = nameNode.text().as_string();
             log_debug("Checking {} node {}", (bool)quirks, name);
-            if (quirks && actionFlags.find(name) != actionFlags.end() && actionFlags.at(name) != QUIRK_FLAG_NONE && !quirks->hasFlag(actionFlags.at(name))) {
+            if (quirks && actionFlags.find(name) != actionFlags.end() && actionFlags.at(name) != Quirk::None && !quirks->hasFlag(actionFlags.at(name))) {
                 actionListNode.node().remove_child(actionNode);
                 log_debug("Removing node {}", name);
             }

@@ -931,7 +931,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
                 continue;
             }
             // check for client flags and filter if no match
-            if (quirks && filter->getClientFlags() > 0 && quirks->checkFlags(filter->getClientFlags()) == 0) {
+            if (quirks && filter->getClientFlags() != QUIRK_FLAG_NONE && !quirks->hasFlag(filter->getClientFlags())) {
                 continue;
             }
 
@@ -945,7 +945,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
                 continue;
 
             // check for client profile prop and filter if no match
-            if (quirks && tp->getClientFlags() > 0 && quirks->checkFlags(tp->getClientFlags()) == 0) {
+            if (quirks && tp->getClientFlags() != QUIRK_FLAG_NONE && !quirks->hasFlag(tp->getClientFlags())) {
                 continue;
             }
             if (ct == CONTENT_TYPE_OGG) {
@@ -1101,7 +1101,7 @@ void UpnpXMLBuilder::addResources(
             for (auto&& [from, to] : mimeMappings) {
                 replaceAllString(protocolInfo, from, to);
             }
-            if (quirks && quirks->hasFlag(QUIRK_FLAG_CAPTION_PROTOCOL))
+            if (quirks && quirks->hasFlag(Quirk::CaptionProtocol))
                 captionInfo[EnumMapper::getAttributeName(ResourceAttribute::PROTOCOLINFO)] = protocolInfo;
 
             captionInfoEx.push_back(std::move(captionInfo));
@@ -1141,7 +1141,7 @@ void UpnpXMLBuilder::addResources(
             }
         }
         std::map<std::string, std::string> clientSpecficAttrs;
-        if (res->getHandlerType() == ContentHandler::DEFAULT && !captionInfoEx.empty() && quirks && quirks->checkFlags(QUIRK_FLAG_PV_SUBTITLES)) {
+        if (res->getHandlerType() == ContentHandler::DEFAULT && !captionInfoEx.empty() && quirks && quirks->hasFlag(Quirk::PvSubtitles)) {
             auto captionInfo = captionInfoEx[0];
             clientSpecficAttrs["pv:subtitleFileType"] = toUpper(captionInfo["sec:type"]);
             clientSpecficAttrs["pv:subtitleFileUri"] = captionInfo[""];

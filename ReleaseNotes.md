@@ -10,6 +10,8 @@
 
 ### Code Improvements
 
+- Quirks flags refactored to enum
+
 ## v3.0.0
 
 This release is in two ways disconnecting Gerbera from it's MediaTomb past: The way JavaScript is integrated is finally changed from script to function

@@ -384,7 +384,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithResourcesWithQuirks)
         .WillRepeatedly(Return(std::make_shared<TranscodingProfileList>()));
 
     ClientProfile pInfo;
-    pInfo.flags = QUIRK_FLAG_CAPTION_PROTOCOL;
+    pInfo.flags = ClientConfig::getFlags({ Quirk::CaptionProtocol });
     auto addr = std::make_shared<GrbNet>("127.0.0.1");
     struct ClientObservation client(addr, "ua", std::chrono::seconds(0), std::chrono::seconds(0), nullptr, &pInfo);
     auto quirks = std::make_shared<Quirks>(&client);
