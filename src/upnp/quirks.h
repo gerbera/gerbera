@@ -26,8 +26,6 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
-#include "util/grb_fs.h"
-
 #include <cinttypes>
 #include <map>
 #include <memory>
@@ -39,30 +37,34 @@ class xml_node;
 
 using QuirkFlags = std::uint32_t;
 
-#define QUIRK_FLAG_NONE 0x00000000
-#define QUIRK_FLAG_SAMSUNG 0x00000001
-#define QUIRK_FLAG_SAMSUNG_BOOKMARK_SEC 0x00000002
-#define QUIRK_FLAG_SAMSUNG_BOOKMARK_MSEC 0x00000004
-#define QUIRK_FLAG_IRADIO 0x00000008
-#define QUIRK_FLAG_SAMSUNG_FEATURES 0x00000010
-#define QUIRK_FLAG_SAMSUNG_HIDE_DYNAMIC 0x00000020
-#define QUIRK_FLAG_PV_SUBTITLES 0x00000040
-#define QUIRK_FLAG_PANASONIC 0x00000080
-#define QUIRK_FLAG_STRICTXML 0x00000100
-#define QUIRK_FLAG_HIDE_RES_THUMBNAIL 0x00000200
-#define QUIRK_FLAG_HIDE_RES_SUBTITLE 0x00000400
-#define QUIRK_FLAG_HIDE_RES_TRANSCODE 0x00000800
-#define QUIRK_FLAG_SIMPLE_DATE 0x00001000
-#define QUIRK_FLAG_DCM10 0x00002000
-#define QUIRK_FLAG_HIDE_CONTAINER_SHORTCUTS 0x00004000
-#define QUIRK_FLAG_ASCIIXML 0x00008000
-#define QUIRK_FLAG_FORCE_NO_CONVERSION 0x00010000
-#define QUIRK_FLAG_SHOW_INTERNAL_SUBTITLES 0x00020000
-#define QUIRK_FLAG_FORCE_SORT_CRITERIA_TITLE 0x00040000
-#define QUIRK_FLAG_CAPTION_PROTOCOL 0x00080000
-#define QUIRK_FLAG_TRANSCODING1 0x00100000
-#define QUIRK_FLAG_TRANSCODING2 0x00200000
-#define QUIRK_FLAG_TRANSCODING3 0x00400000
+static constexpr QuirkFlags QUIRK_FLAG_NONE = 0x00000000;
+
+enum class Quirk {
+    None = -1,
+    Samsung = 0,
+    SamsungBookmarkSeconds,
+    SamsungBookmarkMilliSeconds,
+    IRadio,
+    SamsungFeatures,
+    SamsungHideDynamic,
+    PvSubtitles,
+    Panasonic,
+    StrictXML,
+    HideResourceThumbnail,
+    HideResourceSubtitle,
+    HideResourceTranscode,
+    SimpleDate,
+    DCM10,
+    HideContainerShortcuts,
+    AsciiXML,
+    ForceNoConversion,
+    ShowInternalSubtitles,
+    ForceSortCriteriaTitle,
+    CaptionProtocol,
+    Transcoding1,
+    Transcoding2,
+    Transcoding3,
+};
 
 // forward declaration
 class ActionRequest;
@@ -180,14 +182,6 @@ public:
      */
     bool needsFileNameUri() const;
 
-    /** @brief Check whether the supplied flags are set
-     *
-     * @param flags bitset of the flags to check
-     * @return bitset of the flags
-     *
-     */
-    QuirkFlags checkFlags(QuirkFlags flags) const;
-
     /** @brief Get number of allow CaptionInfoEx entries
      *
      * @return number for client
@@ -283,6 +277,7 @@ public:
     /** @brief Check for active flag
      */
     bool hasFlag(QuirkFlags flag) const;
+    bool hasFlag(Quirk flag) const;
 
     /** @brief Check for header entry
      */

@@ -3,6 +3,7 @@
 ### HEAD
 
 - Negation of client-flags
+- Refactor Quirks to enum
 
 ### v3.0.0
 
