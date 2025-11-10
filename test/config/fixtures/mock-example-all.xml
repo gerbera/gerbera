@@ -178,6 +178,7 @@
         <username>gerbera</username>
         <database>gerbera</database>
         <port>0</port>
+        <password></password>
         <init-sql-file>/usr/local/share/gerbera/postgres.sql</init-sql-file>
         <upgrade-file>/usr/local/share/gerbera/postgres-upgrade.xml</upgrade-file>
         <drop-file>/usr/local/share/gerbera/postgres-drop.sql</drop-file>

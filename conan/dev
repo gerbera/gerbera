@@ -6,15 +6,15 @@ include(./common)
 build_type=Debug
 
 [options]
-pupnp/*:ipv6=True
-pupnp/*:reuseaddr=True
-pupnp/*:blocking-tcp=False
 # Use shared libraries for faster link time
 *:shared=True
-debug_logging=True
-tests=True
+&:debug_logging=True
+&:tests=True
+&:exiv2=False
+&:postgres=True
 
 [buildenv]
 gerbera:CXXFLAGS=-Og -Werror -Wall
 # Requires CMake >= 3.17
 CMAKE_EXPORT_COMPILE_COMMANDS=ON
+CMAKE_POLICY_VERSION_MINIMUM=3.18

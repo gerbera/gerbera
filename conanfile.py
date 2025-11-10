@@ -26,6 +26,7 @@ class GerberaConan(ConanFile):
         "exiv2": [True, False],
         "matroska": [True, False],
         "mysql": [True, False],
+        "postgres": [True, False],
         "ffmpeg": [True, False],
         "icu": [True, False],
         "ffmpegthumbnailer": [True, False],
@@ -42,6 +43,7 @@ class GerberaConan(ConanFile):
         "exiv2": False,
         "matroska": True,
         "mysql": True,
+        "postgres": True,
         "ffmpeg": True,
         "icu": True,
         "ffmpegthumbnailer": True,
@@ -54,7 +56,7 @@ class GerberaConan(ConanFile):
         "spdlog/1.15.1",
         "pugixml/1.14",
         "jsoncpp/[>=1.9.6]",
-        "libiconv/[>=1.16]",
+        "libiconv/1.17",
         "sqlite3/[>=3.35.5]",
         "libsystemd/[>=255]",
         "zlib/1.3.1",
@@ -82,7 +84,7 @@ class GerberaConan(ConanFile):
 
     def requirements(self):
         if self.options.tests:
-            self.requires("gtest/[>=1.13.0]")
+            self.requires("gtest/[>=1.17.0]")
 
         if self.options.js:
             self.requires("duktape/[>=2.7.0]")
@@ -91,11 +93,15 @@ class GerberaConan(ConanFile):
             self.requires("libcurl/[>=7.85.0]")
 
         if self.options.exiv2:
-            self.requires("inih/57")
-            self.requires("exiv2/0.28.1")
+            self.requires("inih/58") # Required by exiv2
+            self.requires("exiv2/0.28.3")
 
         if self.options.mysql:
             self.requires("mariadb-connector-c/[<3.4.3]") # That recipe is broken
+
+        if self.options.postgres:
+            self.requires("libpq/15.4") # required by libpqxx
+            self.requires("libpqxx/7.10.3")
 
         if self._needs_system_uuid:
             self.requires("libuuid/1.0.3")
@@ -156,6 +162,7 @@ class GerberaConan(ConanFile):
         tc.cache_variables["WITH_EXIV2"] = self.options.exiv2
         tc.cache_variables["WITH_MATROSKA"] = self.options.matroska
         tc.cache_variables["WITH_MYSQL"] = self.options.mysql
+        tc.cache_variables["WITH_PGSQL"] = self.options.postgres
         tc.cache_variables["WITH_ICU"] = self.options.icu
         tc.cache_variables["WITH_AVCODEC"] = self.options.ffmpeg
         tc.cache_variables["WITH_FFMPEGTHUMBNAILER"] = self.options.ffmpegthumbnailer
