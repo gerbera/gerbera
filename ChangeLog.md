@@ -4,6 +4,7 @@
 
 - Negation of client-flags
 - Refactor Quirks to enum
+- Update Conan integration
 
 ### v3.0.0
 
