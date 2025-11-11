@@ -60,7 +60,7 @@ SearchLexer::SearchLexer(std::string input)
 {
 }
 
-std::unique_ptr<SearchToken> SearchLexer::nextToken()
+std::optional<SearchToken> SearchLexer::nextToken()
 {
     while (currentPos < input.length()) {
         char ch = input[currentPos];
@@ -73,7 +73,7 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
             auto token = std::string(&ch, 1);
             TokenType tokenType = tokenTypes.at(token);
             currentPos++;
-            return std::make_unique<SearchToken>(tokenType, std::move(token));
+            return std::make_optional<SearchToken>(tokenType, std::move(token));
         }
         case '>':
         case '<':
@@ -83,30 +83,30 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
                 token.push_back('=');
                 TokenType tokenType = tokenTypes.at(token);
                 currentPos += 2;
-                return std::make_unique<SearchToken>(tokenType, std::move(token));
+                return std::make_optional<SearchToken>(tokenType, std::move(token));
             } else {
                 auto token = std::string(&ch, 1);
                 TokenType tokenType = tokenTypes.at(token);
                 currentPos++;
-                return std::make_unique<SearchToken>(tokenType, std::move(token));
+                return std::make_optional<SearchToken>(tokenType, std::move(token));
             }
         case '"':
             if (!inQuotes) {
                 auto token = std::string(&ch, 1);
                 currentPos++;
                 inQuotes = true;
-                return std::make_unique<SearchToken>(TokenType::DQUOTE, std::move(token));
+                return std::make_optional<SearchToken>(TokenType::DQUOTE, std::move(token));
             } else {
                 auto token = std::string(&ch, 1);
                 currentPos++;
                 inQuotes = false;
-                return std::make_unique<SearchToken>(TokenType::DQUOTE, std::move(token));
+                return std::make_optional<SearchToken>(TokenType::DQUOTE, std::move(token));
             }
         default:
             if (inQuotes) {
                 auto quotedStr = getQuotedValue(input);
                 if (!quotedStr.empty())
-                    return std::make_unique<SearchToken>(TokenType::ESCAPEDSTRING, std::move(quotedStr));
+                    return std::make_optional<SearchToken>(TokenType::ESCAPEDSTRING, std::move(quotedStr));
             }
             if (std::isspace(ch)) {
                 currentPos++;
@@ -120,7 +120,7 @@ std::unique_ptr<SearchToken> SearchLexer::nextToken()
             }
         }
     }
-    return nullptr;
+    return std::nullopt;
 }
 
 std::string SearchLexer::getQuotedValue(const std::string& input)
@@ -159,13 +159,12 @@ std::string SearchLexer::nextStringToken(const std::string& input)
     return input.substr(startPos, currentPos - startPos);
 }
 
-std::unique_ptr<SearchToken> SearchLexer::makeToken(std::string tokenStr)
+std::optional<SearchToken> SearchLexer::makeToken(std::string tokenStr)
 {
     auto itr = tokenTypes.find(toLower(tokenStr));
-    if (itr != tokenTypes.end()) {
-        return std::make_unique<SearchToken>(itr->second, std::move(tokenStr));
-    }
-    return std::make_unique<SearchToken>(TokenType::PROPERTY, std::move(tokenStr));
+    if (itr != tokenTypes.end())
+        return std::make_optional<SearchToken>(itr->second, std::move(tokenStr));
+    return std::make_optional<SearchToken>(TokenType::PROPERTY, std::move(tokenStr));
 }
 
 SearchParser::SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria)

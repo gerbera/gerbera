@@ -35,6 +35,7 @@
 #include <fmt/core.h>
 #include <map>
 #include <memory>
+#include <optional>
 #include <tuple>
 #include <unordered_map>
 #include <vector>
@@ -93,11 +94,11 @@ class SearchLexer {
 public:
     explicit SearchLexer(std::string input);
 
-    std::unique_ptr<SearchToken> nextToken();
+    std::optional<SearchToken> nextToken();
 
 protected:
     std::string nextStringToken(const std::string& input);
-    static std::unique_ptr<SearchToken> makeToken(std::string tokenStr);
+    static std::optional<SearchToken> makeToken(std::string tokenStr);
     std::string getQuotedValue(const std::string& input);
 
     std::string input;
@@ -419,7 +420,7 @@ protected:
     std::unique_ptr<ASTQuotedString> parseQuotedString();
 
 private:
-    std::unique_ptr<SearchToken> currentToken;
+    std::optional<SearchToken> currentToken;
     std::unique_ptr<SearchLexer> lexer;
     const SQLEmitter& sqlEmitter;
 };

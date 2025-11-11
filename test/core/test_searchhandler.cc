@@ -27,12 +27,12 @@
 #include <gtest/gtest.h>
 #include <regex>
 
-using upVecUpST = std::unique_ptr<std::vector<std::unique_ptr<SearchToken>>>;
+using upVecUpST = std::unique_ptr<std::vector<std::optional<SearchToken>>>;
 static decltype(auto) getAllTokens(const std::string& input)
 {
     SearchLexer lexer { input };
-    upVecUpST searchTokens = std::make_unique<std::vector<std::unique_ptr<SearchToken>>>();
-    std::unique_ptr<SearchToken> searchToken = nullptr;
+    upVecUpST searchTokens = std::make_unique<std::vector<std::optional<SearchToken>>>();
+    std::optional<SearchToken> searchToken;
     bool gotToken;
     do {
         searchToken = lexer.nextToken();
