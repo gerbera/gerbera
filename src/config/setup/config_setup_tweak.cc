@@ -37,6 +37,7 @@
 #include "util/logger.h"
 
 #include <numeric>
+#include <pugixml.hpp>
 
 /// @brief Creates an array of DirectoryTweak objects from a XML nodeset.
 bool ConfigDirectorySetup::createOptionFromNode(

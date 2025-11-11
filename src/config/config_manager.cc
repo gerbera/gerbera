@@ -50,6 +50,7 @@
 #include "util/tools.h"
 
 #include <numeric>
+#include <pugixml.hpp>
 #include <sstream>
 
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)

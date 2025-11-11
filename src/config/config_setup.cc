@@ -31,6 +31,7 @@
 #include "util/logger.h"
 
 #include <numeric>
+#include <pugixml.hpp>
 
 pugi::xml_node ConfigSetup::getXmlElement(const pugi::xml_node& root) const
 {

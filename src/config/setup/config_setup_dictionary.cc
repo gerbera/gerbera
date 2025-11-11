@@ -35,6 +35,7 @@
 #include "util/tools.h"
 
 #include <numeric>
+#include <pugixml.hpp>
 
 /// @brief Creates a dictionary from an XML nodeset.
 bool ConfigDictionarySetup::createOptionFromNode(

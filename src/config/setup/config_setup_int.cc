@@ -31,6 +31,8 @@
 #include "config/config_options.h"
 #include "util/logger.h"
 
+#include <pugixml.hpp>
+
 template <typename T, class OptionClass>
 void ConfigIntegerSetup<T, OptionClass>::makeOption(
     const pugi::xml_node& root,

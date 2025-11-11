@@ -34,6 +34,8 @@
 #include "content/inotify/mt_inotify.h"
 #endif
 
+#include <pugixml.hpp>
+
 #define B_TRUE "true"
 #define B_FALSE "false"
 

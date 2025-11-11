@@ -34,6 +34,7 @@
 #include "util/logger.h"
 
 #include <numeric>
+#include <pugixml.hpp>
 
 /// @brief Creates an array of strings from an XML nodeset.
 bool ConfigArraySetup::createOptionFromNode(

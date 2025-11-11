@@ -33,6 +33,8 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
+#include <pugixml.hpp>
+
 void ConfigStringSetup::makeOption(
     const pugi::xml_node& root,
     const std::shared_ptr<Config>& config,
