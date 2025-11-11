@@ -37,6 +37,7 @@
 #include "util/logger.h"
 
 #include <numeric>
+#include <pugixml.hpp>
 
 /// @brief Creates an array of DynamicContent objects from a XML nodeset.
 bool ConfigDynamicContentSetup::createOptionFromNode(

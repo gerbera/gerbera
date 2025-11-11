@@ -30,6 +30,8 @@
 #include "exceptions.h"
 #include "util/grb_time.h"
 
+#include <pugixml.hpp>
+
 LongOptionType ConfigTimeSetup::getXmlContent(
     const pugi::xml_node& root,
     const std::shared_ptr<Config>& config)

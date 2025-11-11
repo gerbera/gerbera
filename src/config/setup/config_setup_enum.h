@@ -30,6 +30,8 @@
 #include "config/config_setup.h"
 #include "util/logger.h"
 
+#include <pugixml.hpp>
+
 template <class En>
 class ConfigEnumSetup : public ConfigSetup {
 protected:

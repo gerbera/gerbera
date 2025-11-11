@@ -32,8 +32,12 @@
 #include <functional>
 #include <map>
 #include <memory>
-#include <pugixml.hpp>
 #include <vector>
+
+namespace pugi {
+class xml_node;
+class xpath_node_set;
+} // namespace pugi
 
 #define YES "yes"
 #define NO "no"
