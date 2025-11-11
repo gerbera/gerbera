@@ -52,7 +52,7 @@ bool ConfigDynamicContentSetup::createOptionFromNode(
     }
     auto&& ccs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_DYNAMIC_CONTAINER);
     for (auto&& it : ccs->getXmlTree(element)) {
-        const pugi::xml_node& child = it.node();
+        auto child = it.node();
         fs::path location = definition->findConfigSetup<ConfigPathSetup>(ConfigVal::A_DYNAMIC_CONTAINER_LOCATION)->getXmlContent(child, config);
         if (config) {
             config->registerNode(child.path());

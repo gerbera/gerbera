@@ -52,7 +52,7 @@ bool ConfigDictionarySetup::createOptionFromNode(
         }
 
         for (auto&& it : dictNodes) {
-            const pugi::xml_node child = it.node();
+            auto child = it.node();
             if (config) {
                 config->registerNode(child.path());
                 config->registerNode(fmt::format("{}/attribute::{}", child.path(), keyAttr));
