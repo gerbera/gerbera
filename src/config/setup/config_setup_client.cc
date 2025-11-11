@@ -56,7 +56,7 @@ bool ConfigClientSetup::createOptionFromNode(
     auto&& gcs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_CLIENTS_GROUP);
     std::map<std::string, std::shared_ptr<ClientGroupConfig>> groupCache;
     for (auto&& it : gcs->getXmlTree(element)) {
-        const pugi::xml_node& child = it.node();
+        auto child = it.node();
         if (config) {
             config->registerNode(child.path());
         }
@@ -71,7 +71,7 @@ bool ConfigClientSetup::createOptionFromNode(
 
     auto&& ccs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_CLIENTS_CLIENT);
     for (auto&& it : ccs->getXmlTree(element)) {
-        const pugi::xml_node& child = it.node();
+        auto child = it.node();
         if (config) {
             config->registerNode(child.path());
         }

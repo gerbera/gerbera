@@ -52,7 +52,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(
     if (!element)
         return true;
 
-    const pugi::xml_node& root = element.root().first_child();
+    auto root = element.root().first_child();
 
     // initialize mapping dictionary
     std::vector<std::shared_ptr<TranscodingFilter>> trFilters;
@@ -68,7 +68,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(
 
     // go through filters
     for (auto&& it : filterNodes) {
-        const pugi::xml_node child = it.node();
+        auto child = it.node();
         if (config) {
             config->registerNode(child.path());
         }
@@ -96,7 +96,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(
 
     // go through profiles
     for (auto&& it : profileNodes) {
-        const pugi::xml_node child = it.node();
+        auto child = it.node();
         if (config) {
             config->registerNode(child.path());
         }

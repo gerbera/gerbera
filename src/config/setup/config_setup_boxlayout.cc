@@ -74,12 +74,12 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
     auto&& boxcs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_BOXLAYOUT_BOX);
     auto&& chaincs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_BOXLAYOUT_CHAIN);
     for (auto&& itBox : listcs->getXmlTree(element)) {
-        const pugi::xml_node& childBox = itBox.node();
+        auto childBox = itBox.node();
         if (config) {
             config->registerNode(childBox.path());
         }
         for (auto&& it : boxcs->getXmlTree(childBox)) {
-            const pugi::xml_node& child = it.node();
+            auto child = it.node();
             if (config) {
                 config->registerNode(child.path());
             }
@@ -111,7 +111,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
         }
         std::size_t index = 0;
         for (auto&& it : chaincs->getXmlTree(childBox)) {
-            const pugi::xml_node& child = it.node();
+            auto child = it.node();
             if (config) {
                 config->registerNode(child.path());
             }

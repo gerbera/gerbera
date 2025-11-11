@@ -80,7 +80,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(
         config->registerNode(element.path());
     }
     for (auto&& it : cs->getXmlTree(element)) {
-        const pugi::xml_node& child = it.node();
+        auto child = it.node();
         if (config) {
             config->registerNode(child.path());
         }

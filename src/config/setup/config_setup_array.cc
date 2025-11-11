@@ -47,7 +47,7 @@ bool ConfigArraySetup::createOptionFromNode(
             config->registerNode(element.path());
         }
         for (auto&& it : element.select_nodes(definition->mapConfigOption(nodeOption))) {
-            const pugi::xml_node& child = it.node();
+            auto child = it.node();
             auto attrKey = (attrOption != ConfigVal::MAX) ? definition->removeAttribute(attrOption) : "";
             if (config) {
                 config->registerNode(child.path());
@@ -245,7 +245,7 @@ bool ConfigArraySetup::InitPlayedItemsMark(const pugi::xml_node& value, std::vec
 {
     if (value && !value.empty()) {
         for (auto&& it : value.select_nodes(nodeName)) {
-            const pugi::xml_node& content = it.node();
+            auto content = it.node();
             std::string markContent = content.text().as_string();
             if (markContent.empty()) {
                 log_error("error in configuration, <{}>, empty <{}> parameter", value.name(), nodeName);
@@ -270,7 +270,7 @@ bool ConfigArraySetup::InitItemsPerPage(const pugi::xml_node& value, std::vector
     if (value && !value.empty()) {
         // create the array from user settings
         for (auto&& it : value.select_nodes(nodeName)) {
-            const pugi::xml_node& child = it.node();
+            auto child = it.node();
             int i = child.text().as_int();
             if (i < 1) {
                 log_error("Error in config file: incorrect <{}> value for <{}>", nodeName, value.name());

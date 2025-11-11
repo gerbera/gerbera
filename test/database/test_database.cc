@@ -68,7 +68,7 @@ void DatabaseTestBase::testUpgrade(ConfigVal option)
 
     size_t version = 1;
     for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
-        const pugi::xml_node& versionNode = versionElement.node();
+        auto versionNode = versionElement.node();
         auto&& myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
         EXPECT_EQ(myHash, std::dynamic_pointer_cast<SQLDatabase>(subject)->getHash(version));
         version++;

@@ -53,7 +53,7 @@ bool ConfigDirectorySetup::createOptionFromNode(
 
     auto&& tcs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_DIRECTORIES_TWEAK);
     for (auto&& it : tcs->getXmlTree(element)) {
-        const pugi::xml_node& child = it.node();
+        auto child = it.node();
         if (config) {
             config->registerNode(child.path());
         }

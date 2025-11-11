@@ -625,7 +625,7 @@ void SQLDatabase::upgradeDatabase(
 
     std::size_t version = firstDBVersion;
     for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
-        const pugi::xml_node& versionNode = versionElement.node();
+        auto versionNode = versionElement.node();
         std::vector<std::pair<std::string, std::string>> versionCmds;
         const auto myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
         if (version < DBVERSION && myHash == hashies.at(version)) {
