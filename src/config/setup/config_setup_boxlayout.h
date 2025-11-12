@@ -52,11 +52,8 @@ public:
         ConfigVal option,
         const char* xpath,
         const char* help,
-        std::vector<BoxLayout> defaultEntries)
-        : ConfigSetup(option, xpath, help)
-        , defaultEntries(std::move(defaultEntries))
-    {
-    }
+        std::vector<BoxLayout> defaultEntries);
+    ~ConfigBoxLayoutSetup() override;
 
     /// @brief Update Option from Web UI or Database
     bool updateItem(

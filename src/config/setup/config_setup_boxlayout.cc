@@ -43,6 +43,18 @@
 #include <algorithm>
 #include <numeric>
 
+ConfigBoxLayoutSetup::ConfigBoxLayoutSetup(
+    ConfigVal option,
+    const char* xpath,
+    const char* help,
+    std::vector<BoxLayout> defaultEntries)
+    : ConfigSetup(option, xpath, help)
+    , defaultEntries(std::move(defaultEntries))
+{
+}
+
+ConfigBoxLayoutSetup::~ConfigBoxLayoutSetup() = default;
+
 /// @brief Creates an array of BoxLayout objects from a XML nodeset.
 /// @param element starting element of the nodeset.
 bool ConfigBoxLayoutSetup::createOptionFromNode(
