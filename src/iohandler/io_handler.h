@@ -39,6 +39,8 @@
 #include <cstdint>
 #include <upnp.h>
 
+#include <sys/types.h>
+
 using grb_read_t = std::int32_t;
 static constexpr grb_read_t CHECK_SOCKET = -666;
 

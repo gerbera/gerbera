@@ -38,6 +38,8 @@
 #include "io_handler.h"
 #include "util/grb_fs.h"
 
+#include <sys/types.h>
+
 /// @brief Allows the web server to read from a file.
 class FileIOHandler : public IOHandler {
 protected:

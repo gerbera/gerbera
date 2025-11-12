@@ -30,13 +30,11 @@
 
 #include "util/grb_fs.h"
 
-#include <chrono>
-#include <vector>
-
 // forward declarations
 class AutoscanDirectory;
 class CdsItemExternalURL;
 class CdsItem;
+class CdsObject;
 class Config;
 class ConfigDefinition;
 class ConfigSetup;

@@ -37,9 +37,10 @@
 #include "grb_time.h"
 #include "thread_runner.h"
 
-#include <algorithm>
 #include <atomic>
 #include <memory>
+
+class Config;
 
 /// @brief Class implementing time driven actions
 class Timer {

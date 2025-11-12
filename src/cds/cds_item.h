@@ -32,6 +32,9 @@ Gerbera - https://gerbera.io/
 
 #include "cds_objects.h"
 
+#include <memory>
+#include <string>
+
 class ClientStatusDetail;
 
 /// @brief An Item in the content directory.

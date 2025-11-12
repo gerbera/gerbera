@@ -40,8 +40,13 @@
 #include "upnp/upnp_common.h"
 #include "util/timer.h"
 
-#include <mutex>
+#include <chrono>
+#include <cstddef>
+#include <map>
+#include <memory>
+#include <string>
 #include <string_view>
+#include <utility>
 
 // forward declarations
 class CdsContainer;

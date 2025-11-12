@@ -26,7 +26,7 @@
 #ifndef __CONFIG_INT_TYPES_H__
 #define __CONFIG_INT_TYPES_H__
 
-#include <cinttypes>
+#include <cstdint>
 
 using IntOptionType = std::int32_t;
 using UIntOptionType = std::uint32_t;

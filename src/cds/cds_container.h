@@ -33,6 +33,12 @@ Gerbera - https://gerbera.io/
 #include "cds_objects.h"
 #include "upnp/upnp_common.h"
 
+#include <memory>
+#include <string>
+
+enum class AutoscanType;
+enum class MetadataFields;
+
 /// @brief A container in the content directory.
 class CdsContainer final : public CdsObject {
 protected:

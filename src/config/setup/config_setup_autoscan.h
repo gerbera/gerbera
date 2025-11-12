@@ -31,6 +31,8 @@
 
 class AutoscanDirectory;
 class AutoscanList;
+class Config;
+class ConfigOption;
 enum class AutoscanScanMode;
 
 class ConfigAutoscanSetup : public ConfigSetup {

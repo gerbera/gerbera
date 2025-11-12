@@ -32,6 +32,9 @@
 
 #include <pugixml.hpp>
 
+class Config;
+class ConfigOption;
+
 template <class En>
 class ConfigEnumSetup : public ConfigSetup {
 protected:

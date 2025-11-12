@@ -36,6 +36,8 @@
 
 #include "parser_script.h"
 
+class CdsItem;
+
 class MetafileParserScript : public ParserScript {
 public:
     MetafileParserScript(const std::shared_ptr<Content>& content, const std::string& parent);

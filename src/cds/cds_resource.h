@@ -39,6 +39,8 @@
 
 #include <map>
 #include <memory>
+#include <string>
+#include <string_view>
 
 #define RESOURCE_OPTION_FOURCC "4cc"
 

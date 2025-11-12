@@ -29,7 +29,10 @@
 
 #include "config/config_setup.h"
 
+class Config;
+class ConfigOption;
 class DynamicContent;
+class DynamicContentList;
 
 /// @brief Setup of dynamic content reader
 class ConfigDynamicContentSetup : public ConfigSetup {

@@ -30,6 +30,10 @@
 #include "config/config_setup.h"
 #include "config/config_val.h"
 
+class ArrayOption;
+class Config;
+class ConfigOption;
+
 using ArrayInitFunction = std::function<bool(const pugi::xml_node& value, std::vector<std::string>& result, const char* node_name)>;
 using ArrayItemCheckFunction = std::function<bool(const std::string& value)>;
 

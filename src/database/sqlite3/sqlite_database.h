@@ -39,9 +39,15 @@
 #include "util/thread_runner.h"
 #include "util/timer.h"
 
+#include <cstddef>
 #include <mutex>
 #include <queue>
 
+class Config;
+class ConverterManager;
+class Database;
+class GrbFile;
+class Mime;
 class Sqlite3Database;
 class Sqlite3Result;
 class SLTask;
@@ -112,7 +118,7 @@ private:
     mutable std::mutex del_mutex;
     using DelAutoLock = std::scoped_lock<std::mutex>;
     mutable std::vector<std::string> deletedEntries;
-    size_t maxDeleteCount { DELETE_CACHE_MAX_SIZE };
+    std::size_t maxDeleteCount { DELETE_CACHE_MAX_SIZE };
     std::chrono::seconds lastDelete;
 
     void threadCleanup() override { }

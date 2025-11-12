@@ -37,6 +37,7 @@
 #include "content/content.h"
 #include "exceptions.h"
 
+#include <algorithm>
 #include <csignal>
 #include <utility>
 

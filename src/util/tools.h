@@ -34,9 +34,8 @@
 #define __TOOLS_H__
 
 #include <algorithm>
-#include <cinttypes>
+#include <cstdint>
 #include <map>
-#include <optional>
 #include <string>
 #include <vector>
 

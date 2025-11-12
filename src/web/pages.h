@@ -45,12 +45,17 @@
 class AutoscanDirectory;
 class CdsItemExternalURL;
 class CdsItem;
+class CdsObject;
 class Config;
 class ConfigDefinition;
 class ConfigSetup;
 class ConfigValue;
+class Content;
+class Context;
 class ConverterManager;
 class Database;
+class Quirks;
+class Server;
 class UpnpXMLBuilder;
 enum class ConfigVal;
 

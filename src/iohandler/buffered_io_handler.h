@@ -39,6 +39,8 @@
 #include <memory>
 #include <upnp.h>
 
+class IOHandler;
+
 /// @brief a IOHandler with buffer support
 /// the buffer is only for read(). write() is not supported
 /// the public functions of this class are *not* thread safe!

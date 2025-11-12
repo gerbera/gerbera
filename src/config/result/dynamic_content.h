@@ -30,10 +30,6 @@
 #include "edit_helper.h"
 #include "util/grb_fs.h"
 
-#include <map>
-#include <mutex>
-#include <vector>
-
 // forward declarations
 class Config;
 class DynamicContent;

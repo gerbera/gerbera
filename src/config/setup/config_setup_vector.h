@@ -29,6 +29,10 @@
 
 #include "config/config_setup.h"
 
+class Config;
+class ConfigOption;
+class VectorOption;
+
 class ConfigVectorSetup : public ConfigSetup {
 protected:
     bool notEmpty = false;

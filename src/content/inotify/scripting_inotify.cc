@@ -36,6 +36,8 @@
 #include "content/scripting/scripting_runtime.h"
 #include "context.h"
 
+#include <algorithm>
+
 template void InotifyManager<PathWatch>::run();
 
 ScriptingInotify::ScriptingInotify(

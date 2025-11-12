@@ -34,14 +34,16 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
-#include <array>
 #include <fmt/format.h>
 #if FMT_VERSION >= 100202
 #include <fmt/ranges.h>
 #endif
-#include <map>
 #include <spdlog/spdlog.h>
 #include <type_traits>
+
+#ifdef GRBDEBUG
+#include <map>
+#endif
 
 #define log_debug SPDLOG_TRACE
 #define log_vdebug(...) (void)0

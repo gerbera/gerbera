@@ -36,6 +36,9 @@
 
 #include "parser_script.h"
 
+class CdsContainer;
+class CdsItem;
+
 class PlaylistParserScript : public ParserScript {
 public:
     PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent);

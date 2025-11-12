@@ -38,6 +38,11 @@
 #include "util/executor.h"
 #include "util/grb_fs.h"
 
+#include <cstddef>
+#include <vector>
+
+#include <sys/types.h>
+
 // forward declaration
 class Content;
 

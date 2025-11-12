@@ -32,10 +32,12 @@
 #include "edit_helper.h"
 #include "upnp/upnp_common.h"
 
+#include <cstddef>
 #include <map>
 #include <memory>
-#include <mutex>
 #include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
 
 // forward declarations

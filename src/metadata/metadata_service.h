@@ -27,6 +27,8 @@ Gerbera - https://gerbera.io/
 #include "util/grb_fs.h"
 
 #include <map>
+#include <memory>
+#include <string>
 
 // forward declaration
 class CdsItem;

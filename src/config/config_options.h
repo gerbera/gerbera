@@ -38,6 +38,7 @@
 #include <fmt/format.h>
 #include <map>
 #include <memory>
+#include <utility>
 #include <vector>
 
 #include "config_int_types.h"

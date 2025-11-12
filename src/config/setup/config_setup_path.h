@@ -29,6 +29,9 @@
 
 #include "config/config_setup.h"
 
+class Config;
+class ConfigOption;
+
 enum class ConfigPathArguments {
     none = 0,
     /// @brief isFile file or directory

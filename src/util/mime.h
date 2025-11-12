@@ -27,11 +27,11 @@
 #define __MIME_H__
 
 #include <map>
-#include <mutex>
 
 #include "util/grb_fs.h"
 
 #ifdef HAVE_MAGIC
+#include <mutex>
 // for older versions of filemagic
 extern "C" {
 #include <magic.h>

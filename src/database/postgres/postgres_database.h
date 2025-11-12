@@ -28,10 +28,13 @@
 #include "util/thread_runner.h"
 #include "util/timer.h"
 
-#include <mutex>
 #include <pqxx/pqxx>
 #include <queue>
 
+class Config;
+class ConverterManager;
+class Database;
+class Mime;
 class PostgresSQLResult;
 class PostgresSQLRow;
 class PGTask;

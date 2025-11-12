@@ -38,6 +38,7 @@
 
 #include "util/thread_runner.h"
 
+#include <sys/types.h>
 #include <upnp.h>
 
 class Config;

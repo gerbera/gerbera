@@ -29,6 +29,9 @@
 
 #include "config/config_setup.h"
 
+class Config;
+class ConfigOption;
+
 class ConfigBoolSetup : public ConfigSetup {
     using ConfigSetup::ConfigSetup;
 

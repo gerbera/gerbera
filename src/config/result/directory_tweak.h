@@ -31,8 +31,6 @@
 #include "util/grb_fs.h"
 
 #include <map>
-#include <mutex>
-#include <vector>
 
 // forward declaration
 class AutoscanDirectory;

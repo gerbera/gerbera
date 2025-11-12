@@ -30,7 +30,10 @@
 #include "config/config_setup.h"
 
 class ClientConfig;
+class ClientConfigList;
 class ClientGroupConfig;
+class Config;
+class ConfigOption;
 
 class ConfigClientSetup : public ConfigSetup {
     using ConfigSetup::ConfigSetup;

@@ -29,6 +29,12 @@
 
 #include "config/config_setup.h" // API
 
+#include "config/config_int_types.h"
+#include "config/config_options.h"
+
+class Config;
+class ConfigOption;
+
 template <typename T, class OptionClass>
 class ConfigIntegerSetup : public ConfigSetup {
     static_assert(std::is_integral_v<T>, "Integral required.");

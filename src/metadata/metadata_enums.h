@@ -39,6 +39,8 @@
 #include "util/enum_iterator.h"
 
 #include <map>
+#include <string>
+#include <utility>
 
 #define CONTENT_TYPE_AIFF "aiff"
 #define CONTENT_TYPE_APE "ape"

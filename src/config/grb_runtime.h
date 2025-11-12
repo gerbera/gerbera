@@ -31,7 +31,10 @@ Gerbera - https://gerbera.io/
 #include <fmt/core.h>
 #include <functional>
 #include <string>
+#include <utility>
 #include <vector>
+
+#include <sys/types.h>
 
 class Config;
 class ConfigDefinition;

@@ -37,9 +37,10 @@
 
 #include "config.h"
 
+#include "config_int_types.h"
+
 #include <map>
 #include <memory>
-#include <netinet/in.h>
 
 namespace pugi {
 class xml_document;

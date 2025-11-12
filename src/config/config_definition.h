@@ -33,6 +33,10 @@
 
 #include <fmt/format.h>
 
+#include <memory>
+#include <string>
+#include <vector>
+
 #define CONFIG_XML_VERSION 2
 
 // default values

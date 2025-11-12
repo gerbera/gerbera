@@ -40,9 +40,18 @@
 #include "util/grb_fs.h"
 
 #include <algorithm>
+#include <chrono>
 #include <map>
 #include <memory>
+#include <string>
+#include <string_view>
+#include <utility>
 #include <vector>
+
+enum class ContentHandler;
+enum class ObjectType;
+enum class ResourceAttribute;
+enum class ResourcePurpose;
 
 /// @brief Generic object in the Content Directory.
 class CdsObject {

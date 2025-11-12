@@ -29,6 +29,9 @@
 
 #include "config/config_setup.h"
 
+class Config;
+class ConfigOption;
+class DirectoryConfigList;
 class DirectoryTweak;
 
 class ConfigDirectorySetup : public ConfigSetup {

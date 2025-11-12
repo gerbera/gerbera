@@ -29,9 +29,12 @@
 
 #include "edit_helper.h"
 #include "upnp/clients.h"
+#include "upnp/quirks.h"
 
 #include <map>
-#include <mutex>
+#include <memory>
+#include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 

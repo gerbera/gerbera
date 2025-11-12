@@ -29,7 +29,12 @@
 
 #include "config/config_setup.h"
 
+#include "config/config_int_types.h"
+
 #include "util/grb_time.h"
+
+class Config;
+class ConfigOption;
 
 class ConfigTimeSetup : public ConfigSetup {
 protected:

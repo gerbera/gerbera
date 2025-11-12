@@ -38,6 +38,7 @@ class GenericTask;
 class CdsContainer;
 class CdsObject;
 class Context;
+class Executor;
 class ScriptingRuntime;
 enum class TaskOwner;
 

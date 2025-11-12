@@ -44,6 +44,9 @@
 
 #include "util/thread_executor.h"
 
+#include <cstddef>
+#include <memory>
+
 /// @brief gets two IOHandler, starts a thread which reads from one IOHandler
 /// and writes the data to the other IOHandler
 class IOHandlerChainer : public ThreadExecutor {

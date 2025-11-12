@@ -35,10 +35,12 @@
 #define __SERVER_H__
 
 #include <memory>
-#include <netinet/in.h>
 #include <string>
-#include <upnp.h>
 #include <vector>
+
+#include <netinet/in.h>
+#include <sys/types.h>
+#include <upnp.h>
 
 // forward declarations
 class ActionRequest;

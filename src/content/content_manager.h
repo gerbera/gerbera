@@ -39,7 +39,6 @@
 
 #include <map>
 #include <memory>
-#include <unordered_set>
 #include <vector>
 
 // forward declarations
@@ -57,14 +56,17 @@ enum class OnlineServiceType;
 
 class AutoscanList;
 class CdsItem;
+class Config;
 class ConverterManager;
 class CMAddFileTask;
+class Database;
 class GenericTask;
 class ImportService;
 class LastFm;
 class Mime;
 class Server;
 class TaskProcessor;
+class Timer;
 class UpdateManager;
 enum class AutoscanScanMode;
 namespace Web {

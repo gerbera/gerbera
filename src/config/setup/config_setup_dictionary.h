@@ -29,6 +29,10 @@
 
 #include "config/config_setup.h"
 
+class Config;
+class ConfigOption;
+class DictionaryOption;
+
 using DictionaryInitFunction = std::function<bool(const pugi::xml_node& value, std::map<std::string, std::string>& result)>;
 
 /// @brief Configuration parser to load dictionaries

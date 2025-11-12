@@ -29,6 +29,10 @@
 
 #include "config/config_setup.h"
 
+class Config;
+class ConfigOption;
+class TranscodingProfileList;
+
 class ConfigTranscodingSetup : public ConfigSetup {
     using ConfigSetup::ConfigSetup;
 

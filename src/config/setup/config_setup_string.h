@@ -29,6 +29,9 @@
 
 #include "config/config_setup.h"
 
+class Config;
+class ConfigOption;
+
 class ConfigStringSetup : public ConfigSetup {
 protected:
     bool notEmpty = false;
