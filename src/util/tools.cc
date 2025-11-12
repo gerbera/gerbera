@@ -38,6 +38,7 @@
 #include "util/logger.h"
 
 #include <algorithm>
+#include <cinttypes>
 #include <numeric>
 #include <queue>
 #include <regex>
