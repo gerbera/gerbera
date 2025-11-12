@@ -26,6 +26,12 @@
 #ifndef __DB_PARAM_H__
 #define __DB_PARAM_H__
 
+#include <memory>
+#include <string>
+#include <vector>
+
+class CdsObject;
+
 /// @brief Base class for actions performed based on UPnP requests
 class ActionParam {
 protected:
