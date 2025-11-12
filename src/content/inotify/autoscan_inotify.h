@@ -33,6 +33,7 @@
 #ifndef __AUTOSCAN_INOTIFY_H__
 #define __AUTOSCAN_INOTIFY_H__
 
+#ifdef HAVE_INOTIFY
 #include "inotify_manager.h"
 #include "util/grb_fs.h"
 
@@ -169,4 +170,5 @@ private:
         const std::shared_ptr<AutoscanDirectory>& adir);
 };
 
+#endif // HAVE_INOTIFY
 #endif // __AUTOSCAN_INOTIFY_H__

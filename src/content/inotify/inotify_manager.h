@@ -25,6 +25,8 @@
 #ifndef __INOTIFY_MANAGER_H__
 #define __INOTIFY_MANAGER_H__
 
+#ifdef HAVE_INOTIFY
+
 #include "content/inotify/inotify_types.h"
 #include "content/inotify/mt_inotify.h"
 #include "util/grb_fs.h"
@@ -74,4 +76,5 @@ protected:
     virtual void threadProc() = 0;
 };
 
+#endif // HAVE_INOTIFY
 #endif // __INOTIFY_MANAGER_H__

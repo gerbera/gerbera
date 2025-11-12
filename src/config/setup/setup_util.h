@@ -27,7 +27,15 @@
 #ifndef __GRB_SETUP_UTIL_H_
 #define __GRB_SETUP_UTIL_H_
 
+#include "config/config_setup.h"
 #include "util/tools.h"
+
+#include <functional>
+#include <memory>
+
+class Config;
+class ConfigDefinition;
+enum class ConfigVal;
 
 /// @brief Utility struct to define properties for update
 template <class CfgResult>
