@@ -40,6 +40,8 @@
 #include "exceptions.h"
 #include "online_service.h"
 
+#include <algorithm>
+
 TaskProcessor::TaskProcessor(std::shared_ptr<Config> config)
     : config(std::move(config))
 {

@@ -26,7 +26,7 @@
 #ifndef __UPNP_QUIRKS_H__
 #define __UPNP_QUIRKS_H__
 
-#include <cinttypes>
+#include <cstdint>
 #include <map>
 #include <memory>
 #include <vector>

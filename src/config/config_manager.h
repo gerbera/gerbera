@@ -39,7 +39,6 @@
 
 #include <map>
 #include <memory>
-#include <netinet/in.h>
 
 namespace pugi {
 class xml_document;
