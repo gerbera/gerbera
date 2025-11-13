@@ -40,6 +40,7 @@
 #include "exceptions.h"
 #include "util/logger.h"
 
+#include <array>
 #include <vector>
 #if FMT_VERSION >= 100202
 #include <fmt/ranges.h>

@@ -41,6 +41,7 @@
 #include "util/logger.h"
 
 #include <algorithm>
+#include <array>
 #include <numeric>
 
 ConfigBoxLayoutSetup::ConfigBoxLayoutSetup(

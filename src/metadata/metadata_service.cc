@@ -73,6 +73,8 @@
 
 #include "metadata/metacontent_handler.h"
 
+#include <array>
+
 static const std::map<MetadataType, std::string_view> handlerNames {
 #ifdef HAVE_TAGLIB
     { MetadataType::TagLib, "TagLib" },
