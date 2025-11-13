@@ -89,7 +89,7 @@ public:
     const std::shared_ptr<StringConverter>& m2i(ConfigVal option, const fs::path& location);
     /// @brief filesystem to internal
     const std::shared_ptr<StringConverter>& f2i() const;
-#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(HAVE_MATROSKA)
+#if defined(HAVE_JS) || defined(HAVE_CURL) || defined(HAVE_TAGLIB) || defined(HAVE_MATROSKA)
     /// @brief safeguard - internal to internal - needed to catch some
     /// scenarious where the user may have forgotten to add proper conversion
     /// in the script.
