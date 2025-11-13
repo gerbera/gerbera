@@ -260,7 +260,7 @@ const std::shared_ptr<StringConverter>& ConverterManager::f2i() const
     return converters.at(charsets.at(ConfigVal::IMPORT_FILESYSTEM_CHARSET));
 }
 
-#if defined(HAVE_JS) || defined(HAVE_TAGLIB) || defined(HAVE_MATROSKA)
+#if defined(HAVE_JS) || defined(HAVE_CURL) || defined(HAVE_TAGLIB) || defined(HAVE_MATROSKA)
 const std::shared_ptr<StringConverter>& ConverterManager::i2i() const
 {
     return converters.at(charsets.at(ConfigVal::MAX));
