@@ -34,14 +34,12 @@
 #ifndef __PROCESS_EXECUTOR_H__
 #define __PROCESS_EXECUTOR_H__
 
-#include <map>
-#include <memory>
-#include <vector>
-
-#include <unistd.h>
-
 #include "util/executor.h"
 #include "util/grb_fs.h"
+
+#include <map>
+#include <unistd.h>
+#include <vector>
 
 class ProcessExecutor final : public Executor {
 public:

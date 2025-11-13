@@ -37,6 +37,7 @@
 #include "common.h"
 #include "script.h"
 
+#include <map>
 #include <memory>
 
 // forward declaration

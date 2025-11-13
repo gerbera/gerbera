@@ -37,9 +37,7 @@
 #include "util/grb_fs.h"
 
 #include <duktape.h>
-#include <map>
 #include <memory>
-#include <mutex>
 #include <vector>
 
 // forward declaration

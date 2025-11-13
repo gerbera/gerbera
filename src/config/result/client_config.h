@@ -31,7 +31,6 @@
 #include "upnp/clients.h"
 
 #include <map>
-#include <mutex>
 #include <utility>
 #include <vector>
 

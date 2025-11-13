@@ -37,7 +37,6 @@
 #include <map>
 #include <memory>
 #include <upnp.h>
-#include <vector>
 
 // forward declaration
 class CdsObject;

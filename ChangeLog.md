@@ -2,6 +2,10 @@
 
 ### HEAD
 
+- add missing headers from headers
+- Clean up obsolete includes
+- don't use references for node()
+- more pugi forward declarations
 - Negation of client-flags
 - Refactor Quirks to enum
 - Update Conan integration

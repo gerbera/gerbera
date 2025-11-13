@@ -28,7 +28,6 @@
 #include "util/thread_runner.h"
 #include "util/timer.h"
 
-#include <mutex>
 #include <pqxx/pqxx>
 #include <queue>
 
