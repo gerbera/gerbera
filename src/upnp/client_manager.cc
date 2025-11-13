@@ -37,6 +37,7 @@
 #include "util/logger.h"
 
 #include <algorithm>
+#include <array>
 #include <pugixml.hpp>
 #include <sys/socket.h>
 #include <upnp.h>
