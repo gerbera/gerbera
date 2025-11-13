@@ -145,7 +145,7 @@ void SLSelectTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
     int ret = sqlite3_get_table(
         db,
         query,
-        &pres->table,
+        &pres->row,
         &pres->nrow,
         &pres->ncolumn,
         &err);
@@ -159,7 +159,7 @@ void SLSelectTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
         throw DatabaseException("", sl.handleError(query, error, db, ret));
     }
 
-    pres->row = pres->table;
+    pres->table.reset(pres->row);
     pres->cur_row = 0;
 }
 

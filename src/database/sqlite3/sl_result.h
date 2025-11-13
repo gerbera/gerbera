@@ -26,10 +26,12 @@
 
 #include "database/sql_result.h"
 
+#include <memory>
+
 /// @brief Represents a result of a sqlite3 select
 class Sqlite3Result : public SQLResult {
 public:
-    Sqlite3Result() = default;
+    Sqlite3Result();
     ~Sqlite3Result() override;
 
     Sqlite3Result(const Sqlite3Result&) = delete;
@@ -39,7 +41,7 @@ private:
     std::unique_ptr<SQLRow> nextRow() override;
     [[nodiscard]] unsigned long long getNumRows() const override { return nrow; }
 
-    char** table { nullptr };
+    std::unique_ptr<char*, void (*)(char**)> table;
     char** row;
 
     int cur_row;

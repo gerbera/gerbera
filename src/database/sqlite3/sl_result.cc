@@ -39,13 +39,12 @@ char* Sqlite3Row::col_c_str(int index) const
 
 /* Sqlite3Result */
 
-Sqlite3Result::~Sqlite3Result()
+Sqlite3Result::Sqlite3Result()
+    : table(nullptr, sqlite3_free_table)
 {
-    if (table) {
-        sqlite3_free_table(table);
-        table = nullptr;
-    }
 }
+
+Sqlite3Result::~Sqlite3Result() = default;
 
 std::unique_ptr<SQLRow> Sqlite3Result::nextRow()
 {
