@@ -37,12 +37,12 @@
 #include "content/content.h"
 #include "exceptions.h"
 
+#include <algorithm>
 #include <csignal>
-#include <utility>
-
 #include <fcntl.h>
 #include <sys/select.h>
 #include <unistd.h>
+#include <utility>
 
 // after MAX_TIMEOUTS we will tell libupnp to check the socket,
 // this will make sure that we do not block the read and allow libupnp to

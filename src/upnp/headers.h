@@ -27,9 +27,8 @@
 #define GERBERA_HEADERS_H
 
 #include <map>
-#include <memory>
+#include <string>
 #include <upnp.h>
-#include <vector>
 
 /// @brief Utility class for HTTP headers in UPnP requests
 class Headers {

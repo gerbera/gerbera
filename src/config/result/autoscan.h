@@ -40,7 +40,6 @@
 #include "upnp/upnp_common.h"
 #include "util/timer.h"
 
-#include <mutex>
 #include <string_view>
 
 // forward declarations

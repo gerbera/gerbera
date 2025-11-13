@@ -36,7 +36,6 @@
 #include <map>
 #include <memory>
 #include <tuple>
-#include <unordered_map>
 #include <vector>
 
 #define UPNP_SEARCH_ID "@id"

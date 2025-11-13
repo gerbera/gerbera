@@ -35,7 +35,7 @@
 #ifndef __TRANSCODING_H__
 #define __TRANSCODING_H__
 
-#include "cds/cds_resource.h"
+#include "cds/cds_enums.h"
 #include "common.h"
 #include "metadata/metadata_enums.h"
 #include "upnp/quirks.h"

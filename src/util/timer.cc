@@ -36,6 +36,8 @@
 #include "exceptions.h"
 #include "util/logger.h"
 
+#include <algorithm>
+
 void Timer::run()
 {
     log_debug("Starting Timer thread...");
