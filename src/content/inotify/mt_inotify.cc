@@ -52,7 +52,7 @@
 #include <sys/select.h>
 #include <thread>
 #include <unistd.h>
-#ifdef SOLARIS
+#ifdef __sun__
 #include <sys/filio.h> // FIONREAD
 #endif
 

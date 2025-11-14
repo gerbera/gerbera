@@ -31,7 +31,7 @@ Gerbera - https://gerbera.io/
 #include <netdb.h>
 #include <regex>
 
-#ifdef SOLARIS
+#ifdef __sun__
 #include <sys/sockio.h>
 #endif
 

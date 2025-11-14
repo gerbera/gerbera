@@ -410,9 +410,7 @@ target_compile_options(libgerbera PRIVATE -Wall)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
 # System specific stuff
-if (${CMAKE_SYSTEM_NAME} MATCHES ".*(SunOS|Solaris).*")
-    target_compile_definitions(libgerbera PUBLIC SOLARIS)
-elseif (${CMAKE_SYSTEM_NAME} MATCHES ".*BSD.*")
+if (${CMAKE_SYSTEM_NAME} MATCHES ".*BSD.*")
     target_compile_definitions(libgerbera PUBLIC BSD)
 endif()
 

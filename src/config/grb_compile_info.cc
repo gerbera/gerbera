@@ -200,7 +200,7 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
 #ifdef TOMBDEBUG
         { "TOMBDEBUG", "" },
 #endif
-#ifdef SOLARIS
+#ifdef __sun__
         { "SOLARIS", "" },
 #endif
 #ifdef BSD

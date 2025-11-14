@@ -62,7 +62,7 @@
 #include <upnptools.h>
 #endif
 
-#ifdef SOLARIS
+#ifdef __sun__
 #include <iso/limits_iso.h>
 #endif
 
