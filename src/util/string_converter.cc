@@ -138,7 +138,7 @@ std::pair<std::string, std::string> StringConverter::_convert(
     auto outputBytes = length;
 
     log_vdebug("iconv: BEFORE: input bytes left: {}  output bytes left: {}", inputBytes, outputBytes);
-#if defined(ICONV_CONST) || defined(SOLARIS)
+#if defined(ICONV_CONST)
     int ret = iconv(cd, inputPtr, &inputBytes, outputPtr, &outputBytes);
 #else
     int ret = iconv(cd, const_cast<char**>(inputPtr), &inputBytes, outputPtr, &outputBytes);
