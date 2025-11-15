@@ -73,7 +73,7 @@ AutoscanDirectory::AutoscanDirectory(
 
 using MediaTypeIterator = EnumIterator<AutoscanDirectory::MediaType, AutoscanDirectory::MediaType::Audio, AutoscanDirectory::MediaType::MAX>;
 
-static std::map<AutoscanDirectory::MediaType, std::string_view> mediaTypes = {
+static std::map<AutoscanDirectory::MediaType, std::string> mediaTypes = {
     { AutoscanDirectory::MediaType::Audio, "Audio" },
     { AutoscanDirectory::MediaType::Music, "Music" },
     { AutoscanDirectory::MediaType::AudioBook, "AudioBook" },
@@ -123,7 +123,7 @@ std::string_view AutoscanDirectory::mapMediaType(AutoscanDirectory::MediaType mt
 std::string AutoscanDirectory::mapMediaType(int mt)
 {
     if (mt < 0)
-        return mediaTypes.at(AutoscanDirectory::MediaType::Any).data();
+        return mediaTypes.at(AutoscanDirectory::MediaType::Any);
 
     std::vector<std::string> myFlags;
 
@@ -144,12 +144,12 @@ std::string AutoscanDirectory::mapMediaType(int mt)
 int AutoscanDirectory::remapMediaType(const std::string& flag)
 {
     for (auto&& bit : MediaTypeIterator()) {
-        if (toLower(mediaTypes[bit].data()) == toLower(flag)) {
+        if (toLower(mediaTypes[bit]) == toLower(flag)) {
             return 1 << to_underlying(bit);
         }
     }
 
-    if (toLower(mediaTypes[MediaType::Any].data()) == toLower(flag)) {
+    if (toLower(mediaTypes[MediaType::Any]) == toLower(flag)) {
         return -1;
     }
     return stoiString(flag, 0, 0);

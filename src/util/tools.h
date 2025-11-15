@@ -43,7 +43,7 @@
 class IOHandler;
 
 // default protocol
-constexpr auto PROTOCOL = std::string_view("http-get");
+constexpr auto PROTOCOL = "http-get";
 
 /// @brief splits the given string into array of strings using a separator character.
 /// @param str String to split
@@ -159,7 +159,7 @@ std::string getMTFromProtocolInfo(std::string_view protocol);
 ///
 /// @param protocolInfo the String from renderProtocolInfo.
 /// @return Protocol (i.e. http-get).
-std::string_view getProtocol(std::string_view protocolInfo);
+std::string getProtocol(const std::string& protocolInfo);
 
 /// @brief Adds escaping to special characters
 ///

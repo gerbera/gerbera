@@ -107,7 +107,7 @@ struct ServiceCapabilityValues {
 };
 
 struct ServiceCapabilities {
-    std::string_view serviceType;
+    const char* serviceType;
     Quirk quirkFlags;
     std::vector<ServiceCapabilityValues> serviceValues;
 };
@@ -181,7 +181,7 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(const std::string&
                         serviceValue.push_back(value);
                     }
                 }
-                auto serviceEntry = device.append_child(tag.data());
+                auto serviceEntry = device.append_child(tag);
                 if (!serviceValue.empty())
                     serviceEntry.append_child(pugi::node_pcdata).set_value(fmt::format("{}", fmt::join(serviceValue, ",")).c_str());
             }

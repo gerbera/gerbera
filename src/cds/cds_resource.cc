@@ -112,7 +112,7 @@ std::string CdsResource::getAttribute(ResourceAttribute attr) const
 }
 
 struct ProfMapping {
-    std::string_view val;
+    std::string val;
     unsigned int mx;
     unsigned int my;
 };
@@ -125,9 +125,9 @@ static const std::vector<struct ProfMapping> resSteps {
     { RESOURCE_IMAGE_STEP_HD, 1920, 1920 },
     { RESOURCE_IMAGE_STEP_UHD, 4096, 4096 },
 };
-static const std::vector<std::string_view> sizeUnits { "kB", "MB", "GB", "TB" };
-static const std::vector<std::string_view> freqUnits { "kHz", "MHz", "GHz" };
-static const std::vector<std::string_view> orientation { "Top-left", "Top-right", "Bottom-right", "Bottom-left", "Left-top", "Right-top", "Right-bottom", "Left-bottom" };
+static const std::vector sizeUnits { "kB", "MB", "GB", "TB" };
+static const std::vector freqUnits { "kHz", "MHz", "GHz" };
+static const std::vector orientation { "Top-left", "Top-right", "Bottom-right", "Bottom-left", "Left-top", "Right-top", "Right-bottom", "Left-bottom" };
 std::string CdsResource::formatSizeValue(double value)
 {
     auto result = fmt::format("{} B", value);
@@ -175,7 +175,7 @@ std::string CdsResource::getAttributeValue(ResourceAttribute attr) const
             auto res = Resolution(result);
             for (auto&& [val, mx, my] : resSteps) {
                 if (res.x() <= mx && res.y() <= my) {
-                    return val.data();
+                    return val;
                 }
             }
             return RESOURCE_IMAGE_STEP_XHD; // Image is larger with no step defined
@@ -188,7 +188,7 @@ std::string CdsResource::getAttributeValue(ResourceAttribute attr) const
     case ResourceAttribute::ORIENTATION: {
         try {
             std::size_t value = stoiString(result);
-            return (value > 0 && value <= orientation.size()) ? orientation.at(value - 1).data() : result;
+            return (value > 0 && value <= orientation.size()) ? orientation.at(value - 1) : result;
         } catch (const std::runtime_error& e) {
             log_warning("Resource attribute for orientation {} is invalid", result);
             return result;

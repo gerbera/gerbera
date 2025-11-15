@@ -163,7 +163,7 @@ protected:
     std::shared_ptr<pugi::xml_node> setXmlValue(const std::shared_ptr<pugi::xml_node>& parent, ConfigVal option, const std::string& value);
 
     /// @brief dictionary with section names
-    static std::map<GeneratorSections, std::string_view> sections;
+    static std::map<GeneratorSections, std::string> sections;
 };
 
 #endif // GERBERA_CONFIG_GENERATOR_H

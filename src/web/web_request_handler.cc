@@ -192,13 +192,13 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(
     return ioHandler;
 }
 
-static std::map<AutoscanType, std::string_view> asTypeMap = {
+static std::map<AutoscanType, std::string> asTypeMap = {
     { AutoscanType::Ui, "ui" },
     { AutoscanType::Config, "persistent" },
     { AutoscanType::None, "none" },
 };
 
-std::string_view WebRequestHandler::mapAutoscanType(AutoscanType type)
+std::string WebRequestHandler::mapAutoscanType(AutoscanType type)
 {
     return asTypeMap.at(type);
 }

@@ -67,7 +67,7 @@ static constexpr std::array chKeys = {
     std::pair(ContentHandler::RESOURCE, "Resource"),
 };
 
-static const auto otKeys = std::map<ObjectType, std::string_view> {
+static const auto otKeys = std::map<ObjectType, std::string> {
     { ObjectType::Unknown, "Unknown" },
     { ObjectType::Folder, "Folder" },
     { ObjectType::Playlist, "Playlist" },
@@ -81,7 +81,7 @@ static const auto otKeys = std::map<ObjectType, std::string_view> {
 
 std::string EnumMapper::mapObjectType(ObjectType ot)
 {
-    return otKeys.at(ot).data();
+    return otKeys.at(ot);
 }
 
 bool EnumMapper::checkContentHandler(const std::string& contHandler)

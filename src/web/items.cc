@@ -168,7 +168,7 @@ std::vector<std::shared_ptr<CdsObject>> Web::Items::doBrowse(
         }
     }
     items["autoscan_mode"] = autoscanMode;
-    items["autoscan_type"] = mapAutoscanType(autoscanType).data();
+    items["autoscan_type"] = mapAutoscanType(autoscanType);
     items["protect_container"] = protectContainer;
     items["protect_items"] = protectItems;
 
