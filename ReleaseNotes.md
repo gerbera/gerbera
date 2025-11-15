@@ -11,6 +11,7 @@
 ### Code Improvements
 
 - Quirks flags refactored to enum
+- Update maximum library versions of ffmpegthumbnailer (2.2.4)
 
 ## v3.0.0
 
