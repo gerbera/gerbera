@@ -2,13 +2,17 @@
 
 ### HEAD
 
+- add missing array headers
 - add missing headers from headers
 - Clean up obsolete includes
 - don't use references for node()
+- enable i2i for HAVE_CURL
+- header removals and destructor fix.
 - more pugi forward declarations
 - Negation of client-flags
 - Refactor Quirks to enum
 - Update Conan integration
+- Update ffmpegthumbnailer to 2.2.4
 
 ### v3.0.0
 
