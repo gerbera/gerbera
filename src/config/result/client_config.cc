@@ -158,7 +158,7 @@ static constexpr std::array clientTypes {
     std::pair("StandardUPnP", ClientType::StandardUPnP),
 };
 
-std::string_view ClientConfig::mapClientType(ClientType clientType)
+std::string ClientConfig::mapClientType(ClientType clientType)
 {
     for (auto [cLabel, cType] : clientTypes) {
         if (clientType == cType) {
@@ -177,7 +177,7 @@ static constexpr std::array matchTypes {
     std::pair(ClientMatchType::Manufacturer, "Manufacturer"),
 };
 
-std::string_view ClientConfig::mapMatchType(ClientMatchType matchType)
+std::string ClientConfig::mapMatchType(ClientMatchType matchType)
 {
     for (auto [mType, mLabel] : matchTypes) {
         if (matchType == mType) {
@@ -197,7 +197,7 @@ ClientMatchType ClientConfig::remapMatchType(const std::string& matchType)
     return ClientMatchType::None;
 }
 
-std::vector<std::pair<std::string_view, Quirk>> ClientConfig::quirkFlags {
+std::vector<std::pair<std::string, Quirk>> ClientConfig::quirkFlags {
     { "None", Quirk::None },
     { "Samsung", Quirk::Samsung },
     { "SamsungBookmarkSeconds", Quirk::SamsungBookmarkSeconds },
@@ -245,7 +245,7 @@ std::vector<std::pair<std::string_view, Quirk>> ClientConfig::quirkFlags {
 QuirkFlags ClientConfig::remapFlag(const std::string& flag)
 {
     for (auto [qLabel, qFlag] : quirkFlags) {
-        if (toLower(flag) == toLower(qLabel.data())) {
+        if (toLower(flag) == toLower(qLabel)) {
             return getFlag(qFlag);
         }
     }

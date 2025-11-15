@@ -152,7 +152,7 @@ std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
     throw_std_runtime_error("invalid object type: {}", objectType);
 }
 
-std::string_view CdsObject::mapObjectType(unsigned int type)
+std::string CdsObject::mapObjectType(unsigned int type)
 {
     if (IS_CDS_CONTAINER(type))
         return STRING_OBJECT_TYPE_CONTAINER;
