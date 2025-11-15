@@ -165,12 +165,6 @@ void Web::ConfigLoad::setValue(Json::Value& item, const std::string& value)
 }
 
 template <>
-void Web::ConfigLoad::setValue(Json::Value& item, const std::string_view& value)
-{
-    item[CONFIG_LOAD_VALUE] = value.data();
-}
-
-template <>
 void Web::ConfigLoad::setValue(Json::Value& item, const fs::path& value)
 {
     item[CONFIG_LOAD_VALUE] = value.string();
@@ -682,10 +676,10 @@ void Web::ConfigLoad::writeBoxLayout(Json::Value& values)
             for (auto&& [key, value] : link) {
                 indexList = { i, j, k };
                 addValue(values,
-                    cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkKey.data()),
+                    cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkKey),
                     cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_LINK, key);
                 addValue(values,
-                    cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkValue.data()),
+                    cs->getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkValue),
                     cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_LINK, value);
                 k++;
             }
@@ -717,11 +711,11 @@ void Web::ConfigLoad::writeBoxLayout(Json::Value& values)
         cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_TYPE, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_CHAIN_TYPE));
 
     addNewValue(values,
-        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkKey.data()),
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkKey),
         cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_LINK, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_CHAIN_LINK));
 
     addNewValue(values,
-        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkValue.data()),
+        cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, ConfigBoxLayoutSetup::linkValue),
         cs->option, ConfigVal::A_BOXLAYOUT_CHAIN_LINK, definition->findConfigSetup(ConfigVal::A_BOXLAYOUT_CHAIN_LINK));
 }
 

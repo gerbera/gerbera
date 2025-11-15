@@ -351,7 +351,7 @@ bool ConfigBoxLayoutSetup::updateItem(
 
     // Links vector key
     {
-        auto keyIndex = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, linkKey.data());
+        auto keyIndex = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, linkKey);
         if (optItem == keyIndex) {
             std::size_t j = indexList.at(1);
             std::size_t k = indexList.at(2);
@@ -368,7 +368,7 @@ bool ConfigBoxLayoutSetup::updateItem(
     }
     // Links vector value
     {
-        auto valIndex = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, linkValue.data());
+        auto valIndex = getItemPath(indexList, { ConfigVal::A_BOXLAYOUT_CHAIN, ConfigVal::A_BOXLAYOUT_CHAIN_LINKS, ConfigVal::A_BOXLAYOUT_CHAIN_LINK }, linkValue);
         if (optItem == valIndex) {
             std::size_t j = indexList.at(1);
             std::size_t k = indexList.at(2);

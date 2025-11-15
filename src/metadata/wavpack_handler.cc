@@ -34,7 +34,7 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-static const auto fileFormats = std::map<int, std::string_view> {
+static const std::map<int, std::string> fileFormats {
     { WP_FORMAT_WAV, "WAV" },
     { WP_FORMAT_W64, "Wave64" },
     { WP_FORMAT_CAF, "CAF" },
@@ -188,7 +188,7 @@ bool WavPackHandler::getAttributes(
         - WP_FORMAT_DSF: Sony DSD format
     */
     auto fileFormat = WavpackGetFileFormat(context);
-    resource->addAttribute(ResourceAttribute::FORMAT, fileFormats.at(fileFormat).data());
+    resource->addAttribute(ResourceAttribute::FORMAT, fileFormats.at(fileFormat));
     auto avgBitrate = WavpackGetAverageBitrate(context, 0);
     resource->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(avgBitrate));
     return true;

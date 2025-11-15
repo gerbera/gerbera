@@ -26,7 +26,6 @@ Gerbera - https://gerbera.io/
 
 #include <chrono>
 #include <string>
-#include <string_view>
 
 enum class GrbTimeType {
     Seconds,
@@ -46,7 +45,7 @@ std::chrono::seconds toSeconds(TP tp)
 std::string millisecondsToHMSF(long long milliseconds);
 
 /// @brief converts a "H*:MM:SS.F*" representation to milliseconds
-long long HMSFToMilliseconds(std::string_view time);
+long long HMSFToMilliseconds(const std::string& time);
 std::string millisecondsToString(long long milliseconds, bool all = false);
 
 std::chrono::seconds currentTime();

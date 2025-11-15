@@ -108,8 +108,8 @@ public:
 
     std::string getCurrentValue() const override { return {}; }
 
-    constexpr static std::string_view linkKey = "key";
-    constexpr static std::string_view linkValue = "value";
+    static const inline std::string linkKey = "key";
+    static const inline std::string linkValue = "value";
 };
 
 #endif // __CONFIG_SETUP_BOXLAYOUT_H__
