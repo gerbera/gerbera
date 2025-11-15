@@ -73,8 +73,8 @@ bool Web::Clients::processPageAction(Json::Value& element, const std::string& ac
         auto flags = ClientConfig::mapFlags(obj.pInfo->flags);
         replaceAllString(flags, "|", " | ");
         item["flags"] = flags;
-        item["matchType"] = ClientConfig::mapMatchType(obj.pInfo->matchType).data();
-        item["clientType"] = ClientConfig::mapClientType(obj.pInfo->type).data();
+        item["matchType"] = ClientConfig::mapMatchType(obj.pInfo->matchType);
+        item["clientType"] = ClientConfig::mapClientType(obj.pInfo->type);
         if (obj.headers) {
             Json::Value headers(Json::arrayValue);
             for (auto&& [key, value] : obj.headers->getHeaders()) {

@@ -131,7 +131,7 @@ void Web::EditLoad::writeCoreInfo(
     lutEl["editable"] = false;
     item["last_updated"] = lutEl;
 
-    item["obj_type"] = CdsObject::mapObjectType(obj->getObjectType()).data();
+    item["obj_type"] = CdsObject::mapObjectType(obj->getObjectType());
 }
 
 void Web::EditLoad::writeMetadata(
@@ -303,7 +303,7 @@ void Web::EditLoad::writeItemInfo(
 
     if (objItem->isExternalItem()) {
         Json::Value protocol;
-        protocol["value"] = getProtocol(objItem->getResource(ContentHandler::DEFAULT)->getAttribute(ResourceAttribute::PROTOCOLINFO)).data();
+        protocol["value"] = getProtocol(objItem->getResource(ContentHandler::DEFAULT)->getAttribute(ResourceAttribute::PROTOCOLINFO));
         protocol["editable"] = true;
         item["protocol"] = protocol;
     }

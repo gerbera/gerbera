@@ -99,7 +99,7 @@ protected:
     virtual std::string_view getPage() const = 0;
 
     /// @brief Convert Autoscan type to string representation
-    static std::string_view mapAutoscanType(AutoscanType type);
+    static std::string mapAutoscanType(AutoscanType type);
 
 public:
     /// @brief Constructor

@@ -81,7 +81,7 @@ std::string millisecondsToHMSF(long long milliseconds)
     return fmt::format("{:01}:{:02}:{:02}.{:03}", hours, minutes, seconds, ms);
 }
 
-long long HMSFToMilliseconds(std::string_view time)
+long long HMSFToMilliseconds(const std::string& time)
 {
     if (time.empty()) {
         log_warning("Could not convert time representation to seconds!");
@@ -92,7 +92,7 @@ long long HMSFToMilliseconds(std::string_view time)
     long long minutes = 0;
     long long seconds = 0;
     long long ms = 0;
-    if (sscanf(time.data(), "%lld:%lld:%lld.%lld", &hours, &minutes, &seconds, &ms) > 3)
+    if (sscanf(time.c_str(), "%lld:%lld:%lld.%lld", &hours, &minutes, &seconds, &ms) > 3)
         return ((hours * 3600) + (minutes * 60) + seconds) * 1000 + ms;
 
     log_warning("Could not parse time '{}'!", time);
@@ -107,11 +107,11 @@ static const auto timeFactors = std::map<GrbTimeType, std::vector<int>> {
 
 std::string makeSimpleDate(std::string& s)
 {
-    std::string_view date_time_format { "%Y-%m-%dT%H:%M:%S" };
+    constexpr auto date_time_format = "%Y-%m-%dT%H:%M:%S";
     std::istringstream ss { s };
     std::tm dt {};
 
-    ss >> std::get_time(&dt, date_time_format.data());
+    ss >> std::get_time(&dt, date_time_format);
     if (!ss.fail()) {
         int tz;
         ss >> tz;
@@ -130,11 +130,11 @@ std::string makeSimpleDate(std::string& s)
 
 bool parseSimpleDate(const std::string& s, std::chrono::seconds& date)
 {
-    std::string_view date_time_format { "%Y-%m-%dT%H:%M:%S" };
+    constexpr auto date_time_format = "%Y-%m-%dT%H:%M:%S";
     std::istringstream ss { s };
     std::tm dt {};
 
-    ss >> std::get_time(&dt, date_time_format.data());
+    ss >> std::get_time(&dt, date_time_format);
     if (!ss.fail()) {
         auto t = std::mktime(&dt);
         date = std::chrono::seconds(t);

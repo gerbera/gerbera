@@ -189,8 +189,8 @@ public:
     }
 
     /* helpers for clientType stuff */
-    static std::string_view mapClientType(ClientType clientType);
-    static std::string_view mapMatchType(ClientMatchType matchType);
+    static std::string mapClientType(ClientType clientType);
+    static std::string mapMatchType(ClientMatchType matchType);
     static ClientMatchType remapMatchType(const std::string& matchType);
     static QuirkFlags remapFlag(const std::string& flag);
     static QuirkFlags makeFlags(const std::string& optValue);
@@ -202,7 +202,7 @@ public:
 
 protected:
     ClientProfile clientProfile;
-    static std::vector<std::pair<std::string_view, Quirk>> quirkFlags;
+    static std::vector<std::pair<std::string, Quirk>> quirkFlags;
 };
 
 #endif

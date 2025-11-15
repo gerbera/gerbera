@@ -59,7 +59,7 @@ std::string ConfigGenerator::printSections(int section)
 
     for (auto [bit, label] : sections) {
         if (section & (1 << to_underlying(bit))) {
-            myFlags.emplace_back(label.data());
+            myFlags.emplace_back(label);
             section &= ~(1 << to_underlying(bit));
         }
     }
@@ -77,7 +77,7 @@ int ConfigGenerator::makeSections(const std::string& optValue)
     return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ConfigGenerator::remapGeneratorSections(trimString(i)); });
 }
 
-std::map<GeneratorSections, std::string_view> ConfigGenerator::sections = {
+std::map<GeneratorSections, std::string> ConfigGenerator::sections = {
     { GeneratorSections::Server, "Server" },
     { GeneratorSections::Ui, "Ui" },
     { GeneratorSections::ExtendedRuntime, "ExtendedRuntime" },
@@ -95,12 +95,12 @@ std::map<GeneratorSections, std::string_view> ConfigGenerator::sections = {
 int ConfigGenerator::remapGeneratorSections(const std::string& arg)
 {
     for (auto&& bit : GeneratorSectionsIterator()) {
-        if (toLower(ConfigGenerator::sections[bit].data()) == toLower(arg)) {
+        if (toLower(ConfigGenerator::sections[bit]) == toLower(arg)) {
             return 1 << to_underlying(bit);
         }
     }
 
-    if (toLower(ConfigGenerator::sections[GeneratorSections::All].data()) == toLower(arg)) {
+    if (toLower(ConfigGenerator::sections[GeneratorSections::All]) == toLower(arg)) {
         int result = 0;
         for (auto&& bit : GeneratorSectionsIterator())
             result |= 1 << to_underlying(bit);
