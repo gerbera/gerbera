@@ -50,7 +50,7 @@ StringConverter::StringConverter(const std::string& from, const std::string& to)
     : cd(iconv_open(to.c_str(), from.c_str()))
     , to(to)
 {
-    if (!cd) {
+    if (cd == iconv_t(-1)) {
         cd = {};
         throw_fmt_system_error("iconv");
     }
