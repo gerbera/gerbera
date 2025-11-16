@@ -80,7 +80,7 @@ function importVideo(obj, cont, rootPath, autoscanId, containerType) {
   result.push(addCdsObject(obj, container, rootPath));
 
   // Year
-  if (boxSetup[BK_videoAll].enabled && video.month.length > 0) {
+  if (boxSetup[BK_videoAllYears].enabled && video.month.length > 0) {
     chain.year.title = video.year;
     chain.month.title = video.month;
     result.push(addCdsObject(obj, addContainerTree([chain.video, chain.allYears, chain.year, chain.month]), rootPath));
