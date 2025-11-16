@@ -4,15 +4,19 @@
 
 - add missing array headers
 - add missing headers from headers
+- Avoid string_view conversion
 - Clean up obsolete includes
 - don't use references for node()
 - enable i2i for HAVE_CURL
+- fix compilation under OmniOS
 - header removals and destructor fix.
 - more pugi forward declarations
 - Negation of client-flags
 - Refactor Quirks to enum
+- remove various string_view data usages
 - Update Conan integration
 - Update ffmpegthumbnailer to 2.2.4
+- use correct name for boxlayout enabled years
 
 ### v3.0.0
 

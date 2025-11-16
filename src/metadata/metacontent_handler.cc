@@ -537,7 +537,7 @@ bool ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
                 continue;
 
             resource = std::make_shared<CdsResource>(ContentHandler::RESOURCE, ResourcePurpose::Thumbnail);
-            resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("res"));
+            resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(""));
             resource->addAttribute(ResourceAttribute::RESOURCE_FILE, mval);
             obj->addResource(resource);
             result = true;

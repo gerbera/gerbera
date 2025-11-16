@@ -61,7 +61,11 @@
 
 static constexpr auto hexChars = "0123456789abcdef";
 
-std::vector<std::string> splitString(std::string_view str, char sep, char quote, bool empty)
+std::vector<std::string> splitString(
+    std::string str,
+    char sep,
+    char quote,
+    bool empty)
 {
     std::vector<std::string> ret;
 
@@ -328,10 +332,13 @@ std::string generateRandomId()
 
 std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes)
 {
-    return mimeTypes.empty() ? "" : fmt::format("http-get:*:{}:*", fmt::join(mimeTypes, ":*,http-get:*:"));
+    return mimeTypes.empty() ? "" : fmt::format("{}:*:{}:*", PROTOCOL, fmt::join(mimeTypes, fmt::format(":*,{}:*:", PROTOCOL)));
 }
 
-std::string renderProtocolInfo(std::string_view mimetype, std::string_view protocol, std::string_view extend)
+std::string renderProtocolInfo(
+    const std::string& mimetype,
+    const std::string& protocol,
+    const std::string& extend)
 {
     if (!mimetype.empty() && !protocol.empty()) {
         if (!extend.empty())
@@ -339,10 +346,10 @@ std::string renderProtocolInfo(std::string_view mimetype, std::string_view proto
         return fmt::format("{}:*:{}:*", protocol, mimetype);
     }
 
-    return "http-get:*:*:*";
+    return fmt::format("{}:*:*:*", PROTOCOL);
 }
 
-std::string getMTFromProtocolInfo(std::string_view protocol)
+std::string getMTFromProtocolInfo(const std::string& protocol)
 {
     std::vector<std::string> parts = splitString(protocol, ':');
     if (parts.size() > 2)

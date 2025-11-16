@@ -51,7 +51,11 @@ constexpr auto PROTOCOL = "http-get";
 /// @param quote masking character encapsulating separators
 /// @param empty treat subsequent separators as empty array elements
 /// @return array of strings
-std::vector<std::string> splitString(std::string_view str, char sep, char quote = '\0', bool empty = false);
+std::vector<std::string> splitString(
+    std::string str,
+    char sep,
+    char quote = '\0',
+    bool empty = false);
 
 /// @brief remove leading and trailing whitespace (in place)
 void trimStringInPlace(std::string& str);
@@ -148,12 +152,15 @@ std::string mimeTypesToCsv(const std::vector<std::string>& mimeTypes);
 /// @param protocol the protocol which should be inserted (default: "http-get")
 /// @param extend extend the protocolInfo
 /// @return The rendered protocolInfo String
-std::string renderProtocolInfo(std::string_view mimetype, std::string_view protocol = PROTOCOL, std::string_view extend = "");
+std::string renderProtocolInfo(
+    const std::string& mimetype,
+    const std::string& protocol = PROTOCOL,
+    const std::string& extend = "");
 
 /// @brief Extracts mimetype from the protocol info string.
 /// @param protocol info string as used in the protocolInfo attribute
 /// @return mime-type in protocol
-std::string getMTFromProtocolInfo(std::string_view protocol);
+std::string getMTFromProtocolInfo(const std::string& protocol);
 
 /// @brief Parses a protocolInfo string (see renderProtocolInfo).
 ///
