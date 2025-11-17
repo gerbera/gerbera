@@ -48,6 +48,38 @@ class MyConfigMock final : public ConfigMock {
 public:
     MyConfigMock() { list = std::make_shared<ClientConfigList>(); }
     std::shared_ptr<ClientConfigList> getClientConfigListOption(ConfigVal option) const override { return list; }
+    std::string getOption(ConfigVal option) const override
+    {
+        switch (option) {
+#ifdef HAVE_LIBEXIF
+        case ConfigVal::IMPORT_LIBOPTS_EXIF_CHARSET:
+#endif
+#ifdef HAVE_EXIV2
+        case ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET:
+#endif
+#ifdef HAVE_TAGLIB
+        case ConfigVal::IMPORT_LIBOPTS_ID3_CHARSET:
+#endif
+#ifdef HAVE_FFMPEG
+        case ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET:
+#endif
+#ifdef HAVE_MATROSKA
+        case ConfigVal::IMPORT_LIBOPTS_MKV_CHARSET:
+#endif
+#ifdef HAVE_WAVPACK
+        case ConfigVal::IMPORT_LIBOPTS_WAVPACK_CHARSET:
+#endif
+#ifdef HAVE_JS
+        case ConfigVal::IMPORT_SCRIPTING_CHARSET:
+        case ConfigVal::IMPORT_PLAYLIST_CHARSET:
+#endif
+        case ConfigVal::IMPORT_METADATA_CHARSET:
+        case ConfigVal::IMPORT_FILESYSTEM_CHARSET:
+            return DEFAULT_INTERNAL_CHARSET;
+        default:
+            return "";
+        }
+    }
     std::shared_ptr<ClientConfigList> list;
 };
 

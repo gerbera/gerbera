@@ -9,6 +9,7 @@
 - don't use references for node()
 - enable i2i for HAVE_CURL
 - fix compilation under OmniOS
+- fix error handling in string_converter
 - header removals and destructor fix.
 - more pugi forward declarations
 - Negation of client-flags
