@@ -48,7 +48,6 @@
 #include "database/db_param.h"
 
 #include <fmt/chrono.h>
-#include <numeric>
 
 #define CONFIG_LOAD_AID "aid"
 #define CONFIG_LOAD_DEFAULTVALUE "defaultValue"
@@ -830,7 +829,7 @@ void Web::ConfigLoad::writeTranscoding(Json::Value& values)
                 addValue(values,
                     cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC }),
                     cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC,
-                    std::accumulate(next(fourCCList.begin()), fourCCList.end(), fourCCList[0], [](auto&& a, auto&& b) { return fmt::format("{}, {}", a, b); }));
+                    fmt::format("{}", fmt::join(fourCCList, ", ")));
             }
         }
         pr++;
