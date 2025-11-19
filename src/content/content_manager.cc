@@ -677,10 +677,10 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
     std::error_code ec;
     auto rootDir = fs::directory_entry(location, ec);
-    std::unique_ptr<fs::directory_iterator> dIter;
+    std::optional<fs::directory_iterator> dIter;
 
     if (!ec && rootDir.exists(ec) && rootDir.is_directory(ec)) {
-        dIter = std::make_unique<fs::directory_iterator>(location, ec);
+        dIter = std::make_optional<fs::directory_iterator>(location, ec);
         if (ec) {
             log_error("_rescanDirectory: Failed to iterate {}, {}", location.c_str(), ec.message());
         }
