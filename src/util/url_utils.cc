@@ -158,26 +158,25 @@ std::string urlUnescape(std::string_view str)
     return buf.str();
 }
 
-static std::string dictEncode(const std::map<std::string, std::string>& dict, char sep1, char sep2)
+static std::string dictEncode(const std::map<std::string, std::string>& dict, std::string_view sep1, char sep2)
 {
-    std::ostringstream buf;
-    for (auto it = dict.begin(); it != dict.end(); ++it) {
-        if (it != dict.begin())
-            buf << sep1;
-        buf << urlEscape(it->first) << sep2
-            << urlEscape(it->second);
-    }
-    return buf.str();
+    std::vector<std::string> items;
+    items.reserve(dict.size());
+
+    for (const auto& [k, v] : dict)
+        items.push_back(fmt::format("{}{}{}", urlEscape(k), sep2, urlEscape(v)));
+
+    return fmt::format("{}", fmt::join(items, sep1));
 }
 
 std::string dictEncode(const std::map<std::string, std::string>& dict)
 {
-    return dictEncode(dict, '&', '=');
+    return dictEncode(dict, "&", '=');
 }
 
 std::string dictEncodeSimple(const std::map<std::string, std::string>& dict)
 {
-    return dictEncode(dict, '/', '/');
+    return dictEncode(dict, "/", '/');
 }
 
 std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscape)
