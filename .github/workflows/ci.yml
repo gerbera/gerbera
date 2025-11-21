@@ -73,18 +73,18 @@ jobs:
           conan remove 'gerbera/*' -c
           conan create -pr ./conan/dev -o 'gerbera/*:icu=${{ matrix.compiler.icu }}' --build=missing --version dev .
       - name: cleanup
-        # Remove build directories before creating a cache.
         run: |
+          # Remove build directories before creating a cache.
           conan remove '*' -c
 
   head-check:
     strategy:
-       matrix:
-         head:
-           - name: check
-             lib: pupnp
-           - name: npupnp
-             lib: npupnp
+      matrix:
+        head:
+          - name: check
+            lib: pupnp
+          - name: npupnp
+            lib: npupnp
     runs-on: ubuntu-latest
     name: head-${{ matrix.head.name }}
     container:
@@ -108,3 +108,35 @@ jobs:
       - name: Build and test
         run: |
           bash scripts/debian/build-deb.sh HEAD ${{ matrix.head.lib }}
+
+  FreeBSD:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: vmactions/freebsd-vm@v1
+        with:
+          prepare: |
+            pkg install -y cmake curl duktape duktape-lib googletest \
+                exiv2 jsoncpp icu libexif ninja pkgconf \
+                sqlite3 pugixml spdlog taglib upnp magic wavpack \
+                ffmpeg ffmpegthumbnailer libmatroska libiconv libinotify
+          run: |
+            cmake -S . -B build -G Ninja --preset=develop \
+                -DWITH_MYSQL=0 -DWITH_PGSQL=0 -DBUILD_DOC=0 -DBUILD_CHANGELOG=0
+            cmake --build build -j$(nproc) --verbose
+            cd build
+            ctest --output-on-failure
+
+  OmniOS:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: vmactions/omnios-vm@v1
+        with:
+          prepare: |
+            pkg install bash cmake gnu-make icu4c curl ffmpeg gcc14 ninja \
+                pkg-config sqlite-3 libexif taglib gnu-coreutils \
+                autoconf automake gnu-m4 libtool gnu-tar gzip bzip2
+          run: |
+            export GH_ACTIONS=y
+            scripts/sunos/build-solaris.sh

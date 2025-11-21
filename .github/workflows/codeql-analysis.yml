@@ -23,33 +23,33 @@ jobs:
         language: [ 'cpp', 'javascript' ]
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v5
+      - name: Checkout repository
+        uses: actions/checkout@v5
 
-    - if: matrix.language == 'cpp'
-      name: Install Deps
-      run: |
-         sudo apt-get update && \
-         sudo apt-get install -y \
-            libpugixml-dev libexiv2-dev libsqlite3-dev \
-            libduktape207 duktape-dev \
-            lsb-release uuid-dev\
-            libmagic-dev libmatroska-dev libexif-dev
+      - if: matrix.language == 'cpp'
+        name: Install Deps
+        run: |
+           sudo apt-get update && \
+           sudo apt-get install -y \
+             libpugixml-dev libexiv2-dev libsqlite3-dev \
+             libduktape207 duktape-dev \
+             lsb-release uuid-dev\
+             libmagic-dev libmatroska-dev libexif-dev
 
-         sudo bash ./scripts/install-pupnp.sh
-         sudo bash ./scripts/install-fmt.sh
-         sudo bash ./scripts/install-spdlog.sh
-         sudo bash ./scripts/install-taglib.sh
+           sudo bash ./scripts/install-pupnp.sh
+           sudo bash ./scripts/install-fmt.sh
+           sudo bash ./scripts/install-spdlog.sh
+           sudo bash ./scripts/install-taglib.sh
 
-    # Initializes the CodeQL tools for scanning.
-    - name: Initialize CodeQL
-      uses: github/codeql-action/init@v4
-      with:
-        languages: ${{ matrix.language }}
-        config-file: ./.github/codeql/codeql-config.yml
+        # Initializes the CodeQL tools for scanning.
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: ${{ matrix.language }}
+          config-file: ./.github/codeql/codeql-config.yml
 
-    - name: Autobuild
-      uses: github/codeql-action/autobuild@v4
+      - name: Autobuild
+        uses: github/codeql-action/autobuild@v4
 
-    - name: Perform CodeQL Analysis
-      uses: github/codeql-action/analyze@v4
+      - name: Perform CodeQL Analysis
+        uses: github/codeql-action/analyze@v4

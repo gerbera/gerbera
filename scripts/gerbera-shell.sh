@@ -19,8 +19,33 @@
 #
 # $Id$
 
+lsb_codename=""
+lsb_distro=""
+lsb_rel=""
+lsb_arch="$(uname -p)"
+if [ -x "$(command -v dpkg)" ]; then
+    lsb_arch=$(dpkg --print-architecture)
+fi
 
-set -Eeuo pipefail
+if [ -x "$(command -v lsb_release)" ]; then
+    lsb_codename=$(lsb_release -c --short)
+    if [[ "${lsb_codename}" == "n/a" ]]; then
+        lsb_codename="unstable"
+    fi
+    lsb_distro=$(lsb_release -i --short)
+    lsb_rel=$(lsb_release -r --short)
+    lsb_codename=${lsb_codename,,}
+    lsb_distro=${lsb_distro,,}
+    lsb_rel=${lsb_rel,,}
+fi
+if [ -z "${lsb_codename}" ]; then
+    lsb_codename="$(uname -o)"
+    lsb_distro="$(uname)"
+    lsb_rel="unknown"
+    lsb_codename=${lsb_codename,,}
+    lsb_distro=${lsb_distro,,}
+    lsb_rel=${lsb_rel,,}
+fi
 
 if [[ -z "${ROOT_DIR-}" ]]; then
   GRB_SH_DIR=$(dirname "$0")
@@ -28,6 +53,8 @@ if [[ -z "${ROOT_DIR-}" ]]; then
 else
   GRB_SH_DIR="${ROOT_DIR}scripts/"
 fi
+
+set -Eeuo pipefail
 
 function install-fmt() {
   echo "::group::Installing fmt"
@@ -105,5 +132,17 @@ function install-matroska() {
 function install-ffmpegthumbnailer() {
   echo "::group::Installing ffmpegthumbnailer"
   sudo bash "${GRB_SH_DIR}install-ffmpegthumbnailer.sh"
+  echo "::endgroup::"
+}
+
+function install-wavpack() {
+  echo "::group::Installing WavPACK"
+  sudo bash "${GRB_SH_DIR}install-wavpack.sh"
+  echo "::endgroup::"
+}
+
+function install-jsoncpp() {
+  echo "::group::Installing JsonCPP"
+  sudo bash "${GRB_SH_DIR}install-jsoncpp.sh"
   echo "::endgroup::"
 }

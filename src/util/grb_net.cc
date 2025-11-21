@@ -43,34 +43,59 @@ Gerbera - https://gerbera.io/
 /// @brief Compare sockaddr
 /// inspired by: http://www.opensource.apple.com/source/postfix/postfix-197/postfix/src/util/sock_addr.c
 #define SOCK_ADDR_IN_PTR(sa) reinterpret_cast<const struct sockaddr_in*>(sa)
-#define SOCK_ADDR_IN_ADDR(sa) SOCK_ADDR_IN_PTR(sa)->sin_addr
 #define SOCK_ADDR_IN6_PTR(sa) reinterpret_cast<const struct sockaddr_in6*>(sa)
-#define SOCK_ADDR_IN6_ADDR(sa) SOCK_ADDR_IN6_PTR(sa)->sin6_addr
-static int sockAddrCmpAddr(const struct sockaddr* sa, const struct sockaddr* sb, int prefix = -1)
+
+static int sockAddrCmpAddr(
+    const struct sockaddr* sa,
+    const struct sockaddr* sb,
+    int prefix = -1)
 {
     if (sa->sa_family != sb->sa_family)
         return sa->sa_family - sb->sa_family;
 
     if (sa->sa_family == AF_INET) {
+        auto sin_a = SOCK_ADDR_IN_PTR(sa);
+        auto sin_b = SOCK_ADDR_IN_PTR(sb);
+        uint32_t addr_a = ntohl(sin_a->sin_addr.s_addr);
+        uint32_t addr_b = ntohl(sin_b->sin_addr.s_addr);
+
         uint32_t netmask = 0;
         if (prefix > 0 && prefix < 33) {
-            while (prefix) {
-                netmask <<= 1;
-                netmask++;
-                prefix--;
-            }
+            netmask = prefix == 32 ? 0xFFFFFFFF : ~((1U << (32 - prefix)) - 1);
         }
-        if (netmask > 0 && (SOCK_ADDR_IN_ADDR(sa).s_addr & netmask) == (SOCK_ADDR_IN_ADDR(sb).s_addr & netmask)) {
+
+        if (netmask > 0 && (addr_a & netmask) == (addr_b & netmask)) {
             return 0;
         }
-        return SOCK_ADDR_IN_ADDR(sa).s_addr - SOCK_ADDR_IN_ADDR(sb).s_addr;
+        return (addr_a < addr_b) ? -1 : (addr_a > addr_b ? 1 : 0);
     }
 
     if (sa->sa_family == AF_INET6) {
+        auto sin6_a = SOCK_ADDR_IN6_PTR(sa);
+        auto sin6_b = SOCK_ADDR_IN6_PTR(sb);
+
         if (prefix > 0 && prefix < 129) {
-            return std::memcmp((SOCK_ADDR_IN6_ADDR(sa)).s6_addr, (SOCK_ADDR_IN6_ADDR(sb).s6_addr), sizeof(SOCK_ADDR_IN6_ADDR(sa).s6_addr[0]) * prefix / 8);
+            int full_bytes = prefix / 8;
+            int rem_bits = prefix % 8;
+
+            // Compare full bytes
+            int res = std::memcmp(sin6_a->sin6_addr.s6_addr, sin6_b->sin6_addr.s6_addr, full_bytes);
+            if (res != 0)
+                return res;
+
+            // If there are remaining bits, compare them
+            if (rem_bits > 0) {
+                uint8_t mask = (~0U) << (8 - rem_bits);
+                uint8_t a = sin6_a->sin6_addr.s6_addr[full_bytes] & mask;
+                uint8_t b = sin6_b->sin6_addr.s6_addr[full_bytes] & mask;
+                if (a != b)
+                    return (a < b) ? -1 : 1;
+            }
+            return 0;
         }
-        return std::memcmp(&(SOCK_ADDR_IN6_ADDR(sa)), &(SOCK_ADDR_IN6_ADDR(sb)), sizeof(SOCK_ADDR_IN6_ADDR(sa)));
+        // Compare all 16 bytes
+        int res = std::memcmp(sin6_a->sin6_addr.s6_addr, sin6_b->sin6_addr.s6_addr, 16);
+        return res;
     }
 
     throw_std_runtime_error("Unsupported address family: {}", sa->sa_family);

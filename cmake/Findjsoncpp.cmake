@@ -26,7 +26,7 @@ FIND_PACKAGE_HANDLE_STANDARD_ARGS(jsoncpp
         JSONCPP_VERSION)
 
 if (JSONCPP_FOUND)
-    if(CMAKE_SYSTEM_NAME MATCHES "Darwin")
+    if(CMAKE_SYSTEM_NAME MATCHES "Darwin" OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD" OR CMAKE_SYSTEM_NAME MATCHES ".*(SunOS|Solaris).*")
        set (jsoncpp_LIBRARIES ${JSONCPP_LIBRARY})
     else ()
        set (jsoncpp_LIBRARIES ${JSONCPP_LIBRARY} ${PC_JSONCPP_LIBRARIES})
@@ -38,6 +38,8 @@ if (JSONCPP_FOUND)
         set_target_properties(jsoncpp::jsoncpp PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${jsoncpp_INCLUDE_DIRS}")
         set_property(TARGET jsoncpp::jsoncpp PROPERTY INTERFACE_LINK_LIBRARIES "${jsoncpp_LIBRARIES}")
     endif()
+else ()
+   set (jsoncpp_LIBRARIES ${PC_JSONCPP_LIBRARIES})
 endif ()
 
 MARK_AS_ADVANCED(

@@ -11,5 +11,4 @@ pupnp/*:ipv6=True
 pupnp/*:reuseaddr=True
 pupnp/*:blocking-tcp=False
 # blocking-tcp is broken in conan recipe so expect warning during configure
-mariadb-connector-c/*:with_ssl=False
 libcurl/*:with_ssl=False

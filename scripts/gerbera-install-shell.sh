@@ -29,6 +29,14 @@ if [ "$(id -u)" != 0 ]; then
     exit 1
 fi
 
+lsb_codename=""
+lsb_distro=""
+lsb_rel=""
+lsb_arch="$(uname -p)"
+if [ -x "$(command -v dpkg)" ]; then
+    lsb_arch=$(dpkg --print-architecture)
+fi
+
 if [ -x "$(command -v lsb_release)" ]; then
     lsb_codename=$(lsb_release -c --short)
     if [[ "${lsb_codename}" == "n/a" ]]; then
@@ -39,10 +47,14 @@ if [ -x "$(command -v lsb_release)" ]; then
     lsb_codename=${lsb_codename,,}
     lsb_distro=${lsb_distro,,}
     lsb_rel=${lsb_rel,,}
-else
-    lsb_codename="unknown"
-    lsb_distro="unknown"
+fi
+if [ -z "${lsb_codename}" ]; then
+    lsb_codename="$(uname -o)"
+    lsb_distro="$(uname)"
     lsb_rel="unknown"
+    lsb_codename=${lsb_codename,,}
+    lsb_distro=${lsb_distro,,}
+    lsb_rel=${lsb_rel,,}
 fi
 
 function downloadSource()
@@ -120,7 +132,7 @@ function makeInstall()
 
 function ldConfig()
 {
-    if [ "$(uname)" != 'Darwin' ]; then
+    if [[ "$(uname)" != 'Darwin' && "$(uname)" != "SunOS" ]]; then
         if [ -f /etc/os-release ]; then
             . /etc/os-release
         else
