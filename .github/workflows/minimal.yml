@@ -14,9 +14,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        platform: ['x86_64', 'x86', 'armhf', 'armv7', 'aarch64', 'ppc64le', 'riscv64']
+        platform: ['x86_64', 'x86', 'armhf', 'armv7', 'aarch64', 'ppc64le', 'riscv64', 's390x']
         branch: ['v3.21', 'v3.22', 'edge']
-    
+
     name: Minimal ${{matrix.platform}}${{matrix.branch != 'v3.22' && format(' - {0}', matrix.branch) || format('')}}
     defaults:
       run:

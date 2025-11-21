@@ -299,8 +299,8 @@ const ClientObservation* ClientManager::getInfo(
     }
 
     // always return something, 'Unknown' if we do not know better
-    assert(clientProfile[0].type == ClientType::Unknown);
-    info = clientProfile.data();
+    assert(clientProfile.at(0).type == ClientType::Unknown);
+    info = &(clientProfile.at(0));
 
     // also add to cache, for web-ui proposes only
     return updateCache(addr, userAgent, headers, info);
