@@ -36,7 +36,7 @@ installDeps ${main_dir} pupnp
 
 (
     cd "${src_dir}"
-    ./bootstrap
+    bash ./bootstrap
 )
 
 if [ "${UNAME}" = 'FreeBSD' ]; then

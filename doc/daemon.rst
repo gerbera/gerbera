@@ -125,11 +125,11 @@ If your system uses an old style system V init, commandline options are availabl
 
 .. index:: Solaris
 
-Using solaris
-~~~~~~~~~~~~~
+Using solaris / OmniOS
+~~~~~~~~~~~~~~~~~~~~~~
 
 
-You can use the solaris script provided in ``scripts/solaris`` to add Gerbera as a service in solaris.
+You can use the solaris script provided in ``scripts/sunos`` to add Gerbera as a service in Solaris / OmniOS.
 
 
 .. index:: LaunchD

@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # Gerbera - https://gerbera.io/
 #
-# debian/deps/pqxx.sh - this file is part of Gerbera.
+# sunos/deps/ffmpegthumbnailer.sh - this file is part of Gerbera.
 #
 # Copyright (C) 2025 Gerbera Contributors
 #
@@ -19,5 +19,7 @@
 #
 # $Id$
 
-sudo apt-get install -y \
-    libpq-dev libpq5
+set +e
+pkg install \
+    ffmpeg
+set -e

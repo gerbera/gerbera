@@ -97,7 +97,8 @@ class GerberaConan(ConanFile):
             self.requires("exiv2/0.28.3")
 
         if self.options.mysql:
-            self.requires("mariadb-connector-c/[<3.4.3]") # That recipe is broken
+            self.requires("mariadb-connector-c/3.4.3") # That recipe is broken
+            #self.requires("mariadb-connector-c/[<3.4.3]") # That recipe is broken
 
         if self.options.postgres:
             self.requires("libpq/15.4") # required by libpqxx

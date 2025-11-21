@@ -251,6 +251,39 @@
         "WITH_ONLINE_SERVICES": "OFF",
         "WITH_TESTS": "ON"
       }
+    },
+    {
+      "name": "sunos-develop",
+      "displayName": "Build for OmniOS / Solaris",
+      "description": "Configuration for OmniOS / Solaris.",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "WITH_NPUPNP": "OFF",
+        "STATIC_LIBUPNP": "ON",
+        "WITH_MAGIC": "OFF",
+        "WITH_MYSQL": "OFF",
+        "WITH_PGSQL": "OFF",
+        "WITH_CURL": "ON",
+        "WITH_INOTIFY": "ON",
+        "WITH_JS": "ON",
+        "WITH_TAGLIB": "ON",
+        "WITH_AVCODEC": "ON",
+        "WITH_WAVPACK": "ON",
+        "WITH_FFMPEGTHUMBNAILER": "ON",
+        "WITH_EXIF": "ON",
+        "WITH_EXIV2": "OFF",
+        "WITH_MATROSKA": "ON",
+        "WITH_SYSTEMD": "ON",
+        "WITH_LASTFM": "ON",
+        "WITH_ICU": "ON",
+        "WITH_DEBUG": "ON",
+        "WITH_DEBUG_OPTIONS": "ON",
+        "WITH_ONLINE_SERVICES": "OFF",
+        "WITH_TESTS": "ON",
+        "INSTALL_DOC": "ON",
+        "BUILD_DOC": "OFF",
+        "BUILD_CHANGELOG": "OFF"
+      }
     }
   ]
 }

@@ -12,6 +12,8 @@
 
 - Quirks flags refactored to enum
 - Update maximum library versions of ffmpegthumbnailer (2.2.4)
+- Support building for OmniOS
+- Added CI checks for s390x and FreeBSD
 
 ## v3.0.0
 

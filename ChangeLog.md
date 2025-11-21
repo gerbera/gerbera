@@ -2,19 +2,24 @@
 
 ### HEAD
 
+- accumulate to join
 - add missing array headers
 - add missing headers from headers
 - Avoid string_view conversion
+- Bump js-yaml from 4.1.0 to 4.1.1 in /gerbera-web
 - Clean up obsolete includes
 - don't use references for node()
 - enable i2i for HAVE_CURL
 - fix compilation under OmniOS
 - fix error handling in string_converter
 - header removals and destructor fix.
+- More CI checks
 - more pugi forward declarations
 - Negation of client-flags
 - Refactor Quirks to enum
+- remove unique_ptr from xml_document
 - remove various string_view data usages
+- replaced lock_guard with scoped_lock
 - Update Conan integration
 - Update ffmpegthumbnailer to 2.2.4
 - use correct name for boxlayout enabled years

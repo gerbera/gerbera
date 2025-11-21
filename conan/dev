@@ -12,6 +12,7 @@ build_type=Debug
 &:tests=True
 &:exiv2=False
 &:postgres=True
+&:mysql=False
 
 [buildenv]
 gerbera:CXXFLAGS=-Og -Werror -Wall

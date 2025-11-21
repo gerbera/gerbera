@@ -6,10 +6,10 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v5
-    - uses: DoozyX/clang-format-lint-action@v0.20
-      with:
-        source: './src'
-        exclude: './src/contrib'
-        extensions: 'h,cc'
-        clangFormatVersion: 18
+      - uses: actions/checkout@v5
+      - uses: DoozyX/clang-format-lint-action@v0.20
+        with:
+          source: './src'
+          exclude: './src/contrib'
+          extensions: 'h,cc'
+          clangFormatVersion: 18
