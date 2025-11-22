@@ -160,13 +160,13 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(const std::string&
             { "dlna:X_DLNADOC", Quirk::Samsung, { { "M-DMS-1.50", Quirk::None } } },
             { "deviceType", Quirk::None, { { "urn:schemas-upnp-org:device:MediaServer:1", Quirk::None } } },
             { "presentationURL", Quirk::None, { { getPresentationUrl(ip, port), Quirk::None } } },
-            { "sec:ProductCap", Quirk::None, {
+            { "sec:ProductCap", Quirk::DCM10, {
                                                  { "smi", Quirk::None },
-                                                 { "DCM10", Quirk::Samsung },
+                                                 { "DCM10", Quirk::None },
                                                  { "getMediaInfo.sec", Quirk::None },
                                                  { "getCaptionInfo.sec", Quirk::None },
                                              } },
-            { "sec:X_ProductCap", Quirk::Samsung, {
+            { "sec:X_ProductCap", Quirk::DCM10, {
                                                       { "smi", Quirk::None },
                                                       { "DCM10", Quirk::None },
                                                       { "getMediaInfo.sec", Quirk::None },
