@@ -115,7 +115,7 @@ void ClientManager::refresh()
             "Samsung other TVs",
             DEFAULT_CLIENT_GROUP,
             ClientType::SamsungSeriesCDE,
-            ClientConfig::getFlags({ Quirk::Samsung, Quirk::SamsungFeatures, Quirk::SamsungHideDynamic }),
+            ClientConfig::getFlags({ Quirk::Samsung, Quirk::SamsungFeatures, Quirk::SamsungHideDynamic, Quirk::DCM10 }),
             ClientMatchType::UserAgent,
             "SEC_HHP_",
         },
