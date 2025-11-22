@@ -29,6 +29,9 @@ if [ "$(id -u)" != 0 ]; then
     exit 1
 fi
 
+lsb_codename=""
+lsb_distro=""
+lsb_rel=""
 if [ -x "$(command -v lsb_release)" ]; then
     lsb_codename=$(lsb_release -c --short)
     if [[ "${lsb_codename}" == "n/a" ]]; then
@@ -39,10 +42,18 @@ if [ -x "$(command -v lsb_release)" ]; then
     lsb_codename=${lsb_codename,,}
     lsb_distro=${lsb_distro,,}
     lsb_rel=${lsb_rel,,}
-else
-    lsb_codename="unknown"
-    lsb_distro="unknown"
+fi
+if [ -z "${lsb_codename}" ]; then
+    lsb_codename="$(uname -o)"
+    lsb_distro="$(uname)"
     lsb_rel="unknown"
+    if [ -f /etc/omnio-release ]; then
+        lsb_rel="$(cat /etc/omnio-release)"
+        lsb_distro="sunos"
+    fi
+    lsb_codename=${lsb_codename,,}
+    lsb_distro=${lsb_distro,,}
+    lsb_rel=${lsb_rel,,}
 fi
 
 function downloadSource()

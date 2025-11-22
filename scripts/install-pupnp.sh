@@ -19,6 +19,7 @@
 #
 # $Id$
 set -Eeuo pipefail
+set -x
 
 main_dir=$(dirname "${BASH_SOURCE[0]}")
 main_dir=$(realpath "${main_dir}")/
@@ -36,7 +37,8 @@ installDeps ${main_dir} pupnp
 
 (
     cd "${src_dir}"
-    ./bootstrap
+    ls -l .
+    bash ./bootstrap
 )
 
 if [ "${UNAME}" = 'FreeBSD' ]; then

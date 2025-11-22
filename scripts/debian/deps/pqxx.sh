@@ -20,4 +20,4 @@
 # $Id$
 
 sudo apt-get install -y \
-    libpq-dev
+    libpq-dev libpq5
