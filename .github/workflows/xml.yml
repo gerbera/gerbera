@@ -30,7 +30,7 @@ jobs:
     name: Validate XSD with ${{ matrix.xml-config }}
     steps:
       - name: Checkout Gerbera code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Enable Annotations for Validation Errors and Warnings
         uses: korelstar/xmllint-problem-matcher@v1
       - name: Validate ${{ matrix.xml-config }} Using Schema ${{ matrix.xsd-schema }}

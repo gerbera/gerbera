@@ -22,7 +22,7 @@ jobs:
       run:
         shell: alpine.sh {0}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
       - uses: jirutka/setup-alpine@v1
         with:
           branch: ${{matrix.branch}}
