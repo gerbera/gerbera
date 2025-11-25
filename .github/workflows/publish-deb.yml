@@ -57,7 +57,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     name: Compile ${{ matrix.os-ver }} ${{ matrix.arch }}
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
