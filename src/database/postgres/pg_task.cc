@@ -93,10 +93,10 @@ void PGScriptTask::run(
     PostgresDatabase& pg,
     bool throwOnError)
 {
-    log_debug("Running: init");
+    log_debug("Running: script");
 
     auto sqlFilePath = fs::path(config->getOption(scriptFile));
-    log_debug("Loading initialisation SQL from: {}", sqlFilePath.c_str());
+    log_debug("Loading SQL from: {}", sqlFilePath.c_str());
     auto sql = GrbFile(std::move(sqlFilePath)).readTextFile();
     auto&& myHash = stringHash(sql);
     replaceAllString(sql, STRING_LIMIT, fmt::to_string(stringLimit));

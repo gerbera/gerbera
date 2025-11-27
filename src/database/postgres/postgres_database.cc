@@ -79,7 +79,7 @@ std::string PostgresDatabase::prepareDatabase()
 
     if (dbVersion.empty()) {
         log_info("Database doesn't seem to exist. Creating database...");
-        auto itask = std::make_shared<PGScriptTask>(config, hashies[0], stringLimit, ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE);
+        auto itask = std::make_shared<PGScriptTask>(config, hashies.at(0), stringLimit, ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE);
         addTask(itask);
         try {
             itask->waitForTask();
@@ -157,7 +157,7 @@ void PostgresDatabase::dropTables()
 {
     auto file = config->getOption(ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE);
     log_info("Dropping tables with {}", file);
-    auto dtask = std::make_shared<PGScriptTask>(config, hashies[0], stringLimit, ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE);
+    auto dtask = std::make_shared<PGScriptTask>(config, hashies.at(DBVERSION), stringLimit, ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE);
     addTask(dtask);
     try {
         dtask->waitForTask();
