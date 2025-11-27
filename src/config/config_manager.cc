@@ -211,13 +211,13 @@ void ConfigManager::load(const fs::path& userHome)
             setOption(root, option);
 
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE);
-        co->setDefaultValue(dataDir / "mysql.sql");
+        co->setDefaultValue(dataDir / MY_INIT_FILE);
         co->makeOption(root, self);
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE);
-        co->setDefaultValue(dataDir / "mysql-upgrade.xml");
+        co->setDefaultValue(dataDir / MY_UPGR_FILE);
         co->makeOption(root, self);
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_MYSQL_DROP_FILE);
-        co->setDefaultValue(dataDir / "mysql-drop.sql");
+        co->setDefaultValue(dataDir / MY_DROP_FILE);
         co->makeOption(root, self);
         dbDriver = DB_DRIVER_MYSQL;
     }
@@ -230,13 +230,13 @@ void ConfigManager::load(const fs::path& userHome)
             setOption(root, option);
 
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE);
-        co->setDefaultValue(dataDir / "postgres.sql");
+        co->setDefaultValue(dataDir / PG_INIT_FILE);
         co->makeOption(root, self);
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE);
-        co->setDefaultValue(dataDir / "postgres-upgrade.xml");
+        co->setDefaultValue(dataDir / PG_UPGR_FILE);
         co->makeOption(root, self);
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE);
-        co->setDefaultValue(dataDir / "postgres-drop.sql");
+        co->setDefaultValue(dataDir / PG_DROP_FILE);
         co->makeOption(root, self);
         dbDriver = DB_DRIVER_POSTGRES;
     }
@@ -248,13 +248,13 @@ void ConfigManager::load(const fs::path& userHome)
             setOption(root, option);
 
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE);
-        co->setDefaultValue(dataDir / "sqlite3.sql");
+        co->setDefaultValue(dataDir / SL_INIT_FILE);
         co->makeOption(root, self);
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE);
-        co->setDefaultValue(dataDir / "sqlite3-upgrade.xml");
+        co->setDefaultValue(dataDir / SL_UPGR_FILE);
         co->makeOption(root, self);
         co = definition->findConfigSetup(ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE);
-        co->setDefaultValue(dataDir / "sqlite3-drop.sql");
+        co->setDefaultValue(dataDir / SL_DROP_FILE);
         co->makeOption(root, self);
         dbDriver = DB_DRIVER_SQLITE;
     }

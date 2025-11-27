@@ -6,10 +6,12 @@
 - add missing array headers
 - add missing headers from headers
 - Avoid string_view conversion
+- Bump actions/checkout from 5 to 6
 - Bump js-yaml from 4.1.0 to 4.1.1 in /gerbera-web
 - Clean up obsolete includes
 - don't use references for node()
 - enable i2i for HAVE_CURL
+- Extract default database configuration strings
 - fix compilation under OmniOS
 - fix error handling in string_converter
 - header removals and destructor fix.
@@ -23,6 +25,8 @@
 - Update Conan integration
 - Update ffmpegthumbnailer to 2.2.4
 - use correct name for boxlayout enabled years
+- use more fmt::join
+- use optional instead of unique_ptr
 
 ### v3.0.0
 

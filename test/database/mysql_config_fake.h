@@ -38,16 +38,16 @@ public:
             return "root";
         }
         if (option == ConfigVal::SERVER_STORAGE_DRIVER) {
-            return "mysql";
+            return DB_DRIVER_MYSQL;
         }
         if (option == ConfigVal::SERVER_STORAGE_MYSQL_INIT_SQL_FILE) {
-            return "mysql.sql";
+            return MY_INIT_FILE;
         }
         if (option == ConfigVal::SERVER_STORAGE_MYSQL_DROP_FILE) {
-            return "mysql-drop.sql";
+            return MY_DROP_FILE;
         }
         if (option == ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE) {
-            return "mysql-upgrade.xml";
+            return MY_UPGR_FILE;
         }
         //        if (option == ConfigVal::SERVER_STORAGE_MYSQL_DATABASE) {
         //            return "gerbera";
