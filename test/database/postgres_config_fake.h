@@ -38,16 +38,16 @@ public:
             return "root";
         }
         if (option == ConfigVal::SERVER_STORAGE_DRIVER) {
-            return "pgsql";
+            return DB_DRIVER_POSTGRES;
         }
         if (option == ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE) {
-            return "postgres.sql";
+            return PG_INIT_FILE;
         }
         if (option == ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE) {
-            return "postgres-drop.sql";
+            return PG_DROP_FILE;
         }
         if (option == ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE) {
-            return "postgres-upgrade.xml";
+            return PG_UPGR_FILE;
         }
         //        if (option == ConfigVal::SERVER_STORAGE_PGSQL_DATABASE) {
         //            return "gerbera";

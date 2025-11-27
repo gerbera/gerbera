@@ -35,19 +35,19 @@ public:
             return "/tmp/gerbera.db";
         }
         if (option == ConfigVal::SERVER_STORAGE_SQLITE_INIT_SQL_FILE) {
-            return "sqlite3.sql";
+            return SL_INIT_FILE;
         }
         if (option == ConfigVal::SERVER_STORAGE_SQLITE_RESTORE) {
             return "true";
         }
         if (option == ConfigVal::SERVER_STORAGE_SQLITE_DROP_FILE) {
-            return "sqlite3-drop.sql";
+            return SL_DROP_FILE;
         }
         if (option == ConfigVal::SERVER_STORAGE_SQLITE_UPGRADE_FILE) {
-            return "sqlite3-upgrade.xml";
+            return SL_UPGR_FILE;
         }
         if (option == ConfigVal::SERVER_STORAGE_DRIVER) {
-            return "sqlite3";
+            return DB_DRIVER_SQLITE;
         }
         return {};
     }

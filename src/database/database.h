@@ -68,6 +68,16 @@ class Timer;
 #define DB_DRIVER_MYSQL "mysql"
 #define DB_DRIVER_POSTGRES "postgres"
 
+#define SL_DROP_FILE "sqlite3-drop.sql"
+#define SL_UPGR_FILE "sqlite3-upgrade.xml"
+#define SL_INIT_FILE "sqlite3.sql"
+#define MY_DROP_FILE "mysql-drop.sql"
+#define MY_UPGR_FILE "mysql-upgrade.xml"
+#define MY_INIT_FILE "mysql.sql"
+#define PG_DROP_FILE "postgres-drop.sql"
+#define PG_UPGR_FILE "postgres-upgrade.xml"
+#define PG_INIT_FILE "postgres.sql"
+
 enum class DbFileType {
     Auto,
     Directory,

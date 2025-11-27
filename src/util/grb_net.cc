@@ -35,6 +35,8 @@ Gerbera - https://gerbera.io/
 #include <sys/sockio.h>
 #endif
 
+#define SOCK_ADDR_PTR(sa) reinterpret_cast<const struct sockaddr*>(sa)
+
 #define M_SOCK_ADDR_IN_PTR(sa) reinterpret_cast<struct sockaddr_in*>(sa)
 #define M_SOCK_ADDR_IN_ADDR(sa) M_SOCK_ADDR_IN_PTR(sa)->sin_addr
 #define M_SOCK_ADDR_IN6_PTR(sa) reinterpret_cast<struct sockaddr_in6*>(sa)
@@ -127,17 +129,17 @@ GrbNet::GrbNet(const struct sockaddr_storage* addr)
 
 void GrbNet::setPort(in_port_t port)
 {
-    reinterpret_cast<struct sockaddr_in*>(&sockAddr)->sin_port = port;
+    M_SOCK_ADDR_IN_PTR(&sockAddr)->sin_port = port;
 }
 
 in_port_t GrbNet::getPort() const
 {
-    return reinterpret_cast<const struct sockaddr_in*>(&sockAddr)->sin_port;
+    return SOCK_ADDR_IN_PTR(&sockAddr)->sin_port;
 }
 
 int GrbNet::getAdressFamily() const
 {
-    return reinterpret_cast<const struct sockaddr*>(&sockAddr)->sa_family;
+    return SOCK_ADDR_PTR(&sockAddr)->sa_family;
 }
 
 bool GrbNet::equals(const std::string& match) const
@@ -149,7 +151,7 @@ bool GrbNet::equals(const std::string& match) const
         // IPv6
         struct sockaddr_in6 clientAddr = {};
         clientAddr.sin6_family = AF_INET6;
-        if ((inet_pton(AF_INET6, ip.c_str(), &clientAddr.sin6_addr) == 1) && (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(&sockAddr), prefix) == 0))
+        if ((inet_pton(AF_INET6, ip.c_str(), &clientAddr.sin6_addr) == 1) && (sockAddrCmpAddr(SOCK_ADDR_PTR(&clientAddr), SOCK_ADDR_PTR(&sockAddr), prefix) == 0))
             return true;
     } else if (ip.find('.') != std::string::npos) {
 
@@ -158,7 +160,7 @@ bool GrbNet::equals(const std::string& match) const
         struct sockaddr_in clientAddr = {};
         clientAddr.sin_family = AF_INET;
         clientAddr.sin_addr.s_addr = inet_addr(ip.c_str());
-        if (sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&clientAddr), reinterpret_cast<const struct sockaddr*>(&sockAddr), prefix) == 0)
+        if (sockAddrCmpAddr(SOCK_ADDR_PTR(&clientAddr), SOCK_ADDR_PTR(&sockAddr), prefix) == 0)
             return true;
     }
     return false;
@@ -166,7 +168,7 @@ bool GrbNet::equals(const std::string& match) const
 
 bool GrbNet::equals(const std::shared_ptr<GrbNet>& other) const
 {
-    return sockAddrCmpAddr(reinterpret_cast<const struct sockaddr*>(&other->sockAddr), reinterpret_cast<const struct sockaddr*>(&sockAddr)) == 0;
+    return sockAddrCmpAddr(SOCK_ADDR_PTR(&other->sockAddr), SOCK_ADDR_PTR(&sockAddr)) == 0;
 }
 
 std::string GrbNet::getHostName()
@@ -174,7 +176,7 @@ std::string GrbNet::getHostName()
     if (!hostName.empty())
         return hostName;
 
-    auto addr = reinterpret_cast<const struct sockaddr*>(&sockAddr);
+    auto addr = SOCK_ADDR_PTR(&sockAddr);
     char hoststr[NI_MAXHOST] = "";
     char portstr[NI_MAXSERV] = "";
     int len = addr->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
@@ -199,7 +201,7 @@ std::string GrbNet::getHostName()
 
 std::string GrbNet::getNameInfo(bool withPort) const
 {
-    auto addr = reinterpret_cast<const struct sockaddr*>(&sockAddr);
+    auto addr = SOCK_ADDR_PTR(&sockAddr);
     char hoststr[NI_MAXHOST] = "";
     char portstr[NI_MAXSERV] = "";
     int len = addr->sa_family == AF_INET6 ? sizeof(struct sockaddr_in6) : sizeof(struct sockaddr_in);
