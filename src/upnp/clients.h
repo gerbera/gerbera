@@ -46,7 +46,10 @@ enum class ClientType {
     Unknown = 0, // if not listed otherwise
     BubbleUPnP,
     SamsungAllShare,
+    SamsungSeriesA,
+    SamsungSeriesB,
     SamsungSeriesQ,
+    SamsungSeriesQN,
     SamsungBDP,
     SamsungSeriesCDE,
     SamsungBDJ5500,
