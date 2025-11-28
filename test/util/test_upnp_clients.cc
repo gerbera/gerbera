@@ -108,6 +108,34 @@ TEST_F(UpnpClientsTest, kodiV18_9)
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 }
 
+TEST_F(UpnpClientsTest, samsungTVUE40D7000)
+{
+    const ClientObservation* pClient;
+    auto addr = std::make_shared<GrbNet>("192.168.1.42");
+
+    // 1. via actionReq (e.g. doBrowse)
+    pClient = subject->getInfo(addr, "DLNADOC/1.50 SEC_HHP_[TV]UE40D7000/1.0", nullptr);
+    EXPECT_EQ(pClient->pInfo->type, ClientType::SamsungSeriesCDE);
+
+    // 2. via fileInfo (e.g. info/open/read video)
+    pClient = subject->getInfo(addr, "samsung-agent/1.1", nullptr);
+    EXPECT_EQ(pClient->pInfo->type, ClientType::SamsungSeriesCDE);
+}
+
+TEST_F(UpnpClientsTest, samsungAllShare)
+{
+    const ClientObservation* pClient;
+    auto addr = std::make_shared<GrbNet>("192.168.1.42");
+
+    // 1. via actionReq (e.g. doBrowse)
+    pClient = subject->getInfo(addr, "DLNADOC/1.50 SEC_HHP_[PC]LPC001/1.0  MS-DeviceCaps/1024", nullptr);
+    EXPECT_EQ(pClient->pInfo->type, ClientType::SamsungAllShare);
+
+    // 2. via fileInfo (e.g. info/open/read video)
+    pClient = subject->getInfo(addr, "samsung-agent/1.1", nullptr);
+    EXPECT_EQ(pClient->pInfo->type, ClientType::SamsungAllShare);
+}
+
 TEST_F(UpnpClientsTest, samsungTVQ70)
 {
     const ClientObservation* pClient;
@@ -120,6 +148,20 @@ TEST_F(UpnpClientsTest, samsungTVQ70)
     // 2. via fileInfo (e.g. info/open/read video)
     pClient = subject->getInfo(addr, "samsung-agent/1.1", nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::SamsungSeriesQ);
+}
+
+TEST_F(UpnpClientsTest, samsungTVQN90AA)
+{
+    const ClientObservation* pClient;
+    auto addr = std::make_shared<GrbNet>("192.168.1.42");
+
+    // 1. via actionReq (e.g. doBrowse)
+    pClient = subject->getInfo(addr, "DLNADOC/1.50 SEC_HHP_Samsung QN90AA 50 TV/1.0", nullptr);
+    EXPECT_EQ(pClient->pInfo->type, ClientType::SamsungSeriesQN);
+
+    // 2. via fileInfo (e.g. info/open/read video)
+    pClient = subject->getInfo(addr, "samsung-agent/1.1", nullptr);
+    EXPECT_EQ(pClient->pInfo->type, ClientType::SamsungSeriesQN);
 }
 
 TEST_F(UpnpClientsTest, vlcV3_0_11_1)

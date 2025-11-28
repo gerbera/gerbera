@@ -112,10 +112,10 @@ void ClientManager::refresh()
         // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_ Family TV/1.0
         // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] UE65JU7000/1.0 UPnP/1.0
         {
-            "Samsung other TVs",
+            "Samsung Series [CDEFJ] TVs",
             DEFAULT_CLIENT_GROUP,
             ClientType::SamsungSeriesCDE,
-            ClientConfig::getFlags({ Quirk::Samsung, Quirk::SamsungFeatures, Quirk::SamsungHideDynamic, Quirk::DCM10 }),
+            ClientConfig::getFlags({ Quirk::Samsung, Quirk::SamsungFeatures, Quirk::SamsungHideDynamic, Quirk::DCM10, Quirk::CaptionProtocol, Quirk::SamsungBookmarkSeconds }),
             ClientMatchType::UserAgent,
             "SEC_HHP_",
         },
@@ -123,7 +123,7 @@ void ClientManager::refresh()
         // This is AllShare running on a PC. We don't want to respond with Samsung capabilities, or Windows (and AllShare) might get grumpy.
         // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[PC]LPC001/1.0  MS-DeviceCaps/1024
         {
-            "AllShare",
+            "Samsung AllShare",
             DEFAULT_CLIENT_GROUP,
             ClientType::SamsungAllShare,
             ClientConfig::getFlags({ Quirk::None }),
@@ -136,9 +136,39 @@ void ClientManager::refresh()
             "Samsung Series [Q] TVs",
             DEFAULT_CLIENT_GROUP,
             ClientType::SamsungSeriesQ,
-            ClientConfig::getFlags({ Quirk::Samsung, Quirk::SamsungFeatures, Quirk::SamsungHideDynamic, Quirk::DCM10 }),
+            ClientConfig::getFlags({ Quirk::Samsung, Quirk::SamsungFeatures, Quirk::SamsungHideDynamic, Quirk::DCM10, Quirk::CaptionProtocol, Quirk::SamsungBookmarkMilliSeconds }),
             ClientMatchType::UserAgent,
             "SEC_HHP_[TV] Samsung Q",
+        },
+
+        // User-Agent: DLNADOC/1.50 SEC_HHP_Samsung QN90AA 50 TV/1.0
+        {
+            "Samsung Series [QN] TVs",
+            DEFAULT_CLIENT_GROUP,
+            ClientType::SamsungSeriesQN,
+            ClientConfig::getFlags({ Quirk::Samsung, Quirk::SamsungFeatures, Quirk::SamsungHideDynamic, Quirk::DCM10, Quirk::CaptionProtocol, Quirk::SamsungBookmarkMilliSeconds }),
+            ClientMatchType::UserAgent,
+            "SEC_HHP_Samsung QN",
+        },
+
+        // User-Agent: ?
+        {
+            "Samsung Series A TVs",
+            DEFAULT_CLIENT_GROUP,
+            ClientType::SamsungSeriesA,
+            ClientConfig::getFlags({ Quirk::Samsung, Quirk::SamsungFeatures }),
+            ClientMatchType::UserAgent,
+            "SamsungWiselinkPro",
+        },
+
+        // User-Agent: ?
+        {
+            "Samsung Series B TVs",
+            DEFAULT_CLIENT_GROUP,
+            ClientType::SamsungSeriesB,
+            ClientConfig::getFlags({ Quirk::Samsung, Quirk::SamsungFeatures }),
+            ClientMatchType::UserAgent,
+            "Samsung DTV DMR",
         },
 
         // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_BD-D5100/1.0
@@ -146,7 +176,7 @@ void ClientManager::refresh()
             "Samsung Blu-ray Player BD-D5100",
             DEFAULT_CLIENT_GROUP,
             ClientType::SamsungBDP,
-            ClientConfig::getFlags({ Quirk::Samsung, Quirk::SamsungFeatures, Quirk::CaptionProtocol }),
+            ClientConfig::getFlags({ Quirk::Samsung, Quirk::SamsungFeatures }),
             ClientMatchType::UserAgent,
             "SEC_HHP_BD",
         },
