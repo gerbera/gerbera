@@ -379,8 +379,8 @@ void UpnpXMLBuilder::renderObject(
     result.append_attribute("restricted") = obj->isRestricted() ? "1" : "0";
 
     UpnpXMLBuilder::XmlStringFormat xmlFormat = {
-        quirks && quirks->needsStrictXml(),
-        quirks && quirks->needsAsciiXml(),
+        quirks && quirks->hasFlag(Quirk::StrictXML),
+        quirks && quirks->hasFlag(Quirk::AsciiXML),
         stringLimit,
     };
     const std::string title = obj->getTitle();
@@ -400,7 +400,7 @@ void UpnpXMLBuilder::renderObject(
         if (quirks) {
             quirks->restoreSamsungBookMarkedPosition(item, result, config->getLongOption(ConfigVal::CLIENTS_BOOKMARK_OFFSET));
             mvMeta = quirks->getMultiValue();
-            simpleDate = quirks->needsSimpleDate();
+            simpleDate = quirks->hasFlag(Quirk::SimpleDate);
         }
 
         auto metaGroups = obj->getMetaGroups();
@@ -1088,7 +1088,7 @@ void UpnpXMLBuilder::addResources(
         }
 
         if (purpose == ResourcePurpose::Subtitle) {
-            if (quirks && res->getHandlerType() != ContentHandler::SUBTITLE && !quirks->showInternalSubtitles()) {
+            if (quirks && res->getHandlerType() != ContentHandler::SUBTITLE && !quirks->hasFlag(Quirk::ShowInternalSubtitles)) {
                 continue;
             }
             auto captionInfo = std::map<std::string, std::string>();
@@ -1136,7 +1136,7 @@ void UpnpXMLBuilder::addResources(
             if (!quirks->supportsResource(purpose)) {
                 continue;
             }
-            if (purpose == ResourcePurpose::Subtitle && res->getHandlerType() != ContentHandler::SUBTITLE && !quirks->showInternalSubtitles()) {
+            if (purpose == ResourcePurpose::Subtitle && res->getHandlerType() != ContentHandler::SUBTITLE && !quirks->hasFlag(Quirk::ShowInternalSubtitles)) {
                 continue;
             }
         }
@@ -1205,7 +1205,7 @@ std::string UpnpXMLBuilder::buildProtocolInfo(
     // we do not support seeking at all, so 00
     // and the media is converted, so set CI to 1
     if (resource.getPurpose() == ResourcePurpose::Transcode) {
-        extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, quirks && quirks->needsNoConversion() ? UPNP_DLNA_NO_CONVERSION : UPNP_DLNA_CONVERSION));
+        extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, quirks && quirks->hasFlag(Quirk::ForceNoConversion) ? UPNP_DLNA_NO_CONVERSION : UPNP_DLNA_CONVERSION));
     } else {
         extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION));
     }

@@ -159,7 +159,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
 
     // build response
     pugi::xml_document didlLite;
-    if (!quirks->blockXmlDeclaration()) {
+    if (!quirks->hasFlag(Quirk::NoXmlDeclaration)) {
         auto decl = didlLite.prepend_child(pugi::node_declaration);
         decl.append_attribute("version") = "1.0";
         decl.append_attribute("encoding") = "UTF-8";
@@ -180,7 +180,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
         xmlBuilder->renderObject(obj, splitString(filter, ','), stringLimitClient, didlLiteRoot, quirks);
     }
 
-    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks && quirks->needsStrictXml() ? pugi::format_no_escapes : 0);
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks && quirks->hasFlag(Quirk::StrictXML) ? pugi::format_no_escapes : 0);
     log_debug("didl {}", didlLiteXml);
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
@@ -221,7 +221,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
 
     auto&& quirks = request.getQuirks();
     pugi::xml_document didlLite;
-    if (!quirks || !quirks->blockXmlDeclaration()) {
+    if (!quirks || !quirks->hasFlag(Quirk::NoXmlDeclaration)) {
         auto decl = didlLite.prepend_child(pugi::node_declaration);
         decl.append_attribute("version") = "1.0";
         decl.append_attribute("encoding") = "UTF-8";
@@ -288,7 +288,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         xmlBuilder->renderObject(cdsObject, splitString(filter, ','), stringLimitClient, didlLiteRoot);
     }
 
-    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks && quirks->needsStrictXml() ? pugi::format_no_escapes : 0);
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks && quirks->hasFlag(Quirk::StrictXML) ? pugi::format_no_escapes : 0);
     log_debug("didl {}", didlLiteXml);
 
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
