@@ -41,11 +41,11 @@ The automatic detection supports the following devices and software:
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
 | SamsungBDJ5500                      | Samsung Blu-ray Player J5500                     | ``SAMSUNG|SAMSUNG_FEATURES|CAPTION_PROTOCOL``           |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
-| EC-IRadio                           | e.g. Dual CR 510                                 | ``IRADIO``                                              |
+| EC-IRadio                           | e.g. Dual CR 510                                 | ``NoXmlDeclaration``                                    |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
 | FSL/Frontier Silicon/Frontier Smart | e.g. Technisat DigitRadio 580                    | ``SIMPLE_DATE``                                         |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
-| PanasonicTV                         | all Panasonic TV                                 | ``PANASONIC``                                           |
+| PanasonicTV                         | all Panasonic TV                                 |                                                         |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
 | BoseSoundtouch                      | Running on Smartphone to support Bose Multiroom  | ``STRICTXML``                                           |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
@@ -59,83 +59,78 @@ The automatic detection supports the following devices and software:
 Device Flags
 ~~~~~~~~~~~~
 
-The device flags have the following meaning. The value represents the current implementation but can be changed in the future.
+The device flags have the following meaning.
 
 .. versionchanged:: HEAD The Key is not case sensitve anymore
 .. versionchanged:: HEAD Alternate camel-case representations for the keys added
 
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| Key                            | Value   | Description                                                                    |
-+================================+=========+================================================================================+
-| ``SAMSUNG`` ``Samsung``        | 0x01    | Add "CaptionInfo.sec" to video header                                          |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``SAMSUNG_BOOKMARK_SEC``       | 0x02    | Restore last played position when the media is played again                    |
-| ``SamsungBookmarkSeconds``     |         | (only for Samsung). Not applicable for transcoded media                        |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``SAMSUNG_BOOKMARK_MSEC``      | 0x04    | Same as ``SAMSUNG_BOOKMARK_SEC``, but the bookmark value is received           |
-| ``SamsungBookmarkMilliSeconds``|         | from the Samsung TV as msec                                                    |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``SAMSUNG_FEATURES``           | 0x10    | Activate Samsung features protocol                                             |
-| ``SamsungFeatures``            |         |                                                                                |
-|                                |         | (support for additional request like                                           |
-|                                |         | `X_GetFeatureList`, `X_GetObjectIDfromIndex`, `X_GetIndexfromRID`)             |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``SAMSUNG_HIDE_DYNAMIC``       | 0x20    | Some Samsung devices do not work with dynamic folders on top level,            |
-| ``SamsungHideDynamic``         |         | so this flag hides them for those devices                                      |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``IRADIO`` ``IRadio``          | 0x08    | Don't send ``<?xml ...?>`` declaration in response                             |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``PV_SUBTITLES``               | 0x40    | Add attributes ``pv:subtitleFileType`` and ``pv:subtitleFileUri``              |
-| ``PvSubtitles``                |         | to video files if subtitles exist                                              |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``PANASONIC``                  | 0x80    | Avoid adding part of the filename in item uri. Filename in item uri is         |
-| ``Panasonic``                  |         | used by other players,                                                         |
-|                                |         |                                                                                |
-|                                |         | e.g. VLC to detect the language of a subtitle file.                            |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``STRICTXML`` ``StringXML``    | 0x100   | Encode most of special chars also, like ``'`` as ``&amp;apos;``                |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``HIDE_THUMBNAIL_RESOURCE``    | 0x200   | Hide thumbnail resource in UPnP data (only adds albumArtUri)                   |
-|                                |         |                                                                                |
-| ``HideThumbnailResource``      |         |                                                                                |
-| ``HideResourceThumbnail``      |         |                                                                                |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``HIDE_SUBTITLE_RESOURCE``     | 0x400   | Hide subtitle resource in UPnP data (only add captionInfo)                     |
-|                                |         |                                                                                |
-| ``HideSubtitleResource``       |         |                                                                                |
-| ``HideResourceSubtitle``       |         |                                                                                |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``HIDE_TRANSCODE_RESOURCE``    | 0x800   | Hide transcoded resources in UPnP data (only adds content stream resources)    |
-|                                |         |                                                                                |
-| ``HideTranscodeResource``      |         |                                                                                |
-| ``HideResourceTranscode``      |         |                                                                                |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``SIMPLE_DATE``                | 0x1000  | Return ``dc:date`` without timezone as Zulu time.                              |
-| ``SimpleDate``                 |         |                                                                                |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``DCM10``                      | 0x2000  | Add DCM10 as device capability.                                                |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``HIDE_CONTAINER_SHORTCUTS``   | 0x4000  | Disable UPnP feature for shortcuts.                                            |
-| ``HideContainerShortcuts``     |         |                                                                                |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``ASCIIXML`` ``AsciiXML``      | 0x8000  | UPnP client supports only ascii characters                                     |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``NO_CONVERSION``              | 0x10000 | UPnP client does not support conversion                                        |
-|                                |         |                                                                                |
-| ``NoConversion``               |         |                                                                                |
-| ``ForceNoConversion``          |         |                                                                                |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``SHOW_INTERNAL_SUBTITLES``    | 0x20000 | UPnP client does not automatically read internal subtitles from stream         |
-| ``ShowInternalSubtitles``      |         |                                                                                |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``FORCE_SORT_CRITERIA_TITLE``  | 0x40000 | Always sort by ``dc:title`` ascending when browsing or searching.              |
-| ``ForceSortCriteriaTitle``     |         |                                                                                |
-|                                |         | This quirk might help if your client sends hardcoded SortCriteria,             |
-|                                |         | e.g. old Panasonic TV sets                                                     |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
-| ``CAPTION_PROTOCOL``           | 0x80000 | Add protocolInfo to ``sec:CaptionInfoEx`` for Samsung                          |
-| ``CaptionProtocol``            |         |                                                                                |
-+--------------------------------+---------+--------------------------------------------------------------------------------+
++--------------------------------+--------------------------------------------------------------------------------+
+| Key                            | Description                                                                    |
++================================================================================================================+
+| ``SAMSUNG`` ``Samsung``        | Add "CaptionInfo.sec" to video header                                          |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``SAMSUNG_BOOKMARK_SEC``       | Restore last played position when the media is played again                    |
+| ``SamsungBookmarkSeconds``     | (only for Samsung). Not applicable for transcoded media                        |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``SAMSUNG_BOOKMARK_MSEC``      | Same as ``SAMSUNG_BOOKMARK_SEC``, but the bookmark value is received           |
+| ``SamsungBookmarkMilliSeconds``| from the Samsung TV as msec                                                    |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``SAMSUNG_FEATURES``           | Activate Samsung features protocol                                             |
+| ``SamsungFeatures``            |                                                                                |
+|                                | (support for additional request like                                           |
+|                                | `X_GetFeatureList`, `X_GetObjectIDfromIndex`, `X_GetIndexfromRID`)             |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``SAMSUNG_HIDE_DYNAMIC``       | Some Samsung devices do not work with dynamic folders on top level,            |
+| ``SamsungHideDynamic``         | so this flag hides them for those devices                                      |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``IRADIO`` ``IRadio``          | Don't send ``<?xml ...?>`` declaration in response                             |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``PV_SUBTITLES``               | Add attributes ``pv:subtitleFileType`` and ``pv:subtitleFileUri``              |
+| ``PvSubtitles``                | to video files if subtitles exist                                              |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``STRICTXML`` ``StringXML``    | Encode most of special chars also, like ``'`` as ``&amp;apos;``                |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``HIDE_THUMBNAIL_RESOURCE``    | Hide thumbnail resource in UPnP data (only adds albumArtUri)                   |
+|                                |                                                                                |
+| ``HideThumbnailResource``      |                                                                                |
+| ``HideResourceThumbnail``      |                                                                                |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``HIDE_SUBTITLE_RESOURCE``     | Hide subtitle resource in UPnP data (only add captionInfo)                     |
+|                                |                                                                                |
+| ``HideSubtitleResource``       |                                                                                |
+| ``HideResourceSubtitle``       |                                                                                |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``HIDE_TRANSCODE_RESOURCE``    | Hide transcoded resources in UPnP data (only adds content stream resources)    |
+|                                |                                                                                |
+| ``HideTranscodeResource``      |                                                                                |
+| ``HideResourceTranscode``      |                                                                                |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``SIMPLE_DATE``                | Return ``dc:date`` without timezone as Zulu time.                              |
+| ``SimpleDate``                 |                                                                                |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``DCM10``                      | Add DCM10 as device capability.                                                |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``HIDE_CONTAINER_SHORTCUTS``   | Disable UPnP feature for shortcuts.                                            |
+| ``HideContainerShortcuts``     |                                                                                |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``ASCIIXML`` ``AsciiXML``      | UPnP client supports only ascii characters                                     |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``NO_CONVERSION``              | UPnP client does not support conversion                                        |
+|                                |                                                                                |
+| ``NoConversion``               |                                                                                |
+| ``ForceNoConversion``          |                                                                                |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``SHOW_INTERNAL_SUBTITLES``    | UPnP client does not automatically read internal subtitles from stream         |
+| ``ShowInternalSubtitles``      |                                                                                |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``FORCE_SORT_CRITERIA_TITLE``  | Always sort by ``dc:title`` ascending when browsing or searching.              |
+| ``ForceSortCriteriaTitle``     |                                                                                |
+|                                | This quirk might help if your client sends hardcoded SortCriteria,             |
+|                                | e.g. old Panasonic TV sets                                                     |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``CAPTION_PROTOCOL``           | Add protocolInfo to ``sec:CaptionInfoEx`` for Samsung                          |
+| ``CaptionProtocol``            |                                                                                |
++--------------------------------+--------------------------------------------------------------------------------+
 
 
 Manual Overrides
