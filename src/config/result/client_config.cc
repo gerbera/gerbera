@@ -211,10 +211,10 @@ std::vector<std::pair<std::string, Quirk>> ClientConfig::quirkFlags {
     { "SAMSUNG_FEATURES", Quirk::SamsungFeatures },
     { "SamsungHideDynamic", Quirk::SamsungHideDynamic },
     { "SAMSUNG_HIDE_DYNAMIC", Quirk::SamsungHideDynamic },
-    { "IRadio", Quirk::IRadio },
+    { "IRadio", Quirk::NoXmlDeclaration }, // backward compatiblity
+    { "NoXmlDeclaration", Quirk::NoXmlDeclaration },
     { "PvSubtitles", Quirk::PvSubtitles },
     { "PV_SUBTITLES", Quirk::PvSubtitles },
-    { "Panasonic", Quirk::Panasonic },
     { "StrictXML", Quirk::StrictXML },
     { "HideThumbnailResource", Quirk::HideResourceThumbnail },
     { "HideResourceThumbnail", Quirk::HideResourceThumbnail },

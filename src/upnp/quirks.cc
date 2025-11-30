@@ -369,16 +369,6 @@ bool Quirks::supportsResource(ResourcePurpose purpose) const
     return pClientProfile ? std::find(pClientProfile->supportedResources.begin(), pClientProfile->supportedResources.end(), purpose) != pClientProfile->supportedResources.end() : true;
 }
 
-bool Quirks::blockXmlDeclaration() const
-{
-    return hasFlag(Quirk::IRadio);
-}
-
-bool Quirks::needsFileNameUri() const
-{
-    return !hasFlag(Quirk::Panasonic);
-}
-
 int Quirks::getCaptionInfoCount() const
 {
     return pClientProfile ? pClientProfile->captionInfoCount : -1;
@@ -387,31 +377,6 @@ int Quirks::getCaptionInfoCount() const
 int Quirks::getStringLimit() const
 {
     return pClientProfile ? pClientProfile->stringLimit : -1;
-}
-
-bool Quirks::needsStrictXml() const
-{
-    return hasFlag(Quirk::StrictXML);
-}
-
-bool Quirks::needsAsciiXml() const
-{
-    return hasFlag(Quirk::AsciiXML);
-}
-
-bool Quirks::needsNoConversion() const
-{
-    return hasFlag(Quirk::ForceNoConversion);
-}
-
-bool Quirks::showInternalSubtitles() const
-{
-    return hasFlag(Quirk::ShowInternalSubtitles);
-}
-
-bool Quirks::needsSimpleDate() const
-{
-    return hasFlag(Quirk::SimpleDate);
 }
 
 bool Quirks::getMultiValue() const

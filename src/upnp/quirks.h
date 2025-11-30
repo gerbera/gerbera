@@ -39,16 +39,16 @@ using QuirkFlags = std::uint32_t;
 
 static constexpr QuirkFlags QUIRK_FLAG_NONE = 0x00000000;
 
+// for documentaion see supported-devices.rst
 enum class Quirk {
     None = -1,
     Samsung = 0,
     SamsungBookmarkSeconds,
     SamsungBookmarkMilliSeconds,
-    IRadio,
+    NoXmlDeclaration,
     SamsungFeatures,
     SamsungHideDynamic,
     PvSubtitles,
-    Panasonic,
     StrictXML,
     HideResourceThumbnail,
     HideResourceSubtitle,
@@ -168,20 +168,6 @@ public:
      */
     bool supportsResource(ResourcePurpose purpose) const;
 
-    /** @brief block XML header in response for broken clients
-     *
-     * @return bool
-     *
-     */
-    bool blockXmlDeclaration() const;
-
-    /** @brief client need the filename in the uri to determine language or other detailes
-     *
-     * @return bool
-     *
-     */
-    bool needsFileNameUri() const;
-
     /** @brief Get number of allow CaptionInfoEx entries
      *
      * @return number for client
@@ -196,34 +182,6 @@ public:
      */
     int getStringLimit() const;
 
-    /** @brief UPnP client needs everything escaped, esp. '
-     *
-     * @return bool
-     *
-     */
-    bool needsStrictXml() const;
-
-    /** @brief UPnP client supports only ascii characters
-     *
-     * @return bool
-     *
-     */
-    bool needsAsciiXml() const;
-
-    /** @brief UPnP client needs simple dates
-     *
-     * @return bool
-     *
-     */
-    bool needsSimpleDate() const;
-
-    /** @brief UPnP client does not support conversion
-     *
-     * @return bool
-     *
-     */
-    bool needsNoConversion() const;
-
     /** @brief Get multi value upnp properties
      *
      * @return true if multi-value is enabled for client
@@ -237,13 +195,6 @@ public:
      *
      */
     bool getFullFilter() const;
-
-    /** @brief Get visibility if internal subtitles
-     *
-     * @return true if internal subtitles are visible
-     *
-     */
-    bool showInternalSubtitles() const;
 
     /** @brief Get group for ClientStatusDetail
      *
