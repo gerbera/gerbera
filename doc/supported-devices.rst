@@ -24,13 +24,22 @@ The automatic detection supports the following devices and software:
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
 | SamsungAllShare                     | AllShare running on Windows                      |                                                         |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
-| SamsungSeriesQ                      | Samsung Series [Q] TVs                           | ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC|DCM10`` |
+| SamsungSeriesQ                      | Samsung Series [Q] TVs                           | ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC|``      |
+|                                     |                                                  | ``DCM10|CAPTION_PROTOCOL|SAMSUNG_BOOKMARK_MSEC``        |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
-| SamsungSeriesCDE                    | Samsung other TVs                                | ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC``       |
+| SamsungSeriesQN                     | Samsung Series [QN] TVs                          | ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC|``      |
+|                                     |                                                  | ``DCM10|CAPTION_PROTOCOL|SAMSUNG_BOOKMARK_MSEC``        |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| SamsungSeriesCDE                    | Samsung Series [CDEFJ] TVs                       | ``SAMSUNG|SAMSUNG_FEATURES|SAMSUNG_HIDE_DYNAMIC``       |
+|                                     |                                                  | ``DCM10|CAPTION_PROTOCOL|SAMSUNG_BOOKMARK_SEC``         |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| SamsungSeriesA                      | Samsung Series A TVs                             | ``SAMSUNG|SAMSUNG_FEATURES``                            |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| SamsungSeriesB                      | Samsung Series B TVs                             | ``SAMSUNG|SAMSUNG_FEATURES``                            |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
 | SamsungBDP                          | Samsung Blu-ray Player BD-D5100                  | ``SAMSUNG|SAMSUNG_FEATURES``                            |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
-| SamsungBDJ5500                      | Samsung Blu-ray Player J5500                     | ``SAMSUNG|SAMSUNG_FEATURES``                            |
+| SamsungBDJ5500                      | Samsung Blu-ray Player J5500                     | ``SAMSUNG|SAMSUNG_FEATURES|CAPTION_PROTOCOL``           |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
 | EC-IRadio                           | e.g. Dual CR 510                                 | ``IRADIO``                                              |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
