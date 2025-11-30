@@ -70,7 +70,7 @@ The device flags have the following meaning.
 | ``SAMSUNG`` ``Samsung``        | Add "CaptionInfo.sec" to video header                                          |
 +--------------------------------+--------------------------------------------------------------------------------+
 | ``SAMSUNG_BOOKMARK_SEC``       | Restore last played position when the media is played again                    |
-| ``SamsungBookmarkSeconds``     | (only for Samsung). Not applicable for transcoded media                        |
+| ``SamsungBookmarkSeconds``     | (only for Samsung) as second. Not applicable for transcoded media              |
 +--------------------------------+--------------------------------------------------------------------------------+
 | ``SAMSUNG_BOOKMARK_MSEC``      | Same as ``SAMSUNG_BOOKMARK_SEC``, but the bookmark value is received           |
 | ``SamsungBookmarkMilliSeconds``| from the Samsung TV as msec                                                    |
@@ -83,7 +83,7 @@ The device flags have the following meaning.
 | ``SAMSUNG_HIDE_DYNAMIC``       | Some Samsung devices do not work with dynamic folders on top level,            |
 | ``SamsungHideDynamic``         | so this flag hides them for those devices                                      |
 +--------------------------------+--------------------------------------------------------------------------------+
-| ``IRADIO`` ``IRadio``          | Don't send ``<?xml ...?>`` declaration in response                             |
+| ``NoXmlDeclaration``           | Don't send ``<?xml ...?>`` declaration in response                             |
 +--------------------------------+--------------------------------------------------------------------------------+
 | ``PV_SUBTITLES``               | Add attributes ``pv:subtitleFileType`` and ``pv:subtitleFileUri``              |
 | ``PvSubtitles``                | to video files if subtitles exist                                              |
@@ -105,8 +105,8 @@ The device flags have the following meaning.
 | ``HideTranscodeResource``      |                                                                                |
 | ``HideResourceTranscode``      |                                                                                |
 +--------------------------------+--------------------------------------------------------------------------------+
-| ``SIMPLE_DATE``                | Return ``dc:date`` without timezone as Zulu time.                              |
-| ``SimpleDate``                 |                                                                                |
+| ``SIMPLE_DATE``                | UPnP Client needs simple dates                                                 |
+| ``SimpleDate``                 | Return ``dc:date`` without timezone as Zulu time.                              |
 +--------------------------------+--------------------------------------------------------------------------------+
 | ``DCM10``                      | Add DCM10 as device capability.                                                |
 +--------------------------------+--------------------------------------------------------------------------------+
