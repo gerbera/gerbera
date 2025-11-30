@@ -312,22 +312,31 @@ void Quirks::getSamsungIndexfromRID(ActionRequest& request) const
     request.setResponse(std::move(response));
 }
 
-void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node& result, int offset) const
+void Quirks::restoreSamsungBookMarkedPosition(const std::shared_ptr<CdsItem>& item, pugi::xml_node& result, int offsetSecond) const
 {
     if (!hasFlag(Quirk::SamsungBookmarkSeconds) && !hasFlag(Quirk::SamsungBookmarkMilliSeconds)) {
         log_debug("restoreSamsungBookMarkedPosition called, but it is not enabled for this client");
         return;
     }
 
-    auto positionToRestore = item->getPlayStatus() ? item->getPlayStatus()->getBookMarkPosition().count() : 0;
-    if (positionToRestore > offset)
-        positionToRestore -= offset;
-    log_debug("restoreSamsungBookMarkedPosition: ObjectID [{}] positionToRestore [{}] sec", item->getID(), positionToRestore);
+    auto playStatus = item->getPlayStatus();
+    auto bookMarkPos = playStatus ? playStatus->getBookMarkPosition().count() : 0;
 
-    if (hasFlag(Quirk::SamsungBookmarkMilliSeconds))
-        positionToRestore *= 1000;
+    auto offsetMilliseconds = offsetSecond * 1000;
+    if (bookMarkPos > offsetMilliseconds) {
+        bookMarkPos -= offsetMilliseconds;
+    } else {
+        bookMarkPos = 0;
+    }
+    if (bookMarkPos <= 0)
+        return;
 
-    auto dcmInfo = fmt::format("CREATIONDATE=0,FOLDER={},BM={}", item->getTitle(), positionToRestore);
+    log_debug("restoreSamsungBookMarkedPosition: ObjectID [{}] BookMarkPos [{}] msec", item->getID(), bookMarkPos);
+
+    if (hasFlag(Quirk::SamsungBookmarkSeconds))
+        bookMarkPos /= 1000;
+
+    auto dcmInfo = fmt::format("CREATIONDATE=0,FOLDER={},BM={}", item->getTitle(), bookMarkPos);
     result.append_child("sec:dcmInfo").append_child(pugi::node_pcdata).set_value(dcmInfo.c_str());
 }
 
@@ -336,18 +345,21 @@ void Quirks::saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& data
     if (!hasFlag(Quirk::SamsungBookmarkSeconds) && !hasFlag(Quirk::SamsungBookmarkMilliSeconds)) {
         log_debug("X_SetBookmark called, but it is not enabled for this client");
     } else {
-        auto divider = hasFlag(Quirk::SamsungBookmarkMilliSeconds) ? 1 : 1000;
         auto doc = request.getRequest();
         auto reqRoot = doc->document_element();
         if (reqRoot) {
             log_debug("request {}", UpnpXMLBuilder::printXml(reqRoot, " "));
 
             auto objectID = stoiString(reqRoot.child_value("ObjectID"));
-            auto bookMarkPos = stoiString(reqRoot.child_value("PosSecond")) / divider;
+            auto bookMarkPos = stoiString(reqRoot.child_value("PosSecond"));
             [[maybe_unused]] auto categoryType = reqRoot.child_value("CategoryType");
             [[maybe_unused]] auto rID = reqRoot.child_value("RID");
 
-            log_debug("X_SetBookmark: ObjectID [{}] PosSecond [{}] CategoryType [{}] RID [{}]", objectID, bookMarkPos, categoryType, rID);
+            if (hasFlag(Quirk::SamsungBookmarkSeconds))
+                bookMarkPos *= 1000;
+
+            log_debug("X_SetBookmark: ObjectID [{}] CategoryType [{}] RID [{}] BookMarkPos [{}] msec", objectID, categoryType, rID, bookMarkPos);
+
             auto playStatus = database->getPlayStatus(pClientProfile->group, objectID);
             if (!playStatus)
                 playStatus = std::make_shared<ClientStatusDetail>(pClientProfile->group, objectID, 1, 0, 0, bookMarkPos);
