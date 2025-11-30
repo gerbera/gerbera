@@ -100,13 +100,13 @@ public:
      *
      * @param item CdsItem which will be played and stores the bookmark information.
      * @param result Answer content.
-     * @param offset number of seconds to jump
+     * @param offsetSecond number of seconds to jump back
      *
      */
     void restoreSamsungBookMarkedPosition(
         const std::shared_ptr<CdsItem>& item,
         pugi::xml_node& result,
-        int offset = 10) const;
+        int offsetSecond) const;
 
     /** @brief Stored bookmark information into the database
      *
