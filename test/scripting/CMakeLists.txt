@@ -22,20 +22,21 @@
 
 add_executable(testscripting
     main.cc
-    mock/duk_helper.h
-    mock/duk_helper.cc
     mock/common_script_mock.h
-    mock/script_test_fixture.h
+    mock/duk_helper.cc
+    mock/duk_helper.h
     mock/script_test_fixture.cc
+    mock/script_test_fixture.h
     test_common_script.cc
+    test_external_asx_playlist.cc
     test_external_m3u_playlist.cc
     test_external_pls_playlist.cc
-    test_external_asx_playlist.cc
-    test_import_script.cc
+    test_import_details_script.cc
     test_import_initials_script.cc
+    test_import_script.cc
     test_import_struct_script.cc
-    test_internal_m3u_playlist.cc
     test_internal_m3u8_playlist.cc
+    test_internal_m3u_playlist.cc
     test_internal_pls_playlist.cc
     test_nfo_metafile.cc
     test_runtime.cc

@@ -41,6 +41,7 @@ public:
     virtual duk_ret_t addContainerTree(std::vector<std::string> tree) = 0;
     virtual duk_ret_t createContainerChain(std::vector<std::string> chain) = 0;
     virtual duk_ret_t mapGenre(std::string genre) = 0;
+    virtual duk_ret_t mapModel(std::string model) = 0;
     virtual duk_ret_t getLastPath(std::string path) = 0;
     virtual duk_ret_t getLastPath2(std::string path, int length) = 0;
     virtual duk_ret_t readln(std::string line) = 0;
@@ -62,6 +63,7 @@ public:
     MOCK_METHOD1(addContainerTree, duk_ret_t(std::vector<std::string> tree));
     MOCK_METHOD1(createContainerChain, duk_ret_t(std::vector<std::string> chain));
     MOCK_METHOD1(mapGenre, duk_ret_t(std::string genre));
+    MOCK_METHOD1(mapModel, duk_ret_t(std::string model));
     MOCK_METHOD1(getLastPath, duk_ret_t(std::string path));
     MOCK_METHOD2(getLastPath2, duk_ret_t(std::string path, int length));
     MOCK_METHOD1(readln, duk_ret_t(std::string line));

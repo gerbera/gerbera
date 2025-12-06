@@ -251,6 +251,7 @@ TEST_F(MetafileNfoTest, SetsPropertiesFromFile)
         { "12-upnp:actor", "Ian Whyman" },
         { "13-upnp:actor", "Karl Straussberger" },
     };
+    std::map<std::string, std::string> aux;
 
     // Expecting the common script calls..and will proxy through the mock objects for verification.
     EXPECT_CALL(*commonScriptMock, print2(Eq("Info"), Eq(fmt::format("Processing metafile: {} for {} nfo", fileName, location)))).WillOnce(Return(1));
@@ -278,7 +279,7 @@ TEST_F(MetafileNfoTest, SetsPropertiesFromFile)
 
     addGlobalFunctions(ctx, js_global_functions);
     auto fnResult = callFunction(ctx, dukMockMetafile,
-        { { "title", title }, { "location", location } }, {}, {}, {},
+        { { "title", title }, { "location", location } }, {}, aux, {},
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video),
         fileName);
     std::vector<int> items {};

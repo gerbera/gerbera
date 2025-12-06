@@ -84,6 +84,13 @@ enum class BoxKeys {
     imageAllYears,
     imageRoot,
     imageUnknown,
+    imageAllModels,
+    imageYearMonth,
+    imageYearDate,
+
+    topicRoot,
+    topic,
+    topicExtra,
 
 #ifdef ONLINE_SERVICES
     trailerAllGenres,

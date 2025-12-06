@@ -45,6 +45,7 @@
 #include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_dictionary.h"
 #include "config/setup/config_setup_enum.h"
+#include "config/setup/config_setup_vector.h"
 #include "content/autoscan_setting.h"
 #include "content/content.h"
 #include "context.h"
@@ -214,6 +215,19 @@ void Script::init()
             setProperty(key.substr(5), val);
         }
         duk_put_prop_string(ctx, -2, dcs->getItemPathRoot().c_str());
+    }
+
+    for (auto&& vcs : definition->getConfigSetupList<ConfigVectorSetup>()) {
+        auto dukArray = duk_push_array(ctx);
+        auto vector = vcs->getValue()->getVectorOption(true);
+        for (duk_uarridx_t configIndex = 0; configIndex < vector.size(); configIndex++) {
+            duk_push_object(ctx);
+            for (auto&& [key, val] : vector.at(configIndex)) {
+                setProperty(key, val);
+            }
+            duk_put_prop_index(ctx, dukArray, configIndex);
+        }
+        duk_put_prop_string(ctx, -2, vcs->getItemPathRoot().c_str());
     }
 
     for (auto&& acs : definition->getConfigSetupList<ConfigArraySetup>()) {

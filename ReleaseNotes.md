@@ -2,11 +2,17 @@
 
 ## HEAD
 
+Removed unused explicit flag for PanasonicTV
+
 ### NEW Features
 
 - Negation of `client-flags` in transcoding
 
 ### FIXES
+
+- Endieness in network filtering
+- Handling of Samsung flags
+- Checksum error in loading of Postgres Scripts
 
 ### Code Improvements
 

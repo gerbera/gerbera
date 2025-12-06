@@ -275,6 +275,12 @@
           <box key="Image/allYears" title="Year" class="object.container" upnp-shortcut="IMAGES_YEARS" />
           <box key="Image/imageRoot" title="Photos" class="object.container" upnp-shortcut="IMAGES" />
           <box key="Image/unknown" title="Unknown" class="object.container" />
+          <box key="ImageDetail/allModels" title="All Models" class="object.container" />
+          <box key="ImageDetail/yearMonth" title="Year+Month" class="object.container" />
+          <box key="ImageDetail/yearDate" title="Year+Date" class="object.container" />
+          <box key="Topic/topicRoot" title="Topics" class="object.container" />
+          <box key="Topic/topic" title="Topic" class="object.container" />
+          <box key="Topic/topicExtra" title="Extra" class="object.container" />
           <box key="Playlist/playlistRoot" title="Playlists" class="object.container" />
           <box key="Playlist/allPlaylists" title="All Playlists" class="object.container" />
           <box key="Playlist/allDirectories" title="Directories" class="object.container" upnp-shortcut="MUSIC_PLAYLISTS" />

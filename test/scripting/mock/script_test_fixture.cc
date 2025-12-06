@@ -203,7 +203,8 @@ void ScriptTestFixture::addGlobalFunctions(
     const duk_function_list_entry* funcs,
     const std::map<std::string_view, std::string_view>& configValues,
     const std::vector<boxConfig>& boxDefaults,
-    const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts)
+    const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts,
+    const std::map<std::string_view, std::vector<std::vector<std::pair<std::string_view, std::string_view>>>>& configVects)
 {
 
     for (auto&& [meta, str] : MetaEnumMapper::mt_keys) {
@@ -240,7 +241,8 @@ void ScriptTestFixture::addGlobalFunctions(
             ctx,
             { { "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "" } },
             boxDefaults,
-            configDicts);
+            configDicts,
+            configVects);
     } else {
         addConfig(ctx, configValues, boxDefaults, configDicts);
     }
@@ -257,7 +259,8 @@ void ScriptTestFixture::addConfig(
     duk_context* ctx,
     const std::map<std::string_view, std::string_view>& configValues,
     const std::vector<boxConfig>& boxDefaults,
-    const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts)
+    const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts,
+    const std::map<std::string_view, std::vector<std::vector<std::pair<std::string_view, std::string_view>>>>& configVects)
 {
     duk_push_object(ctx); // config
     for (auto&& [key, value] : configValues) {
@@ -271,6 +274,19 @@ void ScriptTestFixture::addConfig(
         for (auto&& [key, value] : dict) {
             duk_push_string(ctx, value.data());
             duk_put_prop_string(ctx, -2, key.data());
+        }
+        duk_put_prop_string(ctx, -2, dictName.data()); // dict
+    }
+
+    for (auto&& [dictName, vector] : configVects) {
+        auto dukArray = duk_push_array(ctx);
+        for (duk_uarridx_t configIndex = 0; configIndex < vector.size(); configIndex++) {
+            duk_push_object(ctx);
+            for (auto&& [key, value] : vector.at(configIndex)) {
+                duk_push_string(ctx, value.data());
+                duk_put_prop_string(ctx, -2, key.data());
+            }
+            duk_put_prop_index(ctx, dukArray, configIndex);
         }
         duk_put_prop_string(ctx, -2, dictName.data()); // dict
     }
@@ -460,6 +476,23 @@ std::string ScriptTestFixture::mapGenre(
     std::string genre = duk_to_string(ctx, 0);
     int mapped = genMap.find(genre) != genMap.end() ? 1 : 0;
     auto result = mapped == 1 ? genMap[genre] : genre;
+    duk_push_object(ctx);
+
+    duk_push_int(ctx, mapped);
+    duk_put_prop_string(ctx, -2, "mapped");
+    duk_push_string(ctx, result.c_str());
+    duk_put_prop_string(ctx, -2, "value");
+
+    return result;
+}
+
+std::string ScriptTestFixture::mapModel(
+    duk_context* ctx,
+    std::map<std::string, std::string> modelMap)
+{
+    std::string model = duk_to_string(ctx, 0);
+    int mapped = modelMap.find(model) != modelMap.end() ? 1 : 0;
+    auto result = mapped == 1 ? modelMap[model] : model;
     duk_push_object(ctx);
 
     duk_push_int(ctx, mapped);

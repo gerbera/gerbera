@@ -14,19 +14,25 @@
 - Extract default database configuration strings
 - fix compilation under OmniOS
 - fix error handling in string_converter
+- github CI: add loongarch64
 - header removals and destructor fix.
+- improve Samsung TVs quirks
 - More CI checks
 - more pugi forward declarations
 - Negation of client-flags
+- New import scripts for images and videos
 - Refactor Quirks to enum
 - remove unique_ptr from xml_document
 - remove various string_view data usages
 - replaced lock_guard with scoped_lock
+- samsung bookmark save/restore
+- simplify using quirks
 - Update Conan integration
 - Update ffmpegthumbnailer to 2.2.4
 - use correct name for boxlayout enabled years
 - use more fmt::join
 - use optional instead of unique_ptr
+- use Quirk::DCM10 flag
 
 ### v3.0.0
 

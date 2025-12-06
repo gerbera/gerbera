@@ -270,6 +270,17 @@
                     <genre from="Musical" to="Musical"/>
                     <genre from="Pop|A Capella|Folk|Sports|Data|Disco|Diva|Electronica|World|Glam|New Age|Romantic|Vocals|European|Classic Prog|Urban AC" to="Pop"/>
                 </genre-map>
+                <model-map>
+                    <model from="&lt;KENOX S760  / Samsung S760&gt;" to="Samsung S760"/>
+                    <model from="5800 Xpres" to="Nokia 5800 Xpres"/>
+                    <model from="X6-00" to="Nokia X6"/>
+                </model-map>
+                <headline-map>
+                    <headline from="Karl" to="Karl" type="Topic"/>
+                    <headline from="Karl[- ]*([^ ].*)" to="$1" type="SubTopic"/>
+                    <headline from="([0-9]*) *([^0-9 ].*[^0-9 ]) *([0-9]*)" to="$1$3 $2" type="SubTopic"/>
+                    <headline from="^(?!.*\d{4}).*$" to="" type="Ignore"/>
+                </headline-map>
                 <boxlayout>
                     <chain type="audio">
                         <link key="Audio/audioRoot" />
@@ -311,6 +322,12 @@
                     <box key="Image/allYears" title="Year" class="object.container" upnp-shortcut="IMAGES_YEARS"/>
                     <box key="Image/imageRoot" title="Photos" class="object.container" upnp-shortcut="IMAGES"/>
                     <box key="Image/unknown" title="Unknown" class="object.container"/>
+                    <box key="ImageDetail/allModels" title="All Models" class="object.container" />
+                    <box key="ImageDetail/yearMonth" title="Year+Month" class="object.container" />
+                    <box key="ImageDetail/yearDate" title="Year+Date" class="object.container" />
+                    <box key="Topic/topicRoot" title="Topics" class="object.container" />
+                    <box key="Topic/topic" title="Topic" class="object.container" />
+                    <box key="Topic/topicExtra" title="Extra" class="object.container" />
                     <box key="Trailer/trailerRoot" title="Online Services" class="object.container"/>
                     <box key="Trailer/allTrailers" title="All Trailers" class="object.container"/>
                     <box key="Trailer/allGenres" title="Genres" class="object.container"/>

@@ -790,6 +790,136 @@ Replace genre ``from`` by genre ``to``.
 
    Target genre value.
 
+Mapping for Camera Models
+-------------------------
+
+Camera model values as taken from exif tags are sometimes unstructured
+across manufacturers.
+The goal of model-mapping is to unify values in your media library.
+
+.. confval:: model-map
+   :type: :confval:`Section`
+   :required: false
+
+   .. versionadded:: HEAD
+   .. code:: xml
+
+       <model-map>
+          <model from="X6-00" to="Nokia X6"/>
+       </model-map>
+
+Define mapping of camera model value.
+
+Camera Model
+^^^^^^^^^^^^
+
+.. confval:: model-map model
+   :type: :confval:`Section`
+   :required: false
+
+   .. code:: xml
+
+      <model from="X6-00" to="Nokia X6"/>
+
+Replace model ``from`` by genre ``to``.
+
+   .. confval:: model-map model from
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+          from="X6-00"
+
+   Original model value. Can be a regular expression.
+
+   .. confval:: model-map model to
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+         to="Nokia X6"
+
+   Target model value.
+
+Rules for Headlines for Topics Section
+--------------------------------------
+
+The topics section in virtual layout combines files from images
+and videos and is populated with the respective :confval:`import-function`.
+The headlines (call topic and subtopic) in this section are derived from
+media description or special properties as implemented in the imoort function..
+
+.. confval:: headline-map
+   :type: :confval:`Section`
+   :required: false
+
+   .. versionadded:: HEAD
+   .. code:: xml
+
+       <headline-map>
+         <headline from="Gerbera" to="Gerbera" type="Topic"/>
+         <headline from="Gerbera[- ]*([^ ].*)" to="$1" type="SubTopic"/>
+         <headline from="^(?!.*\d{4}).*$" to="" type="Ignore"/>
+       </headline-map>
+
+Define mapping to build the headlines in topic section.
+
+Headline
+^^^^^^^^
+
+.. confval:: headline-map headline
+   :type: :confval:`Section`
+   :required: false
+
+   .. code:: xml
+
+      <headline from="Gerbera" to="Gerbera" type="Topic"/>
+
+Set headline of ``type`` to ``to`` if source property matches ``from``.
+
+   .. confval:: headline-map headline from
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+          from="Gerbera"
+
+   Original headline value. Can be a regular expression.
+   It is applied to the description of images.
+   The property topic and subtopic is taken from NFO files for videos.
+   If the property matches its source property
+   the :confval:`headline-map headline type` defines the topic level to be set.
+
+   .. confval:: headline-map headline to
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code:: xml
+
+         to="Nokia X6"
+
+   Target headline value.
+
+   .. confval:: headline-map headline type
+      :type: :confval:`Enum` (`Topic|SubTopic|Ignore`)
+      :required: false
+      :default: `SubTopic`
+   ..
+
+      .. code:: xml
+
+         type="Ignore"
+
+   Set type of topic level to be referenced.
+   `Ignore` means that the :confval:`headline-map headline to` and the whole item is ignored.
+
 .. _boxlayout:
 
 Properties of Layout Boxes
@@ -2305,7 +2435,7 @@ a :confval:`library charset` and a :confval:`library enabled` attribute:
 
 - :confval:`id3`: Configure ``taglib`` settings used for audio file analysis.
 - :confval:`libexiv`: Configure ``libexiv`` settings used for image file analysis.
-- :confval:`evix2`: Configure ``libexiv2`` settings used for image file analysis.
+- :confval:`exiv2`: Configure ``libexiv2`` settings used for image file analysis.
 - :confval:`wavpack`: Configure ``libwavpack`` settings used for enhanced wavpack file analysis.
 - :confval:`ffmpeg`: Configure ``ffmpeg`` settings used for audio and video file analysis.
 - :confval:`mkv`: Configure ``libmatroska`` settings used for enhanced mkv file analysis.
@@ -2631,7 +2761,7 @@ A sample configuration for the example described above would be:
 Exiv2
 ^^^^^
 
-.. confval:: evix2
+.. confval:: exiv2
    :type: :confval:`Section`
    :required: false
 ..

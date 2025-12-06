@@ -95,6 +95,9 @@ function importPlaylist(obj, cont, rootPath, autoscanId, containerType) {
 }
 
 // doc-playlist-m3u-parse-begin
+const reM3uLine = new RegExp('^#EXTINF:(-?\\d+),\\s*(\\S.*)$', 'i');
+const reM3uTitle = new RegExp('^#EXTINF:(-?\\d+),\\s*(\\S.*),\\s*(\\S.*)$', 'i');
+const reM3uComment = new RegExp('^(#|\\s*$)');
 function readM3uPlaylist(playlist_title, playlistLocation, playlistChain, playlistDirChain, rootPath) {
   var entry = {
     title: null,
@@ -118,17 +121,16 @@ function readM3uPlaylist(playlist_title, playlistLocation, playlistChain, playli
 
   // Here is the do - while loop which will read the playlist line by line.
   do {
-    var matches = line ? line.match(/^#EXTINF:(-?\d+),\s*(\S.*)$/i) : undefined;
-
+    var matches = line ? reM3uLine.exec(line) : undefined;
     if (matches && matches.length > 1) {
       // duration = matches[1]; // currently unused
       entry.title = matches[2];
-      matches = line.match(/^#EXTINF:(-?\d+),\s*(\S.*),\s*(\S.*)$/i);
+      matches = reM3uTitle.exec(line);
       if (matches && matches.length > 1) {
         entry.title = matches[2];
         entry.mimetype = matches[3];
       }
-    } else if (line && !line.match(/^(#|\s*$)/)) {
+    } else if (line && !reM3uComment.test(line)) {
       entry.location = line;
       // Call the helper function to add the item once you gathered the data:
       var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath);
@@ -239,6 +241,13 @@ function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playli
   return result;
 }
 
+const rePlsPlaylist = new RegExp("^\\[playlist\\]$", 'i');
+const rePlsNumberOfEntries = new RegExp("^NumberOfEntries=(\\d+)$", 'i');
+const rePlsVersion = new RegExp("^Version=(\\d+)$", 'i');
+const rePlsFile = new RegExp("^File\\s*(\\d+)\\s*=\\s*(\\S.+)$", 'i');
+const rePlsTitle = new RegExp("^Title\\s*(\\d+)\\s*=\\s*(\\S.+)$", 'i');
+const rePlsMime = new RegExp("^MimeType\\s*(\\d+)\\s*=\\s*(\\S.+)$", 'i');
+const rePlsLength = new RegExp("^Length\\s*(\\d+)\\s*=\\s*(\\S.+)$", 'i');
 function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playlistDirChain, rootPath) {
   var entry = {
     title: null,
@@ -256,15 +265,15 @@ function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playli
   const result = [];
 
   do {
-    if (line.match(/^\[playlist\]$/i)) {
+    if (rePlsPlaylist.test(line)) {
       // It seems to be a correct playlist, but we will try to parse it
       // anyway even if this header is missing, so do nothing.
-    } else if (line.match(/^NumberOfEntries=(\d+)$/i)) {
+    } else if (rePlsNumberOfEntries.test(line)) {
       // var numEntries = RegExp.$1;
-    } else if (line.match(/^Version=(\d+)$/i)) {
+    } else if (rePlsVersion.test(line)) {
       // var plsVersion =  RegExp.$1;
-    } else if (line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i)) {
-      const matches = line.match(/^File\s*(\d+)\s*=\s*(\S.+)$/i);
+    } else if (rePlsFile.test(line)) {
+      const matches = rePlsFile.exec(line);
       const thisFile = matches[2];
       const id = parseInt(matches[1], 10);
       if (entry.order === -1)
@@ -283,8 +292,8 @@ function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playli
         entry.order = id;
       }
       entry.location = thisFile;
-    } else if (line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i)) {
-      const matches = line.match(/^Title\s*(\d+)\s*=\s*(\S.+)$/i);
+    } else if (rePlsTitle.test(line)) {
+      const matches = rePlsTitle.exec(line);
       const thisTitle = matches[2];
       const id = parseInt(matches[1], 10);
       if (entry.order === -1)
@@ -303,8 +312,8 @@ function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playli
         entry.order = id;
       }
       entry.title = thisTitle;
-    } else if (line.match(/^MimeType\s*(\d+)\s*=\s*(\S.+)$/i)) {
-      const matches = line.match(/^MimeType\s*(\d+)\s*=\s*(\S.+)$/i);
+    } else if (rePlsMime.test(line)) {
+      const matches = rePlsMime.exec(line);
       const thisMime = matches[2];
       const id = parseInt(matches[1], 10);
       if (entry.order === -1)
@@ -323,7 +332,7 @@ function readPlsPlaylist(playlist_title, playlistLocation, playlistChain, playli
         entry.order = id;
       }
       entry.mimetype = thisMime;
-    } else if (line.match(/^Length\s*(\d+)\s*=\s*(\S.+)$/i)) {
+    } else if (rePlsLength.test(line)) {
       // currently unused
     }
 

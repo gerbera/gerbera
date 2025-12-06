@@ -90,6 +90,12 @@
           <box key="Image/allYears" title="Year" class="object.container" upnp-shortcut="IMAGES_YEARS" />
           <box key="Image/imageRoot" title="Photos" class="object.container" upnp-shortcut="IMAGES" />
           <box key="Image/unknown" title="Unknown" class="object.container" />
+          <box key="ImageDetail/allModels" title="All Models" class="object.container" />
+          <box key="ImageDetail/yearMonth" title="Year+Month" class="object.container" />
+          <box key="ImageDetail/yearDate" title="Year+Date" class="object.container" />
+          <box key="Topic/topicRoot" title="Topics" class="object.container" />
+          <box key="Topic/topic" title="Topic" class="object.container" />
+          <box key="Topic/topicExtra" title="Extra" class="object.container" />
         </boxlayout>
       </virtual-layout>
     </scripting>

@@ -132,7 +132,7 @@ public:
     std::shared_ptr<ConfigOption> newOption(
         const std::map<std::string, std::string>& optValue);
 
-    std::string getCurrentValue() const override { return {}; }
+    std::string getCurrentValue() const override;
 };
 
 #endif // __CONFIG_SETUP_DICTIONARY_H__

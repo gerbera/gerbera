@@ -96,6 +96,7 @@ const static auto upnp_classes = std::map<const std::string_view, const std::str
     { UPNP_CLASS_MUSIC_CONDUCTOR, "UPNP_CLASS_CONTAINER_MUSIC_CONDUCTOR" },
     { UPNP_CLASS_MUSIC_ORCHESTRA, "UPNP_CLASS_CONTAINER_MUSIC_ORCHESTRA" },
     { UPNP_CLASS_CONTAINER, "UPNP_CLASS_CONTAINER" },
+    { UPNP_CLASS_ALBUM, "UPNP_CLASS_CONTAINER_ALBUM" },
 
     { UPNP_CLASS_ITEM, "UPNP_CLASS_ITEM" },
     { UPNP_CLASS_PLAYLIST_ITEM, "UPNP_CLASS_PLAYLIST_ITEM" },
@@ -157,6 +158,13 @@ const static auto boxKeyNames = std::map<const std::string_view, BoxKeys> {
     { "BK_imageAllYears", BoxKeys::imageAllYears },
     { "BK_imageRoot", BoxKeys::imageRoot },
     { "BK_imageUnknown", BoxKeys::imageUnknown },
+    { "BK_imageAllModels", BoxKeys::imageAllModels },
+    { "BK_imageYearMonth", BoxKeys::imageYearMonth },
+    { "BK_imageYearDate", BoxKeys::imageYearDate },
+
+    { "BK_topicRoot", BoxKeys::topicRoot },
+    { "BK_topic", BoxKeys::topic },
+    { "BK_topicExtra", BoxKeys::topicExtra },
 
 #ifdef ONLINE_SERVICES
     { "BK_trailerAllGenres", BoxKeys::trailerAllGenres },

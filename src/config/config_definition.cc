@@ -860,6 +860,12 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         BoxLayout(BoxKeys::imageAllYears, "Year", UPNP_CLASS_CONTAINER, "IMAGES_YEARS"),
         BoxLayout(BoxKeys::imageRoot, "Photos", UPNP_CLASS_CONTAINER, "IMAGES"),
         BoxLayout(BoxKeys::imageUnknown, "Unknown"),
+        BoxLayout(BoxKeys::imageAllModels, "All Models", UPNP_CLASS_CONTAINER),
+        BoxLayout(BoxKeys::imageYearMonth, "Year+Month", UPNP_CLASS_CONTAINER),
+        BoxLayout(BoxKeys::imageYearDate, "Year+Date", UPNP_CLASS_CONTAINER),
+        BoxLayout(BoxKeys::topicRoot, "Topics", UPNP_CLASS_CONTAINER),
+        BoxLayout(BoxKeys::topic, "Topic", UPNP_CLASS_CONTAINER),
+        BoxLayout(BoxKeys::topicExtra, "Extra", UPNP_CLASS_CONTAINER),
 
 #ifdef ONLINE_SERVICES
         BoxLayout(BoxKeys::trailerRoot, "Online Services"),
@@ -1228,6 +1234,16 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
             "/import/scripting/virtual-layout/genre-map", "config-import.html#confval-genre-map",
             ConfigVal::A_IMPORT_LAYOUT_GENRE, ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO),
+
+        std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_MODEL_MAP,
+            "/import/scripting/virtual-layout/model-map", "config-import.html#confval-model-map",
+            ConfigVal::A_IMPORT_LAYOUT_MODEL, ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO),
+
+        std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_HEADLINE_MAP,
+            "/import/scripting/virtual-layout/headline-map", "config-import.html#confval-headline-map",
+            ConfigVal::A_IMPORT_LAYOUT_HEADLINE,
+            std::vector<ConfigVal> { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO, ConfigVal::A_IMPORT_LAYOUT_HEADLINE_TYPE },
+            false, false, false),
 
         // character conversion
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_FILESYSTEM_CHARSET,
@@ -1911,6 +1927,12 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getSimpleOptions()
             "value", "config-import.html#confval-script-option-value"),
         std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LAYOUT_GENRE,
             "genre", "config-import.html#confval-genre"),
+        std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LAYOUT_MODEL,
+            "model", "config-import.html#confval-model-map-model"),
+        std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LAYOUT_HEADLINE,
+            "headline", "config-import.html#confval-headline-map-headline"),
+        std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LAYOUT_HEADLINE_TYPE,
+            "type", "config-import.html#confval-headline-map-headline-type"),
         std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_SYSTEM_DIR_ADD_PATH,
             "add-path", "config-import.html#confval-system-directories-add-path"),
         std::make_shared<ConfigSetup>(ConfigVal::A_DYNAMIC_CONTAINER,
@@ -1953,90 +1975,201 @@ void ConfigDefinition::initOptions(const std::shared_ptr<ConfigDefinition>& self
 void ConfigDefinition::initHierarchy()
 {
     parentOptions = {
-        { ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED, { ConfigVal::TRANSCODING_PROFILE_LIST } },
-        { ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS, { ConfigVal::TRANSCODING_PROFILE_LIST } },
-        { ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL, { ConfigVal::TRANSCODING_PROFILE_LIST } },
-        { ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE, { ConfigVal::TRANSCODING_PROFILE_LIST } },
+        { ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED, {
+                                                                ConfigVal::TRANSCODING_PROFILE_LIST,
+                                                            } },
+        { ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS, {
+                                                                    ConfigVal::TRANSCODING_PROFILE_LIST,
+                                                                } },
+        { ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL, {
+                                                               ConfigVal::TRANSCODING_PROFILE_LIST,
+                                                           } },
+        { ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE, {
+                                                             ConfigVal::TRANSCODING_PROFILE_LIST,
+                                                         } },
 
-        { ConfigVal::A_CLIENTS_UPNP_FILTER_FULL, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::CLIENTS_LIST } },
-        { ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::CLIENTS_LIST } },
+        { ConfigVal::A_CLIENTS_UPNP_FILTER_FULL, {
+                                                     ConfigVal::A_CLIENTS_CLIENT,
+                                                     ConfigVal::CLIENTS_LIST,
+                                                 } },
+        { ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE, {
+                                                     ConfigVal::A_CLIENTS_CLIENT,
+                                                     ConfigVal::CLIENTS_LIST,
+                                                 } },
 
-        { ConfigVal::A_UPNP_PROPERTIES_PROPERTY, { ConfigVal::UPNP_ALBUM_PROPERTIES, ConfigVal::UPNP_GENRE_PROPERTIES, ConfigVal::UPNP_ARTIST_PROPERTIES, ConfigVal::UPNP_TITLE_PROPERTIES, ConfigVal::UPNP_PLAYLIST_PROPERTIES } },
-        { ConfigVal::A_UPNP_PROPERTIES_UPNPTAG, { ConfigVal::UPNP_ALBUM_PROPERTIES, ConfigVal::UPNP_GENRE_PROPERTIES, ConfigVal::UPNP_ARTIST_PROPERTIES, ConfigVal::UPNP_TITLE_PROPERTIES, ConfigVal::UPNP_PLAYLIST_PROPERTIES } },
-        { ConfigVal::A_UPNP_PROPERTIES_METADATA, { ConfigVal::UPNP_ALBUM_PROPERTIES, ConfigVal::UPNP_GENRE_PROPERTIES, ConfigVal::UPNP_ARTIST_PROPERTIES, ConfigVal::UPNP_TITLE_PROPERTIES, ConfigVal::UPNP_PLAYLIST_PROPERTIES } },
+        { ConfigVal::A_UPNP_PROPERTIES_PROPERTY, {
+                                                     ConfigVal::UPNP_ALBUM_PROPERTIES,
+                                                     ConfigVal::UPNP_GENRE_PROPERTIES,
+                                                     ConfigVal::UPNP_ARTIST_PROPERTIES,
+                                                     ConfigVal::UPNP_TITLE_PROPERTIES,
+                                                     ConfigVal::UPNP_PLAYLIST_PROPERTIES,
+                                                 } },
+        { ConfigVal::A_UPNP_PROPERTIES_UPNPTAG, {
+                                                    ConfigVal::UPNP_ALBUM_PROPERTIES,
+                                                    ConfigVal::UPNP_GENRE_PROPERTIES,
+                                                    ConfigVal::UPNP_ARTIST_PROPERTIES,
+                                                    ConfigVal::UPNP_TITLE_PROPERTIES,
+                                                    ConfigVal::UPNP_PLAYLIST_PROPERTIES,
+                                                } },
+        { ConfigVal::A_UPNP_PROPERTIES_METADATA, {
+                                                     ConfigVal::UPNP_ALBUM_PROPERTIES,
+                                                     ConfigVal::UPNP_GENRE_PROPERTIES,
+                                                     ConfigVal::UPNP_ARTIST_PROPERTIES,
+                                                     ConfigVal::UPNP_TITLE_PROPERTIES,
+                                                     ConfigVal::UPNP_PLAYLIST_PROPERTIES,
+                                                 } },
 
-        { ConfigVal::A_UPNP_DEFAULT_PROPERTY_PROPERTY, { ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS, ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS, ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS } },
-        { ConfigVal::A_UPNP_DEFAULT_PROPERTY_TAG, { ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS, ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS, ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS } },
-        { ConfigVal::A_UPNP_DEFAULT_PROPERTY_VALUE, { ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS, ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS, ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS } },
+        { ConfigVal::A_UPNP_DEFAULT_PROPERTY_PROPERTY, {
+                                                           ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS,
+                                                           ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS,
+                                                           ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS,
+                                                       } },
+        { ConfigVal::A_UPNP_DEFAULT_PROPERTY_TAG, {
+                                                      ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS,
+                                                      ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS,
+                                                      ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS,
+                                                  } },
+        { ConfigVal::A_UPNP_DEFAULT_PROPERTY_VALUE, {
+                                                        ConfigVal::UPNP_RESOURCE_PROPERTY_DEFAULTS,
+                                                        ConfigVal::UPNP_OBJECT_PROPERTY_DEFAULTS,
+                                                        ConfigVal::UPNP_CONTAINER_PROPERTY_DEFAULTS,
+                                                    } },
 
-        { ConfigVal::A_UPNP_NAMESPACE_PROPERTY, { ConfigVal::UPNP_ALBUM_NAMESPACES, ConfigVal::UPNP_GENRE_NAMESPACES, ConfigVal::UPNP_ARTIST_NAMESPACES, ConfigVal::UPNP_TITLE_NAMESPACES, ConfigVal::UPNP_PLAYLIST_NAMESPACES } },
-        { ConfigVal::A_UPNP_NAMESPACE_KEY, { ConfigVal::UPNP_ALBUM_NAMESPACES, ConfigVal::UPNP_GENRE_NAMESPACES, ConfigVal::UPNP_ARTIST_NAMESPACES, ConfigVal::UPNP_TITLE_NAMESPACES, ConfigVal::UPNP_PLAYLIST_NAMESPACES } },
-        { ConfigVal::A_UPNP_NAMESPACE_URI, { ConfigVal::UPNP_ALBUM_NAMESPACES, ConfigVal::UPNP_GENRE_NAMESPACES, ConfigVal::UPNP_ARTIST_NAMESPACES, ConfigVal::UPNP_TITLE_NAMESPACES, ConfigVal::UPNP_PLAYLIST_NAMESPACES } },
+        { ConfigVal::A_UPNP_NAMESPACE_PROPERTY, {
+                                                    ConfigVal::UPNP_ALBUM_NAMESPACES,
+                                                    ConfigVal::UPNP_GENRE_NAMESPACES,
+                                                    ConfigVal::UPNP_ARTIST_NAMESPACES,
+                                                    ConfigVal::UPNP_TITLE_NAMESPACES,
+                                                    ConfigVal::UPNP_PLAYLIST_NAMESPACES,
+                                                } },
+        { ConfigVal::A_UPNP_NAMESPACE_KEY, {
+                                               ConfigVal::UPNP_ALBUM_NAMESPACES,
+                                               ConfigVal::UPNP_GENRE_NAMESPACES,
+                                               ConfigVal::UPNP_ARTIST_NAMESPACES,
+                                               ConfigVal::UPNP_TITLE_NAMESPACES,
+                                               ConfigVal::UPNP_PLAYLIST_NAMESPACES,
+                                           } },
+        { ConfigVal::A_UPNP_NAMESPACE_URI, {
+                                               ConfigVal::UPNP_ALBUM_NAMESPACES,
+                                               ConfigVal::UPNP_GENRE_NAMESPACES,
+                                               ConfigVal::UPNP_ARTIST_NAMESPACES,
+                                               ConfigVal::UPNP_TITLE_NAMESPACES,
+                                               ConfigVal::UPNP_PLAYLIST_NAMESPACES,
+                                           } },
 
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, {
+                                                        ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+                                                        ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
-                                                        ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
+                                                        ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST,
 #endif
                                                     } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, {
+                                                    ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+                                                    ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
-                                                    ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
+                                                    ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST,
 #endif
                                                 } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE, {
+                                                         ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+                                                         ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
-                                                         ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
+                                                         ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST,
 #endif
                                                      } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_MEDIATYPE, {
+                                                         ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+                                                         ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
-                                                         ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
+                                                         ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST,
 #endif
                                                      } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_HIDDENFILES, {
+                                                           ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+                                                           ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
-                                                           ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
+                                                           ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST,
 #endif
                                                        } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS, {
+                                                              ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+                                                              ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
-                                                              ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
+                                                              ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST,
 #endif
                                                           } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT, {
+                                                         ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+                                                         ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
-                                                         ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
+                                                         ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST,
 #endif
                                                      } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_RETRYCOUNT, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_RETRYCOUNT, {
+                                                          ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+                                                          ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
-                                                          ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
+                                                          ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST,
 #endif
                                                       } },
-        { ConfigVal::A_AUTOSCAN_DIRECTORY_LMT, { ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
+        { ConfigVal::A_AUTOSCAN_DIRECTORY_LMT, {
+                                                   ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST,
+                                                   ConfigVal::IMPORT_AUTOSCAN_MANUAL_LIST,
 #ifdef HAVE_INOTIFY
-                                                   ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST
+                                                   ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST,
 #endif
                                                } },
 
-        { ConfigVal::A_DIRECTORIES_TWEAK_LOCATION, { ConfigVal::IMPORT_DIRECTORIES_LIST } },
-        { ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE, { ConfigVal::IMPORT_DIRECTORIES_LIST } },
-        { ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN, { ConfigVal::IMPORT_DIRECTORIES_LIST } },
-        { ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE, { ConfigVal::IMPORT_DIRECTORIES_LIST } },
-        { ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS, { ConfigVal::IMPORT_DIRECTORIES_LIST } },
+        { ConfigVal::A_DIRECTORIES_TWEAK_LOCATION, {
+                                                       ConfigVal::IMPORT_DIRECTORIES_LIST,
+                                                   } },
+        { ConfigVal::A_DIRECTORIES_TWEAK_RECURSIVE, {
+                                                        ConfigVal::IMPORT_DIRECTORIES_LIST,
+                                                    } },
+        { ConfigVal::A_DIRECTORIES_TWEAK_HIDDEN, {
+                                                     ConfigVal::IMPORT_DIRECTORIES_LIST,
+                                                 } },
+        { ConfigVal::A_DIRECTORIES_TWEAK_CASE_SENSITIVE, {
+                                                             ConfigVal::IMPORT_DIRECTORIES_LIST,
+                                                         } },
+        { ConfigVal::A_DIRECTORIES_TWEAK_FOLLOW_SYMLINKS, {
+                                                              ConfigVal::IMPORT_DIRECTORIES_LIST,
+                                                          } },
 
-        { ConfigVal::A_DYNAMIC_CONTAINER, { ConfigVal::SERVER_DYNAMIC_CONTENT_LIST } },
-        { ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, { ConfigVal::SERVER_DYNAMIC_CONTENT_LIST } },
-        { ConfigVal::A_DYNAMIC_CONTAINER_IMAGE, { ConfigVal::SERVER_DYNAMIC_CONTENT_LIST } },
-        { ConfigVal::A_DYNAMIC_CONTAINER_TITLE, { ConfigVal::SERVER_DYNAMIC_CONTENT_LIST } },
-        { ConfigVal::A_DYNAMIC_CONTAINER_FILTER, { ConfigVal::SERVER_DYNAMIC_CONTENT_LIST } },
-        { ConfigVal::A_DYNAMIC_CONTAINER_SORT, { ConfigVal::SERVER_DYNAMIC_CONTENT_LIST } },
+        { ConfigVal::A_DYNAMIC_CONTAINER, {
+                                              ConfigVal::SERVER_DYNAMIC_CONTENT_LIST,
+                                          } },
+        { ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, {
+                                                       ConfigVal::SERVER_DYNAMIC_CONTENT_LIST,
+                                                   } },
+        { ConfigVal::A_DYNAMIC_CONTAINER_IMAGE, {
+                                                    ConfigVal::SERVER_DYNAMIC_CONTENT_LIST,
+                                                } },
+        { ConfigVal::A_DYNAMIC_CONTAINER_TITLE, {
+                                                    ConfigVal::SERVER_DYNAMIC_CONTENT_LIST,
+                                                } },
+        { ConfigVal::A_DYNAMIC_CONTAINER_FILTER, {
+                                                     ConfigVal::SERVER_DYNAMIC_CONTENT_LIST,
+                                                 } },
+        { ConfigVal::A_DYNAMIC_CONTAINER_SORT, {
+                                                   ConfigVal::SERVER_DYNAMIC_CONTENT_LIST,
+                                               } },
 
         { ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_MIMETYPE, {} },
 
-        { ConfigVal::A_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, { ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST } },
-        { ConfigVal::A_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, { ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST } },
-        { ConfigVal::A_IMPORT_MAPPINGS_M2CTYPE_LIST_AS, { ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST, ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST } },
+        { ConfigVal::A_IMPORT_MAPPINGS_M2CTYPE_LIST_MIMETYPE, {
+                                                                  ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
+                                                                  ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
+                                                              } },
+        { ConfigVal::A_IMPORT_MAPPINGS_M2CTYPE_LIST_TREAT, {
+                                                               ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
+                                                               ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
+                                                           } },
+        { ConfigVal::A_IMPORT_MAPPINGS_M2CTYPE_LIST_AS, {
+                                                            ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST,
+                                                            ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST,
+                                                        } },
         { ConfigVal::A_IMPORT_LIBOPTS_COMMENT_LABEL, {
 #ifdef HAVE_LIBEXIF
                                                          ConfigVal::IMPORT_LIBOPTS_EXIF_COMMENT_LIST,
@@ -2142,23 +2275,61 @@ void ConfigDefinition::initHierarchy()
                                                         ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE,
                                                     } },
 
-        { ConfigVal::A_IMPORT_RESOURCES_NAME, { ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, //
-                                                  ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, //
-                                                  ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, //
-                                                  ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST, //
-                                                  ConfigVal::IMPORT_SYSTEM_DIRECTORIES, ConfigVal::IMPORT_RESOURCES_ORDER } },
-        { ConfigVal::A_IMPORT_RESOURCES_EXT, { ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, //
-                                                 ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST } },
-        { ConfigVal::A_IMPORT_RESOURCES_PTT, { ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, //
-                                                 ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST } },
-        { ConfigVal::A_IMPORT_RESOURCES_MIME, { ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, //
-                                                  ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST } },
+        { ConfigVal::A_IMPORT_RESOURCES_NAME, {
+                                                  ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST,
+                                                  ConfigVal::IMPORT_SYSTEM_DIRECTORIES,
+                                                  ConfigVal::IMPORT_RESOURCES_ORDER,
+                                              } },
+        { ConfigVal::A_IMPORT_RESOURCES_EXT, {
+                                                 ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST,
+                                                 ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST,
+                                                 ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST,
+                                                 ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST,
+                                                 ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST,
+                                             } },
+        { ConfigVal::A_IMPORT_RESOURCES_PTT, {
+                                                 ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST,
+                                                 ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST,
+                                                 ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST,
+                                                 ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST,
+                                                 ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST,
+                                             } },
+        { ConfigVal::A_IMPORT_RESOURCES_MIME, {
+                                                  ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST,
+                                                  ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST,
+                                              } },
 
-        { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, { ConfigVal::IMPORT_LAYOUT_MAPPING, ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
-        { ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO, { ConfigVal::IMPORT_LAYOUT_MAPPING, ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP } },
+        { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, {
+                                                       ConfigVal::IMPORT_LAYOUT_MAPPING,
+                                                       ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
+                                                       ConfigVal::IMPORT_SCRIPTING_IMPORT_MODEL_MAP,
+                                                       ConfigVal::IMPORT_SCRIPTING_IMPORT_HEADLINE_MAP,
+                                                   } },
+        { ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO, {
+                                                     ConfigVal::IMPORT_LAYOUT_MAPPING,
+                                                     ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
+                                                     ConfigVal::IMPORT_SCRIPTING_IMPORT_MODEL_MAP,
+                                                     ConfigVal::IMPORT_SCRIPTING_IMPORT_HEADLINE_MAP,
+                                                 } },
 #ifdef HAVE_JS
-        { ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_NAME, { ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS } },
-        { ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE, { ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS } },
+        { ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_NAME, {
+                                                             ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
+                                                         } },
+        { ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE, {
+                                                              ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
+                                                          } },
 #endif
     };
 }
