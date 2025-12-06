@@ -82,6 +82,13 @@ const std::map<BoxKeys, std::string_view> BoxLayout::boxKeys = {
     { BoxKeys::imageAllYears, "Image/allYears" },
     { BoxKeys::imageRoot, "Image/imageRoot" },
     { BoxKeys::imageUnknown, "Image/unknown" },
+    { BoxKeys::imageAllModels, "ImageDetail/allModels" },
+    { BoxKeys::imageYearMonth, "ImageDetail/yearMonth" },
+    { BoxKeys::imageYearDate, "ImageDetail/yearDate" },
+
+    { BoxKeys::topicRoot, "Topic/topicRoot" },
+    { BoxKeys::topic, "Topic/topic" },
+    { BoxKeys::topicExtra, "Topic/topicExtra" },
 
 #ifdef ONLINE_SERVICES
     { BoxKeys::trailerAllGenres, "Trailer/allGenres" },

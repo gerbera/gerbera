@@ -1159,6 +1159,47 @@
           ]
         },
         {
+          "item": "/import/scripting/virtual-layout/model-map/model",
+          "caption": "Camera Model Map",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/scripting/virtual-layout/model-map/model/attribute::from",
+              "caption": "Pattern",
+              "editable": true
+            },
+            {
+              "item": "/import/scripting/virtual-layout/model-map/model/attribute::to",
+              "caption": "Value",
+              "editable": true
+            }
+          ]
+        },
+        {
+          "item": "/import/scripting/virtual-layout/headline-map/headline",
+          "caption": "Topic Headline Rule",
+          "type": "List",
+          "editable": true,
+          "children": [
+            {
+              "item": "/import/scripting/virtual-layout/headline-map/headline/attribute::from",
+              "caption": "Pattern",
+              "editable": true
+            },
+            {
+              "item": "/import/scripting/virtual-layout/headline-map/headline/attribute::to",
+              "caption": "Value",
+              "editable": true
+            },
+            {
+              "item": "/import/scripting/virtual-layout/headline-map/headline/attribute::type",
+              "caption": "Type",
+              "editable": true
+            }
+          ]
+        },
+        {
           "item": "/import/scripting/virtual-layout/boxlayout/box",
           "caption": "Box Layout",
           "type": "List",

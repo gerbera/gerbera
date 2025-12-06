@@ -121,14 +121,16 @@ public:
         const duk_function_list_entry* funcs,
         const std::map<std::string_view, std::string_view>& config = {},
         const std::vector<boxConfig>& boxDefaults = {},
-        const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts = {});
+        const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts = {},
+        const std::map<std::string_view, std::vector<std::vector<std::pair<std::string_view, std::string_view>>>>& configVects = {});
 
     /// @brief Add config entries to global context
     static void addConfig(
         duk_context* ctx,
         const std::map<std::string_view, std::string_view>& configValues,
         const std::vector<boxConfig>& boxDefaults = {},
-        const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts = {});
+        const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts = {},
+        const std::map<std::string_view, std::vector<std::vector<std::pair<std::string_view, std::string_view>>>>& configVects = {});
 
     /// @brief Access the global object(script) by name, and execute
     std::vector<int> callFunction(
@@ -183,6 +185,12 @@ public:
     static std::string mapGenre(
         duk_context* ctx,
         std::map<std::string, std::string> genMap);
+
+    /// @brief Proxy the Duktape script with `mapModel` global function.
+    /// Translates the Duktape value stack to c++
+    static std::string mapModel(
+        duk_context* ctx,
+        std::map<std::string, std::string> modelMap);
 
     /// @brief roxy the Duktape script with `addContainerTree` C function.
     /// Translates the Duktape value stack to c++

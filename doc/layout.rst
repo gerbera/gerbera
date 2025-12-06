@@ -94,19 +94,41 @@ For more details see :ref:`Scripting <scripting>`.
 At the moment there are three different layout functions for audio files and one for videos and images.
 The layout function can be set in configuration of :ref:`Import Function <import-function>`.
 
-+-----------------------+-----------------------------------------------------------------------+------+
-| Layout Function       | Description                                                           | Code |
-+=======================+=======================================================================+======+
-| importAudio           | Create default audio layout similar to builtin layout                 | da   |
-+-----------------------+-----------------------------------------------------------------------+------+
-| importAudioInitial    | Create a folder for each album artist. Suitable for large collections | ia   |
-+-----------------------+-----------------------------------------------------------------------+------+
-| importAudioStructured | Create boxes for a group of initial letters in one box                | sa   |
-+-----------------------+-----------------------------------------------------------------------+------+
-| importVideo           | Create video layout similar to builtin layout                         | dv   |
-+-----------------------+-----------------------------------------------------------------------+------+
-| importImage           | Create image layout similar to builtin layout                         | di   |
-+-----------------------+-----------------------------------------------------------------------+------+
++-----------------------+--------------------------------------------------------------------------+------+
+| Layout Function       | Description                                                              | Code |
++=======================+==========================================================================+======+
+| importAudio           | Create simple audio layout similar to builtin layout                     | a-0  |
++-----------------------+--------------------------------------------------------------------------+------+
+| importAudioInitial    | Create a folder for each album artist. Suitable for large collections    | a-i  |
++-----------------------+--------------------------------------------------------------------------+------+
+| importAudioStructured | Create boxes for a group of initial letters in one box                   | a-s  |
++-----------------------+--------------------------------------------------------------------------+------+
+| importVideo           | Create video layout similar to builtin layout                            | v-0  |
++-----------------------+--------------------------------------------------------------------------+------+
+| importVideoDetails    | | Create video layout with topic detail                                  | v-d  |
+|                       | |                                                                        |      |
+|                       | | Requires aux to be populated from nfo by :confval:`metafile-script`    |      |
+|                       | | ``NFO:topic``                                                          |      |
+|                       | | ``NFO:subtopic``                                                       |      |
+|                       | | ``NFO:createdate``                                                     |      |
+|                       | |                                                                        |      |
+|                       | | Requires configuration of :confval:`headline-map`                      |      |
++-----------------------+--------------------------------------------------------------------------+------+
+| importImage           | Create image layout similar to builtin layout                            | i-0  |
++-----------------------+--------------------------------------------------------------------------+------+
+| importImageDetails    | | Create image layout with model and topic details                       | i-d  |
+|                       | |                                                                        |      |
+|                       | | Requires aux to be populated by :confval:`libexiv` or :confval:`exiv2` |      |
+|                       | | ``EXIF_TAG_MODEL`` | ``Exif.Image.Model``                              |      |
+|                       | | ``EXIF_TAG_DATE_TIME_ORIGINAL`` | ``Exif.Image.DateTime``              |      |
+|                       | | ``EXIF_TAG_IMAGE_DESCRIPTION`` | ``Exif.Image.Description``            |      |
+|                       | | ``EXIF_TAG_ARTIST`` | ``Exif.Image.Artist``                            |      |
+|                       | | `` | ``Xmp.dc.subject``                                                |      |
+|                       | | `` | ``Xmp.photoshop.Headline``                                        |      |
+|                       | |                                                                        |      |
+|                       | | Support configuration of :confval:`model-map`                          |      |
+|                       | | Requires configuration of :confval:`headline-map`                      |      |
++-----------------------+--------------------------------------------------------------------------+------+
 
 
 Playlists
@@ -133,71 +155,83 @@ The codes in *js layout* column refer to the *Code* column above.
 +---------------------------------+------------------+-----------+----------------+
 | Box                             | Default Caption  | js layout | builtin layout |
 +=================================+==================+===========+================+
-| Audio/allAlbums                 | Albums           | da, ia    | yes            |
+| Audio/allAlbums                 | Albums           | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/allArtists                | Artists          | da, ia    | yes            |
+| Audio/allArtists                | Artists          | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/allAudio                  | All Audio        | da, ia    | yes            |
+| Audio/allAudio                  | All Audio        | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/allComposers              | Composers        | da, ia    | yes            |
+| Audio/allComposers              | Composers        | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/allDirectories            | Directories      | da, ia    | yes            |
+| Audio/allDirectories            | Directories      | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/allGenres                 | Genres           | da, ia    | yes            |
+| Audio/allGenres                 | Genres           | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/allSongs                  | All Songs        | da, ia    | yes            |
+| Audio/allSongs                  | All Songs        | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/allTracks                 | All - full name  | da, ia    | yes            |
+| Audio/allTracks                 | All - full name  | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/allYears                  | Year             | da, ia    | yes            |
+| Audio/allYears                  | Year             | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/audioRoot                 | Audio            | da, ia    | yes            |
+| Audio/audioRoot                 | Audio            | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/artistChronology          | Album Chronology | da, ia    | yes            |
+| Audio/artistChronology          | Album Chronology | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| AudioInitial/abc                | ABC              | ia        | no             |
+| AudioInitial/abc                | ABC              | a-i       | no             |
 +---------------------------------+------------------+-----------+----------------+
-| AudioInitial/allArtistTracks    | 000 All          | ia        | no             |
+| AudioInitial/allArtistTracks    | 000 All          | a-i       | no             |
 +---------------------------------+------------------+-----------+----------------+
-| AudioInitial/allBooks           | Books            | ia        | no             |
+| AudioInitial/allBooks           | Books            | a-i       | no             |
 +---------------------------------+------------------+-----------+----------------+
-| AudioInitial/audioBookRoot      | AudioBooks       | ia        | no             |
+| AudioInitial/audioBookRoot      | AudioBooks       | a-i       | no             |
 +---------------------------------+------------------+-----------+----------------+
-| AudioStructured/allAlbums       | -Album-          | sa        | no             |
+| AudioStructured/allAlbums       | -Album-          | a-s       | no             |
 +---------------------------------+------------------+-----------+----------------+
-| AudioStructured/allArtistTracks | all              | sa        | no             |
+| AudioStructured/allArtistTracks | all              | a-s       | no             |
 +---------------------------------+------------------+-----------+----------------+
-| AudioStructured/allArtists      | -Artist-         | sa        | no             |
+| AudioStructured/allArtists      | -Artist-         | a-s       | no             |
 +---------------------------------+------------------+-----------+----------------+
-| AudioStructured/allGenres       | -Genre-          | sa        | no             |
+| AudioStructured/allGenres       | -Genre-          | a-s       | no             |
 +---------------------------------+------------------+-----------+----------------+
-| AudioStructured/allTracks       | -Track-          | sa        | no             |
+| AudioStructured/allTracks       | -Track-          | a-s       | no             |
 +---------------------------------+------------------+-----------+----------------+
-| AudioStructured/allYears        | -Year-           | sa        | no             |
+| AudioStructured/allYears        | -Year-           | a-s       | no             |
 +---------------------------------+------------------+-----------+----------------+
-| Video/allDates                  | Date             | dv        | yes            |
+| Video/allDates                  | Date             | v-0       | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Video/allDirectories            | Directories      | dv        | yes            |
+| Video/allDirectories            | Directories      | v-0       | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Video/allVideo                  | All Video        | dv        | yes            |
+| Video/allVideo                  | All Video        | v-0       | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Video/allYears                  | Year             | dv        | yes            |
+| Video/allYears                  | Year             | v-0       | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Video/unknown                   | Unknown          | dv        | yes            |
+| Video/unknown                   | Unknown          | v-0       | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Video/videoRoot                 | Video            | dv        | yes            |
+| Video/videoRoot                 | Video            | v-0       | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Image/allDates                  | Date             | di        | yes            |
+| Image/allDates                  | Date             | i-0, i-d  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Image/allDirectories            | Directories      | di        | yes            |
+| Image/allDirectories            | Directories      | i-0, i-d  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Image/allImages                 | All Photos       | di        | yes            |
+| Image/allImages                 | All Photos       | i-0, i-d  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Image/allYears                  | Year             | di        | yes            |
+| Image/allYears                  | Year             | i-0, i-d  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Image/imageRoot                 | Photos           | di        | yes            |
+| Image/imageRoot                 | Photos           | i-0, i-d  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Image/unknown                   | Unknown          | di        | yes            |
+| Image/unknown                   | Unknown          | i-0, i-d  | yes            |
++---------------------------------+------------------+-----------+----------------+
+| ImageDetail/allModels           | All Models       | i-d       | no             |
++---------------------------------+------------------+-----------+----------------+
+| ImageDetail/yearMonth           | Year+Month       | i-d       | no             |
++---------------------------------+------------------+-----------+----------------+
+| ImageDetail/yearDate            | Year+Date        | i-d       | no             |
++---------------------------------+------------------+-----------+----------------+
+| Topic/topicRoot                 | Topics           | i-d, v-d  | no             |
++---------------------------------+------------------+-----------+----------------+
+| Topic/topic                     | Topic            | i-d, v-d  | no             |
++---------------------------------+------------------+-----------+----------------+
+| Topic/topicExtra                | Extra            | i-d, v-d  | no             |
 +---------------------------------+------------------+-----------+----------------+
 | Trailer/trailerRoot             | Online Services  | dt        | yes            |
 +---------------------------------+------------------+-----------+----------------+
@@ -229,11 +263,15 @@ depend on the layout function. The options can be set in the config.xml section 
 +---------------------------------+------------------+--------------------------------------------------------------------------+
 | Option                          | Layout Function  | Description                                                              |
 +=================================+==================+==========================================================================+
-| trackNumbers                    | da, sa, ia       | Use 'show' or 'hide' to add track number in front of the track title     |
+| trackNumbers                    | a-0, a-s, a-i    | Use 'show' or 'hide' to add track number in front of the track title     |
 |                                 |                  | the default behaviour depends on the function.                           |
 +---------------------------------+------------------+--------------------------------------------------------------------------+
-| specialGenre                    | ia               | Add disk number to tracks matching this genre (regular expression)       |
+| specialGenre                    | a-i              | Add disk number to tracks matching this genre (regular expression)       |
 +---------------------------------+------------------+--------------------------------------------------------------------------+
-| spokenGenre                     | ia               | Do not add tracks to 'All' section                                       |
+| spokenGenre                     | a-i              | Do not add tracks to 'All' section                                       |
 |                                 |                  | if the genre matches (regular expression)                                |
++---------------------------------+------------------+--------------------------------------------------------------------------+
+| topicFromPath                   | i-d              | Determine topic from path, if path matches the given string              |
++---------------------------------+------------------+--------------------------------------------------------------------------+
+| rawImageFilter                  | i-d              | Regular pattern to identify raw images that are skipped by layout        |
 +---------------------------------+------------------+--------------------------------------------------------------------------+

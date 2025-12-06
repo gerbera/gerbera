@@ -247,6 +247,16 @@ std::map<std::string, std::string> ConfigDictionarySetup::getXmlContent(
     return result;
 }
 
+std::string ConfigDictionarySetup::getCurrentValue() const
+{
+    auto dict = optionValue->getDictionaryOption();
+    auto list = std::vector<std::string>();
+    list.reserve(dict.size());
+    for (auto&& [k, v] : dict)
+        list.push_back(fmt::format("{}={}", k, v));
+    return fmt::format("[{}]", fmt::join(list, ", "));
+}
+
 std::shared_ptr<ConfigOption> ConfigDictionarySetup::newOption(const std::map<std::string, std::string>& optValue)
 {
     optionValue = std::make_shared<DictionaryOption>(optValue);

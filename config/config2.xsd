@@ -69,7 +69,7 @@
                 <xs:element ref="modelName" minOccurs="0"/>
                 <xs:element ref="modelNumber" minOccurs="0"/>
                 <xs:element ref="bookmark" minOccurs="0"/>
-                <xs:element ref="model" minOccurs="0"/>
+                <xs:element name="model" type="xs:string" minOccurs="0"/>
                 <xs:element ref="manufacturer" minOccurs="0"/>
                 <xs:element ref="manufacturerURL" minOccurs="0"/>
                 <xs:element ref="virtualURL" minOccurs="0"/>
@@ -260,8 +260,6 @@
     <xs:element name="upnp-string-limit" type="xs:integer"/>
 
     <xs:element name="bookmark" type="xs:string"/>
-
-    <xs:element name="model" type="xs:string"/>
 
     <xs:element name="pc-directory">
         <xs:complexType>
@@ -717,6 +715,8 @@
                 <xs:element ref="genre-map" minOccurs="0"/>
                 <xs:element ref="boxlayout" minOccurs="0"/>
                 <xs:element ref="structured-layout" minOccurs="0"/>
+                <xs:element ref="model-map" minOccurs="0"/>
+                <xs:element ref="headline-map" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="type" default="builtin">
                 <xs:simpleType>
@@ -804,6 +804,51 @@
         <xs:complexType>
             <xs:attribute name="from" type="xs:string" use="required"/>
             <xs:attribute name="to" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="model-map">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="model" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="model">
+        <xs:complexType>
+            <xs:attribute name="from" type="xs:string" use="required"/>
+            <xs:attribute name="to" type="xs:string" use="required"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="headline-map">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="headline" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="headline">
+        <xs:complexType>
+            <xs:attribute name="from" type="xs:string" use="required"/>
+            <xs:attribute name="to" type="xs:string" use="required"/>
+            <xs:attribute name="type" default="subtopic">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="SubTopic"/>
+                        <xs:enumeration value="Subtopic"/>
+                        <xs:enumeration value="subtopic"/>
+                        <xs:enumeration value="Topic"/>
+                        <xs:enumeration value="topic"/>
+                        <xs:enumeration value="Ignore"/>
+                        <xs:enumeration value="ignore"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 

@@ -63,10 +63,11 @@ The device flags have the following meaning.
 
 .. versionchanged:: HEAD The Key is not case sensitve anymore
 .. versionchanged:: HEAD Alternate camel-case representations for the keys added
+.. versionchanged:: HEAD Removed ``PANASONIC``
 
 +--------------------------------+--------------------------------------------------------------------------------+
 | Key                            | Description                                                                    |
-+================================================================================================================+
++================================+================================================================================+
 | ``SAMSUNG`` ``Samsung``        | Add "CaptionInfo.sec" to video header                                          |
 +--------------------------------+--------------------------------------------------------------------------------+
 | ``SAMSUNG_BOOKMARK_SEC``       | Restore last played position when the media is played again                    |

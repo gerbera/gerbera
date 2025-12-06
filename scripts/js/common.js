@@ -34,12 +34,57 @@ function createContainerChain(arr) {
   return path;
 }
 
+const reYear = new RegExp("^([0-9]{4})-");
 function getYear(date) {
-  var matches = date.match(/^([0-9]{4})-/);
+  var matches = reYear.exec(date);
   if (matches)
     return matches[1];
   else
     return date;
+}
+
+function toDigits(num, len) {
+  if (!len) len = 2;
+  if (num != undefined && 'padStart' in String.prototype)
+    return num.toString().padStart(len, '0');
+  return ("0000000" + num).slice(-len)
+}
+
+function getAuxInfo(obj, mainTag, auxTag) {
+  if (!obj.aux) return '';
+  var result = obj.aux[mainTag];;
+  if ((!result || result === '') && auxTag !== '')
+    result = obj.aux[auxTag];;
+  if (!result)
+    return '';
+  return result.trim();
+}
+
+const dateFactor = 86400000; // = (24 * 60 * 60 * 1000)
+
+function weekOf(year, month, day, hours, timezone) {
+  const currentDate = new Date(Date.UTC(year, month, day /* + (hours+timezone)/24 */));
+  // Transform to Thursday of current week (ISO definition)
+  currentDate.setUTCDate(currentDate.getUTCDate() + 4 - (currentDate.getUTCDay() || 7));
+
+  var startDate = new Date(Date.UTC(year, 0, 1));
+  const endDate = new Date(Date.UTC(year, 11, 31));
+  const weekDay = startDate.getUTCDay() || 7;
+  var days = Math.ceil((currentDate - startDate) / dateFactor + 1);
+  const daysInYear = Math.ceil((endDate - startDate) / dateFactor + 1);
+
+  if (weekDay > 3 && days < 4) {
+    // make it last week of previous year
+    year--;
+    startDate = new Date(Date.UTC(year, 0, 1));
+    days = Math.ceil((currentDate - startDate) / dateFactor + 1);
+  } else if (weekDay < 2 && days > daysInYear - 3) {
+    // make it first week of following year
+    year++;
+    days -= daysInYear;
+  }
+  const week = Math.ceil(days / 7);
+  return "" + year + "-" + toDigits(week);
 }
 
 function getPlaylistType(mimetype) {
@@ -293,6 +338,24 @@ function mapGenre(genre) {
     }
   }
   return { value: genre, mapped: mapped };
+}
+
+function mapModel(model) {
+  const modelConfig = config['/import/scripting/virtual-layout/model-map/model'];
+  var mapped = false;
+  if (modelConfig) {
+    const modelNames = Object.getOwnPropertyNames(modelConfig);
+    for (var idx = 0; idx < modelNames.length; idx++) {
+      var re = new RegExp('(' + modelNames[idx] + ')', 'i');
+      var match = re.exec(model);
+      if (match) {
+        model = modelConfig[modelNames[idx]];
+        mapped = true;
+        break;
+      }
+    }
+  }
+  return { value: model, mapped: mapped };
 }
 
 // doc-map-audio-details-begin
@@ -600,36 +663,250 @@ function getVideoDetails(obj, rootPath) {
   const date = obj.metaData[M_CREATION_DATE] && obj.metaData[M_CREATION_DATE][0] ? obj.metaData[M_CREATION_DATE][0] : '';
   const dateParts = date.split('-');
   const dateParts2 = date.split('T');
-  const dir = getRootPath(rootPath, obj.location);
-  return {
-    title: title ? title.trim() : '',
-    year: (dateParts.length > 1) ? dateParts[0] : '',
+  var dir = getRootPath(rootPath, obj.location);
+
+  if (!dir || dir.length === 0) {
+    dir = obj.location;
+    if (dir.charAt(0) === '/') {
+      dir = dir.substring(1).split('/');
+    } else {
+      dir = dir.split('/');
+    }
+  }
+  const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
+
+  var topicFromPath = scriptOptions ? scriptOptions['topicFromPath'] : undefined;
+  if (topicFromPath)
+    topicFromPath = topicFromPath.split(',');
+  else
+    topicFromPath = [];
+
+  // path -> topic
+  var topic;
+  var mapSize = topicFromPath.length;
+  for (var i = 0; i < mapSize; i++) {
+    const re = new RegExp(topicFromPath[i]);
+    if (dir && re.test(dir.join('/'))) {
+      topic = topicFromPath[i];
+    }
+  }
+  var subTopic = getAuxInfo(obj, 'NFO:subtopic', '');
+
+  var videoDate;
+  var crDate = getAuxInfo(obj, 'NFO:createdate');
+  if (crDate && crDate.trim().length === 14) {
+    crDate = crDate.trim();
+    videoDate = new Date(crDate.substring(0, 4), Number.parseInt(crDate.substring(4, 6)) - 1, crDate.substring(6, 8),
+      crDate.substring(8, 10), crDate.substring(10, 12), crDate.substring(12));
+  }
+  const description = obj.description;
+  const artist = obj.metaData['upnp:director'] ? obj.metaData['upnp:director'][0] : undefined;
+  if (!topic)
+    topic = getAuxInfo(obj, 'NFO:topic', '');
+  const headlineConfig = config['/import/scripting/virtual-layout/headline-map/headline'];
+  if (headlineConfig) {
+    for (var idx = 0; idx < headlineConfig.length; idx++) {
+      var re = new RegExp(headlineConfig[idx].from, 'i');
+      const type = !headlineConfig[idx].type ? "subtopic" : headlineConfig[idx].type.toLowerCase();
+      if (type === "subtopic") {
+        const match = re.exec(subTopic);
+        if (match) {
+          subTopic = subTopic.replace(re, headlineConfig[idx].to);
+        }
+      } else if (type === "topic") {
+        const match = re.exec(topic);
+        if (match) {
+          topic = topic.replace(re, headlineConfig[idx].to);
+        }
+      } else if (type === "ignore") {
+        const match = re.exec(subTopic);
+        if (match) {
+          topic = undefined;
+          subTopic = undefined;
+          break;
+        }
+      }
+    }
+  }
+  const model = getAuxInfo(obj, 'NFO:source', '');
+  var week;
+  if (videoDate)
+    week = (videoDate.getFullYear() > 0) ? weekOf(videoDate.getFullYear(), videoDate.getMonth(), videoDate.getDate(), videoDate.getHours(), 0) : '';
+
+  const result =
+  {
+    title: (title ? title.trim() : ''),
+    year: ((dateParts.length > 1) ? dateParts[0] : ''),
     month: (dateParts.length > 1) ? dateParts[1] : '',
     date: (dateParts2.length > 1) ? dateParts2[0] : date,
+    description: description,
     dir: dir,
-  }
+    artist: artist,
+    topic: topic,
+    subTopic: subTopic,
+    model: model,
+    videoDate: videoDate,
+    week: week,
+  };
+  return result;
 }
 
 function getImageDetails(obj, rootPath) {
   const title = getTitle(obj);
-  const date = obj.metaData[M_DATE] && obj.metaData[M_DATE][0] ? obj.metaData[M_DATE][0] : '';
-  const dateParts = date.split('-');
+  var date = obj.metaData[M_DATE] && obj.metaData[M_DATE][0] ? obj.metaData[M_DATE][0] : '';
+  var dateParts = date.split('-');
   const dateParts2 = date.split('T');
-  const dir = getRootPath(rootPath, obj.location);
-  return {
+  var dir = getRootPath(rootPath, obj.location);
+
+  if (!dir || dir.length === 0) {
+    dir = obj.location;
+    if (dir.charAt(0) === '/') {
+      dir = dir.substring(1).split('/');
+    } else {
+      dir = dir.split('/');
+    }
+  }
+  var model = getAuxInfo(obj, 'EXIF_TAG_MODEL', 'Exif.Image.Model');
+  const time = getAuxInfo(obj, 'EXIF_TAG_DATE_TIME_ORIGINAL', 'Exif.Image.DateTime');
+  const description = getAuxInfo(obj, 'EXIF_TAG_IMAGE_DESCRIPTION', 'Exif.Image.Description');
+  const artist = getAuxInfo(obj, 'EXIF_TAG_ARTIST', 'Exif.Image.Artist');
+  const subject = getAuxInfo(obj, 'Xmp.dc.subject', '');
+  const headline = getAuxInfo(obj, 'Xmp.photoshop.Headline', '');
+
+  const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
+
+  var topicFromPath = scriptOptions ? scriptOptions['topicFromPath'] : undefined;
+  if (topicFromPath)
+    topicFromPath = topicFromPath.split(',');
+  else
+    topicFromPath = [];
+
+  model = mapModel(model).value;
+  var imageDate = new Date(0, 0, 1, 0, 0, 0);
+
+  if (time && time !== '') {
+    const timeX = time.split(' ');
+    if (timeX.length > 1) {
+      const tDateParts = timeX[0].split(':');
+      const timeParts = timeX[1].split(':');
+
+      if (dateParts.length <= tDateParts.length)
+        dateParts = tDateParts;
+      if (tDateParts.length > 2) {
+        date = tDateParts[0] + '-' + tDateParts[1] + '-' + tDateParts[2];
+        imageDate = new Date(tDateParts[0], Number.parseInt(tDateParts[1]) - 1, tDateParts[2], 0, 0, 0);
+      }
+      if (timeParts.length > 2) {
+        imageDate.setHours(timeParts[0]);
+        imageDate.setMinutes(timeParts[1]);
+        imageDate.setSeconds(timeParts[2]);
+      }
+    }
+  } else if (date) {
+    const tDateParts = dateParts2[0].split('-');
+    const timeParts = dateParts2.length > 1 ? dateParts2[1].split(':') : [];
+    dateParts = tDateParts;
+    if (dateParts.length > 2) {
+      imageDate = new Date(tDateParts[0], Number.parseInt(tDateParts[1]) - 1, tDateParts[2], 0, 0, 0);
+      if (timeParts.length > 2) {
+        imageDate.setHours(timeParts[0]);
+        imageDate.setMinutes(timeParts[1]);
+        const secs = timeParts[2].split('+');
+        imageDate.setSeconds(secs[0]);
+      }
+    }
+  }
+  const week = (imageDate.getFullYear() > 0) ? weekOf(imageDate.getFullYear(), imageDate.getMonth(), imageDate.getDate(), imageDate.getHours(), 0) : '';
+
+  var topic;
+  var subTopic;
+
+  // headline -> topic
+  if (headline !== '' && headline !== description) {
+    topic = headline;
+  }
+  // path -> topic
+  var mapSize = topicFromPath.length;
+  for (var i = 0; i < mapSize; i++) {
+    const re = new RegExp(topicFromPath[i]);
+    if (dir && re.test(dir.join('/'))) {
+      topic = topicFromPath[i];
+    }
+  }
+
+  // description -> topic / subTopic
+  const headlineConfig = config['/import/scripting/virtual-layout/headline-map/headline'];
+  if (headlineConfig) {
+    var isTopMatch = false;
+    var isSubMatch = false;
+    if (!topic || topic === '') {
+      topic = description;
+    } else {
+      isTopMatch = true;
+    }
+
+    subTopic = description;
+    for (var idx = 0; idx < headlineConfig.length; idx++) {
+      const type = !headlineConfig[idx].type ? "subtopic" : headlineConfig[idx].type.toLowerCase();
+      const re = new RegExp(headlineConfig[idx].from, 'i');
+      if (type === "subtopic") {
+        const match = re.exec(subTopic);
+        if (match) {
+          subTopic = subTopic.replace(re, headlineConfig[idx].to);
+          isSubMatch = true;
+        }
+      } else if (type === "topic") {
+        const match = re.exec(topic);
+        if (match) {
+          topic = topic.replace(re, headlineConfig[idx].to);
+          isTopMatch = true;
+        }
+      } else if (type === "ignore") {
+        const match = re.exec(subTopic);
+        if (match) {
+          topic = undefined;
+          subTopic = undefined;
+          isTopMatch = true;
+          isSubMatch = true;
+          break;
+        }
+      }
+    }
+    if (!isSubMatch) {
+      subTopic = undefined;
+    }
+    if (!isTopMatch) {
+      topic = undefined;
+    }
+  }
+
+  const result =
+  {
     title: title ? title.trim() : '',
     year: (dateParts.length > 1) ? dateParts[0] : '',
     month: (dateParts.length > 1) ? dateParts[1] : '',
     date: (dateParts2.length > 1) ? dateParts2[0] : date,
     dir: dir,
-  }
+    time: time,
+    imageDate: imageDate,
+    week: week,
+    model: model,
+    description: description,
+    topic: topic,
+    subTopic: subTopic,
+    artist: artist,
+    subject: subject,
+    headline: headline,
+  };
+  return result;
 }
 
 // doc-add-playlist-item-begin
+const reHttp = new RegExp("^.*:\\/\\/");
 function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath) {
   // Determine if the item that we got is an URL or a local file.
 
-  if (entry.location.match(/^.*:\/\//)) {
+  if (reHttp.test(entry.location)) {
     var exturl = {};
 
     // Setting the mimetype is crucial and tricky... if you get it
@@ -708,4 +985,9 @@ function addMeta(obj, key, value) {
     obj.metaData[key].push(value);
   else
     obj.metaData[key] = [value];
+}
+
+function addAux(obj, key, value) {
+    if (!obj.aux) obj.aux = {};
+    obj.aux[key] = [value];
 }

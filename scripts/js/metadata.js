@@ -76,6 +76,9 @@ function parseNfo(obj, nfo_file_name) {
     } else if (node.NAME == "showtitle") {
       addMeta(obj, "upnp:seriesTitle", node.VALUE);
       node = readXml(0); // read next
+    } else if (node.NAME == "sorttitle") {
+      obj.sortKey = node.VALUE;
+      node = readXml(0); // read next
     } else if (node.NAME == "plot") {
       obj.description = node.VALUE;
       node = readXml(0); // read next
@@ -109,6 +112,9 @@ function parseNfo(obj, nfo_file_name) {
       node = readXml(0); // read next
     } else if (node.NAME == "director") {
       addMeta(obj, M_DIRECTOR, node.VALUE);
+      node = readXml(0); // read next
+    } else if (level === 1 && node.VALUE !== '') {
+      addAux(obj, "NFO:" + node.NAME, node.VALUE);
       node = readXml(0); // read next
     } else {
       node = readXml(0); // read next

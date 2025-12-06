@@ -77,6 +77,172 @@ TEST_F(CommonScriptTest, escapeSlash_AddsEscapeCharsForSlash)
     EXPECT_STREQ(result.c_str(), "some\\/path\\/to\\/escape");
 }
 
+TEST_F(CommonScriptTest, weekOf0)
+{
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2024);
+    duk_push_int(ctx, 0); // month starts at 0
+    duk_push_int(ctx, 1);
+
+    duk_pcall(ctx, 3);
+
+    std::string result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2024-01") << "2024-01-01";
+
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2023);
+    duk_push_int(ctx, 11); // month starts at 0
+    duk_push_int(ctx, 31);
+
+    duk_pcall(ctx, 3);
+
+    result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2023-52") << "2023-12-31";
+
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2024);
+    duk_push_int(ctx, 0); // month starts at 0
+    duk_push_int(ctx, 7);
+
+    duk_pcall(ctx, 3);
+
+    result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2024-01") << "2024-01-07";
+}
+
+TEST_F(CommonScriptTest, weekOf1)
+{
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2025);
+    duk_push_int(ctx, 0); // month starts at 0
+    duk_push_int(ctx, 1);
+
+    duk_pcall(ctx, 3);
+
+    std::string result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2025-01") << "2025-01-01";
+
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2024);
+    duk_push_int(ctx, 11); // month starts at 0
+    duk_push_int(ctx, 30);
+
+    duk_pcall(ctx, 3);
+
+    result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2025-01") << "2024-12-30";
+
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2025);
+    duk_push_int(ctx, 0); // month starts at 0
+    duk_push_int(ctx, 5);
+
+    duk_pcall(ctx, 3);
+
+    result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2025-01") << "2025-01-05";
+}
+
+TEST_F(CommonScriptTest, weekOf53)
+{
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2027);
+    duk_push_int(ctx, 0); // month starts at 0
+    duk_push_int(ctx, 1);
+
+    duk_pcall(ctx, 3);
+
+    std::string result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2026-53") << "2027-01-01";
+
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2026);
+    duk_push_int(ctx, 11); // month starts at 0
+    duk_push_int(ctx, 27);
+
+    duk_pcall(ctx, 3);
+
+    result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2026-52") << "2026-12-27";
+
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2026);
+    duk_push_int(ctx, 11); // month starts at 0
+    duk_push_int(ctx, 28);
+
+    duk_pcall(ctx, 3);
+
+    result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2026-53") << "2026-12-28";
+
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2027);
+    duk_push_int(ctx, 0); // month starts at 0
+    duk_push_int(ctx, 3);
+
+    duk_pcall(ctx, 3);
+
+    result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2026-53") << "2027-01-03";
+
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2027);
+    duk_push_int(ctx, 0); // month starts at 0
+    duk_push_int(ctx, 4);
+
+    duk_pcall(ctx, 3);
+
+    result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2027-01") << "2027-01-04";
+}
+
+TEST_F(CommonScriptTest, weekOf45)
+{
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2025);
+    duk_push_int(ctx, 10); // month starts at 0
+    duk_push_int(ctx, 3);
+
+    duk_pcall(ctx, 3);
+
+    std::string result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2025-45");
+
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2025);
+    duk_push_int(ctx, 10); // month starts at 0
+    duk_push_int(ctx, 2);
+
+    duk_pcall(ctx, 3);
+
+    result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2025-44");
+
+    duk_get_global_string(ctx, "weekOf");
+    duk_push_int(ctx, 2025);
+    duk_push_int(ctx, 10); // month starts at 0
+    duk_push_int(ctx, 8);
+
+    duk_pcall(ctx, 3);
+
+    result = duk_to_string(ctx, -1);
+
+    EXPECT_STREQ(result.c_str(), "2025-45");
+}
+
 TEST_F(CommonScriptTest, mapInitial_Latin)
 {
     duk_get_global_string(ctx, "mapInitial");
