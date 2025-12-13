@@ -78,7 +78,7 @@ else
     WAVPACK="5.8.1"
     TAGLIB="2.1.1"
     JSONCPP="1.9.6"
-    CMAKE="4.1.2"
+    CMAKE="4.2.0"
     PQXX="7.10.3"
 
 fi

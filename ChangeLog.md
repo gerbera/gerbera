@@ -13,6 +13,7 @@
 - enable i2i for HAVE_CURL
 - Extract default database configuration strings
 - fix compilation under OmniOS
+- fix edit for container
 - fix error handling in string_converter
 - github CI: add loongarch64
 - header removals and destructor fix.
