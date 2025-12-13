@@ -591,13 +591,15 @@
       .prop('disabled', true)
       .closest('.form-group').show();
 
-    showFields([
+    const pstCnt = modal.find('#editFlag-PersistentContainer');
+    const plstRef = modal.find('#editFlag-PlaylistRef');
+    var visibleFields = [
       modal.find('#editFlags'),
       modal.find('#editFlag-Searchable'),
-      modal.find('#editFlag-PersistentContainer'),
-      modal.find('#editFlag-PlaylistRef'),
-    ]);
-    hideFields([
+      pstCnt,
+      plstRef,
+    ];
+    var hiddenFields = [
       modal.find('#editLocation'),
       modal.find('#editMime'),
       modal.find('#editDesc'),
@@ -607,7 +609,11 @@
       modal.find('#editFlag-Restricted'),
       modal.find('#editFlag-OggTheora'),
       modal.find('#editFlag-UseResourceRef'),
-    ]);
+    ];
+    showFields(visibleFields);
+    hideFields(hiddenFields);
+    plstRef.prop('disabled', true);
+    pstCnt.prop('disabled', true);
   }
 
   function loadExternalUrl(modal, item) {
