@@ -6,7 +6,9 @@
 - add missing array headers
 - add missing headers from headers
 - Avoid string_view conversion
+- Bump actions/cache from 4 to 5
 - Bump actions/checkout from 5 to 6
+- Bump actions/upload-artifact from 5 to 6
 - Bump js-yaml from 4.1.0 to 4.1.1 in /gerbera-web
 - Clean up obsolete includes
 - don't use references for node()
@@ -30,6 +32,7 @@
 - simplify using quirks
 - Update Conan integration
 - Update ffmpegthumbnailer to 2.2.4
+- Update ffmpegthumbnailer to 2.3.0
 - use correct name for boxlayout enabled years
 - use more fmt::join
 - use optional instead of unique_ptr

@@ -50,36 +50,36 @@ sudo make install
 
 ## Dependencies
 
-| Library             | Min Version | Recommended | Latest tested        | Required?     | Note                       | Default  |
-|---------------------|-------------|-------------|----------------------|---------------|----------------------------|----------|
-| libupnp             | 1.14.6      | 1.14.20     | 1.14.25              | XOR libnpupnp | [pupnp]                    |          |
-| libnpupnp           | 4.2.1       | 5.1.2       | 6.2.1                | XOR libupnp   | [npupnp]                   | Disabled |
-| libuuid             |             |             |                      | Depends on OS | Not required on \*BSD      |          |
-| [pugixml]           |             | 1.10        | 1.15                 | Required      | XML file and data support  |          |
-| [jsoncpp]           | 1.7.4       | 1.9.6       | 1.9.6                | Required      | JSON data support          |          |
-| libiconv            |             |             |                      | Required      | Charset conversion         |          |
-| sqlite3             | 3.7.0       | 3.35.5      | 3.50.2               | Required      | Database storage           |          |
-| zlib                |             |             |                      | Required      | Data compression           |          |
-| [fmtlib]            | 7.1.3       | 11.2.0      | 12.1.0               | Required      | Fast string formatting     |          |
-| [spdlog]            | 1.8.1       | 1.11.0      | 1.16.0               | Required      | Runtime logging            |          |
-| [icu4c]             | 65.1        | 65.1        | 65.1                 | Required      | Transliteration            | Enabled  |
-| [duktape]           | 2.1.0       | 2.6.0       | 2.7.0                | Optional      | Scripting Support          | Enabled  |
-| mysql               |             |             |                      | Optional      | Alternate database storage | Disabled |
-| [libpqxx]           | 7.10.1      | 7.10.3      | 7.10.3               | Optional      | Alternate database storage | Disabled |
-| [libpq]             | 12.22       |             | 17.0.6               | Optional      | Alternate database storage | Disabled |
-| curl                |             |             |                      | Optional      | Enables web services       | Enabled  |
-| [taglib]            | 1.12        | 1.12        | 2.1.1                | Optional      | Audio tag support          | Enabled  |
-| libmagic            |             |             |                      | Optional      | File type detection        | Enabled  |
-| [wavpack]           | 5.1.0       | 5.4.0       | 5.8.1                | Optional      | WavPack metadata support   | Disabled |
-| [libmatroska]       | 1.4.8       | 1.6.3       | 1.7.1                | Optional      | MKV metadata               | Enabled  |
-| [libebml]           | 1.3.5       | 1.4.2       | 1.4.5                | Optional      | requird by [libmatroska]   | Enabled  |
-| ffmpeg/libav        |             |             | 7.1.2                | Optional      | File metadata              | Disabled |
-| [libexif]           | v0.6.21     | v0.6.24     | v0.6.25              | Optional      | JPEG Exif metadata         | Enabled  |
-| [libexiv2]          | v0.26       | v0.27.7     | v0.28.7              | Optional      | Exif, IPTC, XMP metadata   | Disabled |
-| [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0                | Optional      | Enables scrobbling         | Disabled |
-| [ffmpegthumbnailer] | 2.1.1       | 2.2.3       | 2.2.4                | Optional      | Generate video thumbnails  | Disabled |
-| [libsystemd]        | 237         | 254         | 257                  | Optional      | Generate video thumbnails  | Disabled |
-| inotify             |             |             |                      | Optional      | Efficient file monitoring  | Enabled  |
+| Library             | Min Version | Recommended | Latest tested        | Required?     | Note                             | Default  |
+|---------------------|-------------|-------------|----------------------|---------------|----------------------------------|----------|
+| libupnp             | 1.14.6      | 1.14.20     | 1.14.25              | XOR libnpupnp | [pupnp]                          |          |
+| libnpupnp           | 4.2.1       | 5.1.2       | 6.2.1                | XOR libupnp   | [npupnp]                         | Disabled |
+| libuuid             |             |             |                      | Depends on OS | Not required on \*BSD            |          |
+| [pugixml]           |             | 1.10        | 1.15                 | Required      | XML file and data support        |          |
+| [jsoncpp]           | 1.7.4       | 1.9.6       | 1.9.6                | Required      | JSON data support                |          |
+| libiconv            |             |             |                      | Required      | Charset conversion               |          |
+| sqlite3             | 3.7.0       | 3.35.5      | 3.50.2               | Required      | Database storage                 |          |
+| zlib                |             |             |                      | Required      | Data compression                 |          |
+| [fmtlib]            | 7.1.3       | 11.2.0      | 12.1.0               | Required      | Fast string formatting           |          |
+| [spdlog]            | 1.8.1       | 1.11.0      | 1.16.0               | Required      | Runtime logging                  |          |
+| [icu4c]             | 65.1        | 65.1        | 65.1                 | Required      | Transliteration                  | Enabled  |
+| [duktape]           | 2.1.0       | 2.6.0       | 2.7.0                | Optional      | Scripting Support                | Enabled  |
+| mysql               |             |             |                      | Optional      | Alternate database MySQL/MariaDB | Disabled |
+| [libpqxx]           | 7.10.1      | 7.10.3      | 7.10.3               | Optional      | Alternate database PostgreSQL    | Disabled |
+| [libpq]             | 12.22       |             | 17.0.6               | Optional      | required by [libpqxx]            | Disabled |
+| curl                |             |             |                      | Optional      | Enables web services             | Enabled  |
+| [taglib]            | 1.12        | 1.12        | 2.1.1                | Optional      | Audio tag support                | Enabled  |
+| libmagic            |             |             |                      | Optional      | File type detection              | Enabled  |
+| [wavpack]           | 5.1.0       | 5.4.0       | 5.8.1                | Optional      | WavPack metadata support         | Disabled |
+| [libmatroska]       | 1.4.8       | 1.6.3       | 1.7.1                | Optional      | MKV metadata                     | Enabled  |
+| [libebml]           | 1.3.5       | 1.4.2       | 1.4.5                | Optional      | requird by [libmatroska]         | Enabled  |
+| ffmpeg/libav        |             |             | 7.1.2                | Optional      | File metadata                    | Disabled |
+| [libexif]           | v0.6.21     | v0.6.24     | v0.6.25              | Optional      | JPEG Exif metadata               | Enabled  |
+| [libexiv2]          | v0.26       | v0.27.7     | v0.28.7              | Optional      | Exif, IPTC, XMP metadata         | Disabled |
+| [lastfmlib]         | 0.4.0       | 0.4.0       | 0.4.0                | Optional      | Enables scrobbling               | Disabled |
+| [ffmpegthumbnailer] | 2.1.1       | 2.2.3       | 2.3.0                | Optional      | Generate video/image thumbnails  | Disabled |
+| [libsystemd]        | 237         | 254         | 257                  | Optional      | Interact with systemd            | Disabled |
+| inotify             |             |             |                      | Optional      | Efficient file monitoring        | Enabled  |
 
 ## Development Dependencies
 

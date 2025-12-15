@@ -7,6 +7,7 @@ Removed unused explicit flag for PanasonicTV
 ### NEW Features
 
 - Negation of `client-flags` in transcoding
+- import scripts for images and videos
 
 ### FIXES
 
@@ -17,7 +18,7 @@ Removed unused explicit flag for PanasonicTV
 ### Code Improvements
 
 - Quirks flags refactored to enum
-- Update maximum library versions of ffmpegthumbnailer (2.2.4)
+- Update maximum versions of ffmpegthumbnailer (2.3.0), cmake (4.2.0)
 - Support building for OmniOS
 - Added CI checks for s390x and FreeBSD
 
