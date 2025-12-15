@@ -60,7 +60,7 @@ jobs:
           pip install -U --no-cache-dir conan
           conan profile detect --name default
       - name: Cache conan dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           path: ~/.conan2
           key: ${{ runner.os }}-conan2-${{ matrix.compiler.name }}-${{ hashFiles('conanfile.py') }}-${{ hashFiles('conan/*') }}
