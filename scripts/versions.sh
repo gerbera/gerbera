@@ -66,7 +66,7 @@ else
     EBML="1.4.5"
     EXIV2="v0.28.7"
     EXIF="v0.6.25"
-    FFMPEGTHUMBNAILER="v2.2.4"
+    FFMPEGTHUMBNAILER="v2.3.0"
     FMT="12.1.0"
     GOOGLETEST="1.17.0"
     LASTFM="0.4.0"
