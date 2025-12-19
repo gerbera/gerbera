@@ -191,7 +191,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     std::string genre2 = "Genre2";
     std::string desc = "Description";
     std::string id = "2";
-    std::string location = "/home/gerbera/audio.mp3";
+    std::string location = "/home/gerbera/home/gerbera/audio.mp3";
     std::string channels = "2";
     std::string track = "2";
     int onlineService = 0;
@@ -305,7 +305,7 @@ TEST_F(ImportScriptTest, AddsVideoItemToCdsContainerChainWithDirs)
     std::string title = "Video Title";
     std::string mimetype = "video/mpeg";
     std::string id = "2";
-    std::string location = "/home/gerbera/video.mp4";
+    std::string location = "/home/gerbera/home/gerbera/video.mp4";
 #ifdef ONLINE_SERVICES
     auto onlineService = to_underlying(OnlineServiceType::None);
 #else
@@ -357,7 +357,7 @@ TEST_F(ImportScriptTest, AddsImageItemToCdsContainerChains)
     std::string mimetype = "image/jpeg";
     std::string date = "2018-01-01";
     std::string id = "2";
-    std::string location = "/home/gerbera/image.jpg";
+    std::string location = "/home/gerbera/home/gerbera/image.jpg";
 #ifdef ONLINE_SERVICES
     auto onlineService = to_underlying(OnlineServiceType::None);
 #else
@@ -419,7 +419,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraVideoItemToCdsContainerChainWithDirs)
     std::string title = "Video Title";
     std::string mimetype = "application/ogg";
     std::string id = "2";
-    std::string location = "/home/gerbera/video.ogg";
+    std::string location = "/home/gerbera/home/gerbera/video.ogg";
 #ifdef ONLINE_SERVICES
     auto onlineService = to_underlying(OnlineServiceType::None);
 #else
@@ -479,7 +479,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     std::string conductor = "Conductor";
     std::string orchestra = "Orchestra";
     std::string id = "2";
-    std::string location = "/home/gerbera/audio.mp3";
+    std::string location = "/home/gerbera/home/gerbera/audio.mp3";
     std::string channels = "2";
     int onlineService = 0;
     int theora = 0;

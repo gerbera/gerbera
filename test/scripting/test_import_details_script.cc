@@ -163,7 +163,7 @@ TEST_F(ImportDetailsScriptTest, AddsImageWithDetails)
     std::string year = "2025";
     std::string desc = "Headline 2025";
     std::string id = "2";
-    std::string location = "/home/gerbera/image.jpg";
+    std::string location = "/home/gerbera/home/gerbera/image.jpg";
     std::map<std::string, std::string> aux {
         { "EXIF_TAG_MODEL", "Gerbera" },
         { "EXIF_TAG_DATE_TIME_ORIGINAL", "2025:01:01 19:42:00" },
@@ -250,7 +250,7 @@ TEST_F(ImportDetailsScriptTest, AddsImageWithDetailsAndTopics)
     std::string year = "2025";
     std::string desc = "Headline 2025";
     std::string id = "2";
-    std::string location = "/home/gerbera/image.jpg";
+    std::string location = "/home/gerbera/home/gerbera/image.jpg";
     std::map<std::string, std::string> aux {
         { "EXIF_TAG_MODEL", "Gerbera" },
         { "EXIF_TAG_DATE_TIME_ORIGINAL", "2025:01:01 19:42:00" },
@@ -348,7 +348,7 @@ TEST_F(ImportDetailsScriptTest, AddsImageWithDetailsAndTopicsMapped)
     std::string year = "2025";
     std::string desc = "Headline 2025";
     std::string id = "2";
-    std::string location = "/home/gerbera/image.jpg";
+    std::string location = "/home/gerbera/home/gerbera/image.jpg";
     std::map<std::string, std::string> aux {
         { "EXIF_TAG_MODEL", "Gerbera" },
         { "EXIF_TAG_DATE_TIME_ORIGINAL", "2025:01:01 19:42:00" },
@@ -447,7 +447,7 @@ TEST_F(ImportDetailsScriptTest, AddsImageWithDetailsAndTopicsFromPath)
     std::string year = "2025";
     std::string desc = "Headline 2025";
     std::string id = "2";
-    std::string location = "/home/gerbera/image.jpg";
+    std::string location = "/home/gerbera/home/gerbera/image.jpg";
     std::map<std::string, std::string> aux {
         { "EXIF_TAG_MODEL", "Gerbera" },
         { "EXIF_TAG_DATE_TIME_ORIGINAL", "2025:01:01 19:42:00" },
@@ -548,7 +548,7 @@ TEST_F(ImportDetailsScriptTest, AddsVideoWithDetailsAndTopics)
     std::string genre2 = "Mediatomb";
     std::string desc = "Video Plot";
     std::string id = "2";
-    std::string location = "/home/gerbera/video.mp4";
+    std::string location = "/home/gerbera/home/gerbera/video.mp4";
     std::map<std::string, std::string> res;
 
     std::vector<std::pair<std::string, std::string>> meta {
@@ -640,7 +640,7 @@ TEST_F(ImportDetailsScriptTest, AddsVideoWithDetailsAndTopicsFromPath)
     std::string genre2 = "Mediatomb";
     std::string desc = "Video Plot";
     std::string id = "2";
-    std::string location = "/home/gerbera/video.mp4";
+    std::string location = "/home/gerbera/home/gerbera/video.mp4";
     std::map<std::string, std::string> res;
 
     std::vector<std::pair<std::string, std::string>> meta {
