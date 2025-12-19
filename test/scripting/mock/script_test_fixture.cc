@@ -594,6 +594,7 @@ getRootPathParams ScriptTestFixture::getRootPath(duk_context* ctx)
     std::string objScriptPath = duk_to_string(ctx, 0);
     std::string origObjLocation = duk_to_string(ctx, 1);
     std::string objLocation = origObjLocation;
+    std::string rootPath = objScriptPath;
     size_t pos;
     std::string delimiter = "/";
     std::vector<std::string> dirs;
@@ -604,6 +605,19 @@ getRootPathParams ScriptTestFixture::getRootPath(duk_context* ctx)
         objLocation.erase(0, pos + delimiter.length());
     }
 
+    if (objScriptPath.at(objScriptPath.size() - 1) != '/')
+        objScriptPath += '/';
+    while ((pos = objScriptPath.find(delimiter)) != std::string::npos) {
+        std::string token = objScriptPath.substr(0, pos);
+        if (token.length() > 0) {
+            if (dirs.at(0) == token)
+                dirs.erase(dirs.begin());
+            else
+                break;
+        }
+        objScriptPath.erase(0, pos + delimiter.length());
+    }
+
     duk_idx_t arrIdx = duk_push_array(ctx);
     for (size_t i = 0; i < dirs.size(); i++) {
         std::string dir = dirs.at(i);
@@ -612,7 +626,7 @@ getRootPathParams ScriptTestFixture::getRootPath(duk_context* ctx)
     }
 
     getRootPathParams params;
-    params.objScriptPath = objScriptPath;
+    params.objScriptPath = rootPath;
     params.origObjLocation = origObjLocation;
 
     return params;

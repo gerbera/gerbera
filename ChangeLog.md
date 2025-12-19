@@ -3,6 +3,7 @@
 ### HEAD
 
 - accumulate to join
+- Add community scripts
 - add missing array headers
 - add missing headers from headers
 - Avoid string_view conversion
@@ -25,6 +26,7 @@
 - Negation of client-flags
 - New import scripts for images and videos
 - Refactor Quirks to enum
+- remove unique_ptr from std::vector
 - remove unique_ptr from xml_document
 - remove various string_view data usages
 - replaced lock_guard with scoped_lock

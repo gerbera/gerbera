@@ -103,6 +103,8 @@ The layout function can be set in configuration of :ref:`Import Function <import
 +-----------------------+--------------------------------------------------------------------------+------+
 | importAudioStructured | Create boxes for a group of initial letters in one box                   | a-s  |
 +-----------------------+--------------------------------------------------------------------------+------+
+| importAudioClassical  | Create boxes for a classical music colkection                            | a-c  |
++-----------------------+--------------------------------------------------------------------------+------+
 | importVideo           | Create video layout similar to builtin layout                            | v-0  |
 +-----------------------+--------------------------------------------------------------------------+------+
 | importVideoDetails    | | Create video layout with topic detail                                  | v-d  |
@@ -129,7 +131,8 @@ The layout function can be set in configuration of :ref:`Import Function <import
 |                       | | Support configuration of :confval:`model-map`                          |      |
 |                       | | Requires configuration of :confval:`headline-map`                      |      |
 +-----------------------+--------------------------------------------------------------------------+------+
-
+| importFsContainers    | Create a copy of the physical structure with part of the path skipped    | s-f  |
++-----------------------+--------------------------------------------------------------------------+------+
 
 Playlists
 ---------
@@ -155,17 +158,21 @@ The codes in *js layout* column refer to the *Code* column above.
 +---------------------------------+------------------+-----------+----------------+
 | Box                             | Default Caption  | js layout | builtin layout |
 +=================================+==================+===========+================+
-| Audio/allAlbums                 | Albums           | a-0, a-i  | yes            |
+| Audio/allAlbums                 | Albums           | a-0, a-i, | yes            |
+|                                 |                  | a-c       |                |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/allArtists                | Artists          | a-0, a-i  | yes            |
+| Audio/allArtists                | Artists          | a-0, a-i, | yes            |
+|                                 |                  | a-c       |                |
 +---------------------------------+------------------+-----------+----------------+
 | Audio/allAudio                  | All Audio        | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/allComposers              | Composers        | a-0, a-i  | yes            |
+| Audio/allComposers              | Composers        | a-0, a-i, | yes            |
+|                                 |                  | a-c       |                |
 +---------------------------------+------------------+-----------+----------------+
 | Audio/allDirectories            | Directories      | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
-| Audio/allGenres                 | Genres           | a-0, a-i  | yes            |
+| Audio/allGenres                 | Genres           | a-0, a-i, | yes            |
+|                                 |                  | a-c       |                |
 +---------------------------------+------------------+-----------+----------------+
 | Audio/allSongs                  | All Songs        | a-0, a-i  | yes            |
 +---------------------------------+------------------+-----------+----------------+
@@ -263,15 +270,19 @@ depend on the layout function. The options can be set in the config.xml section 
 +---------------------------------+------------------+--------------------------------------------------------------------------+
 | Option                          | Layout Function  | Description                                                              |
 +=================================+==================+==========================================================================+
-| trackNumbers                    | a-0, a-s, a-i    | Use 'show' or 'hide' to add track number in front of the track title     |
-|                                 |                  | the default behaviour depends on the function.                           |
+| trackNumbers                    | a-0, a-s, a-i,   | Use ``show`` or ``hide`` to add track number in front of the track title |
+|                                 | a-c              | the default behaviour depends on the function.                           |
 +---------------------------------+------------------+--------------------------------------------------------------------------+
 | specialGenre                    | a-i              | Add disk number to tracks matching this genre (regular expression)       |
 +---------------------------------+------------------+--------------------------------------------------------------------------+
 | spokenGenre                     | a-i              | Do not add tracks to 'All' section                                       |
 |                                 |                  | if the genre matches (regular expression)                                |
 +---------------------------------+------------------+--------------------------------------------------------------------------+
+| channelCount                    | a-c              | Set to ``show`` to have channel numbers in front of the title            |
++---------------------------------+------------------+--------------------------------------------------------------------------+
 | topicFromPath                   | i-d              | Determine topic from path, if path matches the given string              |
 +---------------------------------+------------------+--------------------------------------------------------------------------+
 | rawImageFilter                  | i-d              | Regular pattern to identify raw images that are skipped by layout        |
++---------------------------------+------------------+--------------------------------------------------------------------------+
+| skipFolders                     | s-f              | Number of folders in path to ignore                                      |
 +---------------------------------+------------------+--------------------------------------------------------------------------+
