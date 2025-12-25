@@ -238,8 +238,18 @@ std::string expandNumbersString(std::string str, std::size_t size)
         std::string matchStr = strMatch[1].str();
 
         if (!matchStr.empty()) {
-            auto matchInt = std::stoul(matchStr);
-            result += fmt::format("{0}{1:0{2}}", strMatch.prefix().str(), matchInt, matchStr.size() < size ? size : matchStr.size());
+            try {
+                char* endptr;
+                auto matchInt = std::strtoumax(matchStr.c_str(), &endptr, 10);
+                if (matchInt == UINTMAX_MAX) {
+                    result += fmt::format("{0}{1}", strMatch.prefix().str(), matchStr);
+                } else {
+                    result += fmt::format("{0}{1:0{2}}", strMatch.prefix().str(), matchInt, matchStr.size() < size ? size : matchStr.size());
+                }
+            } catch (const std::exception& ex) {
+                result += fmt::format("{0}{1}", strMatch.prefix().str(), matchStr);
+                log_error("{} (input {})", ex.what(), matchStr);
+            }
             str = strMatch.suffix();
         }
     }

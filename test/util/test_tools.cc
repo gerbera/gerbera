@@ -265,6 +265,8 @@ TEST(ToolsTest, expandNumbersStringTest)
     EXPECT_EQ(expandNumbersString("A0001b00002c", 3), "A0001b00002c");
     EXPECT_EQ(expandNumbersString("A1b2", 3), "A001b002");
     EXPECT_EQ(expandNumbersString("1b2c", 3), "001b002c");
+    EXPECT_EQ(expandNumbersString("9999999999", 15), "000009999999999");
+    EXPECT_EQ(expandNumbersString("9999999999999999999999", 15), "9999999999999999999999");
 }
 
 TEST(ToolsTest, startswithTest)

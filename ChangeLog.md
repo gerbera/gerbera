@@ -18,6 +18,7 @@
 - fix compilation under OmniOS
 - fix edit for container
 - fix error handling in string_converter
+- fix sortKey for extra long numbers
 - github CI: add loongarch64
 - header removals and destructor fix.
 - improve Samsung TVs quirks
