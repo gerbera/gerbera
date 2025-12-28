@@ -91,7 +91,12 @@ Optional Packages
 | libmatroska_        | MKV metadata               | WITH\_MATROSKA          | Enabled  | install-matroska.sh          |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | libpqxx_            | Alternate database storage | WITH\_PGSQL             | Disabled | install-libpqxx.sh           |
+|                     |                            |                         |          |                              |
 | libpq               |                            |                         |          |                              |
++---------------------+----------------------------+-------------------------+----------+------------------------------+
+| libzippp_           | Zip package download       | WITH\_ZIP               | Enabled  | install-libzippp.sh          |
+|                     |                            |                         |          |                              |
+| libzip_             |                            |                         |          | install-libzip.sh            |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | libsystemd_         | Systemd support and        | WITH\_SYSTEMD           | Enabled  |                              |
 |                     |                            |                         |          |                              |
@@ -121,6 +126,8 @@ Optional Packages
 .. _libpupnp: https://github.com/pupnp/pupnp
 .. _libpqxx: https://github.com/jtv/libpqxx
 .. _libsystemd: https://github.com/systemd/systemd
+.. _libzip: https://github.com/nih-at/libzip
+.. _libzippp: https://github.com/ctabin/libzippp
 .. _pugixml: https://github.com/zeux/pugixml
 .. _spdlog: https://github.com/gabime/spdlog
 .. _taglib: https://taglib.org/

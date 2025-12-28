@@ -79,6 +79,17 @@ $ docker run \
      gerbera/gerbera:3.0.0
 ```
 
+## Keep config, database and runtime files outside
+```console
+$ docker run \
+    --name another-gerbera \
+    --network=host \
+    -v /some/files:/mnt/content:ro \
+    -v /some/path:/var/run/gerbera \
+     gerbera/gerbera:3.0.0
+```
+Make sure that the container user has write access the the config path.
+
 ## Overwrite default ports
 
 In cases (e.g. running multiple gerbera containers with different versions) you can override the exported ports

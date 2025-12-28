@@ -64,6 +64,7 @@ option(WITH_MATROSKA          "Use libmatroska to extract video/mkv metadata" ON
 option(WITH_SYSTEMD           "Install Systemd unit file and notify systemd" ON)
 option(WITH_LASTFM            "Enable scrobbling to LastFM" OFF)
 option(WITH_ICU               "Enable Support for transliteration" ON)
+option(WITH_ZIP               "Enable zip for package download" ON)
 option(WITH_ONLINE_SERVICES   "Enable support for Online Services" OFF) # currently there is no online service left, this enables compiling the empty shell
 option(WITH_DEBUG             "Enables debug logging" ON)
 option(WITH_DEBUG_OPTIONS     "Enables dedicated debug messages" ON)
@@ -397,6 +398,7 @@ add_library(libgerbera STATIC
         src/web/web_update.cc
         )
 target_include_directories(libgerbera PUBLIC "${CMAKE_SOURCE_DIR}/src")
+set_target_properties(libgerbera PROPERTIES PREFIX "") # Avoid duplicate "lib" prefix
 
 add_executable(gerbera src/main.cc)
 target_link_libraries(gerbera PRIVATE libgerbera)
@@ -603,6 +605,17 @@ target_link_libraries(libgerbera PUBLIC spdlog::spdlog)
 
 find_package(jsoncpp REQUIRED)
 target_link_libraries(libgerbera PUBLIC jsoncpp::jsoncpp)
+
+
+if(WITH_ZIP)
+    find_package(libzip REQUIRED)
+    target_link_libraries(libgerbera PUBLIC zip::zip)
+
+    find_package(libzippp REQUIRED)
+    target_link_libraries(libgerbera PUBLIC zippp::zippp)
+    target_compile_definitions(libgerbera PUBLIC LIBZIPPP_VERSION="${ZIPPP_VERSION}")
+    target_compile_definitions(libgerbera PUBLIC HAVE_ZIP)
+endif()
 
 find_package(pugixml REQUIRED)
 target_link_libraries(libgerbera PUBLIC pugixml::pugixml)

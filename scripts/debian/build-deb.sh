@@ -233,6 +233,7 @@ if [[ ! -d "${BUILD_DIR}" ]]; then
     fi
   fi
 
+  install-libzippp
   install-fmt
   install-spdlog
   install-taglib

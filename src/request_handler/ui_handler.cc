@@ -77,6 +77,7 @@ bool UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
     auto headers = Headers();
     headers.addHeader("Content-Security-Policy", csp);
     headers.addHeader("SameSite", "Lax");
+    headers.addHeader("Vary", "Origin");
     if (quirks)
         quirks->updateHeaders(headers);
     headers.writeHeaders(info);

@@ -42,8 +42,8 @@ const initialize = () => {
   return Promise.resolve();
 };
 
-const makeTrail = (selectedItem, config) => {
-  const items = (selectedItem !== null) ? gatherTrail(selectedItem) : [{ text: "current configuration" }];
+const makeTrail = (selectedItem, config, myItem) => {
+  const items = (selectedItem !== null) ? gatherTrail(selectedItem, myItem) : [{ text: "current configuration" }];
   const configDefaults = {
     itemType: GerberaApp.getType()
   };
@@ -51,7 +51,7 @@ const makeTrail = (selectedItem, config) => {
   createTrail(items, trailConfig);
 };
 
-const gatherTrail = (treeElement) => {
+const gatherTrail = (treeElement, myItem) => {
   const items = [];
   let lastItem = {};
   if ($(treeElement).data('grb-id') !== undefined) {
@@ -59,7 +59,8 @@ const gatherTrail = (treeElement) => {
     lastItem = {
       id: $(treeElement).data('grb-id'),
       text: title,
-      fullPath: "/" + title
+      fullPath: "/" + title,
+      zip: myItem ? myItem.zip : undefined,
     };
     items.push(lastItem);
   }
@@ -69,7 +70,8 @@ const gatherTrail = (treeElement) => {
     const gerberaId = $(element).data('grb-id');
     const item = {
       id: gerberaId,
-      text: title
+      text: title,
+      zip: myItem ? myItem.zip : undefined,
     };
     if (gerberaId != 0) {
       lastItem.fullPath = "/" + title + lastItem.fullPath;
@@ -92,6 +94,7 @@ const makeTrailFromItem = (items, parentItem) => {
   const treeElement = (itemType !== 'config') ? Tree.getTreeElementById(items.parent_id) : null;
   let enableAdd = false;
   let enableEdit = false;
+  let enableDownloadZip = false;
   let enableDelete = false;
   let enableDeleteAll = false;
   let enableAddAutoscan = false;
@@ -102,6 +105,7 @@ const makeTrailFromItem = (items, parentItem) => {
   let onAdd;
   let onDelete;
   let onEdit;
+  let onDownloadZip;
   let onSave;
   let onClear;
   let onAddAutoscan;
@@ -126,6 +130,8 @@ const makeTrailFromItem = (items, parentItem) => {
       enableDelete = isNotProtected;
       enableDeleteAll = isNotProtected && isVirtual;
       enableEditAutoscan = allowsAutoscan && isNotProtected;
+      enableDownloadZip = (parentItem && 'zip' in parentItem) && !!parentItem.zip;
+      items.zip = (parentItem) ? parentItem.zip : undefined;
     }
   } else if (itemType === 'fs') {
     enableAddTweak = items.parent_id !== 0;
@@ -141,6 +147,7 @@ const makeTrailFromItem = (items, parentItem) => {
 
   onAdd = enableAdd ? addItem : noOp;
   onEdit = enableEdit ? editItem : noOp;
+  onDownloadZip = enableDownloadZip ? downloadZip : noOp;
   onDelete = enableDelete ? deleteItem : noOp;
   onDeleteAll = enableDeleteAll ? deleteAllItems : noOp;
   onAddAutoscan = enableAddAutoscan ? addAutoscan : noOp;
@@ -157,6 +164,8 @@ const makeTrailFromItem = (items, parentItem) => {
     onAdd: onAdd,
     enableEdit: enableEdit,
     onEdit: onEdit,
+    enableDownloadZip: enableDownloadZip,
+    onDownloadZip: onDownloadZip,
     enableDelete: enableDelete,
     onDelete: onDelete,
     enableDeleteAll: enableDeleteAll,
@@ -176,7 +185,7 @@ const makeTrailFromItem = (items, parentItem) => {
     onRescan: onRescan,
   };
 
-  makeTrail(treeElement, config);
+  makeTrail(treeElement, config, items);
 };
 
 const addItem = (event) => {
@@ -190,6 +199,10 @@ const addItem = (event) => {
 
 const editItem = (event) => {
   return Items.editItem(event);
+};
+
+const downloadZip = (event) => {
+  return Items.downloadZip(event);
 };
 
 const addAutoscan = (event) => {

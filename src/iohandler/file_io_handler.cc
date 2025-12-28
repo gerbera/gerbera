@@ -35,10 +35,12 @@
 #include "file_io_handler.h" // API
 
 #include "exceptions.h"
+#include "util/logger.h"
 
 FileIOHandler::FileIOHandler(const fs::path& filename)
     : file(filename)
 {
+    log_debug("path = {}", file.getPath().string());
 }
 
 void FileIOHandler::open(enum UpnpOpenFileMode mode)
@@ -47,12 +49,14 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
         throw_std_runtime_error("open: UpnpOpenFileMode mode not supported");
 
     f = file.open("rb");
+    log_debug("open {}", file.getPath().string());
 }
 
 grb_read_t FileIOHandler::read(std::byte* buf, std::size_t length)
 {
     std::size_t ret = std::fread(buf, sizeof(std::byte), length, f);
 
+    log_debug("read {} {}", file.getPath().string(), length);
     if (ret == 0) {
         if (std::feof(f))
             return 0;
@@ -82,4 +86,11 @@ off_t FileIOHandler::tell()
 
 void FileIOHandler::close()
 {
+}
+
+void ZipIOHandler::close()
+{
+    file.close();
+    file.remove();
+    log_debug("close {}", file.getPath().string());
 }

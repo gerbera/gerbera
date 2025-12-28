@@ -40,6 +40,8 @@ jobs:
            sudo bash ./scripts/install-fmt.sh
            sudo bash ./scripts/install-spdlog.sh
            sudo bash ./scripts/install-taglib.sh
+           sudo bash ./scripts/install-libzip.sh
+           sudo bash ./scripts/install-libzippp.sh
 
         # Initializes the CodeQL tools for scanning.
       - name: Initialize CodeQL

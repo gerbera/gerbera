@@ -297,7 +297,8 @@ const transformContainers = (response, createParent) => {
       upnpShortcut: item.upnp_shortcut ?? null,
       autoScanMode: item.autoscan_mode,
       autoScanType: item.autoscan_type,
-      image: ('image' in item) ? item.image : null
+      image: ('image' in item) ? item.image : null,
+      zip: ('zip' in item) ? item.zip : null,
     };
     if (!GerberaApp.serverConfig.enableThumbnail) {
       node.gerbera.image = null;

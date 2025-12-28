@@ -34,6 +34,10 @@ Gerbera - https://gerbera.io/
 #include <spdlog/version.h>
 #include <sqlite3.h>
 
+#ifdef HAVE_ZIP
+#include <zip.h>
+#endif
+
 #ifdef HAVE_JS
 #include <duktape.h>
 #endif
@@ -110,6 +114,10 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
         { "SQLITE ", fmt::to_string(SQLITE_VERSION) },
         { "PUGIXML", fmt::to_string(PUGIXML_VERSION) },
         { "JSONCPP", JSONCPP_VERSION_STRING },
+#ifdef HAVE_ZIP
+        { "LIBZIPPP", LIBZIPPP_VERSION },
+        { "LIBZIP", zip_libzip_version() },
+#endif
 #ifdef PACKAGE_DATADIR
         { "PACKAGE_DATADIR", PACKAGE_DATADIR },
 #endif
@@ -117,6 +125,12 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
         { "NPUPNP ", fmt::to_string(UPNP_VERSION) },
 #else
         { "PUPNP  ", fmt::to_string(UPNP_VERSION) },
+#endif
+#ifdef UPNP_MINISERVER_REUSEADDR
+        { "", "UPNP_REUSEADDR" },
+#endif
+#ifdef UPNP_ENABLE_BLOCKING_TCP_CONNECTIONS
+        { "", "UPNP_BLOCKING_TCP_CONNECTIONS" },
 #endif
 #ifdef UPNP_HAVE_TOOLS
         { "", "UPNP_HAVE_TOOLS" },

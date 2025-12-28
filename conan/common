@@ -10,5 +10,6 @@ tools.system.package_manager:sudo=true
 pupnp/*:ipv6=True
 pupnp/*:reuseaddr=True
 pupnp/*:blocking-tcp=False
+libzip/*:crypto=False
 # blocking-tcp is broken in conan recipe so expect warning during configure
 libcurl/*:with_ssl=False

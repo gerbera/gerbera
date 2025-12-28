@@ -38,6 +38,9 @@ if [[ "${GERBERA_ENV-head}" == "minimum" ]]; then
     JSONCPP="1.7.4"
     CMAKE="3.31.8"
     PQXX="7.10.3"
+    LIBZIP="v1.11.4"
+    LIBZIPPP_COMMIT="8992d6002b6ae941ad1a61d5bc7a512277907be3"
+    LIBZIPPP="v7.1-1.10.1"
 
 elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
 
@@ -59,6 +62,9 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
     JSONCPP="1.9.6"
     CMAKE="3.31.8"
     PQXX="7.10.3"
+    LIBZIP="v1.11.4"
+    LIBZIPPP_COMMIT="8992d6002b6ae941ad1a61d5bc7a512277907be3"
+    LIBZIPPP="v7.1-1.10.1"
 
 else
 
@@ -80,5 +86,8 @@ else
     JSONCPP="1.9.6"
     CMAKE="4.2.0"
     PQXX="7.10.3"
+    LIBZIP="v1.11.4"
+    LIBZIPPP_COMMIT="8992d6002b6ae941ad1a61d5bc7a512277907be3"
+    LIBZIPPP="v7.1-1.10.1"
 
 fi

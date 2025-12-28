@@ -101,9 +101,9 @@ describe('Gerbera Trail', () => {
       fixture.load('trail.html');
       const treeElement = $('#first-child-one-one');
       const expected = [
-        { id: 111, text: 'first' },
-        { id: 1111, text: 'first.child.one' },
-        { id: 11111, text: 'first.child.one.one', fullPath: '/first/first.child.one/first.child.one.one' }
+        { id: 111, text: 'first', zip: undefined },
+        { id: 1111, text: 'first.child.one', zip: undefined },
+        { id: 11111, text: 'first.child.one.one', fullPath: '/first/first.child.one/first.child.one.one', zip: undefined }
       ];
 
       const result = Trail.gatherTrail(treeElement);
@@ -115,9 +115,9 @@ describe('Gerbera Trail', () => {
       fixture.load('trail-fs.html');
       const treeElement = $('#first-child-one-one');
       const expected = [
-        { id: 'aaa', text: 'first' },
-        { id: 'aaaa', text: 'first.child.one' },
-        { id: 'aaaaa', text: 'first.child.one.one', fullPath: '/first/first.child.one/first.child.one.one' }
+        { id: 'aaa', text: 'first', zip: undefined },
+        { id: 'aaaa', text: 'first.child.one', zip: undefined },
+        { id: 'aaaaa', text: 'first.child.one.one', fullPath: '/first/first.child.one/first.child.one.one', zip: undefined }
       ];
 
       const result = Trail.gatherTrail(treeElement);
@@ -314,7 +314,7 @@ describe('Gerbera Trail', () => {
       Trail.makeTrailFromItem(items);
       $('#trail .grb-trail-delete-all').click();
 
-      expect(Items.deleteGerberaItem).toHaveBeenCalledWith({ id: 11111, text: 'first.child.one.one' }, true);
+      expect(Items.deleteGerberaItem).toHaveBeenCalledWith({ id: 11111, text: 'first.child.one.one', zip: undefined }, true);
     });
 
     it('when click add for fs type calls Gerbera Item add', () => {
