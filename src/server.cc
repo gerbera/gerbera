@@ -90,6 +90,7 @@
 #include <upnptools.h>
 #endif
 
+#include <regex>
 #include <thread>
 
 constexpr auto DEVICE_DESCRIPTION_PATH = std::string_view(UPNP_DESC_SCPD_URL UPNP_DESC_DEVICE_DESCRIPTION);
@@ -276,18 +277,18 @@ void Server::run()
         validHosts = std::vector<std::string> {
             std::string(UpnpGetServerIpAddress()),
         };
-        if (!ip6.empty()) {
-            validHosts.push_back(ip6);
-        }
-        if (!ulaGuaIp6.empty()) {
-            validHosts.push_back(ulaGuaIp6);
-        }
         if (!url.empty()) {
             validHosts.push_back(url);
         }
         url = getExternalUrl();
         if (!url.empty()) {
             validHosts.push_back(url);
+        }
+        if (!ip6.empty()) {
+            validHosts.push_back(ip6);
+        }
+        if (!ulaGuaIp6.empty()) {
+            validHosts.push_back(ulaGuaIp6);
         }
     }
 
@@ -296,21 +297,25 @@ void Server::run()
             "'self'",
             fmt::format("http://{}", UpnpGetServerIpAddress()),
         };
+        std::string url = getVirtualUrl();
+        std::regex re(":[0-9]+");
+        if (!url.empty()) {
+            corsHosts.push_back(url);
+            corsHosts.push_back(std::regex_replace(url, re, ""));
+        }
+        url = getExternalUrl();
+        if (!url.empty()) {
+            corsHosts.push_back(url);
+            corsHosts.push_back(std::regex_replace(url, re, ""));
+        }
         if (!ip6.empty()) {
             corsHosts.push_back(fmt::format("http://[{}]", ip6));
         }
         if (!ulaGuaIp6.empty()) {
             corsHosts.push_back(fmt::format("http://[{}]", ulaGuaIp6));
         }
-        std::string url = getVirtualUrl();
-        if (!url.empty()) {
-            corsHosts.push_back(url);
-        }
-        url = getExternalUrl();
-        if (!url.empty()) {
-            corsHosts.push_back(url);
-        }
-        UpnpSetWebServerCorsString(fmt::format("{}", fmt::join(corsHosts, " ")).c_str());
+        // CORS does not support multiple values
+        UpnpSetWebServerCorsString("*");
     }
 
     UpnpSetHostValidateCallback(HostValidateCallback, this);
@@ -792,13 +797,13 @@ UpnpWebFileHandle Server::OpenCallback(
 }
 
 int Server::ReadCallback(
-    UpnpWebFileHandle f,
+    UpnpWebFileHandle fileHandle,
     char* buf,
     std::size_t length,
     const void* cookie,
     const void* requestCookie)
 {
-    log_debug("{} read({})", f, length);
+    log_debug("{} read({})", fileHandle, length);
     if (static_cast<const Server*>(cookie)->getShutdownStatus())
         return -1;
     auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
@@ -809,29 +814,29 @@ int Server::ReadCallback(
         return -1;
     }
 
-    auto ioHandler = static_cast<IOHandler*>(f);
+    auto ioHandler = static_cast<IOHandler*>(fileHandle);
     return ioHandler ? ioHandler->read(reinterpret_cast<std::byte*>(buf), length) : 0;
 }
 
 int Server::WriteCallback(
-    UpnpWebFileHandle f,
+    UpnpWebFileHandle fileHandle,
     char* buf,
     std::size_t length,
     const void* cookie,
     const void* requestCookie)
 {
-    log_debug("{} write not implemented({})", f, length);
+    log_debug("{} write not implemented({})", fileHandle, length);
     return 0;
 }
 
 int Server::SeekCallback(
-    UpnpWebFileHandle f,
+    UpnpWebFileHandle fileHandle,
     off_t offset,
     int whence,
     const void* cookie,
     const void* requestCookie)
 {
-    log_debug("{} seek({}, {})", f, offset, whence);
+    log_debug("{} seek({}, {})", fileHandle, offset, whence);
     try {
         auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
         auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
@@ -840,7 +845,7 @@ int Server::SeekCallback(
             log_debug("Client blocked {}", clientIp);
             return -1;
         }
-        auto ioHandler = static_cast<IOHandler*>(f);
+        auto ioHandler = static_cast<IOHandler*>(fileHandle);
         if (ioHandler)
             ioHandler->seek(offset, whence);
         return 0;
@@ -851,13 +856,13 @@ int Server::SeekCallback(
 }
 
 int Server::CloseCallback(
-    UpnpWebFileHandle f,
+    UpnpWebFileHandle fileHandle,
     const void* cookie,
     const void* requestCookie)
 {
-    log_debug("{} close()", f);
+    log_debug("{} close()", fileHandle);
     int retClose = 0;
-    auto ioHandler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(f));
+    auto ioHandler = std::unique_ptr<IOHandler>(static_cast<IOHandler*>(fileHandle));
     if (ioHandler) {
         try {
             ioHandler->close();

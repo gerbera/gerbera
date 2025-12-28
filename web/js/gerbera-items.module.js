@@ -233,6 +233,7 @@ const loadItems = (response, item) => {
       datagrid.dataitems('destroy');
     }
     datagrid.dataitems(dataItems);
+    currentItemView.totalMatches = dataItems.parentItem.total_matches;
     Trail.makeTrailFromItem(dataItems.parentItem, item);
   }
 };
@@ -368,10 +369,63 @@ const downloadItem = (event) => {
   link.download = item.text;
   link.type = item.mtype;
   link.href = item.url;
+  link.target = "_blank" ;
 
   document.body.appendChild(link);
   link.click();
 
+  document.body.removeChild(link);
+};
+
+const downloadZip = (event) => {
+  const item = event.data;
+  event.preventDefault();
+  GerberaApp.startLoading();
+
+  fetchWithTimeout(item.zip, { timeout: currentItemView.totalMatches * 500 }) // assume 500 ms to zip one file
+    .then(blob => {
+      downloadBlob(blob, item.text, item.mtype);
+      GerberaApp.stopLoading();
+    })
+    .catch(err => {
+      GerberaApp.stopLoading();
+      if (err.name === 'AbortError') {
+        alert('Download: Timeout reacjed!');
+      } else {
+        alert('Download-Error: ' + err.message);
+      }
+  });
+};
+
+const fetchWithTimeout = (resource, options = {}) => {
+  const { timeout = 8000 } = options; // Timeout in ms (z.B. 8000ms = 8s)
+
+  const controller = new AbortController();
+  const id = setTimeout(() => controller.abort(), timeout);
+
+  return fetch(resource, {
+        ...options,
+        signal: controller.signal
+      })
+      .then(response => {
+        clearTimeout(id);
+        if (!response.ok)
+          throw new Error('Network response was not ok');
+        return response.blob();
+      });
+};
+
+const downloadBlob = (blob, filename, type) => {
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.style.display = 'none';
+  link.href = url;
+  link.type = type;
+  link.download = filename;
+  link.target = "_blank" ;
+  document.body.appendChild(link);
+  link.click();
+  window.URL.revokeObjectURL(url);
   document.body.removeChild(link);
 };
 
@@ -591,6 +645,7 @@ export const Items = {
   deleteGerberaItem,
   destroy,
   downloadItem,
+  downloadZip,
   editItem,
   loadEditItem,
   loadItems,

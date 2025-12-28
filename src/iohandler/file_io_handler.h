@@ -81,4 +81,12 @@ public:
     void close() override;
 };
 
+/// @brief Allows the web server to read from a temporary zip file.
+class ZipIOHandler : public FileIOHandler {
+    using FileIOHandler::FileIOHandler;
+
+    /// @brief Close a previously opened file and delete it.
+    void close() override;
+};
+
 #endif // __FILE_IO_HANDLER_H__

@@ -130,6 +130,17 @@ $.widget('grb.trail', {
       autoscanItemIcon.appendTo(buttons);
     }
 
+    if (config.enableDownloadZip && config.onDownloadZip) {
+      const downloadItemIcon = this.generateItemButton(item, {
+        title: 'Download as Zip',
+        tooltip: 'Download content of container as Zip file',
+        class: 'grb-trail-download',
+        iconClass: 'fa-download',
+        click: config.onDownloadZip ? config.onDownloadZip : noOp
+      });
+      downloadItemIcon.appendTo(buttons);
+    }
+
     if (config.enableDelete && config.onDelete) {
       const deleteItemIcon = this.generateItemButton(item, {
         title: 'Delete Container',

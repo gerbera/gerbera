@@ -79,6 +79,14 @@ COPY scripts/alpine/*.* ./alpine/
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-libpqxx.sh
 
+# Build libzippp
+WORKDIR /libzippp_build
+COPY scripts/install-libzip*.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/alpine/*.* ./alpine/
+COPY scripts/alpine/deps/*.sh ./alpine/deps/
+RUN ./install-libzip.sh
+RUN ./install-libzippp.sh
+
 # Build Gerbera
 WORKDIR /gerbera_build
 COPY . .
@@ -132,6 +140,8 @@ COPY --from=builder /usr/local/lib/libexif.so* /usr/lib/
 COPY --from=builder /usr/local/lib/libffmpegthumbnailer.so* /usr/lib/
 # Copy libpqxx
 COPY --from=builder /usr/local/lib/libpqxx*.so* /usr/lib/
+# Copy libzippp
+COPY --from=builder /usr/local/lib/libzip*.so* /usr/lib/
 
 # Copy Gerbera
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera

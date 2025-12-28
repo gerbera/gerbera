@@ -146,10 +146,26 @@ GrbFile::GrbFile(fs::path path)
 
 GrbFile::~GrbFile()
 {
+    close();
+}
+
+bool GrbFile::close()
+{
     if (fd && std::fclose(fd) != 0) {
         log_error("fclose {} failed", path.c_str());
+        return false;
     }
     fd = nullptr;
+    return true;
+}
+
+bool GrbFile::remove()
+{
+    if (!fd && std::remove(path.c_str()) != 0) {
+        log_error("remove {} failed", path.c_str());
+        return false;
+    }
+    return fd;
 }
 
 #ifdef __linux__

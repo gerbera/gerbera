@@ -40,15 +40,19 @@
 
 #include "upnp/xml_builder.h"
 
+class CdsObject;
 class CdsResource;
+class Headers;
 class MetadataHandler;
 class MetadataService;
 
 class FileRequestHandler : public RequestHandler {
 
 public:
-    explicit FileRequestHandler(const std::shared_ptr<Content>& content,
-        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, const std::shared_ptr<Quirks>& quirks,
+    explicit FileRequestHandler(
+        const std::shared_ptr<Content>& content,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        const std::shared_ptr<Quirks>& quirks,
         std::shared_ptr<MetadataService> metadataService);
 
     /// \inherit
@@ -59,11 +63,50 @@ public:
     /// @param quirks allows modifying the content of the response based on the client
     /// @param mode either UPNP_READ or UPNP_WRITE
     /// @return the appropriate IOHandler for the request.
-    std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
+    std::unique_ptr<IOHandler> open(
+        const char* filename,
+        const std::shared_ptr<Quirks>& quirks,
+        enum UpnpOpenFileMode mode) override;
 
 private:
-    static std::size_t parseResourceInfo(const std::map<std::string, std::string>& params);
-    std::shared_ptr<MetadataHandler> getResourceMetadataHandler(std::shared_ptr<CdsObject>& obj, std::shared_ptr<CdsResource>& resource) const;
+    static std::size_t parseResourceInfo(
+        const std::map<std::string, std::string>& params);
+    std::shared_ptr<MetadataHandler> getResourceMetadataHandler(
+        std::shared_ptr<CdsObject>& obj,
+        std::shared_ptr<CdsResource>& resource) const;
+
+    /// @brief get header information for transcoding
+    std::string getTranscodingInfo(
+        const std::shared_ptr<CdsObject>& obj,
+        UpnpFileInfo* info,
+        const std::string& path,
+        const std::string& trProfile);
+    /// @brief get header information for zip archives
+    std::string getZipInfo(
+        const std::shared_ptr<CdsObject>& obj,
+        UpnpFileInfo* info);
+    /// @brief get header information for resource
+    std::string getResourceInfo(
+        std::shared_ptr<CdsObject>& obj,
+        UpnpFileInfo* info,
+        std::size_t resourceId,
+        std::string path,
+        Headers& headers);
+
+    /// @brief open resource or file stream
+    std::unique_ptr<IOHandler> openResource(
+        std::shared_ptr<CdsObject>& obj,
+        std::size_t resourceId);
+    /// @brief open transcoding stream
+    std::unique_ptr<IOHandler> openTranscoding(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::string& path,
+        const std::string& trProfile,
+        const std::string& group,
+        const std::map<std::string, std::string>& params);
+    /// @brief open zip archive stream
+    std::unique_ptr<IOHandler> openZip(
+        const std::shared_ptr<CdsObject>& obj);
 
     std::shared_ptr<MetadataService> metadataService;
 };

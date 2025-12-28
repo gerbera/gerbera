@@ -25,6 +25,7 @@
         "autoscan_mode": "none",
         "title": "Photos",
         "location": "/my/Directory/",
+        "zip": "http://localhost/media/object/2778/zip/1/Photos.zip",
         "upnp_class": "upnp.class"
       },
       {

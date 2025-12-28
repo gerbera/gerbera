@@ -237,10 +237,10 @@ protected:
     static int HostValidateCallback(const char* host, void* cookie);
     static int GetInfoCallback(const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie);
     static UpnpWebFileHandle OpenCallback(const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie);
-    static int ReadCallback(UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie);
-    static int WriteCallback(UpnpWebFileHandle f, char* buf, std::size_t length, const void* cookie, const void* requestCookie);
-    static int SeekCallback(UpnpWebFileHandle f, off_t offset, int whence, const void* cookie, const void* requestCookie);
-    static int CloseCallback(UpnpWebFileHandle f, const void* cookie, const void* requestCookie);
+    static int ReadCallback(UpnpWebFileHandle fileHandle, char* buf, std::size_t length, const void* cookie, const void* requestCookie);
+    static int WriteCallback(UpnpWebFileHandle fileHandle, char* buf, std::size_t length, const void* cookie, const void* requestCookie);
+    static int SeekCallback(UpnpWebFileHandle fileHandle, off_t offset, int whence, const void* cookie, const void* requestCookie);
+    static int CloseCallback(UpnpWebFileHandle fileHandle, const void* cookie, const void* requestCookie);
 };
 
 #endif // __SERVER_H__

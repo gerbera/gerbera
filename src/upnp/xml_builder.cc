@@ -535,7 +535,8 @@ static bool isPrivateAttribute(ResourceAttribute attribute)
     }
 }
 
-void UpnpXMLBuilder::renderResource(const CdsObject& object,
+void UpnpXMLBuilder::renderResource(
+    const CdsObject& object,
     const CdsResource& resource,
     pugi::xml_node& parent,
     const std::vector<std::string>& filter,
@@ -700,7 +701,8 @@ std::string UpnpXMLBuilder::renderResourceURL(
 
 /// @brief build path for first resource from item
 /// depending on the item type it returns the url to the media
-std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>& item) const
+std::string UpnpXMLBuilder::getFirstResourcePath(
+    const std::shared_ptr<CdsItem>& item) const
 {
     auto res = item->getResource(ResourcePurpose::Content);
     if (res)
@@ -708,7 +710,8 @@ std::string UpnpXMLBuilder::getFirstResourcePath(const std::shared_ptr<CdsItem>&
     return {};
 }
 
-std::optional<std::string> UpnpXMLBuilder::renderContainerImageURL(const std::shared_ptr<CdsContainer>& cont) const
+std::optional<std::string> UpnpXMLBuilder::renderContainerImageURL(
+    const std::shared_ptr<CdsContainer>& cont) const
 {
     auto orderedResources = getOrderedResources(*cont);
     auto resFound = std::find_if(orderedResources.begin(), orderedResources.end(), [](auto&& res) { return res->getPurpose() == ResourcePurpose::Thumbnail; });
@@ -718,7 +721,16 @@ std::optional<std::string> UpnpXMLBuilder::renderContainerImageURL(const std::sh
     return {};
 }
 
-std::optional<std::string> UpnpXMLBuilder::renderItemImageURL(const std::shared_ptr<CdsItem>& item) const
+std::optional<std::string> UpnpXMLBuilder::renderContainerZipURL(
+    const std::shared_ptr<CdsContainer>& cont) const
+{
+    auto url = mediaContentBuilder.buildUrl(virtualURL, cont->getID());
+    url.append(URLUtils::joinUrl({ URL_PARAM_ZIP_REQUEST, fmt::format("{}.zip", cont->getTitle()) }));
+    return url;
+}
+
+std::optional<std::string> UpnpXMLBuilder::renderItemImageURL(
+    const std::shared_ptr<CdsItem>& item) const
 {
     auto orderedResources = getOrderedResources(*item);
     auto resFound = std::find_if(orderedResources.begin(), orderedResources.end(), [](auto&& res) { return res->getPurpose() == ResourcePurpose::Thumbnail; });

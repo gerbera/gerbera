@@ -76,6 +76,13 @@ bool Web::Containers::processPageAction(Json::Value& element, const std::string&
             ce["image"] = url.value();
         }
 
+#ifdef HAVE_ZIP
+        auto zip = xmlBuilder->renderContainerZipURL(cont);
+        if (zip) {
+            ce["zip"] = zip.value();
+        }
+#endif
+
         auto autoscanType = cont->getAutoscanType();
         std::string autoscanMode = (autoscanType != AutoscanType::None) ? AUTOSCAN_TIMED : "none";
         auto adir = content->getAutoscanDirectory(cont->getLocation());

@@ -74,6 +74,13 @@ function install-libpqxx() {
   echo "::endgroup::"
 }
 
+function install-libzippp() {
+  echo "::group::Installing libzippp"
+  sudo bash "${GRB_SH_DIR}install-libzip.sh" $*
+  sudo bash "${GRB_SH_DIR}install-libzippp.sh" $*
+  echo "::endgroup::"
+}
+
 function install-pupnp() {
   echo "::group::Installing libupnp"
   sudo bash "${GRB_SH_DIR}install-pupnp.sh"

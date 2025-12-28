@@ -114,6 +114,9 @@ public:
     /// @brief Renders the image of a container as url to be used in a resource
     std::optional<std::string> renderContainerImageURL(
         const std::shared_ptr<CdsContainer>& cont) const;
+    /// @brief Renders download zip of a container as url to be used in a resource
+    std::optional<std::string> renderContainerZipURL(
+        const std::shared_ptr<CdsContainer>& cont) const;
     /// @brief Renders the image of an item as url to be used in a resource
     std::optional<std::string> renderItemImageURL(
         const std::shared_ptr<CdsItem>& item) const;

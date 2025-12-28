@@ -30,6 +30,7 @@ Gerbera - https://gerbera.io/
 
 namespace fs = std::filesystem;
 
+/// @brief Encapsulation of file on disk
 class GrbFile {
 private:
     fs::path path;
@@ -42,6 +43,7 @@ public:
     GrbFile(const GrbFile&) = delete;
     GrbFile& operator=(const GrbFile&) = delete;
 
+    /// @brief Open a file for reading.
     std::FILE* open(const char* mode, bool fail = true);
     /// @brief Reads the entire contents of a text file and returns it as a string.
     std::string readTextFile();
@@ -54,8 +56,14 @@ public:
     void writeBinaryFile(const std::byte* data, std::size_t size);
     /// @brief Ensure that a file has permissions 644 (-rw-r--r--)
     void setPermissions();
+    /// @brief Check that file is readable
     bool isReadable(bool warn = false);
+    /// @brief Check that file is writable
     bool isWritable();
+    /// @brief close file
+    bool close();
+    /// @brief Delete file from disk
+    bool remove();
     const fs::path& getPath() { return path; }
 };
 
