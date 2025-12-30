@@ -27,7 +27,7 @@ respective `PC Directory` entries.
 PC Directory
 ~~~~~~~~~~~~
 
-``PC Directory`` is simply a special non-removable container. Any media file added will have an entry inside the 
+``PC Directory`` is simply a special non-removable container. Any media file added will have an entry inside the
 PC Directory tree. PC Directory's hierarchy reflects the file system hierarchy, all objects inside the PC Directory
 including itself are NON-VIRTUAL objects.
 
@@ -57,7 +57,7 @@ When you add a file or directory to the database several things happen.
    items.
 
 Each UPnP server implements this so called virtual object hierarchy in a different way. Files are usually sorted by
-artist, album, some servers may just present a view similar to the file system and so on. In Gerbera we try to allow 
+artist, album, some servers may just present a view similar to the file system and so on. In Gerbera we try to allow
 changing this by a scriptable virtual object engine.
 
 Theory of Operation
@@ -88,7 +88,7 @@ options via :ref:`Boxlayout Configuration <boxlayout>`.
 js Layout
 ---------
 
-To implement more sophisticated layouts and populate additional metadata fields we integrated a javascript runtime engine. 
+To implement more sophisticated layouts and populate additional metadata fields we integrated a javascript runtime engine.
 For more details see :ref:`Scripting <scripting>`.
 
 At the moment there are three different layout functions for audio files and one for videos and images.
