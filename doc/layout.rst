@@ -32,10 +32,10 @@ PC Directory tree. PC Directory's hierarchy reflects the file system hierarchy, 
 including itself are NON-VIRTUAL objects.
 
 All other entries are virtual objects and may have a different title, description, etc., but they are still referencing
-to objects in the PC-Directory. That's why it is not possible to change the phyiscal location property of a virtual object 
+to objects in the PC-Directory. That's why it is not possible to change the physical location property of a virtual object
 - the only exceptions are URL items.
 
-If an entry is deleted from the PC Directory all its referenes in the virtual structure are deleted as well.
+If an entry is deleted from the PC Directory all its references in the virtual structure are deleted as well.
 
 If your virtual layout is the only thing needed, the PC Directory can be hidden completely from browsing.
 
@@ -103,7 +103,7 @@ The layout function can be set in configuration of :ref:`Import Function <import
 +-----------------------+--------------------------------------------------------------------------+------+
 | importAudioStructured | Create boxes for a group of initial letters in one box                   | a-s  |
 +-----------------------+--------------------------------------------------------------------------+------+
-| importAudioClassical  | Create boxes for a classical music colkection                            | a-c  |
+| importAudioClassical  | Create boxes for a classical music collection                            | a-c  |
 +-----------------------+--------------------------------------------------------------------------+------+
 | importVideo           | Create video layout similar to builtin layout                            | v-0  |
 +-----------------------+--------------------------------------------------------------------------+------+

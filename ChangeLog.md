@@ -40,6 +40,7 @@
 - use more fmt::join
 - use optional instead of unique_ptr
 - use Quirk::DCM10 flag
+- fix typos in documentation
 
 ### v3.0.0
 
