@@ -164,11 +164,11 @@ profile which is defined below.
       .. versionchanged:: HEAD allow negation with ``~``
       .. code:: xml
 
-         client-flags="TRANSCODE1"
-         client-flags="~TRANSCODE1"
+         client-flags="TRANSCODING1"
+         client-flags="~TRANSCODING1"
 
    If the flags match the ones defined in :ref:`Supported Devices <supported-devices>`, the profile is selected for that client.
-   Choose ``TRANSCODE1``, ``TRANSCODE2``, ``TRANSCODE3`` or an unused flag, e.g. "0x10000000", to avoid collisions with other features.
+   Choose ``TRANSCODING1``, ``TRANSCODING2``, ``TRANSCODING3`` or an unused flag, e.g. "0x10000000", to avoid collisions with other features.
 
    Multiple flags can be separated by ``|``. The profile is selected if at least one flag is present for the client.
 
@@ -278,11 +278,11 @@ Profile Attributes
       .. versionchanged:: HEAD allow negation with ``~``
       .. code:: xml
 
-         client-flags="TRANSCODE1"
-         client-flags="~TRANSCODE1"
+         client-flags="TRANSCODING1"
+         client-flags="~TRANSCODING1"
 
    If the flags match the ones defined in clients, the profile is selected for that client.
-   There are are ``TRANSCODE1``, ``TRANSCODE2``, ``TRANSCODE3`` or choose an unused flag,
+   There are are ``TRANSCODING1``, ``TRANSCODING2``, ``TRANSCODING3`` or choose an unused flag,
    e.g. ``0x100000000``, to avoid collisions with other features.
 
    Multiple flags can be separated by ``|``. The profile is selected if at least one flag is present for the client.

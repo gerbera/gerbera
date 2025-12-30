@@ -1,0 +1,31 @@
+--- libzippp-8992d6002b6ae941ad1a61d5bc7a512277907be3/CMakeLists.txt    2025-10-06 16:21:17.000000000 +0200
++++ libzippp-v7.1-1.10.1-8992d6/CMakeLists.txt  2025-12-30 15:26:26.963277094 +0100
+@@ -74,7 +74,7 @@
+ if (BUILD_SHARED_LIBS)
+   target_compile_definitions(libzippp PRIVATE LIBZIPPP_EXPORTS)
+ else()
+-  set_target_properties(libzippp PROPERTIES OUTPUT_NAME "libzippp_static")
++  set_target_properties(libzippp PROPERTIES OUTPUT_NAME "libzippp")
+ endif()
+
+ export(TARGETS libzippp NAMESPACE libzippp:: FILE ${PROJECT_BINARY_DIR}/libzippp-target.cmake)
+@@ -141,7 +141,7 @@
+     DESTINATION ${configInstallDestination}
+   )
+ 
+-  if(BUILD_SHARED_LIBS AND LIBZIPPP_GNUINSTALLDIRS AND LIBZIPPP_INSTALL_HEADERS)
++  if(LIBZIPPP_GNUINSTALLDIRS AND LIBZIPPP_INSTALL_HEADERS)
+     string(
+       REGEX REPLACE "^${CMAKE_INSTALL_PREFIX}" "\${prefix}"
+       pc_includedir "${CMAKE_INSTALL_FULL_INCLUDEDIR}"
+--- libzippp-8992d6002b6ae941ad1a61d5bc7a512277907be3/libzippp.pc.in    2025-10-06 16:21:17.000000000 +0200
++++ libzippp-v7.1-1.10.1-8992d6/libzippp.pc.in  2025-12-30 15:22:51.671750259 +0100
+@@ -8,5 +8,5 @@
+ URL: @PROJECT_HOMEPAGE_URL@
+ Version: @PROJECT_VERSION@
+
+-Libs: -L${libdir} -lzippp
++Libs: @PKG_CONFIG_RPATH@ -L${libdir} -lzippp
+ Cflags: -I${includedir} @pc_compile_definitions@
+ 
+ 

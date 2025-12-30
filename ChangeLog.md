@@ -6,11 +6,13 @@
 - Add community scripts
 - add missing array headers
 - add missing headers from headers
+- Align transcoding flag documentation and code
 - Avoid string_view conversion
 - Bump actions/cache from 4 to 5
 - Bump actions/checkout from 5 to 6
 - Bump actions/upload-artifact from 5 to 6
 - Bump js-yaml from 4.1.0 to 4.1.1 in /gerbera-web
+- Bump min-document from 2.19.0 to 2.19.2 in /gerbera-web
 - Clean up obsolete includes
 - don't use references for node()
 - enable i2i for HAVE_CURL
@@ -19,6 +21,7 @@
 - fix edit for container
 - fix error handling in string_converter
 - fix sortKey for extra long numbers
+- fix typos in documentation
 - github CI: add loongarch64
 - header removals and destructor fix.
 - improve Samsung TVs quirks
@@ -33,6 +36,7 @@
 - replaced lock_guard with scoped_lock
 - samsung bookmark save/restore
 - simplify using quirks
+- UI: Add ZIP download of container
 - Update Conan integration
 - Update ffmpegthumbnailer to 2.2.4
 - Update ffmpegthumbnailer to 2.3.0
@@ -40,7 +44,6 @@
 - use more fmt::join
 - use optional instead of unique_ptr
 - use Quirk::DCM10 flag
-- fix typos in documentation
 
 ### v3.0.0
 
