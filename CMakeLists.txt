@@ -606,15 +606,14 @@ target_link_libraries(libgerbera PUBLIC spdlog::spdlog)
 find_package(jsoncpp REQUIRED)
 target_link_libraries(libgerbera PUBLIC jsoncpp::jsoncpp)
 
-
 if(WITH_ZIP)
-    find_package(libzip REQUIRED)
-    target_link_libraries(libgerbera PUBLIC zip::zip)
-
     find_package(libzippp REQUIRED)
     target_link_libraries(libgerbera PUBLIC zippp::zippp)
     target_compile_definitions(libgerbera PUBLIC LIBZIPPP_VERSION="${ZIPPP_VERSION}")
     target_compile_definitions(libgerbera PUBLIC HAVE_ZIP)
+
+    find_package(libzip REQUIRED)
+    target_link_libraries(libgerbera PUBLIC zip::zip)
 endif()
 
 find_package(pugixml REQUIRED)

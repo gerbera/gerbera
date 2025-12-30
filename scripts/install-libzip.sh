@@ -44,11 +44,17 @@ downloadSource
 installDeps ${main_dir} libzip
 
 cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED} \
-         -DBUILD_STATIC_LIBS=${BUILD_STATIC} \
          -DBUILD_TOOLS=OFF \
          -DBUILD_REGRESS=OFF \
          -DBUILD_OSSFUZZ=OFF \
          -DBUILD_EXAMPLES=OFF \
+         -DENABLE_BZIP2=${BUILD_SHARED} \
+         -DENABLE_ZSTD=${BUILD_SHARED} \
+         -DENABLE_LZMA=${BUILD_SHARED} \
+         -DENABLE_COMMONCRYPTO=${BUILD_SHARED} \
+         -DENABLE_OPENSSL=${BUILD_SHARED} \
+         -DENABLE_GNUTLS=${BUILD_SHARED} \
+         -DENABLE_MBEDTLS=${BUILD_SHARED} \
          -DBUILD_DOC=OFF
 
 makeInstall

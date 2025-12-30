@@ -30,6 +30,7 @@
 #include "config/result/transcoding.h"
 #include "context.h"
 #include "metadata/metadata_handler.h"
+#include "upnp/headers.h"
 #include "upnp/client_manager.h"
 #include "upnp/xml_builder.h"
 #include "util/grb_net.h"
@@ -296,6 +297,21 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithEscapes)
     // assert
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "");
     EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
+}
+
+TEST_F(UpnpXmlTest, QuirksFlag)
+{
+    auto addr = std::make_shared<GrbNet>("192.168.99.100");
+    auto headers = std::make_shared<Headers>();
+    auto profile = ClientProfile();
+    profile.flags = ClientConfig::getFlag(Quirk::Transcoding1);
+    auto client = ClientObservation(addr, "", std::chrono::seconds(0), std::chrono::seconds(0), headers, &profile);
+    auto quirk = Quirks(&client);
+    EXPECT_TRUE(quirk.hasFlag(Quirk::Transcoding1));
+    EXPECT_FALSE(quirk.hasFlag(Quirk::Transcoding2));
+    profile.flags = 0;
+    EXPECT_FALSE(quirk.hasFlag(Quirk::Transcoding1));
+    EXPECT_FALSE(quirk.hasFlag(Quirk::Transcoding2));
 }
 
 TEST_F(UpnpXmlTest, RenderObjectItemWithStrictXmlQuirks)
