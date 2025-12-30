@@ -171,7 +171,7 @@ Activate debugging messages only for certain subsystems. The following subsystem
     :caption: Subsystem names are the strings in quotes
     :language: c++
 
-Multiple subsystems can be combined with a ``|``. Names are not case sensitive. This is for developers and testers mostly and has to be activted in cmake
+Multiple subsystems can be combined with a ``|``. Names are not case sensitive. This is for developers and testers mostly and has to be activated in cmake
 options at compile time (``-DWITH_DEBUG_OPTIONS=YES``).
 
 Check Config

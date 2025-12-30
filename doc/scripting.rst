@@ -532,7 +532,7 @@ within the import and/or the playlist script:
     :param object object:
         A virtual object that is either a copy of or a reference to 'orig'
     :param string containerId:
-        A string, containing the container id as optained from ``addContainerTree``.
+        A string, containing the container id as obtained from ``addContainerTree``.
     :param string rootPath:
         A string, containing the start point of the autoscan directory.
     :returns: object id for use as result of the import function.
@@ -542,7 +542,7 @@ within the import and/or the playlist script:
 
     Creates a hierarchy of containers
 
-    :param array arr: An array of container defintions. It has the object structure as described above.
+    :param array arr: An array of container definitions. It has the object structure as described above.
     :returns: container id for use in ``addCdsObject``
 
     .. code-block:: js
@@ -803,7 +803,7 @@ The entry point of each import function has the following synopsis
 
     :param object obj: Original object as created in PC Directory
     :param object cont: Container in PC Directory containing the original object
-    :param string rootPath: Root folder of the autoscan directoy
+    :param string rootPath: Root folder of the autoscan directory
     :param string containerType: UPnP  type configured to create containers
     :returns: nothing
 
@@ -1013,7 +1013,7 @@ Add following code to the playlists.js script inside the if-statement.
 
   else if (type == 'cue')
   {
-    // .cue file parsing tested only with one audio file and multiplse tracks,
+    // .cue file parsing tested only with one audio file and multiple tracks,
     // but this should work also with multiple audio files
     var thisGenre = null;
     var thisDate = null;
@@ -1199,7 +1199,7 @@ And add a function createSubItem to playlists.js:
 
 You see that we create for each track a external link object with a mime type "audio/x-cue+flac". We will need "our" mime type to use our transcoding script.
 
-In my case the JavaScipt-funtion btoa was not included in the runtime environment so we add our own btoa() to common.js.
+In my case the JavaScipt-function btoa was not included in the runtime environment so we add our own btoa() to common.js.
 
 .. code-block:: js
 
