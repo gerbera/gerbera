@@ -174,6 +174,20 @@ profile which is defined below.
 
    If the value starts with ``~`` (negation), the profile will be active for all clients that do not have the respective flag.
 
+   .. confval:: client-without-flag
+      :type: :confval:`Boolean`
+      :required: false
+      :default: ``false``
+   ..
+
+      .. versionadded:: HEAD
+      .. code:: xml
+
+         client-without-flag="true"
+
+   If clients do not have flags they will not get the transcoding resource even if
+   all flags are set. This option adds these clients to get transcoding also.
+
    .. confval:: using
       :type: :confval:`String`
       :required: false
@@ -288,6 +302,20 @@ Profile Attributes
    Multiple flags can be separated by ``|``. The profile is selected if at least one flag is present for the client.
 
    If the value starts with ``~`` (negation), the profile will be active for all clients that do not have the respective flag.
+
+   .. confval:: profile client-without-flag
+      :type: :confval:`Boolean`
+      :required: false
+      :default: ``false``
+   ..
+
+      .. versionadded:: HEAD
+      .. code:: xml
+
+         client-without-flag="true"
+
+   If clients do not have flags they will not get the transcoding resource even if
+   all flags are set. This option adds these clients to get transcoding also.
 
    .. confval:: profile type
       :type: :confval:`Enum` (``external``)

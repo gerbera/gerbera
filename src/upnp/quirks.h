@@ -227,7 +227,7 @@ public:
 
     /** @brief Check for active flag
      */
-    bool hasFlag(QuirkFlags flag) const;
+    bool hasFlag(QuirkFlags flag, bool matchesWithOut) const;
     bool hasFlag(Quirk flag) const;
 
     /** @brief Check for header entry

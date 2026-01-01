@@ -78,6 +78,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(
             definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_USING)->getXmlContent(child, config));
         filter->setSourceProfile(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SRCDLNA)->getXmlContent(child, config));
         filter->setClientFlags(definition->findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child, config));
+        filter->setMatchWithOut(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTWITHOUT)->getXmlContent(child, config));
         auto noTranscoding = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NOTRANSCODING)->getXmlContent(child, config);
         std::vector<std::string> noTranscodingVector;
         for (auto&& mime : splitString(noTranscoding, ','))
@@ -106,6 +107,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(
             definition->findConfigSetup<ConfigEnumSetup<TranscodingType>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE)->getXmlContent(child, config),
             definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME)->getXmlContent(child, config));
         prof->setClientFlags(definition->findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS)->getXmlContent(child, config));
+        prof->setMatchWithOut(definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTWITHOUT)->getXmlContent(child, config));
 
         // read resolution
         {
@@ -346,6 +348,16 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
                     return true;
                 },
             },
+            // Client without flags
+            {
+                { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTWITHOUT },
+                "Client without flags",
+                [&](const std::shared_ptr<TranscodingFilter>& entry) { return fmt::to_string(entry->matchesWithOut()); },
+                [&](const std::shared_ptr<TranscodingFilter>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    entry->setMatchWithOut(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                    return true;
+                },
+            },
             // Source DLNA Profile
             {
                 { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SRCDLNA },
@@ -408,6 +420,16 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
                 [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->getClientFlags()); },
                 [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
                     entry->setClientFlags(definition->findConfigSetup<ConfigUIntSetup>(cfg)->checkIntValue(optValue));
+                    return true;
+                },
+            },
+            // Client without flags
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTWITHOUT },
+                "Client without flags",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->matchesWithOut()); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    entry->setMatchWithOut(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
                     return true;
                 },
             },

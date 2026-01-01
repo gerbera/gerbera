@@ -943,7 +943,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
                 continue;
             }
             // check for client flags and filter if no match
-            if (quirks && filter->getClientFlags() != QUIRK_FLAG_NONE && !quirks->hasFlag(filter->getClientFlags())) {
+            if (quirks && filter->getClientFlags() != QUIRK_FLAG_NONE && !quirks->hasFlag(filter->getClientFlags(), filter->matchesWithOut())) {
                 continue;
             }
 
@@ -957,7 +957,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
                 continue;
 
             // check for client profile prop and filter if no match
-            if (quirks && tp->getClientFlags() != QUIRK_FLAG_NONE && !quirks->hasFlag(tp->getClientFlags())) {
+            if (quirks && tp->getClientFlags() != QUIRK_FLAG_NONE && !quirks->hasFlag(tp->getClientFlags(), tp->matchesWithOut())) {
                 continue;
             }
             if (ct == CONTENT_TYPE_OGG) {

@@ -36,6 +36,7 @@
 - replaced lock_guard with scoped_lock
 - samsung bookmark save/restore
 - simplify using quirks
+- transcoding: filtering of clients without flags
 - UI: Add ZIP download of container
 - Update Conan integration
 - Update ffmpegthumbnailer to 2.2.4
