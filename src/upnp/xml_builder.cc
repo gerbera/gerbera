@@ -938,10 +938,17 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
                     continue;
                 }
             }
+
             // check for client profile prop and filter if no match
             if (!filter->getSourceProfile().empty() && filter->getSourceProfile() != sourceProfile) {
                 continue;
             }
+
+            // check for no client flags and filter if no match
+            if (quirks && filter->getClientFlags() == QUIRK_FLAG_NONE && filter->matchesWithOut() && !quirks->hasFlag(~QUIRK_FLAG_NONE, true)) {
+                continue;
+            }
+
             // check for client flags and filter if no match
             if (quirks && filter->getClientFlags() != QUIRK_FLAG_NONE && !quirks->hasFlag(filter->getClientFlags(), filter->matchesWithOut())) {
                 continue;
@@ -956,10 +963,16 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
             if (!tp->isEnabled())
                 continue;
 
+            // check for no client flags and filter if no match
+            if (quirks && tp->getClientFlags() == QUIRK_FLAG_NONE && tp->matchesWithOut() && !quirks->hasFlag(~QUIRK_FLAG_NONE, true)) {
+                continue;
+            }
+
             // check for client profile prop and filter if no match
             if (quirks && tp->getClientFlags() != QUIRK_FLAG_NONE && !quirks->hasFlag(tp->getClientFlags(), tp->matchesWithOut())) {
                 continue;
             }
+
             if (ct == CONTENT_TYPE_OGG) {
                 if ((item->getFlag(OBJECT_FLAG_OGG_THEORA) && !tp->isTheora()) || (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && tp->isTheora())) {
                     continue;

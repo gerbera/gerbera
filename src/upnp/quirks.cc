@@ -4,7 +4,7 @@
 
     quirks.cc - this file is part of Gerbera.
 
-    Copyright (C) 2020-2025 Gerbera Contributors
+    Copyright (C) 2020-2026 Gerbera Contributors
 
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -64,7 +64,7 @@ Quirks::Quirks(const ClientObservation* client)
 
 bool Quirks::hasFlag(QuirkFlags flag, bool matchesWithOut) const
 {
-    return pClientProfile && ((pClientProfile->flags & flag) == flag || (pClientProfile->flags == QUIRK_FLAG_NONE && matchesWithOut));
+    return pClientProfile && ((pClientProfile->flags & flag) != QUIRK_FLAG_NONE || (pClientProfile->flags == QUIRK_FLAG_NONE && matchesWithOut));
 }
 
 bool Quirks::hasFlag(Quirk flag) const

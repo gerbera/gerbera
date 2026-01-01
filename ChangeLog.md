@@ -22,6 +22,7 @@
 - fix error handling in string_converter
 - fix sortKey for extra long numbers
 - fix typos in documentation
+- Gerbera welcomes 2026
 - github CI: add loongarch64
 - header removals and destructor fix.
 - improve Samsung TVs quirks
