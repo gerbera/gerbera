@@ -2269,6 +2269,11 @@
               "editable": true
             },
             {
+              "item": "/transcoding/mimetype-profile-mappings/transcode/attribute::client-without-flag",
+              "caption": "Client without flags",
+              "editable": true
+            },
+            {
               "item": "/transcoding/mimetype-profile-mappings/transcode/attribute::using",
               "caption": "Profile",
               "editable": false
@@ -2294,6 +2299,11 @@
             {
               "item": "/transcoding/profiles/profile/attribute::client-flags",
               "caption": "Client flags",
+              "editable": true
+            },
+            {
+              "item": "/transcoding/profiles/profile/attribute::client-without-flag",
+              "caption": "Client without flags",
               "editable": true
             },
             {

@@ -744,6 +744,9 @@ void Web::ConfigLoad::writeTranscoding(Json::Value& values)
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS }),
             cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS, ClientConfig::mapFlags(filter->getClientFlags()), cs);
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTWITHOUT, filter->matchesWithOut(), cs);
 
         if (filter->getTranscodingProfile())
             profiles[filter->getTranscodingProfile()->getName()] = filter->getTranscodingProfile();
@@ -763,6 +766,9 @@ void Web::ConfigLoad::writeTranscoding(Json::Value& values)
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS }),
             cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS, ClientConfig::mapFlags(entry->getClientFlags()));
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTWITHOUT }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTWITHOUT, entry->matchesWithOut(), cs);
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED }),
             cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED, entry->isEnabled());

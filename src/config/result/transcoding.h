@@ -80,8 +80,13 @@ class TranscodingProfile {
 public:
     TranscodingProfile(bool enabled, TranscodingType trType, std::string name);
 
+    /// @brief Client Flags required to match
     QuirkFlags getClientFlags() const { return clientFlags; }
     void setClientFlags(QuirkFlags clientFlags) { this->clientFlags = clientFlags; }
+
+    /// @brief Clienta without flags match
+    bool matchesWithOut() const { return matchWithOut; }
+    void setMatchWithOut(bool matchWithOut) { this->matchWithOut = matchWithOut; }
 
     /// @brief returns the transcoding type.
     TranscodingType getType() const { return trType; }
@@ -236,6 +241,7 @@ protected:
     std::vector<std::string> fourccList;
     AviFourccListmode fourccMode { AviFourccListmode::None };
     QuirkFlags clientFlags { 0 };
+    bool matchWithOut;
     std::string dlnaProf;
     std::vector<TranscodingMimeProperty> mimeProperties;
 };
@@ -260,6 +266,10 @@ public:
     QuirkFlags getClientFlags() const { return clientFlags; }
     void setClientFlags(QuirkFlags clientFlags) { this->clientFlags = clientFlags; }
 
+    /// @brief Clienta without flags match
+    bool matchesWithOut() const { return matchWithOut; }
+    void setMatchWithOut(bool matchWithOut) { this->matchWithOut = matchWithOut; }
+
     /// @brief source dlna profile
     std::string getSourceProfile() const { return sourceProf; }
     void setSourceProfile(const std::string& dlna) { this->sourceProf = dlna; }
@@ -273,6 +283,7 @@ protected:
     std::string transcoder;
     std::string sourceProf;
     QuirkFlags clientFlags { 0 };
+    bool matchWithOut;
     std::vector<std::string> noTranscodingMimeTypes;
     std::shared_ptr<TranscodingProfile> transcodingProfile;
 };

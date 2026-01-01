@@ -312,6 +312,18 @@ TEST_F(UpnpXmlTest, QuirksFlag)
     profile.flags = 0;
     EXPECT_FALSE(quirk.hasFlag(Quirk::Transcoding1));
     EXPECT_FALSE(quirk.hasFlag(Quirk::Transcoding2));
+    profile.flags = ClientConfig::makeFlags("Transcoding1");
+    EXPECT_TRUE(quirk.hasFlag(Quirk::Transcoding1));
+    EXPECT_FALSE(quirk.hasFlag(Quirk::Transcoding2));
+    EXPECT_TRUE(quirk.hasFlag(ClientConfig::makeFlags("Transcoding1"), false));
+    EXPECT_FALSE(quirk.hasFlag(ClientConfig::makeFlags("Transcoding2"), false));
+    EXPECT_TRUE(quirk.hasFlag(ClientConfig::makeFlags("Transcoding1"), true));
+    EXPECT_FALSE(quirk.hasFlag(ClientConfig::makeFlags("Transcoding2"), true));
+    profile.flags = 0;
+    EXPECT_FALSE(quirk.hasFlag(ClientConfig::makeFlags("Transcoding1"), false));
+    EXPECT_FALSE(quirk.hasFlag(ClientConfig::makeFlags("Transcoding2"), false));
+    EXPECT_TRUE(quirk.hasFlag(ClientConfig::makeFlags("Transcoding1"), true));
+    EXPECT_TRUE(quirk.hasFlag(ClientConfig::makeFlags("Transcoding2"), true));
 }
 
 TEST_F(UpnpXmlTest, RenderObjectItemWithStrictXmlQuirks)

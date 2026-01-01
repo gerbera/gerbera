@@ -62,9 +62,9 @@ Quirks::Quirks(const ClientObservation* client)
 {
 }
 
-bool Quirks::hasFlag(QuirkFlags flag) const
+bool Quirks::hasFlag(QuirkFlags flag, bool matchesWithOut) const
 {
-    return pClientProfile && (pClientProfile->flags & flag) == flag;
+    return pClientProfile && ((pClientProfile->flags & flag) == flag || (pClientProfile->flags == QUIRK_FLAG_NONE && matchesWithOut));
 }
 
 bool Quirks::hasFlag(Quirk flag) const
