@@ -103,7 +103,7 @@ by starting gerbera from the shell.
   2025-01-01 19:54:47    INFO: Gerbera UPnP Server version 3.0.0 - https://gerbera.io/
   2025-01-01 19:54:47    INFO: ===============================================================================
   2025-01-01 19:54:47    INFO: Gerbera is free software, covered by the GNU General Public License version 2
-  2025-01-01 19:54:47    INFO: Copyright 2016-2025 Gerbera Contributors.
+  2025-01-01 19:54:47    INFO: Copyright 2016-2026 Gerbera Contributors.
   2025-01-01 19:54:47    INFO: Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.
   2025-01-01 19:54:47    INFO: ===============================================================================
   2025-01-01 19:54:47    INFO: Loading configuration from: /etc/gerbera/config.xml
