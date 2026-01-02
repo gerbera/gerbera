@@ -58,8 +58,8 @@ module.exports = function (driver) {
   };
 
   this.emptyVisible = async () => {
-    await driver.executeScript('return $(\'#server-empty\').show();')
     await driver.executeScript('return $(\'#server-status\').hide();')
+    return await driver.executeScript('return $(\'#server-empty\').show();')
   };
 
   this.logout = async () => {
@@ -79,7 +79,8 @@ module.exports = function (driver) {
 
   this.submitLogin = async () => {
     await driver.findElement(By.id('login-submit')).click();
-    return await driver.wait(until.elementLocated(By.id('logout')), 5000);
+    await driver.wait(until.elementLocated(By.id('logout')), 5000);
+    return await driver.sleep(500);
   };
 
   this.setDisplayMode = async (mode) => {

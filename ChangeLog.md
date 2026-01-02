@@ -42,6 +42,7 @@
 - Update Conan integration
 - Update ffmpegthumbnailer to 2.2.4
 - Update ffmpegthumbnailer to 2.3.0
+- Update screenshots
 - use correct name for boxlayout enabled years
 - use more fmt::join
 - use optional instead of unique_ptr

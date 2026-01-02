@@ -61,7 +61,7 @@ $.widget('grb.trail', {
     itemBreadcrumb.appendTo(trailContainer);
 
     const buttonContainer = $('<div></div>');
-    buttonContainer.addClass('col-4 col-sm-5 my-auto');
+    buttonContainer.addClass('col-4 col-sm-6 my-auto');
     let buttons;
 
     buttons = $('<ol></ol>');
@@ -203,7 +203,7 @@ $.widget('grb.trail', {
     }
 
     buttons.appendTo(buttonContainer);
-    trailContainer.addClass('col-8 col-sm-7');
+    trailContainer.addClass('col-8 col-sm-6');
 
     parent.append(trailContainer);
     parent.append(buttonContainer);

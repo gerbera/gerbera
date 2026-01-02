@@ -37,7 +37,8 @@
         "child_count": 2,
         "autoscan_type": "persistent",
         "autoscan_mode": "none",
-        "title": "Video"
+        "title": "Video",
+        "zip": "http://localhost/media/7443/zip/1/Video.zip"
       }
     ]
   }
