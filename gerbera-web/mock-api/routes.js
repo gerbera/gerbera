@@ -65,7 +65,7 @@ module.exports = function (app) {
         break;
     }
   });
-  app.get('/assets/*.json', (req, res) => {
+  app.get('/assets/{:cfg}.json', (req, res) => {
         res.send(require(configLoadMock.getResponse('')));
   });
   app.get('/reset', (req, res) => {

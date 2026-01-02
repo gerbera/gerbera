@@ -310,6 +310,9 @@ Database View
     * Create Container or Item in Virtual Layout
 * Edit Item
     * Change Settings of Container
+* Download as Zip
+    * Download items of container in Zip (maybe large) file
+    * Requires Zip support to be built into server
 * Delete Container
     * Delete container and items of container
 * Delete with References
