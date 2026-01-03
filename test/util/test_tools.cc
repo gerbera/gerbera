@@ -27,6 +27,8 @@
 #include "util/tools.h"
 #include "util/url_utils.h"
 
+#include <fmt/chrono.h>
+#include <fmt/core.h>
 #include <gtest/gtest.h>
 
 TEST(ToolsTest, simpleDate)
@@ -45,6 +47,30 @@ TEST(ToolsTest, simpleDate)
     EXPECT_EQ(makeSimpleDate(dt), "2009-08-21T15:21:40Z");
     dt = "2009-08-22T00:01:41+0930";
     EXPECT_EQ(makeSimpleDate(dt), "2009-08-21T14:31:41Z");
+}
+
+TEST(ToolsTest, parseDate)
+{
+    {
+        auto dt = "20240321";
+        std::tm tmWork {};
+        EXPECT_TRUE(parseDate(dt, tmWork));
+        EXPECT_EQ(fmt::format("{:%Y-%m-%d}", tmWork), "2024-03-21");
+    }
+    {
+        auto dt = "2024-03-21";
+        std::tm tmWork {};
+        EXPECT_TRUE(parseDate(dt, tmWork));
+        EXPECT_EQ(fmt::format("{:%Y-%m-%d}", tmWork), "2024-03-21");
+    }
+#ifndef SOLARIS
+    {
+        auto dt = "2024";
+        std::tm tmWork {};
+        EXPECT_TRUE(parseDate(dt, tmWork));
+        EXPECT_EQ(fmt::format("{:%Y-%m-%d}", tmWork), "2024-01-01");
+    }
+#endif
 }
 
 TEST(ToolsTest, millisecondsToHMSF)
@@ -228,7 +254,8 @@ TEST(ToolsTest, replaceAllStringTest)
 {
     std::string str = "test ( with br";
     replaceAllString(str, "(", "\\\(");
-    EXPECT_EQ(str, "test \\" "( with br");
+    EXPECT_EQ(str, "test \\"
+                   "( with br");
 
     str = "test ] with br";
     replaceAllString(str, "]", "\\]");

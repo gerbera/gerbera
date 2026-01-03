@@ -128,6 +128,40 @@ std::string makeSimpleDate(std::string& s)
     return s;
 }
 
+bool parseDate(const char* value, std::tm& tmWork)
+{
+    if (strptime(value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
+        // convert creation_time to local time
+    } else if (strptime(value, "%Y-%m-%d", &tmWork)) {
+        ; // use the value as is
+        tmWork.tm_hour = 13;
+        tmWork.tm_min = 0;
+        tmWork.tm_sec = 0;
+        tmWork.tm_isdst = false;
+    } else if (strptime(value, "%Y%m%d", &tmWork)) {
+        ; // use the value as is
+        tmWork.tm_hour = 13;
+        tmWork.tm_min = 0;
+        tmWork.tm_sec = 0;
+        tmWork.tm_isdst = false;
+    } else if (strptime(value, "%Y", &tmWork)) {
+        // convert the value to "XXXX-01-01"
+        tmWork.tm_mon = 0; // Month (0-11)
+        tmWork.tm_mday = 1; // Day of the month (1-31)
+        tmWork.tm_hour = 13;
+        tmWork.tm_min = 0;
+        tmWork.tm_sec = 0;
+        tmWork.tm_isdst = false;
+    } else
+        return false;
+    std::time_t utcTime = timegm(&tmWork);
+    if (utcTime == -1) {
+        return false;
+    }
+    localtime_r(&utcTime, &tmWork);
+    return true;
+}
+
 bool parseSimpleDate(const std::string& s, std::chrono::seconds& date)
 {
     constexpr auto date_time_format = "%Y-%m-%dT%H:%M:%S";

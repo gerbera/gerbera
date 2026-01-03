@@ -108,6 +108,7 @@ private:
         std::pair(MetadataFields::M_ALBUMARTIST, "album_artist"),
         std::pair(MetadataFields::M_COMPOSER, "composer"),
         std::pair(MetadataFields::M_DATE, "date"),
+        std::pair(MetadataFields::M_UPNP_DATE, "date"),
         std::pair(MetadataFields::M_CREATION_DATE, "creation_time"),
     };
     /// @brief activate separation of artwork found by handler

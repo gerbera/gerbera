@@ -52,6 +52,7 @@
 #include <asffile.h>
 #include <attachedpictureframe.h>
 #include <flacfile.h>
+#include <fmt/chrono.h>
 #include <id3v2tag.h>
 #include <mp4file.h>
 #include <mpegfile.h>
@@ -148,7 +149,15 @@ void TagLibHandler::addField(
         unsigned int i = tag->year();
         if (i == 0)
             return;
-        value.push_back(fmt::format("{}-01-01", i));
+        if (i < 10000) {
+            value.push_back(fmt::format("{}-01-01", i));
+        } else {
+            auto val = fmt::format("{}", i);
+            std::tm tmWork {};
+            if (parseDate(val.c_str(), tmWork)) {
+                value.push_back(fmt::format("{:%Y-%m-%d}", tmWork));
+            }
+        }
         break;
     }
     case MetadataFields::M_DESCRIPTION:
