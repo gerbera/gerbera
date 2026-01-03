@@ -395,27 +395,14 @@ bool FfmpegHandler::getFfmpegMetadataField(
             return p.second == key && item->getMetaData(p.first).empty();
         });
     if (pIt != propertyMap.end()) {
-        log_debug("Identified default metadata '{}': {}", pIt->second, value);
+        log_debug("Identified default metadata '{}' '{}': {}", pIt->first, pIt->second, value);
         const auto field = pIt->first;
         if (field == MetadataFields::M_TITLE && streamType != item->getMediaType())
             return result;
         if (emptyProperties[field]) {
-            if (field == MetadataFields::M_DATE || field == MetadataFields::M_CREATION_DATE) {
+            if (field == MetadataFields::M_DATE || field == MetadataFields::M_UPNP_DATE || field == MetadataFields::M_CREATION_DATE) {
                 std::tm tmWork {};
-                if (strptime(avEntry->value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
-                    // convert creation_time to local time
-                    std::time_t utcTime = timegm(&tmWork);
-                    if (utcTime == -1) {
-                        return result;
-                    }
-                    tmWork = *std::localtime(&utcTime);
-                } else if (strptime(avEntry->value, "%Y-%m-%d", &tmWork)) {
-                    ; // use the value as is
-                } else if (strptime(avEntry->value, "%Y", &tmWork)) {
-                    // convert the value to "XXXX-01-01"
-                    tmWork.tm_mon = 0; // Month (0-11)
-                    tmWork.tm_mday = 1; // Day of the month (1-31)
-                } else
+                if (!parseDate(avEntry->value, tmWork))
                     return result;
                 auto mDate = fmt::format("{:%Y-%m-%d}", tmWork);
                 item->addMetaData(field, mDate);
