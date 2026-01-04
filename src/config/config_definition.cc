@@ -1779,7 +1779,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             "attribute::client-flags", "config-transcode.html#confval-client-flags",
             0U, ClientConfig::makeFlags, ClientConfig::mapFlags),
         std::make_shared<ConfigBoolSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTWITHOUT,
-            "/transcoding/profiles/attribute::client-without-flag", "config-transcode.html#confval-profile-client-without-flag",
+            "attribute::client-without-flag", "config-transcode.html#confval-profile-client-without-flag",
             NO),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_SRCDLNA,
             "attribute::source-profile", "config-transcode.html#confval-source-profile",
