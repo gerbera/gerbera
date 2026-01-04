@@ -25,6 +25,7 @@
 - Gerbera welcomes 2026
 - github CI: add loongarch64
 - header removals and destructor fix.
+- Improve date parsing #3740
 - improve Samsung TVs quirks
 - More CI checks
 - more pugi forward declarations

@@ -135,6 +135,7 @@ std::string FileRequestHandler::getTranscodingInfo(
     const std::string& path,
     const std::string& trProfile)
 {
+    getFileInfo(path, info, false, ContentHandler::TRANSCODE, ResourcePurpose::Transcode);
     auto transcodingProfile = config->getTranscodingProfileListOption(ConfigVal::TRANSCODING_PROFILE_LIST)->getByName(trProfile);
     if (!transcodingProfile)
         throw_std_runtime_error("Requested transcoding of file {} but no profile matching the name {} found", path, trProfile);
@@ -176,6 +177,34 @@ std::string FileRequestHandler::getZipInfo(
     return mimeType;
 }
 
+void FileRequestHandler::getFileInfo(
+    const std::string& path,
+    UpnpFileInfo* info,
+    bool isResourceFile,
+    ContentHandler handlerType,
+    ResourcePurpose purpose)
+{
+    if (!path.empty()) {
+        // Check the path (if its real) is accessible
+        struct stat statbuf { };
+        int ret = stat(path.c_str(), &statbuf);
+        if (ret != 0) {
+            if (isResourceFile) {
+                throw ResourceNotFoundException(fmt::format("{} file {} is not available.", EnumMapper::getPurposeDisplay(purpose), path));
+            }
+            throw_fmt_system_error("Failed to open {}", path);
+        }
+
+        // If we get to here we can read the thing
+        UpnpFileInfo_set_IsReadable(info, true);
+        UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
+        bool isDir = (handlerType == ContentHandler::DEFAULT && S_ISDIR(statbuf.st_mode));
+        UpnpFileInfo_set_IsDirectory(info, isDir);
+        if (!isDir)
+            UpnpFileInfo_set_FileLength(info, statbuf.st_size);
+    }
+}
+
 std::string FileRequestHandler::getResourceInfo(
     std::shared_ptr<CdsObject>& obj,
     UpnpFileInfo* info,
@@ -199,26 +228,7 @@ std::string FileRequestHandler::getResourceInfo(
         path = resPath;
     }
 
-    // Check the path (if its real) is accessible
-    if (!path.empty()) {
-        struct stat statbuf { };
-        int ret = stat(path.c_str(), &statbuf);
-        if (ret != 0) {
-            if (isResourceFile) {
-                throw ResourceNotFoundException(fmt::format("{} file {} is not available.", EnumMapper::getPurposeDisplay(resource->getPurpose()), path.c_str()));
-            }
-            throw_fmt_system_error("Failed to open {}", path);
-        }
-
-        // If we get to here we can read the thing
-        UpnpFileInfo_set_IsReadable(info, true);
-        UpnpFileInfo_set_LastModified(info, statbuf.st_mtime);
-        bool isDir = (resource->getHandlerType() == ContentHandler::DEFAULT && S_ISDIR(statbuf.st_mode));
-        UpnpFileInfo_set_IsDirectory(info, isDir);
-        if (!isDir)
-            UpnpFileInfo_set_FileLength(info, statbuf.st_size);
-    }
-
+    getFileInfo(path, info, isResourceFile, resource->getHandlerType(), resource->getPurpose());
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     std::string mimeType = item ? item->getMimeType() : "";
 

@@ -45,6 +45,7 @@ class CdsResource;
 class Headers;
 class MetadataHandler;
 class MetadataService;
+enum class ResourcePurpose;
 
 class FileRequestHandler : public RequestHandler {
 
@@ -75,6 +76,13 @@ private:
         std::shared_ptr<CdsObject>& obj,
         std::shared_ptr<CdsResource>& resource) const;
 
+    /// @brief get header information from file
+    void getFileInfo(
+        const std::string& path,
+        UpnpFileInfo* info,
+        bool isResourceFile,
+        ContentHandler handlerType,
+        ResourcePurpose purpose);
     /// @brief get header information for transcoding
     std::string getTranscodingInfo(
         const std::shared_ptr<CdsObject>& obj,
