@@ -1,0 +1,15 @@
+--- spdlog-1.17.0-kx/include/spdlog/details/os-inl.h	2026-01-04 17:06:01.000000000 +0100
++++ spdlog-1.17.0/include/spdlog/details/os-inl.h	2026-01-04 21:18:43.459764506 +0100
+@@ -263,7 +263,12 @@
+ #else
+ // On unix simply use tm_gmtoff
+ SPDLOG_INLINE int utc_minutes_offset(const std::tm &tm) {
++#if defined(__USE_BSD) || (defined(__APPLE__) && defined(__MACH__))
+     return static_cast<int>(tm.tm_gmtoff / 60);
++#else
++    // Fallback implementation, e.g. return 0 or custom offset logic
++    return 0;
++#endif
+ }
+ #endif  // _WIN32
+ #endif  // SPDLOG_NO_TZ_OFFSET

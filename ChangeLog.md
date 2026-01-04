@@ -26,7 +26,7 @@
 - Gerbera welcomes 2026
 - github CI: add loongarch64
 - header removals and destructor fix.
-- Improve date parsing #3740
+- Improve date parsing
 - improve Samsung TVs quirks
 - More CI checks
 - more pugi forward declarations
@@ -45,6 +45,7 @@
 - Update ffmpegthumbnailer to 2.2.4
 - Update ffmpegthumbnailer to 2.3.0
 - Update screenshots
+- Update spdlog to 1.17.0
 - use correct name for boxlayout enabled years
 - use more fmt::join
 - use optional instead of unique_ptr
