@@ -18,6 +18,7 @@
 - enable i2i for HAVE_CURL
 - Extract default database configuration strings
 - fix compilation under OmniOS
+- fix definition of client-without-flag
 - fix edit for container
 - fix error handling in string_converter
 - fix sortKey for extra long numbers
