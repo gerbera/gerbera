@@ -105,6 +105,7 @@ enum class ResourceAttribute : int {
     FORMAT,
     ORIENTATION,
     PIXELFORMAT,
+    LYRICS,
     MAX
 };
 
@@ -160,6 +161,7 @@ private:
         { ResourceAttribute::TYPE, "type" },
         { ResourceAttribute::ORIENTATION, "orientation" },
         { ResourceAttribute::PIXELFORMAT, "pixelFormat" },
+        { ResourceAttribute::LYRICS, "lyrics" },
         { ResourceAttribute::MAX, "unknown" },
     };
     inline static const std::map<ResourceAttribute, std::string> attrToDisplay {
@@ -182,6 +184,7 @@ private:
         { ResourceAttribute::TYPE, "type" },
         { ResourceAttribute::ORIENTATION, "orientation" },
         { ResourceAttribute::PIXELFORMAT, "pixelFormat" },
+        { ResourceAttribute::LYRICS, "lyrics" },
         { ResourceAttribute::MAX, "unknown" },
     };
     inline static const std::map<ResourceAttribute, ResourceDataType> attrToType {
@@ -204,6 +207,7 @@ private:
         { ResourceAttribute::TYPE, ResourceDataType::String },
         { ResourceAttribute::ORIENTATION, ResourceDataType::Number },
         { ResourceAttribute::PIXELFORMAT, ResourceDataType::String },
+        { ResourceAttribute::LYRICS, ResourceDataType::String },
         { ResourceAttribute::MAX, ResourceDataType::String },
     };
 

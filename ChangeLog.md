@@ -29,6 +29,7 @@
 - Improve date parsing
 - improve Samsung TVs quirks
 - More CI checks
+- More FFMPeg Resource Information
 - more pugi forward declarations
 - Negation of client-flags
 - New import scripts for images and videos

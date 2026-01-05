@@ -41,6 +41,7 @@
 #define __FFMPEG_HANDLER_H__
 #ifdef HAVE_FFMPEG
 
+#include "cds/cds_enums.h"
 #include "metadata_enums.h"
 #include "metadata_handler.h"
 
@@ -50,9 +51,11 @@
 class CdsItem;
 class FfmpegObject;
 class IOHandler;
+class StringConverter;
+
 struct AVFormatContext;
 struct AVDictionaryEntry;
-class StringConverter;
+struct AVStream;
 
 /// @brief This class is responsible for reading id3 tags metadata
 class FfmpegHandler : public MediaMetadataHandler {
@@ -96,6 +99,11 @@ private:
         const FfmpegObject& ffmpegObject) const;
     /// @brief try to extract mime type and content type from stream data
     std::string getContentTypeFromByteVector(const std::vector<std::uint8_t>& data) const;
+    /// @brief load resource attributes from stream
+    static void setResourceAttributes(
+        const std::shared_ptr<CdsResource>& res,
+        AVStream* st,
+        long long stream_number);
 
     static constexpr std::array propertyMap {
         std::pair(MetadataFields::M_TITLE, "title"),
@@ -110,6 +118,10 @@ private:
         std::pair(MetadataFields::M_DATE, "date"),
         std::pair(MetadataFields::M_UPNP_DATE, "date"),
         std::pair(MetadataFields::M_CREATION_DATE, "creation_time"),
+    };
+    static constexpr std::array resourceMap {
+        std::pair(ResourceAttribute::LANGUAGE, "language"),
+        std::pair(ResourceAttribute::LYRICS, "lyrics"),
     };
     /// @brief activate separation of artwork found by handler
     bool artWorkEnabled;
