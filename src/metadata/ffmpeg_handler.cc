@@ -418,7 +418,7 @@ bool FfmpegHandler::getFfmpegMetadataField(
         }
         result = true;
     } else {
-        log_debug("Unhandled metadata {} = '{}'", key, value);
+        log_debug("Skipped metadata {} = '{}'", key, value);
     }
     return result;
 }
@@ -443,12 +443,14 @@ static std::vector<std::uint8_t> extractArtImage(
     const FfmpegObject& ffmpegObject,
     std::size_t imageStreamIndex)
 {
-    log_debug("start");
+    log_debug("start {}", imageStreamIndex);
     if (!ffmpegObject) {
         return {};
     }
+    if (imageStreamIndex >= ffmpegObject.pFormatCtx->nb_streams) {
+        return {};
+    }
 
-    av_seek_frame(ffmpegObject.pFormatCtx, imageStreamIndex, 0, 0);
     AVStream* audioStream = nullptr;
     // Find Audio Stream with attaced picture
     for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
@@ -595,6 +597,22 @@ static void setBitRate(const std::shared_ptr<CdsResource>& res, int64_t value)
     }
 }
 
+void FfmpegHandler::setResourceAttributes(
+    const std::shared_ptr<CdsResource>& res,
+    AVStream* st,
+    long long stream_number)
+{
+    for (auto&& [attr, tag] : resourceMap) {
+        AVDictionaryEntry* md = (st->metadata) ? av_dict_get(st->metadata, tag, nullptr, 0) : nullptr;
+        if (md && md->value) {
+            log_debug("Resource {}: {}", tag, md->value);
+            res->addAttribute(attr, md->value);
+        } else if (stream_number > -1) {
+            res->addAttribute(attr, fmt::to_string(stream_number));
+        }
+    }
+}
+
 bool FfmpegHandler::addFfmpegResourceFields(
     const std::shared_ptr<CdsItem>& item,
     const FfmpegObject& ffmpegObject)
@@ -653,6 +671,7 @@ bool FfmpegHandler::addFfmpegResourceFields(
                 setDuration(resource2, st->duration * av_q2d(st->time_base));
             // bitrate of stream
             setBitRate(resource2, as_codecpar(st)->bit_rate);
+            setResourceAttributes(resource2, st, -1);
 
             // video codec
             auto codecId = as_codecpar(st)->codec_id;
@@ -715,13 +734,7 @@ bool FfmpegHandler::addFfmpegResourceFields(
                 }
             }
 
-            AVDictionaryEntry* lang = (st->metadata) ? av_dict_get(st->metadata, "language", nullptr, 0) : nullptr;
-            if (lang && lang->value) {
-                log_debug("Subtitle Language: {}", lang->value);
-                stResource->addAttribute(ResourceAttribute::LANGUAGE, lang->value);
-            } else {
-                stResource->addAttribute(ResourceAttribute::LANGUAGE, fmt::to_string(stream_number));
-            }
+            setResourceAttributes(stResource, st, stream_number);
 
             if (as_codecpar(st)->extradata && as_codecpar(st)->extradata_size > 0) {
                 log_debug("Subtitle Size: {}", as_codecpar(st)->extradata_size);
@@ -743,6 +756,7 @@ bool FfmpegHandler::addFfmpegResourceFields(
                 resource->addOption(STREAM_NUMBER_OPTION, fmt::to_string(stream_number));
             }
 
+            setResourceAttributes(resource, st, -1);
             // audio codec
             auto codecId = as_codecpar(st)->codec_id;
             resource->addAttribute(ResourceAttribute::AUDIOCODEC, avcodec_get_name(codecId));
@@ -844,8 +858,9 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(
 
         if (as_codecpar(st)->width > 0 && as_codecpar(st)->height > 0) {
             auto res = fmt::format("{}x{}", as_codecpar(st)->width, as_codecpar(st)->height);
-            if (res != resolution)
+            if (res != resolution) {
                 log_warning("resource {} pointing to wrong index {}, resolution mismatch {} - {}", streamIndex, res, resolution);
+            }
             auto image = extractArtImage(ffmpegObject, streamIndex);
             if (!image.empty()) {
                 return std::make_unique<MemIOHandler>(image.data(), image.size());
