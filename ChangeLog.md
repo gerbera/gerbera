@@ -42,6 +42,7 @@
 - simplify using quirks
 - transcoding: filtering of clients without flags
 - UI: Add ZIP download of container
+- Update Alpine to v3.23
 - Update Conan integration
 - Update ffmpegthumbnailer to 2.2.4
 - Update ffmpegthumbnailer to 2.3.0
