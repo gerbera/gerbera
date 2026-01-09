@@ -20,7 +20,8 @@ Removed unused explicit flag for PanasonicTV
 
 - Quirks flags refactored to enum
 - Update maximum versions of ffmpegthumbnailer (2.3.0), cmake (4.2.0), spdlog (1.17.0)
-- Update containers to use Alpine v3.23
+- Update images to use Alpine v3.23
+- Add debug docker image
 - Support building for OmniOS
 - Added CI checks for s390x and FreeBSD
 
