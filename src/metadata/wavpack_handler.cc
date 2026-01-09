@@ -40,6 +40,9 @@ static const std::map<int, std::string> fileFormats {
     { WP_FORMAT_CAF, "CAF" },
     { WP_FORMAT_DFF, "DSDIFF" },
     { WP_FORMAT_DSF, "DSD" },
+#ifdef WP_FORMAT_AIF
+    { WP_FORMAT_AIF, "AIFF" },
+#endif
 };
 
 static const auto propertyMap = std::map<std::string_view, MetadataFields> {
@@ -188,7 +191,10 @@ bool WavPackHandler::getAttributes(
         - WP_FORMAT_DSF: Sony DSD format
     */
     auto fileFormat = WavpackGetFileFormat(context);
-    resource->addAttribute(ResourceAttribute::FORMAT, fileFormats.at(fileFormat));
+    if (fileFormats.find(fileFormat) != fileFormats.end())
+        resource->addAttribute(ResourceAttribute::FORMAT, fileFormats.at(fileFormat));
+    else
+        resource->addAttribute(ResourceAttribute::FORMAT, fmt::format("WV_FORMAT_{}", fileFormat));
     auto avgBitrate = WavpackGetAverageBitrate(context, 0);
     resource->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(avgBitrate));
     return true;
