@@ -47,6 +47,19 @@ jobs:
             type=sha
             type=edge
 
+      - name: Docker meta (debug)
+        id: docker_meta_debug
+        uses: docker/metadata-action@v5
+        with:
+          images: gerbera/gerbera
+          flavor: |
+            suffix=-debug
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+            type=edge
+
       - name: Set up QEMU
         if: "${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}"
         uses: docker/setup-qemu-action@v3
@@ -70,6 +83,22 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+
+      - name: Build and export
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          platforms: "linux/amd64${{ ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) && ',linux/arm/v7,linux/arm64' || '' }}"
+          load: ${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}
+          tags: ${{ steps.docker_meta.outputs.tags }}
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      - name: Test
+        run: |
+          docker run --rm gerbera/gerbera:edge gerbera --compile-info
 
       - name: Build and push
         uses: docker/build-push-action@v6
@@ -96,6 +125,19 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
           target: with_transcoding
+
+      - name: Build and push (debug)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.debug
+          platforms: "linux/amd64${{ ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) && ',linux/arm/v7,linux/arm64' || '' }}"
+          push: ${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}
+          tags: ${{ steps.docker_meta_debug.outputs.tags }}
+          labels: ${{ steps.docker_meta_debug.outputs.labels }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+          target: debug
 
       - # Temp fix
         # https://github.com/docker/build-push-action/issues/252

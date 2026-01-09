@@ -65,7 +65,7 @@ WORKDIR /wavpack_build
 COPY scripts/install-wavpack.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
 COPY scripts/alpine/*.* ./alpine/
 COPY scripts/alpine/deps/*.sh ./alpine/deps/
-RUN ./install-wavpack.sh
+RUN ./install-wavpack.sh shared apps
 
 # Build ebml
 WORKDIR /ebml_build
@@ -249,4 +249,4 @@ ENV IMAGE_PORT=${IMAGE_PORT:-49494}
 ENTRYPOINT ["/sbin/tini", "--", "docker-entrypoint.sh"]
 CMD ["/bin/sh", "-c", "gerbera --port ${IMAGE_PORT} --config /var/run/gerbera/config.xml"]
 
-FROM gerbera AS default
+FROM gerbera AS debug

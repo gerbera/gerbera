@@ -29,8 +29,12 @@ Connecting Gerbera to your network via the "macvlan" driver should work, but rem
 able to access the container from the docker host with this method by default.
 
 # Transcoding Tools
-Transcoding tools are made available in a separate image with the `-transcoding` suffix.
-e.g. `gerbera/gerbera:3.0.0-transcoding`. Includes tools such as ffmpeg and vlc.
+Transcoding tools are made available in a separate image with the `-transcoding` suffix,
+e.g. `gerbera/gerbera:3.0.0-transcoding`. It includes tools such as ffmpeg and vlc.
+
+# Debug build
+A full debug build is available as separate image whit the `-debug` suffix,
+e.g. `gerbera/gerbera:3.0.0-debug`. It is building most libraries and tools based on the latest supported versions.
 
 # Examples
 

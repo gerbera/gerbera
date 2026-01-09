@@ -30,11 +30,17 @@ VERSION="${WAVPACK-5.4.0}"
 setFiles wavpack tar.xz
 source_files+=("https://github.com/dbry/WavPack/releases/download/${VERSION}/wavpack-${VERSION}.tar.xz")
 
+BUILD_APPS="disable"
 BUILD_SHARED=YES
 
 if [ $# -gt 0 ]; then
     if [ "$1" = "static" ]; then
         BUILD_SHARED=NO
+    fi
+fi
+if [ $# -gt 1 ]; then
+    if [ "$2" = "apps" ]; then
+        BUILD_APPS="enable"
     fi
 fi
 
@@ -48,10 +54,10 @@ fi
 
 ../configure \
     --disable-asm \
-    --enable-man \
+    --${BUILD_APPS}-man \
     --enable-rpath \
     --disable-tests \
-    --disable-apps \
+    --${BUILD_APPS}-apps \
     --enable-dsd \
     --enable-legacy
 
