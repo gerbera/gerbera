@@ -169,6 +169,7 @@ RUN apk add --no-cache \
     sqlite \
     sqlite-libs \
     jsoncpp \
+    libpq \
     icu \
     su-exec \
     tini \
