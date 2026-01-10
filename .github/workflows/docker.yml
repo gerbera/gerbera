@@ -71,6 +71,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-buildx-
 
+        # https://docs.docker.com/build/ci/github-actions/test-before-push/
+      - name: Build and export
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          load: true
+          tags: ${{ steps.docker_meta.outputs.tags }}-test
+          labels: ${{ steps.docker_meta.outputs.labels }}
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
+
+      - name: Test
+        run: |
+          docker run --user gerbera:gerbera --rm ${{ steps.docker_meta.outputs.tags }}-test gerbera --compile-info
+
       - name: Build and push
         uses: docker/build-push-action@v6
         with:
@@ -159,6 +175,23 @@ jobs:
           key: ${{ runner.os }}-buildx-${{ github.sha }}
           restore-keys: |
             ${{ runner.os }}-buildx-
+
+      - name: Build and export (debug)
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.debug
+          platforms: "linux/amd64"
+          load: true
+          tags: ${{ steps.docker_meta_debug.outputs.tags }}-test
+          labels: ${{ steps.docker_meta_debug.outputs.labels }}
+          cache-from: type=local,src=/tmp/.buildx-dbg
+          cache-to: type=local,dest=/tmp/.buildx-cache-dbg,mode=max
+          target: debug
+
+      - name: Test (debug)
+        run: |
+          docker run --user gerbera:gerbera --rm ${{ steps.docker_meta_debug.outputs.tags }}-test gerbera --compile-info
 
       - name: Build and push (debug)
         uses: docker/build-push-action@v6

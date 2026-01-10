@@ -14,6 +14,7 @@
 - Bump js-yaml from 4.1.0 to 4.1.1 in /gerbera-web
 - Bump min-document from 2.19.0 to 2.19.2 in /gerbera-web
 - CI: Add debug docker image
+- CI: Add test to docker
 - Clean up obsolete includes
 - don't use references for node()
 - enable i2i for HAVE_CURL
