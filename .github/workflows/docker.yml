@@ -73,6 +73,7 @@ jobs:
 
         # https://docs.docker.com/build/ci/github-actions/test-before-push/
       - name: Build and export
+        if: ${{github.event_name == 'pull_request'}}
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -84,6 +85,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
       - name: Test
+        if: ${{github.event_name == 'pull_request'}}
         run: |
           docker run --user gerbera:gerbera --rm ${{ steps.docker_meta.outputs.tags }}-test gerbera --compile-info
 
@@ -177,6 +179,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build and export (debug)
+        if: ${{github.event_name == 'pull_request'}}
         uses: docker/build-push-action@v6
         with:
           context: .
@@ -190,6 +193,7 @@ jobs:
           target: debug
 
       - name: Test (debug)
+        if: ${{github.event_name == 'pull_request'}}
         run: |
           docker run --user gerbera:gerbera --rm ${{ steps.docker_meta_debug.outputs.tags }}-test gerbera --compile-info
 
