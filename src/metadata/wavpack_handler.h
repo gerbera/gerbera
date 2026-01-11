@@ -31,7 +31,9 @@
 
 #include "metadata_handler.h"
 
+extern "C" {
 #include <wavpack/wavpack.h>
+}
 
 // forward declarations
 class CdsItem;
@@ -44,7 +46,8 @@ public:
     WavPackHandler(const WavPackHandler&) = delete;
     WavPackHandler& operator=(const WavPackHandler&) = delete;
 
-    bool isSupported(const std::string& contentType,
+    bool isSupported(
+        const std::string& contentType,
         bool isOggTheora,
         const std::string& mimeType,
         ObjectType mediaType) override;
@@ -55,16 +58,17 @@ public:
 
 private:
     /// @brief read media attributes from stream
-    static bool getAttributes(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
+    static bool getAttributes(
+        WavpackContext* wpContext,
+        const std::shared_ptr<CdsItem>& item);
     /// @brief get read meta data tags from file
-    bool getTags(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
+    bool getTags(
+        WavpackContext* wpContext,
+        const std::shared_ptr<CdsItem>& item);
     /// @brief get attachments like artwork
-    bool getAttachments(WavpackContext* context, const std::shared_ptr<CdsItem>& item);
-    /// @brief try to identify mime type from binary object
-    std::string getMimeTypeFromByteVector(const char* data, int size) const;
-
-    /// @brief reference to WavPack context
-    WavpackContext* context = nullptr;
+    bool getAttachments(
+        WavpackContext* wpContext,
+        const std::shared_ptr<CdsItem>& item);
 };
 
 #endif // HAVE_WAVPACK
