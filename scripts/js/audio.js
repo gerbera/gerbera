@@ -710,10 +710,14 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
     };
   } else {
     allAlbumsKey = BK_audioAllAlbums;
-    container = addContainerTree([chain.audio, chain.allAudio]);
-    result.push(addCdsObject(obj, container, rootPath));
-    container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
-    result.push(addCdsObject(obj, container, rootPath));
+    if (boxSetup[BK_audioAll].enabled) {
+      container = addContainerTree([chain.audio, chain.allAudio]);
+      result.push(addCdsObject(obj, container, rootPath));
+    }
+    if (boxSetup[BK_audioAllArtists].enabled) {
+      container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allSongs]);
+      result.push(addCdsObject(obj, container, rootPath));
+    }
   }
 
   var temp = '';
@@ -732,8 +736,10 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
     if (boxSetup[BK_audioAllTracks].enabled) {
       container = addContainerTree([chain.audio, chain.allFull]);
       result.push(addCdsObject(obj, container, rootPath));
-      container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFullArtist]);
-      result.push(addCdsObject(obj, container, rootPath));
+      if (boxSetup[BK_audioAllArtists].enabled) {
+        container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.allFullArtist]);
+        result.push(addCdsObject(obj, container, rootPath));
+      }
     }
   }
 
@@ -742,14 +748,17 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
   artistSearch = artistSearch || chain.artist.searchable;
 
   obj.title = audio.track + audio.title;
-  container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.album]);
-  result.push(addCdsObject(obj, container, rootPath));
+  if (boxSetup[BK_audioAllArtists].enabled) {
+    container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.album]);
+    result.push(addCdsObject(obj, container, rootPath));
+  }
 
   if (boxSetup[BK_audioAllAlbums].enabled) {
-    chain.album.searchable = boxSetup[allAlbumsKey].searchable && !albumSearch;
+    // only searchable if not active for initials section
+    chain.album.searchable = !boxSetup[BK_audioInitialAbc].searchable && boxSetup[allAlbumsKey].searchable && !albumSearch;
     albumSearch = albumSearch || chain.album.searchable;
 
-    if (!isAudioBook) {
+    if (!isAudioBook && boxSetup[BK_audioInitialAllArtistTracks].enabled) {
       obj.title = audio.album + " - " + audio.track + audio.title;
       container = addContainerTree([chain.audio, chain.allAlbums, chain.artist, chain.all000]);
       result.push(addCdsObject(obj, container, rootPath));
@@ -765,7 +774,7 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
     chain.all000.metaData[M_ARTIST] = [];
     chain.all000.metaData[M_ALBUMARTIST] = [];
 
-    if (!isAudioBook) {
+    if (!isAudioBook && boxSetup[BK_audioInitialAllArtistTracks].enabled) {
       chain.album.location = getRootPath(rootPath, obj.location).join('_');
       container = addContainerTree([chain.audio, chain.allAlbums, chain.all000, chain.album]);
       chain.album.location = '';
@@ -802,7 +811,7 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
   chain.artist.searchable = false;
   chain.album.searchable = false;
 
-  if (spokenMatch === false && !isAudioBook) {
+  if (spokenMatch === false && !isAudioBook && boxSetup[BK_audioInitialAllArtistTracks].enabled) {
     var part = '';
     if (obj.metaData[M_UPNP_DATE] && obj.metaData[M_UPNP_DATE][0])
       part = obj.metaData[M_UPNP_DATE][0] + ' - ';
@@ -825,7 +834,7 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
         chain.all000.metaData[M_GENRE] = [mapResult.value];
         chain.genre.metaData[M_GENRE] = [mapResult.value];
 
-        if (spokenMatch === false && !isAudioBook) {
+        if (spokenMatch === false && !isAudioBook && boxSetup[BK_audioInitialAllArtistTracks].enabled) {
           container = addContainerTree([chain.audio, chain.allGenres, chain.genre, chain.all000]);
           result.push(addCdsObject(obj, container, rootPath));
         }
@@ -856,7 +865,7 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
     chain.genre.searchable = boxSetup[BK_audioAllGenres].searchable && !genreSearch;
     genreSearch = genreSearch || chain.genre.searchable;
 
-    if (!isAudioBook) {
+    if (!isAudioBook && boxSetup[BK_audioInitialAllArtistTracks].enabled) {
       container = addContainerTree([chain.audio, chain.allGenres, chain.all000, chain.genre]);
       result.push(addCdsObject(obj, container, rootPath));
     }

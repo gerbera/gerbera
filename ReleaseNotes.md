@@ -12,6 +12,7 @@ Removed unused explicit flag for PanasonicTV
 
 ### FIXES
 
+- Import of wavpack files with long properties
 - Endieness in network filtering
 - Handling of Samsung flags
 - Checksum error in loading of Postgres Scripts

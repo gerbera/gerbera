@@ -32,6 +32,7 @@
 - header removals and destructor fix.
 - Improve date parsing
 - improve Samsung TVs quirks
+- JS: allow disabling boxes in initals audio layout
 - More CI checks
 - More FFMPeg Resource Information
 - more pugi forward declarations
