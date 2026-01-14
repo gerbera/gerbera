@@ -165,8 +165,8 @@ function importVideoDetail(obj, cont, rootPath, autoscanId, containerType) {
   }
   if (boxSetup[BK_videoAllDirectories].enabled) {
     var path = video.dir;
-
     var tree = [chain.video, chain.allDirectories];
+
     for (var i = 0; i < path.length; i++) {
         tree = tree.concat({ title: path[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_ALBUM });
     }

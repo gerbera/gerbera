@@ -1,8 +1,12 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v3.1.0
 
-Removed unused explicit flag for PanasonicTV
+This release is more or less a maintenance release to stabilize recent changes.
+On top of the javascript approach several new layout functions have been added.
+Based on this the Zip download function can be used to export virtual folders.
+
+After reworking the flag handling, the unused explicit flag for PanasonicTV was removed.
 
 ### NEW Features
 

@@ -161,7 +161,7 @@ profile which is defined below.
       :default: `empty`
    ..
 
-      .. versionchanged:: HEAD allow negation with ``~``
+      .. versionchanged:: 3.1.0 allow negation with ``~``
       .. code:: xml
 
          client-flags="TRANSCODING1"
@@ -180,7 +180,7 @@ profile which is defined below.
       :default: ``false``
    ..
 
-      .. versionadded:: HEAD
+      .. versionadded:: 3.1.0
       .. code:: xml
 
          client-without-flag="true"
@@ -289,7 +289,7 @@ Profile Attributes
       :default: `empty`
    ..
 
-      .. versionchanged:: HEAD allow negation with ``~``
+      .. versionchanged:: 3.1.0 allow negation with ``~``
       .. code:: xml
 
          client-flags="TRANSCODING1"
@@ -309,7 +309,7 @@ Profile Attributes
       :default: ``false``
    ..
 
-      .. versionadded:: HEAD
+      .. versionadded:: 3.1.0
       .. code:: xml
 
          client-without-flag="true"

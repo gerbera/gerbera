@@ -801,7 +801,7 @@ The goal of model-mapping is to unify values in your media library.
    :type: :confval:`Section`
    :required: false
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.1.0
    .. code:: xml
 
        <model-map>
@@ -857,7 +857,7 @@ media description or special properties as implemented in the imoort function..
    :type: :confval:`Section`
    :required: false
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.1.0
    .. code:: xml
 
        <headline-map>

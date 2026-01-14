@@ -61,9 +61,9 @@ Device Flags
 
 The device flags have the following meaning.
 
-.. versionchanged:: HEAD The Key is not case sensitve anymore
-.. versionchanged:: HEAD Alternate camel-case representations for the keys added
-.. versionchanged:: HEAD Removed ``PANASONIC``
+.. versionchanged:: 3.1.0 The Key is not case sensitve anymore
+.. versionchanged:: 3.1.0 Alternate camel-case representations for the keys added
+.. versionchanged:: 3.1.0 Removed ``PANASONIC``
 
 +--------------------------------+--------------------------------------------------------------------------------+
 | Key                            | Description                                                                    |
