@@ -107,7 +107,7 @@ suite(() => {
 
           const image = await Jimp.read(fileName);
           image.resize({ w:1280 });
-          image.crop({ x:0, y:0, w: 1280, h: 680 });
+          image.crop({ x:0, y:0, w: 1280, h: 750 });
           image.write(fileName);
         });
     });

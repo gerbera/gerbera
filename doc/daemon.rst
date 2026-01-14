@@ -81,7 +81,7 @@ Check the status of gerbera.  You should see success similar to below
 
   ● gerbera.service - Gerbera Media Server
      Loaded: loaded (/etc/systemd/system/gerbera.service; disabled; vendor preset: disabled)
-     Active: active (running) since Wed 2017-09-20 19:48:44 EDT; 47s ago
+     Active: active (running) since Wed 2026-01-01 19:48:44 EDT; 47s ago
    Main PID: 4818 (gerbera)
       Tasks: 12 (limit: 4915)
      CGroup: /system.slice/gerbera.service
@@ -100,14 +100,14 @@ by starting gerbera from the shell.
   Password:
   $  /usr/local/bin/gerbera -c /etc/gerbera/config.xml
 
-  2025-01-01 19:54:47    INFO: Gerbera UPnP Server version 3.0.0 - https://gerbera.io/
-  2025-01-01 19:54:47    INFO: ===============================================================================
-  2025-01-01 19:54:47    INFO: Gerbera is free software, covered by the GNU General Public License version 2
-  2025-01-01 19:54:47    INFO: Copyright 2016-2026 Gerbera Contributors.
-  2025-01-01 19:54:47    INFO: Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.
-  2025-01-01 19:54:47    INFO: ===============================================================================
-  2025-01-01 19:54:47    INFO: Loading configuration from: /etc/gerbera/config.xml
-  2025-01-01 19:54:47    INFO: Checking configuration...
+  2026-01-01 19:54:47    INFO: Gerbera UPnP Server version 3.1.0 - https://gerbera.io/
+  2026-01-01 19:54:47    INFO: ===============================================================================
+  2026-01-01 19:54:47    INFO: Gerbera is free software, covered by the GNU General Public License version 2
+  2026-01-01 19:54:47    INFO: Copyright 2016-2026 Gerbera Contributors.
+  2026-01-01 19:54:47    INFO: Gerbera is based on MediaTomb: Copyright 2005-2010 Gena Batsyan, Sergey Bostandzhyan, Leonhard Wimmer.
+  2026-01-01 19:54:47    INFO: ===============================================================================
+  2026-01-01 19:54:47    INFO: Loading configuration from: /etc/gerbera/config.xml
+  2026-01-01 19:54:47    INFO: Checking configuration...
 
 .. index:: Commandline options
 

@@ -1,6 +1,6 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v3.1.0
 
 - accumulate to join
 - Add community scripts
