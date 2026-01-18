@@ -1,6 +1,8 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v3.1.1
+
+This release fixes an issue in the docker container.
 
 ### FIXES
 
