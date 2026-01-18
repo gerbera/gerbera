@@ -1,5 +1,10 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### HEAD
+
+- cope with su-exec breaking change
+- Update wavpack to 5.9.0
+
 ### v3.1.0
 
 - accumulate to join

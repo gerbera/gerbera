@@ -1,5 +1,15 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
+### FIXES
+
+- docker startup under default user
+
+### Code Improvements
+
+- Update maximum versions of wavpack (5.9.0), cmake (4.2.1)
+
 ## v3.1.0
 
 This release is more or less a maintenance release to stabilize recent changes.

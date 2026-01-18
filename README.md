@@ -70,7 +70,7 @@ sudo make install
 | curl                |              |              |                      | Optional      | Enables web services             | Enabled  |
 | [taglib]            | 1.12         | 1.12         | 2.1.1                | Optional      | Audio tag support                | Enabled  |
 | libmagic            |              |              |                      | Optional      | File type detection              | Enabled  |
-| [wavpack]           | 5.1.0        | 5.4.0        | 5.8.1                | Optional      | WavPack metadata support         | Disabled |
+| [wavpack]           | 5.1.0        | 5.4.0        | 5.9.0                | Optional      | WavPack metadata support         | Disabled |
 | [libmatroska]       | 1.4.8        | 1.6.3        | 1.7.1                | Optional      | MKV metadata                     | Enabled  |
 | [libebml]           | 1.3.5        | 1.4.2        | 1.4.5                | Optional      | required by [libmatroska]        | Enabled  |
 | ffmpeg/libav        |              |              | 7.1.2                | Optional      | File metadata                    | Disabled |
@@ -89,7 +89,7 @@ sudo make install
 |---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
 | [googletest]        | 1.10.0      | 1.10.0      | 1.17.0        | Optional      | Running tests                  | Disabled |
 | [doxygen]           |             | 1.8.14      | 1.8.14        | Optional      | Building source documentation  | Disabled |
-| [cmake]             | 3.25.0      | 3.31.38     | 4.2.0         | Required      | Build processing               | Enabled  |
+| [cmake]             | 3.25.0      | 3.31.38     | 4.2.1         | Required      | Build processing               | Enabled  |
 
 ## License
 
