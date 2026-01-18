@@ -95,7 +95,7 @@ fi
 if [[ "$3" =~ "^gerbera " || "$1" == "gerbera" ]]; then
   if [ "$(id -u)" -eq '0' ]; then
     echo "Root DEF"
-    if ! (command su-exec 2>&1) > /dev/null
+    if ! (command su-exec $IMAGE_USER /bin/true 2>&1) > /dev/null
     then
         sudo touch /var/run/gerbera/run.sh
         sudo chown $IMAGE_USER:$IMAGE_GROUP /var/run/gerbera/run.sh
