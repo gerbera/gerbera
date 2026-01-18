@@ -26,6 +26,13 @@ if [ "${_UID}" -ne "$IMAGE_UID" -a "${_UID}" -gt 0 ]; then
   sudo usermod -u "${_UID}" "$IMAGE_USER"
 fi
 
+if ! (command su-exec $IMAGE_USER /bin/true 2>&1) > /dev/null
+then
+  if [ -n "$(cat /etc/passwd | grep gerbera | grep nologin)" ]; then
+    sudo usermod -s "" "$IMAGE_USER"
+  fi
+fi
+
 if [ "${_GID}" -ne "$IMAGE_GID" -a "${_GID}" -gt 0 ]; then
   sudo groupmod -g "${_GID}" "$IMAGE_GROUP" || usermod -a -G "${_GID}" "$IMAGE_USER"
 fi
@@ -94,15 +101,17 @@ fi
 # If we are root, chown home and drop privs
 if [[ "$3" =~ "^gerbera " || "$1" == "gerbera" ]]; then
   if [ "$(id -u)" -eq '0' ]; then
-    echo "Root DEF"
+    echo "Running as user $IMAGE_USER instead of root"
     if ! (command su-exec $IMAGE_USER /bin/true 2>&1) > /dev/null
     then
         sudo touch /var/run/gerbera/run.sh
         sudo chown $IMAGE_USER:$IMAGE_GROUP /var/run/gerbera/run.sh
         sudo chmod 777 /var/run/gerbera/run.sh
         sudo echo $@ > /var/run/gerbera/run.sh
-        exec su - $IMAGE_USER -c "/var/run/gerbera/run.sh"
+        echo "su - $IMAGE_USER"
+        exec su -c "/var/run/gerbera/run.sh" - $IMAGE_USER
     else
+        echo "su-exec $IMAGE_USER"
         exec su-exec $IMAGE_USER "$@"
     fi
     exit
