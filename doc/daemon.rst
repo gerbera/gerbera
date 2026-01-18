@@ -100,7 +100,7 @@ by starting gerbera from the shell.
   Password:
   $  /usr/local/bin/gerbera -c /etc/gerbera/config.xml
 
-  2026-01-01 19:54:47    INFO: Gerbera UPnP Server version 3.1.0 - https://gerbera.io/
+  2026-01-01 19:54:47    INFO: Gerbera UPnP Server version 3.1.1 - https://gerbera.io/
   2026-01-01 19:54:47    INFO: ===============================================================================
   2026-01-01 19:54:47    INFO: Gerbera is free software, covered by the GNU General Public License version 2
   2026-01-01 19:54:47    INFO: Copyright 2016-2026 Gerbera Contributors.
