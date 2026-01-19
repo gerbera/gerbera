@@ -167,7 +167,12 @@ protected:
     std::vector<std::shared_ptr<ConfigOption>> options;
     std::map<std::string, bool> knownNodes;
 
-    std::shared_ptr<ConfigOption> setOption(const pugi::xml_node& root, ConfigVal option, const std::map<std::string, std::string>* arguments = nullptr);
+    std::shared_ptr<ConfigOption> setOption(
+        const pugi::xml_node& root,
+        ConfigVal option,
+        const std::map<std::string, std::string>* arguments = nullptr);
+    /// @brief load all modules referenced with "from-file"
+    void expandFiles(pugi::xml_node& parent);
     /// @brief cache all nodes from config file
     void getAllNodes(const pugi::xml_node& parent, bool getAttributes = true);
 

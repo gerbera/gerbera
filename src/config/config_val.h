@@ -325,6 +325,7 @@ enum class ConfigVal {
     MAX,
 
     // only attributes are allowed beyond MAX
+    A_LOAD_SECTION_FROM_FILE,
     A_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT,
     A_SERVER_UI_ITEMS_PER_PAGE_DROPDOWN_OPTION,
     A_SERVER_UI_ACCOUNT_LIST_ACCOUNT,

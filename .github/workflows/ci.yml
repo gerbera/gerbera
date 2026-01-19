@@ -119,13 +119,15 @@ jobs:
             pkg install -y cmake curl duktape duktape-lib googletest \
                 exiv2 jsoncpp icu libexif ninja pkgconf \
                 sqlite3 pugixml spdlog taglib upnp magic wavpack \
-                ffmpeg ffmpegthumbnailer libmatroska libiconv libinotify
+                ffmpeg ffmpegthumbnailer libmatroska libiconv libinotify \
+                libzippp libzip
           run: |
             cmake -S . -B build -G Ninja --preset=develop \
                 -DWITH_MYSQL=0 -DWITH_PGSQL=0 -DBUILD_DOC=0 -DBUILD_CHANGELOG=0
             cmake --build build -j$(nproc) --verbose
             cd build
             ctest --output-on-failure
+            $GITHUB_WORKSPACE/build/gerbera --compile-info
 
   OmniOS:
     runs-on: ubuntu-latest
@@ -140,3 +142,5 @@ jobs:
           run: |
             export GH_ACTIONS=y
             scripts/sunos/build-solaris.sh
+            export LD_LIBRARY_PATH=/usr/local/lib:/opt/ooce/lib:/opt/ooce/lib/amd64:${LD_LIBRARY_PATH}
+            ./build-solaris/gerbera --compile-info

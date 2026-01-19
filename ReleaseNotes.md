@@ -1,5 +1,11 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
+### NEW Features
+
+- Split config files into modules (from-file)
+
 ## v3.1.1
 
 This release fixes an issue in the docker container.

@@ -56,10 +56,12 @@ using HandleCallback = std::function<bool()>;
 #define GRB_OPTION_CREATEEXAMPLECONFIG "create-example-config"
 #define GRB_OPTION_CREATEADVANCEDCONFIG "create-advanced-config"
 #define GRB_OPTION_CHECKCONFIG "check-config"
+#define GRB_OPTION_MODULES "modules"
 #define GRB_OPTION_OFFLINE "offline"
 #define GRB_OPTION_DAEMON "daemon"
 #define GRB_OPTION_USER "user"
 #define GRB_OPTION_HOME "home"
+#define GRB_OPTION_SCRIPTS "scripts"
 #define GRB_OPTION_PIDFILE "pidfile"
 #define GRB_OPTION_CONFIG "config"
 #define GRB_OPTION_CFGDIR "cfgdir"
@@ -125,6 +127,8 @@ public:
     std::optional<std::string> getMagic() { return magic; }
     /// @brief access property for home directory
     fs::path getHome() { return home.value_or(""); }
+    /// @brief access property for custom scripts directory
+    fs::path getScripts() { return scripts.value_or(""); }
     /// @brief access property for configuration file
     fs::path getConfigFile() { return configFile.value_or(""); }
     /// @brief access property for configuration directory
@@ -156,6 +160,7 @@ private:
     std::vector<ArgumentHandler> argumentServerCallbacks;
     std::optional<fs::path> logfile;
     std::optional<fs::path> home;
+    std::optional<fs::path> scripts;
     std::optional<std::string> user;
     std::optional<fs::path> pidfile;
     std::optional<fs::path> configFile;
@@ -166,9 +171,10 @@ private:
     bool debug = false;
     bool offline = false;
     bool dropDatabase = false;
+    int configModules = { 0 };
     bool lastFM = false;
     ConfigLevel exampleConfigSet;
-    int sections;
+    int sections = { 0 };
     bool createConfigSet = false;
     bool configDirSet = false;
     pid_t pid;
@@ -203,10 +209,14 @@ private:
     bool createAdvancedConfig(const std::string& arg);
     /// @brief handler for home directory
     bool setHome(const std::string& arg);
+    /// @brief handler for custom scripts directory
+    bool setScripts(const std::string& arg);
     /// @brief are we requested to drop privs?
     bool setUser(const std::string& arg);
     /// @brief are we requested to daemonize?
     bool runAsDeamon(const std::string& arg);
+    /// @brief handler for create config modules option
+    bool setConfigModules(const std::string& arg);
     /// @brief handler for offline mode
     bool setOfflineMode(const std::string& arg);
     /// @brief are we requested to write a pidfile ?

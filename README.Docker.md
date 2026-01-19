@@ -33,7 +33,7 @@ Transcoding tools are made available in a separate image with the `-transcoding`
 e.g. `gerbera/gerbera:3.1.1-transcoding`. It includes tools such as ffmpeg and vlc.
 
 # Debug build
-A full debug build is available as separate image whit the `-debug` suffix,
+A full debug build is available as separate image with the `-debug` suffix,
 e.g. `gerbera/gerbera:3.1.1-debug`. It is building most libraries and tools based on the latest supported versions.
 
 # Examples

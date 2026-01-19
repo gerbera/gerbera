@@ -344,6 +344,16 @@ The default configuration directory is combined out of the users home and the de
 this option allows you to override the default directory naming. This is useful when you want to setup the server in a
 nonstandard location, but want that the default configuration to be written by the server.
 
+Custom Scripts Directory
+------------------------
+
+::
+
+    --scripts
+
+The javascript files shipped with gerbera should not be modified. Instead, they can be extended or overwritten in custom scripts.
+The folder for these can be either set in ``config.xml`` with :confval:`script-folder custom` or provided by the command line argument.
+
 Magic File
 ----------
 

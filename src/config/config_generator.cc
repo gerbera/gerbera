@@ -43,6 +43,7 @@
 #define XML_XMLNS "http://gerbera.io/config/"
 
 using GeneratorSectionsIterator = EnumIterator<GeneratorSections, GeneratorSections::Server, GeneratorSections::All>;
+using GeneratorModulesIterator = EnumIterator<GeneratorModules, GeneratorModules::Autoscan, GeneratorModules::None>;
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::init()
 {
@@ -109,9 +110,39 @@ int ConfigGenerator::remapGeneratorSections(const std::string& arg)
     return stoiString(arg, 0, 0);
 }
 
+int ConfigGenerator::makeModules(const std::string& optValue)
+{
+    std::vector<std::string> flagsVector = splitString(optValue, '|');
+    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | ConfigGenerator::remapGeneratorModules(trimString(i)); });
+}
+
+std::map<GeneratorModules, std::string> ConfigGenerator::modules = {
+    { GeneratorModules::Autoscan, "Autoscan" },
+    { GeneratorModules::None, "None" },
+};
+
+int ConfigGenerator::remapGeneratorModules(const std::string& arg)
+{
+    for (auto&& bit : GeneratorModulesIterator()) {
+        if (toLower(ConfigGenerator::modules[bit]) == toLower(arg)) {
+            return 1 << to_underlying(bit);
+        }
+    }
+
+    if (toLower(ConfigGenerator::modules[GeneratorModules::None]) == toLower(arg)) {
+        return 0;
+    }
+    return stoiString(arg, 0, 0);
+}
+
 bool ConfigGenerator::isGenerated(GeneratorSections section) const
 {
     return this->generateSections == 0 || (this->generateSections & (1 << to_underlying(section)));
+}
+
+bool ConfigGenerator::isGenerated(GeneratorModules module) const
+{
+    return (this->doModules & (1 << to_underlying(module)));
 }
 
 std::shared_ptr<pugi::xml_node> ConfigGenerator::getNode(const std::string& tag) const
@@ -250,7 +281,8 @@ std::string ConfigGenerator::generate(
     const fs::path& userHome,
     const fs::path& configDir,
     const fs::path& dataDir,
-    const fs::path& magicFile)
+    const fs::path& magicFile,
+    const fs::path& customJsFolder)
 {
     auto decl = doc.prepend_child(pugi::node_declaration);
     decl.append_attribute("version") = "1.0";
@@ -273,7 +305,7 @@ std::string ConfigGenerator::generate(
     docinfo.set_value(headInfo.c_str());
 
     generateServer(userHome, configDir, dataDir);
-    generateImport(dataDir, userHome / configDir, magicFile);
+    generateImport(dataDir, userHome / configDir, magicFile, customJsFolder);
     generateTranscoding();
 
     std::ostringstream buf;
@@ -568,7 +600,11 @@ void ConfigGenerator::generateExtendedRuntime()
     setValue(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT_LIST, ConfigVal::A_SERVER_EXTOPTS_MARK_PLAYED_ITEMS_CONTENT, DEFAULT_MARK_PLAYED_CONTENT_VIDEO);
 }
 
-void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile)
+void ConfigGenerator::generateImportOptions(
+    const fs::path& prefixDir,
+    const fs::path& configDir,
+    const fs::path& magicFile,
+    const fs::path& customJsFolder)
 {
     if (!isGenerated(GeneratorSections::Import))
         return;
@@ -599,7 +635,7 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
 #ifdef ONLINESERVICES
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_TRAILER, ConfigLevel::Base },
 #endif
-        { ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER, ConfigLevel::Example },
+        { ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER, customJsFolder.empty() ? ConfigLevel::Example : ConfigLevel::Base },
         { ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS, ConfigLevel::Example },
         { ConfigVal::IMPORT_SCRIPTING_STRUCTURED_LAYOUT_SKIPCHARS, ConfigLevel::Example },
         { ConfigVal::IMPORT_SCRIPTING_STRUCTURED_LAYOUT_DIVCHAR, ConfigLevel::Example },
@@ -746,8 +782,9 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
         co->setDefaultValue(scriptDir);
     }
     {
-        std::string scriptDir;
-        scriptDir = configDir / DEFAULT_JS_DIR;
+        std::string scriptDir = customJsFolder;
+        if (customJsFolder.empty())
+            scriptDir = configDir / DEFAULT_JS_DIR;
         auto co = definition->findConfigSetup(ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER);
         co->setDefaultValue(scriptDir);
     }
@@ -759,6 +796,12 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
         co->setDefaultValue(magicFile);
     }
 #endif
+
+    if (isGenerated(GeneratorModules::Autoscan)) {
+        auto&& autoscanTag = definition->mapConfigOption(ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST);
+        auto as = setValue(fmt::format("{}/", autoscanTag), {}, "", true);
+        setXmlValue(as, ConfigVal::A_LOAD_SECTION_FROM_FILE, "autoscan.xml");
+    }
 
     if (level > ConfigLevel::Base) {
         // Generate Autoscan Example
@@ -818,9 +861,13 @@ void ConfigGenerator::generateImportOptions(const fs::path& prefixDir, const fs:
     generateOptions(options);
 }
 
-void ConfigGenerator::generateImport(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile)
+void ConfigGenerator::generateImport(
+    const fs::path& prefixDir,
+    const fs::path& configDir,
+    const fs::path& magicFile,
+    const fs::path& customJsFolder)
 {
-    generateImportOptions(prefixDir, configDir, magicFile);
+    generateImportOptions(prefixDir, configDir, magicFile, customJsFolder);
     generateMappings();
     generateBoxlayout(ConfigVal::BOXLAYOUT_LIST);
 #ifdef ONLINE_SERVICES

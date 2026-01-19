@@ -125,6 +125,10 @@ default that equals to .config/gerbera, this option allows you to override the
 default directory naming. This is useful when you want to set up the server in a
 nonstandard location.
 .TP
+\*(T<\fB\-\-scripts\fR\*(T>
+The directory for custom javascript files can be either set in config.xml or with
+this command line option.
+.TP
 \*(T<\fB\-f\fR\*(T>, \*(T<\fB\-\-magic\fR\*(T>
 The magic file is set/overwritten. By default it is read from environment variables GERBERA_MAGIC_FILE or MEDIATOMB_MAGIC_FILE.
 .TP
@@ -172,6 +176,10 @@ Print the compilation configuration (defaults for used libraries and enabled fea
 Output the default/example/advanced example configuration to stdout and exit.
 Copy the output to your config.xml and adjust to your needs.
 You can provide the names of sections separated by | to get the section only.
+.TP
+\*(T<\fB\-\-modules=Module\fR\*(T>
+Activate generation of from-file attributes in Module.
+You can provide the names of modules separated by | to load multiple sections as modules.
 .TP
 \*(T<\fB\-\-check\-config\fR\*(T>
 Check the current configuration before running the service and exit. Helpful in conjunction with --debug.

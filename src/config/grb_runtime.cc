@@ -109,9 +109,11 @@ void GerberaRuntime::init(
         { GRB_OPTION_CREATEEXAMPLECONFIG, [=](const std::string& arg) { return this->createExampleConfig(arg); }, true, [=]() { return this->printConfig(); } },
         { GRB_OPTION_CREATEADVANCEDCONFIG, [=](const std::string& arg) { return this->createAdvancedConfig(arg); }, true, [=]() { return this->printConfig(); } },
         { GRB_OPTION_HOME, [=](const std::string& arg) { return this->setHome(arg); } },
+        { GRB_OPTION_SCRIPTS, [=](const std::string& arg) { return this->setScripts(arg); } },
         { GRB_OPTION_USER, [=](const std::string& arg) { return this->setUser(arg); } },
         { GRB_OPTION_DAEMON, [=](const std::string& arg) { return this->runAsDeamon(arg); } },
         { GRB_OPTION_OFFLINE, [=](const std::string& arg) { return this->setOfflineMode(arg); } },
+        { GRB_OPTION_MODULES, [=](const std::string& arg) { return this->setConfigModules(arg); } },
         { GRB_OPTION_PIDFILE, [=](const std::string& arg) { return this->createPidFile(arg); } },
         { GRB_OPTION_CONFIG, [=](const std::string& arg) { return this->setConfigFile(arg); } },
         { GRB_OPTION_CFGDIR, [=](const std::string& arg) { return this->setConfigDir(arg); } },
@@ -268,6 +270,18 @@ bool GerberaRuntime::setHome(const std::string& arg)
         home = fs::path(homePath[0]);
         if (!fs::directory_entry(*home).exists()) {
             log_warning("Home dir {} missing", home->c_str());
+        }
+    }
+    return true;
+}
+
+bool GerberaRuntime::setScripts(const std::string& arg)
+{
+    auto scriptsPath = (*results)[arg].as<std::vector<std::string>>();
+    if (!scriptsPath.empty()) {
+        scripts = fs::path(scriptsPath[0]);
+        if (!fs::directory_entry(*scripts).exists()) {
+            log_debug("Scripts dir {} missing", scripts->c_str());
         }
     }
     return true;
@@ -497,6 +511,15 @@ bool GerberaRuntime::createConfig(const std::string& arg)
     return true;
 }
 
+bool GerberaRuntime::setConfigModules(const std::string& arg)
+{
+    std::optional<std::string> modulesString = (*results)[arg].as<std::string>();
+
+    configModules = ConfigGenerator::makeModules(modulesString.value_or("None"));
+
+    return true;
+}
+
 bool GerberaRuntime::setOfflineMode(const std::string& arg)
 {
     offline = (*results)[arg].as<bool>();
@@ -562,11 +585,11 @@ bool GerberaRuntime::checkDirs()
 
 bool GerberaRuntime::printConfig()
 {
-    ConfigGenerator configGenerator(definition, GERBERA_VERSION, exampleConfigSet, sections);
+    ConfigGenerator configGenerator(definition, GERBERA_VERSION, exampleConfigSet, sections, configModules);
     if (!configDirSet) {
         confDir = "";
     }
-    std::string generated = configGenerator.generate(getHome(), getConfDir(), getDataDir(), getMagic().value_or(""));
+    std::string generated = configGenerator.generate(getHome(), getConfDir(), getDataDir(), getMagic().value_or(""), getScripts());
     fmt::print("{}\n", generated);
 
     return true;
