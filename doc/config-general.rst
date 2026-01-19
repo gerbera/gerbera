@@ -78,6 +78,20 @@ Section
 
 Full xml sub structure.
 
+.. confval:: from-file
+   :type: :confval:`Path`
+   :required: false
+   :default: unset
+
+   .. versionadded:: HEAD
+   .. code-block:: xml
+
+       <autoscan from-file="autoscan.xml"/>
+
+Load section from file instead from content. If the file exists it overwrites
+the full section.
+
+
 Content
 -------
 

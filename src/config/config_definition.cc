@@ -1898,6 +1898,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
 std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getSimpleOptions()
 {
     return {
+        std::make_shared<ConfigPathSetup>(ConfigVal::A_LOAD_SECTION_FROM_FILE,
+            "attribute::from-file", "config.html#confval-from-file"),
+
         std::make_shared<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON_KEY,
             "environ", "config-transcode.html#confval-environ"),
         std::make_shared<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON_NAME,

@@ -50,6 +50,13 @@ enum class GeneratorSections {
     All,
 };
 
+/// @brief list of module ids available for generation
+enum class GeneratorModules {
+    Autoscan,
+
+    None,
+};
+
 enum class ConfigLevel : int {
     Base, // --create-config
     Example, // --create-example-config
@@ -64,11 +71,13 @@ public:
         std::shared_ptr<ConfigDefinition> definition,
         std::string version,
         ConfigLevel level,
-        int sections = 0)
+        int sections = 0,
+        int modules = 0)
         : definition(std::move(definition))
         , version(std::move(version))
         , level(level)
         , generateSections(sections)
+        , doModules(modules)
     {
     }
     /// @brief gerate full output
@@ -76,7 +85,8 @@ public:
         const fs::path& userHome,
         const fs::path& configDir,
         const fs::path& dataDir,
-        const fs::path& magicFile);
+        const fs::path& magicFile,
+        const fs::path& customJsFolder = "");
 
     /// @brief directly generate server section
     void generateServer(const fs::path& userHome, const fs::path& configDir, const fs::path& dataDir);
@@ -89,7 +99,11 @@ public:
     /// @brief directly generate database section
     void generateDatabase(const fs::path& prefixDir);
     /// @brief directly generate import section
-    void generateImport(const fs::path& prefixDir, const fs::path& configDir, const fs::path& magicFile);
+    void generateImport(
+        const fs::path& prefixDir,
+        const fs::path& configDir,
+        const fs::path& magicFile,
+        const fs::path& customJsFolder = "");
     /// @brief directly generate mapping section
     void generateMappings();
     /// @brief directly generate box-layout section
@@ -109,12 +123,18 @@ public:
 
     /// @brief check selected sections
     bool isGenerated(GeneratorSections section) const;
+    /// @brief check selected modules
+    bool isGenerated(GeneratorModules module) const;
     /// @brief extract section id from string argument
     static int remapGeneratorSections(const std::string& arg);
     /// @brief print section names for given id
     static std::string printSections(int section);
     /// @brief convert section string to section id bit field
     static int makeSections(const std::string& optValue);
+    /// @brief extract module id from string argument
+    static int remapGeneratorModules(const std::string& arg);
+    /// @brief convert modules string to module id bit field
+    static int makeModules(const std::string& optValue);
 
 protected:
     std::shared_ptr<ConfigDefinition> definition;
@@ -128,6 +148,8 @@ protected:
     std::map<std::string, std::shared_ptr<pugi::xml_node>> generated;
     /// @brief root xml document
     pugi::xml_document doc;
+    /// @brief bitfield to generate "from-file" attributes for config module loading
+    int doModules { 0 };
 
     /// @brief generate list of options
     void generateOptions(const std::vector<std::pair<ConfigVal, ConfigLevel>>& options);
@@ -141,7 +163,8 @@ protected:
     void generateImportOptions(
         const fs::path& prefixDir,
         const fs::path& configDir,
-        const fs::path& magicFile);
+        const fs::path& magicFile,
+        const fs::path& customJsFolder);
 
     /// @brief create xml entry based on xpath in tag
     std::shared_ptr<pugi::xml_node> setValue(
@@ -164,6 +187,8 @@ protected:
 
     /// @brief dictionary with section names
     static std::map<GeneratorSections, std::string> sections;
+    /// @brief dictionary with module names
+    static std::map<GeneratorModules, std::string> modules;
 };
 
 #endif // GERBERA_CONFIG_GENERATOR_H

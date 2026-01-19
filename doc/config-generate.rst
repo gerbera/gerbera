@@ -37,7 +37,12 @@ You can also run ``gerbera --create-config=sections`` to export only a relevant 
 but not as a full configuration. The following sections are supported: ``Server``, ``Ui``, ``ExtendedRuntime``, ``DynamicContainer``, ``Database``, ``Import``,
 ``Mappings``, ``Boxlayout``, ``Transcoding``. The pseudo section ``All`` is equivalent to stating no section at all.
 
-You can use ``gerbera --check-config -c <file>`` to verify your settings before starting the service.
+The command line option ``--modules=Autoscan`` can be used to generate a ``from-file="autoscan.xml"``
+for autoscan section allowing to put the autoscan config in a separate file.
+
+After adjusting the file to your needs, you can use
+``gerbera --check-config -c <file>`` to verify your settings before starting
+the service.
 
 .. admonition:: Example
 

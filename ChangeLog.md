@@ -1,5 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### HEAD
+
+- Load Config file modules
+
 ### v3.1.1
 
 - cope with su-exec breaking change

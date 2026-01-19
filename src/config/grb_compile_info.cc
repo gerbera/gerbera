@@ -157,11 +157,10 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
         { "HAVE_JS", fmt::to_string(DUK_VERSION) },
 #endif
 #ifdef HAVE_MYSQL
-        { "HAVE_MYSQL", MYSQL_SERVER_VERSION },
+        { "HAVE_MYSQL", fmt::format("Server {}, Client {}", MYSQL_SERVER_VERSION, mysql_get_client_info()) },
 #endif
 #ifdef HAVE_PGSQL
-        { "HAVE_PGSQL", PQXX_VERSION },
-        { "", fmt::to_string(PQlibVersion()) },
+        { "HAVE_PGSQL", fmt::format("Pqxx {}, PqLib {}", PQXX_VERSION, PQlibVersion()) },
 #endif
 #ifdef HAVE_CURL
         { "HAVE_CURL", LIBCURL_VERSION },

@@ -60,7 +60,7 @@ Copyright
       | Sergey Bostandzhyan <jin at mediatomb dot cc>
       | Leonhard Wimmer <leo at mediatomb dot cc>
 
-   Copyright (C) 2016-2025
+   Copyright (C) 2016-2026
       | Gerbera Contributors
 
 License

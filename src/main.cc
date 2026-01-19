@@ -188,6 +188,9 @@ int main(int argc, char** argv, char** envp)
         { ConfigVal::SERVER_IP, "i", "ip", "IP to bind with", std::optional<std::string>(), "IP" },
         { ConfigVal::SERVER_NETWORK_INTERFACE, "e", "interface", "Interface to bind with", std::optional<std::string>(), "IF" },
         { ConfigVal::SERVER_HOME, "m", GRB_OPTION_HOME, "Search this directory for a .config/gerbera folder containing a config file", std::optional<std::string>(), "DIR" },
+#ifdef HAVE_JS
+        { ConfigVal::IMPORT_SCRIPTING_CUSTOM_FOLDER, "", GRB_OPTION_SCRIPTS, "Search this directory for custom javascript files", std::optional<std::string>(), "DIR" },
+#endif
 #ifdef HAVE_MAGIC
         { ConfigVal::IMPORT_MAGIC_FILE, "", "magic", "Set magic FILE", magic, "FILE" },
 #endif
@@ -205,6 +208,7 @@ int main(int argc, char** argv, char** envp)
         (GRB_OPTION_CREATECONFIG, "Print a default config.xml file and exit", cxxopts::value<std::string>()->implicit_value("All"), "Section") //
         (GRB_OPTION_CREATEEXAMPLECONFIG, "Print a example config.xml file and exit", cxxopts::value<std::string>()->implicit_value("All"), "Section") //
         (GRB_OPTION_CREATEADVANCEDCONFIG, "Print a advanced example config.xml file and exit", cxxopts::value<std::string>()->implicit_value("All"), "Section") //
+        (GRB_OPTION_MODULES, "Create \"from-file\" module statements in config.xml", cxxopts::value<std::string>()->implicit_value("None"), "Module") //
         (GRB_OPTION_CHECKCONFIG, "Check config.xml file and exit") //
         (GRB_OPTION_PRINTOPTIONS, "Print simple config options and exit") //
         (GRB_OPTION_OFFLINE, "Do not answer UPnP content requests", cxxopts::value<bool>()->default_value("false")) // good for initial scans

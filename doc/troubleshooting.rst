@@ -129,7 +129,7 @@ Do not output log messages to stdout, but redirect everything to a specified fil
 
 ::
 
-    --rotatelog FILE
+    --rotatelog=FILE
 
 Do not output log messages to stdout, but redirect everything to a rotating list of files. The max size of each
 log file can be set with config option ``server/logging/attribute::rotate-file-size``. The max count of log files
@@ -137,7 +137,7 @@ can be set with config option ``server/logging/attribute::rotate-file-count``. S
 
 ::
 
-    --syslog LOG
+    --syslog=LOG
 
 Do not output log messages to stdout, but redirect everything to syslog. The optional
 argument contains the syslog facility. If no argument is given LOG_USER is used. The following values for ``LOG``
@@ -160,7 +160,7 @@ Debug Mode
 
 ::
 
-    --debug-mode "subsystem[|subsystem2|...]"
+    --debug-mode="subsystem[|subsystem2|...]"
 
 Activate debugging messages only for certain subsystems. The following subsystems are available:
 
@@ -171,8 +171,8 @@ Activate debugging messages only for certain subsystems. The following subsystem
     :caption: Subsystem names are the strings in quotes
     :language: c++
 
-Multiple subsystems can be combined with a ``|``. Names are not case sensitive. This is for developers and testers mostly and has to be activated in cmake
-options at compile time (``-DWITH_DEBUG_OPTIONS=YES``).
+Multiple subsystems can be combined with a ``|``. Names are not case sensitive. This is for developers and testers mostly and has to be
+activated in cmake options at compile time (``-DWITH_DEBUG_OPTIONS=YES``).
 
 Check Config
 ------------
@@ -186,11 +186,16 @@ If you have startup problems or unexpected behaviour you can check the configura
 Check the current configuration and exit. Useful to check new settings before running gerbera as a service.
 Best use with --debug in case of problems.
 
+Config Modules
+^^^^^^^^^^^^^^
+
+If configuration is loaded from module files with ``from-file`` the content of the section of config.xml is ignored.
+
 Compile Info
 ------------
 
-Gerbera has some compile options regarding support for media file formats. If your media files are not scanned at all or metadata is not detected completely
-the compile info may help to look at the right place.
+Gerbera has some compile options regarding support for media file formats. If your media files are not scanned at all or metadata is not
+detected completely the compile info may help to look at the right place.
 
 ::
 
