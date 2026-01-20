@@ -225,6 +225,9 @@ The tables will be created automatically during the first startup.
 All table names have a ``mt_`` or ``grb_`` prefix, so you can theoretically share the database with a different application.
 However, this is not recommended.
 
+Newer versions of MySQL/MariaDB connectors assume SSL/TLS encryption which might not
+be active on your system. In that case you have to set the environment variable
+``MARIADB_TLS_DISABLE_PEER_VERIFICATION=1`` to skip certificate handling.
 
 Last.FM Setup
 ~~~~~~~~~~~~~~

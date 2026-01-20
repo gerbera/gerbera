@@ -289,6 +289,9 @@ copy to play with if necessary.
 Mysql
 ~~~~~
 
+4-Byte UTF8
+-----------
+
 For 4byte utf8 support you may try
 
 .. code-block:: sql
@@ -298,5 +301,12 @@ For 4byte utf8 support you may try
         ALTER TABLE `mt_metadata` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
         ALTER TABLE `grb_cds_resource` CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 
-You will also have to set the ``string-limit`` to ``250`` to cope with the maximum
+You will also have to set the :confval:`string-limit` to ``250`` to cope with the maximum
 index size of 1000.
+
+TLS/SSL error
+-------------
+
+Newer versions of MySQL/MariaDB connectors assume SSL/TLS encryption which might not
+be active on your system. In that case you have to set the environment variable
+``MARIADB_TLS_DISABLE_PEER_VERIFICATION=1`` to skip certificate handling.

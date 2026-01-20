@@ -109,7 +109,7 @@ $ docker run \
 
 ## Overwrite default user and group id
 
-In cases (e.g. running multiple gerbera containers with different versions) you can override the exported ports
+In cases you want to map the gerbera you to a local user id you can set the environment variables `UID` and `GID`
 
 ```console
 $ docker run \
@@ -117,6 +117,20 @@ $ docker run \
     --network=host \
     --env UID=<newuid> \
     --env GID=<newgid> \
+    -v /some/files:/mnt/content:ro \
+     gerbera/gerbera:3.1.1 gerbera --config /var/run/gerbera/config.xml
+```
+
+## Avoid certificate check with MySQL/MariaDB
+
+MariaDB connector assumes SSL/TLS encryption which might not be active on your database. To skip certificate check,
+you have to set the environment variable `MARIADB_TLS_DISABLE_PEER_VERIFICATION`.
+
+```console
+$ docker run \
+    --name another-gerbera \
+    --network=host \
+    --env MARIADB_TLS_DISABLE_PEER_VERIFICATION=1 \
     -v /some/files:/mnt/content:ro \
      gerbera/gerbera:3.1.1 gerbera --config /var/run/gerbera/config.xml
 ```
