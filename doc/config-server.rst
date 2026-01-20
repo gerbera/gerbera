@@ -918,7 +918,7 @@ Switches default sorting by property of ``dc_title`` to ``sort_key``. The sort k
 expanding all numbers to fixed digits.
 
 .. confval:: string-limit
-   :type: :confval:`Boolean`
+   :type: :confval:`Integer`
    :required: false
    :default: ``255``
 

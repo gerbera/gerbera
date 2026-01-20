@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Document MARIADB_TLS_DISABLE_PEER_VERIFICATION
 - Load Config file modules
 
 ### v3.1.1

@@ -52,11 +52,11 @@ if [ ! -f /var/run/gerbera/config.xml ]; then
   gerbera --create-config --home /var/run/gerbera --scripts /mnt/customization/js --modules=Autoscan > /var/run/gerbera/config.xml
 
   # Automatically scan /content with inotify (for a volume mount)
-  echo '\
-    <autoscan use-inotify="yes">\n\
-      <directory location="/mnt/content" mode="inotify" \
-                 recursive="yes" hidden-files="no"/>\n\
-    </autoscan>' > /var/run/gerbera/autoscan.xml
+  echo \
+'<autoscan use-inotify="yes">
+  <directory location="/mnt/content" mode="inotify"
+             recursive="yes" hidden-files="no"/>
+</autoscan>' > /var/run/gerbera/autoscan.xml
 
   # Allow customization of Gerbera configuration file
   if [ -x /mnt/customization/shell/gerbera_config.sh ]; then
