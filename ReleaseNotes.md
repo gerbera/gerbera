@@ -6,6 +6,10 @@
 
 - Split config files into modules (from-file)
 
+### Code Improvements
+
+- Update maximum versions of npupnp (6.2.3)
+
 ## v3.1.1
 
 This release fixes an issue in the docker container.

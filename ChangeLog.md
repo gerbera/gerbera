@@ -4,6 +4,7 @@
 
 - Document MARIADB_TLS_DISABLE_PEER_VERIFICATION
 - Load Config file modules
+- Update npupnp to 6.2.3
 
 ### v3.1.1
 
