@@ -63,10 +63,10 @@ Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const st
 
     // if sqlite3.sql or sqlite3-upgrade.xml is changed hashies have to be updated
     hashies = {
-        3418613970, // index 0 is used for create script sqlite3.sql = Version 1
+        106688730, // index 0 is used for create script sqlite3.sql = Version 1
         778996897, 3362507034, 853149842, 2776802417, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, // upgrade 2-11
         3908767237, 509765404, 2512852146, 1273710965, 319062951, 2316641127, 1028160353, 881071639, 1989518047, 782849313, // upgrade 12-21
-        3135921396, 3108208, 2156790525, 2004941040,
+        3135921396, 3108208, 2156790525, 2004941040, 3165480624,
         459854332 // index DBVERSION is used for drop script sqlite3-drop.sql = Version -1
     };
 }

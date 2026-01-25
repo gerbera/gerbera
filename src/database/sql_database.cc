@@ -95,6 +95,7 @@ enum class SearchColumn {
     Flags,
     PartNumber,
     TrackNumber,
+    Source,
     Location,
     LastModified,
     LastUpdated,
@@ -125,6 +126,7 @@ static std::map<BrowseColumn, SearchProperty> browseColMap {
     { BrowseColumn::Flags, { ITM_ALIAS, "flags" } },
     { BrowseColumn::PartNumber, { ITM_ALIAS, "part_number", FieldType::Integer } },
     { BrowseColumn::TrackNumber, { ITM_ALIAS, "track_number", FieldType::Integer } },
+    { BrowseColumn::Source, { ITM_ALIAS, "source", FieldType::Integer } },
     { BrowseColumn::ServiceId, { ITM_ALIAS, "service_id" } },
     { BrowseColumn::LastModified, { ITM_ALIAS, "last_modified", FieldType::Date } },
     { BrowseColumn::LastUpdated, { ITM_ALIAS, "last_updated", FieldType::Date } },
@@ -150,6 +152,7 @@ static std::map<SearchColumn, SearchProperty> searchColMap {
     { SearchColumn::Flags, { SRC_ALIAS, "flags", FieldType::Integer } },
     { SearchColumn::PartNumber, { SRC_ALIAS, "part_number", FieldType::Integer } },
     { SearchColumn::TrackNumber, { SRC_ALIAS, "track_number", FieldType::Integer } },
+    { SearchColumn::Source, { SRC_ALIAS, "source", FieldType::Integer } },
     { SearchColumn::Location, { SRC_ALIAS, "location" } },
     { SearchColumn::LastModified, { SRC_ALIAS, "last_modified", FieldType::Date } },
     { SearchColumn::LastUpdated, { SRC_ALIAS, "last_updated", FieldType::Date } },
@@ -384,6 +387,7 @@ void SQLDatabase::init()
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), BrowseColumn::PartNumber },
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), BrowseColumn::TrackNumber },
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), BrowseColumn::DcTitle },
+        { "source", BrowseColumn::Source },
         { UPNP_SORT_KEY, BrowseColumn::SortKey },
         { UPNP_SEARCH_CLASS, BrowseColumn::UpnpClass },
         { UPNP_SEARCH_PATH, BrowseColumn::Location },
@@ -396,6 +400,7 @@ void SQLDatabase::init()
     searchSortMap = {
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchColumn::PartNumber },
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchColumn::TrackNumber },
+        { "source", SearchColumn::Source },
         { UPNP_SORT_KEY, SearchColumn::SortKey },
         { UPNP_SEARCH_CLASS, SearchColumn::UpnpClass },
         { UPNP_SEARCH_PATH, SearchColumn::Location },
@@ -647,7 +652,7 @@ void SQLDatabase::upgradeDatabase(
                 upgradeFile.c_str(), DBVERSION, dbVersion, version),
             LINE_MESSAGE);
 
-    version = 1;
+    version = firstDBVersion;
     static const std::map<std::string, bool (SQLDatabase::*)()> migActions {
         { "metadata", &SQLDatabase::doMetadataMigration },
         { "resources", &SQLDatabase::doResourceMigration },
@@ -812,6 +817,7 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
 
     setCol(cdsObjectSql, BrowseColumn::DcTitle, obj->getTitle(), browseColMap);
     setCol(cdsObjectSql, BrowseColumn::SortKey, obj->getSortKey(), browseColMap);
+    cdsObjectSql.emplace(BrowseColumn::Source, quote(int(obj->getSource())));
 
     if (op == Operation::Update)
         cdsObjectSql.emplace(BrowseColumn::Auxdata, SQL_NULL);
@@ -847,6 +853,7 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
             if (obj->isPureItem()) {
                 if (parentID < 0) {
                     parentID = ensurePathExistence(loc.parent_path(), changedContainer);
+                    log_debug("ensurePathExistence {} -> {}", loc.parent_path().string(), parentID);
                     obj->setParentID(parentID);
                 }
                 fs::path dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
@@ -1806,6 +1813,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
     obj->setSortKey(getCol(row, BrowseColumn::SortKey));
     obj->setClass(fallbackString(getCol(row, BrowseColumn::UpnpClass), getCol(row, BrowseColumn::RefUpnpClass)));
     obj->setFlags(std::stoi(getCol(row, BrowseColumn::Flags)));
+    obj->setSource(ObjectSource(std::stoi(getCol(row, BrowseColumn::Source))));
     obj->setMTime(std::chrono::seconds(stoulString(getCol(row, BrowseColumn::LastModified))));
     obj->setUTime(std::chrono::seconds(stoulString(getCol(row, BrowseColumn::LastUpdated))));
 
@@ -1908,6 +1916,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::str
     obj->setSortKey(getCol(row, SearchColumn::SortKey));
     obj->setClass(getCol(row, SearchColumn::UpnpClass));
     obj->setFlags(std::stoi(getCol(row, SearchColumn::Flags)));
+    obj->setSource(ObjectSource(std::stoi(getCol(row, SearchColumn::Source))));
 
     auto metaData = retrieveMetaDataForObject(obj->getID());
     if (!metaData.empty())

@@ -50,6 +50,7 @@ void Web::AddObject::addContainer(
     const std::string& upnp_class)
 {
     auto cont = content->addContainer(parentID, title, upnp_class);
+    cont->setSource(ObjectSource::User);
 
     std::string flags = param("flags");
     if (!flags.empty()) {
@@ -70,6 +71,7 @@ std::shared_ptr<CdsItem> Web::AddObject::addItem(
     item->setTitle(title);
     item->setLocation(location);
     item->setClass(upnp_class);
+    item->setSource(ObjectSource::User);
 
     if (isHiddenFile(item)) {
         log_debug("Hidden file '{}' cannot be added", item->getLocation().c_str());
@@ -109,6 +111,7 @@ std::shared_ptr<CdsItemExternalURL> Web::AddObject::addUrl(
     item->setTitle(title);
     item->setURL(location);
     item->setClass(upnp_class);
+    item->setSource(ObjectSource::User);
 
     std::string desc = param("description");
     if (!desc.empty()) {

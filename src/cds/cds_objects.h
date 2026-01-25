@@ -44,6 +44,13 @@
 #include <memory>
 #include <vector>
 
+/// @brief allow identification of user created objects
+enum class ObjectSource : int {
+    Import, /// @brief object was automatically created
+    ImportModified, /// @brief user modified object after import
+    User, /// @brief user created object
+};
+
 /// @brief Generic object in the Content Directory.
 class CdsObject {
 protected:
@@ -88,8 +95,16 @@ protected:
     /// @brief property that allows to sort objects within a container
     std::string sortKey;
 
+    /// @brief where does the object come from
+    ObjectSource source { ObjectSource::Import };
+
+    /// @brief metadata of object defined by UPnP protocol
     std::vector<std::pair<std::string, std::string>> metaData;
+
+    /// @brief additional metadata with no relation to UPnP
     std::map<std::string, std::string> auxdata;
+
+    /// logical or physical components assigned to object
     std::vector<std::shared_ptr<CdsResource>> resources;
 
     /// @brief reference to parent, transporting details from import script
@@ -186,6 +201,15 @@ public:
     void setVirtual(bool virt) { this->virt = virt; }
     /// @brief Query the virtual flag.
     bool isVirtual() const { return virt; }
+
+    /// @brief Set the source
+    void setSource(ObjectSource source)
+    {
+        if (source > this->source)
+            this->source = source;
+    }
+    /// @brief Query the source
+    ObjectSource getSource() const { return source; }
 
     /// @brief Query information on object type: item, container, etc.
     unsigned int getObjectType() const { return objectType; }
@@ -413,6 +437,7 @@ public:
     static std::string mapFlags(int flag);
     static int remapFlags(const std::string& flag);
     static int makeFlag(const std::string& optValue);
+    static std::string mapSource(ObjectSource source);
 };
 
 #endif // __CDS_OBJECTS_H__

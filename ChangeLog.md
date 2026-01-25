@@ -2,7 +2,9 @@
 
 ### HEAD
 
+- Bump lodash from 4.17.21 to 4.17.23 in /gerbera-web
 - Document MARIADB_TLS_DISABLE_PEER_VERIFICATION
+- Keep track of changed objects
 - Load Config file modules
 - Update npupnp to 6.2.3
 

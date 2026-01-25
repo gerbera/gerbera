@@ -58,7 +58,7 @@ enum class BrowseColumn;
 enum class ResourceDataType;
 enum class Operation;
 
-#define DBVERSION 25
+#define DBVERSION 26
 #define STRING_LIMIT "GRBMAX"
 
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
@@ -173,6 +173,8 @@ public:
     template <typename T>
     void deleteRow(const std::string& tableName, const std::string& key, const T& value);
     void deleteRows(std::string_view tableName, const std::string& key, const std::vector<int>& values);
+
+    int getFirstVersion() const override { return firstDBVersion; };
 
 protected:
     std::shared_ptr<Mime> mime;

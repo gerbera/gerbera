@@ -15,6 +15,7 @@ CREATE TABLE "mt_cds_object"(
     "flags" integer unsigned NOT NULL default 1,
     "part_number" integer default NULL,
     "track_number" integer default NULL,
+    "source" integer NOT NULL default 0,
     "service_id" varchar(255) default NULL,
     "last_modified" integer unsigned default NULL,
     "last_updated" integer unsigned default 0,

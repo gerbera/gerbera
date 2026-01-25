@@ -200,4 +200,8 @@
         <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `orientation`</script>
         <script>ALTER TABLE `grb_cds_resource` CHANGE `orientation2` `orientation` bigint(20) default NULL</script>
     </version>
+    <version number="24" remark="add object source">
+        <script>ALTER TABLE `mt_cds_object` ADD `source` int(11) default '0'</script>
+        <script>UPDATE `mt_cds_object` SET `source`='0'</script>
+    </version>
 </upgrade>

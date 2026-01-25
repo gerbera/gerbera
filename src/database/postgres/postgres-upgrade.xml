@@ -1,2 +1,6 @@
 <upgrade>
+    <version number="26" remark="add object source">
+        <script>ALTER TABLE "mt_cds_object" ADD "source" integer default 0</script>
+        <script>UPDATE "mt_cds_object" SET "source"=0</script>
+    </version>
 </upgrade>

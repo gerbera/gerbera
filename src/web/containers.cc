@@ -70,6 +70,7 @@ bool Web::Containers::processPageAction(Json::Value& element, const std::string&
         ce["id"] = cont->getID();
         ce["ref_id"] = cont->getRefID();
         ce["child_count"] = cont->getChildCount();
+        ce["source"] = CdsObject::mapSource(cont->getSource());
 
         auto url = xmlBuilder->renderContainerImageURL(cont);
         if (url) {
