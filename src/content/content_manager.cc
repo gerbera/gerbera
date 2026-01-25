@@ -1021,7 +1021,9 @@ void ContentManager::addRecursive(
 }
 
 template <typename T>
-std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr<T>& item, const std::map<std::string, std::string>& parameters)
+std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
+    const std::shared_ptr<T>& item,
+    const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string sortKey = getValueOrDefault(parameters, "sortKey");
@@ -1037,7 +1039,9 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr
 }
 
 template <>
-std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr<CdsContainer>& item, const std::map<std::string, std::string>& parameters)
+std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
+    const std::shared_ptr<CdsContainer>& item,
+    const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string sortKey = getValueOrDefault(parameters, "sortKey");
@@ -1049,6 +1053,7 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr
     auto clone = CdsObject::createObject(item->getObjectType());
     item->copyTo(clone);
 
+    clone->setSource(ObjectSource::ImportModified);
     if (!title.empty())
         clone->setTitle(title);
     if (!sortKey.empty())
@@ -1075,7 +1080,9 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr
 }
 
 template <>
-std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr<CdsItem>& item, const std::map<std::string, std::string>& parameters)
+std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
+    const std::shared_ptr<CdsItem>& item,
+    const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
     std::string upnpClass = getValueOrDefault(parameters, "class");
@@ -1090,6 +1097,7 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr
     auto clone = CdsObject::createObject(item->getObjectType());
     item->copyTo(clone);
 
+    clone->setSource(ObjectSource::ImportModified);
     if (!title.empty())
         clone->setTitle(title);
     if (!sortKey.empty())
@@ -1149,7 +1157,9 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(const std::shared_ptr
     return clone;
 }
 
-std::shared_ptr<CdsObject> ContentManager::updateObject(int objectID, const std::map<std::string, std::string>& parameters)
+std::shared_ptr<CdsObject> ContentManager::updateObject(
+    int objectID,
+    const std::map<std::string, std::string>& parameters)
 {
     auto obj = database->loadObject(objectID);
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);

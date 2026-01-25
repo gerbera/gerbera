@@ -77,6 +77,8 @@ bool Web::Items::processPageAction(Json::Value& element, const std::string& acti
         item["title"] = cdsObj->getTitle();
         item["upnp_class"] = cdsObj->getClass();
         item["index"] = fmt::format(trackFmt, cnt);
+        item["source"] = CdsObject::mapSource(cdsObj->getSource());
+
         if (cdsObj->isItem()) {
             auto cdsItem = std::static_pointer_cast<CdsItem>(cdsObj);
             if (cdsItem->getPartNumber() > 0 && container->isSubClass(UPNP_CLASS_MUSIC_ALBUM))

@@ -47,6 +47,7 @@ const std::vector<BrowseColumn> Object2Table::tableColumnOrder = {
     BrowseColumn::Flags,
     BrowseColumn::PartNumber,
     BrowseColumn::TrackNumber,
+    BrowseColumn::Source,
     BrowseColumn::ServiceId,
     BrowseColumn::LastModified,
     BrowseColumn::LastUpdated,

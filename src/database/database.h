@@ -280,6 +280,7 @@ public:
 
     virtual void threadCleanup() = 0;
     virtual bool threadCleanupRequired() const = 0;
+    virtual int getFirstVersion() const { return 1; };
 
 protected:
     static std::shared_ptr<Database> createInstance(const std::shared_ptr<Config>& config,

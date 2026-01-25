@@ -113,6 +113,11 @@ void Web::EditLoad::writeCoreInfo(
     flagsEl["editable"] = false;
     item["flags"] = flagsEl;
 
+    Json::Value sourceEl;
+    flagsEl["value"] = CdsObject::mapSource(obj->getSource());
+    flagsEl["editable"] = false;
+    item["source"] = sourceEl;
+
     Json::Value lmtEl;
     if (obj->getMTime() > std::chrono::seconds::zero()) {
         lmtEl["value"] = grbLocaltime("{:%Y-%m-%d %H:%M:%S}", obj->getMTime());

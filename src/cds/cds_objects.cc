@@ -60,6 +60,7 @@ void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
     obj->setAuxData(auxdata);
     obj->setFlags(objectFlags);
     obj->setSortKey(sortKey);
+    obj->setSource(source);
     for (auto&& resource : resources)
         obj->addResource(resource->clone());
 }
@@ -85,6 +86,7 @@ bool CdsObject::equals(const std::shared_ptr<CdsObject>& obj, bool exactly) cons
             && mtime == obj->getMTime()
             && sizeOnDisk == obj->getSizeOnDisk()
             && virt == obj->isVirtual()
+            && source == obj->getSource()
             && std::equal(auxdata.begin(), auxdata.end(), obj->auxdata.begin())
             && objectFlags == obj->getFlags());
 }
@@ -203,6 +205,17 @@ int CdsObject::remapFlags(const std::string& flag)
         }
     }
     return stoiString(flag, 0, 0);
+}
+
+static const auto sourceNames = std::map<ObjectSource, const char*> {
+    { ObjectSource::Import, "Import" },
+    { ObjectSource::ImportModified, "Modified" },
+    { ObjectSource::User, "User" },
+};
+
+std::string CdsObject::mapSource(ObjectSource source)
+{
+    return sourceNames.at(source);
 }
 
 /// @brief Query single auxdata value.

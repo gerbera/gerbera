@@ -100,6 +100,7 @@ enum class BrowseColumn {
     Flags,
     PartNumber,
     TrackNumber,
+    Source,
     ServiceId,
     LastModified,
     LastUpdated,

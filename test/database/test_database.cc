@@ -66,7 +66,7 @@ void DatabaseTestBase::testUpgrade(ConfigVal option)
     auto root = xmlDoc.document_element();
     EXPECT_TRUE(root.name() == std::string_view("upgrade"));
 
-    size_t version = 1;
+    size_t version = subject->getFirstVersion();
     for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
         auto versionNode = versionElement.node();
         auto&& myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
