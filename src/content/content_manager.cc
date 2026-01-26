@@ -1209,13 +1209,15 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj, bool first
     }
 }
 
-std::shared_ptr<CdsContainer> ContentManager::addContainer(int parentID, const std::string& title, const std::string& upnpClass)
+std::shared_ptr<CdsContainer> ContentManager::addContainer(int parentID, const std::string& title, const std::string& upnpClass, ObjectSource source)
 {
     fs::path cPath = database->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
     std::vector<std::shared_ptr<CdsObject>> cVec;
     cVec.reserve(std::distance(cPath.begin(), cPath.end()));
     for (auto&& segment : cPath) {
-        cVec.push_back(std::make_shared<CdsContainer>(segment.string(), upnpClass));
+        auto cont = std::make_shared<CdsContainer>(segment.string(), upnpClass);
+        cont->setSource(source);
+        cVec.push_back(std::move(cont));
     }
     addContainerTree(cVec, nullptr);
     return importService->getContainer(fmt::format("/{}", cPath.string()));

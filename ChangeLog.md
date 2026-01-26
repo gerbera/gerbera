@@ -6,6 +6,7 @@
 - Document MARIADB_TLS_DISABLE_PEER_VERIFICATION
 - Keep track of changed objects
 - Load Config file modules
+- Show changed items in UI
 - Update npupnp to 6.2.3
 
 ### v3.1.1

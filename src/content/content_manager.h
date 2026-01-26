@@ -121,7 +121,12 @@ public:
     /// @param path location of the container to handle
     /// @return objectID of the container given by path
     int ensurePathExistence(const fs::path& path) const override;
-    std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj, const fs::path& path, bool rescanResource, bool async = true, bool all = false) override;
+    std::vector<int> removeObject(
+        const std::shared_ptr<AutoscanDirectory>& adir,
+        const std::shared_ptr<CdsObject>& obj,
+        const fs::path& path, bool rescanResource,
+        bool async = true,
+        bool all = false) override;
 
     /// @brief Updates an object in the database using the given parameters.
     /// @param objectID ID of the object to update
@@ -170,7 +175,12 @@ public:
     /// @param parentID the id of the parent.
     /// @param title the title of the container.
     /// @param upnpClass the upnp class of the container.
-    std::shared_ptr<CdsContainer> addContainer(int parentID, const std::string& title, const std::string& upnpClass) override;
+    /// @param source of the new object.
+    std::shared_ptr<CdsContainer> addContainer(
+        int parentID,
+        const std::string& title,
+        const std::string& upnpClass,
+        ObjectSource source) override;
 
     /// @brief Updates an object in the database.
     /// @param obj the object to update

@@ -1027,7 +1027,7 @@ function importAudioClassical(obj, cont, rootPath, autoscanId, containerType) {
     albumSearch = albumSearch || chain.album.searchable;
 
     for (var i = 0; i < artCnt; i++) {
-     chain.artist.title = audio.artists[i];
+      chain.artist.title = audio.artists[i];
       chain.abc1.title = chain.artist.title.toUpperCase().substring(0, 1);
       chain.abc2.title = chain.artist.title.toUpperCase().substring(0, 2);
 

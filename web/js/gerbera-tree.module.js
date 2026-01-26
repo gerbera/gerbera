@@ -327,6 +327,14 @@ const generateBadges = (item) => {
   if ('tweak' in item && (item.tweak || item.tweak === 'true')) {
     badges.push('t');
   }
+  if ('source' in item) {
+    if (item.source === 'User') {
+      badges.push('u');
+    } else if (item.source === 'Modified') {
+      badges.push('m');
+    }
+  }
+
   return badges;
 };
 

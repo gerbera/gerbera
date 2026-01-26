@@ -5,7 +5,8 @@
     "res": "http://localhost/item-number-1",
     "size": "1 MB",
     "duration": "1:42:00.448",
-    "resolution": "720x756"
+    "resolution": "720x756",
+    "source": "Import"
   },
   {
     "id": 22222,
@@ -13,7 +14,8 @@
     "res": "http://localhost/item-number-2",
     "size": "2 MB",
     "duration": "1:42:00.448",
-    "resolution": "720x756"
+    "resolution": "720x756",
+    "source": "Modified"
   },
   {
     "id": 33333,
@@ -21,7 +23,8 @@
     "res": "http://localhost/item-number-3",
     "size": "3 MB",
     "duration": "1:42:00.448",
-    "resolution": "720x756"
+    "resolution": "720x756",
+    "source": "User"
   },
   {
     "id": 44444,

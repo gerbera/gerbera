@@ -369,7 +369,7 @@ const downloadItem = (event) => {
   link.download = item.text;
   link.type = item.mtype;
   link.href = item.url;
-  link.target = "_blank" ;
+  link.target = "_blank";
 
   document.body.appendChild(link);
   link.click();
@@ -394,7 +394,7 @@ const downloadZip = (event) => {
       } else {
         alert('Download-Error: ' + err.message);
       }
-  });
+    });
 };
 
 const fetchWithTimeout = (resource, options = {}) => {
@@ -404,15 +404,15 @@ const fetchWithTimeout = (resource, options = {}) => {
   const id = setTimeout(() => controller.abort(), timeout);
 
   return fetch(resource, {
-        ...options,
-        signal: controller.signal
-      })
-      .then(response => {
-        clearTimeout(id);
-        if (!response.ok)
-          throw new Error('Network response was not ok');
-        return response.blob();
-      });
+    ...options,
+    signal: controller.signal
+  })
+    .then(response => {
+      clearTimeout(id);
+      if (!response.ok)
+        throw new Error('Network response was not ok');
+      return response.blob();
+    });
 };
 
 const downloadBlob = (blob, filename, type) => {
@@ -422,7 +422,7 @@ const downloadBlob = (blob, filename, type) => {
   link.href = url;
   link.type = type;
   link.download = filename;
-  link.target = "_blank" ;
+  link.target = "_blank";
   document.body.appendChild(link);
   link.click();
   window.URL.revokeObjectURL(url);
@@ -540,6 +540,7 @@ const transformItems = (items) => {
       size: ('size' in gItem) ? gItem.size : null,
       duration: ('duration' in gItem) ? gItem.duration : null,
       resolution: ('resolution' in gItem) ? gItem.resolution : null,
+      source: ('source' in gItem) ? gItem.source : null,
     };
 
     if (!GerberaApp.serverConfig.enableNumbering) {

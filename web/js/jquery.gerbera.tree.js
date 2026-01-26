@@ -91,6 +91,18 @@ $.widget('grb.tree', {
             aBadge.click({ id: data[i].gerbera.id, fullPath: data[i].gerbera.path }, config.onTweakEdit);
             aBadge.prop('title', 'Tweak: Import of folder modified');
             badges.push(aBadge);
+          } else if (badgeData === 'u') {
+            const aBadge = $('<a></a>').addClass('badge badge-secondary').html('<i class="fa fa-user"/>');
+            aBadge.addClass('pull-right');
+            aBadge.addClass('autoscan-child');
+            aBadge.prop('title', 'Container created by User');
+            badges.push(aBadge);
+          } else if (badgeData === 'm') {
+            const aBadge = $('<a></a>').addClass('badge badge-secondary').html('<i class="fa fa-user-o"/>');
+            aBadge.addClass('pull-right');
+            aBadge.addClass('autoscan-child');
+            aBadge.prop('title', 'Container modified by User');
+            badges.push(aBadge);
           } else if (!isNaN(badgeData)) {
             item.addClass("has-children");
           }

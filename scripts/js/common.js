@@ -988,6 +988,6 @@ function addMeta(obj, key, value) {
 }
 
 function addAux(obj, key, value) {
-    if (!obj.aux) obj.aux = {};
-    obj.aux[key] = [value];
+  if (!obj.aux) obj.aux = {};
+  obj.aux[key] = [value];
 }

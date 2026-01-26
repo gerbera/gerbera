@@ -49,8 +49,7 @@ void Web::AddObject::addContainer(
     const std::string& title,
     const std::string& upnp_class)
 {
-    auto cont = content->addContainer(parentID, title, upnp_class);
-    cont->setSource(ObjectSource::User);
+    auto cont = content->addContainer(parentID, title, upnp_class, ObjectSource::User);
 
     std::string flags = param("flags");
     if (!flags.empty()) {
