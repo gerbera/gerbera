@@ -1618,7 +1618,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     if (!err.empty()) {
         log_warning("{}: {}", path.filename().string(), err);
     }
-    return createContainer(parentID, mval, path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, itemMetadata);
+    return createContainer(parentID, mval, path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, ObjectSource::Import, itemMetadata);
 }
 
 int SQLDatabase::createContainer(
@@ -1629,6 +1629,7 @@ int SQLDatabase::createContainer(
     bool isVirtual,
     const std::string& upnpClass,
     int refID,
+    ObjectSource source,
     const std::vector<std::pair<std::string, std::string>>& itemMetadata,
     const std::vector<std::shared_ptr<CdsResource>>& itemResources)
 {
@@ -1650,6 +1651,7 @@ int SQLDatabase::createContainer(
         { BrowseColumn::SortKey, quote(name) },
         { BrowseColumn::Location, quote(dbLocation) },
         { BrowseColumn::LocationHash, quote(stringHash(dbLocation)) },
+        { BrowseColumn::Source, quote(int(source)) },
         { BrowseColumn::RefId, (refID > 0) ? quote(refID) : SQL_NULL },
     };
     beginTransaction("createContainer");
@@ -1779,7 +1781,7 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     if (cont->getMetaData(MetadataFields::M_DATE).empty())
         cont->addMetaData(MetadataFields::M_DATE, grbLocaltime("{:%FT%T%z}", cont->getMTime()));
 
-    *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), cont->isVirtual(), cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getMetaData(), cont->getResources());
+    *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), cont->isVirtual(), cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getSource(), cont->getMetaData(), cont->getResources());
     return true;
 }
 

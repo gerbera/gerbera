@@ -88,7 +88,7 @@ suite(() => {
 
           const image = await Jimp.read(fileName);
           image.resize({ w: 1280 });
-          image.crop({ x:0, y: 0, w: 1280, h:680 });
+          image.crop({ x: 0, y: 0, w: 1280, h: 680 });
           image.write(fileName);
         });
     });
@@ -106,8 +106,8 @@ suite(() => {
           await loginPage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1280 });
-          image.crop({ x:0, y:0, w: 1280, h: 750 });
+          image.resize({ w: 1280 });
+          image.crop({ x: 0, y: 0, w: 1280, h: 750 });
           image.write(fileName);
         });
     });
@@ -122,7 +122,7 @@ suite(() => {
 
           const image = await Jimp.read(fileName);
           image.resize({ w: 1440 });
-          image.crop({ x:420, y:100, w:600, h:470 });
+          image.crop({ x: 420, y: 100, w: 600, h: 470 });
           image.write(fileName);
         });
     });
@@ -139,8 +139,8 @@ suite(() => {
           await loginPage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:0, y:0, w:1430, h:80 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 0, y: 0, w: 1430, h: 80 });
           image.write(fileName);
         });
     });
@@ -160,8 +160,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1280 });
-          image.crop({ x:0, y:0, w:1280, h:700 });
+          image.resize({ w: 1280 });
+          image.crop({ x: 0, y: 0, w: 1280, h: 700 });
           image.write(fileName);
         });
     });
@@ -183,8 +183,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1280 });
-          image.crop({ x:0, y:0, w:1280, h:450 });
+          image.resize({ w: 1280 });
+          image.crop({ x: 0, y: 0, w: 1280, h: 450 });
           image.write(fileName);
         });
     });
@@ -206,8 +206,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1280 });
-          image.crop({ x:0, y:0, w:1280, h:500 });
+          image.resize({ w: 1280 });
+          image.crop({ x: 0, y: 0, w: 1280, h: 500 });
           image.write(fileName);
         });
     });
@@ -228,7 +228,7 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1280 });
+          image.resize({ w: 1280 });
           image.write(fileName);
         });
     });
@@ -250,8 +250,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1280 });
-          image.crop({ x:0, y:0, w:1280, h:500 });
+          image.resize({ w: 1280 });
+          image.crop({ x: 0, y: 0, w: 1280, h: 500 });
           image.write(fileName);
         });
     });
@@ -271,7 +271,7 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1280 });
+          image.resize({ w: 1280 });
           image.write(fileName);
         });
     });
@@ -290,8 +290,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1280 });
-          image.crop({ x:0, y:0, w:1280, h:500 });
+          image.resize({ w: 1280 });
+          image.crop({ x: 0, y: 0, w: 1280, h: 500 });
           image.write(fileName);
         });
     });
@@ -311,8 +311,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1280 });
-          image.crop({ x:0, y:0, w:1280, h:750 });
+          image.resize({ w: 1280 });
+          image.crop({ x: 0, y: 0, w: 1280, h: 750 });
           image.write(fileName);
         });
     });
@@ -332,7 +332,7 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1280 });
+          image.resize({ w: 1280 });
           image.write(fileName);
         });
     });
@@ -353,8 +353,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:500, y:90, w:450, h:875 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 500, y: 90, w: 450, h: 875 });
           image.write(fileName);
         });
     });
@@ -376,8 +376,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:235, y:75, w:975, h:920 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 235, y: 75, w: 975, h: 920 });
           image.write(fileName);
         });
     });
@@ -397,8 +397,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:800, y:0, w:630, h:140 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 800, y: 0, w: 630, h: 140 });
           image.write(fileName);
         });
     });
@@ -418,8 +418,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:860, y:0, w:570, h:140 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 860, y: 0, w: 570, h: 140 });
           image.write(fileName);
         });
     });
@@ -440,8 +440,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:380, y:220, w:680, h:660 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 380, y: 220, w: 680, h: 660 });
           image.write(fileName);
         });
     });
@@ -463,8 +463,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:235, y:180, w:965, h:740 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 235, y: 180, w: 965, h: 740 });
           image.write(fileName);
         });
     });
@@ -485,8 +485,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:290, y:0, w:860, h:500 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 290, y: 0, w: 860, h: 500 });
           image.write(fileName);
         });
     });
@@ -504,8 +504,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:860, y:0, w:570, h:140 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 860, y: 0, w: 570, h: 140 });
           image.write(fileName);
         });
     });
@@ -525,8 +525,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:325, y:125, w:1115, h:125 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 325, y: 160, w: 1115, h: 160 });
           image.write(fileName);
         });
     });
@@ -547,8 +547,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:0, y:990, w:1440, h:100 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 0, y: 990, w: 1440, h: 100 });
           image.write(fileName);
         });
     });
@@ -569,8 +569,8 @@ suite(() => {
           await homePage.takeScreenshot(fileName);
 
           const image = await Jimp.read(fileName);
-          image.resize({ w:1440 });
-          image.crop({ x:0, y:990, w:1440, h:100 });
+          image.resize({ w: 1440 });
+          image.crop({ x: 0, y: 990, w: 1440, h: 100 });
           image.write(fileName);
         });
     });

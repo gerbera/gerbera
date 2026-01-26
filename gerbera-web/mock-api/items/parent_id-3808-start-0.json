@@ -23,25 +23,28 @@
         "id": 39467,
         "title": "Test1.mp4",
         "res": "http://localhost:49152/content/media/object_id/39467/res_id/0",
-        "size": "1 MB",
-        "duration": "1:42:00.448",
-        "resolution": "720x756"
+        "size": "0.9 MB",
+        "duration": "1:42:01.448",
+        "resolution": "720x756",
+        "source": "Import"
       },
       {
         "id": 39449,
         "title": "Test2.mp4",
         "res": "http://localhost:49152/content/media/object_id/39449/res_id/0",
-        "size": "1 MB",
-        "duration": "1:42:00.448",
-        "resolution": "720x756"
+        "size": "1.2 MB",
+        "duration": "1:42:02.448",
+        "resolution": "720x756",
+        "source": "Modified"
       },
       {
         "id": 39458,
         "title": "Test3.mp4",
         "res": "http://localhost:49152/content/media/object_id/39458/res_id/0",
-        "size": "1 MB",
-        "duration": "1:42:00.448",
-        "resolution": "720x756"
+        "size": "1.5 MB",
+        "duration": "1:42:03.448",
+        "resolution": "720x756",
+        "source": "User"
       },
       {
         "id": 39476,

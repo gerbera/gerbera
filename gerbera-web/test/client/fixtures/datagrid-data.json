@@ -12,7 +12,8 @@
     "index": null,
     "size": "1 MB",
     "duration": "1:42:00.448",
-    "resolution": "720x756"
+    "resolution": "720x756",
+    "source": "Import"
   },
   {
     "id": 22222,
@@ -27,7 +28,8 @@
     "index": null,
     "size": "2 MB",
     "duration": "1:42:00.448",
-    "resolution": "720x756"
+    "resolution": "720x756",
+    "source": "Modified"
   },
   {
     "id": 33333,
@@ -42,7 +44,8 @@
     "index": null,
     "size": "3 MB",
     "duration": "1:42:00.448",
-    "resolution": "720x756"
+    "resolution": "720x756",
+    "source": "User"
   },
   {
     "id": 44444,
@@ -57,7 +60,8 @@
     "index": null,
     "size": "4 MB",
     "duration": "1:42:00.448",
-    "resolution": "720x756"
+    "resolution": "720x756",
+    "source": null
   },
   {
     "id": 55555,
@@ -72,7 +76,8 @@
     "index": null,
     "size": "5 MB",
     "duration": "1:42:00.448",
-    "resolution": "720x756"
+    "resolution": "720x756",
+    "source": null
   },
   {
     "id": 66666,
@@ -87,7 +92,8 @@
     "index": null,
     "size": "6 MB",
     "duration": null,
-    "resolution": "756x568"
+    "resolution": "756x568",
+    "source": null
   },
   {
     "id": 77777,
@@ -102,7 +108,8 @@
     "index": null,
     "size": "7 MB",
     "duration": "1:42:00.448",
-    "resolution": null
+    "resolution": null,
+    "source": null
   },
   {
     "id": 88888,
@@ -117,7 +124,8 @@
     "index": null,
     "size": "8 MB",
     "duration": "1:42:00.448",
-    "resolution": "720x756"
+    "resolution": "720x756",
+    "source": null
   },
   {
     "id": 99999,
@@ -132,7 +140,8 @@
     "index": null,
     "size": "9 MB",
     "duration": "1:42:00.448",
-    "resolution": "720x756"
+    "resolution": "720x756",
+    "source": null
   },
   {
     "id": 101010,
@@ -147,6 +156,7 @@
     "index": null,
     "size": "10 MB",
     "duration": "1:42:00.448",
-    "resolution": "720x756"
+    "resolution": "720x756",
+    "source": null
   }
 ]

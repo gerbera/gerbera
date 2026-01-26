@@ -56,6 +56,7 @@ template <class Col>
 class EnumColumnMapper;
 enum class BrowseColumn;
 enum class ResourceDataType;
+enum class ObjectSource;
 enum class Operation;
 
 #define DBVERSION 26
@@ -293,8 +294,17 @@ private:
     static std::pair<fs::path, char> stripLocationPrefix(std::string_view dbLocation);
 
     std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
-    int createContainer(int parentID, const std::string& name, const std::string& virtualPath, int flags, bool isVirtual, const std::string& upnpClass, int refID,
-        const std::vector<std::pair<std::string, std::string>>& itemMetadata, const std::vector<std::shared_ptr<CdsResource>>& itemResources = {});
+    int createContainer(
+        int parentID,
+        const std::string& name,
+        const std::string& virtualPath,
+        int flags,
+        bool isVirtual,
+        const std::string& upnpClass,
+        int refID,
+        ObjectSource source,
+        const std::vector<std::pair<std::string, std::string>>& itemMetadata,
+        const std::vector<std::shared_ptr<CdsResource>>& itemResources = {});
 
     static bool remapBool(const std::string& field) { return field == "1"; }
     static bool remapBool(int field) { return field == 1; }

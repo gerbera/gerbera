@@ -8,7 +8,7 @@
 
 ### Code Improvements
 
-- Update maximum versions of npupnp (6.2.3)
+- Update maximum versions of npupnp (6.2.3), cmake (4.2.2)
 
 ## v3.1.1
 

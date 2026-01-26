@@ -217,7 +217,11 @@ operations
 
 - Downloading the item retrieves the media directly from the Gerbera server.
 - Deleting the item removes it from the virtual Database View.
-- Editing the item updates the UPNP meta-data for the item.
+- Editing the item updates the UPNP meta-data for the item. The edit icon is depending on
+
+  - The item is created during import
+  - An imported item was modified by the user
+  - The item is created by the user
 
 .. image:: _static/edit-item.png
    :width: 300

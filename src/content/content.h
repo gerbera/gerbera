@@ -39,6 +39,7 @@ class CdsContainer;
 class CdsObject;
 class Context;
 class ScriptingRuntime;
+enum class ObjectSource;
 enum class TaskOwner;
 
 #ifdef ONLINE_SERVICES
@@ -122,7 +123,13 @@ public:
     /// @param parentID the id of the parent.
     /// @param title the title of the container.
     /// @param upnpClass the upnp class of the container.
-    virtual std::shared_ptr<CdsContainer> addContainer(int parentID, const std::string& title, const std::string& upnpClass) = 0;
+    /// @param source of the new object.
+    virtual std::shared_ptr<CdsContainer> addContainer(
+        int parentID,
+        const std::string& title,
+        const std::string& upnpClass,
+        ObjectSource source)
+        = 0;
     /// @brief Adds a virtual item.
     /// @param obj item to add
     /// @param allowFifo flag to indicate that it is ok to add a fifo,
@@ -145,9 +152,18 @@ public:
     /// @brief Updates an object in the database using the given parameters.
     /// @param objectID ID of the object to update
     /// @param parameters key value pairs of fields to be updated
-    virtual std::shared_ptr<CdsObject> updateObject(int objectID, const std::map<std::string, std::string>& parameters) = 0;
-    virtual std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>& adir, const std::shared_ptr<CdsObject>& obj,
-        const fs::path& path, bool rescanResource, bool async = true, bool all = false)
+    virtual std::shared_ptr<CdsObject> updateObject(
+        int objectID,
+        const std::map<std::string, std::string>& parameters)
+        = 0;
+    /// @brief Removes an object in the database using the given parameters.
+    virtual std::vector<int> removeObject(
+        const std::shared_ptr<AutoscanDirectory>& adir,
+        const std::shared_ptr<CdsObject>& obj,
+        const fs::path& path,
+        bool rescanResource,
+        bool async = true,
+        bool all = false)
         = 0;
 
 #ifdef ONLINE_SERVICES
