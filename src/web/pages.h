@@ -338,6 +338,12 @@ public:
 
 protected:
     bool processPageAction(Json::Value& element, const std::string& action) override;
+    /// @brief Search Objects modified or created by user
+    void doBrowse(Json::Value& items);
+    /// @brief Parse JSON data to CdsObject
+    std::vector<std::pair<std::shared_ptr<CdsObject>, std::string>> doParse(const std::string& content);
+    /// @brief update database with imported content
+    void doImport(const std::vector<std::pair<std::shared_ptr<CdsObject>, std::string>>& content);
 };
 
 /// @brief Browse clients list

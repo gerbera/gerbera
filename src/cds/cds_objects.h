@@ -431,13 +431,18 @@ public:
     /// @brief Checks if the minimum required parameters for the object have been set and are valid.
     virtual void validate() const;
 
+    /// @brief factory method to create correct sub class
     static std::shared_ptr<CdsObject> createObject(unsigned int objectType);
 
     static std::string mapObjectType(unsigned int type);
+    static unsigned int remapObjectType(const std::string& type);
+
     static std::string mapFlags(int flag);
     static int remapFlags(const std::string& flag);
     static int makeFlag(const std::string& optValue);
+
     static std::string mapSource(ObjectSource source);
+    static ObjectSource remapSource(const std::string& source);
 };
 
 #endif // __CDS_OBJECTS_H__

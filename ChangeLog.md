@@ -4,6 +4,7 @@
 
 - Bump lodash from 4.17.21 to 4.17.23 in /gerbera-web
 - Document MARIADB_TLS_DISABLE_PEER_VERIFICATION
+- Export and import changed object from database
 - Keep track of changed objects
 - Load Config file modules
 - Show changed items in UI

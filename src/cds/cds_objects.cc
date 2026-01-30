@@ -165,6 +165,17 @@ std::string CdsObject::mapObjectType(unsigned int type)
     throw_std_runtime_error("illegal objectType: {}", type);
 }
 
+unsigned int CdsObject::remapObjectType(const std::string& type)
+{
+    if (type == STRING_OBJECT_TYPE_CONTAINER)
+        return OBJECT_TYPE_CONTAINER;
+    if (type == STRING_OBJECT_TYPE_ITEM)
+        return OBJECT_TYPE_ITEM;
+    if (type == STRING_OBJECT_TYPE_EXTERNAL_URL)
+        return OBJECT_TYPE_ITEM | OBJECT_TYPE_ITEM_EXTERNAL_URL;
+    return 0;
+}
+
 static constexpr std::array upnpFlags {
     std::pair("Restricted", OBJECT_FLAG_RESTRICTED),
     std::pair("Searchable", OBJECT_FLAG_SEARCHABLE),
@@ -216,6 +227,16 @@ static const auto sourceNames = std::map<ObjectSource, const char*> {
 std::string CdsObject::mapSource(ObjectSource source)
 {
     return sourceNames.at(source);
+}
+
+ObjectSource CdsObject::remapSource(const std::string& source)
+{
+    for (auto [src, uLabel] : sourceNames) {
+        if (toLower(uLabel) == toLower(source)) {
+            return src;
+        }
+    }
+    return ObjectSource::User;
 }
 
 /// @brief Query single auxdata value.

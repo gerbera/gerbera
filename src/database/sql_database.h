@@ -102,7 +102,12 @@ public:
     int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
     std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot) override;
 
-    std::size_t getObjects(int parentID, bool withoutContainer, std::unordered_set<int>& ret, bool full) override;
+    std::size_t getObjects(
+        int parentID,
+        bool withoutContainer,
+        std::unordered_set<int>& ret,
+        bool full,
+        int refID) override;
     std::vector<int> getRefObjects(int objectId) override;
     std::unordered_set<int> getUnreferencedObjects() override;
 
@@ -111,10 +116,6 @@ public:
 
     std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID, const std::string& group) override;
     std::vector<int> getServiceObjectIDs(char servicePrefix) override;
-
-    /* accounting methods */
-    long long getFileStats(const StatsParam& stats) override;
-    std::map<std::string, long long> getGroupStats(const StatsParam& stats) override;
 
     std::vector<std::shared_ptr<CdsObject>> browse(BrowseParam& param) override;
     std::vector<std::shared_ptr<CdsObject>> search(SearchParam& param) override;
@@ -127,12 +128,26 @@ public:
         int startIndex,
         int count,
         const std::string& group) override;
-    std::shared_ptr<CdsObject> findObjectByPath(const fs::path& fullpath, const std::string& group, DbFileType fileType = DbFileType::Auto) override;
-    int findObjectIDByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) override;
+    std::shared_ptr<CdsObject> findObjectByPath(
+        const fs::path& fullpath,
+        const std::string& group,
+        DbFileType fileType = DbFileType::Auto) override;
+    int findObjectIDByPath(
+        const fs::path& fullpath,
+        DbFileType fileType = DbFileType::Auto) override;
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override;
 
     fs::path buildContainerPath(int parentID, const std::string& title) override;
-    bool addContainer(int parentContainerId, std::string virtualPath, const std::shared_ptr<CdsContainer>& cont, int* containerID) override;
+    bool addContainer(
+        int parentContainerId,
+        std::string virtualPath,
+        const std::shared_ptr<CdsContainer>& cont,
+        int* containerID) override;
+
+    /* accounting methods */
+    long long getFileStats(const StatsParam& stats) override;
+    std::map<std::string, long long> getGroupStats(const StatsParam& stats) override;
+
     std::string getInternalSetting(const std::string& key) override;
     void storeInternalSetting(const std::string& key, const std::string& value) override = 0;
 

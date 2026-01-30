@@ -24,19 +24,34 @@
       <div class="collapse navbar-collapse" id="navbarContent">
         <ul id="navbar" class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a id="nav-db" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="db">
+            <a
+              id="nav-db"
+              class="nav-link disabled"
+              data-gerbera-menu-cmd="SELECT_TYPE"
+              data-gerbera-type="db"
+            >
               <i class="fa fa-database"></i>
               <span>Database</span>
             </a>
           </li>
           <li class="nav-item" style="display: none">
-            <a id="nav-search" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="search">
+            <a
+              id="nav-search"
+              class="nav-link disabled"
+              data-gerbera-menu-cmd="SELECT_TYPE"
+              data-gerbera-type="search"
+            >
               <i class="fa fa-search"></i>
               <span>Search</span>
             </a>
           </li>
           <li class="nav-item">
-            <a id="nav-fs" class="nav-link disabled" data-gerbera-menu-cmd="SELECT_TYPE" data-gerbera-type="fs">
+            <a
+              id="nav-fs"
+              class="nav-link disabled"
+              data-gerbera-menu-cmd="SELECT_TYPE"
+              data-gerbera-type="fs"
+            >
               <i class="fa fa-folder-open"></i>
               <span>File System</span>
             </a>
@@ -66,13 +81,23 @@
         </ul>
         <ul class="navbar-nav">
           <li class="nav-item" id="source-docs">
-            <a id="devs" class="nav-link noactive" href="./dev/index.html" target="_blank">
+            <a
+              id="devs"
+              class="nav-link noactive"
+              href="./dev/index.html"
+              target="_blank"
+            >
               <i class="fa fa-code"></i>
               <span>Source Docs</span>
             </a>
           </li>
           <li class="nav-item" id="user-docs">
-            <a id="docs" class="nav-link disabled noactive" href="https://docs.gerbera.io/en/stable/" target="_blank">
+            <a
+              id="docs"
+              class="nav-link disabled noactive"
+              href="https://docs.gerbera.io/en/stable/"
+              target="_blank"
+            >
               <i class="fa fa-question-circle"></i>
               <span>Documentation</span>
             </a>
@@ -97,7 +122,13 @@
               <span></span>
             </div>
           </li>
-          <a id="logout" type="button" class="btn btn-danger my-2 my-sm-0" style="display: none">Logout</a>
+          <a
+            id="logout"
+            type="button"
+            class="btn btn-danger my-2 my-sm-0"
+            style="display: none"
+            >Logout</a
+          >
         </ul>
       </div>
     </nav>
@@ -117,7 +148,10 @@
         </div>
       </div>
       <div id="login" style="display: none">
-        <form id="login-form" class="form p-5 my-lg-5 mx-lg-auto col-lg-4 bg-white">
+        <form
+          id="login-form"
+          class="form p-5 my-lg-5 mx-lg-auto col-lg-4 bg-white"
+        >
           <div class="form-group">
             <label for="username">Username</label>
             <input type="text" class="form-control" id="username" />
@@ -126,28 +160,46 @@
             <label for="password">Password</label>
             <input type="password" class="form-control" id="password" />
           </div>
-          <button id="login-submit" class="btn btn-primary btn-block">Login</button>
+          <button id="login-submit" class="btn btn-primary btn-block">
+            Login
+          </button>
         </form>
       </div>
       <div class="container-fluid">
         <div class="row">
           <div class="col-md-6 col-12" id="homelinks" style="display: none">
             <div class="card-style mt-3">
-              <a id="addlink" href="javascript:;" onclick="$('#nav-fs').click(); // Replace with hashchange handling">
+              <a
+                id="addlink"
+                href="javascript:;"
+                onclick="
+                  $('#nav-fs').click() // Replace with hashchange handling
+                "
+              >
                 <h4>
                   <i class="fa fa-plus"></i>
                   Add some files
                 </h4>
                 <p>Browse and import your multimedia files into Gerbera.</p>
               </a>
-              <a id="viewlink" href="javascript:;" onclick="$('#nav-db').click(); // Replace with hashchange handling">
+              <a
+                id="viewlink"
+                href="javascript:;"
+                onclick="
+                  $('#nav-db').click() // Replace with hashchange handling
+                "
+              >
                 <h4>
                   <i class="fa fa-files-o"></i>
                   View indexed files
                 </h4>
                 <span>View, update and remove files from Gerbera.</span>
               </a>
-              <a id="searchlink" href="javascript:;" onclick="$('#nav-search').click();">
+              <a
+                id="searchlink"
+                href="javascript:;"
+                onclick="$('#nav-search').click()"
+              >
                 <div>
                   <h4>
                     <i class="fa fa-search"></i>
@@ -156,14 +208,25 @@
                   <span>Find files managed by Gerbera.</span>
                 </div>
               </a>
-              <a id="clientlink" href="javascript:;" onclick="$('#nav-clients').click();">
+              <a
+                id="clientlink"
+                href="javascript:;"
+                onclick="$('#nav-clients').click()"
+              >
                 <h4>
                   <i class="fa fa-desktop"></i>
                   Show connected clients
                 </h4>
-                <span>Show clients detected by Gerbera and their profile details</span>
+                <span
+                  >Show clients detected by Gerbera and their profile
+                  details</span
+                >
               </a>
-              <a id="configlink" href="javascript:;" onclick="$('#nav-config').click();">
+              <a
+                id="configlink"
+                href="javascript:;"
+                onclick="$('#nav-config').click()"
+              >
                 <h4>
                   <i class="fa fa-sliders"></i>
                   Edit Configuration
@@ -229,10 +292,16 @@
                     <div class="stat-value text-muted">General</div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-item-count"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-item-count"
+                    ></div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-item-size"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-item-size"
+                    ></div>
                   </td>
                 </tr>
                 <tr id="status-audio" class="status-line">
@@ -252,10 +321,16 @@
                     <div class="stat-value text-muted">Music Tracks</div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-audioMusic-count"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-audioMusic-count"
+                    ></div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-audioMusic-size"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-audioMusic-size"
+                    ></div>
                   </td>
                 </tr>
                 <tr id="status-audioBook">
@@ -263,10 +338,16 @@
                     <div class="stat-value text-muted">Audiobooks</div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-audioBook-count"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-audioBook-count"
+                    ></div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-audioBook-size"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-audioBook-size"
+                    ></div>
                   </td>
                 </tr>
                 <tr id="status-audioBroadcast">
@@ -274,10 +355,16 @@
                     <div class="stat-value text-muted">Audio Broadcasts</div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-audioBroadcast-count"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-audioBroadcast-count"
+                    ></div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-audioBroadcast-size"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-audioBroadcast-size"
+                    ></div>
                   </td>
                 </tr>
                 <tr id="status-video" class="status-line">
@@ -297,10 +384,16 @@
                     <div class="stat-value text-muted">Movies</div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-videoMovie-count"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-videoMovie-count"
+                    ></div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-videoMovie-size"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-videoMovie-size"
+                    ></div>
                   </td>
                 </tr>
                 <tr id="status-videoBroadcast">
@@ -308,10 +401,16 @@
                     <div class="stat-value text-muted">Video Broadcasts</div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-videoBroadcast-count"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-videoBroadcast-count"
+                    ></div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-videoBroadcast-size"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-videoBroadcast-size"
+                    ></div>
                   </td>
                 </tr>
                 <tr id="status-videoMusicVideoClip">
@@ -319,10 +418,16 @@
                     <div class="stat-value text-muted">Music Video Clips</div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-videoMusicVideoClip-count"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-videoMusicVideoClip-count"
+                    ></div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-videoMusicVideoClip-size"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-videoMusicVideoClip-size"
+                    ></div>
                   </td>
                 </tr>
                 <tr id="status-image" class="status-line">
@@ -342,10 +447,16 @@
                     <div class="stat-value text-muted">Photos</div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-imagePhoto-count"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-imagePhoto-count"
+                    ></div>
                   </td>
                   <td>
-                    <div class="stat-value text-muted" id="status-imagePhoto-size"></div>
+                    <div
+                      class="stat-value text-muted"
+                      id="status-imagePhoto-size"
+                    ></div>
                   </td>
                 </tr>
                 <tr id="status-text" class="status-line">
@@ -377,11 +488,15 @@
           </div>
           <div id="server-empty" class="col md-3">
             <h4>Set up Gerbera with persistent content</h4>
-            <span class="text-muted">A bit more complicated but safer in the long run</span>
+            <span class="text-muted"
+              >A bit more complicated but safer in the long run</span
+            >
             <ul>
               <li>
                 Add autoscan entry in config.xml (
-                <a target="_blank" href="https://docs.gerbera.io/en/latest/config-import.html#autoscan"
+                <a
+                  target="_blank"
+                  href="https://docs.gerbera.io/en/latest/config-import.html#autoscan"
                   >See documentation</a
                 >
                 )
@@ -393,7 +508,8 @@
             </ul>
             <h4>Set up Gerbera with dynamic content</h4>
             <span class="text-muted"
-              >Easier to create but all setup is lost when your database is deleted or corrupted</span
+              >Easier to create but all setup is lost when your database is
+              deleted or corrupted</span
             >
             <ul>
               <li>
@@ -430,29 +546,59 @@
     <div id="right">
       <div id="search" style="display: none; padding: 20px">
         <h3><i class="fa fa-search"></i>&nbsp;Search</h3>
-        <span class="small text-muted">Please use UPnP syntax for Query and Sort</span>
+        <span class="small text-muted"
+          >Please use UPnP syntax for Query and Sort</span
+        >
         <ul>
           <li>
             <label class="searchLabel"
               >Query:
               <span class="small text-muted"
-                >upnp:class derivedfrom "object.item" and dc:title contains "music"</span
+                >upnp:class derivedfrom "object.item" and dc:title contains
+                "music"</span
               ></label
             >
-            <br /><textarea id="searchQuery" cols="50" rows="2"></textarea> <br /><span
-              class="small text-muted"
-              id="searchCaps"
-            ></span>
+            <br /><textarea id="searchQuery" cols="50" rows="2"></textarea>
+            <br /><span class="small text-muted" id="searchCaps"></span>
           </li>
           <li>
-            <label class="searchLabel">Sort: <span class="small text-muted">-dc:title</span></label>
-            <br /><textarea id="searchSort" cols="50" rows="1"></textarea> <br /><span
-              class="small text-muted"
-              id="sortCaps"
-            ></span>
+            <label class="searchLabel"
+              >Sort: <span class="small text-muted">-dc:title</span></label
+            >
+            <br /><textarea id="searchSort" cols="50" rows="1"></textarea>
+            <br /><span class="small text-muted" id="sortCaps"></span>
           </li>
         </ul>
         <button id="searchButton" class="btn btn-primary">Execute</button>
+      </div>
+      <div id="database" style="display: none; padding: 20px">
+        <div class="ml-2 grb-caption" style="width: 80%">
+          <h4>Export changed items</h4>
+          <span class="text-muted"
+            >Download JSON string from server and store in file.</span
+          ><br />
+          <button id="exportButton" class="btn btn-primary">Export</button
+          ><br />
+          <textarea
+            id="exportCode"
+            style="display: none"
+            cols="80"
+            rows="20"
+          ></textarea>
+          <span id="exportMissing" style="display: none"
+            >No Data available</span
+          >
+        </div>
+        <br /><br />
+        <div class="ml-2 grb-caption" style="width: 80%">
+          <h4>Import saved items</h4>
+          <span class="text-muted">Import JSON file and apply to server.</span
+          ><br />
+          <button id="importButton" class="btn btn-primary">Import</button
+          ><br />
+          <label>File Name</label
+          ><input id="importFile" style="width: 350px; margin-left: 20px" />
+        </div>
       </div>
       <div id="datagrid"></div>
     </div>
@@ -475,11 +621,19 @@
 <div id="video" style="display: none"></div>
 
 <div id="editModal" class="modal fade edit-modal" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable edit-dialog" role="document">
+  <div
+    class="modal-dialog modal-dialog-centered modal-dialog-scrollable edit-dialog"
+    role="document"
+  >
     <div class="modal-content edit-content">
       <div class="modal-header">
         <h5 class="modal-title">Edit Item</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -491,12 +645,24 @@
                 <div class="form-group" id="objectIdGroup" hidden>
                   <label for="editdObjectIdTxt">ID</label>
                   <span id="editdObjectIdTxt" class="h3"></span>
-                  <input type="hidden" class="form-control" id="objectId" readonly disabled />
+                  <input
+                    type="hidden"
+                    class="form-control"
+                    id="objectId"
+                    readonly
+                    disabled
+                  />
                 </div>
                 <div class="form-group" id="parentIdGroup" hidden>
                   <label for="addParentId">Parent ID</label>
                   <span id="addParentIdTxt" class="h3"></span>
-                  <input type="hidden" class="form-control" id="addParentId" readonly disabled />
+                  <input
+                    type="hidden"
+                    class="form-control"
+                    id="addParentId"
+                    readonly
+                    disabled
+                  />
                 </div>
                 <div class="form-group">
                   <img width="150px" id="mediaimage" />
@@ -515,9 +681,13 @@
                   <label for="editObjectType">Type</label>
                   <select id="editObjectType" class="form-control">
                     <option value="audio">Audio File</option>
-                    <option value="audioBroadcast">Audio Broadcast (URL)</option>
+                    <option value="audioBroadcast">
+                      Audio Broadcast (URL)
+                    </option>
                     <option value="video">Video File</option>
-                    <option value="videoBroadcast">Video Broadcast (URL)</option>
+                    <option value="videoBroadcast">
+                      Video Broadcast (URL)
+                    </option>
                     <option value="image">Image File</option>
                     <option value="imagePhoto">Photo File</option>
                     <option value="imageLink">Image Link (URL)</option>
@@ -536,11 +706,22 @@
                 </div>
                 <div class="form-group">
                   <label for="editClass">Class</label>
-                  <input type="text" class="form-control" id="editClass" value="default" />
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editClass"
+                    value="default"
+                  />
                 </div>
                 <div class="form-group">
                   <label for="editSortKey">Sort Key</label>
-                  <input type="text" required class="form-control" id="editSortKey" value="default" />
+                  <input
+                    type="text"
+                    required
+                    class="form-control"
+                    id="editSortKey"
+                    value="default"
+                  />
                 </div>
                 <div class="form-group">
                   <label for="editDesc">Description</label>
@@ -556,38 +737,85 @@
                 </div>
                 <div class="form-group">
                   <label>Flags</label>
-                  <input type="text" class="form-control" id="editFlags" hidden />
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="editFlags"
+                    hidden
+                  />
                   <div class="row form-group grb-edit-check" hidden>
                     <label for="editFlag-Restricted">Restricted</label>
-                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-Restricted" />
+                    <input
+                      type="checkbox"
+                      class="form-control"
+                      name="editFlag"
+                      id="editFlag-Restricted"
+                    />
                   </div>
                   <div class="row form-group grb-edit-check">
                     <label for="editFlag-Searchable">Searchable</label>
-                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-Searchable" />
+                    <input
+                      type="checkbox"
+                      class="form-control"
+                      name="editFlag"
+                      id="editFlag-Searchable"
+                    />
                   </div>
                   <div class="row form-group grb-edit-check">
                     <label for="editFlag-UseResourceRef">UseResourceRef</label>
-                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-UseResourceRef" />
+                    <input
+                      type="checkbox"
+                      class="form-control"
+                      name="editFlag"
+                      id="editFlag-UseResourceRef"
+                    />
                   </div>
                   <div class="row form-group grb-edit-check">
-                    <label for="editFlag-PersistentContainer">PersistentContainer</label>
-                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-PersistentContainer" />
+                    <label for="editFlag-PersistentContainer"
+                      >PersistentContainer</label
+                    >
+                    <input
+                      type="checkbox"
+                      class="form-control"
+                      name="editFlag"
+                      id="editFlag-PersistentContainer"
+                    />
                   </div>
                   <div class="row form-group grb-edit-check">
                     <label for="editFlag-PlaylistRef">PlaylistRef</label>
-                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-PlaylistRef" />
+                    <input
+                      type="checkbox"
+                      class="form-control"
+                      name="editFlag"
+                      id="editFlag-PlaylistRef"
+                    />
                   </div>
                   <div class="row form-group grb-edit-check">
                     <label for="editFlag-ProxyUrl">ProxyUrl</label>
-                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-ProxyUrl" />
+                    <input
+                      type="checkbox"
+                      class="form-control"
+                      name="editFlag"
+                      id="editFlag-ProxyUrl"
+                    />
                   </div>
                   <div class="row form-group grb-edit-check">
                     <label for="editFlag-OnlineService">OnlineService</label>
-                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-OnlineService" />
+                    <input
+                      type="checkbox"
+                      class="form-control"
+                      name="editFlag"
+                      id="editFlag-OnlineService"
+                    />
                   </div>
                   <div class="row form-group grb-edit-check">
                     <label for="editFlag-OggTheora">OggTheora</label>
-                    <input type="checkbox" class="form-control" name="editFlag" id="editFlag-OggTheora" />
+                    <input
+                      type="checkbox"
+                      class="form-control"
+                      name="editFlag"
+                      id="editFlag-OggTheora"
+                    />
                   </div>
                 </div>
                 <div class="form-group">
@@ -613,21 +841,52 @@
       </div>
       <!-- /.modal-content -->
       <div class="modal-footer bg-light">
-        <button id="hidebutton" type="button" class="btn btn-default">Hide Details</button>
-        <button id="detailbutton" type="button" class="btn btn-default">Show Details</button>
-        <button id="editCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="editSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Item</button>
+        <button id="hidebutton" type="button" class="btn btn-default">
+          Hide Details
+        </button>
+        <button id="detailbutton" type="button" class="btn btn-default">
+          Show Details
+        </button>
+        <button
+          id="editCancel"
+          type="button"
+          class="btn btn-default"
+          data-dismiss="modal"
+        >
+          Close
+        </button>
+        <button
+          id="editSave"
+          type="submit"
+          class="btn btn-primary"
+          data-dismiss="modal"
+        >
+          Save Item
+        </button>
       </div>
     </div>
     <!-- /.modal-dialog -->
   </div>
 </div>
-<div id="autoscanModal" class="modal fade edit-modal" tabindex="-1" role="dialog">
-  <div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable edit-dialog" role="document">
+<div
+  id="autoscanModal"
+  class="modal fade edit-modal"
+  tabindex="-1"
+  role="dialog"
+>
+  <div
+    class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable edit-dialog"
+    role="document"
+  >
     <div class="modal-content edit-content">
       <div class="modal-header">
         <h5 class="modal-title">Edit Autoscan</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -637,7 +896,8 @@
             <div class="col" style="min-width: 250px !important">
               <div class="form-group" id="autoscan-persistent-msg">
                 <span>
-                  This is a persistent autoscan directory (defined in config), it cannot be modified via the web UI.
+                  This is a persistent autoscan directory (defined in config),
+                  it cannot be modified via the web UI.
                 </span>
               </div>
               <div class="form-group row" hidden>
@@ -648,7 +908,11 @@
                   <span id="autoscanIdTxt" class="overflow"></span>
                   <input type="hidden" id="autoscanId" />
                   <input type="checkbox" class="hidden" id="autoscanFromFs" />
-                  <input type="checkbox" class="hidden" id="autoscanPersistent" />
+                  <input
+                    type="checkbox"
+                    class="hidden"
+                    id="autoscanPersistent"
+                  />
                 </div>
               </div>
               <div class="form-group row no-gutters">
@@ -665,8 +929,13 @@
                       value="none"
                       aria-describedby="autoscanModeNoneHelp"
                     />
-                    <label for="autoscanModeNone" class="form-check-label">None</label>
-                    <small id="autoscanModeNoneHelp" class="form-text text-muted">
+                    <label for="autoscanModeNone" class="form-check-label"
+                      >None</label
+                    >
+                    <small
+                      id="autoscanModeNoneHelp"
+                      class="form-text text-muted"
+                    >
                       Disable autoscanning for this directory
                     </small>
                   </div>
@@ -679,10 +948,16 @@
                       value="inotify"
                       aria-describedby="autoscanModeInotifyHelp"
                     />
-                    <label for="autoscanModeInotify" class="form-check-label">INotify</label>
-                    <small id="autoscanModeInotifyHelp" class="form-text text-muted">
-                      Efficiently and quickly update based on system filesystem events. This is the suggested method
-                      unless the underlying system does not support it.
+                    <label for="autoscanModeInotify" class="form-check-label"
+                      >INotify</label
+                    >
+                    <small
+                      id="autoscanModeInotifyHelp"
+                      class="form-text text-muted"
+                    >
+                      Efficiently and quickly update based on system filesystem
+                      events. This is the suggested method unless the underlying
+                      system does not support it.
                     </small>
                   </div>
                   <div class="form-check">
@@ -694,9 +969,15 @@
                       value="timed"
                       aria-describedby="autoscanModeTimedHelp"
                     />
-                    <label for="autoscanModeTimed" class="form-check-label">Timed</label>
-                    <small id="autoscanModeTimedHelp" class="form-text text-muted">
-                      Re-scans the directory at set intervals. Resource intensive if run too often.
+                    <label for="autoscanModeTimed" class="form-check-label"
+                      >Timed</label
+                    >
+                    <small
+                      id="autoscanModeTimedHelp"
+                      class="form-text text-muted"
+                    >
+                      Re-scans the directory at set intervals. Resource
+                      intensive if run too often.
                     </small>
                   </div>
                   <div class="form-check">
@@ -708,8 +989,13 @@
                       value="manual"
                       aria-describedby="autoscanModeManualHelp"
                     />
-                    <label for="autoscanModeManual" class="form-check-label">Manual</label>
-                    <small id="autoscanModeManualHelp" class="form-text text-muted">
+                    <label for="autoscanModeManual" class="form-check-label"
+                      >Manual</label
+                    >
+                    <small
+                      id="autoscanModeManualHelp"
+                      class="form-text text-muted"
+                    >
                       Scans have to be started manually
                     </small>
                   </div>
@@ -728,8 +1014,13 @@
                       class="form-check-input"
                       aria-describedby="autoscanRecursiveHelp"
                     />
-                    <label for="autoscanRecursive" class="form-check-label">Recursive</label>
-                    <small id="autoscanRecursiveHelp" class="form-text text-muted">
+                    <label for="autoscanRecursive" class="form-check-label"
+                      >Recursive</label
+                    >
+                    <small
+                      id="autoscanRecursiveHelp"
+                      class="form-text text-muted"
+                    >
                       Descend into child directories and index them.
                     </small>
                   </div>
@@ -748,7 +1039,9 @@
                       class="form-check-input"
                       aria-describedby="autoscanHiddenHelp"
                     />
-                    <label for="autoscanHidden" class="form-check-label">Include Hidden</label>
+                    <label for="autoscanHidden" class="form-check-label"
+                      >Include Hidden</label
+                    >
                     <small id="autoscanHiddenHelp" class="form-text text-muted">
                       Include hidden files/directories
                     </small>
@@ -768,8 +1061,13 @@
                       class="form-check-input"
                       aria-describedby="autoscanSymlinksHelp"
                     />
-                    <label for="autoscanSymlinks" class="form-check-label">Follow Symbolic Links</label>
-                    <small id="autoscanSymlinksHelp" class="form-text text-muted">
+                    <label for="autoscanSymlinks" class="form-check-label"
+                      >Follow Symbolic Links</label
+                    >
+                    <small
+                      id="autoscanSymlinksHelp"
+                      class="form-text text-muted"
+                    >
                       Follow symbolic links and import them.
                     </small>
                   </div>
@@ -788,8 +1086,13 @@
                       class="form-check-input"
                       aria-describedby="autoscanDirTypesHelp"
                     />
-                    <label for="autoscanDirTypes" class="form-check-label">Apply UPnP Directory Types</label>
-                    <small id="autoscanDirTypesHelp" class="form-text text-muted">
+                    <label for="autoscanDirTypes" class="form-check-label"
+                      >Apply UPnP Directory Types</label
+                    >
+                    <small
+                      id="autoscanDirTypesHelp"
+                      class="form-text text-muted"
+                    >
                       Set UPnP Directory Type based on content.
                     </small>
                   </div>
@@ -808,27 +1111,48 @@
                       class="form-check-input"
                       aria-describedby="autoscanForceRescanHelp"
                     />
-                    <label for="autoscanForceRescan" class="form-check-label">Force Rescan of Unknown Files</label>
-                    <small id="autoscanForceRescanHelp" class="form-text text-muted">
+                    <label for="autoscanForceRescan" class="form-check-label"
+                      >Force Rescan of Unknown Files</label
+                    >
+                    <small
+                      id="autoscanForceRescanHelp"
+                      class="form-text text-muted"
+                    >
                       Rescan unknown files on restart to fix missing properties.
                     </small>
                   </div>
                 </div>
               </div>
               <div class="form-group row no-gutters">
-                <label for="autoscanInterval" class="col-3 col-form-label">Scan Interval (in seconds)</label>
+                <label for="autoscanInterval" class="col-3 col-form-label"
+                  >Scan Interval (in seconds)</label
+                >
                 <div class="col-4">
-                  <input type="number" id="autoscanInterval" class="form-control" />
+                  <input
+                    type="number"
+                    id="autoscanInterval"
+                    class="form-control"
+                  />
                 </div>
               </div>
               <div class="form-group row no-gutters">
-                <label for="autoscanRetryCount" class="col-3 col-form-label">Number of Scan Retries</label>
+                <label for="autoscanRetryCount" class="col-3 col-form-label"
+                  >Number of Scan Retries</label
+                >
                 <div class="col-4">
-                  <input type="number" id="autoscanRetryCount" class="form-control" />
+                  <input
+                    type="number"
+                    id="autoscanRetryCount"
+                    class="form-control"
+                  />
                 </div>
               </div>
             </div>
-            <div class="col ml-2" id="detailAutoscanCol" style="min-width: 250px !important">
+            <div
+              class="col ml-2"
+              id="detailAutoscanCol"
+              style="min-width: 250px !important"
+            >
               <div class="form-group row no-gutters">
                 <div class="col-3">
                   <label>Audio</label>
@@ -844,7 +1168,11 @@
                           class="form-check-input"
                           aria-describedby="autoscanAudioHelp"
                         />
-                        <label for="autoscanAudio" class="form-check-label grb-media-type">All Audio</label>
+                        <label
+                          for="autoscanAudio"
+                          class="form-check-label grb-media-type"
+                          >All Audio</label
+                        >
                       </div>
                       <div>
                         <input
@@ -854,7 +1182,11 @@
                           class="form-check-input"
                           aria-describedby="autoscanAudioHelp"
                         />
-                        <label for="autoscanAudioMusic" class="form-check-label grb-media-type">Music</label>
+                        <label
+                          for="autoscanAudioMusic"
+                          class="form-check-label grb-media-type"
+                          >Music</label
+                        >
                       </div>
                       <div>
                         <input
@@ -864,7 +1196,11 @@
                           class="form-check-input"
                           aria-describedby="autoscanAudioHelp"
                         />
-                        <label for="autoscanAudioBook" class="form-check-label grb-media-type">Audio Book</label>
+                        <label
+                          for="autoscanAudioBook"
+                          class="form-check-label grb-media-type"
+                          >Audio Book</label
+                        >
                       </div>
                       <div>
                         <input
@@ -874,7 +1210,9 @@
                           class="form-check-input"
                           aria-describedby="autoscanAudioHelp"
                         />
-                        <label for="autoscanAudioBroadcast" class="form-check-label grb-media-type"
+                        <label
+                          for="autoscanAudioBroadcast"
+                          class="form-check-label grb-media-type"
                           >Audio Broadcast</label
                         >
                       </div>
@@ -900,7 +1238,11 @@
                           class="form-check-input"
                           aria-describedby="autoscanImageHelp"
                         />
-                        <label for="autoscanImage" class="form-check-label grb-media-type">All Images</label>
+                        <label
+                          for="autoscanImage"
+                          class="form-check-label grb-media-type"
+                          >All Images</label
+                        >
                       </div>
                       <div>
                         <input
@@ -910,7 +1252,11 @@
                           class="form-check-input"
                           aria-describedby="autoscanImageHelp"
                         />
-                        <label for="autoscanImagePhoto" class="form-check-label grb-media-type">Photo</label>
+                        <label
+                          for="autoscanImagePhoto"
+                          class="form-check-label grb-media-type"
+                          >Photo</label
+                        >
                       </div>
                     </div>
                     <small id="autoscanImageHelp" class="form-text text-muted"
@@ -934,7 +1280,11 @@
                           class="form-check-input"
                           aria-describedby="autoscanVideoHelp"
                         />
-                        <label for="autoscanVideo" class="form-check-label grb-media-type">All Video</label>
+                        <label
+                          for="autoscanVideo"
+                          class="form-check-label grb-media-type"
+                          >All Video</label
+                        >
                       </div>
                       <div>
                         <input
@@ -944,7 +1294,11 @@
                           class="form-check-input"
                           aria-describedby="autoscanVideoHelp"
                         />
-                        <label for="autoscanVideoMovie" class="form-check-label grb-media-type">Movie</label>
+                        <label
+                          for="autoscanVideoMovie"
+                          class="form-check-label grb-media-type"
+                          >Movie</label
+                        >
                       </div>
                       <div>
                         <input
@@ -954,7 +1308,11 @@
                           class="form-check-input"
                           aria-describedby="autoscanVideoHelp"
                         />
-                        <label for="autoscanVideoTV" class="form-check-label grb-media-type">TV</label>
+                        <label
+                          for="autoscanVideoTV"
+                          class="form-check-label grb-media-type"
+                          >TV</label
+                        >
                       </div>
                       <div>
                         <input
@@ -964,7 +1322,11 @@
                           class="form-check-input"
                           aria-describedby="autoscanVideoHelp"
                         />
-                        <label for="autoscanVideoMusicVideo" class="form-check-label grb-media-type">Music Video</label>
+                        <label
+                          for="autoscanVideoMusicVideo"
+                          class="form-check-label grb-media-type"
+                          >Music Video</label
+                        >
                       </div>
                     </div>
                     <small id="autoscanVideoHelp" class="form-text text-muted"
@@ -974,7 +1336,11 @@
                 </div>
               </div>
               <div class="form-group row no-gutters">
-                <label for="autoscanContainerTypeAudio" class="col-3 col-form-label">Audio Container</label>
+                <label
+                  for="autoscanContainerTypeAudio"
+                  class="col-3 col-form-label"
+                  >Audio Container</label
+                >
                 <div class="col-9">
                   <input
                     type="text"
@@ -983,13 +1349,19 @@
                     class="form-control"
                     aria-describedby="autoscanContainertypeAudioHelp"
                   />
-                  <small id="autoscanContainertypeAudioHelp" class="form-text text-muted"
+                  <small
+                    id="autoscanContainertypeAudioHelp"
+                    class="form-text text-muted"
                     >Container type for audio files</small
                   >
                 </div>
               </div>
               <div class="form-group row no-gutters">
-                <label for="autoscanContainerTypeImage" class="col-3 col-form-label">Image Container</label>
+                <label
+                  for="autoscanContainerTypeImage"
+                  class="col-3 col-form-label"
+                  >Image Container</label
+                >
                 <div class="col-9">
                   <input
                     type="text"
@@ -998,13 +1370,19 @@
                     class="form-control"
                     aria-describedby="autoscanContainertypeImageHelp"
                   />
-                  <small id="autoscanContainertypeImageHelp" class="form-text text-muted"
+                  <small
+                    id="autoscanContainertypeImageHelp"
+                    class="form-text text-muted"
                     >Container type for image files</small
                   >
                 </div>
               </div>
               <div class="form-group row no-gutters">
-                <label for="autoscanContainerTypeVideo" class="col-3 col-form-label">Video Container</label>
+                <label
+                  for="autoscanContainerTypeVideo"
+                  class="col-3 col-form-label"
+                  >Video Container</label
+                >
                 <div class="col-9">
                   <input
                     type="text"
@@ -1013,7 +1391,9 @@
                     class="form-control"
                     aria-describedby="autoscanContainertypeVideoHelp"
                   />
-                  <small id="autoscanContainertypeVideoHelp" class="form-controlform-text text-muted"
+                  <small
+                    id="autoscanContainertypeVideoHelp"
+                    class="form-controlform-text text-muted"
                     >Container type for video files</small
                   >
                 </div>
@@ -1023,10 +1403,28 @@
         </div>
       </div>
       <div class="modal-footer bg-light">
-        <button id="hideAutoscanButton" type="button" class="btn btn-default">Hide Details</button>
-        <button id="detailAutoscanButton" type="button" class="btn btn-default">Show Details</button>
-        <button id="autoscanCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="autoscanSave" type="submit" class="btn btn-primary" data-dismiss="modal">Save Autoscan</button>
+        <button id="hideAutoscanButton" type="button" class="btn btn-default">
+          Hide Details
+        </button>
+        <button id="detailAutoscanButton" type="button" class="btn btn-default">
+          Show Details
+        </button>
+        <button
+          id="autoscanCancel"
+          type="button"
+          class="btn btn-default"
+          data-dismiss="modal"
+        >
+          Close
+        </button>
+        <button
+          id="autoscanSave"
+          type="submit"
+          class="btn btn-primary"
+          data-dismiss="modal"
+        >
+          Save Autoscan
+        </button>
       </div>
     </div>
     <!-- /.modal-content -->
@@ -1038,7 +1436,12 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Edit Directory Tweak</h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+        <button
+          type="button"
+          class="close"
+          data-dismiss="modal"
+          aria-label="Close"
+        >
           <span aria-hidden="true">&times;</span>
         </button>
       </div>
@@ -1050,59 +1453,118 @@
                 <label for="dirTweakLocation">Location:</label>
               </div>
               <div class="col-md-6">
-                <input type="text" id="dirTweakLocation" name="location" class="form-control" disabled />
-                <input type="number" id="dirTweakId" name="id" class="form-control" hidden />
-                <input type="number" id="dirTweakIndex" name="index" class="form-control" hidden />
-                <input type="text" id="dirTweakStatus" name="status" class="form-control" hidden />
+                <input
+                  type="text"
+                  id="dirTweakLocation"
+                  name="location"
+                  class="form-control"
+                  disabled
+                />
+                <input
+                  type="number"
+                  id="dirTweakId"
+                  name="id"
+                  class="form-control"
+                  hidden
+                />
+                <input
+                  type="number"
+                  id="dirTweakIndex"
+                  name="index"
+                  class="form-control"
+                  hidden
+                />
+                <input
+                  type="text"
+                  id="dirTweakStatus"
+                  name="status"
+                  class="form-control"
+                  hidden
+                />
               </div>
             </div>
             <div class="form-check form-check-inline row">
               <div class="col-md-4">
-                <label for="dirTweakInherit" class="form-check-label">Inherit settings to subdirs:</label>
+                <label for="dirTweakInherit" class="form-check-label"
+                  >Inherit settings to subdirs:</label
+                >
               </div>
               <div class="col-md-6">
                 <div class="form-check form-check-inline">
-                  <input type="checkbox" name="dirTweakInherit" id="dirTweakInherit" class="form-check-input" />
+                  <input
+                    type="checkbox"
+                    name="dirTweakInherit"
+                    id="dirTweakInherit"
+                    class="form-check-input"
+                  />
                 </div>
               </div>
             </div>
             <div class="form-check form-check-inline row">
               <div class="col-md-4">
-                <label for="dirTweakSymLinks" class="form-check-label">Follow Symbolic Links:</label>
+                <label for="dirTweakSymLinks" class="form-check-label"
+                  >Follow Symbolic Links:</label
+                >
               </div>
               <div class="col-md-6">
                 <div class="form-check form-check-inline">
-                  <input type="checkbox" name="dirTweakSymLinks" id="dirTweakSymLinks" class="form-check-input" />
+                  <input
+                    type="checkbox"
+                    name="dirTweakSymLinks"
+                    id="dirTweakSymLinks"
+                    class="form-check-input"
+                  />
                 </div>
               </div>
             </div>
             <div class="form-check form-check-inline row">
               <div class="col-md-4">
-                <label for="dirTweakRecursive" class="form-check-label">Recursive import:</label>
+                <label for="dirTweakRecursive" class="form-check-label"
+                  >Recursive import:</label
+                >
               </div>
               <div class="col-md-6">
                 <div class="form-check form-check-inline">
-                  <input type="checkbox" name="dirTweakRecursive" id="dirTweakRecursive" class="form-check-input" />
+                  <input
+                    type="checkbox"
+                    name="dirTweakRecursive"
+                    id="dirTweakRecursive"
+                    class="form-check-input"
+                  />
                 </div>
               </div>
             </div>
             <div class="form-check form-check-inline row">
               <div class="col-md-4">
-                <label for="dirTweakHidden" class="form-check-label">Include hidden files/directories:</label>
+                <label for="dirTweakHidden" class="form-check-label"
+                  >Include hidden files/directories:</label
+                >
               </div>
               <div class="col-md-6">
                 <div class="form-check form-check-inline">
-                  <input type="checkbox" name="dirTweakHidden" id="dirTweakHidden" class="form-check-input" />
+                  <input
+                    type="checkbox"
+                    name="dirTweakHidden"
+                    id="dirTweakHidden"
+                    class="form-check-input"
+                  />
                 </div>
               </div>
             </div>
             <div class="form-check form-check-inline row">
               <div class="col-md-4">
-                <label for="dirTweakCaseSens" class="form-check-label">Case sensitive resources:</label>
+                <label for="dirTweakCaseSens" class="form-check-label"
+                  >Case sensitive resources:</label
+                >
               </div>
               <div class="col-md-6">
                 <div class="form-check form-check-inline">
-                  <input type="checkbox" name="dirTweakCaseSens" id="dirTweakCaseSens" class="form-check-input" />
+                  <input
+                    type="checkbox"
+                    name="dirTweakCaseSens"
+                    id="dirTweakCaseSens"
+                    class="form-check-input"
+                  />
                 </div>
               </div>
             </div>
@@ -1111,7 +1573,11 @@
                 <label for="dirTweakMetaCharset">Metadata Charset</label>
               </div>
               <div class="col-md-6">
-                <input type="text" id="dirTweakMetaCharset" class="form-control" />
+                <input
+                  type="text"
+                  id="dirTweakMetaCharset"
+                  class="form-control"
+                />
               </div>
             </div>
             <div class="form-group row">
@@ -1142,11 +1608,29 @@
         </div>
       </div>
       <div class="modal-footer">
-        <button id="dirTweakCancel" type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-        <button id="dirTweakDelete" type="submit" class="btn btn-primary" data-dismiss="modal" hidden>
+        <button
+          id="dirTweakCancel"
+          type="button"
+          class="btn btn-default"
+          data-dismiss="modal"
+        >
+          Close
+        </button>
+        <button
+          id="dirTweakDelete"
+          type="submit"
+          class="btn btn-primary"
+          data-dismiss="modal"
+          hidden
+        >
           Delete Directory Tweak
         </button>
-        <button id="dirTweakSave" type="submit" class="btn btn-primary" data-dismiss="modal">
+        <button
+          id="dirTweakSave"
+          type="submit"
+          class="btn btn-primary"
+          data-dismiss="modal"
+        >
           Save Directory Tweak
         </button>
       </div>

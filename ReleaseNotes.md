@@ -5,6 +5,7 @@
 ### NEW Features
 
 - Split config files into modules (from-file)
+- Export and import changed objects
 
 ### Code Improvements
 

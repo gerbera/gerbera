@@ -1112,7 +1112,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
     const auto forbiddenDirectories = param.getForbiddenDirectories();
     log_vdebug("browse forbiddenDirectories {}", fmt::join(forbiddenDirectories, ","));
 
-    if (param.getDynamicContainers() && dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
+    if (param.getDynamicContainers() && parent && dynamicContainers.find(parent->getID()) != dynamicContainers.end()) {
         auto dynConfig = dynamicContentList->getKey(parent->getLocation());
         if (dynConfig) {
             auto reqCount = (param.getRequestedCount() <= 0 || param.getRequestedCount() > dynConfig->getMaxCount()) ? dynConfig->getMaxCount() : param.getRequestedCount();
@@ -1132,20 +1132,25 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
 
     bool hideFsRoot = param.getFlag(BROWSE_HIDE_FS_ROOT);
     int childCount = 1;
-    if (param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
-        childCount = getChildCount(parent->getID(), getContainers, getItems, hideFsRoot);
-        param.setTotalMatches(childCount);
-    } else {
-        param.setTotalMatches(1);
-    }
-
     std::vector<std::string> where;
     std::string orderBy;
     std::string limit;
     std::string addColumns;
     std::string addJoin;
 
-    if (param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+    if (param.getSources().size() > 0) {
+        where.push_back(fmt::format("{} IN ({})",
+            browseColumnMapper->mapQuoted(BrowseColumn::Source),
+            fmt::join(param.getSources(), ",")));
+
+        orderBy = fmt::format(" ORDER BY {} ASC, {} DESC, {} ASC",
+            browseColumnMapper->mapQuoted(BrowseColumn::ObjectType),
+            browseColumnMapper->mapQuoted(BrowseColumn::Source),
+            browseColumnMapper->mapQuoted(BrowseColumn::Location));
+
+    } else if (param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+        childCount = getChildCount(parent->getID(), getContainers, getItems, hideFsRoot);
+        param.setTotalMatches(childCount);
 
         where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseColumn::ParentId), parent->getID()));
 
@@ -1211,9 +1216,11 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
 
         limit = limitCode(param.getStartingIndex(), param.getRequestedCount());
     } else { // metadata
+        param.setTotalMatches(1);
         where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseColumn::Id), parent->getID()));
         limit = " LIMIT 1";
     }
+
     auto qb = fmt::format("SELECT {} {} FROM {} {} WHERE {}{}{}", sql_browse_columns, addColumns, sql_browse_query, addJoin, fmt::join(where, " AND "), orderBy, limit);
     log_debug("QUERY: {}", qb);
     beginTransaction("browse");
@@ -1249,7 +1256,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         }
     }
 
-    if (param.getDynamicContainers() && dynamicContentEnabled && getContainers && param.getStartingIndex() == 0 && param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
+    if (param.getDynamicContainers() && dynamicContentEnabled && getContainers && param.getStartingIndex() == 0 && param.getFlag(BROWSE_DIRECT_CHILDREN) && parent && parent->isContainer()) {
         if (dynamicContainers.size() < dynamicContentList->size()) {
             initDynContainers(parent);
         }
@@ -1260,6 +1267,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             }
         }
         param.setTotalMatches(childCount);
+    } else if (param.getSources().size() > 0) {
+        param.setTotalMatches(result.size());
     }
     return result;
 }
@@ -1562,8 +1571,18 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(
         auto where = std::vector {
             browseColumnMapper->getClause(BrowseColumn::LocationHash, quote(stringHash(dbLocation))),
             browseColumnMapper->getClause(BrowseColumn::Location, quote(dbLocation)),
-            fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseColumn::RefId)),
         };
+        auto countSQL = fmt::format("SELECT COUNT(*) FROM {} WHERE {}", sql_browse_query, fmt::join(where, " AND "));
+
+        beginTransaction("countFind");
+        auto sqlResult = select(countSQL);
+        commit("countFind");
+
+        auto countRow = sqlResult->nextRow();
+        if (countRow && countRow->col_int(0, 0) > 1) {
+            where.push_back(fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseColumn::RefId)));
+        }
+
         auto findSql = fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", sql_browse_columns, sql_browse_query, fmt::join(where, " AND "));
 
         beginTransaction("findObjectByPath");
@@ -2092,13 +2111,24 @@ std::string SQLDatabase::incrementUpdateIDs(const std::unordered_set<int>& ids)
     return fmt::format("{}", fmt::join(rows, ","));
 }
 
-std::size_t SQLDatabase::getObjects(int parentID, bool withoutContainer, std::unordered_set<int>& ret, bool full)
+std::size_t SQLDatabase::getObjects(
+    int parentID,
+    bool withoutContainer,
+    std::unordered_set<int>& ret,
+    bool full,
+    int refID)
 {
+    auto where = std::vector {
+        browseColumnMapper->getClause(BrowseColumn::ParentId, parentID, true)
+    };
+    if (refID > INVALID_OBJECT_ID) {
+        where.push_back(browseColumnMapper->getClause(BrowseColumn::RefId, refID, true));
+    }
     auto getSql = fmt::format("SELECT {}, {} FROM {} WHERE {}",
         browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
         browseColumnMapper->mapQuoted(BrowseColumn::ObjectType, true),
         browseColumnMapper->getTableName(),
-        browseColumnMapper->getClause(BrowseColumn::ParentId, parentID, true));
+        fmt::join(where, " AND "));
     auto res = select(getSql);
     if (!res)
         throw DatabaseException(fmt::format("error selecting form {}", browseColumnMapper->getTableName()), LINE_MESSAGE);
@@ -2113,7 +2143,7 @@ std::size_t SQLDatabase::getObjects(int parentID, bool withoutContainer, std::un
             ret.insert(id);
         else if (!withoutContainer && full) {
             ret.insert(id);
-            getObjects(id, withoutContainer, ret, full);
+            getObjects(id, withoutContainer, ret, full, refID);
         }
     }
     log_debug("found {} child objects of {}", ret.size(), parentID);

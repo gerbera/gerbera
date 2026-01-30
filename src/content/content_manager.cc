@@ -715,7 +715,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
     // request only items if non-recursive scan is wanted
     auto list = std::unordered_set<int>();
-    database->getObjects(containerID, !asSetting.recursive || importMode != ImportMode::Gerbera, list, importMode == ImportMode::Gerbera);
+    database->getObjects(containerID, !asSetting.recursive || importMode != ImportMode::Gerbera, list, importMode == ImportMode::Gerbera, INVALID_OBJECT_ID);
 
     unsigned int thisTaskID;
     if (task) {
@@ -961,7 +961,7 @@ void ContentManager::addRecursive(
     }
 
     auto list = std::unordered_set<int>();
-    database->getObjects(parentID, false, list, false);
+    database->getObjects(parentID, false, list, false, INVALID_OBJECT_ID);
     bool firstChild = true;
     std::shared_ptr<CdsObject> firstObject;
     for (auto&& subDirEnt : dIter) {

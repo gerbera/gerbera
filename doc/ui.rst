@@ -326,6 +326,16 @@ Database View
    :alt: Trail operations
    :target: _static/trail-operations.png
 
+* Export and Import changed Content
+    * Select the database container in db view
+    * Press `Export`
+    * Copy the text to a file and save it to the disk of the server
+    * After database update, enter the file path and press `Import`
+
+.. image:: _static/content-export.png
+   :alt: Export
+   :target: _static/content-export.png
+
 Config View
 -----------
 
