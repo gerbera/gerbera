@@ -31,6 +31,7 @@
 #include <vector>
 
 class CdsObject;
+enum class ObjectSource;
 
 /// @brief Base class for actions performed based on UPnP requests
 class ActionParam {
@@ -91,6 +92,7 @@ protected:
     std::shared_ptr<CdsObject> object;
 
     bool showDynamicContainers { true };
+    std::vector<ObjectSource> sources;
 
 public:
     BrowseParam(std::shared_ptr<CdsObject> object, unsigned int flags)
@@ -112,6 +114,9 @@ public:
     }
 
     bool getDynamicContainers() const { return showDynamicContainers; }
+
+    void addSource(ObjectSource source) { this->sources.push_back(source); }
+    const std::vector<ObjectSource>& getSources() const { return sources; }
 };
 
 /// @brief Parameters for UPnP search request

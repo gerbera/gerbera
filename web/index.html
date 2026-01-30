@@ -541,6 +541,21 @@
             </ul>
             <button id="searchButton" class="btn btn-primary">Execute</button>
           </div>
+          <div id="database" style="display: none; padding: 20px">
+            <div class="ml-2 grb-caption" style="width: 80%">
+              <h4>Export changed items</h4>
+              <span class="text-muted">Download JSON string from server and store in file.</span><br/>
+              <button id="exportButton" class="btn btn-primary">Export</button><br/>
+              <textarea id="exportCode" style="display: none" cols="80" rows="20"></textarea>
+              <span id="exportMissing" style="display: none">No Data available</span>
+            </div><br/><br/>
+            <div class="ml-2 grb-caption" style="width: 80%">
+              <h4>Import saved items</h4>
+              <span class="text-muted">Import JSON file and apply to server.</span><br/>
+              <button id="importButton" class="btn btn-primary">Import</button><br/>
+              <label>File Name</label><input id="importFile" style="width: 350px; margin-left: 20px"/>
+            </div>
+          </div>
           <div id="datagrid"></div>
         </div>
       </div>

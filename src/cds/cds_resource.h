@@ -67,7 +67,8 @@ public:
         std::string_view options = {},
         std::string_view parameters = {});
     CdsResource(
-        ContentHandler handlerType, ResourcePurpose purpose,
+        ContentHandler handlerType,
+        ResourcePurpose purpose,
         std::map<ResourceAttribute, std::string> attributes,
         std::map<std::string, std::string> parameters,
         std::map<std::string, std::string> options);

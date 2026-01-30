@@ -205,15 +205,26 @@ public:
     /// @param path delete resource references to this path
     /// @param all if true and the object to be removed is a reference
     /// @return changed container ids
-    virtual std::unique_ptr<ChangedContainers> removeObject(int objectID, const fs::path& path, bool all) = 0;
+    virtual std::unique_ptr<ChangedContainers> removeObject(
+        int objectID,
+        const fs::path& path,
+        bool all)
+        = 0;
 
     /// @brief Get all objects under the given parentID.
     /// @param parentID parent container
     /// @param withoutContainer if false: all children are returned; if true: only items are returned
     /// @param ret list of matching objects
     /// @param full do full hierarchy search
+    /// @param refID check for references of ID
     /// @return number of objects found
-    virtual std::size_t getObjects(int parentID, bool withoutContainer, std::unordered_set<int>& ret, bool full) = 0;
+    virtual std::size_t getObjects(
+        int parentID,
+        bool withoutContainer,
+        std::unordered_set<int>& ret,
+        bool full,
+        int refID)
+        = 0;
     virtual std::vector<int> getRefObjects(int objectId) = 0;
     virtual std::unordered_set<int> getUnreferencedObjects() = 0;
 
