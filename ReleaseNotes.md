@@ -9,7 +9,7 @@
 
 ### Code Improvements
 
-- Update maximum versions of npupnp (6.2.3), cmake (4.2.2)
+- Update maximum versions of npupnp (6.2.3), cmake (4.2.2), pupnp (1.14.26)
 
 ## v3.1.1
 
