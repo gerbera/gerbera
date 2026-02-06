@@ -9,6 +9,7 @@
 - Load Config file modules
 - Show changed items in UI
 - Update npupnp to 6.2.3
+- Update to pupnp 1.14.26
 
 ### v3.1.1
 
