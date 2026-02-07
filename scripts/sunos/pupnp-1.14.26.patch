@@ -1,0 +1,11 @@
+--- pupnp-1.14.26/upnp/src/genlib/net/http/webserver.c
++++ pupnp-1.14.26/upnp/src/genlib/net/http/webserver.c
+@@ -144,7 +144,7 @@ static char *web_server_asctime_r(const struct tm *tm, char *buf)
+ 	asctime_s(buf, ASCTIME_R_BUFFER_SIZE, tm);
+ 	return buf;
+ }
+-	#elif defined(__sun__)
++	#elif defined(__sun__) && !defined(_POSIX_PTHREAD_SEMANTICS)
+ static char *web_server_asctime_r(const struct tm *tm, char *buf)
+ {
+ 	if (tm == NULL || buf == NULL)
