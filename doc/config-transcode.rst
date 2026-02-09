@@ -172,7 +172,7 @@ profile which is defined below.
 
    Multiple flags can be separated by ``|``. The profile is selected if at least one flag is present for the client.
 
-   If the value starts with ``~`` (negation), the profile will be active for all clients that do not have the respective flag.
+   If the value starts with ``~`` (negation), the profile will be active for all clients that do not have the respective :confval:`flags`.
 
    .. confval:: client-without-flag
       :type: :confval:`Boolean`
@@ -301,7 +301,7 @@ Profile Attributes
 
    Multiple flags can be separated by ``|``. The profile is selected if at least one flag is present for the client.
 
-   If the value starts with ``~`` (negation), the profile will be active for all clients that do not have the respective flag.
+   If the value starts with ``~`` (negation), the profile will be active for all clients that do not have the respective :confval:`flags`.
 
    .. confval:: profile client-without-flag
       :type: :confval:`Boolean`
