@@ -142,5 +142,5 @@ jobs:
           run: |
             export GH_ACTIONS=y
             scripts/sunos/build-solaris.sh
-            export LD_LIBRARY_PATH=/usr/local/lib:/opt/ooce/lib:/opt/ooce/lib/amd64:${LD_LIBRARY_PATH}
+            export LD_LIBRARY_PATH=/usr/local/lib:/opt/ooce/lib:/opt/ooce/lib/amd64:${LD_LIBRARY_PATH:-}
             ./build-solaris/gerbera --compile-info
