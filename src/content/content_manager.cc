@@ -1022,7 +1022,7 @@ void ContentManager::addRecursive(
 
 template <typename T>
 std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
-    const std::shared_ptr<T>& item,
+    const std::shared_ptr<T>& obj,
     const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
@@ -1040,7 +1040,7 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
 
 template <>
 std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
-    const std::shared_ptr<CdsContainer>& item,
+    const std::shared_ptr<CdsContainer>& cont,
     const std::map<std::string, std::string>& parameters)
 {
     std::string title = getValueOrDefault(parameters, "title");
@@ -1050,8 +1050,8 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
 
     log_debug("updateCdsObject: CdsContainer {} updated", title);
 
-    auto clone = CdsObject::createObject(item->getObjectType());
-    item->copyTo(clone);
+    auto clone = CdsObject::createObject(cont->getEntryType());
+    cont->copyTo(clone);
 
     clone->setSource(ObjectSource::ImportModified);
     if (!title.empty())
@@ -1063,18 +1063,18 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
     if (!flags.empty())
         clone->setFlags(CdsObject::makeFlag(flags));
     else
-        clone->clearFlag(item->getFlags());
+        clone->clearFlag(cont->getFlags());
 
     auto clonedItem = std::static_pointer_cast<CdsContainer>(clone);
 
-    if (!item->equals(clonedItem, true)) {
+    if (!cont->equals(clonedItem, true)) {
         clone->validate();
         int containerChanged = INVALID_OBJECT_ID;
         database->updateObject(clone, &containerChanged);
         update_manager->containerChanged(containerChanged);
         session_manager->containerChangedUI(containerChanged);
-        update_manager->containerChanged(item->getParentID());
-        session_manager->containerChangedUI(item->getParentID());
+        update_manager->containerChanged(cont->getParentID());
+        session_manager->containerChangedUI(cont->getParentID());
     }
     return clone;
 }
@@ -1094,7 +1094,7 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
     std::string flags = getValueOrDefault(parameters, "flags");
     log_debug("updateCdsObject: CdsItem {} updated", title);
 
-    auto clone = CdsObject::createObject(item->getObjectType());
+    auto clone = CdsObject::createObject(item->getEntryType());
     item->copyTo(clone);
 
     clone->setSource(ObjectSource::ImportModified);
@@ -1105,7 +1105,7 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
     if (!upnpClass.empty())
         clone->setClass(upnpClass);
     if (!location.empty())
-        clone->setLocation(location);
+        clone->setLocation(location, item->getEntryType());
     if (!flags.empty())
         clone->setFlags(CdsObject::makeFlag(flags));
     else
@@ -1209,7 +1209,12 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj, bool first
     }
 }
 
-std::shared_ptr<CdsContainer> ContentManager::addContainer(int parentID, const std::string& title, const std::string& upnpClass, ObjectSource source)
+std::shared_ptr<CdsContainer> ContentManager::addContainer(
+    int parentID,
+    const std::string& title,
+    const std::string& upnpClass,
+    ObjectSource source,
+    CdsEntryType type)
 {
     fs::path cPath = database->buildContainerPath(parentID, escape(title, VIRTUAL_CONTAINER_ESCAPE, VIRTUAL_CONTAINER_SEPARATOR));
     std::vector<std::shared_ptr<CdsObject>> cVec;
@@ -1217,13 +1222,16 @@ std::shared_ptr<CdsContainer> ContentManager::addContainer(int parentID, const s
     for (auto&& segment : cPath) {
         auto cont = std::make_shared<CdsContainer>(segment.string(), upnpClass);
         cont->setSource(source);
+        cont->setEntryType(type);
         cVec.push_back(std::move(cont));
     }
     addContainerTree(cVec, nullptr);
     return importService->getContainer(fmt::format("/{}", cPath.string()));
 }
 
-std::pair<int, bool> ContentManager::addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain, const std::shared_ptr<CdsObject>& refItem)
+std::pair<int, bool> ContentManager::addContainerTree(
+    const std::vector<std::shared_ptr<CdsObject>>& chain,
+    const std::shared_ptr<CdsObject>& refItem)
 {
     if (chain.empty()) {
         log_error("Received empty chain");

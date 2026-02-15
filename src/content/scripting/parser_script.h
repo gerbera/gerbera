@@ -54,7 +54,9 @@ duk_ret_t jsUpdateCdsObject(duk_context* ctx);
 
 class ParserScript : public Script {
 public:
+    /// @brief read next non-empty line from file
     std::pair<std::string, bool> readLine();
+    /// @brief read next non-empty xml tag from file
     pugi::xml_node& readXml(int direction);
 
 protected:
@@ -67,6 +69,7 @@ protected:
     ~ParserScript() override;
 
     static pugi::xml_node nullNode;
+    /// @brief maximum length of one text line
     static constexpr int ONE_TEXTLINE_BYTES = 1024;
 
     std::FILE* currentHandle {};

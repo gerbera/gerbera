@@ -93,9 +93,9 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
     }
 
     std::vector<std::shared_ptr<CdsObject>> chain;
-    auto length = duk_get_length(ctx, -1);
+    duk_size_t length = duk_get_length(ctx, -1);
 
-    for (duk_uarridx_t i = 0; i < length; i++) {
+    for (duk_size_t i = 0; i < length; i++) {
         if (duk_get_prop_index(ctx, -1, i)) {
             if (!duk_is_object(ctx, -1)) {
                 duk_pop(ctx);
@@ -105,29 +105,34 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
             duk_to_object(ctx, -1);
             auto cdsObj = self->dukObject2cdsObject(nullptr);
             if (cdsObj) {
+                log_debug("get container {} {}", cdsObj->getClass(), cdsObj->getTitle());
                 chain.push_back(std::move(cdsObj));
             } else {
                 log_debug("no CdsObject at {}", i);
             }
+        } else {
+            log_debug("no item at {}", i);
         }
         duk_pop(ctx);
     }
 
     if (!chain.empty()) {
-        auto lastItem = chain.at(chain.size() - 1);
+        auto lastItem = chain.back();
+        auto refId = lastItem->getRefID();
         if (lastItem->isContainer()) {
-            log_debug("lastContainer {}, resSize {}, refID {}", lastItem->getTitle(), lastItem->getResourceCount(), lastItem->getRefID());
-            if (lastItem->getResourceCount() == 0 && lastItem->getRefID() >= CDS_ID_ROOT) {
-                lastItem = self->getDatabase()->loadObject(lastItem->getRefID());
+            log_debug("lastContainer {}, resSize {}, refID {}", lastItem->getTitle(), lastItem->getResourceCount(), refId);
+            if (lastItem->getResourceCount() == 0 && refId >= CDS_ID_ROOT) {
+                lastItem = self->getDatabase()->loadObject(refId);
                 log_debug("lastItem from RefID {}, resSize {}, loc {}", lastItem->getTitle(), lastItem->getResourceCount(), lastItem->getLocation().string());
             }
         } else
-            log_debug("lastItem {}, resSize {}, refID {}", lastItem->getTitle(), lastItem->getResourceCount(), lastItem->getRefID());
+            log_debug("lastItem {}, resSize {}, refID {}", lastItem->getTitle(), lastItem->getResourceCount(), refId);
         auto cm = self->getContent();
         auto containerId = std::get<0>(cm->addContainerTree(chain, lastItem));
+        chain.clear();
         if (containerId != INVALID_OBJECT_ID) {
             /* setting last container ID as return value */
-            log_debug("container {}", containerId);
+            log_debug("container {} {}", containerId, lastItem->getID());
             duk_push_string(ctx, fmt::to_string(containerId).c_str());
             return 1;
         }

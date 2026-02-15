@@ -32,7 +32,8 @@ Gerbera - https://gerbera.io/
 
 #include "util/grb_time.h"
 
-CdsContainer::CdsContainer()
+CdsContainer::CdsContainer(CdsEntryType type)
+    : CdsObject(type)
 {
     objectType = OBJECT_TYPE_CONTAINER;
     upnpClass = UPNP_CLASS_CONTAINER;

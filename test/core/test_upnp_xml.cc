@@ -116,7 +116,7 @@ public:
 
     std::shared_ptr<CdsObject> makeObjectWithRes()
     {
-        auto obj = std::make_shared<CdsItem>();
+        auto obj = std::make_shared<CdsItem>(CdsEntryType::File);
         obj->setID(42);
         obj->setParentID(2);
         obj->setRestricted(false);
@@ -165,7 +165,7 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     // arrange
     pugi::xml_document didlLite;
     auto root = didlLite.append_child("DIDL-Lite");
-    auto obj = std::make_shared<CdsContainer>();
+    auto obj = std::make_shared<CdsContainer>(CdsEntryType::Directory);
     obj->setID(1);
     obj->setParentID(2);
     obj->setRestricted(false);
@@ -215,7 +215,7 @@ TEST_F(UpnpXmlTest, RenderObjectItem)
     // arrange
     pugi::xml_document didlLite;
     auto root = didlLite.append_child("DIDL-Lite");
-    auto obj = std::make_shared<CdsItem>();
+    auto obj = std::make_shared<CdsItem>(CdsEntryType::File);
     obj->setID(1);
     obj->setParentID(2);
     obj->setRestricted(false);
@@ -257,7 +257,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithEscapes)
     // arrange
     pugi::xml_document didlLite;
     auto root = didlLite.append_child("DIDL-Lite");
-    auto obj = std::make_shared<CdsItem>();
+    auto obj = std::make_shared<CdsItem>(CdsEntryType::File);
     obj->setID(1);
     obj->setParentID(2);
     obj->setRestricted(false);
@@ -331,7 +331,7 @@ TEST_F(UpnpXmlTest, RenderObjectItemWithStrictXmlQuirks)
     // arrange
     pugi::xml_document didlLite;
     auto root = didlLite.append_child("DIDL-Lite");
-    auto obj = std::make_shared<CdsItem>();
+    auto obj = std::make_shared<CdsItem>(CdsEntryType::File);
     obj->setID(1);
     obj->setParentID(2);
     obj->setRestricted(false);
@@ -483,7 +483,7 @@ TEST_F(UpnpXmlTest, CreateResponse)
 TEST_F(UpnpXmlTest, FirstResourceRendersEmptyWhenNoResource)
 {
     auto obj = std::make_shared<CdsItemExternalURL>();
-    obj->setLocation("http://localhost/external/url");
+    obj->setURL("http://localhost/external/url");
 
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
@@ -495,7 +495,7 @@ TEST_F(UpnpXmlTest, FirstResourceRendersEmptyWhenNoResource)
 TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl)
 {
     auto obj = std::make_shared<CdsItemExternalURL>();
-    obj->setLocation("http://localhost/external/url");
+    obj->setURL("http://localhost/external/url");
 
     auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
     resource->addAttribute(ResourceAttribute::PROTOCOLINFO, "http-get:*:audio/mpeg:*");
@@ -514,7 +514,7 @@ TEST_F(UpnpXmlTest, FirstResourceRendersPureWhenExternalUrl)
 TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenWithProxy)
 {
     auto obj = std::make_shared<CdsItemExternalURL>();
-    obj->setLocation("http://localhost/external/url");
+    obj->setURL("http://localhost/external/url");
     obj->setID(12345);
     obj->setFlag(OBJECT_FLAG_PROXY_URL);
 
@@ -533,8 +533,8 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenWithProxy)
 
 TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem)
 {
-    auto obj = std::make_shared<CdsItem>();
-    obj->setLocation("local/content");
+    auto obj = std::make_shared<CdsItem>(CdsEntryType::File);
+    obj->setLocation("local/content", CdsEntryType::File);
     obj->setID(12345);
 
     auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);

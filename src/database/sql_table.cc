@@ -48,6 +48,7 @@ const std::vector<BrowseColumn> Object2Table::tableColumnOrder = {
     BrowseColumn::PartNumber,
     BrowseColumn::TrackNumber,
     BrowseColumn::Source,
+    BrowseColumn::EntryType,
     BrowseColumn::ServiceId,
     BrowseColumn::LastModified,
     BrowseColumn::LastUpdated,
@@ -88,7 +89,9 @@ const std::vector<AutoscanColumn> Autoscan2Table::tableColumnOrder = {
     AutoscanColumn::RetryCount,
     AutoscanColumn::DirTypes,
     AutoscanColumn::ForceRescan,
+    AutoscanColumn::ItemId,
     AutoscanColumn::ObjLocation,
+    AutoscanColumn::EntryType,
 };
 
 const std::vector<ConfigColumn> Config2Table::tableColumnOrder = {

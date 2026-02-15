@@ -35,7 +35,8 @@ Gerbera - https://gerbera.io/
 #include "upnp/upnp_common.h"
 #include "util/grb_time.h"
 
-CdsItem::CdsItem()
+CdsItem::CdsItem(CdsEntryType type)
+    : CdsObject(type)
 {
     objectType = OBJECT_TYPE_ITEM;
     upnpClass = UPNP_CLASS_ITEM;
@@ -89,7 +90,8 @@ void CdsItem::validate() const
 
 //---------
 
-CdsItemExternalURL::CdsItemExternalURL()
+CdsItemExternalURL::CdsItemExternalURL(CdsEntryType type)
+    : CdsItem(type)
 {
     objectType |= OBJECT_TYPE_ITEM_EXTERNAL_URL;
     upnpClass = UPNP_CLASS_ITEM;

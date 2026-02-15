@@ -186,10 +186,60 @@ void StateCache::cacheState(
 std::shared_ptr<CdsObject> StateCache::getObject(const fs::path& location) const
 {
     log_debug("start {}", location.string());
+    auto cacheLock = CacheAutoLock(cacheMutex);
     if (contentStateCache.find(location) != contentStateCache.end()) {
         return contentStateCache.at(location)->getObject();
     }
     return {};
+}
+
+void ContainerCache::set(
+    const fs::path& entryPath,
+    const std::shared_ptr<CdsContainer>& cdsContainer)
+{
+    auto cacheLock = CacheAutoLock(cacheMutex);
+    containerMap[entryPath] = cdsContainer;
+}
+
+void ContainerCache::setFanArt(
+    int id,
+    const std::shared_ptr<CdsContainer>& cdsContainer)
+{
+    auto cacheLock = CacheAutoLock(cacheMutex);
+    containersWithFanArt[id] = cdsContainer;
+}
+
+std::shared_ptr<CdsContainer> ContainerCache::at(const fs::path& location) const
+{
+    auto cacheLock = CacheAutoLock(cacheMutex);
+    log_debug("start {}", location.string());
+    auto llocation = location;
+    if (!hasCaseSensitiveNames) {
+        llocation = toLower(location);
+    }
+    if (containerMap.find(llocation) != containerMap.end()) {
+        return containerMap.at(llocation);
+    }
+    return {};
+}
+
+std::shared_ptr<CdsContainer> ContainerCache::getFanArt(int id) const
+{
+    auto cacheLock = CacheAutoLock(cacheMutex);
+    log_debug("start {}", id);
+
+    if (containersWithFanArt.find(id) != containersWithFanArt.end()) {
+        return containersWithFanArt.at(id);
+    }
+    return {};
+}
+
+void ContainerCache::clear()
+{
+    log_debug("Clearing Cache");
+    auto cacheLock = CacheAutoLock(cacheMutex);
+    containerMap.clear();
+    containersWithFanArt.clear();
 }
 
 ImportService::ImportService(std::shared_ptr<Context> context, std::shared_ptr<ConverterManager> converterManager)
@@ -200,6 +250,7 @@ ImportService::ImportService(std::shared_ptr<Context> context, std::shared_ptr<C
     , converterManager(std::move(converterManager))
     , containerTypeMap(AutoscanDirectory::ContainerTypesDefaults)
     , importStateCache(std::make_shared<StateCache>())
+    , containerCache(this->config->getBoolOption(ConfigVal::IMPORT_CASE_SENSITIVE_TAGS))
 {
     hasReadableNames = config->getBoolOption(ConfigVal::IMPORT_READABLE_NAMES);
     hasCaseSensitiveNames = config->getBoolOption(ConfigVal::IMPORT_CASE_SENSITIVE_TAGS);
@@ -291,8 +342,7 @@ std::string ImportService::mimeTypeToUpnpClass(const std::string& mimeType) cons
 void ImportService::clearCache()
 {
     log_debug("Clearing Cache '{}'", rootPath.c_str());
-    containerMap.clear();
-    containersWithFanArt.clear();
+    containerCache.clear();
 }
 
 std::shared_ptr<CdsObject> ImportService::doImport(
@@ -488,7 +538,7 @@ void ImportService::createContainers(
             auto cdsObj = stateEntry->getObject();
             if (cdsObj) {
                 auto oldLocation = cdsObj->getLocation();
-                cdsObj->setLocation(contPath);
+                cdsObj->setLocation(contPath, CdsEntryType::Directory);
                 log_debug("Container renamed {} {}", cdsObj->getTitle(), contPath.filename().string());
                 cdsObj->setTitle(contPath.filename().string());
                 auto sortKey = expandNumbersString(contPath.filename().stem().string());
@@ -643,7 +693,7 @@ void ImportService::createItems(
                     item->clearAuxData();
                     item->clearResources();
                     log_debug("Changing location {} to {}", item->getLocation().string(), itemPath.string());
-                    item->setLocation(itemPath);
+                    item->setLocation(itemPath, CdsEntryType::File);
                     item->setTitle(makeTitle(itemPath, item->getClass()));
                     auto sortKey = expandNumbersString(itemPath.filename().stem().string());
                     if (!sortKey.empty()) {
@@ -710,8 +760,8 @@ std::pair<bool, std::shared_ptr<CdsObject>> ImportService::createSingleItem(cons
     if (mimetype.empty() && upnpClass.empty()) {
         return { skip, nullptr };
     }
-    auto item = std::make_shared<CdsItem>();
-    item->setLocation(objectPath);
+    auto item = std::make_shared<CdsItem>(CdsEntryType::File);
+    item->setLocation(objectPath, CdsEntryType::File);
 
     if (!mimetype.empty()) {
         item->setMimeType(mimetype);
@@ -796,8 +846,11 @@ void ImportService::fillSingleLayout(
             if (contentType == CONTENT_TYPE_PLAYLIST) {
 #ifdef HAVE_JS
                 try {
-                    if (playlistParserScript)
+                    if (playlistParserScript) {
+                        // only lock mutex while processing playlist layout
+                        LayoutAutoLock lock(layoutMutex);
                         playlistParserScript->processPlaylistObject(cdsObject, task, rootPath);
+                    }
                 } catch (const std::runtime_error& e) {
                     log_error("{}", e.what());
                 }
@@ -898,7 +951,7 @@ void ImportService::assignFanArt(
         }
     }
 
-    if (containersWithFanArt.find(container->getID()) != containersWithFanArt.end()) {
+    if (containerCache.getFanArt(container->getID())) {
         log_debug("Already {} assigned fanart {}", container->getLocation().string(), container->getID());
         if (doUpdate)
             database->updateObject(container, nullptr);
@@ -971,9 +1024,10 @@ void ImportService::assignFanArt(
     }
     if (fanart) {
         container->clearResources();
-        container->addResource(fanart); // overwrite all other resources
+        auto theFanArt = std::make_shared<CdsResource>(fanart->getHandlerType(), fanart->getPurpose(), fanart->getAttributes(), fanart->getParameters(), fanart->getOptions());
+        container->addResource(theFanArt); // overwrite all other resources
         doUpdate = true;
-        containersWithFanArt[container->getID()] = container;
+        containerCache.setFanArt(container->getID(), container);
     }
     if (doUpdate)
         database->updateObject(container, nullptr);
@@ -981,11 +1035,7 @@ void ImportService::assignFanArt(
 
 std::shared_ptr<CdsContainer> ImportService::getContainer(const std::string& location) const
 {
-    if (!hasCaseSensitiveNames) {
-        auto llocation = toLower(location);
-        return containerMap.at(llocation);
-    }
-    return containerMap.at(location);
+    return containerCache.at(location);
 }
 
 std::shared_ptr<CdsContainer> ImportService::createSingleContainer(
@@ -996,16 +1046,19 @@ std::shared_ptr<CdsContainer> ImportService::createSingleContainer(
     std::vector<std::shared_ptr<CdsObject>> cVec;
     auto location = dirEntry.path();
     for (auto&& segment : location) {
-        if (segment != "/")
-            cVec.push_back(std::make_shared<CdsContainer>(segment.string(), upnpClass));
+        if (segment != "/") {
+            cVec.push_back(std::make_shared<CdsContainer>(segment.string(), upnpClass, CdsEntryType::Directory));
+        }
     }
     std::vector<int> createdIds;
     addContainerTree(parentContainerId, cVec, nullptr, createdIds);
 
-    if (containerMap.find(location) != containerMap.end()) {
-        auto result = containerMap.at(location);
-        result->setMTime(toSeconds(dirEntry.last_write_time(ec)));
-        return result;
+    {
+        auto result = containerCache.at(location);
+        if (result) {
+            result->setMTime(toSeconds(dirEntry.last_write_time(ec)));
+            return result;
+        }
     }
     return {};
 }
@@ -1023,6 +1076,7 @@ std::pair<int, bool> ImportService::addContainerTree(
     bool isNew = false;
     bool isVirtual = parentContainerId != CDS_ID_FS_ROOT;
     int count = 0;
+
     for (auto&& item : chain) {
         std::string subTree;
         if (item->getTitle().empty()) {
@@ -1051,7 +1105,7 @@ std::pair<int, bool> ImportService::addContainerTree(
                     std::string location = item->getLocation().c_str();
                     if (!location.empty()) {
                         dirKeyValues.push_back(location);
-                        item->setLocation("");
+                        item->setLocation("", item->getEntryType());
                     }
                 } else if (endswith(field, "_1")) {
                     auto metaField = MetaEnumMapper::remapMetaDataField(field.replace(field.end() - 2, field.end(), ""));
@@ -1074,46 +1128,45 @@ std::pair<int, bool> ImportService::addContainerTree(
             if (!hasCaseSensitiveNames) {
                 subTree = toLower(subTree);
             }
-            if (containerMap.find(subTree) == containerMap.end() || !containerMap.at(subTree)) {
+            if (!containerCache.at(subTree)) {
                 auto cont = database->findObjectByPath(subTree, UNUSED_CLIENT_GROUP, DbFileType::Virtual);
                 if (cont && cont->isContainer())
-                    containerMap[subTree] = std::dynamic_pointer_cast<CdsContainer>(cont);
+                    containerCache.set(subTree, std::dynamic_pointer_cast<CdsContainer>(cont));
                 else
-                    containerMap[subTree] = nullptr;
+                    containerCache.set(subTree, nullptr);
                 log_debug("Loaded container chain item {} -> {}", subTree, cont && cont->isContainer());
             }
         } else if (subTree.empty()) {
             subTree = tree;
         }
-        if (containerMap.find(subTree) == containerMap.end() || !containerMap.at(subTree)) {
+        if (!containerCache.at(subTree)) {
             item->removeMetaData(MetadataFields::M_TITLE);
             item->addMetaData(MetadataFields::M_TITLE, item->getTitle());
             item->setParentID(result);
-            auto cont = std::dynamic_pointer_cast<CdsContainer>(item);
-            cont->setVirtual(isVirtual);
-            log_debug("Creating container chain item {} virtual {}", subTree, cont->isVirtual());
-            if (database->addContainer(result, subTree, cont, &result)) {
-                createdIds.push_back(result);
-            }
-            auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(result));
-            containerMap[subTree] = container;
-            if (item->getMTime() > container->getMTime()) {
-                createdIds.push_back(result); // ensure update
-            }
-            isNew = true;
             if (item->isContainer()) {
-                std::shared_ptr<CdsContainer> itemContainer = std::dynamic_pointer_cast<CdsContainer>(item);
-                container->setUpnpShortcut(itemContainer->getUpnpShortcut());
+                auto cont = std::dynamic_pointer_cast<CdsContainer>(item);
+                cont->setVirtual(isVirtual);
+                log_debug("Creating container chain item {} virtual {}", subTree, cont->isVirtual());
+                if (database->addContainer(result, subTree, cont, &result)) {
+                    createdIds.push_back(result);
+                }
+                auto container = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(result));
+                containerCache.set(subTree, container);
+                if (item->getMTime() > container->getMTime()) {
+                    createdIds.push_back(result); // ensure update
+                }
+                isNew = true;
+                container->setUpnpShortcut(cont->getUpnpShortcut());
             }
         } else {
-            result = containerMap.at(subTree)->getID();
-            if (item->getMTime() > containerMap.at(subTree)->getMTime()) {
+            result = containerCache.at(subTree)->getID();
+            if (item->getMTime() > containerCache.at(subTree)->getMTime()) {
                 createdIds.push_back(result);
             }
         }
         count++;
         if (isVirtual) // && chain.size() - count < containerImageParentCount
-            assignFanArt(containerMap.at(subTree),
+            assignFanArt(containerCache.at(subTree),
                 refItem && count > containerImageMinDepth ? refItem : item,
                 AutoscanMediaMode::Mixed,
                 false /* isDir */,

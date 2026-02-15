@@ -52,7 +52,7 @@ void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
     obj->setParentID(parentID);
     obj->setTitle(title);
     obj->setClass(upnpClass);
-    obj->setLocation(location);
+    obj->setLocation(location, entryType);
     obj->setMTime(mtime);
     obj->setSizeOnDisk(sizeOnDisk);
     obj->setVirtual(virt);
@@ -140,7 +140,7 @@ ObjectType CdsObject::getMediaType(const std::string& contentType) const
 std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
 {
     if (IS_CDS_CONTAINER(objectType)) {
-        return std::make_shared<CdsContainer>();
+        return std::make_shared<CdsContainer>(CdsEntryType::VirtualContainer);
     }
 
     if (IS_CDS_ITEM_EXTERNAL_URL(objectType)) {
@@ -148,10 +148,61 @@ std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
     }
 
     if (isCdsItem(objectType)) {
-        return std::make_shared<CdsItem>();
+        return std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
+    }
+
+    if (objectType == 0) {
+        return std::make_shared<CdsObject>(CdsEntryType::Root);
     }
 
     throw_std_runtime_error("invalid object type: {}", objectType);
+}
+
+std::shared_ptr<CdsObject> CdsObject::createObject(CdsEntryType entryType)
+{
+    if (entryType == CdsEntryType::Directory || entryType == CdsEntryType::VirtualContainer || entryType == CdsEntryType::DynamicFolder) {
+        return std::make_shared<CdsContainer>(entryType);
+    }
+
+    if (entryType == CdsEntryType::ExternalUrl) {
+        return std::make_shared<CdsItemExternalURL>();
+    }
+
+    if (entryType == CdsEntryType::File || entryType == CdsEntryType::VirtualItem) {
+        return std::make_shared<CdsItem>(entryType);
+    }
+
+    if (entryType == CdsEntryType::Root) {
+        return std::make_shared<CdsObject>(entryType);
+    }
+
+    throw_std_runtime_error("invalid entry type: {}", mapEntryType(entryType));
+}
+
+static const auto entryTypes = std::map<CdsEntryType, std::string> {
+    { CdsEntryType::Unset, "Unset" },
+    { CdsEntryType::Root, "Root" },
+    { CdsEntryType::Directory, "Directory" },
+    { CdsEntryType::File, "File" },
+    { CdsEntryType::VirtualContainer, "Container" },
+    { CdsEntryType::VirtualItem, "Item" },
+    { CdsEntryType::ExternalUrl, "ExternalUrl" },
+    { CdsEntryType::DynamicFolder, "DynamicFolder" },
+};
+
+std::string CdsObject::mapEntryType(CdsEntryType type)
+{
+    return entryTypes.at(type);
+}
+
+CdsEntryType CdsObject::remapEntryType(const std::string& type)
+{
+    for (auto [tp, uLabel] : entryTypes) {
+        if (toLower(uLabel) == toLower(type)) {
+            return tp;
+        }
+    }
+    return CdsEntryType::Unset;
 }
 
 std::string CdsObject::mapObjectType(unsigned int type)

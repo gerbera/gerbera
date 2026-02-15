@@ -39,6 +39,7 @@ class CdsContainer;
 class CdsObject;
 class Context;
 class ScriptingRuntime;
+enum class CdsEntryType;
 enum class ObjectSource;
 enum class TaskOwner;
 
@@ -123,12 +124,14 @@ public:
     /// @param parentID the id of the parent.
     /// @param title the title of the container.
     /// @param upnpClass the upnp class of the container.
-    /// @param source of the new object.
+    /// @param source of the new container.
+    /// @param type entry type of the new container.
     virtual std::shared_ptr<CdsContainer> addContainer(
         int parentID,
         const std::string& title,
         const std::string& upnpClass,
-        ObjectSource source)
+        ObjectSource source,
+        CdsEntryType type)
         = 0;
     /// @brief Adds a virtual item.
     /// @param obj item to add
