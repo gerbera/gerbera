@@ -200,8 +200,20 @@
         <script>ALTER TABLE `grb_cds_resource` DROP COLUMN `orientation`</script>
         <script>ALTER TABLE `grb_cds_resource` CHANGE `orientation2` `orientation` bigint(20) default NULL</script>
     </version>
-    <version number="24" remark="add object source">
+    <version number="26" remark="add object source">
         <script>ALTER TABLE `mt_cds_object` ADD `source` int(11) default '0'</script>
         <script>UPDATE `mt_cds_object` SET `source`='0'</script>
+    </version>
+    <version number="27" remark="add entry type">
+        <script>ALTER TABLE `mt_cds_object` ADD `entry_type` int(11) default '-1'</script>
+        <script>UPDATE `mt_cds_object` SET `entry_type`='0' WHERE `id`='-1'</script>
+        <script>UPDATE `mt_cds_object` SET `entry_type`='3' WHERE `id`='0'</script>
+        <script>UPDATE `mt_cds_object` SET `entry_type`='1' WHERE `id`='1'</script>
+        <script>UPDATE `mt_cds_object` SET `entry_type`='0'</script>
+        <script>UPDATE `mt_cds_object` SET `entry_type`='1' WHERE `location` like 'D%';</script>
+        <script>UPDATE `mt_cds_object` SET `entry_type`='2' WHERE `location` like 'F%';</script>
+        <script>UPDATE `mt_cds_object` SET `entry_type`='3' WHERE `location` like 'V%' and `upnp_class` like 'object.container%';</script>
+        <script>UPDATE `mt_cds_object` SET `entry_type`='4' WHERE `location` is null and `object_type` = 2;</script>
+        <script migration="location">UPDATE `mt_cds_object` SET `entry_type`='5' WHERE `upnp_class` like 'object.item%' and `object_type` = 10;</script>
     </version>
 </upgrade>

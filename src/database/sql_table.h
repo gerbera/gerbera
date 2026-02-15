@@ -101,6 +101,7 @@ enum class BrowseColumn {
     PartNumber,
     TrackNumber,
     Source,
+    EntryType,
     ServiceId,
     LastModified,
     LastUpdated,
@@ -135,6 +136,7 @@ enum class AutoscanColumn {
     PathIds,
     Touched,
     ItemId,
+    EntryType,
 };
 
 /// @brief configvalue column ids

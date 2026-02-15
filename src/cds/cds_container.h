@@ -47,15 +47,18 @@ protected:
 
 public:
     /// @brief Constructor, initializes default values for the flags and sets the object type.
-    CdsContainer();
-    explicit CdsContainer(const std::string& title, const std::string& upnpClass = UPNP_CLASS_CONTAINER)
+    CdsContainer() = delete;
+    explicit CdsContainer(CdsEntryType type);
+    explicit CdsContainer(
+        const std::string& title,
+        const std::string& upnpClass = UPNP_CLASS_CONTAINER,
+        CdsEntryType type = CdsEntryType::VirtualContainer)
+        : CdsObject(type)
     {
         this->objectType = OBJECT_TYPE_CONTAINER;
         this->title = title;
         this->upnpClass = upnpClass;
     }
-
-    bool isContainer() const override { return true; }
 
     /// @brief Set the searchable flag.
     void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }

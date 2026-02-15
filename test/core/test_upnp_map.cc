@@ -34,14 +34,14 @@ TEST(UpnpMapTest, StringTest)
     UpnpMap testMap3("video/", UPNP_CLASS_VIDEO_ITEM, { {"location", "<", "/path" } });
     UpnpMap testMap4("video/", UPNP_CLASS_VIDEO_ITEM, { {"location", ">", "/path" } });
     UpnpMap testMap5("video/", UPNP_CLASS_VIDEO_ITEM, { {"upnp:artist", "==", "Artist" } });
-    auto item = std::make_shared<CdsItem>();
+    auto item = std::make_shared<CdsItem>(CdsEntryType::File);
     item->setID(1);
     item->setParentID(2);
     item->setRestricted(false);
     item->setTitle("Title");
     item->setMimeType("video/mp4");
     item->setClass(UPNP_CLASS_VIDEO_ITEM);
-    item->setLocation("/path");
+    item->setLocation("/path", CdsEntryType::File);
     item->addMetaData(MetadataFields::M_ARTIST, "Artist");
 
     EXPECT_TRUE(testMap1.isMatch(item, "video/mp4"));
@@ -59,14 +59,14 @@ TEST(UpnpMapTest, NumberTest)
     UpnpMap testMap4("video/", UPNP_CLASS_VIDEO_ITEM, { {"tracknumber", "<", "2" } });
     UpnpMap testMap5("video/", UPNP_CLASS_VIDEO_ITEM, { {"tracknumber", ">", "1" } });
     UpnpMap testMap6("video/", UPNP_CLASS_VIDEO_ITEM, { {"tracknumber", ">", "0" } });
-    auto item = std::make_shared<CdsItem>();
+    auto item = std::make_shared<CdsItem>(CdsEntryType::File);
     item->setID(1);
     item->setParentID(2);
     item->setRestricted(false);
     item->setTitle("Title");
     item->setMimeType("video/mp4");
     item->setClass(UPNP_CLASS_VIDEO_ITEM);
-    item->setLocation("/path");
+    item->setLocation("/path", CdsEntryType::File);
     item->setTrackNumber(1);
     item->addMetaData(MetadataFields::M_ARTIST, "Artist");
 

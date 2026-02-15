@@ -222,6 +222,7 @@ public:
         // Close the media file
         if (pFormatCtx)
             avformat_close_input(&pFormatCtx);
+        pFormatCtx = nullptr;
     }
 
     FfmpegObject(const FfmpegObject&) = delete;

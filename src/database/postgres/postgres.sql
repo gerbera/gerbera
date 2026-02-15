@@ -15,6 +15,7 @@ CREATE TABLE "mt_cds_object"(
     "part_number" integer default NULL,
     "track_number" integer default NULL,
     "source" integer NOT NULL default 0,
+    "entry_type" integer NOT NULL default -1,
     "service_id" varchar(GRBMAX) default NULL,
     "last_modified" bigint default NULL,
     "last_updated" bigint default 0,

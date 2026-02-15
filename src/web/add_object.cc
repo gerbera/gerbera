@@ -49,7 +49,7 @@ void Web::AddObject::addContainer(
     const std::string& title,
     const std::string& upnp_class)
 {
-    auto cont = content->addContainer(parentID, title, upnp_class, ObjectSource::User);
+    auto cont = content->addContainer(parentID, title, upnp_class, ObjectSource::User, CdsEntryType::VirtualContainer);
 
     std::string flags = param("flags");
     if (!flags.empty()) {
@@ -64,11 +64,11 @@ std::shared_ptr<CdsItem> Web::AddObject::addItem(
     const std::string& upnp_class,
     const fs::path& location)
 {
-    auto item = std::make_shared<CdsItem>();
+    auto item = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
     item->setParentID(parentID);
 
     item->setTitle(title);
-    item->setLocation(location);
+    item->setLocation(location, CdsEntryType::VirtualItem);
     item->setClass(upnp_class);
     item->setSource(ObjectSource::User);
 

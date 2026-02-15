@@ -169,18 +169,22 @@ public:
     /// @param chain list of container objects to create
     /// @param refItem object to take artwork from
     /// @return ID of the last container in the chain.
-    std::pair<int, bool> addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain, const std::shared_ptr<CdsObject>& refItem) override;
+    std::pair<int, bool> addContainerTree(
+        const std::vector<std::shared_ptr<CdsObject>>& chain,
+        const std::shared_ptr<CdsObject>& refItem) override;
 
     /// @brief Adds a virtual container specified by parentID and title
     /// @param parentID the id of the parent.
     /// @param title the title of the container.
     /// @param upnpClass the upnp class of the container.
-    /// @param source of the new object.
+    /// @param source of the new container.
+    /// @param type entry type of the new container.
     std::shared_ptr<CdsContainer> addContainer(
         int parentID,
         const std::string& title,
         const std::string& upnpClass,
-        ObjectSource source) override;
+        ObjectSource source,
+        CdsEntryType type) override;
 
     /// @brief Updates an object in the database.
     /// @param obj the object to update

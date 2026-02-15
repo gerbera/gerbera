@@ -59,7 +59,7 @@ enum class ResourceDataType;
 enum class ObjectSource;
 enum class Operation;
 
-#define DBVERSION 26
+#define DBVERSION 27
 #define STRING_LIMIT "GRBMAX"
 
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
@@ -233,6 +233,11 @@ protected:
     /// @brief migrate resource data for cdsObject
     void migrateResources(int objectId, const std::string& resourcesStr);
 
+    /// @brief drop prefix from location
+    bool doLocationMigration();
+    /// @brief migrate a location for cdsObject
+    void migrateLocation(int objectId, const std::string& location);
+
     /// @brief upgrade database version by applying migration commands
     void upgradeDatabase(
         unsigned int dbVersion,
@@ -299,14 +304,6 @@ private:
     void _autoscanChangePersistentFlag(int objectID, bool persistent);
     static std::shared_ptr<AutoscanDirectory> _fillAutoscanDirectory(const std::unique_ptr<SQLRow>& row);
     std::vector<int> _checkOverlappingAutoscans(const std::shared_ptr<AutoscanDirectory>& adir);
-
-    /* location helper: filesystem path or virtual path to db location*/
-    static std::string addLocationPrefix(
-        char prefix,
-        const fs::path& path,
-        std::string_view suffix = "");
-    /* location helpers: db location to filesystem path */
-    static std::pair<fs::path, char> stripLocationPrefix(std::string_view dbLocation);
 
     std::shared_ptr<CdsObject> checkRefID(const std::shared_ptr<CdsObject>& obj);
     int createContainer(

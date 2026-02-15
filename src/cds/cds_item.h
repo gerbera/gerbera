@@ -53,13 +53,11 @@ protected:
 
 public:
     /// @brief Constructor, sets the object type and default upnp:class (object.item)
-    CdsItem();
+    CdsItem() = delete;
+    explicit CdsItem(CdsEntryType type);
 
     /// @brief Set mime-type information of the media.
     void setMimeType(const std::string& mimeType) { this->mimeType = mimeType; }
-
-    bool isItem() const override { return true; }
-    bool isPureItem() const override { return true; }
 
     /// @brief Query mime-type information.
     std::string getMimeType() const { return mimeType; }
@@ -111,13 +109,15 @@ public:
 class CdsItemExternalURL : public CdsItem {
 public:
     /// @brief Constructor, sets the object type.
-    CdsItemExternalURL();
-    bool isPureItem() const override { return false; }
-    bool isExternalItem() const override { return true; }
+    explicit CdsItemExternalURL(CdsEntryType type = CdsEntryType::ExternalUrl);
 
     /// @brief Sets the URL for the item.
     /// @param URL full url to the item: http://somewhere.com/something.mpg
-    void setURL(const std::string& URL) { this->location = URL; }
+    void setURL(const std::string& URL)
+    {
+        this->location = URL;
+        this->entryType = CdsEntryType::ExternalUrl;
+    }
 
 #if 0
     /// @brief Copies all object properties to another object.

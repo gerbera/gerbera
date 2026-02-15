@@ -74,12 +74,6 @@
 #define RES_ALIAS "re"
 #define SRC_ALIAS "c"
 
-// database
-#define LOC_DIR_PREFIX 'D'
-#define LOC_FILE_PREFIX 'F'
-#define LOC_VIRT_PREFIX 'V'
-#define LOC_ILLEGAL_PREFIX 'X'
-
 #define WILDCARD "%"
 
 /// @brief search column ids
@@ -96,6 +90,7 @@ enum class SearchColumn {
     PartNumber,
     TrackNumber,
     Source,
+    EntryType,
     Location,
     LastModified,
     LastUpdated,
@@ -127,6 +122,7 @@ static std::map<BrowseColumn, SearchProperty> browseColMap {
     { BrowseColumn::PartNumber, { ITM_ALIAS, "part_number", FieldType::Integer } },
     { BrowseColumn::TrackNumber, { ITM_ALIAS, "track_number", FieldType::Integer } },
     { BrowseColumn::Source, { ITM_ALIAS, "source", FieldType::Integer } },
+    { BrowseColumn::EntryType, { ITM_ALIAS, "entry_type", FieldType::Integer } },
     { BrowseColumn::ServiceId, { ITM_ALIAS, "service_id" } },
     { BrowseColumn::LastModified, { ITM_ALIAS, "last_modified", FieldType::Date } },
     { BrowseColumn::LastUpdated, { ITM_ALIAS, "last_updated", FieldType::Date } },
@@ -153,6 +149,7 @@ static std::map<SearchColumn, SearchProperty> searchColMap {
     { SearchColumn::PartNumber, { SRC_ALIAS, "part_number", FieldType::Integer } },
     { SearchColumn::TrackNumber, { SRC_ALIAS, "track_number", FieldType::Integer } },
     { SearchColumn::Source, { SRC_ALIAS, "source", FieldType::Integer } },
+    { SearchColumn::EntryType, { SRC_ALIAS, "entry_type", FieldType::Integer } },
     { SearchColumn::Location, { SRC_ALIAS, "location" } },
     { SearchColumn::LastModified, { SRC_ALIAS, "last_modified", FieldType::Date } },
     { SearchColumn::LastUpdated, { SRC_ALIAS, "last_updated", FieldType::Date } },
@@ -215,8 +212,9 @@ static const std::map<AutoscanColumn, SearchProperty> autoscanColMap {
     { AutoscanColumn::ForceRescan, { AUS_ALIAS, "force_rescan", FieldType::Bool } },
     { AutoscanColumn::PathIds, { AUS_ALIAS, "path_ids", FieldType::String } },
     { AutoscanColumn::Touched, { AUS_ALIAS, "touched", FieldType::Bool } },
-    { AutoscanColumn::ObjLocation, { ITM_ALIAS, "location" } },
     { AutoscanColumn::ItemId, { ITM_ALIAS, "id" } },
+    { AutoscanColumn::ObjLocation, { ITM_ALIAS, "location" } },
+    { AutoscanColumn::EntryType, { ITM_ALIAS, "entry_type" } },
 };
 
 /// @brief Map browse sort keys to column ids
@@ -265,6 +263,7 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
     { "dir_types", AutoscanColumn::DirTypes },
     { "force_rescan", AutoscanColumn::ForceRescan },
     { "obj_location", AutoscanColumn::ObjLocation },
+    { "entry_type", AutoscanColumn::EntryType },
 };
 
 /// @brief Map playstatus column ids to column names
@@ -388,6 +387,7 @@ void SQLDatabase::init()
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), BrowseColumn::TrackNumber },
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE), BrowseColumn::DcTitle },
         { "source", BrowseColumn::Source },
+        { "entry_type", BrowseColumn::EntryType },
         { UPNP_SORT_KEY, BrowseColumn::SortKey },
         { UPNP_SEARCH_CLASS, BrowseColumn::UpnpClass },
         { UPNP_SEARCH_PATH, BrowseColumn::Location },
@@ -401,6 +401,7 @@ void SQLDatabase::init()
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchColumn::PartNumber },
         { MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER), SearchColumn::TrackNumber },
         { "source", SearchColumn::Source },
+        { "entry_type", SearchColumn::EntryType },
         { UPNP_SORT_KEY, SearchColumn::SortKey },
         { UPNP_SEARCH_CLASS, SearchColumn::UpnpClass },
         { UPNP_SEARCH_PATH, SearchColumn::Location },
@@ -551,7 +552,7 @@ void SQLDatabase::fillDatabase()
     log_debug("start");
     constexpr int nullID = -1;
     auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST);
-    auto nullObject = std::make_shared<CdsObject>();
+    auto nullObject = std::make_shared<CdsObject>(CdsEntryType::Root);
     nullObject->setFlags(OBJECT_FLAG_PERSISTENT_CONTAINER | OBJECT_FLAG_RESTRICTED);
     nullObject->setID(nullID);
     nullObject->setParentID(nullID);
@@ -563,6 +564,7 @@ void SQLDatabase::fillDatabase()
 
     auto blPc = blOption->getKey(BoxKeys::pcDirectory);
     auto fileContainer = setDefaultContainer(blPc, "PC Directory");
+    fileContainer->setEntryType(CdsEntryType::Directory);
     fileContainer->setID(CDS_ID_FS_ROOT);
     fileContainer->setParentID(CDS_ID_ROOT);
     fileContainer->addMetaData(MetadataFields::M_DATE, "1900-01-01T00:00:00Z");
@@ -572,6 +574,7 @@ void SQLDatabase::fillDatabase()
         cdsObjectSql.emplace(BrowseColumn::Id, quote(obj->getID()));
         cdsObjectSql.emplace(BrowseColumn::ParentId, quote(obj->getParentID()));
         cdsObjectSql.emplace(BrowseColumn::ObjectType, quote(obj->getObjectType()));
+        cdsObjectSql.emplace(BrowseColumn::EntryType, quote(int(obj->getEntryType())));
         cdsObjectSql.emplace(BrowseColumn::Flags, quote(obj->getFlags()));
         if (!obj->getClass().empty())
             cdsObjectSql.emplace(BrowseColumn::UpnpClass, quote(obj->getClass()));
@@ -656,6 +659,7 @@ void SQLDatabase::upgradeDatabase(
     static const std::map<std::string, bool (SQLDatabase::*)()> migActions {
         { "metadata", &SQLDatabase::doMetadataMigration },
         { "resources", &SQLDatabase::doResourceMigration },
+        { "location", &SQLDatabase::doLocationMigration },
     };
     this->addResourceColumnCmd = addResourceColumnCmd;
 
@@ -818,6 +822,7 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
     setCol(cdsObjectSql, BrowseColumn::DcTitle, obj->getTitle(), browseColMap);
     setCol(cdsObjectSql, BrowseColumn::SortKey, obj->getSortKey(), browseColMap);
     cdsObjectSql.emplace(BrowseColumn::Source, quote(int(obj->getSource())));
+    cdsObjectSql.emplace(BrowseColumn::EntryType, quote(int(obj->getEntryType())));
 
     if (op == Operation::Update)
         cdsObjectSql.emplace(BrowseColumn::Auxdata, SQL_NULL);
@@ -840,9 +845,9 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
 
     int parentID = obj->getParentID();
     if (obj->isContainer() && op == Operation::Update) {
-        fs::path dbLocation = addLocationPrefix(obj->isVirtual() ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX, obj->getLocation());
+        std::string dbLocation = obj->getLocation();
         setCol(cdsObjectSql, BrowseColumn::Location, dbLocation, browseColMap);
-        cdsObjectSql.emplace(BrowseColumn::LocationHash, quote(stringHash(dbLocation.string())));
+        cdsObjectSql.emplace(BrowseColumn::LocationHash, quote(stringHash(dbLocation)));
     } else if (obj->isItem()) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
 
@@ -850,18 +855,16 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
             fs::path loc = item->getLocation();
             if (loc.empty())
                 throw DatabaseException("tried to create or update a non-referenced item without a location set", LINE_MESSAGE);
+            setCol(cdsObjectSql, BrowseColumn::Location, loc, browseColMap);
             if (obj->isPureItem()) {
                 if (parentID < 0) {
                     parentID = ensurePathExistence(loc.parent_path(), changedContainer);
                     log_debug("ensurePathExistence {} -> {}", loc.parent_path().string(), parentID);
                     obj->setParentID(parentID);
                 }
-                fs::path dbLocation = addLocationPrefix(LOC_FILE_PREFIX, loc);
-                setCol(cdsObjectSql, BrowseColumn::Location, dbLocation, browseColMap);
-                cdsObjectSql.emplace(BrowseColumn::LocationHash, quote(stringHash(dbLocation.string())));
+                cdsObjectSql.emplace(BrowseColumn::LocationHash, quote(stringHash(loc.c_str())));
             } else {
                 // URLs
-                setCol(cdsObjectSql, BrowseColumn::Location, loc, browseColMap);
                 cdsObjectSql.emplace(BrowseColumn::LocationHash, SQL_NULL);
             }
         }
@@ -1092,7 +1095,7 @@ std::vector<int> SQLDatabase::getServiceObjectIDs(char servicePrefix)
     auto res = select(getSql);
     commit("getServiceObjectIDs");
     if (!res)
-        throw DatabaseException(fmt::format("error selecting form {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
+        throw DatabaseException(fmt::format("error selecting from {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
 
     std::vector<int> objectIDs;
     objectIDs.reserve(res->getNumRows());
@@ -1160,8 +1163,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
         if (getItems && !forbiddenDirectories.empty()) {
             std::vector<std::string> forbiddenList;
             for (auto&& forbDir : forbiddenDirectories) {
-                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseColumn::RefLocation), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, WILDCARD))));
-                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseColumn::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, WILDCARD))));
+                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseColumn::RefLocation), quote(forbDir + WILDCARD)));
+                forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", browseColumnMapper->mapQuoted(BrowseColumn::Location), quote(forbDir + WILDCARD)));
             }
             where.push_back(fmt::format("(NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
         }
@@ -1292,7 +1295,7 @@ void SQLDatabase::initDynContainers(const std::shared_ptr<CdsObject>& sParent)
             auto dynId = parent ? static_cast<std::int32_t>(static_cast<std::int64_t>(-(parent->getID() + 1)) * 10000 - count) : INVALID_OBJECT_ID;
             // create runtime container
             if (parent && dynamicContainers.find(dynId) == dynamicContainers.end()) {
-                auto dynFolder = std::make_shared<CdsContainer>();
+                auto dynFolder = std::make_shared<CdsContainer>(CdsEntryType::DynamicFolder);
                 dynFolder->setTitle(dynConfig->getTitle());
                 dynFolder->setID(dynId);
                 dynFolder->setParentID(parent->getID());
@@ -1301,7 +1304,7 @@ void SQLDatabase::initDynContainers(const std::shared_ptr<CdsObject>& sParent)
                     location = toLower(location);
                     dynConfig->setLocation(location); // use lowercase for current run
                 }
-                dynFolder->setLocation(location);
+                dynFolder->setLocation(location, CdsEntryType::DynamicFolder);
                 dynFolder->setClass(UPNP_CLASS_DYNAMIC_CONTAINER);
                 dynFolder->setUpnpShortcut(dynConfig->getUpnpShortcut());
 
@@ -1349,7 +1352,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
         std::vector<std::string> forbiddenList;
         forbiddenList.reserve(forbiddenDirectories.size());
         for (auto&& forbDir : forbiddenDirectories) {
-            forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(addLocationPrefix(LOC_FILE_PREFIX, forbDir, WILDCARD))));
+            forbiddenList.push_back(fmt::format("({0} is not null AND {0} like {1})", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(forbDir + WILDCARD)));
         }
         searchSQL.append(fmt::format(" AND (NOT (({0} & {1}) = {1} AND ({2})) OR ({0} & {1}) != {1})", searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_ITEM, fmt::join(forbiddenList, " OR ")));
     }
@@ -1515,7 +1518,7 @@ std::vector<std::string> SQLDatabase::getMimeTypes()
     commit("getMimeTypes");
 
     if (!res)
-        throw DatabaseException(fmt::format("error selecting form {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
+        throw DatabaseException(fmt::format("error selecting from {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
 
     std::vector<std::string> arr;
     arr.reserve(res->getNumRows());
@@ -1557,47 +1560,61 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(
     const std::string& group,
     DbFileType fileType)
 {
-    auto fileTypeList = fileType == DbFileType::Any ? std::vector<DbFileType> { DbFileType::File, DbFileType::Directory, DbFileType::Virtual } : std::vector<DbFileType> { fileType };
-    for (auto&& ft : fileTypeList) {
-        std::string dbLocation = [&fullpath, ft] {
-            std::error_code ec;
-            if (ft == DbFileType::File || (ft == DbFileType::Auto && isRegularFile(fullpath, ec)))
-                return addLocationPrefix(LOC_FILE_PREFIX, fullpath);
-            if (ft == DbFileType::Virtual)
-                return addLocationPrefix(LOC_VIRT_PREFIX, fullpath);
-            return addLocationPrefix(LOC_DIR_PREFIX, fullpath);
-        }();
+    std::vector<int> et;
+    switch (fileType) {
+    case DbFileType::Auto:
+    default: {
+        std::error_code ec;
+        if (isRegularFile(fullpath, ec))
+            et.push_back(int(CdsEntryType::File));
+        else
+            et.push_back(int(CdsEntryType::Directory));
+        break;
+    }
+    case DbFileType::File:
+        et.push_back(int(CdsEntryType::File));
+        break;
+    case DbFileType::Directory:
+        et.push_back(int(CdsEntryType::Directory));
+        break;
+    case DbFileType::Virtual:
+        et.push_back(int(CdsEntryType::VirtualContainer));
+        break;
+    case DbFileType::Any:
+        et = std::vector<int> { int(CdsEntryType::File), int(CdsEntryType::Directory), int(CdsEntryType::VirtualContainer) };
+        break;
+    }
+    auto where = std::vector {
+        browseColumnMapper->getClause(BrowseColumn::LocationHash, quote(stringHash(fullpath.c_str()))),
+        browseColumnMapper->getClause(BrowseColumn::Location, quote(fullpath)),
+    };
+    where.push_back(fmt::format("{} IN ({})", browseColumnMapper->mapQuoted(BrowseColumn::EntryType), fmt::join(et, ",")));
 
-        auto where = std::vector {
-            browseColumnMapper->getClause(BrowseColumn::LocationHash, quote(stringHash(dbLocation))),
-            browseColumnMapper->getClause(BrowseColumn::Location, quote(dbLocation)),
-        };
-        auto countSQL = fmt::format("SELECT COUNT(*) FROM {} WHERE {}", sql_browse_query, fmt::join(where, " AND "));
+    auto countSQL = fmt::format("SELECT COUNT(*) FROM {} WHERE {}", sql_browse_query, fmt::join(where, " AND "));
 
-        beginTransaction("countFind");
-        auto sqlResult = select(countSQL);
-        commit("countFind");
+    beginTransaction("countFind");
+    auto sqlResult = select(countSQL);
+    commit("countFind");
 
-        auto countRow = sqlResult->nextRow();
-        if (countRow && countRow->col_int(0, 0) > 1) {
-            where.push_back(fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseColumn::RefId)));
-        }
+    auto countRow = sqlResult->nextRow();
+    if (countRow && countRow->col_int(0, 0) > 1) {
+        where.push_back(fmt::format("{} IS NULL", browseColumnMapper->mapQuoted(BrowseColumn::RefId)));
+    }
 
-        auto findSql = fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", sql_browse_columns, sql_browse_query, fmt::join(where, " AND "));
+    auto findSql = fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1", sql_browse_columns, sql_browse_query, fmt::join(where, " AND "));
 
-        beginTransaction("findObjectByPath");
-        auto res = select(findSql);
-        log_debug("{} -> res={} ({})", findSql, !!res, res ? res->getNumRows() : -1);
-        if (!res) {
-            commit("findObjectByPath");
-            throw DatabaseException(fmt::format("error while doing select: {}", findSql), LINE_MESSAGE);
-        }
-        auto row = res->nextRow();
-        if (row) {
-            auto result = createObjectFromRow(group, row);
-            commit("findObjectByPath");
-            return result;
-        }
+    beginTransaction("findObjectByPath");
+    auto res = select(findSql);
+    log_debug("{} -> res={} ({})", findSql, !!res, res ? res->getNumRows() : -1);
+    if (!res) {
+        commit("findObjectByPath");
+        throw DatabaseException(fmt::format("error while doing select: {}", findSql), LINE_MESSAGE);
+    }
+    auto row = res->nextRow();
+    if (row) {
+        auto result = createObjectFromRow(group, row);
+        commit("findObjectByPath");
+        return result;
     }
 
     commit("findObjectByPath");
@@ -1659,7 +1676,6 @@ int SQLDatabase::createContainer(
         if (!refObj)
             throw DatabaseException("tried to create container with refID set, but refID doesn't point to an existing object", LINE_MESSAGE);
     }
-    std::string dbLocation = addLocationPrefix((isVirtual ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX), virtualPath);
 
     auto dict = std::map<BrowseColumn, std::string> {
         { BrowseColumn::ParentId, fmt::to_string(parentID) },
@@ -1668,9 +1684,10 @@ int SQLDatabase::createContainer(
         { BrowseColumn::UpnpClass, !upnpClass.empty() ? quote(upnpClass) : quote(UPNP_CLASS_CONTAINER) },
         { BrowseColumn::DcTitle, quote(name) },
         { BrowseColumn::SortKey, quote(name) },
-        { BrowseColumn::Location, quote(dbLocation) },
-        { BrowseColumn::LocationHash, quote(stringHash(dbLocation)) },
+        { BrowseColumn::Location, quote(virtualPath) },
+        { BrowseColumn::LocationHash, quote(stringHash(virtualPath)) },
         { BrowseColumn::Source, quote(int(source)) },
+        { BrowseColumn::EntryType, quote(int(isVirtual ? CdsEntryType::VirtualContainer : CdsEntryType::Directory)) },
         { BrowseColumn::RefId, (refID > 0) ? quote(refID) : SQL_NULL },
     };
     beginTransaction("createContainer");
@@ -1743,8 +1760,9 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
         return title;
 
     beginTransaction("buildContainerPath");
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
+    auto res = select(fmt::format("SELECT {}, {} FROM {} WHERE {} LIMIT 1",
         browseColumnMapper->mapQuoted(BrowseColumn::Location, true),
+        browseColumnMapper->mapQuoted(BrowseColumn::EntryType, true),
         browseColumnMapper->getTableName(),
         browseColumnMapper->getClause(BrowseColumn::Id, parentID, true)));
     commit("buildContainerPath");
@@ -1755,14 +1773,18 @@ fs::path SQLDatabase::buildContainerPath(int parentID, const std::string& title)
     if (!row)
         return {};
 
-    auto [path, prefix] = stripLocationPrefix(fmt::format("{}{}{}", row->col(0), VIRTUAL_CONTAINER_SEPARATOR, title));
-    if (prefix != LOC_VIRT_PREFIX)
+    if (CdsEntryType(row->col_int(1, int(CdsEntryType::Unset))) != CdsEntryType::VirtualContainer)
         throw DatabaseException("Tried to build a virtual container path with an non-virtual parentID", LINE_MESSAGE);
+    fs::path path = fmt::format("{}{}{}", row->col(0), VIRTUAL_CONTAINER_SEPARATOR, title);
 
     return path.relative_path();
 }
 
-bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, const std::shared_ptr<CdsContainer>& cont, int* containerID)
+bool SQLDatabase::addContainer(
+    int parentContainerId,
+    std::string virtualPath,
+    const std::shared_ptr<CdsContainer>& cont,
+    int* containerID)
 {
     log_debug("Adding container for path: {}, lastRefId: {}, containerId: {}", virtualPath.c_str(), cont->getRefID(), containerID ? *containerID : -999);
 
@@ -1776,14 +1798,17 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
         *containerID = CDS_ID_ROOT;
         return false;
     }
-    std::string dbLocation = addLocationPrefix(cont->isVirtual() ? LOC_VIRT_PREFIX : LOC_DIR_PREFIX, virtualPath);
 
     beginTransaction("addContainer");
-    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} AND {} LIMIT 1",
+    auto where = std::vector {
+        browseColumnMapper->getClause(BrowseColumn::EntryType, quote(int(cont->getEntryType())), true),
+        browseColumnMapper->getClause(BrowseColumn::Location, quote(virtualPath), true),
+        browseColumnMapper->getClause(BrowseColumn::LocationHash, quote(stringHash(virtualPath)), true)
+    };
+    auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
         browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
         browseColumnMapper->getTableName(),
-        browseColumnMapper->getClause(BrowseColumn::LocationHash, quote(stringHash(dbLocation)), true),
-        browseColumnMapper->getClause(BrowseColumn::Location, quote(dbLocation), true)));
+        fmt::join(where, " AND ")));
     if (res) {
         auto row = res->nextRow();
         if (row) {
@@ -1804,40 +1829,28 @@ bool SQLDatabase::addContainer(int parentContainerId, std::string virtualPath, c
     return true;
 }
 
-std::string SQLDatabase::addLocationPrefix(
-    char prefix,
-    const fs::path& path,
-    std::string_view suffix)
+std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(
+    const std::string& group,
+    const std::unique_ptr<SQLRow>& row)
 {
-    return fmt::format("{}{}{}", prefix, path.string(), suffix);
-}
-
-std::pair<fs::path, char> SQLDatabase::stripLocationPrefix(std::string_view dbLocation)
-{
-    if (dbLocation.empty())
-        return { "", LOC_ILLEGAL_PREFIX };
-
-    return { dbLocation.substr(1), dbLocation.at(0) };
-}
-
-std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& group, const std::unique_ptr<SQLRow>& row)
-{
+    auto entryType = CdsEntryType(std::stoi(getCol(row, BrowseColumn::EntryType)));
     int objectType = std::stoi(getCol(row, BrowseColumn::ObjectType));
-    auto obj = CdsObject::createObject(objectType);
+    auto obj = CdsObject::createObject(entryType);
 
-    /* set common properties */
+    // set common properties
     obj->setID(std::stoi(getCol(row, BrowseColumn::Id)));
     obj->setRefID(stoiString(getCol(row, BrowseColumn::RefId)));
-
     obj->setParentID(std::stoi(getCol(row, BrowseColumn::ParentId)));
     obj->setTitle(getCol(row, BrowseColumn::DcTitle));
     obj->setSortKey(getCol(row, BrowseColumn::SortKey));
     obj->setClass(fallbackString(getCol(row, BrowseColumn::UpnpClass), getCol(row, BrowseColumn::RefUpnpClass)));
     obj->setFlags(std::stoi(getCol(row, BrowseColumn::Flags)));
     obj->setSource(ObjectSource(std::stoi(getCol(row, BrowseColumn::Source))));
+    obj->setEntryType(entryType);
     obj->setMTime(std::chrono::seconds(stoulString(getCol(row, BrowseColumn::LastModified))));
     obj->setUTime(std::chrono::seconds(stoulString(getCol(row, BrowseColumn::LastUpdated))));
 
+    // handle metadata
     auto metaData = retrieveMetaDataForObject(obj->getID());
     if (!metaData.empty()) {
         obj->setMetaData(std::move(metaData));
@@ -1847,10 +1860,12 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
             obj->setMetaData(std::move(metaData));
     }
 
+    // handle aux data
     std::string auxdataStr = fallbackString(getCol(row, BrowseColumn::Auxdata), getCol(row, BrowseColumn::RefAuxdata));
     std::map<std::string, std::string> aux = URLUtils::dictDecode(auxdataStr);
     obj->setAuxData(aux);
 
+    // handle resources
     bool resourceZeroOk = false;
     auto resources = retrieveResourcesForObject(obj->getID());
     if (!resources.empty()) {
@@ -1864,17 +1879,17 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
         }
     }
 
-    obj->setVirtual((obj->getRefID() != CDS_ID_ROOT && obj->isPureItem()) || (obj->isItem() && !obj->isPureItem())); // gets set to true for virtual containers below
+    obj->setVirtual(entryType == CdsEntryType::VirtualContainer || entryType == CdsEntryType::VirtualItem || entryType == CdsEntryType::ExternalUrl);
 
     bool matchedType = false;
 
+    obj->setLocation(fallbackString(getCol(row, BrowseColumn::Location), getCol(row, BrowseColumn::RefLocation)), entryType);
     if (obj->isContainer()) {
+        // set container properties
         auto cont = std::static_pointer_cast<CdsContainer>(obj);
         cont->setUpdateID(std::stoi(getCol(row, BrowseColumn::UpdateId)));
-        auto [location, locationPrefix] = stripLocationPrefix(getCol(row, BrowseColumn::Location));
-        cont->setLocation(location);
-        if (locationPrefix == LOC_VIRT_PREFIX)
-            cont->setVirtual(true);
+        auto location = getCol(row, BrowseColumn::Location);
+        cont->setLocation(location, entryType);
 
         std::string autoscanPersistent = getCol(row, BrowseColumn::AsPersistent);
         if (!autoscanPersistent.empty()) {
@@ -1889,15 +1904,14 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
         if (!resourceZeroOk)
             throw DatabaseException("tried to create object without at least one resource", LINE_MESSAGE);
 
+        // set item properties
         auto item = std::static_pointer_cast<CdsItem>(obj);
         item->setMimeType(fallbackString(getCol(row, BrowseColumn::MimeType), getCol(row, BrowseColumn::RefMimeType)));
         if (obj->isPureItem()) {
             if (!obj->isVirtual())
-                item->setLocation(stripLocationPrefix(getCol(row, BrowseColumn::Location)).first);
+                item->setLocation(getCol(row, BrowseColumn::Location), entryType);
             else
-                item->setLocation(stripLocationPrefix(getCol(row, BrowseColumn::RefLocation)).first);
-        } else { // URLs
-            item->setLocation(fallbackString(getCol(row, BrowseColumn::Location), getCol(row, BrowseColumn::RefLocation)));
+                item->setLocation(getCol(row, BrowseColumn::RefLocation), entryType);
         }
 
         item->setTrackNumber(stoiString(getCol(row, BrowseColumn::TrackNumber)));
@@ -1925,10 +1939,11 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromRow(const std::string& g
 
 std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::string& group, const std::unique_ptr<SQLRow>& row)
 {
+    auto entryType = CdsEntryType(std::stoi(getCol(row, SearchColumn::EntryType)));
     int objectType = std::stoi(getCol(row, SearchColumn::ObjectType));
-    auto obj = CdsObject::createObject(objectType);
+    auto obj = CdsObject::createObject(entryType);
 
-    /* set common properties */
+    // set common properties
     obj->setID(std::stoi(getCol(row, SearchColumn::Id)));
     obj->setRefID(stoiString(getCol(row, SearchColumn::RefId)));
 
@@ -1938,11 +1953,14 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::str
     obj->setClass(getCol(row, SearchColumn::UpnpClass));
     obj->setFlags(std::stoi(getCol(row, SearchColumn::Flags)));
     obj->setSource(ObjectSource(std::stoi(getCol(row, SearchColumn::Source))));
+    obj->setEntryType(entryType);
 
+    // handle metadata
     auto metaData = retrieveMetaDataForObject(obj->getID());
     if (!metaData.empty())
         obj->setMetaData(std::move(metaData));
 
+    // handle resources
     bool resourceZeroOk = false;
     auto resources = retrieveResourcesForObject(obj->getID());
     if (!resources.empty()) {
@@ -1956,17 +1974,14 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::str
         }
     }
 
+    obj->setLocation(getCol(row, SearchColumn::Location), entryType);
     if (obj->isItem()) {
+        // set item properties
         if (!resourceZeroOk)
             throw DatabaseException("tried to create object without at least one resource", LINE_MESSAGE);
 
         auto item = std::static_pointer_cast<CdsItem>(obj);
         item->setMimeType(getCol(row, SearchColumn::MimeType));
-        if (obj->isPureItem()) {
-            item->setLocation(stripLocationPrefix(getCol(row, SearchColumn::Location)).first);
-        } else { // URLs
-            item->setLocation(getCol(row, SearchColumn::Location));
-        }
 
         item->setPartNumber(stoiString(getCol(row, SearchColumn::PartNumber)));
         item->setTrackNumber(stoiString(getCol(row, SearchColumn::TrackNumber)));
@@ -1974,10 +1989,7 @@ std::shared_ptr<CdsObject> SQLDatabase::createObjectFromSearchRow(const std::str
         auto playStatus = getPlayStatus(group, obj->getID());
         if (playStatus)
             item->setPlayStatus(playStatus);
-    } else if (obj->isContainer()) {
-        auto cont = std::static_pointer_cast<CdsItem>(obj);
-        cont->setLocation(stripLocationPrefix(getCol(row, SearchColumn::Location)).first);
-    } else {
+    } else if (!obj->isContainer()) {
         throw DatabaseException(fmt::format("Unknown object type: {}", objectType), LINE_MESSAGE);
     }
 
@@ -2015,7 +2027,10 @@ long long SQLDatabase::getFileStats(const StatsParam& stats)
     if (!stats.getUpnpClass().empty()) {
         where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::UpnpClass), quote(fmt::format("{}" WILDCARD, stats.getUpnpClass()))));
     }
-    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(fmt::format("{}" WILDCARD, stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
+    auto fileTypes = (stats.getVirtual())
+        ? std::vector<int> { int(CdsEntryType::VirtualContainer), int(CdsEntryType::VirtualItem), int(CdsEntryType::ExternalUrl) }
+        : std::vector<int> { int(CdsEntryType::File), int(CdsEntryType::Directory) };
+    where.push_back(fmt::format("{} IN ({})", searchColumnMapper->mapQuoted(SearchColumn::EntryType), fmt::join(fileTypes, ",")));
 
     std::string mode;
     std::string join;
@@ -2030,9 +2045,11 @@ long long SQLDatabase::getFileStats(const StatsParam& stats)
     }
     }
     auto query = fmt::format("SELECT {} FROM {} {} WHERE {}", mode, searchColumnMapper->tableQuoted(), join, fmt::join(where, " AND "));
+    log_debug(query);
     auto res = select(query);
     std::unique_ptr<SQLRow> row;
     if (res && (row = res->nextRow())) {
+        log_debug("-> {}", row->col(0));
         return row->col_long(0, 0);
     }
     return 0;
@@ -2049,7 +2066,10 @@ std::map<std::string, long long> SQLDatabase::getGroupStats(const StatsParam& st
     if (!stats.getUpnpClass().empty()) {
         where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::UpnpClass), quote(fmt::format("{}" WILDCARD, stats.getUpnpClass()))));
     }
-    where.push_back(fmt::format("{} LIKE {}", searchColumnMapper->mapQuoted(SearchColumn::Location), quote(fmt::format("{}" WILDCARD, stats.getVirtual() ? LOC_VIRT_PREFIX : LOC_FILE_PREFIX))));
+    auto fileTypes = (stats.getVirtual())
+        ? std::vector<int> { int(CdsEntryType::VirtualContainer), int(CdsEntryType::VirtualItem), int(CdsEntryType::ExternalUrl) }
+        : std::vector<int> { int(CdsEntryType::File), int(CdsEntryType::Directory) };
+    where.push_back(fmt::format("{} IN ({})", searchColumnMapper->mapQuoted(SearchColumn::EntryType), fmt::join(fileTypes, ",")));
 
     std::string mode;
     std::string join;
@@ -2064,11 +2084,13 @@ std::map<std::string, long long> SQLDatabase::getGroupStats(const StatsParam& st
     }
     }
     auto query = fmt::format("SELECT {}, {} FROM {}{} WHERE {} GROUP BY {}", searchColumnMapper->mapQuoted(SearchColumn::UpnpClass), mode, searchColumnMapper->tableQuoted(), join, fmt::join(where, " AND "), searchColumnMapper->mapQuoted(SearchColumn::UpnpClass));
+    log_debug(query);
     auto res = select(query);
     std::unique_ptr<SQLRow> row;
     std::map<std::string, long long> result;
     if (res) {
         while ((row = res->nextRow())) {
+            log_debug("-> {}={}", row->col(0), row->col_long(1, 0));
             result[row->col(0)] = row->col_long(1, 0);
         }
     }
@@ -2131,7 +2153,7 @@ std::size_t SQLDatabase::getObjects(
         fmt::join(where, " AND "));
     auto res = select(getSql);
     if (!res)
-        throw DatabaseException(fmt::format("error selecting form {}", browseColumnMapper->getTableName()), LINE_MESSAGE);
+        throw DatabaseException(fmt::format("error selecting from {}", browseColumnMapper->getTableName()), LINE_MESSAGE);
 
     if (res->getNumRows() == 0)
         return 0;
@@ -2161,7 +2183,7 @@ std::vector<int> SQLDatabase::getRefObjects(int objectId)
 
     auto res = select(getSql);
     if (!res)
-        throw DatabaseException(fmt::format("error selecting form {}", browseColumnMapper->getTableName()), LINE_MESSAGE);
+        throw DatabaseException(fmt::format("error selecting from {}", browseColumnMapper->getTableName()), LINE_MESSAGE);
 
     std::vector<int> result;
     if (res->getNumRows() == 0)
@@ -2188,7 +2210,7 @@ std::unordered_set<int> SQLDatabase::getUnreferencedObjects()
     log_debug("getSql {}", getSql);
     auto res = select(getSql);
     if (!res)
-        throw DatabaseException(fmt::format("error selecting form {}", table), LINE_MESSAGE);
+        throw DatabaseException(fmt::format("error selecting from {}", table), LINE_MESSAGE);
 
     std::unordered_set<int> ret;
     if (res->getNumRows() == 0)
@@ -2218,7 +2240,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::removeObjects(const st
         browseColumnMapper->getTableName(),
         fmt::join(list, ",")));
     if (!res)
-        throw DatabaseException(fmt::format("error selecting form {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
+        throw DatabaseException(fmt::format("error selecting from {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
 
     std::vector<std::int32_t> items;
     std::vector<std::int32_t> containers;
@@ -2260,11 +2282,11 @@ void SQLDatabase::_removeObjects(const std::vector<std::int32_t>& objectIDs)
             const int colId = row->col_int(0, INVALID_OBJECT_ID); // ASColumn::id
             bool persistent = remapBool(row->col_int(1, 0));
             if (persistent) {
-                auto location = std::get<0>(stripLocationPrefix(row->col(2)));
+                auto location = row->col(2);
                 auto fields = std::map<AutoscanColumn, std::string> {
                     { AutoscanColumn::Id, quote(colId) },
                     { AutoscanColumn::ObjId, SQL_NULL },
-                    { AutoscanColumn::Location, quote(location.string()) },
+                    { AutoscanColumn::Location, quote(location) },
                 };
                 Autoscan2Table at(fields, Operation::Update, autoscanColumnMapper);
                 execOnTable(AUTOSCAN_TABLE, at.sqlForUpdate(nullptr), colId);
@@ -2508,7 +2530,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             std::shared_ptr<SQLResult> res = select(sql);
             selUpnp.clear();
             if (!res)
-                throw DatabaseException(fmt::format("error selecting form {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
+                throw DatabaseException(fmt::format("error selecting from {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
             while ((row = res->nextRow())) {
                 const int flags = row->col_int(3, 0);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER)
@@ -2529,7 +2551,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
             std::shared_ptr<SQLResult> res = select(sql);
             selUi.clear();
             if (!res)
-                throw DatabaseException(fmt::format("error selecting form {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
+                throw DatabaseException(fmt::format("error selecting from {}", CDS_OBJECT_TABLE), LINE_MESSAGE);
             while ((row = res->nextRow())) {
                 const int flags = row->col_int(3, 0);
                 if (flags & OBJECT_FLAG_PERSISTENT_CONTAINER) {
@@ -2948,15 +2970,15 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
     if (!objectIDstr.empty())
         objectID = std::stoi(objectIDstr);
     int databaseID = std::stoi(getCol(row, AutoscanColumn::Id));
+    CdsEntryType entryType = CdsEntryType(std::stoi(getCol(row, AutoscanColumn::EntryType)));
 
     fs::path location;
     if (objectID == INVALID_OBJECT_ID) {
         location = getCol(row, AutoscanColumn::Location);
     } else {
-        auto [l, prefix] = stripLocationPrefix(getCol(row, AutoscanColumn::ObjLocation));
-        location = l;
-        if (prefix != LOC_DIR_PREFIX)
+        if (entryType != CdsEntryType::Directory)
             return nullptr;
+        location = getCol(row, AutoscanColumn::ObjLocation);
     }
 
     AutoscanScanMode mode = AutoscanDirectory::remapScanmode(getCol(row, AutoscanColumn::ScanMode));
@@ -3150,7 +3172,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
             autoscanColumnMapper->getTableName(),
             fmt::join(where, " AND ")));
         if (!res)
-            throw DatabaseException(fmt::format("error selecting form {}", AUTOSCAN_TABLE), LINE_MESSAGE);
+            throw DatabaseException(fmt::format("error selecting from {}", AUTOSCAN_TABLE), LINE_MESSAGE);
 
         row = res->nextRow();
         if (row) {
@@ -3175,7 +3197,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
         log_debug("------------ {}", qRec);
         auto res = select(qRec);
         if (!res)
-            throw DatabaseException(fmt::format("error selecting form {}", AUTOSCAN_TABLE), LINE_MESSAGE);
+            throw DatabaseException(fmt::format("error selecting from {}", AUTOSCAN_TABLE), LINE_MESSAGE);
         row = res->nextRow();
         if (row) {
             const int objectID = row->col_int(0, INVALID_OBJECT_ID);
@@ -3204,7 +3226,7 @@ std::vector<int> SQLDatabase::_checkOverlappingAutoscans(const std::shared_ptr<A
             autoscanColumnMapper->getTableName(),
             fmt::join(where, " AND ")));
         if (!res)
-            throw DatabaseException(fmt::format("error selecting form {}", AUTOSCAN_TABLE), LINE_MESSAGE);
+            throw DatabaseException(fmt::format("error selecting from {}", AUTOSCAN_TABLE), LINE_MESSAGE);
         if (!(row = res->nextRow()))
             return pathIDs;
     }
@@ -3531,5 +3553,58 @@ void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr
         }
     } else {
         log_debug("Skipping migration - no resources for cds object {}", objectId);
+    }
+}
+
+// PREFIX is removed from location in DBVERSION 27
+bool SQLDatabase::doLocationMigration()
+{
+    log_debug("Checking if resources migration is required");
+    auto res = select(
+        fmt::format("SELECT COUNT(*) FROM {0} WHERE {1} LIKE {2} OR {1} LIKE {3} OR {1} LIKE {4}",
+            browseColumnMapper->getTableName(),
+            browseColumnMapper->mapQuoted(BrowseColumn::Location, true),
+            quote("F%"),
+            quote("D%"),
+            quote("V%")));
+    int expectedConversionCount = res->nextRow()->col_int(0, 0);
+    log_debug("{} rows having location: {}", CDS_OBJECT_TABLE, expectedConversionCount);
+
+    log_info("About to migrate location values in {}", CDS_OBJECT_TABLE);
+
+    auto resIds = select(
+        fmt::format("SELECT {0}, {1}, {2} FROM {3} WHERE {1} LIKE {4} OR {1} LIKE {5} OR {1} LIKE {6}",
+            browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
+            browseColumnMapper->mapQuoted(BrowseColumn::Location, true),
+            browseColumnMapper->mapQuoted(BrowseColumn::LocationHash, true),
+            browseColumnMapper->getTableName(),
+            quote("F%"),
+            quote("D%"),
+            quote("V%")));
+    std::unique_ptr<SQLRow> row;
+
+    int objectsUpdated = 0;
+    while ((row = resIds->nextRow())) {
+        migrateLocation(row->col_int(0, INVALID_OBJECT_ID), row->col(1));
+        ++objectsUpdated;
+    }
+    log_info("Migrated location - object count: {}", objectsUpdated);
+    return true;
+}
+
+void SQLDatabase::migrateLocation(int objectId, const std::string& location)
+{
+    if (!location.empty()) {
+        auto dbLocation = location.substr(1);
+        log_debug("Migrating location for cds object {} to {} without {}", objectId, dbLocation, location.at(0));
+        auto dict = std::map<BrowseColumn, std::string> {
+            { BrowseColumn::Id, quote(objectId) },
+            { BrowseColumn::Location, quote(dbLocation) },
+            { BrowseColumn::LocationHash, quote(stringHash(dbLocation)) },
+        };
+        Object2Table ot(std::move(dict), Operation::Update, browseColumnMapper);
+        execOnTable(CDS_OBJECT_TABLE, ot.sqlForUpdate(nullptr), objectId);
+    } else {
+        log_debug("Skipping migration - no location for cds object {}", objectId);
     }
 }

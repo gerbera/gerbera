@@ -550,6 +550,7 @@ void Script::setMetaData(
 
 std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>& pcd)
 {
+    log_debug("creating obj");
     int objType = ScriptNamedProperty(ctx, "objectType").getIntValue(-1);
     if (objType == -1) {
         log_error("missing objectType property");
@@ -688,6 +689,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             obj->setTitle(pcd->getTitle());
         }
     }
+
     // update sortKey
     {
         auto val = ScriptNamedProperty(ctx, "sortKey").getStringValue();
@@ -738,7 +740,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
     fs::path location = !hasCaseSensitiveNames && obj->isContainer() ? toLower(ScriptNamedProperty(ctx, "location").getStringValue()) : ScriptNamedProperty(ctx, "location").getStringValue();
     if (!location.empty()) {
         // location must not be touched by character conversion!
-        obj->setLocation(location);
+        obj->setLocation(location, obj->getEntryType());
     }
 
     // update description
@@ -799,7 +801,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
 
         // update location if not set in script
         if (location.empty() && pcd) {
-            obj->setLocation(pcd->getLocation());
+            obj->setLocation(pcd->getLocation(), obj->getEntryType());
         }
 
         // CdsExternalItem (like links)
@@ -890,6 +892,8 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     setProperty("sortKey", obj->getSortKey(), false);
     setProperty("upnpclass", obj->getClass(), false);
     setProperty("location", obj->getLocation(), false);
+    setProperty("source", CdsObject::mapSource(obj->getSource()), false);
+    setProperty("entryType", CdsObject::mapEntryType(obj->getEntryType()), false);
 
     setIntProperty("mtime", static_cast<int>(obj->getMTime().count()));
     setIntProperty("utime", static_cast<int>(obj->getUTime().count()));

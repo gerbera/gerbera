@@ -3,13 +3,15 @@
 ### HEAD
 
 - Bump lodash from 4.17.21 to 4.17.23 in /gerbera-web
+- Bump qs from 6.14.1 to 6.14.2 in /gerbera-web
 - Document MARIADB_TLS_DISABLE_PEER_VERIFICATION
 - Export and import changed object from database
 - Keep track of changed objects
 - Load Config file modules
 - Show changed items in UI
 - Update npupnp to 6.2.3
-- Update to pupnp 1.14.29
+- Update to pupnp 1.14.30
+- Use entry_type instead of location prefix
 
 ### v3.1.1
 

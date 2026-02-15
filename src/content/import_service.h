@@ -131,6 +131,7 @@ public:
     using CacheAutoLock = std::scoped_lock<decltype(cacheMutex)>;
 
     mutable std::map<fs::path, std::shared_ptr<ContentState>> contentStateCache;
+
     /// @brief store entry in cache map
     void cacheState(
         const fs::path& entryPath,
@@ -140,6 +141,36 @@ public:
         const std::shared_ptr<CdsObject>& cdsObject = nullptr);
     /// @brief get object if stored in cache map
     std::shared_ptr<CdsObject> getObject(const fs::path& location) const;
+};
+
+/// @brief Container for cached cdsContainers
+class ContainerCache {
+private:
+    bool hasCaseSensitiveNames { true };
+
+public:
+    ContainerCache(bool hcsn)
+        : hasCaseSensitiveNames(hcsn)
+    {
+    }
+
+    mutable std::mutex cacheMutex;
+    using CacheAutoLock = std::scoped_lock<decltype(cacheMutex)>;
+
+    /// @brief cache for containers while creating new layout
+    mutable std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
+    mutable std::map<int, std::shared_ptr<CdsContainer>> containersWithFanArt;
+    /// @brief store entry in cache map
+    void set(
+        const fs::path& entryPath,
+        const std::shared_ptr<CdsContainer>& cdsObject);
+    void setFanArt(
+        int id,
+        const std::shared_ptr<CdsContainer>& cdsObject);
+    /// @brief get object if stored in cache map
+    std::shared_ptr<CdsContainer> at(const fs::path& location) const;
+    std::shared_ptr<CdsContainer> getFanArt(int id) const;
+    void clear();
 };
 
 /// @brief Mapping logic to generate upnpClass from file (meta) data
@@ -185,6 +216,7 @@ private:
     std::shared_ptr<AutoscanDirectory> autoscanDir;
     std::map<AutoscanMediaMode, std::string> containerTypeMap;
     std::shared_ptr<StateCache> importStateCache;
+    ContainerCache containerCache;
 
     std::string noMediaName;
     bool hasReadableNames { false };
@@ -195,10 +227,6 @@ private:
     int containerImageMinDepth { 2 };
 
     std::vector<std::vector<std::pair<std::string, std::string>>> virtualDirKeys;
-
-    /// @brief cache for containers while creating new layout
-    mutable std::map<std::string, std::shared_ptr<CdsContainer>> containerMap;
-    mutable std::map<int, std::shared_ptr<CdsContainer>> containersWithFanArt;
 
     mutable std::mutex layoutMutex;
     using LayoutAutoLock = std::scoped_lock<decltype(layoutMutex)>;

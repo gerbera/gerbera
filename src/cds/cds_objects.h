@@ -46,9 +46,32 @@
 
 /// @brief allow identification of user created objects
 enum class ObjectSource : int {
-    Import, /// @brief object was automatically created
-    ImportModified, /// @brief user modified object after import
-    User, /// @brief user created object
+    /// @brief object was automatically created
+    Import,
+    /// @brief user modified object after import
+    ImportModified,
+    /// @brief user created object
+    User,
+};
+
+/// @brief tag the object with its type
+enum class CdsEntryType : int {
+    /// @brief the object was not yet defined
+    Unset = -1,
+    /// @brief the root object
+    Root,
+    /// @brief the object was created from a directory on disk
+    Directory,
+    /// @brief the object was created from a file on disk
+    File,
+    /// @brief the container tree was created as part of the virtual layout
+    VirtualContainer,
+    /// @brief the item was created as part of the virtual layout
+    VirtualItem,
+    /// @brief Url pointing to some web stream
+    ExternalUrl,
+    /// @brief Dynamic folder pointing to some search
+    DynamicFolder,
 };
 
 /// @brief Generic object in the Content Directory.
@@ -98,6 +121,9 @@ protected:
     /// @brief where does the object come from
     ObjectSource source { ObjectSource::Import };
 
+    /// @brief type of database entry
+    CdsEntryType entryType { CdsEntryType::Unset };
+
     /// @brief metadata of object defined by UPnP protocol
     std::vector<std::pair<std::string, std::string>> metaData;
 
@@ -111,7 +137,8 @@ protected:
     std::shared_ptr<CdsObject> parent;
 
 public:
-    CdsObject() = default;
+    explicit CdsObject(CdsEntryType type)
+        : entryType(type) {};
     virtual ~CdsObject() = default;
 
     CdsObject(const CdsObject&) = delete;
@@ -178,7 +205,11 @@ public:
     ObjectType getMediaType(const std::string& contentType = "") const;
 
     /// @brief Set the physical location of the media (usually an absolute path)
-    void setLocation(const fs::path& location) { this->location = location; }
+    void setLocation(const fs::path& location, CdsEntryType type)
+    {
+        this->location = location;
+        this->entryType = type;
+    }
     /// @brief Retrieve media location.
     const fs::path& getLocation() const { return location; }
 
@@ -211,12 +242,17 @@ public:
     /// @brief Query the source
     ObjectSource getSource() const { return source; }
 
+    /// @brief Set the entry type
+    void setEntryType(CdsEntryType type) { this->entryType = type; }
+    /// @brief Query the entry type
+    CdsEntryType getEntryType() const { return entryType; }
+
     /// @brief Query information on object type: item, container, etc.
     unsigned int getObjectType() const { return objectType; }
-    virtual bool isItem() const { return false; }
-    virtual bool isPureItem() const { return false; }
-    virtual bool isExternalItem() const { return false; }
-    virtual bool isContainer() const { return false; }
+    bool isItem() const { return isPureItem() || isExternalItem(); }
+    bool isPureItem() const { return entryType == CdsEntryType::File || entryType == CdsEntryType::VirtualItem; }
+    bool isExternalItem() const { return entryType == CdsEntryType::ExternalUrl; }
+    bool isContainer() const { return entryType == CdsEntryType::Directory || entryType == CdsEntryType::VirtualContainer || entryType == CdsEntryType::DynamicFolder; }
 
     /// @brief Get flags of an object.
     unsigned int getFlags() const { return objectFlags; }
@@ -433,9 +469,13 @@ public:
 
     /// @brief factory method to create correct sub class
     static std::shared_ptr<CdsObject> createObject(unsigned int objectType);
+    static std::shared_ptr<CdsObject> createObject(CdsEntryType entryType);
 
     static std::string mapObjectType(unsigned int type);
     static unsigned int remapObjectType(const std::string& type);
+
+    static std::string mapEntryType(CdsEntryType type);
+    static CdsEntryType remapEntryType(const std::string& type);
 
     static std::string mapFlags(int flag);
     static int remapFlags(const std::string& flag);

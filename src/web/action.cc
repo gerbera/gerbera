@@ -165,7 +165,7 @@ std::vector<std::pair<std::shared_ptr<CdsObject>, std::string>> Web::Action::doP
         obj->setSortKey(item["sort_key"].asString());
         obj->setClass(item["upnp_class"].asString());
         obj->setSource(CdsObject::remapSource(item["source"].asString()));
-        obj->setLocation(item["location"].asString());
+        obj->setLocation(item["location"].asString(), CdsObject::remapEntryType(item["entry_type"].asString()));
         obj->setVirtual(item["virtual"].asBool());
         obj->setFlags(CdsObject::remapFlags(item["flags"].asString()));
 
@@ -230,6 +230,7 @@ void Web::Action::doBrowse(Json::Value& items)
     for (auto&& cdsObj : result) {
         Json::Value item;
         item["obj_type"] = CdsObject::mapObjectType(cdsObj->getObjectType());
+        item["entry_type"] = CdsObject::mapEntryType(cdsObj->getEntryType());
         item["id"] = cdsObj->getID();
         item["ref_id"] = cdsObj->getRefID();
         item["title"] = cdsObj->getTitle();
