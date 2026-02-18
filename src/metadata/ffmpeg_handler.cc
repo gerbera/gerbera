@@ -146,6 +146,7 @@ int FfmpegLogger::logLevel = AV_LOG_INFO;
 FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_FFMPEG_CONTENT_LIST,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_ENABLED,
@@ -814,7 +815,7 @@ bool FfmpegHandler::addFfmpegResourceFields(
 bool FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item || !isEnabled)
+    if (!item || !enabled)
         return false;
 
     log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
@@ -839,7 +840,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(
     const std::shared_ptr<CdsResource>& resource)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item || !isEnabled || !resource)
+    if (!item || !enabled || !resource)
         return nullptr;
     auto streamIndex = stoulString(resource->getOption(STREAM_NUMBER_OPTION));
     if (streamIndex < 1)

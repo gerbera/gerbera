@@ -1530,11 +1530,50 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
         { "Focal length 35 mm equivalent", "Exif.Photo.FocalLengthIn35mmFilm" },
     };
 #endif
+    /// @brief default values for ConfigVal::IMPORT_LIBOPTS_EXI*_CONTENT_LIST
+    static const std::vector<std::string> imgContentTypes {
+        CONTENT_TYPE_JPG,
+        CONTENT_TYPE_PNG,
+    };
 
 #ifdef HAVE_TAGLIB
     /// @brief default values for ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST
     static const std::map<std::string, std::string> id3SpecialPropertyMap {
         { "PERFORMER", UPNP_SEARCH_ARTIST "@role[Performer]" },
+    };
+    /// @brief default values for ConfigVal::IMPORT_LIBOPTS_ID3_CONTENT_LIST
+    static const std::vector<std::string> taglibContentTypes {
+        CONTENT_TYPE_AIFF,
+        CONTENT_TYPE_APE,
+        CONTENT_TYPE_ASF,
+        CONTENT_TYPE_AVI,
+        CONTENT_TYPE_DSD,
+        CONTENT_TYPE_FLAC,
+        CONTENT_TYPE_JPG,
+        CONTENT_TYPE_MKA,
+        CONTENT_TYPE_MKV,
+        CONTENT_TYPE_MP3,
+        CONTENT_TYPE_MPEG,
+        CONTENT_TYPE_OGG,
+        CONTENT_TYPE_PCM,
+        CONTENT_TYPE_PNG,
+        CONTENT_TYPE_WAVPACK,
+        CONTENT_TYPE_WMA,
+    };
+#endif
+
+#ifdef HAVE_WAVPACK
+    /// @brief default values for ConfigVal::IMPORT_LIBOPTS_WAVPACK_CONTENT_LIST
+    static const std::vector<std::string> wavpackContentTypes {
+        CONTENT_TYPE_WAVPACK,
+    };
+#endif
+
+#ifdef HAVE_MATROSKA
+    /// @brief default values for ConfigVal::IMPORT_LIBOPTS_MKV_CONTENT_LIST
+    static const std::vector<std::string> mkvContentTypes {
+        CONTENT_TYPE_MKA,
+        CONTENT_TYPE_MKV,
     };
 #endif
 
@@ -1542,6 +1581,26 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
     /// @brief default values for ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST
     static const std::map<std::string, std::string> ffmpegSpecialPropertyMap {
         { "performer", UPNP_SEARCH_ARTIST "@role[Performer]" },
+    };
+    /// @brief default values for ConfigVal::IMPORT_LIBOPTS_FFMPEG_CONTENT_LIST
+    static const std::vector<std::string> ffmpegContentTypes {
+        CONTENT_TYPE_AIFF,
+        CONTENT_TYPE_APE,
+        CONTENT_TYPE_ASF,
+        CONTENT_TYPE_AVI,
+        CONTENT_TYPE_DSD,
+        CONTENT_TYPE_FLAC,
+        CONTENT_TYPE_JPG,
+        CONTENT_TYPE_MKA,
+        CONTENT_TYPE_MKV,
+        CONTENT_TYPE_MP3,
+        CONTENT_TYPE_MP4,
+        CONTENT_TYPE_MPEG,
+        CONTENT_TYPE_OGG,
+        CONTENT_TYPE_PCM,
+        CONTENT_TYPE_PNG,
+        CONTENT_TYPE_WAVPACK,
+        CONTENT_TYPE_WMA,
     };
 #endif
 
@@ -1565,6 +1624,11 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_EXIF_ENABLED,
             "/import/library-options/libexif/attribute::enabled", "config-import.html#confval-library-enabled",
             YES),
+        std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_EXIF_CONTENT_LIST,
+            "/import/library-options/libexif/libcontent", "config-import.html#confval-libcontent",
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_DATA,
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_KEY,
+            false, false, imgContentTypes),
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_EXIF_COMMENT_ENABLED,
             "/import/library-options/libexif/comment/attribute::enabled", "config-import.html#confval-comment-enabled",
             NO),
@@ -1594,6 +1658,11 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_EXIV2_ENABLED,
             "/import/library-options/exiv2/attribute::enabled", "config-import.html#confval-library-enabled",
             YES),
+        std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_EXIV2_CONTENT_LIST,
+            "/import/library-options/exiv2/libcontent", "config-import.html#confval-libcontent",
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_DATA,
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_KEY,
+            false, false, imgContentTypes),
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_ENABLED,
             "/import/library-options/exiv2/comment/attribute::enabled", "config-import.html#confval-comment-enabled",
             YES),
@@ -1623,6 +1692,11 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_ID3_ENABLED,
             "/import/library-options/id3/attribute::enabled", "config-import.html#confval-library-enabled",
             YES),
+        std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_ID3_CONTENT_LIST,
+            "/import/library-options/id3/libcontent", "config-import.html#confval-libcontent",
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_DATA,
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_KEY,
+            false, false, taglibContentTypes),
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_ID3_COMMENT_ENABLED,
             "/import/library-options/id3/comment/attribute::enabled", "config-import.html#confval-comment-enabled",
             NO),
@@ -1652,11 +1726,16 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_FFMPEG_ENABLED,
             "/import/library-options/ffmpeg/attribute::enabled", "config-import.html#confval-library-enabled",
             YES),
-        std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_ENABLED,
-            "/import/library-options/ffmpeg/comment/attribute::enabled", "config-import.html#confval-comment-enabled",
-            NO),
+        std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_FFMPEG_CONTENT_LIST,
+            "/import/library-options/ffmpeg/libcontent", "config-import.html#confval-libcontent",
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_DATA,
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_KEY,
+            false, false, ffmpegContentTypes),
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_FFMPEG_ARTWORK_ENABLED,
             "/import/library-options/ffmpeg/attribute::artwork-enabled", "config-import.html#confval-artwork-enabled",
+            NO),
+        std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_ENABLED,
+            "/import/library-options/ffmpeg/comment/attribute::enabled", "config-import.html#confval-comment-enabled",
             NO),
         std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_LIST,
             "/import/library-options/ffmpeg/comment", "config-import.html#confval-ffmpeg",
@@ -1687,6 +1766,11 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_MKV_ENABLED,
             "/import/library-options/mkv/attribute::enabled", "config-import.html#confval-library-enabled",
             YES),
+        std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_MKV_CONTENT_LIST,
+            "/import/library-options/mkv/libcontent", "config-import.html#confval-libcontent",
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_DATA,
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_KEY,
+            false, false, mkvContentTypes),
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_MKV_COMMENT_ENABLED,
             "/import/library-options/mkv/comment/attribute::enabled", "config-import.html#confval-comment-enabled",
             NO),
@@ -1716,6 +1800,11 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getLibraryOptions()
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_WAVPACK_ENABLED,
             "/import/library-options/wavpack/attribute::enabled", "config-import.html#confval-library-enabled",
             YES),
+        std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_LIBOPTS_WAVPACK_CONTENT_LIST,
+            "/import/library-options/wavpack/libcontent", "config-import.html#confval-libcontent",
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_DATA,
+            ConfigVal::A_IMPORT_LIBOPTS_CONTENT_KEY,
+            false, false, wavpackContentTypes),
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_LIBOPTS_WAVPACK_COMMENT_ENABLED,
             "/import/library-options/wavpack/comment/attribute::enabled", "config-import.html#confval-comment-enabled",
             NO),
@@ -1921,6 +2010,10 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getSimpleOptions()
             "add-data", "config-import.html#confval-auxdata-add-data"),
         std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LIBOPTS_COMMENT_DATA,
             "add-comment", "config-import.html#confval-library-comment"),
+        std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LIBOPTS_CONTENT_DATA,
+            "add-libcontent", "config-import.html#confval-libcontent"),
+        std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LIBOPTS_CONTENT_KEY,
+            "contenttype", "config-import.html#confval-libcontent"),
         std::make_shared<ConfigSetup>(ConfigVal::A_TRANSCODING_MIMETYPE_PROF_MAP_TRANSCODE,
             "transcode", "config-transcode.html#confval-transcode"),
         std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LAYOUT_MAPPING_PATH,

@@ -197,6 +197,7 @@ static void logfunc(ExifLog* log, ExifLogCode code, const char* domain, const ch
 LibExifHandler::LibExifHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context,
           ConfigVal::IMPORT_LIBOPTS_EXIF_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_EXIF_CONTENT_LIST,
           ConfigVal::IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_EXIF_COMMENT_ENABLED,
@@ -427,7 +428,7 @@ void LibExifHandler::process_ifd(
 bool LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item || !isEnabled)
+    if (!item || !enabled)
         return false;
 
     LibExifObject exifObject(converterManager, item);

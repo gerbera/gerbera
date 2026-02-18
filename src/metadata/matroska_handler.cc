@@ -111,6 +111,7 @@ public:
 MatroskaHandler::MatroskaHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context,
           ConfigVal::IMPORT_LIBOPTS_MKV_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_MKV_CONTENT_LIST,
           ConfigVal::IMPORT_LIBOPTS_MKV_METADATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_MKV_AUXDATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_MKV_COMMENT_ENABLED,
@@ -130,7 +131,7 @@ bool MatroskaHandler::isSupported(
 bool MatroskaHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item || !isEnabled)
+    if (!item || !enabled)
         return false;
 
     parseMKV(item, nullptr);

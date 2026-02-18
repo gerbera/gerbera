@@ -296,11 +296,19 @@
       <libexif charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata></metadata>
+        <libcontent>
+          <add-libcontent contenttype="jpg" />
+          <add-libcontent contenttype="png" />
+        </libcontent>
         <comment enabled="no"></comment>
       </libexif>
       <exiv2 charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata></metadata>
+        <libcontent>
+          <add-libcontent contenttype="jpg" />
+          <add-libcontent contenttype="png" />
+        </libcontent>
         <comment enabled="yes">
           <add-comment label="Flash setting" tag="Exif.Photo.Flash" />
           <add-comment label="Focal length" tag="Exif.Photo.FocalLength" />
@@ -313,6 +321,24 @@
         <metadata>
           <add-data tag="PERFORMER" key="upnp:artist@role[Performer]" />
         </metadata>
+        <libcontent>
+          <add-libcontent contenttype="aiff" />
+          <add-libcontent contenttype="ape" />
+          <add-libcontent contenttype="asf" />
+          <add-libcontent contenttype="avi" />
+          <add-libcontent contenttype="dsd" />
+          <add-libcontent contenttype="flac" />
+          <add-libcontent contenttype="jpg" />
+          <add-libcontent contenttype="mka" />
+          <add-libcontent contenttype="mkv" />
+          <add-libcontent contenttype="mp3" />
+          <add-libcontent contenttype="mpeg" />
+          <add-libcontent contenttype="ogg" />
+          <add-libcontent contenttype="pcm" />
+          <add-libcontent contenttype="png" />
+          <add-libcontent contenttype="wv" />
+          <add-libcontent contenttype="wma" />
+        </libcontent>
         <comment enabled="no"></comment>
       </id3>
       <ffmpeg charset="UTF-8" enabled="yes" artwork-enabled="no" subtitle-seek-size="2048">
@@ -320,16 +346,42 @@
         <metadata>
           <add-data tag="performer" key="upnp:artist@role[Performer]" />
         </metadata>
+        <libcontent>
+          <add-libcontent contenttype="aiff" />
+          <add-libcontent contenttype="ape" />
+          <add-libcontent contenttype="asf" />
+          <add-libcontent contenttype="avi" />
+          <add-libcontent contenttype="dsd" />
+          <add-libcontent contenttype="flac" />
+          <add-libcontent contenttype="jpg" />
+          <add-libcontent contenttype="mka" />
+          <add-libcontent contenttype="mkv" />
+          <add-libcontent contenttype="mp3" />
+          <add-libcontent contenttype="mp4" />
+          <add-libcontent contenttype="mpeg" />
+          <add-libcontent contenttype="ogg" />
+          <add-libcontent contenttype="pcm" />
+          <add-libcontent contenttype="png" />
+          <add-libcontent contenttype="wv" />
+          <add-libcontent contenttype="wma" />
+        </libcontent>
         <comment enabled="no"></comment>
       </ffmpeg>
       <mkv charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata></metadata>
+        <libcontent>
+          <add-libcontent contenttype="mka" />
+          <add-libcontent contenttype="mkv" />
+        </libcontent>
         <comment enabled="no"></comment>
       </mkv>
       <wavpack charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata></metadata>
+        <libcontent>
+          <add-libcontent contenttype="wv" />
+        </libcontent>
         <comment enabled="no"></comment>
       </wavpack>
     </library-options>

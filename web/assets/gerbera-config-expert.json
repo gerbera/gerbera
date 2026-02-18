@@ -1695,6 +1695,19 @@
               ]
             },
             {
+              "item": "/import/library-options/libexif/libcontent/add-libcontent",
+              "caption": "libcontent",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/libexif/libcontent/add-libcontent/attribute::contenttype",
+                  "caption": "Content Type",
+                  "editable": true
+                }
+              ]
+            },
+            {
               "item": "/import/library-options/libexif/comment/attribute::enabled",
               "caption": "comment enabled",
               "editable": true
@@ -1762,6 +1775,19 @@
                 {
                   "item": "/import/library-options/id3/metadata/add-data/attribute::key",
                   "caption": "Upnp metadata entry",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/id3/libcontent/add-libcontent",
+              "caption": "libcontent",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/id3/libcontent/add-libcontent/attribute::contenttype",
+                  "caption": "Content Type",
                   "editable": true
                 }
               ]
@@ -1839,6 +1865,19 @@
               ]
             },
             {
+              "item": "/import/library-options/exiv2/libcontent/add-libcontent",
+              "caption": "libcontent",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/exiv2/libcontent/add-libcontent/attribute::contenttype",
+                  "caption": "Content Type",
+                  "editable": true
+                }
+              ]
+            },
+            {
               "item": "/import/library-options/exiv2/comment/attribute::enabled",
               "caption": "comment enabled",
               "editable": true
@@ -1911,6 +1950,19 @@
               ]
             },
             {
+              "item": "/import/library-options/ffmpeg/libcontent/add-libcontent",
+              "caption": "libcontent",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/ffmpeg/libcontent/add-libcontent/attribute::contenttype",
+                  "caption": "Content Type",
+                  "editable": true
+                }
+              ]
+            },
+            {
               "item": "/import/library-options/ffmpeg/comment/attribute::enabled",
               "caption": "comment enabled",
               "editable": true
@@ -1936,7 +1988,7 @@
           ]
         },
         {
-          "item": "/import/library-options/ffmpeg",
+          "item": "/import/library-options/wavpack",
           "type": "Element",
           "caption": "wavpack Library Options",
           "editable": true,
@@ -1978,6 +2030,19 @@
                 {
                   "item": "/import/library-options/wavpack/metadata/add-data/attribute::key",
                   "caption": "Upnp metadata entry",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/wavpack/libcontent/add-libcontent",
+              "caption": "libcontent",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/wavpack/libcontent/add-libcontent/attribute::contenttype",
+                  "caption": "Content Type",
                   "editable": true
                 }
               ]
@@ -2050,6 +2115,19 @@
                 {
                   "item": "/import/library-options/mkv/metadata/add-data/attribute::key",
                   "caption": "Upnp metadata entry",
+                  "editable": true
+                }
+              ]
+            },
+            {
+              "item": "/import/library-options/mkv/libcontent/add-libcontent",
+              "caption": "libcontent",
+              "type": "List",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/import/library-options/mkv/libcontent/add-libcontent/attribute::contenttype",
+                  "caption": "Content Type",
                   "editable": true
                 }
               ]

@@ -22,10 +22,12 @@
 /// @brief Implementation of the LastFmScrobbler class.
 
 #ifdef HAVE_CURL
+#define GRB_LOG_FAC GrbLogFacility::online
 
 #include "lastfmlib.h" // API
 
 #include "exceptions.h"
+#include "util/logger.h"
 #include "util/tools.h"
 
 #include <curl/curl.h>
@@ -38,6 +40,7 @@
 static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp)
 {
     ((std::string*)userp)->append((char*)contents, size * nmemb);
+    log_debug("got {}", *((std::string*)userp));
     return size * nmemb;
 }
 
@@ -67,17 +70,25 @@ void LastFmScrobbler::authenticate()
 std::string LastFmScrobbler::fetchAuthToken()
 {
     std::vector<std::pair<std::string, std::string>> params = {
+        { "api_key", apiKey },
         { "method", "auth.getToken" },
-        { "api_key", apiKey }
     };
     params.emplace_back("api_sig", buildApiSig(params));
     std::string response = postRequest(params);
 
     pugi::xml_document doc;
     if (doc.load_string(response.c_str())) {
-        auto token = doc.child("lfm").child("token");
-        if (token)
-            return token.child_value();
+        auto lfm = doc.child("lfm");
+        std::string status = lfm.attribute("status").as_string();
+        log_debug("status = {}", status);
+        if (status == "failed") {
+            auto error = lfm.child("error");
+            log_error("Fetch Auth Token failed\ncode = {}\nmessage = {}", error.attribute("code").as_int(), error.text().as_string());
+        } else {
+            auto token = lfm.child("token");
+            if (token)
+                return token.child_value();
+        }
     }
     return {};
 }
@@ -99,10 +110,18 @@ bool LastFmScrobbler::fetchSessionKey(const std::string& token)
 
     pugi::xml_document doc;
     if (doc.load_string(response.c_str())) {
-        auto key = doc.child("lfm").child("session").child("key");
-        if (key) {
-            sessionKey = key.child_value();
-            return true;
+        auto lfm = doc.child("lfm");
+        std::string status = lfm.attribute("status").as_string();
+        log_debug("status = {}", status);
+        if (status == "failed") {
+            auto error = lfm.child("error");
+            log_error("Fetch Session Key failed\ncode = {}\nmessage = {}", error.attribute("code").as_int(), error.text().as_string());
+        } else {
+            auto key = lfm.child("session").child("key");
+            if (key) {
+                sessionKey = key.child_value();
+                return true;
+            }
         }
     }
     return false;
@@ -184,7 +203,8 @@ std::string LastFmScrobbler::buildApiSig(const std::vector<std::pair<std::string
     for (const auto& [key, val] : sorted) {
         sig.append(fmt::format("{}{}", key, val));
     }
-    return hexStringMd5(fmt::format("{}{}", sig, apiSecret));
+    sig.append(apiSecret);
+    return hexStringMd5(sig);
 }
 
 std::string LastFmScrobbler::postRequest(const std::vector<std::pair<std::string, std::string>>& params) const
@@ -197,8 +217,9 @@ std::string LastFmScrobbler::postRequest(const std::vector<std::pair<std::string
     CURL* curl = curl_easy_init();
     std::string response;
     if (curl) {
-        curl_easy_setopt(curl, CURLOPT_URL, scrobbleUrl.c_str());
-        curl_easy_setopt(curl, CURLOPT_POSTFIELDS, fmt::format("{}", fmt::join(postFields, "&")).c_str());
+        auto request = fmt::format("{}?{}", scrobbleUrl, fmt::join(postFields, "&"));
+        log_debug("Posting {}", request);
+        curl_easy_setopt(curl, CURLOPT_URL, request.c_str());
         curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, WriteCallback);
         curl_easy_setopt(curl, CURLOPT_WRITEDATA, &response);
         curl_easy_perform(curl);

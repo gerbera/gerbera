@@ -72,6 +72,8 @@ public:
     MetadataHandler(const MetadataHandler&) = delete;
     MetadataHandler& operator=(const MetadataHandler&) = delete;
 
+    /// @brief check whether the handler is enabled for the file type
+    virtual bool isEnabled(const std::string& contentType) { return true; }
     /// @brief check whether file type is supported by handler
     virtual bool isSupported(const std::string& contentType,
         bool isOggTheora,
@@ -97,7 +99,7 @@ public:
 class MediaMetadataHandler : public MetadataHandler {
 protected:
     /// @brief allow handler to be disabled by config
-    bool isEnabled {};
+    bool enabled {};
     /// @brief allow comment generation to be disabled by config
     bool isCommentEnabled {};
     /// @brief store all found metadata tags
@@ -108,6 +110,8 @@ protected:
     std::map<std::string, std::string> commentMap;
     /// @brief access converter
     std::shared_ptr<ConverterManager> converterManager;
+    /// @brief only handle content types
+    std::vector<std::string> enabledContentTypes;
 
     /// @brief check mimetype validity
     static bool isValidArtworkContentType(std::string_view artMimetype);
@@ -124,16 +128,20 @@ public:
     explicit MediaMetadataHandler(
         const std::shared_ptr<Context>& context,
         ConfigVal enableOption,
+        ConfigVal contentOption,
         ConfigVal metaOption,
         ConfigVal auxOption);
     explicit MediaMetadataHandler(
         const std::shared_ptr<Context>& context,
         ConfigVal enableOption,
+        ConfigVal contentOption,
         ConfigVal metaOption,
         ConfigVal auxOption,
         ConfigVal enableCommentOption,
         ConfigVal commentOption);
     ~MediaMetadataHandler() override;
+
+    bool isEnabled(const std::string& contentType) override;
 };
 
 #endif // __METADATA_HANDLER_H__

@@ -43,7 +43,7 @@ MetadataHandler::~MetadataHandler() = default;
 
 MediaMetadataHandler::MediaMetadataHandler(const std::shared_ptr<Context>& context, ConfigVal enableOption)
     : MetadataHandler(context)
-    , isEnabled(this->config->getBoolOption(enableOption))
+    , enabled(this->config->getBoolOption(enableOption))
     , converterManager(context->getConverterManager())
 {
 }
@@ -53,30 +53,34 @@ MediaMetadataHandler::~MediaMetadataHandler() = default;
 MediaMetadataHandler::MediaMetadataHandler(
     const std::shared_ptr<Context>& context,
     ConfigVal enableOption,
+    ConfigVal contentOption,
     ConfigVal metaOption,
     ConfigVal auxOption)
     : MetadataHandler(context)
-    , isEnabled(this->config->getBoolOption(enableOption))
+    , enabled(this->config->getBoolOption(enableOption))
     , metaTags(this->config->getDictionaryOption(metaOption))
     , auxTags(this->config->getArrayOption(auxOption))
     , converterManager(context->getConverterManager())
+    , enabledContentTypes(this->config->getArrayOption(contentOption))
 {
 }
 
 MediaMetadataHandler::MediaMetadataHandler(
     const std::shared_ptr<Context>& context,
     ConfigVal enableOption,
+    ConfigVal contentOption,
     ConfigVal metaOption,
     ConfigVal auxOption,
     ConfigVal enableCommentOption,
     ConfigVal commentOption)
     : MetadataHandler(context)
-    , isEnabled(this->config->getBoolOption(enableOption))
+    , enabled(this->config->getBoolOption(enableOption))
     , isCommentEnabled(this->config->getBoolOption(enableCommentOption))
     , metaTags(this->config->getDictionaryOption(metaOption))
     , auxTags(this->config->getArrayOption(auxOption))
     , commentMap(this->config->getDictionaryOption(commentOption))
     , converterManager(context->getConverterManager())
+    , enabledContentTypes(this->config->getArrayOption(contentOption))
 {
 }
 
@@ -103,4 +107,9 @@ std::shared_ptr<CdsResource> MediaMetadataHandler::addArtworkResource(
         return resource;
     }
     return {};
+}
+
+bool MediaMetadataHandler::isEnabled(const std::string& contentType)
+{
+    return enabled && (enabledContentTypes.empty() || std::find(enabledContentTypes.begin(), enabledContentTypes.end(), contentType) != enabledContentTypes.end());
 }

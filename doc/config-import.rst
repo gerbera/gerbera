@@ -80,6 +80,9 @@ The import settings define various options on how to aggregate the content.
             <auxdata>
               <add-data/>
             </auxdata>
+            <libcontent>
+              <add-libcontent/>
+            </libcontent>
             <metadata>
               <add-data/>
             </metadata>
@@ -88,6 +91,9 @@ The import settings define various options on how to aggregate the content.
             <auxdata>
               <add-data/>
             </auxdata>
+            <libcontent>
+              <add-libcontent/>
+            </libcontent>
             <metadata>
               <add-data/>
             </metadata>
@@ -96,6 +102,9 @@ The import settings define various options on how to aggregate the content.
             <auxdata>
               <add-data/>
             </auxdata>
+            <libcontent>
+              <add-libcontent/>
+            </libcontent>
             <metadata>
               <add-data/>
             </metadata>
@@ -104,6 +113,9 @@ The import settings define various options on how to aggregate the content.
             <auxdata>
               <add-data/>
             </auxdata>
+            <libcontent>
+              <add-libcontent/>
+            </libcontent>
             <metadata>
               <add-data/>
             </metadata>
@@ -112,6 +124,9 @@ The import settings define various options on how to aggregate the content.
             <auxdata>
               <add-data/>
             </auxdata>
+            <libcontent>
+              <add-libcontent/>
+            </libcontent>
             <metadata>
               <add-data/>
             </metadata>
@@ -120,6 +135,9 @@ The import settings define various options on how to aggregate the content.
             <auxdata>
               <add-data/>
             </auxdata>
+            <libcontent>
+              <add-libcontent/>
+            </libcontent>
             <metadata>
               <add-data/>
             </metadata>
@@ -2562,6 +2580,52 @@ If the library was able to extract the data according to the given keyword, it w
          key="upnp:Key"
 
    Sets the UPnP meta property.
+
+Filter Files by Content Type
+----------------------------
+
+.. confval:: libcontent
+   :type: :confval:`Section`
+   :required: false
+   :default: Extensible default, see :confval:`extend`
+..
+
+   .. versionadded:: HEAD
+   .. code-block:: xml
+
+      <libcontent>
+         <add-libcontent contenttype="png"/>
+      </libcontent>
+
+In case a content type is handled by multiple libraries, import time can increase
+significantly. To avoid parsing files twice, you can select the content types for
+handling by the library.
+
+Add Content Type
+^^^^^^^^^^^^^^^^
+
+.. confval:: libcontent add-libcontent
+   :type: :confval:`Section`
+   :required: false
+..
+
+   .. code-block:: xml
+
+      <add-libcontent contenttype="png"/>
+      <add-libcontent contenttype="jpg"/>
+
+   .. confval:: libcontent add-libcontent contenttype
+      :type: :confval:`String`
+      :required: true
+   ..
+
+      .. code-block:: xml
+
+         contenttype="jpg"
+
+   Select the content type.
+
+If the library is not able to handle the content type the value is ignored.
 
 Fabricate Comment
 -----------------

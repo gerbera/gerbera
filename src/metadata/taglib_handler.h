@@ -156,6 +156,11 @@ private:
         TagLib::IOStream& roStream,
         const std::shared_ptr<CdsItem>& item,
         const std::shared_ptr<CdsResource>& res) const;
+    /// @brief read specific matroska data
+    void extractMkv(
+        TagLib::IOStream& roStream,
+        const std::shared_ptr<CdsItem>& item,
+        const std::shared_ptr<CdsResource>& res) const;
 
     /// @brief set bits per sample based on media type
     template <class Media>
