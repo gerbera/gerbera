@@ -216,6 +216,7 @@ private:
     std::shared_ptr<AutoscanDirectory> autoscanDir;
     std::map<AutoscanMediaMode, std::string> containerTypeMap;
     std::shared_ptr<StateCache> importStateCache;
+    /// @brief cache for containers while creating new layout
     ContainerCache containerCache;
 
     std::string noMediaName;

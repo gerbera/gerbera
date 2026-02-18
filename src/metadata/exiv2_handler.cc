@@ -51,6 +51,7 @@
 Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context,
           ConfigVal::IMPORT_LIBOPTS_EXIV2_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_EXIV2_CONTENT_LIST,
           ConfigVal::IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_ENABLED,
@@ -153,7 +154,7 @@ bool Exiv2Handler::isSupported(
 bool Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item || !isEnabled)
+    if (!item || !enabled)
         return false;
 
     bool result = true;

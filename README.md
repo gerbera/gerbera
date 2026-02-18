@@ -68,7 +68,7 @@ sudo make install
 | [libpqxx]           | 7.10.1       | 7.10.3       | 7.10.3               | Optional      | Alternate database PostgreSQL    | Disabled |
 | [libpq]             | 12.22        |              | 17.0.6               | Optional      | required by [libpqxx]            | Disabled |
 | curl                |              |              |                      | Optional      | Enables web services             | Enabled  |
-| [taglib]            | 1.12         | 1.12         | 2.1.1                | Optional      | Audio tag support                | Enabled  |
+| [taglib]            | 1.12         | 1.12         | 2.2                  | Optional      | Audio tag support                | Enabled  |
 | libmagic            |              |              |                      | Optional      | File type detection              | Enabled  |
 | [wavpack]           | 5.1.0        | 5.4.0        | 5.9.0                | Optional      | WavPack metadata support         | Disabled |
 | [libmatroska]       | 1.4.8        | 1.6.3        | 1.7.1                | Optional      | MKV metadata                     | Enabled  |

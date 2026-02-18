@@ -195,7 +195,7 @@ bool MetadataService::extractMetaData(
     };
     bool result = false;
     for (auto handler : metaHandlers) {
-        if (handlers.at(handler)->isSupported(contentType, isOggTheora, mimetype, mediaType)) {
+        if (handlers.at(handler)->isEnabled(contentType) && handlers.at(handler)->isSupported(contentType, isOggTheora, mimetype, mediaType)) {
             try {
                 log_debug("Running {} for {}", handlerNames.at(handler), item->getLocation().c_str());
                 auto handlerResult = handlers.at(handler)->fillMetadata(item);
@@ -246,7 +246,7 @@ bool MetadataService::attachResourceFiles(
     };
     bool result = false;
     for (auto handler : metaHandlers) {
-        if (handlers.at(handler)->isSupported(contentType, false, mimeType, mediaType)) {
+        if (handlers.at(handler)->isEnabled(contentType) && handlers.at(handler)->isSupported(contentType, false, mimeType, mediaType)) {
             try {
                 log_debug("Running {} for {}", handlerNames.at(handler), item->getLocation().c_str());
                 auto handlerResult = handlers.at(handler)->fillMetadata(item);

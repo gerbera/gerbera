@@ -1203,11 +1203,12 @@
 
     <xs:element name="libexif">
         <xs:complexType>
-            <xs:sequence>
+            <xs:all>
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="libcontent" minOccurs="0"/>
                 <xs:element ref="comment" minOccurs="0"/>
-            </xs:sequence>
+            </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>
@@ -1215,11 +1216,12 @@
 
     <xs:element name="exiv2">
         <xs:complexType>
-            <xs:sequence>
+            <xs:all>
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="libcontent" minOccurs="0"/>
                 <xs:element ref="comment" minOccurs="0"/>
-            </xs:sequence>
+            </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>
@@ -1227,11 +1229,12 @@
 
     <xs:element name="ffmpeg">
         <xs:complexType>
-            <xs:sequence>
+            <xs:all>
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="libcontent" minOccurs="0"/>
                 <xs:element ref="comment" minOccurs="0"/>
-            </xs:sequence>
+            </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="artwork-enabled" type="boolean" default="no"/>
             <xs:attribute name="subtitle-seek-size" type="xs:nonNegativeInteger" default="2048"/>
@@ -1241,11 +1244,12 @@
 
     <xs:element name="id3">
         <xs:complexType>
-            <xs:sequence>
+            <xs:all>
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="libcontent" minOccurs="0"/>
                 <xs:element ref="comment" minOccurs="0"/>
-            </xs:sequence>
+            </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>
@@ -1253,11 +1257,12 @@
 
     <xs:element name="mkv">
         <xs:complexType>
-            <xs:sequence>
+            <xs:all>
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="libcontent" minOccurs="0"/>
                 <xs:element ref="comment" minOccurs="0"/>
-            </xs:sequence>
+            </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>
@@ -1265,11 +1270,12 @@
 
     <xs:element name="wavpack">
         <xs:complexType>
-            <xs:sequence>
+            <xs:all>
                 <xs:element ref="auxdata" minOccurs="0"/>
                 <xs:element ref="metadata" minOccurs="0"/>
+                <xs:element ref="libcontent" minOccurs="0"/>
                 <xs:element ref="comment" minOccurs="0"/>
-            </xs:sequence>
+            </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>
@@ -1297,6 +1303,21 @@
         <xs:complexType>
             <xs:attribute name="tag" type="xs:string" use="required"/>
             <xs:attribute name="key" type="xs:string"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="libcontent">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element ref="add-libcontent" minOccurs="0" maxOccurs="unbounded"/>
+            </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="add-libcontent">
+        <xs:complexType>
+            <xs:attribute name="contenttype" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
 

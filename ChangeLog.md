@@ -11,6 +11,7 @@
 - Show changed items in UI
 - Update npupnp to 6.2.3
 - Update to pupnp 1.14.30
+- Upgrade to taglib 2.2 with new file type and filtering
 - Use entry_type instead of location prefix
 
 ### v3.1.1

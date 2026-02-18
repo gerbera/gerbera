@@ -66,6 +66,7 @@ WavPackHandler::WavPackHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(
           context,
           ConfigVal::IMPORT_LIBOPTS_WAVPACK_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_WAVPACK_CONTENT_LIST,
           ConfigVal::IMPORT_LIBOPTS_WAVPACK_METADATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_WAVPACK_AUXDATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_WAVPACK_COMMENT_ENABLED,
@@ -249,7 +250,7 @@ public:
 bool WavPackHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item || !isEnabled)
+    if (!item || !enabled)
         return false;
 
     WavPackObject wpObject(item);
@@ -475,7 +476,7 @@ std::unique_ptr<IOHandler> WavPackHandler::serveContent(
     const std::shared_ptr<CdsResource>& resource)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item) // not streamable
+    if (!item && !enabled) // not streamable
         return {};
     if (!resource)
         return {};
