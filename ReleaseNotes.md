@@ -12,7 +12,7 @@
 ### Code Improvements
 
 - Remove prefix for location type in database
-- Update maximum versions of npupnp (6.2.3), cmake (4.2.3), pupnp (1.14.30), taglib (2.2)
+- Update maximum versions of npupnp (6.2.3), cmake (4.2.3), pupnp (1.18.0), taglib (2.2)
 
 ## v3.1.1
 
