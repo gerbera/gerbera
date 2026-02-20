@@ -148,7 +148,19 @@ bool LastFmScrobbler::updateNowPlaying(
     std::string response = postRequest(params);
 
     pugi::xml_document doc;
-    return doc.load_string(response.c_str()) && std::string(doc.child("lfm").attribute("status").value()) == "ok";
+    if (doc.load_string(response.c_str())) {
+        auto lfm = doc.child("lfm");
+        std::string status = lfm.attribute("status").as_string();
+        log_debug("status = {}", status);
+        if (status == "failed") {
+            auto error = lfm.child("error");
+            log_error("Update Now Playing failed\ncode = {}\nmessage = {}", error.attribute("code").as_int(), error.text().as_string());
+            return false;
+        } else {
+            return status == "ok";
+        }
+    }
+    return false;
 }
 
 void LastFmScrobbler::startedPlaying(const SubmissionInfo& info)
@@ -188,7 +200,19 @@ bool LastFmScrobbler::scrobbleTrack(
     std::string response = postRequest(params);
 
     pugi::xml_document doc;
-    return doc.load_string(response.c_str()) && std::string(doc.child("lfm").attribute("status").value()) == "ok";
+    if (doc.load_string(response.c_str())) {
+        auto lfm = doc.child("lfm");
+        std::string status = lfm.attribute("status").as_string();
+        log_debug("status = {}", status);
+        if (status == "failed") {
+            auto error = lfm.child("error");
+            log_error("Scrobble failed\ncode = {}\nmessage = {}", error.attribute("code").as_int(), error.text().as_string());
+            return false;
+        } else {
+            return status == "ok";
+        }
+    }
+    return false;
 }
 
 std::string LastFmScrobbler::buildApiSig(const std::vector<std::pair<std::string, std::string>>& params) const
