@@ -26,8 +26,10 @@
 
 #ifdef HAVE_CURL
 
+#include <atomic>
 #include <ctime>
 #include <string>
+#include <thread>
 #include <vector>
 
 class SubmissionInfo {
@@ -133,6 +135,10 @@ private:
 
     std::string buildApiSig(const std::vector<std::pair<std::string, std::string>>& params) const;
     std::string postRequest(const std::vector<std::pair<std::string, std::string>>& params) const;
+    std::string getRequest(const std::vector<std::pair<std::string, std::string>>& params) const;
+
+    std::atomic<bool> stopRequested { false };
+    std::thread scrobbleThread;
 };
 
 #endif // HAVE_CURL
