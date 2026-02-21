@@ -9,6 +9,11 @@
 - Extract Matroska metadata also with taglib 2.2
 - Select content type for import library to reduce import time
 
+### FIXES
+
+- LastFM with rest API
+- Configuration for FFmpeg stream data import to reduce import times
+
 ### Code Improvements
 
 - Remove prefix for location type in database

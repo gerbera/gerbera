@@ -152,6 +152,7 @@ FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_ENABLED,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_LIST)
     , artWorkEnabled(config->getBoolOption(ConfigVal::IMPORT_LIBOPTS_FFMPEG_ARTWORK_ENABLED))
+    , streamsEnabled(config->getBoolOption(ConfigVal::IMPORT_LIBOPTS_FFMPEG_STREAMS_ENABLED))
     , subtitleSeekSize(config->getUIntOption(ConfigVal::IMPORT_LIBOPTS_FFMPEG_SUBTITLE_SEEK_SIZE))
 {
 #if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100))
@@ -193,12 +194,17 @@ public:
     std::string location;
     std::shared_ptr<StringConverter> sc;
     ObjectType objType;
+    bool streamsEnabled;
     AVFormatContext* pFormatCtx = nullptr;
 
-    FfmpegObject(const std::shared_ptr<ConverterManager>& converterManager, const std::shared_ptr<CdsItem>& item)
+    FfmpegObject(
+        const std::shared_ptr<ConverterManager>& converterManager,
+        const std::shared_ptr<CdsItem>& item,
+        bool streamsEnabled)
         : location(item->getLocation())
         , sc(converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET, location))
         , objType(item->getMediaType())
+        , streamsEnabled(streamsEnabled)
     {
         // ffmpeg library context
         pFormatCtx = avformat_alloc_context();
@@ -235,6 +241,8 @@ public:
         if (!pFormatCtx)
             return false;
         if (!pFormatCtx->metadata) {
+            if (!streamsEnabled)
+                return false;
             for (std::size_t stream_number = 0; stream_number < pFormatCtx->nb_streams; stream_number++) {
                 if (pFormatCtx->streams[stream_number]->metadata)
                     return true;
@@ -258,9 +266,11 @@ public:
                 return val;
             }
         }
+        if (!streamsEnabled)
+            return "";
         for (std::size_t stream_number = 0; stream_number < pFormatCtx->nb_streams; stream_number++) {
             if (pFormatCtx->streams[stream_number]->metadata) {
-                auto tag = av_dict_get(pFormatCtx->metadata, desiredTag.c_str(), nullptr, AV_DICT_IGNORE_SUFFIX);
+                auto tag = av_dict_get(pFormatCtx->streams[stream_number]->metadata, desiredTag.c_str(), nullptr, AV_DICT_IGNORE_SUFFIX);
                 if (tag && tag->value && tag->value[0]) {
                     auto [val, err] = sc->convert(trimString(tag->value));
                     if (!err.empty()) {
@@ -352,6 +362,8 @@ bool FfmpegHandler::addFfmpegMetadataFields(
         while ((avEntry = av_dict_get(ffmpegObject.pFormatCtx->metadata, "", avEntry, AV_DICT_IGNORE_SUFFIX))) {
             result = getFfmpegMetadataField(item, ffmpegObject, avEntry, item->getMediaType(), emptyProperties, emptySpecProperties) || result;
         }
+    if (!streamsEnabled)
+        return result;
     for (std::size_t stream_number = 0; stream_number < ffmpegObject.pFormatCtx->nb_streams; stream_number++) {
         auto st = ffmpegObject.pFormatCtx->streams[stream_number];
         if (st->metadata) {
@@ -820,7 +832,7 @@ bool FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
 
     log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
 
-    FfmpegObject ffmpegObject(converterManager, item);
+    FfmpegObject ffmpegObject(converterManager, item, streamsEnabled);
 
     bool result = false;
     // Add metadata for unset values
@@ -849,7 +861,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(
     log_debug("Running ffmpeg handler on {}", item->getLocation().c_str());
 
     if (resource->getPurpose() == ResourcePurpose::Thumbnail) {
-        FfmpegObject ffmpegObject(converterManager, item);
+        FfmpegObject ffmpegObject(converterManager, item, streamsEnabled);
         auto resolution = resource->getAttribute(ResourceAttribute::RESOLUTION);
         auto st = ffmpegObject.pFormatCtx->streams[streamIndex];
 
@@ -870,7 +882,7 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(
         }
     }
     if (resource->getPurpose() == ResourcePurpose::Subtitle) {
-        FfmpegObject ffmpegObject(converterManager, item);
+        FfmpegObject ffmpegObject(converterManager, item, streamsEnabled);
         auto language = resource->getAttribute(ResourceAttribute::LANGUAGE);
         auto st = ffmpegObject.pFormatCtx->streams[streamIndex];
 

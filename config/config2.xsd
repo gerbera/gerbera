@@ -1237,6 +1237,7 @@
             </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="artwork-enabled" type="boolean" default="no"/>
+            <xs:attribute name="streams-enabled" type="boolean" default="no"/>
             <xs:attribute name="subtitle-seek-size" type="xs:nonNegativeInteger" default="2048"/>
             <xs:attribute name="charset" type="xs:string"/>
         </xs:complexType>

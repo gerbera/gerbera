@@ -125,6 +125,9 @@ private:
     };
     /// @brief activate separation of artwork found by handler
     bool artWorkEnabled;
+    /// @brief activate reading metadata from all streams
+    bool streamsEnabled;
+    /// @brief number of bytes to read for mime detection of subtitles
     unsigned int subtitleSeekSize;
 };
 
