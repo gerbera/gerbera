@@ -2793,6 +2793,18 @@ documents all of the metadata keys that FFmpeg honors, depending on the format b
 Create a separate resource for the artwork if detected by ffmpeg instead of merging
 the attributes into the existing thumbnail resource (e.g. created by taglib)
 
+   .. confval:: streams-enabled
+      :type: :confval:`Boolean`
+      :required: false
+      :default: ``no``
+
+      .. versionadded:: HEAD
+      .. code-block:: xml
+
+         streams-enabled="yes"
+
+Check all streams for metadata. Expect longer import times in case of large files.
+
    .. confval:: subtitle-seek-size
       :type: :confval:`Integer`
       :required: false

@@ -394,7 +394,7 @@
                     <add-data tag="PERFORMER" key="upnp:artist@role[Performer]"/>
                 </metadata>
             </id3>
-            <ffmpeg charset="UTF-8" enabled="yes" artwork-enabled="no">
+            <ffmpeg charset="UTF-8" enabled="yes" artwork-enabled="no" streams-enabled="no">
                 <auxdata/>
                 <libcontent>
                   <add-libcontent contenttype="aiff" />

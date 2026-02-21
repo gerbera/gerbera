@@ -676,6 +676,7 @@ void ConfigGenerator::generateImportOptions(
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_LIST, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_ARTWORK_ENABLED, ConfigLevel::Example },
+        { ConfigVal::IMPORT_LIBOPTS_FFMPEG_STREAMS_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_SUBTITLE_SEEK_SIZE, ConfigLevel::Example },
 #endif
 #ifdef HAVE_MATROSKA
