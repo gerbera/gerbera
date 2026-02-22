@@ -396,7 +396,7 @@
             </id3>
             <ffmpeg charset="UTF-8" enabled="yes" artwork-enabled="no" streams-enabled="no">
                 <auxdata/>
-                <libcontent>
+                <libcontent enabled="true" extend="true">
                   <add-libcontent contenttype="aiff" />
                   <add-libcontent contenttype="ape" />
                   <add-libcontent contenttype="asf" />

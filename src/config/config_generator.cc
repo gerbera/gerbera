@@ -646,6 +646,7 @@ void ConfigGenerator::generateImportOptions(
         { ConfigVal::IMPORT_LIBOPTS_EXIF_CHARSET, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_EXIF_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_EXIF_CONTENT_LIST, ConfigLevel::Example },
+        { ConfigVal::IMPORT_LIBOPTS_EXIF_CONTENT_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_EXIF_COMMENT_LIST, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_EXIF_COMMENT_ENABLED, ConfigLevel::Example },
 #endif
@@ -655,6 +656,7 @@ void ConfigGenerator::generateImportOptions(
         { ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_EXIV2_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_EXIV2_CONTENT_LIST, ConfigLevel::Example },
+        { ConfigVal::IMPORT_LIBOPTS_EXIV2_CONTENT_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_LIST, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_EXIV2_COMMENT_ENABLED, ConfigLevel::Example },
 #endif
@@ -664,6 +666,7 @@ void ConfigGenerator::generateImportOptions(
         { ConfigVal::IMPORT_LIBOPTS_ID3_CHARSET, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_ID3_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_ID3_CONTENT_LIST, ConfigLevel::Example },
+        { ConfigVal::IMPORT_LIBOPTS_ID3_CONTENT_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_ID3_COMMENT_LIST, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_ID3_COMMENT_ENABLED, ConfigLevel::Example },
 #endif
@@ -673,6 +676,7 @@ void ConfigGenerator::generateImportOptions(
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_CHARSET, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_CONTENT_LIST, ConfigLevel::Example },
+        { ConfigVal::IMPORT_LIBOPTS_FFMPEG_CONTENT_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_LIST, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_FFMPEG_ARTWORK_ENABLED, ConfigLevel::Example },
@@ -685,8 +689,9 @@ void ConfigGenerator::generateImportOptions(
         { ConfigVal::IMPORT_LIBOPTS_MKV_CHARSET, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_MKV_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_MKV_CONTENT_LIST, ConfigLevel::Example },
-        { ConfigVal::IMPORT_LIBOPTS_MKV_COMMENT_ENABLED, ConfigLevel::Example },
+        { ConfigVal::IMPORT_LIBOPTS_MKV_CONTENT_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_MKV_COMMENT_LIST, ConfigLevel::Example },
+        { ConfigVal::IMPORT_LIBOPTS_MKV_COMMENT_ENABLED, ConfigLevel::Example },
 #endif
 #ifdef HAVE_WAVPACK
         { ConfigVal::IMPORT_LIBOPTS_WAVPACK_AUXDATA_TAGS_LIST, ConfigLevel::Example },
@@ -694,8 +699,9 @@ void ConfigGenerator::generateImportOptions(
         { ConfigVal::IMPORT_LIBOPTS_WAVPACK_CHARSET, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_WAVPACK_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_WAVPACK_CONTENT_LIST, ConfigLevel::Example },
-        { ConfigVal::IMPORT_LIBOPTS_WAVPACK_COMMENT_ENABLED, ConfigLevel::Example },
+        { ConfigVal::IMPORT_LIBOPTS_WAVPACK_CONTENT_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_WAVPACK_COMMENT_LIST, ConfigLevel::Example },
+        { ConfigVal::IMPORT_LIBOPTS_WAVPACK_COMMENT_ENABLED, ConfigLevel::Example },
 #endif
         { ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE, ConfigLevel::Base },
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP, ConfigLevel::Example },

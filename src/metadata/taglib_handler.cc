@@ -100,6 +100,7 @@ GerberaTagLibDebugListener GerberaTagLibDebugListener::grbListener;
 TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context,
           ConfigVal::IMPORT_LIBOPTS_ID3_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_ID3_CONTENT_ENABLED,
           ConfigVal::IMPORT_LIBOPTS_ID3_CONTENT_LIST,
           ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST,

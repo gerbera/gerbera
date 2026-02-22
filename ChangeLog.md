@@ -6,6 +6,7 @@
 - Bump qs from 6.14.1 to 6.14.2 in /gerbera-web
 - Document MARIADB_TLS_DISABLE_PEER_VERIFICATION
 - Export and import changed object from database
+- Extend content type filter configuration
 - FFmpeg: configuration for stream data import
 - Keep track of changed objects
 - Load Config file modules

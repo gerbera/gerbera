@@ -110,8 +110,10 @@ protected:
     std::map<std::string, std::string> commentMap;
     /// @brief access converter
     std::shared_ptr<ConverterManager> converterManager;
+    /// @brief allow contenttypes to be disabled by config
+    bool enabledContentTypes {};
     /// @brief only handle content types
-    std::vector<std::string> enabledContentTypes;
+    std::vector<std::string> contentTypes;
 
     /// @brief check mimetype validity
     static bool isValidArtworkContentType(std::string_view artMimetype);
@@ -128,12 +130,14 @@ public:
     explicit MediaMetadataHandler(
         const std::shared_ptr<Context>& context,
         ConfigVal enableOption,
+        ConfigVal enableContentOption,
         ConfigVal contentOption,
         ConfigVal metaOption,
         ConfigVal auxOption);
     explicit MediaMetadataHandler(
         const std::shared_ptr<Context>& context,
         ConfigVal enableOption,
+        ConfigVal enableContentOption,
         ConfigVal contentOption,
         ConfigVal metaOption,
         ConfigVal auxOption,

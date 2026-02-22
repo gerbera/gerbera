@@ -145,8 +145,14 @@ private:
 
 #undef log_debug
 #undef log_vdebug
+
+#define IS_DEBUGGING GrbLogger::Logger.isDebugging(GRB_LOG_FAC)
 #define log_debug(...) log_facility(GRB_LOG_FAC, __VA_ARGS__)
 #define log_vdebug(...) log_facility2(GRB_LOG_FAC, GrbLogFacility::verbose, __VA_ARGS__)
+
+#else
+
+#define IS_DEBUGGING false
 
 #endif
 
@@ -162,6 +168,7 @@ private:
     bool debug;
 };
 #define log_facility(fac, ...) log_debug(__VA_ARGS__)
+#define IS_DEBUGGING false
 
 #endif
 

@@ -146,6 +146,7 @@ int FfmpegLogger::logLevel = AV_LOG_INFO;
 FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_FFMPEG_CONTENT_ENABLED,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_CONTENT_LIST,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST,
