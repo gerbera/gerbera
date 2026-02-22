@@ -197,6 +197,7 @@ static void logfunc(ExifLog* log, ExifLogCode code, const char* domain, const ch
 LibExifHandler::LibExifHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context,
           ConfigVal::IMPORT_LIBOPTS_EXIF_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_EXIF_CONTENT_ENABLED,
           ConfigVal::IMPORT_LIBOPTS_EXIF_CONTENT_LIST,
           ConfigVal::IMPORT_LIBOPTS_EXIF_METADATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_EXIF_AUXDATA_TAGS_LIST,

@@ -111,6 +111,7 @@ public:
 MatroskaHandler::MatroskaHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context,
           ConfigVal::IMPORT_LIBOPTS_MKV_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_MKV_CONTENT_ENABLED,
           ConfigVal::IMPORT_LIBOPTS_MKV_CONTENT_LIST,
           ConfigVal::IMPORT_LIBOPTS_MKV_METADATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_MKV_AUXDATA_TAGS_LIST,
@@ -416,20 +417,22 @@ void MatroskaHandler::parseTags(
                 continue;
             for (auto&& tagEln : *tagEl) {
                 if (EbmlId(*tagEln) == EBML_ID(KaxTagTargets)) {
-                    auto tagTargets = dynamic_cast<KaxTagTargets*>(tagEln);
-                    for (auto&& tagTarget : *tagTargets) {
-                        if (EbmlId(*tagTarget) == EBML_ID(KaxTagTargetType)) {
-                            log_debug("{} target type", mkvObject.location);
-                        } else if (EbmlId(*tagTarget) == EBML_ID(KaxTagTargetTypeValue)) {
-                            log_debug("{} targeti type value", mkvObject.location);
-                        } else if (EbmlId(*tagTarget) == EBML_ID(KaxTagTrackUID)) {
-                            log_debug("{} target track", mkvObject.location);
-                        } else if (EbmlId(*tagTarget) == EBML_ID(KaxTagChapterUID)) {
-                            log_debug("{} target chapter", mkvObject.location);
-                        } else if (EbmlId(*tagTarget) == EBML_ID(KaxTagEditionUID)) {
-                            log_debug("{} target edition", mkvObject.location);
-                        } else if (EbmlId(*tagTarget) == EBML_ID(KaxTagAttachmentUID)) {
-                            log_debug("{} target attachment", mkvObject.location);
+                    if (IS_DEBUGGING) {
+                        auto tagTargets = dynamic_cast<KaxTagTargets*>(tagEln);
+                        for (auto&& tagTarget : *tagTargets) {
+                            if (EbmlId(*tagTarget) == EBML_ID(KaxTagTargetType)) {
+                                log_debug("{} target type", mkvObject.location);
+                            } else if (EbmlId(*tagTarget) == EBML_ID(KaxTagTargetTypeValue)) {
+                                log_debug("{} target type value", mkvObject.location);
+                            } else if (EbmlId(*tagTarget) == EBML_ID(KaxTagTrackUID)) {
+                                log_debug("{} target track", mkvObject.location);
+                            } else if (EbmlId(*tagTarget) == EBML_ID(KaxTagChapterUID)) {
+                                log_debug("{} target chapter", mkvObject.location);
+                            } else if (EbmlId(*tagTarget) == EBML_ID(KaxTagEditionUID)) {
+                                log_debug("{} target edition", mkvObject.location);
+                            } else if (EbmlId(*tagTarget) == EBML_ID(KaxTagAttachmentUID)) {
+                                log_debug("{} target attachment", mkvObject.location);
+                            }
                         }
                     }
                 } else if (EbmlId(*tagEln) == EBML_ID(KaxTagSimple)) {

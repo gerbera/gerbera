@@ -51,6 +51,7 @@
 Exiv2Handler::Exiv2Handler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(context,
           ConfigVal::IMPORT_LIBOPTS_EXIV2_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_EXIV2_CONTENT_ENABLED,
           ConfigVal::IMPORT_LIBOPTS_EXIV2_CONTENT_LIST,
           ConfigVal::IMPORT_LIBOPTS_EXIV2_METADATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_EXIV2_AUXDATA_TAGS_LIST,
@@ -71,11 +72,26 @@ public:
 #else
     Exiv2::Image::AutoPtr image;
 #endif
-    Exiv2::ExifData* exifData;
-    Exiv2::XmpData* xmpData;
+    struct Data {
+        const Exiv2::ExifData& exif;
+        const Exiv2::IptcData& iptc;
+        const Exiv2::XmpData& xmp;
+        Data(
+            const Exiv2::ExifData& exif,
+            const Exiv2::IptcData& iptc,
+            const Exiv2::XmpData& xmp)
+            : exif(exif)
+            , iptc(iptc)
+            , xmp(xmp)
+        {
+        }
+    };
+    std::unique_ptr<Data> data;
     std::string comment;
 
-    Exiv2Object(const std::shared_ptr<ConverterManager>& converterManager, const std::shared_ptr<CdsItem>& item)
+    Exiv2Object(
+        const std::shared_ptr<ConverterManager>& converterManager,
+        const std::shared_ptr<CdsItem>& item)
         : location(item->getLocation())
         , sc(converterManager->m2i(ConfigVal::IMPORT_LIBOPTS_EXIV2_CHARSET, location))
         , image(Exiv2::ImageFactory::open(location))
@@ -92,8 +108,10 @@ public:
         }
 #endif
         image->readMetadata();
-        exifData = &(image->exifData());
-        xmpData = &(image->xmpData());
+        data = std::make_unique<Data>(
+            image->exifData(),
+            image->iptcData(),
+            image->xmpData());
         // first retrieve jpeg comment
         comment = image->comment();
     }
@@ -121,12 +139,16 @@ public:
         log_debug("key: {} ", key);
         std::string keyValue;
         if (startswith(key, "Exif")) {
-            auto md = exifData->findKey(Exiv2::ExifKey(key));
-            if (md != exifData->end())
+            auto md = data->exif.findKey(Exiv2::ExifKey(key));
+            if (md != data->exif.end())
                 keyValue = md->toString();
+        } else if (startswith(key, "Iptc")) {
+            auto iptcMd = data->iptc.findKey(Exiv2::IptcKey(key));
+            if (iptcMd != data->iptc.end())
+                keyValue = iptcMd->toString();
         } else if (startswith(key, "Xmp")) {
-            auto xmpMd = xmpData->findKey(Exiv2::XmpKey(key));
-            if (xmpMd != xmpData->end())
+            auto xmpMd = data->xmp.findKey(Exiv2::XmpKey(key));
+            if (xmpMd != data->xmp.end())
                 keyValue = xmpMd->toString();
         } else {
             log_warning("Invalid key {}", key);
@@ -160,7 +182,7 @@ bool Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
     bool result = true;
     try {
         Exiv2Object exivObj(converterManager, item);
-        if (exivObj.exifData->empty()) {
+        if (exivObj.data->exif.empty()) {
             // no exiv2 record found in image
             return false;
         }

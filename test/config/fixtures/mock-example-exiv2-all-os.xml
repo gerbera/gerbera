@@ -297,7 +297,7 @@
       <libexif charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata></metadata>
-        <libcontent>
+        <libcontent enabled="no">
           <add-libcontent contenttype="jpg" />
           <add-libcontent contenttype="png" />
         </libcontent>
@@ -306,7 +306,7 @@
       <exiv2 charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata></metadata>
-        <libcontent>
+        <libcontent enabled="no">
           <add-libcontent contenttype="jpg" />
           <add-libcontent contenttype="png" />
         </libcontent>
@@ -322,7 +322,7 @@
         <metadata>
           <add-data tag="PERFORMER" key="upnp:artist@role[Performer]" />
         </metadata>
-        <libcontent>
+        <libcontent enabled="no">
           <add-libcontent contenttype="aiff" />
           <add-libcontent contenttype="ape" />
           <add-libcontent contenttype="asf" />
@@ -347,7 +347,7 @@
         <metadata>
           <add-data tag="performer" key="upnp:artist@role[Performer]" />
         </metadata>
-        <libcontent>
+        <libcontent enabled="no">
           <add-libcontent contenttype="aiff" />
           <add-libcontent contenttype="ape" />
           <add-libcontent contenttype="asf" />
@@ -371,7 +371,7 @@
       <mkv charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata></metadata>
-        <libcontent>
+        <libcontent enabled="yes">
           <add-libcontent contenttype="mka" />
           <add-libcontent contenttype="mkv" />
         </libcontent>
@@ -380,7 +380,7 @@
       <wavpack charset="UTF-8" enabled="yes">
         <auxdata></auxdata>
         <metadata></metadata>
-        <libcontent>
+        <libcontent enabled="yes">
           <add-libcontent contenttype="wv" />
         </libcontent>
         <comment enabled="no"></comment>

@@ -1695,6 +1695,11 @@
               ]
             },
             {
+              "item": "/import/library-options/libexif/libcontent/attribute::enabled",
+              "caption": "libcontent enabled",
+              "editable": true
+            },
+            {
               "item": "/import/library-options/libexif/libcontent/add-libcontent",
               "caption": "libcontent",
               "type": "List",
@@ -1778,6 +1783,11 @@
                   "editable": true
                 }
               ]
+            },
+            {
+              "item": "/import/library-options/id3/libcontent/attribute::enabled",
+              "caption": "libcontent enabled",
+              "editable": true
             },
             {
               "item": "/import/library-options/id3/libcontent/add-libcontent",
@@ -1865,6 +1875,11 @@
               ]
             },
             {
+              "item": "/import/library-options/exiv2/libcontent/attribute::enabled",
+              "caption": "libcontent enabled",
+              "editable": true
+            },
+            {
               "item": "/import/library-options/exiv2/libcontent/add-libcontent",
               "caption": "libcontent",
               "type": "List",
@@ -1910,17 +1925,27 @@
           "children": [
             {
               "item": "/import/library-options/ffmpeg/attribute::enabled",
-              "caption": "enabled",
+              "caption": "Enabled",
               "editable": true
             },
             {
               "item": "/import/library-options/ffmpeg/attribute::charset",
-              "caption": "charset",
+              "caption": "Charset",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/ffmpeg/attribute::artwork-enabled",
+              "caption": "Artwork Enabled",
+              "editable": true
+            },
+            {
+              "item": "/import/library-options/ffmpeg/attribute::streams-enabled",
+              "caption": "Streams Enabled",
               "editable": true
             },
             {
               "item": "/import/library-options/ffmpeg/auxdata/add-data",
-              "caption": "auxdata",
+              "caption": "AuxData",
               "type": "List",
               "editable": true,
               "children": [
@@ -1933,7 +1958,7 @@
             },
             {
               "item": "/import/library-options/ffmpeg/metadata/add-data",
-              "caption": "metadata",
+              "caption": "Metadata",
               "type": "List",
               "editable": true,
               "children": [
@@ -1950,8 +1975,13 @@
               ]
             },
             {
+              "item": "/import/library-options/ffmpeg/libcontent/attribute::enabled",
+              "caption": "libcontent enabled",
+              "editable": true
+            },
+            {
               "item": "/import/library-options/ffmpeg/libcontent/add-libcontent",
-              "caption": "libcontent",
+              "caption": "LibContent",
               "type": "List",
               "editable": true,
               "children": [
@@ -1964,23 +1994,23 @@
             },
             {
               "item": "/import/library-options/ffmpeg/comment/attribute::enabled",
-              "caption": "comment enabled",
+              "caption": "Comment Enabled",
               "editable": true
             },
             {
               "item": "/import/library-options/ffmpeg/comment/add-comment",
-              "caption": "comment",
+              "caption": "Comment",
               "type": "List",
               "editable": true,
               "children": [
                 {
                   "item": "/import/library-options/ffmpeg/comment/add-comment/attribute::label",
-                  "caption": "Comment label",
+                  "caption": "Comment Label",
                   "editable": true
                 },
                 {
                   "item": "/import/library-options/ffmpeg/comment/add-comment/attribute::tag",
-                  "caption": "Comment metadata",
+                  "caption": "Comment Metadata",
                   "editable": true
                 }
               ]
@@ -2033,6 +2063,11 @@
                   "editable": true
                 }
               ]
+            },
+            {
+              "item": "/import/library-options/wavpack/libcontent/attribute::enabled",
+              "caption": "libcontent enabled",
+              "editable": true
             },
             {
               "item": "/import/library-options/wavpack/libcontent/add-libcontent",
@@ -2118,6 +2153,11 @@
                   "editable": true
                 }
               ]
+            },
+            {
+              "item": "/import/library-options/mkv/libcontent/attribute::enabled",
+              "caption": "libcontent enabled",
+              "editable": true
             },
             {
               "item": "/import/library-options/mkv/libcontent/add-libcontent",

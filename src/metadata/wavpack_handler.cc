@@ -66,6 +66,7 @@ WavPackHandler::WavPackHandler(const std::shared_ptr<Context>& context)
     : MediaMetadataHandler(
           context,
           ConfigVal::IMPORT_LIBOPTS_WAVPACK_ENABLED,
+          ConfigVal::IMPORT_LIBOPTS_WAVPACK_CONTENT_ENABLED,
           ConfigVal::IMPORT_LIBOPTS_WAVPACK_CONTENT_LIST,
           ConfigVal::IMPORT_LIBOPTS_WAVPACK_METADATA_TAGS_LIST,
           ConfigVal::IMPORT_LIBOPTS_WAVPACK_AUXDATA_TAGS_LIST,

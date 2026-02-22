@@ -2593,13 +2593,24 @@ Filter Files by Content Type
    .. versionadded:: HEAD
    .. code-block:: xml
 
-      <libcontent>
+      <libcontent enabled="yes">
          <add-libcontent contenttype="png"/>
       </libcontent>
 
 In case a content type is handled by multiple libraries, import time can increase
 significantly. To avoid parsing files twice, you can select the content types for
 handling by the library.
+
+.. confval:: libcontent enabled
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``no``
+
+   .. code:: xml
+
+      enabled="yes"
+
+Enable filtering by the content type.
 
 Add Content Type
 ^^^^^^^^^^^^^^^^
@@ -2861,6 +2872,7 @@ A sample configuration for the example described above would be:
            <add-data tag="Exif.Photo.DateTimeOriginal"/>
            <add-data tag="Exif.Image.Orientation"/>
            <add-data tag="Exif.Image.Rating"/>
+           <add-data tag="Iptc.Application2.Subject"/>
            <add-data tag="Xmp.xmp.Rating" />
            <add-data tag="Xmp.dc.subject"/>
        </auxdata>
