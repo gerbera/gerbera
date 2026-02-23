@@ -10,6 +10,7 @@
 - FFmpeg: configuration for stream data import
 - Keep track of changed objects
 - Load Config file modules
+- Refactor FFMpegThumbnailer
 - Show changed items in UI
 - Update npupnp to 6.2.3
 - Update to pupnp 1.18.0

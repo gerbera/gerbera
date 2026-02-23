@@ -143,7 +143,10 @@ std::optional<std::vector<std::byte>> FfmpegThumbnailerHandler::readThumbnailCac
     return GrbFile(path).readBinaryFile();
 }
 
-void FfmpegThumbnailerHandler::writeThumbnailCacheFile(const fs::path& movieFilename, const std::byte* data, std::size_t size) const
+void FfmpegThumbnailerHandler::writeThumbnailCacheFile(
+    const fs::path& movieFilename,
+    const std::byte* data,
+    std::size_t size) const
 {
     try {
         auto path = getThumbnailCachePath(getThumbnailCacheBasePath(), movieFilename);
@@ -154,7 +157,9 @@ void FfmpegThumbnailerHandler::writeThumbnailCacheFile(const fs::path& movieFile
     }
 }
 
-std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
+std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(
+    const std::shared_ptr<CdsObject>& obj,
+    const std::shared_ptr<CdsResource>& resource)
 {
     if (!enabled)
         return nullptr;
@@ -162,12 +167,16 @@ std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::sha
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item)
         return nullptr;
+    auto itemLocation = item->getLocation();
+    if (itemLocation.empty()) {
+        log_warning("Missing location for {}", item->getTitle());
+        return nullptr;
+    }
 
-    auto cacheEnabled = config->getBoolOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED);
     if (cacheEnabled) {
-        auto data = readThumbnailCacheFile(item->getLocation());
+        auto data = readThumbnailCacheFile(itemLocation);
         if (data) {
-            log_debug("Returning cached thumbnail for file: {}", item->getLocation().c_str());
+            log_debug("Returning cached thumbnail for file: {}", itemLocation.c_str());
             return std::make_unique<MemIOHandler>(data->data(), data->size());
         }
     }
@@ -177,11 +186,11 @@ std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::sha
     try {
         auto thumbLock = std::scoped_lock<std::mutex>(thumb_mutex);
 
-        auto th = ffmpegthumbnailer::VideoThumbnailer(config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE), false, true, config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY), false);
+        auto th = ffmpegthumbnailer::VideoThumbnailer(thumbSize, false, true, imageQuality, false);
 
         th.setLogCallback(ffmpegThLogger);
-        th.setSeekPercentage(config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE));
-        if (config->getBoolOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ROTATE) && resource) {
+        th.setSeekPercentage(seekPercentage);
+        if (doRotate && resource) {
             // 1: Normal (0° rotation)
             // 3: Upside-down (180° rotation)
             // 6: Rotated 90° counterclockwise (270° clockwise)
@@ -200,22 +209,22 @@ std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(const std::sha
                 th.addFilter(rotationFilter.get());
             }
         }
-        if (config->getBoolOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY)) {
+        if (stripOverlay) {
             filmStripFilter = std::make_unique<ffmpegthumbnailer::FilmStripFilter>();
             th.addFilter(filmStripFilter.get());
         }
 
-        log_debug("Generating thumbnail for file: {}", item->getLocation().c_str());
+        log_debug("Generating thumbnail for file: {}", itemLocation.c_str());
 
         std::vector<uint8_t> img;
-        th.generateThumbnail(item->getLocation().c_str(), Jpeg, img);
+        th.generateThumbnail(itemLocation, Jpeg, img);
         if (cacheEnabled) {
-            writeThumbnailCacheFile(item->getLocation(), reinterpret_cast<std::byte*>(img.data()), img.size());
+            writeThumbnailCacheFile(itemLocation, reinterpret_cast<std::byte*>(img.data()), img.size());
         }
 
         return std::make_unique<MemIOHandler>(img.data(), img.size());
     } catch (const std::logic_error& e) {
-        log_warning("Thumbnail generation failed for file {}: {}", item->getLocation().c_str(), e.what());
+        log_warning("Thumbnail generation failed for file {}: {}", itemLocation.c_str(), e.what());
         return nullptr;
     }
 }
@@ -229,6 +238,11 @@ bool FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
     if (!item)
         return false;
 
+    auto itemLocation = item->getLocation();
+    if (itemLocation.empty()) {
+        log_warning("Missing location for {}", item->getTitle());
+        return false;
+    }
     try {
         std::string videoResolution = item->getResource(ContentHandler::DEFAULT)->getAttribute(ResourceAttribute::RESOLUTION);
         if (videoResolution.empty())
@@ -239,15 +253,15 @@ bool FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& ob
         auto thumbResource = std::make_shared<CdsResource>(ContentHandler::FFTH, ResourcePurpose::Thumbnail);
         thumbResource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(thumbMimetype));
 
-        auto y = config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE) * resolution.y() / resolution.x();
-        auto x = config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE);
+        auto y = thumbSize * resolution.y() / resolution.x();
+        auto x = thumbSize;
         thumbResource->addAttribute(ResourceAttribute::RESOLUTION, fmt::format("{}x{}", x, y));
         item->addResource(thumbResource);
-        log_debug("Adding resource for {} thumbnail", EnumMapper::mapObjectType(mediaType));
+        log_debug("Adding resource to {} for {} thumbnail", itemLocation.c_str(), EnumMapper::mapObjectType(mediaType));
         return true;
 
     } catch (const std::runtime_error& e) {
-        log_warning("Failed to generate resource for thumbnail: {} {}", item->getLocation().c_str(), e.what());
+        log_warning("Failed to generate resource for thumbnail: {} {}", itemLocation.c_str(), e.what());
     }
     return false;
 }
@@ -258,8 +272,15 @@ FfmpegThumbnailerHandler::FfmpegThumbnailerHandler(
     ObjectType mediaType)
     : MediaMetadataHandler(context, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)
     , mediaType(mediaType)
+    , thumbSize(config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE))
+    , seekPercentage(config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_SEEK_PERCENTAGE))
+    , imageQuality(config->getIntOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_IMAGE_QUALITY))
+    , cacheEnabled(config->getBoolOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR_ENABLED))
+    , stripOverlay(config->getBoolOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_FILMSTRIP_OVERLAY))
+    , doRotate(config->getBoolOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ROTATE))
 {
     enabled = this->enabled && config->getBoolOption(checkOption);
+
     if (enabled) {
         auto configuredDir = config->getOption(ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_CACHE_DIR);
         if (!configuredDir.empty()) {

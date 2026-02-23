@@ -104,6 +104,27 @@ If gerbera appears to be running but other devices on the network can't see it, 
 firewall is not blocking UDP port ``1900`` or the server port that Gerbera is using
 (e.g. ``49152``, see the :ref:`Port <troubleshoot_port>` section above).
 
+The following addition to the firewall configuration of the machine running the media server may solve discovery issues:
+
+::
+
+    firewall-cmd --permanent --zone=internal --add-protocol=igmp
+
+    iptables
+       -A TCP -m tcp --dport 49152 -m comment --comment gerbera -j ACCEPT
+       -A UDP -d 239.255.255.250/32 -m udp --dport 1900 -m comment --comment "upnp dlna" -j ACCEPT
+       -A IGMP -d 224.0.0.1/32 -m comment --comment "igmp membership queries, upnp/dlna" -j ACCEPT
+       -A IGMP -d 239.0.0.0/8 -m comment --comment "igmp multicast, upnp/dlna" -j ACCEPT
+
+In case you have bridged network devices something like this might help:
+(Add it at the best place of your boot process)
+
+::
+
+    echo 0 >> /sys/devices/virtual/net/br0/bridge/multicast_snooping
+    systemctl enable multicast_snooping.service
+    systemctl start multicast_snooping.service
+
 If you have opened only a single server port in your firewall for Gerbera to use, consider adding that port
 to the command line or config file to prevent it from changing upon server restart.
 If multiple instances of Gerbera or other UPnP media servers are running at the same time you may need
