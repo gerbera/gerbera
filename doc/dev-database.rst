@@ -15,9 +15,36 @@ Tables ``mt_internal_setting`` and ``grb_config_value`` store settings (like dat
 Modify Schema
 -------------
 
-- src/database/sql_database.h: Update ``DBVERSION``
-- src/database/sqlite3/sqlite3.sql and src/database/mysql/mysql.sql: Modify ``CREATE TABLE`` statements
-- src/database/sqlite3/sqlite3-upgrade.xml and src/database/mysql/mysql-upgrade.xml: Add schema update commands
-- src/database/sqlite3/sqlite_database.cc and src/database/mysql/mysql_database.cc:
-     - Add correct hashy to hashies list (run ``ctest`` to get error on wrong hash)
-     - Update hashies[0] for the create scripts (run ``ctest`` to get error on wrong hash)
+- Update ``DBVERSION``
+
+  - `src/database/sql_database.h`
+
+- Modify ``CREATE TABLE`` statements
+
+  - `src/database/sqlite3/sqlite3.sql`
+  - `src/database/postgres/postgres.sql`
+  - `src/database/mysql/mysql.sql`
+
+- Add schema update commands
+
+  - `src/database/sqlite3/sqlite3-upgrade.xml`
+  - `src/database/postgres/postgres-upgrade.xml`
+  -  `src/database/mysql/mysql-upgrade.xml`
+
+- Add drop schema commands
+
+  - `src/database/sqlite3/sqlite3-drop.sql`
+  - `src/database/postgres/postgres-drop.sql`
+  - `src/database/mysql/mysql-drop.sql`
+
+
+- Hash codes to avoid script manipulations
+
+  - run ``ctest`` to get error on wrong hash for
+  - `src/database/sqlite3/sqlite_database.cc`
+  - `src/database/postgres/postgres_database.cc`
+  - `src/database/mysql/mysql_database.cc`
+
+     - Add correct hashy to hashies list
+     - Update ``hashies[0]`` for the create scripts
+     - Update ``hashies[DBVERSION]`` for the drop scripts
