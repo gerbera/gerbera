@@ -46,10 +46,10 @@
 #include "exceptions.h"
 #include "metadata/metadata_enums.h"
 #include "search_handler.h"
+#include "sql_migration.h"
 #include "sql_result.h"
 #include "sql_table.h"
 #include "upnp/clients.h"
-#include "upnp/xml_builder.h"
 #include "util/grb_net.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
@@ -61,8 +61,6 @@
 
 #define MAX_REMOVE_SIZE 1000
 #define MAX_REMOVE_RECURSION 500
-
-#define RESOURCE_SEP '|'
 
 #define AUS_ALIAS "as"
 #define CFG_ALIAS "co"
@@ -618,75 +616,9 @@ void SQLDatabase::upgradeDatabase(
     const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd)
 {
     /* --- load database upgrades from config file --- */
-    const fs::path& upgradeFile = config->getOption(upgradeOption);
-    log_debug("db_version: {}", dbVersion);
-    log_debug("Loading SQL Upgrades from: {}", upgradeFile.c_str());
-    std::vector<std::vector<std::pair<std::string, std::string>>> dbUpdates;
-    pugi::xml_document xmlDoc;
-    pugi::xml_parse_result result = xmlDoc.load_file(upgradeFile.c_str());
-    if (result.status != pugi::xml_parse_status::status_ok) {
-        throw ConfigParseException(result.description());
-    }
-    auto root = xmlDoc.document_element();
-    if (std::string_view(root.name()) != "upgrade")
-        throw std::runtime_error("Error in upgrade file: <upgrade> tag not found");
-
-    std::size_t version = firstDBVersion;
-    for (auto&& versionElement : root.select_nodes("/upgrade/version")) {
-        auto versionNode = versionElement.node();
-        std::vector<std::pair<std::string, std::string>> versionCmds;
-        const auto myHash = stringHash(UpnpXMLBuilder::printXml(versionNode));
-        if (version < DBVERSION && myHash == hashies.at(version)) {
-            for (auto&& scriptNode : versionNode.children("script")) {
-                std::string migration = trimString(scriptNode.attribute("migration").as_string());
-                versionCmds.emplace_back(std::move(migration), trimString(scriptNode.text().as_string()));
-            }
-        } else {
-            log_error("Wrong hash for version {}: {} != {}", version + 1, myHash, hashies.at(version));
-            throw DatabaseException(fmt::format("Wrong hash for version {}", version + 1), LINE_MESSAGE);
-        }
-        dbUpdates.push_back(std::move(versionCmds));
-        version++;
-    }
-
-    if (version != DBVERSION)
-        throw DatabaseException(
-            fmt::format("The database upgrade file {} seems to be from another Gerbera version. Expected {}, actual {}, found {}",
-                upgradeFile.c_str(), DBVERSION, dbVersion, version),
-            LINE_MESSAGE);
-
-    version = firstDBVersion;
-    static const std::map<std::string, bool (SQLDatabase::*)()> migActions {
-        { "metadata", &SQLDatabase::doMetadataMigration },
-        { "resources", &SQLDatabase::doResourceMigration },
-        { "location", &SQLDatabase::doLocationMigration },
-    };
-    this->addResourceColumnCmd = addResourceColumnCmd;
-
-    /* --- run database upgrades --- */
-    for (auto&& upgrade : dbUpdates) {
-        if (dbVersion == version) {
-            log_info("Running an automatic database upgrade from database version {} to version {}...", version, version + 1);
-            for (auto&& [migrationCmd, upgradeCmd] : upgrade) {
-                bool actionResult = true;
-                replaceAllString(upgradeCmd, STRING_LIMIT, fmt::to_string(stringLimit));
-                if (!migrationCmd.empty() && migActions.find(migrationCmd) != migActions.end())
-                    actionResult = (*this.*(migActions.at(migrationCmd)))();
-                if (actionResult && !upgradeCmd.empty())
-                    _exec(upgradeCmd);
-            }
-            log_debug("upgrade {}", fmt::format(updateVersionCommand, version + 1, version));
-            _exec(fmt::format(updateVersionCommand, version + 1, version));
-            dbVersion = version + 1;
-            log_info("Database upgrade to version {} successful.", dbVersion);
-        }
-        version++;
-    }
-
-    if (dbVersion != DBVERSION)
-        throw DatabaseException(fmt::format("The database seems to be from another Gerbera version. Expected {}, actual {}", DBVERSION, dbVersion), LINE_MESSAGE);
-
-    prepareResourceTable(addResourceColumnCmd);
+    auto self = std::dynamic_pointer_cast<SQLDatabase>(getSelf());
+    auto migration = SQLMigration(self, browseColumnMapper, metaColumnMapper, resColumnMapper, addResourceColumnCmd);
+    migration.upgradeDatabase(dbVersion, hashies, config->getOption(upgradeOption), updateVersionCommand, firstDBVersion, stringLimit);
 }
 
 void SQLDatabase::shutdown()
@@ -3399,212 +3331,5 @@ void SQLDatabase::generateResourceDBOperations(
             }
             ++resId;
         }
-    }
-}
-
-// column metadata is dropped in DBVERSION 12
-bool SQLDatabase::doMetadataMigration()
-{
-    log_debug("Checking if metadata migration is required");
-    auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {} IS NOT NULL",
-        browseColumnMapper->getTableName(),
-        identifier("metadata"))); // metadata column is removed!
-    int expectedConversionCount = res->nextRow()->col_int(0, 0);
-    log_debug("mt_cds_object rows having metadata: {}", expectedConversionCount);
-
-    res = select(fmt::format("SELECT COUNT(*) FROM {}", metaColumnMapper->getTableName()));
-    int metadataRowCount = res->nextRow()->col_int(0, 0);
-    log_debug("mt_metadata rows having metadata: {}", metadataRowCount);
-
-    if (expectedConversionCount > 0 && metadataRowCount > 0) {
-        log_info("No metadata migration required");
-        return true;
-    }
-
-    log_info("About to migrate metadata from mt_cds_object to mt_metadata");
-
-    auto resIds = select(fmt::format("SELECT {0}, {1} FROM {2} WHERE {1} IS NOT NULL",
-        browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
-        identifier("metadata"),
-        browseColumnMapper->getTableName()));
-    std::unique_ptr<SQLRow> row;
-
-    int objectsUpdated = 0;
-    while ((row = resIds->nextRow())) {
-        migrateMetadata(row->col_int(0, INVALID_OBJECT_ID), row->col(1));
-        ++objectsUpdated;
-    }
-    log_info("Migrated metadata - object count: {}", objectsUpdated);
-    return true;
-}
-
-void SQLDatabase::migrateMetadata(int objectId, const std::string& metadataStr)
-{
-    std::map<std::string, std::string> itemMetadata = URLUtils::dictDecode(metadataStr);
-
-    if (!itemMetadata.empty()) {
-        log_debug("Migrating metadata for cds object {}", objectId);
-        std::vector<std::map<MetadataColumn, std::string>> multiDict;
-        multiDict.reserve(itemMetadata.size());
-        for (auto&& [key, val] : itemMetadata) {
-            auto mDict = std::map<MetadataColumn, std::string> {
-                { MetadataColumn::ItemId, quote(objectId) },
-                { MetadataColumn::PropertyName, quote(key) },
-                { MetadataColumn::PropertyValue, quote(val) },
-            };
-            multiDict.push_back(std::move(mDict));
-        }
-        Metadata2Table mt(std::move(multiDict), metaColumnMapper);
-        execOnTable(METADATA_TABLE, mt.sqlForMultiInsert(nullptr), objectId);
-    } else {
-        log_debug("Skipping migration - no metadata for cds object {}", objectId);
-    }
-}
-
-void SQLDatabase::prepareResourceTable(const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd)
-{
-    auto resourceAttributes = splitString(getInternalSetting("resource_attribute"), ',');
-    bool addedAttribute = false;
-    for (auto&& resAttrId : ResourceAttributeIterator()) {
-        auto&& resAttrib = EnumMapper::getAttributeName(resAttrId);
-        if (std::find(resourceAttributes.begin(), resourceAttributes.end(), resAttrib) == resourceAttributes.end()) {
-            auto addColumnCmd = addResourceColumnCmd.at(EnumMapper::getAttributeType(resAttrId));
-            _exec(fmt::format(addColumnCmd, resAttrib));
-            log_info("'{}': Adding column '{}'", RESOURCE_TABLE, resAttrib);
-            resourceAttributes.push_back(resAttrib);
-            addedAttribute = true;
-        }
-    }
-    if (addedAttribute)
-        storeInternalSetting("resource_attribute", fmt::format("{}", fmt::join(resourceAttributes, ",")));
-}
-
-// column resources is dropped in DBVERSION 13
-bool SQLDatabase::doResourceMigration()
-{
-    if (!addResourceColumnCmd.empty())
-        prepareResourceTable(addResourceColumnCmd);
-
-    log_debug("Checking if resources migration is required");
-    auto res = select(
-        fmt::format("SELECT COUNT(*) FROM {} WHERE {} IS NOT NULL",
-            browseColumnMapper->getTableName(),
-            identifier("resources"))); // resources column is removed!
-    int expectedConversionCount = res->nextRow()->col_int(0, 0);
-    log_debug("{} rows having resources: {}", CDS_OBJECT_TABLE, expectedConversionCount);
-
-    res = select(
-        fmt::format("SELECT COUNT(*) FROM {}", resColumnMapper->getTableName()));
-    int resourceRowCount = res->nextRow()->col_int(0, 0);
-    log_debug("{} rows having entries: {}", RESOURCE_TABLE, resourceRowCount);
-
-    if (expectedConversionCount > 0 && resourceRowCount > 0) {
-        log_info("No resources migration required");
-        return true;
-    }
-
-    log_info("About to migrate resources from {} to {}", CDS_OBJECT_TABLE, RESOURCE_TABLE);
-
-    auto resIds = select(
-        fmt::format("SELECT {0}, {1} FROM {2} WHERE {1} IS NOT NULL",
-            browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
-            identifier("resources"),
-            browseColumnMapper->getTableName()));
-    std::unique_ptr<SQLRow> row;
-
-    int objectsUpdated = 0;
-    while ((row = resIds->nextRow())) {
-        migrateResources(row->col_int(0, INVALID_OBJECT_ID), row->col(1));
-        ++objectsUpdated;
-    }
-    log_info("Migrated resources - object count: {}", objectsUpdated);
-    return true;
-}
-
-void SQLDatabase::migrateResources(int objectId, const std::string& resourcesStr)
-{
-    if (!resourcesStr.empty()) {
-        log_debug("Migrating resources for cds object {}", objectId);
-        auto resources = splitString(resourcesStr, RESOURCE_SEP);
-        std::size_t resId = 0;
-        for (auto&& resString : resources) {
-            std::map<ResourceAttribute, std::string> resourceVals;
-            auto&& resource = CdsResource::decode(resString);
-            for (auto&& [key, val] : resource->getAttributes()) {
-                resourceVals[key] = quote(val);
-            }
-            auto dict = std::map<ResourceColumn, std::string> {
-                { ResourceColumn::ItemId, quote(objectId) },
-                { ResourceColumn::ResId, quote(resId) },
-                { ResourceColumn::HandlerType, quote(to_underlying(resource->getHandlerType())) },
-                { ResourceColumn::Purpose, quote(to_underlying(resource->getPurpose())) },
-            };
-            auto&& options = resource->getOptions();
-            if (!options.empty()) {
-                dict[ResourceColumn::Options] = quote(URLUtils::dictEncode(options));
-            }
-            auto&& parameters = resource->getParameters();
-            if (!parameters.empty()) {
-                dict[ResourceColumn::Parameters] = quote(URLUtils::dictEncode(parameters));
-            }
-            Resource2Table rt(std::move(dict), std::move(resourceVals), Operation::Insert, resColumnMapper);
-            execOnTable(RESOURCE_TABLE, rt.sqlForInsert(nullptr), objectId);
-            resId++;
-        }
-    } else {
-        log_debug("Skipping migration - no resources for cds object {}", objectId);
-    }
-}
-
-// PREFIX is removed from location in DBVERSION 27
-bool SQLDatabase::doLocationMigration()
-{
-    log_debug("Checking if resources migration is required");
-    auto res = select(
-        fmt::format("SELECT COUNT(*) FROM {0} WHERE {1} LIKE {2} OR {1} LIKE {3} OR {1} LIKE {4}",
-            browseColumnMapper->getTableName(),
-            browseColumnMapper->mapQuoted(BrowseColumn::Location, true),
-            quote("F%"),
-            quote("D%"),
-            quote("V%")));
-    int expectedConversionCount = res->nextRow()->col_int(0, 0);
-    log_debug("{} rows having location: {}", CDS_OBJECT_TABLE, expectedConversionCount);
-
-    log_info("About to migrate location values in {}", CDS_OBJECT_TABLE);
-
-    auto resIds = select(
-        fmt::format("SELECT {0}, {1}, {2} FROM {3} WHERE {1} LIKE {4} OR {1} LIKE {5} OR {1} LIKE {6}",
-            browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
-            browseColumnMapper->mapQuoted(BrowseColumn::Location, true),
-            browseColumnMapper->mapQuoted(BrowseColumn::LocationHash, true),
-            browseColumnMapper->getTableName(),
-            quote("F%"),
-            quote("D%"),
-            quote("V%")));
-    std::unique_ptr<SQLRow> row;
-
-    int objectsUpdated = 0;
-    while ((row = resIds->nextRow())) {
-        migrateLocation(row->col_int(0, INVALID_OBJECT_ID), row->col(1));
-        ++objectsUpdated;
-    }
-    log_info("Migrated location - object count: {}", objectsUpdated);
-    return true;
-}
-
-void SQLDatabase::migrateLocation(int objectId, const std::string& location)
-{
-    if (!location.empty()) {
-        auto dbLocation = location.substr(1);
-        log_debug("Migrating location for cds object {} to {} without {}", objectId, dbLocation, location.at(0));
-        auto dict = std::map<BrowseColumn, std::string> {
-            { BrowseColumn::Id, quote(objectId) },
-            { BrowseColumn::Location, quote(dbLocation) },
-            { BrowseColumn::LocationHash, quote(stringHash(dbLocation)) },
-        };
-        Object2Table ot(std::move(dict), Operation::Update, browseColumnMapper);
-        execOnTable(CDS_OBJECT_TABLE, ot.sqlForUpdate(nullptr), objectId);
-    } else {
-        log_debug("Skipping migration - no location for cds object {}", objectId);
     }
 }

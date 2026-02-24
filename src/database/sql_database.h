@@ -221,23 +221,6 @@ protected:
     /// @brief create core entries in fresh database
     void fillDatabase();
 
-    /// @brief migrate metadata from mt_cds_objects to mt_metadata before removing the column (DBVERSION 12)
-    bool doMetadataMigration();
-    /// @brief migrate metadata for cdsObject
-    void migrateMetadata(int objectId, const std::string& metadataStr);
-
-    /// @brief Add a column to resource table for each defined resource attribute
-    void prepareResourceTable(const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd);
-    /// @brief migrate resources from mt_cds_objects to grb_resource before removing the column (DBVERSION 13)
-    bool doResourceMigration();
-    /// @brief migrate resource data for cdsObject
-    void migrateResources(int objectId, const std::string& resourcesStr);
-
-    /// @brief drop prefix from location
-    bool doLocationMigration();
-    /// @brief migrate a location for cdsObject
-    void migrateLocation(int objectId, const std::string& location);
-
     /// @brief upgrade database version by applying migration commands
     void upgradeDatabase(
         unsigned int dbVersion,
@@ -261,7 +244,6 @@ private:
     std::string sql_meta_query;
     std::string sql_autoscan_query;
     std::string sql_resource_query;
-    std::map<ResourceDataType, std::string_view> addResourceColumnCmd;
 
     /// @brief Configuration content for dynamic folders
     std::shared_ptr<DynamicContentList> dynamicContentList;
@@ -324,6 +306,7 @@ private:
     std::shared_ptr<SQLEmitter> sqlEmitter;
 
     using AutoLock = std::scoped_lock<std::mutex>;
+    friend class SQLMigration;
 };
 
 template <typename T>

@@ -247,6 +247,8 @@ add_library(libgerbera STATIC
         src/database/sql_database.cc
         src/database/sql_database.h
         src/database/sql_format.h
+        src/database/sql_migration.cc
+        src/database/sql_migration.h
         src/database/sql_result.h
         src/database/sql_table.cc
         src/database/sql_table.h
