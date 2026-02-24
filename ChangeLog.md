@@ -12,6 +12,7 @@
 - Load Config file modules
 - Refactor FFMpegThumbnailer
 - Show changed items in UI
+- Split off Database Migrations
 - Update npupnp to 6.2.3
 - Update to pupnp 1.18.0
 - Upgrade to taglib 2.2 with new file type and filtering

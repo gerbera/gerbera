@@ -3,12 +3,18 @@
 Database Schema
 ===============
 
-The database contains 8 tables.
-3 tables ``mt_cds_object`` (for media items or directories), ``mt_metadata`` (like artist or track number) and ``grb_cds_resource`` (like bitrate or image size) store details of the media (audio, video and images) and associated items (like subtitles or album art images).
-Table ``mt_autoscan`` contains data on autoscan directories.
-Table ``grb_playstatus`` contains statistics on played media items.
-Table ``grb_client`` stores details on connected clients.
-Tables ``mt_internal_setting`` and ``grb_config_value`` store settings (like database version) and configuration values changed via UI.
+The gerbera database contains 8 tables.
+
+- 3 core tables store details of the media (audio, video and images) and associated items (like subtitles or album art images)
+
+  - ``mt_cds_object``: for media items or directories
+  - ``mt_metadata``: metadata like artist name or track number and
+  - ``grb_cds_resource``: resource details like bitrate or image size
+
+- Table ``mt_autoscan`` contains data on autoscan directories.
+- Table ``grb_playstatus`` contains statistics on played media items.
+- Table ``grb_client`` stores details on connected clients.
+- Tables ``mt_internal_setting`` and ``grb_config_value`` store settings (like database version) and configuration values changed via UI.
 
 .. image:: _static/gerbera-db.png
 
@@ -29,7 +35,7 @@ Modify Schema
 
   - `src/database/sqlite3/sqlite3-upgrade.xml`
   - `src/database/postgres/postgres-upgrade.xml`
-  -  `src/database/mysql/mysql-upgrade.xml`
+  - `src/database/mysql/mysql-upgrade.xml`
 
 - Add drop schema commands
 
@@ -37,6 +43,10 @@ Modify Schema
   - `src/database/postgres/postgres-drop.sql`
   - `src/database/mysql/mysql-drop.sql`
 
+- Implement complex Database Migration
+
+  - `src/database/sql_migration.h`
+  - `src/database/sql_migration.cc`
 
 - Hash codes to avoid script manipulations
 
