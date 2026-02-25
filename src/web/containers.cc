@@ -62,7 +62,7 @@ bool Web::Containers::processPageAction(Json::Value& element, const std::string&
     auto flags = BROWSE_DIRECT_CHILDREN | BROWSE_CONTAINERS;
     if (config->getBoolOption(ConfigVal::SERVER_HIDE_PC_DIRECTORY_WEB))
         flags |= BROWSE_HIDE_FS_ROOT;
-    auto browseParam = BrowseParam(database->loadObject(getGroup(), parentID), flags);
+    auto browseParam = BrowseParam(database->loadObject(parentID, getGroup()), flags);
     auto arr = database->browse(browseParam);
     for (auto&& obj : arr) {
         auto cont = std::static_pointer_cast<CdsContainer>(obj);

@@ -70,5 +70,5 @@ std::shared_ptr<CdsObject> RequestHandler::loadObject(const std::map<std::string
         group = it->second;
     }
 
-    return database->loadObject(group, objectID);
+    return database->loadObject(objectID, group);
 }

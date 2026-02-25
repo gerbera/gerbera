@@ -119,8 +119,9 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     else if (browseFlag != "BrowseMetadata")
         throw UpnpException(UPNP_SOAP_E_INVALID_ARGS, "Invalid browse flag: " + browseFlag);
 
-    auto parent = database->loadObject(quirks->getGroup(), objectID);
+    auto parent = database->loadObject(objectID, quirks->getGroup());
     auto upnpClass = parent->getClass();
+    log_debug("browse {}", upnpClass);
     if (sortCriteria.empty() && (startswith(upnpClass, UPNP_CLASS_MUSIC_ALBUM) || startswith(upnpClass, UPNP_CLASS_PLAYLIST_CONTAINER)))
         flag |= BROWSE_TRACK_SORT;
     else if (quirks->hasFlag(Quirk::ForceSortCriteriaTitle))
@@ -442,7 +443,7 @@ bool ContentDirectoryService::processSubscriptionRequest(const SubscriptionReque
     auto propset = xmlBuilder->createEventPropertySet();
     auto property = propset->document_element().first_child();
     property.append_child("SystemUpdateID").append_child(pugi::node_pcdata).set_value(fmt::to_string(systemUpdateID).c_str());
-    auto obj = database->loadObject(DEFAULT_CLIENT_GROUP, 0);
+    auto obj = database->loadObject(0, DEFAULT_CLIENT_GROUP);
     auto cont = std::static_pointer_cast<CdsContainer>(obj);
     property.append_child("ContainerUpdateIDs").append_child(pugi::node_pcdata).set_value(fmt::format("0,{}", cont->getUpdateID()).c_str());
 

@@ -78,6 +78,8 @@ class Timer;
 #define PG_UPGR_FILE "postgres-upgrade.xml"
 #define PG_INIT_FILE "postgres.sql"
 
+#define UNUSED_CLIENT_GROUP ""
+
 enum class DbFileType {
     Auto,
     Directory,
@@ -171,13 +173,6 @@ public:
         DbFileType fileType = DbFileType::Auto)
         = 0;
 
-    /// @brief checks for a given (pc directory) object, identified by the given path
-    /// from the database
-    /// @param fullpath the path of the object; object is interpreted as directory
-    /// @param fileType type of the database entry to search
-    /// @return the obejectID
-    virtual int findObjectIDByPath(const fs::path& fullpath, DbFileType fileType = DbFileType::Auto) = 0;
-
     /// @brief increments the updateIDs for the given objectIDs
     /// @param ids pointer to the array of ids
     /// @return a String for UPnP: a CSV list; for every existing object:
@@ -185,10 +180,17 @@ public:
     virtual std::string incrementUpdateIDs(const std::unordered_set<int>& ids) = 0;
 
     /* utility methods */
-    virtual std::shared_ptr<CdsObject> loadObject(int objectID) = 0;
-    virtual std::shared_ptr<CdsObject> loadObject(const std::string& group, int objectID) = 0;
-    virtual int getChildCount(int contId, bool containers = true, bool items = true, bool hideFsRoot = false) = 0;
-    virtual std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers = true, bool items = true, bool hideFsRoot = false) = 0;
+    virtual std::shared_ptr<CdsObject> loadObject(
+        int objectID,
+        const std::string& group = UNUSED_CLIENT_GROUP)
+        = 0;
+    /// @brief get number of items in container by id
+    virtual std::map<int, int> getChildCounts(
+        const std::vector<int>& contId,
+        bool containers = true,
+        bool items = true,
+        bool hideFsRoot = false)
+        = 0;
 
     struct ChangedContainers {
         // Signed because IDs start at -1.

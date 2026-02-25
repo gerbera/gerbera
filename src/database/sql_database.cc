@@ -937,7 +937,9 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
     commit("updateObject");
 }
 
-std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
+std::shared_ptr<CdsObject> SQLDatabase::loadObject(
+    int objectID,
+    const std::string& group)
 {
     if (dynamicContainers.find(objectID) != dynamicContainers.end()) {
         return dynamicContainers.at(objectID);
@@ -948,28 +950,6 @@ std::shared_ptr<CdsObject> SQLDatabase::loadObject(int objectID)
         sql_browse_columns,
         sql_browse_query,
         browseColumnMapper->getClause(BrowseColumn::Id, quote(objectID)));
-    auto res = select(loadSql);
-    if (res) {
-        auto row = res->nextRow();
-        if (row) {
-            auto result = createObjectFromRow(UNUSED_CLIENT_GROUP, row);
-            commit("loadObject");
-            return result;
-        }
-    }
-    log_debug("sql_query = {}", loadSql);
-    commit("loadObject");
-    throw ObjectNotFoundException(fmt::format("Object not found: {}", objectID));
-}
-
-std::shared_ptr<CdsObject> SQLDatabase::loadObject(const std::string& group, int objectID)
-{
-    if (dynamicContainers.find(objectID) != dynamicContainers.end()) {
-        return dynamicContainers.at(objectID);
-    }
-
-    beginTransaction("loadObject");
-    auto loadSql = fmt::format("SELECT {} FROM {} WHERE {} = {}", sql_browse_columns, sql_browse_query, browseColumnMapper->mapQuoted(BrowseColumn::Id), objectID);
     auto res = select(loadSql);
     if (res) {
         auto row = res->nextRow();
@@ -1084,7 +1064,8 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             browseColumnMapper->mapQuoted(BrowseColumn::Location));
 
     } else if (param.getFlag(BROWSE_DIRECT_CHILDREN) && parent->isContainer()) {
-        childCount = getChildCount(parent->getID(), getContainers, getItems, hideFsRoot);
+        auto childCounts = getChildCounts({ parent->getID() }, getContainers, getItems, hideFsRoot);
+        childCount = childCounts.empty() ? 0 : childCounts.at(parent->getID());
         param.setTotalMatches(childCount);
 
         where.push_back(fmt::format("{} = {}", browseColumnMapper->mapQuoted(BrowseColumn::ParentId), parent->getID()));
@@ -1218,8 +1199,8 @@ void SQLDatabase::initDynContainers(const std::shared_ptr<CdsObject>& sParent)
             if (!hasCaseSensitiveNames) {
                 location = toLower(location);
             }
-            auto parent = location != "/" ? findObjectByPath(location, UNUSED_CLIENT_GROUP, DbFileType::Virtual) : loadObject(CDS_ID_ROOT);
-            if (sParent && (sParent->getLocation() == location || (sParent->getLocation().empty() && location == "/"))) {
+            auto parent = location != FS_ROOT_DIRECTORY ? findObjectByPath(location, UNUSED_CLIENT_GROUP, DbFileType::Virtual) : loadObject(CDS_ID_ROOT);
+            if (sParent && (sParent->getLocation() == location || (sParent->getLocation().empty() && location == FS_ROOT_DIRECTORY))) {
                 parent = sParent;
             }
             if (!parent)
@@ -1376,36 +1357,11 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
     return result;
 }
 
-int SQLDatabase::getChildCount(int contId, bool containers, bool items, bool hideFsRoot)
-{
-    if (!containers && !items)
-        return 0;
-
-    auto where = std::vector {
-        browseColumnMapper->getClause(BrowseColumn::ParentId, contId, true)
-    };
-    if (containers && !items)
-        where.push_back(browseColumnMapper->getClause(BrowseColumn::ObjectType, OBJECT_TYPE_CONTAINER, true));
-    else if (items && !containers)
-        where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType, true), OBJECT_TYPE_ITEM));
-    if (contId == CDS_ID_ROOT && hideFsRoot) {
-        where.push_back(fmt::format("{} != {:d}", browseColumnMapper->mapQuoted(BrowseColumn::Id, true), CDS_ID_FS_ROOT));
-    }
-
-    beginTransaction("getChildCount");
-    auto res = select(fmt::format("SELECT COUNT(*) FROM {} WHERE {}", browseColumnMapper->getTableName(), fmt::join(where, " AND ")));
-    commit("getChildCount");
-
-    if (res) {
-        auto row = res->nextRow();
-        if (row) {
-            return row->col_int(0, 0);
-        }
-    }
-    return 0;
-}
-
-std::map<int, int> SQLDatabase::getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot)
+std::map<int, int> SQLDatabase::getChildCounts(
+    const std::vector<int>& contId,
+    bool containers,
+    bool items,
+    bool hideFsRoot)
 {
     std::map<int, int> result;
     if (!containers && !items)
@@ -1551,14 +1507,6 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(
 
     commit("findObjectByPath");
     return nullptr;
-}
-
-int SQLDatabase::findObjectIDByPath(const fs::path& fullpath, DbFileType fileType)
-{
-    auto obj = findObjectByPath(fullpath, UNUSED_CLIENT_GROUP, fileType);
-    if (!obj)
-        return INVALID_OBJECT_ID;
-    return obj->getID();
 }
 
 int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer)
@@ -2824,11 +2772,11 @@ void SQLDatabase::updateAutoscanList(AutoscanScanMode scanmode, const std::share
         if (location.empty())
             throw DatabaseException("AutoscanDirectoy with illegal location given to SQLDatabase::updateAutoscanPersistentList", LINE_MESSAGE);
 
-        int objectID = findObjectIDByPath(location);
-        log_debug("objectID = {}", objectID);
-        auto where = (objectID == INVALID_OBJECT_ID)
+        auto object = findObjectByPath(location, UNUSED_CLIENT_GROUP, DbFileType::Auto);
+        log_debug("objectID = {}", object ? object->getID() : INVALID_OBJECT_ID);
+        auto where = (!object)
             ? autoscanColumnMapper->getClause(AutoscanColumn::Location, quote(location))
-            : autoscanColumnMapper->getClause(AutoscanColumn::ObjId, quote(objectID));
+            : autoscanColumnMapper->getClause(AutoscanColumn::ObjId, quote(object->getID()));
 
         beginTransaction("updateAutoscanList x");
         auto res = select(fmt::format("SELECT {0} FROM {1} WHERE {2} LIMIT 1",
@@ -2953,12 +2901,15 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
         throw DatabaseException("addAutoscanDirectory called with adir==nullptr", LINE_MESSAGE);
     if (adir->getDatabaseID() >= 0)
         throw DatabaseException("tried to add autoscan directory with a database id set", LINE_MESSAGE);
-    int objectID = (adir->getLocation() == FS_ROOT_DIRECTORY) ? CDS_ID_FS_ROOT : findObjectIDByPath(adir->getLocation());
-    if (!adir->persistent() && objectID < 0)
+    auto object = (adir->getLocation() == FS_ROOT_DIRECTORY)
+        ? loadObject(CDS_ID_FS_ROOT)
+        : findObjectByPath(adir->getLocation(), UNUSED_CLIENT_GROUP, DbFileType::Auto);
+    if (!adir->persistent() && !object)
         throw DatabaseException("tried to add non-persistent autoscan directory with an illegal objectID or location", LINE_MESSAGE);
 
     auto pathIds = _checkOverlappingAutoscans(adir);
 
+    auto objectID = object->getID();
     _autoscanChangePersistentFlag(objectID, true);
 
     auto fields = std::map<AutoscanColumn, std::string> {

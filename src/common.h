@@ -58,6 +58,5 @@ constexpr auto DIR_SEPARATOR = char('/');
 
 static constexpr auto CLIENT_GROUP_TAG = "group";
 #define DEFAULT_CLIENT_GROUP "default"
-#define UNUSED_CLIENT_GROUP ""
 
 #endif // __COMMON_H__
