@@ -11,6 +11,7 @@
 - Keep track of changed objects
 - Load Config file modules
 - Refactor FFMpegThumbnailer
+- Reduce almost duplicate methods
 - Show changed items in UI
 - Split off Database Migrations
 - Update npupnp to 6.2.3

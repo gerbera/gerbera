@@ -55,7 +55,7 @@ bool Web::EditLoad::processPageAction(Json::Value& element, const std::string& a
         throw_std_runtime_error("invalid object id");
 
     auto objectID = std::stoi(objID);
-    auto obj = database->loadObject(getGroup(), objectID);
+    auto obj = database->loadObject(objectID, getGroup());
 
     Json::Value item;
     writeCoreInfo(obj, item, objectID);

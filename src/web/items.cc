@@ -62,7 +62,7 @@ bool Web::Items::processPageAction(Json::Value& element, const std::string& acti
     Json::Value items;
     items["parent_id"] = parentID;
 
-    auto container = database->loadObject(getGroup(), parentID);
+    auto container = database->loadObject(parentID, getGroup());
     std::string trackFmt = "{:02}";
     auto result = action == "browse"
         ? doBrowse(container, start, count, items, trackFmt)

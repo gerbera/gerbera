@@ -97,10 +97,14 @@ public:
     void addObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer) override;
     void updateObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer) override;
 
-    std::shared_ptr<CdsObject> loadObject(int objectID) override;
-    std::shared_ptr<CdsObject> loadObject(const std::string& group, int objectID) override;
-    int getChildCount(int contId, bool containers, bool items, bool hideFsRoot) override;
-    std::map<int, int> getChildCounts(const std::vector<int>& contId, bool containers, bool items, bool hideFsRoot) override;
+    std::shared_ptr<CdsObject> loadObject(
+        int objectID,
+        const std::string& group = UNUSED_CLIENT_GROUP) override;
+    std::map<int, int> getChildCounts(
+        const std::vector<int>& contId,
+        bool containers,
+        bool items,
+        bool hideFsRoot) override;
 
     std::size_t getObjects(
         int parentID,
@@ -131,9 +135,6 @@ public:
     std::shared_ptr<CdsObject> findObjectByPath(
         const fs::path& fullpath,
         const std::string& group,
-        DbFileType fileType = DbFileType::Auto) override;
-    int findObjectIDByPath(
-        const fs::path& fullpath,
         DbFileType fileType = DbFileType::Auto) override;
     std::string incrementUpdateIDs(const std::unordered_set<int>& ids) override;
 

@@ -1193,7 +1193,8 @@ void ContentManager::addObject(const std::shared_ptr<CdsObject>& obj, bool first
     session_manager->containerChangedUI(containerChanged);
     // this is the first entry, so the container is new also, send update for parent of parent
     if (firstChild) {
-        firstChild = (database->getChildCount(parentId) == 1);
+        auto childCount = database->getChildCounts({ parentId });
+        firstChild = !childCount.empty() && childCount.at(parentId) == 1;
     }
     if (parentId >= CDS_ID_ROOT) {
         if (firstChild) {
