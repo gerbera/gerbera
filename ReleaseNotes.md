@@ -2,6 +2,9 @@
 
 ## HEAD
 
+The config property `xmlns` was renamed to `xml-ns` for compliance reasons. Watch
+out for warnings `Found extra config file entry '/config/server/upnp/title-properties/upnp-namespace/attribute::xmlns'`.
+
 ### NEW Features
 
 - Split config files into modules (from-file)

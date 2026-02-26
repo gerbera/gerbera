@@ -2754,7 +2754,7 @@
           "editable": true,
           "children": [
             {
-              "item": "/server/upnp/album-properties/upnp-namespace/attribute::xmlns",
+              "item": "/server/upnp/album-properties/upnp-namespace/attribute::xml-ns",
               "caption": "xmlns",
               "editable": true
             },
@@ -2790,7 +2790,7 @@
           "editable": true,
           "children": [
             {
-              "item": "/server/upnp/artist-properties/upnp-namespace/attribute::xmlns",
+              "item": "/server/upnp/artist-properties/upnp-namespace/attribute::xml-ns",
               "caption": "xmlns",
               "editable": true
             },
@@ -2826,7 +2826,7 @@
           "editable": true,
           "children": [
             {
-              "item": "/server/upnp/genre-properties/upnp-namespace/attribute::xmlns",
+              "item": "/server/upnp/genre-properties/upnp-namespace/attribute::xml-ns",
               "caption": "xmlns",
               "editable": true
             },
@@ -2862,7 +2862,7 @@
           "editable": true,
           "children": [
             {
-              "item": "/server/upnp/playlist-properties/upnp-namespace/attribute::xmlns",
+              "item": "/server/upnp/playlist-properties/upnp-namespace/attribute::xml-ns",
               "caption": "xmlns",
               "editable": true
             },
@@ -2898,7 +2898,7 @@
           "editable": true,
           "children": [
             {
-              "item": "/server/upnp/title-properties/upnp-namespace/attribute::xmlns",
+              "item": "/server/upnp/title-properties/upnp-namespace/attribute::xml-ns",
               "caption": "xmlns",
               "editable": true
             },

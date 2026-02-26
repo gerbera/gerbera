@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Bump basic-ftp from 5.1.0 to 5.2.0 in /gerbera-web
 - Bump lodash from 4.17.21 to 4.17.23 in /gerbera-web
 - Bump qs from 6.14.1 to 6.14.2 in /gerbera-web
 - Document MARIADB_TLS_DISABLE_PEER_VERIFICATION
@@ -10,14 +11,15 @@
 - FFmpeg: configuration for stream data import
 - Keep track of changed objects
 - Load Config file modules
-- Refactor FFMpegThumbnailer
 - Reduce almost duplicate methods
+- Refactor FFMpegThumbnailer
 - Show changed items in UI
 - Split off Database Migrations
 - Update npupnp to 6.2.3
 - Update to pupnp 1.18.0
 - Upgrade to taglib 2.2 with new file type and filtering
 - Use entry_type instead of location prefix
+- xsd improvement
 
 ### v3.1.1
 

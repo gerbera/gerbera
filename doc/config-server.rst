@@ -1750,7 +1750,7 @@ Response properties contain the following entries.
 
     .. code-block:: xml
 
-        <upnp-namespace xmlns="gerbera" uri="https://gerbera.io"/>
+        <upnp-namespace xml-ns="gerbera" uri="https://gerbera.io"/>
         <upnp-property upnp-tag="gerbera:artist" meta-data="M_ARTIST"/>
 
     Defines an UPnP property and references the namespace for the property.
@@ -1766,13 +1766,15 @@ Property Namespace
 
 Add namespace required for properties.
 
-    .. confval:: xmlns
+    .. confval:: xml-ns
        :type: :confval:`String`
        :required: true
 
        .. code-block:: xml
 
-           xmlns="..."
+           xml-ns="..."
+
+    .. versionchanged:: HEAD renamed from ``xmlns``
 
     Key for the namespace
 
