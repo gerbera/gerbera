@@ -88,6 +88,7 @@
             </xs:all>
             <xs:attribute name="debug-mode" type="xs:string"/>
             <xs:attribute name="upnp-max-jobs" type="xs:nonNegativeInteger"/>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -156,6 +157,7 @@
                 <xs:element ref="mark-played-items" minOccurs="0"/>
                 <xs:element ref="lastfm" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -291,6 +293,7 @@
             <xs:attribute name="show-video" type="boolean" default="no"/>
             <xs:attribute name="fs-add-item" type="boolean" default="no"/>
             <xs:attribute name="edit-sortkey" type="boolean" default="no"/>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -366,6 +369,7 @@
             <xs:attribute name="use-transactions" type="boolean" default="no"/>
             <xs:attribute name="enable-sort-key" type="boolean" default="yes"/>
             <xs:attribute name="string-limit" type="xs:nonNegativeInteger" default="255"/>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -420,6 +424,7 @@
             </xs:restriction>
         </xs:simpleType>
     </xs:element>
+
     <xs:element name="backup">
         <xs:complexType>
             <xs:attribute name="enabled" type="boolean" default="no"/>
@@ -447,6 +452,7 @@
             <xs:attribute name="enabled" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
+
     <xs:element name="postgres">
         <xs:complexType>
             <xs:all>
@@ -497,6 +503,7 @@
             <xs:attribute name="search-result-separator" type="xs:string" default=" - "/>
             <xs:attribute name="search-filename" type="boolean" default="no"/>
             <xs:attribute name="caption-info-count" type="xs:integer" default="-1"/>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -509,10 +516,10 @@
     </xs:element>
 
     <xs:complexType name="upnp-properties">
-        <xs:sequence>
-            <xs:element ref="upnp-namespace" minOccurs="0" maxOccurs="unbounded"/>
-            <xs:element ref="upnp-property" minOccurs="0" maxOccurs="unbounded"/>
-        </xs:sequence>
+        <xs:choice minOccurs="0" maxOccurs="unbounded">
+            <xs:element ref="upnp-namespace"/>
+            <xs:element ref="upnp-property"/>
+        </xs:choice>
         <xs:attribute name="extend" type="boolean" default="no"/>
     </xs:complexType>
 
@@ -532,7 +539,7 @@
 
     <xs:element name="upnp-namespace">
         <xs:complexType>
-            <xs:attribute name="FIXMExmlns" type="xs:string" use="required"/>
+            <xs:attribute name="xml-ns" type="xs:string" use="required"/>
             <xs:attribute name="uri" type="xs:string" use="required"/>
         </xs:complexType>
     </xs:element>
@@ -548,13 +555,14 @@
 
     <xs:element name="clients">
         <xs:complexType>
-            <xs:choice maxOccurs="unbounded">
+            <xs:choice minOccurs="0" maxOccurs="unbounded">
                 <xs:element ref="client"/>
                 <xs:element ref="group"/>
             </xs:choice>
             <xs:attribute name="enabled" type="boolean" default="no"/>
             <xs:attribute name="cache-threshold" type="xs:positiveInteger" default="6"/>
             <xs:attribute name="bookmark-offset" type="xs:positiveInteger" default="10"/>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -645,6 +653,7 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -666,6 +675,7 @@
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -730,6 +740,7 @@
             <xs:attribute name="audio-layout" type="xs:string"/>
             <xs:attribute name="video-layout" type="xs:string"/>
             <xs:attribute name="image-layout" type="xs:string"/>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -868,6 +879,7 @@
                 <xs:element ref="link" minOccurs="0" maxOccurs="unbounded"/>
             </xs:sequence>
             <xs:attribute name="type" type="xs:string"/>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -928,6 +940,7 @@
                 </xs:simpleType>
             </xs:attribute>
             <xs:attribute name="inotify-attrib" type="boolean" default="no"/>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -1014,6 +1027,7 @@
                 <xs:element ref="mimetype-dlnatransfermode" minOccurs="0"/>
                 <xs:element ref="contenttype-dlnaprofile" minOccurs="0"/>
             </xs:all>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -1102,6 +1116,7 @@
                 <xs:element ref="resource" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="case-sensitive" type="boolean" default="yes"/>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -1198,6 +1213,7 @@
             </xs:all>
             <xs:attribute name="multi-value-separator" type="xs:string" default="; "/>
             <xs:attribute name="legacy-value-separator" type="xs:string"/>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 
@@ -1350,6 +1366,7 @@
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="fetch-buffer-size" type="xs:positiveInteger" default="262144"/>
             <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
+            <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
 

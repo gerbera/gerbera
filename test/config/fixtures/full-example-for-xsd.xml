@@ -75,7 +75,14 @@
             <playlist-properties>
                 <upnp-property upnp-tag="dc:date" meta-data="M_UPNP_DATE"/>
             </playlist-properties>
-            <title-properties/>
+            <title-properties>
+                <upnp-namespace xml-ns="xbmc" uri="urn:schemas-xbmc-org:metadata-1-0/"/>
+                <upnp-property upnp-tag="upnp:icon" meta-data="M_ALBUMARTURI"/>
+                <upnp-property upnp-tag="xbmc:artwork" meta-data="M_ALBUMARTURI"/>
+                <upnp-property upnp-tag="upnp:longDescription" meta-data="M_DESCRIPTION"/>
+                <upnp-namespace xml-ns="av" uri="urn:schemas-sony-com:av"/>
+                <upnp-property upnp-tag="av:dateTime" meta-data="M_DATE"/>
+            </title-properties>
             <resource-defaults>
                 <property-default tag="@allowedUse" value="UNKNOWN"/>
                 <property-default tag="@bitrate" value="0"/>

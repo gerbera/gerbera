@@ -569,7 +569,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
             ConfigVal::A_UPNP_NAMESPACE_PROPERTY, ConfigVal::A_UPNP_NAMESPACE_KEY, ConfigVal::A_UPNP_NAMESPACE_URI,
             false, false, false),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_UPNP_NAMESPACE_KEY,
-            "attribute::xmlns", "config-server.html#confval-xmlns"),
+            "attribute::xml-ns", "config-server.html#confval-xml-ns"),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_UPNP_NAMESPACE_URI,
             "attribute::uri", "config-server.html#confval-uri"),
 
