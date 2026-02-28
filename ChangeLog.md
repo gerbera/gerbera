@@ -4,6 +4,7 @@
 
 - Bump basic-ftp from 5.1.0 to 5.2.0 in /gerbera-web
 - Bump lodash from 4.17.21 to 4.17.23 in /gerbera-web
+- Bump minimatch in /gerbera-web
 - Bump qs from 6.14.1 to 6.14.2 in /gerbera-web
 - Document MARIADB_TLS_DISABLE_PEER_VERIFICATION
 - Export and import changed object from database
@@ -15,6 +16,7 @@
 - Refactor FFMpegThumbnailer
 - Show changed items in UI
 - Split off Database Migrations
+- Update npm and web ui tests
 - Update npupnp to 6.2.3
 - Update to pupnp 1.18.0
 - Upgrade to taglib 2.2 with new file type and filtering
