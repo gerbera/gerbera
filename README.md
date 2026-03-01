@@ -75,7 +75,7 @@ sudo make install
 | [libebml]           | 1.3.5        | 1.4.2        | 1.4.5                | Optional      | required by [libmatroska]        | Enabled  |
 | ffmpeg/libav        |              |              | 7.1.2                | Optional      | File metadata                    | Disabled |
 | [libexif]           | v0.6.21      | v0.6.24      | v0.6.25              | Optional      | JPEG Exif metadata               | Enabled  |
-| [libexiv2]          | v0.26        | v0.27.7      | v0.28.7              | Optional      | Exif, IPTC, XMP metadata         | Disabled |
+| [libexiv2]          | v0.26        | v0.27.7      | v0.28.8              | Optional      | Exif, IPTC, XMP metadata         | Disabled |
 | [lastfmlib]         | 0.4.0        | 0.4.0        | 0.4.0                | Optional      | Enables scrobbling               | Disabled |
 | [ffmpegthumbnailer] | 2.1.1        | 2.2.3        | 2.3.0                | Optional      | Generate video/image thumbnails  | Disabled |
 | [libsystemd]        | 237          | 254          | 257                  | Optional      | Interact with systemd            | Disabled |
