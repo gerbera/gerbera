@@ -71,6 +71,31 @@ constant data flow in case of slow connections. Usually this setting is not need
 patiently wait for data and we anyway buffer on the output end. However, we observed that ffmpeg will fail to transcode flv
 files if it encounters buffer underruns - this setting helps to avoid this situation.
 
+.. confval:: fetch-buffer-timeout
+   :type: :confval:`Time` Seconds
+   :required: false
+   :default: ``2``
+..
+
+   .. code:: xml
+
+       fetch-buffer-timeout="15"
+
+This setting allows to set the timeout for fetch operations to fill the buffer. Increase it for chunked streams or
+on connections with high latency.
+
+.. confval:: fetch-buffer-retry-count
+   :type: :confval:`Integer`
+   :required: false
+   :default: ``2``
+..
+
+   .. code:: xml
+
+       fetch-buffer-retry-count="5"
+
+This setting allows to set the number of retries after a timeout occured. Increase it for unrelyable streams.
+
 Mimetype Profile Mappings
 =========================
 
@@ -665,7 +690,7 @@ Profile Buffer
 
    .. code-block:: xml
 
-       <buffer size="1048576" chunk-size="131072" fill-size="262144"/>
+       <buffer size="1048576" chunk-size="131072" fill-size="262144" timeout="4" retry-count="5"/>
 
 These settings help you to achieve a smooth playback of transcoded media. The actual values need to be tuned
 and depend on the speed of your system. The general idea is to buffer the data before sending it out to the
@@ -680,7 +705,7 @@ transcode them in real time.
 
    .. code:: xml
 
-       size="262144"
+      size="262144"
 
    Size of the buffer in bytes.
 
@@ -689,9 +714,9 @@ transcode them in real time.
       :required: true
    ..
 
-      .. code:: xml
+   .. code:: xml
 
-          chunk-size="65536"
+      chunk-size="65536"
 
    Size of chunks in bytes, that are read by the buffer from the transcoder. Smaller chunks will produce a
    more constant buffer fill ratio, however too small chunks may slow things down.
@@ -701,9 +726,33 @@ transcode them in real time.
       :required: true
    ..
 
-      .. code:: xml
+   .. code:: xml
 
-          fill-size="65536"
+      fill-size="65536"
 
    Initial fill size - number of bytes that have to be in the buffer before the first read (i.e. before
    sending the data to the player for the first time). Set this to ``0`` (zero) if you want to disable prefilling.
+
+   .. confval:: buffer timeout
+      :type: :confval:`Time` Seconds
+      :required: false
+      :default: ``2``
+   ..
+
+   .. code:: xml
+
+      timeout="15"
+
+   This setting allows to set the timeout for operations to fill the buffer. Increase it for slow streams
+
+   .. confval:: buffer retry-count
+      :type: :confval:`Integer`
+      :required: false
+      :default: ``2``
+   ..
+
+   .. code:: xml
+
+       retry-count="5"
+
+   This setting allows to set the number of retries after a timeout occured. Increase it for unrelyable streams.

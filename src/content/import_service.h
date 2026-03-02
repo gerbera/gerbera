@@ -89,6 +89,8 @@ private:
     /// @brief parent container (if cdsObject is a item)
     std::shared_ptr<CdsContainer> parentObject;
 
+    mutable std::mutex counterMutex;
+
 public:
     ContentState(fs::directory_entry dirEntry,
         ImportState state,
@@ -120,7 +122,11 @@ public:
 
     ImportState getState() const { return state; }
     void setState(ImportState newState) { state = newState; }
-    void increaseItemCounter(ObjectType mt) { itemCounter[mt]++; }
+    void increaseItemCounter(ObjectType mt)
+    {
+        std::lock_guard<std::mutex> lock(counterMutex);
+        itemCounter[mt]++;
+    }
     AutoscanMediaMode getMediaMode() const;
 };
 

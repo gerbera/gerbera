@@ -447,7 +447,7 @@ const downloadZip = (event) => {
     .catch(err => {
       GerberaApp.stopLoading();
       if (err.name === 'AbortError') {
-        alert('Download: Timeout reacjed!');
+        alert('Download: Timeout reached!');
       } else {
         alert('Download-Error: ' + err.message);
       }

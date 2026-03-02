@@ -46,19 +46,20 @@
 
 #include <array>
 
-/// @brief Sets resolution for a given resource index, item must be a JPEG image
-static void setJpegResolutionResource(
+void LibExifHandler::setJpegResolutionResource(
     const std::shared_ptr<CdsItem>& item,
-    std::size_t resNum = 0)
+    std::size_t resNum)
 {
     if (resNum >= item->getResourceCount()) {
         log_warning("Invalid resource {} index {}", item->getLocation().c_str(), resNum);
         return;
     }
+    std::lock_guard<std::mutex> lock(jpegMutex);
     try {
         auto fioH = FileIOHandler(item->getLocation());
         fioH.open(UPNP_READ);
         auto resolution = getJpegResolution(fioH);
+        fioH.close();
 
         item->getResource(resNum)->addAttribute(ResourceAttribute::RESOLUTION, resolution.string());
 
@@ -310,6 +311,7 @@ public:
             auto ioH = MemIOHandler(exifData->data, exifData->size);
             ioH.open(UPNP_READ);
             auto thResolution = getJpegResolution(ioH);
+            ioH.close();
             log_debug("EXIF Thumb Resolution: {}", thResolution.string());
             return thResolution.string();
         } catch (const std::runtime_error& e) {

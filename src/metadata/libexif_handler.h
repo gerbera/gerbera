@@ -39,6 +39,7 @@
 
 #include <libexif/exif-content.h>
 #include <libexif/exif-data.h>
+#include <mutex>
 #include <vector>
 
 // forward declarations
@@ -51,6 +52,7 @@ class StringConverter;
 class LibExifHandler : public MediaMetadataHandler {
 private:
     ExifLog* log = nullptr;
+    std::mutex jpegMutex;
 
     /// @brief read exif content values
     void process_ifd(
@@ -60,6 +62,11 @@ private:
         std::vector<std::string>& snippets,
         std::string& imageX,
         std::string& imageY);
+
+    /// @brief Sets resolution for a given resource index, item must be a JPEG image
+    void setJpegResolutionResource(
+        const std::shared_ptr<CdsItem>& item,
+        std::size_t resNum = 0);
 
 public:
     explicit LibExifHandler(const std::shared_ptr<Context>& context);

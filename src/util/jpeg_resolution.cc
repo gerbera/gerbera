@@ -167,8 +167,12 @@ Resolution getJpegResolution(IOHandler& ioh)
         auto res = getJpegResolutionRaw(ioh);
         ioh.close();
         return res;
-    } catch (const std::runtime_error& ex) {
-        ioh.close();
+    } catch (const std::exception& ex) {
+        try {
+            ioh.close();
+        } catch (...) {
+            // don't handle close errors
+        }
         throw;
     }
 }

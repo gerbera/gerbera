@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Bump actions/upload-artifact from 6 to 7
 - Bump basic-ftp from 5.1.0 to 5.2.0 in /gerbera-web
 - Bump lodash from 4.17.21 to 4.17.23 in /gerbera-web
 - Bump minimatch in /gerbera-web
@@ -16,10 +17,11 @@
 - Refactor FFMpegThumbnailer
 - Show changed items in UI
 - Split off Database Migrations
+- Threading and Transcoding with better configuration
 - Update npm and web ui tests
 - Update libexiv2 to 0.28.8
 - Update npupnp to 6.2.3
-- Update to pupnp 1.18.0
+- Update to pupnp 1.18.1
 - Upgrade to taglib 2.2 with new file type and filtering
 - Use entry_type instead of location prefix
 - xsd improvement
