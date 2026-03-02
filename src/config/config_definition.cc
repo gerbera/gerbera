@@ -1867,6 +1867,12 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
         std::make_shared<ConfigIntSetup>(ConfigVal::EXTERNAL_TRANSCODING_CURL_FILL_SIZE,
             "/transcoding/attribute::fetch-buffer-fill-size", "config-transcode.html#confval-fetch-buffer-fill-size",
             0, 0, ConfigIntSetup::CheckMinValue),
+        std::make_shared<ConfigTimeSetup>(ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_TIMEOUT,
+            "/transcoding/attribute::fetch-buffer-timeout", "config-transcode.html#confval-fetch-buffer-timeout",
+            GrbTimeType::Seconds, 2, 1),
+        std::make_shared<ConfigUIntSetup>(ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_RETRY_COUNT,
+            "/transcoding/attribute::fetch-buffer-retry-count", "config-transcode.html#confval-fetch-buffer-retry-count",
+            2, 0, ConfigIntSetup::CheckMinValue),
 #endif // HAVE_CURL
 
         // mimetype identification and media filtering
@@ -1958,6 +1964,12 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
         std::make_shared<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL,
             "attribute::fill-size", "config-transcode.html#confval-buffer-fill-size",
             0, 0, ConfigIntSetup::CheckMinValue),
+        std::make_shared<ConfigTimeSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_TIMEOUT,
+            "attribute::timeout", "config-transcode.html#confval-buffer-timeout",
+            GrbTimeType::Seconds, 2, 1),
+        std::make_shared<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT,
+            "attribute::retry-count", "config-transcode.html#confval-buffer-retry-count",
+            2, 0, ConfigIntSetup::CheckMinValue),
 
         // Agent
         std::make_shared<ConfigPathSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND,

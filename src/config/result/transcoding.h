@@ -218,6 +218,14 @@ public:
     void setNumChannels(int chans) { numberOfChannels = chans; }
     int getNumChannels() const { return numberOfChannels; }
 
+    /// @brief Timeout of buffer request
+    void setBufferTimeout(std::chrono::seconds timeout) { bufferTimeout = timeout; }
+    std::chrono::seconds getBufferTimeout() const { return bufferTimeout; }
+
+    /// @brief Retry Count after request timeout
+    void setBufferRetryCount(unsigned int count) { retryCount = count; }
+    unsigned int getBufferRetryCount() const { return retryCount; }
+
 protected:
     bool enabled { true };
     std::string name;
@@ -233,6 +241,8 @@ protected:
     std::size_t bufferSize {};
     std::size_t chunkSize {};
     std::size_t initialFillSize {};
+    std::chrono::seconds bufferTimeout { 2 };
+    unsigned int retryCount { 2 };
     TranscodingType trType { TranscodingType::None };
     int numberOfChannels { SOURCE };
     int sampleFrequency { SOURCE };

@@ -39,7 +39,12 @@
 
 class Config;
 
-BufferedIOHandler::BufferedIOHandler(const std::shared_ptr<Config>& config, std::unique_ptr<IOHandler> underlyingHandler, std::size_t bufSize, std::size_t maxChunkSize, std::size_t initialFillSize)
+BufferedIOHandler::BufferedIOHandler(
+    const std::shared_ptr<Config>& config,
+    std::unique_ptr<IOHandler> underlyingHandler,
+    std::size_t bufSize,
+    std::size_t maxChunkSize,
+    std::size_t initialFillSize)
     : IOHandlerBufferHelper(config, bufSize, initialFillSize)
 {
     if (!underlyingHandler)

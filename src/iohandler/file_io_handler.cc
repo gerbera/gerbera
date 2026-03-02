@@ -48,12 +48,15 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
     if (mode != UPNP_READ)
         throw_std_runtime_error("open: UpnpOpenFileMode mode not supported");
 
+    std::lock_guard<std::mutex> lock(mutex);
     f = file.open("rb");
     log_debug("open {}", file.getPath().string());
 }
 
 grb_read_t FileIOHandler::read(std::byte* buf, std::size_t length)
 {
+    std::lock_guard<std::mutex> lock(mutex);
+
     std::size_t ret = std::fread(buf, sizeof(std::byte), length, f);
 
     log_debug("read {} {}", file.getPath().string(), length);
@@ -69,11 +72,15 @@ grb_read_t FileIOHandler::read(std::byte* buf, std::size_t length)
 
 std::size_t FileIOHandler::write(std::byte* buf, std::size_t length)
 {
+    std::lock_guard<std::mutex> lock(mutex);
+
     return std::fwrite(buf, sizeof(std::byte), length, f);
 }
 
 void FileIOHandler::seek(off_t offset, int whence)
 {
+    std::lock_guard<std::mutex> lock(mutex);
+
     if (fseeko(f, offset, whence) != 0) {
         throw_std_runtime_error("fseek failed");
     }
@@ -81,15 +88,18 @@ void FileIOHandler::seek(off_t offset, int whence)
 
 off_t FileIOHandler::tell()
 {
+    std::lock_guard<std::mutex> lock(mutex);
     return ftello(f);
 }
 
 void FileIOHandler::close()
 {
+    std::lock_guard<std::mutex> lock(mutex);
 }
 
 void ZipIOHandler::close()
 {
+    std::lock_guard<std::mutex> lock(mutex);
     file.close();
     file.remove();
     log_debug("close {}", file.getPath().string());

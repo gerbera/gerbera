@@ -2366,6 +2366,16 @@
           "editable": true
         },
         {
+          "item": "/transcoding/attribute::fetch-buffer-timeout",
+          "caption": "Fetch Buffer Read/Write Timeout",
+          "editable": true
+        },
+        {
+          "item": "/transcoding/attribute::fetch-buffer-retry-count",
+          "caption": "Fetch Buffer Timeout Retry Count",
+          "editable": true
+        },
+        {
           "item": "/transcoding/mimetype-profile-mappings/transcode",
           "caption": "Transcoding Filters",
           "type": "List",
@@ -2511,6 +2521,16 @@
             {
               "item": "/transcoding/profiles/profile/buffer/attribute::fill-size",
               "caption": "Buffer Initial Fill Size",
+              "editable": true
+            },
+            {
+              "item": "/transcoding/profiles/profile/buffer/attribute::timeout",
+              "caption": "Buffer Read/Write Timeout",
+              "editable": true
+            },
+            {
+              "item": "/transcoding/profiles/profile/buffer/attribute::retry-count",
+              "caption": "Buffer Timeout Retry Count",
               "editable": true
             }
           ]

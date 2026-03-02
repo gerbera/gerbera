@@ -1366,6 +1366,8 @@
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="fetch-buffer-size" type="xs:positiveInteger" default="262144"/>
             <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
+            <xs:attribute name="fetch-buffer-timeout" type="xs:positiveInteger" default="2"/>
+            <xs:attribute name="fetch-buffer-retry-count" type="xs:positiveInteger" default="2"/>
             <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
@@ -1469,6 +1471,8 @@
             <xs:attribute name="size" type="xs:positiveInteger" use="required"/>
             <xs:attribute name="chunk-size" type="xs:positiveInteger" use="required"/>
             <xs:attribute name="fill-size" type="xs:nonNegativeInteger" use="required"/>
+            <xs:attribute name="timeout" type="xs:positiveInteger" default="2"/>
+            <xs:attribute name="retry-count" type="xs:positiveInteger" default="2"/>
         </xs:complexType>
     </xs:element>
 

@@ -37,6 +37,7 @@
 #include "config_setup_int.h"
 #include "config_setup_path.h"
 #include "config_setup_string.h"
+#include "config_setup_time.h"
 #include "metadata/resolution.h"
 #include "setup_util.h"
 #include "util/logger.h"
@@ -229,6 +230,8 @@ bool ConfigTranscodingSetup::createOptionFromNode(
             }
 
             prof->setBufferOptions(buffer, chunk, fill);
+            prof->setBufferTimeout(std::chrono::seconds(definition->findConfigSetup<ConfigTimeSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_TIMEOUT)->getXmlContent(sub, config)));
+            prof->setBufferRetryCount(definition->findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT)->getXmlContent(sub, config));
         }
 
         bool set = false;

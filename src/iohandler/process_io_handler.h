@@ -38,11 +38,10 @@
 #include "util/executor.h"
 #include "util/grb_fs.h"
 
+#include <mutex>
+
 // forward declaration
 class Content;
-
-#define FIFO_READ_TIMEOUT 2
-#define FIFO_WRITE_TIMEOUT 2
 
 class ProcListItem {
 public:
@@ -74,6 +73,8 @@ public:
     /// @param ignoreSeek don't throw exception when seek is called
     ProcessIOHandler(const std::shared_ptr<Content>& content,
         fs::path filename, std::shared_ptr<Executor> mainProc,
+        std::chrono::seconds timeout,
+        unsigned int retryCount,
         std::vector<ProcListItem> procList = {},
         bool ignoreSeek = false);
     ~ProcessIOHandler() override;
@@ -124,6 +125,14 @@ protected:
 
     /// @brief if this flag is set seek on a fifo will not return an error
     bool ignoreSeek;
+
+    /// @brief number of seconds to wait for data
+    std::chrono::seconds timeout { 2 };
+
+    /// @brief number of retries after timeout
+    unsigned int retryCount;
+
+    std::mutex mutex;
 
     bool abort() const;
     void killAll() const;

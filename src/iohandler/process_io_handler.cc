@@ -44,12 +44,6 @@
 #include <unistd.h>
 #include <utility>
 
-// after MAX_TIMEOUTS we will tell libupnp to check the socket,
-// this will make sure that we do not block the read and allow libupnp to
-// call our close() callback
-
-#define MAX_TIMEOUTS 2 // maximum allowed consecutive timeouts
-
 ProcListItem::ProcListItem(std::shared_ptr<Executor> exec, bool abortOnDeath)
     : executor(std::move(exec))
     , abort(abortOnDeath)
@@ -106,9 +100,12 @@ void ProcessIOHandler::unregisterAll()
     }
 }
 
-ProcessIOHandler::ProcessIOHandler(const std::shared_ptr<Content>& content,
+ProcessIOHandler::ProcessIOHandler(
+    const std::shared_ptr<Content>& content,
     fs::path filename,
     std::shared_ptr<Executor> mainProc,
+    std::chrono::seconds timeout,
+    unsigned int retryCount,
     std::vector<ProcListItem> procList,
     bool ignoreSeek)
     : content(content)
@@ -116,6 +113,8 @@ ProcessIOHandler::ProcessIOHandler(const std::shared_ptr<Content>& content,
     , mainProc(std::move(mainProc))
     , path(std::move(filename))
     , ignoreSeek(ignoreSeek)
+    , timeout(timeout)
+    , retryCount(retryCount)
 {
     if (this->mainProc && (!this->mainProc->isAlive() || abort())) {
         killAll();
@@ -130,6 +129,8 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
         killAll();
         throw_std_runtime_error("process terminated early");
     }
+
+    std::lock_guard<std::mutex> lock(mutex);
 
     if (mode == UPNP_READ)
 #ifdef __linux__
@@ -161,19 +162,21 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
 
 grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
 {
+    std::lock_guard<std::mutex> lock(mutex);
+
     fd_set readSet;
-    struct timespec timeout = { FIFO_READ_TIMEOUT, 0 };
+    struct timespec requestTimeout = { timeout.count(), 0 };
     std::size_t numBytes = 0;
     auto pBuffer = buf;
     int exitStatus = EXIT_SUCCESS;
     int ret;
-    int timeoutCount = 0;
+    unsigned int timeoutCount = 0;
 
     while (true) {
         FD_ZERO(&readSet);
         FD_SET(fd, &readSet);
 
-        ret = pselect(fd + 1, &readSet, nullptr, nullptr, &timeout, nullptr);
+        ret = pselect(fd + 1, &readSet, nullptr, nullptr, &requestTimeout, nullptr);
         if ((ret == -1) && (errno == EINTR))
             continue;
 
@@ -198,8 +201,11 @@ grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
             }
 
             timeoutCount++;
-            if (timeoutCount > MAX_TIMEOUTS) {
-                log_debug("max timeouts, checking socket!");
+            if (timeoutCount > retryCount) {
+                // after MAX_TIMEOUTS we will tell libupnp to check the socket,
+                // this will make sure that we do not block the read and allow libupnp to
+                // call our close() callback
+                log_debug("max timeouts {}, checking socket!", retryCount);
                 return CHECK_SOCKET;
             }
         }
@@ -247,8 +253,10 @@ grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
 
 std::size_t ProcessIOHandler::write(std::byte* buf, std::size_t length)
 {
+    std::lock_guard<std::mutex> lock(mutex);
+
     fd_set writeSet;
-    struct timespec timeout = { FIFO_WRITE_TIMEOUT, 0 };
+    struct timespec requestTimeout = { timeout.count(), 0 };
     ssize_t bytesWritten;
     std::size_t numBytes = 0;
     auto pBuffer = buf;
@@ -259,7 +267,7 @@ std::size_t ProcessIOHandler::write(std::byte* buf, std::size_t length)
         FD_ZERO(&writeSet);
         FD_SET(fd, &writeSet);
 
-        ret = pselect(fd + 1, nullptr, &writeSet, nullptr, &timeout, nullptr);
+        ret = pselect(fd + 1, nullptr, &writeSet, nullptr, &requestTimeout, nullptr);
         if ((ret == -1) && (errno == EINTR))
             continue;
 

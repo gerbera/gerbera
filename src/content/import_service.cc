@@ -142,6 +142,7 @@ AutoscanMediaMode ContentState::getMediaMode() const
 {
     AutoscanMediaMode mediaMode = AutoscanMediaMode::Mixed;
     std::size_t maxValue = 3; // at least 4 items are required to set upnp_class
+    std::lock_guard<std::mutex> lock(counterMutex);
     if (itemCounter.at(ObjectType::Audio) > maxValue) {
         mediaMode = AutoscanMediaMode::Audio;
         maxValue = itemCounter.at(ObjectType::Audio);

@@ -1220,20 +1220,20 @@ std::string UpnpXMLBuilder::buildProtocolInfo(
     const std::map<std::string, std::string>& mimeMappings,
     const std::shared_ptr<Quirks>& quirks) const
 {
-    // Why is this here? Just for transcoding maybe?
-
     auto mimeType = getMimeType(resource, mimeMappings);
     if (mimeType.empty())
         return "";
     auto contentType = getValueOrDefault(ctMappings, mimeType);
     auto extend = dlnaProfileString(resource, contentType, quirks);
-    // we do not support seeking at all, so 00
-    // and the media is converted, so set CI to 1
+
     if (resource.getPurpose() == ResourcePurpose::Transcode) {
+        // we do not support seeking at all, so 00
+        // and the media is converted, so set CI to 1
         extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, quirks && quirks->hasFlag(Quirk::ForceNoConversion) ? UPNP_DLNA_NO_CONVERSION : UPNP_DLNA_CONVERSION));
     } else {
         extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION));
     }
+
     std::string dlnaFlags;
     if (startswith(mimeType, "audio") || startswith(mimeType, "video"))
         dlnaFlags = UPNP_DLNA_ORG_FLAGS_AV;

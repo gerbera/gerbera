@@ -191,7 +191,7 @@ void IOHandlerBufferHelper::stopBufferThread()
 {
     auto lock = threadRunner->uniqueLock();
     threadShutdown = true;
-    threadRunner->notify();
+    threadRunner->notifyAll();
     lock.unlock();
 
     threadRunner->join();

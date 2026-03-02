@@ -38,6 +38,8 @@
 #include "io_handler.h"
 #include "util/grb_fs.h"
 
+#include <mutex>
+
 /// @brief Allows the web server to read from a file.
 class FileIOHandler : public IOHandler {
 protected:
@@ -46,6 +48,8 @@ protected:
 
     /// @brief Handle of the file.
     std::FILE* f {};
+
+    std::mutex mutex;
 
 public:
     /// @brief Sets the filename to work with.
