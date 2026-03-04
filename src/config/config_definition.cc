@@ -708,11 +708,14 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerExtendedOpt
 
 #ifdef HAVE_CURL
         std::make_shared<ConfigIntSetup>(ConfigVal::URL_REQUEST_CURL_BUFFER_SIZE,
-            "/server/online-content/attribute::fetch-buffer-size", "config-online.html#online-content",
+            "/server/online-content/attribute::fetch-buffer-size", "config-online.html#confval-online-fetch-buffer-size",
             1024 * 1024, CURL_MAX_WRITE_SIZE, ConfigIntSetup::CheckMinValue),
         std::make_shared<ConfigIntSetup>(ConfigVal::URL_REQUEST_CURL_FILL_SIZE,
-            "/server/online-content/attribute::fetch-buffer-fill-size", "config-online.html#online-content",
+            "/server/online-content/attribute::fetch-buffer-fill-size", "config-online.html#confval-online-fetch-buffer-fill-size",
             0, 0, ConfigIntSetup::CheckMinValue),
+        std::make_shared<ConfigTimeSetup>(ConfigVal::URL_REQUEST_CURL_CONNECT_TIMEOUT,
+            "/server/online-content/attribute::connect-timeout", "config-online.html#confval-online-connect-timeout",
+            GrbTimeType::Seconds, 20, 1),
 #endif // HAVE_CURL
     };
 }
@@ -2507,6 +2510,8 @@ void ConfigDefinition::initDependencies()
 #ifdef HAVE_CURL
         { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE, ConfigVal::TRANSCODING_TRANSCODING_ENABLED },
         { ConfigVal::EXTERNAL_TRANSCODING_CURL_FILL_SIZE, ConfigVal::TRANSCODING_TRANSCODING_ENABLED },
+        { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_TIMEOUT, ConfigVal::TRANSCODING_TRANSCODING_ENABLED },
+        { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_RETRY_COUNT, ConfigVal::TRANSCODING_TRANSCODING_ENABLED },
 #endif
 #ifdef HAVE_FFMPEGTHUMBNAILER
         { ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_THUMBSIZE, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED },

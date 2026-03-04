@@ -68,11 +68,15 @@ public:
     /// @param content content handler instance
     /// @param filename to read the data from
     /// @param mainProc main process to observe
+    /// @param timeout number of seconds to wait for data
+    /// @param retryCount number of retries after timeout
     /// @param procList associated processes that will be terminated once
     /// they are no longer needed
     /// @param ignoreSeek don't throw exception when seek is called
-    ProcessIOHandler(const std::shared_ptr<Content>& content,
-        fs::path filename, std::shared_ptr<Executor> mainProc,
+    ProcessIOHandler(
+        const std::shared_ptr<Content>& content,
+        fs::path filename,
+        std::shared_ptr<Executor> mainProc,
         std::chrono::seconds timeout,
         unsigned int retryCount,
         std::vector<ProcListItem> procList = {},

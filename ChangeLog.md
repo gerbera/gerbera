@@ -11,6 +11,7 @@
 - Export and import changed object from database
 - Extend content type filter configuration
 - FFmpeg: configuration for stream data import
+- Improve configuration of online content
 - Keep track of changed objects
 - Load Config file modules
 - Reduce almost duplicate methods

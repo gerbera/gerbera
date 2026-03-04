@@ -183,7 +183,7 @@ protected:
     std::shared_ptr<pugi::xml_node> setVector(ConfigVal option);
 
     /// @brief create subentry of xml node
-    std::shared_ptr<pugi::xml_node> setXmlValue(const std::shared_ptr<pugi::xml_node>& parent, ConfigVal option, const std::string& value);
+    std::shared_ptr<pugi::xml_node> setXmlValue(const std::shared_ptr<pugi::xml_node>& parent, ConfigVal option, const std::string& value = "");
 
     /// @brief dictionary with section names
     static std::map<GeneratorSections, std::string> sections;

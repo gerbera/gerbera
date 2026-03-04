@@ -162,5 +162,5 @@
       <map from="wma" to="WMAFULL" />
     </contenttype-dlnaprofile>
   </mappings>
-  <online-content />
+  <online-services />
 </import>
