@@ -292,7 +292,7 @@ TEST_F(ConfigGeneratorTest, GeneratesImportNoMagicJSnorOnline)
 #ifdef ONLINE_SERVICES
 TEST_F(ConfigGeneratorTest, GeneratesOnlineContentEmpty)
 {
-    std::string mockXml = "<online-content />\n";
+    std::string mockXml = "<online-services />\n";
 
     subject->generateOnlineContent();
     auto import = subject->getNode("/import");

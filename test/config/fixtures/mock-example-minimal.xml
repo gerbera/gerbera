@@ -386,7 +386,7 @@
         <first-resource>yes</first-resource>
         <accept-ogg-theora>no</accept-ogg-theora>
         <agent command="ffmpeg" arguments="-y -i %in -f mp3 %out" />
-        <buffer size="1048576" chunk-size="131072" fill-size="262144" />
+        <buffer size="1048576" chunk-size="131072" fill-size="262144" timeout="10" retry-count="4" />
       </profile>
       <profile name="vlcmpeg" enabled="no" type="external" no-transcoding="">
         <mimetype>video/mpeg</mimetype>
@@ -403,7 +403,7 @@
           <fourcc>DX50</fourcc>
         </avi-fourcc-list>
         <agent command="vlc" arguments="-I dummy %in --sout #transcode{venc=ffmpeg,vcodec=mp2v,vb=4096,fps=25,aenc=ffmpeg,acodec=mpga,ab=192,samplerate=44100,channels=2}:standard{access=file,mux=ps,dst=%out} vlc://quit" />
-        <buffer size="14400000" chunk-size="512000" fill-size="120000" />
+        <buffer size="14400000" chunk-size="512000" fill-size="120000" timeout="2" retry-count="2" />
       </profile>
     </profiles>
   </transcoding>

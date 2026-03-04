@@ -69,3 +69,15 @@ This setting allows to prebuffer a certain amount of data, given in bytes, befor
 should ensure a constant data flow in case of slow connections. Usually this setting is not needed, because most
 players will anyway have some kind of buffering, however if the connection is particularly slow you may want to try enable this setting.
 
+.. confval:: online connect timeout
+   :type: :confval:`Time` Seconds
+   :required: false
+   :default: ``20``
+..
+
+   .. versionadded:: HEAD
+   .. code:: xml
+
+      timeout="50"
+
+This setting allows to set the timeout to connect to the URL. Increase it for slow servers.

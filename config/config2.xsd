@@ -85,6 +85,7 @@
                 <xs:element ref="retries-on-timeout" minOccurs="0"/>
                 <xs:element ref="upnp" minOccurs="0"/>
                 <xs:element ref="containers" minOccurs="0"/>
+                <xs:element ref="online-content" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="debug-mode" type="xs:string"/>
             <xs:attribute name="upnp-max-jobs" type="xs:nonNegativeInteger"/>
@@ -637,7 +638,7 @@
                 <xs:element ref="resources" minOccurs="0"/>
                 <xs:element ref="library-options" minOccurs="0"/>
                 <xs:element ref="magic-file" minOccurs="0"/>
-                <xs:element ref="online-content" minOccurs="0"/>
+                <xs:element ref="online-services" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="hidden-files" type="boolean" default="no"/>
             <xs:attribute name="follow-symlinks" type="boolean" default="yes"/>
@@ -1499,10 +1500,16 @@
 
     <!-- online-content -->
 
+    <xs:element name="online-services">
+        <xs:complexType>
+        </xs:complexType>
+    </xs:element>
+
     <xs:element name="online-content">
         <xs:complexType>
             <xs:attribute name="fetch-buffer-size" type="xs:positiveInteger" default="1048576"/>
             <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
+            <xs:attribute name="connect-timeout" type="xs:nonNegativeInteger" default="20"/>
         </xs:complexType>
     </xs:element>
 </xs:schema>

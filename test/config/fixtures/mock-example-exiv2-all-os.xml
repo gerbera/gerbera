@@ -211,6 +211,7 @@
         </mark>
       </mark-played-items>
     </extended-runtime-options>
+    <online-content fetch-buffer-size="1048576" fetch-buffer-fill-size="0" connect-timeout="20" />
   </server>
   <import hidden-files="no" follow-symlinks="yes" default-date="yes" import-mode="mt" nomedia-file=".nomedia" readable-names="yes">
     <autoscan use-inotify="auto">
@@ -518,9 +519,9 @@
         <add-file name="tmp" />
       </ignore-extensions>
     </mappings>
-    <online-content />
+    <online-services />
   </import>
-  <transcoding enabled="no" fetch-buffer-size="262144" fetch-buffer-fill-size="0">
+  <transcoding enabled="no" fetch-buffer-size="262144" fetch-buffer-fill-size="0" fetch-buffer-timeout="2" fetch-buffer-retry-count="2">
     <mimetype-profile-mappings allow-unused="no">
       <transcode mimetype="application/ogg" using="vlcmpeg" />
       <transcode mimetype="audio/ogg" using="ogg2mp3" />
@@ -533,7 +534,7 @@
         <first-resource>yes</first-resource>
         <accept-ogg-theora>no</accept-ogg-theora>
         <agent command="ffmpeg" arguments="-y -i %in -f mp3 %out" />
-        <buffer size="1048576" chunk-size="131072" fill-size="262144" />
+        <buffer size="1048576" chunk-size="131072" fill-size="262144" timeout="10" retry-count="4" />
       </profile>
       <profile name="vlcmpeg" enabled="no" type="external" no-transcoding="">
         <mimetype>video/mpeg</mimetype>

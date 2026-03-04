@@ -47,7 +47,12 @@ class Config;
 /// @brief Allows the web server to read from a web site.
 class CurlIOHandler : public IOHandlerBufferHelper {
 public:
-    CurlIOHandler(const std::shared_ptr<Config>& config, std::string url, std::size_t bufSize, std::size_t initialFillSize);
+    CurlIOHandler(
+        const std::shared_ptr<Config>& config,
+        std::string url,
+        std::size_t bufSize,
+        std::size_t initialFillSize,
+        std::chrono::seconds timeout);
     ~CurlIOHandler() noexcept override;
 
     void open(enum UpnpOpenFileMode mode) override;
@@ -60,6 +65,9 @@ private:
 #if 0
     off_t bytesCurl { 0 };
 #endif
+
+    /// @brief number of seconds to wait for connection
+    std::chrono::seconds timeout { 20 };
 
     static std::size_t curlCallback(void* ptr, std::size_t size, std::size_t nmemb, CurlIOHandler* ego);
     void threadProc() override;

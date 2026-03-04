@@ -42,6 +42,14 @@
 #define XML_XMLNS_XSI "http://www.w3.org/2001/XMLSchema-instance"
 #define XML_XMLNS "http://gerbera.io/config/"
 
+#define DEFAULT_AUDIO_BUFFER_SIZE 1048576
+#define DEFAULT_AUDIO_CHUNK_SIZE 131072
+#define DEFAULT_AUDIO_FILL_SIZE 262144
+
+#define DEFAULT_VIDEO_BUFFER_SIZE 14400000
+#define DEFAULT_VIDEO_CHUNK_SIZE 512000
+#define DEFAULT_VIDEO_FILL_SIZE 120000
+
 using GeneratorSectionsIterator = EnumIterator<GeneratorSections, GeneratorSections::Server, GeneratorSections::All>;
 using GeneratorModulesIterator = EnumIterator<GeneratorModules, GeneratorModules::Autoscan, GeneratorModules::None>;
 
@@ -206,12 +214,15 @@ std::shared_ptr<pugi::xml_node> ConfigGenerator::setXmlValue(
     ConfigVal option,
     const std::string& value)
 {
+    auto setup = definition->findConfigSetup(option);
+    auto val = value.empty() ? setup->getDefaultValue() : value;
     auto cs = std::string(definition->mapConfigOption(option));
+
     if (startswith(cs, ConfigDefinition::ATTRIBUTE)) {
         cs = definition->removeAttribute(option);
-        parent->append_attribute(cs.c_str()) = value.c_str();
+        parent->append_attribute(cs.c_str()) = val.c_str();
     } else {
-        parent->append_child(cs.c_str()).append_child(pugi::node_pcdata).set_value(value.c_str());
+        parent->append_child(cs.c_str()).append_child(pugi::node_pcdata).set_value(val.c_str());
     }
     return parent;
 }
@@ -883,9 +894,7 @@ void ConfigGenerator::generateImport(
     generateImportOptions(prefixDir, configDir, magicFile, customJsFolder);
     generateMappings();
     generateBoxlayout(ConfigVal::BOXLAYOUT_LIST);
-#ifdef ONLINE_SERVICES
     generateOnlineContent();
-#endif
 }
 
 void ConfigGenerator::generateMappings()
@@ -947,11 +956,17 @@ void ConfigGenerator::generateOnlineContent()
     if (!isGenerated(GeneratorSections::OnlineContent))
         return;
 
-    auto options = std::vector<std::pair<ConfigVal, ConfigLevel>> {};
+    auto options = std::vector<std::pair<ConfigVal, ConfigLevel>> {
+#ifdef HAVE_CURL
+        { ConfigVal::URL_REQUEST_CURL_BUFFER_SIZE, ConfigLevel::Example },
+        { ConfigVal::URL_REQUEST_CURL_FILL_SIZE, ConfigLevel::Example },
+        { ConfigVal::URL_REQUEST_CURL_CONNECT_TIMEOUT, ConfigLevel::Example },
+#endif
+    };
     generateOptions(options);
 
 #ifdef ONLINE_SERVICES
-    setValue("/import/online-content/");
+    setValue("/import/online-services/");
 #endif
 }
 
@@ -967,6 +982,8 @@ void ConfigGenerator::generateTranscoding()
 #ifdef HAVE_CURL
         { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE, ConfigLevel::Example },
         { ConfigVal::EXTERNAL_TRANSCODING_CURL_FILL_SIZE, ConfigLevel::Example },
+        { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_TIMEOUT, ConfigLevel::Example },
+        { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_RETRY_COUNT, ConfigLevel::Example },
 #endif // HAVE_CURL
     };
     generateOptions(options);
@@ -991,6 +1008,8 @@ void ConfigGenerator::generateTranscoding()
     setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_AUDIO_BUFFER_SIZE));
     setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_AUDIO_CHUNK_SIZE));
     setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_AUDIO_FILL_SIZE));
+    setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_TIMEOUT, "10");
+    setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT, "4");
 
     auto vlcmpeg = setValue(fmt::format("{}/", profileTag), {}, "", true);
     setXmlValue(vlcmpeg, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME, "vlcmpeg");
@@ -1022,6 +1041,8 @@ void ConfigGenerator::generateTranscoding()
     setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, fmt::to_string(DEFAULT_VIDEO_BUFFER_SIZE));
     setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, fmt::to_string(DEFAULT_VIDEO_CHUNK_SIZE));
     setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, fmt::to_string(DEFAULT_VIDEO_FILL_SIZE));
+    setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_TIMEOUT);
+    setXmlValue(buffer, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT);
 }
 
 void ConfigGenerator::generateUdn(bool doExport)

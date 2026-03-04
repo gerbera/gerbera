@@ -2984,6 +2984,28 @@
           ]
         }
       ]
+    },
+    {
+      "item": "/server/online-content",
+      "caption": "Online Content Retrieval",
+      "type": "Element",
+      "editable": true,
+      "children": [
+        {
+          "item": "/server/online-content/attribute::fetch-buffer-size",
+          "caption": "Buffer Size",
+          "editable": true
+        },
+        {
+          "item": "/server/online-content/attribute::fetch-buffer-fill-size",
+          "caption": "Buffer Fill Size",
+          "editable": true
+        },
+        {
+          "item": "/server/online-content/attribute::connect-timeout",
+          "caption": "Coonect Timeout",
+          "editable": true
+        }]
     }
   ],
   "success": true

@@ -598,6 +598,26 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
                     return true;
                 },
             },
+            // BufferTimeOut
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_TIMEOUT },
+                "BufferTimeOut",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->getBufferTimeout().count()); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    entry->setBufferTimeout(std::chrono::seconds(definition->findConfigSetup<ConfigTimeSetup>(cfg)->checkTimeValue(optValue)));
+                    return true;
+                },
+            },
+            // BufferRetryCount
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT },
+                "BufferRetryCount",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->getBufferRetryCount()); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    entry->setBufferRetryCount(definition->findConfigSetup<ConfigUIntSetup>(cfg)->checkIntValue(optValue));
+                    return true;
+                },
+            },
 
             // Agent
             // Agent Command
