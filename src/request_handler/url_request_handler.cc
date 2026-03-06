@@ -151,7 +151,8 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, const s
     auto ioHandler = std::make_unique<CurlIOHandler>(config, url,
         config->getIntOption(ConfigVal::URL_REQUEST_CURL_BUFFER_SIZE),
         config->getIntOption(ConfigVal::URL_REQUEST_CURL_FILL_SIZE),
-        std::chrono::seconds(config->getLongOption(ConfigVal::URL_REQUEST_CURL_CONNECT_TIMEOUT)));
+        std::chrono::seconds(config->getLongOption(ConfigVal::URL_REQUEST_CURL_CONNECT_TIMEOUT)),
+        std::chrono::seconds(config->getLongOption(ConfigVal::URL_REQUEST_CURL_TIMEOUT)));
     content->triggerPlayHook(group, obj);
     return ioHandler;
 }

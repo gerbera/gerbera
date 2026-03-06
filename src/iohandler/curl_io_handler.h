@@ -52,6 +52,7 @@ public:
         std::string url,
         std::size_t bufSize,
         std::size_t initialFillSize,
+        std::chrono::seconds connectTimeout,
         std::chrono::seconds timeout);
     ~CurlIOHandler() noexcept override;
 
@@ -67,7 +68,9 @@ private:
 #endif
 
     /// @brief number of seconds to wait for connection
-    std::chrono::seconds timeout { 20 };
+    std::chrono::seconds connectTimeout { 20 };
+    /// @brief number of seconds to wait for data
+    std::chrono::seconds timeout { 0 };
 
     static std::size_t curlCallback(void* ptr, std::size_t size, std::size_t nmemb, CurlIOHandler* ego);
     void threadProc() override;

@@ -165,7 +165,8 @@ fs::path TranscodeExternalHandler::openCurlFifo(const fs::path& location, std::v
         auto cIoh = std::make_unique<CurlIOHandler>(config, url,
             config->getIntOption(ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_SIZE),
             config->getIntOption(ConfigVal::EXTERNAL_TRANSCODING_CURL_FILL_SIZE),
-            std::chrono::seconds(config->getLongOption(ConfigVal::URL_REQUEST_CURL_CONNECT_TIMEOUT)));
+            std::chrono::seconds(config->getLongOption(ConfigVal::URL_REQUEST_CURL_CONNECT_TIMEOUT)),
+            std::chrono::seconds(config->getLongOption(ConfigVal::URL_REQUEST_CURL_TIMEOUT)));
         auto pIoh = std::make_unique<ProcessIOHandler>(content, ret, nullptr,
             std::chrono::seconds(config->getLongOption(ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_TIMEOUT)),
             config->getUIntOption(ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_RETRY_COUNT));

@@ -961,6 +961,7 @@ void ConfigGenerator::generateOnlineContent()
         { ConfigVal::URL_REQUEST_CURL_BUFFER_SIZE, ConfigLevel::Example },
         { ConfigVal::URL_REQUEST_CURL_FILL_SIZE, ConfigLevel::Example },
         { ConfigVal::URL_REQUEST_CURL_CONNECT_TIMEOUT, ConfigLevel::Example },
+        { ConfigVal::URL_REQUEST_CURL_TIMEOUT, ConfigLevel::Example },
 #endif
     };
     generateOptions(options);
