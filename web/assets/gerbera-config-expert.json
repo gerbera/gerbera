@@ -3003,9 +3003,15 @@
         },
         {
           "item": "/server/online-content/attribute::connect-timeout",
-          "caption": "Coonect Timeout",
+          "caption": "Connect Timeout",
           "editable": true
-        }]
+        },
+        {
+          "item": "/server/online-content/attribute::timeout",
+          "caption": "Timeout",
+          "editable": true
+        }
+      ]
     }
   ],
   "success": true

@@ -211,7 +211,7 @@
         </mark>
       </mark-played-items>
     </extended-runtime-options>
-    <online-content fetch-buffer-size="1048576" fetch-buffer-fill-size="0" connect-timeout="20" />
+    <online-content fetch-buffer-size="1048576" fetch-buffer-fill-size="0" connect-timeout="20" timeout="0" />
   </server>
   <import hidden-files="no" follow-symlinks="yes" default-date="yes" import-mode="mt" nomedia-file=".nomedia" readable-names="yes">
     <autoscan use-inotify="auto">

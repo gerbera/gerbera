@@ -1510,6 +1510,7 @@
             <xs:attribute name="fetch-buffer-size" type="xs:positiveInteger" default="1048576"/>
             <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
             <xs:attribute name="connect-timeout" type="xs:nonNegativeInteger" default="20"/>
+            <xs:attribute name="timeout" type="xs:nonNegativeInteger" default="0"/>
         </xs:complexType>
     </xs:element>
 </xs:schema>

@@ -45,9 +45,11 @@ CurlIOHandler::CurlIOHandler(
     std::string url,
     std::size_t bufSize,
     std::size_t initialFillSize,
+    std::chrono::seconds connectTimeout,
     std::chrono::seconds timeout)
     : IOHandlerBufferHelper(config, bufSize, initialFillSize)
     , URL(std::move(url))
+    , connectTimeout(connectTimeout)
     , timeout(timeout)
 
 {
@@ -116,7 +118,8 @@ void CurlIOHandler::threadProc()
         curl_easy_setopt(curl_handle, CURLOPT_VERBOSE, 1);
     }
 
-    curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, timeout.count()); // seconds
+    curl_easy_setopt(curl_handle, CURLOPT_CONNECTTIMEOUT, connectTimeout.count()); // seconds
+    curl_easy_setopt(curl_handle, CURLOPT_TIMEOUT, timeout.count()); // seconds
 
     // proxy..
 

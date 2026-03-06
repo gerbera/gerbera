@@ -14,6 +14,7 @@
 - Improve configuration of online content
 - Keep track of changed objects
 - Load Config file modules
+- More configuration of online content
 - Reduce almost duplicate methods
 - Refactor FFMpegThumbnailer
 - Show changed items in UI

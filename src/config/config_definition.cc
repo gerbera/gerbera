@@ -716,6 +716,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerExtendedOpt
         std::make_shared<ConfigTimeSetup>(ConfigVal::URL_REQUEST_CURL_CONNECT_TIMEOUT,
             "/server/online-content/attribute::connect-timeout", "config-online.html#confval-online-connect-timeout",
             GrbTimeType::Seconds, 20, 1),
+        std::make_shared<ConfigTimeSetup>(ConfigVal::URL_REQUEST_CURL_TIMEOUT,
+            "/server/online-content/attribute::timeout", "config-online.html#confval-online-timeout",
+            GrbTimeType::Seconds, 0, 0),
 #endif // HAVE_CURL
     };
 }
