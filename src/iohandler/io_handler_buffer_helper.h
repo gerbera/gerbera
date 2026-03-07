@@ -75,7 +75,6 @@ protected:
     bool readError {};
     bool waitForInitialFillSize;
     bool signalAfterEveryRead {};
-    bool checkSocket {};
 
     // buffer stuff..
     bool empty { true };

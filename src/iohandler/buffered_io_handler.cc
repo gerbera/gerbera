@@ -180,12 +180,9 @@ void BufferedIOHandler::threadProc()
                         threadRunner->notify();
                     }
                 }
-            } else if (readBytes == CHECK_SOCKET) {
-                checkSocket = true;
-                threadRunner->notify();
             }
         }
-    } while ((maxWrite == 0 || readBytes > 0 || readBytes == CHECK_SOCKET) && !threadShutdown);
+    } while ((maxWrite == 0 || readBytes > 0) && !threadShutdown);
     if (!threadShutdown) {
         if (readBytes == 0)
             eof = true;

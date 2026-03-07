@@ -35,6 +35,7 @@
 #include "io_handler_buffer_helper.h" // API
 
 #include "exceptions.h"
+#include "upnp/compat.h"
 
 #include <algorithm>
 
@@ -79,15 +80,11 @@ grb_read_t IOHandlerBufferHelper::read(std::byte* buf, std::size_t length)
     auto lock = threadRunner->uniqueLock();
 
     while ((empty || waitForInitialFillSize) && !threadShutdown && !eof && !readError) {
-        if (checkSocket) {
-            checkSocket = false;
-            return CHECK_SOCKET;
-        }
         threadRunner->wait(lock);
     }
 
     if (readError || threadShutdown)
-        return -1;
+        return GRB_READ_ERROR;
     if (empty && eof)
         return 0;
 

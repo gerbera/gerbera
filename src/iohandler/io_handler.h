@@ -36,11 +36,8 @@
 #define __IO_HANDLER_H__
 
 #include <cstddef>
-#include <cstdint>
-#include <upnp.h>
 
-using grb_read_t = std::int32_t;
-static constexpr grb_read_t CHECK_SOCKET = -666;
+#include "upnp/compat.h"
 
 class IOHandler {
 public:

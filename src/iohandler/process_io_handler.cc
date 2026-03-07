@@ -36,6 +36,7 @@
 
 #include "content/content.h"
 #include "exceptions.h"
+#include "upnp/compat.h"
 
 #include <algorithm>
 #include <csignal>
@@ -160,6 +161,37 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
     }
 }
 
+/// @brief check if writing to the socket is possible
+static bool isSocketWritable(int sockfd)
+{
+    fd_set readSet;
+    fd_set exceptSet;
+    struct timeval timeout;
+
+    FD_ZERO(&readSet);
+    FD_ZERO(&exceptSet);
+    FD_SET(sockfd, &readSet);
+    FD_SET(sockfd, &exceptSet);
+
+    timeout.tv_sec = 1; // 1 second select, we do not care if it times out
+                        // we only look for an error
+    timeout.tv_usec = 0;
+
+    int retCode = select(sockfd + 1, &readSet, NULL, &exceptSet, &timeout);
+
+    if (FD_ISSET(sockfd, &readSet) || FD_ISSET(sockfd, &exceptSet)) {
+        return true;
+    }
+
+    if (retCode >= 0) // timeout or fd ready for writing
+        return false;
+
+    if (retCode == -1 && errno == EINTR)
+        return false;
+
+    return true;
+}
+
 grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
 {
     std::lock_guard<std::mutex> lock(mutex);
@@ -193,7 +225,7 @@ grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
                     }
                     mainProc->kill();
                     killAll();
-                    return -1;
+                    return GRB_READ_ERROR;
                 }
             } else {
                 killAll();
@@ -202,11 +234,18 @@ grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
 
             timeoutCount++;
             if (timeoutCount > retryCount) {
-                // after MAX_TIMEOUTS we will tell libupnp to check the socket,
+                // after retryCount we will check the socket,
                 // this will make sure that we do not block the read and allow libupnp to
                 // call our close() callback
                 log_debug("max timeouts {}, checking socket!", retryCount);
-                return CHECK_SOCKET;
+                if (!isSocketWritable(fd)) {
+                    log_debug("socket broken aborting read!!!");
+                    mainProc->kill();
+                    killAll();
+                    return GRB_READ_ERROR;
+                }
+                timeoutCount = 0;
+                continue;
             }
         }
 
@@ -218,7 +257,7 @@ grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
 
             if (bytesRead < 0) {
                 log_debug("aborting read!!!");
-                return -1;
+                return GRB_READ_ERROR;
             }
 
             numBytes = numBytes + bytesRead;
@@ -234,7 +273,7 @@ grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
     if (numBytes == 0) {
         // not sure what we return here since no way of knowing about feof
         // actually that will depend on the ret code of the process
-        ret = -1;
+        ret = GRB_READ_ERROR;
 
         if (mainProc) {
             if (mainProc->isAlive())

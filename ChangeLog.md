@@ -24,7 +24,8 @@
 - Update libexiv2 to 0.28.8
 - Update npupnp to 6.2.3
 - Update to pupnp 1.18.1
-- Upgrade to taglib 2.2 with new file type and filtering
+- Upgrade broken check-socket stuff
+- Upgrade to taglib 2.2.1 with new file type and filtering
 - Use entry_type instead of location prefix
 - xsd improvement
 
