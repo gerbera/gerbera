@@ -34,6 +34,8 @@
 
 #include "io_handler.h" // API
 
+#include "upnp/compat.h"
+
 /// @brief Opens a file for the web server.
 /// @param mode in which the data will be opened (we only support UPNP_READ)
 void IOHandler::open(enum UpnpOpenFileMode mode)
@@ -52,7 +54,7 @@ void IOHandler::open(enum UpnpOpenFileMode mode)
 /// \retval -1  Error.
 grb_read_t IOHandler::read(std::byte* buf, std::size_t length)
 {
-    return -1;
+    return GRB_READ_ERROR;
 }
 
 /// @brief Writes to a previously opened file sequentially.
