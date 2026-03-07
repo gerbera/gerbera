@@ -28,10 +28,16 @@
 #define GRB_UPNP_COMPAT_H__
 #include <upnp.h>
 
+#include <cstdint>
 #include <map>
 #include <string>
 
+using grb_read_t = std::int32_t;
+static constexpr grb_read_t GRB_READ_END = 0;
+
 #if defined(USING_NPUPNP)
+
+static constexpr grb_read_t GRB_READ_ERROR = -1;
 
 #ifndef UPNP_VERSION
 #define UPNP_VERSION (NPUPNP_VERSION_MAJOR * 10000 + NPUPNP_VERSION_MINOR * 100 + NPUPNP_VERSION_PATCH)
@@ -54,6 +60,12 @@ extern "C" int UpnpSetWebServerCorsString(const char*);
 #endif
 
 #else // USING_NPUPNP
+
+#if (UPNP_VERSION <= 11801)
+static constexpr grb_read_t GRB_READ_ERROR = 0;
+#else
+static constexpr grb_read_t GRB_READ_ERROR = -1;
+#endif
 
 #define UPNP_NEEDS_NOTIFY_XML
 int UpnpNotifyXML(UpnpDevice_Handle handle, const char* devID, const char* servName, const std::string& propertySet);

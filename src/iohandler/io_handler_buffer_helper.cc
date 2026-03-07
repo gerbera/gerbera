@@ -35,10 +35,14 @@
 #include "io_handler_buffer_helper.h" // API
 
 #include "exceptions.h"
+#include "upnp/compat.h"
 
 #include <algorithm>
 
-IOHandlerBufferHelper::IOHandlerBufferHelper(std::shared_ptr<Config> config, std::size_t bufSize, std::size_t initialFillSize)
+IOHandlerBufferHelper::IOHandlerBufferHelper(
+    std::shared_ptr<Config> config,
+    std::size_t bufSize,
+    std::size_t initialFillSize)
     : config(std::move(config))
     , bufSize(bufSize)
     , initialFillSize(initialFillSize)
@@ -79,33 +83,29 @@ grb_read_t IOHandlerBufferHelper::read(std::byte* buf, std::size_t length)
     auto lock = threadRunner->uniqueLock();
 
     while ((empty || waitForInitialFillSize) && !threadShutdown && !eof && !readError) {
-        if (checkSocket) {
-            checkSocket = false;
-            return CHECK_SOCKET;
-        }
-        threadRunner->wait(lock);
+        threadRunner->wait(lock); // waiting for data to be read in main thread
     }
 
     if (readError || threadShutdown)
-        return -1;
+        return GRB_READ_ERROR;
     if (empty && eof)
-        return 0;
+        return GRB_READ_END;
 
-    std::size_t bLocal = b;
+    std::size_t endPosition = endIndex;
     lock.unlock();
 
     // we ensured with the while above that the buffer isn't empty
-    auto currentFillSize = static_cast<int>(bLocal - a);
+    auto currentFillSize = static_cast<int>(endPosition - startIndex);
     if (currentFillSize <= 0)
         currentFillSize += bufSize;
 
-    auto maxRead1 = (a < bLocal) ? bLocal - a : bufSize - a;
-    auto read1 = std::min(length, maxRead1);
+    auto maxRead = (startIndex < endPosition) ? endPosition - startIndex : bufSize - startIndex;
+    auto read1 = std::min(length, maxRead);
 
     auto remaining = (length > read1) ? length - read1 : 0;
     auto read2 = std::min(remaining, static_cast<std::size_t>(currentFillSize - read1));
 
-    std::copy_n(buffer + a, read1, buf);
+    std::copy_n(buffer + startIndex, read1, buf);
     if (read2)
         std::copy_n(buffer, read2, buf + read1);
 
@@ -115,15 +115,15 @@ grb_read_t IOHandlerBufferHelper::read(std::byte* buf, std::size_t length)
 
     bool signalled = false;
     // was the buffer full or became it "full" while we read?
-    if (signalAfterEveryRead || a == b) {
+    if (signalAfterEveryRead || startIndex == endIndex) {
         threadRunner->notify();
         signalled = true;
     }
 
-    a += didRead;
-    if (a >= bufSize)
-        a -= bufSize;
-    if (a == b) {
+    startIndex += didRead;
+    if (startIndex >= bufSize)
+        startIndex -= bufSize;
+    if (startIndex == endIndex) {
         empty = true;
         if (!signalled)
             threadRunner->notify();
@@ -174,8 +174,6 @@ void IOHandlerBufferHelper::close()
     delete[] buffer;
     buffer = nullptr;
 }
-
-// thread stuff...
 
 void IOHandlerBufferHelper::startBufferThread()
 {

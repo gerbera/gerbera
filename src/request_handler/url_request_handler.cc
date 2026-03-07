@@ -100,7 +100,7 @@ bool URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     UpnpFileInfo_set_LastModified(info, 0);
     UpnpFileInfo_set_IsDirectory(info, 0);
     GrbUpnpFileInfoSetContentType(info, mimeType);
-    log_debug("web_get_info(): end");
+    log_debug("end");
 
     return quirks && quirks->getClient();
 }
@@ -144,7 +144,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, const s
         auto trD = std::make_unique<TranscodeDispatcher>(content);
         auto ioHandler = trD->serveContent(tp, url, item, group, "");
 
-        log_debug("end");
+        log_debug("end transcoding");
         return ioHandler;
     }
 
@@ -154,6 +154,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, const s
         std::chrono::seconds(config->getLongOption(ConfigVal::URL_REQUEST_CURL_CONNECT_TIMEOUT)),
         std::chrono::seconds(config->getLongOption(ConfigVal::URL_REQUEST_CURL_TIMEOUT)));
     content->triggerPlayHook(group, obj);
+    log_debug("end");
     return ioHandler;
 }
 

@@ -25,7 +25,14 @@ main_dir=$(realpath "${main_dir}")/
 . ${main_dir}/gerbera-install-shell.sh
 . ${main_dir}/versions.sh
 
-VERSION="${PUPNP-1.14.12}"
+VERSION="${PUPNP-1.14.30}"
+COMMIT="${PUPNP_COMMIT:-}"
+
+if [[ -n "$COMMIT" ]]; then
+    source_files+=("https://github.com/pupnp/pupnp/archive/${COMMIT}.tar.gz")
+    VERSION+="-"
+    VERSION+=`echo $COMMIT | cut -c 1-6`
+fi
 
 setFiles pupnp tgz
 source_files+=("https://github.com/pupnp/pupnp/archive/release-${VERSION}.tar.gz")

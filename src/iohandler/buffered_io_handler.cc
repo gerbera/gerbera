@@ -97,19 +97,19 @@ void BufferedIOHandler::threadProc()
             lastLog = currentTimeMS();
             [[maybe_unused]] float percentFillLevel = 0;
             if (!empty) {
-                auto currentFillSize = static_cast<int>(b - a);
+                auto currentFillSize = static_cast<int>(endIndex - startIndex);
                 if (currentFillSize <= 0)
                     currentFillSize += bufSize;
                 percentFillLevel = (static_cast<float>(currentFillSize) / static_cast<float>(bufSize)) * 100;
             }
-            log_debug("buffer fill level: {:03.2f}%  (bufSize: {}; a: {}; b: {})", percentFillLevel, bufSize, a, b);
+            log_debug("buffer fill level: {:03.2f}%  (bufSize: {}; startIndex: {}; endIndex: {})", percentFillLevel, bufSize, startIndex, endIndex);
         }
 #endif
         if (empty)
-            a = b = 0;
+            startIndex = endIndex = 0;
 
         if (doSeek && !empty && (seekWhence == SEEK_SET || (seekWhence == SEEK_CUR && seekOffset > 0))) {
-            auto currentFillSize = static_cast<int>(b - a);
+            auto currentFillSize = static_cast<int>(endIndex - startIndex);
             if (currentFillSize <= 0)
                 currentFillSize += bufSize;
 
@@ -118,13 +118,13 @@ void BufferedIOHandler::threadProc()
                 relSeek -= posRead;
 
             if (relSeek <= currentFillSize) { // we have everything we need in the buffer already
-                a += relSeek;
+                startIndex += relSeek;
                 posRead += relSeek;
-                if (a >= bufSize)
-                    a -= bufSize;
-                if (a == b) {
+                if (startIndex >= bufSize)
+                    startIndex -= bufSize;
+                if (startIndex == endIndex) {
                     empty = true;
-                    a = b = 0;
+                    startIndex = endIndex = 0;
                 }
 
                 /// \todo do we need to wait for initialFillSize again?
@@ -141,7 +141,7 @@ void BufferedIOHandler::threadProc()
             try {
                 underlyingHandler->seek(seekOffset, seekWhence);
                 empty = true;
-                a = b = 0;
+                startIndex = endIndex = 0;
             } catch (const std::runtime_error& e) {
                 log_error("Error while seeking in buffer: {}", e.what());
             }
@@ -153,25 +153,27 @@ void BufferedIOHandler::threadProc()
             threadRunner->notify();
         }
 
-        maxWrite = (empty ? bufSize : (a < b ? bufSize - b : a - b));
+        maxWrite = (empty ? bufSize : (startIndex < endIndex ? bufSize - endIndex : startIndex - endIndex));
         if (maxWrite == 0) {
-            threadRunner->wait(lock);
+            log_debug("buffer: wait for read {}", (void*)underlyingHandler.get());
+            threadRunner->wait(lock); // buffer full, wait for read
+            log_debug("buffer running {}", (void*)underlyingHandler.get());
         } else {
             lock.unlock();
             std::size_t chunkSize = (maxChunkSize > maxWrite ? maxWrite : maxChunkSize);
-            readBytes = underlyingHandler->read(buffer + static_cast<int>(b), chunkSize);
+            readBytes = underlyingHandler->read(buffer + static_cast<int>(endIndex), chunkSize);
             lock.lock();
             if (readBytes > 0) {
-                b += readBytes;
-                assert(b <= bufSize);
-                if (b == bufSize)
-                    b = 0;
+                endIndex += readBytes;
+                assert(endIndex <= bufSize);
+                if (endIndex == bufSize)
+                    endIndex = 0;
                 if (empty) {
                     empty = false;
                     threadRunner->notify();
                 }
                 if (waitForInitialFillSize) {
-                    auto currentFillSize = static_cast<int>(b - a);
+                    auto currentFillSize = static_cast<int>(endIndex - startIndex);
                     if (currentFillSize <= 0)
                         currentFillSize += bufSize;
                     if (static_cast<std::size_t>(currentFillSize) >= initialFillSize) {
@@ -180,12 +182,9 @@ void BufferedIOHandler::threadProc()
                         threadRunner->notify();
                     }
                 }
-            } else if (readBytes == CHECK_SOCKET) {
-                checkSocket = true;
-                threadRunner->notify();
             }
         }
-    } while ((maxWrite == 0 || readBytes > 0 || readBytes == CHECK_SOCKET) && !threadShutdown);
+    } while ((maxWrite == 0 || readBytes > 0) && !threadShutdown);
     if (!threadShutdown) {
         if (readBytes == 0)
             eof = true;

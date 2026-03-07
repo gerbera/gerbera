@@ -184,7 +184,7 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
     int bufFree;
     do {
         if (ego->doSeek && !ego->empty && (ego->seekWhence == SEEK_SET || (ego->seekWhence == SEEK_CUR && ego->seekOffset > 0))) {
-            auto currentFillSize = static_cast<int>(ego->b - ego->a);
+            auto currentFillSize = static_cast<int>(ego->endIndex - ego->startIndex);
             if (currentFillSize <= 0)
                 currentFillSize += ego->bufSize;
 
@@ -193,13 +193,13 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
                 relSeek -= ego->posRead;
 
             if (relSeek <= currentFillSize) { // we have everything we need in the buffer already
-                ego->a += relSeek;
+                ego->startIndex += relSeek;
                 ego->posRead += relSeek;
-                if (ego->a >= ego->bufSize)
-                    ego->a -= ego->bufSize;
-                if (ego->a == ego->b) {
+                if (ego->startIndex >= ego->bufSize)
+                    ego->startIndex -= ego->bufSize;
+                if (ego->startIndex == ego->endIndex) {
                     ego->empty = true;
-                    ego->a = ego->b = 0;
+                    ego->startIndex = ego->endIndex = 0;
                 }
                 /// \todo do we need to wait for initialFillSize again?
 
@@ -212,7 +212,7 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
         // but this should suffice for now
 
         if (ego->doSeek) { // seek not been processed yet
-            ego->a = ego->b = 0;
+            ego->startIndex = ego->endIndex = 0;
             ego->empty = true;
 
             // terminate this request, because we need a new request
@@ -229,20 +229,20 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
             return 0;
 
         if (ego->empty) {
-            ego->a = ego->b = 0;
+            ego->startIndex = ego->endIndex = 0;
             bufFree = ego->bufSize;
         } else {
-            bufFree = ego->a - ego->b;
+            bufFree = ego->startIndex - ego->endIndex;
             if (bufFree < 0)
                 bufFree += ego->bufSize;
         }
     } while (static_cast<std::size_t>(bufFree) < wantWrite);
 
-    std::size_t maxWrite = (ego->empty ? ego->bufSize : (ego->a < ego->b ? ego->bufSize - ego->b : ego->a - ego->b));
+    std::size_t maxWrite = (ego->empty ? ego->bufSize : (ego->startIndex < ego->endIndex ? ego->bufSize - ego->endIndex : ego->startIndex - ego->endIndex));
     std::size_t write1 = (wantWrite > maxWrite ? maxWrite : wantWrite);
     std::size_t write2 = (write1 < wantWrite ? wantWrite - write1 : 0);
 
-    std::size_t bLocal = ego->b;
+    std::size_t bLocal = ego->endIndex;
 
     lock.unlock();
 
@@ -255,15 +255,15 @@ std::size_t CurlIOHandler::curlCallback(void* ptr, std::size_t size, std::size_t
 #if 0
     ego->bytesCurl += wantWrite;
 #endif
-    ego->b += wantWrite;
-    if (ego->b >= ego->bufSize)
-        ego->b -= ego->bufSize;
+    ego->endIndex += wantWrite;
+    if (ego->endIndex >= ego->bufSize)
+        ego->endIndex -= ego->bufSize;
     if (ego->empty) {
         ego->empty = false;
         threadRunner->notify();
     }
     if (ego->waitForInitialFillSize) {
-        auto currentFillSize = static_cast<int>(ego->b - ego->a);
+        auto currentFillSize = static_cast<int>(ego->endIndex - ego->startIndex);
         if (currentFillSize <= 0)
             currentFillSize += ego->bufSize;
         if (static_cast<std::size_t>(currentFillSize) >= ego->initialFillSize) {

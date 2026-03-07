@@ -35,6 +35,7 @@
 #include "file_io_handler.h" // API
 
 #include "exceptions.h"
+#include "upnp/compat.h"
 #include "util/logger.h"
 
 FileIOHandler::FileIOHandler(const fs::path& filename)
@@ -62,9 +63,9 @@ grb_read_t FileIOHandler::read(std::byte* buf, std::size_t length)
     log_debug("read {} {}", file.getPath().string(), length);
     if (ret == 0) {
         if (std::feof(f))
-            return 0;
+            return GRB_READ_END;
         if (std::ferror(f))
-            return -1;
+            return GRB_READ_ERROR;
     }
 
     return ret;

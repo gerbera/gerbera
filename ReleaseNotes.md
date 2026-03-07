@@ -2,6 +2,8 @@
 
 ## HEAD
 
+After almost 10 years of dropping _Mediatomb_'s UPnP hack an issue with transcoding and other returns to libpupnp could be resolved.
+
 The config property `xmlns` was renamed to `xml-ns` for compliance reasons. Watch
 out for warnings `Found extra config file entry '/config/server/upnp/title-properties/upnp-namespace/attribute::xmlns'`.
 
@@ -14,13 +16,14 @@ out for warnings `Found extra config file entry '/config/server/upnp/title-prope
 
 ### FIXES
 
+- Timeouts in transcoding or other read errors leading to broken responses
 - LastFM with rest API
 - Configuration for FFmpeg stream data import to reduce import times
 
 ### Code Improvements
 
 - Remove prefix for location type in database
-- Update maximum versions of npupnp (6.2.3), cmake (4.2.3), pupnp (1.18.1), taglib (2.2), libexiv2 (0.28.8)
+- Update maximum versions of npupnp (6.2.3), cmake (4.2.3), pupnp (1.18.1), taglib (2.2.1), libexiv2 (0.28.8)
 
 ## v3.1.1
 

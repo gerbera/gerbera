@@ -805,17 +805,17 @@ int Server::ReadCallback(
 {
     log_debug("{} read({})", fileHandle, length);
     if (static_cast<const Server*>(cookie)->getShutdownStatus())
-        return -1;
+        return GRB_READ_ERROR;
     auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
     auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
     if (quirks && !quirks->isAllowed()) {
         auto clientIp = client && client->addr ? client->addr->getHostName() : "unknown";
         log_debug("Client blocked {}", clientIp);
-        return -1;
+        return GRB_READ_ERROR;
     }
 
     auto ioHandler = static_cast<IOHandler*>(fileHandle);
-    return ioHandler ? ioHandler->read(reinterpret_cast<std::byte*>(buf), length) : 0;
+    return ioHandler ? ioHandler->read(reinterpret_cast<std::byte*>(buf), length) : GRB_READ_END;
 }
 
 int Server::WriteCallback(
