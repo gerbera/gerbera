@@ -67,20 +67,20 @@ public:
 
 protected:
     std::shared_ptr<Config> config;
-    std::size_t bufSize;
-    std::size_t initialFillSize;
+
+    std::size_t bufSize { 0 };
+    std::size_t initialFillSize { 0 };
     std::byte* buffer {};
     bool isOpen {};
     bool eof {};
     bool readError {};
-    bool waitForInitialFillSize;
+    bool waitForInitialFillSize {};
     bool signalAfterEveryRead {};
-    bool checkSocket {};
 
     // buffer stuff..
     bool empty { true };
-    std::size_t a {};
-    std::size_t b {};
+    std::size_t startIndex {};
+    std::size_t endIndex {};
     off_t posRead {};
 
     // seek stuff...
@@ -89,12 +89,15 @@ protected:
     off_t seekOffset {};
     int seekWhence {};
 
-    // thread stuff..
+    /// @brief Startup
     void startBufferThread();
+    /// @brief Shutdown
     void stopBufferThread();
+    /// @brief Main thread loop
     virtual void threadProc() = 0;
-
+    /// @brief Thread holder
     std::unique_ptr<StdThreadRunner> threadRunner;
+    /// @brief Thread status
     bool threadShutdown {};
 };
 

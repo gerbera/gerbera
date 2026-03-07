@@ -4,6 +4,11 @@
 
 - Bump actions/upload-artifact from 6 to 7
 - Bump basic-ftp from 5.1.0 to 5.2.0 in /gerbera-web
+- Bump docker/build-push-action from 6 to 7
+- Bump docker/login-action from 3 to 4
+- Bump docker/metadata-action from 5 to 6
+- Bump docker/setup-buildx-action from 3 to 4
+- Bump docker/setup-qemu-action from 3 to 4
 - Bump lodash from 4.17.21 to 4.17.23 in /gerbera-web
 - Bump minimatch in /gerbera-web
 - Bump qs from 6.14.1 to 6.14.2 in /gerbera-web
@@ -20,11 +25,12 @@
 - Show changed items in UI
 - Split off Database Migrations
 - Threading and Transcoding with better configuration
-- Update npm and web ui tests
 - Update libexiv2 to 0.28.8
+- Update npm and web ui tests
 - Update npupnp to 6.2.3
 - Update to pupnp 1.18.1
-- Upgrade to taglib 2.2 with new file type and filtering
+- Upgrade broken check-socket stuff
+- Upgrade to taglib 2.2.1 with new file type and filtering
 - Use entry_type instead of location prefix
 - xsd improvement
 

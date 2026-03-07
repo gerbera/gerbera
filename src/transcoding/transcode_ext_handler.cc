@@ -63,26 +63,6 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(const std::sha
     if (!profile)
         throw_std_runtime_error("Transcoding of file {} requested but no profile given", location.c_str());
 
-#if 0
-    std::string mimeType = profile->getTargetMimeType();
-    if (obj->isItem()) {
-        auto item = std::static_pointer_cast<CdsItem>(obj);
-        auto mappings = config->getDictionaryOption(
-            ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
-
-        if (getValueOrDefault(mappings, mimeType) == CONTENT_TYPE_PCM) {
-            auto res = obj->getResource(ContentHandler::DEFAULT);
-            std::string freq = res->getAttribute(ResourceAttribute::SAMPLEFREQUENCY));
-            std::string nrch = res->getAttribute(ResourceAttribute::NRAUDIOCHANNELS));
-
-            if (!freq.empty())
-                mimeType = mimeType + ";rate=" + freq;
-            if (!nrch.empty())
-                mimeType = mimeType + ";channels=" + nrch;
-        }
-    }
-#endif
-
     std::vector<ProcListItem> procList;
     fs::path inLocation = location;
 

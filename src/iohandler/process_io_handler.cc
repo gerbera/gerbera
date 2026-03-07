@@ -36,9 +36,11 @@
 
 #include "content/content.h"
 #include "exceptions.h"
+#include "upnp/compat.h"
 
 #include <algorithm>
 #include <csignal>
+#include <deque>
 #include <fcntl.h>
 #include <sys/select.h>
 #include <unistd.h>
@@ -160,16 +162,51 @@ void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
     }
 }
 
+/// @brief check if writing to the socket is possible
+static bool isSocketReadable(int sockfd, long to_val)
+{
+    fd_set readSet;
+    fd_set exceptSet;
+    struct timeval timeout;
+
+    FD_ZERO(&readSet);
+    FD_ZERO(&exceptSet);
+    FD_SET(sockfd, &readSet);
+    FD_SET(sockfd, &exceptSet);
+
+    timeout.tv_sec = to_val;
+    timeout.tv_usec = 0;
+
+    int retCode = select(sockfd + 1, &readSet, NULL, &exceptSet, &timeout);
+
+    if (FD_ISSET(sockfd, &readSet) || FD_ISSET(sockfd, &exceptSet)) {
+        return true;
+    }
+
+    if (retCode == 0) { // timeout or fd ready for writing
+        log_debug("timeout {}", sockfd);
+        return false;
+    }
+
+    if (retCode == -1 && errno == EINTR) {
+        log_debug("error {}", sockfd);
+        return false;
+    }
+
+    return true;
+}
+
 grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
 {
     std::lock_guard<std::mutex> lock(mutex);
 
     fd_set readSet;
     struct timespec requestTimeout = { timeout.count(), 0 };
+    std::deque<long> fibonaccis = { 2, 3 };
     std::size_t numBytes = 0;
     auto pBuffer = buf;
     int exitStatus = EXIT_SUCCESS;
-    int ret;
+    int ret = GRB_READ_ERROR;
     unsigned int timeoutCount = 0;
 
     while (true) {
@@ -177,7 +214,7 @@ grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
         FD_SET(fd, &readSet);
 
         ret = pselect(fd + 1, &readSet, nullptr, nullptr, &requestTimeout, nullptr);
-        if ((ret == -1) && (errno == EINTR))
+        if (ret == -1 && errno == EINTR)
             continue;
 
         // timeout
@@ -189,24 +226,35 @@ grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
                         exitStatus = mainProc->getStatus();
                         log_debug("process exited with status {}", exitStatus);
                         killAll();
-                        return (exitStatus == EXIT_SUCCESS) ? 0 : -1;
+                        return (exitStatus == EXIT_SUCCESS) ? GRB_READ_END : GRB_READ_ERROR;
                     }
                     mainProc->kill();
                     killAll();
-                    return -1;
+                    return GRB_READ_ERROR;
                 }
             } else {
                 killAll();
-                return 0;
+                return GRB_READ_END;
             }
 
             timeoutCount++;
+            requestTimeout.tv_sec = timeout.count() * fibonaccis.front();
+            fibonaccis.push_back(fibonaccis.front() + fibonaccis.back());
+            fibonaccis.pop_front();
+            log_info("Socket timeout adjusted to {}", requestTimeout.tv_sec);
             if (timeoutCount > retryCount) {
-                // after MAX_TIMEOUTS we will tell libupnp to check the socket,
+                // after retryCount we will check the socket,
                 // this will make sure that we do not block the read and allow libupnp to
                 // call our close() callback
                 log_debug("max timeouts {}, checking socket!", retryCount);
-                return CHECK_SOCKET;
+                if (!isSocketReadable(fd, requestTimeout.tv_sec)) {
+                    log_debug("socket broken aborting read!!!");
+                    mainProc->kill();
+                    killAll();
+                    return GRB_READ_ERROR;
+                }
+                timeoutCount = 0;
+                continue;
             }
         }
 
@@ -218,7 +266,7 @@ grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
 
             if (bytesRead < 0) {
                 log_debug("aborting read!!!");
-                return -1;
+                return GRB_READ_ERROR;
             }
 
             numBytes = numBytes + bytesRead;
@@ -234,20 +282,20 @@ grb_read_t ProcessIOHandler::read(std::byte* buf, std::size_t length)
     if (numBytes == 0) {
         // not sure what we return here since no way of knowing about feof
         // actually that will depend on the ret code of the process
-        ret = -1;
+        ret = GRB_READ_ERROR;
 
         if (mainProc) {
             if (mainProc->isAlive())
                 mainProc->kill();
             if (mainProc->getStatus() == EXIT_SUCCESS)
-                ret = 0;
+                ret = GRB_READ_END;
         } else
-            ret = 0;
+            ret = GRB_READ_END;
 
         killAll();
         return ret;
     }
-
+    timeout = std::chrono::seconds(requestTimeout.tv_sec);
     return numBytes;
 }
 
