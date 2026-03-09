@@ -62,7 +62,7 @@ jobs:
           fetch-depth: 0 # We need history/tags to generate version info
 
       - name: Set up QEMU
-        uses: docker/setup-qemu-action@v3
+        uses: docker/setup-qemu-action@v4
 
       - name: Build and upload deb
         env:
