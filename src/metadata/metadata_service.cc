@@ -166,7 +166,7 @@ bool MetadataService::extractMetaData(
     std::string contentType = getValueOrDefault(mappings, mimetype);
     bool isOggTheora = false;
     if ((contentType == CONTENT_TYPE_OGG) && (isTheora(item->getLocation()))) {
-        item->setFlag(OBJECT_FLAG_OGG_THEORA);
+        item->setFlag(ObjectFlag::OggTheora);
         isOggTheora = true;
     }
 

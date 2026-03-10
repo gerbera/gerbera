@@ -541,7 +541,9 @@ static std::shared_ptr<CdsContainer> setDefaultContainer(
     auto container = std::make_shared<CdsContainer>(title);
     container->setSortKey(sortKey);
     container->setClass(upnpClass);
-    container->setFlags(OBJECT_FLAG_PERSISTENT_CONTAINER | OBJECT_FLAG_RESTRICTED);
+    container->resetFlags();
+    container->setFlag(ObjectFlag::PersistentContainer);
+    container->setFlag(ObjectFlag::Restricted);
     return container;
 }
 
@@ -551,7 +553,9 @@ void SQLDatabase::fillDatabase()
     constexpr int nullID = -1;
     auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST);
     auto nullObject = std::make_shared<CdsObject>(CdsEntryType::Root);
-    nullObject->setFlags(OBJECT_FLAG_PERSISTENT_CONTAINER | OBJECT_FLAG_RESTRICTED);
+    nullObject->resetFlags();
+    nullObject->setFlag(ObjectFlag::PersistentContainer);
+    nullObject->setFlag(ObjectFlag::Restricted);
     nullObject->setID(nullID);
     nullObject->setParentID(nullID);
 
@@ -710,7 +714,7 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
 {
     std::shared_ptr<CdsObject> refObj;
     bool hasReference = false;
-    bool playlistRef = obj->getFlag(OBJECT_FLAG_PLAYLIST_REF);
+    bool playlistRef = obj->hasFlag(ObjectFlag::PlaylistReference);
     if (playlistRef) {
         if (obj->isPureItem())
             throw DatabaseException("Tried to add pure item with PLAYLIST_REF flag set", LINE_MESSAGE);
@@ -726,7 +730,7 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
         if (!refObj)
             throw DatabaseException("Tried to add or update a virtual object with illegal reference id and an illegal location", LINE_MESSAGE);
     } else if (obj->getRefID() > 0) {
-        if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
+        if (obj->hasFlag(ObjectFlag::OnlineService)) {
             hasReference = true;
             refObj = loadObject(obj->getRefID());
             if (!refObj)
@@ -764,8 +768,8 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
         cdsObjectSql.insert_or_assign(BrowseColumn::Auxdata, quote(URLUtils::dictEncode(auxData)));
     }
 
-    const bool useResourceRef = obj->getFlag(OBJECT_FLAG_USE_RESOURCE_REF);
-    obj->clearFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+    const bool useResourceRef = obj->hasFlag(ObjectFlag::UseResourceReference);
+    obj->clearFlag(ObjectFlag::UseResourceReference);
     cdsObjectSql.emplace(BrowseColumn::Flags, quote(obj->getFlags()));
 
     if (obj->getMTime() > std::chrono::seconds::zero()) {
@@ -1256,7 +1260,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
     }
     if (param.getSearchableContainers()) {
         searchSQL.append(fmt::format(" AND ({0} & {1} = {1} OR {2} != {3})",
-            searchColumnMapper->mapQuoted(SearchColumn::Flags), OBJECT_FLAG_SEARCHABLE, searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_CONTAINER));
+            searchColumnMapper->mapQuoted(SearchColumn::Flags), CdsObject::getFlag(ObjectFlag::Searchable), searchColumnMapper->mapQuoted(SearchColumn::ObjectType), OBJECT_TYPE_CONTAINER));
     }
 
     const auto forbiddenDirectories = param.getForbiddenDirectories();
@@ -1534,7 +1538,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
     if (!err.empty()) {
         log_warning("{}: {}", path.filename().string(), err);
     }
-    return createContainer(parentID, mval, path, OBJECT_FLAG_RESTRICTED, false, "", INVALID_OBJECT_ID, ObjectSource::Import, itemMetadata);
+    return createContainer(parentID, mval, path, CdsObject::getFlag(ObjectFlag::Restricted), false, "", INVALID_OBJECT_ID, ObjectSource::Import, itemMetadata);
 }
 
 int SQLDatabase::createContainer(
@@ -1683,7 +1687,7 @@ bool SQLDatabase::addContainer(
     auto where = std::vector {
         browseColumnMapper->getClause(BrowseColumn::EntryType, quote(int(cont->getEntryType())), true),
         browseColumnMapper->getClause(BrowseColumn::Location, quote(virtualPath), true),
-        browseColumnMapper->getClause(BrowseColumn::LocationHash, quote(stringHash(virtualPath)), true)
+        browseColumnMapper->getClause(BrowseColumn::LocationHash, quote(stringHash(virtualPath)), true),
     };
     auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
         browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
@@ -1705,7 +1709,10 @@ bool SQLDatabase::addContainer(
     if (cont->getMetaData(MetadataFields::M_DATE).empty())
         cont->addMetaData(MetadataFields::M_DATE, grbLocaltime("{:%FT%T%z}", cont->getMTime()));
 
-    *containerID = createContainer(parentContainerId, cont->getTitle(), virtualPath, cont->getFlags(), cont->isVirtual(), cont->getClass(), cont->getFlag(OBJECT_FLAG_PLAYLIST_REF) ? cont->getRefID() : INVALID_OBJECT_ID, cont->getSource(), cont->getMetaData(), cont->getResources());
+    *containerID = createContainer(parentContainerId,
+        cont->getTitle(), virtualPath, cont->getFlags(), cont->isVirtual(), cont->getClass(),
+        cont->hasFlag(ObjectFlag::PlaylistReference) ? cont->getRefID() : INVALID_OBJECT_ID,
+        cont->getSource(), cont->getMetaData(), cont->getResources());
     return true;
 }
 
@@ -2400,6 +2407,7 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
 
     bool again;
     int count = 0;
+    static const auto OBJECT_FLAG_PERSISTENT_CONTAINER = CdsObject::getFlag(ObjectFlag::PersistentContainer);
     do {
         again = false;
 
@@ -3018,6 +3026,7 @@ void SQLDatabase::_autoscanChangePersistentFlag(int objectID, bool persistent)
         log_warning("cannot change autoscan to persistent {} with illegal ID", persistent);
         return;
     }
+    static const auto OBJECT_FLAG_PERSISTENT_CONTAINER = CdsObject::getFlag(ObjectFlag::PersistentContainer);
     auto dict = std::map<BrowseColumn, std::string> {
         { BrowseColumn::Id, quote(objectID) },
         { BrowseColumn::Flags, fmt::format("({} {}{})", browseColumnMapper->mapQuoted(BrowseColumn::Flags, true), (persistent ? " | " : " & ~"), OBJECT_FLAG_PERSISTENT_CONTAINER) }

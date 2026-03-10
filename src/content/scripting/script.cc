@@ -901,10 +901,10 @@ void Script::cdsObject2dukObject(const std::shared_ptr<CdsObject>& obj)
     setIntProperty("flags", obj->getFlags());
 
     setBoolProperty("restricted", obj->isRestricted());
-    setBoolProperty("theora", obj->getFlag(OBJECT_FLAG_OGG_THEORA));
+    setBoolProperty("theora", obj->hasFlag(ObjectFlag::OggTheora));
 
 #ifdef ONLINE_SERVICES
-    if (obj->getFlag(OBJECT_FLAG_ONLINE_SERVICE)) {
+    if (obj->hasFlag(ObjectFlag::OnlineService)) {
         auto service = OnlineServiceType(std::stoi(obj->getAuxData(ONLINE_SERVICE_AUX_ID)));
         setIntProperty("onlineservice", static_cast<int>(service));
     } else

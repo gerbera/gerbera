@@ -115,14 +115,19 @@ bool CdsObject::isSubClass(const std::string& cls) const
     return startswith(upnpClass, cls);
 }
 
+std::string CdsObject::getAuxData(const std::string& key) const
+{
+    return getValueOrDefault(auxdata, key);
+}
+
 ObjectType CdsObject::getMediaType(const std::string& contentType) const
 {
 #ifdef ONLINE_SERVICES
-    if (getFlag(OBJECT_FLAG_ONLINE_SERVICE) && isExternalItem())
+    if (hasFlag(ObjectFlag::OnlineService) && isExternalItem())
         return ObjectType::OnlineService;
 #endif
     if (contentType == CONTENT_TYPE_OGG) {
-        return (getFlag(OBJECT_FLAG_OGG_THEORA)) ? ObjectType::Video : ObjectType::Audio;
+        return (hasFlag(ObjectFlag::OggTheora)) ? ObjectType::Video : ObjectType::Audio;
     }
     if (contentType == CONTENT_TYPE_PLAYLIST)
         return ObjectType::Playlist;
@@ -227,25 +232,27 @@ unsigned int CdsObject::remapObjectType(const std::string& type)
     return 0;
 }
 
-static constexpr std::array upnpFlags {
-    std::pair("Restricted", OBJECT_FLAG_RESTRICTED),
-    std::pair("Searchable", OBJECT_FLAG_SEARCHABLE),
-    std::pair("UseResourceRef", OBJECT_FLAG_USE_RESOURCE_REF),
-    std::pair("PersistentContainer", OBJECT_FLAG_PERSISTENT_CONTAINER),
-    std::pair("PlaylistRef", OBJECT_FLAG_PLAYLIST_REF),
-    std::pair("ProxyUrl", OBJECT_FLAG_PROXY_URL),
-    std::pair("OnlineService", OBJECT_FLAG_ONLINE_SERVICE),
-    std::pair("OggTheora", OBJECT_FLAG_OGG_THEORA),
+static constexpr std::array upnpObjectFlags {
+    std::pair("None", ObjectFlag::None),
+    std::pair("Restricted", ObjectFlag::Restricted),
+    std::pair("Searchable", ObjectFlag::Searchable),
+    std::pair("UseResourceRef", ObjectFlag::UseResourceReference),
+    std::pair("PersistentContainer", ObjectFlag::PersistentContainer),
+    std::pair("PlaylistRef", ObjectFlag::PlaylistReference),
+    std::pair("ProxyUrl", ObjectFlag::ProxyUrl),
+    std::pair("OnlineService", ObjectFlag::OnlineService),
+    std::pair("OggTheora", ObjectFlag::OggTheora),
 };
 
-std::string CdsObject::mapFlags(int flags)
+std::string CdsObject::mapFlags(unsigned int flags)
 {
     if (!flags)
-        return "None";
+        return upnpObjectFlags.front().first;
 
     std::vector<std::string> myFlags;
 
-    for (auto [uLabel, uFlag] : upnpFlags) {
+    for (auto [uLabel, bit] : upnpObjectFlags) {
+        auto uFlag = 1U << to_underlying(bit);
         if (flags & uFlag) {
             myFlags.emplace_back(uLabel);
             flags &= ~uFlag;
@@ -259,14 +266,42 @@ std::string CdsObject::mapFlags(int flags)
     return fmt::format("{}", fmt::join(myFlags, " | "));
 }
 
-int CdsObject::remapFlags(const std::string& flag)
+std::string CdsObject::mapFlag(ObjectFlag flag)
 {
-    for (auto [uLabel, uFlag] : upnpFlags) {
-        if (toLower(uLabel) == toLower(flag)) {
-            return uFlag;
+    for (auto [uLabel, bit] : upnpObjectFlags) {
+        if (flag == bit) {
+            return uLabel;
         }
     }
-    return stoiString(flag, 0, 0);
+
+    return upnpObjectFlags.front().first;
+}
+
+unsigned int CdsObject::getFlag(ObjectFlag flag)
+{
+    if (flag == ObjectFlag::None)
+        return 0;
+
+    return 1U << to_underlying(flag);
+}
+
+unsigned int CdsObject::remapFlags(const std::string& flag)
+{
+    if (toLower(flag) == toLower(upnpObjectFlags.front().first))
+        return 0;
+
+    for (auto [uLabel, bit] : upnpObjectFlags) {
+        if (toLower(uLabel) == toLower(flag)) {
+            return 1U << to_underlying(bit);
+        }
+    }
+    return stoulString(flag, 0, 0);
+}
+
+unsigned int CdsObject::makeFlag(const std::string& optValue)
+{
+    std::vector<std::string> flagsVector = splitString(optValue, '|');
+    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0U, [](auto flg, auto&& i) { return flg | CdsObject::remapFlags(trimString(i)); });
 }
 
 static const auto sourceNames = std::map<ObjectSource, const char*> {
@@ -288,16 +323,4 @@ ObjectSource CdsObject::remapSource(const std::string& source)
         }
     }
     return ObjectSource::User;
-}
-
-/// @brief Query single auxdata value.
-std::string CdsObject::getAuxData(const std::string& key) const
-{
-    return getValueOrDefault(auxdata, key);
-}
-
-int CdsObject::makeFlag(const std::string& optValue)
-{
-    std::vector<std::string> flagsVector = splitString(optValue, '|');
-    return std::accumulate(flagsVector.begin(), flagsVector.end(), 0, [](auto flg, auto&& i) { return flg | CdsObject::remapFlags(trimString(i)); });
 }

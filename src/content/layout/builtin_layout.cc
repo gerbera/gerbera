@@ -92,7 +92,7 @@ int BuiltinLayout::add(
 {
     obj->setParentID(parentID.first);
     if (useRef)
-        obj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+        obj->setFlag(ObjectFlag::UseResourceReference);
     obj->setID(INVALID_OBJECT_ID);
 
     content->addObject(obj, parentID.second);

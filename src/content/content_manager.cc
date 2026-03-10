@@ -1063,7 +1063,7 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
     if (!flags.empty())
         clone->setFlags(CdsObject::makeFlag(flags));
     else
-        clone->clearFlag(cont->getFlags());
+        clone->resetFlags();
 
     auto clonedItem = std::static_pointer_cast<CdsContainer>(clone);
 
@@ -1109,7 +1109,7 @@ std::shared_ptr<CdsObject> ContentManager::updateCdsObject(
     if (!flags.empty())
         clone->setFlags(CdsObject::makeFlag(flags));
     else
-        clone->clearFlag(item->getFlags());
+        clone->resetFlags();
 
     auto clonedItem = std::static_pointer_cast<CdsItem>(clone);
 

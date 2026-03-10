@@ -80,7 +80,7 @@ sudo make install
 | [ffmpegthumbnailer] | 2.1.1        | 2.2.3        | 2.3.0                | Optional      | Generate video/image thumbnails  | Disabled |
 | [libsystemd]        | 237          | 254          | 257                  | Optional      | Interact with systemd            | Disabled |
 | inotify             |              |              |                      | Optional      | Efficient file monitoring        | Enabled  |
-| [libzippp]          | v7.1-g8992d6 | v7.1-g8992d6 | v7.1-g8992d6         | Optional      | ZIP Package download             | Enabled  |
+| [libzippp]          | v7.1-g8992d6 | v7.1-g8992d6 | v7.1-gd4a60d         | Optional      | ZIP Package download             | Enabled  |
 | [libzip]            | 1.10.1       | 1.11.4       | 1.11.4               | Optional      | Required for [libzippp]          | Enabled  |
 
 ## Development Dependencies

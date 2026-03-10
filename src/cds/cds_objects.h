@@ -113,7 +113,7 @@ protected:
     unsigned int objectType { 0 };
 
     /// @brief field which can hold various flags for the object
-    unsigned int objectFlags { OBJECT_FLAG_RESTRICTED };
+    unsigned int objectFlags { getFlag(ObjectFlag::Restricted) };
 
     /// @brief property that allows to sort objects within a container
     std::string sortKey;
@@ -174,9 +174,9 @@ public:
     int getParentID() const { return parentID; }
 
     /// @brief Set the restricted flag.
-    void setRestricted(bool restricted) { changeFlag(OBJECT_FLAG_RESTRICTED, restricted); }
+    void setRestricted(bool restricted) { changeFlag(ObjectFlag::Restricted, restricted); }
     /// @brief Query the restricted flag.
-    bool isRestricted() const { return getFlag(OBJECT_FLAG_RESTRICTED); }
+    bool isRestricted() const { return hasFlag(ObjectFlag::Restricted); }
 
     /// @brief Set the object title (dc:title)
     void setTitle(const std::string& title)
@@ -257,26 +257,29 @@ public:
     /// @brief Get flags of an object.
     unsigned int getFlags() const { return objectFlags; }
 
-    /// @brief Get a flag of an object.
-    unsigned int getFlag(unsigned int mask) const { return objectFlags & mask; }
-
     /// @brief Set flags for the object.
     void setFlags(unsigned int objectFlags) { this->objectFlags = objectFlags; }
 
-    /// @brief Set a flag of the object.
-    void setFlag(unsigned int mask) { objectFlags |= mask; }
+    /// @brief Get a flag of an object.
+    bool hasFlag(ObjectFlag flag) const { return objectFlags & getFlag(flag); }
+
+    /// @brief Reset flags for the object.
+    void resetFlags() { this->objectFlags = 0; }
 
     /// @brief Set a flag of the object.
-    void changeFlag(unsigned int mask, bool value)
+    void setFlag(ObjectFlag flag) { objectFlags |= getFlag(flag); }
+
+    /// @brief Set a flag of the object.
+    void changeFlag(ObjectFlag flag, bool value)
     {
         if (value)
-            setFlag(mask);
+            setFlag(flag);
         else
-            clearFlag(mask);
+            clearFlag(flag);
     }
 
     /// @brief Clears a flag of the object.
-    void clearFlag(unsigned int mask) { objectFlags &= ~mask; }
+    void clearFlag(ObjectFlag flag) { objectFlags &= ~(getFlag(flag)); }
 
     /// @brief Query single metadata value.
     std::string getMetaData(MetadataFields key) const
@@ -477,9 +480,11 @@ public:
     static std::string mapEntryType(CdsEntryType type);
     static CdsEntryType remapEntryType(const std::string& type);
 
-    static std::string mapFlags(int flag);
-    static int remapFlags(const std::string& flag);
-    static int makeFlag(const std::string& optValue);
+    static std::string mapFlags(unsigned int flags);
+    static std::string mapFlag(ObjectFlag flag);
+    static unsigned int remapFlags(const std::string& flag);
+    static unsigned int makeFlag(const std::string& optValue);
+    static unsigned int getFlag(ObjectFlag flag);
 
     static std::string mapSource(ObjectSource source);
     static ObjectSource remapSource(const std::string& source);

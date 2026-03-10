@@ -63,6 +63,7 @@ LastFmScrobbler::LastFmScrobbler(const std::string& apiKey, const std::string& a
         scrobbleThread.join();
 }
 
+/// @see https://www.last.fm/api/rest
 void LastFmScrobbler::authenticate()
 {
     if (apiKey.empty())

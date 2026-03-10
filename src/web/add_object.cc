@@ -90,7 +90,7 @@ std::shared_ptr<CdsItem> Web::AddObject::addItem(
     if (!flags.empty())
         item->setFlags(CdsObject::makeFlag(flags));
 
-    item->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+    item->setFlag(ObjectFlag::UseResourceReference);
 
     return item;
 }

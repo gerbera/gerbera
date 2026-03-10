@@ -516,7 +516,7 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToExternalUrlWhenWithProxy)
     auto obj = std::make_shared<CdsItemExternalURL>();
     obj->setURL("http://localhost/external/url");
     obj->setID(12345);
-    obj->setFlag(OBJECT_FLAG_PROXY_URL);
+    obj->setFlag(ObjectFlag::ProxyUrl);
 
     auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
     resource->addAttribute(ResourceAttribute::DURATION, "123456");
