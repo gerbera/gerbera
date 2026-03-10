@@ -61,10 +61,10 @@ public:
     }
 
     /// @brief Set the searchable flag.
-    void setSearchable(bool searchable) { changeFlag(OBJECT_FLAG_SEARCHABLE, searchable); }
+    void setSearchable(bool searchable) { changeFlag(ObjectFlag::Searchable, searchable); }
 
     /// @brief Query searchable flag.
-    int isSearchable() const { return getFlag(OBJECT_FLAG_SEARCHABLE); }
+    bool isSearchable() const { return hasFlag(ObjectFlag::Searchable); }
 
     /// @brief Set the container update ID value.
     void setUpdateID(int updateID) { this->updateID = updateID; }

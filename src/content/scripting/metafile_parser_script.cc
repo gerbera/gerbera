@@ -116,7 +116,7 @@ bool MetafileParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
 {
     if (!cdsObj->isExternalItem()) {
         cdsObj->setRefID(origObject->getID());
-        cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+        cdsObj->setFlag(ObjectFlag::UseResourceReference);
     }
     return true;
 }

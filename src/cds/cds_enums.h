@@ -51,14 +51,19 @@ static constexpr bool IS_CDS_ITEM_EXTERNAL_URL(unsigned int type)
     return type & OBJECT_TYPE_ITEM_EXTERNAL_URL;
 }
 
-#define OBJECT_FLAG_RESTRICTED 0x00000001u
-#define OBJECT_FLAG_SEARCHABLE 0x00000002u
-#define OBJECT_FLAG_USE_RESOURCE_REF 0x00000004u
-#define OBJECT_FLAG_PERSISTENT_CONTAINER 0x00000008u
-#define OBJECT_FLAG_PLAYLIST_REF 0x00000010u
-#define OBJECT_FLAG_PROXY_URL 0x00000020u
-#define OBJECT_FLAG_ONLINE_SERVICE 0x00000040u
-#define OBJECT_FLAG_OGG_THEORA 0x00000080u
+/// @brief mulitple flags for CdsObject stored in one column
+/// enum values must be kept even if flag is deleted
+enum class ObjectFlag : int {
+    None = -1,
+    Restricted = 0,
+    Searchable = 1,
+    UseResourceReference = 2,
+    PersistentContainer = 3,
+    PlaylistReference = 4,
+    ProxyUrl = 5,
+    OnlineService = 6,
+    OggTheora = 7,
+};
 
 enum class AutoscanType : int {
     None = 0,

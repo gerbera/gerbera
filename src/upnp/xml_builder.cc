@@ -635,21 +635,22 @@ std::string UpnpXMLBuilder::renderResourceURL(
             url = mediaContentBuilder.buildUrl(virtualURL, objID, resID);
         }
     } else if (item.isExternalItem()) {
+        auto hasProxyUrl = item.hasFlag(ObjectFlag::ProxyUrl);
         if (purpose == ResourcePurpose::Content) {
             // Remote URL is just passed straight out
             // FIXME: OBJECT_FLAG_PROXY_URL and location should be on the resource not the item!
-            if (!item.getFlag(OBJECT_FLAG_PROXY_URL)) {
+            if (!hasProxyUrl) {
                 return item.getLocation();
             }
 
             // Proxied remote URL
-            if (item.getFlag(OBJECT_FLAG_PROXY_URL)) {
+            if (hasProxyUrl) {
                 url = onlineContentBuilder.buildUrl(virtualURL, item.getID(), res.getResId());
             }
         } else if (purpose == ResourcePurpose::Transcode) {
             // Transcoded resources dont set a resId, uses pr_name from params instead.
             url = onlineContentBuilder.buildUrl(virtualURL, item.getID());
-        } else if (purpose == ResourcePurpose::Thumbnail && res.getHandlerType() == ContentHandler::EXTURL && !item.getFlag(OBJECT_FLAG_PROXY_URL)) {
+        } else if (purpose == ResourcePurpose::Thumbnail && res.getHandlerType() == ContentHandler::EXTURL && !hasProxyUrl) {
             url = res.getAttribute(ResourceAttribute::RESOURCE_FILE);
             if (url.empty())
                 throw_std_runtime_error("Missing attribute thumbnail URL");
@@ -974,7 +975,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
             }
 
             if (ct == CONTENT_TYPE_OGG) {
-                if ((item->getFlag(OBJECT_FLAG_OGG_THEORA) && !tp->isTheora()) || (!item->getFlag(OBJECT_FLAG_OGG_THEORA) && tp->isTheora())) {
+                if ((item->hasFlag(ObjectFlag::OggTheora) && !tp->isTheora()) || (!item->hasFlag(ObjectFlag::OggTheora) && tp->isTheora())) {
                     continue;
                 }
             } else if (ct == CONTENT_TYPE_AVI) {
@@ -1079,7 +1080,7 @@ void UpnpXMLBuilder::addResources(
     const std::vector<std::string>& filter,
     const std::shared_ptr<Quirks>& quirks) const
 {
-    bool isExternalURL = (item->isExternalItem() && !item->getFlag(OBJECT_FLAG_PROXY_URL));
+    bool isExternalURL = (item->isExternalItem() && !item->hasFlag(ObjectFlag::ProxyUrl));
 
     auto orderedResources = getOrderedResources(*item);
 

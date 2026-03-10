@@ -107,10 +107,10 @@ bool PlaylistParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
         }
         if (cdsObj->getID() != pcdId) {
             cdsObj->setRefID(pcdId);
-            cdsObj->setFlag(OBJECT_FLAG_USE_RESOURCE_REF);
+            cdsObj->setFlag(ObjectFlag::UseResourceReference);
         }
     } else if (config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS)) {
-        cdsObj->setFlag(OBJECT_FLAG_PLAYLIST_REF);
+        cdsObj->setFlag(ObjectFlag::PlaylistReference);
         cdsObj->setRefID(origObject->getID());
     }
     return true;
@@ -119,7 +119,7 @@ bool PlaylistParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
 void PlaylistParserScript::handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont)
 {
     if (config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS) && cont->getRefID() > 0) {
-        cont->setFlag(OBJECT_FLAG_PLAYLIST_REF);
+        cont->setFlag(ObjectFlag::PlaylistReference);
     }
 }
 

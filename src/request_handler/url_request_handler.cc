@@ -79,7 +79,7 @@ bool URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
         UpnpFileInfo_set_FileLength(info, -1);
     } else {
 #ifdef ONLINE_SERVICES
-        std::string url = item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
+        std::string url = item->hasFlag(ObjectFlag::OnlineService) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
 #else
         std::string url = item->getLocation().string();
 #endif
@@ -122,7 +122,7 @@ std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, const s
 
     auto item = std::static_pointer_cast<CdsItemExternalURL>(obj);
 #ifdef ONLINE_SERVICES
-    std::string url = item->getFlag(OBJECT_FLAG_ONLINE_SERVICE) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
+    std::string url = item->hasFlag(ObjectFlag::OnlineService) ? OnlineServiceHelper::resolveURL(item) : item->getLocation().string();
 #else
     std::string url = item->getLocation().string();
 #endif

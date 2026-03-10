@@ -101,7 +101,7 @@ bool Web::Containers::processPageAction(Json::Value& element, const std::string&
 #endif
         ce["autoscan_type"] = mapAutoscanType(autoscanType);
         ce["autoscan_mode"] = autoscanMode;
-        ce["persistent"] = cont->getFlags() & OBJECT_FLAG_PERSISTENT_CONTAINER ? true : false;
+        ce["persistent"] = cont->hasFlag(ObjectFlag::PersistentContainer);
         ce["title"] = cont->getTitle();
         ce["location"] = cont->getLocation().string();
         ce["upnp_shortcut"] = cont->getUpnpShortcut();
