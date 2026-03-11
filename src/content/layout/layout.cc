@@ -47,6 +47,7 @@ void Layout::processCdsObject(const std::shared_ptr<CdsObject>& obj,
     log_debug("Process CDS Object: {}", obj->getTitle());
     auto clone = CdsObject::createObject(obj->getObjectType());
     obj->copyTo(clone);
+    clone->setEntryType(obj->isItem() ? CdsEntryType::VirtualItem : CdsEntryType::VirtualContainer);
     clone->setVirtual(true);
 
     std::vector<int> resObjects;
