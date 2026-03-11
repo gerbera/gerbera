@@ -26,6 +26,7 @@
 - Show changed items in UI
 - Split off Database Migrations
 - Threading and Transcoding with better configuration
+- Update cxxopts to 3.3.1
 - Update libexiv2 to 0.28.8
 - Update npm and web ui tests
 - Update npupnp to 6.2.3

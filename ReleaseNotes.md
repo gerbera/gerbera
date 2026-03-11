@@ -24,7 +24,7 @@ out for warnings `Found extra config file entry '/config/server/upnp/title-prope
 
 - Remove prefix for location type in database
 - Object Flags refactored to enum
-- Update maximum versions of npupnp (6.2.3), cmake (4.2.3), pupnp (1.18.2), taglib (2.2.1), libexiv2 (0.28.8)
+- Update maximum versions of npupnp (6.2.3), cmake (4.2.3), pupnp (1.18.2), taglib (2.2.1), libexiv2 (0.28.8), cxxopts (3.3.1)
 
 ## v3.1.1
 

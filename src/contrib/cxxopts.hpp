@@ -27,6 +27,7 @@ THE SOFTWARE.
 #ifndef CXXOPTS_HPP_INCLUDED
 #define CXXOPTS_HPP_INCLUDED
 
+#include <cstdint>
 #include <cstdlib>
 #include <cstring>
 #include <exception>
@@ -72,6 +73,12 @@ THE SOFTWARE.
 #      define CXXOPTS_HAS_OPTIONAL
 #    endif
 #  endif
+#  if __has_include(<filesystem>)
+#    include <filesystem>
+#    ifdef __cpp_lib_filesystem
+#      define CXXOPTS_HAS_FILESYSTEM
+#    endif
+#  endif
 #endif
 
 #define CXXOPTS_FALLTHROUGH
@@ -93,7 +100,7 @@ THE SOFTWARE.
 #endif
 
 #define CXXOPTS__VERSION_MAJOR 3
-#define CXXOPTS__VERSION_MINOR 2
+#define CXXOPTS__VERSION_MINOR 3
 #define CXXOPTS__VERSION_PATCH 1
 
 #if (__GNUC__ < 10 || (__GNUC__ == 10 && __GNUC_MINOR__ < 1)) && __GNUC__ >= 6
@@ -1073,6 +1080,15 @@ parse_value(const std::string& text, std::optional<T>& value)
 }
 #endif
 
+#ifdef CXXOPTS_HAS_FILESYSTEM
+inline
+void
+parse_value(const std::string& text, std::filesystem::path& value)
+{
+  value.assign(text);
+}
+#endif
+
 inline
 void parse_value(const std::string& text, char& c)
 {
@@ -1740,6 +1756,12 @@ CXXOPTS_DIAGNOSTIC_POP
     }
 
     return viter->second.count();
+  }
+
+  bool
+  contains(const std::string& o) const
+  {
+    return static_cast<bool>(count(o));
   }
 
   const OptionValue&

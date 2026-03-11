@@ -624,6 +624,9 @@ target_link_libraries(libgerbera PUBLIC pugixml::pugixml)
 find_package(SQLite3 3.7.11 REQUIRED)
 target_link_libraries(libgerbera PUBLIC SQLite::SQLite3)
 
+find_package(cxxopts 3.2.0 REQUIRED)
+target_include_directories(libgerbera PUBLIC ${CXXOPTS_INCLUDE_DIRS})
+
 # We should probably move these two out to their own FindLocale
 include(CheckFunctionExists)
 check_function_exists(nl_langinfo HAVE_NL_LANGINFO)

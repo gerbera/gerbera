@@ -26,6 +26,7 @@ Gerbera - https://gerbera.io/
 #include "upnp/compat.h"
 #include "util/tools.h"
 
+#include <cxxopts.hpp>
 #include <fmt/format.h>
 #if FMT_VERSION >= 100202
 #include <fmt/ranges.h>
@@ -133,6 +134,7 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
 #ifdef SPDLOG_FMT_EXTERNAL
             { "", "SPDLOG_FMT_EXTERNAL" },
 #endif
+            { "CXXOPTS", fmt::format("{}.{}.{}", cxxopts::version.major, cxxopts::version.minor, cxxopts::version.patch) },
             { "SQLITE ", fmt::to_string(SQLITE_VERSION) },
             { "PUGIXML", fmt::to_string(PUGIXML_VERSION) },
             { "JSONCPP", JSONCPP_VERSION_STRING },
