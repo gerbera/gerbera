@@ -153,3 +153,9 @@ function install-jsoncpp() {
   sudo bash "${GRB_SH_DIR}install-jsoncpp.sh"
   echo "::endgroup::"
 }
+
+function install-cxxopts() {
+  echo "::group::Installing cxxopts"
+  sudo bash "${GRB_SH_DIR}install-cxxopts.sh"
+  echo "::endgroup::"
+}

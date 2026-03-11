@@ -138,6 +138,13 @@ COPY scripts/alpine/deps/*.sh ./alpine/deps/
 RUN ./install-libzip.sh
 RUN ./install-libzippp.sh
 
+# Build cxxopts
+WORKDIR /cxxopts_build
+COPY scripts/install-cxxopts.sh scripts/versions.sh scripts/gerbera-install-shell.sh ./
+COPY scripts/alpine/*.* ./alpine/
+COPY scripts/alpine/deps/*.sh ./alpine/deps/
+RUN ./install-cxxopts.sh
+
 # Build Gerbera
 WORKDIR /gerbera_build
 COPY . .

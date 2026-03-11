@@ -25,9 +25,9 @@ Gerbera - https://gerbera.io/
 #define __GRB_RUNTIME_H__
 
 #include "config/config.h"
-#include "contrib/cxxopts.hpp"
 #include "util/grb_fs.h"
 
+#include <cxxopts.hpp>
 #include <fmt/core.h>
 #include <functional>
 #include <string>
