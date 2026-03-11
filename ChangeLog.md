@@ -15,6 +15,7 @@
 - Document MARIADB_TLS_DISABLE_PEER_VERIFICATION
 - Export and import changed object from database
 - Extend content type filter configuration
+- Fix entryType for builtin layout
 - FFmpeg: configuration for stream data import
 - Improve configuration of online content
 - Keep track of changed objects

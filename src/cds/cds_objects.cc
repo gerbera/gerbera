@@ -52,7 +52,7 @@ void CdsObject::copyTo(const std::shared_ptr<CdsObject>& obj)
     obj->setParentID(parentID);
     obj->setTitle(title);
     obj->setClass(upnpClass);
-    obj->setLocation(location, entryType);
+    obj->setLocation(location, obj->getEntryType()); // keep the entry type from object creation
     obj->setMTime(mtime);
     obj->setSizeOnDisk(sizeOnDisk);
     obj->setVirtual(virt);
