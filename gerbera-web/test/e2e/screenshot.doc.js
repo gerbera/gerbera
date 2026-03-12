@@ -166,6 +166,28 @@ suite(() => {
         });
     });
 
+    describe('content-export', () => {
+      const viewName = 'content-export';
+      if (!view || viewName.match(new RegExp(view)))
+        it('for [content export]', async () => {
+          const fileName = DEFAULT_FOLDER_STORE + viewName + suffix;
+          await loginPage.username('user');
+          await loginPage.password('pwd');
+          await loginPage.submitLogin();
+          await homePage.clickMenu('nav-db');
+          await homePage.clickTree('database');
+          await homePage.setTextValue('importFile', '/home/gerbera/export.json');
+          await driver.sleep(500);
+
+          await homePage.takeScreenshot(fileName);
+
+          const image = await Jimp.read(fileName);
+          image.resize({ w: 1280 });
+          image.crop({ x: 478, y: 85, w: 370, h: 250 });
+          image.write(fileName);
+        });
+    });
+
     describe('database-smallgrid-view', () => {
       const viewName = 'database-smallgrid-view';
       if (!view || viewName.match(new RegExp(view)))

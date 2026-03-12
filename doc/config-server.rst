@@ -1774,7 +1774,7 @@ Add namespace required for properties.
 
            xml-ns="..."
 
-    .. versionchanged:: HEAD renamed from ``xmlns``
+    .. versionchanged:: 3.2.0 renamed from ``xmlns``
 
     Key for the namespace
 

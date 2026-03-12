@@ -2590,7 +2590,7 @@ Filter Files by Content Type
    :default: Extensible default, see :confval:`extend`
 ..
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.2.0
    .. code-block:: xml
 
       <libcontent enabled="yes">
@@ -2809,7 +2809,7 @@ the attributes into the existing thumbnail resource (e.g. created by taglib)
       :required: false
       :default: ``no``
 
-      .. versionadded:: HEAD
+      .. versionadded:: 3.2.0
       .. code-block:: xml
 
          streams-enabled="yes"

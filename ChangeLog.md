@@ -1,6 +1,6 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v3.2.0
 
 - Bump actions/upload-artifact from 6 to 7
 - Bump basic-ftp from 5.1.0 to 5.2.0 in /gerbera-web

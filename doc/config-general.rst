@@ -83,7 +83,7 @@ Full xml sub structure.
    :required: false
    :default: unset
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.2.0
    .. code-block:: xml
 
        <autoscan from-file="autoscan.xml"/>
