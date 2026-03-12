@@ -75,7 +75,7 @@ players will anyway have some kind of buffering, however if the connection is pa
    :default: ``20``
 ..
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.2.0
    .. code:: xml
 
       connect-timeout="50"
@@ -88,7 +88,7 @@ This setting allows to set the timeout to connect to the URL. Increase it for sl
    :default: ``0``
 ..
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.2.0
    .. code:: xml
 
       timeout="50"

@@ -77,7 +77,7 @@ files if it encounters buffer underruns - this setting helps to avoid this situa
    :default: ``2``
 ..
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.2.0
    .. code:: xml
 
        fetch-buffer-timeout="15"
@@ -91,7 +91,7 @@ on connections with high latency.
    :default: ``2``
 ..
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.2.0
    .. code:: xml
 
        fetch-buffer-retry-count="5"
@@ -741,7 +741,7 @@ transcode them in real time.
       :default: ``2``
    ..
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.2.0
    .. code:: xml
 
       timeout="15"
@@ -754,7 +754,7 @@ transcode them in real time.
       :default: ``2``
    ..
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.2.0
    .. code:: xml
 
        retry-count="5"

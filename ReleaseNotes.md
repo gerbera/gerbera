@@ -1,15 +1,20 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v3.2.0
 
-After almost 10 years of dropping _Mediatomb_'s UPnP hack an issue with transcoding and other returns to libpupnp could be resolved.
+This release brings some really interesting changes without being a new landmark.
 
-The config property `xmlns` was renamed to `xml-ns` for compliance reasons. Watch
-out for warnings `Found extra config file entry '/config/server/upnp/title-properties/upnp-namespace/attribute::xmlns'`.
+1. After almost 10 years of dropping _Mediatomb_'s UPnP hack an issue with transcoding and error returns to LibPUPnP could be resolved.
+2. The configuration file config.xml can be split at any section
+3. Entries created or modified via the web ui can be exported before the database is cleared and reimported afterwards
+
+Many more configuration entries were added to control the import process and runtime features. In this wake the config property
+`xmlns` was renamed to `xml-ns` for compliance reasons. Watch out for warnings like
+`Found extra config file entry '/config/server/upnp/title-properties/upnp-namespace/attribute::xmlns'`.
 
 ### NEW Features
 
-- Split config files into modules (from-file)
+- Split config files into modules (`from-file`)
 - Export and import changed objects
 - Extract Matroska metadata also with taglib 2.2.1
 - Select content type for import library to reduce import time
@@ -19,12 +24,14 @@ out for warnings `Found extra config file entry '/config/server/upnp/title-prope
 - Timeouts in transcoding or other read errors leading to broken responses
 - LastFM with rest API
 - Configuration for FFmpeg stream data import to reduce import times
+- Error return codes to LibPUPnP
 
 ### Code Improvements
 
 - Remove prefix for location type in database
 - Object Flags refactored to enum
-- Update maximum versions of npupnp (6.2.3), cmake (4.2.3), pupnp (1.18.2), taglib (2.2.1), libexiv2 (0.28.8), cxxopts (3.3.1)
+- Update maximum versions of npupnp (6.2.3), cmake (4.2.3), pupnp (1.18.2), taglib (2.2.1), libexiv2 (0.28.8)
+- cxxopts was updated to version 3.3.1 and can now be updated like any library
 
 ## v3.1.1
 
