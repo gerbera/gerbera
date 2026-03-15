@@ -1,5 +1,7 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
 ## v3.2.0
 
 This release brings some really interesting changes without being a new landmark.
