@@ -1,0 +1,29 @@
+name: Release Drafter Autolabeler
+
+on:
+  push:
+    # branches to consider in the event; optional, defaults to all
+    branches:
+      - master
+  # pull_request_target event is required for autolabeler to support PRs from forks
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions: write-all
+      # write permission is required for autolabeler
+      # otherwise, read permission is required at least
+  #contents: read
+
+jobs:
+  update_auto_labels:
+    runs-on: ubuntu-latest
+    permissions:
+      pull-requests: write  # allow autolabeler to set label values
+    steps:
+      # (Optional) GitHub Enterprise requires GHE_HOST variable set
+      #- name: Set GHE_HOST
+      #  run: |
+      #    echo "GHE_HOST=${GITHUB_SERVER_URL##https:\/\/}" >> $GITHUB_ENV
+
+      # Update labels according to autolabeler definitions in .github/release-drafter.yml
+      - uses: release-drafter/release-drafter/autolabeler@v7
