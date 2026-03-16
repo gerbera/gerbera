@@ -1,5 +1,23 @@
 name-template: Gerbera v$NEXT_PATCH_VERSION
 tag-template: v$NEXT_PATCH_VERSION
+
+autolabeler:
+  - label: 'bug'
+    branch:
+      - '/fix/i'
+    title:
+      - '/fix/i'
+  - label: 'update'
+    branch:
+      - '/update/i'
+      - '/bump/i'
+    title:
+      - '/update/i'
+      - '/bump/i'
+  - label: 'enhancement'
+    branch:
+      - '/feature\/.+/'
+
 exclude-labels:
   - ignore
   - release
