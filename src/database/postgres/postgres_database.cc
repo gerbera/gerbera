@@ -58,7 +58,7 @@ PostgresDatabase::PostgresDatabase(std::shared_ptr<Config> config,
         3713274383, // index 0 is used for create script postgres.sql = Version 1
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // upgrade 2-11
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // upgrade 12-21
-        0, 0, 0, 0, 99037268, 2147789230,
+        0, 0, 0, 0, 99037268, 1496320046,
         2796031870 // index DBVERSION is used for drop script postgres-drop.sql = Version -1
     };
 }
