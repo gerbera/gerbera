@@ -206,10 +206,10 @@
     </version>
     <version number="27" remark="add entry type">
         <script>ALTER TABLE `mt_cds_object` ADD `entry_type` int(11) default '-1'</script>
+        <script>UPDATE `mt_cds_object` SET `entry_type`='0'</script>
         <script>UPDATE `mt_cds_object` SET `entry_type`='0' WHERE `id`='-1'</script>
         <script>UPDATE `mt_cds_object` SET `entry_type`='3' WHERE `id`='0'</script>
         <script>UPDATE `mt_cds_object` SET `entry_type`='1' WHERE `id`='1'</script>
-        <script>UPDATE `mt_cds_object` SET `entry_type`='0'</script>
         <script>UPDATE `mt_cds_object` SET `entry_type`='1' WHERE `location` like 'D%';</script>
         <script>UPDATE `mt_cds_object` SET `entry_type`='2' WHERE `location` like 'F%';</script>
         <script>UPDATE `mt_cds_object` SET `entry_type`='3' WHERE `location` like 'V%' and `upnp_class` like 'object.container%';</script>
