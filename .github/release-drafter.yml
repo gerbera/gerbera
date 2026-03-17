@@ -30,6 +30,7 @@ categories:
       - 'bug'
   - title: '📚 Libraries'
     labels:
+      - 'update'
       - 'library'
       - 'dependencies'
 
@@ -38,6 +39,7 @@ exclude-labels:
   - release
 change-template: ' * $TITLE (#$NUMBER), thanks @$AUTHOR'
 no-changes-template: ' * Nothing'
+
 template: |
   We are happy to announce that Gerbera Media Server $NEXT_PATCH_VERSION is now available.
 
@@ -45,7 +47,9 @@ template: |
 
   $CHANGES
 
-  Please see our [Documentation](https://docs.gerbera.io/en/stable) for how to [install the latest Gerbera version](https://docs.gerbera.io/en/stable/install.html) on your system.
+footer: |
+
+  Please see our [Documentation](https://docs.gerbera.io/en/stable) for how to [install the latest stable Gerbera version](https://docs.gerbera.io/en/stable/install.html) on your system.
   
   ## Full Changelog
   https://github.com/gerbera/gerbera/compare/$PREVIOUS_TAG...v$NEXT_PATCH_VERSION
