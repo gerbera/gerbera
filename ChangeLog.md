@@ -2,7 +2,10 @@
 
 ### HEAD
 
+- Add Autolabeler
+- Bump ReleaseDrafter from 6 to 7
 - Fix SQL Migration Statement
+- Update to pupnp 1.18.3
 
 ### v3.2.0
 

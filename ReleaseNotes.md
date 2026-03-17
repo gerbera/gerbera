@@ -2,6 +2,10 @@
 
 ## HEAD
 
+### Code Improvements
+
+- Update maximum versions of pupnp (1.18.3)
+
 ## v3.2.0
 
 This release brings some really interesting changes without being a new landmark.
