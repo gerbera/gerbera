@@ -28,7 +28,7 @@ categories:
       - 'fix'
       - 'bugfix'
       - 'bug'
-  - title: '📚 Libraries'
+  - title: '📚 Dependencies'
     labels:
       - 'update'
       - 'library'
@@ -48,7 +48,6 @@ template: |
   $CHANGES
 
 footer: |
-
   Please see our [Documentation](https://docs.gerbera.io/en/stable) for how to [install the latest stable Gerbera version](https://docs.gerbera.io/en/stable/install.html) on your system.
   
   ## Full Changelog
