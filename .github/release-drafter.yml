@@ -19,11 +19,11 @@ autolabeler:
       - '/feature\/.+/'
 
 categories:
-  - title: '🚀 Features'
+  - title: '🌼 Features'
     labels:
       - 'feature'
       - 'enhancement'
-  - title: '🐛 Bug Fixes'
+  - title: '🐞 Bug Fixes'
     labels:
       - 'fix'
       - 'bugfix'
@@ -47,7 +47,8 @@ template: |
 
   $CHANGES
 
-footer: |
+  ## Documentation
+
   Please see our [Documentation](https://docs.gerbera.io/en/stable) for how to [install the latest stable Gerbera version](https://docs.gerbera.io/en/stable/install.html) on your system.
   
   ## Full Changelog

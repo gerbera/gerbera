@@ -1,3 +1,4 @@
+# ~~~
 # - Try to find duktape
 # Once done this will define
 #
@@ -5,38 +6,38 @@
 #  DUKTAPE_INCLUDE_DIRS - the Duktape include directory
 #  DUKTAPE_LIBRARIES - Link these to use DUKTAPE
 #  DUKTAPE_DEFINITIONS - Compiler switches required for using Duktape
-#
+# ~~~
 
 find_package(PkgConfig QUIET)
 pkg_search_module(PC_DUK QUIET duktape libduktape)
 
-find_path(DUKTAPE_INCLUDE_DIR duktape.h
+find_path(
+    DUKTAPE_INCLUDE_DIR duktape.h
     HINTS ${PC_DUK_INCLUDEDIR} ${PC_DUK_INCLUDE_DIRS}
     PATH_SUFFIXES duktape)
 
-find_library(DUKTAPE_LIBRARY
+find_library(
+    DUKTAPE_LIBRARY
     NAMES duktape libduktape
     HINTS ${PC_DUK_LIBDIR} ${PC_DUK_LIBRARY_DIRS})
 set(DUKTAPE_VERSION ${PC_DUK_VERSION})
 
 include(FindPackageHandleStandardArgs)
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(duktape
-    REQUIRED_VARS
-        DUKTAPE_LIBRARY DUKTAPE_INCLUDE_DIR
-    VERSION_VAR
-        DUKTAPE_VERSION)
+find_package_handle_standard_args(
+    duktape
+    REQUIRED_VARS DUKTAPE_LIBRARY DUKTAPE_INCLUDE_DIR
+    VERSION_VAR DUKTAPE_VERSION)
 
-if (DUKTAPE_FOUND)
-    set (DUKTAPE_LIBRARIES ${DUKTAPE_LIBRARY})
-    set (DUKTAPE_INCLUDE_DIRS ${DUKTAPE_INCLUDE_DIR} )
+if(DUKTAPE_FOUND)
+    set(DUKTAPE_LIBRARIES ${DUKTAPE_LIBRARY})
+    set(DUKTAPE_INCLUDE_DIRS ${DUKTAPE_INCLUDE_DIR})
     if(NOT TARGET duktape::duktape)
         add_library(duktape::duktape INTERFACE IMPORTED)
     endif()
-    set_property(TARGET duktape::duktape PROPERTY INTERFACE_INCLUDE_DIRECTORIES "${DUKTAPE_INCLUDE_DIRS}")
+    set_property(TARGET duktape::duktape PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+                                                  "${DUKTAPE_INCLUDE_DIRS}")
     set_property(TARGET duktape::duktape PROPERTY INTERFACE_LINK_LIBRARIES "${DUKTAPE_LIBRARIES}")
-endif ()
+endif()
 
-MARK_AS_ADVANCED(
-    DUKTAPE_INCLUDE_DIR
-    DUKTAPE_LIBRARY
-)
+mark_as_advanced(
+    DUKTAPE_INCLUDE_DIR DUKTAPE_LIBRARY)

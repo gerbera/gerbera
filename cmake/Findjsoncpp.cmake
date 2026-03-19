@@ -1,48 +1,52 @@
+# ~~~
 # - Try to find libjsoncpp
 # Once done this will define
 #
 #  JSONCPP_FOUND - system has libjsoncpp
 #  jsoncpp_INCLUDE_DIRS - the jsoncpp include directory
 #  jsoncpp_LIBRARIES - Link these to use JSONCPP
-#
+# ~~~
 
-INCLUDE(FindPackageHandleStandardArgs)
+include(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig QUIET)
 
 pkg_search_module(PC_JSONCPP QUIET libjsoncpp jsoncpp)
-find_path(JSONCPP_INCLUDE_DIR json/json.h
+find_path(
+    JSONCPP_INCLUDE_DIR json/json.h
     HINTS ${PC_JSONCPP_INCLUDEDIR} ${PC_JSONCPP_INCLUDE_DIRS})
-FIND_LIBRARY(JSONCPP_LIBRARY
+find_library(
+    JSONCPP_LIBRARY
     NAMES jsoncpp libjsoncpp
     HINTS ${PC_JSONCPP_LIBDIR} ${PC_JSONCPP_LIBRARY_DIRS})
 
 set(JSONCPP_VERSION ${PC_JSONCPP_VERSION})
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(jsoncpp
-    REQUIRED_VARS
-        JSONCPP_LIBRARY JSONCPP_INCLUDE_DIR
-    VERSION_VAR
-        JSONCPP_VERSION)
+find_package_handle_standard_args(
+    jsoncpp
+    REQUIRED_VARS JSONCPP_LIBRARY JSONCPP_INCLUDE_DIR
+    VERSION_VAR JSONCPP_VERSION)
 
-if (JSONCPP_FOUND)
-    if(CMAKE_SYSTEM_NAME MATCHES "Darwin" OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD" OR CMAKE_SYSTEM_NAME MATCHES ".*(SunOS|Solaris).*")
-       set (jsoncpp_LIBRARIES ${JSONCPP_LIBRARY})
-    else ()
-       set (jsoncpp_LIBRARIES ${JSONCPP_LIBRARY} ${PC_JSONCPP_LIBRARIES})
-    endif ()
-    set (jsoncpp_INCLUDE_DIRS ${JSONCPP_INCLUDE_DIR})
+if(JSONCPP_FOUND)
+    if(CMAKE_SYSTEM_NAME MATCHES "Darwin"
+       OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD"
+       OR CMAKE_SYSTEM_NAME MATCHES ".*(SunOS|Solaris).*")
+        set(jsoncpp_LIBRARIES ${JSONCPP_LIBRARY})
+    else()
+        set(jsoncpp_LIBRARIES ${JSONCPP_LIBRARY} ${PC_JSONCPP_LIBRARIES})
+    endif()
+    set(jsoncpp_INCLUDE_DIRS ${JSONCPP_INCLUDE_DIR})
 
     if(NOT TARGET jsoncpp::jsoncpp)
         add_library(jsoncpp::jsoncpp INTERFACE IMPORTED)
-        set_target_properties(jsoncpp::jsoncpp PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${jsoncpp_INCLUDE_DIRS}")
-        set_property(TARGET jsoncpp::jsoncpp PROPERTY INTERFACE_LINK_LIBRARIES "${jsoncpp_LIBRARIES}")
+        set_target_properties(jsoncpp::jsoncpp PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                                          "${jsoncpp_INCLUDE_DIRS}")
+        set_property(TARGET jsoncpp::jsoncpp PROPERTY INTERFACE_LINK_LIBRARIES
+                                                      "${jsoncpp_LIBRARIES}")
     endif()
-else ()
-   set (jsoncpp_LIBRARIES ${PC_JSONCPP_LIBRARIES})
-endif ()
+else()
+    set(jsoncpp_LIBRARIES ${PC_JSONCPP_LIBRARIES})
+endif()
 
-MARK_AS_ADVANCED(
-    JSONCPP_INCLUDE_DIR
-    JSONCPP_LIBRARY
-)
+mark_as_advanced(
+    JSONCPP_INCLUDE_DIR JSONCPP_LIBRARY)

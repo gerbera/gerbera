@@ -1,8 +1,10 @@
-INCLUDE (FindPackageHandleStandardArgs)
+include(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig REQUIRED QUIET)
-PKG_SEARCH_MODULE(LastFMLib liblastfm liblastfmlib QUIET)
+pkg_search_module(LastFMLib liblastfm liblastfmlib QUIET)
 
-find_package_handle_standard_args(LastFMLib DEFAULT_MSG LastFMLib_FOUND QUIET)
+find_package_handle_standard_args(
+    LastFMLib DEFAULT_MSG LastFMLib_FOUND QUIET)
 
-MARK_AS_ADVANCED(LastFMLib_LIBRARIES LastFMLib_INCLUDE_DIRS)
+mark_as_advanced(
+    LastFMLib_LIBRARIES LastFMLib_INCLUDE_DIRS)

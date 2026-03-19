@@ -1,4 +1,5 @@
-#--------------------------------------------------------
+# ~~~
+# --------------------------------------------------------
 # Copyright (C) 1995-2007 MySQL AB
 #
 # This program is free software; you can redistribute it and/or modify
@@ -26,90 +27,94 @@
 # this software, see the FLOSS License Exception available on
 # mysql.com.
 
-##########################################################################
+# ##################################################################################################
+# ~~~
 
+# -------------- FIND MYSQL_INCLUDE_DIR ------------------
+find_path(
+    MYSQL_INCLUDE_DIR
+    mysql.h
+    /usr/include/mysql
+    /usr/include/mariadb
+    /usr/local/include/mysql
+    /opt/mysql/mysql/include
+    /opt/mysql/mysql/include/mysql
+    /opt/mysql/include
+    /opt/local/include/mysql5
+    /usr/local/mysql/include
+    /usr/local/mysql/include/mysql
+    $ENV{ProgramFiles}/MySQL/*/include
+    $ENV{SystemDrive}/MySQL/*/include)
 
-#-------------- FIND MYSQL_INCLUDE_DIR ------------------
-FIND_PATH(MYSQL_INCLUDE_DIR mysql.h
-  /usr/include/mysql
-  /usr/include/mariadb
-  /usr/local/include/mysql
-  /opt/mysql/mysql/include
-  /opt/mysql/mysql/include/mysql
-  /opt/mysql/include
-  /opt/local/include/mysql5
-  /usr/local/mysql/include
-  /usr/local/mysql/include/mysql
-  $ENV{ProgramFiles}/MySQL/*/include
-  $ENV{SystemDrive}/MySQL/*/include)
+# ----------------- FIND MYSQL_LIB_DIR -------------------
+if(WIN32)
+    # Set lib path suffixes dist = for mysql binary distributions build = for custom built tree
+    if(CMAKE_BUILD_TYPE STREQUAL Debug)
+        set(libsuffixDist debug)
+        set(libsuffixBuild Debug)
+    else(CMAKE_BUILD_TYPE STREQUAL Debug)
+        set(libsuffixDist opt)
+        set(libsuffixBuild Release)
+        add_definitions(-DDBUG_OFF)
+    endif(CMAKE_BUILD_TYPE STREQUAL Debug)
 
-#----------------- FIND MYSQL_LIB_DIR -------------------
-IF (WIN32)
-  # Set lib path suffixes
-  # dist = for mysql binary distributions
-  # build = for custom built tree
-  IF (CMAKE_BUILD_TYPE STREQUAL Debug)
-    SET(libsuffixDist debug)
-    SET(libsuffixBuild Debug)
-  ELSE (CMAKE_BUILD_TYPE STREQUAL Debug)
-    SET(libsuffixDist opt)
-    SET(libsuffixBuild Release)
-    ADD_DEFINITIONS(-DDBUG_OFF)
-  ENDIF (CMAKE_BUILD_TYPE STREQUAL Debug)
+    find_library(
+        MYSQL_LIB
+        NAMES mysqlclient
+        PATHS $ENV{MYSQL_DIR}/lib/${libsuffixDist}
+              $ENV{MYSQL_DIR}/libmysql
+              $ENV{MYSQL_DIR}/libmysql/${libsuffixBuild}
+              $ENV{MYSQL_DIR}/client/${libsuffixBuild}
+              $ENV{MYSQL_DIR}/libmysql/${libsuffixBuild}
+              $ENV{ProgramFiles}/MySQL/*/lib/${libsuffixDist}
+              $ENV{SystemDrive}/MySQL/*/lib/${libsuffixDist})
+else(WIN32)
+    find_library(
+        MYSQL_LIB
+        NAMES mysqlclient_r mysqlclient mariadbclient
+        PATHS /usr/lib/mysql
+              /usr/lib/mariadb
+              /usr/local/lib/mysql
+              /usr/local/mysql/lib
+              /usr/local/mysql/lib/mysql
+              /opt/local/mysql5/lib
+              /opt/local/lib/mysql5/mysql
+              /opt/mysql/mysql/lib/mysql
+              /opt/mysql/lib/mysql)
+endif(WIN32)
 
-  FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient
-    PATHS
-    $ENV{MYSQL_DIR}/lib/${libsuffixDist}
-    $ENV{MYSQL_DIR}/libmysql
-    $ENV{MYSQL_DIR}/libmysql/${libsuffixBuild}
-    $ENV{MYSQL_DIR}/client/${libsuffixBuild}
-    $ENV{MYSQL_DIR}/libmysql/${libsuffixBuild}
-    $ENV{ProgramFiles}/MySQL/*/lib/${libsuffixDist}
-    $ENV{SystemDrive}/MySQL/*/lib/${libsuffixDist})
-ELSE (WIN32)
-  FIND_LIBRARY(MYSQL_LIB NAMES mysqlclient_r mysqlclient mariadbclient
-    PATHS
-    /usr/lib/mysql
-    /usr/lib/mariadb
-    /usr/local/lib/mysql
-    /usr/local/mysql/lib
-    /usr/local/mysql/lib/mysql
-    /opt/local/mysql5/lib
-    /opt/local/lib/mysql5/mysql
-    /opt/mysql/mysql/lib/mysql
-    /opt/mysql/lib/mysql)
-ENDIF (WIN32)
+if(MYSQL_LIB)
+    get_filename_component(MYSQL_LIB_DIR ${MYSQL_LIB} PATH)
+endif(MYSQL_LIB)
 
-IF(MYSQL_LIB)
-  GET_FILENAME_COMPONENT(MYSQL_LIB_DIR ${MYSQL_LIB} PATH)
-ENDIF(MYSQL_LIB)
+if(MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)
+    set(MYSQL_FOUND TRUE)
 
-IF (MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)
-  SET(MYSQL_FOUND TRUE)
+    include_directories(${MYSQL_INCLUDE_DIR})
+    link_directories(${MYSQL_LIB_DIR})
 
-  INCLUDE_DIRECTORIES(${MYSQL_INCLUDE_DIR})
-  LINK_DIRECTORIES(${MYSQL_LIB_DIR})
+    find_library(MYSQL_ZLIB zlib PATHS ${MYSQL_LIB_DIR})
+    find_library(MYSQL_TAOCRYPT taocrypt PATHS ${MYSQL_LIB_DIR})
+    if(MYSQL_LIB)
+        set(MYSQL_CLIENT_LIBS ${MYSQL_LIB})
+    else()
+        set(MYSQL_CLIENT_LIBS mysqlclient_r)
+    endif()
+    if(MYSQL_ZLIB)
+        set(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} zlib)
+    endif(MYSQL_ZLIB)
+    if(MYSQL_TAOCRYPT)
+        set(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} taocrypt)
+    endif(MYSQL_TAOCRYPT)
+    # Added needed mysqlclient dependencies on Windows
+    if(WIN32)
+        set(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} ws2_32)
+    endif(WIN32)
 
-  FIND_LIBRARY(MYSQL_ZLIB zlib PATHS ${MYSQL_LIB_DIR})
-  FIND_LIBRARY(MYSQL_TAOCRYPT taocrypt PATHS ${MYSQL_LIB_DIR})
-  IF (MYSQL_LIB)
-    SET(MYSQL_CLIENT_LIBS ${MYSQL_LIB})
-  ELSE()
-    SET(MYSQL_CLIENT_LIBS mysqlclient_r)
-  ENDIF()
-  IF (MYSQL_ZLIB)
-    SET(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} zlib)
-  ENDIF (MYSQL_ZLIB)
-  IF (MYSQL_TAOCRYPT)
-    SET(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} taocrypt)
-  ENDIF (MYSQL_TAOCRYPT)
-  # Added needed mysqlclient dependencies on Windows
-  IF (WIN32)
-    SET(MYSQL_CLIENT_LIBS ${MYSQL_CLIENT_LIBS} ws2_32)
-  ENDIF (WIN32)
-
-  MESSAGE(STATUS "MySQL Include dir: ${MYSQL_INCLUDE_DIR}  library dir: ${MYSQL_LIB_DIR}")
-  MESSAGE(STATUS "MySQL client libraries: ${MYSQL_CLIENT_LIBS}")
-ELSEIF (MySQL_FIND_REQUIRED)
-  MESSAGE(FATAL_ERROR "Cannot find MySQL. Include dir: ${MYSQL_INCLUDE_DIR}  library dir: ${MYSQL_LIB_DIR}")
-ENDIF (MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)
+    message(STATUS "MySQL Include dir: ${MYSQL_INCLUDE_DIR}  library dir: ${MYSQL_LIB_DIR}")
+    message(STATUS "MySQL client libraries: ${MYSQL_CLIENT_LIBS}")
+elseif(MySQL_FIND_REQUIRED)
+    message(
+        FATAL_ERROR
+            "Cannot find MySQL. Include dir: ${MYSQL_INCLUDE_DIR}  library dir: ${MYSQL_LIB_DIR}")
+endif(MYSQL_INCLUDE_DIR AND MYSQL_LIB_DIR)

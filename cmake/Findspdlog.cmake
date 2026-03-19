@@ -1,5 +1,6 @@
-# This is a wrapper for spdlog to cover case when spdlog cmake config
-# is not installed (on some Joyent systems).
+# This is a wrapper for spdlog to cover case when spdlog cmake config is not installed (on some
+# Joyent systems).
+
 include(FindPackageHandleStandardArgs)
 
 find_package(spdlog QUIET NO_MODULE)
@@ -13,7 +14,9 @@ spdlog is built without SPDLOG_FMT_EXTERNAL.
 Since Gerbera uses fmt library internally the spdlog's bundled version wlll be in conflict
 It is strongly recommended to rebuild spdlog without bundled fmt]=])
         if(spdlog_VERSION VERSION_GREATER_EQUAL "1.4.0" AND fmt_VERSION VERSION_LESS "6.0.0")
-            message(FATAL_ERROR [=[
+            message(
+                FATAL_ERROR
+                    [=[
 The version of spdlog >= 1.4 bundles fmt version 6, but an older version of fmt was found.
 The current combination won't link.
 Please upgrade fmt or build spdlog with SPDLOG_FMT_EXTERNAL=ON]=])
@@ -32,8 +35,10 @@ else()
 
         if(NOT TARGET spdlog::spdlog)
             add_library(spdlog::spdlog INTERFACE IMPORTED)
-            set_target_properties(spdlog::spdlog PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${spdlog_INCLUDE_DIRS}")
-            set_property(TARGET spdlog::spdlog PROPERTY INTERFACE_LINK_LIBRARIES "${spdlog_LIBRARIES}")
+            set_target_properties(spdlog::spdlog PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                                            "${spdlog_INCLUDE_DIRS}")
+            set_property(TARGET spdlog::spdlog PROPERTY INTERFACE_LINK_LIBRARIES
+                                                        "${spdlog_LIBRARIES}")
         endif()
     endif()
 
