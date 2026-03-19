@@ -1,46 +1,50 @@
+# ~~~
 # - Try to find wavpack
 # Once done this will define
 #
 #  WAVPACK_FOUND - system has wavpack
 #  wavpack_INCLUDE_DIRS - the wavpack include directory
 #  wavpack_LIBRARIES - Link these to use WAVPACK
-#
+# ~~~
 
-INCLUDE(FindPackageHandleStandardArgs)
+include(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig QUIET)
 pkg_check_modules(PC_WAVPACK QUIET wavpack)
 
-find_path(WAVPACK_INCLUDE_DIR wavpack.h
+find_path(
+    WAVPACK_INCLUDE_DIR wavpack.h
     HINTS ${PC_WAVPACK_INCLUDEDIR} ${PC_WAVPACK_INCLUDE_DIRS}
     PATH_SUFFIXES wavpack)
 
-FIND_LIBRARY(WAVPACK_LIBRARY wavpack
+find_library(
+    WAVPACK_LIBRARY wavpack
     HINTS ${PC_WAVPACK_LIBDIR} ${PC_WAVPACK_LIBRARY_DIRS})
 set(WAVPACK_VERSION ${PC_WAVPACK_VERSION})
 
-FIND_PACKAGE_HANDLE_STANDARD_ARGS(wavpack
-    REQUIRED_VARS
-        WAVPACK_LIBRARY WAVPACK_INCLUDE_DIR
-    VERSION_VAR
-        WAVPACK_VERSION)
+find_package_handle_standard_args(
+    wavpack
+    REQUIRED_VARS WAVPACK_LIBRARY WAVPACK_INCLUDE_DIR
+    VERSION_VAR WAVPACK_VERSION)
 
-if (WAVPACK_FOUND)
-    if(CMAKE_SYSTEM_NAME MATCHES "Darwin" OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD" OR CMAKE_SYSTEM_NAME MATCHES ".*(SunOS|Solaris).*")
-       set (wavpack_LIBRARIES ${WAVPACK_LIBRARY})
-    else ()
-       set (wavpack_LIBRARIES ${WAVPACK_LIBRARY} ${PC_WAVPACK_LIBRARIES})
-    endif ()
-    set (wavpack_INCLUDE_DIRS ${WAVPACK_INCLUDE_DIR})
+if(WAVPACK_FOUND)
+    if(CMAKE_SYSTEM_NAME MATCHES "Darwin"
+       OR CMAKE_SYSTEM_NAME MATCHES "FreeBSD"
+       OR CMAKE_SYSTEM_NAME MATCHES ".*(SunOS|Solaris).*")
+        set(wavpack_LIBRARIES ${WAVPACK_LIBRARY})
+    else()
+        set(wavpack_LIBRARIES ${WAVPACK_LIBRARY} ${PC_WAVPACK_LIBRARIES})
+    endif()
+    set(wavpack_INCLUDE_DIRS ${WAVPACK_INCLUDE_DIR})
 
     if(NOT TARGET wavpack::wavpack)
         add_library(wavpack::wavpack INTERFACE IMPORTED)
-        set_target_properties(wavpack::wavpack PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${wavpack_INCLUDE_DIRS}")
-        set_property(TARGET wavpack::wavpack PROPERTY INTERFACE_LINK_LIBRARIES "${wavpack_LIBRARIES}")
+        set_target_properties(wavpack::wavpack PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                                          "${wavpack_INCLUDE_DIRS}")
+        set_property(TARGET wavpack::wavpack PROPERTY INTERFACE_LINK_LIBRARIES
+                                                      "${wavpack_LIBRARIES}")
     endif()
-endif ()
+endif()
 
-MARK_AS_ADVANCED(
-    WAVPACK_INCLUDE_DIR
-    WAVPACK_LIBRARY
-)
+mark_as_advanced(
+    WAVPACK_INCLUDE_DIR WAVPACK_LIBRARY)

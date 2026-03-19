@@ -1,113 +1,103 @@
+# ~~~
 #
 #  FIND_LIBRARY_WITH_DEBUG
 #  -> enhanced FIND_LIBRARY to allow the search for an
 #     optional debug library with a WIN32_DEBUG_POSTFIX similar
 #     to CMAKE_DEBUG_POSTFIX when creating a shared lib
 #     it has to be the second and third argument
-
+#
 # Copyright (c) 2007, Christian Ehrlicher, <ch.ehrlicher@gmx.de>
 # Redistribution and use is allowed according to the terms of the BSD license.
 # For details see the accompanying COPYING-CMAKE-SCRIPTS file.
+# ~~~
 
-MACRO(FIND_LIBRARY_WITH_DEBUG var_name win32_dbg_postfix_name dgb_postfix libname)
+macro(FIND_LIBRARY_WITH_DEBUG var_name win32_dbg_postfix_name dgb_postfix libname)
 
-  IF(NOT "${win32_dbg_postfix_name}" STREQUAL "WIN32_DEBUG_POSTFIX")
+    if(NOT "${win32_dbg_postfix_name}" STREQUAL "WIN32_DEBUG_POSTFIX")
 
-     # no WIN32_DEBUG_POSTFIX -> simply pass all arguments to FIND_LIBRARY
-     FIND_LIBRARY(${var_name}
-                  ${win32_dbg_postfix_name}
-                  ${dgb_postfix}
-                  ${libname}
-                  ${ARGN}
-     )
+        # no WIN32_DEBUG_POSTFIX -> simply pass all arguments to FIND_LIBRARY
+        find_library(${var_name} ${win32_dbg_postfix_name} ${dgb_postfix} ${libname} ${ARGN})
 
-  ELSE(NOT "${win32_dbg_postfix_name}" STREQUAL "WIN32_DEBUG_POSTFIX")
+    else(NOT "${win32_dbg_postfix_name}" STREQUAL "WIN32_DEBUG_POSTFIX")
 
-    IF(NOT WIN32)
-      # on non-win32 we don't need to take care about WIN32_DEBUG_POSTFIX
+        if(NOT WIN32)
+            # on non-win32 we don't need to take care about WIN32_DEBUG_POSTFIX
 
-      FIND_LIBRARY(${var_name} ${libname} ${ARGN})
+            find_library(${var_name} ${libname} ${ARGN})
 
-    ELSE(NOT WIN32)
+        else(NOT WIN32)
 
-      # 1. get all possible libnames
-      SET(args ${ARGN})
-      SET(newargs "")
-      SET(libnames_release "")
-      SET(libnames_debug "")
+            # 1. get all possible libnames
+            set(args ${ARGN})
+            set(newargs "")
+            set(libnames_release "")
+            set(libnames_debug "")
 
-      LIST(LENGTH args listCount)
+            list(LENGTH args listCount)
 
-      IF("${libname}" STREQUAL "NAMES")
-        SET(append_rest 0)
-        LIST(APPEND args " ")
+            if("${libname}" STREQUAL "NAMES")
+                set(append_rest 0)
+                list(APPEND args " ")
 
-        FOREACH(i RANGE ${listCount})
-          LIST(GET args ${i} val)
+                foreach(i RANGE ${listCount})
+                    list(GET args ${i} val)
 
-          IF(append_rest)
-            LIST(APPEND newargs ${val})
-          ELSE(append_rest)
-            IF("${val}" STREQUAL "PATHS")
-              LIST(APPEND newargs ${val})
-              SET(append_rest 1)
-            ELSE("${val}" STREQUAL "PATHS")
-              LIST(APPEND libnames_release "${val}")
-              LIST(APPEND libnames_debug   "${val}${dgb_postfix}")
-            ENDIF("${val}" STREQUAL "PATHS")
-          ENDIF(append_rest)
+                    if(append_rest)
+                        list(APPEND newargs ${val})
+                    else(append_rest)
+                        if("${val}" STREQUAL "PATHS")
+                            list(APPEND newargs ${val})
+                            set(append_rest 1)
+                        else("${val}" STREQUAL "PATHS")
+                            list(APPEND libnames_release "${val}")
+                            list(APPEND libnames_debug "${val}${dgb_postfix}")
+                        endif("${val}" STREQUAL "PATHS")
+                    endif(append_rest)
 
-        ENDFOREACH(i)
+                endforeach(i)
 
-      ELSE("${libname}" STREQUAL "NAMES")
+            else("${libname}" STREQUAL "NAMES")
 
-        # just one name
-        LIST(APPEND libnames_release "${libname}")
-        LIST(APPEND libnames_debug   "${libname}${dgb_postfix}")
+                # just one name
+                list(APPEND libnames_release "${libname}")
+                list(APPEND libnames_debug "${libname}${dgb_postfix}")
 
-        SET(newargs ${args})
+                set(newargs ${args})
 
-      ENDIF("${libname}" STREQUAL "NAMES")
+            endif("${libname}" STREQUAL "NAMES")
 
-      # search the release lib
-      FIND_LIBRARY(${var_name}_RELEASE
-                   NAMES ${libnames_release}
-                   ${newargs}
-      )
+            # search the release lib
+            find_library(${var_name}_RELEASE NAMES ${libnames_release} ${newargs})
 
-      # search the debug lib
-      FIND_LIBRARY(${var_name}_DEBUG
-                   NAMES ${libnames_debug}
-                   ${newargs}
-      )
+            # search the debug lib
+            find_library(${var_name}_DEBUG NAMES ${libnames_debug} ${newargs})
 
-      IF(${var_name}_RELEASE AND ${var_name}_DEBUG)
+            if(${var_name}_RELEASE AND ${var_name}_DEBUG)
 
-        # both libs found
-        SET(${var_name} optimized ${${var_name}_RELEASE}
-                        debug     ${${var_name}_DEBUG})
+                # both libs found
+                set(${var_name} optimized ${${var_name}_RELEASE} debug ${${var_name}_DEBUG})
 
-      ELSE(${var_name}_RELEASE AND ${var_name}_DEBUG)
+            else(${var_name}_RELEASE AND ${var_name}_DEBUG)
 
-        IF(${var_name}_RELEASE)
+                if(${var_name}_RELEASE)
 
-          # only release found
-          SET(${var_name} ${${var_name}_RELEASE})
+                    # only release found
+                    set(${var_name} ${${var_name}_RELEASE})
 
-        ELSE(${var_name}_RELEASE)
+                else(${var_name}_RELEASE)
 
-          # only debug (or nothing) found
-          SET(${var_name} ${${var_name}_DEBUG})
+                    # only debug (or nothing) found
+                    set(${var_name} ${${var_name}_DEBUG})
 
-        ENDIF(${var_name}_RELEASE)
-       
-      ENDIF(${var_name}_RELEASE AND ${var_name}_DEBUG)
+                endif(${var_name}_RELEASE)
 
-      MARK_AS_ADVANCED(${var_name}_RELEASE)
-      MARK_AS_ADVANCED(${var_name}_DEBUG)
+            endif(${var_name}_RELEASE AND ${var_name}_DEBUG)
 
-    ENDIF(NOT WIN32)
+            mark_as_advanced(${var_name}_RELEASE)
+            mark_as_advanced(${var_name}_DEBUG)
 
-  ENDIF(NOT "${win32_dbg_postfix_name}" STREQUAL "WIN32_DEBUG_POSTFIX")
+        endif(NOT WIN32)
 
-ENDMACRO(FIND_LIBRARY_WITH_DEBUG)
+    endif(NOT "${win32_dbg_postfix_name}" STREQUAL "WIN32_DEBUG_POSTFIX")
+
+endmacro(FIND_LIBRARY_WITH_DEBUG)

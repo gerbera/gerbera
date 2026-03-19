@@ -1,3 +1,4 @@
+# ~~~
 # - Find libexif
 # Find the native EXIF includes and library.
 # Once done this will define:
@@ -22,9 +23,9 @@
 # the environment variable EXIF_ROOT_DIR can be set to the base folder of
 # the library.
 #
-#=============================================================================
+# =============================================================================
 # Copyright (C) 2011 Simone Rossetto <simros85@gmail.com>
-# 
+#
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
 # the Free Software Foundation, either version 3 of the License, or
@@ -37,43 +38,50 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#=============================================================================
+# =============================================================================
+# ~~~
 
-INCLUDE(FindPackageHandleStandardArgs)
+include(FindPackageHandleStandardArgs)
 
 find_package(PkgConfig QUIET)
 pkg_search_module(PC_EXIF QUIET exif libexif)
 set(EXIF_VERSION ${PC_EXIF_VERSION})
 
-### FIND section ###
-find_path(EXIF_ROOT_DIR
+# FIND section ###
+find_path(
+    EXIF_ROOT_DIR
     NAMES "include/libexif/exif-data.h"
     PATHS ENV EXIF_ROOT_DIR)
 
-find_path(EXIF_INCLUDE_DIR "libexif/exif-data.h"
+find_path(
+    EXIF_INCLUDE_DIR "libexif/exif-data.h"
     HINTS ${PC_EXIF_INCLUDEDIR} ${PC_EXIF_INCLUDE_DIRS})
-FIND_LIBRARY(EXIF_LIBRARY
+find_library(
+    EXIF_LIBRARY
     NAMES exif libexif
     HINTS ${PC_EXIF_LIBDIR} ${PC_EXIF_LIBRARY_DIRS})
 
-if (NOT EXIF_INCLUDE_DIR)
-    find_path(EXIF_INCLUDE_DIR
+if(NOT EXIF_INCLUDE_DIR)
+    find_path(
+        EXIF_INCLUDE_DIR
         NAMES "libexif/exif-data.h"
         HINTS ${EXIF_ROOT_DIR}
         PATHS ENV EXIF_ROOT_DIR
         PATH_SUFFIXES "include")
 endif()
 
-if (NOT EXIF_LIBRARY)
-    find_library(EXIF_LIBRARY
+if(NOT EXIF_LIBRARY)
+    find_library(
+        EXIF_LIBRARY
         NAMES "exif"
         HINTS ${EXIF_ROOT_DIR}
         PATHS ENV EXIF_ROOT_DIR
         PATH_SUFFIXES "lib")
 endif()
 
-if (NOT PC_EXIF_VERSION)
-    find_file(_exif_pkg_config_file
+if(NOT PC_EXIF_VERSION)
+    find_file(
+        _exif_pkg_config_file
         NAMES "libexif.pc"
         HINTS ${EXIF_ROOT_DIR}
         PATHS ENV EXIF_ROOT_DIR
@@ -82,8 +90,10 @@ if (NOT PC_EXIF_VERSION)
     if(EXISTS ${_exif_pkg_config_file})
         file(STRINGS "${_exif_pkg_config_file}" _exif_version REGEX "^Version: .*$")
         string(REGEX REPLACE "^.*Version: ([0-9]+).*$" "\\1" EXIF_VERSION_MAJOR "${_exif_version}")
-        string(REGEX REPLACE "^.*Version: [0-9]+\\.([0-9]+).*$" "\\1" EXIF_VERSION_MINOR  "${_exif_version}")
-        string(REGEX REPLACE "^.*Version: [0-9]+\\.[0-9]+\\.([0-9]+).*$" "\\1" EXIF_VERSION_PATCH "${_exif_version}")
+        string(REGEX REPLACE "^.*Version: [0-9]+\\.([0-9]+).*$" "\\1" EXIF_VERSION_MINOR
+                             "${_exif_version}")
+        string(REGEX REPLACE "^.*Version: [0-9]+\\.[0-9]+\\.([0-9]+).*$" "\\1" EXIF_VERSION_PATCH
+                             "${_exif_version}")
         set(EXIF_VERSION_STRING "${EXIF_VERSION_MAJOR}.${EXIF_VERSION_MINOR}.${EXIF_VERSION_PATCH}")
     else(EXISTS ${_exif_pkg_config_file})
         set(EXIF_VERSION_STRING "")
@@ -93,7 +103,7 @@ else()
     set(EXIF_VERSION_STRING ${EXIF_VERSION})
 endif()
 
-### OPTIONS and COMPONENTS section ###
+# OPTIONS and COMPONENTS section ###
 if(EXIF_USE_STATIC_LIB)
     set(_exif_shared_lib ${EXIF_LIBRARY})
     if(WIN32 AND NOT MSVC)
@@ -113,20 +123,14 @@ if(EXIF_USE_STATIC_LIB)
 endif(EXIF_USE_STATIC_LIB)
 
 mark_as_advanced(
-    EXIF_LIBRARY
-    EXIF_INCLUDE_DIR
-    EXIF_VERSION_STRING
-    _exif_pkg_config_file
-    _exif_shared_lib
+    EXIF_LIBRARY EXIF_INCLUDE_DIR EXIF_VERSION_STRING _exif_pkg_config_file _exif_shared_lib
     _exif_static_lib)
 
-
-### final check ###
-find_package_handle_standard_args(EXIF
-    REQUIRED_VARS
-        EXIF_LIBRARY EXIF_INCLUDE_DIR
-    VERSION_VAR
-        EXIF_VERSION_STRING)
+# final check ###
+find_package_handle_standard_args(
+    EXIF
+    REQUIRED_VARS EXIF_LIBRARY EXIF_INCLUDE_DIR
+    VERSION_VAR EXIF_VERSION_STRING)
 
 if(EXIF_FOUND)
     set(EXIF_INCLUDE_DIRS ${EXIF_INCLUDE_DIR} "${EXIF_INCLUDE_DIR}/libexif")

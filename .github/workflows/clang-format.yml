@@ -13,3 +13,49 @@ jobs:
           exclude: './src/contrib'
           extensions: 'h,cc'
           clangFormatVersion: 18
+
+  cmake-format:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cmake-file:
+          - "CMakeLists.txt"
+          - "./cmake/Findcxxopts.cmake"
+          - "./cmake/Findduktape.cmake"
+          - "./cmake/FindEBML.cmake"
+          - "./cmake/FindEXIF.cmake"
+          - "./cmake/FindFFMPEG.cmake"
+          - "./cmake/FindFFMpegThumbnailer.cmake"
+          - "./cmake/FindFilesystem.cmake"
+          - "./cmake/FindGMock.cmake"
+          - "./cmake/FindInotify.cmake"
+          - "./cmake/Findjsoncpp.cmake"
+          - "./cmake/FindLastFMLib.cmake"
+          - "./cmake/FindLFS.cmake"
+          - "./cmake/FindLibExiv2.cmake"
+          - "./cmake/FindLibMagic.cmake"
+          - "./cmake/FindLibraryWithDebug.cmake"
+          - "./cmake/Findlibsystemd.cmake"
+          - "./cmake/Findlibzip.cmake"
+          - "./cmake/Findlibzippp.cmake"
+          - "./cmake/FindMatroska.cmake"
+          - "./cmake/FindMySQL.cmake"
+          - "./cmake/FindNPUPNP.cmake"
+          - "./cmake/Findpugixml.cmake"
+          - "./cmake/Findspdlog.cmake"
+          - "./cmake/FindSQLite3.cmake"
+          - "./cmake/FindSystemd.cmake"
+          - "./cmake/FindTaglib.cmake"
+          - "./cmake/FindUPNP.cmake"
+          - "./cmake/FindUUID.cmake"
+          - "./cmake/Findwavpack.cmake"
+          - "./cmake/GenCompileInfo.cmake"
+          - "./cmake/generateDoc.cmake"
+          - "./cmake/packaging.cmake"
+    steps:
+      - uses: actions/checkout@v6
+      - name: Install cmake-format
+        run: pip install cmakelang
+
+      - name: Run cmake-format ${{ matrix.cmake-file }}
+        run: cmake-format -c ./.cmake-format.py --check ${{ matrix.cmake-file }}
