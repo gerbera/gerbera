@@ -4,6 +4,7 @@
 
 - Add Autolabeler
 - Bump ReleaseDrafter from 6 to 7
+- Fix init with disabled ffmpegthumbnailer
 - Fix SQL Migration Statement
 - Run cmake-format
 - Update to jsoncpp 1.9.7
