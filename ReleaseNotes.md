@@ -1,10 +1,20 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v3.2.1
+
+This release fixes a small issue in the migration for MySQL and PostgreSQL databases
+and a startup issue when disabling ffmpegthumbnailer.
+
+### FIXES
+
+- Database migration for MySQL and PostgreSQL
+- Init with disabled ffmpegthumbnailer
 
 ### Code Improvements
 
 - Update maximum versions of pupnp (1.18.3), jsoncpp (1.9,7)
+- Upgrade of release-drafter
+- Make use of autolabeler
 
 ## v3.2.0
 

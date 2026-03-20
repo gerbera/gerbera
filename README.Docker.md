@@ -30,11 +30,11 @@ able to access the container from the docker host with this method by default.
 
 # Transcoding Tools
 Transcoding tools are made available in a separate image with the `-transcoding` suffix,
-e.g. `gerbera/gerbera:3.2.0-transcoding`. It includes tools such as ffmpeg and vlc.
+e.g. `gerbera/gerbera:3.2.1-transcoding`. It includes tools such as ffmpeg and vlc.
 
 # Debug build
 A full debug build is available as separate image with the `-debug` suffix,
-e.g. `gerbera/gerbera:3.2.0-debug`. It is building most libraries and tools based on the latest supported versions.
+e.g. `gerbera/gerbera:3.2.1-debug`. It is building most libraries and tools based on the latest supported versions.
 
 # Examples
 
@@ -44,14 +44,14 @@ $ docker run \
     --name some-gerbera \
     --network=host \
     -v /some/files:/mnt/content:ro \
-     gerbera/gerbera:3.2.0
+     gerbera/gerbera:3.2.1
 ```
 
 or for those that prefer docker-compose:
 
 ```console
 ---
-version: "3.2.0"
+version: "3.2.1"
 services:
   gerbera:
     image: gerbera/gerbera
@@ -80,7 +80,7 @@ $ docker run \
     --network=host \
     -v /some/files:/mnt/content:ro \
     -v /some/path/config.xml:/var/run/gerbera/config.xml \
-     gerbera/gerbera:3.2.0
+     gerbera/gerbera:3.2.1
 ```
 
 ## Keep config, database and runtime files outside
@@ -90,7 +90,7 @@ $ docker run \
     --network=host \
     -v /some/files:/mnt/content:ro \
     -v /some/path:/var/run/gerbera \
-     gerbera/gerbera:3.2.0
+     gerbera/gerbera:3.2.1
 ```
 Make sure that the container user has write access the the config path.
 
@@ -104,7 +104,7 @@ $ docker run \
     --network=host \
     --expose <your-port>:<your-port> \
     -v /some/files:/mnt/content:ro \
-     gerbera/gerbera:3.2.0 gerbera --port <your-port> --config /var/run/gerbera/config.xml
+     gerbera/gerbera:3.2.1 gerbera --port <your-port> --config /var/run/gerbera/config.xml
 ```
 
 ## Overwrite default user and group id
@@ -118,7 +118,7 @@ $ docker run \
     --env UID=<newuid> \
     --env GID=<newgid> \
     -v /some/files:/mnt/content:ro \
-     gerbera/gerbera:3.2.0 gerbera --config /var/run/gerbera/config.xml
+     gerbera/gerbera:3.2.1 gerbera --config /var/run/gerbera/config.xml
 ```
 
 ## Avoid certificate check with MySQL/MariaDB
@@ -132,7 +132,7 @@ $ docker run \
     --network=host \
     --env MARIADB_TLS_DISABLE_PEER_VERIFICATION=1 \
     -v /some/files:/mnt/content:ro \
-     gerbera/gerbera:3.2.0 gerbera --config /var/run/gerbera/config.xml
+     gerbera/gerbera:3.2.1 gerbera --config /var/run/gerbera/config.xml
 ```
 
 # Build Variables
