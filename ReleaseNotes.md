@@ -4,7 +4,7 @@
 
 ### Code Improvements
 
-- Update maximum versions of pupnp (1.18.3)
+- Update maximum versions of pupnp (1.18.3), jsoncpp (1.9,7)
 
 ## v3.2.0
 

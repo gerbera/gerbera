@@ -6,6 +6,7 @@
 - Bump ReleaseDrafter from 6 to 7
 - Fix SQL Migration Statement
 - Run cmake-format
+- Update to jsoncpp 1.9.7
 - Update to pupnp 1.18.3
 
 ### v3.2.0

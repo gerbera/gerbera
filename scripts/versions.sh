@@ -85,7 +85,7 @@ else
     SPDLOG="1.17.0"
     WAVPACK="5.9.0"
     TAGLIB="2.2.1"
-    JSONCPP="1.9.6"
+    JSONCPP="1.9.7"
     CMAKE="4.2.3"
     PQXX="7.10.3"
     LIBZIP="v1.11.4"
