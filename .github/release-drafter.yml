@@ -43,13 +43,13 @@ no-changes-template: ' * Nothing'
 template: |
   We are happy to announce that Gerbera Media Server $NEXT_PATCH_VERSION is now available.
 
-  ## Changes
+  # Documentation
+
+  Please see our [Documentation](https://docs.gerbera.io/en/stable) for how to [install the latest stable Gerbera version](https://docs.gerbera.io/en/stable/install.html) on your system.
+
+  # Changes
 
   $CHANGES
 
-  ## Documentation
-
-  Please see our [Documentation](https://docs.gerbera.io/en/stable) for how to [install the latest stable Gerbera version](https://docs.gerbera.io/en/stable/install.html) on your system.
-  
-  ## Full Changelog
+  # Full Changelog
   https://github.com/gerbera/gerbera/compare/$PREVIOUS_TAG...v$NEXT_PATCH_VERSION
