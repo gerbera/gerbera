@@ -1,8 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v3.2.1
 
 - Add Autolabeler
+- Bump flatted from 3.4.1 to 3.4.2 in /gerbera-web
 - Bump ReleaseDrafter from 6 to 7
 - Fix init with disabled ffmpegthumbnailer
 - Fix SQL Migration Statement
