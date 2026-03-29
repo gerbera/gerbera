@@ -80,23 +80,23 @@ if [ ! -f /var/run/gerbera/config.xml ]; then
   fi
 fi
 
-# --- Device permissions -----------------------------------------------------
-for dev in /dev/video10 /dev/video11 /dev/video12 /dev/dri; do
-  if [ -e "$dev" ]; then
-    sudo chown root:video "$dev"
-  fi
-done
-
 # --- Ownership of directory's -----------------------------------------
-# Restamp everything under /var/run/gerbera to the runtime _UID:_GID.
+# Align everything under /var/run/gerbera to the runtime _UID:_GID.
 sudo chown -R "${_UID}:${_GID}" /var/run/gerbera
-# Restamp everything under /mnt/customization to the runtime _UID:_GID.
+# Align everything under /mnt/customization to the runtime _UID:_GID.
 sudo chown -R "${_UID}:${_GID}" /mnt/customization
 
 # Ensure the group can read config.xml (e.g. for tooling running as the same group).
 if [ -f /var/run/gerbera/config.xml ]; then
   sudo chmod g+r /var/run/gerbera/config.xml
 fi
+
+# --- Device permissions -----------------------------------------------------
+for dev in /dev/video10 /dev/video11 /dev/video12 /dev/dri; do
+  if [ -e "$dev" ]; then
+    sudo chown root:video "$dev"
+  fi
+done
 
 # --- Privilege drop ---------------------------------------------------------
 # The Docker CMD is: /bin/sh -c "gerbera --port ..."
