@@ -45,7 +45,7 @@ unset _nl
 
 # --- UID remapping ----------------------------------------------------------
 if [ "${_UID}" -ne "$IMAGE_UID" ] && [ "${_UID}" -gt 0 ]; then
-  sudo usermod -u "${_UID}" "$IMAGE_USER"
+  sudo usermod -u "${_UID}" -s "$_NOLOGIN" "$IMAGE_USER"
 fi
 
 # --- GID remapping ----------------------------------------------------------
