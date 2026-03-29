@@ -50,20 +50,16 @@ fi
 
 # --- GID remapping ----------------------------------------------------------
 if [ "${_GID}" -ne "$IMAGE_GID" ] && [ "${_GID}" -gt 0 ]; then
-  # groupmod needs a group name, not a GID number.
   _GROUP_NAME=$(getent group "${_GID}" | cut -d: -f1)
   sudo groupmod -g "${_GID}" "$IMAGE_GROUP" \
     || sudo usermod -a -G "${_GROUP_NAME:-$IMAGE_GROUP}" "$IMAGE_USER"
 fi
-
-
 
 # --- Config directory setup -------------------------------------------------
 # Create the run directory if missing
 if [ ! -d /var/run/gerbera/ ]; then
   [ "$(id -u)" -eq '0' ] && mkdir -p /var/run/gerbera || sudo mkdir -p /var/run/gerbera
 fi
-
 
 if [ ! -f /var/run/gerbera/config.xml ]; then
   # Generate a config file with home set
@@ -115,7 +111,7 @@ if [[ "$3" =~ $grb_pattern || "$1" == "gerbera" ]]; then
       # Slow path: minimal wrapper script and hand off via su.
       _run=/var/run/gerbera/run.sh
       {
-        printf '#!/bin/sh\nexec'
+        printf '#!/bin/bash\nexec'
         printf ' %q' "$@"
         printf '\n'
       } | sudo tee "$_run" > /dev/null
