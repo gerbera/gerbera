@@ -59,9 +59,9 @@ fi
 
 
 # --- Config directory setup -------------------------------------------------
-# Create the run directory when it is missing; _UID/_GID own it.
-if [ ! -d /var/run/gerbera/ ] && [ "$(id -u)" -ne '0' ]; then
-  sudo mkdir -p /var/run/gerbera
+# Create the run directory if missing
+if [ ! -d /var/run/gerbera/ ]; then
+  [ "$(id -u)" -eq '0' ] && mkdir -p /var/run/gerbera || sudo mkdir -p /var/run/gerbera
 fi
 
 
