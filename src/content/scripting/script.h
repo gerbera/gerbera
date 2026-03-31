@@ -193,12 +193,12 @@ protected:
     std::shared_ptr<Content> content;
     std::shared_ptr<ScriptingRuntime> runtime;
     std::shared_ptr<StringConverter> sc;
+    std::string contextName;
 
 private:
     bool hasCaseSensitiveNames;
     bool needResult;
     std::string entrySeparator;
-    std::string contextName;
     std::string objectName;
     std::string scriptPath;
     void _load(const fs::path& scriptPath);

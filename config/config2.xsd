@@ -704,6 +704,7 @@
                 <xs:element ref="image-file" minOccurs="0"/>
                 <xs:element ref="playlist" minOccurs="0"/>
                 <xs:element ref="meta-file" minOccurs="0"/>
+                <xs:element ref="cuesheet" minOccurs="0"/>
             </xs:all>
         </xs:complexType>
     </xs:element>
@@ -711,6 +712,7 @@
     <xs:element name="video-file" type="xs:string"/>
     <xs:element name="image-file" type="xs:string"/>
     <xs:element name="meta-file" type="xs:string"/>
+    <xs:element name="cuesheet" type="xs:string"/>
     <xs:element name="playlist">
         <xs:complexType>
             <xs:simpleContent>

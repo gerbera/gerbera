@@ -75,13 +75,17 @@ public:
     /// @brief check whether the handler is enabled for the file type
     virtual bool isEnabled(const std::string& contentType) { return true; }
     /// @brief check whether file type is supported by handler
-    virtual bool isSupported(const std::string& contentType,
+    virtual bool isSupported(
+        const std::string& contentType,
         bool isOggTheora,
         const std::string& mimeType,
         ObjectType mediaType) { return true; }
     /// @brief read metadata from file and add to object
     /// @param obj Object to handle
-    virtual bool fillMetadata(const std::shared_ptr<CdsObject>& obj) = 0;
+    virtual bool fillMetadata(
+        const std::shared_ptr<CdsObject>& obj,
+        std::vector<int>& newIds)
+        = 0;
 
     /// @brief stream content of object or resource to client
     /// @param obj Object to stream

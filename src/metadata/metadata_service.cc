@@ -72,6 +72,7 @@
 #endif
 
 #include "metadata/metacontent_handler.h"
+#include "metadata/metafile_handler.h"
 
 #include <array>
 
@@ -103,6 +104,7 @@ static const std::map<MetadataType, std::string_view> handlerNames {
     { MetadataType::ContainerArt, "ContainerArt" },
     { MetadataType::Subtitle, "Subtitle" },
     { MetadataType::Metafile, "Metafile" },
+    { MetadataType::CueSheet, "CueSheet" },
     { MetadataType::ResourceFile, "ResourceFile" },
 };
 
@@ -140,14 +142,16 @@ MetadataService::MetadataService(const std::shared_ptr<Context>& context, const 
         { MetadataType::FanArt, std::make_shared<FanArtHandler>(context) },
         { MetadataType::ContainerArt, std::make_shared<ContainerArtHandler>(context) },
         { MetadataType::Subtitle, std::make_shared<SubtitleHandler>(context) },
-        { MetadataType::Metafile, std::make_shared<MetafileHandler>(context, content) },
+        { MetadataType::Metafile, std::make_shared<MetaFileHandler>(context, content) },
+        { MetadataType::CueSheet, std::make_shared<CueSheetHandler>(context, content) },
         { MetadataType::ResourceFile, std::make_shared<ResourceHandler>(context) },
     };
 }
 
 bool MetadataService::extractMetaData(
     const std::shared_ptr<CdsItem>& item,
-    const fs::directory_entry& dirEnt)
+    const fs::directory_entry& dirEnt,
+    std::vector<int>& newIds)
 {
     std::error_code ec;
     if (!isRegularFile(dirEnt, ec))
@@ -158,7 +162,7 @@ bool MetadataService::extractMetaData(
 
     auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
     resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(mimetype));
-    resource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(filesize));
+    resource->addAttribute(ResourceAttribute::SIZE, filesize);
 
     item->addResource(resource);
     item->clearMetaData();
@@ -198,7 +202,7 @@ bool MetadataService::extractMetaData(
         if (handlers.at(handler)->isEnabled(contentType) && handlers.at(handler)->isSupported(contentType, isOggTheora, mimetype, mediaType)) {
             try {
                 log_debug("Running {} for {}", handlerNames.at(handler), item->getLocation().c_str());
-                auto handlerResult = handlers.at(handler)->fillMetadata(item);
+                auto handlerResult = handlers.at(handler)->fillMetadata(item, newIds);
                 result = result || handlerResult;
             } catch (const std::exception& ex) {
                 log_error("fillMetadata {} failed for {}: {}", handlerNames.at(handler), item->getLocation().c_str(), ex.what());
@@ -221,7 +225,8 @@ bool MetadataService::extractMetaData(
 
 bool MetadataService::attachResourceFiles(
     const std::shared_ptr<CdsItem>& item,
-    const fs::directory_entry& dirEnt)
+    const fs::directory_entry& dirEnt,
+    std::vector<int>& newIds)
 {
     std::error_code ec;
     if (!isRegularFile(dirEnt, ec))
@@ -249,7 +254,42 @@ bool MetadataService::attachResourceFiles(
         if (handlers.at(handler)->isEnabled(contentType) && handlers.at(handler)->isSupported(contentType, false, mimeType, mediaType)) {
             try {
                 log_debug("Running {} for {}", handlerNames.at(handler), item->getLocation().c_str());
-                auto handlerResult = handlers.at(handler)->fillMetadata(item);
+                auto handlerResult = handlers.at(handler)->fillMetadata(item, newIds);
+                result = result || handlerResult;
+            } catch (const std::exception& ex) {
+                log_error("fillMetadata {} failed for {}: {}", handlerNames.at(handler), item->getLocation().c_str(), ex.what());
+            }
+        } else {
+            log_debug("Handler {} not supported for {}, {}, {}, {}", handlerNames.at(handler), item->getLocation().c_str(), contentType, mimeType, EnumMapper::mapObjectType(mediaType));
+        }
+    }
+
+    return result;
+}
+
+bool MetadataService::afterCreation(
+    const std::shared_ptr<CdsItem>& item,
+    const fs::directory_entry& dirEnt,
+    std::vector<int>& newIds)
+{
+    std::error_code ec;
+    if (!isRegularFile(dirEnt, ec))
+        throw_std_runtime_error("Not a file: {}", dirEnt.path().c_str());
+
+    auto mediaType = item->getMediaType();
+    std::string mimeType = item->getMimeType();
+    std::string contentType = getValueOrDefault(mappings, mimeType);
+
+    constexpr auto metaHandlers = std::array {
+        // CueSheet from text files
+        MetadataType::CueSheet,
+    };
+    bool result = false;
+    for (auto handler : metaHandlers) {
+        if (handlers.at(handler)->isEnabled(contentType) && handlers.at(handler)->isSupported(contentType, false, mimeType, mediaType)) {
+            try {
+                log_debug("Running {} for {}", handlerNames.at(handler), item->getLocation().c_str());
+                auto handlerResult = handlers.at(handler)->fillMetadata(item, newIds);
                 result = result || handlerResult;
             } catch (const std::exception& ex) {
                 log_error("fillMetadata {} failed for {}: {}", handlerNames.at(handler), item->getLocation().c_str(), ex.what());
@@ -311,6 +351,8 @@ std::shared_ptr<MetadataHandler> MetadataService::getHandler(ContentHandler hand
         return handlers[MetadataType::ResourceFile];
     case ContentHandler::METAFILE:
         return handlers[MetadataType::Metafile];
+    case ContentHandler::CUESHEET:
+        return handlers[MetadataType::CueSheet];
     case ContentHandler::DEFAULT:
     case ContentHandler::TRANSCODE:
     case ContentHandler::EXTURL:

@@ -27,6 +27,7 @@
 #ifndef __CONTENT_H__
 #define __CONTENT_H__
 
+#include "common.h"
 #include "util/grb_fs.h"
 #include "util/timer.h"
 
@@ -71,9 +72,21 @@ public:
 
     virtual std::shared_ptr<ScriptingRuntime> getScriptingRuntime() const = 0;
     /// @brief parse a file containing metadata for object
-    virtual void parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const = 0;
+    virtual void parseMetafile(
+        const std::shared_ptr<CdsObject>& obj,
+        const fs::path& path) const
+        = 0;
+    /// @brief parse a file containing cuesheet
+    virtual std::vector<int> parseCueSheet(
+        const std::shared_ptr<CdsObject>& obj,
+        const fs::path& path) const
+        = 0;
 
-    virtual bool isHiddenFile(const fs::directory_entry& dirEntry, bool isDirectory, const AutoScanSetting& settings) = 0;
+    virtual bool isHiddenFile(
+        const fs::directory_entry& dirEntry,
+        bool isDirectory,
+        const AutoScanSetting& settings)
+        = 0;
 
     /// @brief Ensures that a container given by it's location on disk is
     /// present in the database. If it does not exist it will be created, but
@@ -82,9 +95,19 @@ public:
     /// @param path location of the container to handle
     /// @return objectID of the container given by path
     virtual int ensurePathExistence(const fs::path& path) const = 0;
-    virtual void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath = {}, bool cancellable = true) = 0;
-    virtual void handlePersistentAutoscanRecreate(const std::shared_ptr<AutoscanDirectory>& adir) = 0;
-    virtual void triggerPlayHook(const std::string& group, const std::shared_ptr<CdsObject>& obj) = 0;
+    virtual void rescanDirectory(
+        const std::shared_ptr<AutoscanDirectory>& adir,
+        int objectId,
+        fs::path descPath = {},
+        bool cancellable = true)
+        = 0;
+    virtual void handlePersistentAutoscanRecreate(
+        const std::shared_ptr<AutoscanDirectory>& adir)
+        = 0;
+    virtual void triggerPlayHook(
+        const std::string& group,
+        const std::shared_ptr<CdsObject>& obj)
+        = 0;
 
     /// @brief register executor
     /// When an external process is launched we will register the executor
@@ -180,8 +203,11 @@ public:
     /// @param lowPriority for immediate processing or in normal order
     /// @param cancellable can be canceled
     /// @return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    virtual std::shared_ptr<CdsObject> addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting,
-        bool lowPriority = false, bool cancellable = true)
+    virtual std::shared_ptr<CdsObject> addFile(
+        const fs::directory_entry& dirEnt,
+        AutoScanSetting& asSetting,
+        bool lowPriority = false,
+        bool cancellable = true)
         = 0;
     /// @brief Adds a file or directory to the database.
     /// @param dirEnt absolute path to the file
@@ -190,16 +216,30 @@ public:
     /// @param lowPriority for immediate processing or in normal order
     /// @param cancellable can be canceled
     /// @return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    virtual std::shared_ptr<CdsObject> addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
-        bool lowPriority = false, bool cancellable = true)
+    virtual std::shared_ptr<CdsObject> addFile(
+        const fs::directory_entry& dirEnt,
+        const fs::path& rootpath,
+        AutoScanSetting& asSetting,
+        bool lowPriority = false,
+        bool cancellable = true)
         = 0;
     /// @brief Adds a virtual container chain specified by path.
     /// @param chain list of container objects to create
     /// @param refItem object to take artwork from
+    /// @param rootId id of the parent container
     /// @return ID of the last container in the chain.
-    virtual std::pair<int, bool> addContainerTree(const std::vector<std::shared_ptr<CdsObject>>& chain, const std::shared_ptr<CdsObject>& refItem) = 0;
+    virtual std::pair<int, bool> addContainerTree(
+        const std::vector<std::shared_ptr<CdsObject>>& chain,
+        const std::shared_ptr<CdsObject>& refItem,
+        int rootId = CDS_ID_ROOT)
+        = 0;
     // returns nullptr if file does not exist or is ignored due to configuration
-    virtual std::shared_ptr<CdsObject> createObjectFromFile(const std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& dirEnt, bool followSymlinks, bool allowFifo = false) = 0;
+    virtual std::shared_ptr<CdsObject> createObjectFromFile(
+        const std::shared_ptr<AutoscanDirectory>& adir,
+        const fs::directory_entry& dirEnt,
+        bool followSymlinks,
+        bool allowFifo = false)
+        = 0;
 };
 
 #endif // __CONTENT_H__

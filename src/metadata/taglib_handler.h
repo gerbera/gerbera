@@ -59,7 +59,9 @@ public:
         ObjectType mediaType) override;
     /// @brief read metadata from file and add to object
     /// @param obj Object to handle
-    bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
+    bool fillMetadata(
+        const std::shared_ptr<CdsObject>& obj,
+        std::vector<int>& newIds) override;
 
     /// @brief stream content of object or resource to client
     /// @param obj Object to stream

@@ -273,7 +273,9 @@ bool FanArtHandler::isSupported(
     return mediaType == ObjectType::Audio || mediaType == ObjectType::Video;
 }
 
-bool FanArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool FanArtHandler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
 {
     log_debug("Running fanart handler on {}", obj->getLocation().c_str());
     auto pathList = setup->getContentPath(obj, SETTING_FANART);
@@ -332,7 +334,9 @@ ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context
     }
 }
 
-bool ContainerArtHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool ContainerArtHandler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
 {
     auto pathList = setup->getContentPath(obj, SETTING_CONTAINERART, config->getOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION));
     if (pathList.empty() || pathList[0].empty()) {
@@ -406,7 +410,9 @@ bool SubtitleHandler::isSupported(
     return mediaType == ObjectType::Video;
 }
 
-bool SubtitleHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool SubtitleHandler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
 {
     auto pathList = setup->getContentPath(obj, SETTING_SUBTITLE);
     auto objFilename = obj->getLocation().filename().stem().string();
@@ -471,42 +477,6 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(const std::shared_ptr<C
     return std::make_unique<FileIOHandler>(path);
 }
 
-std::unique_ptr<ContentPathSetup> MetafileHandler::setup {};
-
-MetafileHandler::MetafileHandler(const std::shared_ptr<Context>& context, std::shared_ptr<Content> content)
-    : MetacontentHandler(context)
-    , content(std::move(content))
-{
-    if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST);
-    }
-}
-
-bool MetafileHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
-{
-    bool result = false;
-#ifdef HAVE_JS
-    auto pathList = setup->getContentPath(obj, SETTING_METAFILE);
-
-    if (pathList.empty() || pathList[0].empty())
-        obj->removeResource(ContentHandler::METAFILE);
-
-    for (auto&& path : pathList) {
-        if (!path.empty()) {
-            log_debug("Running metafile handler on {} -> '{}'", obj->getLocation().c_str(), path.c_str());
-            content->parseMetafile(obj, path);
-            result = true;
-        }
-    }
-#endif
-    return result;
-}
-
-std::unique_ptr<IOHandler> MetafileHandler::serveContent(const std::shared_ptr<CdsObject>& obj, const std::shared_ptr<CdsResource>& resource)
-{
-    return {};
-}
-
 std::unique_ptr<ContentPathSetup> ResourceHandler::setup {};
 
 ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
@@ -517,7 +487,9 @@ ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
     }
 }
 
-bool ResourceHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool ResourceHandler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
 {
     auto pathList = setup->getContentPath(obj, SETTING_RESOURCE);
 

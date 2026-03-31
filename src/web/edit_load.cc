@@ -264,6 +264,20 @@ void Web::EditLoad::writeItemInfo(
     mimeType["editable"] = true;
     item["mime-type"] = mimeType;
 
+    if (objItem->getTrackNumber() > 0) {
+        Json::Value track;
+        track["value"] = fmt::to_string(objItem->getTrackNumber());
+        track["editable"] = true;
+        item["track"] = track;
+    }
+
+    if (objItem->getPartNumber() > 0) {
+        Json::Value part;
+        part["value"] = fmt::to_string(objItem->getPartNumber());
+        part["editable"] = true;
+        item["part"] = part;
+    }
+
     auto url = xmlBuilder->renderItemImageURL(objItem);
     if (url) {
         Json::Value image;

@@ -89,22 +89,9 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
         throw;
     }
 
-    currentHandle = nullptr;
-
     log_debug("Done metafile {} ...", path.string());
 
-    delete[] currentLine;
-    currentLine = nullptr;
-    xmlDoc.reset();
-    root = nullNode;
-
-    currentObjectID = INVALID_OBJECT_ID;
-
-    gc_counter++;
-    if (gc_counter > JS_CALL_GC_AFTER_NUM) {
-        duk_gc(ctx, 0);
-        gc_counter = 0;
-    }
+    cleanUp();
 }
 
 std::pair<std::shared_ptr<CdsObject>, int> MetafileParserScript::createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath)

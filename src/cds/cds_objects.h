@@ -72,6 +72,10 @@ enum class CdsEntryType : int {
     ExternalUrl,
     /// @brief Dynamic folder pointing to some search
     DynamicFolder,
+    /// @brief the object was created based on a file used in a cuesheet etc
+    ExtraFile,
+    /// @brief the object was created based on a file used in a cuesheet etc
+    ExtraDirectory,
 };
 
 /// @brief Generic object in the Content Directory.
@@ -250,9 +254,9 @@ public:
     /// @brief Query information on object type: item, container, etc.
     unsigned int getObjectType() const { return objectType; }
     bool isItem() const { return isPureItem() || isExternalItem(); }
-    bool isPureItem() const { return entryType == CdsEntryType::File || entryType == CdsEntryType::VirtualItem; }
+    bool isPureItem() const { return entryType == CdsEntryType::File || entryType == CdsEntryType::VirtualItem || entryType == CdsEntryType::ExtraFile; }
     bool isExternalItem() const { return entryType == CdsEntryType::ExternalUrl; }
-    bool isContainer() const { return entryType == CdsEntryType::Directory || entryType == CdsEntryType::VirtualContainer || entryType == CdsEntryType::DynamicFolder; }
+    bool isContainer() const { return entryType == CdsEntryType::Directory || entryType == CdsEntryType::VirtualContainer || entryType == CdsEntryType::DynamicFolder || entryType == CdsEntryType::ExtraDirectory; }
 
     /// @brief Get flags of an object.
     unsigned int getFlags() const { return objectFlags; }

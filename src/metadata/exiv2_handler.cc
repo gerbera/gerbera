@@ -173,7 +173,9 @@ bool Exiv2Handler::isSupported(
     return mediaType == ObjectType::Image;
 }
 
-bool Exiv2Handler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool Exiv2Handler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !enabled)

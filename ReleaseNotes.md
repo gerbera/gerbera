@@ -1,5 +1,23 @@
 # Gerbera - UPnP AV Mediaserver.
 
+## HEAD
+
+This release add support for cuesheets which are similar to playlists but offer new tracks with their own metadata and
+therefor are added to the physical layout and are handled in virtual layout.
+
+### NEW Features
+
+- Support for cuesheets
+
+### FIXES
+
+- Resource migration from old gerbera versions
+- Editing some config values on web ui
+
+### Code Improvements
+
+- Update maximum versions of pupnp (1.18.4)
+
 ## v3.2.1
 
 This release fixes a small issue in the migration for MySQL and PostgreSQL databases

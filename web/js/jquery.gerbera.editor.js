@@ -383,9 +383,14 @@
           appendMetaItem(tbody, item.metadata[i].metaname, item.metadata[i].metavalue);
         }
       }
-      if (item.flags && item.flags.value) {
+      if (item.flags || item.track || item.part) {
         const tbody = makeDetailsHead(metatable, 'Extras', '', itemData.onData);
-        appendMetaItem(tbody, "flags", item.flags.value);
+        if (item.flags)
+          appendMetaItem(tbody, "flags", item.flags.value);
+        if (item.track)
+          appendMetaItem(tbody, "track", item.track.value);
+        if (item.part)
+          appendMetaItem(tbody, "part", item.part.value);
         tbody.hide();
         metatable.append(tbody);
       }

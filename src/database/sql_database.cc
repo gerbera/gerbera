@@ -597,7 +597,7 @@ void SQLDatabase::fillDatabase()
                 log_debug("Generated insert: {}", qb);
 
                 auto id = exec(qb, browseColumnMapper->mapQuoted(BrowseColumn::Id, true));
-                if (id != obj->getID() && obj->getID() <= 0) {
+                if (id != obj->getID() && obj->getID() <= CDS_ID_ROOT) {
                     // work around autoincrement columns not accepting value
                     auto upd = fmt::format("UPDATE {0} SET {1} = {2} WHERE {1} = {3}", CDS_OBJECT_TABLE, identifier("id"), quote(obj->getID()), quote(id));
                     log_debug("Generated update: {}", upd);
@@ -686,7 +686,7 @@ std::shared_ptr<CdsObject> SQLDatabase::checkRefID(const std::shared_ptr<CdsObje
     if (location.empty())
         throw DatabaseException("tried to check refID without a location set", LINE_MESSAGE);
 
-    if (refID > 0) {
+    if (refID > CDS_ID_ROOT) {
         try {
             auto refObj = loadObject(refID);
             if (refObj && refObj->getLocation() == location)
@@ -718,18 +718,19 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
     if (playlistRef) {
         if (obj->isPureItem())
             throw DatabaseException("Tried to add pure item with PLAYLIST_REF flag set", LINE_MESSAGE);
-        if (obj->getRefID() <= 0)
+        if (obj->getRefID() <= CDS_ID_ROOT)
             throw DatabaseException(fmt::format("PLAYLIST_REF flag set for '{}' but refId is <=0", obj->getLocation().c_str()), LINE_MESSAGE);
         refObj = loadObject(obj->getRefID());
         log_vdebug("Setting Playlist {} ref to {}", obj->getLocation().c_str(), refObj->getLocation().c_str());
         if (!refObj)
             throw DatabaseException("PLAYLIST_REF flag set but refId doesn't point to an existing object", LINE_MESSAGE);
     } else if (obj->isVirtual() && obj->isPureItem()) {
-        hasReference = true;
+        hasReference = obj->getEntryType() != CdsEntryType::ExtraFile;
         refObj = checkRefID(obj);
         if (!refObj)
-            throw DatabaseException("Tried to add or update a virtual object with illegal reference id and an illegal location", LINE_MESSAGE);
-    } else if (obj->getRefID() > 0) {
+            throw DatabaseException("Tried to add or update a object with illegal reference id and an illegal location", LINE_MESSAGE);
+        log_debug("refObj {}", refObj->getLocation().c_str());
+    } else if (obj->getRefID() > CDS_ID_ROOT) {
         if (obj->hasFlag(ObjectFlag::OnlineService)) {
             hasReference = true;
             refObj = loadObject(obj->getRefID());
@@ -793,7 +794,7 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
                 throw DatabaseException("tried to create or update a non-referenced item without a location set", LINE_MESSAGE);
             setCol(cdsObjectSql, BrowseColumn::Location, loc, browseColMap);
             if (obj->isPureItem()) {
-                if (parentID < 0) {
+                if (parentID < CDS_ID_ROOT) { // parent is unset
                     parentID = ensurePathExistence(loc.parent_path(), changedContainer);
                     log_debug("ensurePathExistence {} -> {}", loc.parent_path().string(), parentID);
                     obj->setParentID(parentID);
@@ -1475,6 +1476,9 @@ std::shared_ptr<CdsObject> SQLDatabase::findObjectByPath(
     case DbFileType::Any:
         et = std::vector<int> { int(CdsEntryType::File), int(CdsEntryType::Directory), int(CdsEntryType::VirtualContainer) };
         break;
+    case DbFileType::All:
+        et = std::vector<int> { int(CdsEntryType::File), int(CdsEntryType::Directory), int(CdsEntryType::VirtualContainer), int(CdsEntryType::ExtraFile) };
+        break;
     }
     auto where = std::vector {
         browseColumnMapper->getClause(BrowseColumn::LocationHash, quote(stringHash(fullpath.c_str()))),
@@ -1555,7 +1559,7 @@ int SQLDatabase::createContainer(
 {
     log_debug("Creating Container: parent: {}, name: '{}', path '{}', flags: {}, isVirt: {}, upnpClass: '{}', refId: {}",
         parentID, name, virtualPath, flags, isVirtual, upnpClass, refID);
-    if (refID > 0) {
+    if (refID > CDS_ID_ROOT) {
         auto refObj = loadObject(refID);
         if (!refObj)
             throw DatabaseException("tried to create container with refID set, but refID doesn't point to an existing object", LINE_MESSAGE);
@@ -1572,7 +1576,7 @@ int SQLDatabase::createContainer(
         { BrowseColumn::LocationHash, quote(stringHash(virtualPath)) },
         { BrowseColumn::Source, quote(int(source)) },
         { BrowseColumn::EntryType, quote(int(isVirtual ? CdsEntryType::VirtualContainer : CdsEntryType::Directory)) },
-        { BrowseColumn::RefId, (refID > 0) ? quote(refID) : SQL_NULL },
+        { BrowseColumn::RefId, (refID > CDS_ID_ROOT) ? quote(refID) : SQL_NULL },
     };
     beginTransaction("createContainer");
     Object2Table ot(std::move(dict), Operation::Insert, browseColumnMapper);
@@ -2028,10 +2032,12 @@ std::size_t SQLDatabase::getObjects(
     int refID)
 {
     auto where = std::vector {
-        browseColumnMapper->getClause(BrowseColumn::ParentId, parentID, true)
+        browseColumnMapper->getClause(BrowseColumn::ParentId, parentID, true),
     };
     if (refID > INVALID_OBJECT_ID) {
         where.push_back(browseColumnMapper->getClause(BrowseColumn::RefId, refID, true));
+    } else {
+        where.push_back(fmt::format("{} IN ({},{})", browseColumnMapper->mapQuoted(BrowseColumn::EntryType, true), int(CdsEntryType::File), int(CdsEntryType::Directory)));
     }
     auto getSql = fmt::format("SELECT {}, {} FROM {} WHERE {}",
         browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
@@ -2921,7 +2927,7 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
     _autoscanChangePersistentFlag(objectID, true);
 
     auto fields = std::map<AutoscanColumn, std::string> {
-        { AutoscanColumn::ObjId, objectID >= 0 ? quote(objectID) : SQL_NULL },
+        { AutoscanColumn::ObjId, objectID >= CDS_ID_ROOT ? quote(objectID) : SQL_NULL },
         { AutoscanColumn::ScanMode, quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) },
         { AutoscanColumn::Recursive, quote(adir->getRecursive()) },
         { AutoscanColumn::MediaType, quote(adir->getMediaType()) },
@@ -2933,7 +2939,7 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
         { AutoscanColumn::Interval, quote(adir->getInterval().count()) },
         { AutoscanColumn::LastModified, quote(adir->getPreviousLMT().count()) },
         { AutoscanColumn::Persistent, quote(adir->persistent()) },
-        { AutoscanColumn::Location, objectID >= 0 ? SQL_NULL : quote(adir->getLocation()) },
+        { AutoscanColumn::Location, objectID >= CDS_ID_ROOT ? SQL_NULL : quote(adir->getLocation()) },
         { AutoscanColumn::PathIds, pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ","))) },
         { AutoscanColumn::RetryCount, quote(adir->getRetryCount()) },
         { AutoscanColumn::DirTypes, quote(adir->hasDirTypes()) },
@@ -2963,7 +2969,7 @@ void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         _autoscanChangePersistentFlag(objectID, true);
     }
     auto fields = std::map<AutoscanColumn, std::string> {
-        { AutoscanColumn::ObjId, objectID >= 0 ? quote(objectID) : SQL_NULL },
+        { AutoscanColumn::ObjId, objectID >= CDS_ID_ROOT ? quote(objectID) : SQL_NULL },
         { AutoscanColumn::ScanMode, quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) },
         { AutoscanColumn::Recursive, quote(adir->getRecursive()) },
         { AutoscanColumn::MediaType, quote(adir->getMediaType()) },
@@ -2974,7 +2980,7 @@ void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirector
         { AutoscanColumn::CtVideo, quote(adir->getContainerTypes().at(AutoscanMediaMode::Video)) },
         { AutoscanColumn::Interval, quote(adir->getInterval().count()) },
         { AutoscanColumn::Persistent, quote(adir->persistent()) },
-        { AutoscanColumn::Location, objectID >= 0 ? SQL_NULL : quote(adir->getLocation()) },
+        { AutoscanColumn::Location, objectID >= CDS_ID_ROOT ? SQL_NULL : quote(adir->getLocation()) },
         { AutoscanColumn::PathIds, pathIds.empty() ? SQL_NULL : quote(fmt::format(",{},", fmt::join(pathIds, ","))) },
         { AutoscanColumn::RetryCount, quote(adir->getRetryCount()) },
         { AutoscanColumn::DirTypes, quote(adir->hasDirTypes()) },

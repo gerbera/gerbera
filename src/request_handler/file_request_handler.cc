@@ -292,7 +292,7 @@ std::shared_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(
         auto objID = stoiString(resource->getAttribute(ResourceAttribute::FANART_OBJ_ID));
         auto resID = stoiString(resource->getAttribute(ResourceAttribute::FANART_RES_ID));
         try {
-            auto resObj = (objID > 0 && objID != obj->getID()) ? database->loadObject(objID) : nullptr;
+            auto resObj = (objID > CDS_ID_ROOT && objID != obj->getID()) ? database->loadObject(objID) : nullptr;
             if (resObj) {
                 auto resRes = resObj->getResource(resID);
                 if (resRes) {
@@ -437,12 +437,13 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(
     auto params = URLUtils::parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
     auto obj = loadObject(params);
     auto resourceId = parseResourceInfo(params);
+    auto res = obj->getResource(resourceId);
 
     // Transcoding
     std::string trProfile = getValueOrDefault(params, URL_PARAM_TRANSCODE_PROFILE_NAME);
     std::string zipRequest = getValueOrDefault(params, URL_PARAM_ZIP_REQUEST);
     // Serve metadata resources
-    if (trProfile.empty() && zipRequest.empty() && obj->getResource(resourceId)->getHandlerType() != ContentHandler::DEFAULT) {
+    if (trProfile.empty() && zipRequest.empty() && res && res->getHandlerType() != ContentHandler::DEFAULT) {
         return openResource(obj, resourceId);
     }
 
@@ -465,9 +466,12 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(
         return openZip(obj);
     }
     content->triggerPlayHook(group, obj);
+    off_t offset = 0;
+    if (res)
+        offset = stoulString(res->getAttribute(ResourceAttribute::OFFSET));
 
     // Boring old file
-    return std::make_unique<FileIOHandler>(path);
+    return std::make_unique<FileIOHandler>(path, offset);
 }
 
 std::size_t FileRequestHandler::parseResourceInfo(
