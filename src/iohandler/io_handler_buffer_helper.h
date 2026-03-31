@@ -78,6 +78,7 @@ protected:
     bool signalAfterEveryRead {};
 
     // buffer stuff..
+    bool isFresh {};
     bool empty { true };
     std::size_t startIndex {};
     std::size_t endIndex {};

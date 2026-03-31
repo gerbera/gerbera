@@ -82,6 +82,7 @@ enum class ObjectType : int {
     Unknown = 0,
     Folder,
     Playlist,
+    Cuesheet,
     Audio,
     Video,
     Image,
@@ -111,6 +112,7 @@ enum class ResourceAttribute : int {
     ORIENTATION,
     PIXELFORMAT,
     LYRICS,
+    OFFSET,
     MAX
 };
 
@@ -135,6 +137,7 @@ enum class ContentHandler : int {
     CONTAINERART = 11,
     WAVPACK = 12,
     METAFILE = 13,
+    CUESHEET = 14,
     RESOURCE = 20,
 };
 
@@ -167,6 +170,7 @@ private:
         { ResourceAttribute::ORIENTATION, "orientation" },
         { ResourceAttribute::PIXELFORMAT, "pixelFormat" },
         { ResourceAttribute::LYRICS, "lyrics" },
+        { ResourceAttribute::OFFSET, "offset" },
         { ResourceAttribute::MAX, "unknown" },
     };
     inline static const std::map<ResourceAttribute, std::string> attrToDisplay {
@@ -190,6 +194,7 @@ private:
         { ResourceAttribute::ORIENTATION, "orientation" },
         { ResourceAttribute::PIXELFORMAT, "pixelFormat" },
         { ResourceAttribute::LYRICS, "lyrics" },
+        { ResourceAttribute::OFFSET, "offset" },
         { ResourceAttribute::MAX, "unknown" },
     };
     inline static const std::map<ResourceAttribute, ResourceDataType> attrToType {
@@ -213,6 +218,7 @@ private:
         { ResourceAttribute::ORIENTATION, ResourceDataType::Number },
         { ResourceAttribute::PIXELFORMAT, ResourceDataType::String },
         { ResourceAttribute::LYRICS, ResourceDataType::String },
+        { ResourceAttribute::OFFSET, ResourceDataType::Number },
         { ResourceAttribute::MAX, ResourceDataType::String },
     };
 

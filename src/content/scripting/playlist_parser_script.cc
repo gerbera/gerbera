@@ -52,6 +52,9 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& conte
     : ParserScript(content, parent, "playlist", "pls", true)
 {
     playlistFunction = config->getOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST);
+    linkObjects = config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS);
+    followSymlinks = config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
+    hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
 }
 
 std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(
@@ -77,9 +80,9 @@ std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cd
 
         if (!mainObj) {
             AutoScanSetting asSetting;
-            asSetting.followSymlinks = config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
+            asSetting.followSymlinks = followSymlinks;
             asSetting.recursive = false;
-            asSetting.hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
+            asSetting.hidden = hidden;
             asSetting.rescanResource = false;
             asSetting.async = false;
             asSetting.adir = content->findAutoscanDirectory(rootPath);
@@ -109,7 +112,7 @@ bool PlaylistParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
             cdsObj->setRefID(pcdId);
             cdsObj->setFlag(ObjectFlag::UseResourceReference);
         }
-    } else if (config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS)) {
+    } else if (linkObjects) {
         cdsObj->setFlag(ObjectFlag::PlaylistReference);
         cdsObj->setRefID(origObject->getID());
     }
@@ -118,7 +121,7 @@ bool PlaylistParserScript::setRefId(const std::shared_ptr<CdsObject>& cdsObj, co
 
 void PlaylistParserScript::handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont)
 {
-    if (config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS) && cont->getRefID() > 0) {
+    if (linkObjects && cont->getRefID() > CDS_ID_ROOT) {
         cont->setFlag(ObjectFlag::PlaylistReference);
     }
 }
@@ -193,34 +196,12 @@ void PlaylistParserScript::processPlaylistObject(
     try {
         call(obj, nullptr, playlistFunction, rootPath, "");
     } catch (const std::runtime_error&) {
-        currentHandle = nullptr;
-
-        delete[] currentLine;
-        currentLine = nullptr;
-
-        currentObjectID = INVALID_OBJECT_ID;
-        currentTask = nullptr;
-
+        cleanUp();
         throw;
     }
 
-    currentHandle = nullptr;
-
-    log_debug("Done playlist {} ({})...", obj->getLocation().string(), obj->getID());
-
-    delete[] currentLine;
-    currentLine = nullptr;
-    xmlDoc.reset();
-    root = nullNode;
-
-    currentObjectID = INVALID_OBJECT_ID;
-    currentTask = nullptr;
-
-    gc_counter++;
-    if (gc_counter > JS_CALL_GC_AFTER_NUM) {
-        duk_gc(ctx, 0);
-        gc_counter = 0;
-    }
+    log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
+    cleanUp();
 }
 
 #endif // HAVE_JS

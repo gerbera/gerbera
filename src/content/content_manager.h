@@ -101,8 +101,11 @@ public:
     /// @param lowPriority for immediate processing or in normal order
     /// @param cancellable can be canceled
     /// @return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    std::shared_ptr<CdsObject> addFile(const fs::directory_entry& dirEnt, AutoScanSetting& asSetting,
-        bool lowPriority = false, bool cancellable = true) override;
+    std::shared_ptr<CdsObject> addFile(
+        const fs::directory_entry& dirEnt,
+        AutoScanSetting& asSetting,
+        bool lowPriority = false,
+        bool cancellable = true) override;
 
     /// @brief Adds a file or directory to the database.
     /// @param dirEnt absolute path to the file
@@ -111,8 +114,12 @@ public:
     /// @param lowPriority for immediate processing or in normal order
     /// @param cancellable can be canceled
     /// @return object ID of the added file - only in blockign mode, when used in async mode this function will return INVALID_OBJECT_ID
-    std::shared_ptr<CdsObject> addFile(const fs::directory_entry& dirEnt, const fs::path& rootpath, AutoScanSetting& asSetting,
-        bool lowPriority = false, bool cancellable = true) override;
+    std::shared_ptr<CdsObject> addFile(
+        const fs::directory_entry& dirEnt,
+        const fs::path& rootpath,
+        AutoScanSetting& asSetting,
+        bool lowPriority = false,
+        bool cancellable = true) override;
 
     /// @brief Ensures that a container given by it's location on disk is
     /// present in the database. If it does not exist it will be created, but
@@ -131,15 +138,23 @@ public:
     /// @brief Updates an object in the database using the given parameters.
     /// @param objectID ID of the object to update
     /// @param parameters key value pairs of fields to be updated
-    std::shared_ptr<CdsObject> updateObject(int objectID, const std::map<std::string, std::string>& parameters) override;
+    std::shared_ptr<CdsObject> updateObject(
+        int objectID,
+        const std::map<std::string, std::string>& parameters) override;
 
     // returns nullptr if file does not exist or is ignored due to configuration
-    std::shared_ptr<CdsObject> createObjectFromFile(const std::shared_ptr<AutoscanDirectory>& adir, const fs::directory_entry& dirEnt, bool followSymlinks, bool allowFifo = false) override;
+    std::shared_ptr<CdsObject> createObjectFromFile(
+        const std::shared_ptr<AutoscanDirectory>& adir,
+        const fs::directory_entry& dirEnt,
+        bool followSymlinks,
+        bool allowFifo = false) override;
 
 #ifdef ONLINE_SERVICES
     /// @brief Creates a layout based from data that is obtained from an
     /// online service
-    void fetchOnlineContent(OnlineServiceType serviceType, bool lowPriority = true,
+    void fetchOnlineContent(
+        OnlineServiceType serviceType,
+        bool lowPriority = true,
         bool cancellable = true,
         bool unscheduledRefresh = false);
 
@@ -168,10 +183,12 @@ public:
     /// @brief Adds a virtual container chain specified by path.
     /// @param chain list of container objects to create
     /// @param refItem object to take artwork from
+    /// @param rootId id of the parent container
     /// @return ID of the last container in the chain.
     std::pair<int, bool> addContainerTree(
         const std::vector<std::shared_ptr<CdsObject>>& chain,
-        const std::shared_ptr<CdsObject>& refItem) override;
+        const std::shared_ptr<CdsObject>& refItem,
+        int rootId = CDS_ID_ROOT) override;
 
     /// @brief Adds a virtual container specified by parentID and title
     /// @param parentID the id of the parent.
@@ -243,7 +260,13 @@ public:
     void triggerPlayHook(const std::string& group, const std::shared_ptr<CdsObject>& obj) override;
 
     /// @brief parse a file containing metadata for object
-    void parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const override;
+    void parseMetafile(
+        const std::shared_ptr<CdsObject>& obj,
+        const fs::path& path) const override;
+    /// @brief parse a file containing cuesheet
+    std::vector<int> parseCueSheet(
+        const std::shared_ptr<CdsObject>& obj,
+        const fs::path& path) const override;
 
     std::shared_ptr<Context> getContext() const override
     {
@@ -298,7 +321,8 @@ protected:
         AutoScanSetting& asSetting,
         const std::shared_ptr<CMAddFileTask>& task = nullptr);
 
-    std::shared_ptr<ImportService> getImportService(const std::shared_ptr<AutoscanDirectory>& adir);
+    /// @brief get the import service assiciated with the autoscan directory
+    std::shared_ptr<ImportService> getImportService(const std::shared_ptr<AutoscanDirectory>& adir) const;
     std::vector<int> _removeObject(
         const std::shared_ptr<AutoscanDirectory>& adir,
         const std::shared_ptr<CdsObject>& obj,

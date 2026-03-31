@@ -51,6 +51,8 @@
 #define RESOURCE_IMAGE_STEP_XHD "XHD"
 #define RESOURCE_IMAGE_STEP_DEF "*"
 
+#define OFFSET_FACTOR 1000
+
 class CdsResource {
 public:
     /// @brief creates a new resource object.
@@ -82,6 +84,7 @@ public:
     /// @param res attribute name
     /// @param value attribute value
     void addAttribute(ResourceAttribute res, std::string value);
+    void addAttribute(ResourceAttribute res, long long value);
 
     /// @brief Merge existing attributes with new ones
     void mergeAttributes(const std::map<ResourceAttribute, std::string>& additional);

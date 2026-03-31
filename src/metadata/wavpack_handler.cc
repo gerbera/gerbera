@@ -248,7 +248,9 @@ public:
 #endif
 };
 
-bool WavPackHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool WavPackHandler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !enabled)
@@ -321,11 +323,11 @@ bool WavPackHandler::getAttributes(
 {
     auto resource = item->getResource(ContentHandler::DEFAULT);
     auto nrChannels = WavpackGetNumChannels(wpContext);
-    resource->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(nrChannels));
+    resource->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, nrChannels);
     auto sampleRate = WavpackGetSampleRate(wpContext);
-    resource->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, fmt::to_string(sampleRate));
+    resource->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, sampleRate);
     auto bitsPerSample = WavpackGetBitsPerSample(wpContext);
-    resource->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, fmt::to_string(bitsPerSample));
+    resource->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, bitsPerSample);
     /*
     int WavpackGetFileFormat (WavpackContext *wpc);
         Return the file format specified in the call to WavpackSetFileInformation() when the file
@@ -344,7 +346,7 @@ bool WavPackHandler::getAttributes(
     else
         resource->addAttribute(ResourceAttribute::FORMAT, fmt::format("WP_FORMAT_{}", fileFormat));
     auto avgBitrate = WavpackGetAverageBitrate(wpContext, 0);
-    resource->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(avgBitrate));
+    resource->addAttribute(ResourceAttribute::BITRATE, avgBitrate);
     return true;
 }
 

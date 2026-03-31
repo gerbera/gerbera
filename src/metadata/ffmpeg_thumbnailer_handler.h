@@ -49,7 +49,9 @@ public:
         const std::string& mimeType,
         ObjectType mediaType) override;
 
-    bool fillMetadata(const std::shared_ptr<CdsObject>& obj) override;
+    bool fillMetadata(
+        const std::shared_ptr<CdsObject>& obj,
+        std::vector<int>& newIds) override;
 
     std::unique_ptr<IOHandler> serveContent(
         const std::shared_ptr<CdsObject>& obj,

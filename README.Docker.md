@@ -109,7 +109,7 @@ $ docker run \
 
 ## Overwrite default user and group id
 
-In cases you want to map the gerbera you to a local user id you can set the environment variables `UID` and `GID`
+In cases you want to map the gerbera user to a local user id you can set the environment variables `UID` and `GID`
 
 ```console
 $ docker run \

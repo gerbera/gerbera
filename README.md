@@ -52,8 +52,8 @@ sudo make install
 
 | Library             | Min Version  | Recommended  | Latest tested        | Required?     | Note                             | Default  |
 |---------------------|--------------|--------------|----------------------|---------------|----------------------------------|----------|
-| [libupnp]           | 1.14.6       | 1.14.30      | 1.18.3               | XOR libnpupnp | UPnP protocol support            |          |
-| [libnpupnp]         | 4.2.1        | 5.1.2        | 6.2.3                | XOR libupnp   | Alternate UPnP protocol support  | Disabled |
+| [libupnp]           | 1.14.6       | 1.14.30      | 1.18.4               | XOR libnpupnp | UPnP protocol support            |          |
+| [libnpupnp]         | 4.2.1        | 5.1.2        | 6.3.0                | XOR libupnp   | Alternate UPnP protocol support  | Disabled |
 | libuuid             |              |              |                      | Depends on OS | Not required on \*BSD            |          |
 | [pugixml]           |              | 1.10         | 1.15                 | Required      | XML file and data support        |          |
 | [jsoncpp]           | 1.7.4        | 1.9.6        | 1.9.7                | Required      | JSON data support                |          |
@@ -75,7 +75,7 @@ sudo make install
 | [libmatroska]       | 1.4.8        | 1.6.3        | 1.7.1                | Optional      | MKV metadata                     | Enabled  |
 | [libebml]           | 1.3.5        | 1.4.2        | 1.4.5                | Optional      | required by [libmatroska]        | Enabled  |
 | ffmpeg/libav        |              |              | 7.1.2                | Optional      | File metadata                    | Disabled |
-| [libexif]           | v0.6.21      | v0.6.24      | v0.6.25              | Optional      | JPEG Exif metadata               | Enabled  |
+| [libexif]           | v0.6.21      | v0.6.24      | v0.6.26              | Optional      | JPEG Exif metadata               | Enabled  |
 | [libexiv2]          | v0.26        | v0.27.7      | v0.28.8              | Optional      | Exif, IPTC, XMP metadata         | Disabled |
 | [lastfmlib]         | 0.4.0        | 0.4.0        | 0.4.0                | Optional      | Enables scrobbling               | Disabled |
 | [ffmpegthumbnailer] | 2.1.1        | 2.2.3        | 2.3.0                | Optional      | Generate video/image thumbnails  | Disabled |

@@ -428,7 +428,9 @@ void LibExifHandler::process_ifd(
     }
 }
 
-bool LibExifHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool LibExifHandler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !enabled)

@@ -78,7 +78,10 @@ public:
         std::unordered_set<int>& ret,
         bool full,
         int refID) override { return 0; }
-    std::vector<int> getRefObjects(int objectId) override { return {}; }
+    std::vector<int> getRefObjects(
+        int objectId,
+        CdsEntryType entryType) override { return {}; }
+
     std::unordered_set<int> getUnreferencedObjects() override { return {}; }
 
     std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) override { return {}; }

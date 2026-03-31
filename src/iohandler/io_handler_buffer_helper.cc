@@ -62,6 +62,7 @@ void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
     buffer = new std::byte[bufSize];
     startBufferThread();
     isOpen = true;
+    isFresh = true;
 }
 
 IOHandlerBufferHelper::~IOHandlerBufferHelper() noexcept
@@ -136,8 +137,11 @@ grb_read_t IOHandlerBufferHelper::read(std::byte* buf, std::size_t length)
 void IOHandlerBufferHelper::seek(off_t offset, int whence)
 {
     log_debug("seek called: {} {}", offset, whence);
-    if (!seekEnabled)
+    if (!seekEnabled && (offset > 0 || !isFresh))
         throw_std_runtime_error("seek currently disabled in this IOHandlerBufferHelper");
+    if (offset == 0 && isFresh)
+        return; // ignore seek on a freshly opened buffer
+    isFresh = false;
 
     assert(isOpen);
 

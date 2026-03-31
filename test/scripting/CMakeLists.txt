@@ -1,4 +1,5 @@
-#*GRB*
+# ~~~
+# *GRB*
 #
 #  Gerbera - https://gerbera.io/
 #
@@ -19,8 +20,10 @@
 #  along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 #
 #  $Id$
+# ~~~
 
-add_executable(testscripting
+add_executable(
+    testscripting
     main.cc
     mock/common_script_mock.h
     mock/duk_helper.cc
@@ -28,6 +31,7 @@ add_executable(testscripting
     mock/script_test_fixture.cc
     mock/script_test_fixture.h
     test_common_script.cc
+    test_cue_cuesheet.cc
     test_external_asx_playlist.cc
     test_external_m3u_playlist.cc
     test_external_pls_playlist.cc
@@ -40,19 +44,12 @@ add_executable(testscripting
     test_internal_m3u_playlist.cc
     test_internal_pls_playlist.cc
     test_nfo_metafile.cc
-    test_runtime.cc
-)
+    test_runtime.cc)
 
-if (NOT TARGET GTest::gmock)
-    target_link_libraries(testscripting PRIVATE
-        libgerbera
-        GTest::GTest
-    )
+if(NOT TARGET GTest::gmock)
+    target_link_libraries(testscripting PRIVATE libgerbera GTest::GTest)
 else()
-    target_link_libraries(testscripting PRIVATE
-        libgerbera
-        GTest::gmock
-    )
+    target_link_libraries(testscripting PRIVATE libgerbera GTest::gmock)
 endif()
 
 target_compile_definitions(testscripting PRIVATE SCRIPTS_DIR="${CMAKE_SOURCE_DIR}/scripts")
@@ -61,12 +58,16 @@ add_dependencies(testscripting libgerbera gerbera)
 include(GoogleTest)
 gtest_discover_tests(testscripting DISCOVERY_TIMEOUT 60 TEST_LIST GRB_SCRIPTING_TESTS)
 
-add_test(NAME scriptingFixtures
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/fixtures
-    # DEPENDS fixtures/*
+add_test(
+    NAME scriptingFixtures
+    COMMAND
+        ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures
+        ${CMAKE_CURRENT_BINARY_DIR}/fixtures
+        # DEPENDS fixtures/*
 )
 set_tests_properties(scriptingFixtures PROPERTIES FIXTURES_SETUP GrbScripting)
 
-set_property(DIRECTORY APPEND PROPERTY
-    TEST_INCLUDE_FILES ${CMAKE_CURRENT_LIST_DIR}/CTestManip.cmake
-)
+set_property(
+    DIRECTORY
+    APPEND
+    PROPERTY TEST_INCLUDE_FILES ${CMAKE_CURRENT_LIST_DIR}/CTestManip.cmake)

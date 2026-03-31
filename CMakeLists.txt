@@ -210,6 +210,8 @@ add_library(
     src/content/onlineservice/online_service_helper.h
     src/content/onlineservice/task_processor.cc
     src/content/onlineservice/task_processor.h
+    src/content/scripting/cuesheet_parser_script.cc
+    src/content/scripting/cuesheet_parser_script.h
     src/content/scripting/duk_compat.h
     src/content/scripting/import_script.cc
     src/content/scripting/import_script.h
@@ -297,6 +299,8 @@ add_library(
     src/metadata/metacontent_handler.h
     src/metadata/metadata_enums.cc
     src/metadata/metadata_enums.h
+    src/metadata/metafile_handler.cc
+    src/metadata/metafile_handler.h
     src/metadata/metadata_handler.cc
     src/metadata/metadata_handler.h
     src/metadata/metadata_service.cc
@@ -406,8 +410,12 @@ add_library(
 target_include_directories(libgerbera PUBLIC "${CMAKE_SOURCE_DIR}/src")
 set_target_properties(libgerbera PROPERTIES PREFIX "") # Avoid duplicate "lib" prefix
 
-add_executable(gerbera src/main.cc)
-target_link_libraries(gerbera PRIVATE libgerbera)
+add_executable(
+    gerbera
+    src/main.cc)
+target_link_libraries(
+    gerbera
+    PRIVATE libgerbera)
 
 # Warnings are nice
 target_compile_options(gerbera PRIVATE -Wall)
@@ -455,7 +463,9 @@ else()
 endif()
 
 find_package(Threads REQUIRED)
-target_link_libraries(libgerbera PUBLIC Threads::Threads)
+target_link_libraries(
+    libgerbera
+    PUBLIC Threads::Threads)
 
 check_library_exists(atomic __atomic_fetch_add_4 "" HAVE_ATOMIC)
 if(HAVE_ATOMIC)
@@ -463,7 +473,9 @@ if(HAVE_ATOMIC)
 endif(HAVE_ATOMIC)
 
 find_package(Filesystem REQUIRED)
-target_link_libraries(libgerbera PUBLIC std::filesystem)
+target_link_libraries(
+    libgerbera
+    PUBLIC std::filesystem)
 
 check_c_source_compiles(
     "
@@ -493,12 +505,16 @@ endif()
 unset(CMAKE_REQUIRED_LIBRARIES)
 
 find_package(UUID REQUIRED)
-target_link_libraries(libgerbera PUBLIC UUID::UUID)
+target_link_libraries(
+    libgerbera
+    PUBLIC UUID::UUID)
 
 find_package(LFS REQUIRED)
 target_compile_definitions(libgerbera PUBLIC ${LFS_DEFINITIONS})
 target_compile_options(libgerbera PUBLIC ${LFS_COMPILE_OPTIONS})
-target_link_libraries(libgerbera PUBLIC ${LFS_LIBRARIES})
+target_link_libraries(
+    libgerbera
+    PUBLIC ${LFS_LIBRARIES})
 
 if(WITH_NPUPNP)
     set(REQ_NPUPNP_VERSION 4.2.1)
@@ -617,13 +633,19 @@ else()
 endif()
 
 find_package(fmt 7.1.3 REQUIRED)
-target_link_libraries(libgerbera PUBLIC fmt::fmt)
+target_link_libraries(
+    libgerbera
+    PUBLIC fmt::fmt)
 
 find_package(spdlog 1.8.1 REQUIRED)
-target_link_libraries(libgerbera PUBLIC spdlog::spdlog)
+target_link_libraries(
+    libgerbera
+    PUBLIC spdlog::spdlog)
 
 find_package(jsoncpp REQUIRED)
-target_link_libraries(libgerbera PUBLIC jsoncpp::jsoncpp)
+target_link_libraries(
+    libgerbera
+    PUBLIC jsoncpp::jsoncpp)
 
 if(WITH_ZIP)
     find_package(libzippp REQUIRED)
@@ -636,10 +658,14 @@ if(WITH_ZIP)
 endif()
 
 find_package(pugixml REQUIRED)
-target_link_libraries(libgerbera PUBLIC pugixml::pugixml)
+target_link_libraries(
+    libgerbera
+    PUBLIC pugixml::pugixml)
 
 find_package(SQLite3 3.7.11 REQUIRED)
-target_link_libraries(libgerbera PUBLIC SQLite::SQLite3)
+target_link_libraries(
+    libgerbera
+    PUBLIC SQLite::SQLite3)
 
 find_package(cxxopts 3.2.0 REQUIRED)
 target_include_directories(libgerbera PUBLIC ${CXXOPTS_INCLUDE_DIRS})
@@ -881,7 +907,9 @@ if(WITH_ICU)
 endif()
 
 find_package(ZLIB REQUIRED)
-target_link_libraries(libgerbera PUBLIC ZLIB::ZLIB)
+target_link_libraries(
+    libgerbera
+    PUBLIC ZLIB::ZLIB)
 
 if(WITH_SYSTEMD AND (${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
     find_package(Systemd)

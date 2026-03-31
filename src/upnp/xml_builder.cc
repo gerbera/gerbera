@@ -1036,7 +1036,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
                         targetMimeType.append(fmt::format(";rate={}", frequency));
                     }
                 } else if (freq != OFF) {
-                    tRes->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, fmt::to_string(freq));
+                    tRes->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, freq);
                     targetMimeType.append(fmt::format(";rate={}", freq));
                 }
 
@@ -1048,7 +1048,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
                         targetMimeType.append(fmt::format(";channels={}", nchannels));
                     }
                 } else if (chan != OFF) {
-                    tRes->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(chan));
+                    tRes->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, chan);
                     targetMimeType.append(fmt::format(";channels={}", chan));
                 }
             }

@@ -640,6 +640,7 @@ void ConfigGenerator::generateImportOptions(
         { ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER, ConfigLevel::Base },
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_PLAYLIST, ConfigLevel::Base },
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE, ConfigLevel::Base },
+        { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_CUESHEET, ConfigLevel::Base },
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_AUDIOFILE, ConfigLevel::Base },
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_VIDEOFILE, ConfigLevel::Base },
         { ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_IMAGEFILE, ConfigLevel::Base },
