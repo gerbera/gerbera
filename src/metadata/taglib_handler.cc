@@ -278,7 +278,7 @@ void TagLibHandler::populateGenericTags(
         // UPnP bitrate is in bytes/second
         int temp = audioProps->bitrate() * 1024 / 8; // kbit/second -> byte/second
         if (temp > 0) {
-            res->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(temp));
+            res->addAttribute(ResourceAttribute::BITRATE, temp);
         }
     }
 
@@ -292,14 +292,14 @@ void TagLibHandler::populateGenericTags(
     {
         int temp = audioProps->sampleRate();
         if (temp > 0) {
-            res->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, fmt::to_string(temp));
+            res->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, temp);
         }
     }
 
     {
         int temp = audioProps->channels();
         if (temp > 0) {
-            res->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(temp));
+            res->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, temp);
         }
     }
 
@@ -371,7 +371,9 @@ void TagLibHandler::makeComment(
 
 /// @brief read metadata from file and add to object
 /// @param obj Object to handle
-bool TagLibHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool TagLibHandler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !enabled)
@@ -739,7 +741,7 @@ void TagLibHandler::extractMP3(
 
         auto resource = addArtworkResource(item, ContentHandler::ID3, artMimetype);
         if (resource)
-            resource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(pic.size()));
+            resource->addAttribute(ResourceAttribute::SIZE, pic.size());
     }
 }
 
@@ -947,7 +949,7 @@ void TagLibHandler::extractDSF(
 
         auto resource = addArtworkResource(item, ContentHandler::ID3, artMimetype);
         if (resource)
-            resource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(pic.size()));
+            resource->addAttribute(ResourceAttribute::SIZE, pic.size());
     }
 #else
     log_warning("For DSF support in file '{}' TaglibHandler needs to be built with taglib 2 and above", item->getLocation().c_str());
@@ -1080,7 +1082,7 @@ void TagLibHandler::setBitsPerSample(
     auto audioProps = media.audioProperties();
     auto bps = audioProps->bitsPerSample();
     if (bps > 0) {
-        res->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, fmt::to_string(bps));
+        res->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, bps);
     }
 }
 

@@ -608,7 +608,7 @@ static void setBitRate(const std::shared_ptr<CdsResource>& res, int64_t value)
         // See http://www.upnp.org/schemas/av/didl-lite-v3.xsd
         auto bitrate = value / 8;
         log_debug("Added bitrate: {} kb/s", bitrate);
-        res->addAttribute(ResourceAttribute::BITRATE, fmt::to_string(bitrate));
+        res->addAttribute(ResourceAttribute::BITRATE, bitrate);
     }
 }
 
@@ -623,7 +623,7 @@ void FfmpegHandler::setResourceAttributes(
             log_debug("Resource {}: {}", tag, md->value);
             res->addAttribute(attr, md->value);
         } else if (stream_number > -1) {
-            res->addAttribute(attr, fmt::to_string(stream_number));
+            res->addAttribute(attr, stream_number);
         }
     }
 }
@@ -676,10 +676,10 @@ bool FfmpegHandler::addFfmpegResourceFields(
                         resource2->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(artMimetype));
                     }
                 }
-                resource2->addAttribute(ResourceAttribute::SIZE, fmt::to_string(image.size()));
+                resource2->addAttribute(ResourceAttribute::SIZE, image.size());
             }
             // orientation
-            resource2->addAttribute(ResourceAttribute::ORIENTATION, fmt::format("{}", getOrientation(st)));
+            resource2->addAttribute(ResourceAttribute::ORIENTATION, getOrientation(st));
 
             // duration of stream
             if (st->duration * av_q2d(st->time_base) > ffmpegObject.pFormatCtx->duration || resource2->getAttribute(ResourceAttribute::DURATION).empty())
@@ -753,9 +753,9 @@ bool FfmpegHandler::addFfmpegResourceFields(
 
             if (as_codecpar(st)->extradata && as_codecpar(st)->extradata_size > 0) {
                 log_debug("Subtitle Size: {}", as_codecpar(st)->extradata_size);
-                stResource->addAttribute(ResourceAttribute::SIZE, fmt::format("{}", as_codecpar(st)->extradata_size));
+                stResource->addAttribute(ResourceAttribute::SIZE, as_codecpar(st)->extradata_size);
             } else
-                stResource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(subtitle.size()));
+                stResource->addAttribute(ResourceAttribute::SIZE, subtitle.size());
             result = true;
             break;
         }
@@ -791,7 +791,7 @@ bool FfmpegHandler::addFfmpegResourceFields(
                 log_debug("Bits per coded sample: {}", bitsPerSample);
 
                 if (bitsPerSample > 0) {
-                    resource->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, fmt::to_string(bitsPerSample));
+                    resource->addAttribute(ResourceAttribute::BITS_PER_SAMPLE, bitsPerSample);
 
                     // Fix up Sample rate reporting
                     // FFMpeg will tell us DSD is 16bit PCM, but its actually 1bit, so we have to multiply this out
@@ -801,7 +801,7 @@ bool FfmpegHandler::addFfmpegResourceFields(
                 }
 
                 log_debug("Added sample frequency: {} Hz from stream {}", sampleFreq, stream_number);
-                resource->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, fmt::to_string(sampleFreq));
+                resource->addAttribute(ResourceAttribute::SAMPLEFREQUENCY, sampleFreq);
                 audioSet++;
             }
 // FF_API_OLD_CHANNEL_LAYOUT
@@ -812,7 +812,7 @@ bool FfmpegHandler::addFfmpegResourceFields(
 #endif
             if (audioCh > 0) {
                 log_debug("Added number of audio channels: {} from stream {}", audioCh, stream_number);
-                resource->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, fmt::to_string(audioCh));
+                resource->addAttribute(ResourceAttribute::NRAUDIOCHANNELS, audioCh);
             }
             result = true;
             break;
@@ -825,7 +825,9 @@ bool FfmpegHandler::addFfmpegResourceFields(
     return result;
 }
 
-bool FfmpegHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool FfmpegHandler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !enabled)

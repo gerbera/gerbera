@@ -22,6 +22,7 @@
 */
 #ifdef HAVE_JS
 
+#include "cds/cds_objects.h"
 #include "content/scripting/script_names.h"
 #include "content/scripting/script_property.h"
 #include "util/grb_fs.h"
@@ -206,7 +207,6 @@ void ScriptTestFixture::addGlobalFunctions(
     const std::map<std::string_view, std::map<std::string_view, std::string_view>>& configDicts,
     const std::map<std::string_view, std::vector<std::vector<std::pair<std::string_view, std::string_view>>>>& configVects)
 {
-
     for (auto&& [meta, str] : MetaEnumMapper::mt_keys) {
         duk_push_lstring(ctx, str.data(), str.size());
         auto sym = mt_names.at(meta);
@@ -234,6 +234,13 @@ void ScriptTestFixture::addGlobalFunctions(
         auto&& sym = BoxLayout::getBoxKey(bkey);
         duk_push_lstring(ctx, sym.data(), sym.length());
         duk_put_global_lstring(ctx, field.data(), field.length());
+    }
+
+    for (auto et : EntryTypeIterator()) {
+        auto etString = CdsObject::mapEntryType(et);
+        auto sym = fmt::format("ET_{}", etString);
+        duk_push_lstring(ctx, etString.c_str(), etString.length());
+        duk_put_global_lstring(ctx, sym.c_str(), sym.length());
     }
 
     if (configValues.empty()) {

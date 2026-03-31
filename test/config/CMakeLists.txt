@@ -1,4 +1,5 @@
-#*GRB*
+# ~~~
+# *GRB*
 #
 #  Gerbera - https://gerbera.io/
 #
@@ -19,23 +20,19 @@
 #  along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 #
 #  $Id$
+# ~~~
 
-add_executable(testconfig
-    main.cc
-    test_configgenerator.cc
-    test_configmanager.cc
+add_executable(
+    testconfig
+    main.cc #
+    test_configgenerator.cc #
+    test_configmanager.cc #
 )
 
-if (NOT TARGET GTest::gmock)
-    target_link_libraries(testconfig PRIVATE
-        libgerbera
-        GTest::GTest
-    )
+if(NOT TARGET GTest::gmock)
+    target_link_libraries(testconfig PRIVATE libgerbera GTest::GTest)
 else()
-    target_link_libraries(testconfig PRIVATE
-        libgerbera
-        GTest::gmock
-    )
+    target_link_libraries(testconfig PRIVATE libgerbera GTest::gmock)
 endif()
 
 target_compile_definitions(testconfig PRIVATE CMAKE_BINARY_DIR="${CMAKE_BINARY_DIR}")
@@ -47,12 +44,16 @@ include(GoogleTest)
 
 gtest_discover_tests(testconfig DISCOVERY_TIMEOUT 60 TEST_LIST GRB_CONFIG_TESTS)
 
-add_test(NAME configFixtures
-    COMMAND ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures ${CMAKE_CURRENT_BINARY_DIR}/fixtures
-    # DEPENDS fixtures/*
+add_test(
+    NAME configFixtures
+    COMMAND
+        ${CMAKE_COMMAND} -E copy_directory ${CMAKE_CURRENT_SOURCE_DIR}/fixtures
+        ${CMAKE_CURRENT_BINARY_DIR}/fixtures
+        # DEPENDS fixtures/*
 )
 set_tests_properties(configFixtures PROPERTIES FIXTURES_SETUP GrbConfig)
 
-set_property(DIRECTORY APPEND PROPERTY
-    TEST_INCLUDE_FILES ${CMAKE_CURRENT_LIST_DIR}/CTestManip.cmake
-)
+set_property(
+    DIRECTORY
+    APPEND
+    PROPERTY TEST_INCLUDE_FILES ${CMAKE_CURRENT_LIST_DIR}/CTestManip.cmake)

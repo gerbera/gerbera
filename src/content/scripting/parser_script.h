@@ -68,6 +68,9 @@ protected:
         bool needResult);
     ~ParserScript() override;
 
+    /// @brief clean up caches and parsing output
+    void cleanUp();
+
     static pugi::xml_node nullNode;
     /// @brief maximum length of one text line
     static constexpr int ONE_TEXTLINE_BYTES = 1024;
@@ -78,6 +81,7 @@ protected:
     std::shared_ptr<GenericTask> currentTask;
     pugi::xml_document xmlDoc;
     pugi::xml_node root;
+    bool doTrim { true };
 };
 
 #endif // __PARSER_SCRIPT_H__

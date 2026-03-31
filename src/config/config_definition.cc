@@ -925,6 +925,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "video/x-mkv", CONTENT_TYPE_MKV },
         { "video/x-ms-asf", CONTENT_TYPE_ASF },
         { MIME_TYPE_ASX_PLAYLIST, CONTENT_TYPE_PLAYLIST },
+        { MIME_TYPE_CUESHEET, CONTENT_TYPE_CUESHEET },
         { "video/x-msvideo", CONTENT_TYPE_AVI },
     };
 
@@ -969,6 +970,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
     static const std::map<std::string, std::string> extMtDefaults {
         { "asf", "video/x-ms-asf" },
         { "asx", MIME_TYPE_ASX_PLAYLIST }, // tweak to handle asx as playlist
+        { "cue", MIME_TYPE_CUESHEET }, // tweak to handle cuesheets
         { "dff", "audio/x-dff" },
         { "dsd", "audio/x-dsd" },
         { "dsf", "audio/x-dsf" },
@@ -1210,6 +1212,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE,
             "/import/scripting/import-function/meta-file", "config-import.html#confval-meta-file",
             "importMetadata"),
+        std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_CUESHEET,
+            "/import/scripting/import-function/cuesheet", "config-import.html#confval-cuesheet",
+            "importCuesheet"),
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_AUDIOFILE,
             "/import/scripting/import-function/audio-file", "config-import.html#confval-audio-file",
             "importAudio"),

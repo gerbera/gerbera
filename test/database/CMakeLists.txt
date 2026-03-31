@@ -1,4 +1,5 @@
-#*GRB*
+# ~~~
+# *GRB*
 #
 #  Gerbera - https://gerbera.io/
 #
@@ -19,73 +20,102 @@
 #  along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 #
 #  $Id$
+# ~~~
 
-add_executable(testdb
-    main.cc
-    test_database.cc
-    test_sql_generators.cc
-    postgres_config_fake.h
-    mysql_config_fake.h
-    sqlite_config_fake.h)
+add_executable(
+    testdb
+    main.cc #
+    mysql_config_fake.h #
+    postgres_config_fake.h #
+    sqlite_config_fake.h #
+    test_database.cc #
+    test_sql_generators.cc #
+)
 
-if (NOT TARGET GTest::gmock)
-    target_link_libraries(testdb PRIVATE
-        libgerbera
-        GTest::GTest
-    )
+if(NOT TARGET GTest::gmock)
+    target_link_libraries(testdb PRIVATE libgerbera GTest::GTest)
 else()
-    target_link_libraries(testdb PRIVATE
-        libgerbera
-        GTest::gmock
-    )
+    target_link_libraries(testdb PRIVATE libgerbera GTest::gmock)
 endif()
 add_dependencies(testdb libgerbera gerbera)
 
 include(GoogleTest)
 gtest_discover_tests(testdb DISCOVERY_TIMEOUT 60 TEST_LIST GRB_DB_TESTS)
 
-add_test(NAME dbFixturesSqLite
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/sqlite3/sqlite3.sql ${CMAKE_CURRENT_BINARY_DIR}
-    # DEPENDS fixtures/*
+add_test(
+    NAME dbFixturesSqLite
+    COMMAND
+        ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/sqlite3/sqlite3.sql
+        ${CMAKE_CURRENT_BINARY_DIR}
+        # DEPENDS fixtures/*
 )
-add_test(NAME dbFixturesSqLiteDrop
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/sqlite3/sqlite3-drop.sql ${CMAKE_CURRENT_BINARY_DIR}
-    # DEPENDS fixtures/*
+add_test(
+    NAME dbFixturesSqLiteDrop
+    COMMAND
+        ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/sqlite3/sqlite3-drop.sql
+        ${CMAKE_CURRENT_BINARY_DIR}
+        # DEPENDS fixtures/*
 )
-add_test(NAME dbFixturesSqliteUpgrade
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/sqlite3/sqlite3-upgrade.xml ${CMAKE_CURRENT_BINARY_DIR}
-    # DEPENDS fixtures/*
+add_test(
+    NAME dbFixturesSqliteUpgrade
+    COMMAND
+        ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/sqlite3/sqlite3-upgrade.xml
+        ${CMAKE_CURRENT_BINARY_DIR}
+        # DEPENDS fixtures/*
 )
-add_test(NAME dbFixturesMySql
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/mysql/mysql.sql ${CMAKE_CURRENT_BINARY_DIR}
-    # DEPENDS fixtures/*
+add_test(
+    NAME dbFixturesMySql
+    COMMAND
+        ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/mysql/mysql.sql
+        ${CMAKE_CURRENT_BINARY_DIR}
+        # DEPENDS fixtures/*
 )
-add_test(NAME dbFixturesMySqlDrop
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/mysql/mysql-drop.sql ${CMAKE_CURRENT_BINARY_DIR}
-    # DEPENDS fixtures/*
+add_test(
+    NAME dbFixturesMySqlDrop
+    COMMAND
+        ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/mysql/mysql-drop.sql
+        ${CMAKE_CURRENT_BINARY_DIR}
+        # DEPENDS fixtures/*
 )
-add_test(NAME dbFixtureMySqlUpgrade
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/mysql/mysql-upgrade.xml ${CMAKE_CURRENT_BINARY_DIR}
-    # DEPENDS fixtures/*
+add_test(
+    NAME dbFixtureMySqlUpgrade
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/mysql/mysql-upgrade.xml
+            ${CMAKE_CURRENT_BINARY_DIR} # DEPENDS fixtures/*
 )
-add_test(NAME dbFixturesPostgres
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/postgres/postgres.sql ${CMAKE_CURRENT_BINARY_DIR}
-    # DEPENDS fixtures/*
+add_test(
+    NAME dbFixturesPostgres
+    COMMAND
+        ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/postgres/postgres.sql
+        ${CMAKE_CURRENT_BINARY_DIR}
+        # DEPENDS fixtures/*
 )
-add_test(NAME dbFixturesPostgresDrop
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/postgres/postgres-drop.sql ${CMAKE_CURRENT_BINARY_DIR}
-    # DEPENDS fixtures/*
+add_test(
+    NAME dbFixturesPostgresDrop
+    COMMAND
+        ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/postgres/postgres-drop.sql
+        ${CMAKE_CURRENT_BINARY_DIR}
+        # DEPENDS fixtures/*
 )
-add_test(NAME dbFixturePostgresUpgrade
-    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/postgres/postgres-upgrade.xml ${CMAKE_CURRENT_BINARY_DIR}
-    # DEPENDS fixtures/*
+add_test(
+    NAME dbFixturePostgresUpgrade
+    COMMAND
+        ${CMAKE_COMMAND} -E copy ${PROJECT_SOURCE_DIR}/src/database/postgres/postgres-upgrade.xml
+        ${CMAKE_CURRENT_BINARY_DIR}
+        # DEPENDS fixtures/*
 )
 set_tests_properties(
-    dbFixturesSqLite dbFixturesSqliteUpgrade dbFixturesSqLiteDrop
-    dbFixturesMySql dbFixtureMySqlUpgrade dbFixturesMySqlDrop
-    dbFixturesPostgres dbFixturePostgresUpgrade dbFixturesPostgresDrop
+    dbFixturesSqLite
+    dbFixturesSqliteUpgrade
+    dbFixturesSqLiteDrop
+    dbFixturesMySql
+    dbFixtureMySqlUpgrade
+    dbFixturesMySqlDrop
+    dbFixturesPostgres
+    dbFixturePostgresUpgrade
+    dbFixturesPostgresDrop
     PROPERTIES FIXTURES_SETUP GrbDb)
 
-set_property(DIRECTORY APPEND PROPERTY
-    TEST_INCLUDE_FILES ${CMAKE_CURRENT_LIST_DIR}/CTestManip.cmake
-)
+set_property(
+    DIRECTORY
+    APPEND
+    PROPERTY TEST_INCLUDE_FILES ${CMAKE_CURRENT_LIST_DIR}/CTestManip.cmake)

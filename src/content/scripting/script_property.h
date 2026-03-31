@@ -47,14 +47,14 @@ public:
 
     std::vector<std::string> getStringArrayValue() const;
     std::vector<int> getIntArrayValue() const;
-    std::string getStringValue() const;
+    std::string getStringValue(const std::string& defValue = "") const;
     int getIntValue(int defValue) const;
     int getBoolValue() const;
     std::vector<std::string> getPropertyNames() const;
     void getObject(const std::function<void()>& objectHandler) const
     {
-        if (!duk_is_null_or_undefined(ctx, -1) && duk_is_object(ctx, -1)) {
-            duk_to_object(ctx, -1);
+        if (!duk_is_null_or_undefined(ctx, index) && duk_is_object(ctx, index)) {
+            duk_to_object(ctx, index);
             objectHandler();
         }
     }

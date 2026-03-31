@@ -1,4 +1,5 @@
-#*GRB*
+# ~~~
+# *GRB*
 #
 #  Gerbera - https://gerbera.io/
 #
@@ -19,23 +20,19 @@
 #  along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 #
 #  $Id$
+# ~~~
 
-add_executable(testcontent
-    main.cc
-    test_autoscan_list.cc
-    test_resolution.cc
+add_executable(
+    testcontent
+    main.cc #
+    test_autoscan_list.cc #
+    test_resolution.cc #
 )
 
-if (NOT TARGET GTest::gmock)
-    target_link_libraries(testcontent PRIVATE
-        libgerbera
-        GTest::GTest
-    )
+if(NOT TARGET GTest::gmock)
+    target_link_libraries(testcontent PRIVATE libgerbera GTest::GTest)
 else()
-    target_link_libraries(testcontent PRIVATE
-        libgerbera
-        GTest::gmock
-    )
+    target_link_libraries(testcontent PRIVATE libgerbera GTest::gmock)
 endif()
 add_dependencies(testcontent libgerbera gerbera)
 

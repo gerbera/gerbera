@@ -50,6 +50,7 @@ function importPlaylist(obj, cont, rootPath, autoscanId, containerType) {
       objectType: OBJECT_TYPE_CONTAINER,
       mtime: obj.mtime,
       upnpclass: UPNP_CLASS_PLAYLIST_CONTAINER,
+      entryType: ET_PlaylistContainer,
       metaData: []
     },
     lastPath: {

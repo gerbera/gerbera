@@ -45,6 +45,7 @@ class AutoscanDirectory;
 class AutoscanList;
 enum class AutoscanScanMode;
 class BrowseParam;
+enum class CdsEntryType;
 class CdsContainer;
 class CdsObject;
 struct ClientObservation;
@@ -86,6 +87,7 @@ enum class DbFileType {
     File,
     Virtual,
     Any,
+    All,
 };
 
 class Database {
@@ -227,17 +229,27 @@ public:
         bool full,
         int refID)
         = 0;
-    virtual std::vector<int> getRefObjects(int objectId) = 0;
+    /// @brief Get all objects referencing the given objectId
+    virtual std::vector<int> getRefObjects(
+        int objectId,
+        CdsEntryType entryType)
+        = 0;
     virtual std::unordered_set<int> getUnreferencedObjects() = 0;
 
     /// @brief Remove all objects found in list
     /// @param list a DBHash containing objectIDs that have to be removed
     /// @param all if true and the object to be removed is a reference
     /// @return changed container ids
-    virtual std::unique_ptr<ChangedContainers> removeObjects(const std::unordered_set<int>& list, bool all = false) = 0;
+    virtual std::unique_ptr<ChangedContainers> removeObjects(
+        const std::unordered_set<int>& list,
+        bool all = false)
+        = 0;
 
     /// @brief Loads an object given by the online service ID.
-    virtual std::shared_ptr<CdsObject> loadObjectByServiceID(const std::string& serviceID, const std::string& group) = 0;
+    virtual std::shared_ptr<CdsObject> loadObjectByServiceID(
+        const std::string& serviceID,
+        const std::string& group)
+        = 0;
 
     /// @brief Return an array of object ID's for a particular service.
     ///

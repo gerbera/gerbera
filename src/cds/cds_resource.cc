@@ -68,6 +68,11 @@ CdsResource::CdsResource(
 {
 }
 
+void CdsResource::addAttribute(ResourceAttribute res, long long value)
+{
+    attributes[res] = fmt::to_string(value);
+}
+
 void CdsResource::addAttribute(ResourceAttribute res, std::string value)
 {
     attributes[res] = std::move(value);

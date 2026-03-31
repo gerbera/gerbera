@@ -94,7 +94,7 @@ with section("format"):
   keyword_case = 'upper'
 
   # A list of command names which should always be wrapped
-  always_wrap = ['install', 'mark_as_advanced', 'find_path', 'find_package_handle_standard_args', 'find_library']
+  always_wrap = ['install', 'mark_as_advanced', 'find_path', 'find_package_handle_standard_args', 'find_library', 'add_executable', 'target_link_libraries']
 
   # If true, the argument lists which are known to be sortable will be sorted
   # lexicographicall

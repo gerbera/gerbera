@@ -264,6 +264,20 @@ void Web::EditLoad::writeItemInfo(
     mimeType["editable"] = true;
     item["mime-type"] = mimeType;
 
+    if (objItem->getTrackNumber() > 0) {
+        Json::Value track;
+        track["value"] = fmt::to_string(objItem->getTrackNumber());
+        track["editable"] = true;
+        item["track"] = track;
+    }
+
+    if (objItem->getPartNumber() > 0) {
+        Json::Value part;
+        part["value"] = fmt::to_string(objItem->getPartNumber());
+        part["editable"] = true;
+        item["part"] = part;
+    }
+
     auto url = xmlBuilder->renderItemImageURL(objItem);
     if (url) {
         Json::Value image;
@@ -333,7 +347,7 @@ void Web::EditLoad::writeReferenceInfo(
     Json::Value& itemRefArray)
 {
     auto tId = obj->getRefID() > CDS_ID_ROOT ? obj->getRefID() : obj->getID();
-    auto refObjects = database->getRefObjects(tId);
+    constexpr static auto types = std::array { CdsEntryType::VirtualItem, CdsEntryType::PlaylistContainer };
     if (tId > CDS_ID_ROOT && tId != obj->getID()) {
         auto refItem = database->loadObject(tId);
         Json::Value refEntry;
@@ -345,17 +359,20 @@ void Web::EditLoad::writeReferenceInfo(
         }
         itemRefArray.append(refEntry);
     }
-    for (auto&& id : refObjects) {
-        auto refItem = database->loadObject(id);
-        if (id != obj->getID()) {
-            Json::Value refEntry;
-            refEntry["id"] = id;
-            if (refItem) {
-                auto refParent = database->loadObject(refItem->getParentID());
-                refEntry["title"] = refItem->getTitle();
-                refEntry["location"] = refParent->getLocation().string();
+    for (auto type : types) {
+        auto refObjects = database->getRefObjects(tId, type);
+        for (auto&& id : refObjects) {
+            auto refItem = database->loadObject(id);
+            if (id != obj->getID()) {
+                Json::Value refEntry;
+                refEntry["id"] = id;
+                if (refItem) {
+                    auto refParent = database->loadObject(refItem->getParentID());
+                    refEntry["title"] = refItem->getTitle();
+                    refEntry["location"] = refParent->getLocation().string();
+                }
+                itemRefArray.append(refEntry);
             }
-            itemRefArray.append(refEntry);
         }
     }
 }

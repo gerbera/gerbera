@@ -32,6 +32,7 @@ function(generate_compile_info)
         "STATIC_LIBUPNP=${STATIC_LIBUPNP}"
         "WITH_MAGIC=${WITH_MAGIC}"
         "WITH_MYSQL=${WITH_MYSQL}"
+        "WITH_PGSQL=${WITH_PGSQL}"
         "WITH_CURL=${WITH_CURL}"
         "WITH_INOTIFY=${WITH_INOTIFY}"
         "WITH_JS=${WITH_JS}"
@@ -44,7 +45,9 @@ function(generate_compile_info)
         "WITH_WAVPACK=${WITH_WAVPACK}"
         "WITH_SYSTEMD=${WITH_SYSTEMD}"
         "WITH_ICU=${WITH_ICU}"
+        "WITH_ZIP=${WITH_ZIP}"
         "WITH_LASTFM=${WITH_LASTFM}"
+        "WITH_ONLINE_SERVICES=${WITH_ONLINE_SERVICES}"
         "WITH_DEBUG=${WITH_DEBUG}"
         "WITH_DEBUG_OPTIONS=${WITH_DEBUG_OPTIONS}"
         "WITH_TESTS=${WITH_TESTS}")

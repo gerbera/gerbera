@@ -44,6 +44,7 @@
 #define CONTENT_TYPE_APE "ape"
 #define CONTENT_TYPE_ASF "asf"
 #define CONTENT_TYPE_AVI "avi"
+#define CONTENT_TYPE_CUESHEET "cuesheet"
 #define CONTENT_TYPE_DSD "dsd"
 #define CONTENT_TYPE_FLAC "flac"
 #define CONTENT_TYPE_JPG "jpg"
@@ -59,6 +60,7 @@
 #define CONTENT_TYPE_WAVPACK "wv"
 #define CONTENT_TYPE_WMA "wma"
 
+#define MIME_TYPE_CUESHEET "text/cue"
 #define MIME_TYPE_ASX_PLAYLIST "video/x-ms-asx"
 #define MIME_TYPE_SRT_SUBTITLE "application/x-srt"
 

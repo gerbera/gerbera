@@ -51,9 +51,12 @@ protected:
 
     std::mutex mutex;
 
+    /// @brief open file with offset
+    off_t offset;
+
 public:
     /// @brief Sets the filename to work with.
-    explicit FileIOHandler(const fs::path& filename);
+    explicit FileIOHandler(const fs::path& filename, off_t offset = 0);
 
     /// @brief Opens file for reading (writing is not supported)
     void open(enum UpnpOpenFileMode mode) override;

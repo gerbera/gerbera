@@ -76,6 +76,7 @@
       <import-function>
         <playlist>importPlaylist</playlist>
         <meta-file>importMetadata</meta-file>
+        <cuesheet>importCuesheet</cuesheet>
         <audio-file>importAudio</audio-file>
         <video-file>importVideo</video-file>
         <image-file>importImage</image-file>
@@ -139,6 +140,7 @@
       <extension-mimetype ignore-unknown="no">
         <map from="asf" to="video/x-ms-asf" />
         <map from="asx" to="video/x-ms-asx" />
+        <map from="cue" to="text/cue" />
         <map from="dff" to="audio/x-dff" />
         <map from="dsd" to="audio/x-dsd" />
         <map from="dsf" to="audio/x-dsf" />
@@ -196,6 +198,7 @@
         <treat mimetype="audio/x-wavpack" as="wv" />
         <treat mimetype="image/jpeg" as="jpg" />
         <treat mimetype="image/png" as="png" />
+        <treat mimetype="text/cue" as="cuesheet" />
         <treat mimetype="video/mkv" as="mkv" />
         <treat mimetype="video/mp4" as="mp4" />
         <treat mimetype="video/mpeg" as="mpeg" />

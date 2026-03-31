@@ -52,6 +52,13 @@ jobs:
           - "./cmake/GenCompileInfo.cmake"
           - "./cmake/generateDoc.cmake"
           - "./cmake/packaging.cmake"
+          - "./test/CMakeLists.txt"
+          - "./test/config/CMakeLists.txt"
+          - "./test/content/CMakeLists.txt"
+          - "./test/core/CMakeLists.txt"
+          - "./test/database/CMakeLists.txt"
+          - "./test/scripting/CMakeLists.txt"
+          - "./test/util/CMakeLists.txt"
     steps:
       - uses: actions/checkout@v6
       - name: Install cmake-format

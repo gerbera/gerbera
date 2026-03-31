@@ -112,7 +112,9 @@ public:
         std::unordered_set<int>& ret,
         bool full,
         int refID) override;
-    std::vector<int> getRefObjects(int objectId) override;
+    std::vector<int> getRefObjects(
+        int objectId,
+        CdsEntryType entryType) override;
     std::unordered_set<int> getUnreferencedObjects() override;
 
     std::unique_ptr<ChangedContainers> removeObject(int objectID, const fs::path& path, bool all) override;
