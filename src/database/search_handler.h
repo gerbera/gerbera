@@ -32,7 +32,7 @@
 #include "util/tools.h"
 
 #include <algorithm>
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <map>
 #include <memory>
 #include <tuple>
