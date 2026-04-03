@@ -34,7 +34,7 @@
 #ifndef __EXCEPTIONS_H__
 #define __EXCEPTIONS_H__
 
-#include <fmt/core.h>
+#include <fmt/format.h>
 #include <stdexcept>
 #include <string>
 
