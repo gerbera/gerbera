@@ -31,6 +31,7 @@
 #include "util/logger.h"
 
 #include <pugixml.hpp>
+#include <cstring>
 
 bool ConfigPathSetup::checkPathValue(std::string& optValue, std::string& pathValue) const
 {

@@ -30,6 +30,7 @@ Gerbera - https://gerbera.io/
 #include <fcntl.h>
 #include <fstream>
 #include <sstream>
+#include <cstring>
 #include <sys/stat.h>
 #include <unistd.h>
 

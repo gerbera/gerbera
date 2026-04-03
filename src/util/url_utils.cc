@@ -30,6 +30,7 @@ Gerbera - https://gerbera.io/
 #include <fmt/ranges.h>
 #endif
 #include <sstream>
+#include <cstring>
 
 // URL FORMATTING CONSTANTS
 #define URL_UI_PARAM_SEPARATOR '?'

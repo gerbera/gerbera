@@ -36,6 +36,7 @@
 #include <mutex>
 #include <pthread.h>
 #include <thread>
+#include <cstring>
 
 using ThreadProc = std::function<void(void* target)>;
 
