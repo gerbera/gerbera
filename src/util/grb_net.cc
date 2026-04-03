@@ -30,6 +30,7 @@ Gerbera - https://gerbera.io/
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <regex>
+#include <cstring>
 
 #ifdef SOLARIS
 #include <sys/sockio.h>

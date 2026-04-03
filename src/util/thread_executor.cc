@@ -34,6 +34,7 @@
 #include "thread_executor.h" // API
 
 #include "util/logger.h"
+#include <cstring>
 
 ThreadExecutor::~ThreadExecutor()
 {

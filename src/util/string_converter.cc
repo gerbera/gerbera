@@ -42,6 +42,7 @@
 
 #include <array>
 #include <vector>
+#include <cstring>
 #if FMT_VERSION >= 100202
 #include <fmt/ranges.h>
 #endif

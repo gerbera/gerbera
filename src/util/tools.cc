@@ -43,6 +43,7 @@
 #include <queue>
 #include <regex>
 #include <sstream>
+#include <cstring>
 
 #ifdef __HAIKU__
 #define _DEFAULT_SOURCE
