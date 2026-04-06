@@ -27,10 +27,10 @@ Gerbera - https://gerbera.io/
 #include "tools.h"
 
 #include <arpa/inet.h>
+#include <cstring>
 #include <ifaddrs.h>
 #include <netdb.h>
 #include <regex>
-#include <cstring>
 
 #ifdef SOLARIS
 #include <sys/sockio.h>

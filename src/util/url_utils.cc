@@ -29,8 +29,8 @@ Gerbera - https://gerbera.io/
 #if FMT_VERSION >= 100202
 #include <fmt/ranges.h>
 #endif
-#include <sstream>
 #include <cstring>
+#include <sstream>
 
 // URL FORMATTING CONSTANTS
 #define URL_UI_PARAM_SEPARATOR '?'

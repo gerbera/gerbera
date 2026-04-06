@@ -41,8 +41,8 @@
 #include "util/logger.h"
 
 #include <array>
-#include <vector>
 #include <cstring>
+#include <vector>
 #if FMT_VERSION >= 100202
 #include <fmt/ranges.h>
 #endif
