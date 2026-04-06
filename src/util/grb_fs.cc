@@ -27,10 +27,10 @@ Gerbera - https://gerbera.io/
 #include "util/tools.h"
 
 #include <algorithm>
+#include <cstring>
 #include <fcntl.h>
 #include <fstream>
 #include <sstream>
-#include <cstring>
 #include <sys/stat.h>
 #include <unistd.h>
 

@@ -47,12 +47,12 @@
 
 #include <algorithm>
 #include <array>
+#include <cstring>
 #include <sys/inotify.h>
 #include <sys/ioctl.h>
 #include <sys/select.h>
 #include <thread>
 #include <unistd.h>
-#include <cstring>
 #ifdef SOLARIS
 #include <sys/filio.h> // FIONREAD
 #endif

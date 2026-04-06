@@ -32,11 +32,11 @@
 
 #include <chrono>
 #include <condition_variable>
+#include <cstring>
 #include <functional>
 #include <mutex>
 #include <pthread.h>
 #include <thread>
-#include <cstring>
 
 using ThreadProc = std::function<void(void* target)>;
 

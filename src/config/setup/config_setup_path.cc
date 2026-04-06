@@ -30,8 +30,8 @@
 #include "config/config_options.h"
 #include "util/logger.h"
 
-#include <pugixml.hpp>
 #include <cstring>
+#include <pugixml.hpp>
 
 bool ConfigPathSetup::checkPathValue(std::string& optValue, std::string& pathValue) const
 {
