@@ -393,7 +393,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
                 auto index = getItemPath(indexList, cfg);
                 if (optItem == index) {
                     config->setOrigValue(index, getProperty(filter));
-                    if (setProperty(filter, definition, cfg.at(0), optValue)) {
+                    if (setProperty(filter, definition, cfg.at(1), optValue)) {
                         log_debug("New value for Transcoding Filter {} {} = {}", label.data(), index, getProperty(filter));
                         return true;
                     }
@@ -704,7 +704,7 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
                 auto index = getItemPath(indexList, cfg);
                 if (optItem == index) {
                     auto origValue = getProperty(entry);
-                    if (setProperty(entry, definition, cfg.at(0), optValue)) {
+                    if (setProperty(entry, definition, cfg.at(1), optValue)) {
                         config->setOrigValue(index, origValue);
                         log_debug("New value for Transcoding Profile {} {} = {}", label.data(), index, getProperty(config->getTranscodingProfileListOption(option)->getByName(entry->getName(), true)));
                         if (cfg.at(1) == ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER) {
