@@ -258,7 +258,7 @@ bool ConfigClientSetup::updateItem(
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, getProperty(entry));
-            if (setProperty(entry, definition, cfg.at(0), optValue)) {
+            if (setProperty(entry, definition, cfg.at(1), optValue)) {
                 auto nEntry = EDIT_CAST(EditHelperClientConfig, config->getClientConfigListOption(option))->get(i);
                 log_debug("New value for Client {} {} = {}", label.data(), index, getProperty(nEntry));
                 return true;
@@ -447,7 +447,7 @@ bool ConfigClientSetup::updateItem(
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, getProperty(entry));
-            if (setProperty(entry, definition, cfg.at(0), optValue)) {
+            if (setProperty(entry, definition, cfg.at(1), optValue)) {
                 auto nEntry = EDIT_CAST(EditHelperClientGroupConfig, config->getClientConfigListOption(option))->get(i);
                 log_debug("New value for Group {} {} = {}", label.data(), index, getProperty(nEntry));
                 return true;

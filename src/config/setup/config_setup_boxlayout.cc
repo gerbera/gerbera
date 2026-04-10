@@ -294,7 +294,7 @@ bool ConfigBoxLayoutSetup::updateItem(
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, getProperty(entry));
-            if (setProperty(entry, definition, cfg.at(0), optValue)) {
+            if (setProperty(entry, definition, cfg.at(1), optValue)) {
                 auto nEntry = EDIT_CAST(EditHelperBoxLayout, config->getBoxLayoutListOption(option))->get(i);
                 log_debug("New value for BoxLayout {} {} = {}", label.data(), index, getProperty(nEntry));
                 return true;
@@ -341,7 +341,7 @@ bool ConfigBoxLayoutSetup::updateItem(
         if (optItem == index) {
             if (entry->getOrig())
                 config->setOrigValue(index, getProperty(entry));
-            if (setProperty(entry, definition, cfg.at(0), optValue)) {
+            if (setProperty(entry, definition, cfg.at(1), optValue)) {
                 auto nEntry = EDIT_CAST(EditHelperBoxChain, config->getBoxLayoutListOption(option))->get(i);
                 log_debug("New value for BoxLayout {} {} = {}", label.data(), index, getProperty(nEntry));
                 return true;

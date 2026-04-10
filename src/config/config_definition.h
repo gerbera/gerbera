@@ -28,6 +28,7 @@
 #define __CONFIG_DEFINITION_H__
 
 #include "config.h"
+#include "config_setup.h"
 #include "exceptions.h"
 #include "util/tools.h"
 
@@ -52,8 +53,6 @@
 
 // device description defaults
 #define DESC_MANUFACTURER_URL "https://gerbera.io/"
-
-class ConfigSetup;
 
 class ConfigDefinition {
 public:
@@ -103,7 +102,7 @@ public:
 
         auto result = std::dynamic_pointer_cast<CS>(base);
         if (!result) {
-            throw_std_runtime_error("Error in config code: {} has wrong class", option);
+            throw_std_runtime_error("Error in config code: {}={}  has wrong class", option, base->getUniquePath());
         }
         return result;
     }
