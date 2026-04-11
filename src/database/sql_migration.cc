@@ -36,6 +36,8 @@
 #include <fmt/core.h>
 #include <pugixml.hpp>
 
+#define RES_COLS "GRB_RES_COLS"
+
 void SQLMigration::upgradeDatabase(
     unsigned int dbVersion,
     const std::array<unsigned int, DBVERSION + 1>& hashies,
@@ -87,6 +89,11 @@ void SQLMigration::upgradeDatabase(
         { "location", &SQLMigration::doLocationMigration },
     };
 
+    auto resourceColumns = splitString(database->getInternalSetting("resource_attribute"), ',');
+    std::vector<std::string> resColumns;
+    for (auto&& col : resourceColumns) {
+        resColumns.push_back(fmt::format("{}", database->identifier(col)));
+    }
     /* --- run database upgrades --- */
     for (auto&& upgrade : dbUpdates) {
         if (dbVersion == version) {
@@ -94,6 +101,7 @@ void SQLMigration::upgradeDatabase(
             for (auto&& [migrationCmd, upgradeCmd] : upgrade) {
                 bool actionResult = true;
                 replaceAllString(upgradeCmd, STRING_LIMIT, fmt::to_string(stringLimit));
+                replaceAllString(upgradeCmd, RES_COLS, fmt::format("{}", fmt::join(resColumns, ",")));
                 if (!migrationCmd.empty() && migActions.find(migrationCmd) != migActions.end())
                     actionResult = (*this.*(migActions.at(migrationCmd)))();
                 if (actionResult && !upgradeCmd.empty())
