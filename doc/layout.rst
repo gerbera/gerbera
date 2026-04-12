@@ -120,14 +120,15 @@ The layout function can be set in configuration of :ref:`Import Function <import
 +-----------------------+--------------------------------------------------------------------------+------+
 | importImageDetails    | | Create image layout with model and topic details                       | i-d  |
 |                       | |                                                                        |      |
-|                       | | Requires aux to be populated by :confval:`libexiv` or :confval:`exiv2` |      |
-|                       | | ``EXIF_TAG_MODEL`` | ``Exif.Image.Model``                              |      |
-|                       | | ``EXIF_TAG_DATE_TIME_ORIGINAL`` | ``Exif.Image.DateTime``              |      |
-|                       | | ``EXIF_TAG_IMAGE_DESCRIPTION`` | ``Exif.Image.Description``            |      |
-|                       | | ``EXIF_TAG_ARTIST`` | ``Exif.Image.Artist``                            |      |
-|                       | | `` | ``Xmp.dc.subject``                                                |      |
-|                       | | `` | ``Xmp.photoshop.Headline``                                        |      |
-|                       | |                                                                        |      |
+|                       | | Requires aux to be populated by :confval:`libexiv` / :confval:`exiv2`  |      |
+|                       |                                                                          |      |
+|                       | - ``EXIF_TAG_MODEL``              / ``Exif.Image.Model``                 |      |
+|                       | - ``EXIF_TAG_DATE_TIME_ORIGINAL`` / ``Exif.Image.DateTime``              |      |
+|                       | - ``EXIF_TAG_IMAGE_DESCRIPTION``  / ``Exif.Image.Description``           |      |
+|                       | - ``EXIF_TAG_ARTIST``             / ``Exif.Image.Artist``                |      |
+|                       | -                                 / ``Xmp.dc.subject``                   |      |
+|                       | -                                 / ``Xmp.photoshop.Headline``           |      |
+|                       |                                                                          |      |
 |                       | | Support configuration of :confval:`model-map`                          |      |
 |                       | | Requires configuration of :confval:`headline-map`                      |      |
 +-----------------------+--------------------------------------------------------------------------+------+

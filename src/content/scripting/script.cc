@@ -69,7 +69,7 @@ static constexpr std::array jsGlobalFunctions {
     duk_function_list_entry { "print2", js_print2, DUK_VARARGS },
     duk_function_list_entry { "print", js_print, DUK_VARARGS },
     duk_function_list_entry { "addCdsObject", js_addCdsObject, 3 },
-    duk_function_list_entry { "addContainerTree", js_addContainerTree, 1 },
+    duk_function_list_entry { "addContainerTree", js_addContainerTree, DUK_VARARGS },
     duk_function_list_entry { "copyObject", js_copyObject, 1 },
     duk_function_list_entry { "f2i", js_f2i, 1 },
     duk_function_list_entry { "m2i", js_m2i, 1 },
@@ -363,6 +363,7 @@ Script* Script::getContextScript(duk_context* ctx)
         log_debug("Could not retrieve class instance from global object");
         duk_error(ctx, DUK_ERR_ERROR, "Could not retrieve current script from stash");
     }
+    log_debug("This is {}", self->contextName);
     return self;
 }
 
@@ -666,6 +667,7 @@ std::shared_ptr<CdsObject> Script::createObject(const std::shared_ptr<CdsObject>
 
 std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<CdsObject>& pcd)
 {
+    log_debug("start");
     auto obj = createObject(pcd);
 
     if (!obj)
@@ -737,7 +739,9 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         }
     });
 
-    fs::path location = !hasCaseSensitiveNames && obj->isContainer() ? toLower(ScriptNamedProperty(ctx, "location").getStringValue()) : ScriptNamedProperty(ctx, "location").getStringValue();
+    fs::path location = !hasCaseSensitiveNames && obj->isContainer()
+        ? toLower(ScriptNamedProperty(ctx, "location").getStringValue())
+        : ScriptNamedProperty(ctx, "location").getStringValue();
     if (!location.empty()) {
         // location must not be touched by character conversion!
         obj->setLocation(location, obj->getEntryType());
@@ -787,14 +791,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
         // update description if not set in script
         {
             auto val = ScriptNamedProperty(ctx, "description").getStringValue();
-            if (!val.empty()) {
-                auto [mval, err] = sc->convert(val);
-                if (!err.empty()) {
-                    log_warning("{}: {}", obj->getLocation().string(), err);
-                }
-                item->removeMetaData(MetadataFields::M_DESCRIPTION);
-                item->addMetaData(MetadataFields::M_DESCRIPTION, mval);
-            } else if (pcdItem && item->getMetaData(MetadataFields::M_DESCRIPTION).empty() && !pcdItem->getMetaData(MetadataFields::M_DESCRIPTION).empty()) {
+            if (pcdItem && description.empty() && item->getMetaData(MetadataFields::M_DESCRIPTION).empty() && !pcdItem->getMetaData(MetadataFields::M_DESCRIPTION).empty()) {
                 item->addMetaData(MetadataFields::M_DESCRIPTION, pcdItem->getMetaData(MetadataFields::M_DESCRIPTION));
             }
         }
@@ -833,7 +830,7 @@ std::shared_ptr<CdsObject> Script::dukObject2cdsObject(const std::shared_ptr<Cds
             resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
             int size = ScriptNamedProperty(ctx, "size").getIntValue(-1);
             if (size > -1) {
-                resource->addAttribute(ResourceAttribute::SIZE, fmt::to_string(size));
+                resource->addAttribute(ResourceAttribute::SIZE, size);
             }
         }
 

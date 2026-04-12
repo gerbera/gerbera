@@ -43,13 +43,13 @@ std::vector<std::string> ScriptProperty::getStringArrayValue() const
     }
     duk_enum(ctx, index, 0);
     while (duk_next(ctx, index, 1 /* get_value */)) {
-        duk_get_string(ctx, index);
-        if (duk_is_null_or_undefined(ctx, index)) {
+        duk_get_string(ctx, -1);
+        if (duk_is_null_or_undefined(ctx, -1)) {
             duk_pop_2(ctx);
             continue;
         }
         // [key = duk_to_string(ctx, -2)]
-        auto val = std::string(duk_to_string(ctx, index));
+        auto val = std::string(duk_to_string(ctx, -1));
         result.push_back(std::move(val));
         duk_pop_2(ctx); /* pop_key */
     }
@@ -74,19 +74,19 @@ std::vector<int> ScriptProperty::getIntArrayValue() const
 
     duk_enum(ctx, index, 0);
     while (duk_next(ctx, index, 1 /* get_value */)) {
-        if (duk_is_string(ctx, index)) {
-            duk_get_string(ctx, index);
-            if (duk_is_null_or_undefined(ctx, index)) {
+        if (duk_is_string(ctx, -1)) {
+            duk_get_string(ctx, -1);
+            if (duk_is_null_or_undefined(ctx, -1)) {
                 duk_pop_2(ctx);
                 continue;
             }
-            result.push_back(stoiString(duk_to_string(ctx, index)));
+            result.push_back(stoiString(duk_to_string(ctx, -1)));
         } else {
-            if (duk_is_null_or_undefined(ctx, index)) {
+            if (duk_is_null_or_undefined(ctx, -1)) {
                 duk_pop_2(ctx);
                 continue;
             }
-            result.push_back(duk_to_int32(ctx, index));
+            result.push_back(duk_to_int32(ctx, -1));
         }
         duk_pop_2(ctx); /* pop_key */
     }
@@ -96,17 +96,17 @@ std::vector<int> ScriptProperty::getIntArrayValue() const
     return result;
 }
 
-std::string ScriptProperty::getStringValue() const
+std::string ScriptProperty::getStringValue(const std::string& defValue) const
 {
     if (!isValid()) {
-        return "";
+        return defValue;
     }
 
-    if (duk_is_null_or_undefined(ctx, -1) || !duk_to_string(ctx, -1)) {
-        return "";
+    if (duk_is_null_or_undefined(ctx, index) || !duk_to_string(ctx, index)) {
+        return defValue;
     }
-    auto ret = duk_get_string(ctx, -1);
-    return ret ? ret : "";
+    auto ret = duk_get_string(ctx, index);
+    return ret ? ret : defValue;
 }
 
 int ScriptProperty::getIntValue(int defValue) const
@@ -126,17 +126,17 @@ int ScriptProperty::getBoolValue() const
         return -1;
     }
 
-    if (duk_is_null_or_undefined(ctx, -1)) {
+    if (duk_is_null_or_undefined(ctx, index)) {
         return -1;
     }
-    return duk_to_boolean(ctx, -1);
+    return duk_to_boolean(ctx, index);
 }
 
 std::vector<std::string> ScriptProperty::getPropertyNames() const
 {
     std::vector<std::string> keys;
-    duk_enum(ctx, -1, 0);
-    while (duk_next(ctx, -1, 0 /*get_key*/)) {
+    duk_enum(ctx, index, 0);
+    while (duk_next(ctx, index, 0 /*get_key*/)) {
         /* [ ... enum key ] */
         auto sym = std::string(duk_get_string(ctx, -1));
         keys.push_back(std::move(sym));

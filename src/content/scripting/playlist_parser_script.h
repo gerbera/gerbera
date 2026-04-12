@@ -46,6 +46,9 @@ public:
 
 protected:
     std::string playlistFunction;
+    bool linkObjects;
+    bool followSymlinks;
+    bool hidden;
 
     void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
     void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) override;

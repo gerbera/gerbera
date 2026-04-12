@@ -45,6 +45,7 @@
 
 #ifdef HAVE_JS
 #include "layout/js_layout.h"
+#include "scripting/cuesheet_parser_script.h"
 #include "scripting/import_script.h"
 #include "scripting/metafile_parser_script.h"
 #include "scripting/playlist_parser_script.h"
@@ -309,6 +310,10 @@ void ImportService::initLayout(LayoutType layoutType)
         metafileParserScript = std::make_shared<MetafileParserScript>(content, rootPath.string());
         metafileParserScript->init();
     }
+    if (!cuesheetParserScript) {
+        cuesheetParserScript = std::make_shared<CuesheetParserScript>(content, rootPath.string());
+        cuesheetParserScript->init();
+    }
 #endif
 }
 
@@ -318,6 +323,7 @@ void ImportService::destroyLayout()
 #ifdef HAVE_JS
     playlistParserScript = nullptr;
     metafileParserScript = nullptr;
+    cuesheetParserScript = nullptr;
 #endif
 }
 
@@ -703,7 +709,10 @@ void ImportService::createItems(
                     updateSingleItem(dirEntry, item, item->getMimeType());
                     if (lastModifiedNewMax < cdsObj->getMTime())
                         lastModifiedNewMax = cdsObj->getMTime();
-                    database->updateObject(cdsObj, nullptr);
+                    std::vector<int> newIds;
+                    if (metadataService->afterCreation(item, dirEntry, newIds))
+                        addExtraObjects(stateCache, newIds);
+                    database->updateObject(item, nullptr);
                     stateEntry->setObject(ImportState::Created, cdsObj);
                     log_debug("Item changed {} {}", itemPath.string(), cdsObj->getID());
                 } else {
@@ -730,6 +739,10 @@ void ImportService::createItems(
                     stateEntry->setObject(ImportState::Created, cdsObj);
                     cdsObj->setParentID(parentContainer ? parentContainer->getID() : INVALID_OBJECT_ID);
                     database->addObject(cdsObj, nullptr);
+                    std::vector<int> newIds;
+                    if (metadataService->afterCreation(std::static_pointer_cast<CdsItem>(cdsObj), dirEntry, newIds))
+                        addExtraObjects(stateCache, newIds);
+                    database->updateObject(cdsObj, nullptr);
                 } else {
                     stateEntry->setObject(ImportState::Broken, cdsObj);
                     cdsObj = nullptr;
@@ -808,8 +821,9 @@ void ImportService::updateSingleItem(
     item->setSizeOnDisk(getFileSize(dirEntry));
 
     try {
-        metadataService->extractMetaData(item, dirEntry);
-        metadataService->attachResourceFiles(item, dirEntry);
+        std::vector<int> newIds;
+        metadataService->extractMetaData(item, dirEntry, newIds);
+        metadataService->attachResourceFiles(item, dirEntry, newIds);
         updateItemData(item, mimetype);
     } catch (const std::runtime_error& ex) {
         log_error("updateSingleItem '{}' failed: {}", dirEntry.path().string(), ex.what());
@@ -877,7 +891,9 @@ void ImportService::fillSingleLayout(
     }
 }
 
-void ImportService::parseMetafile(const std::shared_ptr<CdsObject>& obj, const fs::path& path) const
+void ImportService::parseMetafile(
+    const std::shared_ptr<CdsObject>& obj,
+    const fs::path& path) const
 {
 #ifdef HAVE_JS
     try {
@@ -888,6 +904,39 @@ void ImportService::parseMetafile(const std::shared_ptr<CdsObject>& obj, const f
     }
 #else
     log_warning("Metadata file {} will not be parsed: Gerbera was compiled without JS support!", path.string());
+#endif // HAVE_JS
+}
+
+void ImportService::addExtraObjects(
+    const std::shared_ptr<StateCache>& stateCache,
+    const std::vector<int>& newIds)
+{
+    for (auto id : newIds) {
+        auto cueObj = database->loadObject(id);
+        auto location = cueObj->getLocation();
+        auto dirEntry = fs::directory_entry(location);
+        stateCache->cacheState(location / cueObj->getTitle(), dirEntry, ImportState::Created, toSeconds(dirEntry.last_write_time(ec)));
+    }
+}
+
+std::vector<int> ImportService::parseCueSheet(
+    const std::shared_ptr<CdsObject>& obj,
+    const fs::path& path) const
+{
+#ifdef HAVE_JS
+    try {
+        if (cuesheetParserScript) {
+            auto cueIds = cuesheetParserScript->processObject(obj, path);
+            return cueIds;
+        }
+        return {};
+    } catch (const std::runtime_error& e) {
+        log_error("{}: {}", path.string(), e.what());
+        return {};
+    }
+#else
+    log_warning("CueSheet file {} will not be parsed: Gerbera was compiled without JS support!", path.string());
+    return {};
 #endif // HAVE_JS
 }
 
@@ -980,7 +1029,8 @@ void ImportService::assignFanArt(
             container->clearResources();
             doUpdate = true;
         }
-        metadataService->getHandler(ContentHandler::CONTAINERART)->fillMetadata(container);
+        std::vector<int> newIds;
+        metadataService->getHandler(ContentHandler::CONTAINERART)->fillMetadata(container, newIds);
         auto containerart = container->getResource(ResourcePurpose::Thumbnail);
         if (containerart) {
             fanart = containerart;
@@ -1012,8 +1062,8 @@ void ImportService::assignFanArt(
                 }
                 if (refFanArt->getAttribute(ResourceAttribute::RESOURCE_FILE).empty()) {
                     if (fanArtObjId > CDS_ID_ROOT) {
-                        refFanArt->addAttribute(ResourceAttribute::FANART_OBJ_ID, fmt::to_string(fanArtObjId));
-                        refFanArt->addAttribute(ResourceAttribute::FANART_RES_ID, fmt::to_string(fanArtResId));
+                        refFanArt->addAttribute(ResourceAttribute::FANART_OBJ_ID, fanArtObjId);
+                        refFanArt->addAttribute(ResourceAttribute::FANART_RES_ID, fanArtResId);
                         fanart = refFanArt;
                     }
                 } else {
@@ -1075,10 +1125,10 @@ std::pair<int, bool> ImportService::addContainerTree(
     std::string tree; // accumulate path to container here
     int result = parentContainerId;
     bool isNew = false;
-    bool isVirtual = parentContainerId != CDS_ID_FS_ROOT;
     int count = 0;
 
     for (auto&& item : chain) {
+        bool isVirtual = item->getEntryType() != CdsEntryType::Directory && item->getEntryType() != CdsEntryType::File;
         std::string subTree;
         if (item->getTitle().empty()) {
             log_error("Received chain item without title");
@@ -1187,7 +1237,8 @@ void ImportService::updateFanArt(const std::shared_ptr<StateCache>& stateCache, 
         auto dirEntry = stateEntry->getDirEntry();
         auto item = std::dynamic_pointer_cast<CdsItem>(stateEntry->getObject());
         try {
-            if (metadataService->attachResourceFiles(item, dirEntry))
+            std::vector<int> newIds;
+            if (metadataService->attachResourceFiles(item, dirEntry, newIds))
                 database->updateObject(item, nullptr);
         } catch (const std::runtime_error& ex) {
             log_error("Updating FanArt for '{}' failed: {}", dirEntry.path().string(), ex.what());

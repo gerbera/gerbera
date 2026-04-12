@@ -64,6 +64,7 @@ static constexpr std::array chKeys = {
 #endif
     std::pair(ContentHandler::SUBTITLE, "Subtitle"),
     std::pair(ContentHandler::METAFILE, "MetaFile"),
+    std::pair(ContentHandler::CUESHEET, "CueSheet"),
     std::pair(ContentHandler::RESOURCE, "Resource"),
 };
 
@@ -71,6 +72,7 @@ static const auto otKeys = std::map<ObjectType, std::string> {
     { ObjectType::Unknown, "Unknown" },
     { ObjectType::Folder, "Folder" },
     { ObjectType::Playlist, "Playlist" },
+    { ObjectType::Cuesheet, "Cuesheet" },
     { ObjectType::Audio, "Audio" },
     { ObjectType::Video, "Video" },
     { ObjectType::Image, "Image" },

@@ -107,8 +107,8 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
         throw UpnpException(UPNP_E_NO_SUCH_ID, "empty object id");
 
     auto&& quirks = request.getQuirks();
-    int objectID = stoiString(objID);
-    auto arr = quirks && objectID == 0 && objID != "0"
+    int objectID = stoiString(objID, CDS_ID_ROOT);
+    auto arr = quirks && objectID == CDS_ID_ROOT && objID != GRB_STRINGIZE(CDS_ID_ROOT)
         ? quirks->getSamsungFeatureRoot(database, startingIndex, requestedCount, objID)
         : std::vector<std::shared_ptr<CdsObject>>();
 

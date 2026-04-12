@@ -129,7 +129,9 @@ bool MatroskaHandler::isSupported(
     return contentType == CONTENT_TYPE_MKV;
 }
 
-bool MatroskaHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool MatroskaHandler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
     if (!item || !enabled)

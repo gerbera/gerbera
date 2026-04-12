@@ -210,6 +210,8 @@ add_library(
     src/content/onlineservice/online_service_helper.h
     src/content/onlineservice/task_processor.cc
     src/content/onlineservice/task_processor.h
+    src/content/scripting/cuesheet_parser_script.cc
+    src/content/scripting/cuesheet_parser_script.h
     src/content/scripting/duk_compat.h
     src/content/scripting/import_script.cc
     src/content/scripting/import_script.h
@@ -297,6 +299,8 @@ add_library(
     src/metadata/metacontent_handler.h
     src/metadata/metadata_enums.cc
     src/metadata/metadata_enums.h
+    src/metadata/metafile_handler.cc
+    src/metadata/metafile_handler.h
     src/metadata/metadata_handler.cc
     src/metadata/metadata_handler.h
     src/metadata/metadata_service.cc

@@ -229,7 +229,9 @@ std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(
     }
 }
 
-bool FfmpegThumbnailerHandler::fillMetadata(const std::shared_ptr<CdsObject>& obj)
+bool FfmpegThumbnailerHandler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
 {
     if (!enabled)
         return false;

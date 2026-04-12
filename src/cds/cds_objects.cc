@@ -131,6 +131,8 @@ ObjectType CdsObject::getMediaType(const std::string& contentType) const
     }
     if (contentType == CONTENT_TYPE_PLAYLIST)
         return ObjectType::Playlist;
+    if (contentType == CONTENT_TYPE_CUESHEET)
+        return ObjectType::Cuesheet;
     if (isSubClass(UPNP_CLASS_CONTAINER))
         return ObjectType::Folder;
     if (isSubClass(UPNP_CLASS_VIDEO_ITEM))
@@ -165,7 +167,7 @@ std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
 
 std::shared_ptr<CdsObject> CdsObject::createObject(CdsEntryType entryType)
 {
-    if (entryType == CdsEntryType::Directory || entryType == CdsEntryType::VirtualContainer || entryType == CdsEntryType::DynamicFolder) {
+    if (entryType == CdsEntryType::Directory || entryType == CdsEntryType::VirtualContainer || entryType == CdsEntryType::DynamicFolder || entryType == CdsEntryType::ExtraDirectory) {
         return std::make_shared<CdsContainer>(entryType);
     }
 
@@ -173,7 +175,7 @@ std::shared_ptr<CdsObject> CdsObject::createObject(CdsEntryType entryType)
         return std::make_shared<CdsItemExternalURL>();
     }
 
-    if (entryType == CdsEntryType::File || entryType == CdsEntryType::VirtualItem) {
+    if (entryType == CdsEntryType::File || entryType == CdsEntryType::VirtualItem || entryType == CdsEntryType::ExtraFile) {
         return std::make_shared<CdsItem>(entryType);
     }
 
@@ -193,6 +195,8 @@ static const auto entryTypes = std::map<CdsEntryType, std::string> {
     { CdsEntryType::VirtualItem, "Item" },
     { CdsEntryType::ExternalUrl, "ExternalUrl" },
     { CdsEntryType::DynamicFolder, "DynamicFolder" },
+    { CdsEntryType::ExtraFile, "ExtraFile" },
+    { CdsEntryType::ExtraDirectory, "ExtraDirectory" },
 };
 
 std::string CdsObject::mapEntryType(CdsEntryType type)

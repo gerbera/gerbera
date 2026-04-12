@@ -449,6 +449,7 @@ Layout Functions
            <image-file>importImage</image-file>
            <playlist create-link="yes">importPlaylist</playlist>
            <meta-file>importMetadata</meta-file>
+           <cuesheet>importCuesheet</cuesheet>
        </import-function>
 
 Set the entry points for the virtual layout functions and file parsing functions. Selecting the entry point is the replacement for setting
@@ -506,6 +507,17 @@ Name of the javascript function invoked during the first import phase to gather 
 Currently support for ``nfo`` files is implemented (https://kodi.wiki/view/NFO_files/Templates).
 
 The search pattern to identify metadata files is set in :confval:`resources` section.
+
+.. confval:: cuesheet
+   :type: :confval:`String`
+   :required: false
+   :default: ``importCuesheet``
+
+.. versionadded:: HEAD
+
+Name of the javascript function invoked during the first import phase to parse cuesheets.
+Similar to :confval:`playlist` the function is called with the file object and no media file.
+Currently support for ``cue`` files is implemented (https://github.com/libyal/libodraw/blob/main/documentation/CUE%20sheet%20format.asciidoc)
 
 .. _virtual-layout:
 

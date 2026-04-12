@@ -38,8 +38,9 @@
 #include "upnp/compat.h"
 #include "util/logger.h"
 
-FileIOHandler::FileIOHandler(const fs::path& filename)
+FileIOHandler::FileIOHandler(const fs::path& filename, off_t offset)
     : file(filename)
+    , offset(offset)
 {
     log_debug("path = {}", file.getPath().string());
 }
@@ -51,6 +52,8 @@ void FileIOHandler::open(enum UpnpOpenFileMode mode)
 
     std::lock_guard<std::mutex> lock(mutex);
     f = file.open("rb");
+    if (offset > 0)
+        seek(offset, SEEK_SET);
     log_debug("open {}", file.getPath().string());
 }
 

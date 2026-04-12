@@ -86,6 +86,7 @@ enum class DbFileType {
     File,
     Virtual,
     Any,
+    All,
 };
 
 class Database {

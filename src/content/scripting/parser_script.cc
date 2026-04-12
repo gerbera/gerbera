@@ -36,6 +36,7 @@
 
 #include "parser_script.h" // API
 
+#include "cds/cds_objects.h"
 #include "content/content.h"
 #include "context.h"
 #include "database/database.h"
@@ -225,9 +226,28 @@ std::pair<std::string, bool> ParserScript::readLine()
         log_debug("Scanning {}", currentLine);
         if (!fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle))
             return { {}, false };
-        auto ret = trimString(currentLine);
+        auto ret = doTrim ? trimString(currentLine) : currentLine;
         if (!ret.empty())
             return { ret, true };
+    }
+}
+
+void ParserScript::cleanUp()
+{
+    currentHandle = nullptr;
+
+    delete[] currentLine;
+    currentLine = nullptr;
+    xmlDoc.reset();
+    root = nullNode;
+
+    currentObjectID = INVALID_OBJECT_ID;
+    currentTask = nullptr;
+
+    gc_counter++;
+    if (gc_counter > JS_CALL_GC_AFTER_NUM) {
+        duk_gc(ctx, 0);
+        gc_counter = 0;
     }
 }
 

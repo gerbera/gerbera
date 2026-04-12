@@ -82,6 +82,7 @@ public:
     /// @param res attribute name
     /// @param value attribute value
     void addAttribute(ResourceAttribute res, std::string value);
+    void addAttribute(ResourceAttribute res, long long value);
 
     /// @brief Merge existing attributes with new ones
     void mergeAttributes(const std::map<ResourceAttribute, std::string>& additional);

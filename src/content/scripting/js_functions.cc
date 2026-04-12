@@ -93,7 +93,15 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
     }
 
     std::vector<std::shared_ptr<CdsObject>> chain;
-    duk_size_t length = duk_get_length(ctx, -1);
+    duk_size_t length = duk_get_length(ctx, 0);
+
+    duk_idx_t stackCount = duk_get_top(ctx);
+    int rootId = CDS_ID_ROOT;
+    if (stackCount > 1) {
+        rootId = ScriptProperty(ctx, 1, true).getIntValue(CDS_ID_ROOT);
+        log_debug("rootId {}", rootId);
+        duk_swap_top(ctx, 0);
+    }
 
     for (duk_size_t i = 0; i < length; i++) {
         if (duk_get_prop_index(ctx, -1, i)) {
@@ -125,10 +133,11 @@ duk_ret_t js_addContainerTree(duk_context* ctx)
                 lastItem = self->getDatabase()->loadObject(refId);
                 log_debug("lastItem from RefID {}, resSize {}, loc {}", lastItem->getTitle(), lastItem->getResourceCount(), lastItem->getLocation().string());
             }
-        } else
+        } else {
             log_debug("lastItem {}, resSize {}, refID {}", lastItem->getTitle(), lastItem->getResourceCount(), refId);
+        }
         auto cm = self->getContent();
-        auto containerId = std::get<0>(cm->addContainerTree(chain, lastItem));
+        auto containerId = std::get<0>(cm->addContainerTree(chain, lastItem, rootId));
         chain.clear();
         if (containerId != INVALID_OBJECT_ID) {
             /* setting last container ID as return value */
@@ -188,8 +197,8 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
 
         auto parentId = stoiString(containerId);
 
-        if (parentId <= 0) {
-            log_error("Invalid parent id passed to addCdsObject: {}", parentId);
+        if (parentId <= CDS_ID_ROOT) {
+            log_error("Invalid parent id passed to addCdsObject: {}", containerId);
             return 0;
         }
 
