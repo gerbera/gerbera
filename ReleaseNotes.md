@@ -16,7 +16,7 @@ therefor are added to the physical layout and are handled in virtual layout.
 
 ### Code Improvements
 
-- Update maximum versions of pupnp (1.18.4), npupnp (6.3.0), libexif (0.6.26)
+- Update maximum versions of pupnp (1.18.5), npupnp (6.3.0), libexif (0.6.26)
 
 ## v3.2.1
 

@@ -151,8 +151,8 @@ public:
     /// @param query The SQL query string
     /// @param getLastInsertId return the last created object
     /// @param warnOnly no not throw exceptions
-    PGExecTask(const std::string& query, const std::string& getLastInsertId, bool warnOnly = false);
-    PGExecTask(const std::string& query);
+    PGExecTask(std::string query, std::string getLastInsertId, bool warnOnly = false);
+    PGExecTask(std::string query);
 
     void run(
         const std::unique_ptr<pqxx::connection>& conn,
