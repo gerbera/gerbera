@@ -2963,7 +2963,7 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
         fields[AutoscanColumn::LastModified] = quote(adir->getPreviousLMT().count());
     }
     Autoscan2Table at(fields, Operation::Insert, autoscanColumnMapper);
-    adir->setDatabaseID(exec(at.sqlForInsert(adir), autoscanColumnMapper->mapQuoted(AutoscanColumn::ObjId, false)));
+    adir->setDatabaseID(exec(at.sqlForInsert(adir), autoscanColumnMapper->mapQuoted(AutoscanColumn::ObjId, true)));
 }
 
 void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
