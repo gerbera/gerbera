@@ -144,19 +144,19 @@ void PGSelectTask::run(
 /* PGExecTask */
 
 PGExecTask::PGExecTask(
-    const std::string& query,
-    const std::string& getLastInsertId,
+    std::string query,
+    std::string getLastInsertId,
     bool warnOnly)
     : PGTask(!warnOnly)
-    , query(query.c_str())
-    , lastInsertColumn(getLastInsertId)
+    , query(std::move(query))
+    , lastInsertColumn(std::move(getLastInsertId))
 {
     if (!lastInsertColumn.empty())
         this->query = fmt::format("{} RETURNING {}", this->query, this->lastInsertColumn);
 }
 
-PGExecTask::PGExecTask(const std::string& q)
-    : query(q)
+PGExecTask::PGExecTask(std::string query)
+    : query(std::move(query))
 {
 }
 

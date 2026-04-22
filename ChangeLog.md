@@ -8,9 +8,11 @@
 - Bump follow-redirects from 1.15.11 to 1.16.0 in /gerbera-web
 - Bump lodash from 4.17.23 to 4.18.1 in /gerbera-web
 - Bump picomatch from 2.3.1 to 2.3.2 in /gerbera-web
+- Fix for SQL Error when using postgresql
 - Fix includes
 - Fix saving some config properties from ui
 - Fix sqlite resource migration
+- Update to pupnp 1.18.5
 
 ### v3.2.1
 

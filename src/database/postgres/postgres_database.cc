@@ -315,7 +315,7 @@ void PostgresDatabase::execOnTable(std::string_view tableName, const std::string
 int PostgresDatabase::exec(const std::string& query, const std::string& getLastInsertId)
 {
     try {
-        log_debug("Adding query to Queue: {}", query);
+        log_debug("Adding query to Queue: {} RETURNING '{}'", query, getLastInsertId);
         auto etask = std::make_shared<PGExecTask>(query, getLastInsertId);
         addTask(etask);
         etask->waitForTask();
