@@ -78,11 +78,20 @@ endif(NOT FFMPEG_INCLUDE_DIR)
 get_filename_component(FFMPEG_INCLUDE_DIR ${FFMPEG_INCLUDE_DIR} ABSOLUTE)
 
 find_package(PkgConfig QUIET)
-pkg_check_modules(FFMPEG IMPORTED_TARGET GLOBAL libavformat libavutil libavcodec)
+pkg_check_modules(
+    FFMPEG
+    IMPORTED_TARGET
+    GLOBAL
+    libavformat
+    libavutil
+    libavfilter
+    libavcodec)
 if(NOT FFMPEG_FOUND)
     find_library(FFMPEG_avformat_LIBRARY avformat /usr/local/lib /usr/lib)
 
     find_library(FFMPEG_avcodec_LIBRARY avcodec /usr/local/lib /usr/lib)
+
+    find_library(FFMPEG_avfilter_LIBRARY avfilter /usr/local/lib /usr/lib)
 
     find_library(FFMPEG_avutil_LIBRARY avutil /usr/local/lib /usr/lib)
 
@@ -110,85 +119,85 @@ if(NOT FFMPEG_FOUND)
 endif(NOT FFMPEG_FOUND)
 
 set(FFMPEG_LIBRARIES)
-if(FFMPEG_INCLUDE_DIR)
-    if(FFMPEG_avformat_LIBRARY)
-        if(FFMPEG_avcodec_LIBRARY)
-            if(FFMPEG_avutil_LIBRARY)
-                set(FFMPEG_FOUND TRUE)
-                set(FFMPEG_INCLUDE_DIRS ${FFMPEG_INCLUDE_DIR})
-                set(FFMPEG_BASIC_LIBRARIES ${FFMPEG_avformat_LIBRARY} ${FFMPEG_avcodec_LIBRARY}
-                                           ${FFMPEG_avutil_LIBRARY} ${FFMPEG_avcodec_LIBRARY})
+if(FFMPEG_INCLUDE_DIR
+   AND FFMPEG_avformat_LIBRARY
+   AND FFMPEG_avcodec_LIBRARY
+   AND FFMPEG_avutil_LIBRARY
+   AND FFMPEG_avfilter_LIBRARY)
+    set(FFMPEG_FOUND TRUE)
+    set(FFMPEG_INCLUDE_DIRS ${FFMPEG_INCLUDE_DIR})
+    set(FFMPEG_BASIC_LIBRARIES
+        ${FFMPEG_avformat_LIBRARY} ${FFMPEG_avcodec_LIBRARY} ${FFMPEG_avfilter_LIBRARY}
+        ${FFMPEG_avcodec_LIBRARY} ${FFMPEG_avutil_LIBRARY} ${FFMPEG_avcodec_LIBRARY})
 
-                # swresample is a dependency of avformat and avcodec
-                if(FFMPEG_swresample_LIBRARY)
-                    list(APPEND FFMPEG_BASIC_LIBRARIES ${FFMPEG_swresample_LIBRARY})
-                endif(FFMPEG_swresample_LIBRARY)
+    # swresample is a dependency of avformat and avcodec
+    if(FFMPEG_swresample_LIBRARY)
+        list(APPEND FFMPEG_BASIC_LIBRARIES ${FFMPEG_swresample_LIBRARY})
+    endif(FFMPEG_swresample_LIBRARY)
 
-                # swscale is always a part of newer ffmpeg distros
-                if(FFMPEG_swscale_LIBRARY)
-                    list(APPEND FFMPEG_BASIC_LIBRARIES ${FFMPEG_swscale_LIBRARY})
-                endif(FFMPEG_swscale_LIBRARY)
+    # swscale is always a part of newer ffmpeg distros
+    if(FFMPEG_swscale_LIBRARY)
+        list(APPEND FFMPEG_BASIC_LIBRARIES ${FFMPEG_swscale_LIBRARY})
+    endif(FFMPEG_swscale_LIBRARY)
 
-                set(FFMPEG_LIBRARIES ${FFMPEG_BASIC_LIBRARIES})
+    set(FFMPEG_LIBRARIES ${FFMPEG_BASIC_LIBRARIES})
 
-                if(FFMPEG_vorbis_LIBRARY)
-                    list(APPEND FFMPEG_LIBRARIES ${FFMPEG_vorbis_LIBRARY})
-                endif(FFMPEG_vorbis_LIBRARY)
+    if(FFMPEG_vorbis_LIBRARY)
+        list(APPEND FFMPEG_LIBRARIES ${FFMPEG_vorbis_LIBRARY})
+    endif(FFMPEG_vorbis_LIBRARY)
 
-                # ogg is a dependency of vorbis
-                if(FFMPEG_ogg_LIBRARY)
-                    list(APPEND FFMPEG_LIBRARIES ${FFMPEG_ogg_LIBRARY})
-                endif(FFMPEG_ogg_LIBRARY)
+    # ogg is a dependency of vorbis
+    if(FFMPEG_ogg_LIBRARY)
+        list(APPEND FFMPEG_LIBRARIES ${FFMPEG_ogg_LIBRARY})
+    endif(FFMPEG_ogg_LIBRARY)
 
-                if(FFMPEG_dc1394_LIBRARY)
-                    list(APPEND FFMPEG_LIBRARIES ${FFMPEG_dc1394_LIBRARY})
-                endif(FFMPEG_dc1394_LIBRARY)
+    if(FFMPEG_dc1394_LIBRARY)
+        list(APPEND FFMPEG_LIBRARIES ${FFMPEG_dc1394_LIBRARY})
+    endif(FFMPEG_dc1394_LIBRARY)
 
-                if(FFMPEG_vorbisenc_LIBRARY)
-                    list(APPEND FFMPEG_LIBRARIES ${FFMPEG_vorbisenc_LIBRARY})
-                endif(FFMPEG_vorbisenc_LIBRARY)
+    if(FFMPEG_vorbisenc_LIBRARY)
+        list(APPEND FFMPEG_LIBRARIES ${FFMPEG_vorbisenc_LIBRARY})
+    endif(FFMPEG_vorbisenc_LIBRARY)
 
-                if(FFMPEG_theora_LIBRARY)
-                    list(APPEND FFMPEG_LIBRARIES ${FFMPEG_theora_LIBRARY})
-                endif(FFMPEG_theora_LIBRARY)
+    if(FFMPEG_theora_LIBRARY)
+        list(APPEND FFMPEG_LIBRARIES ${FFMPEG_theora_LIBRARY})
+    endif(FFMPEG_theora_LIBRARY)
 
-                if(FFMPEG_dts_LIBRARY)
-                    list(APPEND FFMPEG_LIBRARIES ${FFMPEG_dts_LIBRARY})
-                endif(FFMPEG_dts_LIBRARY)
+    if(FFMPEG_dts_LIBRARY)
+        list(APPEND FFMPEG_LIBRARIES ${FFMPEG_dts_LIBRARY})
+    endif(FFMPEG_dts_LIBRARY)
 
-                if(FFMPEG_gsm_LIBRARY)
-                    list(APPEND FFMPEG_LIBRARIES ${FFMPEG_gsm_LIBRARY})
-                endif(FFMPEG_gsm_LIBRARY)
+    if(FFMPEG_gsm_LIBRARY)
+        list(APPEND FFMPEG_LIBRARIES ${FFMPEG_gsm_LIBRARY})
+    endif(FFMPEG_gsm_LIBRARY)
 
-                if(FFMPEG_z_LIBRARY)
-                    list(APPEND FFMPEG_LIBRARIES ${FFMPEG_z_LIBRARY})
-                endif(FFMPEG_z_LIBRARY)
+    if(FFMPEG_z_LIBRARY)
+        list(APPEND FFMPEG_LIBRARIES ${FFMPEG_z_LIBRARY})
+    endif(FFMPEG_z_LIBRARY)
 
-                if(FFMPEG_bz2_LIBRARY)
-                    list(APPEND FFMPEG_LIBRARIES ${FFMPEG_bz2_LIBRARY})
-                endif(FFMPEG_bz2_LIBRARY)
+    if(FFMPEG_bz2_LIBRARY)
+        list(APPEND FFMPEG_LIBRARIES ${FFMPEG_bz2_LIBRARY})
+    endif(FFMPEG_bz2_LIBRARY)
 
-                set(FFMPEG_LIBRARIES
-                    ${FFMPEG_LIBRARIES}
-                    CACHE INTERNAL "All presently found FFMPEG libraries.")
+    set(FFMPEG_LIBRARIES
+        ${FFMPEG_LIBRARIES}
+        CACHE INTERNAL "All presently found FFMPEG libraries.")
 
-                # It is probablu not a good idea to define a target in PkgConfig namespace, But
-                # alias targets are not correctly exported to try_compile
-                if(NOT TARGET PkgConfig::FFMPEG)
-                    add_library(PkgConfig::FFMPEG INTERFACE IMPORTED)
-                    set_property(TARGET PkgConfig::FFMPEG PROPERTY INTERFACE_INCLUDE_DIRECTORIES
-                                                                   "${FFMPEG_INCLUDE_DIRS}")
-                    set_property(TARGET PkgConfig::FFMPEG PROPERTY INTERFACE_LINK_LIBRARIES
-                                                                   "${FFMPEG_LIBRARIES}")
-                endif()
-            endif(FFMPEG_avutil_LIBRARY)
-        endif(FFMPEG_avcodec_LIBRARY)
-    endif(FFMPEG_avformat_LIBRARY)
-endif(FFMPEG_INCLUDE_DIR)
+    # It is probablu not a good idea to define a target in PkgConfig namespace, But alias targets
+    # are not correctly exported to try_compile
+    if(NOT TARGET PkgConfig::FFMPEG)
+        add_library(PkgConfig::FFMPEG INTERFACE IMPORTED)
+        set_property(TARGET PkgConfig::FFMPEG PROPERTY INTERFACE_INCLUDE_DIRECTORIES
+                                                       "${FFMPEG_INCLUDE_DIRS}")
+        set_property(TARGET PkgConfig::FFMPEG PROPERTY INTERFACE_LINK_LIBRARIES
+                                                       "${FFMPEG_LIBRARIES}")
+    endif()
+endif()
 
 mark_as_advanced(
     FFMPEG_INCLUDE_DIR
     FFMPEG_avformat_LIBRARY
+    FFMPEG_avfilter_LIBRARY
     FFMPEG_avcodec_LIBRARY
     FFMPEG_avutil_LIBRARY
     FFMPEG_vorbis_LIBRARY

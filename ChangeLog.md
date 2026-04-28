@@ -4,6 +4,7 @@
 
 - Add ImportMode to AutoScan settings
 - add missing headers
+- Add internal Transcoding
 - Add quirk NoSecNamespace for Universum DAB+ Internet Radio
 - Add server flags for dynamic description
 - Add support for cuesheets
