@@ -1023,7 +1023,11 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
                 }
             }
 
+#ifdef FFMPEG
+            auto tRes = std::make_shared<CdsResource>((tp->getType() == TranscodingType::Internal) ? ContentHandler::INT_TRANSCODE : ContentHandler::TRANSCODE, ResourcePurpose::Transcode);
+#else
             auto tRes = std::make_shared<CdsResource>(ContentHandler::TRANSCODE, ResourcePurpose::Transcode);
+#endif
             tRes->setResId(std::numeric_limits<int>::max());
             tRes->addParameter(URL_PARAM_TRANSCODE_PROFILE_NAME, tp->getName());
             // after transcoding resource was added we can not rely on
@@ -1246,9 +1250,13 @@ std::string UpnpXMLBuilder::buildProtocolInfo(
     auto extend = dlnaProfileString(resource, contentType, quirks);
 
     if (resource.getPurpose() == ResourcePurpose::Transcode) {
-        // we do not support seeking at all, so 00
-        // and the media is converted, so set CI to 1
-        extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, quirks && quirks->hasFlag(Quirk::ForceNoConversion) ? UPNP_DLNA_NO_CONVERSION : UPNP_DLNA_CONVERSION));
+        if (resource.getHandlerType() == ContentHandler::INT_TRANSCODE) {
+            extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, quirks && quirks->hasFlag(Quirk::ForceNoConversion) ? UPNP_DLNA_NO_CONVERSION : UPNP_DLNA_CONVERSION));
+        } else {
+            // we do not support seeking at all, so 00
+            // and the media is converted, so set CI to 1
+            extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, quirks && quirks->hasFlag(Quirk::ForceNoConversion) ? UPNP_DLNA_NO_CONVERSION : UPNP_DLNA_CONVERSION));
+        }
     } else {
         extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION));
     }

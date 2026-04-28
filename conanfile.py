@@ -142,7 +142,7 @@ class GerberaConan(ConanFile):
             Pkg(self).install(["libmatroska"])
 
         if self.options.ffmpeg:
-            Apt(self).install(["libavformat-dev"])
+            Apt(self).install(["libavformat-dev", "libavfilter-dev"])
             PacMan(self).install(["ffmpeg"])
             Zypper(self).install(["ffmpeg-4"])
             Yum(self).install(["ffmpeg-devel"])

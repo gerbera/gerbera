@@ -528,9 +528,17 @@
     <mimetype-profile-mappings allow-unused="no">
       <transcode mimetype="application/ogg" using="vlcmpeg" />
       <transcode mimetype="audio/ogg" using="ogg2mp3" />
+      <transcode mimetype="audio/x-flac" using="int2mp3" />
       <transcode mimetype="video/x-flv" using="vlcmpeg" />
     </mimetype-profile-mappings>
     <profiles allow-unused="no">
+      <profile name="int2mp3" enabled="no" type="internal">
+        <mimetype>audio/mpeg</mimetype>
+        <accept-url>no</accept-url>
+        <first-resource>yes</first-resource>
+        <accept-ogg-theora>yes</accept-ogg-theora>
+        <encoder format="mp3" acodec="mp3" afilter="anull" />
+      </profile>
       <profile name="ogg2mp3" enabled="no" type="external">
         <mimetype>audio/mpeg</mimetype>
         <accept-url>no</accept-url>

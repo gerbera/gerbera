@@ -38,6 +38,7 @@
 #include "exceptions.h"
 #include "iohandler/io_handler.h"
 #include "transcode_ext_handler.h"
+#include "transcode_int_handler.h"
 
 std::unique_ptr<IOHandler> TranscodeDispatcher::serveContent(
     const std::shared_ptr<TranscodingProfile>& profile,
@@ -52,6 +53,13 @@ std::unique_ptr<IOHandler> TranscodeDispatcher::serveContent(
     if (profile->getType() == TranscodingType::External) {
         auto trExt = std::make_unique<TranscodeExternalHandler>(content);
         return trExt->serveContent(profile, location, obj, group, range);
+    } else if (profile->getType() == TranscodingType::Internal) {
+#ifdef HAVE_FFMPEG
+        auto trInt = std::make_unique<TranscodeInternalHandler>(content);
+        return trInt->serveContent(profile, location, obj, group, range);
+#else
+        log_error("Internal transcoding requires ffmpeg");
+#endif
     }
 
     throw_std_runtime_error("Unknown transcoding type for profile {}", profile->getName());
