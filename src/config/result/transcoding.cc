@@ -47,9 +47,9 @@ TranscodingFilter::TranscodingFilter(std::string mimeType, std::string transcode
 {
 }
 
-void TranscodingProfile::setBufferOptions(std::size_t bs, std::size_t cs, std::size_t ifs)
+void TranscodingBuffer::setOptions(std::size_t bs, std::size_t cs, std::size_t ifs)
 {
-    bufferSize = bs;
+    size = bs;
     chunkSize = cs;
     initialFillSize = ifs;
 }

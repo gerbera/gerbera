@@ -113,31 +113,32 @@ std::uintmax_t getFileSize(const fs::directory_entry& dirEnt)
 #endif
 }
 
-bool isExecutable(const fs::path& path, int* err)
+bool GrbFile::isExecutable(int& err) const
 {
     int ret = access(path.c_str(), R_OK | X_OK);
-    if (err)
-        *err = errno;
+    err = errno;
 
     return ret == 0;
 }
 
-fs::path findInPath(const fs::path& exec)
+bool GrbFile::findInPath()
 {
     auto p = getenv("PATH");
     if (!p)
-        return {};
+        return false;
 
     std::string envPath = p;
     std::error_code ec;
     auto pathAr = splitString(envPath, ':');
-    for (auto&& path : pathAr) {
-        fs::path check = fs::path(path) / exec;
-        if (isRegularFile(check, ec))
-            return check;
+    for (fs::path dir : pathAr) {
+        fs::path check = dir / path;
+        if (isRegularFile(check, ec)) {
+            path = check;
+            return true;
+        }
     }
 
-    return {};
+    return false;
 }
 
 GrbFile::GrbFile(fs::path path)
@@ -266,7 +267,7 @@ void GrbFile::setPermissions()
     }
 }
 
-bool GrbFile::isWritable()
+bool GrbFile::isWritable() const
 {
     auto err = access(path.c_str(), R_OK | W_OK);
     if (err != 0 && errno != ENOENT) {
@@ -276,7 +277,7 @@ bool GrbFile::isWritable()
     return true;
 }
 
-bool GrbFile::isReadable(bool warn)
+bool GrbFile::isReadable(bool warn) const
 {
     auto err = access(path.c_str(), R_OK);
     if (err != 0) {

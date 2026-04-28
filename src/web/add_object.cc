@@ -174,24 +174,25 @@ bool Web::AddObject::processPageAction(Json::Value& element, const std::string& 
     if (objType == STRING_OBJECT_TYPE_CONTAINER) {
         // add additional container in virtual structure
         this->addContainer(parentID, title, upnp_class);
-    } else if (objType == STRING_OBJECT_TYPE_ITEM) {
-        // reference to some local file on disk
-        auto location = fs::path(param("location"));
+    } else {
+        auto location = param("location");
         if (location.empty())
             throw_std_runtime_error("Empty 'location'");
-        std::error_code ec;
-        if (!isRegularFile(location, ec))
-            throw_std_runtime_error("File '{}' not found {}", location.string(), ec.message());
-        obj = this->addItem(parentID, title, upnp_class, location);
-        allowFifo = true;
-    } else if (objType == STRING_OBJECT_TYPE_EXTERNAL_URL) {
-        // URL to serve to upnp devices
-        auto location = fs::path(param("location"));
-        if (location.empty())
-            throw_std_runtime_error("Empty 'location' to be used as URL");
-        obj = this->addUrl(parentID, title, upnp_class, true, location);
-    } else {
-        throw_std_runtime_error("Unknown object type: {}", objType.c_str());
+        if (objType == STRING_OBJECT_TYPE_ITEM) {
+            // reference to some local file on disk
+            std::error_code ec;
+            if (!isRegularFile(location, ec))
+                throw_std_runtime_error("File '{}' not found {}", location, ec.message());
+            obj = this->addItem(parentID, title, upnp_class, location);
+            allowFifo = true;
+        } else if (objType == STRING_OBJECT_TYPE_EXTERNAL_URL) {
+            // URL to serve to upnp devices
+            if (!startswith(location, "http"))
+                throw_std_runtime_error("URL '{}' not valid", location);
+            obj = this->addUrl(parentID, title, upnp_class, true, location);
+        } else {
+            throw_std_runtime_error("Unknown object type: {}", objType.c_str());
+        }
     }
 
     if (obj) {

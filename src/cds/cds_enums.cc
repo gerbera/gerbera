@@ -60,6 +60,7 @@ static constexpr std::array chKeys = {
     std::pair(ContentHandler::WAVPACK, "WavPack"),
 #endif
 #ifdef HAVE_FFMPEG
+    std::pair(ContentHandler::INT_TRANSCODE, "InternalTranscode"),
     std::pair(ContentHandler::FFMPEG, "FFmpeg"),
 #endif
     std::pair(ContentHandler::SUBTITLE, "Subtitle"),

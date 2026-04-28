@@ -1862,6 +1862,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
         { "video/x-flv", "vlcmpeg" },
         { "application/ogg", "vlcmpeg" },
         { "audio/ogg", "ogg2mp3" },
+#ifdef HAVE_FFMPEG
+        { "audio/x-flac", "int2mp3" },
+#endif
     };
 
     return {
@@ -1884,6 +1887,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
         std::make_shared<ConfigUIntSetup>(ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_RETRY_COUNT,
             "/transcoding/attribute::fetch-buffer-retry-count", "config-transcode.html#confval-fetch-buffer-retry-count",
             2, 0, ConfigIntSetup::CheckMinValue),
+        std::make_shared<ConfigUIntSetup>(ConfigVal::EXTERNAL_TRANSCODING_CURL_CHUNK_SIZE,
+            "/transcoding/attribute::curl-chunk-size", "config-transcode.html#confval-curl-chunk-size",
+            16384, 1, ConfigIntSetup::CheckMinValue),
 #endif // HAVE_CURL
 
         // mimetype identification and media filtering
@@ -1918,12 +1924,19 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             NO),
         std::make_shared<ConfigEnumSetup<TranscodingType>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE,
             "attribute::type", "config-transcode.html#confval-profile-type",
-            std::map<std::string, TranscodingType>({ { "none", TranscodingType::None },
-                { "external", TranscodingType::External },
-                /* for the future...{"remote", TranscodingType::Remote}*/ })),
+            std::map<std::string, TranscodingType>(
+                { { "none", TranscodingType::None },
+                    { "external", TranscodingType::External },
+#ifdef HAVE_FFMPEG
+                    { "internal", TranscodingType::Internal },
+#endif
+                    /* for the future...{"remote", TranscodingType::Remote}*/ })),
         std::make_shared<ConfigEnumSetup<AviFourccListmode>>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_MODE,
             "attribute::mode", "config-transcode.html#confval-avi-fourcc-list-mode",
-            std::map<std::string, AviFourccListmode>({ { "ignore", AviFourccListmode::Ignore }, { "process", AviFourccListmode::Process }, { "disabled", AviFourccListmode::None } })),
+            std::map<std::string, AviFourccListmode>(
+                { { "ignore", AviFourccListmode::Ignore },
+                    { "process", AviFourccListmode::Process },
+                    { "disabled", AviFourccListmode::None } })),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AVI4CC_4CC,
             "fourcc", "config-transcode.html#confval-4cc-fourcc",
             ""),
@@ -1999,6 +2012,30 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_RESOLUTION,
             "resolution", "config-transcode.html#confval-resolution",
             false),
+        std::make_shared<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER,
+            "encoder", "config-transcode.html#confval-encoder",
+            true),
+        std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_WIDTH,
+            "encoder-width", "config-transcode.html#confval-encoder-width",
+            GRB_STRINGIZE(SOURCE), CheckProfileNumberValue),
+        std::make_shared<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_HEIGHT,
+            "encoder-height", "config-transcode.html#confval-encoder-height",
+            GRB_STRINGIZE(SOURCE), CheckProfileNumberValue),
+        std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_FORMAT,
+            "attribute::format", "config-transcode.html#confval-encoder-format",
+            ""),
+        std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_ACODEC,
+            "attribute::acodec", "config-transcode.html#confval-encoder-acodec",
+            ""),
+        std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VCODEC,
+            "attribute::vcodec", "config-transcode.html#confval-encoder-vcodec",
+            ""),
+        std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_AFILTER,
+            "attribute::afilter", "config-transcode.html#confval-encoder-afilter",
+            ""),
+        std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VFILTER,
+            "attribute::vfilter", "config-transcode.html#confval-encoder-vfilter",
+            ""),
         std::make_shared<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT,
             "agent", "config-transcode.html#confval-agent",
             true),

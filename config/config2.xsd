@@ -1374,6 +1374,7 @@
             <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
             <xs:attribute name="fetch-buffer-timeout" type="xs:positiveInteger" default="2"/>
             <xs:attribute name="fetch-buffer-retry-count" type="xs:positiveInteger" default="2"/>
+            <xs:attribute name="curl-chunk-size" type="xs:positiveInteger" default="16384"/>
             <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
@@ -1416,8 +1417,9 @@
                 <xs:element ref="first-resource" minOccurs="0"/>
                 <xs:element ref="hide-original-resource" minOccurs="0"/>
                 <xs:element ref="accept-ogg-theora" minOccurs="0"/>
-                <xs:element ref="agent"/>
-                <xs:element ref="buffer"/>
+                <xs:element ref="agent" minOccurs="0"/>
+                <xs:element ref="buffer" minOccurs="0"/>
+                <xs:element ref="encoder" minOccurs="0"/>
                 <xs:element ref="sample-frequency" minOccurs="0"/>
                 <xs:element ref="audio-channels" minOccurs="0"/>
                 <xs:element ref="resolution" minOccurs="0"/>
@@ -1434,6 +1436,7 @@
                 <xs:simpleType>
                     <xs:restriction base="xs:string">
                         <xs:enumeration value="external"/>
+                        <xs:enumeration value="internal"/>
                     </xs:restriction>
                 </xs:simpleType>
             </xs:attribute>
@@ -1479,6 +1482,18 @@
             <xs:attribute name="fill-size" type="xs:nonNegativeInteger" use="required"/>
             <xs:attribute name="timeout" type="xs:positiveInteger" default="2"/>
             <xs:attribute name="retry-count" type="xs:positiveInteger" default="2"/>
+        </xs:complexType>
+    </xs:element>
+
+    <xs:element name="encoder">
+        <xs:complexType>
+            <xs:attribute name="format" type="xs:string" use="required"/>
+            <xs:attribute name="acodec" type="xs:string"/>
+            <xs:attribute name="vcodec" type="xs:string"/>
+            <xs:attribute name="afilter" type="xs:string"/>
+            <xs:attribute name="vfilter" type="xs:string"/>
+            <xs:attribute name="width" type="xs:nonNegativeInteger" default="0"/>
+            <xs:attribute name="height" type="xs:nonNegativeInteger" default="0"/>
         </xs:complexType>
     </xs:element>
 

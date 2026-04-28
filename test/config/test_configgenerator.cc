@@ -306,7 +306,11 @@ TEST_F(ConfigGeneratorTest, GeneratesOnlineContentEmpty)
 
 TEST_F(ConfigGeneratorTest, GeneratesTranscodingProfilesAlways)
 {
+#ifdef HAVE_FFMPEG
     const std::string fileName = "fixtures/mock-transcoding.xml";
+#else
+    const std::string fileName = "fixtures/mock-transcoding-minimal.xml";
+#endif
     auto mockXml = std::pair { fileName, mockConfigXml(fileName) };
 
     subject->generateTranscoding();

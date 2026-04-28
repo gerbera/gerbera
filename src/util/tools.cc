@@ -440,42 +440,6 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
     return getValueOrDefault<std::string, std::string>(m, key, defval);
 }
 
-std::vector<std::string> populateCommandLine(
-    const std::string& line,
-    const std::string& in,
-    const std::string& out,
-    const std::string& range,
-    const std::string& title)
-{
-    log_debug("Template: '{}', in: '{}', out: '{}', range: '{}', title: '{}'", line, in, out, range, title);
-    std::vector<std::string> params = splitString(line, ' ', '"');
-    if (in.empty() && out.empty())
-        return params;
-
-    for (auto&& param : params) {
-        auto inPos = param.find("%in");
-        if (inPos != std::string::npos) {
-            std::string newParam = param.replace(inPos, 3, in);
-        }
-
-        auto outPos = param.find("%out");
-        if (outPos != std::string::npos) {
-            std::string newParam = param.replace(outPos, 4, out);
-        }
-
-        auto rangePos = param.find("%range");
-        if (rangePos != std::string::npos) {
-            std::string newParam = param.replace(rangePos, 6, range);
-        }
-
-        auto titlePos = param.find("%title");
-        if (titlePos != std::string::npos) {
-            std::string newParam = param.replace(titlePos, 6, title);
-        }
-    }
-    return params;
-}
-
 ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
 {
     ssize_t pos = -1;

@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Add internal Transcoding
 - Add support for cuesheets
 - Bump @babel/plugin-transform-modules-systemjs in /gerbera-web
 - Bump axios from 1.13.6 to 1.15.0 in /gerbera-web

@@ -98,6 +98,19 @@ on connections with high latency.
 
 This setting allows to set the number of retries after a timeout occured. Increase it for unrelyable streams.
 
+.. confval:: curl-chunk-size
+   :type: :confval:`Integer`
+   :required: false
+   :default: ``16384``
+..
+
+   .. versionadded:: HEAD
+   .. code:: xml
+
+       curl-chunk-size="32768"
+
+This setting allows to set the size of chunks during processing of online stream.
+
 Mimetype Profile Mappings
 =========================
 
@@ -345,21 +358,23 @@ Profile Attributes
    all flags are set. This option adds these clients to get transcoding also.
 
    .. confval:: profile type
-      :type: :confval:`Enum` (``external``)
+      :type: :confval:`Enum` (``external``, ``internal``)
       :required: true
    ..
 
-     .. code:: xml
+      .. versionchanged:: HEAD new option ``internal``
+      .. code:: xml
 
-        type="external"
+         type="external"
 
-   Defines the profile type, currently only ``external`` is supported, this will change in the future.
+   Defines the profile type, ``external`` is supported to run scripts with transcoding logic,
+   ``internal`` is only supported if ffmpeg was enabled at built time.
 
 Profile Items
 ^^^^^^^^^^^^^
 
    .. confval:: profile mimetype
-      :type: :confval:`Enum` (``external``)
+      :type: :confval:`String` | :confval:`Section`
       :required: true
    ..
 
@@ -612,10 +627,13 @@ Profile Items
 Profile Agent
 -------------
 
+Set agent for :confval:`profile type` = ``external``
+
 .. confval:: agent
    :type: :confval:`Section``
    :required: true
-..
+
+Required for :confval:`profile type` = ``external``
 
    .. code-block:: xml
 
@@ -683,12 +701,13 @@ Used to overwrite the environment of the gerbera process. The entry can appear m
 Profile Buffer
 --------------
 
-   Set value of environment variable.
+Set buffer behaviour.
 
 .. confval:: buffer
    :type: :confval:`Section`
    :required: true
-..
+
+Required for :confval:`profile type` = ``external``
 
    .. code-block:: xml
 
@@ -760,3 +779,76 @@ transcode them in real time.
        retry-count="5"
 
    This setting allows to set the number of retries after a timeout occured. Increase it for unrelyable streams.
+
+Profile Encoder
+---------------
+
+Set values for internal encoder. This is only available if gerbera was compiled with
+ffmpeg support.
+
+.. confval:: encoder
+   :type: :confval:`Section`
+   :required: true
+
+Required for :confval:`profile type` = ``internal``
+
+   .. versionadded:: HEAD
+   .. code-block:: xml
+
+       <encoder format="mp3" acodec="mp3" afilter="anull"/>
+
+   .. confval:: encoder format
+      :type: :confval:`String`
+      :required: true
+   ..
+
+    Set output stream format. This must correspond with :confval:`profile mimetype`.
+    See https://ffmpeg.org/ffmpeg-formats.html for allowed values.
+
+   .. confval:: encoder acodec
+      :type: :confval:`String`
+      :required: false
+   ..
+
+    Set output stream audio codec. This must correspond with :confval:`profile dlna-profile`.
+    See https://ffmpeg.org/ffmpeg-codecs.html for allowed values.
+
+   .. confval:: encoder vcodec
+      :type: :confval:`String`
+      :required: false
+   ..
+
+    Set output stream video codec. This must correspond with :confval:`profile dlna-profile`.
+    See https://ffmpeg.org/ffmpeg-codecs.html for allowed values.
+
+   .. confval:: encoder afilter
+      :type: :confval:`String`
+      :required: false
+   ..
+
+    Set output stream audio filter.
+    See https://ffmpeg.org/ffmpeg-filters.html for allowed values
+
+   .. confval:: encoder vfilter
+      :type: :confval:`String`
+      :required: false
+   ..
+
+    Set output stream video filter.
+    See https://ffmpeg.org/ffmpeg-filters.html for allowed values
+
+   .. confval:: encoder width
+      :type: :confval:`Integer`
+      :required: false
+      :default: ``source``
+   ..
+
+    Set output stream video height.
+
+   .. confval:: encoder height
+      :type: :confval:`Integer`
+      :required: false
+      :default: ``source``
+   ..
+
+    Set output stream video height.
