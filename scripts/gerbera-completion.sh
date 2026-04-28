@@ -28,14 +28,14 @@ _gerbera_completions() {
     cur="${COMP_WORDS[COMP_CWORD]}"
     prev="${COMP_WORDS[COMP_CWORD-1]}"
     
-    commands="-D -c -d -h -v -u -P -f -p -i -e -m"
-    commands="${commands} --help --debug --version --compile-info --create-config --create-example-config --create-advanced-config --check-config --print-options --offline --drop-tables --init-lastfm --daemon --user --pidfile --config --cfgdir --logfile --rotatelog --syslog --add-file --set-option --port --ip --interface --home --magic --import-mode --debug-mode"
+    commands="-D -c -d -h -v -u -P -f -p -i -e -m -s"
+    commands="${commands} --help --debug --version --compile-info --create-config --create-example-config --create-advanced-config --check-config --print-options --offline --drop-tables --init-lastfm --daemon --user --pidfile --config --cfgdir --logfile --rotatelog --syslog --add-file --set-option --port --ip --interface --home --magic --import-mode --debug-mode --database"
     
     if [[ ${COMP_CWORD} -eq 1 ]]; then
         COMPREPLY=( $(compgen -W "${commands}" -- ${cur}) )
     else
         case "${prev}" in
-            -D|-c|-d|-h|-v|-u|-P|-f|-p|-i|-e|-m|--user|--pidfile|--config|--cfgdir|--logfile|--rotatelog|--syslog|--add-file|--set-option|--port|--ip|--interface|--home|--magic|--import-mode|--debug-mode)
+            -D|-c|-d|-h|-v|-u|-P|-f|-p|-i|-e|-m|-s|--user|--pidfile|--config|--cfgdir|--logfile|--rotatelog|--syslog|--add-file|--set-option|--port|--ip|--interface|--home|--magic|--import-mode|--debug-mode|--database)
                 # Provide file path completion for these commands
                 COMPREPLY=( $(compgen -f -- ${cur}) )
                 ;;

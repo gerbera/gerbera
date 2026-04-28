@@ -806,21 +806,29 @@ void Web::ConfigLoad::writeTranscoding(Json::Value& values)
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG }),
             cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG, entry->isTheora());
+        // Agent
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND }),
-            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, entry->getCommand());
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND, entry->agent.getCommand());
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS }),
-            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, entry->getArguments());
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, entry->agent.getArguments());
+        // Buffer
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE }),
-            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, entry->getBufferSize());
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE, entry->buffer.getSize());
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK }),
-            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, entry->getBufferChunkSize());
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK, entry->buffer.getChunkSize());
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL }),
-            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, entry->getBufferInitialFillSize());
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL, entry->buffer.getInitialFillSize());
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_TIMEOUT }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_TIMEOUT, entry->buffer.getTimeout());
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT, entry->buffer.getRetryCount());
 
         auto fourCCMode = entry->getAVIFourCCListMode();
         if (fourCCMode != AviFourccListmode::None) {

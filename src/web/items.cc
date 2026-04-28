@@ -49,6 +49,7 @@ const std::string_view Web::Items::PAGE = "items";
 /// @brief orocess request for item list in ui
 bool Web::Items::processPageAction(Json::Value& element, const std::string& action)
 {
+    log_debug("start {}", action);
     int parentID = intParam("parent_id");
     int start = intParam("start");
     if (start < 0)

@@ -113,7 +113,12 @@ void Web::PageRequest::appendTask(
 int Web::PageRequest::intParam(const std::string& name, int invalid) const
 {
     std::string value = param(name);
-    return !value.empty() ? std::stoi(value) : invalid;
+    try {
+        return !value.empty() && value != "NaN" ? std::stoi(value) : invalid;
+    } catch (const std::exception& e) {
+        log_warning("Parse Error on {}: {}='{}'", getPage(), name, value);
+        return invalid;
+    }
 }
 
 bool Web::PageRequest::boolParam(const std::string& name) const

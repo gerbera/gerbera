@@ -986,6 +986,7 @@ void ConfigGenerator::generateTranscoding()
         { ConfigVal::EXTERNAL_TRANSCODING_CURL_FILL_SIZE, ConfigLevel::Example },
         { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_TIMEOUT, ConfigLevel::Example },
         { ConfigVal::EXTERNAL_TRANSCODING_CURL_BUFFER_RETRY_COUNT, ConfigLevel::Example },
+        { ConfigVal::EXTERNAL_TRANSCODING_CURL_CHUNK_SIZE, ConfigLevel::Example },
 #endif // HAVE_CURL
     };
     generateOptions(options);

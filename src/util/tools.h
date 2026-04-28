@@ -207,24 +207,6 @@ V getValueOrDefault(const std::map<K, V>& m, const K& key, const V& defval)
 std::string getValueOrDefault(const std::vector<std::pair<std::string, std::string>>& m, const std::string& key, const std::string& defval = "");
 std::string getValueOrDefault(const std::map<std::string, std::string>& m, const std::string& key, const std::string& defval = "");
 
-/// @brief Parses a command line, splitting the arguments into an array and
-/// substitutes %in and %out tokens with given strings.
-///
-/// This function splits a string into array parts, where space is used as the
-/// separator. In addition special %in and %out tokens are replaced by given
-/// strings.
-/// @param line configured command with tokens
-/// @param in replacement for %in
-/// @param out replacement for %out
-/// @param range replacement for %range
-/// @param title replacement for %title
-/// @return vector of strings containing command line items
-std::vector<std::string> populateCommandLine(const std::string& line,
-    const std::string& in = "",
-    const std::string& out = "",
-    const std::string& range = "",
-    const std::string& title = "");
-
 /// @brief Calculates a position where it is safe to cut an UTF-8 string.
 /// @return Calculated position or -1 in case of an error.
 ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos);

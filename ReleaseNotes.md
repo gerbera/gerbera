@@ -2,11 +2,15 @@
 
 ## HEAD
 
-This release add support for cuesheets which are similar to playlists but offer new tracks with their own metadata and
-therefor are added to the physical layout and are handled in virtual layout.
+This release adds two major features
+- support for cuesheets which are similar to playlists but offer new tracks
+  with their own metadata and therefor are added to the physical layout and
+  are handled in virtual layout.
 
 ### NEW Features
 
+- ImportMode for AutoScan settings
+- Database selection from command line
 - Support for cuesheets
 
 ### FIXES
@@ -18,7 +22,8 @@ therefor are added to the physical layout and are handled in virtual layout.
 
 ### Code Improvements
 
-- Update maximum versions of pupnp (1.18.5), npupnp (6.3.0), libexif (0.6.26), cmake (4.3.2), taglib (2.3), cxxopts (3.3.1-ga3a21b)
+- Update maximum versions of pupnp (1.18.5), npupnp (6.3.0), libexif (0.6.26), cmake (4.3.2), taglib (2.3), cxxopts (3.3.1-gb61353), libzippp (7.1-g7ed7b6 )
+- build support for Resolute Raccoon
 
 ## v3.2.1
 

@@ -65,10 +65,6 @@ class Timer;
 #define BROWSE_TRACK_SORT 0x00000010
 #define BROWSE_HIDE_FS_ROOT 0x00000020
 
-#define DB_DRIVER_SQLITE "sqlite"
-#define DB_DRIVER_MYSQL "mysql"
-#define DB_DRIVER_POSTGRES "postgres"
-
 #define SL_DROP_FILE "sqlite3-drop.sql"
 #define SL_UPGR_FILE "sqlite3-upgrade.xml"
 #define SL_INIT_FILE "sqlite3.sql"

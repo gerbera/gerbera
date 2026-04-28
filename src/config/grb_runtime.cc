@@ -436,12 +436,16 @@ bool GerberaRuntime::setConfigFile(const std::string& arg)
 bool GerberaRuntime::setDatabase(const std::string& arg)
 {
     database = toLower((*results)[arg].as<std::string>());
-    if (database == "sqlite")
+    if (database == DB_DRIVER_SQLITE)
         return true;
-    if (database == "postgres")
+#ifdef HAVE_PGSQL
+    if (database == DB_DRIVER_POSTGRES)
         return true;
-    if (database == "mysql")
+#endif
+#ifdef HAVE_MYSQL
+    if (database == DB_DRIVER_MYSQL)
         return true;
+#endif
     return false;
 }
 

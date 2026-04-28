@@ -44,25 +44,23 @@ bool ConfigPathSetup::checkPathValue(std::string& optValue, std::string& pathVal
 
 bool ConfigPathSetup::checkExecutable(std::string& optValue) const
 {
-    fs::path tmpPath;
-    if (fs::path(optValue).is_absolute()) {
+    GrbFile tmpPath(optValue);
+    if (tmpPath.isAbsolute()) {
         std::error_code ec;
         fs::directory_entry dirEnt(optValue, ec);
         if (!isRegularFile(dirEnt, ec) && !dirEnt.is_symlink(ec)) {
             log_warning("Error in configuration, could not find command \"{}\" for '{}'", optValue, cpath);
             return !isSet(ConfigPathArguments::mustExist);
         }
-        tmpPath = optValue;
     } else {
-        tmpPath = findInPath(optValue);
-        if (tmpPath.empty()) {
-            log_warning("Error in configuration, could not find  command \"{}\" in $PATH for '{}'", optValue, cpath);
+        if (!tmpPath.findInPath()) {
+            log_warning("Error in configuration, could not find command \"{}\" in $PATH for '{}'", optValue, cpath);
             return !isSet(ConfigPathArguments::mustExist);
         }
     }
 
     int err = 0;
-    if (!isExecutable(tmpPath, &err)) {
+    if (!tmpPath.isExecutable(err)) {
         log_warning("Error in configuration, file {} is not executable: {} for '{}'", optValue, std::strerror(err), cpath);
         return !isSet(ConfigPathArguments::mustExist);
     }
