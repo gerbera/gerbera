@@ -52,7 +52,7 @@ function set-libraries-rel() {
 }
 
 function set-libraries() {
-  libffmpeg="libavformat-dev"
+  libffmpeg="libavformat-dev libavfilter-dev"
   libexif="libexif-dev"
   jsoncpp="libjsoncpp-dev"
   libexiv2="libexiv2-dev"

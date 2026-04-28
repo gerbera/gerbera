@@ -604,11 +604,20 @@
     <transcoding enabled="no" fetch-buffer-size="262144" fetch-buffer-fill-size="0" fetch-buffer-timeout="2" fetch-buffer-retry-count="2">
         <mimetype-profile-mappings allow-unused="no">
             <transcode mimetype="application/ogg" using="vlcmpeg"/>
+            <transcode mimetype="audio/x-flac" using="iffmpeg"/>
             <transcode mimetype="audio/ogg" using="ogg2mp3"/>
             <transcode mimetype="video/x-flv" source-profile="AVC_MKV_HP_HD_AC3" client-flags="0x10" using="vlcmpeg"/>
             <transcode mimetype="application/ogg" using="oggflac2raw"/>
         </mimetype-profile-mappings>
         <profiles allow-unused="no">
+            <profile name="iffmpeg" enabled="yes" type="internal">
+                <mimetype>audio/mpeg</mimetype>
+                <dlna-profile>MP3</dlna-profile>
+                <accept-url>yes</accept-url>
+                <first-resource>yes</first-resource>
+                <accept-ogg-theora>no</accept-ogg-theora>
+                <encoder format="mp3" acodec="mp3" afilter="anull"/>
+            </profile>
             <profile name="ogg2mp3" enabled="no" type="external">
                 <mimetype>audio/mpeg</mimetype>
                 <accept-url>no</accept-url>

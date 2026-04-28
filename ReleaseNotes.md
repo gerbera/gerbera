@@ -2,13 +2,17 @@
 
 ## HEAD
 
-This release adds two major features
+This release adds the following major features
 - support for cuesheets which are similar to playlists but offer new tracks
   with their own metadata and therefor are added to the physical layout and
   are handled in virtual layout.
+- internal transcoding by directly using ffmpeg api (experimental - needs
+  community testing support).
+next to many fixes and minor improvements.
 
 ### NEW Features
 
+- Internal transcoding (experimental)
 - ImportMode for AutoScan settings
 - Database selection from command line
 - Server setting for dynamic description
