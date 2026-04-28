@@ -200,6 +200,15 @@ int main(int argc, char** argv, char** envp)
 #endif
     };
 
+    std::vector<std::string> dbs = {
+        DB_DRIVER_SQLITE,
+#ifdef HAVE_MYSQL
+        DB_DRIVER_MYSQL,
+#endif
+#ifdef HAVE_PGSQL
+        DB_DRIVER_POSTGRES,
+#endif
+    };
     options.add_options() //
         ("h," GRB_OPTION_HELP, "Print this help and exit") //
         ("D," GRB_OPTION_DEBUG, "Enable debugging", cxxopts::value<bool>()->default_value("false")) //
@@ -228,7 +237,7 @@ int main(int argc, char** argv, char** envp)
         (GRB_OPTION_SYSLOG, "Log to syslog", cxxopts::value<std::string>()->implicit_value("USER"), "LOG") //
         (GRB_OPTION_ADDFILE, "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<fs::path>>(), "FILE") //
         (GRB_OPTION_SETOPTION, "Set simple config option OPT to value VAL, can be specified multiple times use --print-options for value OPTs", cxxopts::value<std::vector<std::string>>(), "OPT=VAL") //
-        ("s," GRB_OPTION_DATABASE, "Select Database for storage", cxxopts::value<std::string>(), "DB") //
+        ("s," GRB_OPTION_DATABASE, "Select Database for storage", cxxopts::value<std::string>(), fmt::format("DB=({})", fmt::join(dbs, "|"))) //
         ;
 
     try {

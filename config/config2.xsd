@@ -1365,6 +1365,7 @@
             <xs:attribute name="fetch-buffer-fill-size" type="xs:nonNegativeInteger" default="0"/>
             <xs:attribute name="fetch-buffer-timeout" type="xs:positiveInteger" default="2"/>
             <xs:attribute name="fetch-buffer-retry-count" type="xs:positiveInteger" default="2"/>
+            <xs:attribute name="curl-chunk-size" type="xs:positiveInteger" default="16384"/>
             <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>

@@ -21,6 +21,7 @@
 */
 
 #include "cds/cds_resource.h"
+#include "transcoding/transcode_ext_handler.h"
 #include "util/grb_fs.h"
 #include "util/grb_net.h"
 #include "util/grb_time.h"
@@ -234,7 +235,7 @@ TEST(ToolsTest, populateCommandLineTest)
 {
     {
         auto commandString = R"(-I dummy %in --sout "#transcode{ venc=ffmpeg, vcodec=mp2v, vb=4096, fps=25, aenc=ffmpeg, acodec=mpga, ab=192, samplerate=44100, channels=2 }:standard{ access=file, mux=ps, dst=%out }" vlc:quit)";
-        auto commandParts = populateCommandLine(commandString, "IN", "OUT", "RANGE", "TITLE");
+        auto commandParts = TranscodeExternalHandler::populateCommandLine(commandString, "IN", "OUT", "RANGE", "TITLE");
         ASSERT_EQ(commandParts.size(), 6);
         EXPECT_EQ(commandParts[2], "IN");
         auto cmd0 = splitString(commandParts[4], ':', '\0', true);
@@ -245,7 +246,7 @@ TEST(ToolsTest, populateCommandLineTest)
     }
     {
         auto commandString = R"(-I dummy %in --sout=%out --range %range --title %title)";
-        auto commandParts = populateCommandLine(commandString, "IN", "OUT", "RANGE", "TITLE");
+        auto commandParts = TranscodeExternalHandler::populateCommandLine(commandString, "IN", "OUT", "RANGE", "TITLE");
         ASSERT_EQ(commandParts.size(), 8);
         EXPECT_EQ(commandParts[2], "IN");
         EXPECT_EQ(commandParts[3], "--sout=OUT");

@@ -57,7 +57,7 @@ sudo make install
 | libuuid             |              |              |                      | Depends on OS | Not required on \*BSD            |          |
 | [pugixml]           |              | 1.10         | 1.15                 | Required      | XML file and data support        |          |
 | [jsoncpp]           | 1.7.4        | 1.9.6        | 1.9.7                | Required      | JSON data support                |          |
-| [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1-ga3a21b        | Required      | Command line parsing             | Bundled  |
+| [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1-gb61353        | Required      | Command line parsing             | Bundled  |
 | libiconv            |              |              |                      | Required      | Charset conversion               |          |
 | sqlite3             | 3.7.0        | 3.35.5       | 3.50.2               | Required      | Database storage                 |          |
 | zlib                |              |              |                      | Required      | Data compression                 |          |
@@ -81,7 +81,7 @@ sudo make install
 | [ffmpegthumbnailer] | 2.1.1        | 2.2.3        | 2.3.0                | Optional      | Generate video/image thumbnails  | Disabled |
 | [libsystemd]        | 237          | 254          | 257                  | Optional      | Interact with systemd            | Disabled |
 | inotify             |              |              |                      | Optional      | Efficient file monitoring        | Enabled  |
-| [libzippp]          | v7.1-g8992d6 | v7.1-g8992d6 | v7.1-gd4a60d         | Optional      | ZIP Package download             | Enabled  |
+| [libzippp]          | v7.1-g8992d6 | v7.1-g8992d6 | v7.1-g7ed7b6         | Optional      | ZIP Package download             | Enabled  |
 | [libzip]            | 1.10.1       | 1.11.4       | 1.11.4               | Optional      | Required for [libzippp]          | Enabled  |
 
 ## Development Dependencies

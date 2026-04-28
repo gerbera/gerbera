@@ -98,6 +98,19 @@ on connections with high latency.
 
 This setting allows to set the number of retries after a timeout occured. Increase it for unrelyable streams.
 
+.. confval:: curl-chunk-size
+   :type: :confval:`Integer`
+   :required: false
+   :default: ``16384``
+..
+
+   .. versionadded:: HEAD
+   .. code:: xml
+
+       curl-chunk-size="32768"
+
+This setting allows to set the size of chunks during processing of online stream.
+
 Mimetype Profile Mappings
 =========================
 

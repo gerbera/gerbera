@@ -517,7 +517,7 @@
       </ignore-extensions>
     </mappings>
   </import>
-  <transcoding enabled="no" fetch-buffer-size="262144" fetch-buffer-fill-size="0" fetch-buffer-timeout="2" fetch-buffer-retry-count="2">
+  <transcoding enabled="no" fetch-buffer-size="262144" fetch-buffer-fill-size="0" fetch-buffer-timeout="2" fetch-buffer-retry-count="2" curl-chunk-size="16384">
     <mimetype-profile-mappings allow-unused="no">
       <transcode mimetype="application/ogg" using="vlcmpeg" />
       <transcode mimetype="audio/ogg" using="ogg2mp3" />

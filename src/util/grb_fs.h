@@ -57,14 +57,25 @@ public:
     /// @brief Ensure that a file has permissions 644 (-rw-r--r--)
     void setPermissions();
     /// @brief Check that file is readable
-    bool isReadable(bool warn = false);
+    bool isReadable(bool warn = false) const;
     /// @brief Check that file is writable
-    bool isWritable();
+    bool isWritable() const;
+    /// @brief Check that path is absolute
+    bool isAbsolute() const { return path.is_absolute(); }
+    /// @brief Checks if the given binary is executable by our process
+    /// @param err if not NULL err will contain the errno result of the check
+    /// @return true if the given binary is executable by our process, otherwise false
+    bool isExecutable(int& err) const;
+    /// @brief close file
     /// @brief close file
     bool close();
     /// @brief Delete file from disk
     bool remove();
-    const fs::path& getPath() { return path; }
+    const fs::path& getPath() const { return path; }
+
+    /// @brief Checks if the given executable exists in $PATH
+    /// @return aboslute path to the given executable or nullptr of it was not found
+    bool findInPath();
 };
 
 std::string rtrimPath(std::string& s, unsigned char sep = '/');
@@ -80,17 +91,6 @@ bool isRegularFile(const fs::directory_entry& dirEnt, std::error_code& ec) noexc
 
 /// @brief Returns file size of give file, if it does not exist it will throw an exception
 std::uintmax_t getFileSize(const fs::directory_entry& dirEnt);
-
-/// @brief Checks if the given binary is executable by our process
-/// @param path absolute path of the binary
-/// @param err if not NULL err will contain the errno result of the check
-/// @return true if the given binary is executable by our process, otherwise false
-bool isExecutable(const fs::path& path, int* err = nullptr);
-
-/// @brief Checks if the given executable exists in $PATH
-/// @param exec filename of the executable that needs to be checked
-/// @return aboslute path to the given executable or nullptr of it was not found
-fs::path findInPath(const fs::path& exec);
 
 /// @brief Determines if the particular ogg file contains a video (theora)
 bool isTheora(const fs::path& oggFilename);

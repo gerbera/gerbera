@@ -644,9 +644,7 @@ std::string UpnpXMLBuilder::renderResourceURL(
             }
 
             // Proxied remote URL
-            if (hasProxyUrl) {
-                url = onlineContentBuilder.buildUrl(virtualURL, item.getID(), res.getResId());
-            }
+            url = onlineContentBuilder.buildUrl(virtualURL, item.getID(), res.getResId());
         } else if (purpose == ResourcePurpose::Transcode) {
             // Transcoded resources dont set a resId, uses pr_name from params instead.
             url = onlineContentBuilder.buildUrl(virtualURL, item.getID());
