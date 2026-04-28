@@ -994,6 +994,22 @@ void ConfigGenerator::generateTranscoding()
 
     const auto profileTag = definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE);
 
+#if HAVE_FFMPEG
+    auto internal = setValue(fmt::format("{}/", profileTag), {}, "", true);
+    setXmlValue(internal, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME, "int2mp3");
+    setXmlValue(internal, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);
+    setXmlValue(internal, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_TYPE, "internal");
+    setXmlValue(internal, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE, "audio/mpeg");
+    setXmlValue(internal, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCURL, NO);
+    setXmlValue(internal, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_FIRST, YES);
+    setXmlValue(internal, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ACCOGG, YES);
+
+    auto encoder = setValue(fmt::format("{}/{}/", profileTag, definition->mapConfigOption(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER)), {}, "", true);
+    setXmlValue(encoder, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_FORMAT, "mp3");
+    setXmlValue(encoder, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_ACODEC, "mp3");
+    setXmlValue(encoder, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_AFILTER, "anull");
+#endif // HAVE_FFMPEG
+
     auto oggmp3 = setValue(fmt::format("{}/", profileTag), {}, "", true);
     setXmlValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME, "ogg2mp3");
     setXmlValue(oggmp3, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENABLED, NO);

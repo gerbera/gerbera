@@ -357,6 +357,7 @@ std::shared_ptr<MetadataHandler> MetadataService::getHandler(ContentHandler hand
     case ContentHandler::TRANSCODE:
     case ContentHandler::EXTURL:
     case ContentHandler::FLAC:
+    case ContentHandler::INT_TRANSCODE:
         break;
     }
     throw_std_runtime_error("Unknown content handler ID: {}", handlerType);

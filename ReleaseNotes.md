@@ -6,9 +6,11 @@ This release adds two major features
 - support for cuesheets which are similar to playlists but offer new tracks
   with their own metadata and therefor are added to the physical layout and
   are handled in virtual layout.
+- internal transcoding by directly using ffmpeg api.
 
 ### NEW Features
 
+- Internal transcoding
 - ImportMode for AutoScan settings
 - Database selection from command line
 - Support for cuesheets
