@@ -543,8 +543,14 @@ std::string ASTOrOperator::emit() const
     return sqlEmitter.emit(this, lhs->emit(), rhs->emit());
 }
 
-DefaultSQLEmitter::DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper, std::shared_ptr<ColumnMapper> metaMapper, std::shared_ptr<ColumnMapper> resMapper, std::shared_ptr<ColumnMapper> plyMapper)
-    : colMapper(std::move(colMapper))
+DefaultSQLEmitter::DefaultSQLEmitter(
+    std::shared_ptr<Database> database,
+    std::shared_ptr<ColumnMapper> colMapper,
+    std::shared_ptr<ColumnMapper> metaMapper,
+    std::shared_ptr<ColumnMapper> resMapper,
+    std::shared_ptr<ColumnMapper> plyMapper)
+    : database(std::move(database))
+    , colMapper(std::move(colMapper))
     , metaMapper(std::move(metaMapper))
     , resMapper(std::move(resMapper))
     , plyMapper(std::move(plyMapper))
@@ -572,17 +578,30 @@ std::string DefaultSQLEmitter::emit(const ASTParenthesis* node, const std::strin
 //    3: value
 //    4: property type
 static const std::map<std::string, std::string> logicOperator {
-    { "contains", "({2} LIKE LOWER('%{3}%'))" }, // lower
-    { "doesnotcontain", "({2} NOT LIKE LOWER('%{3}%'))" }, // lower
-    { "startswith", "({2} LIKE LOWER('{3}%'))" }, // lower
-    { "derivedfrom", "({2} LIKE LOWER('{3}%'))" },
+    { "contains", "({2} LIKE LOWER({3}))" }, // lower
+    { "doesnotcontain", "({2} NOT LIKE LOWER({3}))" }, // lower
+    { "startswith", "({2} LIKE LOWER({3}))" }, // lower
+    { "derivedfrom", "({2} LIKE LOWER({3}))" },
     { "exists", "({1} IS {3})" },
     { "@exists", "({1} IS {3})" },
     { "newer", "({1} {3})" },
-    { "compare", "({2}LOWER('{3}'))" }, // lower
-    { "@compare", "({2}LOWER('{3}'))" }, // lower
-    { "neq", "({2}LOWER('{3}'))" }, // lower
-    { "@neq", "({2}LOWER('{3}'))" }, // lower
+    { "compare", "({2}LOWER({3}))" }, // lower
+    { "@compare", "({2}LOWER({3}))" }, // lower
+    { "neq", "({2}LOWER({3}))" }, // lower
+    { "@neq", "({2}LOWER({3}))" }, // lower
+};
+static const std::map<std::string, std::string> valueOperator {
+    { "contains", "%{}%" },
+    { "doesnotcontain", "%{}%" },
+    { "startswith", "{}%" },
+    { "derivedfrom", "{}%" },
+    { "exists", "{}" },
+    { "@exists", "{}" },
+    { "newer", "{}" },
+    { "compare", "{}" },
+    { "@compare", "{}" },
+    { "neq", "{}" },
+    { "@neq", "{}" },
 };
 
 std::tuple<std::string, std::string, FieldType> DefaultSQLEmitter::getPropertyStatement(const std::string& property) const
@@ -616,13 +635,23 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
     if (prpType == FieldType::Date) {
         if ((operatr == ">" || operatr == ">=") && startswith(value, "@last")) {
             auto dateVal = currentTime() - std::chrono::hours(24 * stoiString(value.substr(5)));
-            return fmt::format(logicOperator.at("newer"), "", fmt::format("{} {}", prpUpper, operatr), fmt::format("{} {}", prpLower, operatr), dateVal.count(), prpType);
+            return fmt::format(logicOperator.at("newer"),
+                "",
+                fmt::format("{} {}", prpUpper, operatr),
+                fmt::format("{} {}", prpLower, operatr),
+                dateVal.count(),
+                prpType);
         }
         if (operatr == ">" || operatr == ">=" || operatr == "<" || operatr == "<=") {
             std::chrono::seconds dateVal(0);
             if (parseSimpleDate(value, dateVal)) {
                 log_debug("parseSimpleDate {} -> {}", value, dateVal.count());
-                return fmt::format(logicOperator.at("newer"), "", fmt::format("{} {}", prpUpper, operatr), fmt::format("{} {}", prpLower, operatr), dateVal.count(), prpType);
+                return fmt::format(logicOperator.at("newer"),
+                    "",
+                    fmt::format("{} {}", prpUpper, operatr),
+                    fmt::format("{} {}", prpLower, operatr),
+                    dateVal.count(),
+                    prpType);
             }
         }
     }
@@ -637,8 +666,12 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
         throw_std_runtime_error("Operation '{}' '{}' not yet supported", operatr, value);
 
     auto clsUpper = std::get<0>(getPropertyStatement(UPNP_SEARCH_CLASS));
-    return fmt::format(logicOperator.at(cmpOp), clsUpper,
-        fmt::format("{}{}", prpUpper, operatr), fmt::format("{}{}", prpLower, operatr), value, prpType);
+    return fmt::format(logicOperator.at(cmpOp),
+        clsUpper,
+        fmt::format("{}{}", prpUpper, operatr),
+        fmt::format("{}{}", prpLower, operatr),
+        database->quote(fmt::format(valueOperator.at(cmpOp), value)),
+        prpType);
 }
 
 std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::string& property, const std::string& value) const
@@ -649,7 +682,12 @@ std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::st
     }
     auto [prpUpper, prpLower, prpType] = getPropertyStatement(property);
     auto clsUpper = std::get<0>(getPropertyStatement(UPNP_SEARCH_CLASS));
-    return fmt::format(logicOperator.at(stringOperator), clsUpper, prpUpper, prpLower, value, prpType);
+    return fmt::format(logicOperator.at(stringOperator),
+        clsUpper,
+        prpUpper,
+        prpLower,
+        database->quote(fmt::format(valueOperator.at(stringOperator), value)),
+        prpType);
 }
 
 std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::string& property, const std::string& value) const
@@ -664,7 +702,12 @@ std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::st
     }
     auto [prpUpper, prpLower, prpType] = getPropertyStatement(property);
     auto clsUpper = std::get<0>(getPropertyStatement(UPNP_SEARCH_CLASS));
-    return fmt::format(logicOperator.at((property[0] == '@') ? "@exists" : "exists"), clsUpper, prpUpper, prpLower, exists, prpType);
+    return fmt::format(logicOperator.at((property[0] == '@') ? "@exists" : "exists"),
+        clsUpper,
+        prpUpper,
+        prpLower,
+        exists,
+        prpType);
 }
 
 std::string DefaultSQLEmitter::emit(const ASTAndOperator* node, const std::string& lhs,

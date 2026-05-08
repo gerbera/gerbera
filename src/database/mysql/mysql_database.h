@@ -45,8 +45,7 @@
 
 /// @brief The Database class for using MySQL
 class MySQLDatabase
-    : public SQLDatabase,
-      public std::enable_shared_from_this<SQLDatabase> {
+    : public SQLDatabase {
 public:
     explicit MySQLDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager);
     ~MySQLDatabase() override;

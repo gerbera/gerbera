@@ -37,8 +37,7 @@ class PGTask;
 
 /// @brief The Database class for using Postgres
 class PostgresDatabase
-    : public SQLDatabase,
-      public std::enable_shared_from_this<SQLDatabase> {
+    : public SQLDatabase {
 public:
     PostgresDatabase(
         std::shared_ptr<Config> config,

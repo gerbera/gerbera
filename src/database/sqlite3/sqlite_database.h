@@ -55,8 +55,7 @@ struct sqlite3;
 /// @brief The Database class for using SQLite3
 class Sqlite3Database
     : public Timer::Subscriber,
-      public SQLDatabase,
-      public std::enable_shared_from_this<SQLDatabase> {
+      public SQLDatabase {
 public:
     Sqlite3Database(
         const std::shared_ptr<Config>& config,

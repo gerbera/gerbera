@@ -49,6 +49,7 @@
 #define META_NAME "name"
 #define META_VALUE "value"
 
+class Database;
 class SearchParam;
 
 enum class TokenType {
@@ -378,7 +379,9 @@ struct SearchProperty {
 
 class DefaultSQLEmitter : public SQLEmitter {
 public:
-    DefaultSQLEmitter(std::shared_ptr<ColumnMapper> colMapper,
+    DefaultSQLEmitter(
+        std::shared_ptr<Database> database,
+        std::shared_ptr<ColumnMapper> colMapper,
         std::shared_ptr<ColumnMapper> metaMapper,
         std::shared_ptr<ColumnMapper> resMapper,
         std::shared_ptr<ColumnMapper> plyMapper);
@@ -397,6 +400,7 @@ public:
     std::string emit(const ASTOrOperator* node, const std::string& lhs, const std::string& rhs) const override;
 
 private:
+    std::shared_ptr<Database> database;
     std::shared_ptr<ColumnMapper> colMapper;
     std::shared_ptr<ColumnMapper> metaMapper;
     std::shared_ptr<ColumnMapper> resMapper;
