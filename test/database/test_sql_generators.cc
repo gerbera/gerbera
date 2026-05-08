@@ -29,7 +29,7 @@
 #include <fmt/core.h>
 #include <gtest/gtest.h>
 
-class TestDatabase : public SQLDatabase, public std::enable_shared_from_this<SQLDatabase> {
+class TestDatabase : public SQLDatabase {
 public:
     using SQLDatabase::identifier;
 

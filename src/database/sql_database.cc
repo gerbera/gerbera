@@ -528,7 +528,8 @@ void SQLDatabase::init()
         this->sql_resource_query = fmt::format("SELECT {} ", fmt::join(buf, ", "));
     }
 
-    sqlEmitter = std::make_shared<DefaultSQLEmitter>(searchColumnMapper, metaColumnMapper, resourceColumnMapper, playstatusColumnMapper);
+    auto self = shared_from_this();
+    sqlEmitter = std::make_shared<DefaultSQLEmitter>(self, searchColumnMapper, metaColumnMapper, resourceColumnMapper, playstatusColumnMapper);
 }
 
 static std::shared_ptr<CdsContainer> setDefaultContainer(

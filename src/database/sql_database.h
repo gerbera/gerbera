@@ -64,10 +64,11 @@ enum class Operation;
 
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
 
-class SQLDatabase : public Database {
+class SQLDatabase
+    : public Database,
+      public std::enable_shared_from_this<SQLDatabase> {
 public:
-    /* methods to override in subclasses */
-    virtual std::string quote(const std::string& value) const = 0;
+    virtual std::string quote(const std::string& value) const override = 0;
     std::string quote(const std::string& value, std::size_t len) const;
     /// @brief ensure correct string quoting for SQL statement
     std::string quote(const char* str, std::size_t len = 0) const { return quote(std::string(str), len); }

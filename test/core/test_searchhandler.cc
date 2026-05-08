@@ -21,8 +21,11 @@
     $Id$
 */
 
+#include "../mock/database_mock.h"
+#include "config/config_setup.h"
 #include "database/search_handler.h"
 #include "metadata/metadata_enums.h"
+#include "upnp/clients.h"
 
 #include <gtest/gtest.h>
 #include <regex>
@@ -195,6 +198,16 @@ TEST(SearchLexer, MultipleTokens)
     };
     EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
 
+    input = R"(dc:creator = "some band with 'a single-quote")";
+    expectedTokens = {
+        { "dc:creator", TokenType::PROPERTY },
+        { "=", TokenType::COMPAREOP },
+        { "\"", TokenType::DQUOTE },
+        { "some band with 'a single-quote", TokenType::ESCAPEDSTRING },
+        { "\"", TokenType::DQUOTE }
+    };
+    EXPECT_TRUE(executeSearchLexerTest(input, expectedTokens));
+
     input = R"(dc:creator = "some band with \"a double-quote\"")";
     expectedTokens = {
         { "dc:creator", TokenType::PROPERTY },
@@ -275,6 +288,7 @@ std::string OTN = MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER
 class ParserTest : public ::testing::Test {
 public:
     std::string otn;
+    std::shared_ptr<Database> database;
     std::vector<std::pair<std::string, TestCol>> testSortMap;
     std::map<TestCol, SearchProperty> testColMap;
     std::shared_ptr<EnumColumnMapper<TestCol>> columnMapper;
@@ -284,6 +298,7 @@ public:
 
     void SetUp() override
     {
+        database = std::make_shared<DatabaseMock>(nullptr);
         otn = MetaEnumMapper::getMetaFieldName(MetadataFields::M_TRACKNUMBER);
 
         testSortMap = {
@@ -321,7 +336,7 @@ public:
         const std::string& expectedOutput, const std::string& expectedRe = "")
     {
         try {
-            DefaultSQLEmitter emitter(columnMapper, columnMapper, columnMapper, columnMapper);
+            DefaultSQLEmitter emitter(database, columnMapper, columnMapper, columnMapper, columnMapper);
             auto parser = SearchParser(emitter, input);
             auto rootNode = parser.parse();
             if (!rootNode)
@@ -392,6 +407,11 @@ TEST_F(ParserTest, SearchCriteriaUsingEqualsOperatorParenthesesForSqlite)
     EXPECT_TRUE(executeSearchParserTest(
         "(upnp:album=\"Scraps At Midnight\" or dc:title=\"Hospital Roll Call\")",
         "((_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight')) OR (_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital Roll Call')))"));
+
+    // (equalsOpExpr or equalsOpExpr)
+    EXPECT_TRUE(executeSearchParserTest(
+        "(upnp:album=\"Scraps At Midnight\" or dc:title=\"Hospital 'Roll' Call\")",
+        "((_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight')) OR (_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital \\'Roll\\' Call')))"));
 
     // (equalsOpExpr or equalsOpExpr) or equalsOpExpr
     EXPECT_TRUE(executeSearchParserTest(

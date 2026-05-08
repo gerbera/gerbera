@@ -23,7 +23,9 @@
 #define __DATABASE_MOCK_H__
 
 #include "database/database.h"
+#include "util/tools.h"
 
+#include <fmt/core.h>
 #include <gtest/gtest.h>
 
 class DatabaseMock : public Database {
@@ -33,6 +35,8 @@ public:
     {
     }
 
+    std::string quote(const std::string& value) const override
+    { return fmt::format("'{}'", escape(value, '\'', '\\')); }
     void init() override { }
     void shutdown() override { }
     void dropTables() override { }

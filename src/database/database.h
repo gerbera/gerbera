@@ -102,6 +102,9 @@ public:
     /// open connection to database
     virtual void run() { }
 
+    /// @brief quote query argument to avoid breaking statements
+    virtual std::string quote(const std::string& value) const = 0;
+
     /// @brief initialise the database
     /// create tables and upgrade to current version
     virtual void init() = 0;
