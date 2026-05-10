@@ -48,7 +48,8 @@
 static constexpr auto mysqlUpdateVersion = std::string_view("UPDATE `mt_internal_setting` SET `value`='{}' WHERE `key`='db_version' AND `value`='{}'");
 static const auto mysqlAddResourceAttr = std::map<ResourceDataType, std::string_view> {
     { ResourceDataType::String, R"(ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` varchar(255) default NULL)" },
-    { ResourceDataType::Number, R"(ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` bigint(20) default NULL)" }
+    { ResourceDataType::Number, R"(ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` bigint(20) default NULL)" },
+    { ResourceDataType::Text, R"(ALTER TABLE `grb_cds_resource` ADD COLUMN `{}` mediumtext default NULL)" },
 };
 
 MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::shared_ptr<Mime>& mime, const std::shared_ptr<ConverterManager>& converterManager)
@@ -62,7 +63,7 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
         3693677449, // index 0 is used for create script mysql.sql = Version 1
         928913698, 1984244483, 742641207, 1748460509, 2860006966, 974692115, 70310290, 1863649106, 4238128129, 2979337694, // upgrade 2-11
         1512596496, 507706380, 3545156190, 31528140, 372163748, 2233365597, 751952276, 3893982139, 798767550, 2305803926, // upgrade 12-21
-        3643149536, 4280737637, 991351280, 4129183594, 966576288, 1437624385,
+        3643149536, 4280737637, 991351280, 4129183594, 966576288, 1437624385, 2132165886,
         2131653758 // index DBVERSION is used for drop script mysql-drop.sql = Version -1
     };
 }

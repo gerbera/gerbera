@@ -503,4 +503,44 @@
         <script>UPDATE "mt_cds_object" SET "entry_type"=4 WHERE "location" is null and "object_type" = 2;</script>
         <script migration="location">UPDATE "mt_cds_object" SET "entry_type"=5 WHERE "upnp_class" like 'object.item%' and "object_type" = 10;</script>
     </version>
+    <version number="28" remark="lyrics to mediumtext">
+        <script>
+        CREATE TABLE "grb_cds_resource_new" (
+            "item_id" integer NOT NULL,
+            "res_id" integer NOT NULL,
+            "handlerType" integer NOT NULL,
+            "purpose" integer NOT NULL,
+            "options" text default NULL,
+            "parameters" text default NULL,
+            "size" bigint default NULL,
+            "duration" varchar(255) default NULL,
+            "bitrate" bigint default NULL,
+            "sampleFrequency" bigint default NULL,
+            "nrAudioChannels" bigint default NULL,
+            "resolution" varchar(255) default NULL,
+            "colorDepth" varchar(255) default NULL,
+            "protocolInfo" varchar(255) default NULL,
+            "resFile" varchar(255) default NULL,
+            "fanArtObject" bigint default NULL,
+            "fanArtResource" bigint default NULL,
+            "bitsPerSample" bigint default NULL,
+            "dc:language" varchar(255) default NULL,
+            "sec:acodec" varchar(255) default NULL,
+            "sec:vcodec" varchar(255) default NULL,
+            "format" varchar(255) default NULL,
+            "type" varchar(255) default NULL,
+            "orientation" bigint default NULL,
+            "pixelFormat" varchar(255) default NULL,
+            "lyrics" text default NULL,
+            "offset" bigint default NULL,
+            PRIMARY KEY ("item_id", "res_id"),
+            CONSTRAINT "grb_cds_resource_fk" FOREIGN KEY ("item_id") REFERENCES "mt_cds_object" ("id") ON DELETE CASCADE ON UPDATE CASCADE
+        );
+        INSERT INTO grb_cds_resource_new(item_id,res_id,handlerType,purpose,options,parameters,GRB_RES_COLS) SELECT item_id,res_id,handlerType,purpose,options,parameters,GRB_RES_COLS FROM grb_cds_resource;
+        DROP TABLE grb_cds_resource;
+        ALTER TABLE grb_cds_resource_new RENAME TO grb_cds_resource;
+        CREATE INDEX grb_cds_resource_id ON grb_cds_resource(item_id,res_id);
+        VACUUM;
+        </script>
+    </version>
 </upgrade>

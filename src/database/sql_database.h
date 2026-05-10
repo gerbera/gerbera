@@ -59,7 +59,7 @@ enum class ResourceDataType;
 enum class ObjectSource;
 enum class Operation;
 
-#define DBVERSION 27
+#define DBVERSION 28
 #define STRING_LIMIT "GRBMAX"
 
 #define INTERNAL_SETTINGS_TABLE "mt_internal_setting"
