@@ -46,7 +46,8 @@
 static constexpr auto sqlite3UpdateVersion = std::string_view(R"(UPDATE "mt_internal_setting" SET "value"='{}' WHERE "key"='db_version' AND "value"='{}')");
 static const auto sqlite3AddResourceAttr = std::map<ResourceDataType, std::string_view> {
     { ResourceDataType::String, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" varchar(255) default NULL)" },
-    { ResourceDataType::Number, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" bigint default NULL)" }
+    { ResourceDataType::Number, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" bigint default NULL)" },
+    { ResourceDataType::Text, R"(ALTER TABLE "grb_cds_resource" ADD COLUMN "{}" text default NULL)" },
 };
 
 #define DELETE_CACHE_MAX_TIME 60 // drop cache if last delete was more than 60 secs ago
@@ -66,7 +67,7 @@ Sqlite3Database::Sqlite3Database(const std::shared_ptr<Config>& config, const st
         1911103696, // index 0 is used for create script sqlite3.sql = Version 1
         778996897, 3362507034, 853149842, 2776802417, 3497064885, 974692115, 119767663, 3167732653, 2427825904, 3305506356, // upgrade 2-11
         3908767237, 509765404, 2512852146, 1273710965, 319062951, 2316641127, 1028160353, 881071639, 1989518047, 782849313, // upgrade 12-21
-        3135921396, 3108208, 2156790525, 1240815035, 3165480624, 2252596209,
+        3135921396, 3108208, 2156790525, 1240815035, 3165480624, 2252596209, 890824096,
         459854332 // index DBVERSION is used for drop script sqlite3-drop.sql = Version -1
     };
 }

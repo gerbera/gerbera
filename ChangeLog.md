@@ -3,13 +3,16 @@
 ### HEAD
 
 - Add support for cuesheets
+- Bump @babel/plugin-transform-modules-systemjs in /gerbera-web
 - Bump axios from 1.13.6 to 1.15.0 in /gerbera-web
 - Bump axios from 1.15.0 to 1.16.0 in /gerbera-web
 - Bump basic-ftp from 5.2.0 to 5.2.1 in /gerbera-web
+- Bump fast-uri from 3.1.0 to 3.1.2 in /gerbera-web
 - Bump follow-redirects from 1.15.11 to 1.16.0 in /gerbera-web
 - Bump ip-address from 10.1.0 to 10.2.0 in /gerbera-web
 - Bump lodash from 4.17.23 to 4.18.1 in /gerbera-web
 - Bump picomatch from 2.3.1 to 2.3.2 in /gerbera-web
+- Extend length of lyrics
 - Fix for SQL Error when using postgresql
 - Fix includes
 - Fix saving some config properties from ui

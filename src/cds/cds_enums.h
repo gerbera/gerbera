@@ -118,7 +118,8 @@ enum class ResourceAttribute : int {
 
 enum class ResourceDataType {
     String,
-    Number
+    Number,
+    Text,
 };
 
 // content handler Id's
@@ -217,7 +218,7 @@ private:
         { ResourceAttribute::TYPE, ResourceDataType::String },
         { ResourceAttribute::ORIENTATION, ResourceDataType::Number },
         { ResourceAttribute::PIXELFORMAT, ResourceDataType::String },
-        { ResourceAttribute::LYRICS, ResourceDataType::String },
+        { ResourceAttribute::LYRICS, ResourceDataType::Text },
         { ResourceAttribute::OFFSET, ResourceDataType::Number },
         { ResourceAttribute::MAX, ResourceDataType::String },
     };

@@ -15,4 +15,10 @@
         <script>UPDATE "mt_cds_object" SET "entry_type"=4 WHERE "location" is null and "object_type" = 2;</script>
         <script migration="location">UPDATE "mt_cds_object" SET "entry_type"=5 WHERE "upnp_class" like 'object.item%' and "object_type" = 10;</script>
     </version>
+    <version number="28" remark="lyrics to mediumtext">
+        <script>ALTER TABLE "grb_cds_resource" ADD "lyrics2" text default NULL</script>
+        <script>UPDATE "grb_cds_resource" SET "lyrics2"="lyrics" WHERE "lyrics" is not null AND "lyrics" != ''</script>
+        <script>ALTER TABLE "grb_cds_resource" DROP COLUMN "lyrics"</script>
+        <script>ALTER TABLE "grb_cds_resource" RENAME "lyrics2" TO "lyrics"</script>
+    </version>
 </upgrade>
