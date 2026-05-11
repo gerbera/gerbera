@@ -26,10 +26,18 @@ main_dir=$(realpath "${main_dir}")/
 . ${main_dir}/versions.sh
 
 VERSION="${CXXOPTS-3.2.1}"
+COMMIT="${CXXOPTS_COMMIT:-}"
+
+src_file="https://github.com/jarro2783/cxxopts/archive/refs/tags/v${VERSION}.tar.gz"
+
+if [[ -n "$COMMIT" ]]; then
+    source_files+=("https://github.com/jarro2783/cxxopts/archive/${COMMIT}.tar.gz")
+    VERSION+="-"
+    VERSION+=`echo $COMMIT | cut -c 1-6`
+fi
 
 setFiles cxxopts tar.gz
-source_files+=("https://github.com/jarro2783/cxxopts/archive/refs/tags/v${VERSION}.tar.gz")
-
+source_files+=("${src_file}")
 downloadSource
 
 installDeps ${main_dir} cxxopts

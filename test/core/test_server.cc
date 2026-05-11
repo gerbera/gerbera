@@ -83,6 +83,7 @@ TEST_F(ServerTest, ServerOutputsHelpInformation)
     std::string expected = mockText("fixtures/mock-help.out");
     auto result = std::vector<std::string>();
     auto patternList = std::vector<std::string> {
+        " *gerbera \\[OPTION...\\]",
         "-h, --help *Print this help and exit",
         "-D, --debug *Enable debugging",
         "-v, --version *Print version info and exit",
@@ -92,8 +93,8 @@ TEST_F(ServerTest, ServerOutputsHelpInformation)
         "    --create-example-config \\[=Section\\(=All\\)\\]",
         " *Print a example config.xml file and exit",
         "    --create-advanced-config \\[=Section\\(=All\\)\\]",
-        " *Print a advanced example config.xml file ",
-        " *and exit",
+        " *Print a advanced example config.xml file (and)?",
+        " *(and )?exit",
         "    --modules \\[=Module\\(=None\\)\\]",
         " *Create \\\"from-file\\\" module statements in",
         " *config\\.xml",
@@ -108,26 +109,26 @@ TEST_F(ServerTest, ServerOutputsHelpInformation)
 #endif
         "-d, --daemon *Daemonize after startup",
         "-u, --user UID *Drop privs to user UID",
-        "-P, --pidfile FILE *Write a pidfile to the specified location, ",
+        "-P, --pidfile FILE *Write a pidfile to the specified location, *",
         " *e.g. /run/gerbera.pid",
         "-c, --config FILE *Path to config file",
-        "-f, --cfgdir DIR *Override name of config folder ",
+        "-f, --cfgdir DIR *Override name of config folder *",
         " *\\(.config/gerbera\\) in home folder",
         "-l, --logfile FILE *Set log location",
         "    --rotatelog FILE *Set rotating log location",
         "    --syslog \\[=LOG\\(=USER\\)\\] *Log to syslog",
-        "    --add-file FILE *Scan a file into the DB on startup, can be ",
+        "    --add-file FILE *Scan a file into the DB on startup, can be *",
         " *specified multiple times",
-        "    --set-option OPT=VAL *Set simple config option OPT to value VAL, ",
-        " *can be specified multiple times use ",
+        "    --set-option OPT=VAL *Set simple config option OPT to value VAL, *",
+        " *can be specified multiple times use *",
         " *--print-options for value OPTs",
         "-p, --port PORT *Port to bind with, must be >=49152",
         "-i, --ip IP *IP to bind with",
         "-e, --interface IF *Interface to bind with",
-        "-m, --home DIR *Search this directory for a .config/gerbera ",
+        "-m, --home DIR *Search this directory for a .config/gerbera *",
         " *folder containing a config file",
 #ifdef HAVE_JS
-        "    --scripts DIR *Search this directory for custom javascript ",
+        "    --scripts DIR *Search this directory for custom javascript *",
         " *files",
 #endif
 #ifdef HAVE_MAGIC

@@ -57,7 +57,7 @@ sudo make install
 | libuuid             |              |              |                      | Depends on OS | Not required on \*BSD            |          |
 | [pugixml]           |              | 1.10         | 1.15                 | Required      | XML file and data support        |          |
 | [jsoncpp]           | 1.7.4        | 1.9.6        | 1.9.7                | Required      | JSON data support                |          |
-| [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1                | Required      | Command line parsing             | Bundled  |
+| [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1-ga3a21b        | Required      | Command line parsing             | Bundled  |
 | libiconv            |              |              |                      | Required      | Charset conversion               |          |
 | sqlite3             | 3.7.0        | 3.35.5       | 3.50.2               | Required      | Database storage                 |          |
 | zlib                |              |              |                      | Required      | Data compression                 |          |
@@ -69,7 +69,7 @@ sudo make install
 | [libpqxx]           | 7.10.1       | 7.10.3       | 7.10.3               | Optional      | Alternate database PostgreSQL    | Disabled |
 | [libpq]             | 12.22        |              | 17.0.6               | Optional      | required by [libpqxx]            | Disabled |
 | curl                |              |              |                      | Optional      | Enables web services             | Enabled  |
-| [taglib]            | 1.12         | 1.12         | 2.2.1                | Optional      | Audio tag support                | Enabled  |
+| [taglib]            | 1.12         | 1.12         | 2.3                  | Optional      | Audio tag support                | Enabled  |
 | libmagic            |              |              |                      | Optional      | File type detection              | Enabled  |
 | [wavpack]           | 5.1.0        | 5.4.0        | 5.9.0                | Optional      | WavPack metadata support         | Disabled |
 | [libmatroska]       | 1.4.8        | 1.6.3        | 1.7.1                | Optional      | MKV metadata                     | Enabled  |
@@ -90,7 +90,7 @@ sudo make install
 |---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
 | [googletest]        | 1.10.0      | 1.10.0      | 1.17.0        | Optional      | Running tests                  | Disabled |
 | [doxygen]           |             | 1.8.14      | 1.8.14        | Optional      | Building source documentation  | Disabled |
-| [cmake]             | 3.25.0      | 3.31.38     | 4.2.3         | Required      | Build processing               | Enabled  |
+| [cmake]             | 3.25.0      | 3.31.38     | 4.3.2         | Required      | Build processing               | Enabled  |
 
 ## License
 

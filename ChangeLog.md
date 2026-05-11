@@ -18,7 +18,9 @@
 - Fix saving some config properties from ui
 - Fix sqlite resource migration
 - Fix SQL injection via search parameters
+- Fix SQLDatabase::getRefObjects SQL on MySQL/MariaDB
 - Update to pupnp 1.18.5
+- Update to taglib 2.3
 
 ### v3.2.1
 
