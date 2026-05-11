@@ -2082,7 +2082,7 @@ std::vector<int> SQLDatabase::getRefObjects(
     int objectId,
     CdsEntryType entryType)
 {
-    auto getSql = fmt::format("SELECT {}, {} FROM {} WHERE {} AND {} == {}",
+    auto getSql = fmt::format("SELECT {}, {} FROM {} WHERE {} AND {} = {}",
         browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
         browseColumnMapper->mapQuoted(BrowseColumn::LastUpdated, true),
         browseColumnMapper->getTableName(),
