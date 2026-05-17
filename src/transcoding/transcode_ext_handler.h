@@ -43,11 +43,31 @@ class TranscodeExternalHandler : public TranscodeHandler {
     using TranscodeHandler::TranscodeHandler;
 
 public:
-    std::unique_ptr<IOHandler> serveContent(const std::shared_ptr<TranscodingProfile>& profile,
+    std::unique_ptr<IOHandler> serveContent(
+        const std::shared_ptr<TranscodingProfile>& profile,
         const fs::path& location,
         const std::shared_ptr<CdsObject>& obj,
         const std::string& group,
         const std::string& range) override;
+
+    /// @brief Parses a command line, splitting the arguments into an array and
+    /// substitutes %in and %out tokens with given strings.
+    ///
+    /// This function splits a string into array parts, where space is used as the
+    /// separator. In addition special %in and %out tokens are replaced by given
+    /// strings.
+    /// @param line configured command with tokens
+    /// @param in replacement for %in
+    /// @param out replacement for %out
+    /// @param range replacement for %range
+    /// @param title replacement for %title
+    /// @return vector of strings containing command line items
+    static std::vector<std::string> populateCommandLine(
+        const std::string& line,
+        const std::string& in = "",
+        const std::string& out = "",
+        const std::string& range = "",
+        const std::string& title = "");
 
 private:
     fs::path makeFifo();

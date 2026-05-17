@@ -71,11 +71,7 @@ extern "C" {
 
 } // extern "C"
 
-#ifdef HAVE_AVSTREAM_CODECPAR
-#define as_codecpar(s) s->codecpar
-#else
-#define as_codecpar(s) s->codec
-#endif
+#include "util/ffmpeg_compat.h"
 
 #define STREAM_NUMBER_OPTION "streamNumber"
 

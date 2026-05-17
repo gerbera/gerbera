@@ -2376,6 +2376,11 @@
           "editable": true
         },
         {
+          "item": "/transcoding/attribute::curl-chunk-size",
+          "caption": "cURL Chunk Size",
+          "editable": true
+        },
+        {
           "item": "/transcoding/mimetype-profile-mappings/transcode",
           "caption": "Transcoding Filters",
           "type": "List",
@@ -2485,53 +2490,112 @@
               "editable": true
             },
             {
-              "item": "/transcoding/profiles/profile/agent/attribute::command",
-              "caption": "Agent Command",
-              "editable": true
-            },
-            {
-              "item": "/transcoding/profiles/profile/agent/attribute::arguments",
-              "caption": "Agent Arguments",
-              "editable": true
+              "item": "/transcoding/profiles/profile/agent",
+              "caption": "External Agent",
+              "type": "Element",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/transcoding/profiles/profile/agent/attribute::command",
+                  "caption": "Agent Command",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/agent/attribute::arguments",
+                  "caption": "Agent Arguments",
+                  "editable": true
+                }
+              ]
             },
             {
               "item": "/transcoding/profiles/profile/avi-fourcc-list/attribute::mode",
               "caption": "AVI 4CC Mode",
               "type": "String",
-              "help": "config-transcode.html#profiles",
+              "help": "config-transcode.html#confval-avi-fourcc-list-mode",
               "editable": true
             },
             {
               "item": "/transcoding/profiles/profile/avi-fourcc-list/attribute::fourcc",
               "caption": "AVI 4CC String",
               "type": "String",
-              "help": "config-transcode.html#profiles",
+              "help": "config-transcode.html#confval-4cc-fourcc",
               "editable": true
             },
             {
-              "item": "/transcoding/profiles/profile/buffer/attribute::size",
-              "caption": "Buffer Size",
-              "editable": true
+              "item": "/transcoding/profiles/profile/buffer",
+              "caption": "External Buffer",
+              "type": "Element",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/transcoding/profiles/profile/buffer/attribute::size",
+                  "caption": "Size",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/buffer/attribute::chunk-size",
+                  "caption": "Chunk Size",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/buffer/attribute::fill-size",
+                  "caption": "Initial Fill Size",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/buffer/attribute::timeout",
+                  "caption": "Read/Write Timeout",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/buffer/attribute::retry-count",
+                  "caption": "Timeout Retry Count",
+                  "editable": true
+                }
+              ]
             },
             {
-              "item": "/transcoding/profiles/profile/buffer/attribute::chunk-size",
-              "caption": "Buffer Chunk Size",
-              "editable": true
-            },
-            {
-              "item": "/transcoding/profiles/profile/buffer/attribute::fill-size",
-              "caption": "Buffer Initial Fill Size",
-              "editable": true
-            },
-            {
-              "item": "/transcoding/profiles/profile/buffer/attribute::timeout",
-              "caption": "Buffer Read/Write Timeout",
-              "editable": true
-            },
-            {
-              "item": "/transcoding/profiles/profile/buffer/attribute::retry-count",
-              "caption": "Buffer Timeout Retry Count",
-              "editable": true
+              "item": "/transcoding/profiles/profile/encoder",
+              "caption": "Internal Encoder",
+              "type": "Element",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::format",
+                  "caption": "Format",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::acodec",
+                  "caption": "Audio Codec",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::vcodec",
+                  "caption": "Video Codec",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::afilter",
+                  "caption": "Audio Filter",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::vfilter",
+                  "caption": "Video Filter",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::width",
+                  "caption": "Width",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::height",
+                  "caption": "Height",
+                  "editable": true
+                }
+              ]
             }
           ]
         }

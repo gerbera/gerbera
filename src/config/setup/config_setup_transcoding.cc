@@ -200,12 +200,12 @@ bool ConfigTranscodingSetup::createOptionFromNode(
         }
 
         // read agent options
-        {
+        if (prof->getType() == TranscodingType::External) {
             pugi::xml_node sub = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT)->getXmlElement(child);
             auto cs = definition->findConfigSetup<ConfigPathSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND);
             cs->setFlag(prof->isEnabled(), ConfigPathArguments::mustExist);
-            prof->setCommand(cs->getXmlContent(sub, config));
-            prof->setArguments(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub, config));
+            prof->agent.setCommand(cs->getXmlContent(sub, config));
+            prof->agent.setArguments(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub, config));
         }
         {
             auto cs = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON);
@@ -214,7 +214,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(
         }
 
         // set buffer options
-        {
+        if (prof->getType() == TranscodingType::External) {
             pugi::xml_node sub = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER)->getXmlElement(child);
             std::size_t buffer = definition->findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE)->getXmlContent(sub, config);
             std::size_t chunk = definition->findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK)->getXmlContent(sub, config);
@@ -229,9 +229,18 @@ bool ConfigTranscodingSetup::createOptionFromNode(
                 return false;
             }
 
-            prof->setBufferOptions(buffer, chunk, fill);
-            prof->setBufferTimeout(std::chrono::seconds(definition->findConfigSetup<ConfigTimeSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_TIMEOUT)->getXmlContent(sub, config)));
-            prof->setBufferRetryCount(definition->findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT)->getXmlContent(sub, config));
+            prof->buffer.setOptions(buffer, chunk, fill);
+            prof->buffer.setTimeout(std::chrono::seconds(definition->findConfigSetup<ConfigTimeSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_TIMEOUT)->getXmlContent(sub, config)));
+            prof->buffer.setRetryCount(definition->findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT)->getXmlContent(sub, config));
+        } else if (prof->getType() == TranscodingType::Internal) {
+            pugi::xml_node sub = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER)->getXmlElement(child);
+            prof->encoder.setFormat(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_FORMAT)->getXmlContent(sub, config));
+            prof->encoder.setVCodec(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VCODEC)->getXmlContent(sub, config));
+            prof->encoder.setACodec(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_ACODEC)->getXmlContent(sub, config));
+            prof->encoder.setVFilter(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VFILTER)->getXmlContent(sub, config));
+            prof->encoder.setAFilter(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_AFILTER)->getXmlContent(sub, config));
+            prof->encoder.setWidth(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_WIDTH)->getXmlContent(sub, config));
+            prof->encoder.setHeight(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_HEIGHT)->getXmlContent(sub, config));
         }
 
         bool set = false;
@@ -562,59 +571,59 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
             // Buffersize
             {
                 { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE },
-                "Buffersize",
-                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->getBufferSize()); },
+                "Buffer Size",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->buffer.getSize()); },
                 [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
                     std::size_t buffer = definition->findConfigSetup<ConfigUIntSetup>(cfg)->checkIntValue(optValue);
-                    std::size_t chunk = entry->getBufferChunkSize();
-                    std::size_t fill = entry->getBufferInitialFillSize();
-                    entry->setBufferOptions(buffer, chunk, fill);
+                    std::size_t chunk = entry->buffer.getChunkSize();
+                    std::size_t fill = entry->buffer.getInitialFillSize();
+                    entry->buffer.setOptions(buffer, chunk, fill);
                     return true;
                 },
             },
             // BufferChunkSize
             {
                 { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_CHUNK },
-                "BufferChunkSize",
-                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->getBufferChunkSize()); },
+                "Buffer ChunkSize",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->buffer.getChunkSize()); },
                 [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
-                    std::size_t buffer = entry->getBufferSize();
+                    std::size_t buffer = entry->buffer.getSize();
                     std::size_t chunk = definition->findConfigSetup<ConfigUIntSetup>(cfg)->checkIntValue(optValue);
-                    std::size_t fill = entry->getBufferInitialFillSize();
-                    entry->setBufferOptions(buffer, chunk, fill);
+                    std::size_t fill = entry->buffer.getInitialFillSize();
+                    entry->buffer.setOptions(buffer, chunk, fill);
                     return true;
                 },
             },
-            // BufferChunkFill
+            // BufferFill
             {
                 { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_FILL },
-                "BufferChunkFill",
-                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->getBufferInitialFillSize()); },
+                "Buffer Fill",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->buffer.getInitialFillSize()); },
                 [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
-                    std::size_t buffer = entry->getBufferSize();
-                    std::size_t chunk = entry->getBufferChunkSize();
+                    std::size_t buffer = entry->buffer.getSize();
+                    std::size_t chunk = entry->buffer.getChunkSize();
                     std::size_t fill = definition->findConfigSetup<ConfigUIntSetup>(cfg)->checkIntValue(optValue);
-                    entry->setBufferOptions(buffer, chunk, fill);
+                    entry->buffer.setOptions(buffer, chunk, fill);
                     return true;
                 },
             },
             // BufferTimeOut
             {
                 { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_TIMEOUT },
-                "BufferTimeOut",
-                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->getBufferTimeout().count()); },
+                "Buffer TimeOut",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->buffer.getTimeout().count()); },
                 [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
-                    entry->setBufferTimeout(std::chrono::seconds(definition->findConfigSetup<ConfigTimeSetup>(cfg)->checkTimeValue(optValue)));
+                    entry->buffer.setTimeout(std::chrono::seconds(definition->findConfigSetup<ConfigTimeSetup>(cfg)->checkTimeValue(optValue)));
                     return true;
                 },
             },
             // BufferRetryCount
             {
                 { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT },
-                "BufferRetryCount",
-                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->getBufferRetryCount()); },
+                "Buffer RetryCount",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->buffer.getRetryCount()); },
                 [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
-                    entry->setBufferRetryCount(definition->findConfigSetup<ConfigUIntSetup>(cfg)->checkIntValue(optValue));
+                    entry->buffer.setRetryCount(definition->findConfigSetup<ConfigUIntSetup>(cfg)->checkIntValue(optValue));
                     return true;
                 },
             },
@@ -624,10 +633,10 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
             {
                 { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_COMMAND },
                 "Agent Command",
-                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->getCommand(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->agent.getCommand(); },
                 [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
                     if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
-                        entry->setCommand(optValue);
+                        entry->agent.setCommand(optValue);
                         return true;
                     }
                     return false;
@@ -637,12 +646,99 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
             {
                 { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS },
                 "Agent Arguments",
-                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->getArguments(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->agent.getArguments(); },
                 [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
                     if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
-                        entry->setArguments(optValue);
+                        entry->agent.setArguments(optValue);
                         return true;
                     }
+                    return false;
+                },
+            },
+
+            // Encoder
+            // Encoder Format
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_FORMAT },
+                "Encoder Format",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->encoder.getFormat(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                        entry->encoder.setFormat(optValue);
+                        return true;
+                    }
+                    return false;
+                },
+            },
+            // Encoder Audio Codec
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_ACODEC },
+                "Encoder Audio Codec",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->encoder.getACodec(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                        entry->encoder.setACodec(optValue);
+                        return true;
+                    }
+                    return false;
+                },
+            },
+            // Encoder Video Codec
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VCODEC },
+                "Encoder Video Codec",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->encoder.getVCodec(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                        entry->encoder.setVCodec(optValue);
+                        return true;
+                    }
+                    return false;
+                },
+            },
+            // Encoder Audio Filter
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_AFILTER },
+                "Encoder Audio Filter",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->encoder.getAFilter(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                        entry->encoder.setAFilter(optValue);
+                        return true;
+                    }
+                    return false;
+                },
+            },
+            // Encoder Video Filter
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VFILTER },
+                "Encoder Video Filter",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->encoder.getVFilter(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                        entry->encoder.setVFilter(optValue);
+                        return true;
+                    }
+                    return false;
+                },
+            },
+            // Encoder Width
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_WIDTH },
+                "Encoder Width",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->encoder.getWidth()); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    entry->encoder.setWidth(definition->findConfigSetup<ConfigIntSetup>(cfg)->checkIntValue(optValue));
+                    return false;
+                },
+            },
+            // Encoder Height
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_HEIGHT },
+                "Encoder Height",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->encoder.getHeight()); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    entry->encoder.setHeight(definition->findConfigSetup<ConfigIntSetup>(cfg)->checkIntValue(optValue));
                     return false;
                 },
             },
@@ -696,9 +792,9 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
 
             // cache buffer options
             bool setBuffer = false;
-            std::size_t bufferOrig = entry->getBufferSize();
-            std::size_t chunkOrig = entry->getBufferChunkSize();
-            std::size_t fillOrig = entry->getBufferInitialFillSize();
+            std::size_t bufferOrig = entry->buffer.getSize();
+            std::size_t chunkOrig = entry->buffer.getChunkSize();
+            std::size_t fillOrig = entry->buffer.getInitialFillSize();
 
             for (auto&& [cfg, label, getProperty, setProperty] : resultProfileProperties) {
                 auto index = getItemPath(indexList, cfg);
@@ -717,19 +813,19 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
             }
 
             if (setBuffer) {
-                std::size_t buffer = entry->getBufferSize();
-                std::size_t chunk = entry->getBufferChunkSize();
-                std::size_t fill = entry->getBufferInitialFillSize();
+                std::size_t buffer = entry->buffer.getSize();
+                std::size_t chunk = entry->buffer.getChunkSize();
+                std::size_t fill = entry->buffer.getInitialFillSize();
                 if (chunk > buffer) {
                     log_error("Error in configuration: transcoding profile \"{}\" chunk size {} can not be greater than buffer size {}",
                         entry->getName(), chunk, buffer);
-                    entry->setBufferOptions(bufferOrig, chunkOrig, fillOrig);
+                    entry->buffer.setOptions(bufferOrig, chunkOrig, fillOrig);
                     return false;
                 }
                 if (fill > buffer) {
                     log_error("Error in configuration: transcoding profile \"{}\" fill size {} can not be greater than buffer size {}",
                         entry->getName(), fill, buffer);
-                    entry->setBufferOptions(bufferOrig, chunkOrig, fillOrig);
+                    entry->buffer.setOptions(bufferOrig, chunkOrig, fillOrig);
                     return false;
                 }
                 return true;

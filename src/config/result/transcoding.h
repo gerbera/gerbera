@@ -48,6 +48,7 @@
 enum class TranscodingType {
     None,
     External,
+    Internal,
     Remote
 };
 
@@ -73,6 +74,100 @@ private:
     std::string key;
     ResourceAttribute attribute = ResourceAttribute::MAX;
     MetadataFields metadata = MetadataFields::M_MAX;
+};
+
+/// @brief this class keeps all data associated with buffers for external profiles.
+class TranscodingBuffer {
+private:
+    std::size_t size {};
+    std::size_t chunkSize {};
+    std::size_t initialFillSize {};
+    std::chrono::seconds timeout { 2 };
+    unsigned int retryCount { 2 };
+
+public:
+    /// @brief set buffering options
+    /// @param bs the size of the buffer in bytes
+    /// @param cs the maximum size of the chunks which are read by the buffer
+    /// @param ifs the number of bytes which have to be in the buffer
+    /// before the first read at the very beginning or after a seek returns;
+    /// 0 disables the delay
+    void setOptions(std::size_t bs, std::size_t cs, std::size_t ifs);
+
+    std::size_t getSize() const { return size; }
+    std::size_t getChunkSize() const { return chunkSize; }
+    std::size_t getInitialFillSize() const { return initialFillSize; }
+
+    /// @brief Timeout of buffer request
+    void setTimeout(std::chrono::seconds timeout) { this->timeout = timeout; }
+    std::chrono::seconds getTimeout() const { return timeout; }
+
+    /// @brief Retry Count after request timeout
+    void setRetryCount(unsigned int count) { this->retryCount = count; }
+    unsigned int getRetryCount() const { return retryCount; }
+};
+
+/// @brief this class keeps all data associated with commands for external profiles.
+class TranscodingAgent {
+private:
+    fs::path command;
+    std::string args;
+
+public:
+    /// @brief sets the program name, i.e. the command line name of the
+    /// transcoder that will be executed.
+    void setCommand(const fs::path& command) { this->command = command; }
+
+    /// @brief gets the transcoders program name
+    fs::path getCommand() const { return command; }
+
+    /// @brief sets the arguments that will be fed to the transcoder,
+    /// this is the string that comes right after the command.
+    ///
+    /// The argument string must contain the special %out token and may contain
+    /// the special %in token. The %in token is replaced by the filename of the
+    /// appropriate item - this is the source media for the transcoder. The
+    /// %out token is replaced by the fifo name that is generated when the
+    /// transcoding process is launched. Transcoded data will be read by
+    /// the server from the fifo and served via HTTP to the renderer.
+    void setArguments(const std::string& args) { this->args = args; }
+
+    /// @brief retrieves the argument string
+    std::string getArguments() const { return args; }
+};
+
+/// @brief this class keeps all data associated with encoding for internal profiles.
+class TrancodingEncoder {
+private:
+    std::string format;
+    std::string afilter;
+    std::string vfilter;
+    std::string acodec;
+    std::string vcodec;
+    int width { SOURCE };
+    int height { SOURCE };
+
+public:
+    const std::string& getFormat() const { return format; }
+    void setFormat(const std::string& format) { this->format = format; }
+
+    const std::string& getAFilter() const { return afilter; }
+    void setAFilter(const std::string& afilter) { this->afilter = afilter; }
+
+    const std::string& getVFilter() const { return vfilter; }
+    void setVFilter(const std::string& vfilter) { this->vfilter = vfilter; }
+
+    const std::string& getACodec() const { return acodec; }
+    void setACodec(const std::string& acodec) { this->acodec = acodec; }
+
+    const std::string& getVCodec() const { return vcodec; }
+    void setVCodec(const std::string& vcodec) { this->vcodec = vcodec; }
+
+    int getWidth() const { return width; }
+    void setWidth(int width) { this->width = width; }
+
+    int getHeight() const { return height; }
+    void setHeight(int height) { this->height = height; }
 };
 
 /// @brief this class keeps all data associated with one transcoding profile.
@@ -111,40 +206,8 @@ public:
     std::vector<TranscodingMimeProperty> getTargetMimeProperties() const { return mimeProperties; }
     void addTargetMimeProperty(TranscodingMimeProperty property) { mimeProperties.push_back(std::move(property)); }
 
-    /// @brief sets the program name, i.e. the command line name of the
-    /// transcoder that will be executed.
-    void setCommand(const fs::path& command) { this->command = command; }
-
-    /// @brief gets the transcoders program name
-    fs::path getCommand() const { return command; }
-
-    /// @brief set buffering options
-    /// @param bs the size of the buffer in bytes
-    /// @param cs the maximum size of the chunks which are read by the buffer
-    /// @param ifs the number of bytes which have to be in the buffer
-    /// before the first read at the very beginning or after a seek returns;
-    /// 0 disables the delay
-    void setBufferOptions(std::size_t bs, std::size_t cs, std::size_t ifs);
-
-    std::size_t getBufferSize() const { return bufferSize; }
-    std::size_t getBufferChunkSize() const { return chunkSize; }
-    std::size_t getBufferInitialFillSize() const { return initialFillSize; }
-
-    /// @brief sets the arguments that will be fed to the transcoder,
-    /// this is the string that comes right after the command.
-    ///
-    /// The argument string must contain the special %out token and may contain
-    /// the special %in token. The %in token is replaced by the filename of the
-    /// appropriate item - this is the source media for the transcoder. The
-    /// %out token is replaced by the fifo name that is generated when the
-    /// transcoding process is launched. Transcoded data will be read by
-    /// the server from the fifo and served via HTTP to the renderer.
-    void setArguments(const std::string& args) { this->args = args; }
-
-    /// @brief retrieves the argument string
-    std::string getArguments() const { return args; }
+    /// @brief enviroment variables specific for this call
     void setEnviron(const std::map<std::string, std::string>& environ) { this->environment = environ; }
-
     const std::map<std::string, std::string>& getEnviron() const { return environment; }
 
     /// @brief identifies if the profile should be set as the first resource
@@ -218,31 +281,20 @@ public:
     void setNumChannels(int chans) { numberOfChannels = chans; }
     int getNumChannels() const { return numberOfChannels; }
 
-    /// @brief Timeout of buffer request
-    void setBufferTimeout(std::chrono::seconds timeout) { bufferTimeout = timeout; }
-    std::chrono::seconds getBufferTimeout() const { return bufferTimeout; }
-
-    /// @brief Retry Count after request timeout
-    void setBufferRetryCount(unsigned int count) { retryCount = count; }
-    unsigned int getBufferRetryCount() const { return retryCount; }
+    TranscodingAgent agent;
+    TranscodingBuffer buffer;
+    TrancodingEncoder encoder;
 
 protected:
     bool enabled { true };
     std::string name;
     std::string tm;
-    fs::path command;
-    std::string args;
     bool firstResource {};
     bool theora {};
     bool acceptUrl { true };
     bool hideOrigRes {};
     bool thumbnail {};
     bool forceChunked { true };
-    std::size_t bufferSize {};
-    std::size_t chunkSize {};
-    std::size_t initialFillSize {};
-    std::chrono::seconds bufferTimeout { 2 };
-    unsigned int retryCount { 2 };
     TranscodingType trType { TranscodingType::None };
     int numberOfChannels { SOURCE };
     int sampleFrequency { SOURCE };
