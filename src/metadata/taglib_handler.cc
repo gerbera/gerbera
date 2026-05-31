@@ -435,7 +435,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(
     const std::shared_ptr<CdsResource>& resource)
 {
     auto item = std::dynamic_pointer_cast<CdsItem>(obj);
-    if (!item && !enabled) // not streamable
+    if (!item || !enabled) // not streamable
         return nullptr;
 
     std::string contentType = getValueOrDefault(mimeContentTypeMappings, item->getMimeType());
