@@ -39,6 +39,19 @@
             <xs:enumeration value="no"/>
         </xs:restriction>
     </xs:simpleType>
+    <xs:simpleType name="importMode">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="grb"/>
+            <xs:enumeration value="mt"/>
+        </xs:restriction>
+    </xs:simpleType>
+    <xs:simpleType name="scanMode">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="timed"/>
+            <xs:enumeration value="inotify"/>
+            <xs:enumeration value="manual"/>
+        </xs:restriction>
+    </xs:simpleType>
 
     <xs:element name="config">
         <xs:complexType>
@@ -649,14 +662,7 @@
             <xs:attribute name="nomedia-file" type="xs:string" default=".nomedia"/>
             <xs:attribute name="readable-names" type="boolean" default="yes"/>
             <xs:attribute name="case-sensitive-tags" type="boolean" default="yes"/>
-            <xs:attribute name="import-mode" default="mt">
-                <xs:simpleType>
-                    <xs:restriction base="xs:string">
-                        <xs:enumeration value="grb"/>
-                        <xs:enumeration value="mt"/>
-                    </xs:restriction>
-                </xs:simpleType>
-            </xs:attribute>
+            <xs:attribute name="import-mode" type="importMode" default="mt"/>
             <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
@@ -670,15 +676,7 @@
             </xs:all>
             <xs:attribute name="script-charset" type="xs:string" default="UTF-8"/>
             <xs:attribute name="scan-interval" type="xs:string" default="48:00"/>
-            <xs:attribute name="scan-mode">
-                <xs:simpleType>
-                    <xs:restriction base="xs:string">
-                        <xs:enumeration value="timed"/>
-                        <xs:enumeration value="inotify"/>
-                        <xs:enumeration value="manual"/>
-                    </xs:restriction>
-                </xs:simpleType>
-            </xs:attribute>
+            <xs:attribute name="scan-mode" type="scanMode"/>
             <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>
@@ -972,15 +970,8 @@
             <xs:attribute name="container-type-audio" type="xs:string"/>
             <xs:attribute name="container-type-image" type="xs:string"/>
             <xs:attribute name="container-type-video" type="xs:string"/>
-            <xs:attribute name="mode" use="required">
-                <xs:simpleType>
-                    <xs:restriction base="xs:string">
-                        <xs:enumeration value="timed"/>
-                        <xs:enumeration value="inotify"/>
-                        <xs:enumeration value="manual"/>
-                    </xs:restriction>
-                </xs:simpleType>
-            </xs:attribute>
+            <xs:attribute name="import-mode" type="importMode" default="mt"/>
+            <xs:attribute name="mode" type="scanMode" use="required"/>
         </xs:complexType>
     </xs:element>
 

@@ -4,6 +4,7 @@
     "from_fs": true,
     "object_id": "3808",
     "scan_mode": "timed",
+    "importMode": "grb",
     "recursive": true,
     "hidden": true,
     "dirTypes": true,

@@ -39,6 +39,7 @@
 #include "config/result/client_config.h"
 #include "config/result/transcoding.h"
 #include "config/setup/config_setup_boxlayout.h"
+#include "config/setup/config_setup_enum.h"
 #include "config/setup/config_setup_path.h"
 #include "config_definition.h"
 #include "config_option_enum.h"
@@ -350,6 +351,12 @@ void ConfigManager::load(const fs::path& userHome)
     co = definition->findConfigSetup(ConfigVal::IMPORT_SCRIPTING_CHARSET);
     co->setDefaultValue(defaultCharSet);
 #endif
+
+    // set default for layout mode before loading autoscan directories
+    setOption(root, ConfigVal::IMPORT_LAYOUT_MODE);
+    auto layoutMode = EnumOption<ImportMode>::getEnumOption(self, ConfigVal::IMPORT_LAYOUT_MODE);
+    auto lmco = definition->findConfigSetup<ConfigEnumSetup<ImportMode>>(ConfigVal::A_AUTOSCAN_DIRECTORY_LAYOUT_MODE);
+    lmco->setDefaultValue(layoutMode);
 
     args["hiddenFiles"] = getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES) ? "true" : "false";
     args["followSymlinks"] = getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS) ? "true" : "false";
@@ -709,7 +716,7 @@ std::shared_ptr<ConfigOption> ConfigManager::getConfigOption(ConfigVal option) c
         auto optionValue = options.at(to_underlying(option));
         if (!optionValue) {
             auto cs = definition->findConfigSetup(option);
-            throw_std_runtime_error("option {}='{}'not set", option, cs->getItemPathRoot());
+            throw_std_runtime_error("option {}='{}' not set", option, cs->getItemPathRoot());
         }
         return optionValue;
     } catch (const std::out_of_range& oor) {

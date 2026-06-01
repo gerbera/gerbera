@@ -104,7 +104,6 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
     task_processor = std::make_shared<TaskProcessor>(config);
 #endif
     importService = std::make_shared<ImportService>(this->context, converterManager);
-    importMode = EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
 #ifdef HAVE_INOTIFY
     useAsInotify = config->getBoolOption(ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY);
 #endif
@@ -504,6 +503,7 @@ std::shared_ptr<CdsObject> ContentManager::_addFile(
     if (rootPath.empty() && task)
         rootPath = task->getRootPath();
 
+    auto importMode = asSetting.adir ? asSetting.adir->getLayoutMode() : EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
     if (importMode == ImportMode::Gerbera) {
         std::unordered_set<int> currentContent;
         if (asSetting.changedObject || !asSetting.adir || asSetting.adir->getScanMode() != AutoscanScanMode::INotify) {
@@ -717,6 +717,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         return;
     }
 
+    auto importMode = adir->getLayoutMode();
     AutoScanSetting asSetting;
     asSetting.adir = adir;
     asSetting.recursive = adir->getRecursive();

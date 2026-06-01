@@ -35,12 +35,26 @@
 #include "pages.h" // API
 
 #include "cds/cds_objects.h"
+#include "config/config_definition.h"
+#include "config/config_val.h"
 #include "config/result/autoscan.h"
+#include "config/setup/config_setup_enum.h"
 #include "content/content.h"
+#include "context.h"
 #include "database/database.h"
 #include "exceptions.h"
 
 const std::string_view Web::Autoscan::PAGE = "autoscan";
+
+Web::Autoscan::Autoscan(
+    const std::shared_ptr<Content>& content,
+    const std::shared_ptr<Server>& server,
+    const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+    const std::shared_ptr<Quirks>& quirks)
+    : PageRequest(content, server, xmlBuilder, quirks)
+    , definition(content->getContext()->getDefinition())
+{
+}
 
 bool Web::Autoscan::processPageAction(Json::Value& element, const std::string& action)
 {
@@ -132,6 +146,7 @@ void Web::Autoscan::editSave(
         int retryCount = intParam("retryCount");
         bool dirTypes = boolParam("dirTypes");
         bool forceRescan = boolParam("forceRescan");
+        std::string importMode = param("importMode");
 
         std::vector<std::string> mediaType;
         if (boolParam("audio"))
@@ -168,8 +183,8 @@ void Web::Autoscan::editSave(
 
         int objectID = fromFs ? content->ensurePathExistence(path) : intParam("object_id");
 
-        log_debug("adding autoscan {}: location={}, recursive={}, mediaType={}, interval={}, hidden={}",
-            objectID, path.string(), recursive, fmt::join(mediaType, "|"), interval, hidden);
+        log_debug("adding autoscan {}: location={}, recursive={}, mediaType={}, interval={}, hidden={}, importMode={}",
+            objectID, path.string(), recursive, fmt::join(mediaType, "|"), interval, hidden, importMode);
 
         auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
         containerMap[AutoscanMediaMode::Audio] = param("ctAudio");
@@ -192,6 +207,11 @@ void Web::Autoscan::editSave(
         autoscan->setRetryCount(retryCount);
         autoscan->setDirTypes(dirTypes);
         autoscan->setForceRescan(forceRescan);
+        auto lmEnumSetup = definition->findConfigSetup<ConfigEnumSetup<ImportMode>>(ConfigVal::A_AUTOSCAN_DIRECTORY_LAYOUT_MODE);
+        ImportMode im;
+        if (lmEnumSetup->checkEnumValue(importMode, im))
+            autoscan->setLayoutMode(im);
+
         content->setAutoscanDirectory(autoscan);
     }
 }
@@ -200,8 +220,10 @@ void Web::Autoscan::autoscan2XML(
     const std::shared_ptr<AutoscanDirectory>& adir,
     Json::Value& element)
 {
+    auto lmEnumSetup = definition->findConfigSetup<ConfigEnumSetup<ImportMode>>(ConfigVal::A_AUTOSCAN_DIRECTORY_LAYOUT_MODE);
     if (!adir) {
         element["scan_mode"] = "none";
+        element["importMode"] = lmEnumSetup->getDefaultValue();
         element["recursive"] = 0;
         element["hidden"] = 0;
         element["followSymlinks"] = 0;
@@ -227,6 +249,7 @@ void Web::Autoscan::autoscan2XML(
         element["ctVideo"] = AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video);
     } else {
         element["scan_mode"] = AutoscanDirectory::mapScanmode(adir->getScanMode());
+        element["importMode"] = lmEnumSetup->mapEnumValue(adir->getLayoutMode());
         element["recursive"] = adir->getRecursive() ? 1 : 0;
         element["hidden"] = adir->getHidden() ? 1 : 0;
         element["followSymlinks"] = adir->getFollowSymlinks() ? 1 : 0;

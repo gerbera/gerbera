@@ -857,10 +857,14 @@ void Web::ConfigLoad::writeAutoscan(Json::Value& values)
             addValue(values,
                 ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION }),
                 ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LOCATION, adir->getLocation());
-            // scan mode (timed|inotify)
+            // scan mode (timed|inotify|manual)
             addValue(values,
                 ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_MODE }),
                 ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_MODE, fmt::to_string(AutoscanDirectory::mapScanmode(adir->getScanMode())));
+            // layour mode (mt|grb)
+            addValue(values,
+                ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_LAYOUT_MODE }),
+                ascs->option, ConfigVal::A_AUTOSCAN_DIRECTORY_LAYOUT_MODE, AutoscanDirectory::mapImportMode(adir->getLayoutMode()));
             // interval for timed
             addValue(values,
                 ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL }),

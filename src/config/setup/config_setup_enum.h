@@ -28,6 +28,7 @@
 
 #include "config/config_option_enum.h"
 #include "config/config_setup.h"
+#include "exceptions.h"
 #include "util/logger.h"
 
 #include <pugixml.hpp>
@@ -83,6 +84,12 @@ public:
         , printingFunction(printingFunction)
     {
         this->defaultValue = printingFunction(defaultValue);
+    }
+
+    /// @brief set default value
+    void setDefaultValue(En defaultValue)
+    {
+        this->defaultValue = mapEnumValue(defaultValue);
     }
 
     std::string getTypeString() const override { return "Enum"; }

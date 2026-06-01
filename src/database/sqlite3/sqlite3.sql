@@ -29,6 +29,7 @@ CREATE TABLE "mt_autoscan"(
     "id" integer primary key,
     "obj_id" integer default NULL,
     "scan_mode" varchar(10) NOT NULL,
+    "import_mode" varchar(10) NOT NULL default 'mt',
     "recursive" tinyint unsigned NOT NULL,
     "media_type" integer NOT NULL,
     "hidden" tinyint unsigned NOT NULL,

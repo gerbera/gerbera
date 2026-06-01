@@ -4,6 +4,7 @@
     "from_fs": true,
     "object_id": "7443",
     "scan_mode": "timed",
+    "importMode": "grb",
     "recursive": true,
     "hidden": true,
     "followSymlinks": false,

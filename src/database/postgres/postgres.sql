@@ -40,7 +40,8 @@ CREATE TABLE "mt_internal_setting"(
 CREATE TABLE mt_autoscan(
     "id" SERIAL PRIMARY KEY,
     "obj_id" INTEGER,
-    "scan_mode" VARCHAR(16) NOT NULL CHECK(scan_mode IN('timed', 'inotify', 'manual')),
+    "scan_mode" VARCHAR(16) NOT NULL CHECK("scan_mode" IN('timed', 'inotify', 'manual')),
+    "import_mode" VARCHAR(16) NOT NULL CHECK("import_mode" IN('mt', 'grb', 'mediatomb', 'gerbera')) default 'mt',
     "recursive" SMALLINT NOT NULL,
     "media_type" INTEGER NOT NULL,
     "hidden" SMALLINT NOT NULL,

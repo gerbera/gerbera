@@ -4,6 +4,7 @@
     "from_fs": true,
     "object_id": "2f6d",
     "scan_mode": "timed",
+    "importMode": "grb",
     "recursive": true,
     "hidden": true,
     "followSymlinks": true,
