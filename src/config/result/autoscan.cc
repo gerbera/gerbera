@@ -39,6 +39,7 @@
 #include "util/enum_iterator.h"
 #include "util/tools.h"
 
+#include <array>
 #include <numeric>
 
 const std::map<AutoscanMediaMode, std::string> AutoscanDirectory::ContainerTypesDefaults = {
@@ -283,6 +284,33 @@ AutoscanScanMode AutoscanDirectory::remapScanmode(const std::string& scanmode)
         return it->second;
 
     throw_std_runtime_error("Illegal scanmode ({}) given to remapScanmode()", scanmode);
+}
+
+static const std::array importModes {
+    std::pair<std::string, ImportMode> { "mt", ImportMode::MediaTomb },
+    std::pair<std::string, ImportMode> { "grb", ImportMode::Gerbera },
+    std::pair<std::string, ImportMode> { "mediatomb", ImportMode::MediaTomb },
+    std::pair<std::string, ImportMode> { "gerbera", ImportMode::Gerbera },
+};
+
+std::string AutoscanDirectory::mapImportMode(ImportMode importMode)
+{
+    auto it = std::find_if(importModes.begin(), importModes.end(),
+        [importMode](auto&& m) { return m.second == importMode; });
+    if (it != importModes.end())
+        return it->first;
+
+    throw_std_runtime_error("Illegal importMode ({}) given to mapImportMode()", importMode);
+}
+
+ImportMode AutoscanDirectory::remapImportMode(const std::string& importMode)
+{
+    auto it = std::find_if(importModes.begin(), importModes.end(),
+        [importMode](auto&& m) { return m.first == importMode; });
+    if (it != importModes.end())
+        return it->second;
+
+    throw_std_runtime_error("Illegal importMode ({}) given to remapImportMode()", importMode);
 }
 
 void AutoscanDirectory::copyTo(const std::shared_ptr<AutoscanDirectory>& copy) const

@@ -48,11 +48,6 @@ enum class TaskOwner;
 class OnlineService;
 #endif // ONLINE_SERVICES
 
-enum class ImportMode {
-    MediaTomb,
-    Gerbera,
-};
-
 class Content : public Timer::Subscriber {
 public:
     ~Content() override = default;

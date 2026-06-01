@@ -278,16 +278,23 @@ protected:
 
 /// @brief Call from WebUi to add or remove autoscan
 class Autoscan : public PageRequest {
-    using PageRequest::PageRequest;
-
 public:
+    /// @brief Constructor
+    explicit Autoscan(
+        const std::shared_ptr<Content>& content,
+        const std::shared_ptr<Server>& server,
+        const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder,
+        const std::shared_ptr<Quirks>& quirks);
+
     const static std::string_view PAGE;
     std::string_view getPage() const override { return PAGE; }
 
 protected:
+    std::shared_ptr<ConfigDefinition> definition;
+
     bool processPageAction(Json::Value& element, const std::string& action) override;
     /// @brief Convert autoscan dir to xml for web response
-    static void autoscan2XML(
+    void autoscan2XML(
         const std::shared_ptr<AutoscanDirectory>& adir,
         Json::Value& element);
     /// @brief get details for autoscan editor

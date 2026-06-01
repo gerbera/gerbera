@@ -1294,6 +1294,18 @@ The values have the following meaning:
 
 Scan interval in seconds. The value can be given in a valid time format.
 
+.. confval:: directory import-mode
+   :type: :confval:`Enum` ``grb|mt``
+   :required: false
+   :default: value of :confval:`import-mode`
+
+   .. versionadded:: HEAD
+   .. code:: xml
+
+       import-mode="grb"
+
+Override the default value set by :confval:`import-mode`.
+
 .. confval:: directory recursive
    :type: :confval:`Boolean`
    :required: true

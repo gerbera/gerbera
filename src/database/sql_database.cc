@@ -194,6 +194,7 @@ static const std::map<AutoscanColumn, SearchProperty> autoscanColMap {
     { AutoscanColumn::Id, { AUS_ALIAS, "id" } },
     { AutoscanColumn::ObjId, { AUS_ALIAS, "obj_id" } },
     { AutoscanColumn::ScanMode, { AUS_ALIAS, "scan_mode" } },
+    { AutoscanColumn::ImportMode, { AUS_ALIAS, "import_mode" } },
     { AutoscanColumn::Recursive, { AUS_ALIAS, "recursive", FieldType::Bool } },
     { AutoscanColumn::MediaType, { AUS_ALIAS, "media_type" } },
     { AutoscanColumn::CtAudio, { AUS_ALIAS, "ct_audio" } },
@@ -250,6 +251,7 @@ static const std::vector<std::pair<std::string, AutoscanColumn>> autoscanTagMap 
     { "id", AutoscanColumn::Id },
     { "obj_id", AutoscanColumn::ObjId },
     { "scan_mode", AutoscanColumn::ScanMode },
+    { "import_mode", AutoscanColumn::ImportMode },
     { "recursive", AutoscanColumn::Recursive },
     { "hidden", AutoscanColumn::Hidden },
     { "follow_symlinks", AutoscanColumn::FollowSymlinks },
@@ -2891,6 +2893,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
     }
 
     AutoscanScanMode mode = AutoscanDirectory::remapScanmode(getCol(row, AutoscanColumn::ScanMode));
+    ImportMode importMode = AutoscanDirectory::remapImportMode(getCol(row, AutoscanColumn::ImportMode));
     bool recursive = remapBool(getCol(row, AutoscanColumn::Recursive));
     int mt = getColInt(row, AutoscanColumn::MediaType, 0);
     bool hidden = remapBool(getCol(row, AutoscanColumn::Hidden));
@@ -2911,6 +2914,7 @@ std::shared_ptr<AutoscanDirectory> SQLDatabase::_fillAutoscanDirectory(const std
     log_info("Loading autoscan location: {}; recursive: {}, mt: {}/{}, last_modified: {}", location.c_str(), recursive, mt, AutoscanDirectory::mapMediaType(mt), lastModified > std::chrono::seconds::zero() ? grbLocaltime("{:%Y-%m-%d %H:%M:%S}", lastModified) : "unset");
 
     auto dir = std::make_shared<AutoscanDirectory>(location, mode, recursive, persistent, interval, hidden, followSymlinks, mt, containerMap);
+    dir->setLayoutMode(importMode);
     dir->setObjectID(objectID);
     dir->setDatabaseID(databaseID);
     dir->setRetryCount(retryCount);
@@ -2944,6 +2948,7 @@ void SQLDatabase::addAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>&
     auto fields = std::map<AutoscanColumn, std::string> {
         { AutoscanColumn::ObjId, objectID >= CDS_ID_ROOT ? quote(objectID) : SQL_NULL },
         { AutoscanColumn::ScanMode, quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) },
+        { AutoscanColumn::ImportMode, quote(AutoscanDirectory::mapImportMode(adir->getLayoutMode()).data()) },
         { AutoscanColumn::Recursive, quote(adir->getRecursive()) },
         { AutoscanColumn::MediaType, quote(adir->getMediaType()) },
         { AutoscanColumn::Hidden, quote(adir->getHidden()) },
@@ -2986,6 +2991,7 @@ void SQLDatabase::updateAutoscanDirectory(const std::shared_ptr<AutoscanDirector
     auto fields = std::map<AutoscanColumn, std::string> {
         { AutoscanColumn::ObjId, objectID >= CDS_ID_ROOT ? quote(objectID) : SQL_NULL },
         { AutoscanColumn::ScanMode, quote(AutoscanDirectory::mapScanmode(adir->getScanMode())) },
+        { AutoscanColumn::ImportMode, quote(AutoscanDirectory::mapImportMode(adir->getLayoutMode()).data()) },
         { AutoscanColumn::Recursive, quote(adir->getRecursive()) },
         { AutoscanColumn::MediaType, quote(adir->getMediaType()) },
         { AutoscanColumn::Hidden, quote(adir->getHidden()) },

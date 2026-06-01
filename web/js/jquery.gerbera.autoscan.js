@@ -33,6 +33,11 @@
     const autoscanModeInotify = modal.find('#autoscanModeInotify');
     const autoscanModeTimed = modal.find('#autoscanModeTimed');
     const autoscanModeManual = modal.find('#autoscanModeManual');
+
+    const autoscanImportMode = modal.find('input[name=importMode]');
+    const autoscanImportModeMediatomb = modal.find('#importModeMediatomb');
+    const autoscanImportModeGerbera = modal.find('#importModeGerbera');
+
     const autoscanPersistent = modal.find('#autoscanPersistent');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
@@ -84,6 +89,13 @@
           autoscanModeInotify.closest('.form-check').hide();
           autoscanModeManual.closest('.form-check').hide();
         }
+        if (item.importMode === 'mt') {
+          autoscanImportModeMediatomb.closest('.form-check').show();
+          autoscanImportModeGerbera.closest('.form-check').hide();
+        } else if (item.importMode === 'grb') {
+          autoscanImportModeMediatomb.closest('.form-check').hide();
+          autoscanImportModeGerbera.closest('.form-check').show();
+        }
         autoscanPersistentMsg.show();
       } else {
         autoscanSave.off('click').on('click', itemData.onSave);
@@ -98,6 +110,7 @@
       autoscanIdTxt.prop('title', item.object_id);
       autoscanFromFs.prop('checked', item.from_fs);
       autoscanMode.val([item.scan_mode]);
+      autoscanImportMode.val([item.importMode]);
       autoscanPersistent.prop('checked', item.persistent);
       autoscanRecursive.prop('checked', item.recursive);
       autoscanSymlinks.prop('checked', item.followSymlinks);
@@ -133,6 +146,8 @@
 
   const adjustFieldApplicability = function (modal) {
     const autoscanMode = modal.find('input[name=autoscanMode]:checked');
+    const autoscanImportModeMediatomb = modal.find('#importModeMediatomb');
+    const autoscanImportModeGerbera = modal.find('#importModeGerbera');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
     const autoscanSymlinks = modal.find('#autoscanSymlinks');
@@ -160,6 +175,10 @@
 
     switch (autoscanMode.val()) {
       case 'timed':
+        autoscanImportModeMediatomb.closest('.form-group').removeClass('disabled').show();
+        autoscanImportModeMediatomb.prop('disabled', false);
+        autoscanImportModeGerbera.closest('.form-group').removeClass('disabled').show();
+        autoscanImportModeGerbera.prop('disabled', false);
         autoscanRecursive.closest('.form-group').removeClass('disabled').show();
         autoscanRecursive.prop('disabled', false);
         autoscanHidden.closest('.form-group').removeClass('disabled').show();
@@ -188,6 +207,10 @@
           modal.find('#detailAutoscanButton').show();
         break;
       case 'inotify':
+        autoscanImportModeMediatomb.closest('.form-group').removeClass('disabled').show();
+        autoscanImportModeMediatomb.prop('disabled', false);
+        autoscanImportModeGerbera.closest('.form-group').removeClass('disabled').show();
+        autoscanImportModeGerbera.prop('disabled', false);
         autoscanRecursive.closest('.form-group').removeClass('disabled').show();
         autoscanRecursive.prop('disabled', false);
         autoscanHidden.closest('.form-group').removeClass('disabled').show();
@@ -216,6 +239,10 @@
           modal.find('#detailAutoscanButton').show();
         break;
       case 'manual':
+        autoscanImportModeMediatomb.closest('.form-group').removeClass('disabled').show();
+        autoscanImportModeMediatomb.prop('disabled', false);
+        autoscanImportModeGerbera.closest('.form-group').removeClass('disabled').show();
+        autoscanImportModeGerbera.prop('disabled', false);
         autoscanRecursive.closest('.form-group').removeClass('disabled').show();
         autoscanRecursive.prop('disabled', false);
         autoscanHidden.closest('.form-group').removeClass('disabled').show();
@@ -244,6 +271,10 @@
           modal.find('#detailAutoscanButton').show();
         break;
       case 'none':
+        autoscanImportModeMediatomb.closest('.form-group').addClass('disabled').hide();
+        autoscanImportModeMediatomb.prop('disabled', false);
+        autoscanImportModeGerbera.closest('.form-group').addClass('disabled').hide();
+        autoscanImportModeGerbera.prop('disabled', false);
         autoscanRecursive.closest('.form-group').addClass('disabled').hide();
         autoscanRecursive.prop('disabled', true);
         autoscanHidden.closest('.form-group').addClass('disabled').hide();
@@ -359,6 +390,7 @@
     const autoscanId = modal.find('#autoscanId');
     const fromFs = modal.find('#autoscanFromFs');
     const autoscanMode = modal.find('input:radio[name=autoscanMode]:checked');
+    const autoscanImportMode = modal.find('input:radio[name=importMode]:checked');
     const autoscanRecursive = modal.find('#autoscanRecursive');
     const autoscanHidden = modal.find('#autoscanHidden');
     const autoscanSymlinks = modal.find('#autoscanSymlinks');
@@ -391,6 +423,7 @@
     switch (autoscanMode.val()) {
       case 'timed':
         item = $.extend({}, item, {
+          importMode: autoscanImportMode.val(),
           recursive: autoscanRecursive.is(':checked'),
           hidden: autoscanHidden.is(':checked'),
           followSymlinks: autoscanSymlinks.is(':checked'),
@@ -416,6 +449,7 @@
         break;
       case 'inotify':
         item = $.extend({}, item, {
+          importMode: autoscanImportMode.val(),
           recursive: autoscanRecursive.is(':checked'),
           hidden: autoscanHidden.is(':checked'),
           followSymlinks: autoscanSymlinks.is(':checked'),
@@ -441,6 +475,7 @@
         break;
       case 'manual':
         item = $.extend({}, item, {
+          importMode: autoscanImportMode.val(),
           recursive: autoscanRecursive.is(':checked'),
           hidden: autoscanHidden.is(':checked'),
           followSymlinks: autoscanSymlinks.is(':checked'),

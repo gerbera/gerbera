@@ -118,6 +118,7 @@ enum class AutoscanColumn {
     Id = 0,
     ObjId,
     ScanMode,
+    ImportMode,
     Recursive,
     MediaType,
     CtAudio,

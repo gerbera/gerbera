@@ -785,6 +785,11 @@
               "editable": false
             },
             {
+              "item": "/import/autoscan/timed/directory/attribute::import-mode",
+              "caption": "Import Mode",
+              "editable": true
+            },
+            {
               "item": "/import/autoscan/timed/directory/attribute::recursive",
               "caption": "Recursive",
               "editable": false
@@ -858,6 +863,11 @@
               "type": "String",
               "value": "inotify",
               "editable": false
+            },
+            {
+              "item": "/import/autoscan/inotify/directory/attribute::import-mode",
+              "caption": "Import Mode",
+              "editable": true
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::recursive",
@@ -938,6 +948,11 @@
               "type": "String",
               "value": "manual",
               "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/attribute::import-mode",
+              "caption": "Import Mode",
+              "editable": true
             },
             {
               "item": "/import/autoscan/manual/directory/attribute::recursive",

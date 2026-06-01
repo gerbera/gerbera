@@ -51,6 +51,14 @@ class ImportService;
 #define AUTOSCAN_TIMED "timed"
 #define AUTOSCAN_MANUAL "manual"
 
+/// @brief Import mode - type of import process (by file, staged)
+enum class ImportMode {
+    /// @brief import each file completely
+    MediaTomb,
+    /// @brief staged import (read, parse, layout)
+    Gerbera,
+};
+
 /// @brief Scan mode - type of scan (timed, inotify, etc.)
 enum class AutoscanScanMode : int {
     Timed,
@@ -87,12 +95,6 @@ public:
 
         MAX,
     };
-
-    static int makeMediaType(const std::string& optValue);
-    static std::string_view mapMediaType(MediaType mt);
-    static std::string mapMediaType(int mt);
-    static int remapMediaType(const std::string& flag);
-    static const std::map<AutoscanMediaMode, std::string> ContainerTypesDefaults;
 
     AutoscanDirectory() = default;
 
@@ -132,6 +134,9 @@ public:
 
     void setScanMode(AutoscanScanMode mode) { this->mode = mode; }
     AutoscanScanMode getScanMode() const { return mode; }
+
+    void setLayoutMode(ImportMode layoutMode) { this->layoutMode = layoutMode; }
+    ImportMode getLayoutMode() const { return layoutMode; }
 
     void setRecursive(bool recursive) { this->recursive = recursive; }
     bool getRecursive() const { return recursive; }
@@ -230,6 +235,15 @@ public:
     /* helpers for autoscan enum stuff */
     static const char* mapScanmode(AutoscanScanMode scanmode);
     static AutoscanScanMode remapScanmode(const std::string& scanmode);
+    /* helpers for media type enum stuff */
+    static int makeMediaType(const std::string& optValue);
+    static std::string_view mapMediaType(MediaType mt);
+    static std::string mapMediaType(int mt);
+    static int remapMediaType(const std::string& flag);
+    static const std::map<AutoscanMediaMode, std::string> ContainerTypesDefaults;
+    /* helpers for import mode enum stuff */
+    static std::string mapImportMode(ImportMode importMode);
+    static ImportMode remapImportMode(const std::string& importMode);
 
     /* overrides for Editable */
     void setValid(bool newEntry, std::size_t index) override
@@ -248,6 +262,7 @@ public:
 protected:
     fs::path location;
     AutoscanScanMode mode {};
+    ImportMode layoutMode {};
     bool recursive {};
     bool hidden {};
     bool forceRescan {};

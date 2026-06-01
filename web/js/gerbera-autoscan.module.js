@@ -37,6 +37,7 @@ const addAutoscan = (event) => {
       object_id: item.id,
       action: 'as_edit_load',
       audio: item.audio,
+      importMode: item.importMode,
       retryCount: item.retryCount,
       interval: item.interval,
       dirTypes: item.dirTypes,

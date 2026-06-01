@@ -73,6 +73,7 @@ const std::vector<AutoscanColumn> Autoscan2Table::tableColumnOrder = {
     AutoscanColumn::Id,
     AutoscanColumn::ObjId,
     AutoscanColumn::ScanMode,
+    AutoscanColumn::ImportMode,
     AutoscanColumn::Recursive,
     AutoscanColumn::MediaType,
     AutoscanColumn::CtAudio,

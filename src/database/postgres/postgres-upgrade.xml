@@ -21,4 +21,8 @@
         <script>ALTER TABLE "grb_cds_resource" DROP COLUMN "lyrics"</script>
         <script>ALTER TABLE "grb_cds_resource" RENAME "lyrics2" TO "lyrics"</script>
     </version>
+    <version number="29" remark="import_mode in autoscan">
+        <script>ALTER TABLE "mt_autoscan" ADD "import_mode" VARCHAR(16) NOT NULL CHECK("import_mode" IN('mt', 'grb', 'mediatomb', 'gerbera')) default 'mt'</script>
+        <script>UPDATE "mt_autoscan" SET "import_mode"='mt'</script>
+    </version>
 </upgrade>

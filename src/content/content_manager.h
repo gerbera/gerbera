@@ -371,7 +371,6 @@ protected:
     std::unique_ptr<OnlineServiceList> online_services;
 #endif // ONLINE_SERVICES
 
-    ImportMode importMode = ImportMode::MediaTomb;
     bool layoutEnabled {};
     void threadProc();
 

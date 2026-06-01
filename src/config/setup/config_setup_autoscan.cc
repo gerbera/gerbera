@@ -104,6 +104,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(
             interval = definition->findConfigSetup<ConfigTimeSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_INTERVAL)->getXmlContent(child, config);
         }
 
+        auto layoutMode = definition->findConfigSetup<ConfigEnumSetup<ImportMode>>(ConfigVal::A_AUTOSCAN_DIRECTORY_LAYOUT_MODE)->getXmlContent(child, config);
         bool recursive = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_RECURSIVE)->getXmlContent(child, config);
         bool forceRescan = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_FORCE_REREAD_UNKNOWN)->getXmlContent(child, config);
         bool dirtypes = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_DIRTYPES)->getXmlContent(child, config);
@@ -127,6 +128,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(
             containerMap[AutoscanMediaMode::Video] = ctVideo;
             auto adir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true, interval, hidden, follow, mt, containerMap);
             adir->setRetryCount(retryCount);
+            adir->setLayoutMode(layoutMode);
             adir->setDirTypes(dirtypes);
             adir->setForceRescan(forceRescan);
             result.push_back(adir);
@@ -163,6 +165,21 @@ bool ConfigAutoscanSetup::updateItem(
                     entry->setLocation(pathValue);
                 }
                 return true;
+            },
+        },
+        // Layout Mode
+        {
+            { ConfigVal::A_AUTOSCAN_DIRECTORY_LAYOUT_MODE },
+            "Layout Mode",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return AutoscanDirectory::mapImportMode(entry->getLayoutMode()); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                auto lmEnumSetup = definition->findConfigSetup<ConfigEnumSetup<ImportMode>>(cfg);
+                ImportMode im;
+                if (lmEnumSetup->checkEnumValue(optValue, im)) {
+                    entry->setLayoutMode(im);
+                    return true;
+                }
+                return false;
             },
         },
         // Interval

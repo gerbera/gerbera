@@ -22,16 +22,16 @@
     }
   },
   "devDependencies": {
-    "@babel/core": "^7.29.0",
+    "@babel/core": "^7.29.7",
     "@babel/polyfill": "^7.12.1",
-    "@babel/preset-env": "^7.29.2",
-    "@babel/register": "^7.28.6",
+    "@babel/preset-env": "^7.29.7",
+    "@babel/register": "^7.29.7",
     "@popperjs/core": "^2.11.8",
     "babel-loader": "^10.1.1",
     "bootstrap": "^4.6.2",
     "braces": "^3.0.3",
     "chai": "^6.2.2",
-    "chromedriver": "^147.0.0",
+    "chromedriver": "^148.0.1",
     "concurrently": "^9.2.1",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
@@ -39,11 +39,11 @@
     "eslint-plugin-node": "^11.1.0",
     "eslint-plugin-promise": "^6.6.0",
     "express": "^5.2.1",
-    "jasmine-core": "^6.1.0",
-    "jimp": "^1.6.0",
+    "jasmine-core": "^6.2.0",
+    "jimp": "^1.6.1",
     "jquery": "^3.7.1",
     "jquery-ui": "^1.14.2",
-    "js-cookie": "^3.0.7",
+    "js-cookie": "^3.0.8",
     "karma": "^6.4.4",
     "karma-babel-preprocessor": "^8.0.2",
     "karma-chrome-launcher": "^3.2.0",
@@ -57,10 +57,14 @@
     "karma-webpack": "^5.0.1",
     "lodash": "^4.18.1",
     "mkdirp": "^3.0.1",
-    "mocha": "^11.7.5",
+    "mocha": "^11.7.6",
     "rimraf": "^6.1.3",
-    "selenium-webdriver": "^4.41.0",
-    "webpack": "^5.105.4",
+    "selenium-webdriver": "^4.44.0",
+    "webpack": "^5.107.2",
     "yargs": "^18.0.0"
+  },
+  "allowScripts": {
+    "chromedriver@148.0.1": true,
+    "core-js@2.6.12": true
   }
 }

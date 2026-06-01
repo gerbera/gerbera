@@ -41,6 +41,7 @@ describe('Gerbera Autoscan', () => {
     let autoscanId;
     let autoscanFromFs;
     let autoscanMode;
+    let autoscanImportMode;
     let autoscanPersistent;
     let autoscanRecursive;
     let autoscanHidden;
@@ -65,6 +66,7 @@ describe('Gerbera Autoscan', () => {
       fixture.load('index.html');
       autoscanId = $('#autoscanId');
       autoscanMode = $('input[name=autoscanMode]');
+      autoscanImportMode = $('input[name=importMode]');
       autoscanFromFs = $('#autoscanFromFs');
       autoscanPersistent = $('#autoscanPersistent');
       autoscanRecursive = $('#autoscanRecursive');
@@ -132,6 +134,7 @@ describe('Gerbera Autoscan', () => {
           retryCount: '',
           dirTypes: false,
           forceRescan: false,
+          importMode: 'grb',
           audio: true,
           audioMusic: true,
           audioBook: true,
@@ -162,6 +165,7 @@ describe('Gerbera Autoscan', () => {
         req_type: 'autoscan',
         action: 'as_edit_load',
         object_id: '26fd6',
+        importMode: 'grb',
         interval: undefined,
         retryCount: '',
         dirTypes: false,
@@ -195,6 +199,7 @@ describe('Gerbera Autoscan', () => {
         req_type: 'autoscan',
         action: 'as_edit_load',
         object_id: '26fd6',
+        importMode: 'grb',
         from_fs: false,
         retryCount: '',
         dirTypes: false,
