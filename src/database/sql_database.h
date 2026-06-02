@@ -187,7 +187,7 @@ public:
     static std::string getSortCapabilities();
     static std::string getSearchCapabilities();
 
-    unsigned int getHash(int index) const { return index == -1 ? hashies.at(DBVERSION) : (index < DBVERSION ? hashies.at(index) : 0); }
+    unsigned int getHash(int index) const { return index < DBVERSION ? hashies.at(index) : 0; }
 
     void deleteAll(std::string_view tableName);
     template <typename T>
@@ -202,7 +202,7 @@ protected:
 
     char table_quote_begin { '\0' };
     char table_quote_end { '\0' };
-    std::array<unsigned int, DBVERSION + 1> hashies;
+    std::map<int, unsigned int> hashies;
 
     /// @brief Initial db version with gerbera
     std::size_t firstDBVersion = 1;
@@ -228,7 +228,7 @@ protected:
     /// @brief upgrade database version by applying migration commands
     void upgradeDatabase(
         unsigned int dbVersion,
-        const std::array<unsigned int, DBVERSION + 1>& hashies,
+        const std::map<int, unsigned int>& hashies,
         ConfigVal upgradeOption,
         std::string_view updateVersionCommand,
         const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd);

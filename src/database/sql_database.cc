@@ -617,7 +617,7 @@ void SQLDatabase::fillDatabase()
 
 void SQLDatabase::upgradeDatabase(
     unsigned int dbVersion,
-    const std::array<unsigned int, DBVERSION + 1>& hashies,
+    const std::map<int, unsigned int>& hashies,
     ConfigVal upgradeOption,
     std::string_view updateVersionCommand,
     const std::map<ResourceDataType, std::string_view>& addResourceColumnCmd)

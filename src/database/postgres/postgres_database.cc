@@ -56,11 +56,12 @@ PostgresDatabase::PostgresDatabase(std::shared_ptr<Config> config,
     firstDBVersion = 25; // no need to migrate from older version
     // if postgres.sql or postgres-upgrade.xml is changed hashies have to be updated
     hashies = {
-        811947449, // index 0 is used for create script postgres.sql = Version 1
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // upgrade 2-11
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // upgrade 12-21
-        0, 0, 0, 0, 99037268, 1496320046, 1794356798, 129505793, // upgrade 22-29
-        2796031870 // index DBVERSION is used for drop script postgres-drop.sql = Version -1
+        { 0, 811947449 }, // index 0 is used for create script postgres.sql = Version 1
+        { 25, 99037268 },
+        { 26, 1496320046 },
+        { 27, 1794356798 },
+        { 28, 129505793 },
+        { -1, 2796031870 }, // index -1 is used for drop script postgres-drop.sql
     };
 }
 

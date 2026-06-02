@@ -40,7 +40,7 @@
 
 void SQLMigration::upgradeDatabase(
     unsigned int dbVersion,
-    const std::array<unsigned int, DBVERSION + 1>& hashies,
+    const std::map<int, unsigned int>& hashies,
     const fs::path& upgradeFile,
     std::string_view updateVersionCommand,
     std::size_t firstDBVersion,
