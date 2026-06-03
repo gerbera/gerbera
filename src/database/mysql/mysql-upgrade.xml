@@ -224,6 +224,6 @@
     </version>
     <version number="29" remark="import_mode in autoscan">
         <script>ALTER TABLE `mt_autoscan` ADD `import_mode` enum('mt','grb','mediatomb','gerbera') NOT NULL default 'mt'</script>
-        <script>UPDATE `mt_autoscan´ SET `import_mode`='mt'</script>
+        <script>UPDATE `mt_autoscan` SET `import_mode`='mt'</script>
     </version>
 </upgrade>

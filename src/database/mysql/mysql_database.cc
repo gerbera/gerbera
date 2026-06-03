@@ -88,7 +88,7 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
         { 25, 966576288 },
         { 26, 1437624385 },
         { 27, 2132165886 },
-        { 28, 2702595198 },
+        { 28, 1529766632 },
         { -1, 2131653758 }, // index -1 is used for drop script mysql-drop.sql
     };
 }
