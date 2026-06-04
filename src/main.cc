@@ -228,6 +228,7 @@ int main(int argc, char** argv, char** envp)
         (GRB_OPTION_SYSLOG, "Log to syslog", cxxopts::value<std::string>()->implicit_value("USER"), "LOG") //
         (GRB_OPTION_ADDFILE, "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<fs::path>>(), "FILE") //
         (GRB_OPTION_SETOPTION, "Set simple config option OPT to value VAL, can be specified multiple times use --print-options for value OPTs", cxxopts::value<std::vector<std::string>>(), "OPT=VAL") //
+        ("s," GRB_OPTION_DATABASE, "Select Database for storage", cxxopts::value<std::string>(), "DB") //
         ;
 
     try {
@@ -250,7 +251,7 @@ int main(int argc, char** argv, char** envp)
                 definition,
                 runtime.getConfigFile(), runtime.getHome(), runtime.getConfDir(),
                 runtime.getDataDir(), runtime.getDebug());
-            configManager->load(runtime.getHome());
+            configManager->load(runtime.getHome(), runtime.getDatabase());
             runtime.handleConfigOptions(configManager, additionalArgs);
             configManager->validate();
 #ifdef GRBDEBUG
@@ -360,7 +361,7 @@ int main(int argc, char** argv, char** envp)
                             definition,
                             runtimeChild.getConfigFile(), runtimeChild.getHome(), runtimeChild.getConfDir(),
                             runtimeChild.getDataDir(), runtimeChild.getDebug());
-                        configManager->load(runtimeChild.getHome());
+                        configManager->load(runtimeChild.getHome(), runtime.getDatabase());
 
                         runtimeChild.handleConfigOptions(configManager, additionalArgs);
                         configManager->validate();

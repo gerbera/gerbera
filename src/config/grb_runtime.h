@@ -65,6 +65,7 @@ using HandleCallback = std::function<bool()>;
 #define GRB_OPTION_PIDFILE "pidfile"
 #define GRB_OPTION_CONFIG "config"
 #define GRB_OPTION_CFGDIR "cfgdir"
+#define GRB_OPTION_DATABASE "database"
 #define GRB_OPTION_SETOPTION "set-option"
 #define GRB_OPTION_ADDFILE "add-file"
 #define GRB_OPTION_DROPTABLES "drop-tables"
@@ -145,6 +146,8 @@ public:
     bool getDropDatabase() const { return dropDatabase; }
     /// @brief access property for active init Last.FM flag
     bool getLastFM() const { return lastFM; }
+    /// @brief access property for database
+    std::string getDatabase() { return database.value_or(""); }
 
     /// @brief Name of the appilcation from command line
     static const std::string ProgramName;
@@ -167,6 +170,7 @@ private:
     std::optional<fs::path> confDir;
     std::optional<std::string> magic = getEnv("MAGIC_FILE");
     std::optional<std::string> dataDir = getEnv("DATADIR");
+    std::optional<std::string> database;
     bool startup = false;
     bool debug = false;
     bool offline = false;
@@ -213,6 +217,8 @@ private:
     bool setScripts(const std::string& arg);
     /// @brief are we requested to drop privs?
     bool setUser(const std::string& arg);
+    /// @brief handler for database
+    bool setDatabase(const std::string& arg);
     /// @brief are we requested to daemonize?
     bool runAsDeamon(const std::string& arg);
     /// @brief handler for create config modules option
