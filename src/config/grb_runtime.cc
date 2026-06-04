@@ -117,6 +117,7 @@ void GerberaRuntime::init(
         { GRB_OPTION_PIDFILE, [=](const std::string& arg) { return this->createPidFile(arg); } },
         { GRB_OPTION_CONFIG, [=](const std::string& arg) { return this->setConfigFile(arg); } },
         { GRB_OPTION_CFGDIR, [=](const std::string& arg) { return this->setConfigDir(arg); } },
+        { GRB_OPTION_DATABASE, [=](const std::string& arg) { return this->setDatabase(arg); } },
         { GRB_OPTION_DROPTABLES, [=](const std::string& arg) { return this->dropTables(arg); } },
 #ifdef HAVE_LASTFM
 #ifndef HAVE_LASTFMLIB
@@ -430,6 +431,18 @@ bool GerberaRuntime::setConfigFile(const std::string& arg)
 {
     configFile = (*results)[arg].as<fs::path>();
     return true;
+}
+
+bool GerberaRuntime::setDatabase(const std::string& arg)
+{
+    database = toLower((*results)[arg].as<std::string>());
+    if (database == "sqlite")
+        return true;
+    if (database == "postgres")
+        return true;
+    if (database == "mysql")
+        return true;
+    return false;
 }
 
 bool GerberaRuntime::setConfigDir(const std::string& arg)

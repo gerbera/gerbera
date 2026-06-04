@@ -168,7 +168,7 @@ void ConfigManager::registerNode(const std::string& xmlPath)
     knownNodes[xmlPath] = true;
 }
 
-void ConfigManager::load(const fs::path& userHome)
+void ConfigManager::load(const fs::path& userHome, const std::string& database)
 {
     std::map<std::string, std::string> args;
     auto self = getSelf();
@@ -240,8 +240,39 @@ void ConfigManager::load(const fs::path& userHome)
         sqlite3En = setOption(root, ConfigVal::SERVER_STORAGE_SQLITE_ENABLED)->getBoolOption();
     }
 
-    std::string dbDriver;
+    if (!database.empty()) {
+        // overridden by command line
+        if (database == toLower(DB_DRIVER_MYSQL)) {
+#ifdef HAVE_MYSQL
+            mysqlEn = true;
+            pgsqlEn = false;
+            sqlite3En = false;
 
+            log_info("{} selected", database);
+#else
+            log_error("{} cannot be selected. It was not enabled at compile time", database);
+#endif // HAVE_MYSQL
+        } else if (database == toLower(DB_DRIVER_POSTGRES)) {
+#ifdef HAVE_PGSQL
+            pgsqlEn = true;
+            mysqlEn = false;
+            sqlite3En = false;
+
+            log_info("{} selected", database);
+#else
+            log_error("{} cannot be selected. It was not enabled at compile time", database);
+#endif // HAVE_PGSQL
+        } else if (database == toLower(DB_DRIVER_SQLITE)) {
+            sqlite3En = true;
+            mysqlEn = false;
+            pgsqlEn = false;
+            log_info("{} selected", database);
+        } else {
+            log_error("Unknown database '{}' cannot be selected.", database);
+        }
+    }
+
+    std::string dbDriver;
 #ifdef HAVE_MYSQL
     if (mysqlEn) {
         // read mysql options

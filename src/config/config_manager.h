@@ -71,7 +71,7 @@ public:
     fs::path getConfigFilename() const override { return filename; }
 
     /// @brief load configuration file and initialise values
-    void load(const fs::path& userHome);
+    void load(const fs::path& userHome, const std::string& database);
     /// @brief validate configuration
     bool validate();
     /// @brief load all changed values from database

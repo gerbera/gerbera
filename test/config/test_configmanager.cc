@@ -131,7 +131,7 @@ public:
 TEST_F(ConfigManagerTest, LoadsWebUIDefaultValues)
 {
     auto shared = std::make_shared<ConfigManager>(definition, configFile, home, confdir, prefix, false);
-    shared->load(home);
+    shared->load(home, "");
 
     ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_ENABLED));
     ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_SHOW_TOOLTIPS));
@@ -155,7 +155,7 @@ TEST_F(ConfigManagerTest, ThrowsExceptionWhenMissingConfigFileAndNoDefault)
 
     try {
         auto shared = std::make_shared<ConfigManager>(definition, configFile, notExistsDir, confdir, prefix, false);
-        shared->load(notExistsDir);
+        shared->load(notExistsDir, "");
     } catch (const std::runtime_error& err) {
         EXPECT_EQ(err.what(), expErrMsg.str());
     }
@@ -165,7 +165,7 @@ TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified)
 {
     configFile = "";
     auto shared = std::make_shared<ConfigManager>(definition, configFile, home, confdir, prefix, false);
-    shared->load(home);
+    shared->load(home, "");
 
     ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_ENABLED));
     ASSERT_TRUE(shared->getBoolOption(ConfigVal::SERVER_UI_SHOW_TOOLTIPS));

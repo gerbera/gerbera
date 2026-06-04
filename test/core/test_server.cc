@@ -122,6 +122,7 @@ TEST_F(ServerTest, ServerOutputsHelpInformation)
         "    --set-option OPT=VAL *Set simple config option OPT to value VAL, *",
         " *can be specified multiple times use *",
         " *--print-options for value OPTs",
+        "-s, --database DB *Select Database for storage",
         "-p, --port PORT *Port to bind with, must be >=49152",
         "-i, --ip IP *IP to bind with",
         "-e, --interface IF *Interface to bind with",

@@ -366,6 +366,21 @@ Magic File
 
 The magic file is set/overwritten. By default it is read from environment variables ``GERBERA_MAGIC_FILE`` or ``MEDIATOMB_MAGIC_FILE``.
 
+Database
+--------
+
+::
+
+    --database or -s
+
+Override the storage selection from ``config.xml``.
+
+The option sets the respective database to enabled and disables the remaining
+databases. The configuration section of the selected database must be complete
+and gerbera must be built with support for the database.
+
+The following databases might be available: ``sqlite``, ``mysql`` and ``postgres``.
+
 Add Content
 -----------
 
