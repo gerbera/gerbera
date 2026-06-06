@@ -24,6 +24,7 @@ Gerbera - https://gerbera.io/
 #include "url_utils.h" // API
 
 #include "exceptions.h"
+#include "upnp/compat.h"
 
 #include <fmt/format.h>
 #if FMT_VERSION >= 100202
@@ -195,7 +196,7 @@ std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscap
             auto key = std::string_view(data, eqPos - data);
             auto value = std::string_view(eqPos + 1, ampPos - eqPos - 1);
             if (unEscape) {
-                dict.try_emplace(urlUnescape(key), urlUnescape(value));
+                dict.try_emplace(GrbUrlUnescape(key), GrbUrlUnescape(value));
             } else {
                 dict.emplace(key, value);
             }
