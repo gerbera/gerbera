@@ -14,6 +14,7 @@ therefor are added to the physical layout and are handled in virtual layout.
 - Resource migration from old gerbera versions
 - Editing some config values on web ui
 - SQL Injection via Search parameters
+- URL decoding for npupnp
 
 ### Code Improvements
 

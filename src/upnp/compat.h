@@ -46,6 +46,9 @@ static constexpr grb_read_t GRB_READ_ERROR = -1;
 #define GrbUpnpFileInfoSetContentType(i, mt) (i)->content_type = std::move((mt))
 #define GrbUpnpGetHeaders(i) (i)->request_headers
 #define GrbUpnpSetHeaders(i, h) std::copy((h).begin(), (h).end(), std::back_inserter((i)->response_headers))
+// npupnp reencodes the query arguments to build a parsable URL. We need another
+// decoding layer when using it.
+#define GrbUrlUnescape(u) urlUnescape(urlUnescape(u))
 
 #define UPNP_NEEDS_LITERAL_HOST_REDIRECT
 extern "C" void UpnpSetAllowLiteralHostRedirection(int);
@@ -79,6 +82,8 @@ void UpnpSetHeadersCompat(const UpnpFileInfo* fileInfo, const std::map<std::stri
 #define GrbUpnpFileInfoSetContentType(i, mt) UpnpFileInfo_set_ContentType((i), (mt).c_str())
 #define GrbUpnpGetHeaders(i) UpnpGetHeadersCompat(i)
 #define GrbUpnpSetHeaders(i, h) UpnpSetHeadersCompat(i, h)
+
+#define GrbUrlUnescape(u) urlUnescape(u)
 
 #if (UPNP_VERSION <= 11419) or (UPNP_VERSION > 170000 and UPNP_VERSION <= 170110)
 // new method added

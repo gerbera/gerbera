@@ -19,6 +19,7 @@
 - Fix sqlite resource migration
 - Fix SQL injection via search parameters
 - Fix SQLDatabase::getRefObjects SQL on MySQL/MariaDB
+- Handle url decoding correctly for npupnp
 - Update to pupnp 1.18.5
 - Update to taglib 2.3
 
