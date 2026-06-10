@@ -32,7 +32,7 @@
     "braces": "^3.0.3",
     "chai": "^6.2.2",
     "chromedriver": "^148.0.1",
-    "concurrently": "^9.2.1",
+    "concurrently": "^10.0.3",
     "eslint": "^8.57.1",
     "eslint-config-standard": "^17.1.0",
     "eslint-plugin-import": "^2.32.0",
