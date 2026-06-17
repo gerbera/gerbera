@@ -39,6 +39,7 @@
 
 #include <curl/curl.h>
 #include <memory>
+#include <sstream>
 #include <string>
 
 /// @brief Handle urls for CURL
