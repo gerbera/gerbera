@@ -36,6 +36,7 @@
 
 #include <map>
 #include <memory>
+#include <string>
 #include <upnp.h>
 
 // forward declaration
