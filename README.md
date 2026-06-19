@@ -52,16 +52,16 @@ sudo make install
 
 | Library             | Min Version  | Recommended  | Latest tested        | Required?     | Note                             | Default  |
 |---------------------|--------------|--------------|----------------------|---------------|----------------------------------|----------|
-| [libupnp]           | 1.14.6       | 1.14.30      | 1.18.5               | XOR libnpupnp | UPnP protocol support            |          |
+| [libupnp]           | 1.14.6       | 1.14.30      | 2.0.2                | XOR libnpupnp | UPnP protocol support            |          |
 | [libnpupnp]         | 4.2.1        | 5.1.2        | 6.3.0                | XOR libupnp   | Alternate UPnP protocol support  | Disabled |
 | libuuid             |              |              |                      | Depends on OS | Not required on \*BSD            |          |
-| [pugixml]           |              | 1.10         | 1.15                 | Required      | XML file and data support        |          |
-| [jsoncpp]           | 1.7.4        | 1.9.6        | 1.9.7                | Required      | JSON data support                |          |
+| [pugixml]           |              | 1.10         | 1.16                 | Required      | XML file and data support        |          |
+| [jsoncpp]           | 1.7.4        | 1.9.6        | 1.9.8                | Required      | JSON data support                |          |
 | [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1-gb61353        | Required      | Command line parsing             | Bundled  |
 | libiconv            |              |              |                      | Required      | Charset conversion               |          |
 | sqlite3             | 3.7.0        | 3.35.5       | 3.50.2               | Required      | Database storage                 |          |
 | zlib                |              |              |                      | Required      | Data compression                 |          |
-| [fmtlib]            | 7.1.3        | 11.2.0       | 12.1.0               | Required      | Fast string formatting           |          |
+| [fmtlib]            | 7.1.3        | 11.2.0       | 12.2.0               | Required      | Fast string formatting           |          |
 | [spdlog]            | 1.8.1        | 1.15.3       | 1.17.0               | Required      | Runtime logging                  |          |
 | [icu4c]             | 65.1         | 65.1         | 65.1                 | Required      | Transliteration                  | Enabled  |
 | [duktape]           | 2.1.0        | 2.6.0        | 2.7.0                | Optional      | Scripting Support                | Enabled  |
@@ -90,7 +90,7 @@ sudo make install
 |---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
 | [googletest]        | 1.10.0      | 1.10.0      | 1.17.0        | Optional      | Running tests                  | Disabled |
 | [doxygen]           |             | 1.8.14      | 1.8.14        | Optional      | Building source documentation  | Disabled |
-| [cmake]             | 3.25.0      | 3.31.38     | 4.3.2         | Required      | Build processing               | Enabled  |
+| [cmake]             | 3.25.0      | 3.31.38     | 4.3.3         | Required      | Build processing               | Enabled  |
 
 ## License
 

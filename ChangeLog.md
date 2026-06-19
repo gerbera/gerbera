@@ -3,6 +3,7 @@
 ### HEAD
 
 - Add ImportMode to AutoScan settings
+- add missing headers
 - Add support for cuesheets
 - build support for resolute raccoon
 - Bump @babel/plugin-transform-modules-systemjs in /gerbera-web
@@ -15,6 +16,7 @@
 - Bump js-cookie from 3.0.5 to 3.0.7 in /gerbera-web
 - Bump lodash from 4.17.23 to 4.18.1 in /gerbera-web
 - Bump picomatch from 2.3.1 to 2.3.2 in /gerbera-web
+- Bump shell-quote and concurrently in /gerbera-web
 - Bump tmp from 0.2.5 to 0.2.7 in /gerbera-web
 - Collected Updates
 - Database selection from command line
@@ -29,6 +31,7 @@
 - Fix SQLDatabase::getRefObjects SQL on MySQL/MariaDB
 - Handle url decoding correctly for npupnp
 - Refactor Sql hash codes
+- Update to pupnp 2.0.2 - pugixml 1.16 - fmt 12.2.0
 - Update to pupnp 1.18.5
 - Update to taglib 2.3
 
