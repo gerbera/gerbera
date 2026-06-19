@@ -339,6 +339,8 @@ public:
     ExampleConfigGeneratorTest() = default;
     ~ExampleConfigGeneratorTest() override = default;
 
+    static std::vector<std::string> pugixml116;
+
     void SetUp() override
     {
         std::shared_ptr<ConfigDefinition> definition = std::make_shared<ConfigDefinition>();
@@ -363,11 +365,49 @@ public:
         return str;
     }
 
+    static std::string fixXML(const std::string& input)
+    {
+        // remove UUID, for simple compare...TODO: mock UUID?
+        std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
+        auto result = std::regex_replace(input, reg, "<udn/>");
+
+        // pugixml 1.16 prints empty sections in short version
+        for (auto sec : pugixml116) {
+            std::regex reSec(fmt::format("\\>\\</{}\\>", sec), std::regex_constants::ECMAScript);
+            result = std::regex_replace(result, reSec, " />");
+        }
+        return result;
+    }
+
     ConfigGenerator* subject;
     std::string homePath;
     std::string configDir;
     std::string prefixDir;
     std::string magicFile;
+};
+
+std::vector<std::string> ExampleConfigGeneratorTest::pugixml116 = {
+    "source-docs-link",
+    "ip",
+    "interface",
+    "modelURL",
+    "presentationURL",
+    "virtualURL",
+    "externalURL",
+    "socket",
+    "password",
+    "cache-dir",
+    "genre-map",
+    "auxdata",
+    "metadata",
+    "comment",
+    "visible-directories",
+    "order",
+    "metafile",
+    "resource",
+    "container",
+    "layout",
+    "directories",
 };
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(HAVE_EXIV2) && defined(HAVE_PGSQL) && !defined(HAVE_LASTFM)
@@ -383,9 +423,8 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithExiv2AllDefinitions
     replaceAllString(mockXml, "https://docs.gerbera.io/en/latest/", "https://docs.gerbera.io/en/stable/");
 #endif
 
-    // remove UUID, for simple compare...TODO: mock UUID?
-    std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
-    result = std::regex_replace(result, reg, "<udn/>");
+    mockXml = fixXML(mockXml);
+    result = fixXML(result);
 
     EXPECT_STREQ(mockXml.c_str(), result.c_str());
 }
@@ -404,9 +443,8 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithExiv2AndLastfmAllDe
     replaceAllString(mockXml, "https://docs.gerbera.io/en/latest/", "https://docs.gerbera.io/en/stable/");
 #endif
 
-    // remove UUID, for simple compare...TODO: mock UUID?
-    std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
-    result = std::regex_replace(result, reg, "<udn/>");
+    mockXml = fixXML(mockXml);
+    result = fixXML(result);
 
     EXPECT_STREQ(mockXml.c_str(), result.c_str());
 }
@@ -425,9 +463,8 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)
 #endif
     std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 
-    // remove UUID, for simple compare...TODO: mock UUID?
-    std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
-    result = std::regex_replace(result, reg, "<udn/>");
+    mockXml = fixXML(mockXml);
+    result = fixXML(result);
 
     EXPECT_STREQ(mockXml.c_str(), result.c_str());
 }
@@ -443,9 +480,9 @@ TEST_F(ExampleConfigGeneratorTest, GeneratesConfigXmlWithDefaultDefinitions)
 
     std::string result = subject->generate(homePath, configDir, prefixDir, magicFile);
 
-    // remove UUID, for simple compare...TODO: mock UUID?
-    std::regex reg("<udn>uuid:[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}</udn>");
-    result = std::regex_replace(result, reg, "<udn/>");
+    mockXml = fixXML(mockXml);
+    result = fixXML(result);
+
     EXPECT_STREQ(mockXml.c_str(), result.c_str());
 }
 #endif

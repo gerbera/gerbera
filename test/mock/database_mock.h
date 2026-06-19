@@ -26,6 +26,7 @@
 #include "util/tools.h"
 
 #include <fmt/core.h>
+#include <fmt/format.h>
 #include <gtest/gtest.h>
 
 class DatabaseMock : public Database {
