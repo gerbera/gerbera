@@ -88,19 +88,34 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
 int BuiltinLayout::add(
     const std::shared_ptr<CdsObject>& obj,
     const std::pair<int, bool>& parentID,
-    bool useRef)
+    bool isFirst)
 {
+    bool isNew = obj->getID() == INVALID_OBJECT_ID;
+    // we get the main object here, so the object that we will add below
+    // will be a reference of the main object, that's why we set the ref
+    // id to the object id - the add function will clear out the object
+    // id
+    if (!isNew && isFirst) {
+        obj->setRefID(obj->getID());
+    }
+
     obj->setParentID(parentID.first);
-    if (useRef)
-        obj->setFlag(ObjectFlag::UseResourceReference);
     obj->setID(INVALID_OBJECT_ID);
 
     content->addObject(obj, parentID.second);
+
+    if (isNew) {
+        // the object was not yet in the database (probably we got it from a
+        // playlist script, so we set the ref id after adding - it will be used
+        // for all consequent virtual objects
+        obj->setRefID(obj->getID());
+    }
     return obj->getID();
 }
 
 int BuiltinLayout::getDir(
     const std::shared_ptr<CdsObject>& obj,
+    bool isFirst,
     const fs::path& rootPath,
     BoxKeys c1,
     BoxKeys c2,
@@ -133,7 +148,7 @@ int BuiltinLayout::getDir(
         }
         auto id = content->addContainerTree(dirVect, obj);
         dirVect[dirVect.size() - 1]->setClass(upnpClass);
-        return add(obj, id);
+        return add(obj, id, isFirst);
     }
     return INVALID_OBJECT_ID;
 }
@@ -148,15 +163,13 @@ std::vector<int> BuiltinLayout::addVideo(
     auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST);
     std::vector<int> result;
 
-    auto id = chain["/Video/All Video"];
     log_debug("add video file {}", obj->getLocation().string());
+    bool isFirst = true;
 
-    if (obj->getID() != INVALID_OBJECT_ID) {
-        obj->setRefID(obj->getID());
-        result.push_back(add(obj, id));
-    } else {
-        result.push_back(add(obj, id));
-        obj->setRefID(obj->getID());
+    if (blOption->getKey(BoxKeys::videoAll)->getEnabled()) {
+        auto id = chain["/Video/All Video"];
+        result.push_back(add(obj, id, isFirst));
+        isFirst = false;
     }
 
     auto meta = obj->getMetaData();
@@ -182,8 +195,9 @@ std::vector<int> BuiltinLayout::addVideo(
                 ct.push_back(containerAt(BoxKeys::videoAllYears));
                 ct.push_back(std::make_shared<CdsContainer>(year));
                 ct.push_back(std::make_shared<CdsContainer>(month));
-                id = content->addContainerTree(ct, obj);
-                result.push_back(add(obj, id));
+                auto id = content->addContainerTree(ct, obj);
+                result.push_back(add(obj, id, isFirst));
+                isFirst = false;
             }
         }
 
@@ -196,13 +210,15 @@ std::vector<int> BuiltinLayout::addVideo(
             ct.push_back(containerAt(BoxKeys::videoRoot));
             ct.push_back(containerAt(BoxKeys::videoAllDates));
             ct.push_back(std::make_shared<CdsContainer>(date));
-            id = content->addContainerTree(ct, obj);
-            result.push_back(add(obj, id));
+            auto id = content->addContainerTree(ct, obj);
+            result.push_back(add(obj, id, isFirst));
+            isFirst = false;
         }
     }
 
     if (blOption->getKey(BoxKeys::videoAllDirectories)->getEnabled()) {
-        result.push_back(getDir(obj, rootpath, BoxKeys::videoRoot, BoxKeys::videoAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Video, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video))));
+        result.push_back(getDir(obj, isFirst, rootpath, BoxKeys::videoRoot, BoxKeys::videoAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Video, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Video))));
+        isFirst = false;
     }
     return result;
 }
@@ -219,13 +235,12 @@ std::vector<int> BuiltinLayout::addImage(
 
     log_debug("add image file {}", obj->getLocation().string());
 
-    auto id = chain["/Photos/All Photos"];
-    if (obj->getID() != INVALID_OBJECT_ID) {
-        obj->setRefID(obj->getID());
-        result.push_back(add(obj, id));
-    } else {
-        result.push_back(add(obj, id));
-        obj->setRefID(obj->getID());
+    bool isFirst = true;
+
+    if (blOption->getKey(BoxKeys::imageAll)->getEnabled()) {
+        auto id = chain["/Photos/All Photos"];
+        result.push_back(add(obj, id, isFirst));
+        isFirst = false;
     }
 
     auto meta = obj->getMetaData();
@@ -250,8 +265,9 @@ std::vector<int> BuiltinLayout::addImage(
                 ct.push_back(containerAt(BoxKeys::imageAllYears));
                 ct.push_back(std::make_shared<CdsContainer>(year));
                 ct.push_back(std::make_shared<CdsContainer>(month));
-                id = content->addContainerTree(ct, obj);
-                result.push_back(add(obj, id));
+                auto id = content->addContainerTree(ct, obj);
+                result.push_back(add(obj, id, isFirst));
+                isFirst = false;
             }
         }
 
@@ -264,13 +280,15 @@ std::vector<int> BuiltinLayout::addImage(
             ct.push_back(containerAt(BoxKeys::imageRoot));
             ct.push_back(containerAt(BoxKeys::imageAllDates));
             ct.push_back(std::make_shared<CdsContainer>(date));
-            id = content->addContainerTree(ct, obj);
-            result.push_back(add(obj, id));
+            auto id = content->addContainerTree(ct, obj);
+            result.push_back(add(obj, id, isFirst));
+            isFirst = false;
         }
     }
 
     if (blOption->getKey(BoxKeys::imageAllDirectories)->getEnabled()) {
-        result.push_back(getDir(obj, rootpath, BoxKeys::imageRoot, BoxKeys::imageAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Image, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image))));
+        result.push_back(getDir(obj, isFirst, rootpath, BoxKeys::imageRoot, BoxKeys::imageAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Image, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Image))));
+        isFirst = false;
     }
     return result;
 }
@@ -347,21 +365,12 @@ std::vector<int> BuiltinLayout::addAudio(
         composer = "None";
 
     obj->setTitle(title);
-    auto id = chain["/Audio/All Audio"];
+    bool isFirst = true;
 
-    // we get the main object here, so the object that we will add below
-    // will be a reference of the main object, that's why we set the ref
-    // id to the object id - the add function will clear out the object
-    // id
-    if (obj->getID() != INVALID_OBJECT_ID) {
-        obj->setRefID(obj->getID());
-        result.push_back(add(obj, id));
-    } else {
-        // the object is not yet in the database (probably we got it from a
-        // playlist script, so we set the ref id after adding - it will be used
-        // for all consequent virtual objects
-        result.push_back(add(obj, id));
-        obj->setRefID(obj->getID());
+    if (blOption->getKey(BoxKeys::audioAll)->getEnabled()) {
+        auto id = chain["/Audio/All Audio"];
+        result.push_back(add(obj, id, isFirst));
+        isFirst = false;
     }
 
     auto artistContainer = std::make_shared<CdsContainer>(artist, UPNP_CLASS_MUSIC_ARTIST);
@@ -374,8 +383,9 @@ std::vector<int> BuiltinLayout::addAudio(
         arc.push_back(containerAt(BoxKeys::audioAllArtists));
         arc.push_back(artistContainer);
         arc.push_back(containerAt(BoxKeys::audioAllSongs));
-        id = content->addContainerTree(arc, obj);
-        result.push_back(add(obj, id));
+        auto id = content->addContainerTree(arc, obj);
+        result.push_back(add(obj, id, isFirst));
+        isFirst = false;
     }
 
     std::string prefixTitle;
@@ -400,8 +410,9 @@ std::vector<int> BuiltinLayout::addAudio(
         alc.push_back(containerAt(BoxKeys::audioAllArtists));
         alc.push_back(artistContainer);
         alc.push_back(albumContainer);
-        id = content->addContainerTree(alc, obj);
-        result.push_back(add(obj, id));
+        auto id = content->addContainerTree(alc, obj);
+        result.push_back(add(obj, id, isFirst));
+        isFirst = false;
     }
 
     albumContainer->setSearchable(blOption->getKey(BoxKeys::audioAllAlbums)->getSearchable());
@@ -410,8 +421,9 @@ std::vector<int> BuiltinLayout::addAudio(
         allc.push_back(containerAt(BoxKeys::audioRoot));
         allc.push_back(containerAt(BoxKeys::audioAllAlbums));
         allc.push_back(std::move(albumContainer));
-        id = content->addContainerTree(allc, obj);
-        result.push_back(add(obj, id));
+        auto id = content->addContainerTree(allc, obj);
+        result.push_back(add(obj, id, isFirst));
+        isFirst = false;
     }
 
     if (blOption->getKey(BoxKeys::audioAllGenres)->getEnabled()) {
@@ -422,8 +434,9 @@ std::vector<int> BuiltinLayout::addAudio(
         ct.push_back(containerAt(BoxKeys::audioRoot));
         ct.push_back(containerAt(BoxKeys::audioAllGenres));
         ct.push_back(std::move(genreContainer));
-        id = content->addContainerTree(ct, obj);
-        result.push_back(add(obj, id));
+        auto id = content->addContainerTree(ct, obj);
+        result.push_back(add(obj, id, isFirst));
+        isFirst = false;
     }
 
     if (blOption->getKey(BoxKeys::audioAllComposers)->getEnabled()) {
@@ -434,8 +447,9 @@ std::vector<int> BuiltinLayout::addAudio(
         cc.push_back(containerAt(BoxKeys::audioRoot));
         cc.push_back(containerAt(BoxKeys::audioAllComposers));
         cc.push_back(std::move(composerContainer));
-        id = content->addContainerTree(cc, obj);
-        result.push_back(add(obj, id));
+        auto id = content->addContainerTree(cc, obj);
+        result.push_back(add(obj, id, isFirst));
+        isFirst = false;
     }
 
     if (blOption->getKey(BoxKeys::audioAllYears)->getEnabled()) {
@@ -447,12 +461,14 @@ std::vector<int> BuiltinLayout::addAudio(
         yt.push_back(containerAt(BoxKeys::audioRoot));
         yt.push_back(containerAt(BoxKeys::audioAllYears));
         yt.push_back(std::move(yearContainer));
-        id = content->addContainerTree(yt, obj);
-        result.push_back(add(obj, id));
+        auto id = content->addContainerTree(yt, obj);
+        result.push_back(add(obj, id, isFirst));
+        isFirst = false;
     }
 
     if (blOption->getKey(BoxKeys::audioAllDirectories)->getEnabled()) {
-        result.push_back(getDir(obj, rootpath, BoxKeys::audioRoot, BoxKeys::audioAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio))));
+        result.push_back(getDir(obj, isFirst, rootpath, BoxKeys::audioRoot, BoxKeys::audioAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio))));
+        isFirst = false;
     }
 
     if (blOption->getKey(BoxKeys::audioArtistChronology)->getEnabled() && blOption->getKey(BoxKeys::audioAllArtists)->getEnabled()) {
@@ -463,15 +479,17 @@ std::vector<int> BuiltinLayout::addAudio(
         chronology.push_back(artistContainer);
         chronology.push_back(containerAt(BoxKeys::audioArtistChronology));
         chronology.push_back(std::make_shared<CdsContainer>(date + " - " + album, UPNP_CLASS_MUSIC_ALBUM));
-        id = content->addContainerTree(chronology, obj);
-        result.push_back(add(obj, id));
+        auto id = content->addContainerTree(chronology, obj);
+        result.push_back(add(obj, id, isFirst));
+        isFirst = false;
     }
 
     // Keep this last, since it's modifying the object title
     if (blOption->getKey(BoxKeys::audioAllTracks)->getEnabled()) {
         artistContainer->setSearchable(true);
         obj->setTitle(fmt::format("{}{}", prefixTitle, title));
-        result.push_back(add(obj, chain["/Audio/All - full name"]));
+        result.push_back(add(obj, chain["/Audio/All - full name"], isFirst));
+        isFirst = false;
 
         if (blOption->getKey(BoxKeys::audioAllArtists)->getEnabled()) {
             std::vector<std::shared_ptr<CdsObject>> all;
@@ -479,8 +497,8 @@ std::vector<int> BuiltinLayout::addAudio(
             all.push_back(containerAt(BoxKeys::audioAllArtists));
             all.push_back(std::move(artistContainer));
             all.push_back(containerAt(BoxKeys::audioAllTracks));
-            id = content->addContainerTree(all, obj);
-            result.push_back(add(obj, id));
+            auto id = content->addContainerTree(all, obj);
+            result.push_back(add(obj, id, isFirst));
         }
     }
     return result;

@@ -74,11 +74,14 @@ function importVideo(obj, cont, rootPath, autoscanId, containerType) {
     },
   };
   chain.video.metaData[M_CONTENT_CLASS] = [UPNP_CLASS_VIDEO_ITEM];
-  var container = addContainerTree([chain.video, chain.allVideo]);
   const result = [];
-
   createUserChain(obj, video, _Chain, boxSetup, chainSetup, result, rootPath);
-  result.push(addCdsObject(obj, container, rootPath));
+
+  // All Video
+  if (boxSetup[BK_videoAll].enabled) {
+    var container = addContainerTree([chain.video, chain.allVideo]);
+    result.push(addCdsObject(obj, container, rootPath));
+  }
 
   // Year
   if (boxSetup[BK_videoAllYears].enabled && video.month.length > 0) {
@@ -94,18 +97,7 @@ function importVideo(obj, cont, rootPath, autoscanId, containerType) {
   }
 
   // Directories
-  if (boxSetup[BK_videoAllDirectories].enabled && video.dir.length > 0) {
-    var tree = [chain.video, chain.allDirectories];
-    for (var i = 0; i < video.dir.length; i++) {
-      tree = tree.concat({ title: video.dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER });
-    }
-    tree[tree.length - 1].upnpclass = containerType;
-    tree[tree.length - 1].metaData = {};
-    tree[tree.length - 1].res = containerResource;
-    tree[tree.length - 1].aux = obj.aux;
-    tree[tree.length - 1].refID = containerRefID;
-    result.push(addCdsObject(obj, addContainerTree(tree), rootPath));
-  }
+  getDirectories([chain.video, chain.allDirectories], boxSetup[BK_videoAllDirectories], video.dir, result, rootPath, obj, containerType, containerResource, containerRefID);
 
   return result;
 }
@@ -137,7 +129,7 @@ function importVideoDetail(obj, cont, rootPath, autoscanId, containerType) {
       objectType: OBJECT_TYPE_CONTAINER,
       searchable: true,
       upnpclass: UPNP_CLASS_CONTAINER_ITEM_IMAGE,
-      metaData: [],
+      metaData: {},
       res: containerResource,
       aux: obj.aux,
       refID: cont.id
@@ -163,22 +155,7 @@ function importVideoDetail(obj, cont, rootPath, autoscanId, containerType) {
     chain.video.metaData[M_CONTENT_CLASS] = [UPNP_CLASS_VIDEO_ITEM];
     result.push(addCdsObject(obj, addContainerTree([chain.video, chain.allVideo]), rootPath));
   }
-  if (boxSetup[BK_videoAllDirectories].enabled) {
-    var path = video.dir;
-    var tree = [chain.video, chain.allDirectories];
-
-    for (var i = 0; i < path.length; i++) {
-      tree = tree.concat({ title: path[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_ALBUM });
-    }
-    tree[tree.length - 1].upnpclass = UPNP_CLASS_CONTAINER_ALBUM;
-    tree[tree.length - 1].upnpclass = containerType;
-    tree[tree.length - 1].metaData = [];
-    tree[tree.length - 1].res = containerResource;
-    tree[tree.length - 1].aux = obj.aux;
-    tree[tree.length - 1].refID = cont.id;
-    tree[tree.length - 1].searchable = true;
-    result.push(addCdsObject(obj, addContainerTree(tree), rootPath));
-  }
+  getDirectories([chain.video, chain.allDirectories], boxSetup[BK_videoAllDirectories], video.dir, result, rootPath, obj, containerType, containerResource, cont.id);
   var titlePrefix = '';
 
   if (video.videoDate) {

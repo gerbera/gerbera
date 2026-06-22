@@ -21,7 +21,7 @@
 */
 // doc-add-audio-begin
 function importAudio(obj, cont, rootPath, autoscanId, containerType) {
-  const audio = getAudioDetails(obj);
+  const audio = getAudioDetails(obj, rootPath);
   obj.sortKey = '';
   const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
 
@@ -63,7 +63,8 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
     BK_audioAllComposers,
     BK_audioAllSongs,
     BK_audioAllTracks,
-    BK_audioArtistChronology
+    BK_audioArtistChronology,
+    BK_audioAllDirectories,
   ];
   const _Chain = prepareChains(boxes, boxSetup, chainSetup);
   const chain = {
@@ -84,6 +85,7 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
       metaData: {},
     },
     artistChronology: _Chain[BK_audioArtistChronology],
+    audioAllDirectories: _Chain[BK_audioAllDirectories],
 
     artist: {
       title: audio.artists[0],
@@ -233,7 +235,7 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
     chain.album.searchable = boxSetup[BK_audioAllAlbums].searchable && !albumSearch;
     albumSearch = albumSearch || chain.album.searchable;
 
-    chain.album.location = getRootPath(rootPath, obj.location).join('_');
+    chain.album.location = audio.dir.join('_');
     container = addContainerTree([chain.audio, chain.allAlbums, chain.album]);
     chain.album.location = '';
     result.push(addCdsObject(obj, container, rootPath));
@@ -268,6 +270,7 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
   }
 
   if (boxSetup[BK_audioArtistChronology].enabled && boxSetup[BK_audioAllArtists].enabled) {
+    const titleBackup = obj.title;
     chain.album.searchable = boxSetup[BK_audioArtistChronology].searchable && !albumSearch;
     albumSearch = albumSearch || chain.album.searchable;
 
@@ -280,14 +283,19 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
     }
 
     chain.album.title = audio.album; // Restore the title;
+    obj.title = titleBackup; // Restore the title
   }
+
+  // Directories
+  getDirectories([chain.audio, chain.audioAllDirectories], boxSetup[BK_audioAllDirectories], audio.dir, result, rootPath, obj, containerType, containerResource, containerRefID);
+
   return result;
 }
 // doc-add-audio-end
 
 function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
   // first gather data
-  const audio = getAudioDetails(obj);
+  const audio = getAudioDetails(obj, rootPath);
   obj.sortKey = '';
   const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
 
@@ -363,7 +371,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
       searchable: false,
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST,
-      metaData: [],
+      metaData: {},
       res: containerResource,
       aux: obj.aux,
       refID: containerRefID
@@ -372,7 +380,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
       title: audio.albumArtist,
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST,
-      metaData: [],
+      metaData: {},
       res: containerResource,
       aux: obj.aux,
       refID: containerRefID
@@ -381,7 +389,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
       title: audio.album,
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: containerType,
-      metaData: [],
+      metaData: {},
       res: containerResource,
       aux: obj.aux,
       refID: containerRefID
@@ -390,7 +398,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
       title: audio.genre,
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: UPNP_CLASS_CONTAINER_MUSIC_GENRE,
-      metaData: [],
+      metaData: {},
       res: containerResource,
       aux: obj.aux,
       refID: containerRefID
@@ -536,7 +544,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
 
 // Create layout that has a slot for each initial of the album artist
 function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
-  const audio = getAudioDetails(obj);
+  const audio = getAudioDetails(obj, rootPath);
   const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
 
   obj.title = audio.title;
@@ -580,7 +588,9 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
     BK_audioInitialAllArtistTracks,
     BK_audioInitialAbc,
     BK_audioInitialAudioBookRoot,
-    BK_audioInitialAllBooks];
+    BK_audioInitialAllBooks,
+    BK_audioAllDirectories,
+  ];
   const _Chain = prepareChains(boxes, boxSetup, chainSetup);
   const chain = {
     audio: _Chain[BK_audioRoot],
@@ -600,6 +610,7 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
       metaData: {},
     },
     artistChronology: _Chain[BK_audioArtistChronology],
+    audioAllDirectories: _Chain[BK_audioAllDirectories],
     all000: {
       id: boxSetup[BK_audioInitialAllArtistTracks].id,
       title: boxSetup[BK_audioInitialAllArtistTracks].title,
@@ -630,7 +641,7 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
     },
     album: {
       title: audio.album,
-      location: getRootPath(rootPath, obj.location).join('_'),
+      location: audio.dir.join('_'),
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: containerType,
       metaData: {},
@@ -775,7 +786,7 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
     chain.all000.metaData[M_ALBUMARTIST] = [];
 
     if (!isAudioBook && boxSetup[BK_audioInitialAllArtistTracks].enabled) {
-      chain.album.location = getRootPath(rootPath, obj.location).join('_');
+      chain.album.location = audio.dir.join('_');
       container = addContainerTree([chain.audio, chain.allAlbums, chain.all000, chain.album]);
       chain.album.location = '';
       result.push(addCdsObject(obj, container, rootPath));
@@ -893,6 +904,11 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
 
     chain.album.title = audio.album; // Restore the title;
   }
+
+  obj.title = audio.title;
+  // Directories
+  getDirectories([chain.audio, chain.audioAllDirectories], boxSetup[BK_audioAllDirectories], audio.dir, result, rootPath, obj, containerType, containerResource, containerRefID);
+
   return result;
 }
 
@@ -906,7 +922,7 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
 */
 // based on https://github.com/gerbera/gerbera/discussions/3697#discussioncomment-15084809
 function importAudioClassical(obj, cont, rootPath, autoscanId, containerType) {
-  const audio = getAudioDetails(obj);
+  const audio = getAudioDetails(obj, rootPath);
   obj.sortKey = '';
   const scriptOptions = config['/import/scripting/virtual-layout/script-options/script-option'];
 
@@ -1045,7 +1061,7 @@ function importAudioClassical(obj, cont, rootPath, autoscanId, containerType) {
     chain.album.searchable = boxSetup[BK_audioAllAlbums].searchable && !albumSearch;
     albumSearch = albumSearch || chain.album.searchable;
 
-    chain.album.location = getRootPath(rootPath, obj.location).join('_');
+    chain.album.location = audio.dir.join('_');
     container = addContainerTree([chain.audio, chain.allAlbums, chain.album, chain.composer]);
     chain.album.location = '';
     result.push(addCdsObject(obj, container, rootPath));

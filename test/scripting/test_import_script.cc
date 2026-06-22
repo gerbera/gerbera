@@ -55,6 +55,7 @@ static duk_ret_t addContainerTree(duk_context* ctx)
         { "/Audio/Genres/Genre", "481" },
         { "/Audio/Genres/Genre2", "482" },
         { "/Audio/Composers/Composer", "49" },
+        { "/Audio/Directories/home/gerbera", "491" },
         { "/Audio/Year/2018", "50" },
         { "/Video/All Video", "60" },
         { "/Video/Directories/home/gerbera", "61" },
@@ -283,6 +284,9 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", artist, "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", "/home/gerbera")).WillOnce(Return(1));
 
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Directories", "home", "gerbera"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "491", "/home/gerbera")).WillOnce(Return(1));
+
     addGlobalFunctions(ctx, js_global_functions, {}, audioBox, configDicts);
 
     auto fnResult = callFunction(ctx, dukMockItem,
@@ -296,7 +300,7 @@ TEST_F(ImportScriptTest, AddsAudioItemToVariousCdsContainerChains)
         meta, aux, res,
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
         "/home/gerbera");
-    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 481000, 482000, 50000, 49000, 462000 };
+    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 481000, 482000, 50000, 49000, 462000, 491000 };
     EXPECT_EQ(fnResult, items);
 }
 
@@ -561,6 +565,9 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", artist, "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "462", "/home/gerbera")).WillOnce(Return(1));
 
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Directories", "home", "gerbera"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "491", "/home/gerbera")).WillOnce(Return(1));
+
     addGlobalFunctions(ctx, js_global_functions, {}, audioBox, configDicts);
 
     auto fnResult = callFunction(ctx, dukMockItem,
@@ -574,7 +581,7 @@ TEST_F(ImportScriptTest, AddsOggTheoraAudioItemToVariousCdsContainerChains)
         meta, aux, res,
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
         "/home/gerbera");
-    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 481000, 50000, 49000, 462000 };
+    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 481000, 50000, 49000, 462000, 491000 };
     EXPECT_EQ(fnResult, items);
 }
 
