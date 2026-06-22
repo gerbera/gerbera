@@ -77,7 +77,8 @@ function importImage(obj, cont, rootPath, autoscanId, containerType) {
   const result = [];
 
   createUserChain(obj, image, _Chain, boxSetup, chainSetup, result, rootPath);
-  result.push(addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]), rootPath));
+  if (boxSetup[BK_imageAll].enabled)
+    result.push(addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]), rootPath));
 
   // Years
   if (boxSetup[BK_imageAllYears].enabled && image.month.length > 0) {
@@ -93,18 +94,8 @@ function importImage(obj, cont, rootPath, autoscanId, containerType) {
   }
 
   // Directories
-  if (boxSetup[BK_imageAllDirectories].enabled && image.dir.length > 0) {
-    var tree = [chain.imageRoot, chain.allDirectories];
-    for (var i = 0; i < image.dir.length; i++) {
-      tree = tree.concat([{ title: image.dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }]);
-    }
-    tree[tree.length - 1].upnpclass = containerType;
-    tree[tree.length - 1].metaData = {};
-    tree[tree.length - 1].res = containerResource;
-    tree[tree.length - 1].aux = obj.aux;
-    tree[tree.length - 1].refID = containerRefID;
-    result.push(addCdsObject(obj, addContainerTree(tree), rootPath));
-  }
+  getDirectories([chain.imageRoot, chain.allDirectories], boxSetup[BK_imageAllDirectories], image.dir, result, rootPath, obj, containerType, containerResource, containerRefID);
+
   return result;
 }
 // doc-add-image-end
@@ -163,7 +154,7 @@ function importImageDetail(obj, cont, rootPath, autoscanId, containerType) {
       objectType: OBJECT_TYPE_CONTAINER,
       searchable: true,
       upnpclass: UPNP_CLASS_CONTAINER_ITEM_IMAGE,
-      metaData: [],
+      metaData: {},
       res: containerResource,
       aux: obj.aux,
       refID: cont.id
@@ -207,24 +198,7 @@ function importImageDetail(obj, cont, rootPath, autoscanId, containerType) {
     result.push(addCdsObject(obj, addContainerTree([chain.imageRoot, chain.allImages]), rootPath));
   }
 
-  if (boxSetup[BK_imageAllDirectories].enabled) {
-    var tree = [chain.imageRoot];
-    tree = tree.concat(chain.allDirectories);
-
-    const path = image.dir;
-
-    for (var i = 0; i < path.length; i++) {
-      if (path[i]) {
-        tree = tree.concat({ title: path[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER_ITEM_IMAGE });
-      }
-    }
-    tree[tree.length - 1].upnpclass = containerType;
-    tree[tree.length - 1].metaData = [];
-    tree[tree.length - 1].res = containerResource;
-    tree[tree.length - 1].aux = obj.aux;
-    tree[tree.length - 1].refID = cont.id;
-    result.push(addCdsObject(obj, addContainerTree(tree), rootPath));
-  }
+  getDirectories([chain.imageRoot, chain.allDirectories], boxSetup[BK_imageAllDirectories], image.dir, result, rootPath, obj, containerType, containerResource, cont.id);
 
   if (image.topic) {
     chain.topic.title = image.topic;

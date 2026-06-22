@@ -77,11 +77,8 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
         BoxKeys::root,
         BoxKeys::pcDirectory,
         BoxKeys::audioRoot,
-        BoxKeys::audioAll,
         BoxKeys::imageRoot,
-        BoxKeys::imageAll,
         BoxKeys::videoRoot,
-        BoxKeys::videoAll,
     };
 
     auto&& boxcs = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_BOXLAYOUT_BOX);

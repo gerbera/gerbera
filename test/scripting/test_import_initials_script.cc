@@ -52,6 +52,7 @@ static duk_ret_t addContainerTree(duk_context* ctx)
         { "/Audio/Albums/Artist/000 All", "47" },
         { "/Audio/Albums/Artist/Album", "48" },
         { "/Audio/Albums/000 All/Album", "49" },
+        { "/Audio/Directories/home/gerbera", "481" },
         { "/Audio/ABC/A/Artist/Album", "50" },
         { "/Audio/ABC/A/Artist/000 All", "51" },
         { "/Audio/Genres/Map/000 All", "491" },
@@ -174,7 +175,7 @@ TEST_F(ImportInitialsScriptTest, AddsAudioItemWithInitialFormat)
     std::string genre2 = "Genre2";
     std::string desc = "Description";
     std::string id = "2";
-    std::string location = "/home/gerbera/audio.mp3";
+    std::string location = "/home/gerbera/home/gerbera/audio.mp3";
     std::string track = "2";
     int onlineService = 0;
     int theora = 0;
@@ -298,6 +299,9 @@ TEST_F(ImportInitialsScriptTest, AddsAudioItemWithInitialFormat)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "550", "/home/gerbera")).WillOnce(Return(1));
 
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Directories", "home", "gerbera"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "481", "/home/gerbera")).WillOnce(Return(1));
+
     addGlobalFunctions(ctx, js_global_functions, {},
         audioIniital);
 
@@ -312,7 +316,7 @@ TEST_F(ImportInitialsScriptTest, AddsAudioItemWithInitialFormat)
         meta, aux, res,
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
         "/home/gerbera");
-    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 491000, 492000, 493000, 494000, 496000, 530000, 540000, 550000 };
+    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 491000, 492000, 493000, 494000, 496000, 530000, 540000, 550000, 481000 };
     EXPECT_EQ(fnResult, items);
 }
 
@@ -328,7 +332,7 @@ TEST_F(ImportInitialsScriptTest, AddsSpokenAudioItemWithInitialFormat)
     std::string genre2 = "Genre2";
     std::string desc = "Description";
     std::string id = "2";
-    std::string location = "/home/gerbera/audio.mp3";
+    std::string location = "/home/gerbera/home/gerbera/audio.mp3";
     std::string track = "2";
     std::string disk = "42";
     int onlineService = 0;
@@ -446,6 +450,9 @@ TEST_F(ImportInitialsScriptTest, AddsSpokenAudioItemWithInitialFormat)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album Chronology", "2025 - Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "551", "/home/gerbera")).WillOnce(Return(1));
 
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Directories", "home", "gerbera"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "481", "/home/gerbera")).WillOnce(Return(1));
+
     addGlobalFunctions(ctx, js_global_functions, {},
         audioIniital, configDicts);
 
@@ -460,7 +467,7 @@ TEST_F(ImportInitialsScriptTest, AddsSpokenAudioItemWithInitialFormat)
         meta, aux, res,
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
         "/home/gerbera");
-    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 494000, 497000, 531000, 540000, 551000 };
+    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 494000, 497000, 531000, 540000, 551000, 481000 };
     EXPECT_EQ(fnResult, items);
 }
 
@@ -477,7 +484,7 @@ TEST_F(ImportInitialsScriptTest, AddsUnnumberedAudioItemWithInitialFormat)
     std::string genre2 = "Genre2";
     std::string desc = "Description";
     std::string id = "2";
-    std::string location = "/home/gerbera/audio.mp3";
+    std::string location = "/home/gerbera/home/gerbera/audio.mp3";
     std::string track = "2";
     int onlineService = 0;
     int theora = 0;
@@ -597,6 +604,9 @@ TEST_F(ImportInitialsScriptTest, AddsUnnumberedAudioItemWithInitialFormat)
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Artists", "Artist", "Album Chronology", "2018 - Album"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllFullName), "550", "/home/gerbera")).WillOnce(Return(1));
 
+    EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Audio", "Directories", "home", "gerbera"))).WillOnce(Return(1));
+    EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asAudioAllAudio), "481", "/home/gerbera")).WillOnce(Return(1));
+
     addGlobalFunctions(ctx, js_global_functions, {},
         audioIniital, configDicts);
 
@@ -611,7 +621,7 @@ TEST_F(ImportInitialsScriptTest, AddsUnnumberedAudioItemWithInitialFormat)
         meta, aux, res,
         AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio),
         "/home/gerbera");
-    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 491000, 492000, 493000, 494000, 496000, 530000, 540000, 550000 };
+    std::vector<int> items { 42000, 43000, 44000, 45000, 46000, 47000, 48000, 49000, 50000, 51000, 491000, 492000, 493000, 494000, 496000, 530000, 540000, 550000, 481000 };
     EXPECT_EQ(fnResult, items);
 }
 

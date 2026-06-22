@@ -60,9 +60,10 @@ protected:
     int add(
         const std::shared_ptr<CdsObject>& obj,
         const std::pair<int, bool>& parentID,
-        bool useRef = true);
+        bool isFirst);
     int getDir(
         const std::shared_ptr<CdsObject>& obj,
+        bool isFirst,
         const fs::path& rootPath,
         BoxKeys c1,
         BoxKeys c2,

@@ -238,7 +238,7 @@ const loadItems = (response, item) => {
     if (datagrid.hasClass('grb-dataitems')) {
       datagrid.dataitems('destroy');
     }
-    if (!response.items || response.items.parent_id > 0 || (response.origin && response.origin === 'search' )) {
+    if (!response.items || response.items.parent_id != 0 || (response.origin && response.origin === 'search' )) {
       database.hide();
       datagrid.show();
       datagrid.dataitems(dataItems);

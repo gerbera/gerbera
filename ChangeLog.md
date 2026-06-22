@@ -7,11 +7,13 @@
 - Add support for cuesheets
 - build support for resolute raccoon
 - Bump @babel/plugin-transform-modules-systemjs in /gerbera-web
+- Bump actions/checkout from 6 to 7
 - Bump axios from 1.13.6 to 1.15.0 in /gerbera-web
 - Bump axios from 1.15.0 to 1.16.0 in /gerbera-web
 - Bump basic-ftp from 5.2.0 to 5.2.1 in /gerbera-web
 - Bump fast-uri from 3.1.0 to 3.1.2 in /gerbera-web
 - Bump follow-redirects from 1.15.11 to 1.16.0 in /gerbera-web
+- Bump form-data from 4.0.5 to 4.0.6 in /gerbera-web
 - Bump ip-address from 10.1.0 to 10.2.0 in /gerbera-web
 - Bump js-cookie from 3.0.5 to 3.0.7 in /gerbera-web
 - Bump lodash from 4.17.23 to 4.18.1 in /gerbera-web
@@ -30,6 +32,7 @@
 - Fix SQL injection via search parameters
 - Fix SQLDatabase::getRefObjects SQL on MySQL/MariaDB
 - Handle url decoding correctly for npupnp
+- Make Layout Options consistent
 - Refactor Sql hash codes
 - Update to pupnp 2.0.2 - pugixml 1.16 - fmt 12.2.0
 - Update to pupnp 1.18.5

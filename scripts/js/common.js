@@ -359,7 +359,7 @@ function mapModel(model) {
 }
 
 // doc-map-audio-details-begin
-function getAudioDetails(obj) {
+function getAudioDetails(obj, rootPath) {
   var title = getTitle(obj);
 
   // First we will gather all the metadata that is provided by our
@@ -367,6 +367,16 @@ function getAudioDetails(obj) {
   // we will have to check that to make sure that we handle this
   // case correctly.
 
+  var dir = getRootPath(rootPath, obj.location);
+
+  if (!dir || dir.length === 0) {
+    dir = obj.location;
+    if (dir.charAt(0) === '/') {
+      dir = dir.substring(1).split('/');
+    } else {
+      dir = dir.split('/');
+    }
+  }
   var desc = '';
   var artist = ['Unknown'];
   var artist_full = null;
@@ -510,6 +520,7 @@ function getAudioDetails(obj) {
     orchestra: orchestra,
     desc: desc,
     description: description,
+    dir: dir,
   };
 }
 // doc-map-audio-details-end
@@ -587,6 +598,22 @@ function createUserChain(obj, media, chain, boxSetup, chainSetup, result, rootPa
     }
   }
 }
+
+// doc-getDirectories-begin
+function getDirectories(tree, box, dir, result, rootPath, obj, containerType, containerResource, containerRefID) {
+  if (box.enabled) {
+    for (var i = 0; i < dir.length; i++) {
+      tree = tree.concat([{ title: dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }]);
+    }
+    tree[tree.length - 1].upnpclass = containerType;
+    tree[tree.length - 1].metaData = {};
+    tree[tree.length - 1].res = containerResource;
+    tree[tree.length - 1].aux = obj.aux;
+    tree[tree.length - 1].refID = containerRefID;
+    result.push(addCdsObject(obj, addContainerTree(tree), rootPath));
+  }
+}
+// doc-getDirectories-end
 
 // doc-map-int-config-begin
 function intFromConfig(entry, defValue) {

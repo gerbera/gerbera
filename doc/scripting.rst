@@ -662,6 +662,19 @@ They can be used by the import and by the playlist script.
             return path;
         }
 
+
+.. js:function:: getDirectories(...)
+
+    Converts the directory array to a virtual container tree and adds the object in the last item
+
+    :param: see code
+    :returns: nothing
+
+    .. literalinclude:: ../scripts/js/common.js
+        :start-after: // doc-getDirectories-begin
+        :end-before: // doc-getDirectories-end
+        :language: js
+
 .. js:function:: mapGenre(genre)
 
     Map value of the genre in virtual layout
@@ -687,7 +700,7 @@ They can be used by the import and by the playlist script.
             return genre;
         }
 
-.. js:function:: getAudioDetails(obj)
+.. js:function:: getAudioDetails(obj, rootPath)
 
     Assign required metadata entries to result properties
 
