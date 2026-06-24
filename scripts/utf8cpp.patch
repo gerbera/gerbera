@@ -1,0 +1,43 @@
+diff -urN '--exclude=build' utf8cpp-4.1.1/CMakeLists.txt utf8cpp-4.1.1-ks/CMakeLists.txt
+--- utf8cpp-4.1.1/CMakeLists.txt	2026-05-20 23:59:05.000000000 +0200
++++ utf8cpp-4.1.1-ks/CMakeLists.txt	2026-06-23 14:40:33.919942896 +0200
+@@ -33,17 +33,21 @@
+ configure_package_config_file(
+     "${PROJECT_SOURCE_DIR}/${PROJECT_NAME}Config.cmake.in"
+     "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+-    INSTALL_DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake
++    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME}
+ )
+ 
+ install(EXPORT ${PROJECT_NAME}Targets
+         FILE ${PROJECT_NAME}Targets.cmake
+         NAMESPACE ${PROJECT_NAME}::
+-        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
++        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
+ 
+ install(FILES "${PROJECT_BINARY_DIR}/${PROJECT_NAME}Config.cmake"
+               "${PROJECT_BINARY_DIR}/${PROJECT_NAME}ConfigVersion.cmake"
+-        DESTINATION ${CMAKE_INSTALL_DATAROOTDIR}/${PROJECT_NAME}/cmake)
++        DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/${PROJECT_NAME})
++
++configure_file("${CMAKE_CURRENT_SOURCE_DIR}/${PROJECT_NAME}.pc.cmake" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc" @ONLY)
++install(FILES "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.pc" DESTINATION "${CMAKE_INSTALL_LIBDIR}/pkgconfig"
++        RENAME "${PROJECT_NAME}${TAGLIB_INSTALL_SUFFIX}.pc")
+ 
+ install(FILES ${PROJECT_SOURCE_DIR}/source/utf8.h DESTINATION include/utf8cpp)
+ install(DIRECTORY ${PROJECT_SOURCE_DIR}/source/utf8 DESTINATION
+diff -urN '--exclude=build' utf8cpp-4.1.1/utf8cpp.pc.cmake utf8cpp-4.1.1-ks/utf8cpp.pc.cmake
+--- utf8cpp-4.1.1/utf8cpp.pc.cmake	1970-01-01 01:00:00.000000000 +0100
++++ utf8cpp-4.1.1-ks/utf8cpp.pc.cmake	2026-06-23 14:04:12.686735893 +0200
+@@ -0,0 +1,11 @@
++prefix=@CMAKE_INSTALL_PREFIX@
++exec_prefix=${prefix}
++libdir=@CMAKE_PC_LIBDIR@
++includedir=@CMAKE_PC_INCLUDEDIR@
++
++Name: Utf8Cpp
++Description: UTF-8 with C++ in a Portable Way
++Requires:
++Version: @CMAKE_PROJECT_VERSION@
++Libs:
++Cflags: -I${includedir} -I${includedir}/utf8cpp@UTF8CPP_INSTALL_SUFFIX@

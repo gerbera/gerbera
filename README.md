@@ -70,6 +70,7 @@ sudo make install
 | [libpq]             | 12.22        |              | 17.0.6               | Optional      | required by [libpqxx]            | Disabled |
 | curl                |              |              |                      | Optional      | Enables web services             | Enabled  |
 | [taglib]            | 1.12         | 1.12         | 2.3                  | Optional      | Audio tag support                | Enabled  |
+| [utf8cpp]           | 4.1.1        | 4.1.1        | 4.1.1                | Optional      | Required for [taglib] build      | Enabled  |
 | libmagic            |              |              |                      | Optional      | File type detection              | Enabled  |
 | [wavpack]           | 5.1.0        | 5.4.0        | 5.9.0                | Optional      | WavPack metadata support         | Disabled |
 | [libmatroska]       | 1.4.8        | 1.6.3        | 1.7.1                | Optional      | MKV metadata                     | Enabled  |
@@ -133,4 +134,5 @@ sudo make install
 [pugixml]: https://github.com/zeux/pugixml
 [spdlog]: https://github.com/gabime/spdlog
 [taglib]: https://taglib.org/
+[utf8cpp]: https://github.com/nemtrif/utfcpp
 [wavpack]: https://www.wavpack.com/

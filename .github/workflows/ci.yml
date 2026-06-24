@@ -137,7 +137,7 @@ jobs:
         with:
           prepare: |
             pkg install bash cmake gnu-make icu4c curl ffmpeg gcc14 ninja \
-                pkg-config sqlite-3 libexif taglib gnu-coreutils \
+                pkg-config sqlite-3 libexif gnu-coreutils \
                 autoconf automake gnu-m4 libtool gnu-tar gzip bzip2
           run: |
             export GH_ACTIONS=y

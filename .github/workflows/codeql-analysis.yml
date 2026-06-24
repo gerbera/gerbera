@@ -39,6 +39,7 @@ jobs:
            sudo bash ./scripts/install-pupnp.sh
            sudo bash ./scripts/install-fmt.sh
            sudo bash ./scripts/install-spdlog.sh
+           sudo bash ./scripts/install-utf8cpp.sh
            sudo bash ./scripts/install-taglib.sh
            sudo bash ./scripts/install-libzip.sh
            sudo bash ./scripts/install-libzippp.sh

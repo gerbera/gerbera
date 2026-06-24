@@ -127,7 +127,7 @@ if [[ ! -d "${BUILD_DIR}" ]]; then
   echo "::group::Installing dependencies"
   pkg install \
             gnu-make icu4c ffmpeg ninja \
-            pkg-config sqlite-3 libexif taglib \
+            pkg-config sqlite-3 libexif \
             autoconf automake gnu-m4 libtool gnu-tar gzip bzip2
 
   export PKG_CONFIG_PATH=/usr/local/lib:/usr/local/lib/pkgconfig:/opt/ooce/lib/pkgconfig:/opt/ooce/lib/amd64/pkgconfig:${PKG_CONFIG_PATH}
@@ -147,7 +147,7 @@ if [[ ! -d "${BUILD_DIR}" ]]; then
     install-matroska
     # install-libexiv2 head
     install-pupnp
-    # install-taglib
+    install-taglib
 
     install-googletest
   )

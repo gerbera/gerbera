@@ -100,6 +100,9 @@ function install-googletest() {
 }
 
 function install-taglib() {
+  echo "::group::Installing utf8cpp"
+  sudo bash "${GRB_SH_DIR}install-utf8cpp.sh"
+  echo "::endgroup::"
   echo "::group::Installing taglib"
   sudo bash "${GRB_SH_DIR}install-taglib.sh"
   echo "::endgroup::"

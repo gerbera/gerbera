@@ -42,6 +42,7 @@ if [[ "${GERBERA_ENV-head}" == "minimum" ]]; then
     LIBZIPPP_COMMIT="8992d6002b6ae941ad1a61d5bc7a512277907be3"
     LIBZIPPP="v7.1-1.10.1"
     CXXOPTS="3.2.0"
+    UTF8CPP="4.1.1"
 
 elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
 
@@ -67,6 +68,7 @@ elif [[ "${GERBERA_ENV-head}" == "default" ]]; then
     LIBZIPPP_COMMIT="8992d6002b6ae941ad1a61d5bc7a512277907be3"
     LIBZIPPP="v7.1-1.10.1"
     CXXOPTS="3.2.1"
+    UTF8CPP="4.1.1"
 
 else
 
@@ -93,5 +95,6 @@ else
     LIBZIPPP="v7.1-1.10.1"
     CXXOPTS="3.3.1"
     CXXOPTS_COMMIT="b6135315a54deb2b556219906eda8346f69bf703"
+    UTF8CPP="4.1.1"
 
 fi

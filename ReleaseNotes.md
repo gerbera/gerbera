@@ -19,6 +19,8 @@ This release adds two major features
 - Editing some config values on web ui
 - SQL Injection via Search parameters
 - URL decoding for npupnp
+- Display of dynamic folder content in web view
+- Directories in several layouts and disabling "All Items" folder.
 
 ### Code Improvements
 
