@@ -105,6 +105,8 @@ Optional Packages
 | mysql               | Alternate database storage | WITH\_MYSQL             | Disabled |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | taglib_             | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh            |
+|                     |                            |                         |          |                              |
+| utf8cpp_            | Required for taglib        |                         |          | install-utf8cpp.sh           |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | wavpack_            | WavPack metadata support   | WITH\_WAVPACK           | Disabled | install-wavpack.sh           |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
@@ -131,6 +133,7 @@ Optional Packages
 .. _pugixml: https://github.com/zeux/pugixml
 .. _spdlog: https://github.com/gabime/spdlog
 .. _taglib: https://taglib.org/
+.. _utf8cpp: https://github.com/nemtrif/utfcpp
 .. _wavpack: https://www.wavpack.com/
 
 Scripts for installation of (build) dependencies from source can be found under ``scripts``. They normally install the latest tested version

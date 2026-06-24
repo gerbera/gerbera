@@ -19,5 +19,5 @@
 #
 # $Id$
 
-sudo zypper install --no-confirm \
-       utfcpp-devel
+#sudo zypper install --no-confirm \
+#       utfcpp-devel

@@ -19,5 +19,5 @@
 #
 # $Id$
 
-sudo apt-get install -y \
-      libutfcpp-dev
+#sudo apt-get install -y \
+#      libutfcpp-dev
