@@ -15,6 +15,8 @@ Automatic Device Detection
 With each UPnP request a device sends its signature which is used by gerbera to assign special functionality to the response.
 The automatic detection supports the following devices and software:
 
+.. versionchanged:: HEAD Added ``Universum DAB+ Internet Radio``
+
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
 | Device Type                         | Description                                      | Device Flags                                            |
 +=====================================+==================================================+=========================================================+
@@ -53,6 +55,8 @@ The automatic detection supports the following devices and software:
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
 | Freebox Player                      |                                                  | ``NO_CONVERSION``                                       |
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
+| Universum DAB+ Internet Radio       | e.g IR 500/1.0                                   | ``NoSecNamespace``                                      |
++-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
 
 .. _device-flags:
 
@@ -64,6 +68,7 @@ The device flags have the following meaning.
 .. versionchanged:: 3.1.0 The Key is not case sensitve anymore
 .. versionchanged:: 3.1.0 Alternate camel-case representations for the keys added
 .. versionchanged:: 3.1.0 Removed ``PANASONIC``
+.. versionchanged:: HEAD Added ``NoSecNamespace``
 
 +--------------------------------+--------------------------------------------------------------------------------+
 | Key                            | Description                                                                    |
@@ -85,6 +90,9 @@ The device flags have the following meaning.
 | ``SamsungHideDynamic``         | so this flag hides them for those devices                                      |
 +--------------------------------+--------------------------------------------------------------------------------+
 | ``NoXmlDeclaration``           | Don't send ``<?xml ...?>`` declaration in response                             |
++--------------------------------+--------------------------------------------------------------------------------+
+| ``NO_SEC_NAMESPACE``           |                                                                                |
+| ``NoSecNamespace``             | Don't generate ``sec:`` attributes and namespace entry                         |
 +--------------------------------+--------------------------------------------------------------------------------+
 | ``PV_SUBTITLES``               | Add attributes ``pv:subtitleFileType`` and ``pv:subtitleFileUri``              |
 | ``PvSubtitles``                | to video files if subtitles exist                                              |

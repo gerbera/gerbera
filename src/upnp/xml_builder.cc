@@ -535,6 +535,18 @@ static bool isPrivateAttribute(ResourceAttribute attribute)
     }
 }
 
+/// @brief attributes requiring sec namespace
+static bool isSecAttribute(ResourceAttribute attribute)
+{
+    switch (attribute) {
+    case ResourceAttribute::AUDIOCODEC:
+    case ResourceAttribute::VIDEOCODEC:
+        return true;
+    default:
+        return false;
+    }
+}
+
 void UpnpXMLBuilder::renderResource(
     const CdsObject& object,
     const CdsResource& resource,
@@ -559,15 +571,20 @@ void UpnpXMLBuilder::renderResource(
         if (isPrivateAttribute(attr)) {
             continue;
         }
-        if (filterActive && std::find(filter.begin(), filter.end(), EnumMapper::getAttributeName(attr)) == filter.end())
+        if (quirks && quirks->hasFlag(Quirk::NoSecNamespace) && isSecAttribute(attr)) {
             continue;
+        }
+        if (filterActive && std::find(filter.begin(), filter.end(), EnumMapper::getAttributeName(attr)) == filter.end()) {
+            continue;
+        }
         res.append_attribute(EnumMapper::getAttributeName(attr).c_str()) = val.c_str();
         propNames.push_back(EnumMapper::getAttributeName(attr));
     }
 
     for (auto&& [k, v] : clientSpecificAttrs) {
-        if (filterActive && std::find(filter.begin(), filter.end(), k) == filter.end())
+        if (filterActive && std::find(filter.begin(), filter.end(), k) == filter.end()) {
             continue;
+        }
         res.append_attribute(k.c_str()) = v.c_str();
         propNames.push_back(k);
     }
@@ -1117,7 +1134,9 @@ void UpnpXMLBuilder::addResources(
             }
             auto captionInfo = std::map<std::string, std::string>();
             captionInfo[""] = url;
-            captionInfo["sec:type"] = res->getAttribute(ResourceAttribute::TYPE).empty() ? res->getParameter("type") : res->getAttribute(ResourceAttribute::TYPE);
+            if (!quirks || !quirks->hasFlag(Quirk::NoSecNamespace)) {
+                captionInfo["sec:type"] = res->getAttribute(ResourceAttribute::TYPE).empty() ? res->getParameter("type") : res->getAttribute(ResourceAttribute::TYPE);
+            }
             if (!res->getAttribute(ResourceAttribute::LANGUAGE).empty()) {
                 captionInfo[EnumMapper::getAttributeName(ResourceAttribute::LANGUAGE)] = res->getAttribute(ResourceAttribute::LANGUAGE);
             }
@@ -1133,13 +1152,14 @@ void UpnpXMLBuilder::addResources(
         }
     }
 
-    if (!captionInfoEx.empty()) {
+    if (!captionInfoEx.empty() && (!quirks || !quirks->hasFlag(Quirk::NoSecNamespace))) {
         auto count = (quirks && quirks->getCaptionInfoCount() > -1) ? quirks->getCaptionInfoCount() : config->getIntOption(ConfigVal::UPNP_CAPTION_COUNT);
         bool doCount = (count > -1);
         for (auto&& captionInfo : captionInfoEx) {
             count--;
             if (count < 0 && doCount)
                 break;
+
             auto vs = parent.append_child("sec:CaptionInfoEx");
             for (auto&& [key, val] : captionInfo) {
                 if (key.empty()) {

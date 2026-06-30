@@ -59,6 +59,7 @@ enum class ClientType {
     BoseSoundtouch,
     YamahaRX,
     Freebox,
+    Universum,
     StandardUPnP,
     Custom
 };

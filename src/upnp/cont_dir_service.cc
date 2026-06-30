@@ -160,7 +160,7 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
 
     // build response
     pugi::xml_document didlLite;
-    if (!quirks->hasFlag(Quirk::NoXmlDeclaration)) {
+    if (!quirks || !quirks->hasFlag(Quirk::NoXmlDeclaration)) {
         auto decl = didlLite.prepend_child(pugi::node_declaration);
         decl.append_attribute("version") = "1.0";
         decl.append_attribute("encoding") = "UTF-8";
@@ -169,10 +169,12 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
     didlLiteRoot.append_attribute(UPNP_XML_DIDL_LITE_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
     didlLiteRoot.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
     didlLiteRoot.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
-    didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
+    if (!quirks || !quirks->hasFlag(Quirk::NoSecNamespace)) {
+        didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
+    }
 
     auto stringLimitClient = stringLimit;
-    if (quirks->getStringLimit() > -1) {
+    if (!quirks || quirks->getStringLimit() > -1) {
         stringLimitClient = quirks->getStringLimit();
     }
 
@@ -231,8 +233,10 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
     didlLiteRoot.append_attribute(UPNP_XML_DIDL_LITE_NAMESPACE_ATTR) = UPNP_XML_DIDL_LITE_NAMESPACE;
     didlLiteRoot.append_attribute(UPNP_XML_DC_NAMESPACE_ATTR) = UPNP_XML_DC_NAMESPACE;
     didlLiteRoot.append_attribute(UPNP_XML_UPNP_NAMESPACE_ATTR) = UPNP_XML_UPNP_NAMESPACE;
-    didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
-    if (quirks->hasFlag(Quirk::PvSubtitles))
+    if (!quirks || !quirks->hasFlag(Quirk::NoSecNamespace)) {
+        didlLiteRoot.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
+    }
+    if (!quirks || quirks->hasFlag(Quirk::PvSubtitles))
         didlLiteRoot.append_attribute("xmlns:pv") = "http://www.pv.com/pvns/";
     if (sortCriteria.empty() || quirks->hasFlag(Quirk::ForceSortCriteriaTitle)) {
         sortCriteria = fmt::format("+{}", MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE));
@@ -262,7 +266,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
 
     // build response
     auto stringLimitClient = stringLimit;
-    if (quirks->getStringLimit() > -1) {
+    if (!quirks || quirks->getStringLimit() > -1) {
         stringLimitClient = quirks->getStringLimit();
     }
 

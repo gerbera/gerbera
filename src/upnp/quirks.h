@@ -62,6 +62,7 @@ enum class Quirk {
     ShowInternalSubtitles,
     ForceSortCriteriaTitle,
     CaptionProtocol,
+    NoSecNamespace,
     Transcoding1,
     Transcoding2,
     Transcoding3,

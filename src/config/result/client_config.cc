@@ -158,6 +158,7 @@ static constexpr std::array clientTypes {
     std::pair("BoseSoundtouch", ClientType::BoseSoundtouch),
     std::pair("YamahaRX", ClientType::YamahaRX),
     std::pair("FreeboxPlayer", ClientType::Freebox),
+    std::pair("Universum DAB+ Internet Radio", ClientType::Universum),
     std::pair("StandardUPnP", ClientType::StandardUPnP),
 };
 
@@ -240,6 +241,8 @@ std::vector<std::pair<std::string, Quirk>> ClientConfig::quirkFlags {
     { "FORCE_SORT_CRITERIA_TITLE", Quirk::ForceSortCriteriaTitle },
     { "CaptionProtocol", Quirk::CaptionProtocol },
     { "CAPTION_PROTOCOL", Quirk::CaptionProtocol },
+    { "NoSecNamespace", Quirk::NoSecNamespace },
+    { "NO_SEC_NAMESPACE", Quirk::NoSecNamespace },
     { "Transcoding1", Quirk::Transcoding1 },
     { "Transcoding2", Quirk::Transcoding2 },
     { "Transcoding3", Quirk::Transcoding3 },
