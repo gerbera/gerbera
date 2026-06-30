@@ -4,9 +4,11 @@
 
 - Add ImportMode to AutoScan settings
 - add missing headers
+- Add quirk NoSecNamespace for Universum DAB+ Internet Radio
 - Add support for cuesheets
 - build support for resolute raccoon
 - Bump @babel/plugin-transform-modules-systemjs in /gerbera-web
+- Bump actions/cache from 5 to 6
 - Bump actions/checkout from 6 to 7
 - Bump axios from 1.13.6 to 1.15.0 in /gerbera-web
 - Bump axios from 1.15.0 to 1.16.0 in /gerbera-web

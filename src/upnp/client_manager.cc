@@ -250,6 +250,16 @@ void ClientManager::refresh()
             ClientMatchType::UserAgent,
             "fbxupnpav/6.0",
         },
+
+        // User-Agent(actionReq): Linux/2.6 UPnP/1.0 fbxupnpav/6.0
+        {
+            "Universum DAB+ Internet Radio",
+            DEFAULT_CLIENT_GROUP,
+            ClientType::Universum,
+            ClientConfig::getFlags({ Quirk::NoSecNamespace }),
+            ClientMatchType::UserAgent,
+            "IR 500/1.0",
+        },
     };
 
     auto configList = config->getClientConfigListOption(ConfigVal::CLIENTS_LIST);

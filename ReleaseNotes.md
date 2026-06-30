@@ -12,6 +12,7 @@ This release adds two major features
 - ImportMode for AutoScan settings
 - Database selection from command line
 - Support for cuesheets
+- Quirk NoSecNamespace for Universum DAB+ Internet Radio
 
 ### FIXES
 

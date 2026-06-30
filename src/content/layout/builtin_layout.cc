@@ -303,6 +303,7 @@ std::vector<int> BuiltinLayout::addAudio(
     auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST);
     std::vector<int> result;
 
+    // Collect Metadata
     std::string desc;
     log_debug("add audio file {}", obj->getLocation().string());
 
@@ -367,16 +368,20 @@ std::vector<int> BuiltinLayout::addAudio(
     obj->setTitle(title);
     bool isFirst = true;
 
+    // all audio container
     if (blOption->getKey(BoxKeys::audioAll)->getEnabled()) {
         auto id = chain["/Audio/All Audio"];
         result.push_back(add(obj, id, isFirst));
         isFirst = false;
     }
 
+    // artist container
     auto artistContainer = std::make_shared<CdsContainer>(artist, UPNP_CLASS_MUSIC_ARTIST);
     artistContainer->addMetaData(MetadataFields::M_ARTIST, artist);
     artistContainer->addMetaData(MetadataFields::M_ALBUMARTIST, artist);
     artistContainer->addMetaData(MetadataFields::M_GENRE, genre);
+
+    // create box all Songs
     if (blOption->getKey(BoxKeys::audioAllSongs)->getEnabled() && blOption->getKey(BoxKeys::audioAllArtists)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> arc;
         arc.push_back(containerAt(BoxKeys::audioRoot));
@@ -397,6 +402,7 @@ std::vector<int> BuiltinLayout::addAudio(
     else
         prefixTitle = fmt::format("{} - ", prefixTitle);
 
+    // album container
     auto albumContainer = std::make_shared<CdsContainer>(album, UPNP_CLASS_MUSIC_ALBUM);
     albumContainer->setMetaData(obj->getMetaData());
     if (parent && parent->getResourceCount() > 0)
@@ -404,6 +410,7 @@ std::vector<int> BuiltinLayout::addAudio(
     albumContainer->setRefID(obj->getID());
     artistContainer->setSearchable(blOption->getKey(BoxKeys::audioAllArtists)->getSearchable());
 
+    // create box all Artists
     if (blOption->getKey(BoxKeys::audioAllArtists)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> alc;
         alc.push_back(containerAt(BoxKeys::audioRoot));
@@ -415,6 +422,7 @@ std::vector<int> BuiltinLayout::addAudio(
         isFirst = false;
     }
 
+    // create box all Albums
     albumContainer->setSearchable(blOption->getKey(BoxKeys::audioAllAlbums)->getSearchable());
     if (blOption->getKey(BoxKeys::audioAllAlbums)->getEnabled()) {
         std::vector<std::shared_ptr<CdsObject>> allc;
@@ -426,6 +434,7 @@ std::vector<int> BuiltinLayout::addAudio(
         isFirst = false;
     }
 
+    // create box all Genres
     if (blOption->getKey(BoxKeys::audioAllGenres)->getEnabled()) {
         auto genreContainer = std::make_shared<CdsContainer>(genre, UPNP_CLASS_MUSIC_GENRE);
         genreContainer->addMetaData(MetadataFields::M_GENRE, genre);
@@ -439,6 +448,7 @@ std::vector<int> BuiltinLayout::addAudio(
         isFirst = false;
     }
 
+    // create box all Composers
     if (blOption->getKey(BoxKeys::audioAllComposers)->getEnabled()) {
         auto composerContainer = std::make_shared<CdsContainer>(composer, UPNP_CLASS_MUSIC_COMPOSER);
         composerContainer->addMetaData(MetadataFields::M_COMPOSER, composer);
@@ -452,6 +462,7 @@ std::vector<int> BuiltinLayout::addAudio(
         isFirst = false;
     }
 
+    // create box all Years
     if (blOption->getKey(BoxKeys::audioAllYears)->getEnabled()) {
         auto yearContainer = std::make_shared<CdsContainer>(date);
         yearContainer->addMetaData(MetadataFields::M_DATE, date);
@@ -466,11 +477,13 @@ std::vector<int> BuiltinLayout::addAudio(
         isFirst = false;
     }
 
+    // create box all Directories
     if (blOption->getKey(BoxKeys::audioAllDirectories)->getEnabled()) {
         result.push_back(getDir(obj, isFirst, rootpath, BoxKeys::audioRoot, BoxKeys::audioAllDirectories, getValueOrDefault(containerMap, AutoscanMediaMode::Audio, AutoscanDirectory::ContainerTypesDefaults.at(AutoscanMediaMode::Audio))));
         isFirst = false;
     }
 
+    // create box Chronology
     if (blOption->getKey(BoxKeys::audioArtistChronology)->getEnabled() && blOption->getKey(BoxKeys::audioAllArtists)->getEnabled()) {
         artistContainer->setSearchable(false);
         std::vector<std::shared_ptr<CdsObject>> chronology;
