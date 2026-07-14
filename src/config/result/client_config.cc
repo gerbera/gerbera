@@ -143,6 +143,7 @@ void ClientConfig::setDlnaMapping(std::size_t j, std::size_t k, const std::strin
 static constexpr std::array clientTypes {
     std::pair("None", ClientType::Unknown),
     std::pair("Custom", ClientType::Custom),
+    std::pair("Server", ClientType::Server),
     std::pair("BubbleUPnP", ClientType::BubbleUPnP),
     std::pair("SamsungAllShare", ClientType::SamsungAllShare),
     std::pair("SamsungSeriesA", ClientType::SamsungSeriesA),

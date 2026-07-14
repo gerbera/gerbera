@@ -217,7 +217,14 @@ void Server::run()
     log_debug("Creating UpnpXMLBuilders");
     upnpXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getVirtualUrl());
     webXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getExternalUrl());
-    auto devDescHdl = std::make_shared<DeviceDescriptionHandler>(content, webXmlBuilder, nullptr, getIp(), getPort());
+
+    auto net = std::make_shared<GrbNet>(getIp(), AF_INET);
+    auto userAgent = fmt::format("Gerbera-UPnP-Server/{} Portable SDK for UPnP devices/{}", GERBERA_VERSION, UPNP_VERSION_STRING);
+    clientManager->refresh();
+    clientManager->removeClient(getIp()); // local calls will always be treated as calls from gerbera
+
+    auto quirks = std::make_shared<Quirks>(upnpXmlBuilder, context->getClients(), net, std::move(userAgent), nullptr);
+    auto devDescHdl = std::make_shared<DeviceDescriptionHandler>(content, webXmlBuilder, quirks, getIp(), getPort());
 
     int activeUpnpDescription = config->getBoolOption(ConfigVal::UPNP_DYNAMIC_DESCRIPTION) ? 0 : 1;
     // register root device with the library

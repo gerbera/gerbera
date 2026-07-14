@@ -5,6 +5,7 @@
 - Add ImportMode to AutoScan settings
 - add missing headers
 - Add quirk NoSecNamespace for Universum DAB+ Internet Radio
+- Add server flags for dynamic description
 - Add support for cuesheets
 - build support for resolute raccoon
 - Bump @babel/plugin-transform-modules-systemjs in /gerbera-web

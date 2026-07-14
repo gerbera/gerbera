@@ -278,6 +278,16 @@ void ClientManager::refresh()
         auto clientConfig = clientConfigList->get(i);
         clientProfile.push_back(clientConfig->getClientProfile());
     }
+    ClientProfile serverProfile;
+
+    serverProfile.flags = this->config->getUIntOption(ConfigVal::UPNP_DYNAMIC_SERVER_FLAGS);
+    serverProfile.type = ClientType::Server;
+    serverProfile.matchType = ClientMatchType::IP;
+    serverProfile.match = server ? server->getIp() : "127.0.0.1";
+    serverProfile.name = config->getOption(ConfigVal::SERVER_NAME);
+    serverProfile.groupConfig = defaultGroup;
+    serverProfile.isAllowed = true;
+    clientProfile.push_back(serverProfile);
 }
 
 static constexpr std::array matchTypes {

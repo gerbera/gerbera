@@ -367,6 +367,8 @@ void ConfigGenerator::generateServerOptions(
         { ConfigVal::VIRTUAL_URL, ConfigLevel::Example },
         { ConfigVal::EXTERNAL_URL, ConfigLevel::Example },
         { ConfigVal::UPNP_LITERAL_HOST_REDIRECTION, ConfigLevel::Example },
+        { ConfigVal::UPNP_DYNAMIC_DESCRIPTION, ConfigLevel::Example },
+        { ConfigVal::UPNP_DYNAMIC_SERVER_FLAGS, ConfigLevel::Example },
         { ConfigVal::UPNP_MULTI_VALUES_ENABLED, ConfigLevel::Example },
         { ConfigVal::UPNP_SEARCH_SEPARATOR, ConfigLevel::Example },
         { ConfigVal::UPNP_SEARCH_FILENAME, ConfigLevel::Example },

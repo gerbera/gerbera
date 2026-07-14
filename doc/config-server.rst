@@ -1500,6 +1500,21 @@ Return UPnP description requests based on the client type. This hides,
 e.g., Samsung specific extensions in ``description.xml`` and ``cds.xml``
 from clients that don't handle the respective requests.
 
+.. confval:: server-flags
+   :type: :confval:`String`
+   :required: false
+   :default: ``SAMSUNG|DCM10``
+..
+
+   .. versionadded:: HEAD
+   .. code:: xml
+
+       server-flags="SAMSUNG"
+
+Containing the flags you want to enable for the server to provide the correct dynamic description.
+Must be given in the following format ``SAMSUNG|DCM10``, where the text contains one of the known flags separated by ``|``.
+For valid flags see :doc:`Supported Devices </supported-devices>`. Not all flags have an effect on the upnp description.
+
 .. confval:: literal-host-redirection
    :type: :confval:`Boolean`
    :required: false
