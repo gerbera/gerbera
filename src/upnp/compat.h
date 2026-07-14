@@ -43,6 +43,10 @@ static constexpr grb_read_t GRB_READ_ERROR = -1;
 #define UPNP_VERSION (NPUPNP_VERSION_MAJOR * 10000 + NPUPNP_VERSION_MINOR * 100 + NPUPNP_VERSION_PATCH)
 #endif
 
+#ifndef UPNP_VERSION_STRING
+#define UPNP_VERSION_STRING NPUPNP_VERSION_STRING
+#endif
+
 #define GrbUpnpFileInfoSetContentType(i, mt) (i)->content_type = std::move((mt))
 #define GrbUpnpGetHeaders(i) (i)->request_headers
 #define GrbUpnpSetHeaders(i, h) std::copy((h).begin(), (h).end(), std::back_inserter((i)->response_headers))

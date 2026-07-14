@@ -114,6 +114,7 @@ struct ServiceCapabilities {
 
 std::string DeviceDescriptionHandler::renderDeviceDescription(const std::string& ip, in_port_t port, const std::shared_ptr<Quirks>& quirks) const
 {
+    log_debug("start {}", quirks ? quirks->getClient()->addr->getHostName() : "");
     auto doc = std::make_unique<pugi::xml_document>();
 
     auto style = doc->prepend_child(pugi::node_pi);
@@ -126,7 +127,9 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(const std::string&
 
     auto root = doc->append_child("root");
     root.append_attribute("xmlns") = "urn:schemas-upnp-org:device-1-0";
-    root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
+    if (!quirks || (quirks->hasFlag(Quirk::DCM10) && !quirks->hasFlag(Quirk::NoSecNamespace))) {
+        root.append_attribute(UPNP_XML_SEC_NAMESPACE_ATTR) = UPNP_XML_SEC_NAMESPACE;
+    }
     root.append_attribute(UPNP_XML_DLNA_NAMESPACE_ATTR) = UPNP_XML_DLNA_NAMESPACE;
 
     auto specVersion = root.append_child("specVersion");
@@ -182,6 +185,7 @@ std::string DeviceDescriptionHandler::renderDeviceDescription(const std::string&
                     }
                 }
                 auto serviceEntry = device.append_child(tag);
+                log_debug("{} = '{}'", tag, fmt::join(serviceValue, ","));
                 if (!serviceValue.empty())
                     serviceEntry.append_child(pugi::node_pcdata).set_value(fmt::format("{}", fmt::join(serviceValue, ",")).c_str());
             }

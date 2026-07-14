@@ -103,7 +103,11 @@ public:
 
     void sendSubscriptionUpdate(const std::string& updateString, const std::string& serviceId);
 
+    /// @brief get string for active ip
+    std::string getIp() const;
+    /// @brief get content manager
     std::shared_ptr<Content> getContent() const { return content; }
+    /// @brief get host string for CORS header
     std::vector<std::string> getCorsHosts() const { return corsHosts; }
 
 protected:
@@ -154,8 +158,6 @@ protected:
     std::shared_ptr<UpnpXMLBuilder> webXmlBuilder;
     std::vector<std::unique_ptr<UpnpService>> serviceList;
 
-    /// @brief get string for active ip
-    std::string getIp() const;
     /// @brief get active port
     in_port_t getPort() const;
 

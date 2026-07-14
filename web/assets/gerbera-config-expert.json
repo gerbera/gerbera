@@ -2753,6 +2753,11 @@
           "editable": true
         },
         {
+          "item": "/server/upnp/attribute::server-flags",
+          "caption": "Server Flags",
+          "editable": false
+        },
+        {
           "item": "/server/upnp/attribute::dynamic-descriptions",
           "caption": "Enable Dynamic Descriptions",
           "editable": true

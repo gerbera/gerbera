@@ -21,6 +21,7 @@ class GerberaConan(ConanFile):
         "tests": [True, False],
         "magic": [True, False],
         "curl": [True, False],
+        "zip": [True, False],
         "taglib": [True, False],
         "exif": [True, False],
         "exiv2": [True, False],
@@ -37,6 +38,7 @@ class GerberaConan(ConanFile):
         "tests": False,
         "magic": True,
         "curl": True,
+        "zip": False,
         "taglib": True,
         "exif": True,
         # The following are false in CMakeLists.txt, but almost always turned on.
@@ -60,8 +62,6 @@ class GerberaConan(ConanFile):
         "sqlite3/[>=3.35.5]",
         "libsystemd/[>=255]",
         "zlib/1.3.1",
-        "libzip/1.10.1",
-        "libzippp/7.1-1.10.1",
         "pupnp/[>=1.14.16]",
         "taglib/[>=1.12]",
         "openssl/1.1.1w", # Needed to fix conflicts
@@ -93,6 +93,10 @@ class GerberaConan(ConanFile):
 
         if self.options.curl:
             self.requires("libcurl/[>=7.85.0]")
+
+        if self.options.zip:
+            self.requires("libzip/1.10.1")
+            self.requires("libzippp/7.1-1.10.1")
 
         if self.options.exiv2:
             self.requires("inih/58") # Required by exiv2
@@ -165,6 +169,7 @@ class GerberaConan(ConanFile):
         tc.cache_variables["WITH_EXIV2"] = self.options.exiv2
         tc.cache_variables["WITH_MATROSKA"] = self.options.matroska
         tc.cache_variables["WITH_MYSQL"] = self.options.mysql
+        tc.cache_variables["WITH_ZIP"] = self.options.zip
         tc.cache_variables["WITH_PGSQL"] = self.options.postgres
         tc.cache_variables["WITH_ICU"] = self.options.icu
         tc.cache_variables["WITH_AVCODEC"] = self.options.ffmpeg

@@ -61,7 +61,8 @@ enum class ClientType {
     Freebox,
     Universum,
     StandardUPnP,
-    Custom
+    Custom,
+    Server = -1,
 };
 
 /// @brief specify what property must match in profile
