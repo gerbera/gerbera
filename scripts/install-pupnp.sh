@@ -41,18 +41,33 @@ downloadSource
 
 installDeps ${main_dir} pupnp
 
-(
-    cd "${src_dir}"
-    bash ./bootstrap
-)
-
 if [ "${UNAME}" = 'FreeBSD' ]; then
     extraFlags=""
 else
     extraFlags="--prefix=/usr/local"
 fi
 
-../configure --srcdir=.. $extraFlags --enable-ipv6 --enable-reuseaddr --disable-blocking-tcp-connections
+MODE="2"
+if [[ -f ${src_dir}/bootstrap ]]; then
+    MODE="1"
+fi
+if [[ ${MODE} = "1" ]]; then
+
+    (
+        cd "${src_dir}"
+        bash ./bootstrap
+    )
+    ../configure --srcdir=.. $extraFlags --enable-ipv6 --enable-reuseaddr --disable-blocking-tcp-connections
+else
+    cmake .. -DUPNP_BUILD_SAMPLES=OFF \
+             -DBUILD_SHARED_LIBS=ON \
+             -DUPNP_BUILD_STATIC=ON \
+             -DUPNP_ENABLE_BLOCKING_TCP_CONNECTIONS=OFF \
+             -DUPNP_ENABLE_HELPER_API_TOOLS=ON \
+             -DUPNP_MINISERVER_REUSEADDR=ON \
+             -DUPNP_ENABLE_IPV6=ON \
+             -DUPNP_ENABLE_TESTING=OFF
+fi
 
 makeInstall
 

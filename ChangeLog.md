@@ -37,8 +37,9 @@
 - Handle url decoding correctly for npupnp
 - Make Layout Options consistent
 - Refactor Sql hash codes
-- Update to pupnp 2.0.2 - pugixml 1.16 - fmt 12.2.0
 - Update to pupnp 1.18.5
+- Update to pupnp 2.0.2 - pugixml 1.16 - fmt 12.2.0
+- Update to pupnp 22.0.4
 - Update to taglib 2.3
 - Use latest utfcpp directly
 
