@@ -11,6 +11,8 @@
 - Bump @babel/plugin-transform-modules-systemjs in /gerbera-web
 - Bump actions/cache from 5 to 6
 - Bump actions/checkout from 6 to 7
+- Bump actions/setup-node from 6 to 7
+- Bump actions/setup-python from 6 to 7
 - Bump axios from 1.13.6 to 1.15.0 in /gerbera-web
 - Bump axios from 1.15.0 to 1.16.0 in /gerbera-web
 - Bump basic-ftp from 5.2.0 to 5.2.1 in /gerbera-web
@@ -41,6 +43,7 @@
 - Update to pupnp 2.0.2 - pugixml 1.16 - fmt 12.2.0
 - Update to pupnp 22.0.4
 - Update to taglib 2.3
+- Update to taglib 2.3.1
 - Use latest utfcpp directly
 
 ### v3.2.1

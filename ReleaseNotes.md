@@ -25,7 +25,7 @@ This release adds two major features
 
 ### Code Improvements
 
-- Update maximum versions of pupnp (22.0.4), npupnp (6.3.0), libexif (0.6.26), cmake (4.3.3), taglib (2.3), cxxopts (3.3.1-gb61353),
+- Update maximum versions of pupnp (22.0.4), npupnp (6.3.0), libexif (0.6.26), cmake (4.3.3), taglib (2.3.1), cxxopts (3.3.1-gb61353),
   libzippp (7.1-g7ed7b6 ), jsoncpp (1.9.8), fmt (12.2.0), pugixml (1.16)
 - build support for Resolute Raccoon
 
