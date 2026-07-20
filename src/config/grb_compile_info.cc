@@ -70,6 +70,8 @@ extern "C" {
 #ifdef HAVE_FFMPEG
 extern "C" {
 
+#include <libavcodec/version.h>
+#include <libavfilter/version.h>
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
 
@@ -200,7 +202,7 @@ bool GerberaRuntime::printCompileInfo(const std::string& arg)
             { "HAVE_MAGIC", fmt::to_string(MAGIC_VERSION) },
 #endif
 #ifdef HAVE_FFMPEG
-            { "HAVE_FFMPEG", LIBAVUTIL_IDENT ", " LIBAVFORMAT_IDENT },
+            { "HAVE_FFMPEG", LIBAVUTIL_IDENT ", " LIBAVFORMAT_IDENT ", " LIBAVCODEC_IDENT ", " LIBAVFILTER_IDENT },
 #endif
 #ifdef HAVE_AVSTREAM_CODECPAR
             { "", "HAVE_AVSTREAM_CODECPAR" },

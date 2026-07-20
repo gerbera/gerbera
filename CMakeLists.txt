@@ -331,6 +331,12 @@ add_library(
     src/transcoding/transcode_dispatcher.h
     src/transcoding/transcode_ext_handler.cc
     src/transcoding/transcode_ext_handler.h
+    src/transcoding/transcode_int_handler.cc
+    src/transcoding/transcode_int_handler.h
+    src/transcoding/transcode_int_util.cc
+    src/transcoding/transcode_int_util.h
+    src/transcoding/transcode_io_handler.cc
+    src/transcoding/transcode_io_handler.h
     src/transcoding/transcode_handler.cc
     src/transcoding/transcode_handler.h
     src/upnp/client_manager.cc
@@ -355,6 +361,7 @@ add_library(
     src/upnp/xml_builder.h
     src/util/enum_iterator.h
     src/util/executor.h
+    src/util/ffmpeg_compat.h
     src/util/generic_task.cc
     src/util/generic_task.h
     src/util/grb_fs.cc

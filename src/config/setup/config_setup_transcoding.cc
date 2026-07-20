@@ -232,6 +232,15 @@ bool ConfigTranscodingSetup::createOptionFromNode(
             prof->buffer.setOptions(buffer, chunk, fill);
             prof->buffer.setTimeout(std::chrono::seconds(definition->findConfigSetup<ConfigTimeSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_TIMEOUT)->getXmlContent(sub, config)));
             prof->buffer.setRetryCount(definition->findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT)->getXmlContent(sub, config));
+        } else if (prof->getType() == TranscodingType::Internal) {
+            pugi::xml_node sub = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER)->getXmlElement(child);
+            prof->encoder.setFormat(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_FORMAT)->getXmlContent(sub, config));
+            prof->encoder.setVCodec(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VCODEC)->getXmlContent(sub, config));
+            prof->encoder.setACodec(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_ACODEC)->getXmlContent(sub, config));
+            prof->encoder.setVFilter(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VFILTER)->getXmlContent(sub, config));
+            prof->encoder.setAFilter(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_AFILTER)->getXmlContent(sub, config));
+            prof->encoder.setWidth(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_WIDTH)->getXmlContent(sub, config));
+            prof->encoder.setHeight(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_HEIGHT)->getXmlContent(sub, config));
         }
 
         bool set = false;
@@ -643,6 +652,93 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
                         entry->agent.setArguments(optValue);
                         return true;
                     }
+                    return false;
+                },
+            },
+
+            // Encoder
+            // Encoder Format
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_FORMAT },
+                "Encoder Format",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->encoder.getFormat(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                        entry->encoder.setFormat(optValue);
+                        return true;
+                    }
+                    return false;
+                },
+            },
+            // Encoder Audio Codec
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_ACODEC },
+                "Encoder Audio Codec",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->encoder.getACodec(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                        entry->encoder.setACodec(optValue);
+                        return true;
+                    }
+                    return false;
+                },
+            },
+            // Encoder Video Codec
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VCODEC },
+                "Encoder Video Codec",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->encoder.getVCodec(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                        entry->encoder.setVCodec(optValue);
+                        return true;
+                    }
+                    return false;
+                },
+            },
+            // Encoder Audio Filter
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_AFILTER },
+                "Encoder Audio Filter",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->encoder.getAFilter(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                        entry->encoder.setAFilter(optValue);
+                        return true;
+                    }
+                    return false;
+                },
+            },
+            // Encoder Video Filter
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VFILTER },
+                "Encoder Video Filter",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->encoder.getVFilter(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                        entry->encoder.setVFilter(optValue);
+                        return true;
+                    }
+                    return false;
+                },
+            },
+            // Encoder Width
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_WIDTH },
+                "Encoder Width",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->encoder.getWidth()); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    entry->encoder.setWidth(definition->findConfigSetup<ConfigIntSetup>(cfg)->checkIntValue(optValue));
+                    return false;
+                },
+            },
+            // Encoder Height
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_HEIGHT },
+                "Encoder Height",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->encoder.getHeight()); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    entry->encoder.setHeight(definition->findConfigSetup<ConfigIntSetup>(cfg)->checkIntValue(optValue));
                     return false;
                 },
             },

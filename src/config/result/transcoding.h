@@ -48,6 +48,7 @@
 enum class TranscodingType {
     None,
     External,
+    Internal,
     Remote
 };
 
@@ -133,6 +134,40 @@ public:
 
     /// @brief retrieves the argument string
     std::string getArguments() const { return args; }
+};
+
+/// @brief this class keeps all data associated with encoding for internal profiles.
+class TrancodingEncoder {
+private:
+    std::string format;
+    std::string afilter;
+    std::string vfilter;
+    std::string acodec;
+    std::string vcodec;
+    int width { SOURCE };
+    int height { SOURCE };
+
+public:
+    const std::string& getFormat() const { return format; }
+    void setFormat(const std::string& format) { this->format = format; }
+
+    const std::string& getAFilter() const { return afilter; }
+    void setAFilter(const std::string& afilter) { this->afilter = afilter; }
+
+    const std::string& getVFilter() const { return vfilter; }
+    void setVFilter(const std::string& vfilter) { this->vfilter = vfilter; }
+
+    const std::string& getACodec() const { return acodec; }
+    void setACodec(const std::string& acodec) { this->acodec = acodec; }
+
+    const std::string& getVCodec() const { return vcodec; }
+    void setVCodec(const std::string& vcodec) { this->vcodec = vcodec; }
+
+    int getWidth() const { return width; }
+    void setWidth(int width) { this->width = width; }
+
+    int getHeight() const { return height; }
+    void setHeight(int height) { this->height = height; }
 };
 
 /// @brief this class keeps all data associated with one transcoding profile.
@@ -248,6 +283,7 @@ public:
 
     TranscodingAgent agent;
     TranscodingBuffer buffer;
+    TrancodingEncoder encoder;
 
 protected:
     bool enabled { true };

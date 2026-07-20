@@ -829,6 +829,28 @@ void Web::ConfigLoad::writeTranscoding(Json::Value& values)
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT }),
             cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_RETRY_COUNT, entry->buffer.getRetryCount());
+        // Encoder
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_FORMAT }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_FORMAT, entry->encoder.getFormat());
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_ACODEC }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_ACODEC, entry->encoder.getACodec());
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VCODEC }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VCODEC, entry->encoder.getVCodec());
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_AFILTER }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_AFILTER, entry->encoder.getAFilter());
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VFILTER }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_VFILTER, entry->encoder.getVFilter());
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_WIDTH }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_WIDTH, entry->encoder.getWidth());
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_HEIGHT }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_HEIGHT, entry->encoder.getHeight());
 
         auto fourCCMode = entry->getAVIFourCCListMode();
         if (fourCCMode != AviFourccListmode::None) {
