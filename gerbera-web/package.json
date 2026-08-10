@@ -57,11 +57,11 @@
     "karma-webpack": "^5.0.1",
     "lodash": "^4.18.1",
     "mkdirp": "^3.0.1",
-    "mocha": "^11.7.6",
+    "mocha": "^11.8.0",
     "rimraf": "^6.1.3",
     "selenium-webdriver": "^4.46.0",
-    "webpack": "^5.108.4",
-    "yargs": ">=18.0.0"
+    "webpack": "^5.109.2",
+    "yargs": "^18.1.0"
   },
   "allowScripts": {
     "chromedriver@148.0.1": true,
