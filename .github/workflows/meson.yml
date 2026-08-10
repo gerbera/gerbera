@@ -1,0 +1,138 @@
+name: meson
+
+on: [push, pull_request]
+
+concurrency:
+  group: ${{github.workflow}}-${{github.head_ref}}
+  cancel-in-progress: true
+
+jobs:
+  Ubuntu:
+    runs-on: ubuntu-22.04
+    name: Linux-GCC${{matrix.cxx}}
+    strategy:
+      matrix:
+        cxx: ['9', '13']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: egor-tensin/setup-gcc@v1
+        with:
+          version: ${{matrix.cxx}}
+      - name: Install meson
+        run: python3 -m pip install meson ninja
+      - name: Install dependencies
+        run: sudo apt install -y cmake pkgconf duktape-dev libcurl4-openssl-dev libmariadb-dev libsqlite3-dev libfmt-dev libspdlog-dev
+      - name: Compile and Test
+        run: |
+          meson setup "${{github.workspace}}/build" -Dwarning_level=3 -Dtests=enabled
+          meson compile -C "${{github.workspace}}/build" --verbose
+          meson test -C "${{github.workspace}}/build" --verbose
+  Ubuntu-clang:
+    runs-on: ubuntu-22.04
+    name: Linux-Clang${{matrix.cxx}}
+    strategy:
+      matrix:
+        cxx: ['11', '21']
+    steps:
+      - uses: actions/checkout@v5
+      - uses: egor-tensin/setup-clang@v1
+        with:
+          version: ${{matrix.cxx}}
+      - name: Install meson
+        run: |
+          python3 -m pip install meson ninja
+      - name: Install dependencies
+        run: |
+          sudo apt install -y cmake duktape-dev pkgconf libcurl4-openssl-dev libmariadb-dev libsqlite3-dev
+          sudo apt install -y libc++abi-${{matrix.cxx}}-dev libc++-${{matrix.cxx}}-dev
+      - name: Compile and Test
+        env:
+          CXXFLAGS: -stdlib=libc++
+        run: |
+          meson setup "${{github.workspace}}/build" -Dwarning_level=3 -Dtests=enabled
+          meson compile -C "${{github.workspace}}/build" --verbose
+          meson test -C "${{github.workspace}}/build" --verbose
+  MacOS:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install packages
+        run: |
+          brew install duktape exiv2 jsoncpp ffmpeg ffmpegthumbnailer googletest libexif libmatroska libupnp mariadb-connector-c meson ossp-uuid pugixml spdlog taglib wavpack
+
+      - name: Compile and Test
+        run: |
+          meson setup "${{github.workspace}}/build" -Dwarning_level=3
+          meson compile -C "${{github.workspace}}/build" --verbose
+          meson test -C "${{github.workspace}}/build" --verbose
+  FreeBSD:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: vmactions/freebsd-vm@v1
+        with:
+          prepare: |
+            pkg install -y cmake curl duktape exiv2 jsoncpp libexif libmatroska meson ninja pkgconf pugixml sqlite3 pugixml spdlog taglib upnp
+          run: |
+            meson setup "${{github.workspace}}/build" -Dwarning_level=3 -Dtests=enabled
+            meson compile -C "${{github.workspace}}/build" --verbose
+            meson test -C "${{github.workspace}}/build" --verbose
+  Alpine:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform: ['x86_64', 'x86', 'armhf', 'armv7', 'aarch64', 'ppc64le', 'riscv64', 's390x']
+    defaults:
+      run:
+        shell: alpine.sh {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jirutka/setup-alpine@v1
+        with:
+          branch: edge
+          arch: ${{matrix.platform}}
+          packages: >
+            build-base
+            cmake
+            git
+            pkgconf
+            meson
+            samurai
+            curl-dev
+            duktape-dev
+            exiv2-dev
+            ffmpeg-dev
+            ffmpegthumbnailer-dev
+            file-dev
+            fmt-dev
+            gtest-dev
+            jsoncpp-dev
+            libexif-dev
+            libmatroska-dev
+            libmicrohttpd-dev
+            libupnp-dev
+            mariadb-connector-c-dev
+            pugixml-dev
+            spdlog-dev
+            sqlite-dev
+            taglib-dev
+            util-linux-dev
+            wavpack-dev
+      - name: Compile and Test
+        run: |
+          meson setup "${{github.workspace}}/build" -Dwarning_level=3
+          meson compile -C "${{github.workspace}}/build" --verbose
+          meson test -C "${{github.workspace}}/build" --verbose
+  OmniOS:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: vmactions/omnios-vm@v1
+        with:
+          prepare: |
+            pkg install cmake curl ffmpeg gcc14 meson-313 ninja pkg-config python-313 sqlite-3
+          run: |
+            /usr/lib/python3.13/bin/meson setup "${{github.workspace}}/build" -Dwarning_level=3 -Dtests=enabled -Dnpupnp=enabled
+            /usr/lib/python3.13/bin/meson compile -C "${{github.workspace}}/build" --verbose
+            /usr/lib/python3.13/bin/meson test -C "${{github.workspace}}/build" --verbose
