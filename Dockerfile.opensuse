@@ -1,9 +1,9 @@
 # docker build -t gerbera-opensuse . -f Dockerfile.opensuse
-ARG BASE_IMAGE=opensuse/leap:15.6
+ARG BASE_IMAGE=opensuse/leap:16.0
 
 FROM ${BASE_IMAGE} AS grb_base
 
-RUN zypper addrepo -G http://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Leap_15.6/ "Packman"
+RUN zypper addrepo -G http://ftp.gwdg.de/pub/linux/misc/packman/suse/openSUSE_Leap_16.0/ "Packman"
 RUN zypper refresh
 RUN zypper update --no-confirm
 
