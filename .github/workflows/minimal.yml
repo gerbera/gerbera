@@ -15,9 +15,12 @@ jobs:
     strategy:
       matrix:
         platform: ['x86_64', 'x86', 'armhf', 'armv7', 'aarch64', 'loongarch64', 'ppc64le', 'riscv64', 's390x']
-        branch: ['v3.22', 'v3.23', 'edge']
+        branch: ['v3.23', 'v3.24', 'edge']
+        exclude:
+          - platform: "ppc64le"
+            branch: "v3.24"
 
-    name: Minimal ${{matrix.platform}}${{matrix.branch != 'v3.23' && format(' - {0}', matrix.branch) || format('')}}
+    name: Minimal ${{matrix.platform}}${{matrix.branch != 'v3.24' && format(' - {0}', matrix.branch) || format('')}}
     defaults:
       run:
         shell: alpine.sh {0}

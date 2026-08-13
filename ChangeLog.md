@@ -38,6 +38,7 @@
 - Handle url decoding correctly for npupnp
 - Make Layout Options consistent
 - Refactor Sql hash codes
+- Update Build Environment
 - Update to googletest 1.18.0
 - Update to pugixml 1.16 - fmt 12.2.0
 - Update to pupnp 22.0.6
