@@ -83,7 +83,7 @@ else
     MATROSKA="1.7.2"
     NPUPNP="6.3.0"
     PUGIXML="1.16"
-    PUPNP="22.0.4"
+    PUPNP="22.0.6"
     SPDLOG="1.17.0"
     WAVPACK="5.9.0"
     TAGLIB="2.3.1"

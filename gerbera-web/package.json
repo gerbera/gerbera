@@ -64,7 +64,7 @@
     "yargs": "^18.1.0"
   },
   "allowScripts": {
-    "chromedriver@148.0.1": true,
-    "core-js@2.6.12": true
+    "core-js@2.6.12": true,
+    "chromedriver@148.0.4": true
   }
 }
