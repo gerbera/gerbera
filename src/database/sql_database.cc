@@ -480,16 +480,13 @@ void SQLDatabase::init()
         }
         this->sql_search_columns = fmt::format("{}", fmt::join(colBuf, ", "));
 
-        auto join1 = fmt::format("LEFT JOIN {} ON {} = {}",
-            metaColumnMapper->tableQuoted(),
-            searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), metaColumnMapper->mapQuoted(UPNP_SEARCH_ID));
         auto join2 = fmt::format("LEFT JOIN {} ON {} = {}",
             resourceColumnMapper->tableQuoted(),
             searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), resourceColumnMapper->mapQuoted(UPNP_SEARCH_ID));
         auto join3 = fmt::format("LEFT JOIN {} ON {} = {}",
             playstatusColumnMapper->tableQuoted(),
             searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), playstatusColumnMapper->mapQuoted(UPNP_SEARCH_ID));
-        this->sql_search_query = fmt::format("{} {} {} {}", searchColumnMapper->tableQuoted(), join1, join2, join3);
+        this->sql_search_query = fmt::format("{} {} {}", searchColumnMapper->tableQuoted(), join2, join3);
 
         // Build container query format string
         auto sql_container_query = fmt::format(sql_search_container_query_raw,
@@ -499,7 +496,7 @@ void SQLDatabase::init()
             searchColumnMapper->mapQuoted(UPNP_SEARCH_PARENTID, true),
             searchColumnMapper->mapQuoted(UPNP_SEARCH_ID, true),
             searchColumnMapper->mapQuoted(UPNP_SEARCH_REFID, true));
-        this->sql_search_container_query_format = fmt::format("{} {} {} {}", sql_container_query, join1, join2, join3);
+        this->sql_search_container_query_format = fmt::format("{} {} {}", sql_container_query, join2, join3);
     }
     // Statement for metadata
     {
@@ -531,7 +528,8 @@ void SQLDatabase::init()
     }
 
     auto self = shared_from_this();
-    sqlEmitter = std::make_shared<DefaultSQLEmitter>(self, searchColumnMapper, metaColumnMapper, resourceColumnMapper, playstatusColumnMapper);
+    auto metaSearchMapper = std::make_shared<EnumColumnMapper<MetadataColumn>>(table_quote_begin, table_quote_end, MTA_ALIAS, METADATA_TABLE, metaTagMap, metaColMap);
+    sqlEmitter = std::make_shared<DefaultSQLEmitter>(self, searchColumnMapper, metaSearchMapper, resourceColumnMapper, playstatusColumnMapper);
 }
 
 static std::shared_ptr<CdsContainer> setDefaultContainer(
@@ -1251,7 +1249,9 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
 {
     auto searchParser = SearchParser(*sqlEmitter, param.getSearchCriteria());
     std::shared_ptr<ASTNode> rootNode = searchParser.parse();
-    std::string searchSQL(rootNode->emitSQL());
+    auto sql = rootNode->emitSQL();
+    std::string searchSQL(sql.first);
+    std::string coreSQL = fmt::format("{} {}", sql_search_query, sql.second);
     if (searchSQL.empty())
         throw DatabaseException("failed to generate SQL for search", LINE_MESSAGE);
 
@@ -1284,12 +1284,12 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
     std::string countSQL;
     if (rootContainer) {
         // Use faster, non-recursive search for root container
-        countSQL = fmt::format("SELECT COUNT(DISTINCT {}) FROM {} WHERE {}", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), sql_search_query, searchSQL);
+        countSQL = fmt::format("SELECT COUNT(DISTINCT {}) FROM {} WHERE {}", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID), coreSQL, searchSQL);
     } else {
         // Use recursive container search
         const std::string countSelect = fmt::format("COUNT(DISTINCT {})", searchColumnMapper->mapQuoted(UPNP_SEARCH_ID));
         countSQL = fmt::format(sql_search_container_query_format, param.getContainerID(), countSelect);
-        countSQL += fmt::format(" WHERE {}", searchSQL);
+        countSQL += fmt::format(" {} WHERE {}", sql.second, searchSQL);
     }
 
     log_debug("Search count resolves to SQL [\n{}\n]", countSQL);
@@ -1338,12 +1338,12 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
     std::string retrievalSQL;
     if (rootContainer) {
         // Use faster, non-recursive search for root container
-        retrievalSQL = fmt::format("SELECT DISTINCT {} {} FROM {} {} WHERE {}{}{}", sql_search_columns, addColumns, sql_search_query, addJoin, searchSQL, orderBy, limit);
+        retrievalSQL = fmt::format("SELECT DISTINCT {} {} FROM {} {} WHERE {}{}{}", sql_search_columns, addColumns, coreSQL, addJoin, searchSQL, orderBy, limit);
     } else {
         // Use recursive container search
         const std::string retrievalSelect = fmt::format("DISTINCT {} {}", sql_search_columns, addColumns);
         retrievalSQL = fmt::format(sql_search_container_query_format, param.getContainerID(), retrievalSelect);
-        retrievalSQL += fmt::format(" {} WHERE {}{}{}", addJoin, searchSQL, orderBy, limit);
+        retrievalSQL += fmt::format(" {} {} WHERE {}{}{}", addJoin, sql.second, searchSQL, orderBy, limit);
     }
 
     log_debug("Search statement resolves to SQL [\n{}\n]", retrievalSQL);

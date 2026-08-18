@@ -32,6 +32,7 @@
 - Fix potential nullptr dereference
 - Fix mysql migration 29
 - Fix saving some config properties from ui
+- Fix search for multiple properties
 - Fix sqlite resource migration
 - Fix SQL injection via search parameters
 - Fix SQLDatabase::getRefObjects SQL on MySQL/MariaDB

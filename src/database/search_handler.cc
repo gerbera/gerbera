@@ -342,7 +342,7 @@ std::unique_ptr<ASTQuotedString> SearchParser::parseQuotedString()
     return std::make_unique<ASTQuotedString>(sqlEmitter, std::move(openQuote), std::move(escapedString), std::move(closeQuote));
 }
 
-std::string ASTNode::emitSQL() const
+std::pair<std::string, std::string> ASTNode::emitSQL() const
 {
     return sqlEmitter.emitSQL(this);
 }
@@ -557,11 +557,12 @@ DefaultSQLEmitter::DefaultSQLEmitter(
 {
 }
 
-std::string DefaultSQLEmitter::emitSQL(const ASTNode* node) const
+std::pair<std::string, std::string> DefaultSQLEmitter::emitSQL(const ASTNode* node) const
 {
+    metaMapper->resetCnt();
     std::string predicates = node->emit();
     if (!predicates.empty()) {
-        return predicates;
+        return { predicates, metaMapper->getJoin() };
     }
     throw_std_runtime_error("No SQL generated from AST");
 }
@@ -616,9 +617,13 @@ std::tuple<std::string, std::string, FieldType> DefaultSQLEmitter::getPropertySt
         return { plyMapper->mapQuoted(property), plyMapper->mapQuotedLower(property), plyMapper->getFieldType(property) };
     }
     if (metaMapper) {
+        metaMapper->setAlias("meta_query");
+        metaMapper->addJoin(fmt::format("LEFT JOIN {} ON {} = {}",
+            metaMapper->tableQuoted(),
+            colMapper->mapQuoted(UPNP_SEARCH_ID), metaMapper->mapQuotedTable(UPNP_SEARCH_ID)));
         return {
-            fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuoted(META_VALUE), property),
-            fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuoted(META_NAME), metaMapper->mapQuotedLower(META_VALUE), property),
+            fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuotedTable(META_NAME), metaMapper->mapQuotedTable(META_VALUE), property),
+            fmt::format("{0}='{2}' AND {1}", metaMapper->mapQuotedTable(META_NAME), metaMapper->mapQuotedTableLower(META_VALUE), property),
             metaMapper->getFieldType(property)
         };
     }
@@ -626,7 +631,9 @@ std::tuple<std::string, std::string, FieldType> DefaultSQLEmitter::getPropertySt
     return {};
 }
 
-std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::string& property,
+std::string DefaultSQLEmitter::emit(
+    const ASTCompareOperator* node,
+    const std::string& property,
     const std::string& value) const
 {
     auto operatr = node->getValue();
@@ -674,7 +681,10 @@ std::string DefaultSQLEmitter::emit(const ASTCompareOperator* node, const std::s
         prpType);
 }
 
-std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::string& property, const std::string& value) const
+std::string DefaultSQLEmitter::emit(
+    const ASTStringOperator* node,
+    const std::string& property,
+    const std::string& value) const
 {
     auto stringOperator = toLower(node->getValue());
     if (logicOperator.find(stringOperator) == logicOperator.end()) {
@@ -690,7 +700,10 @@ std::string DefaultSQLEmitter::emit(const ASTStringOperator* node, const std::st
         prpType);
 }
 
-std::string DefaultSQLEmitter::emit(const ASTExistsOperator* node, const std::string& property, const std::string& value) const
+std::string DefaultSQLEmitter::emit(
+    const ASTExistsOperator* node,
+    const std::string& property,
+    const std::string& value) const
 {
     std::string exists;
     if (value == "true") {

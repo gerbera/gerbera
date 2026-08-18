@@ -463,7 +463,7 @@ suite(() => {
 
           const image = await Jimp.read(fileName);
           image.resize({ w: 1440 });
-          image.crop({ x: 380, y: 220, w: 680, h: 660 });
+          image.crop({ x: 380, y: 160, w: 680, h: 760 });
           image.write(fileName);
         });
     });
@@ -486,7 +486,7 @@ suite(() => {
 
           const image = await Jimp.read(fileName);
           image.resize({ w: 1440 });
-          image.crop({ x: 235, y: 180, w: 965, h: 740 });
+          image.crop({ x: 235, y: 120, w: 965, h: 840 });
           image.write(fileName);
         });
     });

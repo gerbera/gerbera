@@ -1,6 +1,6 @@
 {
   "name": "gerbera-web",
-  "version": "3.2.0",
+  "version": "3.3.0",
   "repository": "https://github.com/gerbera/gerbera",
   "license": "GPLv2",
   "scripts": {
@@ -65,6 +65,6 @@
   },
   "allowScripts": {
     "core-js@2.6.12": true,
-    "chromedriver@148.0.4": true
+    "chromedriver@151.0.5": true
   }
 }

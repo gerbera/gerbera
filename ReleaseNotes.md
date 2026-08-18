@@ -20,6 +20,7 @@ This release adds two major features
 - Resource migration from old gerbera versions
 - Editing some config values on web ui
 - SQL Injection via Search parameters
+- Search with multiple properties returned empty
 - URL decoding for npupnp
 - Display of dynamic folder content in web view
 - Directories in several layouts and disabling "All Items" folder.
