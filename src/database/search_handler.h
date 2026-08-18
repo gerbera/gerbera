@@ -33,6 +33,9 @@
 
 #include <algorithm>
 #include <fmt/format.h>
+#if FMT_VERSION >= 100202
+#include <fmt/ranges.h>
+#endif
 #include <map>
 #include <memory>
 #include <tuple>
@@ -119,7 +122,7 @@ public:
     ASTNode(const ASTNode&) = delete;
     ASTNode& operator=(const ASTNode&) = delete;
 
-    std::string emitSQL() const;
+    std::pair<std::string, std::string> emitSQL() const;
     virtual std::string emit() const = 0;
 
 protected:
@@ -298,26 +301,36 @@ public:
     SQLEmitter(const SQLEmitter&) = delete;
     SQLEmitter& operator=(const SQLEmitter&) = delete;
 
-    virtual std::string emitSQL(const ASTNode* node) const = 0;
+    virtual std::pair<std::string, std::string> emitSQL(const ASTNode* node) const = 0;
     virtual std::string emit(const ASTAsterisk* node) const = 0;
     virtual std::string emit(const ASTParenthesis* node,
         const std::string& bracketedNode) const
         = 0;
     virtual std::string emit(const ASTDQuote* node) const = 0;
-    virtual std::string emit(const ASTCompareOperator* node,
-        const std::string& property, const std::string& value) const
+    virtual std::string emit(
+        const ASTCompareOperator* node,
+        const std::string& property,
+        const std::string& value) const
         = 0;
-    virtual std::string emit(const ASTStringOperator* node,
-        const std::string& property, const std::string& value) const
+    virtual std::string emit(
+        const ASTStringOperator* node,
+        const std::string& property,
+        const std::string& value) const
         = 0;
-    virtual std::string emit(const ASTExistsOperator* node,
-        const std::string& property, const std::string& value) const
+    virtual std::string emit(
+        const ASTExistsOperator* node,
+        const std::string& property,
+        const std::string& value) const
         = 0;
-    virtual std::string emit(const ASTAndOperator* node,
-        const std::string& lhs, const std::string& rhs) const
+    virtual std::string emit(
+        const ASTAndOperator* node,
+        const std::string& lhs,
+        const std::string& rhs) const
         = 0;
-    virtual std::string emit(const ASTOrOperator* node,
-        const std::string& lhs, const std::string& rhs) const
+    virtual std::string emit(
+        const ASTOrOperator* node,
+        const std::string& lhs,
+        const std::string& rhs) const
         = 0;
 };
 
@@ -347,13 +360,19 @@ public:
     /// @param tag column name
     /// @param noAlias generate no alias
     virtual std::string mapQuoted(const std::string& tag, bool noAlias = false) const = 0;
+    virtual std::string mapQuotedTable(const std::string& tag) const = 0;
     virtual bool mapQuotedList(std::vector<std::string>& sort, const std::string& tag, const std::string& desc) const = 0;
     /// @brief quote column for statement with lowercase
     virtual std::string mapQuotedLower(const std::string& tag) const = 0;
+    virtual std::string mapQuotedTableLower(const std::string& tag) const = 0;
     /// @brief get type of column from tagMap
     virtual FieldType getFieldType(const std::string& tag) const = 0;
     /// @brief quote tag for statement
     virtual std::string quote(const std::string& tag) const = 0;
+    virtual void setAlias(const std::string& prop) = 0;
+    virtual void addJoin(const std::string& join) = 0;
+    virtual void resetCnt() = 0;
+    virtual std::string getJoin() const = 0;
 };
 
 struct SearchProperty {
@@ -369,11 +388,25 @@ struct SearchProperty {
         return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, alias, field, table_quote_end);
     }
 
+    std::string print(char table_quote_begin, char table_quote_end, const std::string& tabAlias) const
+    {
+        if (tabAlias.empty()) // no column alias
+            return fmt::format("{}{}{}", table_quote_begin, field, table_quote_end);
+        return fmt::format("{0}{1}{3}.{0}{2}{3}", table_quote_begin, tabAlias, field, table_quote_end);
+    }
+
     std::string convert(char table_quote_begin, char table_quote_end) const
     {
         if (alias.empty()) // no column
             return fmt::format("LOWER({}{}{})", table_quote_begin, field, table_quote_end);
         return fmt::format("LOWER({0}{1}{3}.{0}{2}{3})", table_quote_begin, alias, field, table_quote_end);
+    }
+
+    std::string convert(char table_quote_begin, char table_quote_end, const std::string& tabAlias) const
+    {
+        if (tabAlias.empty()) // no column
+            return fmt::format("LOWER({}{}{})", table_quote_begin, field, table_quote_end);
+        return fmt::format("LOWER({0}{1}{3}.{0}{2}{3})", table_quote_begin, tabAlias, field, table_quote_end);
     }
 };
 
@@ -386,16 +419,22 @@ public:
         std::shared_ptr<ColumnMapper> resMapper,
         std::shared_ptr<ColumnMapper> plyMapper);
 
-    std::string emitSQL(const ASTNode* node) const override;
+    std::pair<std::string, std::string> emitSQL(const ASTNode* node) const override;
     std::string emit(const ASTAsterisk* node) const override { return {}; }
     std::string emit(const ASTParenthesis* node, const std::string& bracketedNode) const override;
     std::string emit(const ASTDQuote* node) const override { return {}; }
-    std::string emit(const ASTCompareOperator* node,
-        const std::string& property, const std::string& value) const override;
-    std::string emit(const ASTStringOperator* node,
-        const std::string& property, const std::string& value) const override;
-    std::string emit(const ASTExistsOperator* node,
-        const std::string& property, const std::string& value) const override;
+    std::string emit(
+        const ASTCompareOperator* node,
+        const std::string& property,
+        const std::string& value) const override;
+    std::string emit(
+        const ASTStringOperator* node,
+        const std::string& property,
+        const std::string& value) const override;
+    std::string emit(
+        const ASTExistsOperator* node,
+        const std::string& property,
+        const std::string& value) const override;
     std::string emit(const ASTAndOperator* node, const std::string& lhs, const std::string& rhs) const override;
     std::string emit(const ASTOrOperator* node, const std::string& lhs, const std::string& rhs) const override;
 
@@ -454,6 +493,27 @@ public:
         return fmt::format("{}{}{}", table_quote_begin, tableAlias, table_quote_end);
     }
 
+    void setAlias(const std::string& prop) override
+    {
+        tableAlias = fmt::format("{}{}", prop, metaCnt++);
+    }
+
+    void addJoin(const std::string& join) override
+    {
+        joins.push_back(join);
+    }
+
+    std::string getJoin() const override
+    {
+        return fmt::format("{}", fmt::join(joins, " "));
+    }
+
+    void resetCnt() override
+    {
+        joins.clear();
+        metaCnt = 0;
+    }
+
     std::string mapQuoted(En tag, bool noAlias = false) const
     {
         auto it = std::find_if(colMap.begin(), colMap.end(), [=](auto&& map) { return map.first == tag; });
@@ -492,6 +552,15 @@ public:
         return {};
     }
 
+    std::string mapQuotedTable(const std::string& tag) const override
+    {
+        auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
+        if (it != keyMap.end()) {
+            return colMap.at(it->second).print(table_quote_begin, table_quote_end, tableAlias);
+        }
+        return {};
+    }
+
     std::string quote(const std::string& tag) const override
     {
         if (!tag.empty()) {
@@ -505,6 +574,15 @@ public:
         auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
         if (it != keyMap.end()) {
             return colMap.at(it->second).convert(table_quote_begin, table_quote_end);
+        }
+        return {};
+    }
+
+    std::string mapQuotedTableLower(const std::string& tag) const override
+    {
+        auto it = std::find_if(keyMap.begin(), keyMap.end(), [=](auto&& map) { return map.first == tag; });
+        if (it != keyMap.end()) {
+            return colMap.at(it->second).convert(table_quote_begin, table_quote_end, tableAlias);
         }
         return {};
     }
@@ -533,6 +611,8 @@ private:
     std::string tableName;
     std::vector<std::pair<std::string, En>> keyMap;
     std::map<En, SearchProperty> colMap;
+    std::size_t metaCnt = 0;
+    std::vector<std::string> joins;
 };
 
 class SortParser {

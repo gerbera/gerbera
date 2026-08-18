@@ -337,14 +337,19 @@ public:
     {
         try {
             DefaultSQLEmitter emitter(database, columnMapper, columnMapper, columnMapper, columnMapper);
+            columnMapper->resetCnt();
             auto parser = SearchParser(emitter, input);
             auto rootNode = parser.parse();
             if (!rootNode)
                 return ::testing::AssertionFailure() << "Failed to create AST";
 
             auto output = rootNode->emit();
-            if (output != expectedOutput && !std::regex_match(output, std::regex(expectedRe, std::regex::ECMAScript)))
-                return ::testing::AssertionFailure() << "\nExpected [" << expectedOutput << "]\nActual   [" << output << "]\n";
+            if (output != expectedOutput && !std::regex_match(output, std::regex(expectedRe, std::regex::ECMAScript))) {
+                output = std::regex_replace(output, std::regex("_meta_query[0-9]+_", std::regex::ECMAScript), "_meta_query_");
+                auto expOutput = std::regex_replace(expectedOutput, std::regex("_meta_query[0-9]+_", std::regex::ECMAScript), "_meta_query_");
+                if (output != expOutput)
+                    return ::testing::AssertionFailure() << "\nExpected [" << expectedOutput << "]\nActual   [" << output << "]\n";
+            }
 
             return ::testing::AssertionSuccess();
         } catch (const std::runtime_error& e) {
@@ -378,22 +383,22 @@ TEST_F(ParserTest, SimpleSearchCriteriaUsingEqualsOperator)
     // equalsOpExpr
     EXPECT_TRUE(executeSearchParserTest(
         "dc:title=\"Hospital Roll Call\"",
-        "(_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital Roll Call'))"));
+        "(_meta_query0_._property_name_='dc:title' AND LOWER(_meta_query0_._property_value_)=LOWER('Hospital Roll Call'))"));
 
     // equalsOpExpr
     EXPECT_TRUE(executeSearchParserTest(
         "upnp:album=\"Scraps At Midnight\"",
-        "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight'))"));
+        "(_meta_query0_._property_name_='upnp:album' AND LOWER(_meta_query0_._property_value_)=LOWER('Scraps At Midnight'))"));
 
     // equalsOpExpr or equalsOpExpr
     EXPECT_TRUE(executeSearchParserTest(
         "upnp:album=\"Scraps At Midnight\" or dc:title=\"Hospital Roll Call\"",
-        "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight')) OR (_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital Roll Call'))"));
+        "(_meta_query1_._property_name_='upnp:album' AND LOWER(_meta_query1_._property_value_)=LOWER('Scraps At Midnight')) OR (_meta_query0_._property_name_='dc:title' AND LOWER(_meta_query0_._property_value_)=LOWER('Hospital Roll Call'))"));
 
     // equalsOpExpr or equalsOpExpr or equalsOpExpr
     EXPECT_TRUE(executeSearchParserTest(
         "upnp:album=\"Scraps At Midnight\" or dc:title=\"Hospital Roll Call\" or upnp:artist=\"Deafheaven\"",
-        "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight')) OR (_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital Roll Call')) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_)=LOWER('Deafheaven'))"));
+        "(_meta_query2_._property_name_='upnp:album' AND LOWER(_meta_query2_._property_value_)=LOWER('Scraps At Midnight')) OR (_meta_query1_._property_name_='dc:title' AND LOWER(_meta_query1_._property_value_)=LOWER('Hospital Roll Call')) OR (_meta_query0_._property_name_='upnp:artist' AND LOWER(_meta_query0_._property_value_)=LOWER('Deafheaven'))"));
 }
 
 TEST_F(ParserTest, SearchCriteriaUsingEqualsOperatorParenthesesForSqlite)
@@ -401,84 +406,86 @@ TEST_F(ParserTest, SearchCriteriaUsingEqualsOperatorParenthesesForSqlite)
     // (equalsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(
         "(upnp:album=\"Scraps At Midnight\")",
-        "((_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight')))"));
+        "((_meta_query0_._property_name_='upnp:album' AND LOWER(_meta_query0_._property_value_)=LOWER('Scraps At Midnight')))"));
 
     // (equalsOpExpr or equalsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(
         "(upnp:album=\"Scraps At Midnight\" or dc:title=\"Hospital Roll Call\")",
-        "((_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight')) OR (_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital Roll Call')))"));
+        "((_meta_query1_._property_name_='upnp:album' AND LOWER(_meta_query1_._property_value_)=LOWER('Scraps At Midnight')) OR (_meta_query0_._property_name_='dc:title' AND LOWER(_meta_query0_._property_value_)=LOWER('Hospital Roll Call')))"));
 
     // (equalsOpExpr or equalsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(
         "(upnp:album=\"Scraps At Midnight\" or dc:title=\"Hospital 'Roll' Call\")",
-        "((_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight')) OR (_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital \\'Roll\\' Call')))"));
+        "((_meta_query1_._property_name_='upnp:album' AND LOWER(_meta_query1_._property_value_)=LOWER('Scraps At Midnight')) OR (_meta_query0_._property_name_='dc:title' AND LOWER(_meta_query0_._property_value_)=LOWER('Hospital \\'Roll\\' Call')))"));
 
     // (equalsOpExpr or equalsOpExpr) or equalsOpExpr
     EXPECT_TRUE(executeSearchParserTest(
         "(upnp:album=\"Scraps At Midnight\" or dc:title=\"Hospital Roll Call\") or upnp:artist=\"Deafheaven\"",
-        "((_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight')) OR (_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital Roll Call'))) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_)=LOWER('Deafheaven'))"));
+        "((_meta_query2_._property_name_='upnp:album' AND LOWER(_meta_query2_._property_value_)=LOWER('Scraps At Midnight')) OR (_meta_query1_._property_name_='dc:title' AND LOWER(_meta_query1_._property_value_)=LOWER('Hospital Roll Call'))) OR (_meta_query0_._property_name_='upnp:artist' AND LOWER(_meta_query0_._property_value_)=LOWER('Deafheaven'))"));
 
     // equalsOpExpr or (equalsOpExpr or equalsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(
         "upnp:album=\"Scraps At Midnight\" or (dc:title=\"Hospital Roll Call\" or upnp:artist=\"Deafheaven\")",
-        "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight')) OR ((_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital Roll Call')) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_)=LOWER('Deafheaven')))"));
+        "(_meta_query2_._property_name_='upnp:album' AND LOWER(_meta_query2_._property_value_)=LOWER('Scraps At Midnight')) OR ((_meta_query1_._property_name_='dc:title' AND LOWER(_meta_query1_._property_value_)=LOWER('Hospital Roll Call')) OR (_meta_query0_._property_name_='upnp:artist' AND LOWER(_meta_query0_._property_value_)=LOWER('Deafheaven')))"));
 
     // equalsOpExpr and (equalsOpExpr or equalsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(
         "upnp:album=\"Scraps At Midnight\" and (dc:title=\"Hospital Roll Call\" or upnp:artist=\"Deafheaven\")",
-        "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight')) AND ((_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital Roll Call')) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_)=LOWER('Deafheaven')))"));
+        "(_meta_query2_._property_name_='upnp:album' AND LOWER(_meta_query2_._property_value_)=LOWER('Scraps At Midnight')) AND ((_meta_query1_._property_name_='dc:title' AND LOWER(_meta_query1_._property_value_)=LOWER('Hospital Roll Call')) OR (_meta_query0_._property_name_='upnp:artist' AND LOWER(_meta_query0_._property_value_)=LOWER('Deafheaven')))"));
 
     // equalsOpExpr and (equalsOpExpr or equalsOpExpr or equalsOpExpr)
     EXPECT_TRUE(executeSearchParserTest(
         "upnp:album=\"Scraps At Midnight\" and (dc:title=\"Hospital Roll Call\" or upnp:artist=\"Deafheaven\" or upnp:artist=\"Pavement\")",
-        "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Scraps At Midnight')) AND ((_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital Roll Call')) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_)=LOWER('Deafheaven')) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_)=LOWER('Pavement')))"));
+        "(_meta_query3_._property_name_='upnp:album' AND LOWER(_meta_query3_._property_value_)=LOWER('Scraps At Midnight')) AND ((_meta_query2_._property_name_='dc:title' AND LOWER(_meta_query2_._property_value_)=LOWER('Hospital Roll Call')) OR (_meta_query1_._property_name_='upnp:artist' AND LOWER(_meta_query1_._property_value_)=LOWER('Deafheaven')) OR (_meta_query0_._property_name_='upnp:artist' AND LOWER(_meta_query0_._property_value_)=LOWER('Pavement')))"));
 
     // (equalsOpExpr or equalsOpExpr or equalsOpExpr) and equalsOpExpr and equalsOpExpr
     EXPECT_TRUE(executeSearchParserTest(
         "(dc:title=\"Hospital Roll Call\" or upnp:artist=\"Deafheaven\" or upnp:artist=\"Pavement\") and upnp:album=\"Nevermind\" and upnp:album=\"Sunbather\"",
-        "((_t_._property_name_='dc:title' AND LOWER(_t_._property_value_)=LOWER('Hospital Roll Call')) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_)=LOWER('Deafheaven')) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_)=LOWER('Pavement'))) AND (_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Nevermind')) AND (_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_)=LOWER('Sunbather'))"));
+        "((_meta_query4_._property_name_='dc:title' AND LOWER(_meta_query4_._property_value_)=LOWER('Hospital Roll Call')) OR (_meta_query3_._property_name_='upnp:artist' AND LOWER(_meta_query3_._property_value_)=LOWER('Deafheaven')) OR (_meta_query2_._property_name_='upnp:artist' AND LOWER(_meta_query2_._property_value_)=LOWER('Pavement'))) AND (_meta_query1_._property_name_='upnp:album' AND LOWER(_meta_query1_._property_value_)=LOWER('Nevermind')) AND (_meta_query0_._property_name_='upnp:album' AND LOWER(_meta_query0_._property_value_)=LOWER('Sunbather'))"));
 }
 
 TEST_F(ParserTest, SearchCriteriaUsingContainsOperator)
 {
     // (containsOpExpr)
-    EXPECT_TRUE(executeSearchParserTest("upnp:album contains \"Midnight\"", "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_) LIKE LOWER('%Midnight%'))"));
+    EXPECT_TRUE(executeSearchParserTest("upnp:album contains \"Midnight\"",
+        "(_meta_query0_._property_name_='upnp:album' AND LOWER(_meta_query0_._property_value_) LIKE LOWER('%Midnight%'))"));
 
     // (containsOpExpr or containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest("upnp:album contains \"Midnight\" OR upnp:artist contains \"HEAVE\"",
-        "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_) LIKE LOWER('%Midnight%')) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_) LIKE LOWER('%HEAVE%'))"));
+        "(_meta_query1_._property_name_='upnp:album' AND LOWER(_meta_query1_._property_value_) LIKE LOWER('%Midnight%')) OR (_meta_query0_._property_name_='upnp:artist' AND LOWER(_meta_query0_._property_value_) LIKE LOWER('%HEAVE%'))"));
 }
 
 TEST_F(ParserTest, SearchCriteriaUsingDoesNotContainOperator)
 {
     // (containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest("upnp:album doesnotcontain \"Midnight\"",
-        "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_) NOT LIKE LOWER('%Midnight%'))"));
+        "(_meta_query0_._property_name_='upnp:album' AND LOWER(_meta_query0_._property_value_) NOT LIKE LOWER('%Midnight%'))"));
 
     // (containsOpExpr or containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest("upnp:album doesNotContain \"Midnight\" or upnp:artist doesnotcontain \"HEAVE\"",
-        "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_) NOT LIKE LOWER('%Midnight%')) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_) NOT LIKE LOWER('%HEAVE%'))"));
+        "(_meta_query1_._property_name_='upnp:album' AND LOWER(_meta_query1_._property_value_) NOT LIKE LOWER('%Midnight%')) OR (_meta_query0_._property_name_='upnp:artist' AND LOWER(_meta_query0_._property_value_) NOT LIKE LOWER('%HEAVE%'))"));
 }
 
 TEST_F(ParserTest, SearchCriteriaUsingStartsWithOperator)
 {
     // (containsOpExpr)
-    EXPECT_TRUE(executeSearchParserTest("upnp:album startswith \"Midnight\"", "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_) LIKE LOWER('Midnight%'))"));
+    EXPECT_TRUE(executeSearchParserTest("upnp:album startswith \"Midnight\"",
+        "(_meta_query0_._property_name_='upnp:album' AND LOWER(_meta_query0_._property_value_) LIKE LOWER('Midnight%'))"));
 
     // (containsOpExpr or containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest("upnp:album startsWith \"Midnight\" or upnp:artist startswith \"HEAVE\"",
-        "(_t_._property_name_='upnp:album' AND LOWER(_t_._property_value_) LIKE LOWER('Midnight%')) OR (_t_._property_name_='upnp:artist' AND LOWER(_t_._property_value_) LIKE LOWER('HEAVE%'))"));
+        "(_meta_query1_._property_name_='upnp:album' AND LOWER(_meta_query1_._property_value_) LIKE LOWER('Midnight%')) OR (_meta_query0_._property_name_='upnp:artist' AND LOWER(_meta_query0_._property_value_) LIKE LOWER('HEAVE%'))"));
 }
 
 TEST_F(ParserTest, SearchCriteriaUsingExistsOperator)
 {
     // (containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest("upnp:album exists true",
-        "(_t_._property_name_='upnp:album' AND _t_._property_value_ IS NOT NULL)"));
+        "(_meta_query0_._property_name_='upnp:album' AND _meta_query0_._property_value_ IS NOT NULL)"));
 
     // (containsOpExpr or containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest("upnp:album exists true or upnp:artist exists false",
-        "(_t_._property_name_='upnp:album' AND _t_._property_value_ IS NOT NULL) OR (_t_._property_name_='upnp:artist' AND _t_._property_value_ IS NULL)"));
+        "(_meta_query1_._property_name_='upnp:album' AND _meta_query1_._property_value_ IS NOT NULL) OR (_meta_query0_._property_name_='upnp:artist' AND _meta_query0_._property_value_ IS NULL)"));
 }
 
 TEST_F(ParserTest, SearchCriteriaWithExtendsOperator)
@@ -489,11 +496,11 @@ TEST_F(ParserTest, SearchCriteriaWithExtendsOperator)
 
     // derivedfromOpExpr and (containsOpExpr or containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest("upnp:class derivedfrom \"object.item.audioItem\" and (dc:title contains \"britain\" or dc:creator contains \"britain\"",
-        "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item.audioItem%')) AND ((_t_._property_name_='dc:title' AND LOWER(_t_._property_value_) LIKE LOWER('%britain%')) OR (_t_._property_name_='dc:creator' AND LOWER(_t_._property_value_) LIKE LOWER('%britain%')))"));
+        "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item.audioItem%')) AND ((_meta_query1_._property_name_='dc:title' AND LOWER(_meta_query1_._property_value_) LIKE LOWER('%britain%')) OR (_meta_query0_._property_name_='dc:creator' AND LOWER(_meta_query0_._property_value_) LIKE LOWER('%britain%')))"));
 
     // derivedFromOpExpr and (containsOpExpr or containsOpExpr)
     EXPECT_TRUE(executeSearchParserTest("upnp:class derivedFrom \"object.item.audioItem\" and (dc:title contains \"britain\" or dc:creator contains \"britain\"",
-        "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item.audioItem%')) AND ((_t_._property_name_='dc:title' AND LOWER(_t_._property_value_) LIKE LOWER('%britain%')) OR (_t_._property_name_='dc:creator' AND LOWER(_t_._property_value_) LIKE LOWER('%britain%')))"));
+        "(LOWER(_t_._upnp_class_) LIKE LOWER('object.item.audioItem%')) AND ((_meta_query1_._property_name_='dc:title' AND LOWER(_meta_query1_._property_value_) LIKE LOWER('%britain%')) OR (_meta_query0_._property_name_='dc:creator' AND LOWER(_meta_query0_._property_value_) LIKE LOWER('%britain%')))"));
 }
 
 TEST_F(ParserTest, SearchCriteriaWindowMedia)
