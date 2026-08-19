@@ -140,6 +140,7 @@ enum class ContentHandler : int {
     METAFILE = 13,
     CUESHEET = 14,
     RESOURCE = 20,
+    INT_TRANSCODE = 21,
 };
 
 class EnumMapper {
