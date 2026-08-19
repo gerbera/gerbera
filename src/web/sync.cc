@@ -29,7 +29,9 @@
 
 #include "common.h"
 #include "cds/cds_objects.h"
+#include "config/config_val.h"
 #include "config/result/autoscan.h"
+#include "content/autoscan_setting.h"
 #include "content/content.h"
 #include "database/database.h"
 #include "exceptions.h"
@@ -64,9 +66,20 @@ bool Web::Sync::processPageAction(Json::Value& element, const std::string& actio
         content->rescanDirectory(adir, adir->getObjectID(), path, true);
     } else {
         auto container = database->findObjectByPath(path, UNUSED_CLIENT_GROUP, DbFileType::Directory);
-        if (!container || !container->isContainer())
-            throw_std_runtime_error("Path {} is not a container in the database", path.string());
-        content->rescanDirectory(adir, container->getID(), path, true);
+        if (container && container->isContainer()) {
+            content->rescanDirectory(adir, container->getID(), path, true);
+        } else {
+            // tracked path not scanned yet: import just this subtree,
+            // mirroring the addSubDirectory branch of a running rescan
+            AutoScanSetting asSetting;
+            asSetting.adir = adir;
+            asSetting.recursive = adir->getRecursive();
+            asSetting.followSymlinks = adir->getFollowSymlinks();
+            asSetting.hidden = adir->getHidden();
+            asSetting.rescanResource = false;
+            asSetting.mergeOptions(config, path);
+            content->addFile(dirEnt, adir->getLocation(), asSetting, true, false);
+        }
     }
     return true;
 }
