@@ -402,6 +402,7 @@ add_library(
     src/web/remove.cc
     src/web/session_manager.cc
     src/web/session_manager.h
+    src/web/sync.cc
     src/web/tasks.cc
     src/web/web_autoscan.cc
     src/web/web_request_handler.cc
