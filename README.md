@@ -70,16 +70,16 @@ sudo make install
 | [libpq]             | 12.22        |              | 17.0.6               | Optional      | required by [libpqxx]            | Disabled |
 | curl                |              |              |                      | Optional      | Enables web services             | Enabled  |
 | [taglib]            | 1.12         | 1.12         | 2.3.1                | Optional      | Audio tag support                | Enabled  |
-| [utf8cpp]           | 4.1.1        | 4.1.1        | 4.1.1                | Optional      | Required for [taglib] build      | Enabled  |
+| [utf8cpp]           | 4.1.1        | 4.1.1        | 4.2.0                | Optional      | Required for [taglib] build      | Enabled  |
 | libmagic            |              |              |                      | Optional      | File type detection              | Enabled  |
 | [wavpack]           | 5.1.0        | 5.4.0        | 5.9.0                | Optional      | WavPack metadata support         | Disabled |
 | [libmatroska]       | 1.4.8        | 1.6.3        | 1.7.2                | Optional      | MKV metadata                     | Enabled  |
 | [libebml]           | 1.3.5        | 1.4.2        | 1.4.7                | Optional      | required by [libmatroska]        | Enabled  |
 | ffmpeg/libav        |              |              | 7.1.2                | Optional      | File metadata                    | Disabled |
 | [libexif]           | v0.6.21      | v0.6.24      | v0.6.26              | Optional      | JPEG Exif metadata               | Enabled  |
-| [libexiv2]          | v0.26        | v0.27.7      | v0.28.8              | Optional      | Exif, IPTC, XMP metadata         | Disabled |
+| [libexiv2]          | v0.26        | v0.27.7      | v0.28.9              | Optional      | Exif, IPTC, XMP metadata         | Disabled |
 | [lastfmlib]         | 0.4.0        | 0.4.0        | 0.4.0                | Optional      | Enables scrobbling               | Disabled |
-| [ffmpegthumbnailer] | 2.1.1        | 2.2.3        | 2.3.0                | Optional      | Generate video/image thumbnails  | Disabled |
+| [ffmpegthumbnailer] | 2.1.1        | 2.2.3        | 2.3.1                | Optional      | Generate video/image thumbnails  | Disabled |
 | [libsystemd]        | 237          | 254          | 257                  | Optional      | Interact with systemd            | Disabled |
 | inotify             |              |              |                      | Optional      | Efficient file monitoring        | Enabled  |
 | [libzippp]          | v7.1-g8992d6 | v7.1-g8992d6 | v7.1-g7ed7b6         | Optional      | ZIP Package download             | Enabled  |
@@ -91,7 +91,7 @@ sudo make install
 |---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
 | [googletest]        | 1.10.0      | 1.10.0      | 1.18.0        | Optional      | Running tests                  | Disabled |
 | [doxygen]           |             | 1.8.14      | 1.8.14        | Optional      | Building source documentation  | Disabled |
-| [cmake]             | 3.25.0      | 3.31.38     | 4.4.0         | Required      | Build processing               | Enabled  |
+| [cmake]             | 3.25.0      | 3.31.38     | 4.4.2         | Required      | Build processing               | Enabled  |
 
 ## License
 

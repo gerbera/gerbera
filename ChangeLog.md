@@ -34,6 +34,7 @@
 - Fix saving some config properties from ui
 - Fix search for multiple properties
 - Fix sqlite resource migration
+- Fix SQL injection via search container
 - Fix SQL injection via search parameters
 - Fix SQLDatabase::getRefObjects SQL on MySQL/MariaDB
 - Handle url decoding correctly for npupnp
