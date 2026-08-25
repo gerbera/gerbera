@@ -88,13 +88,13 @@ else
     WAVPACK="5.9.0"
     TAGLIB="2.3.1"
     JSONCPP="1.9.8-rc1"
-    CMAKE="4.4.0"
+    CMAKE="4.4.2"
     PQXX="7.10.3"
     LIBZIP="v1.11.4"
     LIBZIPPP_COMMIT="7ed7b6e2817dc4b1f247f48b44cb8a013ba18683"
     LIBZIPPP="v7.1-1.10.1"
     CXXOPTS="3.3.1"
     CXXOPTS_COMMIT="b6135315a54deb2b556219906eda8346f69bf703"
-    UTF8CPP="4.1.1"
+    UTF8CPP="4.2.0"
 
 fi

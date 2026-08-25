@@ -26,6 +26,8 @@
 #ifndef __DB_PARAM_H__
 #define __DB_PARAM_H__
 
+#include "util/tools.h"
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -122,19 +124,19 @@ public:
 /// @brief Parameters for UPnP search request
 class SearchParam : public ActionParam {
 protected:
-    std::string containerID;
+    int containerID;
     std::string searchCrit;
     bool searchableContainers;
     bool searchContainers;
     bool searchItems;
 
 public:
-    SearchParam(std::string containerID, std::string searchCriteria, const std::string& sortCriteria, int startingIndex,
+    SearchParam(const std::string& containerID, std::string searchCriteria, const std::string& sortCriteria, int startingIndex,
         int requestedCount, bool searchableContainers, const std::string& group,
         bool searchContainers = true,
         bool searchItems = true)
         : ActionParam(sortCriteria, startingIndex, requestedCount, group)
-        , containerID(std::move(containerID))
+        , containerID(stoiString(containerID))
         , searchCrit(std::move(searchCriteria))
         , searchableContainers(searchableContainers)
         , searchContainers(searchContainers)
@@ -142,7 +144,7 @@ public:
     {
     }
     const std::string& getSearchCriteria() const { return searchCrit; }
-    const std::string& getContainerID() const { return containerID; }
+    int getContainerID() const { return containerID; }
     bool getSearchableContainers() const { return searchableContainers; }
     bool getContainers() const { return searchContainers; }
     bool getItems() const { return searchItems; }

@@ -21,7 +21,7 @@ This release adds two major features
 
 - Resource migration from old gerbera versions
 - Editing some config values on web ui
-- SQL Injection via Search parameters
+- SQL Injection via Search
 - Search with multiple properties returned empty
 - URL decoding for npupnp
 - Display of dynamic folder content in web view
@@ -29,9 +29,10 @@ This release adds two major features
 
 ### Code Improvements
 
-- Update maximum versions of pupnp (22.0.6), npupnp (6.3.0), libexif (0.6.26), cmake (4.4.0), taglib (2.3.1), cxxopts (3.3.1-gb61353),
+- Update maximum versions of pupnp (22.0.6), npupnp (6.3.0), libexif (0.6.26),
+  cmake (4.4.2), taglib (2.3.1), cxxopts (3.3.1-gb61353),
   libzippp (7.1-g7ed7b6 ), jsoncpp (1.9.8), fmt (12.2.0), pugixml (1.16), googletest (1.18.0),
-  libebml (1.4.7), libmatroska (1.7.2)
+  libebml (1.4.7), libmatroska (1.7.2), utf8cpp (4.2.0)
 - Docker images base on Alpine v3.24
 - build support for Resolute Raccoon
 
