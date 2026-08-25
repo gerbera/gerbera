@@ -93,7 +93,7 @@ std::pair<std::string, std::string> StringConverter::convert(std::string str, bo
         ret = ret + res.first;
         if (!res.second.empty())
             errors.push_back(res.second);
-        if ((!ret.empty()) && (stoppedAt == 0))
+        if (!ret.empty() && stoppedAt == 0)
             break;
 
         ret = ret + "?";

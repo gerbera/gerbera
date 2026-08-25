@@ -1279,7 +1279,7 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
     }
     log_debug("Search query resolves to SQL [\n{}\n]", searchSQL);
 
-    bool rootContainer = param.getContainerID().empty() || param.getContainerID() == "0";
+    bool rootContainer = param.getContainerID() == 0;
 
     std::string countSQL;
     if (rootContainer) {
