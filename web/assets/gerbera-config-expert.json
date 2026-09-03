@@ -2568,6 +2568,49 @@
                   "editable": true
                 }
               ]
+            },
+            {
+              "item": "/transcoding/profiles/profile/encoder",
+              "caption": "Internal Encoder",
+              "type": "Element",
+              "editable": true,
+              "children": [
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::format",
+                  "caption": "Format",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::acodec",
+                  "caption": "Audio Codec",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::vcodec",
+                  "caption": "Video Codec",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::afilter",
+                  "caption": "Audio Filter",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::vfilter",
+                  "caption": "Video Filter",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::width",
+                  "caption": "Width",
+                  "editable": true
+                },
+                {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::height",
+                  "caption": "Height",
+                  "editable": true
+                }
+              ]
             }
           ]
         }
