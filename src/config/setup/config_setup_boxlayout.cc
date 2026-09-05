@@ -57,7 +57,6 @@ ConfigBoxLayoutSetup::ConfigBoxLayoutSetup(
 ConfigBoxLayoutSetup::~ConfigBoxLayoutSetup() = default;
 
 /// @brief Creates an array of BoxLayout objects from a XML nodeset.
-/// @param element starting element of the nodeset.
 bool ConfigBoxLayoutSetup::createOptionFromNode(
     const std::shared_ptr<Config>& config,
     const pugi::xml_node& element,

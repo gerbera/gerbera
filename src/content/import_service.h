@@ -325,7 +325,7 @@ public:
 
     /// @brief create layout of a single itme
     /// @param state item state
-    /// @param object object to create layout
+    /// @param object object to create layout used to make code compatible with legacy scan
     /// @param parent parent container
     /// @param task import task associated
     void fillSingleLayout(
@@ -349,6 +349,7 @@ public:
     /// @param chain list of container objects to create
     /// @param refItem object to take artwork from
     /// @param createdIds of the last container in the chain.
+    ///        used by messaging in ContentManager
     /// @return last id created
     std::pair<int, bool> addContainerTree(
         int parentContainerId,

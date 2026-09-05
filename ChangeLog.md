@@ -27,6 +27,7 @@
 - Bump tmp from 0.2.5 to 0.2.7 in /gerbera-web
 - Collected Updates
 - Database selection from command line
+- Doxygen: silence warnings
 - Extend length of lyrics
 - Fix for SQL Error when using postgresql
 - Fix includes

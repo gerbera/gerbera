@@ -39,7 +39,6 @@ public:
         const std::shared_ptr<Quirks>& quirks,
         const std::string& ip, in_port_t port);
 
-    /// \inherit
     bool getInfo(const char* filename, UpnpFileInfo* info) override;
 
     /// @brief Prepares the output buffer and calls the process function.

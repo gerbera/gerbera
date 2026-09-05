@@ -59,23 +59,23 @@ sudo make install
 | [jsoncpp]           | 1.7.4        | 1.9.6        | 1.9.8                | Required      | JSON data support                |          |
 | [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1-gb61353        | Required      | Command line parsing             | Bundled  |
 | libiconv            |              |              |                      | Required      | Charset conversion               |          |
-| sqlite3             | 3.7.0        | 3.35.5       | 3.50.2               | Required      | Database storage                 |          |
-| zlib                |              |              |                      | Required      | Data compression                 |          |
+| [sqlite3]           | 3.7.0        | 3.35.5       | 3.53.2               | Required      | Database storage                 |          |
+| [zlib]              |              |              |                      | Required      | Data compression                 |          |
 | [fmtlib]            | 7.1.3        | 11.2.0       | 12.2.0               | Required      | Fast string formatting           |          |
 | [spdlog]            | 1.8.1        | 1.15.3       | 1.17.0               | Required      | Runtime logging                  |          |
-| [icu4c]             | 65.1         | 65.1         | 65.1                 | Required      | Transliteration                  | Enabled  |
+| [icu4c]             | 65.1         | 65.1         | 77.1                 | Optional      | Transliteration                  | Enabled  |
 | [duktape]           | 2.1.0        | 2.6.0        | 2.7.0                | Optional      | Scripting Support                | Enabled  |
-| mysql               |              |              |                      | Optional      | Alternate database MySQL/MariaDB | Disabled |
+| mysql / [mariadb]   |              |              | 3.4.9                | Optional      | Alternate database MySQL/MariaDB | Disabled |
 | [libpqxx]           | 7.10.1       | 7.10.3       | 7.10.3               | Optional      | Alternate database PostgreSQL    | Disabled |
 | [libpq]             | 12.22        |              | 17.0.6               | Optional      | required by [libpqxx]            | Disabled |
-| curl                |              |              |                      | Optional      | Enables web services             | Enabled  |
+| [curl]              |              |              | 8.14.1               | Optional      | Enables web services             | Enabled  |
 | [taglib]            | 1.12         | 1.12         | 2.3.2                | Optional      | Audio tag support                | Enabled  |
 | [utf8cpp]           | 4.1.1        | 4.1.1        | 4.2.0                | Optional      | Required for [taglib] build      | Enabled  |
 | libmagic            |              |              |                      | Optional      | File type detection              | Enabled  |
 | [wavpack]           | 5.1.0        | 5.4.0        | 5.9.0                | Optional      | WavPack metadata support         | Disabled |
 | [libmatroska]       | 1.4.8        | 1.6.3        | 1.7.2                | Optional      | MKV metadata                     | Enabled  |
 | [libebml]           | 1.3.5        | 1.4.2        | 1.4.7                | Optional      | required by [libmatroska]        | Enabled  |
-| ffmpeg/libav        |              |              | 7.1.2                | Optional      | File metadata                    | Disabled |
+| [ffmpeg]            |              |              | 7.1.2                | Optional      | File metadata                    | Disabled |
 | [libexif]           | v0.6.21      | v0.6.24      | v0.6.26              | Optional      | JPEG Exif metadata               | Enabled  |
 | [libexiv2]          | v0.26        | v0.27.7      | v0.28.9              | Optional      | Exif, IPTC, XMP metadata         | Disabled |
 | [lastfmlib]         | 0.4.0        | 0.4.0        | 0.4.0                | Optional      | Enables scrobbling               | Disabled |
@@ -87,7 +87,7 @@ sudo make install
 
 ## Development Dependencies
 
-| Library             | Min Version | Recommended | Latest tested | Required?     | Note                           | Default  |
+| Package             | Min Version | Recommended | Latest tested | Required?     | Note                           | Default  |
 |---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
 | [googletest]        | 1.10.0      | 1.10.0      | 1.18.0        | Optional      | Running tests                  | Disabled |
 | [doxygen]           |             | 1.8.14      | 1.14.0        | Optional      | Building source documentation  | Disabled |
@@ -111,9 +111,11 @@ sudo make install
 
 [cmake]: https://cmake.org/
 [cxxopts]: https://github.com/jarro2783/cxxopts/
+[curl]: https://curl.se/
 [Docker Hub]: https://hub.docker.com/r/gerbera/gerbera
 [doxygen]: https://github.com/doxygen/doxygen
 [duktape]: https://duktape.org
+[ffmpeg]: https://ffmpeg.org/download.html
 [ffmpegthumbnailer]: https://github.com/dirkvdb/ffmpegthumbnailer
 [fmtlib]: https://github.com/fmtlib/fmt
 [googletest]: https://github.com/google/googletest
@@ -131,8 +133,11 @@ sudo make install
 [libupnp]: https://github.com/pupnp/pupnp
 [libzip]: https://github.com/nih-at/libzip
 [libzippp]: https://github.com/ctabin/libzippp
+[mariadb]: https://mariadb.com/docs/connectors/mariadb-connector-c/install-mariadb-connector-c
 [pugixml]: https://github.com/zeux/pugixml
 [spdlog]: https://github.com/gabime/spdlog
+[sqlite3]: https://sqlite.org/
 [taglib]: https://taglib.org/
 [utf8cpp]: https://github.com/nemtrif/utfcpp
 [wavpack]: https://www.wavpack.com/
+[zlib]: https://zlib.net/

@@ -42,9 +42,6 @@ namespace URLUtils {
 /// @brief Splits the url into a path and parameters string.
 /// Only '?' and '/' separators are allowed, otherwise an exception will
 /// be thrown.
-/// @param url URL that has to be processed
-/// @return pair of path and parameters which reference the input-view of url
-///
 /// This function splits the url into its path and parameter components.
 /// content/media SEPARATOR object_id=12345&transcode=wav would be transformed to:
 /// path = "content/media"

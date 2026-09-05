@@ -46,9 +46,10 @@ Required Packages
 +------------+------------------------------+---------------------+--------------------+
 | libiconv   | Charset conversion           |                     |                    |
 +------------+------------------------------+---------------------+--------------------+
-| sqlite3    | Database storage             |                     |                    |
+| sqlite3_   | Database storage             |                     |                    |
 +------------+------------------------------+---------------------+--------------------+
-| zlib       | Data compression             |                     |                    |
+| zlib_      | Data compression,            |                     |                    |
+|            | transitive requirement       |                     |                    |
 +------------+------------------------------+---------------------+--------------------+
 | fmtlib_    | Fast string formatting       |                     | install-fmt.sh     |
 +------------+------------------------------+---------------------+--------------------+
@@ -63,11 +64,11 @@ Optional Packages
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | Library             | Note                       | Compile-time option     | Default  | Script                       |
 +=====================+============================+=========================+==========+==============================+
-| curl                | Enables web services       | WITH\_CURL              | Enabled  |                              |
+| curl_               | Enables web services       | WITH\_CURL              | Enabled  |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | duktape_            | Scripting Support          | WITH\_JS                | Enabled  | install-duktape.sh           |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
-| ffmpeg/libav        | File metadata.             | WITH\_AVCODEC           | Disabled |                              |
+| ffmpeg_             | File metadata.             | WITH\_AVCODEC           | Disabled |                              |
 |                     | Required for ``.m4a``.     |                         |          |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | ffmpegthumbnailer_  | Generate video thumbnails  | WITH\_FFMPEGTHUMBNAILER | Disabled | install-ffmpegthumbnailer.sh |
@@ -92,7 +93,7 @@ Optional Packages
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | libpqxx_            | Alternate database storage | WITH\_PGSQL             | Disabled | install-libpqxx.sh           |
 |                     |                            |                         |          |                              |
-| libpq               |                            |                         |          |                              |
+| libpq_              |                            |                         |          |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | libzippp_           | Zip package download       | WITH\_ZIP               | Enabled  | install-libzippp.sh          |
 |                     |                            |                         |          |                              |
@@ -103,6 +104,8 @@ Optional Packages
 |                     | Install Systemd unit file  |                         |          |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | mysql               | Alternate database storage | WITH\_MYSQL             | Disabled |                              |
+|                     |                            |                         |          |                              |
+| mariadb_            |                            |                         |          |                              |
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 | taglib_             | Audio tag support          | WITH\_TAGLIB            | Enabled  | install-taglib.sh            |
 |                     |                            |                         |          |                              |
@@ -112,8 +115,10 @@ Optional Packages
 +---------------------+----------------------------+-------------------------+----------+------------------------------+
 
 .. _cmake: https://cmake.org
+.. _curl: https://curl.se/download.html
 .. _doxygen: https://github.com/doxygen/doxygen
 .. _duktape: https://duktape.org
+.. _ffmpeg: https://ffmpeg.org/download.html
 .. _ffmpegthumbnailer: https://github.com/dirkvdb/ffmpegthumbnailer
 .. _fmtlib: https://github.com/fmtlib/fmt
 .. _googletest: https://github.com/google/googletest
@@ -127,14 +132,18 @@ Optional Packages
 .. _libnpupnp: https://www.lesbonscomptes.com/upmpdcli/npupnp-doc/libnpupnp.html
 .. _libpupnp: https://github.com/pupnp/pupnp
 .. _libpqxx: https://github.com/jtv/libpqxx
+.. _libpq: https://www.postgresql.org/docs/current/libpq.html
 .. _libsystemd: https://github.com/systemd/systemd
 .. _libzip: https://github.com/nih-at/libzip
 .. _libzippp: https://github.com/ctabin/libzippp
+.. _mariadb: https://mariadb.com/docs/connectors/mariadb-connector-c/install-mariadb-connector-c
 .. _pugixml: https://github.com/zeux/pugixml
 .. _spdlog: https://github.com/gabime/spdlog
+.. _sqlite3: https://sqlite.org/cintro.html
 .. _taglib: https://taglib.org/
 .. _utf8cpp: https://github.com/nemtrif/utfcpp
 .. _wavpack: https://www.wavpack.com/
+.. _zlib: https://zlib.net/
 
 Scripts for installation of (build) dependencies from source can be found under ``scripts``. They normally install the latest tested version
 of the package. The scripts automatically install prerequisites for debian/ubuntu and opensuse/suse.

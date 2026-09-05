@@ -45,7 +45,6 @@
 #include <pugixml.hpp>
 
 /// @brief Creates an array of ClientConfig objects from a XML nodeset.
-/// @param element starting element of the nodeset.
 bool ConfigClientSetup::createOptionFromNode(
     const std::shared_ptr<Config>& config,
     const pugi::xml_node& element,

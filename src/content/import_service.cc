@@ -857,7 +857,6 @@ void ImportService::fillLayout(
     }
 }
 
-/// @param object used to make code compatible with legacy scan
 void ImportService::fillSingleLayout(
     const std::shared_ptr<ContentState>& state,
     std::shared_ptr<CdsObject> object,
@@ -1130,7 +1129,6 @@ std::shared_ptr<CdsContainer> ImportService::createSingleContainer(
     return {};
 }
 
-/// @param createdIds used by messaging in ContentManager
 std::pair<int, bool> ImportService::addContainerTree(
     int parentContainerId,
     const std::vector<std::shared_ptr<CdsObject>>& chain,

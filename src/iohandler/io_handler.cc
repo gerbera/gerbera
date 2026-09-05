@@ -37,14 +37,11 @@
 #include "upnp/compat.h"
 
 /// @brief Opens a file for the web server.
-/// @param mode in which the data will be opened (we only support UPNP_READ)
 void IOHandler::open(enum UpnpOpenFileMode mode)
 {
 }
 
 /// @brief Reads a previously opened file sequentially.
-/// @param buf  This buffer will be filled by fread.
-/// @param length Number of bytes to read.
 ///
 /// This function is called by the web server to perform a sequential
 /// read from an open file. It copies \b length bytes from the file
@@ -58,8 +55,6 @@ grb_read_t IOHandler::read(std::byte* buf, std::size_t length)
 }
 
 /// @brief Writes to a previously opened file sequentially.
-/// @param buf This buffer will be filled by fwrite.
-/// @param length Number of bytes to fwrite.
 ///
 /// This function is called by the web server to perform a sequential
 /// write to an open file. It copies \b length bytes into the file
@@ -74,12 +69,6 @@ std::size_t IOHandler::write(std::byte* buf, std::size_t length)
 }
 
 /// @brief Performs a seek on an open file.
-/// @param offset Number of bytes to move in the file. For seeking forwards
-/// positive values are used, for seeking backwards - negative. \b Offset must
-/// be positive if \b origin is set to \b SEEK_SET
-/// @param whence The position to move relative to. SEEK_CUR to move relative
-/// to current position, SEEK_END to move relative to the end of file,
-/// SEEK_SET to specify an absolute offset.
 ///
 /// This function is called by the web server to perform seek on an a file.
 void IOHandler::seek(off_t offset, int whence)

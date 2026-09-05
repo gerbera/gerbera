@@ -44,7 +44,6 @@
 
 /// @brief Creates an array of TranscodingProfile objects from an XML
 /// nodeset.
-/// @param element starting element of the nodeset.
 bool ConfigTranscodingSetup::createOptionFromNode(
     const std::shared_ptr<Config>& config,
     const pugi::xml_node& element,

@@ -114,7 +114,6 @@ public:
      *
      * @param database storage to retrieve position from
      * @param request request sent by Samsung client, which holds the position information which should be stored
-     * @return void
      *
      */
     void saveSamsungBookMarkedPosition(const std::shared_ptr<Database>& database, ActionRequest& request) const;
@@ -123,7 +122,6 @@ public:
      *
      * @param database DB interface
      * @param features pugi::xml_node item in response
-     * @return void
      *
      */
     void getShortCutList(const std::shared_ptr<Database>& database, pugi::xml_node& features) const;
@@ -131,7 +129,6 @@ public:
     /** @brief get Samsung Feature List
      *
      * @param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
-     * @return void
      *
      */
     void getSamsungFeatureList(ActionRequest& request) const;
@@ -150,7 +147,6 @@ public:
     /** @brief get Samsung ObjectID from Index
      *
      * @param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
-     * @return void
      *
      */
     void getSamsungObjectIDfromIndex(ActionRequest& request) const;
@@ -158,7 +154,6 @@ public:
     /** @brief get Samsung Index from RID
      *
      * @param request const std::unique_ptr<ActionRequest>& request sent by Samsung client
-     * @return void
      *
      */
     void getSamsungIndexfromRID(ActionRequest& request) const;
