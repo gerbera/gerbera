@@ -69,7 +69,7 @@ sudo make install
 | [libpqxx]           | 7.10.1       | 7.10.3       | 7.10.3               | Optional      | Alternate database PostgreSQL    | Disabled |
 | [libpq]             | 12.22        |              | 17.0.6               | Optional      | required by [libpqxx]            | Disabled |
 | curl                |              |              |                      | Optional      | Enables web services             | Enabled  |
-| [taglib]            | 1.12         | 1.12         | 2.3.1                | Optional      | Audio tag support                | Enabled  |
+| [taglib]            | 1.12         | 1.12         | 2.3.2                | Optional      | Audio tag support                | Enabled  |
 | [utf8cpp]           | 4.1.1        | 4.1.1        | 4.2.0                | Optional      | Required for [taglib] build      | Enabled  |
 | libmagic            |              |              |                      | Optional      | File type detection              | Enabled  |
 | [wavpack]           | 5.1.0        | 5.4.0        | 5.9.0                | Optional      | WavPack metadata support         | Disabled |
@@ -90,8 +90,8 @@ sudo make install
 | Library             | Min Version | Recommended | Latest tested | Required?     | Note                           | Default  |
 |---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
 | [googletest]        | 1.10.0      | 1.10.0      | 1.18.0        | Optional      | Running tests                  | Disabled |
-| [doxygen]           |             | 1.8.14      | 1.8.14        | Optional      | Building source documentation  | Disabled |
-| [cmake]             | 3.25.0      | 3.31.38     | 4.4.2         | Required      | Build processing               | Enabled  |
+| [doxygen]           |             | 1.8.14      | 1.14.0        | Optional      | Building source documentation  | Disabled |
+| [cmake]             | 3.25.0      | 3.31.38     | 4.4.3         | Required      | Build processing               | Enabled  |
 
 ## License
 

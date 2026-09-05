@@ -15,13 +15,14 @@
 - Bump actions/setup-python from 6 to 7
 - Bump axios from 1.13.6 to 1.16.0 in /gerbera-web
 - Bump basic-ftp from 5.2.0 to 5.2.1 in /gerbera-web
-- Bump fast-uri from 3.1.0 to 3.1.5 in /gerbera-web
+- Bump fast-uri from 3.1.0 to 3.1.7 in /gerbera-web
 - Bump follow-redirects from 1.15.11 to 1.16.0 in /gerbera-web
 - Bump form-data from 4.0.5 to 4.0.6 in /gerbera-web
 - Bump ip-address from 10.1.0 to 10.4.0 in /gerbera-web
 - Bump js-cookie from 3.0.5 to 3.0.7 in /gerbera-web
 - Bump lodash from 4.17.23 to 4.18.1 in /gerbera-web
 - Bump picomatch from 2.3.1 to 2.3.2 in /gerbera-web
+- Bump serialize-javascript and mocha in /gerbera-web
 - Bump shell-quote and concurrently in /gerbera-web
 - Bump tmp from 0.2.5 to 0.2.7 in /gerbera-web
 - Collected Updates
@@ -44,7 +45,7 @@
 - Update to googletest 1.18.0
 - Update to pugixml 1.16 - fmt 12.2.0
 - Update to pupnp 22.0.6
-- Update to taglib 2.3.1
+- Update to taglib 2.3.2
 - Use latest utfcpp directly
 
 ### v3.2.1

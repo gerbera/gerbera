@@ -86,7 +86,7 @@ else
     PUPNP="22.0.6"
     SPDLOG="1.17.0"
     WAVPACK="5.9.0"
-    TAGLIB="2.3.1"
+    TAGLIB="2.3.2"
     JSONCPP="1.9.8-rc1"
     CMAKE="4.4.2"
     PQXX="7.10.3"
