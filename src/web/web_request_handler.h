@@ -45,6 +45,10 @@ class Server;
 class UpnpXMLBuilder;
 enum class AutoscanType;
 enum class ConfigVal;
+extern "C" {
+enum UpnpOpenFileMode;
+}
+typedef enum UpnpOpenFileMode UpnpOpenFileMode_t;
 
 namespace Web {
 
@@ -74,7 +78,7 @@ protected:
     std::string filename;
 
     /// @brief We can also always see what mode was requested.
-    enum UpnpOpenFileMode mode {};
+    UpnpOpenFileMode_t mode {};
 
     /// @brief This is the json document, the root node to be populated by \c process() method.
     Json::Value jsonDoc;

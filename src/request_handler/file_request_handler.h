@@ -56,7 +56,6 @@ public:
         const std::shared_ptr<Quirks>& quirks,
         std::shared_ptr<MetadataService> metadataService);
 
-    /// \inherit
     bool getInfo(const char* filename, UpnpFileInfo* info) override;
 
     /// @brief Prepares the output buffer and calls the process function.
