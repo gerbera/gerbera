@@ -44,7 +44,7 @@ downloadSource
 installDeps ${main_dir} libzip
 
 cmake .. -DBUILD_SHARED_LIBS=${BUILD_SHARED} \
-         -DBUILD_TOOLS=OFF \
+         -DBUILD_TOOLS=ON \
          -DBUILD_REGRESS=OFF \
          -DBUILD_OSSFUZZ=OFF \
          -DBUILD_EXAMPLES=OFF \
