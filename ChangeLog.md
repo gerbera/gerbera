@@ -45,7 +45,7 @@
 - Update Build Environment
 - Update to googletest 1.18.0
 - Update to pugixml 1.16 - fmt 12.2.0
-- Update to pupnp 22.0.6
+- Update to pupnp 22.1.0
 - Update to taglib 2.3.2
 - Use latest utfcpp directly
 
