@@ -28,6 +28,7 @@
 - Collected Updates
 - Database selection from command line
 - Doxygen: silence warnings
+- Drop EOL distros
 - Extend length of lyrics
 - Fix for SQL Error when using postgresql
 - Fix includes
