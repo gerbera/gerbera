@@ -17,6 +17,8 @@ build.ninja
 .ninja_log
 compile_commands.json
 
+subprojects/packagecache
+
 Testing/
 
 **/node_modules/
