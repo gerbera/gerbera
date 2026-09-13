@@ -104,7 +104,7 @@ This setting allows to set the number of retries after a timeout occured. Increa
    :default: ``16384``
 ..
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.3.0
    .. code:: xml
 
        curl-chunk-size="32768"
@@ -362,7 +362,7 @@ Profile Attributes
       :required: true
    ..
 
-      .. versionchanged:: HEAD new option ``internal``
+      .. versionchanged:: 3.3.0 new option ``internal``
       .. code:: xml
 
          type="external"
@@ -792,7 +792,7 @@ ffmpeg support.
 
 Required for :confval:`profile type` = ``internal``
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.3.0
    .. code-block:: xml
 
        <encoder format="mp3" acodec="mp3" afilter="anull"/>

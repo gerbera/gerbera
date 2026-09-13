@@ -15,7 +15,7 @@ Automatic Device Detection
 With each UPnP request a device sends its signature which is used by gerbera to assign special functionality to the response.
 The automatic detection supports the following devices and software:
 
-.. versionchanged:: HEAD Added ``Universum DAB+ Internet Radio``
+.. versionchanged:: 3.3.0 Added ``Universum DAB+ Internet Radio``
 
 +-------------------------------------+--------------------------------------------------+---------------------------------------------------------+
 | Device Type                         | Description                                      | Device Flags                                            |
@@ -68,7 +68,7 @@ The device flags have the following meaning.
 .. versionchanged:: 3.1.0 The Key is not case sensitve anymore
 .. versionchanged:: 3.1.0 Alternate camel-case representations for the keys added
 .. versionchanged:: 3.1.0 Removed ``PANASONIC``
-.. versionchanged:: HEAD Added ``NoSecNamespace``
+.. versionchanged:: 3.3.0 Added ``NoSecNamespace``
 
 +--------------------------------+--------------------------------------------------------------------------------+
 | Key                            | Description                                                                    |

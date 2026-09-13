@@ -1,6 +1,6 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v3.3.0
 
 - Add ImportMode to AutoScan settings
 - add missing headers
@@ -14,6 +14,7 @@
 - Bump actions/checkout from 6 to 7
 - Bump actions/setup-node from 6 to 7
 - Bump actions/setup-python from 6 to 7
+- Bump adm-zip from 0.6.0 to 0.6.1 in /gerbera-web
 - Bump axios from 1.13.6 to 1.16.0 in /gerbera-web
 - Bump basic-ftp from 5.2.0 to 5.2.1 in /gerbera-web
 - Bump fast-uri from 3.1.0 to 3.1.7 in /gerbera-web
@@ -41,6 +42,7 @@
 - Fix SQL injection via search container
 - Fix SQL injection via search parameters
 - Fix SQLDatabase::getRefObjects SQL on MySQL/MariaDB
+- Fix stack exhaustion via nested search criteria
 - Handle url decoding correctly for npupnp
 - Make Layout Options consistent
 - Refactor Sql hash codes

@@ -448,27 +448,41 @@ private:
     std::tuple<std::string, std::string, FieldType> getPropertyStatement(const std::string& property) const;
 };
 
+/// @brief parser for UPnP search string
 class SearchParser {
 public:
-    SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria, unsigned maxParenthesisDepth = 32);
+    SearchParser(
+        const SQLEmitter& sqlEmitter,
+        const std::string& searchCriteria,
+        unsigned maxParenthesisDepth = 32);
+    /// @brief entry point for parsing
     std::unique_ptr<ASTNode> parse();
 
 protected:
+    /// @brief get next token from search string
     void getNextToken();
+    /// @brief parse complete search expression
     std::unique_ptr<ASTNode> parseSearchExpression();
+    /// @brief parse complete comparison / relation operation
     std::unique_ptr<ASTNode> parseRelationshipExpression();
     /// @brief parse a parenthesized expression
     /// @param depth current parenthesis nesting depth
     std::unique_ptr<ASTNode> parseParenthesis(unsigned depth = 0);
+    /// @brief parse a quoted string
     std::unique_ptr<ASTQuotedString> parseQuotedString();
 
 private:
+    /// @brief currently active token in parser
+    std::unique_ptr<SearchToken> currentToken;
+
+    /// @brief reference to lexer
+    std::unique_ptr<SearchLexer> lexer;
+
+    /// @brief reference to sql emitter
+    const SQLEmitter& sqlEmitter;
+
     /// @brief maximum parenthesis nesting depth to protect the parser from stack exhaustion
     unsigned maxParenthesisDepth;
-
-    std::unique_ptr<SearchToken> currentToken;
-    std::unique_ptr<SearchLexer> lexer;
-    const SQLEmitter& sqlEmitter;
 };
 
 template <class En>

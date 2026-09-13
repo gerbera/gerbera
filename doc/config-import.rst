@@ -513,7 +513,7 @@ The search pattern to identify metadata files is set in :confval:`resources` sec
    :required: false
    :default: ``importCuesheet``
 
-.. versionadded:: HEAD
+.. versionadded:: 3.3.0
 
 Name of the javascript function invoked during the first import phase to parse cuesheets.
 Similar to :confval:`playlist` the function is called with the file object and no media file.
@@ -1299,7 +1299,7 @@ Scan interval in seconds. The value can be given in a valid time format.
    :required: false
    :default: value of :confval:`import-mode`
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.3.0
    .. code:: xml
 
        import-mode="grb"
