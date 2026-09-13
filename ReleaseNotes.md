@@ -1,6 +1,6 @@
 # Gerbera - UPnP AV Mediaserver.
 
-## HEAD
+## v3.3.0
 
 This release adds the following major features
 - support for cuesheets which are similar to playlists but offer new tracks
