@@ -1,6 +1,6 @@
 ## Gerbera - UPnP AV Mediaserver.
 
-### HEAD
+### v3.3.0
 
 - Add ImportMode to AutoScan settings
 - add missing headers

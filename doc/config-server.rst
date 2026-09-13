@@ -1506,7 +1506,7 @@ from clients that don't handle the respective requests.
    :default: ``SAMSUNG|DCM10``
 ..
 
-   .. versionadded:: HEAD
+   .. versionadded:: 3.3.0
    .. code:: xml
 
        server-flags="SAMSUNG"
