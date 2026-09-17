@@ -573,13 +573,17 @@ TEST_F(ParserTest, SearchCriteriaWithCustomParenthesisLimit)
 
     auto withinLimit = std::string(3, '(') + "dc:title=\"x\"" + std::string(3, ')');
     columnMapper->resetCnt();
-    auto parser = SearchParser(emitter, withinLimit, 3);
-    EXPECT_NO_THROW(parser.parse());
+    {
+        auto parser = SearchParser(emitter, withinLimit, 3);
+        EXPECT_NO_THROW(parser.parse());
+    }
 
     auto beyondLimit = std::string(4, '(') + "dc:title=\"x\"" + std::string(4, ')');
     columnMapper->resetCnt();
-    parser = SearchParser(emitter, beyondLimit, 3);
-    EXPECT_THROW(parser.parse(), SearchParseException);
+    {
+        auto parser = SearchParser(emitter, beyondLimit, 3);
+        EXPECT_THROW(parser.parse(), SearchParseException);
+    }
 }
 
 TEST_F(ParserTest, SortCriteria)
