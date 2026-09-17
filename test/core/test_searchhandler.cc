@@ -566,6 +566,22 @@ TEST_F(ParserTest, SearchCriteriaWithTooManyNestedParentheses)
     EXPECT_THROW(parser.parse(), SearchParseException);
 }
 
+TEST_F(ParserTest, SearchCriteriaWithCustomParenthesisLimit)
+{
+    // the nesting limit is a constructor parameter, so it can become a config value
+    DefaultSQLEmitter emitter(database, columnMapper, columnMapper, columnMapper, columnMapper);
+
+    auto withinLimit = std::string(3, '(') + "dc:title=\"x\"" + std::string(3, ')');
+    columnMapper->resetCnt();
+    auto parser = SearchParser(emitter, withinLimit, 3);
+    EXPECT_NO_THROW(parser.parse());
+
+    auto beyondLimit = std::string(4, '(') + "dc:title=\"x\"" + std::string(4, ')');
+    columnMapper->resetCnt();
+    parser = SearchParser(emitter, beyondLimit, 3);
+    EXPECT_THROW(parser.parse(), SearchParseException);
+}
+
 TEST_F(ParserTest, SortCriteria)
 {
     EXPECT_TRUE(executeSortParserTest("+id,-name,+value",

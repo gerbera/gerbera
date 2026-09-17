@@ -450,7 +450,7 @@ private:
 
 class SearchParser {
 public:
-    SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria);
+    SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria, unsigned maxParenthesisDepth = 32);
     std::unique_ptr<ASTNode> parse();
 
 protected:
@@ -464,7 +464,7 @@ protected:
 
 private:
     /// @brief maximum parenthesis nesting depth to protect the parser from stack exhaustion
-    static constexpr unsigned maxParenthesisDepth { 32 };
+    unsigned maxParenthesisDepth;
 
     std::unique_ptr<SearchToken> currentToken;
     std::unique_ptr<SearchLexer> lexer;
