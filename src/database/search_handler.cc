@@ -168,9 +168,10 @@ std::unique_ptr<SearchToken> SearchLexer::makeToken(std::string tokenStr)
     return std::make_unique<SearchToken>(TokenType::PROPERTY, std::move(tokenStr));
 }
 
-SearchParser::SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria)
+SearchParser::SearchParser(const SQLEmitter& sqlEmitter, const std::string& searchCriteria, unsigned maxParenthesisDepth)
     : lexer(std::make_unique<SearchLexer>(searchCriteria))
     , sqlEmitter(sqlEmitter)
+    , maxParenthesisDepth(maxParenthesisDepth)
 {
 }
 
