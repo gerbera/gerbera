@@ -457,10 +457,15 @@ protected:
     void getNextToken();
     std::unique_ptr<ASTNode> parseSearchExpression();
     std::unique_ptr<ASTNode> parseRelationshipExpression();
-    std::unique_ptr<ASTNode> parseParenthesis();
+    /// @brief parse a parenthesized expression
+    /// @param depth current parenthesis nesting depth
+    std::unique_ptr<ASTNode> parseParenthesis(unsigned depth = 0);
     std::unique_ptr<ASTQuotedString> parseQuotedString();
 
 private:
+    /// @brief maximum parenthesis nesting depth to protect the parser from stack exhaustion
+    static constexpr unsigned maxParenthesisDepth { 32 };
+
     std::unique_ptr<SearchToken> currentToken;
     std::unique_ptr<SearchLexer> lexer;
     const SQLEmitter& sqlEmitter;

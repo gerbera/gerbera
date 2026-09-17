@@ -250,8 +250,11 @@ std::unique_ptr<ASTNode> SearchParser::parseSearchExpression()
     return root;
 }
 
-std::unique_ptr<ASTNode> SearchParser::parseParenthesis()
+std::unique_ptr<ASTNode> SearchParser::parseParenthesis(unsigned depth)
 {
+    if (depth >= maxParenthesisDepth)
+        throw SearchParseException(fmt::format("Failed to parse search criteria - more than {} nested parentheses", maxParenthesisDepth), LINE_MESSAGE);
+
     if (currentToken->getType() != TokenType::LPAREN)
         throw SearchParseException("Failed to parse search criteria - expecting a ')'", LINE_MESSAGE);
 
@@ -267,7 +270,9 @@ std::unique_ptr<ASTNode> SearchParser::parseParenthesis()
             auto lhsNode = std::move(currentNode);
 
             getNextToken();
-            auto rhsNode = (currentToken->getType() == TokenType::LPAREN) ? parseParenthesis() : parseRelationshipExpression();
+            auto rhsNode = (currentToken->getType() == TokenType::LPAREN)
+                ? parseParenthesis(depth + 1)
+                : parseRelationshipExpression();
 
             if (tokenType == TokenType::AND)
                 currentNode = std::make_unique<ASTAndOperator>(sqlEmitter, std::move(lhsNode), std::move(rhsNode));
@@ -278,7 +283,7 @@ std::unique_ptr<ASTNode> SearchParser::parseParenthesis()
 
             getNextToken();
         } else if (currentToken->getType() == TokenType::LPAREN) {
-            currentNode = parseParenthesis();
+            currentNode = parseParenthesis(depth + 1);
             getNextToken();
         }
     }
