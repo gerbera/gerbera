@@ -24,6 +24,7 @@
 #include "../mock/database_mock.h"
 #include "config/config_setup.h"
 #include "database/search_handler.h"
+#include "exceptions.h"
 #include "metadata/metadata_enums.h"
 #include "upnp/clients.h"
 
@@ -540,6 +541,29 @@ TEST_F(ParserTest, SearchCriteriaBroken)
         ""));
     EXPECT_FALSE(executeSearchParserTest("upnp:class derivedfrom \"object.item.videoItem and last_updated > \"2024-09-12",
         ""));
+}
+
+TEST_F(ParserTest, SearchCriteriaWithNestedParentheses)
+{
+    // parenthesis nesting up to the parser limit is still handled
+    std::string criteria = "dc:title=\"Hospital Roll Call\"";
+    std::string expectedOutput = "(_meta_query0_._property_name_='dc:title' AND LOWER(_meta_query0_._property_value_)=LOWER('Hospital Roll Call'))";
+    for (unsigned i = 0; i < 32; i++) {
+        criteria = fmt::format("({})", criteria);
+        expectedOutput = fmt::format("({})", expectedOutput);
+    }
+    EXPECT_TRUE(executeSearchParserTest(criteria, expectedOutput));
+}
+
+TEST_F(ParserTest, SearchCriteriaWithTooManyNestedParentheses)
+{
+    // deeply nested parentheses must raise a parse error instead of exhausting the stack
+    auto criteria = std::string(10000, '(');
+
+    DefaultSQLEmitter emitter(database, columnMapper, columnMapper, columnMapper, columnMapper);
+    columnMapper->resetCnt();
+    auto parser = SearchParser(emitter, criteria);
+    EXPECT_THROW(parser.parse(), SearchParseException);
 }
 
 TEST_F(ParserTest, SortCriteria)
