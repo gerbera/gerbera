@@ -57,7 +57,7 @@ sudo make install
 | libuuid             |              |              |                      | Depends on OS | Not required on \*BSD            |          |
 | [pugixml]           |              | 1.10         | 1.16                 | Required      | XML file and data support        |          |
 | [jsoncpp]           | 1.7.4        | 1.9.6        | 1.9.8                | Required      | JSON data support                |          |
-| [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1-gb61353        | Required      | Command line parsing             | Bundled  |
+| [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1-gac6d47        | Required      | Command line parsing             | Bundled  |
 | libiconv            |              |              |                      | Required      | Charset conversion               |          |
 | [sqlite3]           | 3.7.0        | 3.35.5       | 3.53.2               | Required      | Database storage                 |          |
 | [zlib]              |              |              |                      | Required      | Data compression                 |          |
@@ -70,7 +70,7 @@ sudo make install
 | [libpq]             | 12.22        |              | 17.0.6               | Optional      | required by [libpqxx]            | Disabled |
 | [curl]              |              |              | 8.14.1               | Optional      | Enables web services             | Enabled  |
 | [taglib]            | 1.12         | 1.12         | 2.3.2                | Optional      | Audio tag support                | Enabled  |
-| [utf8cpp]           | 4.1.1        | 4.1.1        | 4.2.0                | Optional      | Required for [taglib] build      | Enabled  |
+| [utf8cpp]           | 4.1.1        | 4.1.1        | 4.2.1                | Optional      | Required for [taglib] build      | Enabled  |
 | libmagic            |              |              |                      | Optional      | File type detection              | Enabled  |
 | [wavpack]           | 5.1.0        | 5.4.0        | 5.9.0                | Optional      | WavPack metadata support         | Disabled |
 | [libmatroska]       | 1.4.8        | 1.6.3        | 1.7.2                | Optional      | MKV metadata                     | Enabled  |

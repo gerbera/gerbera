@@ -43,7 +43,6 @@
 #include "config/config_manager.h"
 #include "config/config_val.h"
 #include "config/grb_runtime.h"
-#include "contrib/cxxopts.hpp"
 #include "exceptions.h"
 #include "server.h"
 #include "upnp/conn_mgr_service.h"
@@ -53,6 +52,7 @@
 
 #include <condition_variable>
 #include <csignal>
+#include <cxxopts.hpp>
 #include <fmt/core.h>
 #include <mutex>
 #include <vector>

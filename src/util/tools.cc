@@ -34,7 +34,7 @@
 #include "tools.h" // API
 
 #include "config/config.h"
-#include "contrib/md5.h"
+#include "contrib/md5/md5.h"
 #include "util/logger.h"
 
 #include <algorithm>

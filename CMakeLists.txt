@@ -234,8 +234,8 @@ add_library(
     src/content/update_manager.h
     src/context.cc
     src/context.h
-    src/contrib/md5.c
-    src/contrib/md5.h
+    src/contrib/md5/md5.c
+    src/contrib/md5/md5.h
     src/database/database.cc
     src/database/database.h
     src/database/db_param.h
