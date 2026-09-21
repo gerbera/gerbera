@@ -1,4 +1,9 @@
 # Gerbera - UPnP AV Mediaserver.
+## HEAD
+
+### Code Improvements
+
+- Update maximum versions of utf8cpp (4.2.1), cxxopts (3.3.1-gac6d47)
 
 ## v3.3.0
 

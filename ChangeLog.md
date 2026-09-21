@@ -1,5 +1,9 @@
 ## Gerbera - UPnP AV Mediaserver.
 
+### HEAD
+
+- Update to cxxopts-gac6d47
+
 ### v3.3.0
 
 - Add ImportMode to AutoScan settings
