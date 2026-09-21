@@ -371,6 +371,7 @@ void ConfigGenerator::generateServerOptions(
         { ConfigVal::UPNP_DYNAMIC_SERVER_FLAGS, ConfigLevel::Example },
         { ConfigVal::UPNP_MULTI_VALUES_ENABLED, ConfigLevel::Example },
         { ConfigVal::UPNP_SEARCH_SEPARATOR, ConfigLevel::Example },
+        { ConfigVal::UPNP_SEARCH_NESTING_LIMIT, ConfigLevel::Advanced },
         { ConfigVal::UPNP_SEARCH_FILENAME, ConfigLevel::Example },
         { ConfigVal::UPNP_SEARCH_ITEM_SEGMENTS, ConfigLevel::Example },
         { ConfigVal::UPNP_SEARCH_CONTAINER_FLAG, ConfigLevel::Example },

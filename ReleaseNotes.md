@@ -1,5 +1,10 @@
 # Gerbera - UPnP AV Mediaserver.
+
 ## HEAD
+
+### NEW Features
+
+- Config option for nested search queries
 
 ### Code Improvements
 
