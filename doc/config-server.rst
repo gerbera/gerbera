@@ -1538,6 +1538,18 @@ Enable literal IP redirection.
 
 String used to concatenate result segments as defined in ``search-item-result``
 
+.. confval:: search-nesting-limit
+   :type: :confval:`Integer`
+   :required: false
+   :default: `32`
+
+   .. versionadded:: HEAD
+   .. code-block:: xml
+
+       search-nesting-limit="16"
+
+Set maximum number of open brackets ``(``
+
 .. confval:: multi-value
    :type: :confval:`Boolean`
    :required: false

@@ -521,6 +521,7 @@
             <xs:attribute name="search-result-separator" type="xs:string" default=" - "/>
             <xs:attribute name="search-filename" type="boolean" default="no"/>
             <xs:attribute name="caption-info-count" type="xs:integer" default="-1"/>
+            <xs:attribute name="search-nesting-limit" type="xs:integer" default="32"/>
             <xs:attribute name="from-file" type="xs:string"/>
         </xs:complexType>
     </xs:element>

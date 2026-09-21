@@ -1247,7 +1247,7 @@ void SQLDatabase::initDynContainers(const std::shared_ptr<CdsObject>& sParent)
 
 std::vector<std::shared_ptr<CdsObject>> SQLDatabase::search(SearchParam& param)
 {
-    auto searchParser = SearchParser(*sqlEmitter, param.getSearchCriteria());
+    auto searchParser = SearchParser(*sqlEmitter, param.getSearchCriteria(), config->getIntOption(ConfigVal::UPNP_SEARCH_NESTING_LIMIT));
     std::shared_ptr<ASTNode> rootNode = searchParser.parse();
     auto sql = rootNode->emitSQL();
     std::string searchSQL(sql.first);

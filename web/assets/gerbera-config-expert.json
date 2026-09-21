@@ -2821,6 +2821,11 @@
           "editable": true
         },
         {
+          "item": "/server/upnp/attribute::search-nesting-limit",
+          "caption": "Maximum Bracket Nesting",
+          "editable": true
+        },
+        {
           "item": "/server/upnp/search-item-result/add-data",
           "caption": "Title Result Item",
           "type": "List",
