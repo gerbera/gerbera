@@ -4,11 +4,12 @@
 
 ### NEW Features
 
-- Config option for nested search queries
+- Configuration option for search bracket nesting limit
 
 ### Code Improvements
 
-- Update maximum versions of utf8cpp (4.2.1), cxxopts (3.3.1-gac6d47)
+- Update maximum versions of utf8cpp (4.2.1), cxxopts (3.3.1-gac6d47),
+  pupnp (22.1.1)
 
 ## v3.3.0
 
