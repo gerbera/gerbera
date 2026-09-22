@@ -4,6 +4,7 @@
 
 - Add config for search bracket nesting limit
 - Update to cxxopts-gac6d47
+- Update to pupnp 22.1.1
 
 ### v3.3.0
 
