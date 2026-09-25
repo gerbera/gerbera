@@ -9,7 +9,7 @@
 ### Code Improvements
 
 - Update maximum versions of utf8cpp (4.2.1), cxxopts (3.3.1-gac6d47),
-  pupnp (22.1.4)
+  pupnp (22.1.5)
 
 ## v3.3.0
 
