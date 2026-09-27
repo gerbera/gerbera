@@ -156,6 +156,7 @@ The mappings under mimetype-profile are defined in the following manner:
 
    .. code-block:: xml
 
+      <transcode mimetype="audio/x-flac" using="int2mp3"/>
       <transcode mimetype="audio/x-flac" using="oggflac-pcm"/>
 
 In this example we want to transcode our flac audio files (they have the mimetype audio/x-flac) using the ”oggflac-pcm”
@@ -278,6 +279,13 @@ Profile
 
    .. code-block:: xml
 
+      <profile name="int2mp3" enabled="no" type="internal">
+        <mimetype>audio/mpeg</mimetype>
+        <accept-url>no</accept-url>
+        <first-resource>yes</first-resource>
+        <accept-ogg-theora>yes</accept-ogg-theora>
+        <encoder format="mp3" acodec="mp3" afilter="anull" />
+      </profile>
       <profile name="vlcmpeg" enabled="no" type="external" no-transcoding="" dlna-profile="MP4">
         <mimetype>video/mpeg</mimetype>
         <accept-url>yes</accept-url>
