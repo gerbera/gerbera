@@ -90,10 +90,14 @@ TranscodeInternalIOHandler::~TranscodeInternalIOHandler()
     log_debug("cleanup");
     av_packet_free(&packet);
     avformat_close_input(&inFormatContext);
-#if 0
-    if (outFormatContext && outFormatContext->pb && !(outFormatContext->oformat->flags & AVFMT_NOFILE))
-        avio_closep(&outFormatContext->pb);
-#endif
+    if (outFormatContext && outFormatContext->pb) {
+        uint8_t* buffer = nullptr;
+        int size = avio_close_dyn_buf(outFormatContext->pb, &buffer);
+        if (size < 0)
+            log_error("Close dyn buffer failed (error '{}')", av_err2str(size));
+        av_free(buffer);
+        outFormatContext->pb = nullptr;
+    }
     avformat_free_context(outFormatContext);
 }
 
@@ -274,8 +278,11 @@ int TranscodeInternalIOHandler::open_output_file(const std::string& filename)
     if (!filename.empty()) {
         av_dump_format(outFormatContext, 0, filename.c_str(), 1);
 
-        if (!(outFormatContext->oformat->flags & AVFMT_NOFILE))
-            ret = avio_open(&outFormatContext->pb, filename.c_str(), AVIO_FLAG_WRITE);
+        if (!(outFormatContext->oformat->flags & AVFMT_NOFILE)) {
+            ret = avio_open_dyn_buf(&outFormatContext->pb);
+            if (ret >= 0)
+                outFormatContext->pb->seekable = 0;
+        }
         if (ret < 0) {
             log_error("Could not open output file '{}' (error '{}')", filename, av_err2str(ret));
             return ret;
@@ -476,21 +483,22 @@ std::vector<std::byte> TranscodeInternalIOHandler::readBuffer()
     if (!outFormatContext || !outFormatContext->pb)
         return result;
 
-    int ret = avio_open_dyn_buf(&outFormatContext->pb);
-    if (ret < 0) {
-        log_error("Open dyn buffer failed (error '{}')", av_err2str(ret));
-        return result;
-    }
-    // int avio_close_dyn_buf(AVIOContext *s, uint8_t **pbuffer)
     int size = avio_close_dyn_buf(outFormatContext->pb, &buffer);
+    outFormatContext->pb = nullptr;
     if (size >= 0) {
         if (size > 0)
             result = std::vector<std::byte>((std::byte*)buffer, (std::byte*)(buffer + size));
         log_debug("Got {} bytes from buffer", size);
-        av_free(buffer);
     } else {
         log_error("Close dyn buffer failed (error '{}')", av_err2str(size));
     }
+    av_free(buffer);
+
+    int ret = avio_open_dyn_buf(&outFormatContext->pb);
+    if (ret < 0)
+        log_error("Open dyn buffer failed (error '{}')", av_err2str(ret));
+    else
+        outFormatContext->pb->seekable = 0;
     return result;
 }
 
