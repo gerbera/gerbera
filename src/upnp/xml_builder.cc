@@ -1032,7 +1032,7 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
                 }
             }
 
-#ifdef FFMPEG
+#ifdef HAVE_FFMPEG
             auto tRes = std::make_shared<CdsResource>((tp->getType() == TranscodingType::Internal) ? ContentHandler::INT_TRANSCODE : ContentHandler::TRANSCODE, ResourcePurpose::Transcode);
 #else
             auto tRes = std::make_shared<CdsResource>(ContentHandler::TRANSCODE, ResourcePurpose::Transcode);
