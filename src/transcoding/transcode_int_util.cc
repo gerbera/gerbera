@@ -319,6 +319,27 @@ bool FilteringContext::createAudioBufferSink(const std::string& name)
         return false;
     }
 
+#if (LIBAVFILTER_VERSION_INT >= AV_VERSION_INT(10, 6, 100))
+    // FFmpeg 7.1 and newer: array options
+    int ret = av_opt_set_array(buffersink_ctx, "sample_formats", AV_OPT_SEARCH_CHILDREN,
+        0, 1, AV_OPT_TYPE_SAMPLE_FMT, &encContext->sample_fmt);
+    if (ret < 0) {
+        log_error("Cannot set output sample format (error '{}')", av_err2str(ret));
+        return false;
+    }
+    ret = av_opt_set_array(buffersink_ctx, "samplerates", AV_OPT_SEARCH_CHILDREN,
+        0, 1, AV_OPT_TYPE_INT, &encContext->sample_rate);
+    if (ret < 0) {
+        log_error("Cannot set output sample rate (error '{}')", av_err2str(ret));
+        return false;
+    }
+    ret = av_opt_set_array(buffersink_ctx, "channel_layouts", AV_OPT_SEARCH_CHILDREN,
+        0, 1, AV_OPT_TYPE_CHLAYOUT, &encContext->ch_layout);
+    if (ret < 0) {
+        log_error("Cannot set output channel layout (error '{}')", av_err2str(ret));
+        return false;
+    }
+#else
     // Set output sample format, channel layout, and sample rate
     int ret = av_opt_set_bin(buffersink_ctx, "sample_fmts",
         (uint8_t*)&encContext->sample_fmt, sizeof(encContext->sample_fmt),
@@ -351,6 +372,7 @@ bool FilteringContext::createAudioBufferSink(const std::string& name)
         log_error("Cannot set output sample rate (error '{}')", av_err2str(ret));
         return false;
     }
+#endif
 
     ret = avfilter_init_dict(buffersink_ctx, nullptr);
     if (ret < 0) {
