@@ -560,6 +560,8 @@ StreamContext::StreamContext(
         auto codec = avcodec_find_encoder_by_name(profile->encoder.getACodec().c_str());
         if (codec)
             settings.codecId = codec->id;
+        else
+            log_error("Audio encoder '{}' not found", profile->encoder.getACodec());
     } else if (this->dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO && !profile->encoder.getVCodec().empty()) {
         auto codec = avcodec_find_encoder_by_name(profile->encoder.getVCodec().c_str());
         if (codec)
