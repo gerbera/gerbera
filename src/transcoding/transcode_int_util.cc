@@ -149,6 +149,9 @@ FilteringContext::FilteringContext(
         return;
     }
 
+    if (encContext->frame_size > 0 && buffersink_ctx->inputs && buffersink_ctx->inputs[0])
+        av_buffersink_set_frame_size(buffersink_ctx, encContext->frame_size);
+
     // Allocate encoder packet and frame
     this->encPacket = av_packet_alloc();
     if (!this->encPacket) {
@@ -354,9 +357,6 @@ bool FilteringContext::createAudioBufferSink(const std::string& name)
         log_error("Cannot initialize audio buffer sink (error '{}')", av_err2str(ret));
         return false;
     }
-
-    if (encContext->frame_size > 0 && buffersink_ctx->inputs && buffersink_ctx->inputs[0])
-        av_buffersink_set_frame_size(buffersink_ctx, encContext->frame_size);
 
     return true;
 }
