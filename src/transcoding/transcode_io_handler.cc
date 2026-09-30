@@ -213,9 +213,6 @@ off_t TranscodeInternalIOHandler::tell()
 
 void TranscodeInternalIOHandler::close()
 {
-    std::lock_guard<std::mutex> lock(mutex);
-    if (!outFilePath.empty())
-        GrbFile(outFilePath).remove();
 }
 
 int TranscodeInternalIOHandler::open_input_file()
