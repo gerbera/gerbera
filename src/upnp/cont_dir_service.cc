@@ -272,7 +272,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
 
     for (auto&& cdsObject : results) {
         if (!cdsObject->isItem()) {
-            xmlBuilder->renderObject(cdsObject, splitString(filter, ','), stringLimitClient, didlLiteRoot);
+            xmlBuilder->renderObject(cdsObject, splitString(filter, ','), stringLimitClient, didlLiteRoot, quirks);
             continue;
         }
 
@@ -290,7 +290,7 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         }
 
         markPlayedItem(cdsObject, title);
-        xmlBuilder->renderObject(cdsObject, splitString(filter, ','), stringLimitClient, didlLiteRoot);
+        xmlBuilder->renderObject(cdsObject, splitString(filter, ','), stringLimitClient, didlLiteRoot, quirks);
     }
 
     std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "", quirks && quirks->hasFlag(Quirk::StrictXML) ? pugi::format_no_escapes : 0);
