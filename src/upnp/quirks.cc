@@ -75,8 +75,9 @@ bool Quirks::hasFlag(Quirk flag) const
 
 bool Quirks::hasHeader(const std::string& key, const std::string& value) const
 {
-    // not pClient->headers: the client cache keeps the headers of the request that created the entry
-    return requestHeaders && requestHeaders->hasHeader(key) && requestHeaders->getHeader(key) == value;
+    // the request being served, then the headers the client cache kept from an earlier one
+    return (requestHeaders && requestHeaders->hasHeader(key) && requestHeaders->getHeader(key) == value)
+        || (pClient && pClient->headers && pClient->headers->hasHeader(key) && pClient->headers->getHeader(key) == value);
 }
 
 std::string Quirks::getGroup() const

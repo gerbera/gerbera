@@ -227,7 +227,7 @@ public:
     bool hasFlag(QuirkFlags flag, bool matchesWithOut) const;
     bool hasFlag(Quirk flag) const;
 
-    /** @brief Check for header entry in the request being served
+    /** @brief Check for header entry in the request being served or in the cached client headers
      */
     bool hasHeader(const std::string& key, const std::string& value) const;
 
