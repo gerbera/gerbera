@@ -170,7 +170,8 @@ grb_read_t TranscodeInternalIOHandler::read(std::byte* buf, std::size_t length)
 
         auto buffer = readBuffer();
         std::size_t bytesToWrite = length > buffer.size() ? buffer.size() : length;
-        std::memcpy(buf + index, buffer.data(), bytesToWrite);
+        if (buffer.size() > 0)
+            std::memcpy(buf + index, buffer.data(), bytesToWrite);
         index += bytesToWrite;
         length -= bytesToWrite;
         if (length == 0) {
