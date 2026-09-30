@@ -141,7 +141,7 @@ grb_read_t TranscodeInternalIOHandler::read(std::byte* buf, std::size_t length)
         length -= bytesToWrite;
         if (length == 0) {
             if (extraData.size() > bytesToWrite)
-                extraData = std::vector<std::byte>(extraData.data() + bytesToWrite + 1, extraData.data() + extraData.size());
+                extraData = std::vector<std::byte>(extraData.data() + bytesToWrite, extraData.data() + extraData.size());
             else
                 extraData.clear();
             return bytesToWrite;
@@ -175,7 +175,7 @@ grb_read_t TranscodeInternalIOHandler::read(std::byte* buf, std::size_t length)
         length -= bytesToWrite;
         if (length == 0) {
             if (buffer.size() > bytesToWrite)
-                extraData = std::vector<std::byte>(buffer.data() + bytesToWrite + 1, buffer.data() + buffer.size());
+                extraData = std::vector<std::byte>(buffer.data() + bytesToWrite, buffer.data() + buffer.size());
             return grb_read_t(index); // successful read
         }
         if (isEOF) {
