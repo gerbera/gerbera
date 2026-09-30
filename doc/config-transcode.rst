@@ -706,6 +706,21 @@ Used to overwrite the environment of the gerbera process. The entry can appear m
       :required: true
    ..
 
+.. versionadded:: HEAD
+
+The entry ``SEEK_BITRATE`` is read by Gerbera too. It promises that the agent writes a stream of exactly this
+constant bit rate in bit/s, e.g. an MPEG-TS made by ffmpeg with ``-muxrate``, so that every second of the stream
+has the same number of bytes. Gerbera then serves the transcoded resource like a file: it declares a length of
+one second less than the duration times the bit rate, allows seeking by byte range (``DLNA.ORG_OP=01``) and
+answers a range request by starting the agent from the time that matches its first byte. The agent gets that
+time in seconds in place of the token ``%range``, which is empty for a request from the beginning.
+
+   .. code-block:: xml
+
+       <agent command="/usr/local/bin/transcode-cbr.sh" arguments="%in %out %range">
+           <environ name="SEEK_BITRATE" value="10000000"/>
+       </agent>
+
 Profile Buffer
 --------------
 

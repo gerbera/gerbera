@@ -210,6 +210,15 @@ public:
     void setEnviron(const std::map<std::string, std::string>& environ) { this->environment = environ; }
     const std::map<std::string, std::string>& getEnviron() const { return environment; }
 
+    /// @brief constant bit rate of the transcoded stream in bit/s, from the
+    /// SEEK_BITRATE entry of the agent environment, 0 if the profile does not set it.
+    /// With it a transcoded resource is served like a file: with a length computed
+    /// from the duration, and with byte ranges mapped to a start time for the agent.
+    long long getSeekBitrate() const;
+    /// @brief length in bytes of the transcoded stream of a media with the given
+    /// duration (H:MM:SS.F), -1 if the profile is not seekable or the duration unknown
+    off_t getSeekSize(const std::string& duration) const;
+
     /// @brief identifies if the profile should be set as the first resource
     void setFirstResource(bool fr) { firstResource = fr; }
     bool getFirstResource() const { return firstResource; }

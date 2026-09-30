@@ -798,7 +798,7 @@ std::string UpnpXMLBuilder::getDLNAContentHeader(
     auto seek = UPNP_DLNA_OP_SEEK_RANGE;
     auto conversion = UPNP_DLNA_NO_CONVERSION;
     if (res->getPurpose() == ResourcePurpose::Transcode) {
-        if (res->getHandlerType() != ContentHandler::INT_TRANSCODE)
+        if (res->getHandlerType() != ContentHandler::INT_TRANSCODE && res->getAttribute(ResourceAttribute::SIZE).empty())
             seek = UPNP_DLNA_OP_SEEK_DISABLED;
         if (!quirks || !quirks->hasFlag(Quirk::ForceNoConversion))
             conversion = UPNP_DLNA_CONVERSION;
@@ -1054,6 +1054,10 @@ std::pair<bool, int> UpnpXMLBuilder::insertTempTranscodingResource(
                 std::string duration = mainResource->getAttribute(ResourceAttribute::DURATION);
                 if (!duration.empty())
                     tRes->addAttribute(ResourceAttribute::DURATION, duration);
+                // a profile with a constant bit rate is served like a file of this length
+                auto seekSize = tp->getSeekSize(duration);
+                if (seekSize > 0)
+                    tRes->addAttribute(ResourceAttribute::SIZE, seekSize);
 
                 int freq = tp->getSampleFreq();
                 if (freq == SOURCE) {
@@ -1262,9 +1266,11 @@ std::string UpnpXMLBuilder::buildProtocolInfo(
         if (resource.getHandlerType() == ContentHandler::INT_TRANSCODE) {
             extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, quirks && quirks->hasFlag(Quirk::ForceNoConversion) ? UPNP_DLNA_NO_CONVERSION : UPNP_DLNA_CONVERSION));
         } else {
-            // we do not support seeking at all, so 00
+            // no seeking, 00, unless the profile has a constant bit rate and the resource
+            // a length: then byte ranges, 01, which are mapped to a start time for the agent
             // and the media is converted, so set CI to 1
-            extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_DISABLED, UPNP_DLNA_CONVERSION_INDICATOR, quirks && quirks->hasFlag(Quirk::ForceNoConversion) ? UPNP_DLNA_NO_CONVERSION : UPNP_DLNA_CONVERSION));
+            auto seek = resource.getAttribute(ResourceAttribute::SIZE).empty() ? UPNP_DLNA_OP_SEEK_DISABLED : UPNP_DLNA_OP_SEEK_RANGE;
+            extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, seek, UPNP_DLNA_CONVERSION_INDICATOR, quirks && quirks->hasFlag(Quirk::ForceNoConversion) ? UPNP_DLNA_NO_CONVERSION : UPNP_DLNA_CONVERSION));
         }
     } else {
         extend.append(fmt::format("{}={};{}={}", UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION));
