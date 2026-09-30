@@ -87,7 +87,8 @@ private:
         const std::shared_ptr<CdsObject>& obj,
         UpnpFileInfo* info,
         const std::string& path,
-        const std::string& trProfile);
+        const std::string& trProfile,
+        Headers& headers);
     /// @brief get header information for zip archives
     std::string getZipInfo(
         const std::shared_ptr<CdsObject>& obj,
