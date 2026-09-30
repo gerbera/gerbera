@@ -350,3 +350,14 @@ TEST_F(HeadersHelperTest, ReadsRequestHeaders)
     EXPECT_EQ(actual, expected);
 }
 #endif
+
+TEST_F(HeadersHelperTest, FindsHeadersIgnoringCase)
+{
+    // arrange: npupnp hands request headers over in lower case
+    subject.addHeader("getcaptioninfo.sec", "1");
+
+    // act and assert
+    EXPECT_TRUE(subject.hasHeader("getCaptionInfo.sec"));
+    EXPECT_EQ(subject.getHeader("getCaptionInfo.sec"), "1");
+    EXPECT_FALSE(subject.hasHeader("getMediaInfo.sec"));
+}
