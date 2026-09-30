@@ -120,9 +120,21 @@ std::map<std::string, std::string> UpnpGetHeadersCompat(const UpnpFileInfo* file
         return ret;
     for (auto pos = UpnpListBegin(head); pos != UpnpListEnd(head); pos = UpnpListNext(head, pos)) {
         auto extra = reinterpret_cast<UpnpExtraHeaders*>(pos);
-        auto value = UpnpExtraHeaders_get_resp(extra);
-        std::string header = value ? value : "";
-        ret.insert(parseHeader(header));
+        // libupnp stores the headers of a request in name and value,
+        // resp is the complete line of a header set for the response
+        auto name = UpnpExtraHeaders_get_name_cstr(extra);
+        if (name && *name) {
+            auto value = UpnpExtraHeaders_get_value_cstr(extra);
+            std::string first = name;
+            std::string second = value ? value : "";
+            trimStringInPlace(first);
+            trimStringInPlace(second);
+            ret.emplace(first, second);
+        } else {
+            auto value = UpnpExtraHeaders_get_resp(extra);
+            std::string header = value ? value : "";
+            ret.insert(parseHeader(header));
+        }
     }
 
     return ret;

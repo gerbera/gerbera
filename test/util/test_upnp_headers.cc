@@ -22,6 +22,10 @@
 
 #include "upnp/headers.h"
 
+#if !defined(USING_NPUPNP)
+#include <UpnpExtraHeaders.h>
+#endif
+
 #include <gtest/gtest.h>
 
 class HeadersHelperTest : public ::testing::Test {
@@ -323,6 +327,26 @@ TEST_F(HeadersHelperTest, DoesOverwriteWithUpdate)
 
     // assert
     auto actual = Headers(info).getHeaders();
+    EXPECT_EQ(actual, expected);
+}
+
+TEST_F(HeadersHelperTest, ReadsRequestHeaders)
+{
+    // arrange: libupnp stores the headers of a request in name and value
+    std::string key = "getCaptionInfo.sec";
+    std::string value = "1";
+    std::map<std::string, std::string> expected;
+    expected[key] = value;
+    auto extra = UpnpExtraHeaders_new();
+    UpnpExtraHeaders_strncpy_name(extra, key.c_str(), key.length());
+    UpnpExtraHeaders_strncpy_value(extra, value.c_str(), value.length());
+    auto head = const_cast<UpnpListHead*>(UpnpFileInfo_get_ExtraHeadersList(info));
+    UpnpListInsert(head, UpnpListEnd(head), const_cast<UpnpListHead*>(UpnpExtraHeaders_get_node(extra)));
+
+    // act
+    auto actual = Headers(info).getHeaders();
+
+    // assert
     EXPECT_EQ(actual, expected);
 }
 #endif
