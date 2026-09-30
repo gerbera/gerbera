@@ -105,7 +105,7 @@ bool FileRequestHandler::getInfo(
     Headers headers;
 
     if (obj->isItem() && !trProfile.empty())
-        mimeType = getTranscodingInfo(obj, info, path, trProfile);
+        mimeType = getTranscodingInfo(obj, info, path, trProfile, headers);
     else if (obj->isContainer() && !zipRequest.empty())
         mimeType = getZipInfo(obj, info);
     else
@@ -130,7 +130,8 @@ std::string FileRequestHandler::getTranscodingInfo(
     const std::shared_ptr<CdsObject>& obj,
     UpnpFileInfo* info,
     const std::string& path,
-    const std::string& trProfile)
+    const std::string& trProfile,
+    Headers& headers)
 {
     getFileInfo(path, info, false, ContentHandler::TRANSCODE, ResourcePurpose::Transcode);
     auto transcodingProfile = config->getTranscodingProfileListOption(ConfigVal::TRANSCODING_PROFILE_LIST)->getByName(trProfile);
@@ -152,6 +153,16 @@ std::string FileRequestHandler::getTranscodingInfo(
                 propList.push_back(fmt::format("{}={}", prop.getKey(), value));
         }
         mimeType = fmt::format("{}", fmt::join(propList, ";"));
+    }
+
+    // Generate DLNA Headers, with the values the DIDL has for the transcoded resource
+    auto resource = std::make_shared<CdsResource>(ContentHandler::TRANSCODE, ResourcePurpose::Transcode);
+    if (!transcodingProfile->getDlnaProfile().empty())
+        resource->addOption("dlnaProfile", transcodingProfile->getDlnaProfile());
+    auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
+    std::string dlnaContentHeader = xmlBuilder->getDLNAContentHeader(getValueOrDefault(mappings, transcodingProfile->getTargetMimeType()), resource, quirks);
+    if (!dlnaContentHeader.empty()) {
+        headers.addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
     }
 
     // The length is unknown. Not UPNP_USING_CHUNKED: libupnp answers 406 Not Acceptable to

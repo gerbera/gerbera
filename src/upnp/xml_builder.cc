@@ -794,9 +794,18 @@ std::string UpnpXMLBuilder::getDLNAContentHeader(
     const std::shared_ptr<Quirks>& quirks) const
 {
     std::string contentParameter = dlnaProfileString(*res, contentType, quirks);
+    // seeking and conversion as in buildProtocolInfo
+    auto seek = UPNP_DLNA_OP_SEEK_RANGE;
+    auto conversion = UPNP_DLNA_NO_CONVERSION;
+    if (res->getPurpose() == ResourcePurpose::Transcode) {
+        if (res->getHandlerType() != ContentHandler::INT_TRANSCODE)
+            seek = UPNP_DLNA_OP_SEEK_DISABLED;
+        if (!quirks || !quirks->hasFlag(Quirk::ForceNoConversion))
+            conversion = UPNP_DLNA_CONVERSION;
+    }
     return fmt::format("{}{}={};{}={};{}={}", contentParameter, //
-        UPNP_DLNA_OP, UPNP_DLNA_OP_SEEK_RANGE, //
-        UPNP_DLNA_CONVERSION_INDICATOR, UPNP_DLNA_NO_CONVERSION, //
+        UPNP_DLNA_OP, seek, //
+        UPNP_DLNA_CONVERSION_INDICATOR, conversion, //
         UPNP_DLNA_FLAGS, UPNP_DLNA_ORG_FLAGS_AV);
 }
 
