@@ -158,9 +158,6 @@ grb_read_t TranscodeInternalIOHandler::read(std::byte* buf, std::size_t length)
 
     while (length > 0) {
         auto ret = filterPacket();
-        if (ret < 0)
-            return GRB_READ_ERROR;
-
         if (ret == AVERROR_EOF || ret == AVERROR(EAGAIN)) {
             ret = closeOutput();
             if (ret < 0) {
@@ -168,6 +165,9 @@ grb_read_t TranscodeInternalIOHandler::read(std::byte* buf, std::size_t length)
             }
             isEOF = true;
         }
+        if (ret < 0)
+            return GRB_READ_ERROR;
+
         auto buffer = readBuffer();
         std::size_t bytesToWrite = length > buffer.size() ? buffer.size() : length;
         std::memcpy(buf + index, buffer.data(), bytesToWrite);
