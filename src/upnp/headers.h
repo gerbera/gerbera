@@ -52,6 +52,8 @@ public:
 private:
     /// @brief strip end of line characters
     static std::string stripInvalid(const std::string& value);
+    /// @brief find header by name, ignoring case
+    std::map<std::string, std::string>::const_iterator findHeader(const std::string& key) const;
 
     std::map<std::string, std::string> headers;
 };

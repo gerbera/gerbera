@@ -28,6 +28,9 @@
 
 #include "upnp/compat.h"
 #include "util/logger.h"
+#include "util/tools.h"
+
+#include <algorithm>
 
 Headers::Headers(const UpnpFileInfo* fileInfo)
     : headers(GrbUpnpGetHeaders(fileInfo))
@@ -85,12 +88,23 @@ void Headers::writeHeaders(UpnpFileInfo* fileInfo) const
     GrbUpnpSetHeaders(fileInfo, headers);
 }
 
+std::map<std::string, std::string>::const_iterator Headers::findHeader(const std::string& key) const
+{
+    auto entry = headers.find(key);
+    if (entry != headers.end())
+        return entry;
+    // header names are case-insensitive, and npupnp hands them over in lower case
+    auto lowerKey = toLower(key);
+    return std::find_if(headers.begin(), headers.end(), [&lowerKey](auto&& header) { return toLower(header.first) == lowerKey; });
+}
+
 bool Headers::hasHeader(const std::string& key) const
 {
-    return headers.find(key) != headers.end();
+    return findHeader(key) != headers.end();
 }
 
 std::string Headers::getHeader(const std::string& key) const
 {
-    return headers.find(key)->second;
+    auto entry = findHeader(key);
+    return entry != headers.end() ? entry->second : "";
 }
