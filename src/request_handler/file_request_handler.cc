@@ -154,7 +154,10 @@ std::string FileRequestHandler::getTranscodingInfo(
         mimeType = fmt::format("{}", fmt::join(propList, ";"));
     }
 
-    UpnpFileInfo_set_FileLength(info, UPNP_USING_CHUNKED);
+    // The length is unknown. Not UPNP_USING_CHUNKED: libupnp answers 406 Not Acceptable to
+    // an HTTP/1.0 client, as chunked encoding exists only in HTTP/1.1. Without a length the
+    // stream ends when the connection closes, which clients of both versions understand.
+    UpnpFileInfo_set_FileLength(info, UPNP_UNTIL_CLOSE);
     return mimeType;
 }
 
