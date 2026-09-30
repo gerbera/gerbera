@@ -227,7 +227,7 @@ public:
     bool hasFlag(QuirkFlags flag, bool matchesWithOut) const;
     bool hasFlag(Quirk flag) const;
 
-    /** @brief Check for header entry
+    /** @brief Check for header entry in the request being served
      */
     bool hasHeader(const std::string& key, const std::string& value) const;
 
@@ -242,6 +242,8 @@ private:
     std::shared_ptr<UpnpXMLBuilder> xmlBuilder;
     const ClientProfile* pClientProfile;
     const ClientObservation* pClient;
+    /// @brief headers of the request being served
+    std::shared_ptr<Headers> requestHeaders;
 };
 
 #endif // __UPNP_QUIRKS_H__

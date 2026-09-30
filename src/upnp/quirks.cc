@@ -49,6 +49,7 @@ Quirks::Quirks(
     const std::string& userAgent,
     const std::shared_ptr<Headers>& headers)
     : xmlBuilder(std::move(xmlBuilder))
+    , requestHeaders(headers)
 {
     if (addr || !userAgent.empty()) {
         pClient = clientManager->getInfo(addr, userAgent, headers);
@@ -74,7 +75,8 @@ bool Quirks::hasFlag(Quirk flag) const
 
 bool Quirks::hasHeader(const std::string& key, const std::string& value) const
 {
-    return pClient && pClient->headers && pClient->headers->hasHeader(key) && pClient->headers->getHeader(key) == value;
+    // not pClient->headers: the client cache keeps the headers of the request that created the entry
+    return requestHeaders && requestHeaders->hasHeader(key) && requestHeaders->getHeader(key) == value;
 }
 
 std::string Quirks::getGroup() const
