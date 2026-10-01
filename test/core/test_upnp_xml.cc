@@ -549,3 +549,41 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem)
     EXPECT_NE(result, "");
     EXPECT_STREQ(result.c_str(), "http://server/media/object_id/12345/res_id/0");
 }
+
+class ColorTransferConfigMock final : public ConfigMock {
+public:
+    std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(ConfigVal option) const override
+    {
+        auto mappings = ConfigMock::getVectorOption(option);
+        if (option == ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST)
+            mappings.push_back({ { "from", CONTENT_TYPE_MKV }, { "colorTransfer", "smpte2084" }, { "to", "MKV_HDR" } });
+        return mappings;
+    }
+};
+
+class ProfileXmlBuilder : public UpnpXMLBuilder {
+public:
+    using UpnpXMLBuilder::dlnaProfileString;
+    using UpnpXMLBuilder::UpnpXMLBuilder;
+};
+
+TEST(UpnpXmlProfileTest, MatchesResourceOptions)
+{
+    auto config = std::make_shared<ColorTransferConfigMock>();
+    auto database = std::make_shared<DatabaseMock>(config);
+    auto converterManager = std::make_shared<ConverterManager>(config);
+    auto definition = std::make_shared<ConfigDefinition>();
+    definition->init(definition);
+    auto context = std::make_shared<Context>(definition, config, nullptr, nullptr, database, nullptr, converterManager);
+    ProfileXmlBuilder subject(context, "http://server");
+
+    CdsResource hdr(ContentHandler::DEFAULT, ResourcePurpose::Content);
+    hdr.addOption(RESOURCE_OPTION_COLOR_TRANSFER, "smpte2084");
+    CdsResource sdr(ContentHandler::DEFAULT, ResourcePurpose::Content);
+    sdr.addOption(RESOURCE_OPTION_COLOR_TRANSFER, "bt709");
+    CdsResource unknown(ContentHandler::DEFAULT, ResourcePurpose::Content);
+
+    EXPECT_EQ(subject.dlnaProfileString(hdr, CONTENT_TYPE_MKV, nullptr, false), "MKV_HDR");
+    EXPECT_EQ(subject.dlnaProfileString(sdr, CONTENT_TYPE_MKV, nullptr, false), "MKV");
+    EXPECT_EQ(subject.dlnaProfileString(unknown, CONTENT_TYPE_MKV, nullptr, false), "MKV");
+}

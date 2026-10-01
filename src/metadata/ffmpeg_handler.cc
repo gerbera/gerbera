@@ -725,6 +725,16 @@ bool FfmpegHandler::addFfmpegResourceFields(
                     log_debug("Unknown Pixel Format");
                 }
             }
+
+            // transfer characteristics: smpte2084 (PQ) and arib-std-b67 (HLG) are HDR
+            {
+                auto trc = as_codecpar(st)->color_trc;
+                auto trcName = av_color_transfer_name(trc);
+                if (trc != AVCOL_TRC_UNSPECIFIED && trcName) {
+                    resource2->addOption(RESOURCE_OPTION_COLOR_TRANSFER, trcName);
+                    log_debug("Color Transfer: {}", trcName);
+                }
+            }
             result = true;
             break;
         }
