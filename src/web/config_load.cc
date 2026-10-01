@@ -813,6 +813,9 @@ void Web::ConfigLoad::writeTranscoding(Json::Value& values)
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS }),
             cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS, entry->agent.getArguments());
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_BITRATE }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_BITRATE, entry->agent.getBitrate());
         // Buffer
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE }),

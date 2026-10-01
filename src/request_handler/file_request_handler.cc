@@ -405,11 +405,11 @@ std::unique_ptr<IOHandler> FileRequestHandler::openResource(
 
 /// @brief A transcoded stream served like a file.
 ///
-/// With a constant bit rate the stream carries SEEK_BITRATE / 8 bytes per second,
+/// With a constant bit rate the stream carries bitrate / 8 bytes per second,
 /// so a byte offset is a point in time. For a range request libupnp calls seek()
 /// right after open() and before any read() (httpreadwrite.c, http_SendMessage):
 /// the agent is started at the first read, from the time that matches the offset,
-/// which it gets in seconds through %range.
+/// which it gets in seconds through %range, 0 for a request from the beginning.
 class SeekableTranscodeIOHandler : public IOHandler {
 public:
     SeekableTranscodeIOHandler(
@@ -436,7 +436,8 @@ public:
         // Server::ReadCallback does not catch exceptions
         try {
             if (!transcoder) {
-                std::string range;
+                // also 0, so that the agent can always pass it on, e.g. to ffmpeg's -ss
+                std::string range = "0";
                 if (offset > 0)
                     range = fmt::format("{:.3f}", static_cast<double>(offset) * 8.0 / static_cast<double>(profile->getSeekBitrate()));
                 log_debug("Transcoding {} from byte {}, start time '{}'", path, offset, range);

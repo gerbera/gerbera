@@ -61,13 +61,15 @@ public:
     /// @param out replacement for %out
     /// @param range replacement for %range
     /// @param title replacement for %title
+    /// @param bitrate replacement for %bitrate
     /// @return vector of strings containing command line items
     static std::vector<std::string> populateCommandLine(
         const std::string& line,
         const std::string& in = "",
         const std::string& out = "",
         const std::string& range = "",
-        const std::string& title = "");
+        const std::string& title = "",
+        const std::string& bitrate = "");
 
 private:
     fs::path makeFifo();
