@@ -176,6 +176,18 @@ protected:
     bool processPageAction(Json::Value& element, const std::string& action) override;
 };
 
+/// @brief Call from WebUi to rescan a directory tracked by autoscan
+class Sync : public PageRequest {
+    using PageRequest::PageRequest;
+
+public:
+    const static std::string_view PAGE;
+    std::string_view getPage() const override { return PAGE; }
+
+protected:
+    bool processPageAction(Json::Value& element, const std::string& action) override;
+};
+
 /// @brief Call from WebUi to Remove item in database view
 class Remove : public PageRequest {
     using PageRequest::PageRequest;
