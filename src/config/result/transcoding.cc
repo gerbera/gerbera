@@ -49,19 +49,6 @@ TranscodingFilter::TranscodingFilter(std::string mimeType, std::string transcode
 {
 }
 
-long long TranscodingProfile::getSeekBitrate() const
-{
-    auto entry = environment.find("SEEK_BITRATE");
-    if (entry == environment.end())
-        return 0;
-    try {
-        auto rate = std::stoll(entry->second);
-        return rate > 0 ? rate : 0;
-    } catch (const std::exception&) {
-        return 0;
-    }
-}
-
 off_t TranscodingProfile::getSeekSize(const std::string& duration) const
 {
     auto rate = getSeekBitrate();

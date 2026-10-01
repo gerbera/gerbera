@@ -628,6 +628,11 @@
                 <agent command="ffmpeg" arguments="-y -i %in -f mp3 %out"/>
                 <buffer size="1048576" chunk-size="131072" fill-size="262144"/>
             </profile>
+            <profile name="ts-seek" enabled="no" type="external">
+                <mimetype>video/mpeg</mimetype>
+                <agent command="ffmpeg" bitrate="10000000" arguments="-ss %range -i %in -map 0:v:0 -map 0:a:0 -c:v libx264 -b:v 7500k -maxrate 7500k -bufsize 7500k -x264-params nal-hrd=cbr -c:a ac3 -b:a 448k -copyts -muxrate %bitrate -f mpegts -y %out"/>
+                <buffer size="16777216" chunk-size="524288" fill-size="1048576"/>
+            </profile>
             <profile name="vlcmpeg" enabled="no" type="external">
                 <mimetype>video/mpeg</mimetype>
                 <accept-url>yes</accept-url>

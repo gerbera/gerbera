@@ -252,6 +252,15 @@ TEST(ToolsTest, populateCommandLineTest)
         EXPECT_EQ(commandParts[3], "--sout=OUT");
         EXPECT_EQ(commandParts[7], "TITLE");
     }
+    {
+        auto commandString = R"(-ss %range -i %in -muxrate %bitrate -f mpegts %out)";
+        auto commandParts = TranscodeExternalHandler::populateCommandLine(commandString, "IN", "OUT", "0", "TITLE", "10000000");
+        ASSERT_EQ(commandParts.size(), 9);
+        EXPECT_EQ(commandParts[1], "0");
+        EXPECT_EQ(commandParts[3], "IN");
+        EXPECT_EQ(commandParts[5], "10000000");
+        EXPECT_EQ(commandParts[8], "OUT");
+    }
 }
 
 TEST(ToolsTest, replaceAllStringTest)

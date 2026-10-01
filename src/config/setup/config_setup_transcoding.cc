@@ -205,6 +205,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(
             cs->setFlag(prof->isEnabled(), ConfigPathArguments::mustExist);
             prof->agent.setCommand(cs->getXmlContent(sub, config));
             prof->agent.setArguments(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS)->getXmlContent(sub, config));
+            prof->agent.setBitrate(definition->findConfigSetup<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_BITRATE)->getXmlContent(sub, config));
         }
         {
             auto cs = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON);
@@ -652,6 +653,16 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
                         return true;
                     }
                     return false;
+                },
+            },
+            // Agent Bitrate
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_BITRATE },
+                "Agent Bitrate",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->agent.getBitrate()); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    entry->agent.setBitrate(definition->findConfigSetup<ConfigUIntSetup>(cfg)->checkIntValue(optValue));
+                    return true;
                 },
             },
 

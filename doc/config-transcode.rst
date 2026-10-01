@@ -682,6 +682,33 @@ Defines the transcoding agent and the parameters, in the example above we use og
    There are two special tokens: ``%in`` and ``%out``. Those tokens get substituted by the input file name 
    and the output FIFO name before execution.
 
+   .. confval:: bitrate
+      :type: :confval:`Integer`
+      :required: false
+      :default: ``0``
+   ..
+
+      .. code:: xml
+
+          bitrate="10000000"
+
+   .. versionadded:: HEAD
+
+   Promises that the agent writes a stream of exactly this constant bit rate in bit/s, e.g. an MPEG-TS made
+   by ffmpeg with ``-muxrate``, so that every second of the stream has the same number of bytes. Gerbera then
+   serves the transcoded resource like a file: it declares a length of one second less than the duration
+   times the bit rate, allows seeking by byte range (``DLNA.ORG_OP=01``) and answers a range request by
+   starting the agent from the time that matches its first byte. In the arguments ``%bitrate`` is replaced by
+   the bit rate, and ``%range`` by that time in seconds, ``0`` for a request from the beginning.
+
+   The agent has to encode video and audio at a constant bit rate that leaves room for the container, and to
+   keep the timestamps of the source:
+
+   .. code-block:: xml
+
+       <agent command="ffmpeg" bitrate="10000000"
+              arguments="-ss %range -i %in -map 0:v:0 -map 0:a:0 -c:v libx264 -b:v 7500k -maxrate 7500k -bufsize 7500k -x264-params nal-hrd=cbr -c:a ac3 -b:a 448k -copyts -muxrate %bitrate -f mpegts -y %out"/>
+
 .. confval:: environ
    :type: :confval:`Section`
    :required: false
@@ -705,21 +732,6 @@ Used to overwrite the environment of the gerbera process. The entry can appear m
       :type: :confval:`String`
       :required: true
    ..
-
-.. versionadded:: HEAD
-
-The entry ``SEEK_BITRATE`` is read by Gerbera too. It promises that the agent writes a stream of exactly this
-constant bit rate in bit/s, e.g. an MPEG-TS made by ffmpeg with ``-muxrate``, so that every second of the stream
-has the same number of bytes. Gerbera then serves the transcoded resource like a file: it declares a length of
-one second less than the duration times the bit rate, allows seeking by byte range (``DLNA.ORG_OP=01``) and
-answers a range request by starting the agent from the time that matches its first byte. The agent gets that
-time in seconds in place of the token ``%range``, which is empty for a request from the beginning.
-
-   .. code-block:: xml
-
-       <agent command="/usr/local/bin/transcode-cbr.sh" arguments="%in %out %range">
-           <environ name="SEEK_BITRATE" value="10000000"/>
-       </agent>
 
 Profile Buffer
 --------------
