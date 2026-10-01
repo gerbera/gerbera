@@ -34,6 +34,8 @@
 
 #include "transcoding.h" // API
 
+#include "util/grb_time.h"
+
 TranscodingProfile::TranscodingProfile(bool enabled, TranscodingType trType, std::string name)
     : enabled(enabled)
     , name(std::move(name))
@@ -45,6 +47,21 @@ TranscodingFilter::TranscodingFilter(std::string mimeType, std::string transcode
     : mimeType(std::move(mimeType))
     , transcoder(std::move(transcoder))
 {
+}
+
+off_t TranscodingProfile::getSeekSize(const std::string& duration) const
+{
+    auto rate = getSeekBitrate();
+    if (rate <= 0 || duration.empty())
+        return -1;
+    // One second short of the duration: a stream at constant bit rate ends a
+    // little before duration * rate, and a client that was promised more bytes
+    // than arrive sees the connection close before the end. One second short,
+    // the stream always fills the length and ends cleanly on it.
+    auto milliseconds = HMSFToMilliseconds(duration) - 1000;
+    if (milliseconds <= 0)
+        return -1;
+    return static_cast<off_t>(milliseconds * rate / 8000);
 }
 
 void TranscodingBuffer::setOptions(std::size_t bs, std::size_t cs, std::size_t ifs)

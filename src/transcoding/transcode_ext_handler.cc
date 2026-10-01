@@ -81,7 +81,8 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(
     checkTranscoder(profile);
     fs::path fifoName = makeFifo();
 
-    std::vector<std::string> arglist = populateCommandLine(profile->agent.getArguments(), inLocation, fifoName, range, obj->getTitle());
+    auto bitrate = profile->agent.getBitrate();
+    std::vector<std::string> arglist = populateCommandLine(profile->agent.getArguments(), inLocation, fifoName, range, obj->getTitle(), bitrate > 0 ? fmt::to_string(bitrate) : "");
 
     log_debug("Running profile command: '{}', arguments: '{}'", profile->agent.getCommand().c_str(), fmt::to_string(fmt::join(arglist, " ")));
 
@@ -138,9 +139,10 @@ std::vector<std::string> TranscodeExternalHandler::populateCommandLine(
     const std::string& in,
     const std::string& out,
     const std::string& range,
-    const std::string& title)
+    const std::string& title,
+    const std::string& bitrate)
 {
-    log_debug("Template: '{}', in: '{}', out: '{}', range: '{}', title: '{}'", line, in, out, range, title);
+    log_debug("Template: '{}', in: '{}', out: '{}', range: '{}', title: '{}', bitrate: '{}'", line, in, out, range, title, bitrate);
     std::vector<std::string> params = splitString(line, ' ', '"');
     if (in.empty() && out.empty())
         return params;
@@ -164,6 +166,11 @@ std::vector<std::string> TranscodeExternalHandler::populateCommandLine(
         auto titlePos = param.find("%title");
         if (titlePos != std::string::npos) {
             std::string newParam = param.replace(titlePos, 6, title);
+        }
+
+        auto bitratePos = param.find("%bitrate");
+        if (bitratePos != std::string::npos) {
+            std::string newParam = param.replace(bitratePos, 8, bitrate);
         }
     }
     return params;

@@ -155,20 +155,31 @@ std::string FileRequestHandler::getTranscodingInfo(
         mimeType = fmt::format("{}", fmt::join(propList, ";"));
     }
 
+    // A profile with a constant bit rate is served like a file of this length
+    auto mainResource = obj->getResource(ResourcePurpose::Content);
+    auto seekSize = mainResource ? transcodingProfile->getSeekSize(mainResource->getAttribute(ResourceAttribute::DURATION)) : -1;
+
     // Generate DLNA Headers, with the values the DIDL has for the transcoded resource
     auto resource = std::make_shared<CdsResource>(ContentHandler::TRANSCODE, ResourcePurpose::Transcode);
     if (!transcodingProfile->getDlnaProfile().empty())
         resource->addOption("dlnaProfile", transcodingProfile->getDlnaProfile());
+    if (seekSize > 0)
+        resource->addAttribute(ResourceAttribute::SIZE, seekSize);
     auto mappings = config->getDictionaryOption(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
     std::string dlnaContentHeader = xmlBuilder->getDLNAContentHeader(getValueOrDefault(mappings, transcodingProfile->getTargetMimeType()), resource, quirks);
     if (!dlnaContentHeader.empty()) {
         headers.addHeader(UPNP_DLNA_CONTENT_FEATURES_HEADER, dlnaContentHeader);
     }
 
-    // The length is unknown. Not UPNP_USING_CHUNKED: libupnp answers 406 Not Acceptable to
-    // an HTTP/1.0 client, as chunked encoding exists only in HTTP/1.1. Without a length the
-    // stream ends when the connection closes, which clients of both versions understand.
-    UpnpFileInfo_set_FileLength(info, UPNP_UNTIL_CLOSE);
+    if (seekSize > 0) {
+        // libupnp sends Content-Length and answers range requests
+        UpnpFileInfo_set_FileLength(info, seekSize);
+    } else {
+        // The length is unknown. Not UPNP_USING_CHUNKED: libupnp answers 406 Not Acceptable to
+        // an HTTP/1.0 client, as chunked encoding exists only in HTTP/1.1. Without a length the
+        // stream ends when the connection closes, which clients of both versions understand.
+        UpnpFileInfo_set_FileLength(info, UPNP_UNTIL_CLOSE);
+    }
     return mimeType;
 }
 
@@ -392,6 +403,96 @@ std::unique_ptr<IOHandler> FileRequestHandler::openResource(
     return metadataHandler->serveContent(obj, resource);
 }
 
+/// @brief A transcoded stream served like a file.
+///
+/// With a constant bit rate the stream carries bitrate / 8 bytes per second,
+/// so a byte offset is a point in time. For a range request libupnp calls seek()
+/// right after open() and before any read() (httpreadwrite.c, http_SendMessage):
+/// the agent is started at the first read, from the time that matches the offset,
+/// which it gets in seconds through %range, 0 for a request from the beginning.
+class SeekableTranscodeIOHandler : public IOHandler {
+public:
+    SeekableTranscodeIOHandler(
+        std::shared_ptr<Content> content,
+        std::shared_ptr<TranscodingProfile> profile,
+        std::string path,
+        std::shared_ptr<CdsObject> obj,
+        std::string group)
+        : content(std::move(content))
+        , profile(std::move(profile))
+        , path(std::move(path))
+        , obj(std::move(obj))
+        , group(std::move(group))
+    {
+    }
+
+    void open(enum UpnpOpenFileMode mode) override
+    {
+        this->mode = mode;
+    }
+
+    grb_read_t read(std::byte* buf, std::size_t length) override
+    {
+        // Server::ReadCallback does not catch exceptions
+        try {
+            if (!transcoder) {
+                // also 0, so that the agent can always pass it on, e.g. to ffmpeg's -ss
+                std::string range = "0";
+                if (offset > 0)
+                    range = fmt::format("{:.3f}", static_cast<double>(offset) * 8.0 / static_cast<double>(profile->getSeekBitrate()));
+                log_debug("Transcoding {} from byte {}, start time '{}'", path, offset, range);
+                auto transcodeDispatcher = std::make_unique<TranscodeDispatcher>(content);
+                transcoder = transcodeDispatcher->serveContent(profile, path, obj, group, range);
+                transcoder->open(mode);
+            }
+            auto ret = transcoder->read(buf, length);
+            if (ret > 0)
+                position += ret;
+            return ret;
+        } catch (const std::exception& e) {
+            log_error("Transcoding {} failed: {}", path, e.what());
+            return GRB_READ_ERROR;
+        }
+    }
+
+    void seek(off_t seekOffset, int whence) override
+    {
+        if (transcoder)
+            throw_std_runtime_error("Seek in a running transcoding of {}", path);
+        if (whence == SEEK_SET)
+            offset = seekOffset;
+        else if (whence == SEEK_CUR)
+            offset += seekOffset;
+        else
+            throw_std_runtime_error("Seek from the end of a transcoding of {}", path);
+        if (offset < 0)
+            offset = 0;
+        position = offset;
+    }
+
+    off_t tell() override
+    {
+        return position;
+    }
+
+    void close() override
+    {
+        if (transcoder)
+            transcoder->close();
+    }
+
+private:
+    std::shared_ptr<Content> content;
+    std::shared_ptr<TranscodingProfile> profile;
+    std::string path;
+    std::shared_ptr<CdsObject> obj;
+    std::string group;
+    enum UpnpOpenFileMode mode { UPNP_READ };
+    off_t offset {};
+    off_t position {};
+    std::unique_ptr<IOHandler> transcoder;
+};
+
 std::unique_ptr<IOHandler> FileRequestHandler::openTranscoding(
     const std::shared_ptr<CdsObject>& obj,
     const std::string& path,
@@ -404,6 +505,10 @@ std::unique_ptr<IOHandler> FileRequestHandler::openTranscoding(
         throw_std_runtime_error("Requested transcoding of file {} but no profile matching the name {} found", path.c_str(), trProfile);
 
     std::string range = getValueOrDefault(params, "range");
+
+    auto mainResource = obj->getResource(ResourcePurpose::Content);
+    if (range.empty() && mainResource && transcodingProfile->getSeekSize(mainResource->getAttribute(ResourceAttribute::DURATION)) > 0)
+        return std::make_unique<SeekableTranscodeIOHandler>(content, transcodingProfile, path, obj, group);
 
     auto transcodeDispatcher = std::make_unique<TranscodeDispatcher>(content);
     return transcodeDispatcher->serveContent(transcodingProfile, path, obj, group, range);
