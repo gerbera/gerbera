@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Docker: fix ownership of files created with PUID/PGID, rename UID/GID to PUID/PGID (old names deprecated)
 - Add config for search bracket nesting limit
 - Add ubuntu 26.10
 - Allow multiple clients by ip
