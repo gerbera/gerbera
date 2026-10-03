@@ -36,6 +36,19 @@ e.g. `gerbera/gerbera:3.3.0-transcoding`. It includes tools such as ffmpeg and v
 A full debug build is available as separate image with the `-debug` suffix,
 e.g. `gerbera/gerbera:3.3.0-debug`. It is building most libraries and tools based on the latest supported versions.
 
+# Environment Variables
+
+All environment variables are optional.
+
+| Variable                                | Default | Description                                                                                            |
+|-----------------------------------------|---------|--------------------------------------------------------------------------------------------------------|
+| `PUID`                                  | `1042`  | User id gerbera runs as. Files and folders it creates are owned by this user, see [below](#overwrite-default-user-and-group-id) |
+| `PGID`                                  | `1042`  | Group id gerbera runs as                                                                               |
+| `TZ`                                    | `UTC`   | Time zone, e.g. `Australia/Perth`                                                                      |
+| `IMAGE_PORT`                            | `49494` | Port gerbera listens on, when the default command is used                                              |
+| `MARIADB_TLS_DISABLE_PEER_VERIFICATION` |         | Set to `1` to skip the certificate check for MySQL/MariaDB, see [below](#avoid-certificate-check-with-mysqlmariadb) |
+| `UID`, `GID`                            |         | Deprecated names of `PUID` and `PGID`, still honoured. `PUID`/`PGID` take precedence                   |
+
 # Examples
 
 ## Serve some files via a volume
@@ -43,27 +56,30 @@ e.g. `gerbera/gerbera:3.3.0-debug`. It is building most libraries and tools base
 $ docker run \
     --name some-gerbera \
     --network=host \
+    --env PUID=1000 \
+    --env PGID=1000 \
     -v /some/files:/mnt/content:ro \
      gerbera/gerbera:3.3.0
 ```
 
 or for those that prefer docker-compose:
 
-```console
----
-version: "3.3.0"
+```yaml
 services:
   gerbera:
-    image: gerbera/gerbera
+    image: gerbera/gerbera:3.3.0
     container_name: gerbera
     network_mode: host
+    environment:
+      # all optional, see "Environment Variables"
+      - PUID=1000
+      - PGID=1000
+      # - TZ=Australia/Perth
+      # - IMAGE_PORT=49494
+      # - MARIADB_TLS_DISABLE_PEER_VERIFICATION=1
     volumes:
       - ./gerbera-config:/var/run/gerbera
       - /some/files:/mnt/content:ro
-
-volumes:
-  gerbera-config:
-    external: false
 ```
 
 The directory `/mnt/content` is automatically scanned for content by default.
@@ -88,11 +104,14 @@ $ docker run \
 $ docker run \
     --name another-gerbera \
     --network=host \
+    --env PUID=1000 \
+    --env PGID=1000 \
     -v /some/files:/mnt/content:ro \
     -v /some/path:/var/run/gerbera \
      gerbera/gerbera:3.3.0
 ```
-Make sure that the container user has write access the the config path.
+On startup `/some/path` and everything in it is handed to `PUID:PGID`, so set them to the host user that should own
+these files.
 
 ## Overwrite default ports
 
@@ -109,17 +128,44 @@ $ docker run \
 
 ## Overwrite default user and group id
 
-In cases you want to map the gerbera user to a local user id you can set the environment variables `UID` and `GID`
+In cases you want to map the gerbera user to a local user id you can set the environment variables `PUID` and `PGID`.
+Run `id` on the host to find the ids of your user.
 
 ```console
 $ docker run \
     --name another-gerbera \
     --network=host \
-    --env UID=<newuid> \
-    --env GID=<newgid> \
+    --env PUID=<newuid> \
+    --env PGID=<newgid> \
     -v /some/files:/mnt/content:ro \
      gerbera/gerbera:3.3.0 gerbera --config /var/run/gerbera/config.xml
 ```
+
+or with docker-compose:
+
+```yaml
+services:
+  gerbera:
+    image: gerbera/gerbera:3.3.0
+    network_mode: host
+    environment:
+      - PUID=<newuid>
+      - PGID=<newgid>
+    volumes:
+      - ./gerbera-config:/var/run/gerbera
+      - /some/files:/mnt/content:ro
+```
+
+On startup the container changes the ids of the gerbera user and group, hands `/var/run/gerbera` to `PUID:PGID` and
+then runs gerbera as that user, so everything it creates is owned by `PUID:PGID`. Ids that already exist in the image
+are supported: e.g. `PGID=100` makes the existing `users` group the primary group of the gerbera user.
+A `config.xml` you provide keeps its owner and is made readable for `PGID`.
+
+This requires the container to start as root (the default). With `--user` the ids cannot be changed and gerbera runs
+with the ids given there.
+
+`UID` and `GID` are the older names of these variables. They still work but log a deprecation warning; if both are set,
+`PUID` and `PGID` win.
 
 ## Avoid certificate check with MySQL/MariaDB
 
@@ -133,6 +179,19 @@ $ docker run \
     --env MARIADB_TLS_DISABLE_PEER_VERIFICATION=1 \
     -v /some/files:/mnt/content:ro \
      gerbera/gerbera:3.3.0 gerbera --config /var/run/gerbera/config.xml
+```
+
+or with docker-compose:
+
+```yaml
+services:
+  gerbera:
+    image: gerbera/gerbera:3.3.0
+    network_mode: host
+    environment:
+      - MARIADB_TLS_DISABLE_PEER_VERIFICATION=1
+    volumes:
+      - /some/files:/mnt/content:ro
 ```
 
 # Build Variables
