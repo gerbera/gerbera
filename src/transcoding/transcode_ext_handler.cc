@@ -81,7 +81,7 @@ std::unique_ptr<IOHandler> TranscodeExternalHandler::serveContent(
     checkTranscoder(profile);
     fs::path fifoName = makeFifo();
 
-    auto bitrate = profile->agent.getBitrate();
+    auto bitrate = profile->getBitrate();
     std::vector<std::string> arglist = populateCommandLine(profile->agent.getArguments(), inLocation, fifoName, range, obj->getTitle(), bitrate > 0 ? fmt::to_string(bitrate) : "");
 
     log_debug("Running profile command: '{}', arguments: '{}'", profile->agent.getCommand().c_str(), fmt::to_string(fmt::join(arglist, " ")));

@@ -112,7 +112,6 @@ class TranscodingAgent {
 private:
     fs::path command;
     std::string args;
-    unsigned int bitrate {};
 
 public:
     /// @brief sets the program name, i.e. the command line name of the
@@ -135,11 +134,6 @@ public:
 
     /// @brief retrieves the argument string
     std::string getArguments() const { return args; }
-
-    /// @brief constant bit rate in bit/s of the stream the agent writes, 0 if
-    /// it promises none. The %bitrate token of the arguments is replaced by it.
-    void setBitrate(unsigned int bitrate) { this->bitrate = bitrate; }
-    unsigned int getBitrate() const { return bitrate; }
 };
 
 /// @brief this class keeps all data associated with encoding for internal profiles.
@@ -216,11 +210,15 @@ public:
     void setEnviron(const std::map<std::string, std::string>& environ) { this->environment = environ; }
     const std::map<std::string, std::string>& getEnviron() const { return environment; }
 
-    /// @brief constant bit rate of the transcoded stream in bit/s, from the
-    /// bitrate of the agent, 0 if the profile does not set it.
+    /// @brief constant bit rate in bit/s of the transcoded stream, 0 if the
+    /// profile promises none. An external agent gets it through %bitrate.
+    void setBitrate(unsigned int bitrate) { this->bitrate = bitrate; }
+    unsigned int getBitrate() const { return bitrate; }
+    /// @brief the bit rate that makes the stream seekable, 0 if none.
     /// With it a transcoded resource is served like a file: with a length computed
     /// from the duration, and with byte ranges mapped to a start time for the agent.
-    long long getSeekBitrate() const { return agent.getBitrate(); }
+    /// Only the external agent can start at such a time so far.
+    long long getSeekBitrate() const { return trType == TranscodingType::External ? bitrate : 0; }
     /// @brief length in bytes of the transcoded stream of a media with the given
     /// duration (H:MM:SS.F), -1 if the profile is not seekable or the duration unknown
     off_t getSeekSize(const std::string& duration) const;
@@ -313,6 +311,7 @@ protected:
     TranscodingType trType { TranscodingType::None };
     int numberOfChannels { SOURCE };
     int sampleFrequency { SOURCE };
+    unsigned int bitrate {};
     std::map<ResourceAttribute, std::string> attributeOverrides;
     std::map<std::string, std::string> environment;
     std::vector<std::string> fourccList;

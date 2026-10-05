@@ -2460,6 +2460,11 @@
               "editable": true
             },
             {
+              "item": "/transcoding/profiles/profile/attribute::bitrate",
+              "caption": "Bitrate",
+              "editable": true
+            },
+            {
               "item": "/transcoding/profiles/profile/attribute::mimetype",
               "caption": "Mimetype",
               "editable": true

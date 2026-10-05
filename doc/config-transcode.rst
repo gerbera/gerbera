@@ -378,6 +378,37 @@ Profile Attributes
    Defines the profile type, ``external`` is supported to run scripts with transcoding logic,
    ``internal`` is experimental and only supported if ffmpeg was enabled at built time.
 
+   .. confval:: profile bitrate
+      :type: :confval:`Integer`
+      :required: false
+      :default: ``0``
+   ..
+
+      .. versionadded:: HEAD
+      .. code:: xml
+
+         bitrate="10000000"
+
+   Promises that the transcoded stream has exactly this constant bit rate in bit/s, e.g. an MPEG-TS made
+   by ffmpeg with ``-muxrate``, so that every second of the stream has the same number of bytes. Gerbera then
+   serves the transcoded resource like a file: it declares a length of one second less than the duration
+   times the bit rate, allows seeking by byte range (``DLNA.ORG_OP=01``) and answers a range request by
+   starting the transcoding from the time that matches its first byte. Only :confval:`profile type`
+   ``external`` supports it so far: in the :confval:`arguments` of the :confval:`agent` ``%bitrate`` is
+   replaced by the bit rate, and ``%range`` by that time in seconds, ``0`` for a request from the beginning.
+
+   The agent has to encode video and audio at a constant bit rate that leaves room for the container, and to
+   keep the timestamps of the source:
+
+   .. code-block:: xml
+
+       <profile name="ts-seek" enabled="yes" type="external" bitrate="10000000">
+         <mimetype>video/mpeg</mimetype>
+         <agent command="ffmpeg"
+                arguments="-ss %range -i %in -map 0:v:0 -map 0:a:0 -c:v libx264 -b:v 7500k -maxrate 7500k -bufsize 7500k -x264-params nal-hrd=cbr -c:a ac3 -b:a 448k -copyts -muxrate %bitrate -f mpegts -y %out"/>
+         <buffer size="14400000" chunk-size="512000" fill-size="120000"/>
+       </profile>
+
 Profile Items
 ^^^^^^^^^^^^^
 
@@ -681,33 +712,6 @@ Defines the transcoding agent and the parameters, in the example above we use og
    Specifies the command line arguments that will be given to the transcoder application upon execution.
    There are two special tokens: ``%in`` and ``%out``. Those tokens get substituted by the input file name 
    and the output FIFO name before execution.
-
-   .. confval:: bitrate
-      :type: :confval:`Integer`
-      :required: false
-      :default: ``0``
-   ..
-
-      .. code:: xml
-
-          bitrate="10000000"
-
-   .. versionadded:: HEAD
-
-   Promises that the agent writes a stream of exactly this constant bit rate in bit/s, e.g. an MPEG-TS made
-   by ffmpeg with ``-muxrate``, so that every second of the stream has the same number of bytes. Gerbera then
-   serves the transcoded resource like a file: it declares a length of one second less than the duration
-   times the bit rate, allows seeking by byte range (``DLNA.ORG_OP=01``) and answers a range request by
-   starting the agent from the time that matches its first byte. In the arguments ``%bitrate`` is replaced by
-   the bit rate, and ``%range`` by that time in seconds, ``0`` for a request from the beginning.
-
-   The agent has to encode video and audio at a constant bit rate that leaves room for the container, and to
-   keep the timestamps of the source:
-
-   .. code-block:: xml
-
-       <agent command="ffmpeg" bitrate="10000000"
-              arguments="-ss %range -i %in -map 0:v:0 -map 0:a:0 -c:v libx264 -b:v 7500k -maxrate 7500k -bufsize 7500k -x264-params nal-hrd=cbr -c:a ac3 -b:a 448k -copyts -muxrate %bitrate -f mpegts -y %out"/>
 
 .. confval:: environ
    :type: :confval:`Section`
