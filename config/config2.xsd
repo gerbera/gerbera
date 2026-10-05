@@ -1424,6 +1424,7 @@
             <xs:attribute name="no-transcoding" type="xs:string"/>
             <xs:attribute name="client-flags" type="xs:string"/>
             <xs:attribute name="client-without-flag" type="boolean"/>
+            <xs:attribute name="bitrate" type="xs:nonNegativeInteger" use="optional"/>
             <xs:attribute name="enabled" type="boolean" use="required"/>
             <xs:attribute name="type" use="required">
                 <xs:simpleType>
@@ -1465,7 +1466,6 @@
             </xs:sequence>
             <xs:attribute name="command" type="xs:string" use="required"/>
             <xs:attribute name="arguments" type="xs:string" use="required"/>
-            <xs:attribute name="bitrate" type="xs:nonNegativeInteger" use="optional"/>
         </xs:complexType>
     </xs:element>
 

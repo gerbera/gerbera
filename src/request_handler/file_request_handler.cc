@@ -44,6 +44,7 @@
 #include "database/db_param.h"
 #include "exceptions.h"
 #include "iohandler/file_io_handler.h"
+#include "iohandler/seekable_transcode_io_handler.h"
 #include "metadata/metadata_handler.h"
 #include "metadata/metadata_service.h"
 #include "transcoding/transcode_dispatcher.h"
@@ -402,96 +403,6 @@ std::unique_ptr<IOHandler> FileRequestHandler::openResource(
     log_debug("serveContent {}:{}", obj->getID(), resource->getResId());
     return metadataHandler->serveContent(obj, resource);
 }
-
-/// @brief A transcoded stream served like a file.
-///
-/// With a constant bit rate the stream carries bitrate / 8 bytes per second,
-/// so a byte offset is a point in time. For a range request libupnp calls seek()
-/// right after open() and before any read() (httpreadwrite.c, http_SendMessage):
-/// the agent is started at the first read, from the time that matches the offset,
-/// which it gets in seconds through %range, 0 for a request from the beginning.
-class SeekableTranscodeIOHandler : public IOHandler {
-public:
-    SeekableTranscodeIOHandler(
-        std::shared_ptr<Content> content,
-        std::shared_ptr<TranscodingProfile> profile,
-        std::string path,
-        std::shared_ptr<CdsObject> obj,
-        std::string group)
-        : content(std::move(content))
-        , profile(std::move(profile))
-        , path(std::move(path))
-        , obj(std::move(obj))
-        , group(std::move(group))
-    {
-    }
-
-    void open(enum UpnpOpenFileMode mode) override
-    {
-        this->mode = mode;
-    }
-
-    grb_read_t read(std::byte* buf, std::size_t length) override
-    {
-        // Server::ReadCallback does not catch exceptions
-        try {
-            if (!transcoder) {
-                // also 0, so that the agent can always pass it on, e.g. to ffmpeg's -ss
-                std::string range = "0";
-                if (offset > 0)
-                    range = fmt::format("{:.3f}", static_cast<double>(offset) * 8.0 / static_cast<double>(profile->getSeekBitrate()));
-                log_debug("Transcoding {} from byte {}, start time '{}'", path, offset, range);
-                auto transcodeDispatcher = std::make_unique<TranscodeDispatcher>(content);
-                transcoder = transcodeDispatcher->serveContent(profile, path, obj, group, range);
-                transcoder->open(mode);
-            }
-            auto ret = transcoder->read(buf, length);
-            if (ret > 0)
-                position += ret;
-            return ret;
-        } catch (const std::exception& e) {
-            log_error("Transcoding {} failed: {}", path, e.what());
-            return GRB_READ_ERROR;
-        }
-    }
-
-    void seek(off_t seekOffset, int whence) override
-    {
-        if (transcoder)
-            throw_std_runtime_error("Seek in a running transcoding of {}", path);
-        if (whence == SEEK_SET)
-            offset = seekOffset;
-        else if (whence == SEEK_CUR)
-            offset += seekOffset;
-        else
-            throw_std_runtime_error("Seek from the end of a transcoding of {}", path);
-        if (offset < 0)
-            offset = 0;
-        position = offset;
-    }
-
-    off_t tell() override
-    {
-        return position;
-    }
-
-    void close() override
-    {
-        if (transcoder)
-            transcoder->close();
-    }
-
-private:
-    std::shared_ptr<Content> content;
-    std::shared_ptr<TranscodingProfile> profile;
-    std::string path;
-    std::shared_ptr<CdsObject> obj;
-    std::string group;
-    enum UpnpOpenFileMode mode { UPNP_READ };
-    off_t offset {};
-    off_t position {};
-    std::unique_ptr<IOHandler> transcoder;
-};
 
 std::unique_ptr<IOHandler> FileRequestHandler::openTranscoding(
     const std::shared_ptr<CdsObject>& obj,

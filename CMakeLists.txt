@@ -285,6 +285,8 @@ add_library(
     src/iohandler/mem_io_handler.h
     src/iohandler/process_io_handler.cc
     src/iohandler/process_io_handler.h
+    src/iohandler/seekable_transcode_io_handler.cc
+    src/iohandler/seekable_transcode_io_handler.h
     src/metadata/exiv2_handler.cc
     src/metadata/exiv2_handler.h
     src/metadata/ffmpeg_handler.cc

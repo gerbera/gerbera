@@ -27,6 +27,7 @@ add_executable(
     main.cc #
     test_configgenerator.cc #
     test_configmanager.cc #
+    test_transcoding.cc #
 )
 
 if(NOT TARGET GTest::gmock)
