@@ -854,6 +854,9 @@ void Web::ConfigLoad::writeTranscoding(Json::Value& values)
         addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_HEIGHT }),
             cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_HEIGHT, entry->encoder.getHeight());
+        addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_MUXOPTS }),
+            cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_MUXOPTS, entry->encoder.getMuxOpts());
 
         auto fourCCMode = entry->getAVIFourCCListMode();
         if (fourCCMode != AviFourccListmode::None) {

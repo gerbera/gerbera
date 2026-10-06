@@ -876,6 +876,15 @@ Required for :confval:`profile type` = ``internal``
     Set output stream video filter.
     See https://ffmpeg.org/ffmpeg-filters.html for allowed values
 
+   .. confval:: encoder muxopts
+      :type: :confval:`String`
+      :required: false
+   ..
+
+    Set output muxer options as ``key=value:key2=value2``,
+    e.g. ``movflags=frag_keyframe+empty_moov`` for mp4.
+    See https://ffmpeg.org/ffmpeg-formats.html#Muxers for allowed values
+
    .. confval:: encoder width
       :type: :confval:`Integer`
       :required: false

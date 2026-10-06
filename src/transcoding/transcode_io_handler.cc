@@ -286,8 +286,25 @@ int TranscodeInternalIOHandler::open_output_file(const std::string& filename)
             return ret;
         }
 
+        AVDictionary* muxOpts = nullptr;
+        const auto& muxOptStr = profile->encoder.getMuxOpts();
+        if (!muxOptStr.empty()) {
+            ret = av_dict_parse_string(&muxOpts, muxOptStr.c_str(), "=", ":", 0);
+            if (ret < 0) {
+                log_error("Invalid muxopts '{}' (error '{}')", muxOptStr, av_err2str(ret));
+                av_dict_free(&muxOpts);
+                return ret;
+            }
+        }
+
         /* init muxer, write output file header */
-        ret = avformat_write_header(outFormatContext, nullptr);
+        ret = avformat_write_header(outFormatContext, &muxOpts);
+
+        const AVDictionaryEntry* e = nullptr;
+        while ((e = av_dict_get(muxOpts, "", e, AV_DICT_IGNORE_SUFFIX)))
+            log_warning("Unused muxer option '{}={}'", e->key, e->value);
+        av_dict_free(&muxOpts);
+
         if (ret < 0) {
             log_error("Error occurred when opening output file '{}' (error '{}')", filename, av_err2str(ret));
             return ret;
