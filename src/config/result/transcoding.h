@@ -144,6 +144,7 @@ private:
     std::string vfilter;
     std::string acodec;
     std::string vcodec;
+    std::string muxopts;
     int width { SOURCE };
     int height { SOURCE };
 
@@ -162,6 +163,9 @@ public:
 
     const std::string& getVCodec() const { return vcodec; }
     void setVCodec(const std::string& vcodec) { this->vcodec = vcodec; }
+
+    const std::string& getMuxOpts() const { return muxopts; }
+    void setMuxOpts(const std::string& muxopts) { this->muxopts = muxopts; }
 
     int getWidth() const { return width; }
     void setWidth(int width) { this->width = width; }

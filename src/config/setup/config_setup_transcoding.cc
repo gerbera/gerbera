@@ -241,6 +241,7 @@ bool ConfigTranscodingSetup::createOptionFromNode(
             prof->encoder.setAFilter(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_AFILTER)->getXmlContent(sub, config));
             prof->encoder.setWidth(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_WIDTH)->getXmlContent(sub, config));
             prof->encoder.setHeight(definition->findConfigSetup<ConfigIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_HEIGHT)->getXmlContent(sub, config));
+            prof->encoder.setMuxOpts(definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_MUXOPTS)->getXmlContent(sub, config));
         }
 
         bool set = false;
@@ -749,6 +750,19 @@ bool ConfigTranscodingSetup::updateDetail(const std::string& optItem,
                 [&](const std::shared_ptr<TranscodingProfile>& entry) { return fmt::to_string(entry->encoder.getHeight()); },
                 [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
                     entry->encoder.setHeight(definition->findConfigSetup<ConfigIntSetup>(cfg)->checkIntValue(optValue));
+                    return false;
+                },
+            },
+            // Encoder Muxer Options
+            {
+                { ConfigVal::A_TRANSCODING_PROFILES_PROFLE, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_ENCODER_MUXOPTS },
+                "Encoder Muxer Options",
+                [&](const std::shared_ptr<TranscodingProfile>& entry) { return entry->encoder.getMuxOpts(); },
+                [&](const std::shared_ptr<TranscodingProfile>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                    if (definition->findConfigSetup<ConfigStringSetup>(cfg)->checkValue(optValue)) {
+                        entry->encoder.setMuxOpts(optValue);
+                        return true;
+                    }
                     return false;
                 },
             },

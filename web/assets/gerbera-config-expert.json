@@ -2606,6 +2606,11 @@
                   "editable": true
                 },
                 {
+                  "item": "/transcoding/profiles/profile/encoder/attribute::muxopts",
+                  "caption": "Muxer Options",
+                  "editable": true
+                },
+                {
                   "item": "/transcoding/profiles/profile/encoder/attribute::width",
                   "caption": "Width",
                   "editable": true
