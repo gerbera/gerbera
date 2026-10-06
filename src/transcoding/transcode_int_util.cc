@@ -431,8 +431,7 @@ int FilteringContext::encodeWriteFrame(
         log_debug("Muxing frame");
         // STEP 3: Write to output file/buffer
         // mux encoded frame
-        if (this->encPacket->duration > 0)
-            ret = av_interleaved_write_frame(formatContext, this->encPacket);
+        ret = av_interleaved_write_frame(formatContext, this->encPacket);
     }
 
     return ret;
