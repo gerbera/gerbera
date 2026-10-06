@@ -615,7 +615,7 @@ int StreamContext::createEncoder(
         // STEP 3: Configure encoder for VIDEO
         if (dec_ctx->codec_type == AVMEDIA_TYPE_VIDEO) {
             enc_ctx->height = settings.height;
-            enc_ctx->width = settings.height;
+            enc_ctx->width = settings.width;
             enc_ctx->sample_aspect_ratio = settings.aspectRatio;
 
             // Set first supported pixel format
