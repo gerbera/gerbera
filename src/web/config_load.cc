@@ -343,6 +343,9 @@ void Web::ConfigLoad::writeClientConfig(Json::Value& values)
             cs->getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_ALLOWED }),
             cs->option, ConfigVal::A_CLIENTS_CLIENT_ALLOWED, client->getAllowed(), cs);
         addValue(values,
+            cs->getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_UNIQUE }),
+            cs->option, ConfigVal::A_CLIENTS_CLIENT_UNIQUE, client->getUnique(), cs);
+        addValue(values,
             cs->getItemPath(indexList, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT }),
             cs->option, ConfigVal::A_CLIENTS_UPNP_CAPTION_COUNT, client->getCaptionInfoCount(), cs);
         addValue(values,
@@ -410,6 +413,12 @@ void Web::ConfigLoad::writeClientConfig(Json::Value& values)
         addNewValue(values,
             cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_USERAGENT }),
             cs->option, ConfigVal::A_CLIENTS_CLIENT_USERAGENT, definition->findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_USERAGENT));
+        addNewValue(values,
+            cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_ALLOWED }),
+            cs->option, ConfigVal::A_CLIENTS_CLIENT_ALLOWED, definition->findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_ALLOWED));
+        addNewValue(values,
+            cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_UNIQUE }),
+            cs->option, ConfigVal::A_CLIENTS_CLIENT_UNIQUE, definition->findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_UNIQUE));
         addNewValue(values,
             cs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_GROUP }),
             cs->option, ConfigVal::A_CLIENTS_CLIENT_GROUP, definition->findConfigSetup(ConfigVal::A_CLIENTS_CLIENT_GROUP));

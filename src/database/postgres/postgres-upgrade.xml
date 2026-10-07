@@ -25,4 +25,10 @@
         <script>ALTER TABLE "mt_autoscan" ADD "import_mode" VARCHAR(16) NOT NULL CHECK("import_mode" IN('mt', 'grb', 'mediatomb', 'gerbera')) default 'mt'</script>
         <script>UPDATE "mt_autoscan" SET "import_mode"='mt'</script>
     </version>
+    <version number="30" remark="change client table primary">
+        <script>ALTER TABLE "grb_client"
+          DROP CONSTRAINT grb_client_pkey CASCADE,
+          ADD PRIMARY KEY("addr", "port", "userAgent")
+        </script>
+    </version>
 </upgrade>

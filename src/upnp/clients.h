@@ -89,6 +89,8 @@ struct ClientProfile {
     ClientMatchType matchType { ClientMatchType::None };
     /// @brief value of match applied to match the client
     std::string match;
+    /// @brief only one client running under that address
+    bool isUnique { true };
     /// @brief special mappings for client
     DictionaryOption mimeMappings = DictionaryOption();
     /// @brief additional headers for client
@@ -106,7 +108,12 @@ struct ClientProfile {
     /// @brief client is allowed to connect to server
     bool isAllowed { true };
     /// @brief support resource types by client
-    std::vector<ResourcePurpose> supportedResources { ResourcePurpose::Content, ResourcePurpose::Thumbnail, ResourcePurpose::Subtitle, ResourcePurpose::Transcode };
+    std::vector<ResourcePurpose> supportedResources {
+        ResourcePurpose::Content,
+        ResourcePurpose::Thumbnail,
+        ResourcePurpose::Subtitle,
+        ResourcePurpose::Transcode,
+    };
     /// @brief reference to group configuration
     std::shared_ptr<ClientGroupConfig> groupConfig;
 };
@@ -140,7 +147,13 @@ struct ClientObservation {
 /// @brief store details for a client with relation to a CdsObject
 class ClientStatusDetail {
 public:
-    ClientStatusDetail(std::string group, int itemId, int playCount, int lastPlayed, int lastPlayedPosition, int bookMarkPos)
+    ClientStatusDetail(
+        std::string group,
+        int itemId,
+        int playCount,
+        int lastPlayed,
+        int lastPlayedPosition,
+        int bookMarkPos)
         : group(std::move(group))
         , itemId(itemId)
         , playCount(playCount)

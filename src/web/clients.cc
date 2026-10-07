@@ -47,9 +47,10 @@ bool Web::Clients::processPageAction(Json::Value& element, const std::string& ac
     // Delete client
     if (action == "delete") {
         std::string clientIp = param("client_id");
+        std::string userAgent = param("user_agent");
         if (!clientIp.empty()) {
-            log_debug("Deleting client with {} IP address", clientIp);
-            content->getContext()->getClients()->removeClient(clientIp);
+            log_debug("Deleting client with {} IP address and userAgent {}", clientIp, userAgent);
+            content->getContext()->getClients()->removeClient(clientIp, userAgent);
         } else {
             log_warning("Cannot delete client without IP address");
         }
@@ -70,6 +71,7 @@ bool Web::Clients::processPageAction(Json::Value& element, const std::string& ac
         item["group"] = obj.pInfo->group;
         item["match"] = obj.pInfo->match;
         item["allowed"] = obj.pInfo->isAllowed;
+        item["unique"] = obj.pInfo->isUnique;
         auto flags = ClientConfig::mapFlags(obj.pInfo->flags);
         replaceAllString(flags, "|", " | ");
         item["flags"] = flags;

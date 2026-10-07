@@ -221,7 +221,7 @@ void Server::run()
     auto net = std::make_shared<GrbNet>(getIp(), AF_INET);
     auto userAgent = fmt::format("Gerbera-UPnP-Server/{} Portable SDK for UPnP devices/{}", GERBERA_VERSION, UPNP_VERSION_STRING);
     clientManager->refresh();
-    clientManager->removeClient(getIp()); // local calls will always be treated as calls from gerbera
+    clientManager->removeClient(getIp(), userAgent); // local calls will always be treated as calls from gerbera
 
     auto quirks = std::make_shared<Quirks>(upnpXmlBuilder, context->getClients(), net, std::move(userAgent), nullptr);
     auto devDescHdl = std::make_shared<DeviceDescriptionHandler>(content, webXmlBuilder, quirks, getIp(), getPort());

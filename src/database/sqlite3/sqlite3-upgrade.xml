@@ -547,4 +547,20 @@
         <script>ALTER TABLE "mt_autoscan" ADD "import_mode" varchar(10) NOT NULL default 'mt'</script>
         <script>UPDATE "mt_autoscan" SET "import_mode"='mt'</script>
     </version>
+    <version number="30" remark="change client table primary">
+        <script>
+        CREATE TABLE "grb_client_new" (
+            "addr" varchar(32) NOT NULL,
+            "port" integer NOT NULL,
+            "addrFamily" integer NOT NULL,
+            "userAgent" varchar(255) NOT NULL,
+            "last" integer NOT NULL,
+            "age" integer NOT NULL,
+            PRIMARY KEY ("addr", "port", "userAgent"));
+        INSERT INTO grb_client_new(addr,port,addrFamily,userAgent,last,age) SELECT addr,port,addrFamily,userAgent,last,age FROM grb_client;
+        DROP TABLE grb_client;
+        ALTER TABLE grb_client_new RENAME TO grb_client;
+        VACUUM;
+        </script>
+    </version>
 </upgrade>

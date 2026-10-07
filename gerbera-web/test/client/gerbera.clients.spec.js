@@ -72,7 +72,7 @@ describe('Gerbera Clients', () => {
     it('loads the response as items in the datagrid', () => {
       clientsDataJson.success = true;
       Clients.loadItems(clientsDataJson);
-      expect($('#clientgrid').find('tr').length).toEqual(4);
+      expect($('#clientgrid').find('tr').length).toEqual(5);
       clientsDataJson.success = true;
     });
   });

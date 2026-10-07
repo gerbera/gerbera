@@ -604,6 +604,7 @@
             <xs:attribute name="multi-value" type="boolean" default="yes"/>
             <xs:attribute name="full-filter" type="boolean" default="no"/>
             <xs:attribute name="allowed" type="boolean" default="yes"/>
+            <xs:attribute name="unique" type="boolean" default="yes"/>
         </xs:complexType>
     </xs:element>
 

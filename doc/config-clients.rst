@@ -233,6 +233,23 @@ Make sure that the namespaces are added with the the upnp section :ref:`upnp`
 
 If set to ``no`` all requests from a client are blocked.
 
+.. confval:: client unique
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``yes``
+..
+
+   .. versionadded:: HEAD
+   .. code:: xml
+
+       unique="no"
+
+If set to ``no`` different userAgents from this client will not be considered
+as the same source. This setting can be used for mobile devices or laptops
+with multiple different clients that are, e.g. used to control network
+speakers. Network speakers tend to send different user agent strings for
+SSDP protocol and UPnP requests confusing client detection.
+
 
 Child Entries
 -------------

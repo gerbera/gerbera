@@ -92,7 +92,7 @@ CREATE TABLE "grb_client"(
     "userAgent" text NOT NULL,
     "last" integer NOT NULL,
     "age" integer NOT NULL,
-    PRIMARY KEY("addr", "port"));
+    PRIMARY KEY("addr", "port", "userAgent"));
 
 CREATE TABLE "grb_playstatus"(
     "group" varchar(GRBMAX) NOT NULL,

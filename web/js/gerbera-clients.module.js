@@ -80,7 +80,8 @@ const deleteClient = (type, client) => {
   var requestData = {
     req_type: type,
     action: 'delete',
-    client_id: client.ip
+    client_id: client.ip,
+    user_agent: client.userAgent,
   };
   requestData[Auth.SID] = Auth.getSessionId();
   return $.ajax({

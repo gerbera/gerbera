@@ -2668,6 +2668,11 @@
               "editable": false
             },
             {
+              "item": "/clients/client/attribute::unique",
+              "caption": "Client Unique",
+              "editable": false
+            },
+            {
               "item": "/clients/client/attribute::flags",
               "caption": "flags",
               "editable": true

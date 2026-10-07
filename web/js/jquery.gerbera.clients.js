@@ -38,10 +38,13 @@ $.widget('grb.clients', {
       match: 'Match Pattern',
       clientType: 'Client Type',
       flags: 'Client Flags',
+      allowed: 'Allowed',
+      unique: 'Unique',
       empty: '',
     };
-    const clientProps = [['ip', 'host', 'group'], 'userAgent', ['name', 'matchType', 'match'], 'clientType', ['time', 'last'], 'flags'];
-    this.buildTable(table, this.options.data, clientHeadings, clientProps, 'Clients', clientProps.length, this.options.onDelete);
+    const clientProps = [['ip', 'host', 'group'], 'userAgent', ['name', 'matchType', 'match'], 'clientType', ['time', 'last'], ['flags', 'allowed', 'unique']];
+
+    this.buildTable(table, this.options.data, 'ip', clientHeadings, clientProps, 'Clients', clientProps.length, this.options.onDelete);
 
     const groupHeadings = {
       name: 'Group',
@@ -52,7 +55,7 @@ $.widget('grb.clients', {
       empty: '',
     };
     const groupProps = ['name', 'count', 'playCount', 'bookmarks', 'last', 'empty', 'empty'];
-    this.buildTable(table, this.options.groups, groupHeadings, groupProps, 'Groups', clientProps.length);
+    this.buildTable(table, this.options.groups, 'name', groupHeadings, groupProps, 'Groups', clientProps.length);
     this.element.append(table);
     this.element.addClass('with-data');
   },
@@ -63,7 +66,7 @@ $.widget('grb.clients', {
     this.element.removeClass('with-data');
   },
 
-  buildTable: function (table, data, headings, props, caption, size, onDelete) {
+  buildTable: function (table, data, keyCol, headings, props, caption, size, onDelete) {
     const tbody = $('<tbody></tbody>');
     const thead = $('<thead></thead>');
     let row, content, text;
@@ -93,12 +96,30 @@ $.widget('grb.clients', {
       row.addClass('grb-client');
       thead.append(row);
 
+      let lastKey = '';
+      let keyItem = {};
+      for (let i = 0; i < data.length; i++) {
+        const item = data[i];
+        item.rowCount = 0;
+        if (item[keyCol] !== lastKey) {
+          keyItem = item;
+          keyItem.rowCount = 1;
+          lastKey = item[keyCol];
+        } else {
+          keyItem.rowCount++;
+        }
+      }
+
       for (let i = 0; i < data.length; i++) {
         const item = data[i];
         row = $('<tr></tr>');
-
-        props.forEach(function (prop) {
-          content = $('<td></td>');
+        props.forEach(function (prop, pIdx) {
+          if (item.rowCount === 0 && pIdx === 0) return;
+          if (item.rowCount > 0 && pIdx === 0) {
+            content = $('<td rowspan="' + item.rowCount + '"></td>');
+          } else {
+            content = $('<td></td>');
+          }
           const pL = (Array.isArray(prop)) ? prop : [prop];
           pL.forEach(function (p, idx) {
             if (idx > 0)
@@ -134,5 +155,8 @@ $.widget('grb.clients', {
     }
 
     tbody.appendTo(table);
+    if (data && data.length > 0) {
+      table.append($('<thead><tr><td colspan="7">&nbsp;</td></tr></thead>'));
+    }
   }
 });
