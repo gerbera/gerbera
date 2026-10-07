@@ -762,6 +762,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getClientOptions()
         std::make_shared<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED,
             "allowed", "config-clients.html#confval-client-allowed",
             YES),
+        std::make_shared<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_UNIQUE,
+            "unique", "config-clients.html#confval-client-unique",
+            YES),
 
         std::make_shared<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE,
             "/clients/client", "config-import.html#confval-client-map",

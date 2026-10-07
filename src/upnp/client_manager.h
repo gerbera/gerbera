@@ -76,13 +76,20 @@ public:
     const std::vector<ClientObservation>& getClientList() const { return cache; }
 
     /// @brief Remove single client from cache and database
-    void removeClient(const std::string& clientIp);
+    void removeClient(
+        const std::string& clientIp,
+        const std::string& userAgent);
 
 private:
     const ClientProfile* getInfoByAddr(const std::shared_ptr<GrbNet>& addr) const;
     const ClientProfile* getInfoByType(const std::string& match, ClientMatchType type) const;
 
-    const ClientObservation* getInfoByCache(const std::shared_ptr<GrbNet>& addr) const;
+    /// @brief find client in cache of known clients
+    const ClientObservation* getInfoByCache(
+        const std::shared_ptr<GrbNet>& addr,
+        const std::string& userAgent) const;
+
+    /// @brief add new or updated client to cache
     const ClientObservation* updateCache(
         const std::shared_ptr<GrbNet>& addr,
         const std::string& userAgent,

@@ -65,34 +65,34 @@
 
 constexpr unsigned int ITEM_BUF_SIZE = 16;
 
-static uint16_t getuint16(const std::byte* shrt)
+static std::uint16_t getUint16(const std::byte* shrt)
 {
-    return std::to_integer<uint16_t>(shrt[0]) << CHAR_BIT | std::to_integer<uint8_t>(shrt[1]);
+    return std::to_integer<std::uint16_t>(shrt[0]) << CHAR_BIT | std::to_integer<std::uint8_t>(shrt[1]);
 }
 
-static std::uint8_t getUint8(IOHandler& ioh)
+static std::uint8_t readByte(IOHandler& ioh)
 {
     std::byte byte {};
     auto ret = ioh.read(&byte, sizeof(std::byte));
     if (ret != 1) {
         throw_std_runtime_error("getJpegResolution: failed to read byte");
     }
-    return std::to_integer<uint8_t>(byte);
+    return std::to_integer<std::uint8_t>(byte);
 }
 
 static Resolution getJpegResolutionRaw(IOHandler& ioh)
 {
-    auto initMark = getUint8(ioh);
-    if (initMark != 0xff || getUint8(ioh) != M_SOI) {
+    auto initMark = readByte(ioh);
+    if (initMark != 0xff || readByte(ioh) != M_SOI) {
         throw_std_runtime_error("getJpegResolution: could not read jpeg specs");
     }
 
     while (true) {
-        uint8_t marker = 0;
+        std::uint8_t marker = 0;
         std::byte data[ITEM_BUF_SIZE];
 
         for (std::size_t a = 0; a < 7; a++) {
-            marker = getUint8(ioh);
+            marker = readByte(ioh);
             if (marker != 0xff) {
                 break;
             }
@@ -107,10 +107,10 @@ static Resolution getJpegResolutionRaw(IOHandler& ioh)
         }
 
         // Read the length of the section.
-        uint16_t lh = getUint8(ioh);
-        auto ll = getUint8(ioh);
+        std::uint16_t lh = readByte(ioh);
+        auto ll = readByte(ioh);
 
-        uint16_t itemLen = (lh << CHAR_BIT) | ll;
+        std::uint16_t itemLen = (lh << CHAR_BIT) | ll;
         if (itemLen < 2) {
             throw_std_runtime_error("getJpegResolution: invalid marker");
         }
@@ -152,8 +152,8 @@ static Resolution getJpegResolutionRaw(IOHandler& ioh)
 #if 0
             auto bitsPerColorComponent = std::to_integer<std::uint8_t>(data[2]);
 #endif
-            auto resX = getuint16(data + 5);
-            auto resY = getuint16(data + 3);
+            auto resX = getUint16(data + 5);
+            auto resY = getUint16(data + 3);
             return { static_cast<uint64_t>(resX), static_cast<uint64_t>(resY) };
         }
     }

@@ -60,7 +60,7 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
 
     // if mysql.sql or mysql-upgrade.xml is changed hashies have to be updated
     hashies = {
-        { 0, 3512174326 }, // index 0 is used for create script mysql.sql = Version 1
+        { 0, 40600402 }, // index 0 is used for create script mysql.sql = Version 1
         { 1, 928913698 },
         { 2, 1984244483 },
         { 3, 742641207 },
@@ -89,6 +89,7 @@ MySQLDatabase::MySQLDatabase(const std::shared_ptr<Config>& config, const std::s
         { 26, 1437624385 },
         { 27, 2132165886 },
         { 28, 1529766632 },
+        { 29, 847020325 },
         { -1, 2131653758 }, // index -1 is used for drop script mysql-drop.sql
     };
 }

@@ -86,6 +86,7 @@ bool ConfigClientSetup::createOptionFromNode(
         auto fullFilter = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_UPNP_FILTER_FULL)->getXmlContent(child, config);
         auto allowCS = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_ALLOWED);
         auto isAllowed = allowCS->getXmlContent(child, config);
+        auto isUnique = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_CLIENTS_CLIENT_UNIQUE)->getXmlContent(child, config);
         auto mappings = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_MAP_MIMETYPE)->getXmlContent(child, config);
         auto headers = definition->findConfigSetup<ConfigDictionarySetup>(ConfigVal::A_CLIENTS_UPNP_HEADERS)->getXmlContent(child, config);
         auto profiles = definition->findConfigSetup<ConfigVectorSetup>(ConfigVal::A_CLIENTS_UPNP_MAP_DLNAPROFILE)->getXmlContent(child, config);
@@ -109,6 +110,7 @@ bool ConfigClientSetup::createOptionFromNode(
                 }
             }
             client->setFullFilter(fullFilter);
+            client->setUnique(isUnique);
             if (!mappings.empty())
                 client->setMimeMappings(mappings);
             if (!headers.empty())
@@ -236,6 +238,16 @@ bool ConfigClientSetup::updateItem(
             [&](const std::shared_ptr<ClientConfig>& entry) { return fmt::to_string(entry->getAllowed()); },
             [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
                 entry->setAllowed(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
+                return true;
+            },
+        },
+        // Unique
+        {
+            { ConfigVal::A_CLIENTS_CLIENT, ConfigVal::A_CLIENTS_CLIENT_UNIQUE },
+            "Unique",
+            [&](const std::shared_ptr<ClientConfig>& entry) { return fmt::to_string(entry->getUnique()); },
+            [&](const std::shared_ptr<ClientConfig>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setUnique(definition->findConfigSetup<ConfigBoolSetup>(cfg)->checkValue(optValue));
                 return true;
             },
         },

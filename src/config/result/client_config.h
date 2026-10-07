@@ -163,6 +163,13 @@ public:
         this->clientProfile.isAllowed = isAllowed;
     }
 
+    /// @brief client is unique at its address
+    bool getUnique() const { return this->clientProfile.isUnique; }
+    void setUnique(bool isUnique)
+    {
+        this->clientProfile.isUnique = isUnique;
+    }
+
     /// @brief client ip address if used for identification
     std::string getIp() const { return (this->clientProfile.matchType == ClientMatchType::IP) ? this->clientProfile.match : ""; }
     void setIp(std::string_view ip)

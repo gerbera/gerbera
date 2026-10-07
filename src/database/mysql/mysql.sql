@@ -101,7 +101,7 @@ CREATE TABLE `grb_client` (
   `userAgent` varchar(255) NOT NULL,
   `last` int(11) NOT NULL,
   `age` int(11) NOT NULL,
-  PRIMARY KEY (`addr`, `port`)
+  PRIMARY KEY (`addr`, `port`, `userAgent`)
 ) ENGINE=GRBENGINE CHARSET=GRBCHARSET;
 CREATE TABLE `grb_playstatus` (
   `group` varchar(GRBMAX) NOT NULL,

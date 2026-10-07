@@ -22,7 +22,7 @@ jobs:
           node-version: '24'
       - name: run tests
         run: |
-          npm ci
+          npm ci --legacy-peer-deps
           npm run lint
           npm run test
           npm run test:e2e

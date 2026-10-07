@@ -74,7 +74,7 @@ CREATE TABLE "grb_client"(
     "userAgent" varchar(255) NOT NULL,
     "last" integer NOT NULL,
     "age" integer NOT NULL,
-    PRIMARY KEY("addr", "port"));
+    PRIMARY KEY("addr", "port", "userAgent"));
 CREATE TABLE "grb_playstatus"(
     "group" varchar(255) NOT NULL,
     "item_id" integer NOT NULL,

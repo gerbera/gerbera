@@ -106,6 +106,7 @@ void ClientManager::refresh()
             ClientConfig::getFlags({ Quirk::None }),
             ClientMatchType::UserAgent,
             "BubbleUPnP",
+            false,
         },
 
         // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV]UE40D7000/1.0
@@ -129,6 +130,7 @@ void ClientManager::refresh()
             ClientConfig::getFlags({ Quirk::None }),
             ClientMatchType::UserAgent,
             "SEC_HHP_[PC]",
+            false,
         },
 
         // User-Agent(actionReq): DLNADOC/1.50 SEC_HHP_[TV] Samsung Q7 Series (49)/1.0
@@ -287,6 +289,7 @@ void ClientManager::refresh()
     serverProfile.name = config->getOption(ConfigVal::SERVER_NAME);
     serverProfile.groupConfig = defaultGroup;
     serverProfile.isAllowed = true;
+    serverProfile.isUnique = false;
     clientProfile.push_back(serverProfile);
 }
 
@@ -314,6 +317,7 @@ void ClientManager::addClientByDiscovery(
                         if (deviceProp && deviceProp.node()) {
                             auto info = getInfoByType(deviceProp.node().text().as_string(), mType);
                             if (info) {
+                                log_debug("discovery {}({}, {}) for {} = {}", addr->getHostName(), userAgent, descLocation, mNode, deviceProp.node().text().as_string());
                                 updateCache(addr, userAgent, nullptr, info);
                             }
                         }
@@ -342,11 +346,13 @@ const ClientObservation* ClientManager::getInfo(
     }
     // 3. by cache
     // HINT: most clients do not report exactly the same User-Agent for UPnP services and file request.
-    auto client = getInfoByCache(addr);
+    auto client = getInfoByCache(addr, userAgent);
 
     if (client) {
         return client;
     }
+
+    log_debug("no client");
 
     // always return something, 'Unknown' if we do not know better
     assert(clientProfile.at(0).type == ClientType::Unknown);
@@ -359,6 +365,7 @@ const ClientObservation* ClientManager::getInfo(
 const ClientProfile* ClientManager::getInfoByAddr(const std::shared_ptr<GrbNet>& addr) const
 {
     auto it = std::find_if(clientProfile.begin(), clientProfile.end(), [=](auto&& c) {
+        log_debug("checking client by IP (ip='{}')", c.match);
         if (c.matchType != ClientMatchType::IP)
             return false;
         return addr->equals(c.match);
@@ -386,12 +393,14 @@ const ClientProfile* ClientManager::getInfoByType(const std::string& match, Clie
     return nullptr;
 }
 
-const ClientObservation* ClientManager::getInfoByCache(const std::shared_ptr<GrbNet>& addr) const
+const ClientObservation* ClientManager::getInfoByCache(
+    const std::shared_ptr<GrbNet>& addr,
+    const std::string& userAgent) const
 {
     AutoLock lock(mutex);
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
-        { return entry.addr->equals(addr); });
+        { return entry.addr->equals(addr) && (entry.pInfo->isUnique || entry.userAgent == userAgent); });
 
     if (it != cache.end()) {
         log_debug("found client by cache (hostname='{}')", it->addr ? it->addr->getHostName() : "");
@@ -401,12 +410,16 @@ const ClientObservation* ClientManager::getInfoByCache(const std::shared_ptr<Grb
     return nullptr;
 }
 
-void ClientManager::removeClient(const std::string& clientIp)
+void ClientManager::removeClient(
+    const std::string& clientIp,
+    const std::string& userAgent)
 {
     AutoLock lock(mutex);
+
     cache.erase(std::remove_if(cache.begin(), cache.end(),
-                    [clientIp](auto&& entry) { return entry.addr && entry.addr->equals(clientIp); }),
+                    [clientIp, userAgent](auto&& entry) { return entry.addr && entry.addr->equals(clientIp) && (entry.pInfo->isUnique || entry.userAgent == userAgent); }),
         cache.end());
+
     if (this->database && (!this->server || this->server->isRunning()))
         this->database->saveClients(cache);
 }
@@ -427,9 +440,10 @@ const ClientObservation* ClientManager::updateCache(
         cache.end());
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
-        { return entry.addr->equals(addr); });
+        { return entry.addr->equals(addr) && (entry.pInfo->isUnique || entry.userAgent == userAgent); });
 
     if (it != cache.end()) {
+        log_debug("cache {}", userAgent);
         it->last = now;
         if (it->pInfo != pInfo) {
             // client info changed, update all

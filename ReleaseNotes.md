@@ -5,6 +5,12 @@
 ### NEW Features
 
 - Configuration option for search bracket nesting limit
+- Transcoding with constant bitrate for seeking
+
+### FIXES
+
+- Internal Transcoding now stable
+- header handling for quirks
 
 ### Code Improvements
 

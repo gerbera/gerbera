@@ -114,7 +114,7 @@ struct ServiceCapabilities {
 
 std::string DeviceDescriptionHandler::renderDeviceDescription(const std::string& ip, in_port_t port, const std::shared_ptr<Quirks>& quirks) const
 {
-    log_debug("start {}", quirks ? quirks->getClient()->addr->getHostName() : "");
+    log_debug("start {}", quirks && quirks->getClient() && quirks->getClient()->addr ? quirks->getClient()->addr->getHostName() : "");
     auto doc = std::make_unique<pugi::xml_document>();
 
     auto style = doc->prepend_child(pugi::node_pi);

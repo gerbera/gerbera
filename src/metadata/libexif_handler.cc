@@ -475,10 +475,11 @@ bool LibExifHandler::fillMetadata(
     if (exifObject.hasThumb()) {
         auto resource = std::make_shared<CdsResource>(ContentHandler::LIBEXIF, ResourcePurpose::Thumbnail);
         resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(item->getMimeType()));
-        item->addResource(resource);
         auto resolution = exifObject.getThumbResolution();
-        if (!resolution.empty())
+        if (!resolution.empty()) {
+            item->addResource(resource);
             resource->addAttribute(ResourceAttribute::RESOLUTION, resolution);
+        }
     }
     return true;
 }
