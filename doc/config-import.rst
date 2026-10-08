@@ -2299,6 +2299,19 @@ In order to access special profiles you can specify a resource attribute with it
 mimetype exist, mappings with more details are preferred to simple from-to mappings.
 Resource attributes can be seen in the details page for an item on the web UI. The value must either match exactly the transformed value (incl. unit) or the raw value.
 
+.. versionadded:: HEAD
+
+A mapping can also test the options of a resource, which the details page shows as well. The ffmpeg handler
+sets ``colorTransfer`` to the transfer characteristics of the video, named as ffprobe names them: ``bt709``,
+``smpte2084`` for HDR10 (PQ), ``arib-std-b67`` for HLG. HDR video can then get a profile of its own, e.g. to
+be transcoded for a client that cannot show it:
+
+   .. code:: xml
+
+      <map from="mkv" colorTransfer="smpte2084" to="MKV_HDR"/>
+
+Files imported before get the option when they are imported again.
+
    .. confval:: contenttype-dlnaprofile map from
       :type: :confval:`String`
       :required: true
