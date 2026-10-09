@@ -316,6 +316,117 @@ Complete Example
     </clients>
 
 
+.. _internal-transcoding:
+
+Internal Transcoding
+~~~~~~~~~~~~~~~~~~~~
+
+Besides running an external application, Gerbera can transcode content itself using the ffmpeg libraries it is
+linked against. This is called internal transcoding.
+
+An internal profile is defined with ``type="internal"`` and uses an ``<encoder>`` tag instead of ``<agent>``:
+
+.. code-block:: xml
+
+    <profile name="int2mp4" enabled="yes" type="internal">
+      <mimetype>video/mp4</mimetype>
+      <accept-url>no</accept-url>
+      <first-resource>yes</first-resource>
+      <accept-ogg-theora>yes</accept-ogg-theora>
+      <encoder format="mp4" acodec="aac" vcodec="libx264" afilter="anull"
+               muxopts="movflags=frag_keyframe+empty_moov+default_base_moof"/>
+    </profile>
+
+The profile is selected in the mimetype-profile mappings exactly like an external profile:
+
+.. code-block:: xml
+
+    <transcode mimetype="video/mpeg" using="int2mp4"/>
+
+
+Encoder Settings
+----------------
+
+The ``<encoder>`` tag tells ffmpeg what to produce. The most important attributes are:
+
+ * ``format``: the output container, using the ffmpeg muxer name, e.g. ``mp4`` or ``matroska``.
+   Run ``ffmpeg -muxers`` to see the names available on your system.
+
+ * ``acodec`` and ``vcodec``: the audio and video encoders, e.g. ``aac`` and ``libx264``. Run ``ffmpeg -encoders``
+   to see which ones your ffmpeg build provides. Leave out ``vcodec`` for audio-only profiles.
+
+ * ``afilter`` and ``vfilter``: ffmpeg filter graphs applied to the audio and video. ``anull`` passes audio through
+   unchanged.
+
+ * ``width`` and ``height``: scale the video to this size. If not set, the source size is kept.
+
+ * ``muxopts``: options passed to the muxer, see below.
+
+As with external transcoding, the output format must match the ``<mimetype>`` of the profile, since that is what
+the player is told it will receive.
+
+All attributes are described in detail in :confval:`encoder`.
+
+
+Streamable Output And Muxer Options
+-----------------------------------
+
+The transcoded stream is sent to the player while it is being produced, so the muxer cannot seek back to update
+the beginning of the output. Every container used for internal transcoding therefore has to be written in a
+streamable way (see also `Specifying The Target Mime Type`_).
+
+Some muxers do this by default, others need specific options. These muxer options can be set with the ``muxopts``
+attribute, written as ``key=value`` pairs separated by colons:
+
+.. code-block:: xml
+
+    muxopts="key1=value1:key2=value2"
+
+They correspond to the format-specific options listed in https://ffmpeg.org/ffmpeg-formats.html, i.e. what you would
+pass on the ffmpeg command line after ``-f <format>``.
+
+**MP4**
+
+By default the mp4 muxer writes its index (the ``moov`` atom) at the end of the file, which requires seeking back
+in the output. The solution is to write fragmented mp4 instead, which puts an empty index at the start and then writes the media
+in self-contained fragments:
+
+.. code-block:: xml
+
+    <encoder format="mp4" acodec="aac" vcodec="libx264" afilter="anull"
+             muxopts="movflags=frag_keyframe+empty_moov+default_base_moof"/>
+
+**Matroska**
+
+The matroska muxer can write to non-seekable output without extra options:
+
+.. code-block:: xml
+
+    <encoder format="matroska" acodec="aac" vcodec="libx264" afilter="anull"/>
+
+
+
+Complete Internal Transcoding MP4 Example
+-----------------------------------------
+
+.. code-block:: xml
+
+    <transcoding enabled="yes">
+      <mimetype-profile-mappings>
+        <transcode mimetype="video/mpeg" using="int2mp4"/>
+      </mimetype-profile-mappings>
+      <profiles>
+        <profile name="int2mp4" enabled="yes" type="internal">
+          <mimetype>video/mp4</mimetype>
+          <accept-url>no</accept-url>
+          <first-resource>yes</first-resource>
+          <accept-ogg-theora>yes</accept-ogg-theora>
+          <encoder format="mp4" acodec="aac" vcodec="libx264" afilter="anull"
+                   muxopts="movflags=frag_keyframe+empty_moov+default_base_moof"/>
+        </profile>
+      </profiles>
+    </transcoding>
+
 Testing And Troubleshooting
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
