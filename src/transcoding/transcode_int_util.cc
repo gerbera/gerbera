@@ -619,7 +619,7 @@ int StreamContext::createEncoder(
             enc_ctx->sample_aspect_ratio = settings.aspectRatio;
 
             // Set first supported pixel format
-#if (LIBAVCODEC_VERSION_INT < AV_VERSION_INT(61, 0, 0))
+#if (LIBAVCODEC_VERSION_INT < AV_VERSION_INT(61, 13, 100))
             /* take first format from list of supported formats */
             if (encoder->pix_fmts)
                 enc_ctx->pix_fmt = encoder->pix_fmts[0];
@@ -652,7 +652,7 @@ int StreamContext::createEncoder(
 #endif
 
             // Set first supported sample format
-#if (LIBAVCODEC_VERSION_INT < AV_VERSION_INT(61, 0, 0))
+#if (LIBAVCODEC_VERSION_INT < AV_VERSION_INT(61, 13, 100))
             if (encoder->sample_fmts)
                 enc_ctx->sample_fmt = encoder->sample_fmts[0];
 #else
