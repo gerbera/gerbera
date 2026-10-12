@@ -22,22 +22,44 @@ jobs:
             cc: gcc-10
             cxx: g++-10
             icu: "False"
+            pq: "False"
+            systemd: "True"
             system: ubuntu-22.04
           - name: clang
             cc: clang-13
             cxx: clang++-13
             icu: "True"
+            pq: "False"
+            systemd: "True"
             system: ubuntu-22.04
           - name: gcc-13
             cc: gcc-13
             cxx: g++-13
             icu: "False"
+            pq: "False"
+            systemd: "True"
             system: ubuntu-24.04
           - name: clang-18
             cc: clang-18
             cxx: clang++-18
             icu: "True"
+            pq: "False"
+            systemd: "True"
             system: ubuntu-24.04
+          - name: gcc-15
+            cc: gcc-15
+            cxx: g++-15
+            icu: "False"
+            pq: "False"
+            systemd: "False"
+            system: ubuntu-26.04
+          - name: clang-21
+            cc: clang-21
+            cxx: clang++-21
+            icu: "True"
+            pq: "False"
+            systemd: "False"
+            system: ubuntu-26.04
     runs-on: ${{ matrix.compiler.system }}
     name: Compile ${{ matrix.compiler.name }}
     env:
@@ -71,7 +93,7 @@ jobs:
           # Remove existing package if it comes from the cache, otherwise
           # Conan will skip building it (due to --build=missing policy)
           conan remove 'gerbera/*' -c
-          conan create -pr ./conan/dev -o 'gerbera/*:icu=${{ matrix.compiler.icu }}' --build=missing --version dev .
+          conan create -pr ./conan/dev -o='gerbera/*:icu=${{ matrix.compiler.icu }}' -o='gerbera/*:postgres=${{ matrix.compiler.pq }}' -o='gerbera/*:libsystemd=${{ matrix.compiler.systemd }}' --build=missing --version dev .
       - name: cleanup
         run: |
           # Remove build directories before creating a cache.
@@ -88,7 +110,7 @@ jobs:
     runs-on: ubuntu-latest
     name: head-${{ matrix.head.name }}
     container:
-      image: "ubuntu:24.04"
+      image: "ubuntu:26.04"
       env:
         DEBIAN_FRONTEND: noninteractive
         TZ: Etc/UTC

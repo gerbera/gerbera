@@ -15,30 +15,35 @@ Gerbera is a UPnP media server which allows you to stream your digital media thr
 **Pull requests are very welcome and reporting issues is encouraged.**
 
 ## Documentation
+
 View our documentation online at [https://docs.gerbera.io](https://docs.gerbera.io).
 
 ## Features
-* Browse and playback your media via your network on all kinds of devices.
-* Web UI with a tree view of the database and the file system, allowing to add/remove/edit/browse your media
-* Metadata extraction from MP3, OGG, AAC, M4A, FLAC, wavpack, JPG (and many more!) files.
-* Media thumbnail support
-* Highly flexible media format transcoding via plugins / scripts
-* Automatic directory rescans (timed, inotify)
-* User defined server layout based on extracted metadata
-* Supports last.fm scrobbing
-* On the fly video thumbnail generation
-* Support for external URLs (create links to internet content and serve them via UPnP to your renderer)
-* Runs on Linux, BSD, Mac OS X, and more!
-* Runs on x86, ARM, MIPS, and more!
+
+- Browse and playback your media via your network on all kinds of devices.
+- Web UI with a tree view of the database and the file system, allowing to add/remove/edit/browse your media
+- Metadata extraction from MP3, OGG, AAC, M4A, FLAC, wavpack, JPG (and many more!) files.
+- Media thumbnail support
+- Highly flexible media format transcoding via plugins / scripts
+- Automatic directory rescans (timed, inotify)
+- User defined server layout based on extracted metadata
+- Supports last.fm scrobbing
+- On the fly video thumbnail generation
+- Support for external URLs (create links to internet content and serve them via UPnP to your renderer)
+- Runs on Linux, BSD, Mac OS X, and more!
+- Runs on x86, ARM, MIPS, and more!
 
 ## Installing
+
 Head over to the docs page on [Installing Gerbera](https://docs.gerbera.io/en/stable/install.html) for instructions on
 how to install Gerbera.
 
 ## Building
+
 Visit our docs for instructions to [Compile Gerbera](https://docs.gerbera.io/en/stable/compile.html) or [Compile latest Gerbera](https://docs.gerbera.io/en/latest/compile.html).
 
 ### Quick start build instructions:
+
 ```
 git clone https://github.com/gerbera/gerbera.git
 mkdir build
@@ -50,48 +55,48 @@ sudo make install
 
 ## Dependencies
 
-| Library             | Min Version  | Recommended  | Latest tested        | Required?     | Note                             | Default  |
-|---------------------|--------------|--------------|----------------------|---------------|----------------------------------|----------|
-| [libupnp]           | 1.14.6       | 1.14.30      | 22.1.8               | XOR libnpupnp | UPnP protocol support            |          |
-| [libnpupnp]         | 4.2.1        | 5.1.2        | 6.3.0                | XOR libupnp   | Alternate UPnP protocol support  | Disabled |
-| libuuid             |              |              |                      | Depends on OS | Not required on \*BSD            |          |
-| [pugixml]           |              | 1.10         | 1.16                 | Required      | XML file and data support        |          |
-| [jsoncpp]           | 1.7.4        | 1.9.6        | 1.9.8                | Required      | JSON data support                |          |
-| [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1-gbb7915        | Required      | Command line parsing             | Bundled  |
-| libiconv            |              |              |                      | Required      | Charset conversion               |          |
-| [sqlite3]           | 3.7.0        | 3.35.5       | 3.53.2               | Required      | Database storage                 |          |
-| [zlib]              |              |              |                      | Required      | Data compression                 |          |
-| [fmtlib]            | 7.1.3        | 11.2.0       | 12.2.0               | Required      | Fast string formatting           |          |
-| [spdlog]            | 1.8.1        | 1.15.3       | 1.17.0               | Required      | Runtime logging                  |          |
-| [icu4c]             | 65.1         | 65.1         | 77.1                 | Optional      | Transliteration                  | Enabled  |
-| [duktape]           | 2.1.0        | 2.6.0        | 2.7.0                | Optional      | Scripting Support                | Enabled  |
-| mysql / [mariadb]   |              |              | 3.4.9                | Optional      | Alternate database MySQL/MariaDB | Disabled |
-| [libpqxx]           | 7.10.1       | 7.10.3       | 7.10.3               | Optional      | Alternate database PostgreSQL    | Disabled |
-| [libpq]             | 12.22        |              | 17.0.6               | Optional      | required by [libpqxx]            | Disabled |
-| [curl]              |              |              | 8.14.1               | Optional      | Enables web services             | Enabled  |
-| [taglib]            | 1.12         | 1.12         | 2.3.2                | Optional      | Audio tag support                | Enabled  |
-| [utf8cpp]           | 4.1.1        | 4.1.1        | 4.2.1                | Optional      | Required for [taglib] build      | Enabled  |
-| libmagic            |              |              |                      | Optional      | File type detection              | Enabled  |
-| [wavpack]           | 5.1.0        | 5.4.0        | 5.9.0                | Optional      | WavPack metadata support         | Disabled |
-| [libmatroska]       | 1.4.8        | 1.6.3        | 1.7.2                | Optional      | MKV metadata                     | Enabled  |
-| [libebml]           | 1.3.5        | 1.4.2        | 1.4.7                | Optional      | required by [libmatroska]        | Enabled  |
-| [ffmpeg]            |              |              | 7.1.2                | Optional      | File metadata                    | Disabled |
-| [libexif]           | v0.6.21      | v0.6.24      | v0.6.26              | Optional      | JPEG Exif metadata               | Enabled  |
-| [libexiv2]          | v0.26        | v0.27.7      | v0.28.9              | Optional      | Exif, IPTC, XMP metadata         | Disabled |
-| [lastfmlib]         | 0.4.0        | 0.4.0        | 0.4.0                | Optional      | Enables scrobbling               | Disabled |
-| [ffmpegthumbnailer] | 2.1.1        | 2.2.3        | 2.3.1                | Optional      | Generate video/image thumbnails  | Disabled |
-| [libsystemd]        | 237          | 254          | 257                  | Optional      | Interact with systemd            | Disabled |
-| inotify             |              |              |                      | Optional      | Efficient file monitoring        | Enabled  |
-| [libzippp]          | v7.1-g8992d6 | v7.1-g8992d6 | v7.1-g7ed7b6         | Optional      | ZIP Package download             | Enabled  |
-| [libzip]            | 1.10.1       | 1.11.4       | 1.11.4               | Optional      | Required for [libzippp]          | Enabled  |
+| Library             | Min Version  | Recommended  | Latest tested | Required?     | Note                             | Default  |
+| ------------------- | ------------ | ------------ | ------------- | ------------- | -------------------------------- | -------- |
+| [libupnp]           | 1.14.6       | 1.14.30      | 22.1.8        | XOR libnpupnp | UPnP protocol support            |          |
+| [libnpupnp]         | 4.2.1        | 5.1.2        | 6.3.0         | XOR libupnp   | Alternate UPnP protocol support  | Disabled |
+| libuuid             |              |              |               | Depends on OS | Not required on \*BSD            |          |
+| [pugixml]           |              | 1.10         | 1.16          | Required      | XML file and data support        |          |
+| [jsoncpp]           | 1.7.4        | 1.9.6        | 1.9.8         | Required      | JSON data support                |          |
+| [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1-gbb7915 | Required      | Command line parsing             | Bundled  |
+| libiconv            |              |              |               | Required      | Charset conversion               |          |
+| [sqlite3]           | 3.7.0        | 3.35.5       | 3.53.2        | Required      | Database storage                 |          |
+| [zlib]              |              |              |               | Required      | Data compression                 |          |
+| [fmtlib]            | 7.1.3        | 11.2.0       | 12.2.0        | Required      | Fast string formatting           |          |
+| [spdlog]            | 1.8.1        | 1.15.3       | 1.17.0        | Required      | Runtime logging                  |          |
+| [icu4c]             | 65.1         | 65.1         | 77.1          | Optional      | Transliteration                  | Enabled  |
+| [duktape]           | 2.1.0        | 2.6.0        | 2.7.0         | Optional      | Scripting Support                | Enabled  |
+| mysql / [mariadb]   |              |              | 3.4.9         | Optional      | Alternate database MySQL/MariaDB | Disabled |
+| [libpqxx]           | 7.10.1       | 7.10.3       | 7.10.7        | Optional      | Alternate database PostgreSQL    | Disabled |
+| [libpq]             | 12.22        |              | 17.0.6        | Optional      | required by [libpqxx]            | Disabled |
+| [curl]              |              |              | 8.14.1        | Optional      | Enables web services             | Enabled  |
+| [taglib]            | 1.12         | 1.12         | 2.3.2         | Optional      | Audio tag support                | Enabled  |
+| [utf8cpp]           | 4.1.1        | 4.1.1        | 4.2.1         | Optional      | Required for [taglib] build      | Enabled  |
+| libmagic            |              |              |               | Optional      | File type detection              | Enabled  |
+| [wavpack]           | 5.1.0        | 5.4.0        | 5.9.0         | Optional      | WavPack metadata support         | Disabled |
+| [libmatroska]       | 1.4.8        | 1.6.3        | 1.7.2         | Optional      | MKV metadata                     | Enabled  |
+| [libebml]           | 1.3.5        | 1.4.2        | 1.4.7         | Optional      | required by [libmatroska]        | Enabled  |
+| [ffmpeg]            |              |              | 7.1.2         | Optional      | File metadata                    | Disabled |
+| [libexif]           | v0.6.21      | v0.6.24      | v0.6.26       | Optional      | JPEG Exif metadata               | Enabled  |
+| [libexiv2]          | v0.26        | v0.27.7      | v0.28.9       | Optional      | Exif, IPTC, XMP metadata         | Disabled |
+| [lastfmlib]         | 0.4.0        | 0.4.0        | 0.4.0         | Optional      | Enables scrobbling               | Disabled |
+| [ffmpegthumbnailer] | 2.1.1        | 2.2.3        | 2.3.1         | Optional      | Generate video/image thumbnails  | Disabled |
+| [libsystemd]        | 237          | 254          | 257           | Optional      | Interact with systemd            | Disabled |
+| inotify             |              |              |               | Optional      | Efficient file monitoring        | Enabled  |
+| [libzippp]          | v7.1-g8992d6 | v7.1-g8992d6 | v7.1-g7ed7b6  | Optional      | ZIP Package download             | Enabled  |
+| [libzip]            | 1.10.1       | 1.11.4       | 1.11.4        | Optional      | Required for [libzippp]          | Enabled  |
 
 ## Development Dependencies
 
-| Package             | Min Version | Recommended | Latest tested | Required?     | Note                           | Default  |
-|---------------------|-------------|-------------|---------------|---------------|--------------------------------|----------|
-| [googletest]        | 1.10.0      | 1.10.0      | 1.18.0        | Optional      | Running tests                  | Disabled |
-| [doxygen]           |             | 1.8.14      | 1.14.0        | Optional      | Building source documentation  | Disabled |
-| [cmake]             | 3.25.0      | 3.31.38     | 4.4.3         | Required      | Build processing               | Enabled  |
+| Package      | Min Version | Recommended | Latest tested | Required? | Note                          | Default  |
+| ------------ | ----------- | ----------- | ------------- | --------- | ----------------------------- | -------- |
+| [googletest] | 1.10.0      | 1.10.0      | 1.18.0        | Optional  | Running tests                 | Disabled |
+| [doxygen]    |             | 1.8.14      | 1.14.0        | Optional  | Building source documentation | Disabled |
+| [cmake]      | 3.25.0      | 3.31.38     | 4.4.3         | Required  | Build processing              | Enabled  |
 
 ## License
 

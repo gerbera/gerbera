@@ -15,18 +15,20 @@
 ### Code Improvements
 
 - Update maximum versions of utf8cpp (4.2.1), cxxopts (3.3.1-gbb7915),
-  pupnp (22.1.8)
+  pupnp (22.1.8), libpqxx (7.10.7)
+- Build for ubuntu 26.10
 - Use formatting for exception from fmtlib >= 11
 
 ## v3.3.0
 
 This release adds the following major features
+
 - support for cuesheets which are similar to playlists but offer new tracks
   with their own metadata and therefor are added to the physical layout and
   are handled in virtual layout.
 - internal transcoding by directly using ffmpeg api (experimental - needs
   community testing support).
-next to many fixes and minor improvements.
+  next to many fixes and minor improvements.
 
 ### NEW Features
 
@@ -199,7 +201,6 @@ Also make sure that backup files do not have extension `.js` otherwise they are 
 - Update maximum library versions of exiv2 (0.28.7), fmt (12.1.0), pupnp (1.14.25), spdlog (1.16.0)
 - Cleanup of cmake modules
 
-
 ## v2.6.1
 
 This release focuses on fixing MySQL issues and also stream internal subtitles.
@@ -219,11 +220,11 @@ Also the scripting tests no longer support loading complete files.
 - Increased size of `debug-mode` config option to `unsigned long long` to avoid overflow. Includes new very long integer config option.
 - Support for loading scripts in tests is dropped in preperation of dropping the feature completely.
 
-
 ## v2.6.0
 
 This release especially brings new features in metadata extraction and
 layout configuration which require reimport of the library:
+
 - Improved resource handling for WavPack and FFMpeg
 - Additional file type support for DSF and WAV/PCM
 - Natural file sorting
@@ -265,7 +266,6 @@ config file.
 - Upgrade documentation build environment to sphinx 8.2 with python 3.12
 - Update versions of npupnp (6.2.1), fmtlib (11.2.0), spdlog (1.15.3), googletest (1.17.0), pupnp (1.14.24), taglib (2.1.1)
 - Install script for cmake
-
 
 ## v2.5.0
 
@@ -347,17 +347,18 @@ There are some noteworthy new features in this release:
 - Update Build Environment
 - Update versions of js vendor files jquery-ui (v1.13.2 -> v1.14.1), js-cookie (v3.0.1 -> v3.0.5), @popperjs/core (v2.11.6 -> v2.11.8)
 
-
 ## v2.3.0
 
 Because of the extension of configuration of transcoding profiles, those producing PCM output have to be updated:
 `<mimetype>audio/L16</mimetype>` must become
+
 ```
 <mimetype value="audio/L16">
   <mime-property key="rate" resource="sampleFrequency"/>
   <mime-property key="channels" resource="nrAudioChannels"/>
 </mimetype>
 ```
+
 After many years Apple discontinued their trailers app and we had drop
 Apple Trailer support as the last of Mediatombs online services. Thus online
 service support is disabled in our builds, also, leading to parts of the
@@ -396,7 +397,6 @@ config being unused or triggering warnings.
 - Extract code for npupnp and pupnp specific handling
 - Refactoring of UPnP services
 - Cleanup of several todos, FIXMES, code smells etc.
-
 
 ## v2.2.0
 
@@ -438,7 +438,6 @@ This requires a change in js scripts: All import functions have to return a list
 - Refactoring of Config and Content code
 - Reduce header nesting
 
-
 ## v2.1.0
 
 This release started out as a mere bugfix release but gathered some nice features along the way.
@@ -465,7 +464,6 @@ custom headers for particular clients.
 - Build System: Use cmake presets
 - Build System: Update Conan to V2
 - Build System: Support build with NPUPNP
-
 
 ## v2.0.0
 
@@ -515,7 +513,6 @@ instead of deleted and recreated like before.
 - Update versions of googletest (1.14), pupnp (1.14.18), libexiv2 (v0.28.1), libebml (1.4.5), fmt (10.2.0), pugixml (1.14), spdlog (1.12.0) and taglib (1.13.1)
 - Compatibility with gcc14
 
-
 ## v1.12.1
 
 ### NEW Features
@@ -536,7 +533,6 @@ instead of deleted and recreated like before.
 - Reduced header nesting
 - Build with latest versions of pugixml (1.13), spdlog (1.11.0), taglib (1.13), wavpack (5.6.0)
 
-
 ## v1.12.0
 
 ### NEW Features
@@ -551,6 +547,7 @@ instead of deleted and recreated like before.
 - Offline mode for initial scan large libraries
 
 ### FIXES
+
 - Database update on autoscan table
 - Transcoding for external items
 - Sqlite errors because of deleted objects
@@ -559,17 +556,19 @@ instead of deleted and recreated like before.
 - Update docker images to alpine 3.16
 
 ### Code Improvements
+
 - Xml2Json rework
 - build with latest versions of pupnp (1.14.14), wavpack (5.5.0), ebml (1.4.4), matroska (1.7.1), exiv2 (0.27.5), fmt (9.1.0) and spdlog (1.10.0)
 - Further Cleanups
 
 ### General
-If you activated nfo-metafile resources you have to reimport your media files.
 
+If you activated nfo-metafile resources you have to reimport your media files.
 
 ## v1.11.0
 
 ### NEW Features
+
 - Database: Clients and statistics are stored database so restart does not empty client list. Client grouping for play statistics.
 - Search: Support searching playlists containers
 - Search: Respect ContainerID when performing search
@@ -580,6 +579,7 @@ If you activated nfo-metafile resources you have to reimport your media files.
 - Support Ubuntu 22.04
 
 ### FIXES
+
 - Playlist: Fix parser error
 - Playlist: Handle end of file properly
 - Browsing: Sort containers first
@@ -587,6 +587,7 @@ If you activated nfo-metafile resources you have to reimport your media files.
 - Import: Timestamps in future are not stored for containers
 
 ### Code Improvements
+
 - ContentHandler to enum
 - ResourceContentType to enum
 - ResourceAttribute new style enum
@@ -598,12 +599,13 @@ If you activated nfo-metafile resources you have to reimport your media files.
 - Further Cleanups
 
 ### General
-To benefit from changes a rescan of all media files is recommended
 
+To benefit from changes a rescan of all media files is recommended
 
 ## v1.10.0
 
 ### NEW Features
+
 - Add all metadata is seachable
 - Add support for ASX playlists
 - Drop Ubuntu 20.10, add 21.10
@@ -614,12 +616,13 @@ To benefit from changes a rescan of all media files is recommended
 - WebUI: Thumbnails for images and grid view for items
 
 ### FIXES
+
 - Block negative track numbers
 - Improve matroska parsing speed
 
 ### Code Improvements
-- Update fmt version
 
+- Update fmt version
 
 ## v1.9.2
 

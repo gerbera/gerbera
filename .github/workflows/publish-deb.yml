@@ -28,6 +28,7 @@ jobs:
           - "ubuntu:22.04"
           - "ubuntu:24.04"
           - "ubuntu:26.04"
+          - "ubuntu:26.10"
           - "debian:bookworm"
           - "debian:trixie"
           - "debian:testing"

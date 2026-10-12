@@ -11,5 +11,6 @@ include(./common)
 &:curl=False
 &:mysql=False
 &:postgres=False
+&:libsystemd=False
 &:ffmpeg=False
 &:ffmpegthumbnailer=False

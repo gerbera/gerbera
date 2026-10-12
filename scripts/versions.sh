@@ -89,7 +89,7 @@ else
     TAGLIB="2.3.2"
     JSONCPP="1.9.8-rc1"
     CMAKE="4.4.2"
-    PQXX="7.10.3"
+    PQXX="7.10.7"
     LIBZIP="v1.11.4"
     LIBZIPPP_COMMIT="7ed7b6e2817dc4b1f247f48b44cb8a013ba18683"
     LIBZIPPP="v7.1-1.10.1"

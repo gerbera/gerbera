@@ -11,7 +11,8 @@ build_type=Debug
 &:debug_logging=True
 &:tests=True
 &:exiv2=False
-&:postgres=True
+&:postgres=False
+&:libsystemd=True
 &:mysql=False
 
 [buildenv]
