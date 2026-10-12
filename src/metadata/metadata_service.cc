@@ -232,9 +232,9 @@ bool MetadataService::attachResourceFiles(
     if (!isRegularFile(dirEnt, ec))
         throw_std_runtime_error("Not a file: {}", dirEnt.path().c_str());
 
-    auto mediaType = item->getMediaType();
     std::string mimeType = item->getMimeType();
     std::string contentType = getValueOrDefault(mappings, mimeType);
+    auto mediaType = item->getMediaType(contentType);
 
     constexpr auto metaHandlers = std::array {
 #ifdef HAVE_FFMPEGTHUMBNAILER
@@ -276,9 +276,9 @@ bool MetadataService::afterCreation(
     if (!isRegularFile(dirEnt, ec))
         throw_std_runtime_error("Not a file: {}", dirEnt.path().c_str());
 
-    auto mediaType = item->getMediaType();
     std::string mimeType = item->getMimeType();
     std::string contentType = getValueOrDefault(mappings, mimeType);
+    auto mediaType = item->getMediaType();
 
     constexpr auto metaHandlers = std::array {
         // CueSheet from text files
