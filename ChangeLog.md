@@ -3,6 +3,7 @@
 ### HEAD
 
 - Add config for search bracket nesting limit
+- Add ubuntu 26.10
 - Allow multiple clients by ip
 - Bump serialize-javascript from 7.1.1 to 7.1.2 in /gerbera-web
 - Fix CaptionInfo.sec never being sent to Samsung TVs
@@ -11,6 +12,7 @@
 - Pass the client quirks to the DIDL of search results
 - Seek in transcoded streams of constant bit rate
 - Serve transcoded streams to HTTP/1.0 clients
+- Update metadata_service to use content-type
 - Update to cxxopts-gac6d47
 - Update to pupnp 22.1.8
 - Use fmt exception formatting
@@ -571,90 +573,90 @@
 
 ### v2.0.0
 
- - Add #include to fix building with gcc 14
- - Add artist chronology container
- - Add audio to year container
- - Add cleanup of missing entries to grb import mode
- - Add option for external URL to be used in web page.
- - Add permissions on HV transcoding devices in docker container
- - Add Support for Configuration of Virtual Layout
- - Add support for nomedia file / add options to block default M_DATE
- - Add support for UPnP commands GetFeatureList and GetSortExtensionCapabilities
- - Allow overriding home in config
- - Autoscan: Fix inotify without autoscan
- - Autoscan: Handle renamed directory
- - Autoscan: Use path for handling of non-existing
- - Build for Ubuntu 23.10
- - buildfix: support fmtlib 10
- - Bump @babel/traverse from 7.23.0 to 7.23.2 in /gerbera-web
- - Bump chromedriver from 117.0.3 to 119.0.1 in /gerbera-web
- - Bump engine.io and socket.io in /gerbera-web
- - Bump socket.io-parser from 4.2.2 to 4.2.3 in /gerbera-web
- - Bump ua-parser-js from 0.7.32 to 0.7.33 in /gerbera-web
- - Bump webpack from 5.75.0 to 5.76.0 in /gerbera-web
- - Bump word-wrap from 1.2.3 to 1.2.4 in /gerbera-web
- - Clean up physical entries in subdirectories
- - Clean up unreferenced items
- - Clients: Add detection for FSL radios
- - Clients: Support hiding resource types
- - Config WebUI: Catch up with all config changes
- - Config: Add follow-symlinks for autoscan
- - Config: Add required BoxLayout values from default
- - Config: Add support for time specifications
- - Config: Generate Example Configuration
- - Database items sorting case insensitive
- - DB rework playstatus save
- - DB: Don't fail on uncritical operations.
- - debian: bookworm is now stable
- - Display message on home screen when database is empty
- - Doc: Compile libupnp --disable-blocking-tcp-connections
- - Docker: Add JPEG libs
- - Docker: git badge update
- - Document dependency installation on Debian 12
- - Fix "virtual-directories" heading level in documentation
- - Fix conan
- - Fix for empty path
- - Fix handling transcoding requests
- - Fix import and documentation links
- - Fix processing for M_DATE and M_CREATION_DATE on FFmpeg handler.
- - Fix spelling errors reported by lintian
- - Fix troff warning
- - Fully implement Thumbnail handling for grb mode
- - Gerbera-Web: Update npm packages
- - Import: Add staged import process
- - Import: Fix LastModified for grb-mode
- - Import: Handle really short file names correctly
- - Import: Icon handling and other leftovers
- - Import: Improve handling of thumbnails in mt-mode
- - Keep our unique_ptrs for the xml in scope until we are finished with …
- - Playlist: Add support for boxlayout
- - Quirks: Check for clientInfo
- - README: fix CI badge
- - Restore duktape 2.3 support
- - Rework javascript mechanism
- - Samsung: Handle browse for content class correctly
- - Scripting docs: Fix importFile parameter name
- - Scripting: Log stacktrace on errors
- - Scripting: Remove debugging leftover
- - Set defaults for autoscan settings
- - Transcode: Wildcards for mime type filter
- - Transcoding: Improve docs and examples
- - Transcoding: option to filter mime types with wildcard
- - Update build for libexiv2
- - Update Documentation
- - Update Library Versions and Documentation
- - Update README.Docker.md -Add docker volume section
- - Update supported-devices.rst
- - Update to latest npm packages
- - Update Ubuntu Version
- - Update version of libfmt
- - Update versions of exiv2, fmt, spdlog, googletest and taglib
- - Upnp: Add client flag to send simple date only
- - Use new ffmpeg channel layout API
- - WebUI: Database View - don't allow deleting dynamic containers
- - WebUI: Fix display of time values
- - WebUI: Update JS libs
- - WebUI: Update popper to 2.11.6  / Update MD5 to 2.19.0
+- Add #include to fix building with gcc 14
+- Add artist chronology container
+- Add audio to year container
+- Add cleanup of missing entries to grb import mode
+- Add option for external URL to be used in web page.
+- Add permissions on HV transcoding devices in docker container
+- Add Support for Configuration of Virtual Layout
+- Add support for nomedia file / add options to block default M_DATE
+- Add support for UPnP commands GetFeatureList and GetSortExtensionCapabilities
+- Allow overriding home in config
+- Autoscan: Fix inotify without autoscan
+- Autoscan: Handle renamed directory
+- Autoscan: Use path for handling of non-existing
+- Build for Ubuntu 23.10
+- buildfix: support fmtlib 10
+- Bump @babel/traverse from 7.23.0 to 7.23.2 in /gerbera-web
+- Bump chromedriver from 117.0.3 to 119.0.1 in /gerbera-web
+- Bump engine.io and socket.io in /gerbera-web
+- Bump socket.io-parser from 4.2.2 to 4.2.3 in /gerbera-web
+- Bump ua-parser-js from 0.7.32 to 0.7.33 in /gerbera-web
+- Bump webpack from 5.75.0 to 5.76.0 in /gerbera-web
+- Bump word-wrap from 1.2.3 to 1.2.4 in /gerbera-web
+- Clean up physical entries in subdirectories
+- Clean up unreferenced items
+- Clients: Add detection for FSL radios
+- Clients: Support hiding resource types
+- Config WebUI: Catch up with all config changes
+- Config: Add follow-symlinks for autoscan
+- Config: Add required BoxLayout values from default
+- Config: Add support for time specifications
+- Config: Generate Example Configuration
+- Database items sorting case insensitive
+- DB rework playstatus save
+- DB: Don't fail on uncritical operations.
+- debian: bookworm is now stable
+- Display message on home screen when database is empty
+- Doc: Compile libupnp --disable-blocking-tcp-connections
+- Docker: Add JPEG libs
+- Docker: git badge update
+- Document dependency installation on Debian 12
+- Fix "virtual-directories" heading level in documentation
+- Fix conan
+- Fix for empty path
+- Fix handling transcoding requests
+- Fix import and documentation links
+- Fix processing for M_DATE and M_CREATION_DATE on FFmpeg handler.
+- Fix spelling errors reported by lintian
+- Fix troff warning
+- Fully implement Thumbnail handling for grb mode
+- Gerbera-Web: Update npm packages
+- Import: Add staged import process
+- Import: Fix LastModified for grb-mode
+- Import: Handle really short file names correctly
+- Import: Icon handling and other leftovers
+- Import: Improve handling of thumbnails in mt-mode
+- Keep our unique_ptrs for the xml in scope until we are finished with …
+- Playlist: Add support for boxlayout
+- Quirks: Check for clientInfo
+- README: fix CI badge
+- Restore duktape 2.3 support
+- Rework javascript mechanism
+- Samsung: Handle browse for content class correctly
+- Scripting docs: Fix importFile parameter name
+- Scripting: Log stacktrace on errors
+- Scripting: Remove debugging leftover
+- Set defaults for autoscan settings
+- Transcode: Wildcards for mime type filter
+- Transcoding: Improve docs and examples
+- Transcoding: option to filter mime types with wildcard
+- Update build for libexiv2
+- Update Documentation
+- Update Library Versions and Documentation
+- Update README.Docker.md -Add docker volume section
+- Update supported-devices.rst
+- Update to latest npm packages
+- Update Ubuntu Version
+- Update version of libfmt
+- Update versions of exiv2, fmt, spdlog, googletest and taglib
+- Upnp: Add client flag to send simple date only
+- Use new ffmpeg channel layout API
+- WebUI: Database View - don't allow deleting dynamic containers
+- WebUI: Fix display of time values
+- WebUI: Update JS libs
+- WebUI: Update popper to 2.11.6 / Update MD5 to 2.19.0
 
 ### v1.12.1
 
@@ -681,63 +683,63 @@
 
 ### v1.12.0
 
- - actions: use alpine 3.16 container
- - Add cache for hostname
- - add deleted copy functions for WavPackHandler
- - Add edge tag to docker workflow
- - Add files sizes to server stats
- - Add support for ip subnets in client config
- - Autoscan: Support configuration of upnp class of virtual containers
- - Bump jquery-ui from 1.13.1 to 1.13.2 in /gerbera-web
- - Bump terser from 5.13.1 to 5.14.2 in /gerbera-web
- - clang-tidy: const ref to value
- - clang-tidy: const string ref conversion
- - clang-tidy: don't use else after return
- - clang-tidy: use data() instead of pointer magic
- - Cleanup tasks on removeObject
- - CodeQL: Update version
- - const member functions
- - Coverity fixes
- - database: clearFlags use bit operation
- - Debian: fix unstable build
- - Docker: Improve debugging build
- - Docker: Update to alpine 3.16
- - Drop scan_level on update to DB 19
- - Fix 2663 No album sub-containers per artist created in "builtin"
- - Fix build on systems that have const in second argument to iconv
- - Fix build with fmt 9.0
- - fix compilation with latest exiv2 master
- - Fix npm vulnerabilities
- - Fix removing flags in ui
- - Fix static init
- - Fix: Remove duplicate open breaking url transcoding
- - Handle deleted objects in sqlite queue
- - Handle Promise rejection
- - Import: fix layout and performance issues
- - Improve creating external links
- - Improve error handling for Resolution
- - Limit number of dynamic container entries
- - Minor fixes
- - more sonarlint
- - Path handling cleanup
- - Quirks: Avoid passing references
- - Read Metadata from external files (asx playlist and NFO)
- - remove const from member variables
- - Remove dropped ubuntu versions
- - replace some memcpy by std::copy_n
- - Saveguard Samsung Quirks
- - Simplify Xml2Json
- - sonarlint fixes
- - Sqlite: Configuration for database modes
- - Support tweaking mimetypes for client
- - Systemd: Add wants entry
- - This and that
- - Transcoding for external items
- - Update node packages
- - Update versions
- - use fmt 9.0.0
- - web: update jquery-ui to 1.13.2
- - Workflows: Update actions
+- actions: use alpine 3.16 container
+- Add cache for hostname
+- add deleted copy functions for WavPackHandler
+- Add edge tag to docker workflow
+- Add files sizes to server stats
+- Add support for ip subnets in client config
+- Autoscan: Support configuration of upnp class of virtual containers
+- Bump jquery-ui from 1.13.1 to 1.13.2 in /gerbera-web
+- Bump terser from 5.13.1 to 5.14.2 in /gerbera-web
+- clang-tidy: const ref to value
+- clang-tidy: const string ref conversion
+- clang-tidy: don't use else after return
+- clang-tidy: use data() instead of pointer magic
+- Cleanup tasks on removeObject
+- CodeQL: Update version
+- const member functions
+- Coverity fixes
+- database: clearFlags use bit operation
+- Debian: fix unstable build
+- Docker: Improve debugging build
+- Docker: Update to alpine 3.16
+- Drop scan_level on update to DB 19
+- Fix 2663 No album sub-containers per artist created in "builtin"
+- Fix build on systems that have const in second argument to iconv
+- Fix build with fmt 9.0
+- fix compilation with latest exiv2 master
+- Fix npm vulnerabilities
+- Fix removing flags in ui
+- Fix static init
+- Fix: Remove duplicate open breaking url transcoding
+- Handle deleted objects in sqlite queue
+- Handle Promise rejection
+- Import: fix layout and performance issues
+- Improve creating external links
+- Improve error handling for Resolution
+- Limit number of dynamic container entries
+- Minor fixes
+- more sonarlint
+- Path handling cleanup
+- Quirks: Avoid passing references
+- Read Metadata from external files (asx playlist and NFO)
+- remove const from member variables
+- Remove dropped ubuntu versions
+- replace some memcpy by std::copy_n
+- Saveguard Samsung Quirks
+- Simplify Xml2Json
+- sonarlint fixes
+- Sqlite: Configuration for database modes
+- Support tweaking mimetypes for client
+- Systemd: Add wants entry
+- This and that
+- Transcoding for external items
+- Update node packages
+- Update versions
+- use fmt 9.0.0
+- web: update jquery-ui to 1.13.2
+- Workflows: Update actions
 
 ### v1.11.0
 
@@ -1533,6 +1535,7 @@
 - Enable tests for non-git-builds
 
 ### v1.8.1
+
 - Mysql transactions
 - Support creation_time on FFmpeg handler.
 - Bump lodash from 4.17.19 to 4.17.21 in /gerbera-web
@@ -1579,6 +1582,7 @@
 - Bump master post release
 
 ### v1.8.0
+
 - Significant improvement in import speeds with large collections
 - Handle Samsung X_SetBookmark action, for saving position of viewed media, when enabled by flag
 - New search support for containers, i.e. Albums, Artists and Genres
@@ -1615,12 +1619,15 @@
 In order to benefit from all these improvements it is recommended to clear your database and rescan your media library.
 
 ### v1.6.4
+
 - Fix regression introduced in 1.6.2 in SQL generation
 
 ### v1.6.3
+
 - Fix a regression introduced in 1.6.2 when adding resources
 
 ### v1.6.2
+
 - Fixed a regression where some files could be removed from the library on a restart due to a race
 - Fixed a crash in ffmpeg hander where metadata date field was non-numeric
 - Add Samsung X_SetBookmark stub
@@ -1635,8 +1642,8 @@ In order to benefit from all these improvements it is recommended to clear your 
 - cxxopts: update to 2.2.1
 - Update README badges
 
-
 ### v1.6.1
+
 - fixed mime type retrieval for symlinks with libmagic
 - Drop travis
 - Actions: Run docker build on tags too
@@ -1649,8 +1656,8 @@ In order to benefit from all these improvements it is recommended to clear your 
 - Build fixes
 - std::algorithm conversions
 
-
 ### v1.6.0
+
 - Allow configuration of separator for multi-valued tags
 - Show duk script error message on load
 - Show all object details on UI
@@ -1661,6 +1668,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - lots more!
 
 ### v1.5.0
+
 - Client Auto detection and DLNA quirks always enabled.
 - C++ Standardisation
 - UI Enhancements
@@ -1671,6 +1679,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - The latest 1.12.1 version of libupnp is now required.
 
 ### v1.4.0
+
 - Metadata MKV support via libmatroska
 - SQLite: Add migration to v5 schema
 - Update web modules
@@ -1683,12 +1692,14 @@ In order to benefit from all these improvements it is recommended to clear your 
 - Minor UI improvements
 
 ### v1.3.4/5
+
 - Fix the build with LibUPnP 1.10
 - Build against libupnp 1.8.5
 - Fedora installation.
 - UI e2e: Bump chromedriver
 
 ### v1.3.3
+
 - Remove Storage Cache
 - my_bool is not defined with mysql-connector-c 8.0
 - Update config.xml
@@ -1706,6 +1717,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - Convert Gerbera UI to ES6
 
 ### v1.3.2
+
 - Allow to set the manufacturer and the modelURL via config file
 - Fix find_program taglib-config when cross-compiling
 - Update config-import.rst
@@ -1721,8 +1733,8 @@ In order to benefit from all these improvements it is recommended to clear your 
 - main: bugfix `interface` CLI option
 - Generate config.xml with XML Declaration
 
-
 ### v1.3.1
+
 - Build system improvements
 - Fixes for DLNA Headers handling
 - Add support for TXXX AuxData extraction from MP3
@@ -1730,6 +1742,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - Latest NPM Updates
 
 ### v1.3.0
+
 - C++17 is now required to build (clang, gcc-7, gcc-8)
 - Improved Samsung DTV Support (Still not entirely complete, but some more models may work)
 - Added FLAC, Wavpack, DSD to default configuration
@@ -1747,6 +1760,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - Add CentOS install instructions
 
 ### v1.2.0
+
 - Amazing new web ui
 - UPnP Search implemented
 - Improved Docs: docs.gerbera.io, kindly hosted by Read the Docs.
@@ -1759,6 +1773,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - Fixed "root path" sometimes missing for scripted layouts.
 
 ### v1.1.0
+
 - Modern UI Preview
 - Raspberry Pi / 32bit fixes
 - Video thumbnail support
@@ -1769,6 +1784,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - This release supports <=libupnp 1.8.2 due to breaking changes in libupnp master branch, 1.2 will most likely require >=1.8.3.
 
 ### v1.0.0
+
 - Rebranded as Gerbera, new Logo!
 - Ported to CMake
 - Removed bundled libupnp - Now requires upstream 1.8 version.
@@ -1788,9 +1804,11 @@ In order to benefit from all these improvements it is recommended to clear your 
 - Lots of other stuff.
 
 ### MediaTomb v0.12.2
+
 - Added mtime and sizeOnDisk to JS objects
 
 ### MediaTomb v0.12.1 08.04.2010
+
 - fixed YouTube service support (got broken after they updated their
   website)
 - fixed a problem in soap response http headers (solves "access error"
@@ -1800,6 +1818,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - fixed automatic id3lib detection when taglib is not available
 
 ### MediaTomb v0.12.0 25.03.2010
+
 - added video thumbnail generation using libffmpegthumbnailer
 - added configure settings which allow to enable sqlite backups by
   default
@@ -1873,7 +1892,8 @@ In order to benefit from all these improvements it is recommended to clear your 
 - implemented feature request #1928580 better logging/tracing support
 - implemented feature request #1754010 m4a metadata extraction
 
-### MediaTomb v0.11.0 01.03.2008  External transcoding support
+### MediaTomb v0.11.0 01.03.2008 External transcoding support
+
 - implemented transcoding support that allows to plug in an arbitrary
   transcoding application
 - added fourcc detection for AVI files and transcoding options to
@@ -1940,7 +1960,8 @@ In order to benefit from all these improvements it is recommended to clear your 
 - implemented feature request #1771561, extension to mimetype mappings
   can now be case insensitive
 
-### MediaTomb v0.10.0	11.07.2007  Playlist and inotify autoscan support.
+### MediaTomb v0.10.0 11.07.2007 Playlist and inotify autoscan support.
+
 - MySQL database version pumped to 3 (MediaTomb will automatically
   update the database during the first launch)
 - Sqlite3 database version pumped to 2 (MediaTomb will automatically
@@ -1958,7 +1979,8 @@ In order to benefit from all these improvements it is recommended to clear your 
 - added album art support, album art is extracted from ID3 tags
   and offered to UPnP devices
 
-### MediaTomb v0.9.1  28.05.2007  Playstation 3 support
+### MediaTomb v0.9.1 28.05.2007 Playstation 3 support
+
 - added support for Playstation 3
 - added command line option that allows to tell the server where to
   put the configuration upon first startup
@@ -1975,7 +1997,8 @@ In order to benefit from all these improvements it is recommended to clear your 
 - MySQL database version pumped to 2 (MediaTomb will automatically
   update the database during the first launch)
 
-### MediaTomb v0.9.0  25.03.2007  Major rework
+### MediaTomb v0.9.0 25.03.2007 Major rework
+
 - the UI was completely rewritten from scratch; it uses AJAX for all
   requests
 - integrated libupnp (http://pupnp.sf.net/) into our source tree
@@ -2066,7 +2089,8 @@ In order to benefit from all these improvements it is recommended to clear your 
   for NAS vendors to integrate the server into their web UI
 - made model number configurable
 
-### MediaTomb v0.8.1	07.09.2005
+### MediaTomb v0.8.1 07.09.2005
+
 - added "serve" directory, any files there can be downloaded
   like from a normal webserver
 - implemented keyword extraction for auxdata from libexif
@@ -2085,7 +2109,8 @@ In order to benefit from all these improvements it is recommended to clear your 
 - when an item is deleted all referenced items are deleted as well
 - added option to specify an alternative magic file
 
-### MediaTomb v0.8.0  15.06.2005  Scripting/Virtual Server Layout
+### MediaTomb v0.8.0 15.06.2005 Scripting/Virtual Server Layout
+
 - Server layout can now be defined using java script,
   default layout script is provided.
 - Added ID3 tag support.
@@ -2104,7 +2129,8 @@ In order to benefit from all these improvements it is recommended to clear your 
 - Added target directory option to tomb-install, cleaned up a few
   things.
 
-### MediaTomb v0.7.1  17.04.2005  D-Link DSM-320 fix
+### MediaTomb v0.7.1 17.04.2005 D-Link DSM-320 fix
+
 - Mappings of mime-types to upnp classes are now configurable.
   Actually this is how we solved the DSM-320 problem - they
   crashed if upnp class of items was different than what the
@@ -2117,6 +2143,7 @@ In order to benefit from all these improvements it is recommended to clear your 
 - Improved handling of configuration, if non critical options are
   missing we are now setting default values.
 
-### MediaTomb v0.7    14.04.2005  First release
+### MediaTomb v0.7 14.04.2005 First release
+
 - The changelog does not start at day 0, updates will be made
   starting from this release.

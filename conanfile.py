@@ -30,6 +30,7 @@ class GerberaConan(ConanFile):
         "postgres": [True, False],
         "ffmpeg": [True, False],
         "icu": [True, False],
+        "libsystemd": [True, False],
         "ffmpegthumbnailer": [True, False],
     }
     default_options = {
@@ -45,9 +46,10 @@ class GerberaConan(ConanFile):
         "exiv2": False,
         "matroska": True,
         "mysql": True,
-        "postgres": True,
+        "postgres": False,
         "ffmpeg": True,
         "icu": True,
+        "libsystemd": True,
         "ffmpegthumbnailer": True,
     }
 
@@ -60,7 +62,6 @@ class GerberaConan(ConanFile):
         "jsoncpp/[>=1.9.6]",
         "libiconv/1.17",
         "sqlite3/[>=3.35.5]",
-        "libsystemd/[>=255]",
         "zlib/1.3.1",
         "pupnp/[>=1.14.16]",
         "taglib/[>=1.12]",
@@ -107,14 +108,17 @@ class GerberaConan(ConanFile):
             #self.requires("mariadb-connector-c/[<3.4.3]") # That recipe is broken
 
         if self.options.postgres:
-            self.requires("libpq/15.4") # required by libpqxx
-            self.requires("libpqxx/7.10.3")
+            self.requires("libpq/17.11")
+            self.requires("libpqxx/8.0.2")
 
         if self._needs_system_uuid:
             self.requires("libuuid/1.0.3")
 
         if self.options.icu:
-            self.requires("icu/76.1")
+            self.requires("icu/78.2")
+
+        if self.options.libsystemd:
+            self.requires("libsystemd/[>=255]")
 
     def system_requirements(self):
         if cross_building(self):
@@ -173,6 +177,7 @@ class GerberaConan(ConanFile):
         tc.cache_variables["WITH_PGSQL"] = self.options.postgres
         tc.cache_variables["WITH_ICU"] = self.options.icu
         tc.cache_variables["WITH_AVCODEC"] = self.options.ffmpeg
+        tc.cache_variables["WITH_SYSTEMD"] = self.options.libsystemd
         tc.cache_variables["WITH_FFMPEGTHUMBNAILER"] = self.options.ffmpegthumbnailer
 
         if self.settings.os != "Linux" or cross_building(self):
