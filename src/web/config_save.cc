@@ -56,7 +56,7 @@ bool Web::ConfigSave::processPageAction(Json::Value& element, const std::string&
     try {
         count = std::stoi(param("changedCount"));
     } catch (const std::invalid_argument& ex) {
-        log_error(ex.what());
+        log_error(EX(ex));
     }
     if (action == "clear") {
         database->removeConfigValue("*"); // remove all
@@ -152,7 +152,7 @@ bool Web::ConfigSave::processPageAction(Json::Value& element, const std::string&
                 }
             }
         } catch (const std::runtime_error& e) {
-            log_error("error setting option {}. Exception {}", i, e.what());
+            log_error("error setting option {}. Exception {}", i, EX(e));
         }
     }
 

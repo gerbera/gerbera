@@ -119,7 +119,7 @@ bool ConfigClientSetup::createOptionFromNode(
                 client->setDlnaMappings(profiles);
             EDIT_CAST(EditHelperClientConfig, result)->add(client);
         } catch (const std::runtime_error& e) {
-            throw_std_runtime_error("Could not add {} client: {}", ip, e.what());
+            throw_std_runtime_error("Could not add {} client: {}", ip, EX(e));
         }
     }
 

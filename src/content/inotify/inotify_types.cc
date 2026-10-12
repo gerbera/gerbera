@@ -26,13 +26,10 @@
 #ifdef HAVE_INOTIFY
 #include "content/inotify/inotify_types.h" // API
 
+#include "util/fmt_compat.h"
 #include "util/tools.h"
 
 #include <array>
-#include <fmt/format.h>
-#if FMT_VERSION >= 100202
-#include <fmt/ranges.h>
-#endif
 #include <numeric>
 #include <sys/inotify.h>
 #include <vector>

@@ -25,11 +25,8 @@ Gerbera - https://gerbera.io/
 
 #include "exceptions.h"
 #include "upnp/compat.h"
+#include "util/fmt_compat.h"
 
-#include <fmt/format.h>
-#if FMT_VERSION >= 100202
-#include <fmt/ranges.h>
-#endif
 #include <cstring>
 #include <sstream>
 

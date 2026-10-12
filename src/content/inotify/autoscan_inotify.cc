@@ -184,7 +184,7 @@ void AutoscanInotify::threadProc()
                 log_debug("end event {}", event->wd);
             }
         } catch (const std::runtime_error& e) {
-            log_error("Inotify thread caught exception: {}", e.what());
+            log_error("Inotify thread caught exception: {}", EX(e));
         }
     }
 }

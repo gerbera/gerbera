@@ -26,8 +26,9 @@
 #define GRB_LOG_FAC GrbLogFacility::config
 #include "config_options.h" // API
 
+#include "util/fmt_compat.h"
+
 #include <algorithm>
-#include <fmt/core.h>
 
 std::size_t DictionaryOption::getEditSize() const
 {

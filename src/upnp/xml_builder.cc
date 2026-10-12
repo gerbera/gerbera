@@ -11,7 +11,7 @@
                             Sergey 'Jin' Bostandzhyan <jin@mediatomb.cc>,
                             Leonhard Wimmer <leo@mediatomb.cc>
 
-    Copyright (C) 2016-2024 Gerbera Contributors
+    Copyright (C) 2016-2026 Gerbera Contributors
 
     MediaTomb is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
@@ -49,7 +49,6 @@
 
 #include <algorithm>
 #include <array>
-#include <fmt/chrono.h>
 #include <sstream>
 
 #define URL_FILE_EXTENSION "ext"
@@ -645,7 +644,7 @@ std::string UpnpXMLBuilder::renderResourceURL(
                     }
                 }
             } catch (const std::runtime_error& ex) {
-                log_error(" {}", ex.what());
+                log_error(" {}", EX(ex));
             }
             if (objID <= CDS_ID_ROOT)
                 objID = item.getID();

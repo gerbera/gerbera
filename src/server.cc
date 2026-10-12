@@ -170,8 +170,8 @@ void Server::run()
     try {
         content->run();
     } catch (const std::runtime_error& ex) {
-        log_error("Activating ContentService failed {}", ex.what());
-        throw UpnpException(500, fmt::format("run: Activating ContentService failed {}", ex.what()));
+        log_error("Activating ContentService failed {}", EX(ex));
+        throw UpnpException(500, fmt::format("run: Activating ContentService failed {}", EX(ex)));
     }
 
     std::string iface = config->getOption(ConfigVal::SERVER_NETWORK_INTERFACE);
@@ -539,11 +539,11 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
             request.update();
         } catch (const UpnpException& upnpE) {
             ret = upnpE.getErrorCode();
-            log_warning("UpnpException: {} -> {}", ret, upnpE.what());
+            log_warning("UpnpException: {} -> {}", ret, EX(upnpE));
             UpnpActionRequest_set_ErrCode(const_cast<UpnpActionRequest*>(static_cast<const UpnpActionRequest*>(event)), ret);
             UpnpActionRequest_strcpy_ErrStr(const_cast<UpnpActionRequest*>(static_cast<const UpnpActionRequest*>(event)), upnpE.what());
         } catch (const std::runtime_error& e) {
-            log_warning("Exception: {}", e.what());
+            log_warning("Exception: {}", EX(e));
             ret = UPNP_E_BAD_REQUEST;
         }
         break;
@@ -554,7 +554,7 @@ int Server::handleUpnpRootDeviceEvent(Upnp_EventType eventType, const void* even
             auto request = SubscriptionRequest(const_cast<UpnpSubscriptionRequest*>(static_cast<const UpnpSubscriptionRequest*>(event)));
             routeSubscriptionRequest(request);
         } catch (const UpnpException& upnpE) {
-            log_warning("Subscription exception: {}", upnpE.what());
+            log_warning("Subscription exception: {}", EX(upnpE));
             ret = upnpE.getErrorCode();
         }
         break;
@@ -757,10 +757,10 @@ int Server::GetInfoCallback(
     } catch (const ServerShutdownException&) {
         return -1;
     } catch (const ResourceNotFoundException& stex) {
-        log_warning("ResourceNotFoundException: {}", stex.what());
+        log_warning("ResourceNotFoundException: {}", EX(stex));
         return -1;
     } catch (const std::runtime_error& e) {
-        log_error("Exception: {}", e.what());
+        log_error("Exception: {}", EX(e));
         return -1;
     }
 }
@@ -795,10 +795,10 @@ UpnpWebFileHandle Server::OpenCallback(
     } catch (const ServerShutdownException&) {
         return nullptr;
     } catch (const ResourceNotFoundException& stex) {
-        log_warning("ResourceNotFoundException: {}", stex.what());
+        log_warning("ResourceNotFoundException: {}", EX(stex));
         return nullptr;
     } catch (const std::runtime_error& ex) {
-        log_error("Exception: {}", ex.what());
+        log_error("Exception: {}", EX(ex));
         return nullptr;
     }
 }
@@ -857,7 +857,7 @@ int Server::SeekCallback(
             ioHandler->seek(offset, whence);
         return 0;
     } catch (const std::runtime_error& e) {
-        log_error("Exception during seek: {}", e.what());
+        log_error("Exception during seek: {}", EX(e));
         return -1;
     }
 }
@@ -874,7 +874,7 @@ int Server::CloseCallback(
         try {
             ioHandler->close();
         } catch (const std::runtime_error& e) {
-            log_error("Exception during close: {}", e.what());
+            log_error("Exception during close: {}", EX(e));
             retClose = -1;
         }
     }

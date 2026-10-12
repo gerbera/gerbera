@@ -144,7 +144,7 @@ bool CheckProfileNumberValue(std::string& value)
             if (tempInt <= 0)
                 return false;
         } catch (const std::logic_error& ex) {
-            log_error("CheckProfileNumberValue failed: {}", ex.what());
+            log_error("CheckProfileNumberValue failed: {}", EX(ex));
             return false;
         }
     }

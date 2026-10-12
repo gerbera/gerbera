@@ -153,7 +153,7 @@ void FfmpegThumbnailerHandler::writeThumbnailCacheFile(
         fs::create_directories(path.parent_path());
         GrbFile(path).writeBinaryFile(data, size);
     } catch (const std::runtime_error& e) {
-        log_error("Failed to write thumbnail cache: {}", e.what());
+        log_error("Failed to write thumbnail cache: {}", EX(e));
     }
 }
 
@@ -224,7 +224,7 @@ std::unique_ptr<IOHandler> FfmpegThumbnailerHandler::serveContent(
 
         return std::make_unique<MemIOHandler>(img.data(), img.size());
     } catch (const std::logic_error& e) {
-        log_warning("Thumbnail generation failed for file {}: {}", itemLocation.c_str(), e.what());
+        log_warning("Thumbnail generation failed for file {}: {}", itemLocation.c_str(), EX(e));
         return nullptr;
     }
 }
@@ -263,7 +263,7 @@ bool FfmpegThumbnailerHandler::fillMetadata(
         return true;
 
     } catch (const std::runtime_error& e) {
-        log_warning("Failed to generate resource for thumbnail: {} {}", itemLocation.c_str(), e.what());
+        log_warning("Failed to generate resource for thumbnail: {} {}", itemLocation.c_str(), EX(e));
     }
     return false;
 }

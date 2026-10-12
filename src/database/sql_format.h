@@ -25,10 +25,7 @@
 #ifndef __SQL_FORMAT_H__
 #define __SQL_FORMAT_H__
 
-#include <fmt/format.h>
-#if FMT_VERSION >= 100202
-#include <fmt/ranges.h>
-#endif
+#include "util/fmt_compat.h"
 
 struct SQLIdentifier {
     SQLIdentifier(std::string name, char quote_begin, char quote_end)

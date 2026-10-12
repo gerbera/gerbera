@@ -64,7 +64,7 @@ void LibExifHandler::setJpegResolutionResource(
         item->getResource(resNum)->addAttribute(ResourceAttribute::RESOLUTION, resolution.string());
 
     } catch (const std::runtime_error& e) {
-        log_error("Failed to parse EXIF {} resolution: {}", item->getLocation().c_str(), e.what());
+        log_error("Failed to parse EXIF {} resolution: {}", item->getLocation().c_str(), EX(e));
     }
 }
 
@@ -315,7 +315,7 @@ public:
             log_debug("EXIF Thumb Resolution: {}", thResolution.string());
             return thResolution.string();
         } catch (const std::runtime_error& e) {
-            log_error("Failed to parse EXIF Thumbnail {} details: {}", location, e.what());
+            log_error("Failed to parse EXIF Thumbnail {} details: {}", location, EX(e));
         }
         return "";
     }

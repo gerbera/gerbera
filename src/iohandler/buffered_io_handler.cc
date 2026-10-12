@@ -143,7 +143,7 @@ void BufferedIOHandler::threadProc()
                 empty = true;
                 startIndex = endIndex = 0;
             } catch (const std::runtime_error& e) {
-                log_error("Error while seeking in buffer: {}", e.what());
+                log_error("Error while seeking in buffer: {}", EX(e));
             }
 
             /// \todo should we do that?

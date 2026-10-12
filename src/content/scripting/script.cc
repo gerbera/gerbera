@@ -55,6 +55,7 @@
 #include "script_names.h"
 #include "script_property.h"
 #include "scripting_runtime.h"
+#include "util/fmt_compat.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -63,7 +64,6 @@
 #endif
 
 #include <array>
-#include <fmt/chrono.h>
 
 static constexpr std::array jsGlobalFunctions {
     duk_function_list_entry { "print2", js_print2, DUK_VARARGS },
@@ -405,7 +405,7 @@ void Script::_load(const fs::path& scriptPath)
         }
         scriptText = mval;
     } catch (const std::runtime_error& e) {
-        throw_std_runtime_error("Failed to convert import script: {}", e.what());
+        throw_std_runtime_error("Failed to convert import script: {}", EX(e));
     }
 
     duk_push_string(ctx, scriptPath.c_str());
@@ -446,7 +446,7 @@ void Script::loadFolder(const fs::path& scriptFolder)
                 _execute();
                 log_debug("Loaded {}", entryPath.c_str());
             } catch (const std::runtime_error& e) {
-                log_error("Unable to load {}: {}", entryPath.c_str(), e.what());
+                log_error("Unable to load {}: {}", entryPath.c_str(), EX(e));
             }
         }
     }

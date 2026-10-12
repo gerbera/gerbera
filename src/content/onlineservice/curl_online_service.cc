@@ -87,7 +87,7 @@ std::unique_ptr<pugi::xml_document> CurlOnlineService::getData()
 #endif
         buffer = URL(service_url, curl_handle).download(&retcode, false, verbose, true).second;
     } catch (const std::runtime_error& ex) {
-        log_error("Failed to download {} XML data: {}", serviceName, ex.what());
+        log_error("Failed to download {} XML data: {}", serviceName, EX(ex));
         return doc;
     }
 

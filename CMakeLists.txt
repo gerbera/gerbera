@@ -364,6 +364,7 @@ add_library(
     src/util/enum_iterator.h
     src/util/executor.h
     src/util/ffmpeg_compat.h
+    src/util/fmt_compat.h
     src/util/generic_task.cc
     src/util/generic_task.h
     src/util/grb_fs.cc

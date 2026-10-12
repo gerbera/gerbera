@@ -53,7 +53,7 @@ public:
         try {
             ThreadRunner::startThread();
         } catch (const std::runtime_error& ex) {
-            log_error("{}", ex.what());
+            log_error("{}", EX(ex));
         }
     }
 

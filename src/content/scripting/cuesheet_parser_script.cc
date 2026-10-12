@@ -144,7 +144,7 @@ duk_ret_t jsAddCueObject(duk_context* ctx)
         log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.\n");
     } catch (const std::runtime_error& e) {
-        log_error("{}", e.what());
+        log_error("{}", EX(e));
     }
     return 0;
 }

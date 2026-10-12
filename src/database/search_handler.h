@@ -29,13 +29,10 @@
 #define __SEARCH_HANDLER_H__
 
 #include "upnp/upnp_common.h"
+#include "util/fmt_compat.h"
 #include "util/tools.h"
 
 #include <algorithm>
-#include <fmt/format.h>
-#if FMT_VERSION >= 100202
-#include <fmt/ranges.h>
-#endif
 #include <map>
 #include <memory>
 #include <tuple>

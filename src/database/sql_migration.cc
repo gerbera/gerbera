@@ -33,7 +33,6 @@
 #include "util/logger.h"
 #include "util/url_utils.h"
 
-#include <fmt/core.h>
 #include <pugixml.hpp>
 
 #define RES_COLS "GRB_RES_COLS"

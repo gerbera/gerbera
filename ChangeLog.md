@@ -7,11 +7,13 @@
 - Bump serialize-javascript from 7.1.1 to 7.1.2 in /gerbera-web
 - Fix CaptionInfo.sec never being sent to Samsung TVs
 - Fix internal transcoding with ffmpeg
+- Fix internal video (mpeg) transcoding
 - Pass the client quirks to the DIDL of search results
 - Seek in transcoded streams of constant bit rate
 - Serve transcoded streams to HTTP/1.0 clients
 - Update to cxxopts-gac6d47
 - Update to pupnp 22.1.8
+- Use fmt exception formatting
 
 ### v3.3.0
 

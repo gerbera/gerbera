@@ -31,11 +31,11 @@ Gerbera - https://gerbera.io/
 
 #include "content/scripting/script_names.h"
 #include "exceptions.h"
+#include "util/fmt_compat.h"
 #include "util/tools.h"
 
 #include <algorithm>
 #include <array>
-#include <fmt/format.h>
 
 static constexpr std::array chKeys = {
     std::pair(ContentHandler::DEFAULT, "Default"),

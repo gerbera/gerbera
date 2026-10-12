@@ -89,7 +89,7 @@ bool URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
             UpnpFileInfo_set_FileLength(info, st.getSize());
             log_debug("URL used for request: {}", st.getURL());
         } catch (const std::runtime_error& ex) {
-            log_warning("{}", ex.what());
+            log_warning("{}", EX(ex));
             UpnpFileInfo_set_FileLength(info, -1);
         }
 

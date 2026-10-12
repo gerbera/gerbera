@@ -52,7 +52,6 @@
 #endif
 
 #include <algorithm>
-#include <fmt/chrono.h>
 #include <regex>
 
 bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const std::string& actual) const
@@ -297,7 +296,7 @@ void ImportService::initLayout(LayoutType layoutType)
             }
         } catch (const std::runtime_error& e) {
             layout = nullptr;
-            log_error("Init virtual container layout failed: {}", e.what());
+            log_error("Init virtual container layout failed: {}", EX(e));
             throw;
         }
     }
@@ -587,7 +586,7 @@ void ImportService::createContainers(
                     }
                 } catch (const std::runtime_error& e) {
                     stateEntry->setObject(ImportState::Broken, cdsObj);
-                    log_error("createContainers: Failed to load parent container {}, {}", contPath.c_str(), e.what());
+                    log_error("createContainers: Failed to load parent container {}, {}", contPath.c_str(), EX(e));
                 }
             } else {
                 // Create container
@@ -841,7 +840,7 @@ void ImportService::updateSingleItem(
         metadataService->attachResourceFiles(item, dirEntry, newIds);
         updateItemData(item, mimetype);
     } catch (const std::runtime_error& ex) {
-        log_error("updateSingleItem '{}' failed: {}", dirEntry.path().string(), ex.what());
+        log_error("updateSingleItem '{}' failed: {}", dirEntry.path().string(), EX(ex));
     }
 }
 
@@ -881,7 +880,7 @@ void ImportService::fillSingleLayout(
                         playlistParserScript->processPlaylistObject(cdsObject, task, rootPath);
                     }
                 } catch (const std::runtime_error& e) {
-                    log_error("{}", e.what());
+                    log_error("{}", EX(e));
                 }
 #else
                 log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", cdsObject->getLocation().c_str());
@@ -901,7 +900,7 @@ void ImportService::fillSingleLayout(
             }
 
         } catch (const std::runtime_error& ex) {
-            log_error("{}", ex.what());
+            log_error("{}", EX(ex));
         }
     }
 }
@@ -915,7 +914,7 @@ void ImportService::parseMetafile(
         if (metafileParserScript)
             metafileParserScript->processObject(obj, path);
     } catch (const std::runtime_error& e) {
-        log_error("{}: {}", path.string(), e.what());
+        log_error("{}: {}", path.string(), EX(e));
     }
 #else
     log_warning("Metadata file {} will not be parsed: Gerbera was compiled without JS support!", path.string());
@@ -946,7 +945,7 @@ std::vector<int> ImportService::parseCueSheet(
         }
         return {};
     } catch (const std::runtime_error& e) {
-        log_error("{}: {}", path.string(), e.what());
+        log_error("{}: {}", path.string(), EX(e));
         return {};
     }
 #else
@@ -1255,7 +1254,7 @@ void ImportService::updateFanArt(const std::shared_ptr<StateCache>& stateCache, 
             if (metadataService->attachResourceFiles(item, dirEntry, newIds))
                 database->updateObject(item, nullptr);
         } catch (const std::runtime_error& ex) {
-            log_error("Updating FanArt for '{}' failed: {}", dirEntry.path().string(), ex.what());
+            log_error("Updating FanArt for '{}' failed: {}", dirEntry.path().string(), EX(ex));
         }
     }
     for (auto&& [contPath, stateEntry] : stateCache->contentStateCache) {

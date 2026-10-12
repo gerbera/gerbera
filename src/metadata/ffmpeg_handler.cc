@@ -53,6 +53,7 @@
 #include "iohandler/mem_io_handler.h"
 #include "metadata_enums.h"
 #include "upnp/upnp_common.h"
+#include "util/fmt_compat.h"
 #include "util/grb_time.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
@@ -60,7 +61,6 @@
 
 #include <algorithm>
 #include <cstdint>
-#include <fmt/chrono.h>
 
 extern "C" {
 

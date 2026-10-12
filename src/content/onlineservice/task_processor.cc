@@ -106,7 +106,7 @@ void TaskProcessor::threadProc()
         } catch (const ServerShutdownException&) {
             shutdownFlag = true;
         } catch (const std::runtime_error& e) {
-            log_error("Exception caught: {}", e.what());
+            log_error("Exception caught: {}", EX(e));
         }
 
         if (!shutdownFlag) {
@@ -204,7 +204,7 @@ void TPFetchOnlineContentTask::run()
             content->cleanupOnlineServiceObjects(service);
         }
     } catch (const std::runtime_error& ex) {
-        log_error("{}", ex.what());
+        log_error("{}", EX(ex));
     }
     service->decTaskCount();
     if ((service->getTaskCount() == 0) && (service->getRefreshInterval() > std::chrono::seconds::zero()) && !unscheduled_refresh) {

@@ -40,9 +40,8 @@
 #include "database/database.h"
 #include "exceptions.h"
 #include "upnp/quirks.h"
+#include "util/fmt_compat.h"
 #include "util/tools.h"
-
-#include <fmt/core.h>
 
 RequestHandler::RequestHandler(std::shared_ptr<Content> content, std::shared_ptr<UpnpXMLBuilder> xmlBuilder, std::shared_ptr<Quirks> quirks)
     : content(std::move(content))

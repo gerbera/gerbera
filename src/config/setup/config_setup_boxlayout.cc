@@ -115,7 +115,7 @@ bool ConfigBoxLayoutSetup::createOptionFromNode(
                 allKeys.push_back(key);
                 log_debug("Created BoxLayout key={}, title={}, objClass={}, enabled={}, size={}", key, title, objClass, enabled, size);
             } catch (const std::runtime_error& e) {
-                throw_std_runtime_error("Could not add {} boxlayout: {}", key, e.what());
+                throw_std_runtime_error("Could not add {} boxlayout: {}", key, EX(e));
             }
         }
         std::size_t index = 0;

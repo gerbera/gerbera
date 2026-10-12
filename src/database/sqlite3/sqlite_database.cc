@@ -152,7 +152,7 @@ std::string Sqlite3Database::prepareDatabase(const fs::path& dbFilePath, GrbFile
             dbVersion = getInternalSetting("db_version");
         } catch (const std::runtime_error& e) {
             shutdown();
-            throw_std_runtime_error("Error while creating database: {}", e.what());
+            throw_std_runtime_error("Error while creating database: {}", EX(e));
         }
         log_info("Database tables {} created successfully.", dbFilePath.c_str());
     }
@@ -175,7 +175,7 @@ void Sqlite3Database::dropTables()
         dtask->waitForTask();
     } catch (const std::runtime_error& e) {
         shutdown();
-        throw_std_runtime_error("Error while dropping database: {}", e.what());
+        throw_std_runtime_error("Error while dropping database: {}", EX(e));
     }
 
     // back up file to make sure the tables are dropped from backup as well
@@ -191,7 +191,7 @@ void Sqlite3Database::dropTables()
                 btask->waitForTask();
             } catch (const std::runtime_error& e) {
                 shutdown();
-                throw_std_runtime_error("Error while backing up database: {}", e.what());
+                throw_std_runtime_error("Error while backing up database: {}", EX(e));
             }
         }
     }
@@ -265,7 +265,7 @@ void Sqlite3Database::init()
     } catch (const std::runtime_error& e) {
         log_error("Prematurely shutting down.");
         shutdown();
-        throw_std_runtime_error(e.what());
+        throw_std_runtime_error("{}", EX(e));
     }
 
     try {
@@ -273,7 +273,7 @@ void Sqlite3Database::init()
     } catch (const std::runtime_error& e) {
         log_error("Prematurely shutting down because of initDynContainers.");
         shutdown();
-        throw_std_runtime_error(e.what());
+        throw_std_runtime_error("{}", EX(e));
     }
 }
 
@@ -307,18 +307,18 @@ std::string Sqlite3Database::handleError(const std::string& query, const std::st
 void Sqlite3Database::handleException(const std::exception& exc, const std::string& lineMessage)
 {
     if (!dbInitDone)
-        throw_std_runtime_error(exc.what());
+        throw_std_runtime_error("{}", EX(exc));
     ++shutdownFlag;
     if (shutdownFlag <= 1) {
-        log_error("Prematurely shutting down.\n{}\n{}", lineMessage, exc.what());
+        log_error("Prematurely shutting down.\n{}\n{}", lineMessage, EX(exc));
         rollback("");
         shutdown();
     }
     if (shutdownFlag >= shutdownAttempts) {
-        log_error("Exceeding shutdown limit {}.\n{}\n{}", shutdownAttempts, lineMessage, exc.what());
+        log_error("Exceeding shutdown limit {}.\n{}\n{}", shutdownAttempts, lineMessage, EX(exc));
         std::exit(1);
     }
-    log_error("Already shutting down.\n{}\n{}", lineMessage, exc.what());
+    log_error("Already shutting down.\n{}\n{}", lineMessage, EX(exc));
 }
 
 std::shared_ptr<SQLResult> Sqlite3Database::select(const std::string& query)
@@ -393,7 +393,7 @@ void Sqlite3Database::execOnly(const std::string& query)
         addTask(etask);
         etask->waitForTask();
     } catch (const std::runtime_error& e) {
-        log_error("Failed to execute {}\n{}", query, e.what());
+        log_error("Failed to execute {}\n{}", query, EX(e));
     }
 }
 
@@ -474,7 +474,7 @@ void Sqlite3Database::threadProc()
             db = nullptr;
         }
     } catch (const std::runtime_error& e) {
-        log_error("Aborting thread {}", e.what());
+        log_error("Aborting thread {}", EX(e));
     }
 }
 

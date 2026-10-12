@@ -68,7 +68,7 @@ bool Web::Action::processPageAction(Json::Value& element, const std::string& act
             log_debug("Extracted {} entries.", result.size());
             doImport(result);
         } catch (const std::exception& ex) {
-            log_error(ex.what());
+            log_error(EX(ex));
         }
     }
 
