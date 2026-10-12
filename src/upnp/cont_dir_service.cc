@@ -148,13 +148,13 @@ void ContentDirectoryService::doBrowse(ActionRequest& request)
         else
             param.setTotalMatches(arr.size());
     } catch (const SearchParseException& srcEx) {
-        log_warning(srcEx.what());
+        log_warning(EX(srcEx));
         throw UpnpException(UPNP_E_INVALID_ARGUMENT, srcEx.getUserMessage());
     } catch (const DatabaseException& dbEx) {
-        log_warning(dbEx.what());
+        log_warning(EX(dbEx));
         throw UpnpException(UPNP_E_NO_SUCH_ID, dbEx.getUserMessage());
     } catch (const std::runtime_error& e) {
-        log_warning(e.what());
+        log_warning(EX(e));
         throw UpnpException(UPNP_E_BAD_REQUEST, UpnpXMLBuilder::encodeEscapes(e.what()));
     }
 
@@ -254,13 +254,13 @@ void ContentDirectoryService::doSearch(ActionRequest& request)
         results = database->search(searchParam);
         log_debug("Found {}/{} items", results.size(), searchParam.getTotalMatches());
     } catch (const SearchParseException& srcEx) {
-        log_warning(srcEx.what());
+        log_warning(EX(srcEx));
         throw UpnpException(UPNP_E_INVALID_ARGUMENT, srcEx.getUserMessage());
     } catch (const DatabaseException& dbEx) {
-        log_warning(dbEx.what());
+        log_warning(EX(dbEx));
         throw UpnpException(UPNP_E_NO_SUCH_ID, dbEx.getUserMessage());
     } catch (const std::runtime_error& e) {
-        log_warning(e.what());
+        log_warning(EX(e));
         throw UpnpException(UPNP_E_BAD_REQUEST, UpnpXMLBuilder::encodeEscapes(e.what()));
     }
 

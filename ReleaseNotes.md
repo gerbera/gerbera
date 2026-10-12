@@ -14,8 +14,9 @@
 
 ### Code Improvements
 
-- Update maximum versions of utf8cpp (4.2.1), cxxopts (3.3.1-gac6d47),
+- Update maximum versions of utf8cpp (4.2.1), cxxopts (3.3.1-gbb7915),
   pupnp (22.1.8)
+- Use formatting for exception from fmtlib >= 11
 
 ## v3.3.0
 

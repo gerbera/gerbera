@@ -183,7 +183,7 @@ std::string MySQLDatabase::prepareDatabase()
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (const std::runtime_error& e) {
-        log_debug("{}", e.what());
+        log_debug("{}", EX(e));
     }
 
     if (dbVersion.empty()) {

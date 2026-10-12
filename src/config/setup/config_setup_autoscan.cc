@@ -133,7 +133,7 @@ bool ConfigAutoscanSetup::createOptionFromNode(
             adir->setForceRescan(forceRescan);
             result.push_back(adir);
         } catch (const std::runtime_error& e) {
-            log_error("Could not add {}: {}", location.string(), e.what());
+            log_error("Could not add {}: {}", location.string(), EX(e));
             return false;
         }
     }

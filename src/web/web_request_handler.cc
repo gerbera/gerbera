@@ -155,10 +155,10 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(
         error = e.getUserMessage();
         errorCode = 500;
     } catch (const std::runtime_error& e) {
-        error = fmt::format("Error on {}: {}", getPage(), e.what());
+        error = fmt::format("Error on {}: {}", getPage(), EX(e));
         errorCode = 800;
     } catch (const std::exception& e) {
-        error = fmt::format("Exception on {}: {}", getPage(), e.what());
+        error = fmt::format("Exception on {}: {}", getPage(), EX(e));
         errorCode = 800;
     }
 
@@ -180,9 +180,9 @@ std::unique_ptr<IOHandler> WebRequestHandler::open(
         builder["indentation"] = "  ";
         output = Json::writeString(builder, jsonDoc);
     } catch (const std::runtime_error& e) {
-        log_error("Web marshalling on {} error: {}", getPage(), e.what());
+        log_error("Web marshalling on {} error: {}", getPage(), EX(e));
     } catch (const std::exception& e) {
-        log_error("Web marshalling on {} exception: {}", getPage(), e.what());
+        log_error("Web marshalling on {} exception: {}", getPage(), EX(e));
     }
 
     log_debug("output-----------------------{}", output);

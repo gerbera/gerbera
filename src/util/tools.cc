@@ -159,7 +159,7 @@ std::int32_t stoiString(const std::string& str, std::int32_t def, int base)
         std::size_t pos;
         return std::stoi(str, &pos, base);
     } catch (const std::exception& ex) {
-        log_error("{} (input {})", ex.what(), str);
+        log_error("{} (input {})", EX(ex), str);
     }
     return def;
 }
@@ -173,7 +173,7 @@ std::int64_t stolString(const std::string& str, std::int64_t def, int base)
         std::size_t pos;
         return std::stol(str, &pos, base);
     } catch (const std::exception& ex) {
-        log_error("{} (input {})", ex.what(), str);
+        log_error("{} (input {})", EX(ex), str);
     }
     return def;
 }
@@ -187,7 +187,7 @@ unsigned long stoulString(const std::string& str, unsigned long def, int base)
         std::size_t pos;
         return std::stoul(str, &pos, base);
     } catch (const std::exception& ex) {
-        log_error("{} (input {})", ex.what(), str);
+        log_error("{} (input {})", EX(ex), str);
     }
     return def;
 }
@@ -201,7 +201,7 @@ uintmax_t stoumaxString(const std::string& str, uintmax_t def, int base)
         char* endptr;
         return std::strtoumax(str.c_str(), &endptr, base);
     } catch (const std::exception& ex) {
-        log_error("{} (input {})", ex.what(), str);
+        log_error("{} (input {})", EX(ex), str);
     }
     return def;
 }
@@ -249,7 +249,7 @@ std::string expandNumbersString(std::string str, std::size_t size)
                 }
             } catch (const std::exception& ex) {
                 result += fmt::format("{0}{1}", strMatch.prefix().str(), matchStr);
-                log_error("{} (input {})", ex.what(), matchStr);
+                log_error("{} (input {})", EX(ex), matchStr);
             }
             str = strMatch.suffix();
         }

@@ -205,7 +205,7 @@ bool MetadataService::extractMetaData(
                 auto handlerResult = handlers.at(handler)->fillMetadata(item, newIds);
                 result = result || handlerResult;
             } catch (const std::exception& ex) {
-                log_error("fillMetadata {} failed for {}: {}", handlerNames.at(handler), item->getLocation().c_str(), ex.what());
+                log_error("fillMetadata {} failed for {}: {}", handlerNames.at(handler), item->getLocation().c_str(), EX(ex));
             }
         }
     }
@@ -257,7 +257,7 @@ bool MetadataService::attachResourceFiles(
                 auto handlerResult = handlers.at(handler)->fillMetadata(item, newIds);
                 result = result || handlerResult;
             } catch (const std::exception& ex) {
-                log_error("fillMetadata {} failed for {}: {}", handlerNames.at(handler), item->getLocation().c_str(), ex.what());
+                log_error("fillMetadata {} failed for {}: {}", handlerNames.at(handler), item->getLocation().c_str(), EX(ex));
             }
         } else {
             log_debug("Handler {} not supported for {}, {}, {}, {}", handlerNames.at(handler), item->getLocation().c_str(), contentType, mimeType, EnumMapper::mapObjectType(mediaType));
@@ -292,7 +292,7 @@ bool MetadataService::afterCreation(
                 auto handlerResult = handlers.at(handler)->fillMetadata(item, newIds);
                 result = result || handlerResult;
             } catch (const std::exception& ex) {
-                log_error("fillMetadata {} failed for {}: {}", handlerNames.at(handler), item->getLocation().c_str(), ex.what());
+                log_error("fillMetadata {} failed for {}: {}", handlerNames.at(handler), item->getLocation().c_str(), EX(ex));
             }
         } else {
             log_debug("Handler {} not supported for {}, {}, {}, {}", handlerNames.at(handler), item->getLocation().c_str(), contentType, mimeType, EnumMapper::mapObjectType(mediaType));

@@ -77,7 +77,7 @@ std::string PostgresDatabase::prepareDatabase()
     try {
         dbVersion = getInternalSetting("db_version");
     } catch (const std::runtime_error& e) {
-        log_debug("{}", e.what());
+        log_debug("{}", EX(e));
     }
 
     if (dbVersion.empty()) {
@@ -92,7 +92,7 @@ std::string PostgresDatabase::prepareDatabase()
             dbVersion = getInternalSetting("db_version");
         } catch (const std::runtime_error& e) {
             shutdown();
-            throw_std_runtime_error("Error while creating database: {}", e.what());
+            throw_std_runtime_error("Error while creating database: {}", EX(e));
         }
         log_info("Database created successfully!");
 
@@ -142,9 +142,9 @@ void PostgresDatabase::init()
         }
         dbInitDone = true;
     } catch (const std::runtime_error& e) {
-        log_error("Prematurely shutting down.\n{}", e.what());
+        log_error("Prematurely shutting down.\n{}", EX(e));
         shutdown();
-        throw_std_runtime_error(e.what());
+        throw_std_runtime_error("{}", EX(e));
     }
 
     try {
@@ -152,7 +152,7 @@ void PostgresDatabase::init()
     } catch (const std::runtime_error& e) {
         log_error("Prematurely shutting down because of initDynContainers.");
         shutdown();
-        throw_std_runtime_error(e.what());
+        throw_std_runtime_error("{}", EX(e));
     }
 }
 
@@ -166,7 +166,7 @@ void PostgresDatabase::dropTables()
         dtask->waitForTask();
     } catch (const std::runtime_error& e) {
         shutdown();
-        throw_std_runtime_error("Error while dropping database: {}", e.what());
+        throw_std_runtime_error("Error while dropping database: {}", EX(e));
     }
     log_info("Database tables dropped successfully.");
 }
@@ -220,11 +220,13 @@ void PostgresDatabase::threadProc()
                         dirty = false;
                     task->sendSignal();
                 } catch (const pqxx::argument_error& e) {
-                    log_debug(e.what());
+                    log_debug("{}", EX(e));
                     task->sendSignal(e.what());
                 } catch (const std::runtime_error& e) {
+                    log_debug("{}", EX(e));
                     task->sendSignal(e.what());
                 } catch (const std::logic_error& e) {
+                    log_debug("{}", EX(e));
                     task->sendSignal(e.what());
                 }
                 lock.lock();
@@ -248,27 +250,27 @@ void PostgresDatabase::threadProc()
             conn = nullptr;
         }
     } catch (const std::runtime_error& e) {
-        log_error("Aborting thread {}", e.what());
+        log_error("Aborting thread {}", EX(e));
     } catch (const std::exception& e) {
-        log_error("Aborting thread {}", e.what());
+        log_error("Aborting thread {}", EX(e));
     }
 }
 
 void PostgresDatabase::handleException(const std::exception& exc, const std::string& lineMessage)
 {
     if (!dbInitDone)
-        throw_std_runtime_error(exc.what());
+        throw_std_runtime_error("{}", EX(exc));
     ++shutdownFlag;
     if (shutdownFlag <= 1) {
-        log_error("Prematurely shutting down.\n{}\n{}", lineMessage, exc.what());
+        log_error("Prematurely shutting down.\n{}\n{}", lineMessage, EX(exc));
         rollback("");
         shutdown();
     }
     if (shutdownFlag >= shutdownAttempts) {
-        log_error("Exceeding shutdown limit {}.\n{}\n{}", shutdownAttempts, lineMessage, exc.what());
+        log_error("Exceeding shutdown limit {}.\n{}\n{}", shutdownAttempts, lineMessage, EX(exc));
         std::exit(1);
     }
-    log_error("Already shutting down.\n{}\n{}", lineMessage, exc.what());
+    log_error("Already shutting down.\n{}\n{}", lineMessage, EX(exc));
 }
 
 void PostgresDatabase::addTask(const std::shared_ptr<PGTask>& task, bool onlyIfDirty)
@@ -337,7 +339,7 @@ void PostgresDatabase::execOnly(const std::string& query)
         addTask(etask);
         etask->waitForTask();
     } catch (const std::exception& e) {
-        log_error("Failed to execute {}\n{}", query, e.what());
+        log_error("Failed to execute {}\n{}", query, EX(e));
     }
 }
 
@@ -373,7 +375,7 @@ std::string PostgresDatabase::quote(const std::string& value) const
     try {
         return conn->quote(value);
     } catch (const pqxx::argument_error& e) {
-        log_error("Argument Error.\n{}\n{}: {}", LINE_MESSAGE, value, e.what());
+        log_error("Argument Error.\n{}\n{}: {}", LINE_MESSAGE, value, EX(e));
         std::regex char_re("[^_ [:alnum:]");
         auto nval = std::regex_replace(value, char_re, "");
         return conn->quote(nval);

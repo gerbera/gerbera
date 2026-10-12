@@ -47,8 +47,6 @@
 #include "database/database.h"
 #include "database/db_param.h"
 
-#include <fmt/chrono.h>
-
 #define CONFIG_LOAD_AID "aid"
 #define CONFIG_LOAD_DEFAULTVALUE "defaultValue"
 #define CONFIG_LOAD_HELP "help"
@@ -82,7 +80,7 @@ Web::ConfigLoad::ConfigLoad(const std::shared_ptr<Content>& content,
             log_error("configLoad database missing");
         }
     } catch (const std::runtime_error& e) {
-        log_error("configLoad {}", e.what());
+        log_error("configLoad {}", EX(e));
     }
 }
 
@@ -312,7 +310,7 @@ void Web::ConfigLoad::writeSimpleProperties(Json::Value& values)
             addValue(values, scs->getItemPathRoot(), option, option, scs->getCurrentValue(), scs);
             log_debug("    Option {:03d} {} = {}", option, scs->getItemPath({ 0 }, {}), scs->getCurrentValue());
         } catch (const std::runtime_error& e) {
-            log_warning("Option {:03d} {}", option, e.what());
+            log_warning("Option {:03d} {}", option, EX(e));
         }
     }
 }

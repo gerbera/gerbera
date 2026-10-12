@@ -36,7 +36,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-#include <fmt/chrono.h>
 #include <vector>
 
 #include <ebml/EbmlHead.h>

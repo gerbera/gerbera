@@ -57,7 +57,7 @@ sudo make install
 | libuuid             |              |              |                      | Depends on OS | Not required on \*BSD            |          |
 | [pugixml]           |              | 1.10         | 1.16                 | Required      | XML file and data support        |          |
 | [jsoncpp]           | 1.7.4        | 1.9.6        | 1.9.8                | Required      | JSON data support                |          |
-| [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1-gac6d47        | Required      | Command line parsing             | Bundled  |
+| [cxxopts]           | 3.2.0        | 3.2.1        | 3.3.1-gbb7915        | Required      | Command line parsing             | Bundled  |
 | libiconv            |              |              |                      | Required      | Charset conversion               |          |
 | [sqlite3]           | 3.7.0        | 3.35.5       | 3.53.2               | Required      | Database storage                 |          |
 | [zlib]              |              |              |                      | Required      | Data compression                 |          |

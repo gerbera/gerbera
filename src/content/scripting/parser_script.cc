@@ -84,7 +84,7 @@ duk_ret_t jsReadXml(duk_context* ctx)
         log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.");
     } catch (const std::runtime_error& e) {
-        log_error("DUK exception: {}", e.what());
+        log_error("DUK exception: {}", EX(e));
         return 0;
     }
 
@@ -107,7 +107,7 @@ duk_ret_t jsReadln(duk_context* ctx)
         log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.");
     } catch (const std::runtime_error& e) {
-        log_error("DUK exception: {}", e.what());
+        log_error("DUK exception: {}", EX(e));
         return 0;
     }
 }

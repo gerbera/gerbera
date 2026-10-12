@@ -34,10 +34,8 @@
 #ifndef __LOGGER_H__
 #define __LOGGER_H__
 
-#include <fmt/format.h>
-#if FMT_VERSION >= 100202
-#include <fmt/ranges.h>
-#endif
+#include "util/fmt_compat.h"
+
 #include <spdlog/spdlog.h>
 #include <type_traits>
 

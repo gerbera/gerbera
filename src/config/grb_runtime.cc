@@ -420,7 +420,7 @@ bool GerberaRuntime::createPidFile(const std::string& arg)
         // write pid to file
         fmt::print(pidf, "{}\n", pid);
     } catch (const std::system_error& ex) {
-        log_error("Could not write pidfile {}: {}.", pidfile->c_str(), ex.what());
+        log_error("Could not write pidfile {}: {}.", pidfile->c_str(), EX(ex));
         this->exit(EXIT_FAILURE);
     }
     log_debug("Wrote pidfile {}.", pidfile->c_str());
@@ -479,7 +479,7 @@ bool GerberaRuntime::addFile(const std::string& arg)
                 log_error("Failed to read {}: {}", file.c_str(), ec.message());
             }
         } catch (const std::runtime_error& e) {
-            log_error("{}", e.what());
+            log_error("{}", EX(e));
             this->exit(EXIT_FAILURE);
         }
     }

@@ -178,16 +178,16 @@ void ContentManager::run()
                     dir->setInvalid();
                     autoscanList->add(dir);
                 } catch (const std::logic_error& e) {
-                    log_warning(e.what());
+                    log_warning(EX(e));
                 } catch (const std::runtime_error& e) {
                     // Work around existing config sourced autoscans that were stored to the DB for reasons
-                    log_warning(e.what());
+                    log_warning(EX(e));
                 }
             }
         } catch (const std::logic_error& e) {
-            log_warning(e.what());
+            log_warning(EX(e));
         } catch (const std::runtime_error& e) {
-            log_warning(e.what());
+            log_warning(EX(e));
         }
     }
     for (auto cfMode : cfScans) {
@@ -200,9 +200,9 @@ void ContentManager::run()
             try {
                 autoscanList->add(dir);
             } catch (const std::logic_error& e) {
-                log_warning(e.what());
+                log_warning(EX(e));
             } catch (const std::runtime_error& e) {
-                log_warning(e.what());
+                log_warning(EX(e));
             }
         }
     }
@@ -1018,7 +1018,7 @@ void ContentManager::addRecursive(
                 }
             }
         } catch (const std::runtime_error& ex) {
-            log_warning("skipping {} (ex:{})", newPath.c_str(), ex.what());
+            log_warning("skipping {} (ex:{})", newPath.c_str(), EX(ex));
         }
     } // dIter
 
@@ -1381,7 +1381,7 @@ void ContentManager::threadProc()
         } catch (const ServerShutdownException&) {
             shutdownFlag = true;
         } catch (const std::runtime_error& e) {
-            log_error("Exception caught: {}", e.what());
+            log_error("Exception caught: {}", EX(e));
         }
         log_debug("content manager ASYNC STOP  {}", currentTask->getDescription());
 

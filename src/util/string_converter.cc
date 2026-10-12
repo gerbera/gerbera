@@ -43,9 +43,6 @@
 #include <array>
 #include <cstring>
 #include <vector>
-#if FMT_VERSION >= 100202
-#include <fmt/ranges.h>
-#endif
 
 StringConverter::StringConverter(const std::string& from, const std::string& to)
     : cd(iconv_open(to.c_str(), from.c_str()))
@@ -140,7 +137,7 @@ std::pair<std::string, std::string> StringConverter::_convert(
         output = new char[length];
         output[0] = '\0';
     } catch (const std::bad_alloc& ex) {
-        log_debug("Could not allocate memory for string conversion!\n{}", ex.what());
+        log_debug("Could not allocate memory for string conversion!\n{}", EX(ex));
         throw_std_runtime_error("Could not allocate memory for string conversion");
     }
 

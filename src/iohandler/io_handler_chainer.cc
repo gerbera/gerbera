@@ -92,7 +92,7 @@ void IOHandlerChainer::threadProc()
             }
         }
     } catch (const std::runtime_error& e) {
-        log_debug("{}", e.what());
+        log_debug("{}", EX(e));
         status = IOHC_EXCEPTION;
     }
     try {
@@ -101,7 +101,7 @@ void IOHandlerChainer::threadProc()
         readFrom->close();
         writeTo->close();
     } catch (const std::runtime_error& e) {
-        log_debug("{}", e.what());
+        log_debug("{}", EX(e));
         status = IOHC_EXCEPTION;
     }
 }

@@ -44,7 +44,7 @@ InotifyManager<Watcher>::InotifyManager()
             [[maybe_unused]] int maxWatches = std::stoi(trimString(GrbFile(INOTIFY_MAX_USER_WATCHES_FILE).readTextFile()));
             log_debug("Max watches on the system: {}", maxWatches);
         } catch (const std::runtime_error& ex) {
-            log_error("Could not determine maximum number of inotify user watches: {}", ex.what());
+            log_error("Could not determine maximum number of inotify user watches: {}", EX(ex));
         }
     }
 

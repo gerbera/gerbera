@@ -44,8 +44,6 @@
 #include "exceptions.h"
 #include "logger.h"
 
-#include "fmt/core.h"
-
 ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<std::string>& arglist, const std::map<std::string, std::string>& env, std::vector<fs::path> tempPaths)
     : tempPaths(std::move(tempPaths))
 {
@@ -141,7 +139,7 @@ ProcessExecutor::~ProcessExecutor()
                 break;
             } catch (const fs::filesystem_error& err) {
                 failed = true;
-                log_warning("Failed to remove: {}: {}", path.string(), err.what());
+                log_warning("Failed to remove: {}: {}", path.string(), EX(err));
             }
         }
         if (failed) {

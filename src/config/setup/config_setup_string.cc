@@ -62,7 +62,7 @@ bool ConfigStringSetup::CheckCharset(std::string& value)
     try {
         auto conv = StringConverter(value, DEFAULT_INTERNAL_CHARSET);
     } catch (const std::runtime_error& e) {
-        log_error("Error in config file: unsupported charset specified: {}\n{}", value, e.what());
+        log_error("Error in config file: unsupported charset specified: {}\n{}", value, EX(e));
         return false;
     }
     return true;

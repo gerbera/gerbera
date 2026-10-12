@@ -24,13 +24,10 @@ Gerbera - https://gerbera.io/
 #include "grb_runtime.h" // API
 
 #include "upnp/compat.h"
+#include "util/fmt_compat.h"
 #include "util/tools.h"
 
 #include <cxxopts.hpp>
-#include <fmt/format.h>
-#if FMT_VERSION >= 100202
-#include <fmt/ranges.h>
-#endif
 #include <json/version.h>
 #include <pugixml.hpp>
 #include <spdlog/version.h>

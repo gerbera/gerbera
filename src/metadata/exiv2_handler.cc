@@ -250,10 +250,10 @@ bool Exiv2Handler::fillMetadata(
             log_debug("No aux data requested");
         }
     } catch (const Exiv2::AnyError& ex) {
-        log_warning("Caught Exiv2 exception processing {}: '{}'", item->getLocation().string(), ex.what());
+        log_warning("Caught Exiv2 exception processing {}: '{}'", item->getLocation().string(), EX(ex));
         result = false;
     } catch (const std::runtime_error& e) {
-        log_warning("Caught exception processing {}: '{}'", item->getLocation().string(), e.what());
+        log_warning("Caught exception processing {}: '{}'", item->getLocation().string(), EX(e));
         result = false;
     }
 

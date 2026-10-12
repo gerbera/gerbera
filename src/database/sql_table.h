@@ -28,11 +28,8 @@
 #include "search_handler.h"
 
 #include "exceptions.h"
+#include "util/fmt_compat.h"
 
-#include <fmt/format.h>
-#if FMT_VERSION >= 100202
-#include <fmt/ranges.h>
-#endif
 #include <map>
 #include <memory>
 #include <string>

@@ -226,7 +226,7 @@ void SLBackupTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
             dbBackupFile.setPermissions();
             decontamination = true;
         } catch (const std::runtime_error& e) {
-            log_error("error while making sqlite3 backup: {}", e.what());
+            log_error("error while making sqlite3 backup: {}", EX(e));
         }
     } else {
         log_info("trying to restore sqlite3 database from backup...");
@@ -238,7 +238,7 @@ void SLBackupTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
                 fs::copy_options::overwrite_existing);
             dbFile.setPermissions();
         } catch (const std::runtime_error& e) {
-            throw DatabaseException(fmt::format("Error while restoring sqlite3 backup: {}", e.what()), fmt::format("Error while restoring sqlite3 backup: {}", e.what()));
+            throw DatabaseException(fmt::format("Error while restoring sqlite3 backup: {}", EX(e)), fmt::format("Error while restoring sqlite3 backup: {}", EX(e)));
         }
         int res = sqlite3_open(dbFile.getPath().c_str(), &db);
         if (res != SQLITE_OK) {

@@ -52,7 +52,6 @@
 #include <asffile.h>
 #include <attachedpictureframe.h>
 #include <flacfile.h>
-#include <fmt/chrono.h>
 #include <id3v2tag.h>
 #include <mp4file.h>
 #include <mpegfile.h>

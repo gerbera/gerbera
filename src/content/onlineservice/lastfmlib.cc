@@ -27,14 +27,11 @@
 #include "lastfmlib.h" // API
 
 #include "exceptions.h"
+#include "util/fmt_compat.h"
 #include "util/logger.h"
 #include "util/tools.h"
 
 #include <curl/curl.h>
-#include <fmt/format.h>
-#if FMT_VERSION >= 100202
-#include <fmt/ranges.h>
-#endif
 #include <pugixml.hpp>
 
 static size_t WriteCallback(void* contents, size_t size, size_t nmemb, void* userp)

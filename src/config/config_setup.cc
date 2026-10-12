@@ -163,7 +163,7 @@ std::vector<std::size_t> ConfigSetup::extractIndexList(const std::string& item)
                     std::size_t i = std::stoul(item.substr(startPos, endPos - startPos));
                     result.push_back(i);
                 } catch (const std::invalid_argument& ex) {
-                    log_error(ex.what());
+                    log_error("{}", EX(ex));
                     result.push_back(0);
                 }
             }

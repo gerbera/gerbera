@@ -107,7 +107,7 @@ bool ConfigDirectorySetup::createOptionFromNode(
         try {
             result->add(dir);
         } catch (const std::runtime_error& e) {
-            throw_std_runtime_error("Could not add {} directory: {}", location.string(), e.what());
+            throw_std_runtime_error("Could not add {} directory: {}", location.string(), EX(e));
         }
     }
 

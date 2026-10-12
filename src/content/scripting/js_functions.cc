@@ -223,7 +223,7 @@ duk_ret_t js_addCdsObject(duk_context* ctx)
         log_warning("Aborting script execution due to server shutdown.");
         return duk_error(ctx, DUK_ERR_ERROR, "Aborting script execution due to server shutdown.\n");
     } catch (const std::runtime_error& e) {
-        log_error("{}", e.what());
+        log_error("{}", EX(e));
     }
     return 0;
 }
@@ -246,7 +246,7 @@ static duk_ret_t convertCharsetGeneric(duk_context* ctx, CharsetConversion chr)
         log_warning("Aborting script execution due to server shutdown.");
         return DUK_RET_ERROR;
     } catch (const std::runtime_error& e) {
-        log_error("{}", e.what());
+        log_error("{}", EX(e));
     }
     return 0;
 }

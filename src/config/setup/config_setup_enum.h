@@ -136,9 +136,9 @@ public:
                 }
             }
         } catch (const std::out_of_range& ex) {
-            log_error("Could not map '{}' for {}", value, xpath, ex.what());
+            log_error("Could not map '{}' for {}", value, xpath, EX(ex));
         } catch (const std::runtime_error& ex) {
-            log_error("Could not map '{}' for {}", value, xpath, ex.what());
+            log_error("Could not map '{}' for {}", value, xpath, EX(ex));
         }
         return false;
     }
@@ -181,6 +181,7 @@ public:
             throw_std_runtime_error("Error in config file: {} unsupported Enum value '{}'", xpath, optValue);
         }
         optionValue = std::make_shared<EnumOption<En>>(result, mapEnumValue(result));
+        log_debug("{}={}", xpath, mapEnumValue(result));
         return optionValue;
     }
 };

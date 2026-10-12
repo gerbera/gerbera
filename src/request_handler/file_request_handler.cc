@@ -326,7 +326,7 @@ std::shared_ptr<MetadataHandler> FileRequestHandler::getResourceMetadataHandler(
                 }
             }
         } catch (const std::runtime_error& ex) {
-            log_error(ex.what());
+            log_error("{}", EX(ex));
         }
     }
     log_debug("end: {}", obj->getID());
@@ -441,7 +441,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::openZip(
         archive(path, folderContent);
         return std::make_unique<ZipIOHandler>(path);
     } catch (std::runtime_error& ex) {
-        log_debug(ex.what());
+        log_debug("{}", EX(ex));
         return nullptr;
     }
 #else

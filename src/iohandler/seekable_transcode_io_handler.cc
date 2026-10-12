@@ -69,7 +69,7 @@ grb_read_t SeekableTranscodeIOHandler::read(std::byte* buf, std::size_t length)
             position += ret;
         return ret;
     } catch (const std::exception& e) {
-        log_error("Transcoding {} failed: {}", path, e.what());
+        log_error("Transcoding {} failed: {}", path, EX(e));
         return GRB_READ_ERROR;
     }
 }

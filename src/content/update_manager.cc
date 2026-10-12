@@ -211,7 +211,7 @@ void UpdateManager::threadProc()
                     updateString = database->incrementUpdateIDs(objectIDHash);
                     objectIDHash.clear(); // hash_data_array will be invalid after clear()
                 } catch (const std::runtime_error& e) {
-                    log_error("Fatal error when sending updates: {}", e.what());
+                    log_error("Fatal error when sending updates: {}", EX(e));
                     log_error("Forcing Gerbera shutdown.");
                     kill(0, SIGINT);
                 }
@@ -222,7 +222,7 @@ void UpdateManager::threadProc()
                         server->sendSubscriptionUpdate(updateString, UPNP_DESC_CDS_SERVICE_ID);
                         lastUpdate = currentTimeMS();
                     } catch (const std::runtime_error& e) {
-                        log_error("Fatal error when sending updates: {}", e.what());
+                        log_error("Fatal error when sending updates: {}", EX(e));
                         log_error("Forcing Gerbera shutdown.");
                         kill(0, SIGINT);
                     }

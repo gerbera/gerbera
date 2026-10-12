@@ -85,7 +85,7 @@ bool ConfigDynamicContentSetup::createOptionFromNode(
         try {
             result->add(cont);
         } catch (const std::runtime_error& e) {
-            throw_std_runtime_error("Could not add {} DynamicContent: {}", location.string(), e.what());
+            throw_std_runtime_error("Could not add {} DynamicContent: {}", location.string(), EX(e));
         }
     }
 

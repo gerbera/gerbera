@@ -610,7 +610,7 @@ void ConfigManager::updateConfigFromDatabase(const std::shared_ptr<Database>& da
                 }
             }
         } catch (const std::runtime_error& e) {
-            log_error("error setting option {}. Exception {}", cfgValue.key, e.what());
+            log_error("error setting option {}. Exception {}", cfgValue.key, EX(e));
         }
     }
 }
@@ -671,7 +671,7 @@ std::string ConfigManager::getOption(ConfigVal option) const
         }
         return optionValue->getOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset string option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -687,7 +687,7 @@ IntOptionType ConfigManager::getIntOption(ConfigVal option) const
         }
         return optionValue->getIntOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset int option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -703,7 +703,7 @@ UIntOptionType ConfigManager::getUIntOption(ConfigVal option) const
         }
         return optionValue->getUIntOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset uint option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -719,7 +719,7 @@ LongOptionType ConfigManager::getLongOption(ConfigVal option) const
         }
         return optionValue->getLongOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset long option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -735,7 +735,7 @@ ULongOptionType ConfigManager::getULongOption(ConfigVal option) const
         }
         return optionValue->getULongOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset long option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -751,7 +751,7 @@ std::shared_ptr<ConfigOption> ConfigManager::getConfigOption(ConfigVal option) c
         }
         return optionValue;
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset option option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -767,7 +767,7 @@ bool ConfigManager::getBoolOption(ConfigVal option) const
         }
         return optionValue->getBoolOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset bool option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -783,7 +783,7 @@ std::map<std::string, std::string> ConfigManager::getDictionaryOption(ConfigVal 
         }
         return optionValue->getDictionaryOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset dictionary option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -799,7 +799,7 @@ std::vector<std::vector<std::pair<std::string, std::string>>> ConfigManager::get
         }
         return optionValue->getVectorOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset vector option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -815,7 +815,7 @@ std::vector<std::string> ConfigManager::getArrayOption(ConfigVal option) const
         }
         return optionValue->getArrayOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset array option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -831,7 +831,7 @@ std::vector<std::shared_ptr<AutoscanDirectory>> ConfigManager::getAutoscanListOp
         }
         return optionValue->getAutoscanListOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset autoscan option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -847,7 +847,7 @@ std::shared_ptr<BoxLayoutList> ConfigManager::getBoxLayoutListOption(ConfigVal o
         }
         return optionValue->getBoxLayoutListOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset box layout option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -863,7 +863,7 @@ std::shared_ptr<ClientConfigList> ConfigManager::getClientConfigListOption(Confi
         }
         return optionValue->getClientConfigListOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset client config option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -879,7 +879,7 @@ std::shared_ptr<DirectoryConfigList> ConfigManager::getDirectoryTweakOption(Conf
         }
         return optionValue->getDirectoryTweakOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset directory tweak option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -895,7 +895,7 @@ std::shared_ptr<DynamicContentList> ConfigManager::getDynamicContentListOption(C
         }
         return optionValue->getDynamicContentListOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset dynamic folder option {}='{}'", option, cs->getItemPathRoot());
     }
@@ -911,7 +911,7 @@ std::shared_ptr<TranscodingProfileList> ConfigManager::getTranscodingProfileList
         }
         return optionValue->getTranscodingProfileListOption();
     } catch (const std::out_of_range& oor) {
-        log_error("{}", oor.what());
+        log_error("{}", EX(oor));
         auto cs = definition->findConfigSetup(option);
         throw_std_runtime_error("unset transcoding option {}='{}'", option, cs->getItemPathRoot());
     }

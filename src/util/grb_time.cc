@@ -25,8 +25,6 @@ Gerbera - https://gerbera.io/
 #include "logger.h"
 #include "tools.h"
 
-#include <fmt/chrono.h>
-#include <fmt/core.h>
 #include <iomanip>
 #include <regex>
 #include <sstream>
