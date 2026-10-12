@@ -234,7 +234,7 @@ bool MetadataService::attachResourceFiles(
 
     std::string mimeType = item->getMimeType();
     std::string contentType = getValueOrDefault(mappings, mimeType);
-    auto mediaType = item->getMediaType();
+    auto mediaType = item->getMediaType(contentType);
 
     constexpr auto metaHandlers = std::array {
 #ifdef HAVE_FFMPEGTHUMBNAILER
