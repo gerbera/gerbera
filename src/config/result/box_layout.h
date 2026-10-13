@@ -69,6 +69,7 @@ enum class BoxKeys {
     audioStructuredAllArtists,
     audioStructuredAllGenres,
     audioStructuredAllTracks,
+    audioStructuredTracks,
     audioStructuredAllYears,
 
     videoAllDates,

@@ -121,6 +121,7 @@ static const std::vector<boxConfig> audioBox {
     { "AudioStructured/allArtists", "-Artist-", "object.container", true, 9 },
     { "AudioStructured/allGenres", "-Genre-", "object.container", true, 26 },
     { "AudioStructured/allTracks", "-Track-", "object.container", true, 6 },
+    { "AudioStructured/tracks", "Track", "object.container", false, 6 },
     { "AudioStructured/allYears", "-Year-", "object.container" },
 };
 

@@ -67,6 +67,7 @@ const std::map<BoxKeys, std::string_view> BoxLayout::boxKeys = {
     { BoxKeys::audioStructuredAllArtists, "AudioStructured/allArtists" },
     { BoxKeys::audioStructuredAllGenres, "AudioStructured/allGenres" },
     { BoxKeys::audioStructuredAllTracks, "AudioStructured/allTracks" },
+    { BoxKeys::audioStructuredTracks, "AudioStructured/tracks" },
     { BoxKeys::audioStructuredAllYears, "AudioStructured/allYears" },
 
     { BoxKeys::videoAllDates, "Video/allDates" },

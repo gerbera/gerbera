@@ -9,10 +9,11 @@
 - Fix CaptionInfo.sec never being sent to Samsung TVs
 - Fix internal transcoding with ffmpeg
 - Fix internal video (mpeg) transcoding
+- Fix sorting of files in structured import
 - Pass the client quirks to the DIDL of search results
 - Seek in transcoded streams of constant bit rate
 - Serve transcoded streams to HTTP/1.0 clients
-- Update metadata_service to use content-type
+- Update metadata\_service to use content-type
 - Update to cxxopts-gac6d47
 - Update to pupnp 22.1.8
 - Use fmt exception formatting

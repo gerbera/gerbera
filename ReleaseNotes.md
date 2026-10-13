@@ -10,7 +10,8 @@
 ### FIXES
 
 - Internal Transcoding now stable
-- header handling for quirks
+- Header handling for quirks
+- Sorting of files in structured import
 
 ### Code Improvements
 
@@ -298,19 +299,18 @@ The new autoscan mode `manual` in conjunction with the action `Scan Now` replace
 - Removed static from ConfigDefinition
 - Update versions of pugixml (1.15), libexif (v0.6.25), wavpack (5.8.1), fmt (11.1.4), spdlog (1.15.1), wavpack (1.8.1), googletest (1.16.0), libexiv2 (0.28.5)
 
-
 ## v2.4.1
 
 ### FIXES
 
 - Fix Dockerfile
 
-
 ## v2.4.0
 
 Rerun `gerbera --create-config="Boxlayout|DynamicContainer"` and merge changes to the `boxlayout` and `containers` the get support for upnp shortcut list feature.
 
 There are some noteworthy new features in this release:
+
 - the search page: Query your database with UPnP search statements in Web UI,
 - the dark mode for the Web UI,
 - access permissions for files: Restrict access to directories via client groups,

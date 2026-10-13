@@ -851,6 +851,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         BoxLayout(BoxKeys::audioStructuredAllArtists, "-Artist-", UPNP_CLASS_CONTAINER, "MUSIC_ARTISTS", "", true, true, 9),
         BoxLayout(BoxKeys::audioStructuredAllGenres, "-Genre-", UPNP_CLASS_CONTAINER, "MUSIC_GENRES", "", true, true, 6),
         BoxLayout(BoxKeys::audioStructuredAllTracks, "-Track-", UPNP_CLASS_CONTAINER, "MUSIC_ALL", "", true, true, 6),
+        BoxLayout(BoxKeys::audioStructuredTracks, "Track", UPNP_CLASS_MUSIC_ALBUM, "", "", false, true, 6),
         BoxLayout(BoxKeys::audioStructuredAllYears, "-Year-"),
 
         BoxLayout(BoxKeys::videoAllDates, "Date", UPNP_CLASS_CONTAINER, "VIDEOS_YEARS_MONTH"),
