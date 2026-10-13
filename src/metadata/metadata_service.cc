@@ -278,7 +278,7 @@ bool MetadataService::afterCreation(
 
     std::string mimeType = item->getMimeType();
     std::string contentType = getValueOrDefault(mappings, mimeType);
-    aauto mediaType = item->getMediaType(contentType);
+    auto mediaType = item->getMediaType(contentType);
 
     constexpr auto metaHandlers = std::array {
         // CueSheet from text files
