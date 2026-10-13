@@ -264,6 +264,7 @@
           <box key="AudioStructured/allArtists" title="-Artist-" class="object.container" upnp-shortcut="MUSIC_ARTISTS" size="9" />
           <box key="AudioStructured/allGenres" title="-Genre-" class="object.container" upnp-shortcut="MUSIC_GENRES" size="6" />
           <box key="AudioStructured/allTracks" title="-Track-" class="object.container" upnp-shortcut="MUSIC_ALL" size="6" />
+          <box key="AudioStructured/tracks" title="Track" class="object.container.album.musicAlbum" size="6" enabled="false" />
           <box key="AudioStructured/allYears" title="-Year-" class="object.container" />
           <box key="Video/allDates" title="Date" class="object.container" upnp-shortcut="VIDEOS_YEARS_MONTH" />
           <box key="Video/allDirectories" title="Directories" class="object.container" upnp-shortcut="VIDEOS_FOLDER_STRUCTURE" />

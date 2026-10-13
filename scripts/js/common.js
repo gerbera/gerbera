@@ -360,7 +360,8 @@ function mapModel(model) {
 
 // doc-map-audio-details-begin
 function getAudioDetails(obj, rootPath) {
-  var title = getTitle(obj);
+  var trackTitle = getTitle(obj);
+  var title = trackTitle;
 
   // First we will gather all the metadata that is provided by our
   // object, of course it is possible that some fields are empty -
@@ -388,7 +389,7 @@ function getAudioDetails(obj, rootPath) {
 
 
   var aartist = obj.aux && obj.aux['TPE2'] ? obj.aux['TPE2'] : artist[0];
-  if (obj.metaData[M_ALBUMARTIST] && obj.metaData[M_ALBUMARTIST][0]) {
+  if (obj.metaData[M_ALBUMARTIST] && obj.metaData[M_ALBUMARTIST][0] && obj.metaData[M_ALBUMARTIST][0] !== '') {
     aartist = obj.metaData[M_ALBUMARTIST][0];
   }
 
@@ -465,13 +466,13 @@ function getAudioDetails(obj, rootPath) {
   if (!track) {
     track = '';
   } else {
-    if (track.length == 1) {
+    if (track.length === 1) {
       track = '0' + track;
     }
-    if ((disknr.length > 0) && (track.length == 2)) {
+    if ((disknr.length > 0) && (track.length === 2)) {
       track = '0' + track;
     }
-    if (disknr.length == 1) {
+    if (disknr.length === 1) {
       obj.metaData[M_TRACKNUMBER] = [disknr + '' + track];
       track = '0' + disknr + ' ' + track;
     }
@@ -484,7 +485,7 @@ function getAudioDetails(obj, rootPath) {
     track = track + ' ';
   }
 
-  if (artist.join(' - ') != aartist) {
+  if (artist.join(' - ') !== aartist && aartist !== '') {
     title = artist.join(' - ') + ' - ' + title;
   }
 
@@ -503,6 +504,7 @@ function getAudioDetails(obj, rootPath) {
 
   return {
     title: title,
+    trackTitle: trackTitle,
     disknr: disknr,
     albumArtist: aartist,
     artists: artist,

@@ -145,6 +145,7 @@ const static auto boxKeyNames = std::map<const std::string_view, BoxKeys> {
     { "BK_audioStructuredAllArtists", BoxKeys::audioStructuredAllArtists },
     { "BK_audioStructuredAllGenres", BoxKeys::audioStructuredAllGenres },
     { "BK_audioStructuredAllTracks", BoxKeys::audioStructuredAllTracks },
+    { "BK_audioStructuredTracks", BoxKeys::audioStructuredTracks },
     { "BK_audioStructuredAllYears", BoxKeys::audioStructuredAllYears },
 
     { "BK_videoAllDates", BoxKeys::videoAllDates },

@@ -331,7 +331,8 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
     BK_audioStructuredAllGenres,
     BK_audioStructuredAllAlbums,
     BK_audioStructuredAllYears,
-    BK_audioStructuredAllTracks
+    BK_audioStructuredAllTracks,
+    BK_audioStructuredTracks,
   ];
   const _Chain = prepareChains(boxes, boxSetup, chainSetup);
   const chain = {
@@ -510,18 +511,27 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
   chain.album_artist.searchable = false;
 
   // Tracks
-  if (boxSetup[BK_audioStructuredAllTracks].enabled) {
-    obj.title = audio.title + ' - ' + audio.artists.join(' / ') + ' (' + audio.album + ', ' + audio.date + ')';
-    chain.abc.title = abcbox(audio.title, boxSetup[BK_audioStructuredAllTracks].size, boxConfig.divChar);
+  if (boxSetup[BK_audioStructuredAllTracks].enabled || boxSetup[BK_audioStructuredTracks].enabled) {
+    if (boxSetup[BK_audioStructuredTracks].enabled) {
+      obj.title = audio.trackTitle + ' - ' + audio.artists.join(' / ') + ' (' + audio.album + ', ' + audio.date + ')';
+      chain.abc.title = abcbox(audio.trackTitle, boxSetup[BK_audioStructuredTracks].size, boxConfig.divChar);
+      chain.init.title = mapInitial(audio.trackTitle.charAt(0));
+      chain.init.upnpclass = boxSetup[BK_audioStructuredTracks].class;
+    } else {
+      obj.title = audio.title + ' - ' + audio.artists.join(' / ') + ' (' + audio.album + ', ' + audio.date + ')';
+      chain.abc.title = abcbox(audio.trackTitle, boxSetup[BK_audioStructuredAllTracks].size, boxConfig.divChar);
+      chain.init.title = mapInitial(audio.trackTitle.charAt(0));
+      chain.init.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_ALBUM;
+    }
     isSingleCharBox = boxConfig.singleLetterBoxSize >= chain.abc.title.length;
-    chain.init.title = mapInitial(audio.title.charAt(0));
-    chain.init.upnpclass = UPNP_CLASS_CONTAINER_MUSIC_ARTIST;
     container = addContainerTree(isSingleCharBox ? [chain.allTracks, chain.abc] : [chain.allTracks, chain.abc, chain.init]);
     result.push(addCdsObject(obj, container, rootPath));
 
-    obj.title = audio.title + ' - ' + audio.artistFull;
-    container = addContainerTree([chain.allTracks, chain.entryAllLevel1]);
-    result.push(addCdsObject(obj, container, rootPath));
+    if (boxSetup[BK_audioStructuredAllTracks].enabled) {
+      obj.title = audio.title + ' - ' + audio.artistFull;
+      container = addContainerTree([chain.allTracks, chain.entryAllLevel1]);
+      result.push(addCdsObject(obj, container, rootPath));
+    }
   }
 
   // Sort years into decades
