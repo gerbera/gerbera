@@ -83,7 +83,9 @@ function parseCue(cue, parent, rootPath) {
           parentId = addContainerTree([container], parent.id);
           result.push(parentId);
         }
-        result.push(storeCueEntry(entry, container, parentId, cue, rootPath));
+        var newItem = storeCueEntry(entry, container, parentId, cue, rootPath);
+        if (newItem && newItem > 0)
+          result.push(newItem);
         entry.track = 0;
         entry.type = null;
         entry.offset = null;
@@ -99,7 +101,9 @@ function parseCue(cue, parent, rootPath) {
           parentId = addContainerTree([container], parent.id);
           result.push(parentId);
         }
-        result.push(storeCueEntry(entry, container, parentId, cue, rootPath));
+        var newItem = storeCueEntry(entry, container, parentId, cue, rootPath);
+        if (newItem && newItem > 0)
+          result.push(newItem);
       }
       entry.performer = entry.discArtist;
       entry.track = Number.parseInt(matches[1]);
@@ -122,40 +126,42 @@ function parseCue(cue, parent, rootPath) {
 
     line = readln();
   } while (line !== undefined);
-  
+
   if (entry.fileName && entry.offset) {
-      if (parentId === -1) {
-        parentId = addContainerTree([container], parent.id);
-        result.push(parentId);
-      }
-      result.push(storeCueEntry(entry, container, parentId, cue, rootPath));
+    if (parentId === -1) {
+      parentId = addContainerTree([container], parent.id);
+      result.push(parentId);
+    }
+    var newItem = storeCueEntry(entry, container, parentId, cue, rootPath);
+    if (newItem && newItem > 0)
+      result.push(newItem);
   }
 
   return result;
 }
 
 function storeCueEntry(entry, parent, parentId, cue, rootPath) {
-    entry.location = entry.fileName.startsWith('/') ? entry.fileName : parent.location + "/" + entry.fileName;
-    var cds = getCdsObject(entry.location);
-    if (!cds)
-      cds = {};
-    if (!cds.metaData)
-      cds.metaData = {};
-    cds.refID = cds.id;
-    cds.id = -1;
-    cds.sortKey = '';
-    if (!cds.mimetype)
-      cds.mimetype = entry.format;
-    cds.location = entry.location;
-    cds.title = entry.trackTitle ? entry.trackTitle : entry.fileName;
-    cds.trackNumber = entry.track;
-    cds.description = entry.description ? entry.description : ("Entry from " + cue.location);
-    if (entry.performer) {
-      cds.metaData[M_ARTIST] = [entry.performer];
-      cds.metaData[M_ALBUMARTIST] = [entry.discArtist];
-    }
-    if (entry.discTitle)
-      cds.metaData[M_ALBUM] = [entry.discTitle];
+  entry.location = entry.fileName.startsWith('/') ? entry.fileName : parent.location + "/" + entry.fileName;
+  var cds = getCdsObject(entry.location);
+  if (!cds)
+    cds = {};
+  if (!cds.metaData)
+    cds.metaData = {};
+  cds.refID = cds.id;
+  cds.id = -1;
+  cds.sortKey = '';
+  if (!cds.mimetype)
+    cds.mimetype = entry.format;
+  cds.location = entry.location;
+  cds.title = entry.trackTitle ? entry.trackTitle : entry.fileName;
+  cds.trackNumber = entry.track;
+  cds.description = entry.description ? entry.description : ("Entry from " + cue.location);
+  if (entry.performer) {
+    cds.metaData[M_ARTIST] = [entry.performer];
+    cds.metaData[M_ALBUMARTIST] = [entry.discArtist];
+  }
+  if (entry.discTitle)
+    cds.metaData[M_ALBUM] = [entry.discTitle];
 
-    return addCueObject(cds, entry, parentId, rootPath);
+  return addCueObject(cds, entry, parentId, rootPath);
 }
