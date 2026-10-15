@@ -12,6 +12,7 @@
 - Fix internal video (mpeg) transcoding
 - Fix sorting of files in structured import
 - Handle missing database objects in playlists and cuesheets
+- Keep sortKey for new containers
 - Pass the client quirks to the DIDL of search results
 - Seek in transcoded streams of constant bit rate
 - Serve transcoded streams to HTTP/1.0 clients

@@ -88,7 +88,7 @@ else
     WAVPACK="5.9.0"
     TAGLIB="2.3.2"
     JSONCPP="1.9.8-rc1"
-    CMAKE="4.4.2"
+    CMAKE="4.4.4"
     PQXX="7.10.7"
     LIBZIP="v1.11.4"
     LIBZIPPP_COMMIT="7ed7b6e2817dc4b1f247f48b44cb8a013ba18683"

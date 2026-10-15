@@ -295,6 +295,7 @@ private:
     int createContainer(
         int parentID,
         const std::string& name,
+        const std::string& sortKey,
         const std::string& virtualPath,
         int flags,
         bool isVirtual,

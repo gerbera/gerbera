@@ -86,7 +86,7 @@ jobs:
           ${{ matrix.os-ver }} \
           bash /build/scripts/debian/build-deb.sh ${{ matrix.os-ver }} ${{ matrix.arch }}
 
-      - uses: frabert/replace-string-action@v2.5
+      - uses: frabert/replace-string-action@v2.5.2
         if: ${{github.event_name != 'pull_request'}}
         id: replace
         with:
