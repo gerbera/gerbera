@@ -966,7 +966,12 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
 
     // Your item will be added to the container named by the playlist
     // that you are currently parsing.
-    result.push(addCdsObject(exturl, playlistChain, rootPath));
+    var newItem = addCdsObject(exturl, playlistChain, rootPath);
+    if (newItem && newItem > 0)
+      result.push(newItem);
+    else
+      return false;
+
   } else {
     if (entry.location.substr(0, 1) !== '/') {
       entry.location = playlistLocation + entry.location;
@@ -1003,7 +1008,11 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
     item.extra = entry.extra;
     item.writeThrough = entry.writeThrough;
 
-    result.push(addCdsObject(item, playlistChain, rootPath));
+    var newItem = addCdsObject(item, playlistChain, rootPath);
+    if (newItem && newItem > 0)
+      result.push(newItem);
+    else
+      return false;
   }
   return true;
 }
