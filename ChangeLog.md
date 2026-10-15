@@ -6,6 +6,7 @@
 - Add ubuntu 26.10
 - Allow multiple clients by ip
 - Bump serialize-javascript from 7.1.1 to 7.1.2 in /gerbera-web
+- Extend Mime Mapping
 - Fix CaptionInfo.sec never being sent to Samsung TVs
 - Fix internal transcoding with ffmpeg
 - Fix internal video (mpeg) transcoding

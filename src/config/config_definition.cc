@@ -926,11 +926,16 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "audio/x-scpls", CONTENT_TYPE_PLAYLIST },
         { "audio/x-wav", CONTENT_TYPE_PCM },
         { "audio/x-wavpack", CONTENT_TYPE_WAVPACK },
+        { "image/heic", CONTENT_TYPE_HEIC },
+        { "image/heif", CONTENT_TYPE_HEIF },
         { "image/jpeg", CONTENT_TYPE_JPG },
         { "image/png", CONTENT_TYPE_PNG },
+        { "image/heic", CONTENT_TYPE_HEIC },
+        { "image/heif", CONTENT_TYPE_HEIF },
         { "video/mkv", CONTENT_TYPE_MKV },
         { "video/mp4", CONTENT_TYPE_MP4 },
         { "video/mpeg", CONTENT_TYPE_MPEG },
+        { "video/quicktime", CONTENT_TYPE_MOV },
         { "video/x-matroska", CONTENT_TYPE_MKV },
         { "video/x-mkv", CONTENT_TYPE_MKV },
         { "video/x-ms-asf", CONTENT_TYPE_ASF },
@@ -945,6 +950,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { { "from", CONTENT_TYPE_AVI }, { "to", "AVI" } },
         { { "from", CONTENT_TYPE_DSD }, { "to", "DSF" } },
         { { "from", CONTENT_TYPE_FLAC }, { "to", "FLAC" } },
+        { { "from", CONTENT_TYPE_HEIC }, { "to", "HEIC" } },
+        { { "from", CONTENT_TYPE_HEIF }, { "to", "HEIF" } },
         { { "from", CONTENT_TYPE_JPG }, { "to", "JPEG_LRG" } },
         { { "from", CONTENT_TYPE_MKA }, { "to", "MKV" } },
         { { "from", CONTENT_TYPE_MKV }, { "to", "MKV" } },
@@ -954,6 +961,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { { "from", CONTENT_TYPE_OGG }, { "to", "OGG" } },
         { { "from", CONTENT_TYPE_PCM }, { "to", "LPCM" } },
         { { "from", CONTENT_TYPE_PNG }, { "to", "PNG_LRG" } },
+        { { "from", CONTENT_TYPE_MOV }, { "to", "MOV" } },
         { { "from", CONTENT_TYPE_WMA }, { "to", "WMAFULL" } },
     };
 
@@ -985,13 +993,19 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "dsd", "audio/x-dsd" },
         { "dsf", "audio/x-dsf" },
         { "flv", "video/x-flv" },
+        { "heic", "image/heic" },
+        { "heif", "image/heif" },
+        { "jpg", "image/jpeg" },
+        { "jpeg", "image/jpeg" },
         { "m2ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
         { "m3u", "audio/x-mpegurl" },
         { "m3u8", "audio/x-mpegurl" },
         { "m4a", "audio/mp4" }, // LibMagic identifies this as audio/x-m4a, preventing TagLib from parsing it
         { "mka", "audio/x-matroska" },
         { "mkv", "video/x-matroska" },
+        { "mov", "video/quicktime" },
         { "mp3", "audio/mpeg" },
+        { "mp4", "video/mp4" },
         { "mts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
         { "oga", "audio/ogg" },
         { "ogg", "audio/ogg" },
@@ -999,6 +1013,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "ogv", "video/ogg" },
         { "ogx", "application/ogg" },
         { "pls", "audio/x-scpls" },
+        { "png", "image/png" },
+        { "qt", "video/quicktime" },
         { "srt", MIME_TYPE_SRT_SUBTITLE },
         { "ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
         { "tsa", "audio/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
