@@ -357,17 +357,16 @@ bool WavPackHandler::getAttachments(
     auto tagCount = WavpackGetNumBinaryTagItems(wpContext);
     bool result = false;
     for (int index = 0; index < tagCount; index++) {
-        auto entry = std::make_unique<WavPackEntry>(wpContext, index, item);
-        auto& wavpackEntry = *entry;
-        if (wavpackEntry) {
+        auto wavpackEntry = std::make_unique<WavPackEntry>(wpContext, index, item);
+        if (*wavpackEntry) {
 #ifdef HAVE_MAGIC
-            auto attmtMimetype = wavpackEntry.getMimeTypeFromByteVector(mime);
+            auto attmtMimetype = wavpackEntry->getMimeTypeFromByteVector(mime);
 #else
             std::string attmtMimetype = MIMETYPE_DEFAULT;
 #endif
             auto protocolInfo = renderProtocolInfo(attmtMimetype);
-            log_debug("Identified metadata '{}': {}", wavpackEntry.tag, wavpackEntry.getValue());
-            if (startswith(wavpackEntry.tag, ARTWORK_TAG)) {
+            log_debug("Identified metadata '{}': {}", wavpackEntry->tag, wavpackEntry->getValue());
+            if (startswith(wavpackEntry->tag, ARTWORK_TAG)) {
 
                 /* The convention for binary tag items in APEv2 tags is that the data starts with a NULLterminated
                    string representing a filename. After the terminating NULL, the actual binary data
@@ -378,15 +377,15 @@ bool WavPackHandler::getAttachments(
                 auto resource = std::make_shared<CdsResource>(ContentHandler::WAVPACK, ResourcePurpose::Thumbnail);
                 if (attmtMimetype != MIMETYPE_DEFAULT)
                     resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
-                resource->addOption(ATTACHMENT_OPTION, wavpackEntry.tag);
+                resource->addOption(ATTACHMENT_OPTION, wavpackEntry->tag);
                 item->addResource(resource);
                 result = true;
             } else {
-                log_warning("file {}: wavpack binary tag {} unknown", item->getLocation().c_str(), wavpackEntry.tag);
+                log_warning("file {}: wavpack binary tag {} unknown", item->getLocation().c_str(), wavpackEntry->tag);
                 log_debug("Adding resource '{}'", protocolInfo);
                 auto resource = std::make_shared<CdsResource>(ContentHandler::WAVPACK, ResourcePurpose::Content);
                 resource->addAttribute(ResourceAttribute::PROTOCOLINFO, protocolInfo);
-                resource->addOption(ATTACHMENT_OPTION, wavpackEntry.tag);
+                resource->addOption(ATTACHMENT_OPTION, wavpackEntry->tag);
                 item->addResource(resource);
                 result = true;
             }
@@ -404,62 +403,61 @@ bool WavPackHandler::getTags(
     std::vector<std::string> snippets;
     bool result = false;
     for (int index = 0; index < tagCount; index++) {
-        auto entry = std::make_unique<WavPackEntry>(wpContext, index, sc, item);
-        auto& wavpackEntry = *entry;
-        if (wavpackEntry) {
-            auto property = propertyMap.find(wavpackEntry.tag);
+        auto wavpackEntry = std::make_unique<WavPackEntry>(wpContext, index, sc, item);
+        if (*wavpackEntry) {
+            auto property = propertyMap.find(wavpackEntry->tag);
             if (property == propertyMap.end()) {
-                if (std::string_view(wavpackEntry.tag) == "Year") {
-                    auto dateValue = wavpackEntry.getDate();
+                if (std::string_view(wavpackEntry->tag) == "Year") {
+                    auto dateValue = wavpackEntry->getDate();
                     if (!dateValue.empty()) {
-                        log_debug("Identified metadata '{}': {}", wavpackEntry.tag, dateValue);
+                        log_debug("Identified metadata '{}': {}", wavpackEntry->tag, dateValue);
                         item->addMetaData(MetadataFields::M_DATE, fmt::format("{}-01-01", dateValue));
                         item->addMetaData(MetadataFields::M_UPNP_DATE, fmt::format("{}-01-01", dateValue));
                         result = true;
                     }
                 } else {
-                    log_warning("file {}: wavpack tag {} unknown", item->getLocation().string(), wavpackEntry.tag);
+                    log_warning("file {}: wavpack tag {} unknown", item->getLocation().string(), wavpackEntry->tag);
                 }
             } else {
-                auto val = wavpackEntry.getValue();
+                auto val = wavpackEntry->getValue();
                 if (!val.empty()) {
-                    log_debug("Identified metadata '{}': {}", wavpackEntry.tag, val);
-                    item->removeMetaData(propertyMap.at(wavpackEntry.tag)); // wavpack tags overwrite existing values
-                    item->addMetaData(propertyMap.at(wavpackEntry.tag), val);
+                    log_debug("Identified metadata '{}': {}", wavpackEntry->tag, val);
+                    item->removeMetaData(propertyMap.at(wavpackEntry->tag)); // wavpack tags overwrite existing values
+                    item->addMetaData(propertyMap.at(wavpackEntry->tag), val);
                     result = true;
                 }
             }
-            auto meta = metaTags.find(wavpackEntry.tag);
+            auto meta = metaTags.find(wavpackEntry->tag);
             if (meta != metaTags.end()) {
-                if (std::string_view(wavpackEntry.tag) == "Year") {
-                    auto dateValue = wavpackEntry.getDate();
+                if (std::string_view(wavpackEntry->tag) == "Year") {
+                    auto dateValue = wavpackEntry->getDate();
                     if (!dateValue.empty()) {
-                        log_debug("Identified metadata '{}': {}", wavpackEntry.tag, dateValue);
+                        log_debug("Identified metadata '{}': {}", wavpackEntry->tag, dateValue);
                         item->addMetaData(meta->first, fmt::format("{}-01-01", dateValue));
                         result = true;
                     }
                 } else {
-                    auto val = wavpackEntry.getValue();
+                    auto val = wavpackEntry->getValue();
                     if (!val.empty()) {
-                        log_debug("Identified metadata '{}': {}", wavpackEntry.tag, val);
-                        item->removeMetaData(metaTags.at(wavpackEntry.tag)); // wavpack tags overwrite existing values
-                        item->addMetaData(metaTags.at(wavpackEntry.tag), val);
+                        log_debug("Identified metadata '{}': {}", wavpackEntry->tag, val);
+                        item->removeMetaData(metaTags.at(wavpackEntry->tag)); // wavpack tags overwrite existing values
+                        item->addMetaData(metaTags.at(wavpackEntry->tag), val);
                         result = true;
                     }
                 }
             }
-            auto aux = std::find(auxTags.begin(), auxTags.end(), wavpackEntry.tag);
+            auto aux = std::find(auxTags.begin(), auxTags.end(), wavpackEntry->tag);
             if (aux != auxTags.end()) {
-                auto val = wavpackEntry.getValue();
+                auto val = wavpackEntry->getValue();
                 if (!val.empty()) {
-                    log_debug("Identified auxdata '{}': {}", wavpackEntry.tag, val);
-                    item->setAuxData(wavpackEntry.tag, val);
+                    log_debug("Identified auxdata '{}': {}", wavpackEntry->tag, val);
+                    item->setAuxData(wavpackEntry->tag, val);
                     result = true;
                 }
             }
-            auto comment = std::find_if(commentMap.begin(), commentMap.end(), [&](auto& c) { return c.second == wavpackEntry.tag; });
+            auto comment = std::find_if(commentMap.begin(), commentMap.end(), [&](auto& c) { return c.second == wavpackEntry->tag; });
             if (comment != commentMap.end()) {
-                auto val = wavpackEntry.getValue();
+                auto val = wavpackEntry->getValue();
                 if (!val.empty()) {
                     log_debug("Added comment {}: {}", comment->first, val);
                     snippets.push_back(fmt::format("{}: {}", comment->first, val));
@@ -494,12 +492,11 @@ std::unique_ptr<IOHandler> WavPackHandler::serveContent(
         return {};
     }
 
-    auto entry = std::make_unique<WavPackEntry>(wpObject.wpContext, attmtTag, item);
-    auto& wavpackEntry = *entry;
+    auto wavpackEntry = std::make_unique<WavPackEntry>(wpObject.wpContext, attmtTag, item);
 
-    if (wavpackEntry && startswith(attmtTag, ARTWORK_TAG)) {
+    if (*wavpackEntry && startswith(attmtTag, ARTWORK_TAG)) {
         log_debug("Found image '{}'", attmtTag);
-        return wavpackEntry.getRawValue();
+        return wavpackEntry->getRawValue();
     }
     log_warning("file {}: wavpack binary tag {} unknown", item->getLocation().c_str(), attmtTag);
 
