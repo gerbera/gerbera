@@ -2,6 +2,9 @@
 
 ## HEAD
 
+Because of changes to the configuration defaults, you should generate the the default configuration with ``gerbera --create-config`` and merge
+the additions into you ``config.xml`` file
+
 ### NEW Features
 
 - Configuration option for search bracket nesting limit

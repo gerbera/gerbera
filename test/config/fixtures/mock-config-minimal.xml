@@ -109,13 +109,19 @@
         <map from="dsd" to="audio/x-dsd" />
         <map from="dsf" to="audio/x-dsf" />
         <map from="flv" to="video/x-flv" />
+        <map from="heic" to="image/heic" />
+        <map from="heif" to="image/heif" />
+        <map from="jpeg" to="image/jpeg" />
+        <map from="jpg" to="image/jpeg" />
         <map from="m2ts" to="video/mp2t" />
         <map from="m3u" to="audio/x-mpegurl" />
         <map from="m3u8" to="audio/x-mpegurl" />
         <map from="m4a" to="audio/mp4" />
         <map from="mka" to="audio/x-matroska" />
         <map from="mkv" to="video/x-matroska" />
+        <map from="mov" to="video/quicktime" />
         <map from="mp3" to="audio/mpeg" />
+        <map from="mp4" to="video/mp4" />
         <map from="mts" to="video/mp2t" />
         <map from="oga" to="audio/ogg" />
         <map from="ogg" to="audio/ogg" />
@@ -123,6 +129,8 @@
         <map from="ogv" to="video/ogg" />
         <map from="ogx" to="application/ogg" />
         <map from="pls" to="audio/x-scpls" />
+        <map from="png" to="image/png" />
+        <map from="qt" to="video/quicktime" />
         <map from="srt" to="application/x-srt" />
         <map from="ts" to="video/mp2t" />
         <map from="tsa" to="audio/mp2t" />
@@ -160,12 +168,15 @@
         <treat mimetype="audio/x-scpls" as="playlist" />
         <treat mimetype="audio/x-wav" as="pcm" />
         <treat mimetype="audio/x-wavpack" as="wv" />
+        <treat mimetype="image/heic" as="heic" />
+        <treat mimetype="image/heif" as="heif" />
         <treat mimetype="image/jpeg" as="jpg" />
         <treat mimetype="image/png" as="png" />
         <treat mimetype="text/cue" as="cuesheet" />
         <treat mimetype="video/mkv" as="mkv" />
         <treat mimetype="video/mp4" as="mp4" />
         <treat mimetype="video/mpeg" as="mpeg" />
+        <treat mimetype="video/quicktime" as="qt" />
         <treat mimetype="video/x-matroska" as="mkv" />
         <treat mimetype="video/x-mkv" as="mkv" />
         <treat mimetype="video/x-ms-asf" as="asf" />
@@ -186,6 +197,8 @@
         <map from="avi" to="AVI" />
         <map from="dsd" to="DSF" />
         <map from="flac" to="FLAC" />
+        <map from="heic" to="HEIC" />
+        <map from="heif" to="HEIF" />
         <map from="jpg" to="JPEG_LRG" />
         <map from="mka" to="MKV" />
         <map from="mkv" to="MKV" />
@@ -195,6 +208,7 @@
         <map from="ogg" to="OGG" />
         <map from="pcm" to="LPCM" />
         <map from="png" to="PNG_LRG" />
+        <map from="qt" to="MOV" />
         <map from="wma" to="WMAFULL" />
       </contenttype-dlnaprofile>
     </mappings>
