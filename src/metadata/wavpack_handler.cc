@@ -357,7 +357,8 @@ bool WavPackHandler::getAttachments(
     auto tagCount = WavpackGetNumBinaryTagItems(wpContext);
     bool result = false;
     for (int index = 0; index < tagCount; index++) {
-        WavPackEntry wavpackEntry(wpContext, index, item);
+        auto entry = std::make_unique<WavPackEntry>(wpContext, index, item);
+        auto& wavpackEntry = *entry;
         if (wavpackEntry) {
 #ifdef HAVE_MAGIC
             auto attmtMimetype = wavpackEntry.getMimeTypeFromByteVector(mime);
@@ -403,7 +404,8 @@ bool WavPackHandler::getTags(
     std::vector<std::string> snippets;
     bool result = false;
     for (int index = 0; index < tagCount; index++) {
-        WavPackEntry wavpackEntry(wpContext, index, sc, item);
+        auto entry = std::make_unique<WavPackEntry>(wpContext, index, sc, item);
+        auto& wavpackEntry = *entry;
         if (wavpackEntry) {
             auto property = propertyMap.find(wavpackEntry.tag);
             if (property == propertyMap.end()) {
@@ -492,7 +494,8 @@ std::unique_ptr<IOHandler> WavPackHandler::serveContent(
         return {};
     }
 
-    WavPackEntry wavpackEntry(wpObject.wpContext, attmtTag, item);
+    auto entry = std::make_unique<WavPackEntry>(wpObject.wpContext, attmtTag, item);
+    auto& wavpackEntry = *entry;
 
     if (wavpackEntry && startswith(attmtTag, ARTWORK_TAG)) {
         log_debug("Found image '{}'", attmtTag);
