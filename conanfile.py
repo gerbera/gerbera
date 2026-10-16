@@ -64,7 +64,9 @@ class GerberaConan(ConanFile):
         "sqlite3/[>=3.35.5]",
         "zlib/1.3.1",
         "pupnp/[>=1.14.16]",
-        "taglib/[>=1.12]",
+        # TagLib 2.0 aborts when StringList is copied with _GLIBCXX_ASSERTIONS.
+        # Fixed upstream in 2.0.1; keep support for the unaffected 1.x series.
+        "taglib/[>=1.12 <2.0 || >=2.0.1]",
         "openssl/1.1.1w", # Needed to fix conflicts
     ]
 
