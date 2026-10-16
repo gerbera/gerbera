@@ -461,9 +461,21 @@ std::shared_ptr<CdsObject> ContentManager::createSingleItem(
     } else if (obj->isItem() && processExisting) {
         auto item = std::static_pointer_cast<CdsItem>(obj);
         std::vector<int> newIds;
-        getImportService(adir)->getMetadataService()->extractMetaData(item, dirEnt, newIds);
-        getImportService(adir)->getMetadataService()->attachResourceFiles(item, dirEnt, newIds);
-        getImportService(adir)->updateItemData(item, item->getMimeType());
+        try {
+            getImportService(adir)->getMetadataService()->extractMetaData(item, dirEnt, newIds);
+        } catch (const std::runtime_error& ex) {
+            log_error("createSingleItem '{}' failed: {}", dirEnt.path().string(), EX(ex));
+        }
+        try {
+            getImportService(adir)->getMetadataService()->attachResourceFiles(item, dirEnt, newIds);
+        } catch (const std::runtime_error& ex) {
+            log_error("createSingleItem '{}' failed: {}", dirEnt.path().string(), EX(ex));
+        }
+        try {
+            getImportService(adir)->updateItemData(item, item->getMimeType());
+        } catch (const std::runtime_error& ex) {
+            log_error("createSingleItem '{}' failed: {}", dirEnt.path().string(), EX(ex));
+        }
     }
     if (processExisting || isNew) {
         getImportService(adir)->fillSingleLayout(nullptr, obj, parent, task);
