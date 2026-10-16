@@ -44,6 +44,7 @@ TEST(VideoMetadataMappingsTest, SelectsReadersForWebmAndWmv)
 #include "../mock/config_mock.h"
 #include "cds/cds_item.h"
 #include "cds/cds_resource.h"
+#include "config/result/directory_tweak.h"
 #include "context.h"
 #include "iohandler/io_handler.h"
 #include "metadata/taglib_handler.h"
@@ -98,6 +99,11 @@ public:
             return { "custom_probe" };
 #endif
         return ConfigMock::getArrayOption(option);
+    }
+
+    std::shared_ptr<DirectoryConfigList> getDirectoryTweakOption(ConfigVal) const override
+    {
+        return std::make_shared<DirectoryConfigList>();
     }
 };
 }
