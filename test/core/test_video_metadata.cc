@@ -94,6 +94,8 @@ public:
 
     std::vector<std::string> getArrayOption(ConfigVal option) const override
     {
+        if (option == ConfigVal::IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST)
+            return { "TRACKNUMBER" };
 #ifdef HAVE_FFMPEG
         if (option == ConfigVal::IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST)
             return { "custom_probe" };
@@ -150,7 +152,7 @@ protected:
     }
 
 #ifdef HAVE_FFMPEG
-    void expectFfmpegFallbackPreserved(const fs::path& path, const std::string& mimeType)
+    std::shared_ptr<CdsItem> expectFfmpegFallbackPreserved(const fs::path& path, const std::string& mimeType, int expectedTrackNumber = 7)
     {
         auto before = makeItem(path, mimeType, "object.item.videoItem");
         auto after = read(path, mimeType, "object.item.videoItem");
@@ -176,7 +178,7 @@ protected:
         EXPECT_EQ(after->getMetaData(MetadataFields::M_ALBUM), "Video album");
         EXPECT_EQ(after->getMetaData(MetadataFields::M_DESCRIPTION), "Video comment");
         EXPECT_EQ(after->getMetaData(MetadataFields::M_DATE), "2026-01-01");
-        EXPECT_EQ(after->getTrackNumber(), 7);
+        EXPECT_EQ(after->getTrackNumber(), expectedTrackNumber);
         EXPECT_EQ(after->getPartNumber(), 2);
         EXPECT_EQ(after->getMetaData("upnp:beatsPerMinute"), "123.5");
         EXPECT_EQ(after->getMetaData("upnp:initialKey"), "Am");
@@ -185,6 +187,7 @@ protected:
         EXPECT_THAT(after->getMetaGroup(MetadataFields::M_GENRE), ::testing::UnorderedElementsAre("Techno", "Hard Trance"));
         EXPECT_EQ(after->getClass(), before->getClass());
         EXPECT_EQ(after->getMimeType(), before->getMimeType());
+        return after;
     }
 #endif
 
@@ -233,6 +236,19 @@ TEST_F(VideoTagLibMetadataTest, PreservesWebmFfmpegTagsAndMediaAttributes)
 {
 #if TAGLIB_MAJOR_VERSION >= 2 && TAGLIB_MINOR_VERSION >= 2
     expectFfmpegFallbackPreserved("fixtures/multiple-genres.webm", "video/webm");
+#else
+    GTEST_SKIP() << "Matroska/WebM extraction requires TagLib 2.2";
+#endif
+}
+
+TEST_F(VideoTagLibMetadataTest, PreservesWebmMetadataWithExistingTracknumberTag)
+{
+#if TAGLIB_MAJOR_VERSION >= 2 && TAGLIB_MINOR_VERSION >= 2
+    // Keep the original fixture unchanged: TRACKNUMBER is exposed as a raw
+    // property, but neither previous FFmpeg nor TagLib's track() maps it to
+    // the numeric field. The routing change must still preserve its metadata.
+    auto item = expectFfmpegFallbackPreserved("fixtures/tracknumber-tag.webm", "video/webm", 0);
+    EXPECT_EQ(item->getAuxData("TRACKNUMBER"), "7");
 #else
     GTEST_SKIP() << "Matroska/WebM extraction requires TagLib 2.2";
 #endif
