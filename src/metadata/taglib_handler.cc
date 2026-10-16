@@ -119,7 +119,7 @@ bool TagLibHandler::isSupported(
     const std::string& mimeType,
     ObjectType mediaType)
 {
-    return contentType == CONTENT_TYPE_MP3 || (contentType == CONTENT_TYPE_OGG && !isOggTheora) || contentType == CONTENT_TYPE_WMA || contentType == CONTENT_TYPE_WAVPACK || contentType == CONTENT_TYPE_FLAC || contentType == CONTENT_TYPE_PCM || contentType == CONTENT_TYPE_AIFF || contentType == CONTENT_TYPE_APE || contentType == CONTENT_TYPE_MP4 || contentType == CONTENT_TYPE_DSD || contentType == CONTENT_TYPE_MKV;
+    return contentType == CONTENT_TYPE_MP3 || (contentType == CONTENT_TYPE_OGG && !isOggTheora) || contentType == CONTENT_TYPE_WMA || contentType == CONTENT_TYPE_ASF || contentType == CONTENT_TYPE_WAVPACK || contentType == CONTENT_TYPE_FLAC || contentType == CONTENT_TYPE_PCM || contentType == CONTENT_TYPE_AIFF || contentType == CONTENT_TYPE_APE || contentType == CONTENT_TYPE_MP4 || contentType == CONTENT_TYPE_DSD || contentType == CONTENT_TYPE_MKV;
 }
 
 void TagLibHandler::addField(
@@ -394,7 +394,7 @@ bool TagLibHandler::fillMetadata(
         extractOgg(fs, item, res);
     } else if (contentType == CONTENT_TYPE_APE) {
         extractAPE(fs, item, res);
-    } else if (contentType == CONTENT_TYPE_WMA) {
+    } else if (contentType == CONTENT_TYPE_WMA || contentType == CONTENT_TYPE_ASF) {
         extractASF(fs, item, res);
     } else if (contentType == CONTENT_TYPE_WAVPACK) {
         extractWavPack(fs, item, res);
@@ -539,7 +539,7 @@ std::unique_ptr<IOHandler> TagLibHandler::serveContent(
 
         return std::make_unique<MemIOHandler>(data.data(), data.size());
     }
-    if (contentType == CONTENT_TYPE_WMA) {
+    if (contentType == CONTENT_TYPE_WMA || contentType == CONTENT_TYPE_ASF) {
         // stream album art from WMA file
         auto f = TagLib::ASF::File(&roStream);
 

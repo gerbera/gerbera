@@ -167,6 +167,7 @@
         <map from="tsa" to="audio/mp2t" />
         <map from="tsv" to="video/mp2t" />
         <map from="wax" to="audio/x-ms-wax" />
+        <map from="webm" to="video/webm" />
         <map from="wm" to="video/x-ms-wm" />
         <map from="wma" to="audio/x-ms-wma" />
         <map from="wmv" to="video/x-ms-wmv" />
@@ -208,10 +209,12 @@
         <treat mimetype="video/mp4" as="mp4" />
         <treat mimetype="video/mpeg" as="mpeg" />
         <treat mimetype="video/quicktime" as="qt" />
+        <treat mimetype="video/webm" as="mkv" />
         <treat mimetype="video/x-matroska" as="mkv" />
         <treat mimetype="video/x-mkv" as="mkv" />
         <treat mimetype="video/x-ms-asf" as="asf" />
         <treat mimetype="video/x-ms-asx" as="playlist" />
+        <treat mimetype="video/x-ms-wmv" as="asf" />
         <treat mimetype="video/x-msvideo" as="avi" />
       </mimetype-contenttype>
       <mimetype-dlnatransfermode>

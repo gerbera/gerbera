@@ -34,6 +34,7 @@ add_executable(
     test_upnp_map.cc #
     test_upnp_xml.cc #
     test_url_utils.cc #
+    test_video_metadata.cc #
 )
 
 if(NOT TARGET GTest::gmock)
