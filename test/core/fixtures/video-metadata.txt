@@ -1,0 +1,16 @@
+multiple-genres.webm and multiple-genres.wmv are original synthetic regression
+fixtures: 0.2 seconds of 32x32 black video and stereo silence, with two genuine
+GENRE / WM/Genre entries (Techno and Hard Trance). They do not contain a combined
+semicolon-separated genre. The WMV also contains a generated black 16x16 JPEG.
+
+Both were generated with FFmpeg 7.1 from lavfi color and anullsrc:
+  ffmpeg -f lavfi -i color=black:size=32x32:rate=25 \
+    -f lavfi -i anullsrc=r=48000:cl=stereo -t 0.2 \
+    -c:v libvpx-vp9 -c:a libopus multiple-genres.webm
+  ffmpeg -f lavfi -i color=black:size=32x32:rate=25 \
+    -f lavfi -i anullsrc=r=48000:cl=stereo -t 0.2 \
+    -c:v wmv2 -c:a wmav2 multiple-genres.wmv
+
+The title is "Video metadata regression". Global TITLE and repeated GENRE tags
+were written to WebM with mkvpropedit. Mutagen ASF wrote Title, two WM/Genre
+attributes and the WM/Picture payload to WMV. No third-party media is included.

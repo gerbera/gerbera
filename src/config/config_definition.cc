@@ -936,10 +936,12 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "video/mp4", CONTENT_TYPE_MP4 },
         { "video/mpeg", CONTENT_TYPE_MPEG },
         { "video/quicktime", CONTENT_TYPE_MOV },
+        { "video/webm", CONTENT_TYPE_MKV },
         { "video/x-matroska", CONTENT_TYPE_MKV },
         { "video/x-mkv", CONTENT_TYPE_MKV },
         { "video/x-ms-asf", CONTENT_TYPE_ASF },
         { MIME_TYPE_ASX_PLAYLIST, CONTENT_TYPE_PLAYLIST },
+        { "video/x-ms-wmv", CONTENT_TYPE_ASF },
         { MIME_TYPE_CUESHEET, CONTENT_TYPE_CUESHEET },
         { "video/x-msvideo", CONTENT_TYPE_AVI },
     };
@@ -1020,6 +1022,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "tsa", "audio/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
         { "tsv", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
         { "wax", "audio/x-ms-wax" },
+        { "webm", "video/webm" },
         { "wm", "video/x-ms-wm" },
         { "wma", "audio/x-ms-wma" },
         { "wmv", "video/x-ms-wmv" },
