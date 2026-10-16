@@ -14,3 +14,9 @@ Both were generated with FFmpeg 7.1 from lavfi color and anullsrc:
 The title is "Video metadata regression". Global TITLE and repeated GENRE tags
 were written to WebM with mkvpropedit. Mutagen ASF wrote Title, two WM/Genre
 attributes and the WM/Picture payload to WMV. No third-party media is included.
+
+Both files also contain artist, album artist, album, year, track/disc numbers,
+comment, fractional BPM and initial key tags. A custom_probe tag verifies that
+FFmpeg-only metadata and auxdata remain available after TagLib has run. The
+regression tests compare every non-genre FFmpeg metadata value and every default
+resource attribute against the previous FFmpeg-only path.
