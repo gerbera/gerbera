@@ -41,6 +41,11 @@ Mime::Mime(const std::shared_ptr<Config>& config)
         log_warning("Ignore unknown extensions set, but no mappings specified");
         log_warning("Please review your configuration!");
         ignore_unknown_extensions = false;
+    } else if (ignore_unknown_extensions) {
+        log_info("Ignore unknown extensions set, so unrecognized file types are silently ignored");
+        if (extension_map_case_sensitive) {
+            log_info("File extension are considered case sensitive, so file types may be ignored because of their extension spelling");
+        }
     }
 
 #ifdef HAVE_MAGIC
@@ -52,7 +57,7 @@ Mime::Mime(const std::shared_ptr<Config>& config)
     }
 
     std::string optMagicFile = config->getOption(ConfigVal::IMPORT_MAGIC_FILE);
-    log_debug("magic '{}'", optMagicFile);
+    log_debug("Using Magic file '{}'", optMagicFile);
     const char* magicFile = !optMagicFile.empty() ? optMagicFile.c_str() : nullptr;
     if (magic_load(magicCookie, magicFile) == -1) {
         auto errMsg = magic_error(magicCookie);
@@ -60,6 +65,8 @@ Mime::Mime(const std::shared_ptr<Config>& config)
         magicCookie = nullptr;
         throw_std_runtime_error("magic_load failed: {}", errMsg);
     }
+#else
+    log_info("Extended mime type detection with libmagic no built in. Make sure all your media file extensions are defined.");
 #endif // HAVE_MAGIC
 }
 
@@ -114,5 +121,7 @@ std::pair<bool, std::string> Mime::getMimeType(const fs::path& path, const std::
         mimeType = defval.empty() ? extension : defval;
 #endif
     }
+    if (mimeType.empty() && std::find(unhandledExtensions.begin(), unhandledExtensions.end(), extension) == unhandledExtensions.end())
+        unhandledExtensions.push_back(extension);
     return { ignore_unknown_extensions, mimeType };
 }

@@ -26,9 +26,9 @@
 #ifndef __MIME_H__
 #define __MIME_H__
 
-#include <map>
-
 #include "util/grb_fs.h"
+
+#include <map>
 
 #ifdef HAVE_MAGIC
 #include <mutex>
@@ -41,6 +41,7 @@ extern "C" {
 // forward declaration
 class Config;
 
+// @brief class encapsulating handling of file types
 class Mime {
 public:
     explicit Mime(const std::shared_ptr<Config>& config);
@@ -52,23 +53,39 @@ public:
 
     /// @brief Extracts mimetype from a buffer using filemagic
     std::string bufferToMimeType(const void* buffer, std::size_t length);
-    std::mutex mime_mutex;
 #endif // HAVE_MAGIC
 
+    // @brief get mime type for file
     std::pair<bool, std::string> getMimeType(const fs::path& path, const std::string& defval = "");
 
+    // @brief get extension not mappable to mime types
+    std::vector<std::string> getUnhandledExtensions() const { return unhandledExtensions; }
+
 private:
+    // @brief cache configuration value extension-mimetype case-sensitive
     bool extension_map_case_sensitive;
+
+    // @brief cache configuration value extension-mimetype ignore-unknown
     bool ignore_unknown_extensions;
 
+    // @brief cache configuration value extension-mimetype
     std::map<std::string, std::string> extension_mimetype_map;
+
+    // @brief cache configuration value ignore-extensions
     std::vector<std::string> ignoredExtensions;
 
+    // @brief collect extensions with no mime type
+    std::vector<std::string> unhandledExtensions;
+
 #ifdef HAVE_MAGIC
+    // @brief magic cookie file descriptor
     magic_t magicCookie;
 
     /// @brief Extracts mimetype from a file using filemagic
     std::string fileToMimeType(const fs::path& path, const std::string& defval = "");
+
+    // @brief magic thread mutex
+    std::mutex mime_mutex;
 #endif
 };
 

@@ -133,6 +133,7 @@ void ContentManager::run()
 #ifdef HAVE_LASTFM
     last_fm->run();
 #endif
+    log_debug("ContentTaskThread");
     threadRunner = std::make_unique<ThreadRunner<std::condition_variable_any, std::recursive_mutex>>(
         "ContentTaskThread", [](void* arg) -> void* {
             auto inst = static_cast<ContentManager*>(arg);
@@ -144,6 +145,7 @@ void ContentManager::run()
     // wait for ContentTaskThread to become ready
     threadRunner->waitForReady();
 
+    log_debug("ContentTaskThread ready");
     if (!threadRunner->isAlive()) {
         throw_std_runtime_error("Could not start ContentTaskThread thread");
     }
@@ -873,6 +875,11 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
         getImportService(adir)->finishScan(location, parentContainer, lastModifiedNewMax, firstObject);
     }
+
+    auto unhandledExtensions = mime->getUnhandledExtensions();
+    if (!unhandledExtensions.empty())
+        log_info("Unhandled extensions {} in path {}", fmt::join(unhandledExtensions, ", "), location.c_str());
+
     if (shutdownFlag || (task && !task->isValid())) {
         return;
     }
