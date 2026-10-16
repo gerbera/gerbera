@@ -11,7 +11,9 @@
 - Fix internal transcoding with ffmpeg
 - Fix internal video (mpeg) transcoding
 - Fix sorting of files in structured import
+- Fix WavPack stack overflow by allocating entries on the heap
 - Handle missing database objects in playlists and cuesheets
+- Improve logging for mime and extensions
 - Keep sortKey for new containers
 - Pass the client quirks to the DIDL of search results
 - Seek in transcoded streams of constant bit rate
