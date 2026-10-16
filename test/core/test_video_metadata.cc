@@ -9,10 +9,12 @@
 */
 
 #include "config/config_definition.h"
+#include "config/config_val.h"
 #include "config/setup/config_setup_dictionary.h"
 #include "metadata/metadata_enums.h"
 
 #include <gtest/gtest.h>
+#include <pugixml.hpp>
 
 namespace {
 std::map<std::string, std::string> defaultMappings(ConfigVal option)
@@ -45,6 +47,9 @@ TEST(VideoMetadataMappingsTest, SelectsReadersForWebmAndWmv)
 #include "context.h"
 #include "iohandler/io_handler.h"
 #include "metadata/taglib_handler.h"
+#ifdef HAVE_FFMPEG
+#include "metadata/ffmpeg_handler.h"
+#endif
 #include "util/string_converter.h"
 
 #include <array>
@@ -65,6 +70,10 @@ public:
 
     bool getBoolOption(ConfigVal option) const override
     {
+#ifdef HAVE_FFMPEG
+        if (option == ConfigVal::IMPORT_LIBOPTS_FFMPEG_ENABLED || option == ConfigVal::IMPORT_LIBOPTS_FFMPEG_STREAMS_ENABLED)
+            return true;
+#endif
         return option == ConfigVal::IMPORT_LIBOPTS_ID3_ENABLED || ConfigMock::getBoolOption(option);
     }
 
@@ -72,7 +81,23 @@ public:
     {
         if (option == ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST)
             return defaultMappings(option);
+        if (option == ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST)
+            return { { "BPM", "upnp:beatsPerMinute" }, { "INITIALKEY", "upnp:initialKey" } };
+#ifdef HAVE_FFMPEG
+        if (option == ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST)
+            return { { "bpm", "upnp:beatsPerMinute" }, { "initialkey", "upnp:initialKey" }, { "custom_probe",
+                        "upnp:userAnnotation" } };
+#endif
         return ConfigMock::getDictionaryOption(option);
+    }
+
+    std::vector<std::string> getArrayOption(ConfigVal option) const override
+    {
+#ifdef HAVE_FFMPEG
+        if (option == ConfigVal::IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST)
+            return { "custom_probe" };
+#endif
+        return ConfigMock::getArrayOption(option);
     }
 };
 }
@@ -86,14 +111,22 @@ protected:
         context = std::make_shared<Context>(nullptr, config, nullptr, nullptr, nullptr, nullptr, converter);
     }
 
-    std::shared_ptr<CdsItem> read(const fs::path& path, const std::string& mimeType, const std::string& upnpClass)
+    std::shared_ptr<CdsItem> makeItem(const fs::path& path, const std::string& mimeType, const std::string& upnpClass)
     {
         auto item = std::make_shared<CdsItem>(CdsEntryType::File);
-        item->setLocation(fs::absolute(path));
+        item->setLocation(fs::absolute(path), CdsEntryType::File);
         item->setMimeType(mimeType);
         item->setClass(upnpClass);
         auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
+        resource->addAttribute(ResourceAttribute::PROTOCOLINFO, "http-get:*:" + mimeType + ":*");
+        resource->addAttribute(ResourceAttribute::SIZE, static_cast<long long>(fs::file_size(path)));
         item->addResource(resource);
+        return item;
+    }
+
+    std::shared_ptr<CdsItem> read(const fs::path& path, const std::string& mimeType, const std::string& upnpClass)
+    {
+        auto item = makeItem(path, mimeType, upnpClass);
         TagLibHandler handler(context);
         auto mappings = defaultMappings(ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST);
         auto mapping = mappings.find(mimeType);
@@ -109,6 +142,45 @@ protected:
         EXPECT_EQ(item->getMimeType(), mimeType);
         return item;
     }
+
+#ifdef HAVE_FFMPEG
+    void expectFfmpegFallbackPreserved(const fs::path& path, const std::string& mimeType)
+    {
+        auto before = makeItem(path, mimeType, "object.item.videoItem");
+        auto after = read(path, mimeType, "object.item.videoItem");
+        FfmpegHandler ffmpeg(context);
+        std::vector<int> newIds;
+        ASSERT_TRUE(ffmpeg.fillMetadata(before, newIds));
+        ASSERT_TRUE(ffmpeg.fillMetadata(after, newIds));
+
+        // Compare every previously supplied non-genre value, including custom
+        // metadata and auxdata, rather than only checking the new genres.
+        const auto genreKey = MetaEnumMapper::getMetaFieldName(MetadataFields::M_GENRE);
+        for (const auto& [field, value] : before->getMetaData()) {
+            if (field != genreKey)
+                EXPECT_THAT(after->getMetaGroup(field), ::testing::Contains(value)) << field;
+        }
+        for (const auto& [key, value] : before->getAuxData())
+            EXPECT_EQ(after->getAuxData(key), value) << key;
+        for (const auto& [attribute, value] : before->getResource(ContentHandler::DEFAULT)->getAttributes())
+            EXPECT_EQ(after->getResource(ContentHandler::DEFAULT)->getAttribute(attribute), value) << static_cast<int>(attribute);
+
+        EXPECT_EQ(after->getMetaData(MetadataFields::M_ARTIST), "Video artist");
+        EXPECT_EQ(after->getMetaData(MetadataFields::M_ALBUMARTIST), "Video album artist");
+        EXPECT_EQ(after->getMetaData(MetadataFields::M_ALBUM), "Video album");
+        EXPECT_EQ(after->getMetaData(MetadataFields::M_DESCRIPTION), "Video comment");
+        EXPECT_EQ(after->getMetaData(MetadataFields::M_DATE), "2026-01-01");
+        EXPECT_EQ(after->getTrackNumber(), 7);
+        EXPECT_EQ(after->getPartNumber(), 2);
+        EXPECT_EQ(after->getMetaData("upnp:beatsPerMinute"), "123.5");
+        EXPECT_EQ(after->getMetaData("upnp:initialKey"), "Am");
+        EXPECT_EQ(after->getMetaData("upnp:userAnnotation"), "fallback retained");
+        EXPECT_EQ(after->getAuxData("custom_probe"), "fallback retained");
+        EXPECT_THAT(after->getMetaGroup(MetadataFields::M_GENRE), ::testing::UnorderedElementsAre("Techno", "Hard Trance"));
+        EXPECT_EQ(after->getClass(), before->getClass());
+        EXPECT_EQ(after->getMimeType(), before->getMimeType());
+    }
+#endif
 
     std::shared_ptr<Context> context;
 };
@@ -139,8 +211,25 @@ TEST_F(VideoTagLibMetadataTest, PreservesRepeatedWebmGenres)
 {
 #if TAGLIB_MAJOR_VERSION >= 2 && TAGLIB_MINOR_VERSION >= 2
     read("fixtures/multiple-genres.webm", "video/webm", "object.item.videoItem");
+    read("fixtures/multiple-genres.webm", "video/x-matroska", "object.item.videoItem");
 #else
     GTEST_SKIP() << "Matroska/WebM extraction requires TagLib 2.2";
 #endif
 }
+
+#ifdef HAVE_FFMPEG
+TEST_F(VideoTagLibMetadataTest, PreservesWmvFfmpegTagsAndMediaAttributes)
+{
+    expectFfmpegFallbackPreserved("fixtures/multiple-genres.wmv", "video/x-ms-wmv");
+}
+
+TEST_F(VideoTagLibMetadataTest, PreservesWebmFfmpegTagsAndMediaAttributes)
+{
+#if TAGLIB_MAJOR_VERSION >= 2 && TAGLIB_MINOR_VERSION >= 2
+    expectFfmpegFallbackPreserved("fixtures/multiple-genres.webm", "video/webm");
+#else
+    GTEST_SKIP() << "Matroska/WebM extraction requires TagLib 2.2";
+#endif
+}
+#endif
 #endif
