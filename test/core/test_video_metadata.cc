@@ -8,13 +8,27 @@
     as published by the Free Software Foundation.
 */
 
+#include "../mock/config_mock.h"
+#include "cds/cds_item.h"
+#include "cds/cds_resource.h"
 #include "config/config_definition.h"
 #include "config/config_val.h"
+#include "config/result/directory_tweak.h"
 #include "config/setup/config_setup_dictionary.h"
+#include "context.h"
+#include "iohandler/io_handler.h"
+#include "metadata/ffmpeg_handler.h"
 #include "metadata/metadata_enums.h"
+#include "metadata/taglib_handler.h"
+#include "util/string_converter.h"
 
+#include <array>
+#include <gmock/gmock.h>
 #include <gtest/gtest.h>
 #include <pugixml.hpp>
+#ifdef HAVE_TAGLIB
+#include <taglib.h>
+#endif
 
 namespace {
 std::map<std::string, std::string> defaultMappings(ConfigVal option)
@@ -40,23 +54,6 @@ TEST(VideoMetadataMappingsTest, SelectsReadersForWebmAndWmv)
     EXPECT_EQ(contentTypes.at(extensions.at("wmv")), CONTENT_TYPE_ASF);
 }
 
-#ifdef HAVE_TAGLIB
-#include "../mock/config_mock.h"
-#include "cds/cds_item.h"
-#include "cds/cds_resource.h"
-#include "config/result/directory_tweak.h"
-#include "context.h"
-#include "iohandler/io_handler.h"
-#include "metadata/taglib_handler.h"
-#ifdef HAVE_FFMPEG
-#include "metadata/ffmpeg_handler.h"
-#endif
-#include "util/string_converter.h"
-
-#include <array>
-#include <gmock/gmock.h>
-#include <taglib.h>
-
 namespace {
 class VideoMetadataConfig final : public ConfigMock {
 public:
@@ -75,27 +72,34 @@ public:
         if (option == ConfigVal::IMPORT_LIBOPTS_FFMPEG_ENABLED || option == ConfigVal::IMPORT_LIBOPTS_FFMPEG_STREAMS_ENABLED)
             return true;
 #endif
-        return option == ConfigVal::IMPORT_LIBOPTS_ID3_ENABLED || ConfigMock::getBoolOption(option);
+#ifdef HAVE_TAGLIB
+        if (option == ConfigVal::IMPORT_LIBOPTS_ID3_ENABLED)
+            return true;
+#endif
+        return ConfigMock::getBoolOption(option);
     }
 
     std::map<std::string, std::string> getDictionaryOption(ConfigVal option) const override
     {
         if (option == ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST)
             return defaultMappings(option);
+#ifdef HAVE_TAGLIB
         if (option == ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST)
             return { { "BPM", "upnp:beatsPerMinute" }, { "INITIALKEY", "upnp:initialKey" } };
+#endif
 #ifdef HAVE_FFMPEG
         if (option == ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST)
-            return { { "bpm", "upnp:beatsPerMinute" }, { "initialkey", "upnp:initialKey" }, { "custom_probe",
-                        "upnp:userAnnotation" } };
+            return { { "bpm", "upnp:beatsPerMinute" }, { "initialkey", "upnp:initialKey" }, { "custom_probe", "upnp:userAnnotation" } };
 #endif
         return ConfigMock::getDictionaryOption(option);
     }
 
     std::vector<std::string> getArrayOption(ConfigVal option) const override
     {
+#ifdef HAVE_TAGLIB
         if (option == ConfigVal::IMPORT_LIBOPTS_ID3_AUXDATA_TAGS_LIST)
             return { "TRACKNUMBER" };
+#endif
 #ifdef HAVE_FFMPEG
         if (option == ConfigVal::IMPORT_LIBOPTS_FFMPEG_AUXDATA_TAGS_LIST)
             return { "custom_probe" };
@@ -110,6 +114,7 @@ public:
 };
 }
 
+#ifdef HAVE_TAGLIB
 class VideoTagLibMetadataTest : public ::testing::Test {
 protected:
     void SetUp() override
@@ -151,7 +156,46 @@ protected:
         return item;
     }
 
-#ifdef HAVE_FFMPEG
+    std::shared_ptr<Context> context;
+};
+
+TEST_F(VideoTagLibMetadataTest, PreservesRepeatedWmvGenresAndServesEmbeddedArtwork)
+{
+    auto item = read("fixtures/multiple-genres.wmv", "video/x-ms-wmv", "object.item.videoItem");
+    auto artwork = item->getResource(ContentHandler::ID3);
+    ASSERT_NE(artwork, nullptr);
+    TagLibHandler handler(context);
+    auto io = handler.serveContent(item, artwork);
+    ASSERT_NE(io, nullptr);
+    io->open(UPNP_READ);
+    std::array<std::byte, 2> header {};
+    ASSERT_EQ(io->read(header.data(), header.size()), 2);
+    EXPECT_EQ(header[0], std::byte { 0xff });
+    EXPECT_EQ(header[1], std::byte { 0xd8 });
+    io->close();
+}
+
+TEST_F(VideoTagLibMetadataTest, ReadsExistingAsfAndWmaMappings)
+{
+    read("fixtures/multiple-genres.wmv", "video/x-ms-asf", "object.item.videoItem");
+    read("fixtures/multiple-genres.wmv", "audio/x-ms-wma", "object.item.audioItem.musicTrack");
+}
+
+TEST_F(VideoTagLibMetadataTest, PreservesRepeatedWebmGenres)
+{
+#if TAGLIB_MAJOR_VERSION >= 2 && TAGLIB_MINOR_VERSION >= 2
+    read("fixtures/multiple-genres.webm", "video/webm", "object.item.videoItem");
+    read("fixtures/multiple-genres.webm", "video/x-matroska", "object.item.videoItem");
+#else
+    GTEST_SKIP() << "Matroska/WebM extraction requires TagLib 2.2";
+#endif
+}
+
+#endif // HAVE_TAGLIB
+
+#if defined(HAVE_TAGLIB) && defined(HAVE_FFMPEG)
+class VideoTagLibFfmpegMetadataTest : public VideoTagLibMetadataTest {
+protected:
     void expectFfmpegFallbackPreserved(const fs::path& path, const std::string& mimeType, int expectedTrackNumber = 7)
     {
         auto before = makeItem(path, mimeType, "object.item.videoItem");
@@ -188,50 +232,14 @@ protected:
         EXPECT_EQ(after->getClass(), before->getClass());
         EXPECT_EQ(after->getMimeType(), before->getMimeType());
     }
-#endif
-
-    std::shared_ptr<Context> context;
 };
 
-TEST_F(VideoTagLibMetadataTest, PreservesRepeatedWmvGenresAndServesEmbeddedArtwork)
-{
-    auto item = read("fixtures/multiple-genres.wmv", "video/x-ms-wmv", "object.item.videoItem");
-    auto artwork = item->getResource(ContentHandler::ID3);
-    ASSERT_NE(artwork, nullptr);
-    TagLibHandler handler(context);
-    auto io = handler.serveContent(item, artwork);
-    ASSERT_NE(io, nullptr);
-    io->open(UPNP_READ);
-    std::array<std::byte, 2> header {};
-    ASSERT_EQ(io->read(header.data(), header.size()), 2);
-    EXPECT_EQ(header[0], std::byte { 0xff });
-    EXPECT_EQ(header[1], std::byte { 0xd8 });
-    io->close();
-}
-
-TEST_F(VideoTagLibMetadataTest, ReadsExistingAsfAndWmaMappings)
-{
-    read("fixtures/multiple-genres.wmv", "video/x-ms-asf", "object.item.videoItem");
-    read("fixtures/multiple-genres.wmv", "audio/x-ms-wma", "object.item.audioItem.musicTrack");
-}
-
-TEST_F(VideoTagLibMetadataTest, PreservesRepeatedWebmGenres)
-{
-#if TAGLIB_MAJOR_VERSION >= 2 && TAGLIB_MINOR_VERSION >= 2
-    read("fixtures/multiple-genres.webm", "video/webm", "object.item.videoItem");
-    read("fixtures/multiple-genres.webm", "video/x-matroska", "object.item.videoItem");
-#else
-    GTEST_SKIP() << "Matroska/WebM extraction requires TagLib 2.2";
-#endif
-}
-
-#ifdef HAVE_FFMPEG
-TEST_F(VideoTagLibMetadataTest, PreservesWmvFfmpegTagsAndMediaAttributes)
+TEST_F(VideoTagLibFfmpegMetadataTest, PreservesWmvFfmpegTagsAndMediaAttributes)
 {
     expectFfmpegFallbackPreserved("fixtures/multiple-genres.wmv", "video/x-ms-wmv");
 }
 
-TEST_F(VideoTagLibMetadataTest, PreservesWebmFfmpegTagsAndMediaAttributes)
+TEST_F(VideoTagLibFfmpegMetadataTest, PreservesWebmFfmpegTagsAndMediaAttributes)
 {
 #if TAGLIB_MAJOR_VERSION >= 2 && TAGLIB_MINOR_VERSION >= 2
     expectFfmpegFallbackPreserved("fixtures/multiple-genres.webm", "video/webm");
@@ -240,7 +248,7 @@ TEST_F(VideoTagLibMetadataTest, PreservesWebmFfmpegTagsAndMediaAttributes)
 #endif
 }
 
-TEST_F(VideoTagLibMetadataTest, PreservesWebmMetadataWithExistingTracknumberTag)
+TEST_F(VideoTagLibFfmpegMetadataTest, PreservesWebmMetadataWithExistingTracknumberTag)
 {
 #if TAGLIB_MAJOR_VERSION >= 2 && TAGLIB_MINOR_VERSION >= 2
     // Keep the original fixture unchanged: TRACKNUMBER is exposed as a raw
@@ -253,5 +261,4 @@ TEST_F(VideoTagLibMetadataTest, PreservesWebmMetadataWithExistingTracknumberTag)
     GTEST_SKIP() << "Matroska/WebM extraction requires TagLib 2.2";
 #endif
 }
-#endif
-#endif
+#endif // HAVE_TAGLIB && HAVE_FFMPEG
