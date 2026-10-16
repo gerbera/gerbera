@@ -21,10 +21,12 @@ FFmpeg-only metadata and auxdata remain available after TagLib has run. The
 regression tests compare every non-genre FFmpeg metadata value and every default
 resource attribute against the previous FFmpeg-only path.
 
-The date comparison requires a nonempty date identical to the previous FFmpeg
-reader. It does not impose January 1 on every platform: ToolsTest.parseDate
+For WebM, the date comparison requires a nonempty date identical to the previous
+FFmpeg reader. It does not impose January 1 on every platform: ToolsTest.parseDate
 already records the existing Solaris year-only normalization to December 31 of
-the preceding year. This reader-routing change does not fix that date parser.
+the preceding year. For WMV, FFmpeg alone may not expose the year, so the test
+checks the date added by TagLib (2026-01-01). All existing non-genre FFmpeg values
+are still compared in both formats. This change does not fix the date parser.
 
 WebM uses PART_NUMBER=7 for the Matroska track-number convention and also
 TRACK=7 for the previous FFmpeg reader; both paths must retain the number.

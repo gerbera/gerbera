@@ -222,11 +222,16 @@ protected:
         EXPECT_EQ(after->getMetaData(MetadataFields::M_ALBUMARTIST), "Video album artist");
         EXPECT_EQ(after->getMetaData(MetadataFields::M_ALBUM), "Video album");
         EXPECT_EQ(after->getMetaData(MetadataFields::M_DESCRIPTION), "Video comment");
-        // Preserve the previous reader's date exactly. parseDate currently
-        // normalizes a year differently on Solaris (see ToolsTest.parseDate).
-        const auto previousDate = before->getMetaData(MetadataFields::M_DATE);
-        EXPECT_FALSE(previousDate.empty());
-        EXPECT_EQ(after->getMetaData(MetadataFields::M_DATE), previousDate);
+        if (mimeType == "video/x-ms-wmv") {
+            // TagLib adds the fixture's year; FFmpeg alone may not expose it.
+            EXPECT_EQ(after->getMetaData(MetadataFields::M_DATE), "2026-01-01");
+        } else {
+            // Preserve WebM's previous date exactly. parseDate currently
+            // normalizes a year differently on Solaris (ToolsTest.parseDate).
+            const auto previousDate = before->getMetaData(MetadataFields::M_DATE);
+            EXPECT_FALSE(previousDate.empty());
+            EXPECT_EQ(after->getMetaData(MetadataFields::M_DATE), previousDate);
+        }
         EXPECT_EQ(after->getTrackNumber(), expectedTrackNumber);
         EXPECT_EQ(after->getPartNumber(), 2);
         EXPECT_EQ(after->getMetaData("upnp:beatsPerMinute"), "123.5");
