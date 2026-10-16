@@ -296,77 +296,77 @@ describe('Gerbera Updates', function () {
   describe('addUiTimer()', () => {
     let updateSpy;
 
-    beforeAll(function () {
-      updateSpy = spyOn(Updates, 'getUpdates');
-    });
-
-    beforeEach(() => {
-      updateSpy.calls.reset();
-      Updates.clearAll();
-    });
-
-    afterAll(() => {
-      Updates.clearAll();
-    });
-
-    it('uses the default interval to set a timeout', (done) => {
-      GerberaApp.serverConfig = {};
-      GerberaApp.serverConfig['poll-interval'] = 100;
-      const startTime = new Date().getTime();
-      updateSpy.and.callFake(() => {
-        const currentTime = new Date().getTime();
-        expect((currentTime - startTime) >= 95).toBeTruthy('Actual value was ' + (currentTime - startTime));
-        expect((currentTime - startTime) <= 200).toBeTruthy('Actual value was ' + (currentTime - startTime));
-        Updates.clearAll();
-        done();
-      });
-
-      Updates.addUiTimer();
-    });
-
-    it('overrides the default when passed in', (done) => {
-      GerberaApp.serverConfig = {};
-      GerberaApp.serverConfig['poll-interval'] = 200;
-      const startTime = new Date().getTime();
-      updateSpy.and.callFake(() => {
-        const currentTime = new Date().getTime();
-        expect((currentTime - startTime) >= 195).toBeTruthy('Actual value was ' + (currentTime - startTime));
-        expect((currentTime - startTime) <= 300).toBeTruthy('Actual value was ' + (currentTime - startTime));
-        Updates.clearAll();
-        done();
-      });
-
-      Updates.addUiTimer();
-    });
-  });
-  describe('addTaskInterval()', () => {
-    let updateSpy;
-    beforeAll(function () {
+    beforeAll(() => {
       updateSpy = spyOn(Updates, 'getUpdates');
     });
 
     beforeEach(async () => {
-      await updateSpy.calls.reset();
+      updateSpy.calls.reset();
       await Updates.clearAll();
+      jasmine.clock().install();
     });
 
-    it('sets a recurring interval based on the poll-interval configuration', (done) => {
-      GerberaApp.serverConfig = {};
-      GerberaApp.serverConfig['poll-interval'] = 100;
-      const startTime = new Date().getTime();
-      let totalCount = 0;
-      updateSpy.and.callFake(() => {
-        totalCount++;
-        let currentTime = new Date().getTime();
-        if (totalCount >= 2) {
-          expect((currentTime - startTime) >= 195).toBeTruthy('Interval should accumulate time from start but was ' + (currentTime - startTime));
-          expect((currentTime - startTime) <= 210).toBeTruthy('Interval should accumulate time from start but was ' + (currentTime - startTime));
-          Updates.clearAll();
-          done();
-        }
-      });
+    afterEach(async () => {
+      try {
+        await Updates.clearAll();
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
 
+    it('uses the default interval to set a timeout', () => {
+      GerberaApp.serverConfig = { 'poll-interval': 100 };
+      Updates.addUiTimer();
+      jasmine.clock().tick(99);
+      expect(updateSpy).not.toHaveBeenCalled();
+      jasmine.clock().tick(1);
+      expect(updateSpy).toHaveBeenCalledOnceWith(true);
+    });
+
+    it('overrides the default when passed in', () => {
+      GerberaApp.serverConfig = { 'poll-interval': 200 };
+      Updates.addUiTimer(300);
+      jasmine.clock().tick(299);
+      expect(updateSpy).not.toHaveBeenCalled();
+      jasmine.clock().tick(1);
+      expect(updateSpy).toHaveBeenCalledOnceWith(true);
+    });
+  });
+  describe('addTaskInterval()', () => {
+    let updateSpy;
+
+    beforeAll(() => {
+      updateSpy = spyOn(Updates, 'getUpdates');
+    });
+
+    beforeEach(async () => {
+      updateSpy.calls.reset();
+      await Updates.clearAll();
+      jasmine.clock().install();
+    });
+
+    afterEach(async () => {
+      try {
+        await Updates.clearAll();
+      } finally {
+        jasmine.clock().uninstall();
+      }
+    });
+
+    it('sets a recurring interval based on the poll-interval configuration', () => {
+      GerberaApp.serverConfig = { 'poll-interval': 100 };
       Updates.addTaskInterval();
+      jasmine.clock().tick(99);
+      expect(updateSpy).not.toHaveBeenCalled();
+      jasmine.clock().tick(1);
+      expect(updateSpy).toHaveBeenCalledOnceWith(false);
+      jasmine.clock().tick(99);
+      expect(updateSpy).toHaveBeenCalledTimes(1);
+      jasmine.clock().tick(1);
+      expect(updateSpy).toHaveBeenCalledTimes(2);
+      Updates.clearTaskInterval();
+      jasmine.clock().tick(100);
+      expect(updateSpy).toHaveBeenCalledTimes(2);
     });
   });
   describe('updateTreeByIds()', () => {
