@@ -23,3 +23,10 @@ resource attribute against the previous FFmpeg-only path.
 
 WebM uses PART_NUMBER=7 for the Matroska track-number convention and also
 TRACK=7 for the previous FFmpeg reader; both paths must retain the number.
+
+tracknumber-tag.webm retains the original regression fixture byte-for-byte,
+with TRACKNUMBER=7 instead of PART_NUMBER/TRACK. Neither previous FFmpeg nor
+TagLib's numeric track accessor reads that convention. It remains a separate
+case verifying both genres, all previous metadata/attributes and the raw
+TRACKNUMBER property via configured auxdata; numeric track mapping is not
+claimed for this variant.
