@@ -218,7 +218,7 @@ protected:
     }
 
     fs::path directory;
-    std::shared_ptr<Sqlite3Database> database;
+    std::shared_ptr<Database> database;
 };
 
 TEST_F(PlaylistDatabaseTest, RepeatedFilesKeepTheirPositionsAndReferences)
