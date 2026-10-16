@@ -845,6 +845,13 @@ std::vector<std::shared_ptr<AddUpdateTable<CdsObject>>> SQLDatabase::_addUpdateO
             browseColumnMapper->getClause(BrowseColumn::RefId, fmt::format("{:d}", refObj->getID()), true),
             browseColumnMapper->getClause(BrowseColumn::DcTitle, quote(obj->getTitle()), true),
         };
+        if (obj->isItem() && obj->getMetaData(MetadataFields::M_CONTENT_CLASS) == UPNP_CLASS_PLAYLIST_ITEM) {
+            auto item = std::static_pointer_cast<CdsItem>(obj);
+            // A repeated file at a different playlist position is a separate entry.
+            // Keep matching the same position so reimport remains idempotent.
+            if (item->getTrackNumber() > 0)
+                where.push_back(browseColumnMapper->getClause(BrowseColumn::TrackNumber, quote(item->getTrackNumber()), true));
+        }
         auto res = select(fmt::format("SELECT {} FROM {} WHERE {} LIMIT 1",
             browseColumnMapper->mapQuoted(BrowseColumn::Id, true),
             browseColumnMapper->getTableName(),
