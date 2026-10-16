@@ -318,18 +318,23 @@ describe('Gerbera Trail', () => {
     });
 
     it('when click add for fs type calls Gerbera Item add', () => {
-      GerberaApp.serverConfig.fsAddItem = true;
-      spyOn(GerberaApp, 'getType').and.returnValue('fs');
-      spyOn(Items, 'addFileItem');
-      items = {
-        'parent_id': 467,
-        'virtual': false
-      };
-      Trail.makeTrailFromItem(items);
+      const serverConfig = GerberaApp.serverConfig;
+      GerberaApp.serverConfig = { ...serverConfig, fsAddItem: true };
+      try {
+        spyOn(GerberaApp, 'getType').and.returnValue('fs');
+        spyOn(Items, 'addFileItem');
+        items = {
+          'parent_id': 467,
+          'virtual': false
+        };
+        Trail.makeTrailFromItem(items);
 
-      $('#trail .grb-trail-add').click();
+        $('#trail .grb-trail-add').click();
 
-      expect(Items.addFileItem).toHaveBeenCalled();
+        expect(Items.addFileItem).toHaveBeenCalled();
+      } finally {
+        GerberaApp.serverConfig = serverConfig;
+      }
     });
 
     it('when click add autoscan for fs type calls Gerbera Autoscan add', () => {
