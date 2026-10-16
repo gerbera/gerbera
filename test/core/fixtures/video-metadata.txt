@@ -20,3 +20,6 @@ comment, fractional BPM and initial key tags. A custom_probe tag verifies that
 FFmpeg-only metadata and auxdata remain available after TagLib has run. The
 regression tests compare every non-genre FFmpeg metadata value and every default
 resource attribute against the previous FFmpeg-only path.
+
+WebM uses PART_NUMBER=7 for the Matroska track-number convention and also
+TRACK=7 for the previous FFmpeg reader; both paths must retain the number.
