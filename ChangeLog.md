@@ -17,8 +17,11 @@
 - Improve logging for mime and extensions
 - Keep sortKey for new containers
 - Pass the client quirks to the DIDL of search results
+- Preserve multiple genres in WebM and WMV metadata
+- Preserve repeated local files at different playlist positions
 - Seek in transcoded streams of constant bit rate
 - Serve transcoded streams to HTTP/1.0 clients
+- Stabilize import of broken files
 - Update metadata\_service to use content-type
 - Update to cxxopts-gac6d47
 - Update to pupnp 22.1.8

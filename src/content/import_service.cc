@@ -834,10 +834,18 @@ void ImportService::updateSingleItem(
     item->setUTime(mTime);
     item->setSizeOnDisk(getFileSize(dirEntry));
 
+    std::vector<int> newIds;
     try {
-        std::vector<int> newIds;
         metadataService->extractMetaData(item, dirEntry, newIds);
+    } catch (const std::runtime_error& ex) {
+        log_error("updateSingleItem '{}' failed: {}", dirEntry.path().string(), EX(ex));
+    }
+    try {
         metadataService->attachResourceFiles(item, dirEntry, newIds);
+    } catch (const std::runtime_error& ex) {
+        log_error("updateSingleItem '{}' failed: {}", dirEntry.path().string(), EX(ex));
+    }
+    try {
         updateItemData(item, mimetype);
     } catch (const std::runtime_error& ex) {
         log_error("updateSingleItem '{}' failed: {}", dirEntry.path().string(), EX(ex));
