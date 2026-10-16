@@ -89,7 +89,8 @@ public:
 #endif
 #ifdef HAVE_FFMPEG
         if (option == ConfigVal::IMPORT_LIBOPTS_FFMPEG_METADATA_TAGS_LIST)
-            return { { "bpm", "upnp:beatsPerMinute" }, { "initialkey", "upnp:initialKey" }, { "custom_probe", "upnp:userAnnotation" } };
+            return { { "bpm", "upnp:beatsPerMinute" }, { "initialkey", "upnp:initialKey" }, { "custom_probe", "upnp:userAnnotation" },
+                { "wm/beatsperminute", "upnp:beatsPerMinute" }, { "wm/initialkey", "upnp:initialKey" } };
 #endif
         return ConfigMock::getDictionaryOption(option);
     }
