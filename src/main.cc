@@ -438,7 +438,7 @@ int main(int argc, char** argv, char** envp)
         log_info("Gerbera exiting. Have a nice day.");
         runtime.exit(ret);
     } catch (const cxxopts::exceptions::exception& e) {
-        fmt::print(stderr, "Failed to parse arguments: {}\n", e);
+        fmt::print(stderr, "Failed to parse arguments: {}\n", e.what());
         runtime.exit(EXIT_FAILURE);
     }
 }
