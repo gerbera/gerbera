@@ -218,8 +218,12 @@ TEST_F(BpmMetadataTest, PreservesOtherMetadataResourcesAndArtwork)
     EXPECT_EQ(withoutBpm(current), withoutBpm(previous));
     EXPECT_EQ(current->getResource(ContentHandler::DEFAULT)->getAttributes(), previous->getResource(ContentHandler::DEFAULT)->getAttributes());
     EXPECT_THAT(current->getMetaGroup(MetadataFields::M_GENRE), ::testing::UnorderedElementsAre("Techno", "Hard Trance"));
+#ifdef HAVE_MAGIC
+    auto previousArtwork = previous->getResource(ContentHandler::ID3);
+    ASSERT_NE(previousArtwork, nullptr);
     auto artwork = current->getResource(ContentHandler::ID3);
     ASSERT_NE(artwork, nullptr);
+    EXPECT_EQ(artwork->getAttributes(), previousArtwork->getAttributes());
     TagLibHandler handler(context);
     auto stream = handler.serveContent(current, artwork);
     ASSERT_NE(stream, nullptr);
@@ -229,6 +233,11 @@ TEST_F(BpmMetadataTest, PreservesOtherMetadataResourcesAndArtwork)
     EXPECT_EQ(header[0], std::byte { 0xff });
     EXPECT_EQ(header[1], std::byte { 0xd8 });
     stream->close();
+#else
+    // MP4 cover MIME detection already requires libmagic in the unchanged reader.
+    EXPECT_EQ(previous->getResource(ContentHandler::ID3), nullptr);
+    EXPECT_EQ(current->getResource(ContentHandler::ID3), nullptr);
+#endif
 }
 
 TEST_F(BpmMetadataTest, ReimportReplacesPreviousBpm)
