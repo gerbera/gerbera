@@ -47,6 +47,7 @@ All environment variables are optional.
 | `TZ`                                    | `UTC`   | Time zone, e.g. `Australia/Perth`                                                                      |
 | `IMAGE_PORT`                            | `49494` | Port gerbera listens on, when the default command is used                                              |
 | `MARIADB_TLS_DISABLE_PEER_VERIFICATION` |         | Set to `1` to skip the certificate check for MySQL/MariaDB, see [below](#avoid-certificate-check-with-mysqlmariadb) |
+| `CHOWN_HOME`                            |         | Set to `1` to hand everything in `/var/run/gerbera` to `PUID:PGID`, e.g. after changing the ids       |
 | `UID`, `GID`                            |         | Deprecated names of `PUID` and `PGID`, still honoured. `PUID`/`PGID` take precedence                   |
 
 # Examples
@@ -75,6 +76,7 @@ services:
       - PUID=1000
       - PGID=1000
       # - TZ=Australia/Perth
+      # - CHOWN_HOME=1
       # - IMAGE_PORT=49494
       # - MARIADB_TLS_DISABLE_PEER_VERIFICATION=1
     volumes:
@@ -110,8 +112,9 @@ $ docker run \
     -v /some/path:/var/run/gerbera \
      gerbera/gerbera:3.3.0
 ```
-On startup `/some/path` and everything in it is handed to `PUID:PGID`, so set them to the host user that should own
-these files.
+Gerbera runs as `PUID:PGID` and needs write access to `/some/path`: on startup the folder itself is handed to
+`PUID:PGID`, other files in it are left alone. If you change `PUID`/`PGID` later, start the container once with
+`CHOWN_HOME=1` to hand over the files gerbera created before.
 
 ## Overwrite default ports
 
@@ -156,10 +159,13 @@ services:
       - /some/files:/mnt/content:ro
 ```
 
-On startup the container changes the ids of the gerbera user and group, hands `/var/run/gerbera` to `PUID:PGID` and
-then runs gerbera as that user, so everything it creates is owned by `PUID:PGID`. Ids that already exist in the image
-are supported: e.g. `PGID=100` makes the existing `users` group the primary group of the gerbera user.
-A `config.xml` you provide keeps its owner and is made readable for `PGID`.
+On startup the container changes the ids of the gerbera user and group, hands the folder `/var/run/gerbera` and the
+files it generates there to `PUID:PGID` and then runs gerbera as that user, so everything gerbera creates is owned by
+`PUID:PGID`. Ids that already exist in the image are supported: e.g. `PGID=100` makes the existing `users` group the
+primary group of the gerbera user.
+A `config.xml` or `autoscan.xml` you provide keeps its owner and is made readable for `PGID`. Other files in a
+mounted `/var/run/gerbera` are not touched, unless you set `CHOWN_HOME=1`: then everything in it is handed to
+`PUID:PGID`, which is needed once after changing the ids of an existing setup.
 
 This requires the container to start as root (the default). With `--user` the ids cannot be changed and gerbera runs
 with the ids given there.
