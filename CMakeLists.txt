@@ -761,6 +761,19 @@ endif()
 if(WITH_PGSQL)
     find_package(libpqxx REQUIRED)
     if(libpqxx_FOUND)
+        # libpqxx 8.x headers require C++20; keep it to the sources
+        # including pqxx headers so the rest stays on the default (C++17).
+        # (CXX_STANDARD is target-only, hence per-source COMPILE_OPTIONS.
+        # test/database/test_database.cc is covered in test/database/CMakeLists.txt.)
+        if(libpqxx_VERSION VERSION_GREATER_EQUAL "8.0")
+            set_property(
+                SOURCE
+                    src/database/database.cc
+                    src/database/postgres/pg_result.cc
+                    src/database/postgres/pg_task.cc
+                    src/database/postgres/postgres_database.cc
+                APPEND PROPERTY COMPILE_OPTIONS "-std=c++20")
+        endif()
         target_include_directories(libgerbera PUBLIC ${libpqxx_INCLUDE_DIRS})
         target_link_libraries(libgerbera PUBLIC ${libpqxx_LIBS} ${libpqxx_LIBRARIES})
         target_link_libraries(libgerbera PUBLIC libpqxx::pqxx)
