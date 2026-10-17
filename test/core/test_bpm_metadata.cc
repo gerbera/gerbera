@@ -147,17 +147,23 @@ protected:
 TEST_P(BpmMetadataTest, SelectsMp4SourcesForAudioAndVideo)
 {
     const auto& test = GetParam();
-    config->preferAccuracy = test.enabled;
     config->preferConflict = test.conflict;
     for (const auto* fixture : { "bpm-accuracy.m4a", "bpm-accuracy.mp4" }) {
         SCOPED_TRACE(fixture);
+        // Older TagLib versions do not expose the freeform INITIALKEY property.
+        // Preserve whatever the unchanged reader supplies for the original file.
+        config->preferAccuracy = false;
+        auto original = makeItem(fs::path("fixtures") / fixture);
+        read(original);
+        const auto originalKey = original->getMetaData("upnp:initialKey");
+        config->preferAccuracy = test.enabled;
         const auto path = makeFile(fixture, test.tmpo, test.bpm);
         for (const auto* mime : { "audio/mp4", "video/mp4", "video/x-m4v" }) {
             SCOPED_TRACE(mime);
             auto item = makeItem(path, mime);
             read(item);
             EXPECT_EQ(item->getMetaData("upnp:beatsPerMinute"), test.expected);
-            EXPECT_EQ(item->getMetaData("upnp:initialKey"), "Am");
+            EXPECT_EQ(item->getMetaData("upnp:initialKey"), originalKey);
             if (test.enabled) {
                 EXPECT_EQ(std::count_if(item->getMetaData().begin(), item->getMetaData().end(), [](const auto& entry) {
                     return entry.first == "upnp:beatsPerMinute";
