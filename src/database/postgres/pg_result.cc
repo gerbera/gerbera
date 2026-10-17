@@ -43,7 +43,9 @@ std::unique_ptr<SQLRow> PostgresSQLResult::nextRow()
     if (result.size() == 0 || row >= result.size())
         return nullptr;
     row++;
-    return std::make_unique<PostgresSQLRow>(result.at(row - 1));
+    // libpqxx 8 result::at() returns row_ref, and row(row_ref) is explicit.
+    // Explicit construction also works against libpqxx 7 (copy).
+    return std::make_unique<PostgresSQLRow>(pqxx::row(result.at(row - 1)));
 }
 
 #endif
