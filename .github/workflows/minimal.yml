@@ -9,10 +9,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  APK_TOOLS_URL: https://gitlab.alpinelinux.org/api/v4/projects/5/packages/generic/v2.14.10/x86_64/apk.static
+  APK_TOOLS_SHA256: 34bb1a96f0258982377a289392d4ea9f3f4b767a4bb5806b1b87179b79ad8a1c
+
 jobs:
   build:
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         platform: ['x86_64', 'x86', 'armhf', 'armv7', 'aarch64', 'loongarch64', 'ppc64le', 'riscv64', 's390x']
         branch: ['v3.23', 'v3.24', 'edge']
@@ -26,8 +31,22 @@ jobs:
         shell: alpine.sh {0}
     steps:
       - uses: actions/checkout@v7
+      - name: Download and verify static apk-tools
+        shell: bash
+        timeout-minutes: 6
+        run: |
+          # setup-alpine verifies and reuses this file instead of downloading it again.
+          apk_download="$RUNNER_TEMP/apk.download"
+          trap 'rm -f -- "$apk_download"' EXIT
+          curl --fail --show-error --location \
+            --connect-timeout 30 --max-time 120 \
+            --retry 5 --retry-delay 5 --retry-max-time 180 --retry-connrefused \
+            --output "$apk_download" "$APK_TOOLS_URL"
+          printf '%s  %s\n' "$APK_TOOLS_SHA256" "$apk_download" | sha256sum --check --strict
+          mv -- "$apk_download" "$RUNNER_TEMP/apk"
       - uses: jirutka/setup-alpine@v1
         with:
+          apk-tools-url: '${{ env.APK_TOOLS_URL }}#!sha256!${{ env.APK_TOOLS_SHA256 }}'
           branch: ${{matrix.branch}}
           arch: ${{matrix.platform}}
           packages: >
