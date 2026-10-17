@@ -67,6 +67,7 @@ ProcessExecutor::ProcessExecutor(const std::string& command, const std::vector<s
 
     case 0:
         sigset_t maskSet;
+        sigemptyset(&maskSet);
         pthread_sigmask(SIG_SETMASK, &maskSet, nullptr);
         for (auto&& [eName, eValue] : env) {
             setenv(eName.c_str(), eValue.c_str(), 1);
