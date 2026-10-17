@@ -94,6 +94,7 @@ protected:
         auto converter = std::make_shared<ConverterManager>(config);
         auto mime = std::make_shared<Mime>(config);
         auto definition = std::make_shared<ConfigDefinition>();
+        definition->init(definition);
         context = std::make_shared<Context>(definition, config, nullptr, mime, nullptr, nullptr, converter);
     }
 
