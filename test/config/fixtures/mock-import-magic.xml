@@ -1,7 +1,7 @@
 <import hidden-files="no">
   <magic-file>magic.file</magic-file>
-  <scripting script-charset="UTF-8">
-    <virtual-layout type="js">
+  <scripting>
+    <virtual-layout type="builtin">
       <boxlayout>
         <box key="Root" title="Root" class="object.container" sort-key="00000" />
         <box key="PCDirectory" title="PC Directory" class="object.container" sort-key="00000" />
@@ -97,20 +97,11 @@
       <!-- <map from="avi" to="video/avi" /> -->
     </extension-mimetype>
     <mimetype-upnpclass>
-      <map from="audio/*" to="object.item.audioItem.musicTrack" />
-      <map from="video/*" to="object.item.videoItem" />
-      <map from="image/*" to="object.item.imageItem" />
       <map from="application/ogg" to="object.item.audioItem.musicTrack" />
+      <map from="audio/*" to="object.item.audioItem.musicTrack" />
+      <map from="image/*" to="object.item.imageItem" />
+      <map from="video/*" to="object.item.videoItem" />
     </mimetype-upnpclass>
-    <mimetype-dlnatransfermode>
-      <map from="application/ogg" to="Streaming" />
-      <map from="application/x-srt" to="Background" />
-      <map from="audio/*" to="Streaming" />
-      <map from="image/*" to="Interactive" />
-      <map from="srt" to="Background" />
-      <map from="text/*" to="Background" />
-      <map from="video/*" to="Streaming" />
-    </mimetype-dlnatransfermode>
     <mimetype-contenttype>
       <treat mimetype="application/ogg" as="ogg" />
       <treat mimetype="audio/L16" as="pcm" />
@@ -143,6 +134,15 @@
       <treat mimetype="video/x-ms-wmv" as="asf" />
       <treat mimetype="video/x-msvideo" as="avi" />
     </mimetype-contenttype>
+    <mimetype-dlnatransfermode>
+      <map from="application/ogg" to="Streaming" />
+      <map from="application/x-srt" to="Background" />
+      <map from="audio/*" to="Streaming" />
+      <map from="image/*" to="Interactive" />
+      <map from="srt" to="Background" />
+      <map from="text/*" to="Background" />
+      <map from="video/*" to="Streaming" />
+    </mimetype-dlnatransfermode>
     <contenttype-dlnaprofile>
       <map from="asf" to="VC_ASF_AP_L2_WMA" />
       <map from="avi" to="AVI" />
