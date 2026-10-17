@@ -66,6 +66,12 @@
 #include <vorbisfile.h>
 #include <wavpackfile.h>
 
+#include <cmath>
+#include <locale>
+#include <optional>
+#include <sstream>
+#include <utility>
+
 #if TAGLIB_MAJOR_VERSION >= 2
 #include <dsffile.h>
 #include <mp4itemfactory.h>
@@ -77,6 +83,46 @@
 #include <matroskafile.h>
 #endif
 #endif
+
+namespace {
+std::optional<double> parseBpm(const std::string& text)
+{
+    std::istringstream input(text);
+    input.imbue(std::locale::classic());
+    double value;
+    if (!(input >> std::noskipws >> value) || !input.eof() || !std::isfinite(value) || value <= 0)
+        return std::nullopt;
+    return value;
+}
+
+std::string readMp4Bpm(const TagLib::MP4::Tag& tag, bool preferTmpo)
+{
+    const auto tmpo = tag.contains("tmpo") ? tag.item("tmpo").toInt() : 0;
+    std::optional<double> bpm;
+    std::string bpmText;
+    for (const auto& [key, value] : tag.itemMap()) {
+        if (key.upper() != "----:COM.APPLE.ITUNES:BPM")
+            continue;
+        for (const auto& entry : value.toStringList()) {
+            auto text = entry.to8Bit(true);
+            trimStringInPlace(text);
+            if (auto parsed = parseBpm(text)) {
+                bpm = parsed;
+                bpmText = std::move(text);
+                break;
+            }
+        }
+        if (bpm)
+            break;
+    }
+    if (!bpm)
+        return tmpo > 0 ? std::to_string(tmpo) : std::string {};
+    // Less than one BPM can be caused by rounding or truncation of integer tmpo.
+    if (tmpo > 0 && std::abs(*bpm - tmpo) >= 1.0 && preferTmpo)
+        return std::to_string(tmpo);
+    return bpmText;
+}
+}
 
 class GerberaTagLibDebugListener : public TagLib::DebugListener {
 private:
@@ -111,6 +157,8 @@ TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
     trimStringInPlace(legacyEntrySeparator);
     if (legacyEntrySeparator.empty())
         legacyEntrySeparator = "\n";
+    preferHighestBpmAccuracy = this->config->getBoolOption(ConfigVal::IMPORT_LIBOPTS_ID3_PREFER_HIGHEST_BPM_ACCURACY);
+    preferAmbigousBpmTmpo = this->config->getOption(ConfigVal::IMPORT_LIBOPTS_ID3_PREFER_AMBIGOUS_BPM_VALUE) == "tmpo";
 }
 
 bool TagLibHandler::isSupported(
@@ -235,6 +283,16 @@ void TagLibHandler::addSpecialFields(
 
     for (auto&& [key, meta] : metaTags) {
         auto list = file.properties()[key];
+        if (preferHighestBpmAccuracy && key == "BPM") {
+            const auto* mp4 = dynamic_cast<const TagLib::MP4::File*>(&file);
+            if (mp4 && mp4->hasMP4Tag()) {
+                const auto bpm = readMp4Bpm(*mp4->tag(), preferAmbigousBpmTmpo);
+                list.clear();
+                if (bpm.empty())
+                    continue;
+                list.append(TagLib::String(bpm, TagLib::String::UTF8));
+            }
+        }
         if (list.isEmpty())
             return;
         for (auto&& val : list) {

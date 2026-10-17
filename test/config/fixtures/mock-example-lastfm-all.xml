@@ -319,7 +319,7 @@
           <add-comment label="Taken with" tag="Exif.Image.Model" />
         </comment>
       </exiv2>
-      <id3 charset="UTF-8" enabled="yes">
+      <id3 charset="UTF-8" enabled="yes" prefer_highest_bpm_accuracy="no" prefer_ambigous_bpm_value="bpm_tag">
         <auxdata></auxdata>
         <metadata>
           <add-data tag="PERFORMER" key="upnp:artist@role[Performer]" />

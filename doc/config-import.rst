@@ -2510,6 +2510,87 @@ Enable Library
 
 Exclude the metadata parser from the import process.
 
+MP4 BPM Source Selection
+^^^^^^^^^^^^^^^^^^^^^^^^
+
+These optional attributes belong to ``import/library-options/id3`` (TagLib).
+They select the source for a configured ``BPM`` metadata mapping in MP4-family
+audio and video files, including M4A, MP4 and M4V. They do not switch metadata
+readers or change the extraction of other tags, artwork or resource attributes.
+
+.. code-block:: xml
+
+    <import>
+      <library-options>
+        <id3 prefer_highest_bpm_accuracy="yes" prefer_ambigous_bpm_value="bpm_tag">
+          <metadata>
+            <add-data tag="BPM" key="upnp:beatsPerMinute"/>
+          </metadata>
+        </id3>
+      </library-options>
+    </import>
+
+Merge these attributes and the mapping into an existing ``id3`` section rather
+than adding a second section. Restart Gerbera and reimport affected files to
+apply the policy to existing library entries.
+
+.. confval:: prefer_highest_bpm_accuracy
+   :type: :confval:`Boolean`
+   :required: false
+   :default: ``no``
+
+With ``no`` or an omitted attribute, the existing TagLib property selection is
+unchanged. With ``yes``, Gerbera reads the integer ``tmpo`` atom and the iTunes
+freeform ``BPM`` tag separately. The freeform tag name is matched without regard
+to case. Only finite, positive numeric BPM values are accepted by this policy;
+surrounding whitespace is ignored and a decimal point is used.
+
+If only one source is valid, it is used. If both sources are valid and differ by
+less than 1 BPM, the freeform tag is used to preserve its stored precision.
+This selects a stored value; it does not analyse the audio or establish which
+source is musically correct. A difference of 1 BPM or more is a conflict handled
+by :confval:`prefer_ambigous_bpm_value`. Half/double-tempo values are not corrected
+automatically. If neither source is valid, this TagLib mapping adds no BPM value;
+other configured metadata readers retain their normal fallback behaviour.
+
+.. confval:: prefer_ambigous_bpm_value
+   :type: :confval:`String`
+   :required: false
+   :default: ``bpm_tag``
+
+Allowed values are ``tmpo`` and ``bpm_tag``. This option only affects MP4 BPM
+selection when :confval:`prefer_highest_bpm_accuracy` is ``yes`` and both valid
+sources differ by at least 1 BPM. Omitting it prefers ``bpm_tag``. Invalid option
+values cause a configuration error.
+
+.. list-table:: Examples with ``prefer_highest_bpm_accuracy="yes"``
+   :header-rows: 1
+
+   * - ``tmpo``
+     - Freeform BPM
+     - Conflict preference
+     - Selected BPM
+   * - 123
+     - 123.5
+     - Either value
+     - 123.5
+   * - 124
+     - 123.5
+     - Either value
+     - 123.5
+   * - 123
+     - 124
+     - ``tmpo``
+     - 123
+   * - 123
+     - 124
+     - ``bpm_tag`` or omitted
+     - 124
+   * - 123
+     - Invalid or absent
+     - Either value
+     - 123
+
 
 Additional Library Data
 -----------------------

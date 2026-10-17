@@ -680,6 +680,8 @@ void ConfigGenerator::generateImportOptions(
         { ConfigVal::IMPORT_LIBOPTS_ID3_METADATA_TAGS_LIST, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_ID3_CHARSET, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_ID3_ENABLED, ConfigLevel::Example },
+        { ConfigVal::IMPORT_LIBOPTS_ID3_PREFER_HIGHEST_BPM_ACCURACY, ConfigLevel::Example },
+        { ConfigVal::IMPORT_LIBOPTS_ID3_PREFER_AMBIGOUS_BPM_VALUE, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_ID3_CONTENT_LIST, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_ID3_CONTENT_ENABLED, ConfigLevel::Example },
         { ConfigVal::IMPORT_LIBOPTS_ID3_COMMENT_LIST, ConfigLevel::Example },

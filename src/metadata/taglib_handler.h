@@ -75,6 +75,8 @@ public:
 private:
     std::string entrySeparator;
     std::string legacyEntrySeparator;
+    bool preferHighestBpmAccuracy;
+    bool preferAmbigousBpmTmpo;
 
     /// @brief add metadata field from file content
     void addField(
