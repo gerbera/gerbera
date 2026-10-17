@@ -1,0 +1,36 @@
+bpm-accuracy.m4a and bpm-accuracy.mp4 are original synthetic INTERNAL regression
+fixtures. They are not the shared media-library test files and contain no
+third-party recordings. The tests copy them into temporary files before changing
+tags; the fixtures themselves and the shared library remain unchanged.
+
+Generated with FFmpeg 7.1.5 on Debian 13, using 0.2 seconds of stereo silence and,
+for MP4 video, a 32x32 black frame stream:
+
+  ffmpeg -f lavfi -i anullsrc=r=48000:cl=stereo -t 0.2 \
+    -c:a aac -threads 1 bpm-accuracy.m4a
+  ffmpeg -f lavfi -i color=black:size=32x32:rate=25 \
+    -f lavfi -i anullsrc=r=48000:cl=stereo -t 0.2 \
+    -c:v mpeg4 -c:a aac -threads 1 bpm-accuracy.mp4
+  ffmpeg -f lavfi -i color=black:size=16x16 -frames:v 1 -threads 1 cover.jpg
+
+Mutagen MP4 wrote these original tags:
+
+  title: BPM metadata regression
+  artist: BPM Test Artist
+  album artist: BPM Album Artist
+  album: BPM regression album
+  year: 2026
+  genres: two entries, Techno and Hard Trance
+  comment: Original synthetic internal regression fixture
+  track/disc: 7/12 and 2/3
+  tmpo: 123
+  ----:com.apple.iTunes:BPM: UTF-8 text 123.5
+  ----:com.apple.iTunes:INITIALKEY: UTF-8 text Am
+  covr: the generated black 16x16 JPEG
+
+The tests alter only tmpo and the freeform BPM tag in temporary copies, using
+TagLib's MP4 item API. Cases cover the opt-in policy, disabled legacy behaviour,
+the exact 1-BPM conflict boundary in both directions, both preferences, single
+and absent sources, invalid/nonpositive/nonfinite values, half/double tempo,
+whitespace, lowercase tag names, reimport, FFmpeg fallback and preservation of
+unrelated metadata/resource attributes and readable artwork.

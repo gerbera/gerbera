@@ -1269,6 +1269,15 @@
             </xs:all>
             <xs:attribute name="enabled" type="boolean" default="yes"/>
             <xs:attribute name="charset" type="xs:string"/>
+            <xs:attribute name="prefer_highest_bpm_accuracy" type="boolean" default="no"/>
+            <xs:attribute name="prefer_ambigous_bpm_value" default="bpm_tag">
+                <xs:simpleType>
+                    <xs:restriction base="xs:string">
+                        <xs:enumeration value="tmpo"/>
+                        <xs:enumeration value="bpm_tag"/>
+                    </xs:restriction>
+                </xs:simpleType>
+            </xs:attribute>
         </xs:complexType>
     </xs:element>
 
