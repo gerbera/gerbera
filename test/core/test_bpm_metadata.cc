@@ -11,6 +11,7 @@
 #include "../mock/config_mock.h"
 #include "cds/cds_item.h"
 #include "cds/cds_resource.h"
+#include "config/config_definition.h"
 #include "config/result/directory_tweak.h"
 #include "context.h"
 #include "iohandler/io_handler.h"
@@ -92,7 +93,8 @@ protected:
         config = std::make_shared<BpmConfig>();
         auto converter = std::make_shared<ConverterManager>(config);
         auto mime = std::make_shared<Mime>(config);
-        context = std::make_shared<Context>(nullptr, config, nullptr, mime, nullptr, nullptr, converter);
+        auto definition = std::make_shared<ConfigDefinition>();
+        context = std::make_shared<Context>(definition, config, nullptr, mime, nullptr, nullptr, converter);
     }
 
     void TearDown() override
