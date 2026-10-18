@@ -365,6 +365,7 @@ SQLDatabase::SQLDatabase(
     , dynamicContentList(this->config->getDynamicContentListOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST))
     , dynamicContentEnabled(this->config->getBoolOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST_ENABLED))
     , sortKeyEnabled(this->config->getBoolOption(ConfigVal::SERVER_STORAGE_SORT_KEY_ENABLED))
+    , sortDefault(this->config->getOption(ConfigVal::SERVER_STORAGE_SORT_DEFAULT))
 {
     for (auto&& [key, val] : browseColMap) {
         if (val.type == FieldType::String && val.length > stringLimit)
@@ -1097,18 +1098,30 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
 
         // order by code..
         auto orderByCode = [&]() {
-            std::string orderQb;
+            std::vector<std::string> orderQb;
             if (param.getFlag(BROWSE_TRACK_SORT)) {
-                orderQb = fmt::format("{},{}", browseColumnMapper->mapQuoted(BrowseColumn::PartNumber), browseColumnMapper->mapQuoted(BrowseColumn::TrackNumber));
-            } else {
+                orderQb.push_back(browseColumnMapper->mapQuoted(BrowseColumn::PartNumber));
+                orderQb.push_back(browseColumnMapper->mapQuoted(BrowseColumn::TrackNumber));
+            } else if (!param.getSortCriteria().empty()) {
                 SortParser sortParser(browseColumnMapper, playstatusColumnMapper, metaColumnMapper, param.getSortCriteria());
-                orderQb = sortParser.parse(addColumns, addJoin);
+                auto sort = sortParser.parse(addColumns, addJoin);
+                if (!sort.empty())
+                    orderQb.push_back(sort);
+            } else if (!sortDefault.empty()) {
+                SortParser sortParser(browseColumnMapper, playstatusColumnMapper, metaColumnMapper, sortDefault);
+                auto sort = sortParser.parse(addColumns, addJoin);
+                if (!sort.empty())
+                    orderQb.push_back(sort);
             }
             if (orderQb.empty()) {
+                // Sorting by UpnpClass will avoid mixing different types of containers
+                // "Special" containers like "All Songs" (which are of upnp_class 'object.container') will be displayed before
+                // albums (which are of upnp_class 'object.container.album.musicAlbum')
+                orderQb.push_back(browseColumnMapper->mapQuoted(BrowseColumn::UpnpClass));
                 if (sortKeyEnabled)
-                    orderQb = browseColumnMapper->mapQuoted(BrowseColumn::SortKey);
+                    orderQb.push_back(browseColumnMapper->mapQuoted(BrowseColumn::SortKey));
                 else
-                    orderQb = browseColumnMapper->mapQuoted(BrowseColumn::DcTitle);
+                    orderQb.push_back(browseColumnMapper->mapQuoted(BrowseColumn::DcTitle));
             }
             return orderQb;
         };
@@ -1129,18 +1142,15 @@ std::vector<std::shared_ptr<CdsObject>> SQLDatabase::browse(BrowseParam& param)
             where.push_back(std::move(zero));
         } else if (getContainers && !getItems) {
             where.push_back(fmt::format("{} = {:d}", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType), OBJECT_TYPE_CONTAINER));
-            // Sorting by UpnpClass will avoid mixing different types of containers
-            // "Special" containers like "All Songs" (which are of upnp_class 'object.container') will be displayed before
-            // albums (which are of upnp_class 'object.container.album.musicAlbum')
-            orderBy = fmt::format(" ORDER BY {}, {}", browseColumnMapper->mapQuoted(BrowseColumn::UpnpClass), orderByCode());
+            orderBy = fmt::format(" ORDER BY {}", fmt::join(orderByCode(), ", "));
         } else if (!getContainers && getItems) {
-            where.push_back(fmt::format("({0} & {1}) = {1}", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType), OBJECT_TYPE_ITEM));
-            orderBy = fmt::format(" ORDER BY {}", orderByCode());
+            where.push_back(fmt::format("({0} & {1:d}) = {1:d}", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType), OBJECT_TYPE_ITEM));
+            orderBy = fmt::format(" ORDER BY {}", fmt::join(orderByCode(), ", "));
         } else {
             // ORDER BY (object_type = OBJECT_TYPE_CONTAINER) ensures that containers are returned before items
-            // Sorting by UpnpClass will avoid mixing different types of containers
-            orderBy = fmt::format(" ORDER BY ({} = {}) DESC, {}, {}", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType), OBJECT_TYPE_CONTAINER,
-                browseColumnMapper->mapQuoted(BrowseColumn::UpnpClass), orderByCode());
+            auto orderQb = orderByCode();
+            orderQb.insert(orderQb.begin(), fmt::format("({} = {:d}) DESC", browseColumnMapper->mapQuoted(BrowseColumn::ObjectType), OBJECT_TYPE_CONTAINER));
+            orderBy = fmt::format(" ORDER BY {}", fmt::join(orderQb, ", "));
         }
 
         limit = limitCode(param.getStartingIndex(), param.getRequestedCount());

@@ -255,6 +255,8 @@ private:
     bool dynamicContentEnabled;
     /// @brief Is sorting by sort_key enabled in config
     bool sortKeyEnabled;
+    /// @brief Default sort statement applied for all types
+    std::string sortDefault;
 
     std::shared_ptr<CdsObject> createObjectFromRow(const std::string& group, const std::unique_ptr<SQLRow>& row);
     std::shared_ptr<CdsObject> createObjectFromSearchRow(const std::string& group, const std::unique_ptr<SQLRow>& row);

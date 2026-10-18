@@ -2538,6 +2538,7 @@ apply the policy to existing library entries.
    :type: :confval:`Boolean`
    :required: false
    :default: ``no``
+.. versionadded:: HEAD
 
 With ``no`` or an omitted attribute, the existing TagLib property selection is
 unchanged. With ``yes``, Gerbera reads the integer ``tmpo`` atom and the iTunes
@@ -2557,6 +2558,7 @@ other configured metadata readers retain their normal fallback behaviour.
    :type: enum
    :required: false
    :default: ``bpm_tag``
+.. versionadded:: HEAD
 
 Allowed values are ``tmpo`` and ``bpm_tag``. This option only affects MP4 BPM
 selection when :confval:`prefer_highest_bpm_accuracy` is ``yes`` and both valid

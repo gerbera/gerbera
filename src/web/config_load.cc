@@ -752,7 +752,7 @@ void Web::ConfigLoad::writeTranscoding(Json::Value& values)
             cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS }),
             cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS, ClientConfig::mapFlags(filter->getClientFlags()), cs);
         addValue(values,
-            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTFLAGS }),
+            cs->getItemPath(indexList, { ConfigVal::A_TRANSCODING_MIMETYPE_FILTER, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTWITHOUT }),
             cs->option, ConfigVal::A_TRANSCODING_PROFILES_PROFLE_CLIENTWITHOUT, filter->matchesWithOut(), cs);
 
         if (filter->getTranscodingProfile())

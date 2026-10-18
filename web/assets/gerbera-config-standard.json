@@ -143,6 +143,11 @@
           "editable": false
         },
         {
+          "item": "/server/storage/attribute::sort-default",
+          "caption": "Default Sort clause in UPnP syntax",
+          "editable": false
+        },
+        {
           "item": "/server/storage/sqlite3",
           "caption": "SQLite",
           "type": "Element",

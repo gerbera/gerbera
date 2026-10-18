@@ -506,6 +506,7 @@ void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
         { ConfigVal::SERVER_STORAGE_SQLITE_DATABASE_FILE, ConfigLevel::Base },
         { ConfigVal::SERVER_STORAGE_USE_TRANSACTIONS, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_SORT_KEY_ENABLED, ConfigLevel::Example },
+        { ConfigVal::SERVER_STORAGE_SORT_DEFAULT, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_STRING_LIMIT, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_SQLITE_SYNCHRONOUS, ConfigLevel::Example },
         { ConfigVal::SERVER_STORAGE_SQLITE_JOURNALMODE, ConfigLevel::Example },

@@ -148,7 +148,7 @@
         in an SSDP advertisement being sent every second.
     -->
     <alive>180</alive>
-    <storage use-transactions="no" enable-sort-key="yes" string-limit="255">
+    <storage use-transactions="no" enable-sort-key="yes" sort-default="" string-limit="255">
       <sqlite3 enabled="yes">
         <database-file>gerbera.db</database-file>
         <synchronous>off</synchronous>

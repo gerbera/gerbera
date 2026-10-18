@@ -914,8 +914,22 @@ if you can reproduce the issue.
 
        enable-sort-key="no"
 
-Switches default sorting by property of ``dc_title`` to ``sort_key``. The sort key is derived from the filename by
-expanding all numbers to fixed digits.
+Switches default sorting by property of ``dc_title`` to ``sort_key``.
+The sort key is derived from the filename by expanding all numbers to fixed
+digits.
+
+.. confval:: sort-default
+   :type: :confval:`String`
+   :required: false
+   :default: unset (builtin functionality equals ``+upnp:class,+sort_key``)
+
+   .. versionadded:: HEAD
+   .. code-block:: xml
+
+       sort-default="+sort_key"
+
+Set sorting statement (in UPnP search syntax) to use when no other sorting
+is selected, e.g. by the client app.
 
 .. confval:: string-limit
    :type: :confval:`Integer`
