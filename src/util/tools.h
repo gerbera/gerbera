@@ -36,6 +36,7 @@
 #include <algorithm>
 #include <cstdint>
 #include <map>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -102,6 +103,10 @@ std::int64_t stolString(const std::string& str, std::int64_t def = 0, int base =
 unsigned long stoulString(const std::string& str, unsigned long def = 0, int base = 10);
 /// @brief convert string to maximum width unsigned integer
 uintmax_t stoumaxString(const std::string& str, uintmax_t def = 0, int base = 10);
+
+/// @brief Parse a complete, finite, positive number using the classic locale.
+/// @return std::nullopt for malformed, nonpositive or nonfinite input.
+std::optional<double> parsePositiveDouble(const std::string& text);
 
 /// @brief Used to replace potential multiple following //../ with single /
 void reduceString(std::string& str, char ch);

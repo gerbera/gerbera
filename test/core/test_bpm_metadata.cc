@@ -12,10 +12,12 @@
 #include "cds/cds_item.h"
 #include "cds/cds_resource.h"
 #include "config/config_definition.h"
+#include "config/config_option_enum.h"
 #include "config/result/directory_tweak.h"
 #include "context.h"
 #include "iohandler/io_handler.h"
 #include "metadata/ffmpeg_handler.h"
+#include "metadata/metadata_enums.h"
 #include "metadata/metadata_service.h"
 #include "metadata/taglib_handler.h"
 #include "util/mime.h"
@@ -35,7 +37,7 @@ namespace {
 class BpmConfig final : public ConfigMock {
 public:
     bool preferAccuracy = true;
-    std::string preferConflict = "bpm_tag";
+    BpmSource preferConflict = BpmSource::BpmTag;
 
     std::string getOption(ConfigVal option) const override
     {
@@ -43,8 +45,6 @@ public:
         if (option == ConfigVal::IMPORT_MAGIC_FILE)
             return {};
 #endif
-        if (option == ConfigVal::IMPORT_LIBOPTS_ID3_PREFER_AMBIGOUS_BPM_VALUE)
-            return preferConflict;
         if (option == ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP)
             return "; ";
         if (option == ConfigVal::IMPORT_LIBOPTS_ENTRY_LEGACY_SEP)
@@ -59,6 +59,13 @@ public:
         if (option == ConfigVal::IMPORT_LIBOPTS_ID3_ENABLED)
             return true;
         return ConfigMock::getBoolOption(option);
+    }
+
+    std::shared_ptr<ConfigOption> getConfigOption(ConfigVal option) const override
+    {
+        if (option == ConfigVal::IMPORT_LIBOPTS_ID3_PREFER_AMBIGOUS_BPM_VALUE)
+            return std::make_shared<EnumOption<BpmSource>>(preferConflict, "");
+        return ConfigMock::getConfigOption(option);
     }
 
     std::map<std::string, std::string> getDictionaryOption(ConfigVal option) const override
@@ -79,7 +86,7 @@ public:
 struct BpmCase {
     const char* name;
     bool enabled;
-    const char* conflict;
+    BpmSource conflict;
     int tmpo;
     const char* bpm;
     const char* expected;
@@ -174,7 +181,7 @@ TEST_P(BpmMetadataTest, SelectsMp4SourcesForAudioAndVideo)
     }
 }
 
-INSTANTIATE_TEST_SUITE_P(Sources, BpmMetadataTest, ::testing::Values(BpmCase { "Disabled", false, "bpm_tag", 123, "123.5", "123" }, BpmCase { "DisabledConflict", false, "bpm_tag", 123, "128.5", "123" }, BpmCase { "Fractional", true, "bpm_tag", 123, "123.5", "123.5" }, BpmCase { "FractionalDespiteTmpoPreference", true, "tmpo", 123, "123.5", "123.5" }, BpmCase { "RoundedUp", true, "tmpo", 124, "123.5", "123.5" }, BpmCase { "BoundaryBelow", true, "tmpo", 123, "123.999", "123.999" }, BpmCase { "BoundaryAbove", true, "tmpo", 123, "122.001", "122.001" }, BpmCase { "ConflictTag", true, "bpm_tag", 123, "128.5", "128.5" }, BpmCase { "ConflictTmpo", true, "tmpo", 123, "128.5", "123" }, BpmCase { "ExactlyOneTag", true, "bpm_tag", 123, "124", "124" }, BpmCase { "ExactlyOneTmpo", true, "tmpo", 123, "124", "123" }, BpmCase { "ExactlyOneLowerTmpo", true, "tmpo", 123, "122", "123" }, BpmCase { "HalfTempo", true, "tmpo", 120, "60", "120" }, BpmCase { "DoubleTempo", true, "bpm_tag", 120, "240", "240" }, BpmCase { "EqualValues", true, "tmpo", 123, "123.000", "123.000" }, BpmCase { "TmpoOnly", true, "bpm_tag", 123, "", "123" }, BpmCase { "TagOnly", true, "tmpo", -1, "123.5", "123.5" }, BpmCase { "Neither", true, "bpm_tag", -1, "", "" }, BpmCase { "ZeroTmpo", true, "tmpo", 0, "123.5", "123.5" }, BpmCase { "InvalidTag", true, "bpm_tag", 123, "invalid", "123" }, BpmCase { "TrailingText", true, "bpm_tag", 123, "123.5 BPM", "123" }, BpmCase { "ZeroTag", true, "bpm_tag", 123, "0", "123" }, BpmCase { "NegativeTag", true, "bpm_tag", 123, "-123.5", "123" }, BpmCase { "NanTag", true, "bpm_tag", 123, "NaN", "123" }, BpmCase { "InfiniteTag", true, "bpm_tag", 123, "inf", "123" }, BpmCase { "OverflowTag", true, "bpm_tag", 123, "1e999", "123" }, BpmCase { "DecimalComma", true, "bpm_tag", 123, "123,5", "123" }, BpmCase { "Whitespace", true, "bpm_tag", 123, "  123.5  ", "123.5" }, BpmCase { "OnlyInvalid", true, "bpm_tag", -1, "invalid", "" }),
+INSTANTIATE_TEST_SUITE_P(Sources, BpmMetadataTest, ::testing::Values(BpmCase { "Disabled", false, BpmSource::BpmTag, 123, "123.5", "123" }, BpmCase { "DisabledConflict", false, BpmSource::BpmTag, 123, "128.5", "123" }, BpmCase { "Fractional", true, BpmSource::BpmTag, 123, "123.5", "123.5" }, BpmCase { "FractionalDespiteTmpoPreference", true, BpmSource::Tmpo, 123, "123.5", "123.5" }, BpmCase { "RoundedUp", true, BpmSource::Tmpo, 124, "123.5", "123.5" }, BpmCase { "BoundaryBelow", true, BpmSource::Tmpo, 123, "123.999", "123.999" }, BpmCase { "BoundaryAbove", true, BpmSource::Tmpo, 123, "122.001", "122.001" }, BpmCase { "ConflictTag", true, BpmSource::BpmTag, 123, "128.5", "128.5" }, BpmCase { "ConflictTmpo", true, BpmSource::Tmpo, 123, "128.5", "123" }, BpmCase { "ExactlyOneTag", true, BpmSource::BpmTag, 123, "124", "124" }, BpmCase { "ExactlyOneTmpo", true, BpmSource::Tmpo, 123, "124", "123" }, BpmCase { "ExactlyOneLowerTmpo", true, BpmSource::Tmpo, 123, "122", "123" }, BpmCase { "HalfTempo", true, BpmSource::Tmpo, 120, "60", "120" }, BpmCase { "DoubleTempo", true, BpmSource::BpmTag, 120, "240", "240" }, BpmCase { "EqualValues", true, BpmSource::Tmpo, 123, "123.000", "123.000" }, BpmCase { "TmpoOnly", true, BpmSource::BpmTag, 123, "", "123" }, BpmCase { "TagOnly", true, BpmSource::Tmpo, -1, "123.5", "123.5" }, BpmCase { "Neither", true, BpmSource::BpmTag, -1, "", "" }, BpmCase { "ZeroTmpo", true, BpmSource::Tmpo, 0, "123.5", "123.5" }, BpmCase { "InvalidTag", true, BpmSource::BpmTag, 123, "invalid", "123" }, BpmCase { "TrailingText", true, BpmSource::BpmTag, 123, "123.5 BPM", "123" }, BpmCase { "ZeroTag", true, BpmSource::BpmTag, 123, "0", "123" }, BpmCase { "NegativeTag", true, BpmSource::BpmTag, 123, "-123.5", "123" }, BpmCase { "NanTag", true, BpmSource::BpmTag, 123, "NaN", "123" }, BpmCase { "InfiniteTag", true, BpmSource::BpmTag, 123, "inf", "123" }, BpmCase { "OverflowTag", true, BpmSource::BpmTag, 123, "1e999", "123" }, BpmCase { "DecimalComma", true, BpmSource::BpmTag, 123, "123,5", "123" }, BpmCase { "Whitespace", true, BpmSource::BpmTag, 123, "  123.5  ", "123.5" }, BpmCase { "OnlyInvalid", true, BpmSource::BpmTag, -1, "invalid", "" }),
     [](const auto& info) { return info.param.name; });
 
 TEST_F(BpmMetadataTest, MatchesLowercaseFreeformName)
@@ -190,7 +197,7 @@ TEST_F(BpmMetadataTest, LeavesNonMp4BpmAndMetadataUnchanged)
     auto previous = makeItem("fixtures/multiple-genres.wmv", "video/x-ms-wmv");
     read(previous);
     config->preferAccuracy = true;
-    config->preferConflict = "tmpo";
+    config->preferConflict = BpmSource::Tmpo;
     auto current = makeItem("fixtures/multiple-genres.wmv", "video/x-ms-wmv");
     read(current);
     EXPECT_EQ(current->getMetaData("upnp:beatsPerMinute"), "123.5");
@@ -263,7 +270,7 @@ TEST_F(BpmMetadataTest, ReimportReplacesPreviousBpm)
 #if defined(HAVE_TAGLIB) && defined(HAVE_FFMPEG)
 TEST_F(BpmMetadataTest, LaterFfmpegReaderPreservesSelectedConflictSource)
 {
-    config->preferConflict = "tmpo";
+    config->preferConflict = BpmSource::Tmpo;
     auto item = makeItem(makeFile("bpm-accuracy.mp4", 123, "128.5"), "video/mp4");
     read(item);
     // Enable FFmpeg only after the TagLib selection has been made.

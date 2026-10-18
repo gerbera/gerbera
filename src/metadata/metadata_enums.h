@@ -70,6 +70,12 @@
 #define DC_DATE "dc:date"
 #define DC_TITLE "dc:title"
 
+/// @brief Preferred source when MP4 BPM values conflict.
+enum class BpmSource {
+    BpmTag,
+    Tmpo,
+};
+
 /// @brief Known metadata fields
 enum class MetadataFields {
     /// @brief dc:title

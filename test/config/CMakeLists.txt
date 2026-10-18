@@ -26,6 +26,7 @@ add_executable(
     testconfig
     main.cc #
     test_configgenerator.cc #
+    test_configenum.cc #
     test_configmanager.cc #
     test_transcoding.cc #
 )

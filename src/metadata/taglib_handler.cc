@@ -38,6 +38,7 @@
 
 #include "cds/cds_item.h"
 #include "config/config.h"
+#include "config/config_option_enum.h"
 #include "config/config_val.h"
 #include "exceptions.h"
 #include "iohandler/mem_io_handler.h"
@@ -67,9 +68,7 @@
 #include <wavpackfile.h>
 
 #include <cmath>
-#include <locale>
 #include <optional>
-#include <sstream>
 #include <utility>
 
 #if TAGLIB_MAJOR_VERSION >= 2
@@ -84,18 +83,7 @@
 #endif
 #endif
 
-namespace {
-std::optional<double> parseBpm(const std::string& text)
-{
-    std::istringstream input(text);
-    input.imbue(std::locale::classic());
-    double value;
-    if (!(input >> std::noskipws >> value) || !input.eof() || !std::isfinite(value) || value <= 0)
-        return std::nullopt;
-    return value;
-}
-
-std::string readMp4Bpm(const TagLib::MP4::Tag& tag, bool preferTmpo)
+static std::string readMp4Bpm(const TagLib::MP4::Tag& tag, BpmSource preferredSource)
 {
     const auto tmpo = tag.contains("tmpo") ? tag.item("tmpo").toInt() : 0;
     std::optional<double> bpm;
@@ -106,7 +94,7 @@ std::string readMp4Bpm(const TagLib::MP4::Tag& tag, bool preferTmpo)
         for (const auto& entry : value.toStringList()) {
             auto text = entry.to8Bit(true);
             trimStringInPlace(text);
-            if (auto parsed = parseBpm(text)) {
+            if (auto parsed = parsePositiveDouble(text)) {
                 bpm = parsed;
                 bpmText = std::move(text);
                 break;
@@ -118,10 +106,9 @@ std::string readMp4Bpm(const TagLib::MP4::Tag& tag, bool preferTmpo)
     if (!bpm)
         return tmpo > 0 ? std::to_string(tmpo) : std::string {};
     // Less than one BPM can be caused by rounding or truncation of integer tmpo.
-    if (tmpo > 0 && std::abs(*bpm - tmpo) >= 1.0 && preferTmpo)
+    if (tmpo > 0 && std::abs(*bpm - tmpo) >= 1.0 && preferredSource == BpmSource::Tmpo)
         return std::to_string(tmpo);
     return bpmText;
-}
 }
 
 class GerberaTagLibDebugListener : public TagLib::DebugListener {
@@ -158,7 +145,7 @@ TagLibHandler::TagLibHandler(const std::shared_ptr<Context>& context)
     if (legacyEntrySeparator.empty())
         legacyEntrySeparator = "\n";
     preferHighestBpmAccuracy = this->config->getBoolOption(ConfigVal::IMPORT_LIBOPTS_ID3_PREFER_HIGHEST_BPM_ACCURACY);
-    preferAmbigousBpmTmpo = this->config->getOption(ConfigVal::IMPORT_LIBOPTS_ID3_PREFER_AMBIGOUS_BPM_VALUE) == "tmpo";
+    preferAmbigousBpmValue = EnumOption<BpmSource>::getEnumOption(this->config, ConfigVal::IMPORT_LIBOPTS_ID3_PREFER_AMBIGOUS_BPM_VALUE);
 }
 
 bool TagLibHandler::isSupported(
@@ -286,7 +273,7 @@ void TagLibHandler::addSpecialFields(
         if (preferHighestBpmAccuracy && key == "BPM") {
             const auto* mp4 = dynamic_cast<const TagLib::MP4::File*>(&file);
             if (mp4 && mp4->hasMP4Tag()) {
-                const auto bpm = readMp4Bpm(*mp4->tag(), preferAmbigousBpmTmpo);
+                const auto bpm = readMp4Bpm(*mp4->tag(), preferAmbigousBpmValue);
                 list.clear();
                 if (bpm.empty())
                     continue;

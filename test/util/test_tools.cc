@@ -31,6 +31,36 @@
 #include <fmt/chrono.h>
 #include <fmt/core.h>
 #include <gtest/gtest.h>
+#include <locale>
+
+TEST(ToolsTest, ParsesPositiveDouble)
+{
+    for (const auto& [text, expected] : std::map<std::string, double> { { "123", 123 }, { "123.5", 123.5 }, { ".5", 0.5 }, { "+2.5", 2.5 }, { "1e2", 100 } }) {
+        SCOPED_TRACE(text);
+        EXPECT_EQ(parsePositiveDouble(text), expected);
+    }
+}
+
+TEST(ToolsTest, RejectsInvalidPositiveDouble)
+{
+    for (const auto* text : { "", "0", "-1", "NaN", "inf", "1e999", "123,5", "123.5 BPM", " 1", "1 " }) {
+        SCOPED_TRACE(text);
+        EXPECT_EQ(parsePositiveDouble(text), std::nullopt);
+    }
+}
+
+TEST(ToolsTest, ParsesPositiveDoubleIndependentlyOfGlobalLocale)
+{
+    class DecimalComma : public std::numpunct<char> {
+        char do_decimal_point() const override { return ','; }
+    };
+    auto previous = std::locale::global(std::locale(std::locale::classic(), new DecimalComma));
+    const auto dot = parsePositiveDouble("123.5");
+    const auto comma = parsePositiveDouble("123,5");
+    std::locale::global(previous);
+    EXPECT_EQ(dot, 123.5);
+    EXPECT_EQ(comma, std::nullopt);
+}
 
 TEST(ToolsTest, simpleDate)
 {

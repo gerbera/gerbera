@@ -2554,7 +2554,7 @@ automatically. If neither source is valid, this TagLib mapping adds no BPM value
 other configured metadata readers retain their normal fallback behaviour.
 
 .. confval:: prefer_ambigous_bpm_value
-   :type: :confval:`String`
+   :type: enum
    :required: false
    :default: ``bpm_tag``
 
