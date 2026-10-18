@@ -287,6 +287,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         std::make_shared<ConfigUIntSetup>(ConfigVal::SERVER_STORAGE_STRING_LIMIT,
             "/server/storage/attribute::string-limit", "config-server.html#confval-string-limit",
             255),
+        std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_SORT_DEFAULT,
+            "/server/storage/attribute::sort-default", "config-server.html#confval-sort-default"),
 
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_STORAGE_DRIVER,
             "/server/storage/driver", "config-server.html#storage"),
