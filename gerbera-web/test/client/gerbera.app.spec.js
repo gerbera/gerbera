@@ -22,7 +22,7 @@
 */
 import { Auth } from '../../../web/js/gerbera-auth.module';
 import { Autoscan } from '../../../web/js/gerbera-autoscan.module';
-import { GerberaApp } from '../../../web/js/gerbera-app.module';
+import { App, GerberaApp } from '../../../web/js/gerbera-app.module';
 import { Items } from '../../../web/js/gerbera-items.module';
 import { Menu } from '../../../web/js/gerbera-menu.module';
 import { Trail } from '../../../web/js/gerbera-trail.module';
@@ -36,6 +36,7 @@ import uiDisabled from './fixtures/ui-disabled';
 describe('Gerbera UI App', () => {
   let lsSpy;
   beforeEach(() => {
+    GerberaApp.pageInfo = new App().pageInfo;
     lsSpy = spyOn(window.localStorage, 'getItem').and.callFake((name) => {
       return;
     });

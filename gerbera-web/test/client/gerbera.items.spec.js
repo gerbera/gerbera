@@ -21,7 +21,7 @@
     $Id$
 */
 /* global fixture */
-import { GerberaApp } from "../../../web/js/gerbera-app.module";
+import { App, GerberaApp } from "../../../web/js/gerbera-app.module";
 import { Items, BrowseItemView, SearchItemView, FileItemView } from '../../../web/js/gerbera-items.module';
 import { Trail } from "../../../web/js/gerbera-trail.module";
 import { Updates } from "../../../web/js/gerbera-updates.module";
@@ -43,6 +43,7 @@ describe('Gerbera Items', () => {
   let lsSpy;
   let viewFactoryData;
   beforeEach(() => {
+    GerberaApp.pageInfo = new App().pageInfo;
     GerberaApp.serverConfig = mockConfig.config;
     fixture.setBase('test/client/fixtures');
     fixture.load('index.html');
