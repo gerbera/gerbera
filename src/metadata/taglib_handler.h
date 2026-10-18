@@ -47,6 +47,7 @@
 // forward declarations
 class CdsItem;
 class StringConverter;
+enum class BpmSource;
 
 /// @brief This class is responsible for reading id3 or ogg tags metadata using taglib
 class TagLibHandler : public MediaMetadataHandler {
@@ -76,7 +77,7 @@ private:
     std::string entrySeparator;
     std::string legacyEntrySeparator;
     bool preferHighestBpmAccuracy;
-    bool preferAmbigousBpmTmpo;
+    BpmSource preferAmbigousBpmValue;
 
     /// @brief add metadata field from file content
     void addField(

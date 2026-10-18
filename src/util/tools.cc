@@ -39,7 +39,9 @@
 
 #include <algorithm>
 #include <cinttypes>
+#include <cmath>
 #include <cstring>
+#include <locale>
 #include <numeric>
 #include <queue>
 #include <regex>
@@ -176,6 +178,16 @@ std::int64_t stolString(const std::string& str, std::int64_t def, int base)
         log_error("{} (input {})", EX(ex), str);
     }
     return def;
+}
+
+std::optional<double> parsePositiveDouble(const std::string& text)
+{
+    std::istringstream input(text);
+    input.imbue(std::locale::classic());
+    double value;
+    if (!(input >> std::noskipws >> value) || !input.eof() || !std::isfinite(value) || value <= 0)
+        return std::nullopt;
+    return value;
 }
 
 unsigned long stoulString(const std::string& str, unsigned long def, int base)
