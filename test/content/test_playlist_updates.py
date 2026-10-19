@@ -107,7 +107,9 @@ class Fixture:
             return node
 
         set_value("server/home", root)
-        set_value("server/webroot", args.source_root / "web")
+        web = root / "web"
+        web.mkdir()
+        set_value("server/webroot", web)
         set_value("server/storage/sqlite3/database-file", root / "db.sqlite")
         set_value(
             "server/storage/sqlite3/init-sql-file",
