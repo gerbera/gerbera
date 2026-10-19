@@ -85,3 +85,21 @@ Adding a new test to Gerbera is easy.  The process amounts to a few steps:
 3. Create a `main.cc` Google Test file
 4. Add your files to your `CMakeLists.txt` within your `/test/test_myfeature` folder
 4. Add sub-directory `test_myfeature` to the parent `/test/CMakeLists.txt` file
+
+## XML playlist integration
+
+Native `XmlPlaylistTest` cases check WPL/XSPF structure, namespace resolution,
+URI handling and the explicit fixture expectations. `XmlPlaylistIntegration`
+uses temporary media and real Gerbera processes in both import modes; it checks
+both playlist views, complete resources, legacy formats, rescans and restart.
+The integration case requires Linux, JavaScript, FFmpeg support and Python 3.
+It uses its own database, webroot and SQL paths; installation is not required.
+
+```
+ctest --test-dir build -R XmlPlaylist --output-on-failure
+python3 test/content/test_xml_playlists.py --binary build/gerbera --source-root . --work-directory /tmp/grb-x
+```
+
+The optional work directory must be new. Keep it after a manual run to inspect
+server logs and fixture files. HTTP fixture URLs use example.invalid and are
+never fetched. Real music libraries and server configuration are not modified.
