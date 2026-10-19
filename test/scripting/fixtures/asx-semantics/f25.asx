@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ASX VERSION="3.0"><TITLE>Root title</TITLE><AUTHOR>Root author</AUTHOR><COPYRIGHT>Root rights</COPYRIGHT><ENTRY><TITLE>Entry title</TITLE><AUTHOR>Entry author</AUTHOR><ABSTRACT>Entry description</ABSTRACT><REF HREF="media/a.wav"/></ENTRY><ENTRY><REF HREF="media/b.wav"/></ENTRY></ASX>

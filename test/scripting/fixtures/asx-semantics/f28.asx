@@ -1,0 +1,2 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ASX VERSION="3.0"><ENTRY><REF HREF="media/a.wav"/></ENTRY><EVENT NAME="x"><ENTRY><REF HREF="media/b.wav"/></ENTRY></EVENT><BANNER HREF="https://presentation.example.invalid/image"/><LOGURL HREF="https://log.example.invalid/"/></ASX>
