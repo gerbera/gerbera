@@ -25,6 +25,7 @@
 add_executable(
     testutil
     main.cc #
+    test_m3u_reader.cc #
     test_jpeg_res.cc #
     test_tools.cc #
     test_upnp_clients.cc #

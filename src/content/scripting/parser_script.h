@@ -55,7 +55,7 @@ duk_ret_t jsUpdateCdsObject(duk_context* ctx);
 class ParserScript : public Script {
 public:
     /// @brief read next non-empty line from file
-    std::pair<std::string, bool> readLine();
+    virtual std::pair<std::string, bool> readLine();
     /// @brief read next non-empty xml tag from file
     pugi::xml_node& readXml(int direction);
 
