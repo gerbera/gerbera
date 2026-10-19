@@ -63,7 +63,6 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     log_debug("Checking metafile {} for {}...", path.string(), obj->getLocation().string());
-    GrbFile file(path);
     pugi::xml_parse_result result = xmlDoc.load_file(path.c_str());
     if (result.status == pugi::xml_parse_status::status_ok) {
         root = xmlDoc.document_element();
@@ -74,7 +73,7 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     try {
-        prepareFile(file);
+        prepareFile(path);
         call(obj, nullptr, metafileFunction, path, "");
     } catch (const std::runtime_error&) {
         cleanUp();

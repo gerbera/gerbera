@@ -180,7 +180,6 @@ void PlaylistParserScript::processPlaylistObject(
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     log_debug("Checking playlist {} ...", obj->getLocation().string());
-    GrbFile file(item->getLocation());
     if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
         pugi::xml_parse_result result = xmlDoc.load_file(item->getLocation().c_str());
         if (result.status != pugi::xml_parse_status::status_ok) {
@@ -198,7 +197,7 @@ void PlaylistParserScript::processPlaylistObject(
             auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
             if (mode != TextFileCharset::Default && toLower(item->getLocation().extension().string()) == ".m3u8")
                 mode = TextFileCharset::Utf8;
-            prepareFile(file, mode);
+            prepareFile(item->getLocation(), mode);
         }
         call(obj, nullptr, playlistFunction, rootPath, "");
     } catch (...) {

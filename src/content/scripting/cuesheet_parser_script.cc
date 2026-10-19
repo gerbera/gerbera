@@ -174,7 +174,6 @@ std::vector<int> CuesheetParserScript::processObject(
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     log_debug("Checking cuesheet {} ...", obj->getLocation().string());
-    GrbFile file(item->getLocation());
 
     currentObjectID = item->getID();
     auto parent = item->getParentID() != INVALID_OBJECT_ID
@@ -185,7 +184,7 @@ std::vector<int> CuesheetParserScript::processObject(
     std::vector<int> result;
 
     try {
-        prepareFile(file);
+        prepareFile(item->getLocation());
         result = call(obj, parent, cuesheetFunction, path, "");
     } catch (const std::runtime_error&) {
         log_error("Failed cuesheet {} ({})...", obj->getLocation().string(), obj->getID());
