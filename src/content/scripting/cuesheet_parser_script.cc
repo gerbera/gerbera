@@ -164,7 +164,7 @@ std::vector<int> CuesheetParserScript::processObject(
     const fs::path& path)
 {
     log_debug("start");
-    if (currentObjectID != INVALID_OBJECT_ID || currentHandle || currentLine) {
+    if (currentObjectID != INVALID_OBJECT_ID || currentFile) {
         throw_std_runtime_error("Recursion in cuesheet not allowed");
     }
 
@@ -175,19 +175,17 @@ std::vector<int> CuesheetParserScript::processObject(
 
     log_debug("Checking cuesheet {} ...", obj->getLocation().string());
     GrbFile file(item->getLocation());
-    currentHandle = file.open("r");
 
     currentObjectID = item->getID();
     auto parent = item->getParentID() != INVALID_OBJECT_ID
         ? std::dynamic_pointer_cast<CdsContainer>(database->loadObject(item->getParentID()))
         : nullptr;
-    currentLine = new char[ONE_TEXTLINE_BYTES];
-    currentLine[0] = '\0';
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     std::vector<int> result;
 
     try {
+        prepareFile(file);
         result = call(obj, parent, cuesheetFunction, path, "");
     } catch (const std::runtime_error&) {
         log_error("Failed cuesheet {} ({})...", obj->getLocation().string(), obj->getID());

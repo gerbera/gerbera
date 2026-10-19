@@ -51,8 +51,6 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
-#include <fstream>
-
 PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
     : ParserScript(content, parent, "playlist", "pls", true)
 {
@@ -60,21 +58,7 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& conte
     linkObjects = config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS);
     followSymlinks = config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
     hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
-    m3uCharset = EnumOption<M3uCharset>::getEnumOption(config, ConfigVal::IMPORT_SCRIPTING_PLAYLIST_M3U_CHARSET);
-}
-
-std::pair<std::string, bool> PlaylistParserScript::readLine()
-{
-    if (!m3uReader)
-        return ParserScript::readLine();
-    if (currentTask && !currentTask->isValid())
-        return { {}, false };
-    while (auto line = m3uReader->readLine()) {
-        auto result = doTrim ? trimString(*line) : *line;
-        if (!result.empty())
-            return { result, true };
-    }
-    return { {}, false };
+    charsetMode = EnumOption<TextFileCharset>::getEnumOption(config, ConfigVal::IMPORT_PLAYLIST_CHARSET_MODE);
 }
 
 std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(
@@ -186,7 +170,7 @@ void PlaylistParserScript::processPlaylistObject(
     std::shared_ptr<GenericTask> task,
     const std::string& rootPath)
 {
-    if (currentObjectID != INVALID_OBJECT_ID || currentHandle || currentLine) {
+    if (currentObjectID != INVALID_OBJECT_ID || currentFile) {
         throw_std_runtime_error("Recursion in playlists not allowed");
     }
 
@@ -197,10 +181,7 @@ void PlaylistParserScript::processPlaylistObject(
 
     log_debug("Checking playlist {} ...", obj->getLocation().string());
     GrbFile file(item->getLocation());
-    std::ifstream m3uInput;
-    if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
-        currentHandle = file.open("r");
-    } else {
+    if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
         pugi::xml_parse_result result = xmlDoc.load_file(item->getLocation().c_str());
         if (result.status != pugi::xml_parse_status::status_ok) {
             throw ConfigParseException(result.description());
@@ -210,37 +191,21 @@ void PlaylistParserScript::processPlaylistObject(
 
     currentTask = std::move(task);
     currentObjectID = item->getID();
-    currentLine = new char[ONE_TEXTLINE_BYTES];
-    currentLine[0] = '\0';
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
-    auto originalConverter = sc;
     try {
-        if (m3uCharset != M3uCharset::Default && item->getMimeType() == "audio/x-mpegurl") {
-            m3uInput.open(item->getLocation(), std::ios::binary);
-            if (!m3uInput)
-                throw_std_runtime_error("Cannot open M3U playlist {}", item->getLocation().string());
-            try {
-                m3uReader = std::make_unique<M3uReader>(m3uInput, m3uCharset,
-                    toLower(item->getLocation().extension().string()) == ".m3u8",
-                    [this]() { return !currentTask || currentTask->isValid(); });
-            } catch (const std::runtime_error& ex) {
-                throw_std_runtime_error("Cannot decode playlist {}: {}", item->getLocation().string(), EX(ex));
-            }
-            // Lines are already UTF-8, including EXTINF metadata; do not decode them twice.
-            sc = converterManager->i2i();
-            log_debug("Reading {} as {}", item->getLocation().string(), m3uReader->getCharset());
+        if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
+            auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
+            if (mode != TextFileCharset::Default && toLower(item->getLocation().extension().string()) == ".m3u8")
+                mode = TextFileCharset::Utf8;
+            prepareFile(file, mode);
         }
         call(obj, nullptr, playlistFunction, rootPath, "");
     } catch (...) {
-        sc = originalConverter;
-        m3uReader.reset();
         cleanUp();
         throw;
     }
 
-    sc = originalConverter;
-    m3uReader.reset();
     log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
     cleanUp();
 }

@@ -720,15 +720,6 @@
             <xs:simpleContent>
                 <xs:extension base="xs:string">
                     <xs:attribute name="create-link" type="boolean" default="yes"/>
-                    <xs:attribute name="m3u-charset">
-                        <xs:simpleType>
-                            <xs:restriction base="xs:string">
-                                <xs:enumeration value="auto"/>
-                                <xs:enumeration value="utf-8"/>
-                                <xs:enumeration value="windows-1252"/>
-                            </xs:restriction>
-                        </xs:simpleType>
-                    </xs:attribute>
                 </xs:extension>
             </xs:simpleContent>
         </xs:complexType>
@@ -938,7 +929,23 @@
 
     <xs:element name="metadata-charset" type="xs:string"/>
 
-    <xs:element name="playlist-charset" type="xs:string"/>
+    <xs:element name="playlist-charset">
+        <xs:complexType>
+            <xs:simpleContent>
+                <xs:extension base="xs:string">
+                    <xs:attribute name="mode">
+                        <xs:simpleType>
+                            <xs:restriction base="xs:string">
+                                <xs:enumeration value="auto"/>
+                                <xs:enumeration value="utf-8"/>
+                                <xs:enumeration value="windows-1252"/>
+                            </xs:restriction>
+                        </xs:simpleType>
+                    </xs:attribute>
+                </xs:extension>
+            </xs:simpleContent>
+        </xs:complexType>
+    </xs:element>
 
     <xs:element name="magic-file" type="xs:string"/>
 

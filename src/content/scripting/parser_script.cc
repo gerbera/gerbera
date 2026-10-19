@@ -214,30 +214,40 @@ pugi::xml_node& ParserScript::readXml(int direction)
     return nullNode;
 }
 
+void ParserScript::prepareFile(GrbFile& file, TextFileCharset charset)
+{
+    currentFile = &file;
+    file.open(charset == TextFileCharset::Default ? "r" : "rb");
+    file.setTextCharset(charset, charset == TextFileCharset::Default ? std::function<bool()>() : [this]() { return !currentTask || currentTask->isValid(); });
+    if (charset != TextFileCharset::Default) {
+        savedConverter = sc;
+        sc = converterManager->i2i();
+    }
+}
+
 std::pair<std::string, bool> ParserScript::readLine()
 {
-    if (!currentHandle)
+    if (!currentFile)
         throw_std_runtime_error("readLine not yet setup for use");
-
     if (currentTask && !currentTask->isValid())
         return { {}, false };
-
-    while (true) {
-        log_debug("Scanning {}", currentLine);
-        if (!fgets(currentLine, ONE_TEXTLINE_BYTES, currentHandle))
-            return { {}, false };
-        auto ret = doTrim ? trimString(currentLine) : currentLine;
-        if (!ret.empty())
-            return { ret, true };
+    auto limit = currentFile->getTextCharset() == TextFileCharset::Default ? ONE_TEXTLINE_BYTES - 1 : 0;
+    while (auto line = currentFile->readLine(limit)) {
+        auto text = currentFile->getTextCharset() == TextFileCharset::Default ? std::string(line->c_str()) : *line;
+        auto result = doTrim ? trimString(text) : text;
+        if (!result.empty())
+            return { result, true };
     }
+    return { {}, false };
 }
 
 void ParserScript::cleanUp()
 {
-    currentHandle = nullptr;
-
-    delete[] currentLine;
-    currentLine = nullptr;
+    currentFile = nullptr;
+    if (savedConverter) {
+        sc = savedConverter;
+        savedConverter.reset();
+    }
     xmlDoc.reset();
     root = nullNode;
 

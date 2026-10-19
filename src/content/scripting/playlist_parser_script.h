@@ -35,12 +35,10 @@
 #define __PLAYLIST_PARSER_SCRIPT_H__
 
 #include "parser_script.h"
-#include "util/m3u_reader.h"
 
 class PlaylistParserScript : public ParserScript {
 public:
     PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent);
-    std::pair<std::string, bool> readLine() override;
     void processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath);
 
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override;
@@ -51,8 +49,7 @@ protected:
     bool linkObjects;
     bool followSymlinks;
     bool hidden;
-    M3uCharset m3uCharset;
-    std::unique_ptr<M3uReader> m3uReader;
+    TextFileCharset charsetMode;
 
     void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
     void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) override;
