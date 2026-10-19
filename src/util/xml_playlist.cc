@@ -148,17 +148,20 @@ static std::optional<std::string> decodePath(const std::string& text)
             return c - 'A' + 10;
         return -1;
     };
-    for (std::size_t i = 0; i < text.size(); ++i) {
+    std::size_t i = 0;
+    while (i < text.size()) {
         unsigned char c = text[i];
         if (c == '%') {
-            if (i + 2 >= text.size())
+            if (text.size() - i < 3)
                 return std::nullopt;
-            int hi = hex(text[++i]);
-            int lo = hex(text[++i]);
+            int hi = hex(text[i + 1]);
+            int lo = hex(text[i + 2]);
             if (hi < 0 || lo < 0)
                 return std::nullopt;
             c = static_cast<unsigned char>((hi << 4) | lo);
-        }
+            i += 3;
+        } else
+            ++i;
         if (c == 0)
             return std::nullopt;
         result += static_cast<char>(c);
