@@ -1,0 +1,549 @@
+{
+  "issue": 4007,
+  "base": "ee79f479bc5bf0407c3fad59b438b6b4e7ad04ee",
+  "state": "prepared, not importer-tested",
+  "root_marker": "/fixture/asx",
+  "media": {
+    "A": {
+      "path": "media/a.wav",
+      "title": "Äther 東京",
+      "kind": "audio"
+    },
+    "B": {
+      "path": "media/b.wav",
+      "title": "Second",
+      "kind": "audio"
+    },
+    "C": {
+      "path": "media/c.wav",
+      "title": "Third",
+      "kind": "audio"
+    },
+    "S": {
+      "path": "media/with space.wav",
+      "title": "Space",
+      "kind": "audio"
+    },
+    "Q": {
+      "path": "media/Why?.wav",
+      "title": "Question",
+      "kind": "audio"
+    },
+    "H": {
+      "path": "media/hash#name.wav",
+      "title": "Hash",
+      "kind": "audio"
+    },
+    "P": {
+      "path": "media/100% ready+.wav",
+      "title": "Percent",
+      "kind": "audio"
+    },
+    "L": {
+      "path": "media/a+b.wav",
+      "title": "Plus",
+      "kind": "audio"
+    },
+    "U": {
+      "path": "media/Äther 東京 🎵.wav",
+      "title": "Äther 東京 🎵",
+      "kind": "audio"
+    },
+    "K": {
+      "path": "media/Why%3F.wav",
+      "title": "Literal escape",
+      "kind": "audio"
+    },
+    "X": {
+      "path": "media/amp&quote\".wav",
+      "title": "Ampersand and quote",
+      "kind": "audio"
+    },
+    "V": {
+      "path": "media/v.mp4",
+      "title": "Video",
+      "kind": "video"
+    },
+    "HTTPS": {
+      "uri": "https://media.example.invalid/a.mp3?title=Why%3F&token=a+b",
+      "kind": "external"
+    }
+  },
+  "matrix": {
+    "mode": [
+      "mt",
+      "grb"
+    ],
+    "playlist_charset": [
+      "UTF-8",
+      "windows-1252"
+    ],
+    "views": [
+      "All Playlists",
+      "Directories"
+    ]
+  },
+  "cases": [
+    {
+      "id": "u01",
+      "file": "u01.asx",
+      "purpose": "Unchanged ASCII relative native path",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "d1cf41c26c5d5a92e585437879d5be2d28e9e9eff758db2247a5a5f73b1cf8d9"
+    },
+    {
+      "id": "u02",
+      "file": "u02.asx",
+      "purpose": "Percent-encoded space",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "S"
+      ],
+      "expectation": "required",
+      "sha256": "a9198d21bd94464b30a953d714e7aafee0c270fac6ace2598c4193874004c8ad"
+    },
+    {
+      "id": "u03",
+      "file": "u03.asx",
+      "purpose": "Encoded question mark is a filename byte",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "Q"
+      ],
+      "expectation": "required",
+      "sha256": "f240580e4e3de106715f196bfbc9724be9f5174846306da1db1b5ded09d64e6c",
+      "absent_media": [
+        "K"
+      ]
+    },
+    {
+      "id": "u04",
+      "file": "u04.asx",
+      "purpose": "Encoded hash is a filename byte",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "H"
+      ],
+      "expectation": "required",
+      "sha256": "865ce41f61f2df2781819027c7dea877ce46ce94c64c9cde7bc16e44158967bd"
+    },
+    {
+      "id": "u05",
+      "file": "u05.asx",
+      "purpose": "Percent, space and plus in one encoded reference",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "P"
+      ],
+      "expectation": "required",
+      "sha256": "f42872211c9057ad509cfdf8fa1001809f6227da803ef0b0fc150df7b849dc92"
+    },
+    {
+      "id": "u06",
+      "file": "u06.asx",
+      "purpose": "Literal plus must remain plus",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "L"
+      ],
+      "expectation": "required",
+      "sha256": "1ef2bf7118a22d134c9ee3a01ce1e61af511eef9a8b473ca489eb82894bef14f"
+    },
+    {
+      "id": "u07",
+      "file": "u07.asx",
+      "purpose": "Encoded plus must remain plus",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "L"
+      ],
+      "expectation": "required",
+      "sha256": "a2b7c24d21d43ae1e4bf36a033293d7399013ec68b897e6ec42c54266dce4e68"
+    },
+    {
+      "id": "u08",
+      "file": "u08.asx",
+      "purpose": "Percent-encoded Unicode path",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "U"
+      ],
+      "expectation": "required",
+      "sha256": "95813d2cd9ae28387eb4230cded24e4b86e395eb1313a15d529ae5c960d59444"
+    },
+    {
+      "id": "u09",
+      "file": "u09.asx",
+      "purpose": "Local file URI resolves to Gerbera media, not an external file resource",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "624fd7c303a83d1ce05b48cef3107d0cb87fd1171fa614555e25a267d4a8ee60"
+    },
+    {
+      "id": "u10",
+      "file": "u10.asx",
+      "purpose": "Localhost file authority",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "978a2e91ca39603c5fc6c97ceb2ac8b513c2b086ed6b03d26e805a8dcdd2aa30"
+    },
+    {
+      "id": "u11",
+      "file": "u11.asx",
+      "purpose": "Case-insensitive local file scheme",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "259b5f931c55603e766a2fca1c212da85c2535039add497f22eac97d6df1c196"
+    },
+    {
+      "id": "u12",
+      "file": "u12.asx",
+      "purpose": "Remote file authority must not be mounted",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "b52590802cdc0069fc565f421da0f563b458cb7dd1fde977e4a1533c9c37754c"
+    },
+    {
+      "id": "u13",
+      "file": "u13.asx",
+      "purpose": "External HTTPS query bytes remain unchanged",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "HTTPS"
+      ],
+      "expectation": "required",
+      "sha256": "898cd7f1a2788f37a6b06dd852cc3a4f2113a216f57cbf25329bdf77dbdf84ac"
+    },
+    {
+      "id": "u14",
+      "file": "u14.asx",
+      "purpose": "Explicit source repetitions and exact order",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B",
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "5b4911b625af59addb0bc0d44d4aba80aa6720273e4ac325d4f553302c7af0c7"
+    },
+    {
+      "id": "u15",
+      "file": "u15.asx",
+      "purpose": "Retain working literal Linux question mark",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "Q"
+      ],
+      "expectation": "required",
+      "sha256": "314cf9dca22c5d87de2d4a9ca2b4d1f57ac02ed108bf429519c916ef311d9adb"
+    },
+    {
+      "id": "u16",
+      "file": "u16.asx",
+      "purpose": "Retain working literal Linux hash",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "H"
+      ],
+      "expectation": "required",
+      "sha256": "b3f533c4e543c504ff576ac4160d5ba93eab27dd439e7847cc3ae104dbcd21fb"
+    },
+    {
+      "id": "u17",
+      "file": "u17.asx",
+      "purpose": "Retain working literal percent path",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "P"
+      ],
+      "expectation": "required",
+      "sha256": "767231fe7fc2efebb2eb65c0b2cf924c21dafacd74f7c25468fc09e70a105401"
+    },
+    {
+      "id": "u18",
+      "file": "u18.asx",
+      "purpose": "Retain native Unicode path",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "U"
+      ],
+      "expectation": "required",
+      "sha256": "784bdb0babeb59cd06858aa667cb6ef6b03be7f9c4ae45413df80c485ee61c20"
+    },
+    {
+      "id": "u19",
+      "file": "u19.asx",
+      "purpose": "XML entity decoding is separate from URI decoding",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "X"
+      ],
+      "expectation": "required",
+      "sha256": "9c7c5f4261a31065b9c15f645fd25e6a99b9b2e395826c438e72334652238283"
+    },
+    {
+      "id": "u20",
+      "file": "u20.asx",
+      "purpose": "Decode exactly once; literal %3F file and ? file both exist",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "K"
+      ],
+      "expectation": "required",
+      "sha256": "ec05f7156fe6906f1ec81e73a2659c213caf245ecab4848fe030d6e0ad418f97"
+    },
+    {
+      "id": "u21",
+      "file": "u21.asx",
+      "purpose": "Invalid URI escape/NUL/UTF-8 without an existing native-path target",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "6d8319a20297f638429b235624af942e7cdd7e86fb7f28ca051ff42410d39e1e"
+    },
+    {
+      "id": "u22",
+      "file": "u22.asx",
+      "purpose": "Invalid URI escape/NUL/UTF-8 without an existing native-path target",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "07b3315c7df0c072ceffab483d708a431d3942aafae286c9bd72225f537610a2"
+    },
+    {
+      "id": "u23",
+      "file": "u23.asx",
+      "purpose": "Invalid URI escape/NUL/UTF-8 without an existing native-path target",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "19982f8195af2d8d088b3f3b012d027d66df310cb5ae05c8880b4c658a3a422b"
+    },
+    {
+      "id": "u24",
+      "file": "u24.asx",
+      "purpose": "Invalid URI escape/NUL/UTF-8 without an existing native-path target",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "9256f154b93713b4ebaf13823fb3ac2907fa9dcafe95047e0903cb86df4cac3e"
+    },
+    {
+      "id": "u25",
+      "file": "u25.asx",
+      "purpose": "Invalid URI escape/NUL/UTF-8 without an existing native-path target",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "4324d60dfe6916af4de173b026cf3f2dc029f7674861117d345394c3896d341a"
+    },
+    {
+      "id": "u26",
+      "file": "u26.asx",
+      "purpose": "Do not treat a local file URI query as a filename",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "99b1ab9d19656636387aea55ecde0711d3551a93e4f0c22ed5558aaaeb6027b3"
+    },
+    {
+      "id": "u27",
+      "file": "u27.asx",
+      "purpose": "Do not treat a local file URI fragment as a filename",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "d7e45f9230fff9ca5ed9421411141199066c4f6e53fe66cadeb7df74bcc1677b"
+    },
+    {
+      "id": "u28",
+      "file": "u28.asx",
+      "purpose": "UTF-16 LE/BOM XML text and embedded Unicode media metadata",
+      "xml": "valid",
+      "encoding": "utf-16",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "9bd9d7f5c0dca1376c73c23424041184816e4a141c6ac414e75090bbb0d922ba"
+    },
+    {
+      "id": "u29",
+      "file": "u29.asx",
+      "purpose": "UTF-16 big endian BOM and XML declaration",
+      "xml": "valid",
+      "encoding": "utf-16",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "daabe448e2798864723653c7c0253aab6b6e1598afc6a704daadb6c98d15a29d"
+    },
+    {
+      "id": "u30",
+      "file": "u30.asx",
+      "purpose": "Declared Windows-1252 XML encoding",
+      "xml": "valid",
+      "encoding": "windows-1252",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "0c07c981649a08ffc6315511b117b05fec5ec76063d647dd43855e9d47b9cae9"
+    },
+    {
+      "id": "u31",
+      "file": "u31.asx",
+      "purpose": "Embedded Unicode metadata stays UTF-8 under both legacy playlist charsets",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "d1cf41c26c5d5a92e585437879d5be2d28e9e9eff758db2247a5a5f73b1cf8d9",
+      "required_title": "Äther 東京"
+    },
+    {
+      "id": "u32",
+      "file": "u32.asx",
+      "purpose": "A missing media entry must not renumber away a valid following entry",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "B"
+      ],
+      "expectation": "required",
+      "sha256": "b7426a64a095d3d0357b96d156ee3622eec7bde70d31b8b4fa8b7141e406e83e"
+    },
+    {
+      "id": "u33",
+      "file": "u33.asx",
+      "purpose": "Ambiguous raw percent text: preserve an existing native filename before URI fallback",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "K"
+      ],
+      "expectation": "proposed_compatibility_policy",
+      "sha256": "f240580e4e3de106715f196bfbc9724be9f5174846306da1db1b5ded09d64e6c",
+      "note": "Run this case with both K and Q present; u03 runs with K absent.",
+      "present_media": [
+        "K",
+        "Q"
+      ]
+    },
+    {
+      "id": "u34",
+      "file": "u34.asx",
+      "purpose": "Mixed audio/video and repeated positions",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "V",
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "a5e80ff0a8b99a50ba69521ad195bbcc83504bf8d5d9356e54023c704a0c9c73"
+    },
+    {
+      "id": "u35",
+      "file": "u35.asx",
+      "purpose": "Malformed XML is rejected before database changes",
+      "xml": "invalid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "642f09edd920924d5e825ca09ab9491c504b7d4028b8afe0bae92f8ddf55fb65",
+      "outcome": "reject"
+    },
+    {
+      "id": "u36",
+      "file": "u36.asx",
+      "purpose": "An intentionally empty list remains empty",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "6d52fd9ccae8b8e603c624183d03b3405803eecfd9c5e8e396543d0a07895906"
+    },
+    {
+      "id": "u37",
+      "file": "u37.asx",
+      "purpose": "Existing case-insensitive ASX element and attribute names",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "9fdfe915cc2adbf4b24a4204f1514594e385bacbea06b7462d4b1693d6fa6686"
+    },
+    {
+      "id": "u38",
+      "file": "u38.asx",
+      "purpose": "Windows absolute references are not remapped to Linux/macOS files",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "a20f3515b769f0bb8040dcb8af73e9779bda98a61f3d19fc9963269a9a17d49e",
+      "platform": "non-Windows"
+    },
+    {
+      "id": "u39",
+      "file": "u39.asx",
+      "purpose": "Preserve existing root BASE concatenation while fixing URI handling",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "b523a6c2935514c10b0abc8780520f956327263a0b9e641eaaf84ce9db5dc3ed"
+    }
+  ]
+}
