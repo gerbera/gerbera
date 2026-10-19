@@ -120,6 +120,12 @@ std::string CdsObject::getAuxData(const std::string& key) const
     return getValueOrDefault(auxdata, key);
 }
 
+bool CdsObject::isMediaItem() const
+{
+    auto type = getMediaType();
+    return type == ObjectType::Audio || type == ObjectType::Video || type == ObjectType::Image;
+}
+
 ObjectType CdsObject::getMediaType(const std::string& contentType) const
 {
 #ifdef ONLINE_SERVICES

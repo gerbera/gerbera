@@ -26,6 +26,7 @@ add_executable(
     testcontent
     main.cc #
     test_autoscan_list.cc #
+    test_playlist_update.cc #
     test_resolution.cc #
 )
 
@@ -38,3 +39,16 @@ add_dependencies(testcontent libgerbera gerbera)
 
 include(GoogleTest)
 gtest_discover_tests(testcontent DISCOVERY_TIMEOUT 60)
+
+if(WITH_JS
+   AND WITH_INOTIFY
+   AND (WITH_TAGLIB OR WITH_AVCODEC)
+   AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(Python3 QUIET COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME PlaylistUpdateIntegration
+                 COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_playlist_updates.py
+                         --binary $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR})
+        set_tests_properties(PlaylistUpdateIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 240)
+    endif()
+endif()

@@ -65,7 +65,6 @@ AutoscanInotify::AutoscanInotify(const std::shared_ptr<Content>& content)
 void AutoscanInotify::threadProc()
 {
     std::error_code ec;
-    auto importMode = EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
     while (!shutdownFlag) {
         try {
             std::unique_lock<std::mutex> lock(mutex);
@@ -170,7 +169,7 @@ void AutoscanInotify::threadProc()
                 // changed
                 if (adir && handler.hasEvent()) {
                     // not new
-                    int wd = handler.doExistingEntry(database, content, wdObj, importMode, isDir);
+                    int wd = handler.doExistingEntry(database, content, wdObj, adir->getLayoutMode(), isDir);
                     if (wd > INOTIFY_ROOT)
                         inotify->removeWatch(wd);
                     // new file

@@ -538,6 +538,13 @@ Name of the javascript function called to create the virtual layout for an image
 
 Name of the javascript function called to parse a playlist file.
 
+The standard function returns the IDs of all playlist entries it creates or
+retains, including entries in additional views. After a successful import,
+previous entries not in this array are removed; an empty array clears the
+playlist. Custom wrappers should return the standard function's result.
+For compatibility, a custom function that does not return an array does not
+trigger this cleanup.
+
    .. confval:: playlist create-link
           :type: :confval:`Boolean`
           :required: false
@@ -550,6 +557,11 @@ Name of the javascript function called to parse a playlist file.
 
     Links the playlist to the virtual container which contains the expanded playlist items. This means, that
     if the actual playlist file is removed from the database, the virtual container corresponding to the playlist will also be removed.
+
+    Updates to referenced media files also refresh linked playlists, preserving
+    their order and repeated entries. Updating a media file at the same path
+    retains its physical object ID. Actually deleting a media file removes its
+    unavailable playlist entries.
 
 .. confval:: meta-file
    :type: :confval:`String`
