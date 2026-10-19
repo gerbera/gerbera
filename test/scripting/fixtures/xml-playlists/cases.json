@@ -1,0 +1,391 @@
+{
+  "status": "Preparation only: importer behavior not yet implemented or tested",
+  "issue": "https://github.com/gerbera/gerbera/issues/3997",
+  "fixture_root": "/fixture/xml",
+  "playlist_directory": "/fixture/xml/pl",
+  "target_platform": "Linux; native Windows/macOS handling to be tested separately",
+  "media": {
+    "A": "media/a.wav",
+    "B": "media/b.wav",
+    "V": "media/v.mp4",
+    "U": "media/Müller & Söhne.wav",
+    "Q": "media/quote\"name.wav",
+    "P": "media/100% ready+.wav",
+    "H": "media/hash#name.wav",
+    "D": "media/100%25.wav"
+  },
+  "cases": [
+    {
+      "file": "w01.wpl",
+      "purpose": "Mixed audio/video order and repeated occurrences",
+      "outcome": "import",
+      "expected": [
+        "A",
+        "V",
+        "B",
+        "V",
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "e838d963918d6bbf9ee546d73b4f1914276f197b7364d50e938cc64054600f21"
+    },
+    {
+      "file": "w02.wpl",
+      "purpose": "Portable Windows relative separators",
+      "outcome": "import",
+      "expected": [
+        "A",
+        "B",
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "eca13e152b4abe675111b04dd1312000fac0bf1cee6cf8b5b48192cb72e6cc86"
+    },
+    {
+      "file": "w03.wpl",
+      "purpose": "Unicode and XML escaped attribute characters",
+      "outcome": "import",
+      "expected": [
+        "U",
+        "Q"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "92de881c638a8a4d48e5ffc15a68d061642455124cd1080f9cb42d994331014a"
+    },
+    {
+      "file": "w04.wpl",
+      "purpose": "UTF-16 BOM and declaration",
+      "outcome": "import",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "a02e045de658db25fea377b10cc2a396e8cb455720ea4a762af5f21caf5d224b"
+    },
+    {
+      "file": "w05.wpl",
+      "purpose": "Local file URIs",
+      "outcome": "import",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "22ab1768ddd3ea21937bc7dfe624fe6b50aea73ae134273b1643b8890a0db49f"
+    },
+    {
+      "file": "w06.wpl",
+      "purpose": "Absolute POSIX paths",
+      "outcome": "import",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "0ff2c54ae1cf13b72bb146b05917ddc7b6d5776a66502413c56728f369a9a493"
+    },
+    {
+      "file": "w07.wpl",
+      "purpose": "Do not reinterpret Windows drive paths on Linux",
+      "outcome": "import",
+      "expected": [
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "5392296ec4316294b89c2b6ad16ff72a7f26324651d87de65d3724949f4301b9"
+    },
+    {
+      "file": "w08.wpl",
+      "purpose": "No automatic UNC mounting or Linux path invention",
+      "outcome": "import",
+      "expected": [
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "ec6b7a3334d4dce3428dc58441f70cad93a66e5d524bf7608dbdb7a4fb526d0a"
+    },
+    {
+      "file": "w09.wpl",
+      "purpose": "External URL kept encoded, no fetch during parsing",
+      "outcome": "import",
+      "expected": [
+        "HTTPS",
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "292a0fa0783a6fdbace5d1493854574f9a4ace85af8209e6a0ce225b8b097274"
+    },
+    {
+      "file": "w10.wpl",
+      "purpose": "Unavailable media does not stop following entries",
+      "outcome": "import",
+      "expected": [
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "f8b8a00d2922328735bfaa9d295b01b223e095e6781a251f5ca8e75c1efe19c8"
+    },
+    {
+      "file": "w11.wpl",
+      "purpose": "Empty static playlist",
+      "outcome": "import",
+      "expected": [],
+      "stdlib_parseable": true,
+      "sha256": "7e7b3e6685d5386ce2240272fd90504970301860138f8a80182fcc3cab8f7dbc"
+    },
+    {
+      "file": "w12.wpl",
+      "purpose": "Malformed XML causes no partial import",
+      "outcome": "reject",
+      "expected": [],
+      "stdlib_parseable": false,
+      "sha256": "ca3b568893cb4bb8b8b3bd46a07a4d5bb0f1dbd22736c672c1a058bcf32dc34f"
+    },
+    {
+      "file": "w13.wpl",
+      "purpose": "Reject wrong WPL root",
+      "outcome": "reject",
+      "expected": [],
+      "stdlib_parseable": true,
+      "sha256": "75da195ed1478c8db1c08992729a292cc4c7541ce84fd799100330c941a4ec93"
+    },
+    {
+      "file": "w14.wpl",
+      "purpose": "Reject DTD, no external document access",
+      "outcome": "reject",
+      "expected": [],
+      "stdlib_parseable": true,
+      "sha256": "8ce8d41325f6b597107881defc15a6c3aa94580c0c7d878b9ea06cf318843276"
+    },
+    {
+      "file": "w15.wpl",
+      "purpose": "Dynamic WMP database queries are outside static import scope",
+      "outcome": "unsupported",
+      "expected": [],
+      "stdlib_parseable": true,
+      "sha256": "64e647051485a45d0af8c071cf26f7916dbd02910725eaac94b65d9f4e6a030b"
+    },
+    {
+      "file": "w16.wpl",
+      "purpose": "Filename-derived playlist title, no CID/TID guessing, repeats retained",
+      "outcome": "import",
+      "expected": [
+        "A",
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "ecec84b662e9a01baf083c8ab5889a79fd490e6dca11fdbe16c8c4f2273de4d2"
+    },
+    {
+      "file": "w17.wpl",
+      "purpose": "Literal percent and plus in native filesystem path",
+      "outcome": "import",
+      "expected": [
+        "P",
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "da1c41dab8b29bf32513255663748505ae1ac9f4f767938f3901e39f0a183b3a"
+    },
+    {
+      "file": "x01.xspf",
+      "purpose": "Mixed order and repeated tracks",
+      "outcome": "import",
+      "expected": [
+        "A",
+        "V",
+        "B",
+        "V",
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "e30f0e603b4f9e610941ac36a30a8f3d40e15814d0c431b5aa6e0d1e1f0ab0a7"
+    },
+    {
+      "file": "x02.xspf",
+      "purpose": "Equivalent namespace prefix",
+      "outcome": "import",
+      "expected": [
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "cef416f1b7546b9e5f48e9612cce17af96427c29967cfed68d885272022ff470"
+    },
+    {
+      "file": "x03.xspf",
+      "purpose": "Foreign extension elements cannot become playlist entries",
+      "outcome": "import",
+      "expected": [
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "2eb647fcd0ea2d98f14b0a5d36e36b2246450b0b012b89bb88de6255b5927acc"
+    },
+    {
+      "file": "x04.xspf",
+      "purpose": "Reject wrong XSPF namespace",
+      "outcome": "reject",
+      "expected": [],
+      "stdlib_parseable": true,
+      "sha256": "9c286d68cf8d39574b5aaaa22ef658fa4b31b0fd815d164c0c5497b51c12d004"
+    },
+    {
+      "file": "x05.xspf",
+      "purpose": "Namespace rebinding inside the document",
+      "outcome": "import",
+      "expected": [
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "b3c6dcbb3ca64186023f0c3140967203efc0f976d9d6a6eec21ecf04a545e616"
+    },
+    {
+      "file": "x06.xspf",
+      "purpose": "Inherited XML Base including dot segments",
+      "outcome": "import",
+      "expected": [
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "202e77fc4ad218c84349bdc0295220dd4a5bf016938f292aecde63f52a569e95"
+    },
+    {
+      "file": "x07.xspf",
+      "purpose": "Local file URI and localhost authority",
+      "outcome": "import",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "479c4d7d1bd1e12666339c6c002a033d027794bce6382503e8beb624e66c0785"
+    },
+    {
+      "file": "x08.xspf",
+      "purpose": "Remote file authority unsupported on Linux, no implicit mount",
+      "outcome": "import",
+      "expected": [
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "4a72f1c9bfd079d7778a4d2ed49e1897a93c7ffe6a0c1eba84261ce2b3c9b640"
+    },
+    {
+      "file": "x09.xspf",
+      "purpose": "Alternatives are one position per track, first usable source",
+      "outcome": "import",
+      "expected": [
+        "A",
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "9697156290d8e1a03405008221af27bc9e94954325bb0a8d2b39a11f221d4b7d"
+    },
+    {
+      "file": "x10.xspf",
+      "purpose": "Locationless track skipped without stopping sequence",
+      "outcome": "import",
+      "expected": [
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "37559742e626f0cf43c3d206803f015a8dc1622c07fe2252ea0b493c18b7e490"
+    },
+    {
+      "file": "x11.xspf",
+      "purpose": "Decode Unicode, percent and hash once, keep plus literal",
+      "outcome": "import",
+      "expected": [
+        "U",
+        "P",
+        "H"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "d4a6726d050c833cc76ecb4a50eb2ce832485773beb5da9f69b1a76082647722"
+    },
+    {
+      "file": "x12.xspf",
+      "purpose": "Reject malformed percent encoding without losing valid later track",
+      "outcome": "import",
+      "expected": [
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "c7cd985c746b9a437655b7dc360d9074a5a0d3e116208a05a1cd42cab135cd25"
+    },
+    {
+      "file": "x13.xspf",
+      "purpose": "Empty trackList",
+      "outcome": "import",
+      "expected": [],
+      "stdlib_parseable": true,
+      "sha256": "51d669ef384a1df770c1cc2f2118eda3bbebc47268d071be349c41c1195f5607"
+    },
+    {
+      "file": "x14.xspf",
+      "purpose": "Reject more than one trackList",
+      "outcome": "reject",
+      "expected": [],
+      "stdlib_parseable": true,
+      "sha256": "054d650e77eb500f6d22ac9c87facf5fac3eb42016037accd0e930d50e1cbbcb"
+    },
+    {
+      "file": "x15.xspf",
+      "purpose": "Malformed XML causes no partial import",
+      "outcome": "reject",
+      "expected": [],
+      "stdlib_parseable": false,
+      "sha256": "db360041dd336762b83d1143b4600d48938406818a200b65d648748794f44d21"
+    },
+    {
+      "file": "x16.xspf",
+      "purpose": "Reject DTD and external local entity without reading sentinel",
+      "outcome": "reject",
+      "expected": [],
+      "stdlib_parseable": false,
+      "sha256": "90ba25487792d3bbcd1e27c6cab9289d547840ed6ade0dd8c7e1548e5204b965"
+    },
+    {
+      "file": "x17.xspf",
+      "purpose": "Do not decode remote query or fetch external stream during import",
+      "outcome": "import",
+      "expected": [
+        "HTTPS",
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "53cfccb182e525ab96ea299a41a38840f741c1eaecbdb41a3bb811453c64b28f"
+    },
+    {
+      "file": "x18.xspf",
+      "purpose": "Percent decoding exactly once",
+      "outcome": "import",
+      "expected": [
+        "D"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "3dc47287efae2610832ddd96ca972051c7b22211363529f8d5d6519cb80731d2"
+    },
+    {
+      "file": "x19.xspf",
+      "purpose": "Relative URI under remote XML Base stays remote",
+      "outcome": "import",
+      "expected": [
+        "RELATIVE_HTTPS"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "c00a2b413e6e7a4401a0ed10daa10ac7d6ae7b7ad3ffc1dc8ca41b16007be14b"
+    },
+    {
+      "file": "x20.xspf",
+      "purpose": "Unsupported URI schemes do not become filesystem paths",
+      "outcome": "import",
+      "expected": [
+        "A"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "7f7dcccaf29494214a8b4aa3a2fe7bb063d211481f89000c940753c27416539e"
+    }
+  ]
+}
