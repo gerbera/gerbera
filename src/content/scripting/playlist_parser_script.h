@@ -35,6 +35,7 @@
 #define __PLAYLIST_PARSER_SCRIPT_H__
 
 #include "parser_script.h"
+#include "util/xml_playlist.h"
 
 #include <optional>
 
@@ -42,6 +43,7 @@ class PlaylistParserScript : public ParserScript {
 public:
     PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent);
     std::vector<int> processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath, bool& hasResult);
+    const XmlPlaylistEntry* readPlaylistEntry();
 
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override;
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
@@ -51,7 +53,8 @@ protected:
     bool linkObjects;
     bool followSymlinks;
     bool hidden;
-    TextFileCharset charsetMode;
+    std::vector<XmlPlaylistEntry> xmlEntries;
+    std::size_t xmlPosition {};
 
     void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
     void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) override;
