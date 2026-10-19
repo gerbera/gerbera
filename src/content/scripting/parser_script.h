@@ -71,13 +71,13 @@ protected:
 
     /// @brief clean up caches and parsing output
     void cleanUp();
-    void prepareFile(GrbFile& file, TextFileCharset charset = TextFileCharset::Default);
+    void prepareFile(const fs::path& path, TextFileCharset charset = TextFileCharset::Default);
 
     static pugi::xml_node nullNode;
     /// @brief maximum length of one text line
     static constexpr int ONE_TEXTLINE_BYTES = 1024;
 
-    GrbFile* currentFile {};
+    std::unique_ptr<GrbFile> currentFile;
     std::shared_ptr<StringConverter> savedConverter;
     int currentObjectID { INVALID_OBJECT_ID };
     std::shared_ptr<GenericTask> currentTask;

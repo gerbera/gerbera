@@ -214,11 +214,12 @@ pugi::xml_node& ParserScript::readXml(int direction)
     return nullNode;
 }
 
-void ParserScript::prepareFile(GrbFile& file, TextFileCharset charset)
+void ParserScript::prepareFile(const fs::path& path, TextFileCharset charset)
 {
-    currentFile = &file;
-    file.open(charset == TextFileCharset::Default ? "r" : "rb");
-    file.setTextCharset(charset, charset == TextFileCharset::Default ? std::function<bool()>() : [this]() { return !currentTask || currentTask->isValid(); });
+    auto file = std::make_unique<GrbFile>(path);
+    file->open(charset == TextFileCharset::Default ? "r" : "rb");
+    file->setTextCharset(charset, charset == TextFileCharset::Default ? std::function<bool()>() : [this]() { return !currentTask || currentTask->isValid(); });
+    currentFile = std::move(file);
     if (charset != TextFileCharset::Default) {
         savedConverter = sc;
         sc = converterManager->i2i();
@@ -243,7 +244,7 @@ std::pair<std::string, bool> ParserScript::readLine()
 
 void ParserScript::cleanUp()
 {
-    currentFile = nullptr;
+    currentFile.reset();
     if (savedConverter) {
         sc = savedConverter;
         savedConverter.reset();
