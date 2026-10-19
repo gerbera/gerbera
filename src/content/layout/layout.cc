@@ -30,6 +30,7 @@
 #include "content/content.h"
 #include "context.h"
 #include "database/database.h"
+#include "upnp/upnp_common.h"
 
 #ifdef ONLINE_SERVICES
 #include "content/onlineservice/online_service.h"
@@ -85,8 +86,16 @@ void Layout::cleanUp(const std::vector<int>& refObjects, const std::vector<int>&
             return origId == entry;
         });
         if (newEntry == resObjects.end()) {
+            // Playlist positions belong to their playlist, not to the media layout.
+            auto database = content->getContext()->getDatabase();
+            auto object = database->loadObject(origId);
+            if (object) {
+                auto parent = database->loadObject(object->getParentID());
+                if (parent && parent->isSubClass(UPNP_CLASS_PLAYLIST_CONTAINER))
+                    continue;
+            }
             log_debug("Deleting orphaned virtual item {}", origId);
-            content->getContext()->getDatabase()->removeObject(origId, "", false);
+            database->removeObject(origId, "", false);
         }
     }
 }

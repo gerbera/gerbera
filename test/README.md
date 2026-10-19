@@ -1,5 +1,24 @@
 # Gerbera Test
 
+`PlaylistUpdateIntegration` additionally exercises a real Gerbera process on Linux
+when JavaScript, inotify, Python 3 and TagLib or FFmpeg are available. It uses temporary generated WAV
+files and M3U/M3U8/PLS/ASX playlists, checks both native playlist views through
+ContentDirectory and downloads their complete resources. The sequence covers
+read-only/writable close, media edits/replacement, playlist edits/repetitions,
+rescans, restart, addition and deletion, with both `mt` and `grb` imports.
+It does not use an existing library or configuration. A usable IPv4 network
+interface is needed for the fixture's UPnP listener.
+
+For a focused run with retained diagnostic files:
+
+```sh
+python3 test/content/test_playlist_updates.py --binary build/gerbera \
+    --source-root "$PWD" --work-directory /tmp/grb-pl --debug
+```
+
+Use a fresh work directory for each run. Omit `--work-directory` for automatic
+temporary-file cleanup.
+
 This file outlines how the Gerbera system uses the **GoogleTest**
 framework to provide unit testing for the C++ code-base.
 

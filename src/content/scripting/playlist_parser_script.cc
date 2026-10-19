@@ -165,7 +165,7 @@ void PlaylistParserScript::handleObject2cdsItem(
     item->setPartNumber(0);
 }
 
-void PlaylistParserScript::processPlaylistObject(
+std::optional<std::vector<int>> PlaylistParserScript::processPlaylistObject(
     const std::shared_ptr<CdsObject>& obj,
     std::shared_ptr<GenericTask> task,
     const std::string& rootPath)
@@ -192,22 +192,17 @@ void PlaylistParserScript::processPlaylistObject(
     currentObjectID = item->getID();
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
+    std::vector<int> result;
+    bool hasResult = false;
     try {
-        if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
-            auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
-            if (mode != TextFileCharset::Default && toLower(item->getLocation().extension().string()) == ".m3u8")
-                mode = TextFileCharset::Utf8;
-            prepareFile(item->getLocation(), mode);
-        }
-        call(obj, nullptr, playlistFunction, rootPath, "");
-    } catch (const std::runtime_error& e) {
-        log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), e.what());
+        result = call(obj, nullptr, playlistFunction, rootPath, "", &hasResult);
+    } catch (const std::runtime_error&) {
         cleanUp();
         throw;
     }
 
     cleanUp();
-    log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
+    return hasResult ? std::make_optional(std::move(result)) : std::nullopt;
 }
 
 #endif // HAVE_JS

@@ -34,6 +34,7 @@
 #include "content_manager.h"
 #include "context.h"
 #include "database/database.h"
+#include "database/db_param.h"
 #include "exceptions.h"
 #include "layout/builtin_layout.h"
 #include "metadata/metadata_enums.h"
@@ -694,7 +695,8 @@ void ImportService::createItems(
                 cdsObj = database->findObjectByPath(itemPath, UNUSED_CLIENT_GROUP, DbFileType::File);
             }
             if (cdsObj && cdsObj->isItem()) {
-                auto isChanged = stateEntry->getMTime() != cdsObj->getMTime() || cdsObj->getLocation().string() != dirEntry.path().string();
+                auto isChanged = (settings.changedObject && settings.changedObject->getID() == cdsObj->getID())
+                    || stateEntry->getMTime() != cdsObj->getMTime() || cdsObj->getLocation().string() != dirEntry.path().string();
                 if (autoscanDir && autoscanDir->getForceRescan())
                     isChanged = isChanged || cdsObj->getClass().empty() || cdsObj->getClass() == UPNP_CLASS_ITEM;
                 if (isChanged) {
@@ -872,12 +874,35 @@ void ImportService::fillLayout(
     const std::shared_ptr<StateCache>& stateCache,
     const std::shared_ptr<GenericTask>& task)
 {
+#ifdef HAVE_JS
+    std::unordered_set<int> playlists;
+#endif
     for (auto&& [contPath, stateEntry] : stateCache->contentStateCache) {
         if (!stateEntry || stateEntry->getState() != ImportState::Created)
             continue;
         stateCache->contentStateCache.at(contPath)->setObject(ImportState::Loaded, stateEntry->getObject());
         fillSingleLayout(stateEntry, nullptr, stateEntry->getParentObject(), task);
+#ifdef HAVE_JS
+        if (stateEntry->getObject()->isMediaItem()) {
+            for (int id : database->getRefObjects(stateEntry->getObject()->getID(), CdsEntryType::VirtualItem)) {
+                auto item = database->loadObject(id);
+                auto parent = item ? database->loadObject(item->getParentID()) : nullptr;
+                if (parent && parent->isSubClass(UPNP_CLASS_PLAYLIST_CONTAINER) && parent->getRefID() > CDS_ID_ROOT)
+                    playlists.insert(parent->getRefID());
+            }
+        }
+#endif
     }
+#ifdef HAVE_JS
+    for (int id : playlists) {
+        auto playlist = database->loadObject(id);
+        if (!playlist || !playlist->isItem())
+            continue;
+        auto adir = content->findAutoscanDirectory(playlist->getLocation());
+        auto service = adir ? adir->getImportService() : nullptr;
+        (service ? service.get() : this)->fillSingleLayout(nullptr, playlist, nullptr, task);
+    }
+#endif
 }
 
 void ImportService::fillSingleLayout(
@@ -901,7 +926,21 @@ void ImportService::fillSingleLayout(
                     if (playlistParserScript) {
                         // only lock mutex while processing playlist layout
                         LayoutAutoLock lock(layoutMutex);
-                        playlistParserScript->processPlaylistObject(cdsObject, task, rootPath);
+                        std::unordered_set<int> previous;
+                        for (auto type : { CdsEntryType::VirtualContainer, CdsEntryType::PlaylistContainer }) {
+                            for (int id : database->getRefObjects(cdsObject->getID(), type)) {
+                                auto param = BrowseParam(database->loadObject(id), BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS);
+                                for (auto&& item : database->browse(param))
+                                    previous.insert(item->getID());
+                            }
+                        }
+                        auto current = playlistParserScript->processPlaylistObject(cdsObject, task, rootPath);
+                        if (current) {
+                            for (int id : previous) {
+                                if (std::find(current->begin(), current->end(), id) == current->end())
+                                    database->removeObject(id, "", false);
+                            }
+                        }
                     }
                 } catch (const std::runtime_error& e) {
                     log_error("{}", EX(e));

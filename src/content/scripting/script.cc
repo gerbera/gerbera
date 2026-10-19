@@ -457,7 +457,8 @@ std::vector<int> Script::call(
     const std::shared_ptr<CdsContainer>& cont,
     const std::string& functionName,
     const fs::path& rootPath,
-    const std::string& containerType)
+    const std::string& containerType,
+    bool* hasResult)
 {
     // write global object used in callback functionss
     cdsObject2dukObject(obj);
@@ -509,6 +510,8 @@ std::vector<int> Script::call(
         duk_pop(ctx);
         throw_std_runtime_error("javascript runtime error");
     }
+    if (hasResult)
+        *hasResult = duk_is_array(ctx, -1);
     if (duk_is_null_or_undefined(ctx, -1) && needResult) {
         log_warning("Function '{}' did not return a value!", functionName);
         duk_pop(ctx);

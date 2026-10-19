@@ -885,7 +885,15 @@ void SQLDatabase::addObject(const std::shared_ptr<CdsObject>& obj, int* changedC
     if (obj->getID() != INVALID_OBJECT_ID)
         throw DatabaseException("Tried to add an object with an object ID set", LINE_MESSAGE);
 
+    bool useResourceReference = obj->hasFlag(ObjectFlag::UseResourceReference);
     auto tables = _addUpdateObject(obj, Operation::Insert, changedContainer);
+    if (tables.empty() && obj->getID() != INVALID_OBJECT_ID && obj->isItem()
+        && obj->getMetaData(MetadataFields::M_CONTENT_CLASS) == UPNP_CLASS_PLAYLIST_ITEM) {
+        if (useResourceReference)
+            obj->setFlag(ObjectFlag::UseResourceReference);
+        updateObject(obj, changedContainer);
+        return;
+    }
 
     beginTransaction("addObject");
     for (auto&& addUpdateTable : tables) {

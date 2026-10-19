@@ -518,7 +518,7 @@ std::shared_ptr<CdsObject> ContentManager::_addFile(
         rootPath = task->getRootPath();
 
     auto importMode = asSetting.adir ? asSetting.adir->getLayoutMode() : EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
-    if (importMode == ImportMode::Gerbera) {
+    if (importMode == ImportMode::Gerbera || (asSetting.changedObject && asSetting.changedObject->isMediaItem())) {
         std::unordered_set<int> currentContent;
         if (asSetting.changedObject || !asSetting.adir || asSetting.adir->getScanMode() != AutoscanScanMode::INotify) {
             importService->clearCache(); // may be called by layout
@@ -805,17 +805,21 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
                     // check modification time and update file if changed
                     if (lastModifiedCurrentMax < lwt) {
-                        // re-add object - we have to do this in order to trigger
-                        // layout
-                        auto removedParents = removeObject(adir, newObject, newPath, false, false);
-                        if (std::find_if(removedParents.begin(), removedParents.end(), [=](auto&& pId) { return containerID == pId; }) != removedParents.end()) {
-                            // parent purged
-                            parentContainer = nullptr;
+                        if (newObject->isMediaItem()) {
+                            // Keep the physical identity and dependent playlist entries.
+                            asSetting.changedObject = newObject;
+                        } else {
+                            auto removedParents = removeObject(adir, newObject, newPath, false, false);
+                            if (std::find_if(removedParents.begin(), removedParents.end(), [=](auto&& pId) { return containerID == pId; }) != removedParents.end()) {
+                                // parent purged
+                                parentContainer = nullptr;
+                            }
                         }
                         asSetting.recursive = false;
                         asSetting.rescanResource = false;
                         asSetting.async = false;
                         newObject = addFileInternal(dirEnt, rootpath, asSetting);
+                        asSetting.changedObject.reset();
                         // update time variable
                         if (lastModifiedNewMax < lwt && lwt <= currentTme)
                             lastModifiedNewMax = lwt;

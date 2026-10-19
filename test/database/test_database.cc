@@ -258,6 +258,29 @@ TEST_F(PlaylistDatabaseTest, OrdinaryVirtualReferencesRemainDeduplicated)
     EXPECT_EQ(database->getChildCounts({ parent }).at(parent), 1);
 }
 
+TEST_F(PlaylistDatabaseTest, ReimportUpdatesMetadataWithoutLosingRepeatedPositions)
+{
+    auto file = addFile(1);
+    file->addMetaData(MetadataFields::M_ALBUM, "Before");
+    database->updateObject(file, nullptr);
+    int parent = addContainer("Playlist");
+    int first = addReference(file, parent, 1);
+    int repeated = addReference(file, parent, 3);
+    file->removeMetaData(MetadataFields::M_ALBUM);
+    file->addMetaData(MetadataFields::M_ALBUM, "After");
+    database->updateObject(file, nullptr);
+    EXPECT_EQ(addReference(file, parent, 1), first);
+    EXPECT_EQ(addReference(file, parent, 3), repeated);
+    for (int id : { first, repeated }) {
+        auto item = std::dynamic_pointer_cast<CdsItem>(database->loadObject(id));
+        ASSERT_NE(item, nullptr);
+        EXPECT_EQ(item->getRefID(), file->getID());
+        EXPECT_EQ(item->getMetaData(MetadataFields::M_ALBUM), "After");
+        EXPECT_EQ(item->getTrackNumber(), id == first ? 1 : 3);
+    }
+    EXPECT_EQ(database->getChildCounts({ parent }).at(parent), 2);
+}
+
 TEST_F(PlaylistDatabaseTest, UnpositionedPlaylistReferencesRemainDeduplicated)
 {
     auto file = addFile(1);
