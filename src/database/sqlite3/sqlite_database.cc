@@ -453,7 +453,8 @@ void Sqlite3Database::threadProc()
                 DelAutoLock del_lock(del_mutex);
                 deletedEntries.erase(deletedEntries.begin(), deletedEntries.begin() + maxDeleteCount * DELETE_CACHE_RED_SIZE);
             }
-            threadRunner->wait(lock);
+            // shutdownDriver() may have notified while a task ran without the lock
+            threadRunner->wait(lock, [this] { return shutdownFlag || !taskQueue.empty(); });
         }
         log_debug("Exiting");
 
