@@ -1,0 +1,562 @@
+{
+  "issue": 4008,
+  "base": "ee79f479bc5bf0407c3fad59b438b6b4e7ad04ee",
+  "state": "prepared, not importer-tested",
+  "media": {
+    "A": {
+      "path": "media/a.wav",
+      "title": "Äther 東京",
+      "kind": "audio"
+    },
+    "B": {
+      "path": "media/b.wav",
+      "title": "Second",
+      "kind": "audio"
+    },
+    "C": {
+      "path": "media/c.wav",
+      "title": "Third",
+      "kind": "audio"
+    },
+    "S": {
+      "path": "media/with space.wav",
+      "title": "Space",
+      "kind": "audio"
+    },
+    "Q": {
+      "path": "media/Why?.wav",
+      "title": "Question",
+      "kind": "audio"
+    },
+    "H": {
+      "path": "media/hash#name.wav",
+      "title": "Hash",
+      "kind": "audio"
+    },
+    "P": {
+      "path": "media/100% ready+.wav",
+      "title": "Percent",
+      "kind": "audio"
+    },
+    "L": {
+      "path": "media/a+b.wav",
+      "title": "Plus",
+      "kind": "audio"
+    },
+    "U": {
+      "path": "media/Äther 東京 🎵.wav",
+      "title": "Äther 東京 🎵",
+      "kind": "audio"
+    },
+    "K": {
+      "path": "media/Why%3F.wav",
+      "title": "Literal escape",
+      "kind": "audio"
+    },
+    "X": {
+      "path": "media/amp&quote\".wav",
+      "title": "Ampersand and quote",
+      "kind": "audio"
+    },
+    "V": {
+      "path": "media/v.mp4",
+      "title": "Video",
+      "kind": "video"
+    },
+    "HTTPS": {
+      "uri": "https://media.example.invalid/a.mp3?title=Why%3F&token=a+b",
+      "kind": "external"
+    }
+  },
+  "policy_status": "proposals, not implemented defaults",
+  "proposed_limits": {
+    "nested_metafiles": 5,
+    "total_expanded_positions": 10000,
+    "unbounded_repeat": "one pass with warning"
+  },
+  "matrix": {
+    "mode": [
+      "mt",
+      "grb"
+    ],
+    "playlist_charset": [
+      "UTF-8",
+      "windows-1252"
+    ],
+    "views": [
+      "All Playlists",
+      "Directories"
+    ]
+  },
+  "dependencies": {
+    "sub/child.asx": "9ab379d2ee357dca006269dd148fd723a78ab3b57dd5194bcbc1f131ce84ac75",
+    "sub/skip.asx": "416d73ad595d908f373f7eb14ccd5b690fe1d75cc5a6d71a5ac7bf8e4089df78",
+    "sub/cycle.asx": "c05f2d14ba1d5871fa7b947fa6fcb6eaf4fa1329be28f24492036d85092a4a01",
+    "depth/d1.asx": "156fdb22036e8230c22040f5052f59872de0e2c7d2656dd4bdb74269190ba5bc",
+    "depth/d2.asx": "c3bc03166166723988131b38e5b04b98fae7459520a9047ce09127f92326a1aa",
+    "depth/d3.asx": "3d316548aac3480073500d1c24338d0b4409dc2601795c56b8f23cd2623eecc2",
+    "depth/d4.asx": "a64cd011c3823009c0a2c26f2bcabddf53e9de0380788ac25a797cf1061ed45f",
+    "depth/d5.asx": "b23d6f03cd0c6ca57e8725dead0c39beff717f9126842106020b0f333e8d7daf",
+    "depth/d6.asx": "078ed05f8462e73d287b9ee51952d958fede84b9f0289b1e7be0eed3e292f2de"
+  },
+  "cases": [
+    {
+      "id": "f01",
+      "file": "f01.asx",
+      "purpose": "Keep existing simple lists",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "expectation": "required",
+      "sha256": "781632d8b5b13c7ef317c624e6e7e40cbb971e5a77243236823b38d853ec34d2"
+    },
+    {
+      "id": "f02",
+      "file": "f02.asx",
+      "purpose": "Keep explicit repeated entries",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B",
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "5b4911b625af59addb0bc0d44d4aba80aa6720273e4ac325d4f553302c7af0c7"
+    },
+    {
+      "id": "f03",
+      "file": "f03.asx",
+      "purpose": "Two usable local REF alternatives produce one position, first wins",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "12cbff34995ba3008909d9fbc5aef7b2fdab113b173bacc78d135485ec0eff16"
+    },
+    {
+      "id": "f04",
+      "file": "f04.asx",
+      "purpose": "Missing first alternative falls back locally",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "B"
+      ],
+      "expectation": "required",
+      "sha256": "0745a0fe8d1bfe798b74f1bc4089a0201905366f5d6c726175766e2ebdbe1b5d"
+    },
+    {
+      "id": "f05",
+      "file": "f05.asx",
+      "purpose": "An external first alternative is retained without probing remote availability",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "HTTPS"
+      ],
+      "expectation": "proposed_server_policy",
+      "sha256": "b7effec6c60bef6097578525cbab2bea7081c2ec53bb291b05e9ffa28f473765",
+      "no_network": true
+    },
+    {
+      "id": "f06",
+      "file": "f06.asx",
+      "purpose": "Duplicate alternatives do not create duplicate positions",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "5f4a13fab94e485d7e58f7977161ae204db8fa541577a1ccf31b0023036d2ee6"
+    },
+    {
+      "id": "f07",
+      "file": "f07.asx",
+      "purpose": "Finite repeat follows exact sequence",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B",
+        "A",
+        "B"
+      ],
+      "expectation": "required",
+      "sha256": "9465ea658f13ce9620fbc41e6f1f2075f8a2428d4dc0e53141e57ac67c0373d1"
+    },
+    {
+      "id": "f08",
+      "file": "f08.asx",
+      "purpose": "COUNT zero means play the contained sequence once",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "expectation": "required",
+      "sha256": "0c0004ff654ddce8c8b030d006451f02244173600f16fb729b6238b2233a66ed"
+    },
+    {
+      "id": "f09",
+      "file": "f09.asx",
+      "purpose": "COUNT one preserves the sequence once",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "expectation": "required",
+      "sha256": "3b595afadf3f90470c670d2afbcdc3386421779a77ff188d4a6e819b2ec00b50"
+    },
+    {
+      "id": "f10",
+      "file": "f10.asx",
+      "purpose": "An unbounded repeat cannot be expanded indefinitely",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B",
+        "C"
+      ],
+      "expectation": "proposed_server_policy",
+      "sha256": "b2bad4a658c0f522055b71f8a1eb478754c1a64a71e1945d685a76337fec41cb",
+      "diagnostic": "Unbounded REPEAT imported once"
+    },
+    {
+      "id": "f11",
+      "file": "f11.asx",
+      "purpose": "Invalid or excessive expansion is rejected atomically",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "proposed_server_policy",
+      "sha256": "27e6875015ee0bb4f3bc2fc99733a7071fe27066c1e70465578ddfd057cbe015",
+      "outcome": "reject"
+    },
+    {
+      "id": "f12",
+      "file": "f12.asx",
+      "purpose": "Invalid or excessive expansion is rejected atomically",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "proposed_server_policy",
+      "sha256": "4e00ea6573c48e931dc4754a6d44195c1e624d54a00819233fb5af51eabe7170",
+      "outcome": "reject"
+    },
+    {
+      "id": "f13",
+      "file": "f13.asx",
+      "purpose": "Invalid or excessive expansion is rejected atomically",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "proposed_server_policy",
+      "sha256": "d8e91d0df53be35cade3114f962e50020b5dc2c93fee8d10b0154a94e5c401d3",
+      "outcome": "reject"
+    },
+    {
+      "id": "f14",
+      "file": "f14.asx",
+      "purpose": "Only the first REPEAT has repeat semantics; later block handling needs a documented compatibility decision",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": null,
+      "expectation": "requires_decision",
+      "sha256": "94de2925be9c3ce5eb7fe31e8f972280557dbd62e4805e74e37ca57e68f1ec76",
+      "decision": "Whether later REPEAT children are ignored or retained once; do not infer from source audit."
+    },
+    {
+      "id": "f15",
+      "file": "f15.asx",
+      "purpose": "Nested local entries are inserted at the reference position",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B",
+        "C",
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "37d8b440c8284d4ae4cd87e87e1324c0553e4d153fb89135b0f657dd8bcc73c9"
+    },
+    {
+      "id": "f16",
+      "file": "f16.asx",
+      "purpose": "ENTRYREF inside a finite REPEAT preserves duplicates",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "B",
+        "C",
+        "B",
+        "C"
+      ],
+      "expectation": "required",
+      "sha256": "4b81c41043f9d6d96f609700d49a4ba1bb01eff846e13ecc0b413bc2347ce638"
+    },
+    {
+      "id": "f17",
+      "file": "f17.asx",
+      "purpose": "Repeated use of a child is not mistaken for a cycle",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "B",
+        "C",
+        "B",
+        "C"
+      ],
+      "expectation": "required",
+      "sha256": "b49c7ad0ef97d0992303018b37f1d6424c8351203c9c4813bd9909d42c00ddb1"
+    },
+    {
+      "id": "f18",
+      "file": "f18.asx",
+      "purpose": "Cycle detection uses the active stack and rejects before creating partial entries",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "proposed_server_policy",
+      "sha256": "41d8d1b1195fa13ecd0e3f29daea9cee1e0935629e46ed4720fe575b6a536dfd",
+      "outcome": "reject"
+    },
+    {
+      "id": "f19",
+      "file": "f19.asx",
+      "purpose": "Nesting limit is enforced before unbounded recursion",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "proposed_server_policy",
+      "sha256": "4fe16d5e06140689ae050e9d7fca2134ea1db9e3b162f9af2599298c28c4c7cc",
+      "outcome": "reject"
+    },
+    {
+      "id": "f20",
+      "file": "f20.asx",
+      "purpose": "Missing local child is diagnosed without losing surrounding entries",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "expectation": "proposed_server_policy",
+      "sha256": "501de347a95070ecb0f2f0ee81a557f6536ce9404d18d9fa54d0fd5d9a8212ca",
+      "diagnostic": "Missing local ENTRYREF"
+    },
+    {
+      "id": "f21",
+      "file": "f21.asx",
+      "purpose": "Remote nested playlists are not fetched implicitly",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "expectation": "proposed_server_policy",
+      "sha256": "a31632351e35fba7eca4914c36802458b4775a66a4f773a828824a4c3c2cb874",
+      "diagnostic": "Remote ENTRYREF unsupported",
+      "no_network": true
+    },
+    {
+      "id": "f22",
+      "file": "f22.asx",
+      "purpose": "A child resolves its paths relative to its own directory",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "B",
+        "C"
+      ],
+      "expectation": "required",
+      "sha256": "61b30651c5a76f468637465a758fe1c2965fdfa13d7b9d9bac5410c9f20671c8"
+    },
+    {
+      "id": "f23",
+      "file": "f23.asx",
+      "purpose": "Referenced child skips SKIPIFREF YES entries",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "B"
+      ],
+      "expectation": "required",
+      "sha256": "88ea992435b8c6fe05d59c2ce9fe641e349b903d0a1659dc81c888801af47c72"
+    },
+    {
+      "id": "f24",
+      "file": "f24.asx",
+      "purpose": "The same SKIPIFREF child played directly retains its entries",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "expectation": "required",
+      "sha256": "b43e5d565bbb1a6f4c9a22c4afc9fa605fcc214240184158596d5636a99e1c4e"
+    },
+    {
+      "id": "f25",
+      "file": "f25.asx",
+      "purpose": "Root versus entry metadata inheritance needs explicit field mapping",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": null,
+      "expectation": "requires_decision",
+      "sha256": "4fba6e6ebb03287299c203450fdc5f1ad739b813decc18d05d04001c3ce1ed82",
+      "decision": "Choose creator/author/rights fields and precedence without silently overwriting embedded artist tags."
+    },
+    {
+      "id": "f26",
+      "file": "f26.asx",
+      "purpose": "Existing PARAM and writeThrough behavior must remain compatible",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "expectation": "required",
+      "sha256": "eae92c51b4ba75f9e21bb851e4317ad44a4dc62d04395609f84ec427a09eae62",
+      "metadata_assertions": [
+        "PARAM extensions retained",
+        "No metadata leaks into following B",
+        "No media-tag bytes written"
+      ]
+    },
+    {
+      "id": "f27",
+      "file": "f27.asx",
+      "purpose": "Clipping and marker tags do not falsely change advertised duration",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "proposed_server_policy",
+      "sha256": "c124c3a9542c92cf8a04f38cfbd2f552591db72eb80c3a5c25a68263f91597bc",
+      "diagnostic": "Clip/marker playback semantics unsupported",
+      "assertion": "Original full media bytes and duration preserved; no claim of clip enforcement"
+    },
+    {
+      "id": "f28",
+      "file": "f28.asx",
+      "purpose": "Presentation/event URLs are never executed during import",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "7dc4fc42bfa2ff3e8369983c53df2a34692f57b86fc5e3006376cb9346516934",
+      "no_network": true
+    },
+    {
+      "id": "f29",
+      "file": "f29.asx",
+      "purpose": "Keep legacy root BASE media-reference behavior",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "b523a6c2935514c10b0abc8780520f956327263a0b9e641eaaf84ce9db5dc3ed"
+    },
+    {
+      "id": "f30",
+      "file": "f30.asx",
+      "purpose": "Entry BASE scope is distinct from script-command URL flipping",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": null,
+      "expectation": "requires_decision",
+      "sha256": "be9ebed2e20a834c02693a40f31506098731026b2e8965474285a4bb3c85193d",
+      "decision": "Do not reinterpret Microsoft script-command BASE as a general REF URI base without an explicit compatibility policy."
+    },
+    {
+      "id": "f31",
+      "file": "f31.asx",
+      "purpose": "UTF-16 XML does not lose repeated Unicode entries",
+      "xml": "valid",
+      "encoding": "utf-16",
+      "expected": [
+        "A",
+        "B",
+        "A",
+        "B"
+      ],
+      "expectation": "required",
+      "sha256": "7cdec22afb7cfc8b0dec3520bf9374c1b629c981819ce452f8c21bf0cc7e8be1"
+    },
+    {
+      "id": "f32",
+      "file": "f32.asx",
+      "purpose": "Empty list remains empty",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "6d52fd9ccae8b8e603c624183d03b3405803eecfd9c5e8e396543d0a07895906"
+    },
+    {
+      "id": "f33",
+      "file": "f33.asx",
+      "purpose": "Mixed audio/video source order and repeats",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "V",
+        "A"
+      ],
+      "expectation": "required",
+      "sha256": "a5e80ff0a8b99a50ba69521ad195bbcc83504bf8d5d9356e54023c704a0c9c73"
+    },
+    {
+      "id": "f34",
+      "file": "f34.asx",
+      "purpose": "Malformed XML is rejected before database mutation",
+      "xml": "invalid",
+      "encoding": "utf-8",
+      "expected": [],
+      "expectation": "required",
+      "sha256": "38c78a94c99eba4aacd96c78ffebc8fe75b1c208fc85a05387654fb7815199ab",
+      "outcome": "reject"
+    },
+    {
+      "id": "f35",
+      "file": "f35.asx",
+      "purpose": "Existing REF writeThrough title override and state reset",
+      "xml": "valid",
+      "encoding": "utf-8",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "expectation": "required",
+      "sha256": "d766b217ed17d07b3c4a39a030fe5dcf484115927177c782e84bfb02fceaf657",
+      "metadata_assertions": [
+        "First playlist item uses Override",
+        "Next item uses embedded Second",
+        "Database writeThrough applies once, not once per view",
+        "Actual media tag bytes remain unchanged"
+      ]
+    }
+  ]
+}
