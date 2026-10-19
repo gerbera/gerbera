@@ -39,8 +39,10 @@
     <map from="wma" to="audio/x-ms-wma" />
     <map from="wmv" to="video/x-ms-wmv" />
     <map from="wmx" to="video/x-ms-wmx" />
+    <map from="wpl" to="application/vnd.ms-wpl" />
     <map from="wv" to="audio/x-wavpack" />
     <map from="wvx" to="video/x-ms-wvx" />
+    <map from="xspf" to="application/xspf+xml" />
     <!-- Uncomment the line below for PS3 divx support -->
     <!-- <map from="avi" to="video/divx" /> -->
     <!-- Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 -->
@@ -54,6 +56,8 @@
   </mimetype-upnpclass>
   <mimetype-contenttype>
     <treat mimetype="application/ogg" as="ogg" />
+    <treat mimetype="application/vnd.ms-wpl" as="playlist" />
+    <treat mimetype="application/xspf+xml" as="playlist" />
     <treat mimetype="audio/L16" as="pcm" />
     <treat mimetype="audio/flac" as="flac" />
     <treat mimetype="audio/mp4" as="mp4" />

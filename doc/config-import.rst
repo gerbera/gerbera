@@ -545,6 +545,45 @@ playlist. Custom wrappers should return the standard function's result.
 For compatibility, a custom function that does not return an array does not
 trigger this cleanup.
 
+The standard playlist importer supports M3U/M3U8, PLS, ASX, static Windows Media
+Playlists (WPL) and XSPF version 1. WPL and XSPF preserve source order and repeated
+entries, including mixed audio/video lists. Local entries use the referenced
+media's metadata and resources; a playlist title is used only when the media has
+no title. Playlist containers retain the usual filename-derived name.
+
+WPL reads ``smil/body/seq/media/@src``. Relative Windows backslashes are accepted
+as directory separators. WMP ``cid``/``tid`` repair and dynamic
+``smartPlaylist`` database queries are not supported. Absolute Windows drive and
+UNC paths are not mapped to Linux/macOS paths: use server-relative paths or
+local file URIs instead.
+
+XSPF reads ``playlist/trackList/track/location`` in the
+``http://xspf.org/ns/0/`` namespace, with equivalent namespace prefixes and
+inherited ``xml:base``. Multiple locations in one track are alternatives: the
+first usable location creates one position. Repeated track elements remain
+separate positions. Identifier, image, attribution and extension elements do
+not create media entries.
+
+Both formats use XML encoding declarations/BOMs, independently of
+``playlist-charset``. XSPF paths are URI references: encode spaces as ``%20``,
+literal percent signs as ``%25``, ``#`` as ``%23`` and ``?`` in Linux/macOS
+filenames as ``%3F``. WPL native paths retain a literal ``?``. URI decoding
+is performed once and does not replace ``+`` with a space. Local ``file:`` URIs
+with no host or ``localhost`` are supported; remote file authorities do not
+mount network shares. HTTP(S) references remain external URLs and are not
+downloaded while parsing. External URLs use the existing playlist MIME default
+when no media metadata is available.
+
+Malformed XML, DTDs, an invalid document structure or unsupported dynamic WPL
+queries are rejected before the importer creates entries. An unavailable media
+reference is skipped while later valid entries continue to import.
+
+New configurations include ``wpl`` to ``application/vnd.ms-wpl`` and ``xspf`` to
+``application/xspf+xml`` extension mappings, with both MIME types mapped to the
+``playlist`` content type. Existing configurations with explicit mapping lists
+should include these mappings as well. After adding mappings, restart Gerbera
+and rescan the playlist directory.
+
    .. confval:: playlist create-link
           :type: :confval:`Boolean`
           :required: false
