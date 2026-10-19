@@ -975,6 +975,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
     /// @brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
     static const std::map<std::string, std::string> mtUpnpDefaults {
         { "application/ogg", UPNP_CLASS_MUSIC_TRACK },
+        { MIME_TYPE_WPL_PLAYLIST, UPNP_CLASS_PLAYLIST_ITEM },
+        { MIME_TYPE_XSPF_PLAYLIST, UPNP_CLASS_PLAYLIST_ITEM },
         { "audio/*", UPNP_CLASS_MUSIC_TRACK },
         { "image/*", UPNP_CLASS_IMAGE_ITEM },
         { "video/*", UPNP_CLASS_VIDEO_ITEM },

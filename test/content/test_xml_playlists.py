@@ -71,6 +71,13 @@ class Fixture:
             self.expected[name.stem] = (
                 case["expected"] if case["outcome"] == "import" else []
             )
+        # A basename ending in a format suffix must not lose that suffix.
+        for source, target in [
+            ("w01.wpl", "double.wpl.wpl"),
+            ("x01.xspf", "double.xspf.xspf"),
+        ]:
+            shutil.copyfile(self.pl / source, self.pl / target)
+            self.expected[Path(target).stem] = self.expected[Path(source).stem]
         order = ["A", "V", "B", "V", "A"]
         paths = ["../" + self.manifest["media"][key] for key in order]
         for ext in ["m3u", "m3u8", "pls", "asx"]:
@@ -323,6 +330,15 @@ class Fixture:
             self.record(
                 f"{len(self.manifest['cases'])} XML cases and four legacy formats, both views and full resources"
             )
+            # Refresh the playlist sources as well as the unmodified media.
+            # Generic XML types must retain their container names in grb mode.
+            time.sleep(1.1)
+            for name in ["w01.wpl", "x01.xspf", "double.wpl.wpl", "double.xspf.xspf"]:
+                path = self.pl / name
+                text = path.read_text(encoding="utf-8")
+                path.write_text(text + "\n", encoding="utf-8")
+            self.rescan()
+            self.record("local playlist refresh preserves names and all sequences")
             self.rescan()
             self.record("unchanged rescan preserves all sequences")
             self.rescan()
