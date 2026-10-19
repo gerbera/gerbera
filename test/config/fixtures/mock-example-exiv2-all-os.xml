@@ -462,8 +462,10 @@
         <map from="wma" to="audio/x-ms-wma" />
         <map from="wmv" to="video/x-ms-wmv" />
         <map from="wmx" to="video/x-ms-wmx" />
+        <map from="wpl" to="application/vnd.ms-wpl" />
         <map from="wv" to="audio/x-wavpack" />
         <map from="wvx" to="video/x-ms-wvx" />
+        <map from="xspf" to="application/xspf+xml" />
         <!-- Uncomment the line below for PS3 divx support -->
         <!-- <map from="avi" to="video/divx" /> -->
         <!-- Uncomment the line below for D-Link DSM / ZyXEL DMA-1000 -->
@@ -471,12 +473,16 @@
       </extension-mimetype>
       <mimetype-upnpclass>
         <map from="application/ogg" to="object.item.audioItem.musicTrack" />
+        <map from="application/vnd.ms-wpl" to="object.item.playlistItem" />
+        <map from="application/xspf+xml" to="object.item.playlistItem" />
         <map from="audio/*" to="object.item.audioItem.musicTrack" />
         <map from="image/*" to="object.item.imageItem" />
         <map from="video/*" to="object.item.videoItem" />
       </mimetype-upnpclass>
       <mimetype-contenttype>
         <treat mimetype="application/ogg" as="ogg" />
+        <treat mimetype="application/vnd.ms-wpl" as="playlist" />
+        <treat mimetype="application/xspf+xml" as="playlist" />
         <treat mimetype="audio/L16" as="pcm" />
         <treat mimetype="audio/flac" as="flac" />
         <treat mimetype="audio/mp4" as="mp4" />
@@ -545,6 +551,8 @@
   <transcoding enabled="no" fetch-buffer-size="262144" fetch-buffer-fill-size="0" fetch-buffer-timeout="2" fetch-buffer-retry-count="2" curl-chunk-size="16384">
     <mimetype-profile-mappings allow-unused="no">
       <transcode mimetype="application/ogg" using="vlcmpeg" />
+      <treat mimetype="application/vnd.ms-wpl" as="playlist" />
+      <treat mimetype="application/xspf+xml" as="playlist" />
       <transcode mimetype="audio/ogg" using="ogg2mp3" />
       <transcode mimetype="audio/x-flac" using="int2mp3" />
       <transcode mimetype="video/x-flv" using="vlcmpeg" />
