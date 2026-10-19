@@ -1246,7 +1246,11 @@ Autoscan Directory
    .. code:: xml
 
       <directory location="/media" mode="timed" interval="3600"
-                 recursive="no" hidden-files="no"/>
+                 recursive="no" hidden-files="no">
+          <container-type-audio item-limit="0">object.container.album.musicAlbum</container-type-audio>
+          <container-type-video item-limit="20">object.container</container-type-video>
+          <container-type-image item-limit="10">object.container.album.photoAlbum</container-type-image>
+      </directory>
       <directory location="/audio" mode="inotify"
                  recursive="yes" hidden-files="no"/>
       <directory location="/video" mode="manual"
@@ -1431,6 +1435,9 @@ Values can be concatenated by ``|``. Allowed values are:
 | TV               | object.item.videoItem.videoBroadcast |
 +------------------+--------------------------------------+
 
+Directory Elements
+^^^^^^^^^^^^^^^^^^
+
 .. confval:: container-type-audio
    :type: :confval:`String`
    :required: false
@@ -1451,13 +1458,27 @@ Values can be concatenated by ``|``. Allowed values are:
 
    .. code:: xml
 
-      container-type-audio="object.container"
-      container-type-image="object.container"
-      container-type-video="object.container"
+      <container-type-audio item-limit="0">object.container.album.musicAlbum</container-type-audio>
+      <container-type-video item-limit="20">object.container</container-type-video>
+      <container-type-image item-limit="10">object.container.album.photoAlbum</container-type-image>
 
 Set the default container type for virtual containers and for physical containers in grb-mode during import.
 This is especially useful if the virtual layout simulates the filesystem structure and is not derived from metadata.
 The first object that is added to the container determines the property (audio/image/video) used.
+
+.. confval:: item-limit
+   :type: :confval:`Integer`
+   :required: false
+   :default: ``3``
+..
+
+   .. versionadded: HEAD
+
+   Set the minimal number of items required to assign the container type during import.
+   In order to assign a container-type, the number of items of the type must exceed the
+   privious type and the limit.
+   In the above example, if there is at least 1 audio item, the folder will be created as music album.
+   Only if there are more than 10 images and and more images than music files the folder will be created as photo album.
 
 ******************
 System Directories

@@ -86,6 +86,8 @@ private:
     std::shared_ptr<CdsObject> firstObject;
     /// @brief counters of child object types for container type
     std::map<ObjectType, std::size_t> itemCounter;
+    /// @brief limits of child object types for container type
+    std::map<ObjectType, std::size_t> itemLimit;
 
     /// @brief parent container (if cdsObject is a item)
     std::shared_ptr<CdsContainer> parentObject;
@@ -93,10 +95,12 @@ private:
     mutable std::mutex counterMutex;
 
 public:
-    ContentState(fs::directory_entry dirEntry,
+    ContentState(
+        fs::directory_entry dirEntry,
         ImportState state,
-        std::chrono::seconds mtime = std::chrono::seconds::zero(),
-        std::shared_ptr<CdsObject> cdsObject = nullptr);
+        const std::shared_ptr<AutoscanDirectory>& autoscanDir,
+        std::chrono::seconds mtime,
+        std::shared_ptr<CdsObject> cdsObject);
 
     void setObject(ImportState state, std::shared_ptr<CdsObject> cdsObject)
     {
@@ -144,6 +148,7 @@ public:
         const fs::path& entryPath,
         const fs::directory_entry& dirEntry,
         ImportState state,
+        const std::shared_ptr<AutoscanDirectory>& autoscanDir,
         std::chrono::seconds mtime = std::chrono::seconds::zero(),
         const std::shared_ptr<CdsObject>& cdsObject = nullptr);
     /// @brief get object if stored in cache map

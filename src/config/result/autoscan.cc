@@ -69,6 +69,7 @@ AutoscanDirectory::AutoscanDirectory(
     , scanID(INVALID_SCAN_ID)
     , containerMap(containerMap)
 {
+    containerLimits = std::map<ObjectType, std::size_t> { { ObjectType::Audio, 3 }, { ObjectType::Video, 3 }, { ObjectType::Image, 3 } };
     setMediaType(mediaType);
 }
 

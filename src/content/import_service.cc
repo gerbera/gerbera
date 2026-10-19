@@ -124,7 +124,12 @@ void UpnpMap::initMap(std::vector<UpnpMap>& target, const std::map<std::string, 
     }
 }
 
-ContentState::ContentState(fs::directory_entry dirEntry, ImportState state, std::chrono::seconds mtime, std::shared_ptr<CdsObject> cdsObject)
+ContentState::ContentState(
+    fs::directory_entry dirEntry,
+    ImportState state,
+    const std::shared_ptr<AutoscanDirectory>& autoscanDir,
+    std::chrono::seconds mtime,
+    std::shared_ptr<CdsObject> cdsObject)
     : state(state)
     , dirEntry(std::move(dirEntry))
     , mtime(mtime)
@@ -136,24 +141,34 @@ ContentState::ContentState(fs::directory_entry dirEntry, ImportState state, std:
     itemCounter[ObjectType::Playlist] = 0;
     itemCounter[ObjectType::Folder] = 0;
     itemCounter[ObjectType::Unknown] = 0;
+
+    itemLimit[ObjectType::Audio] = autoscanDir ? autoscanDir->getContainerLimits().at(ObjectType::Audio) : 3;
+    itemLimit[ObjectType::Video] = autoscanDir ? autoscanDir->getContainerLimits().at(ObjectType::Video) : 3;
+    itemLimit[ObjectType::Image] = autoscanDir ? autoscanDir->getContainerLimits().at(ObjectType::Image) : 3;
+    itemLimit[ObjectType::Playlist] = 3;
+    itemLimit[ObjectType::Folder] = 3;
+    itemLimit[ObjectType::Unknown] = 3;
 }
+
+static std::map<ObjectType, AutoscanMediaMode> amm = {
+    { ObjectType::Audio, AutoscanMediaMode::Audio },
+    { ObjectType::Video, AutoscanMediaMode::Video },
+    { ObjectType::Image, AutoscanMediaMode::Image },
+    { ObjectType::Playlist, AutoscanMediaMode::Mixed },
+    { ObjectType::Folder, AutoscanMediaMode::Mixed },
+    { ObjectType::Unknown, AutoscanMediaMode::Mixed },
+};
 
 AutoscanMediaMode ContentState::getMediaMode() const
 {
     AutoscanMediaMode mediaMode = AutoscanMediaMode::Mixed;
-    std::size_t maxValue = 3; // at least 4 items are required to set upnp_class
     std::lock_guard<std::mutex> lock(counterMutex);
-    if (itemCounter.at(ObjectType::Audio) > maxValue) {
-        mediaMode = AutoscanMediaMode::Audio;
-        maxValue = itemCounter.at(ObjectType::Audio);
-    }
-    if (itemCounter.at(ObjectType::Image) > maxValue) {
-        mediaMode = AutoscanMediaMode::Image;
-        maxValue = itemCounter.at(ObjectType::Image);
-    }
-    if (itemCounter.at(ObjectType::Video) > maxValue) {
-        mediaMode = AutoscanMediaMode::Video;
-        maxValue = itemCounter.at(ObjectType::Video);
+    std::size_t maxValue = 0;
+    for (auto&& ot : { ObjectType::Audio, ObjectType::Image, ObjectType::Video }) {
+        if (itemCounter.at(ot) > itemLimit.at(ot) && itemCounter.at(ot) > maxValue) {
+            mediaMode = amm.at(ot);
+            maxValue = itemCounter.at(ot);
+        }
     }
     return mediaMode;
 }
@@ -162,6 +177,7 @@ void StateCache::cacheState(
     const fs::path& entryPath,
     const fs::directory_entry& dirEntry,
     ImportState state,
+    const std::shared_ptr<AutoscanDirectory>& autoscanDir,
     std::chrono::seconds mtime,
     const std::shared_ptr<CdsObject>& cdsObject)
 {
@@ -172,7 +188,7 @@ void StateCache::cacheState(
         return;
 
     if (contentStateCache.find(entryPath) == contentStateCache.end()) {
-        contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, state, mtime, cdsObject);
+        contentStateCache[entryPath] = std::make_shared<ContentState>(dirEntry, state, autoscanDir, mtime, cdsObject);
     } else {
         state = contentStateCache.at(entryPath)->getState() < state ? state : contentStateCache[entryPath]->getState();
         if (!cdsObject)
@@ -371,7 +387,7 @@ std::shared_ptr<CdsObject> ImportService::doImport(
 
     if (!rootPath.empty()) {
         auto rootDirEntry = fs::directory_entry(rootPath);
-        stateCache->cacheState(rootPath, rootDirEntry, ImportState::New, toSeconds(rootDirEntry.last_write_time(ec)));
+        stateCache->cacheState(rootPath, rootDirEntry, ImportState::New, autoscanDir, toSeconds(rootDirEntry.last_write_time(ec)));
     }
     auto rootEntry = fs::directory_entry(location, ec);
     if (ec) {
@@ -384,7 +400,7 @@ std::shared_ptr<CdsObject> ImportService::doImport(
         return {};
     }
 
-    stateCache->cacheState(location, rootEntry, ImportState::New, toSeconds(rootEntry.last_write_time(ec)), settings.changedObject);
+    stateCache->cacheState(location, rootEntry, ImportState::New, autoscanDir, toSeconds(rootEntry.last_write_time(ec)), settings.changedObject);
     if (isDir) {
         readDir(stateCache, location, settings);
     } else {
@@ -439,16 +455,16 @@ void ImportService::readDir(
         if (entryPath.empty() || isHiddenFile(entryPath, true, dirEntry, settings)) {
             continue;
         }
-        stateCache->cacheState(entryPath, dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
+        stateCache->cacheState(entryPath, dirEntry, ImportState::New, autoscanDir, toSeconds(dirEntry.last_write_time(ec)));
         if (dirEntry.is_directory(ec) && settings.recursive) {
             if (!ec) {
                 readDir(stateCache, entryPath, settings);
             } else {
-                stateCache->cacheState(entryPath, dirEntry, ImportState::Broken);
+                stateCache->cacheState(entryPath, dirEntry, ImportState::Broken, autoscanDir);
                 log_error("ImportService::readDir {}: Failed to read {}, {}", location.c_str(), entryPath.c_str(), ec.message());
             }
         } else if (ec) {
-            stateCache->cacheState(entryPath, dirEntry, ImportState::Broken);
+            stateCache->cacheState(entryPath, dirEntry, ImportState::Broken, autoscanDir);
             log_error("ImportService::readDir {}: Failed to read {}, {}", location.c_str(), entryPath.c_str(), ec.message());
         }
     }
@@ -460,17 +476,17 @@ void ImportService::readFile(
     const fs::path& location)
 {
     auto dirEntry = fs::directory_entry(location.parent_path());
-    stateCache->cacheState(location.parent_path(), dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
+    stateCache->cacheState(location.parent_path(), dirEntry, ImportState::New, autoscanDir, toSeconds(dirEntry.last_write_time(ec)));
 
     auto entryPath = dirEntry.path().parent_path();
     while (entryPath != "/" && !entryPath.empty() && entryPath != rootPath) {
         dirEntry.assign(entryPath, ec);
         if (ec) {
-            stateCache->cacheState(entryPath, dirEntry, ImportState::Broken);
+            stateCache->cacheState(entryPath, dirEntry, ImportState::Broken, autoscanDir);
             log_error("ImportService::readFile {}: Failed to navigate up {}, {}", location.c_str(), entryPath.c_str(), ec.message());
             break;
         }
-        stateCache->cacheState(entryPath, dirEntry, ImportState::New, toSeconds(dirEntry.last_write_time(ec)));
+        stateCache->cacheState(entryPath, dirEntry, ImportState::New, autoscanDir, toSeconds(dirEntry.last_write_time(ec)));
         entryPath = entryPath.parent_path();
     }
 }
@@ -513,7 +529,7 @@ bool ImportService::isHiddenFile(
     if ((name.at(0) == '.' && !settings.hidden)
         || (!settings.followSymlinks && dirEntry.is_symlink())
         || config->getConfigFilename() == entryPath) {
-        importStateCache->cacheState(entryPath, dirEntry, ImportState::ToDelete);
+        importStateCache->cacheState(entryPath, dirEntry, ImportState::ToDelete, autoscanDir);
         log_vdebug("hidden {}", entryPath.string());
         return true;
     }
@@ -937,7 +953,7 @@ void ImportService::addExtraObjects(
         auto cueObj = database->loadObject(id);
         auto location = cueObj->getLocation();
         auto dirEntry = fs::directory_entry(location);
-        stateCache->cacheState(location / cueObj->getTitle(), dirEntry, ImportState::Created, toSeconds(dirEntry.last_write_time(ec)));
+        stateCache->cacheState(location / cueObj->getTitle(), dirEntry, ImportState::Created, autoscanDir, toSeconds(dirEntry.last_write_time(ec)));
     }
 }
 

@@ -955,9 +955,9 @@
     <xs:element name="directory">
         <xs:complexType>
             <xs:all>
-                <xs:element name="container-type-audio" minOccurs="0" type="xs:string"/>
-                <xs:element name="container-type-video" minOccurs="0" type="xs:string"/>
-                <xs:element name="container-type-image" minOccurs="0" type="xs:string"/>
+                <xs:element name="container-type-audio" type="container-type" minOccurs="0"/>
+                <xs:element name="container-type-video" type="container-type" minOccurs="0"/>
+                <xs:element name="container-type-image" type="container-type" minOccurs="0"/>
             </xs:all>
             <xs:attribute name="location" type="xs:string" use="required"/>
 
@@ -978,6 +978,14 @@
             <xs:attribute name="mode" type="scanMode" use="required"/>
         </xs:complexType>
     </xs:element>
+
+    <xs:complexType name="container-type">
+        <xs:simpleContent>
+            <xs:extension base="xs:string">
+                <xs:attribute name="item-limit" type="xs:nonNegativeInteger" default="3"/>
+            </xs:extension>
+        </xs:simpleContent>
+    </xs:complexType>
 
     <xs:element name="directories">
         <xs:complexType>

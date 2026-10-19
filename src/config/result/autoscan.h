@@ -46,6 +46,7 @@
 class CdsContainer;
 class Database;
 class ImportService;
+enum class ObjectType;
 
 #define AUTOSCAN_INOTIFY "inotify"
 #define AUTOSCAN_TIMED "timed"
@@ -220,13 +221,23 @@ public:
     std::shared_ptr<Timer::Parameter> getTimerParameter() const;
 
     /// @brief Get the container types dictionary
-    const std::map<AutoscanMediaMode, std::string>& getContainerTypes()
+    const std::map<AutoscanMediaMode, std::string>& getContainerTypes() const
     {
         return containerMap;
     }
     void setContainerType(AutoscanMediaMode entry, const std::string& value)
     {
         containerMap[entry] = value;
+    }
+
+    /// @brief Get the container type limits for dictionary
+    const std::map<ObjectType, std::size_t>& getContainerLimits() const
+    {
+        return containerLimits;
+    }
+    void setContainerLimit(ObjectType entry, std::size_t value)
+    {
+        containerLimits[entry] = value;
     }
 
     void setImportService(std::shared_ptr<ImportService> is) { importService = std::move(is); }
@@ -283,6 +294,7 @@ protected:
     std::map<std::string, bool> scanContent { { UPNP_CLASS_AUDIO_ITEM, true }, { UPNP_CLASS_IMAGE_ITEM, true }, { UPNP_CLASS_VIDEO_ITEM, true } };
     int mediaType { -1 };
     std::map<AutoscanMediaMode, std::string> containerMap;
+    std::map<ObjectType, std::size_t> containerLimits;
     std::shared_ptr<ImportService> importService;
 
     constexpr const static int INVALID_SCAN_ID = -1;

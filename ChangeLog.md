@@ -7,6 +7,7 @@
 - Allow multiple clients by ip
 - Bump serialize-javascript from 7.1.1 to 7.1.2 in /gerbera-web
 - Default Sorting for Browse
+- Define Limits for Containter Type Selection
 - Docker: fix ownership of files created with PUID/PGID, rename UID/GID to PUID/PGID
 - Extend Mime Mapping
 - Fix CaptionInfo.sec never being sent to Samsung TVs
