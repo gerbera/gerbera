@@ -225,8 +225,6 @@
   <transcoding enabled="no">
     <mimetype-profile-mappings>
       <transcode mimetype="application/ogg" using="vlcmpeg" />
-      <treat mimetype="application/vnd.ms-wpl" as="playlist" />
-      <treat mimetype="application/xspf+xml" as="playlist" />
       <transcode mimetype="audio/ogg" using="ogg2mp3" />
       <transcode mimetype="video/x-flv" using="vlcmpeg" />
     </mimetype-profile-mappings>
