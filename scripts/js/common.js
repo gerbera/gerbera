@@ -94,6 +94,10 @@ function getPlaylistType(mimetype) {
     return 'pls';
   if (mimetype == 'video/x-ms-asf' || mimetype === 'video/x-ms-asx')
     return 'asx';
+  if (mimetype === 'application/vnd.ms-wpl')
+    return 'wpl';
+  if (mimetype === 'application/xspf+xml')
+    return 'xspf';
   return '';
 }
 

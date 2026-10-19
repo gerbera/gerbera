@@ -1,5 +1,5 @@
 {
-  "status": "Preparation only: importer behavior not yet implemented or tested",
+  "status": "Executable native and real-server integration corpus",
   "issue": "https://github.com/gerbera/gerbera/issues/3997",
   "fixture_root": "/fixture/xml",
   "playlist_directory": "/fixture/xml/pl",
@@ -12,7 +12,10 @@
     "Q": "media/quote\"name.wav",
     "P": "media/100% ready+.wav",
     "H": "media/hash#name.wav",
-    "D": "media/100%25.wav"
+    "D": "media/100%25.wav",
+    "R": "media/Why?.wav",
+    "K": "media/µ東京🎵 mix +%#?&=;,:@[]{}()!$'\".wav",
+    "L": "media/literal\\name.wav"
   },
   "cases": [
     {
@@ -386,6 +389,86 @@
       ],
       "stdlib_parseable": true,
       "sha256": "7f7dcccaf29494214a8b4aa3a2fe7bb063d211481f89000c940753c27416539e"
+    },
+    {
+      "file": "w18.wpl",
+      "purpose": "Literal question mark in native Linux filename, URI encoding or remote query",
+      "outcome": "import",
+      "expected": [
+        "R"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "302cab5ac8636bf68d47625ab0a79c5315a609cf0f15a994e939c102c4a09a28"
+    },
+    {
+      "file": "x21.xspf",
+      "purpose": "Literal question mark in native Linux filename, URI encoding or remote query",
+      "outcome": "import",
+      "expected": [
+        "R"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "5cb94e65ee33415118b24df856ed120225c6181532c3fbe5f7fd0247a98a502a"
+    },
+    {
+      "file": "x22.xspf",
+      "purpose": "Literal question mark in native Linux filename, URI encoding or remote query",
+      "outcome": "import",
+      "expected": [
+        "R"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "b8a722961ef750ff8a4e2e4476319a84edbf2423e4e6a9e7e078495f55468ba0"
+    },
+    {
+      "file": "x23.xspf",
+      "purpose": "Literal question mark in native Linux filename, URI encoding or remote query",
+      "outcome": "import",
+      "expected": [
+        "HTTPS"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "6247541d13fd31644e5a13f3af99b708e852daccea9f8e7609b04f4d6463729a"
+    },
+    {
+      "file": "w19.wpl",
+      "purpose": "Critical Linux filename characters, XML escaping, Unicode and one URI decode",
+      "outcome": "import",
+      "expected": [
+        "K"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "322650bafe54f8efbc602fbca18f0799172b58de23eb4fb15d443fe44def5eb3"
+    },
+    {
+      "file": "w20.wpl",
+      "purpose": "Critical Linux filename characters, XML escaping, Unicode and one URI decode",
+      "outcome": "import",
+      "expected": [
+        "L"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "93e0f40f613e4e9ec23d959f8cc2e3f5cafbb5610c50b711a3fd2bf985ed323a"
+    },
+    {
+      "file": "x24.xspf",
+      "purpose": "Critical Linux filename characters, XML escaping, Unicode and one URI decode",
+      "outcome": "import",
+      "expected": [
+        "K"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "aae4beadba4c5f9376007decd09f94f7fb9081c5384b99c85a9757af54cd10c9"
+    },
+    {
+      "file": "x25.xspf",
+      "purpose": "Critical Linux filename characters, XML escaping, Unicode and one URI decode",
+      "outcome": "import",
+      "expected": [
+        "L"
+      ],
+      "stdlib_parseable": true,
+      "sha256": "1ef1d4d483a18c0f33cf21059d93f5e12a091534512b312e6d0cb9fdf376e4a4"
     }
   ]
 }

@@ -51,6 +51,32 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
+static duk_ret_t jsReadPlaylistEntry(duk_context* ctx)
+{
+    auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
+    if (!self)
+        return 0;
+    const XmlPlaylistEntry* entry;
+    try {
+        entry = self->readPlaylistEntry();
+    } catch (const std::runtime_error& e) {
+        log_error("{}", EX(e));
+        return duk_error(ctx, DUK_ERR_ERROR, "Aborting playlist import");
+    }
+    if (!entry)
+        return 0;
+    duk_push_object(ctx);
+    duk_push_string(ctx, entry->title.c_str());
+    duk_put_prop_string(ctx, -2, "title");
+    duk_push_array(ctx);
+    for (duk_uarridx_t i = 0; i < entry->locations.size(); ++i) {
+        duk_push_string(ctx, entry->locations[i].c_str());
+        duk_put_prop_index(ctx, -2, i);
+    }
+    duk_put_prop_string(ctx, -2, "locations");
+    return 1;
+}
+
 PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
     : ParserScript(content, parent, "playlist", "pls", true)
 {
@@ -58,7 +84,16 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& conte
     linkObjects = config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS);
     followSymlinks = config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
     hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
-    charsetMode = EnumOption<TextFileCharset>::getEnumOption(config, ConfigVal::IMPORT_PLAYLIST_CHARSET_MODE);
+    defineFunction("readPlaylistEntry", jsReadPlaylistEntry, 0);
+}
+
+const XmlPlaylistEntry* PlaylistParserScript::readPlaylistEntry()
+{
+    if (currentTask && !currentTask->isValid())
+        throw_std_runtime_error("Aborting playlist import after cancellation");
+    if (xmlPosition >= xmlEntries.size())
+        return nullptr;
+    return &xmlEntries[xmlPosition++];
 }
 
 std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(
@@ -182,7 +217,15 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     log_debug("Checking playlist {} ...", obj->getLocation().string());
-    if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
+    GrbFile file(item->getLocation());
+    bool isXmlPlaylist = item->getMimeType() == MIME_TYPE_WPL_PLAYLIST || item->getMimeType() == MIME_TYPE_XSPF_PLAYLIST;
+    xmlEntries.clear();
+    xmlPosition = 0;
+    if (isXmlPlaylist) {
+        xmlEntries = readXmlPlaylist(item->getLocation(), item->getMimeType() == MIME_TYPE_WPL_PLAYLIST ? XmlPlaylistType::Wpl : XmlPlaylistType::Xspf);
+    } else if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
+        currentHandle = file.open("r");
+    } else {
         pugi::xml_parse_result result = xmlDoc.load_file(item->getLocation().c_str());
         if (result.status != pugi::xml_parse_status::status_ok) {
             throw ConfigParseException(result.description());
@@ -195,6 +238,9 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     std::vector<int> result;
+    auto previousConverter = sc;
+    if (isXmlPlaylist)
+        sc = converterManager->i2i(); // XML has already been decoded to UTF-8.
     try {
         if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
             auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
@@ -205,10 +251,14 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
         result = call(obj, nullptr, playlistFunction, rootPath, "", hasResult);
     } catch (const std::runtime_error& e) {
         log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), EX(e));
+        sc = previousConverter;
+        xmlEntries.clear();
         cleanUp();
         throw;
     }
 
+    sc = previousConverter;
+    xmlEntries.clear();
     cleanUp();
     log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
     return result;
