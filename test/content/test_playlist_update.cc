@@ -20,6 +20,10 @@
 #include "context.h"
 #include "upnp/clients.h"
 
+#ifdef ONLINE_SERVICES
+#include "content/onlineservice/online_service.h"
+#endif
+
 #ifdef HAVE_INOTIFY
 #include "content/inotify/autoscan_inotify.h"
 #include "content/inotify/directory_watch.h"

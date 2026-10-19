@@ -117,6 +117,10 @@ class Fixture:
             "server/storage/sqlite3/upgrade-file",
             args.source_root / "src/database/sqlite3/sqlite3-upgrade.xml",
         )
+        set_value(
+            "server/storage/sqlite3/drop-file",
+            args.source_root / "src/database/sqlite3/sqlite3-drop.sql",
+        )
         set_value("server/storage/sqlite3/backup", "").set("enabled", "no")
         set_value("server/ui", "").set("enabled", "yes")
         set_value("server/ui/accounts", "").set("enabled", "no")
