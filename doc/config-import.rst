@@ -580,8 +580,9 @@ reference is skipped while later valid entries continue to import.
 
 New configurations include ``wpl`` to ``application/vnd.ms-wpl`` and ``xspf`` to
 ``application/xspf+xml`` extension mappings, with both MIME types mapped to the
-``playlist`` content type. Existing configurations with explicit mapping lists
-should include these mappings as well. After adding mappings, restart Gerbera
+``playlist`` content type and the ``object.item.playlistItem`` UPnP class.
+Existing configurations with explicit mapping lists should include these
+extension, content-type and UPnP-class mappings as well. After adding mappings, restart Gerbera
 and rescan the playlist directory.
 
    .. confval:: playlist create-link

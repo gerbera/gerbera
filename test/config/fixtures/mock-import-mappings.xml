@@ -50,6 +50,8 @@
   </extension-mimetype>
   <mimetype-upnpclass>
     <map from="application/ogg" to="object.item.audioItem.musicTrack" />
+    <map from="application/vnd.ms-wpl" to="object.item.playlistItem" />
+    <map from="application/xspf+xml" to="object.item.playlistItem" />
     <map from="audio/*" to="object.item.audioItem.musicTrack" />
     <map from="image/*" to="object.item.imageItem" />
     <map from="video/*" to="object.item.videoItem" />
