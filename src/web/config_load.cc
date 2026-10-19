@@ -940,14 +940,26 @@ void Web::ConfigLoad::writeAutoscan(Json::Value& values)
             addValue(values,
                 ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO }),
                 ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, adir->getContainerTypes().at(AutoscanMediaMode::Audio));
+            // item limit for audio
+            addValue(values,
+                ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT }),
+                ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT, adir->getContainerLimits().at(ObjectType::Audio));
             // container type for images
             addValue(values,
                 ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE }),
                 ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE, adir->getContainerTypes().at(AutoscanMediaMode::Image));
+            // item limit for images
+            addValue(values,
+                ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT }),
+                ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT, adir->getContainerLimits().at(ObjectType::Image));
             // container type for videos
             addValue(values,
                 ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO }),
                 ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO, adir->getContainerTypes().at(AutoscanMediaMode::Video));
+            // item limit for videos
+            addValue(values,
+                ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT }),
+                ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT, adir->getContainerLimits().at(ObjectType::Video));
             // active scan count
             addValue(values,
                 ascs->getItemPath(indexList, { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT }),
@@ -1002,14 +1014,26 @@ void Web::ConfigLoad::writeAutoscan(Json::Value& values)
         addNewValue(values,
             ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO }),
             ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO));
+        // item limit for audio
+        addNewValue(values,
+            ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT }),
+            ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT));
         // container type for images
         addNewValue(values,
             ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE }),
             ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE));
+        // item limit for images
+        addNewValue(values,
+            ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT }),
+            ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT));
         // container type for videos
         addNewValue(values,
             ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO }),
             ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO));
+        // item limit for videos
+        addNewValue(values,
+            ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT }),
+            ascs->option, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT, definition->findConfigSetup(ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT));
         // active scan count
         addNewValue(values,
             ascs->getItemPath(ITEM_PATH_NEW, { ConfigVal::A_AUTOSCAN_DIRECTORY_SCANCOUNT }),

@@ -26,6 +26,7 @@
 
 #include "config_setup_autoscan.h" // API
 
+#include "cds/cds_enums.h"
 #include "config/config_definition.h"
 #include "config/config_option_enum.h"
 #include "config/config_options.h"
@@ -50,10 +51,15 @@ std::string ConfigAutoscanSetup::getUniquePath() const
 std::string ConfigAutoscanSetup::getItemPath(const std::vector<std::size_t>& indexList, const std::vector<ConfigVal>& propOptions, const std::string& propText) const
 {
     if (indexList.empty()) {
+        if (propOptions.size() > 1) {
+            return fmt::format("{}/{}/{}[_]/{}/{}{}", xpath, AutoscanDirectory::mapScanmode(scanMode), definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY), definition->mapConfigOption(propOptions[0]), definition->ensureAttribute(propOptions[1]), propText);
+        }
         if (!propOptions.empty())
             return fmt::format("{}/{}/{}[_]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY), definition->ensureAttribute(propOptions[0]));
-        else
-            return fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY));
+        return fmt::format("{}/{}/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY));
+    }
+    if (propOptions.size() > 1) {
+        return fmt::format("{}/{}/{}[{}]/{}/{}{}", xpath, AutoscanDirectory::mapScanmode(scanMode), definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY), indexList[0], definition->mapConfigOption(propOptions[0]), definition->ensureAttribute(propOptions[1]), propText);
     }
     if (!propOptions.empty())
         return fmt::format("{}/{}/{}[{}]/{}", xpath, AutoscanDirectory::mapScanmode(scanMode), definition->mapConfigOption(ConfigVal::A_AUTOSCAN_DIRECTORY), indexList[0], definition->ensureAttribute(propOptions[0]));
@@ -118,15 +124,41 @@ bool ConfigAutoscanSetup::createOptionFromNode(
         cs = definition->findConfigSetup<ConfigBoolSetup>(ConfigVal::A_AUTOSCAN_DIRECTORY_FOLLOWSYMLINKS);
         bool follow = cs->hasXmlElement(child) ? cs->getXmlContent(child, config) : followSymlinks;
 
-        auto ctAudio = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO)->getXmlContent(child, config);
-        auto ctImage = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE)->getXmlContent(child, config);
-        auto ctVideo = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO)->getXmlContent(child, config);
+        auto csLimit = definition->findConfigSetup<ConfigUIntSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT);
+
+        auto csAudio = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO);
+        auto ctAudio = csAudio->getXmlContent(child, config);
+        auto csImage = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE);
+        auto ctImage = csImage->getXmlContent(child, config);
+        auto csVideo = definition->findConfigSetup<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO);
+        auto ctVideo = csVideo->getXmlContent(child, config);
         try {
             auto containerMap = AutoscanDirectory::ContainerTypesDefaults;
             containerMap[AutoscanMediaMode::Audio] = ctAudio;
             containerMap[AutoscanMediaMode::Image] = ctImage;
             containerMap[AutoscanMediaMode::Video] = ctVideo;
             auto adir = std::make_shared<AutoscanDirectory>(location, mode, recursive, true, interval, hidden, follow, mt, containerMap);
+            {
+                pugi::xml_node sub = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO)->getXmlElement(child);
+                if (csLimit->hasXmlElement(sub)) {
+                    auto limit = csLimit->getXmlContent(sub, config);
+                    adir->setContainerLimit(ObjectType::Audio, limit);
+                }
+            }
+            {
+                pugi::xml_node sub = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO)->getXmlElement(child);
+                if (csLimit->hasXmlElement(sub)) {
+                    auto limit = csLimit->getXmlContent(sub, config);
+                    adir->setContainerLimit(ObjectType::Video, limit);
+                }
+            }
+            {
+                pugi::xml_node sub = definition->findConfigSetup<ConfigSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE)->getXmlElement(child);
+                if (csLimit->hasXmlElement(sub)) {
+                    auto limit = csLimit->getXmlContent(sub, config);
+                    adir->setContainerLimit(ObjectType::Image, limit);
+                }
+            }
             adir->setRetryCount(retryCount);
             adir->setLayoutMode(layoutMode);
             adir->setDirTypes(dirtypes);
@@ -242,6 +274,16 @@ bool ConfigAutoscanSetup::updateItem(
                 return true;
             },
         },
+        // ItemLimit Audio
+        {
+            { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT },
+            "ItemLimit Audio",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return fmt::to_string(entry->getContainerLimits().at(ObjectType::Audio)); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setContainerLimit(ObjectType::Audio, definition->findConfigSetup<ConfigUIntSetup>(cfg)->checkIntValue(optValue));
+                return true;
+            },
+        },
         // ContainerType Image
         {
             { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_IMAGE },
@@ -252,6 +294,16 @@ bool ConfigAutoscanSetup::updateItem(
                 return true;
             },
         },
+        // ItemLimit Image
+        {
+            { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT },
+            "ItemLimit Image",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return fmt::to_string(entry->getContainerLimits().at(ObjectType::Image)); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setContainerLimit(ObjectType::Image, definition->findConfigSetup<ConfigUIntSetup>(cfg)->checkIntValue(optValue));
+                return true;
+            },
+        },
         // ContainerType Video
         {
             { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO },
@@ -259,6 +311,16 @@ bool ConfigAutoscanSetup::updateItem(
             [&](const std::shared_ptr<AutoscanDirectory>& entry) { return entry->getContainerTypes().at(AutoscanMediaMode::Video); },
             [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
                 entry->setContainerType(AutoscanMediaMode::Video, optValue);
+                return true;
+            },
+        },
+        // ItemLimit Video
+        {
+            { ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_AUDIO, ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT },
+            "ItemLimit Image",
+            [&](const std::shared_ptr<AutoscanDirectory>& entry) { return fmt::to_string(entry->getContainerLimits().at(ObjectType::Video)); },
+            [&](const std::shared_ptr<AutoscanDirectory>& entry, const std::shared_ptr<ConfigDefinition>& definition, ConfigVal cfg, std::string& optValue) {
+                entry->setContainerLimit(ObjectType::Video, definition->findConfigSetup<ConfigUIntSetup>(cfg)->checkIntValue(optValue));
                 return true;
             },
         },

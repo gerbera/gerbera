@@ -1548,6 +1548,9 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigStringSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_TYPE_VIDEO,
             "container-type-video", "config-import.html#confval-container-type-video",
             UPNP_CLASS_CONTAINER),
+        std::make_shared<ConfigUIntSetup>(ConfigVal::A_AUTOSCAN_CONTAINER_ITEM_LIMIT,
+            "attribute::item-limit", "config-import.html#confval-item-limit",
+            3, 0, ConfigIntSetup::CheckMinValue),
 
         // library attributes
         std::make_shared<ConfigStringSetup>(ConfigVal::A_IMPORT_LIBOPTS_AUXDATA_TAG,
