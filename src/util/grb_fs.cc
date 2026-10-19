@@ -24,6 +24,7 @@ Gerbera - https://gerbera.io/
 
 #include "exceptions.h"
 #include "util/logger.h"
+#include "util/string_converter.h"
 #include "util/tools.h"
 
 #include <algorithm>
@@ -178,6 +179,11 @@ bool GrbFile::remove()
 
 std::FILE* GrbFile::open(const char* mode, bool fail)
 {
+    textCharset = TextFileCharset::Default;
+    textConverter.reset();
+    isValid = {};
+    stripBom = false;
+    lineNumber = 0;
     if (fd && std::fclose(fd) != 0) {
         log_error("fclose {} failed", path.c_str());
     }
@@ -188,6 +194,129 @@ std::FILE* GrbFile::open(const char* mode, bool fail)
         log_error("Could not open {}: {}", path.c_str(), std::strerror(errno));
     }
     return fd;
+}
+
+// RFC 3629: reject overlong sequences, surrogates and values above U+10FFFF.
+static bool isUtf8(const std::string& text)
+{
+    std::size_t i = 0;
+    while (i < text.size()) {
+        auto first = static_cast<unsigned char>(text[i++]);
+        if (first < 0x80)
+            continue;
+        unsigned int count;
+        unsigned int value;
+        unsigned int minimum;
+        if (first >= 0xc2 && first <= 0xdf) {
+            count = 1;
+            value = first & 0x1f;
+            minimum = 0x80;
+        } else if (first >= 0xe0 && first <= 0xef) {
+            count = 2;
+            value = first & 0x0f;
+            minimum = 0x800;
+        } else if (first >= 0xf0 && first <= 0xf4) {
+            count = 3;
+            value = first & 0x07;
+            minimum = 0x10000;
+        } else {
+            return false;
+        }
+        if (text.size() - i < count)
+            return false;
+        while (count--) {
+            auto next = static_cast<unsigned char>(text[i++]);
+            if ((next & 0xc0) != 0x80)
+                return false;
+            value = (value << 6) | (next & 0x3f);
+        }
+        if (value < minimum || value > 0x10ffff || (value >= 0xd800 && value <= 0xdfff))
+            return false;
+    }
+    return true;
+}
+
+void GrbFile::rewindText()
+{
+    if (!fd || std::fseek(fd, 0, SEEK_SET) != 0)
+        throw_std_runtime_error("Cannot rewind text file {}", path.string());
+    std::clearerr(fd);
+    lineNumber = 0;
+}
+
+std::optional<std::string> GrbFile::readRawLine(std::size_t maxBytes)
+{
+    if (!fd)
+        throw_std_runtime_error("Text file {} is not open", path.string());
+    if (isValid && !isValid())
+        throw_std_runtime_error("Reading text file {} cancelled", path.string());
+    std::string line;
+    while (!maxBytes || line.size() < maxBytes) {
+        int c = std::fgetc(fd);
+        if (c == EOF) {
+            if (std::ferror(fd))
+                throw_std_runtime_error("Cannot read text file {} at line {}", path.string(), lineNumber + 1);
+            if (line.empty())
+                return std::nullopt;
+            break;
+        }
+        line += static_cast<char>(c);
+        if (c == '\n')
+            break;
+    }
+    ++lineNumber;
+    if (textCharset != TextFileCharset::Default && line.find('\0') != std::string::npos)
+        throw_std_runtime_error("NUL byte in text file {} at line {}", path.string(), lineNumber);
+    return line;
+}
+
+void GrbFile::setTextCharset(TextFileCharset charset, std::function<bool()> valid)
+{
+    textCharset = charset;
+    textConverter.reset();
+    stripBom = false;
+    isValid = std::move(valid);
+    if (charset == TextFileCharset::Default)
+        return;
+    rewindText();
+    bool validUtf8 = true;
+    std::size_t invalidLine = 0;
+    while (auto line = readRawLine(0)) {
+        if (lineNumber == 1)
+            stripBom = line->compare(0, 3, "\xef\xbb\xbf") == 0 && charset != TextFileCharset::Windows1252;
+        if (!isUtf8(*line) && validUtf8) {
+            validUtf8 = false;
+            invalidLine = lineNumber;
+        }
+    }
+    if (charset == TextFileCharset::Auto)
+        textCharset = (stripBom || validUtf8) ? TextFileCharset::Utf8 : TextFileCharset::Windows1252;
+    if (textCharset == TextFileCharset::Utf8 && !validUtf8)
+        throw_std_runtime_error("Invalid UTF-8 in text file {} at line {}", path.string(), invalidLine);
+    rewindText();
+    if (textCharset == TextFileCharset::Windows1252) {
+        textConverter = std::make_unique<StringConverter>("WINDOWS-1252", "UTF-8");
+        while (readLine()) { }
+        rewindText();
+    }
+}
+
+std::optional<std::string> GrbFile::readLine(std::size_t maxBytes)
+{
+    auto line = readRawLine(maxBytes);
+    if (!line)
+        return std::nullopt;
+    if (lineNumber == 1 && stripBom)
+        line->erase(0, 3);
+    if (textConverter) {
+        auto [text, error] = textConverter->convert(*line);
+        if (!error.empty())
+            throw_std_runtime_error("Invalid Windows-1252 in text file {} at line {}: {}", path.string(), lineNumber, error);
+        return text;
+    }
+    if (textCharset == TextFileCharset::Utf8 && !isUtf8(*line))
+        throw_std_runtime_error("Invalid UTF-8 in text file {} at line {}", path.string(), lineNumber);
+    return line;
 }
 
 std::string GrbFile::readTextFile()

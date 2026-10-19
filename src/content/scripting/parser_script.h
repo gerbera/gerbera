@@ -36,6 +36,7 @@
 
 #include "common.h"
 #include "script.h"
+#include "util/grb_fs.h"
 
 #include <memory>
 #include <pugixml.hpp>
@@ -55,7 +56,7 @@ duk_ret_t jsUpdateCdsObject(duk_context* ctx);
 class ParserScript : public Script {
 public:
     /// @brief read next non-empty line from file
-    virtual std::pair<std::string, bool> readLine();
+    std::pair<std::string, bool> readLine();
     /// @brief read next non-empty xml tag from file
     pugi::xml_node& readXml(int direction);
 
@@ -70,14 +71,15 @@ protected:
 
     /// @brief clean up caches and parsing output
     void cleanUp();
+    void prepareFile(GrbFile& file, TextFileCharset charset = TextFileCharset::Default);
 
     static pugi::xml_node nullNode;
     /// @brief maximum length of one text line
     static constexpr int ONE_TEXTLINE_BYTES = 1024;
 
-    std::FILE* currentHandle {};
+    GrbFile* currentFile {};
+    std::shared_ptr<StringConverter> savedConverter;
     int currentObjectID { INVALID_OBJECT_ID };
-    char* currentLine {};
     std::shared_ptr<GenericTask> currentTask;
     pugi::xml_document xmlDoc;
     pugi::xml_node root;

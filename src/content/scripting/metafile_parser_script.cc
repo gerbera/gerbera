@@ -53,7 +53,7 @@ MetafileParserScript::MetafileParserScript(const std::shared_ptr<Content>& conte
 
 void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, const fs::path& path)
 {
-    if (currentObjectID != INVALID_OBJECT_ID || currentHandle || currentLine) {
+    if (currentObjectID != INVALID_OBJECT_ID || currentFile) {
         throw_std_runtime_error("Recursion in metafiles is not allowed");
     }
 
@@ -68,24 +68,16 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
     if (result.status == pugi::xml_parse_status::status_ok) {
         root = xmlDoc.document_element();
     }
-    currentHandle = file.open("r");
     processed = obj;
 
     currentObjectID = item->getID();
-    currentLine = new char[ONE_TEXTLINE_BYTES];
-    currentLine[0] = '\0';
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     try {
+        prepareFile(file);
         call(obj, nullptr, metafileFunction, path, "");
     } catch (const std::runtime_error&) {
-        currentHandle = nullptr;
-
-        delete[] currentLine;
-        currentLine = nullptr;
-
-        currentObjectID = INVALID_OBJECT_ID;
-
+        cleanUp();
         throw;
     }
 

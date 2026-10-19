@@ -12,7 +12,6 @@
 #include "config/config_val.h"
 #include "config/setup/config_setup_enum.h"
 #include "metadata/metadata_enums.h"
-#include "util/m3u_reader.h"
 
 #include <gtest/gtest.h>
 #include <pugixml.hpp>
@@ -61,28 +60,6 @@ TEST_F(ConfigEnumSetupTest, RejectsUnsupportedNames)
         EXPECT_THROW(setup->newOption(value), std::runtime_error);
     }
 }
-
-#ifdef HAVE_JS
-TEST_F(ConfigEnumSetupTest, MapsM3uCharsetsAndPreservesLegacyDefault)
-{
-    auto setup = definition->findConfigSetup<ConfigEnumSetup<M3uCharset>>(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_M3U_CHARSET);
-    ASSERT_NE(setup, nullptr);
-    for (const auto& [name, value] : std::map<std::string, M3uCharset> {
-             { "", M3uCharset::Default }, { "auto", M3uCharset::Auto },
-             { "utf-8", M3uCharset::Utf8 }, { "windows-1252", M3uCharset::Windows1252 } }) {
-        auto option = std::dynamic_pointer_cast<EnumOption<M3uCharset>>(setup->newOption(name));
-        ASSERT_NE(option, nullptr);
-        EXPECT_EQ(option->getEnumOption(), value);
-    }
-    pugi::xml_document document;
-    ASSERT_TRUE(document.load_string("<config><import><scripting><import-function><playlist>importPlaylist</playlist></import-function></scripting></import></config>"));
-    EXPECT_EQ(setup->getXmlContent(document, nullptr), M3uCharset::Default);
-    document.select_node("/config/import/scripting/import-function/playlist").node().append_attribute("m3u-charset") = "auto";
-    EXPECT_EQ(setup->getXmlContent(document, nullptr), M3uCharset::Auto);
-    for (const auto* value : { "default", "utf8", "AUTO", "UTF-8", "WINDOWS-1252", "ISO-8859-1", "unknown" })
-        EXPECT_THROW(setup->newOption(value), std::runtime_error);
-}
-#endif
 
 #ifdef HAVE_TAGLIB
 TEST_F(ConfigEnumSetupTest, MapsMp4BpmConflictSources)

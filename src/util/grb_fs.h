@@ -25,16 +25,33 @@ Gerbera - https://gerbera.io/
 #define __GRB_FS_H__
 
 #include <filesystem>
+#include <functional>
+#include <memory>
 #include <optional>
 #include <vector>
 
 namespace fs = std::filesystem;
+
+class StringConverter;
+
+enum class TextFileCharset { Default,
+    Auto,
+    Utf8,
+    Windows1252 };
 
 /// @brief Encapsulation of file on disk
 class GrbFile {
 private:
     fs::path path;
     std::FILE* fd {};
+    TextFileCharset textCharset { TextFileCharset::Default };
+    std::unique_ptr<StringConverter> textConverter;
+    std::function<bool()> isValid;
+    bool stripBom {};
+    std::size_t lineNumber {};
+
+    void rewindText();
+    std::optional<std::string> readRawLine(std::size_t maxBytes);
 
 public:
     explicit GrbFile(fs::path path);
@@ -45,6 +62,12 @@ public:
 
     /// @brief Open a file for reading.
     std::FILE* open(const char* mode, bool fail = true);
+    /// @brief Select and validate one charset for the whole open file before consuming lines.
+    void setTextCharset(TextFileCharset charset, std::function<bool()> valid = {});
+    TextFileCharset getTextCharset() const { return textCharset; }
+    /// @brief Read a line including its terminator, optionally limited to maxBytes bytes.
+    /// A zero limit reads the complete line. Explicit charset modes return UTF-8.
+    std::optional<std::string> readLine(std::size_t maxBytes = 0);
     /// @brief Reads the entire contents of a text file and returns it as a string.
     std::string readTextFile();
     /// @brief writes a string into a text file

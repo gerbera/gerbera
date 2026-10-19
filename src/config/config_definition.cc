@@ -54,7 +54,7 @@
 #include "database/sqlite3/sqlite_config.h"
 #include "metadata/metadata_enums.h"
 #include "upnp/upnp_common.h"
-#include "util/m3u_reader.h"
+#include "util/grb_fs.h"
 
 #include <algorithm>
 #include <upnpconfig.h>
@@ -1241,10 +1241,6 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS,
             "/import/scripting/import-function/playlist/attribute::create-link", "config-import.html#confval-playlist-create-link",
             YES),
-        std::make_shared<ConfigEnumSetup<M3uCharset>>(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_M3U_CHARSET,
-            "/import/scripting/import-function/playlist/attribute::m3u-charset", "config-import.html#confval-playlist-m3u-charset",
-            M3uCharset::Default,
-            std::map<std::string, M3uCharset>({ { "", M3uCharset::Default }, { "auto", M3uCharset::Auto }, { "utf-8", M3uCharset::Utf8 }, { "windows-1252", M3uCharset::Windows1252 } })),
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_FUNCTION_METAFILE,
             "/import/scripting/import-function/meta-file", "config-import.html#confval-meta-file",
             "importMetadata"),
@@ -1302,6 +1298,12 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_PLAYLIST_CHARSET,
             "/import/playlist-charset", "config-import.html#confval-playlist-charset",
             DEFAULT_FILESYSTEM_CHARSET, ConfigStringSetup::CheckCharset),
+#ifdef HAVE_JS
+        std::make_shared<ConfigEnumSetup<TextFileCharset>>(ConfigVal::IMPORT_PLAYLIST_CHARSET_MODE,
+            "/import/playlist-charset/attribute::mode", "config-import.html#confval-playlist-charset-mode",
+            TextFileCharset::Default,
+            std::map<std::string, TextFileCharset>({ { "", TextFileCharset::Default }, { "auto", TextFileCharset::Auto }, { "utf-8", TextFileCharset::Utf8 }, { "windows-1252", TextFileCharset::Windows1252 } })),
+#endif
         std::make_shared<ConfigEnumSetup<LayoutType>>(ConfigVal::IMPORT_SCRIPTING_VIRTUAL_LAYOUT_TYPE,
             "/import/scripting/virtual-layout/attribute::type", "config-import.html#confval-virtual-layout-type",
 #ifdef HAVE_JS

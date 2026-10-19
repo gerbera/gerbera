@@ -376,8 +376,6 @@ add_library(
     src/util/jpeg_resolution.cc
     src/util/logger.cc
     src/util/logger.h
-    src/util/m3u_reader.cc
-    src/util/m3u_reader.h
     src/util/mime.cc
     src/util/mime.h
     src/util/process_executor.cc

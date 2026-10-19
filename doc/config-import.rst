@@ -313,6 +313,59 @@ Specifies an alternative file for filemagic, containing mime type information.
 Scripting
 *********
 
+.. confval:: playlist-charset
+   :type: :confval:`String`
+   :required: false
+   :default: system charset
+
+Defines the existing charset used by playlist scripts. The optional
+:confval:`playlist-charset mode` attribute controls whole-file decoding for
+M3U/M3U8 input; omitting it preserves the existing behavior.
+
+.. confval:: playlist-charset mode
+   :type: :confval:`Enum`
+   :required: false
+   :default: absent (existing behavior)
+
+Controls native decoding of M3U input before the playlist script resolves
+file paths. If omitted, the existing input behavior and
+configured ``playlist-charset`` conversions remain unchanged. Detection is
+never enabled implicitly. PLS and XML playlists are unaffected.
+
+Supported values are case-sensitive:
+
+* ``auto``: a UTF-8 BOM selects UTF-8; otherwise validate the entire file as
+  strict UTF-8 and fall back to Windows-1252 if validation fails.
+* ``utf-8``: require valid UTF-8, optionally with a BOM.
+* ``windows-1252``: explicitly decode the entire file as Windows-1252.
+  This overrides detection, including for byte sequences that also form
+  valid UTF-8. A UTF-8 BOM is not stripped in this mode.
+
+With any of these three explicit modes, files with the ``.m3u8`` extension
+(case-insensitive) always require UTF-8 and never fall back to Windows-1252.
+Invalid UTF-8 following a UTF-8 BOM is an error, not a fallback case.
+NUL bytes and characters that cannot be decoded in the selected charset
+also cause an error. The file is validated before importing its entries,
+so an encoding error does not produce a partially imported playlist.
+
+One encoding is selected for the whole file, not individually for each
+line. Arbitrarily mixed encodings are not supported. Detection is a
+heuristic: ambiguous Windows-1252 files can be interpreted as UTF-8;
+select ``windows-1252`` explicitly in this case. No source files are
+rewritten. Paths, EXTINF text, entry order and repeated entries are
+processed by the usual playlist script after decoding. Decoded text is
+already UTF-8 and is not converted again using ``playlist-charset``.
+
+For example, merge this into the existing ``import`` section:
+
+.. code:: xml
+
+   <playlist-charset mode="auto">UTF-8</playlist-charset>
+
+Restart Gerbera after changing the option, then reimport affected playlist
+source records to rebuild previously missing references. Changing the
+option does not repair existing derived playlist entries on its own.
+
 .. confval:: scripting
    :type: :confval:`Section`
    :required: false
@@ -497,53 +550,6 @@ Name of the javascript function called to parse a playlist file.
 
     Links the playlist to the virtual container which contains the expanded playlist items. This means, that
     if the actual playlist file is removed from the database, the virtual container corresponding to the playlist will also be removed.
-
-   .. confval:: playlist m3u-charset
-          :type: :confval:`Enum`
-          :required: false
-          :default: absent (existing behavior)
-
-    Controls native decoding of M3U input before the playlist script resolves
-    file paths. If omitted, the existing input path and
-    configured ``playlist-charset`` conversions remain unchanged. Detection is
-    never enabled implicitly. PLS and XML playlists are unaffected.
-
-    Supported values are case-sensitive:
-
-    * ``auto``: a UTF-8 BOM selects UTF-8; otherwise validate the entire file as
-      strict UTF-8 and fall back to Windows-1252 if validation fails.
-    * ``utf-8``: require valid UTF-8, optionally with a BOM.
-    * ``windows-1252``: explicitly decode the entire file as Windows-1252.
-      This overrides detection, including for byte sequences that also form
-      valid UTF-8. A UTF-8 BOM is not stripped in this mode.
-
-    With any of these three explicit modes, files with the ``.m3u8`` extension
-    (case-insensitive) always require UTF-8 and never fall back to Windows-1252.
-    Invalid UTF-8 following a UTF-8 BOM is an error, not a fallback case.
-    NUL bytes and characters that cannot be decoded in the selected charset
-    also cause an error. The file is validated before importing its entries,
-    so an encoding error does not produce a partially imported playlist.
-
-    One encoding is selected for the whole file, not individually for each
-    line. Arbitrarily mixed encodings are not supported. Detection is a
-    heuristic: ambiguous Windows-1252 files can be interpreted as UTF-8;
-    select ``windows-1252`` explicitly in this case. No source files are
-    rewritten. Paths, EXTINF text, entry order and repeated entries are
-    processed by the usual playlist script after decoding. Decoded text is
-    already UTF-8 and is not converted again using ``playlist-charset``.
-
-    For example, merge this into the existing ``import/scripting`` section,
-    preserving other import functions:
-
-    .. code:: xml
-
-       <import-function>
-           <playlist m3u-charset="auto">importPlaylist</playlist>
-       </import-function>
-
-    Restart Gerbera after changing the option, then reimport affected playlist
-    source records to rebuild previously missing references. Changing the
-    option does not repair existing derived playlist entries on its own.
 
 .. confval:: meta-file
    :type: :confval:`String`
