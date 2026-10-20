@@ -392,7 +392,7 @@ module.exports = function (driver) {
   };
 
   this.clients = async () => {
-    await driver.wait(until.elementLocated(By.id('clientgrid')), 1000);
+    await driver.wait(until.elementLocated(By.css('#clientgrid.with-data')), 5000);
     return await driver.findElements(By.className('grb-client'));
   };
 
