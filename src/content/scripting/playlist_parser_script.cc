@@ -200,13 +200,14 @@ void PlaylistParserScript::processPlaylistObject(
             prepareFile(item->getLocation(), mode);
         }
         call(obj, nullptr, playlistFunction, rootPath, "");
-    } catch (...) {
+    } catch (const std::runtime_error& e) {
+        log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), e.what());
         cleanUp();
         throw;
     }
 
-    log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
     cleanUp();
+    log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
 }
 
 #endif // HAVE_JS
