@@ -120,6 +120,13 @@ static duk_ret_t addCdsObject(duk_context* ctx)
     return ExternalUrlAsxPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.rootPath);
 }
 
+// External references in this script test already use absolute HTTP URLs.
+static duk_ret_t resolvePlaylistReference(duk_context* ctx)
+{
+    duk_dup(ctx, 0);
+    return 1;
+}
+
 // Mock the Duktape C methods
 // that are called from the playlists.js script
 // * These are static methods, which makes mocking difficult.
@@ -131,6 +138,7 @@ static duk_function_list_entry js_global_functions[] = {
     { "getLastPath", CommonScriptTestFixture::js_getLastPath, 1 },
     { "getLastPath2", CommonScriptTestFixture::js_getLastPath2, 2 },
     { "readXml", readXml, 1 },
+    { "resolvePlaylistReference", resolvePlaylistReference, 2 },
     { "addCdsObject", addCdsObject, 3 },
     { "addContainerTree", addContainerTree, 1 },
     { nullptr, nullptr, 0 },
