@@ -1,7 +1,7 @@
 {
   "issue": 4007,
   "base": "ee79f479bc5bf0407c3fad59b438b6b4e7ad04ee",
-  "state": "prepared, not importer-tested",
+  "state": "real importer regression registered; see test/content/test_asx_uris.py for execution",
   "root_marker": "/fixture/asx",
   "media": {
     "A": {
