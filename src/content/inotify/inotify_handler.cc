@@ -157,9 +157,9 @@ int InotifyHandler::doExistingEntry(
         log_debug("found {} -> {}", path.c_str(), changedObject ? changedObject->getID() : INVALID_OBJECT_ID);
         if (changedObject)
             isDir = changedObject->isContainer();
-        bool updateInPlace = (AUTOSCAN_IS_WRITTEN(mask) || AUTOSCAN_IS_MOVED(mask))
-            && (importMode == ImportMode::Gerbera || (changedObject && changedObject->isMediaItem()));
-        if (changedObject && !updateInPlace) {
+        if (changedObject
+            && ((!AUTOSCAN_IS_WRITTEN(mask) && !AUTOSCAN_IS_MOVED(mask))
+                || (importMode != ImportMode::Gerbera && !changedObject->isMediaItem()))) {
             log_debug("deleting {}", path.c_str());
             content->removeObject(adir, changedObject, path, !AUTOSCAN_IS_MOVED(mask), false);
             changedObject = nullptr;

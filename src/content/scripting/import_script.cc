@@ -58,6 +58,7 @@ std::vector<int> ImportScript::callFunction(
         std::string>& containerMap)
 {
     std::vector<int> result;
+    bool hasResult = false;
     processed = obj;
     try {
         auto autoScan = content->getAutoscanDirectory(scriptPath);
@@ -69,7 +70,7 @@ std::vector<int> ImportScript::callFunction(
         }
 
         log_debug("{}, path = {}, containerType = {}", function, scriptPath.c_str(), containerType);
-        result = call(obj, cont, function, scriptPath, containerType);
+        result = call(obj, cont, function, scriptPath, containerType, hasResult);
     } catch (const std::runtime_error&) {
         processed = nullptr;
         throw;

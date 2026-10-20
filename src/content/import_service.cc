@@ -934,10 +934,11 @@ void ImportService::fillSingleLayout(
                                     previous.insert(item->getID());
                             }
                         }
-                        auto current = playlistParserScript->processPlaylistObject(cdsObject, task, rootPath);
-                        if (current) {
+                        bool hasResult = false;
+                        auto current = playlistParserScript->processPlaylistObject(cdsObject, task, rootPath, hasResult);
+                        if (hasResult) {
                             for (int id : previous) {
-                                if (std::find(current->begin(), current->end(), id) == current->end())
+                                if (std::find(current.begin(), current.end(), id) == current.end())
                                     database->removeObject(id, "", false);
                             }
                         }
