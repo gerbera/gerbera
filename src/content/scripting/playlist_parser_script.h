@@ -53,6 +53,7 @@ protected:
     bool linkObjects;
     bool followSymlinks;
     bool hidden;
+    TextFileCharset charsetMode;
     std::vector<XmlPlaylistEntry> xmlEntries;
     std::size_t xmlPosition {};
 

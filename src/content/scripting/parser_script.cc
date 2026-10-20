@@ -42,7 +42,6 @@
 #include "database/database.h"
 #include "exceptions.h"
 #include "util/generic_task.h"
-#include "util/grb_fs.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -238,6 +237,18 @@ void ParserScript::useUtf8Converter()
     sc = converterManager->i2i();
 }
 
+void ParserScript::prepareFile(const fs::path& path, TextFileCharset charset)
+{
+    auto file = std::make_unique<GrbFile>(path);
+    file->open(charset == TextFileCharset::Default ? "r" : "rb");
+    file->setTextCharset(charset, charset == TextFileCharset::Default ? std::function<bool()>() : [this]() { return !currentTask || currentTask->isValid(); });
+    currentFile = std::move(file);
+    if (charset != TextFileCharset::Default) {
+        savedConverter = sc;
+        sc = converterManager->i2i();
+    }
+}
+
 std::pair<std::string, bool> ParserScript::readLine()
 {
     if (!currentFile)
@@ -256,14 +267,11 @@ std::pair<std::string, bool> ParserScript::readLine()
 
 void ParserScript::cleanUp()
 {
-    currentHandle = nullptr;
+    currentFile.reset();
     if (savedConverter) {
         sc = savedConverter;
         savedConverter.reset();
     }
-
-    delete[] currentLine;
-    currentLine = nullptr;
     xmlDoc.reset();
     root = nullNode;
 
