@@ -437,7 +437,7 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
             prepareXmlFile(item->getLocation());
             useUtf8Converter();
             auto plan = readAsxPlaylistPlan(root, fs::weakly_canonical(item->getLocation()), [&](const std::string& href, const fs::path& source) {
-                if (task && !task->isValid())
+                if (currentTask && !currentTask->isValid())
                     throw_std_runtime_error("Aborting playlist import after cancellation");
                 auto location = resolvePlaylistReferenceLocation(href, source);
                 if (!location || !fs::path(*location).is_absolute())
