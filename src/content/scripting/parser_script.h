@@ -71,6 +71,8 @@ protected:
 
     /// @brief clean up caches and parsing output
     void cleanUp();
+    void prepareFile(const fs::path& path, TextFileCharset charset = TextFileCharset::Default);
+
     /// Load XML through the common file utility, retaining BOM/declaration decoding.
     void prepareXmlFile(const fs::path& path, unsigned int flags = pugi::parse_default);
     static void loadXmlFile(const fs::path& path, pugi::xml_document& document, unsigned int flags = pugi::parse_default);
@@ -81,8 +83,8 @@ protected:
     /// @brief maximum length of one text line
     static constexpr int ONE_TEXTLINE_BYTES = 1024;
 
+    std::unique_ptr<GrbFile> currentFile;
     std::shared_ptr<StringConverter> savedConverter;
-    std::FILE* currentHandle {};
     int currentObjectID { INVALID_OBJECT_ID };
     std::shared_ptr<GenericTask> currentTask;
     pugi::xml_document xmlDoc;
