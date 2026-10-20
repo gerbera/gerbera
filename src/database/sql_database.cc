@@ -328,7 +328,7 @@ static const std::vector<std::pair<std::string, ClientColumn>> clientTagMap {
 // Format string for a recursive query of a parent container
 static constexpr auto sql_search_container_query_raw = R"(
 -- Find all children of parent_id
-WITH {0} AS (SELECT * FROM {2} WHERE {4} = {{}}
+WITH RECURSIVE {0} AS (SELECT * FROM {2} WHERE {4} = {{}}
 UNION
 SELECT {3}.* FROM {2} JOIN {0} AS {1} ON {3}.{4} = {1}.{5}
 ),
