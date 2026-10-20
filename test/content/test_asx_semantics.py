@@ -58,7 +58,9 @@ class AsxSemanticsFixture(Fixture):
                 pass
 
         self.remote = ThreadingHTTPServer((self.ip, 0), RemoteTrap)
-        self.remote_thread = threading.Thread(target=self.remote.serve_forever, daemon=True)
+        self.remote_thread = threading.Thread(
+            target=self.remote.serve_forever, daemon=True
+        )
         self.remote_thread.start()
         remote_host = f"http://{self.ip}:{self.remote.server_port}"
         self.remote_media = remote_host + "/a.mp3?title=Why%3F&token=a+b"
@@ -85,9 +87,16 @@ class AsxSemanticsFixture(Fixture):
             assert hashlib.sha256(data).hexdigest() == case["sha256"]
             encoding = case["encoding"]
             text = hidden_children(data.decode(encoding))
-            text = text.replace(self.manifest["media"]["HTTPS"]["uri"].replace("&", "&amp;"), self.remote_media.replace("&", "&amp;"))
-            text = text.replace("https://playlist.example.invalid/list.asx", remote_host + "/child.asx")
-            text = text.replace("https://presentation.example.invalid/image", remote_host + "/image")
+            text = text.replace(
+                self.manifest["media"]["HTTPS"]["uri"].replace("&", "&amp;"),
+                self.remote_media.replace("&", "&amp;"),
+            )
+            text = text.replace(
+                "https://playlist.example.invalid/list.asx", remote_host + "/child.asx"
+            )
+            text = text.replace(
+                "https://presentation.example.invalid/image", remote_host + "/image"
+            )
             text = text.replace("https://log.example.invalid/", remote_host + "/log")
             self.pending_playlists[directory / case["file"]] = text.encode(encoding)
             for child, digest in self.manifest["dependencies"].items():
@@ -98,7 +107,9 @@ class AsxSemanticsFixture(Fixture):
                 path.write_text(hidden_children(contents.decode()), encoding="utf-8")
             self.expected[name] = case["expected"]
             self.case_files[name] = files
-        legacy = "[playlist]\nFile1=https://media.example.invalid/legacy.mp3\nTitle1=Äther\n"
+        legacy = (
+            "[playlist]\nFile1=https://media.example.invalid/legacy.mp3\nTitle1=Äther\n"
+        )
         self.legacy = legacy.encode(charset)
         config = ET.parse(self.config)
         ns = config.getroot().tag.split("}")[0] + "}"
@@ -111,7 +122,11 @@ class AsxSemanticsFixture(Fixture):
         self.original_hashes = self.hash_sources()
 
     def hash_sources(self):
-        return {str(p.relative_to(self.src)): hashlib.sha256(p.read_bytes()).hexdigest() for p in self.src.rglob("*") if p.is_file()}
+        return {
+            str(p.relative_to(self.src)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in self.src.rglob("*")
+            if p.is_file()
+        }
 
     def media_indexed(self):
         expected = sum(len(files) for files in self.case_files.values())
@@ -157,7 +172,9 @@ class AsxSemanticsFixture(Fixture):
                         assert resource.text == self.remote_media, (name, resource.text)
                         continue
                     if key == "LEGACY":
-                        assert resource.text == "https://media.example.invalid/legacy.mp3"
+                        assert (
+                            resource.text == "https://media.example.invalid/legacy.mp3"
+                        )
                         assert item.findtext(DC + "title") == "Äther"
                         continue
                     media = self.manifest["media"][key]
@@ -165,18 +182,36 @@ class AsxSemanticsFixture(Fixture):
                     if name == "f35" and index == 0:
                         title = "Override"
                     title = self.title_overrides.get((name, key), title)
-                    assert item.findtext(DC + "title") == title, (name, key, item.findtext(DC + "title"), title)
+                    assert item.findtext(DC + "title") == title, (
+                        name,
+                        key,
+                        item.findtext(DC + "title"),
+                        title,
+                    )
                     cls = item.findtext(UP + "class")
-                    assert cls.startswith("object.item.videoItem" if key == "V" else "object.item.audioItem"), (name, cls)
-                    assert resource.text.startswith(self.host + "/"), (name, resource.text)
+                    assert cls.startswith(
+                        "object.item.videoItem"
+                        if key == "V"
+                        else "object.item.audioItem"
+                    ), (name, cls)
+                    assert resource.text.startswith(self.host + "/"), (
+                        name,
+                        resource.text,
+                    )
                     with HTTP.open(resource.text, timeout=5) as response:
                         data = response.read()
                     assert data == self.case_files[name][key].read_bytes(), (name, key)
                     if name == "f25":
-                        assert item.findtext(UP + "author") == ("Entry author" if index == 0 else "Root author"), ET.tostring(item)
-                        assert item.findtext(DC + "rights") == "Root rights", ET.tostring(item)
+                        assert item.findtext(UP + "author") == (
+                            "Entry author" if index == 0 else "Root author"
+                        ), ET.tostring(item)
+                        assert (
+                            item.findtext(DC + "rights") == "Root rights"
+                        ), ET.tostring(item)
                         if index == 0:
-                            assert item.findtext(DC + "description") == "Entry description", ET.tostring(item)
+                            assert (
+                                item.findtext(DC + "description") == "Entry description"
+                            ), ET.tostring(item)
                     if name == "f27":
                         duration = resource.get("duration")
                         assert duration, resource.attrib
@@ -200,7 +235,9 @@ class AsxSemanticsFixture(Fixture):
                 self.wait(self.media_indexed)
                 self.add_playlists()
                 self.rescan()
-            self.record("initial structures, exact ordered positions, metadata and complete resources")
+            self.record(
+                "initial structures, exact ordered positions, metadata and complete resources"
+            )
             (self.src / "zlegacy.pls").write_bytes(self.legacy)
             self.expected["zlegacy"] = ["LEGACY"]
             self.original_hashes = self.hash_sources()
@@ -214,24 +251,33 @@ class AsxSemanticsFixture(Fixture):
                 self.record("restart retains all semantic positions")
                 return self.result()
             case = self.src / "f01/f01.asx"
-            case.write_text('<ASX><ENTRY><REF HREF="media/b.wav"/></ENTRY><REPEAT COUNT="2"><ENTRY><REF HREF="media/a.wav"/></ENTRY></REPEAT></ASX>')
+            case.write_text(
+                '<ASX><ENTRY><REF HREF="media/b.wav"/></ENTRY><REPEAT COUNT="2"><ENTRY><REF HREF="media/a.wav"/></ENTRY></REPEAT></ASX>'
+            )
             self.expected["f01"] = ["B", "A", "A"]
             self.original_hashes = self.hash_sources()
             if not self.args.exercise_media_updates:
                 self.rescan()
-            self.record("ordinary parent playlist edit and " + ("inotify" if self.args.exercise_media_updates else "rescan"))
+            self.record(
+                "ordinary parent playlist edit and "
+                + ("inotify" if self.args.exercise_media_updates else "rescan")
+            )
             if self.args.exercise_media_updates:
                 media = self.case_files["f01"]["A"]
                 media.write_bytes(wav_bytes("Changed source title"))
                 self.title_overrides[("f01", "A")] = "Changed source title"
                 self.original_hashes = self.hash_sources()
-                self.record("ordinary media edit preserves repeated playlist references through inotify")
+                self.record(
+                    "ordinary media edit preserves repeated playlist references through inotify"
+                )
                 with media.open("r+b"):
                     pass
                 time.sleep(0.5)
                 self.record("unchanged writable media close retains expanded positions")
             child = self.src / "f15/.sub/child.asx"
-            child.write_text('<ASX><ENTRY><REF HREF="../media/c.wav"/></ENTRY><ENTRY><REF HREF="../media/b.wav"/></ENTRY></ASX>')
+            child.write_text(
+                '<ASX><ENTRY><REF HREF="../media/c.wav"/></ENTRY><ENTRY><REF HREF="../media/b.wav"/></ENTRY></ASX>'
+            )
             self.expected["f15"] = ["A", "C", "B", "A"]
             # Gerbera tracks playlist mtimes, not nested-document dependencies.
             time.sleep(1.1)
@@ -264,7 +310,13 @@ class AsxSemanticsFixture(Fixture):
             self.remote_thread.join()
 
     def result(self):
-        return {"stages": self.checks, "documents": len(self.manifest["cases"]), "view_checks": self.view_checks, "resource_checks": self.resource_checks, "unexpected_remote_requests": self.remote_requests}
+        return {
+            "stages": self.checks,
+            "documents": len(self.manifest["cases"]),
+            "view_checks": self.view_checks,
+            "resource_checks": self.resource_checks,
+            "unexpected_remote_requests": self.remote_requests,
+        }
 
 
 def main():
@@ -273,7 +325,11 @@ def main():
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--ip")
     parser.add_argument("--output", type=Path)
-    parser.add_argument("--exercise-media-updates", action="store_true", help="Combined regression with the independent playlist-update repair (#4006)")
+    parser.add_argument(
+        "--exercise-media-updates",
+        action="store_true",
+        help="Combined regression with the independent playlist-update repair (#4006)",
+    )
     args = parser.parse_args()
     args.binary = args.binary.resolve()
     args.source_root = args.source_root.resolve()
@@ -283,7 +339,9 @@ def main():
             for mode in ["mt", "grb"]:
                 root = Path(tmp) / (mode + "-" + charset)
                 root.mkdir()
-                results[root.name] = AsxSemanticsFixture(args, root, mode, charset).run()
+                results[root.name] = AsxSemanticsFixture(
+                    args, root, mode, charset
+                ).run()
     if args.output:
         args.output.write_text(json.dumps(results, indent=2))
 
