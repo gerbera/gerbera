@@ -767,8 +767,7 @@ if(WITH_PGSQL)
         # test/database/test_database.cc is covered in test/database/CMakeLists.txt.)
         if(libpqxx_VERSION VERSION_GREATER_EQUAL "8.0")
             set_property(
-                SOURCE
-                    src/database/database.cc
+                SOURCE src/database/database.cc
                     src/database/postgres/pg_result.cc
                     src/database/postgres/pg_task.cc
                     src/database/postgres/postgres_database.cc
