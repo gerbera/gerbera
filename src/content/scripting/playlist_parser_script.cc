@@ -84,6 +84,7 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& conte
     linkObjects = config->getBoolOption(ConfigVal::IMPORT_SCRIPTING_PLAYLIST_LINK_OBJECTS);
     followSymlinks = config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
     hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
+    charsetMode = EnumOption<TextFileCharset>::getEnumOption(config, ConfigVal::IMPORT_PLAYLIST_CHARSET_MODE);
     defineFunction("readPlaylistEntry", jsReadPlaylistEntry, 0);
 }
 
