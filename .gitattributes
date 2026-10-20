@@ -53,3 +53,6 @@ Dockerfile* text eol=lf
 
 # Encoding-sensitive ASX regression inputs retain their exact recorded bytes.
 test/scripting/fixtures/asx-uris/*.asx -text
+# Preserve the byte encoding of ASX corpus files, including UTF-16 BOMs.
+test/scripting/fixtures/asx-semantics/*.asx -text
+test/scripting/fixtures/asx-semantics/**/*.asx -text

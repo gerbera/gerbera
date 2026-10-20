@@ -1,7 +1,7 @@
 {
   "issue": 4008,
   "base": "ee79f479bc5bf0407c3fad59b438b6b4e7ad04ee",
-  "state": "prepared, not importer-tested",
+  "state": "feature implementation in progress; runtime validation recorded separately",
   "media": {
     "A": {
       "path": "media/a.wav",
@@ -66,14 +66,14 @@
     "HTTPS": {
       "uri": "https://media.example.invalid/a.mp3?title=Why%3F&token=a+b",
       "kind": "external"
+    },
+    "O": {
+      "path": "other/a.wav",
+      "title": "Other base",
+      "kind": "audio"
     }
   },
-  "policy_status": "proposals, not implemented defaults",
-  "proposed_limits": {
-    "nested_metafiles": 5,
-    "total_expanded_positions": 10000,
-    "unbounded_repeat": "one pass with warning"
-  },
+  "policy_status": "defined server import policy; see policy.rst",
   "matrix": {
     "mode": [
       "mt",
@@ -160,7 +160,7 @@
       "expected": [
         "HTTPS"
       ],
-      "expectation": "proposed_server_policy",
+      "expectation": "documented_server_policy",
       "sha256": "b7effec6c60bef6097578525cbab2bea7081c2ec53bb291b05e9ffa28f473765",
       "no_network": true
     },
@@ -228,7 +228,7 @@
         "B",
         "C"
       ],
-      "expectation": "proposed_server_policy",
+      "expectation": "documented_server_policy",
       "sha256": "b2bad4a658c0f522055b71f8a1eb478754c1a64a71e1945d685a76337fec41cb",
       "diagnostic": "Unbounded REPEAT imported once"
     },
@@ -239,7 +239,7 @@
       "xml": "valid",
       "encoding": "utf-8",
       "expected": [],
-      "expectation": "proposed_server_policy",
+      "expectation": "documented_server_policy",
       "sha256": "27e6875015ee0bb4f3bc2fc99733a7071fe27066c1e70465578ddfd057cbe015",
       "outcome": "reject"
     },
@@ -250,7 +250,7 @@
       "xml": "valid",
       "encoding": "utf-8",
       "expected": [],
-      "expectation": "proposed_server_policy",
+      "expectation": "documented_server_policy",
       "sha256": "4e00ea6573c48e931dc4754a6d44195c1e624d54a00819233fb5af51eabe7170",
       "outcome": "reject"
     },
@@ -261,20 +261,23 @@
       "xml": "valid",
       "encoding": "utf-8",
       "expected": [],
-      "expectation": "proposed_server_policy",
+      "expectation": "documented_server_policy",
       "sha256": "d8e91d0df53be35cade3114f962e50020b5dc2c93fee8d10b0154a94e5c401d3",
       "outcome": "reject"
     },
     {
       "id": "f14",
       "file": "f14.asx",
-      "purpose": "Only the first REPEAT has repeat semantics; later block handling needs a documented compatibility decision",
+      "purpose": "Only the first REPEAT block is processed; subsequent blocks are ignored",
       "xml": "valid",
       "encoding": "utf-8",
-      "expected": null,
-      "expectation": "requires_decision",
+      "expected": [
+        "A",
+        "A"
+      ],
+      "expectation": "documented_server_policy",
       "sha256": "94de2925be9c3ce5eb7fe31e8f972280557dbd62e4805e74e37ca57e68f1ec76",
-      "decision": "Whether later REPEAT children are ignored or retained once; do not infer from source audit."
+      "decision": "Later REPEAT blocks and their children are ignored with a diagnostic, following the documented Microsoft rule."
     },
     {
       "id": "f15",
@@ -328,7 +331,7 @@
       "xml": "valid",
       "encoding": "utf-8",
       "expected": [],
-      "expectation": "proposed_server_policy",
+      "expectation": "documented_server_policy",
       "sha256": "41d8d1b1195fa13ecd0e3f29daea9cee1e0935629e46ed4720fe575b6a536dfd",
       "outcome": "reject"
     },
@@ -339,7 +342,7 @@
       "xml": "valid",
       "encoding": "utf-8",
       "expected": [],
-      "expectation": "proposed_server_policy",
+      "expectation": "documented_server_policy",
       "sha256": "4fe16d5e06140689ae050e9d7fca2134ea1db9e3b162f9af2599298c28c4c7cc",
       "outcome": "reject"
     },
@@ -353,7 +356,7 @@
         "A",
         "B"
       ],
-      "expectation": "proposed_server_policy",
+      "expectation": "documented_server_policy",
       "sha256": "501de347a95070ecb0f2f0ee81a557f6536ce9404d18d9fa54d0fd5d9a8212ca",
       "diagnostic": "Missing local ENTRYREF"
     },
@@ -367,7 +370,7 @@
         "A",
         "B"
       ],
-      "expectation": "proposed_server_policy",
+      "expectation": "documented_server_policy",
       "sha256": "a31632351e35fba7eca4914c36802458b4775a66a4f773a828824a4c3c2cb874",
       "diagnostic": "Remote ENTRYREF unsupported",
       "no_network": true
@@ -413,13 +416,23 @@
     {
       "id": "f25",
       "file": "f25.asx",
-      "purpose": "Root versus entry metadata inheritance needs explicit field mapping",
+      "purpose": "Entry author and abstract override document defaults without inheriting the document title",
       "xml": "valid",
       "encoding": "utf-8",
-      "expected": null,
-      "expectation": "requires_decision",
+      "expected": [
+        "A",
+        "B"
+      ],
+      "expectation": "documented_server_policy",
       "sha256": "4fba6e6ebb03287299c203450fdc5f1ad739b813decc18d05d04001c3ce1ed82",
-      "decision": "Choose creator/author/rights fields and precedence without silently overwriting embedded artist tags."
+      "decision": "AUTHOR maps to upnp:author, COPYRIGHT to dc:rights as virtual metadata defaults; embedded values are retained. The filename-derived container name remains unchanged.",
+      "metadata_assertions": [
+        "First entry author Entry author",
+        "Second entry author Root author",
+        "Both entries rights Root rights",
+        "First entry description Entry description",
+        "Root title is not copied to media titles"
+      ]
     },
     {
       "id": "f26",
@@ -448,7 +461,7 @@
       "expected": [
         "A"
       ],
-      "expectation": "proposed_server_policy",
+      "expectation": "documented_server_policy",
       "sha256": "c124c3a9542c92cf8a04f38cfbd2f552591db72eb80c3a5c25a68263f91597bc",
       "diagnostic": "Clip/marker playback semantics unsupported",
       "assertion": "Original full media bytes and duration preserved; no claim of clip enforcement"
@@ -481,13 +494,15 @@
     {
       "id": "f30",
       "file": "f30.asx",
-      "purpose": "Entry BASE scope is distinct from script-command URL flipping",
+      "purpose": "Entry BASE overrides root BASE for relative media references as documented Gerbera compatibility",
       "xml": "valid",
       "encoding": "utf-8",
-      "expected": null,
-      "expectation": "requires_decision",
+      "expected": [
+        "O"
+      ],
+      "expectation": "documented_server_policy",
       "sha256": "be9ebed2e20a834c02693a40f31506098731026b2e8965474285a4bb3c85193d",
-      "decision": "Do not reinterpret Microsoft script-command BASE as a general REF URI base without an explicit compatibility policy."
+      "decision": "Resolve other/a.wav instead of media/a.wav. Absolute references remain unaffected; no WMP script commands are executed."
     },
     {
       "id": "f31",
@@ -558,5 +573,10 @@
         "Actual media tag bytes remain unchanged"
       ]
     }
-  ]
+  ],
+  "limits": {
+    "nested_metafiles": 5,
+    "total_expanded_positions": 10000,
+    "unbounded_repeat": "one pass with warning"
+  }
 }

@@ -175,21 +175,50 @@ function readM3uPlaylist(playlist_title, playlistLocation, playlistChain, playli
 }
 // doc-playlist-m3u-parse-end
 
-// The native ASX iterator owns XML parsing and reference resolution.
+// The native parser validates and expands the complete structure before any
+// containers or metadata updates are created. Entries retain child contexts.
 function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playlistDirChain, rootPath) {
-  var result = [];
+  const result = [];
   var playlistOrder = 1;
-  var entry = readPlaylistEntry();
-  while (entry) {
-    entry.location = entry.locations[0];
-    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath);
-    if (playlistDirChain && state) {
-      entry.writeThrough = 0;
-      state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result, rootPath);
+  var source = readAsxPlaylistEntry();
+  while (source) {
+    for (var i = 0; i < source.references.length; i++) {
+      const reference = source.references[i];
+      var location = reference.href;
+      // BASE is a Gerbera compatibility extension for relative media paths.
+      if (source.base && location.charAt(0) !== '/' && !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(location))
+        location = source.base.replace(/\/+$/, '') + '/' + location;
+      location = resolvePlaylistReference(location, source.sourcePath);
+      if (!location)
+        continue;
+      const entry = {
+        location: location,
+        title: source.title,
+        description: source.description,
+        writeThrough: reference.writeThrough,
+        extra: {},
+        defaults: {}
+      };
+      if (source.author)
+        entry.defaults['upnp:author'] = source.author;
+      if (source.copyright)
+        entry.defaults['dc:rights'] = source.copyright;
+      for (var parameter in source.parameters) {
+        if (parameter === 'size' || parameter === 'mimetype' || parameter === 'protocol')
+          entry[parameter] = source.parameters[parameter];
+        else
+          entry.extra[parameter] = source.parameters[parameter];
+      }
+      if (addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath)) {
+        if (playlistDirChain) {
+          entry.writeThrough = 0; // Apply source updates once, not once per view.
+          addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result, rootPath);
+        }
+        playlistOrder++;
+        break; // REF children are alternatives for one logical position.
+      }
     }
-    if (state)
-      playlistOrder++;
-    entry = readPlaylistEntry();
+    source = readAsxPlaylistEntry();
   }
   return result;
 }

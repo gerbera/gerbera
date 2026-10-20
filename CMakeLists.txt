@@ -361,6 +361,8 @@ add_library(
     src/upnp/upnp_service.h
     src/upnp/xml_builder.cc
     src/upnp/xml_builder.h
+    src/util/asx_playlist.cc
+    src/util/asx_playlist.h
     src/util/enum_iterator.h
     src/util/executor.h
     src/util/ffmpeg_compat.h
