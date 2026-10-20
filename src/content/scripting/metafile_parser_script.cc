@@ -74,15 +74,17 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     bool hasResult = false;
     try {
+        prepareFile(path);
         call(obj, nullptr, metafileFunction, path, "", hasResult);
     } catch (const std::runtime_error& e) {
         log_debug("Failed to parse metafile {}: {}", path.string(), e.what());
+        currentObjectID = INVALID_OBJECT_ID;
         cleanUp();
         throw;
     }
 
-    cleanUp(); // Also resets currentObjectID after successful parsing.
-
+    currentObjectID = INVALID_OBJECT_ID;
+    cleanUp();
     log_debug("Done metafile {} ...", path.string());
 }
 

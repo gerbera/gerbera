@@ -172,7 +172,7 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     bool& hasResult)
 {
     hasResult = false;
-    if (currentObjectID != INVALID_OBJECT_ID || currentHandle || currentLine) {
+    if (currentObjectID != INVALID_OBJECT_ID || currentFile) {
         throw_std_runtime_error("Recursion in playlists not allowed");
     }
 
@@ -196,6 +196,12 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     std::vector<int> result;
     try {
+        if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
+            auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
+            if (mode != TextFileCharset::Default && toLower(item->getLocation().extension().string()) == ".m3u8")
+                mode = TextFileCharset::Utf8;
+            prepareFile(item->getLocation(), mode);
+        }
         result = call(obj, nullptr, playlistFunction, rootPath, "", hasResult);
     } catch (const std::runtime_error& e) {
         log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), e.what());

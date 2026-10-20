@@ -185,6 +185,7 @@ std::vector<int> CuesheetParserScript::processObject(
     bool hasResult = false;
 
     try {
+        prepareFile(item->getLocation());
         result = call(obj, parent, cuesheetFunction, path, "", hasResult);
     } catch (const std::runtime_error&) {
         log_error("Failed cuesheet {} ({})...", obj->getLocation().string(), obj->getID());
