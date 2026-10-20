@@ -1,9 +1,8 @@
-ASX preparation corpus
-======================
+ASX structure regression corpus
+===============================
 
-This is a preparation-only corpus for issue #4008, based on ee79f479bc5bf0407c3fad59b438b6b4e7ad04ee.
-No production importer changes, CTest registration or passing feature-test
-claim are included. Expected lists are independent acceptance expectations.
+This corpus describes issue #4008. Expected lists are independent acceptance
+expectations; runtime results are recorded separately from input validation.
 Actual media files must be generated in an isolated Linux/macOS fixture from
 ``cases.json``; filenames containing ?, quotes or # must not be created in the
 Windows checkout. Media tags are fixture-owned synthetic data, not library edits.
@@ -15,10 +14,9 @@ as an external URL does not satisfy a local-media expectation. HTTP(S) queries
 must remain byte-identical and no remote availability probe may be performed.
 
 ``required`` expectations describe acceptance/regression cases.
-``proposed_*`` expectations are explicit Gerbera compatibility/server policies
-for review, not assertions of Microsoft player behavior. ``requires_decision``
-cases deliberately have no golden sequence yet. Resolve those policies before
-registering importer tests; never turn these into passing no-op tests.
+``documented_server_policy`` expectations are explicit Gerbera compatibility
+and server policies, not assertions of Microsoft player runtime behavior.
+The f14/f25/f30 decisions are defined in ``policy.rst`` and the manifest.
 
 Run ``python test/scripting/verify_asx_fixtures.py test/scripting/fixtures/asx-semantics`` to check fixture
 hashes, declared XML parsing outcomes, key references and nested local files.
@@ -48,4 +46,10 @@ upstream foundation, or explicitly identify a stacked PR dependency.
 Test parser/converter reuse after a valid ASX document, malformed input and a
 subsequent legacy PLS import. Compare metadata, ordered positions and actual
 media resources, rather than adding a unit test for each configuration default.
-The 39/35 input corpora remain preparation only until the importer runs them.
+The manifest verifier still checks inputs only. ``AsxSemanticsIntegration``
+runs this corpus against the real importer with mt/grb, both legacy charsets,
+both views and complete local resources. Its default mode first indexes the
+isolated media library, then adds the ASX documents. The separate
+``--exercise-media-updates`` mode starts media and playlists together and
+adds inotify, parent/child/media edits, emptying and deletion for combined
+validation with the independent playlist-update repair.

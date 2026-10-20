@@ -58,10 +58,9 @@ std::vector<XmlPlaylistEntry> readXmlPlaylist(const pugi::xml_document& doc,
 
 #ifdef HAVE_JS
 #include "parser_script.h"
+#include "util/asx_playlist.h"
 
 #include <functional>
-#include <optional>
-
 #include <optional>
 
 class PlaylistParserScript : public ParserScript {
@@ -69,6 +68,7 @@ public:
     PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent);
     std::vector<int> processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath, bool& hasResult);
     std::optional<std::reference_wrapper<const XmlPlaylistEntry>> readPlaylistEntry();
+    std::optional<std::reference_wrapper<const AsxPlaylistEntry>> readAsxPlaylistEntry();
 
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override;
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
@@ -81,6 +81,8 @@ protected:
     TextFileCharset charsetMode;
     std::vector<XmlPlaylistEntry> xmlEntries;
     std::size_t xmlPosition {};
+    std::vector<AsxPlaylistEntry> asxEntries;
+    std::size_t asxPosition {};
 
     void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
     void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) override;

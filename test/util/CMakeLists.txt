@@ -25,7 +25,7 @@
 add_executable(
     testutil
     main.cc #
-    test_text_file.cc #
+    test_asx_playlist.cc #
     test_jpeg_res.cc #
     test_tools.cc #
     test_url_utils.cc #

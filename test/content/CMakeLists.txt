@@ -71,5 +71,12 @@ if(WITH_JS
                  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_asx_uris.py
                          --binary $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR})
         set_tests_properties(AsxUriIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 300)
+        add_test(
+            NAME AsxSemanticsIntegration
+            COMMAND
+                ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_asx_semantics.py --binary
+                $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR} --output
+                ${CMAKE_CURRENT_BINARY_DIR}/asx-semantics.json)
+        set_tests_properties(AsxSemanticsIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 300)
     endif()
 endif()

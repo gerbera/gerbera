@@ -2,7 +2,6 @@
 .. index:: Supported File Types
 
 Supported File Types
-====================
 
 Generally file type support depends on the linked libraries. Please check documentation for taglib, ffmpeg, libexif, libexiv2, libmatroska for the whole list and the restrictions.
 Gerbera depends on these libraries to extract the metadata.
@@ -132,6 +131,14 @@ their encoded query strings, are retained without fetching them during import.
 XML-parser output and local media metadata remain UTF-8, independently of the
 ``playlist-charset`` configured for line-based playlists. The existing root
 ``BASE`` prefix and Gerbera ``PARAM``/``writethrough`` extensions are retained.
+
+See :doc:`asx-playlists` for ordered alternatives, bounded repetition, local
+nested playlists, metadata precedence and unsupported player behavior.
+
+.. toctree::
+   :hidden:
+
+   asx-playlists
 
 .. code-block:: xml
 
