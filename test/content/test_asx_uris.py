@@ -160,7 +160,9 @@ class AsxUriFixture(Fixture):
             after = self.src / "zafter.pls"
             after.write_bytes((self.src / "zlegacy.pls").read_bytes())
             self.expected["zafter"] = ["LEGACY"]
-            self.original_hashes["zafter.pls"] = hashlib.sha256(after.read_bytes()).hexdigest()
+            self.original_hashes["zafter.pls"] = hashlib.sha256(
+                after.read_bytes()
+            ).hexdigest()
             self.rescan()
             self.record("rescan and subsequent legacy converter reuse")
             self.stop()
