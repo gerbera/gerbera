@@ -152,7 +152,32 @@ std::vector<XmlPlaylistEntry> readXmlPlaylist(const pugi::xml_document& doc,
 #include "script_property.h"
 #include "scripting_runtime.h"
 #include "util/generic_task.h"
+#include "util/playlist_uri.h"
 #include "util/string_converter.h"
+
+static duk_ret_t jsResolvePlaylistReference(duk_context* ctx)
+{
+    auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
+    if (!self || !duk_is_string(ctx, 0))
+        return 0;
+    const std::string reference = duk_get_string(ctx, 0);
+    const fs::path source = duk_is_string(ctx, 1) ? fs::path(duk_get_string(ctx, 1)) : self->getProcessedObject()->getLocation();
+    try {
+        const auto base = playlistPathUri(source);
+        auto location = resolvePlaylistMediaReference(reference, base, true);
+        std::error_code ec;
+        // Existing native names, including literal percent escapes, retain priority.
+        if (!location || !fs::is_regular_file(*location, ec))
+            location = resolvePlaylistMediaReference(reference, base, false);
+        if (!location)
+            return 0;
+        duk_push_lstring(ctx, location->data(), location->size());
+        return 1;
+    } catch (const std::runtime_error& e) {
+        log_warning("Cannot resolve playlist reference {}: {}", reference, EX(e));
+        return 0;
+    }
+}
 
 static duk_ret_t jsReadPlaylistEntry(duk_context* ctx)
 {
@@ -189,6 +214,7 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& conte
     hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
     charsetMode = EnumOption<TextFileCharset>::getEnumOption(config, ConfigVal::IMPORT_PLAYLIST_CHARSET_MODE);
     defineFunction("readPlaylistEntry", jsReadPlaylistEntry, 0);
+    defineFunction("resolvePlaylistReference", jsResolvePlaylistReference, 2);
 }
 
 std::optional<std::reference_wrapper<const XmlPlaylistEntry>> PlaylistParserScript::readPlaylistEntry()
@@ -335,6 +361,7 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
             useUtf8Converter();
         } else if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
             prepareXmlFile(item->getLocation());
+            useUtf8Converter();
         } else {
             auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
             if (mode != TextFileCharset::Default && toLower(item->getLocation().extension().string()) == ".m3u8")

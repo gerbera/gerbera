@@ -201,7 +201,8 @@ function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playli
       if (entry.location) {
         if (base)
           entry.location = base + '/' + entry.location;
-        var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath);
+        entry.location = resolvePlaylistReference(entry.location);
+        var state = entry.location && addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath);
         if (playlistDirChain && state) {
           entry.writeThrough = 0;
           state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result, rootPath);
@@ -255,7 +256,8 @@ function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playli
   }
 
   if (entry.location) {
-    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath);
+    entry.location = resolvePlaylistReference(entry.location);
+    var state = entry.location && addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath);
     if (playlistDirChain && state) {
       entry.writeThrough = 0;
       addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result, rootPath);
