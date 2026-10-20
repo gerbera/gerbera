@@ -217,47 +217,35 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     log_debug("Checking playlist {} ...", obj->getLocation().string());
-    GrbFile file(item->getLocation());
     bool isXmlPlaylist = item->getMimeType() == MIME_TYPE_WPL_PLAYLIST || item->getMimeType() == MIME_TYPE_XSPF_PLAYLIST;
-    xmlEntries.clear();
-    xmlPosition = 0;
-    if (isXmlPlaylist) {
-        xmlEntries = readXmlPlaylist(item->getLocation(), item->getMimeType() == MIME_TYPE_WPL_PLAYLIST ? XmlPlaylistType::Wpl : XmlPlaylistType::Xspf);
-    } else if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
-        currentHandle = file.open("r");
-    } else {
-        pugi::xml_parse_result result = xmlDoc.load_file(item->getLocation().c_str());
-        if (result.status != pugi::xml_parse_status::status_ok) {
-            throw ConfigParseException(result.description());
-        }
-        root = xmlDoc.document_element();
-    }
-
     currentTask = std::move(task);
     currentObjectID = item->getID();
-
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
+    xmlEntries.clear();
+    xmlPosition = 0;
     std::vector<int> result;
-    auto previousConverter = sc;
-    if (isXmlPlaylist)
-        sc = converterManager->i2i(); // XML has already been decoded to UTF-8.
     try {
-        if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
+        if (isXmlPlaylist) {
+            prepareXmlFile(item->getLocation(), pugi::parse_default | pugi::parse_doctype);
+            xmlEntries = readXmlPlaylist(xmlDoc, item->getLocation(), item->getMimeType() == MIME_TYPE_WPL_PLAYLIST ? XmlPlaylistType::Wpl : XmlPlaylistType::Xspf);
+            useUtf8Converter();
+        } else if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
+            prepareXmlFile(item->getLocation());
+        } else {
             auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
             if (mode != TextFileCharset::Default && toLower(item->getLocation().extension().string()) == ".m3u8")
                 mode = TextFileCharset::Utf8;
             prepareFile(item->getLocation(), mode);
         }
+
         result = call(obj, nullptr, playlistFunction, rootPath, "", hasResult);
     } catch (const std::runtime_error& e) {
         log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), EX(e));
-        sc = previousConverter;
         xmlEntries.clear();
         cleanUp();
         throw;
     }
 
-    sc = previousConverter;
     xmlEntries.clear();
     cleanUp();
     log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
