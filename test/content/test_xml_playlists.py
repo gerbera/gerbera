@@ -95,6 +95,13 @@ class Fixture:
                 text = "\n".join(paths)
             (self.pl / (name + "." + ext)).write_text(text, encoding="utf-8")
             self.expected[name] = order
+        # XML converter selection must not leak into subsequent legacy parsing.
+        (self.pl / "legacycp.m3u").write_bytes(
+            "#EXTINF:-1,Äther\nhttps://media.example.invalid/legacy.mp3\n".encode(
+                "windows-1252"
+            )
+        )
+        self.expected["legacycp"] = ["HTTPS"]
         self.ip = args.ip or socket.gethostbyname(socket.gethostname())
         for port in range(49270, 49370):
             with socket.socket() as probe:
@@ -245,12 +252,15 @@ class Fixture:
                     resource = next(n for n in item if n.tag.endswith("}res"))
                     if key in ["HTTPS", "RELATIVE_HTTPS"]:
                         remote = {
+                            "legacycp": "https://media.example.invalid/legacy.mp3",
                             "w09": "https://media.example.invalid/a.mp3?x=1&y=2",
                             "x17": "https://media.example.invalid/a.mp3?token=one%26two&x=1",
                             "x19": "https://media.example.invalid/media/a.wav",
                             "x23": "https://media.example.invalid/a.mp3?title=Why%3F&token=a+b",
                         }
                         assert resource.text == remote[name], resource.text
+                        if name == "legacycp":
+                            assert item.findtext(DC + "title") == "Äther"
                         if name == "x23":
                             assert item.findtext(DC + "title") == "Why? Äther 東京"
                         continue  # Never contact external fixture URLs.

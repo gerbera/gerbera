@@ -9,6 +9,7 @@
 
 #include "grb_fs.h"
 
+#include <pugixml.hpp>
 #include <string>
 #include <vector>
 
@@ -21,8 +22,8 @@ struct XmlPlaylistEntry {
     std::string title;
 };
 
-/// Read and validate the entire XML before the caller changes playlist contents.
+/// Validate the entire parsed XML before the caller changes playlist contents.
 /// Local references become absolute paths; HTTP(S) references remain encoded URIs.
-std::vector<XmlPlaylistEntry> readXmlPlaylist(const fs::path& path, XmlPlaylistType type);
+std::vector<XmlPlaylistEntry> readXmlPlaylist(const pugi::xml_document& doc, const fs::path& path, XmlPlaylistType type);
 
 #endif

@@ -15,6 +15,18 @@
 
 class XmlPlaylistTest : public ::testing::TestWithParam<std::string> { };
 
+static std::vector<XmlPlaylistEntry> readXmlPlaylist(const fs::path& path, XmlPlaylistType type)
+{
+    auto contents = GrbFile(path).readBinaryFile();
+    if (!contents)
+        throw std::runtime_error("Cannot open XML fixture");
+    pugi::xml_document doc;
+    auto result = doc.load_buffer(contents->data(), contents->size(), pugi::parse_default | pugi::parse_doctype);
+    if (!result)
+        throw std::runtime_error(result.description());
+    return readXmlPlaylist(doc, path, type);
+}
+
 static std::vector<std::string> cases()
 {
     std::vector<std::string> result;
