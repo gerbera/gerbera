@@ -156,8 +156,13 @@ class AsxUriFixture(Fixture):
             self.record(
                 "ASX references, exact positions, UTF-8 metadata and complete HTTP resources"
             )
+            # Import this PLS only after all initial XML imports have completed.
+            after = self.src / "zafter.pls"
+            after.write_bytes((self.src / "zlegacy.pls").read_bytes())
+            self.expected["zafter"] = ["LEGACY"]
+            self.original_hashes["zafter.pls"] = hashlib.sha256(after.read_bytes()).hexdigest()
             self.rescan()
-            self.record("unchanged rescan and legacy converter reuse")
+            self.record("rescan and subsequent legacy converter reuse")
             self.stop()
             self.start()
             self.record("restart preserves both playlist views")
@@ -179,7 +184,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--binary", type=Path, required=True)
     parser.add_argument("--source-root", type=Path, required=True)
-    parser.add_argument("--ip", default="127.0.0.1")
+    parser.add_argument("--ip")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     args.binary = args.binary.resolve()

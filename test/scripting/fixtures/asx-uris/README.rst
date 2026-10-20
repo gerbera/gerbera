@@ -1,9 +1,13 @@
-ASX preparation corpus
-======================
+ASX URI regression corpus
+=========================
 
-This is a preparation-only corpus for issue #4007, based on ee79f479bc5bf0407c3fad59b438b6b4e7ad04ee.
-No production importer changes, CTest registration or passing feature-test
-claim are included. Expected lists are independent acceptance expectations.
+This corpus covers issue #4007. Independent acceptance expectations are consumed
+by the real ContentDirectory integration test ``test/content/test_asx_uris.py``.
+CTest registers it as ``AsxUriIntegration`` on Linux builds with JavaScript and
+AVCodec. It checks all 39 documents in mt/grb modes and both legacy charsets,
+plus decoded XML text, external MMS/RTSP URLs and a later legacy PLS import.
+Each configuration checks both views and full local HTTP resources, then rescans
+and restarts. The input verifier below remains a separate consistency check.
 Actual media files must be generated in an isolated Linux/macOS fixture from
 ``cases.json``; filenames containing ?, quotes or # must not be created in the
 Windows checkout. Media tags are fixture-owned synthetic data, not library edits.
@@ -48,4 +52,4 @@ upstream foundation, or explicitly identify a stacked PR dependency.
 Test parser/converter reuse after a valid ASX document, malformed input and a
 subsequent legacy PLS import. Compare metadata, ordered positions and actual
 media resources, rather than adding a unit test for each configuration default.
-The 39/35 input corpora remain preparation only until the importer runs them.
+The separate ASX feature corpus belongs to issue #4008, not this bug fix.
