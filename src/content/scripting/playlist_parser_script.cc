@@ -161,7 +161,26 @@ static duk_ret_t jsResolvePlaylistReference(duk_context* ctx)
     if (!self || !duk_is_string(ctx, 0))
         return 0;
     const std::string reference = duk_get_string(ctx, 0);
-    const fs::path source = duk_is_string(ctx, 1) ? fs::path(duk_get_string(ctx, 1)) : self->getProcessedObject()->getLocation();
+    const auto schemeEnd = reference.find("://");
+    // Keep the existing ASX external protocols and their query bytes unchanged.
+    if (schemeEnd != std::string::npos && toLower(trimString(reference.substr(0, schemeEnd))) != "file") {
+        duk_push_lstring(ctx, reference.data(), reference.size());
+        return 1;
+    }
+    fs::path source;
+    if (duk_is_string(ctx, 1)) {
+        source = duk_get_string(ctx, 1);
+    } else {
+        // Playlist scripts expose their source through the existing global object.
+        duk_get_global_string(ctx, self->getOrigName().c_str());
+        duk_get_prop_string(ctx, -1, "location");
+        if (!duk_is_string(ctx, -1)) {
+            duk_pop_2(ctx);
+            return 0;
+        }
+        source = duk_get_string(ctx, -1);
+        duk_pop_2(ctx);
+    }
     try {
         const auto base = playlistPathUri(source);
         auto location = resolvePlaylistMediaReference(reference, base, true);
