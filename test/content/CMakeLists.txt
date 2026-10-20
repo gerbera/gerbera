@@ -67,5 +67,9 @@ if(WITH_JS
                  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_xml_playlists.py
                          --binary $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR})
         set_tests_properties(XmlPlaylistIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 240)
+        add_test(NAME AsxUriIntegration
+                 COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_asx_uris.py
+                         --binary $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR})
+        set_tests_properties(AsxUriIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 300)
     endif()
 endif()
