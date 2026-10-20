@@ -158,7 +158,7 @@ protected:
         const std::string& functionName,
         const fs::path& rootPath,
         const std::string& containerType,
-        bool* hasResult = nullptr);
+        bool& hasResult);
     void setMetaData(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsItem>& item,

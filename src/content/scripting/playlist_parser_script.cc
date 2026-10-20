@@ -165,12 +165,14 @@ void PlaylistParserScript::handleObject2cdsItem(
     item->setPartNumber(0);
 }
 
-std::optional<std::vector<int>> PlaylistParserScript::processPlaylistObject(
+std::vector<int> PlaylistParserScript::processPlaylistObject(
     const std::shared_ptr<CdsObject>& obj,
     std::shared_ptr<GenericTask> task,
-    const std::string& rootPath)
+    const std::string& rootPath,
+    bool& hasResult)
 {
-    if (currentObjectID != INVALID_OBJECT_ID || currentFile) {
+    hasResult = false;
+    if (currentObjectID != INVALID_OBJECT_ID || currentHandle || currentLine) {
         throw_std_runtime_error("Recursion in playlists not allowed");
     }
 
@@ -193,16 +195,17 @@ std::optional<std::vector<int>> PlaylistParserScript::processPlaylistObject(
 
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     std::vector<int> result;
-    bool hasResult = false;
     try {
-        result = call(obj, nullptr, playlistFunction, rootPath, "", &hasResult);
-    } catch (const std::runtime_error&) {
+        result = call(obj, nullptr, playlistFunction, rootPath, "", hasResult);
+    } catch (const std::runtime_error& e) {
+        log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), e.what());
         cleanUp();
         throw;
     }
 
     cleanUp();
-    return hasResult ? std::make_optional(std::move(result)) : std::nullopt;
+    log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
+    return result;
 }
 
 #endif // HAVE_JS
