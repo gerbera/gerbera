@@ -50,3 +50,6 @@ Dockerfile* text eol=lf
 # Other
 *.py text eol=lf
 *.js text eol=lf
+
+# Encoding-sensitive ASX regression inputs retain their exact recorded bytes.
+test/scripting/fixtures/asx-uris/*.asx -text
