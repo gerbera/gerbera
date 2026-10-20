@@ -802,8 +802,19 @@ They can be used by the import and by the playlist script.
     for metadata, resources and each configured playlist view. Cancellation
     aborts the script instead of reporting a successful partial import.
 
-    Existing ASX/NFO ``readXml`` behavior and text-playlist ``readln`` behavior
-    are unchanged.
+    NFO ``readXml`` behavior and text-playlist ``readln`` behavior are unchanged.
+
+.. js:function:: resolvePlaylistReference(reference[, sourcePath])
+
+    Available to playlist scripts. Resolves a reference relative to the current
+    playlist, or an explicit absolute source playlist path. Returns an absolute
+    native path or an external URL, or undefined for an unsupported local URI.
+    Existing native regular files take priority before URI decoding, preserving
+    literal percent escapes in legacy ASX filenames. Otherwise percent escapes
+    are decoded once by the shared playlist URI utility. External non-file URLs
+    retain their existing ASX behavior and are not fetched. The standard ASX
+    script passes the resulting location to ``addPlaylistItem`` for the actual
+    media lookup and import.
 
 
 
