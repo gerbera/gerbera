@@ -706,4 +706,120 @@ TEST_F(CommonScriptTest, abcbox_BoxTypeSpecialChars_ReturnsCorrectBoxBasedOnChar
     result = this->invokeABCBOX(ctx, "#1", boxType, divChar);
     EXPECT_STREQ(result.c_str(), "-^&#'-");
 }
+TEST_F(CommonScriptTest, AudioTitleFormatsPreserveMetadataAndOrdering)
+{
+    const duk_function_list_entry functions[] = { { nullptr, nullptr, 0 } };
+    addGlobalFunctions(ctx, functions);
+    ASSERT_EQ(duk_peval_string(ctx, R"JS(
+        function getRootPath() { return []; }
+        function getYear(date) { return date.slice(0, 4); }
+        var formatKey = '/import/scripting/virtual-layout/attribute::audio-title-format';
+        var rulesKey = '/import/scripting/virtual-layout/title-replacements/replace';
+        var sourceItem = {
+            title: 'Artist - File', location: '/music/Artist - File.flac',
+            aux: { DISCNUMBER: '2/3' }, res: {},
+            metaData: {
+                'dc:title': [' Track_"音楽" '],
+                'upnp:artist': ['Artist', 'Guest'],
+                'upnp:albumArtist': ['Various Artists'], 'upnp:album': ['Album'],
+                'upnp:originalTrackNumber': ['02'], 'dc:date': ['2026-01-01'],
+                'upnp:genre': ['Techno', 'Trance'], 'upnp:composer': ['Composer']
+            }
+        };
+        sourceItem.metaData[M_ALBUMARTIST] = ['Various Artists'];
+        function titleCase(pattern, expected, rules, change) {
+            var item = JSON.parse(JSON.stringify(sourceItem));
+            if (change) change(item);
+            delete config[formatKey];
+            delete config[rulesKey];
+            var baseline = getAudioDetails(JSON.parse(JSON.stringify(item)), '/music');
+            var baselineItem = JSON.parse(JSON.stringify(item));
+            getAudioDetails(baselineItem, '/music');
+            config[formatKey] = pattern;
+            config[rulesKey] = rules || [];
+            var result = getAudioDetails(item, '/music');
+            if (result.title !== expected) throw new Error(pattern + ': ' + result.title);
+            result.title = baseline.title;
+            if (JSON.stringify(result) !== JSON.stringify(baseline) ||
+                JSON.stringify(item) !== JSON.stringify(baselineItem))
+                throw new Error('Formatting changed source metadata or ordering');
+        }
+        var defaultItem = JSON.parse(JSON.stringify(sourceItem));
+        var defaultTitle = getAudioDetails(defaultItem, '/music').title;
+        if (defaultTitle !== 'Artist - Guest -   Track_"音楽" ')
+            throw new Error('Default artist prefix changed: ' + defaultTitle);
+        titleCase('%title%', 'Track_"音楽"');
+        titleCase('%artist% - %title%', 'Artist / Guest - Track_"音楽"');
+        titleCase('%albumartist% | %albumtitle% | %year% | %genre% | %composer%',
+            'Various Artists | Album | 2026 | Techno / Trance | Composer');
+        titleCase('%cdnumber%.%tracknr2%/%tracknr1%/%tracknr3%', '2.02/2/002');
+        titleCase('%filename%', 'Artist - File');
+        titleCase('%% %unknown% %TITLE%', '% %unknown% %TITLE%');
+        titleCase('%title%', 'Artist - File', [], function(i) { delete i.metaData['dc:title']; });
+        titleCase('%albumartist%', 'Various Artists', [], function(i) { delete i.metaData['upnp:artist']; });
+        titleCase('%albumartist%', 'Artist', [], function(i) { delete i.metaData[M_ALBUMARTIST]; });
+        titleCase('%artist%%albumartist%%albumtitle%%genre%%composer%%year%%tracknr2%%cdnumber%',
+            'Track_"音楽"', [], function(i) { i.metaData = { 'dc:title': ['Track_"音楽"'] }; i.aux = {}; });
+        titleCase('%tracknr2%/%tracknr3%', '123/123', [], function(i) { i.metaData['upnp:originalTrackNumber'] = ['123']; });
+        titleCase('%tracknr2%%cdnumber%', 'Track_"音楽"', [], function(i) { i.metaData['upnp:originalTrackNumber'] = ['0']; i.aux.DISCNUMBER = '0'; });
+        titleCase('%title%', 'Track "音楽"', [{from:'_',to:' '}]);
+        titleCase('%title%', 'Track_音楽', [{from:'"',to:''}]);
+        titleCase('ab a', 'Xb X', [{from:'a',to:'ab'},{from:'ab',to:'X'}]);
+        titleCase('a', 'first', [{from:'a',to:'first'},{from:'a',to:'second'}]);
+        titleCase('A $1 [x]', 'A literal 音楽', [{from:'a',to:'z'},{from:'$1',to:'literal'},{from:'[x]',to:'音楽'}]);
+        titleCase('REMOVE', 'Track_"音楽"', [{from:'REMOVE',to:''}]);
+        titleCase('%filename%', 'Title', [], function(i) { i.location = 'C:\\music\\Title.mp3'; });
+        titleCase('%title%', 'Track_"音楽"', [{from:'',to:'ignored'}]);
+        titleCase('A  B\tC', 'A B C', [{from:'\\s+',to:' ',regex:'yes'}]);
+        titleCase('A  B', 'A B', [{from:'\\s+',to:' ',regex:'true'}]);
+        titleCase('A.*B', 'literal', [{from:'A.*B',to:'literal',regex:'no'}]);
+        titleCase('A.*B', 'literal', [{from:'A.*B',to:'literal',regex:'false'}]);
+        titleCase('A B A B', 'B/A B/A', [{from:'(A) (B)',to:'$2/$1',regex:'yes'}]);
+        titleCase('A', '$1', [{from:'A',to:'$1'}]);
+        titleCase('%title%', 'Track "音楽"', [{from:'_',to:' ','if-albumtitle':'Album'}]);
+        titleCase('%title%', 'Track_"音楽"', [{from:'_',to:' ','if-albumtitle':'Other'}]);
+        titleCase('%title%', 'Track "音楽"', [{from:'_',to:' ','if-artist':'Guest'}]);
+        titleCase('%title%', 'Track_"音楽"', [{from:'_',to:' ','if-artist':'guest'}]);
+        titleCase('%title%', 'Track "音楽"', [{from:'_',to:' ','if-artist':'Artist','if-albumtitle':'Album'}]);
+        titleCase('%title%', 'Track_"音楽"', [{from:'_',to:' ','if-artist':'Artist','if-albumtitle':'Other'}]);
+        titleCase('%title%', 'Track_"音楽"', [{from:'_',to:' ','if-artist':'Artist'}], function(i) { delete i.metaData[M_ARTIST]; });
+        titleCase('%title%', 'Track_"音楽"', [{from:'_',to:' ','if-albumartist':'Artist'}], function(i) { delete i.metaData[M_ALBUMARTIST]; });
+        titleCase('%title%', 'Track "音楽"', [{from:'_',to:' ','if-albumartist':'Various Artists','if-genre':'Trance','if-composer':'Composer','if-year':'2026'}]);
+        titleCase('%title%', 'Track_"音楽"', [{from:'_',to:' ','if-year':'2025'}]);
+        titleCase('%title%', 'Track_"音楽"', [{from:'_',to:' ','if-year':'Unknown'}], function(i) { delete i.metaData[M_DATE]; });
+        titleCase('%title%', 'Track "音楽"', [{from:'_',to:' ','if-title':' Track_"音楽" '}]);
+        titleCase('%title%', 'Artist - File', [{from:'Artist',to:'Changed','if-title':'Artist - File'}], function(i) { delete i.metaData[M_TITLE]; });
+        titleCase('%title%', 'Track "音楽"', [{from:'_',to:' ','if-artist':''}]);
+        titleCase('A  B', 'A B', [{from:'\\s+',to:' ',regex:'yes','if-artist':'Guest'}]);
+        titleCase('A  B', 'A  B', [{from:'\\s+',to:' ',regex:'yes','if-artist':'Other'}]);
+        titleCase('%title%', 'Track_"音楽"', [{from:'Track',to:'Changed','if-title':'Track_"音楽"'}]);
+        var warnings = [];
+        function print(message) { warnings.push(message); }
+        config[rulesKey] = [{from:'(',to:'bad',regex:'yes'}, {from:'_',to:' '}];
+        var prepared = getAudioTitleReplacements();
+        if (warnings.length !== 1 || prepared.length !== 1 || getAudioTitleReplacements() !== prepared || warnings.length !== 1)
+            throw new Error('Rules must be prepared once; invalid regex skipped and logged once');
+        config[formatKey] = '%title%';
+        if (getAudioDetails(JSON.parse(JSON.stringify(sourceItem)), '/music').title !== 'Track "音楽"')
+            throw new Error('Valid rules following an invalid regex must still apply');
+        config[rulesKey] = [{from:'\\s+',to:' ',regex:'yes'}];
+        config[formatKey] = 'A  B';
+        var regexRules = getAudioTitleReplacements();
+        for (var repeat = 0; repeat < 3; repeat++) {
+            if (getAudioDetails(JSON.parse(JSON.stringify(sourceItem)), '/music').title !== 'A B' ||
+                getAudioTitleReplacements() !== regexRules)
+                throw new Error('Cached global regex state leaked between titles');
+        }
+        config[rulesKey] = [{from:'A',to:'C'}];
+        if (getAudioTitleReplacements() === regexRules || getAudioDetails(JSON.parse(JSON.stringify(sourceItem)), '/music').title !== 'C  B')
+            throw new Error('Replacing configuration must invalidate the prepared rules');
+
+        true;
+    )JS"),
+        DUK_EXEC_SUCCESS)
+        << duk_safe_to_string(ctx, -1);
+    EXPECT_TRUE(duk_get_boolean(ctx, -1));
+    duk_pop(ctx);
+}
+
 #endif

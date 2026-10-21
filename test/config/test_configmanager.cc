@@ -172,3 +172,34 @@ TEST_F(ConfigManagerTest, LoadsConfigFromDefaultHomeWhenExistsButNotSpecified)
     ASSERT_FALSE(shared->getBoolOption(ConfigVal::SERVER_UI_ACCOUNTS_ENABLED));
     ASSERT_EQ(30, shared->getLongOption(ConfigVal::SERVER_UI_SESSION_TIMEOUT));
 }
+
+#ifdef HAVE_JS
+TEST_F(ConfigManagerTest, LoadsAudioTitleFormatAndOrderedReplacements)
+{
+    pugi::xml_document document;
+    ASSERT_TRUE(document.load_file(configFile.c_str()));
+    auto layout = document.child("config").child("import").child("scripting").child("virtual-layout");
+    ASSERT_TRUE(layout);
+    layout.append_attribute("audio-title-format") = "%tracknr2% - %title%";
+    auto rules = layout.append_child("title-replacements");
+    auto first = rules.append_child("replace");
+    first.append_attribute("from") = "_";
+    first.append_attribute("to") = " ";
+    auto second = rules.append_child("replace");
+    second.append_attribute("from") = "REMOVE";
+    second.append_attribute("to") = "";
+    second.append_attribute("regex") = "yes";
+    second.append_attribute("if-albumtitle") = "Album";
+    second.append_attribute("if-artist") = "Artist";
+    ASSERT_TRUE(document.save_file(configFile.c_str()));
+    auto shared = std::make_shared<ConfigManager>(definition, configFile, home, confdir, prefix, false);
+    shared->load(home, "");
+    EXPECT_EQ(shared->getOption(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_FORMAT), "%tracknr2% - %title%");
+    const auto entries = shared->getVectorOption(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS);
+    ASSERT_EQ(entries.size(), 2);
+    const std::vector<std::pair<std::string, std::string>> expectedFirst { { "from", "_" }, { "to", " " } };
+    const std::vector<std::pair<std::string, std::string>> expectedSecond { { "from", "REMOVE" }, { "regex", "yes" }, { "if-albumtitle", "Album" }, { "if-artist", "Artist" } };
+    EXPECT_EQ(entries[0], expectedFirst);
+    EXPECT_EQ(entries[1], expectedSecond);
+}
+#endif

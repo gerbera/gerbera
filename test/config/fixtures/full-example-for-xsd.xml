@@ -259,7 +259,12 @@
                 <cuesheet>importCuesheet</cuesheet>
                 <image-file>importImage</image-file>
             </import-function>
-            <virtual-layout type="builtin">
+            <virtual-layout type="builtin" audio-title-format="%tracknr2% - %title%">
+                <title-replacements>
+                    <replace from="_" to=" "/>
+                    <replace from="[Live]" to=""/>
+                    <replace from="\s+" to=" " regex="yes" if-albumtitle="XXX" if-artist="YY"/>
+                </title-replacements>
                 <structured-layout skip-chars="" div-char=""/>
                 <script-options>
                     <script-option name="album-mode" value="unique"/>

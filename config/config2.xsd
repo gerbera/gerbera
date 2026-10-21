@@ -730,6 +730,7 @@
             <xs:all>
                 <xs:element ref="import-script" minOccurs="0"/>
                 <xs:element ref="script-options" minOccurs="0"/>
+                <xs:element ref="title-replacements" minOccurs="0"/>
                 <xs:element ref="genre-map" minOccurs="0"/>
                 <xs:element ref="boxlayout" minOccurs="0"/>
                 <xs:element ref="structured-layout" minOccurs="0"/>
@@ -746,6 +747,7 @@
                 </xs:simpleType>
             </xs:attribute>
             <xs:attribute name="audio-layout" type="xs:string"/>
+            <xs:attribute name="audio-title-format" type="xs:string"/>
             <xs:attribute name="video-layout" type="xs:string"/>
             <xs:attribute name="image-layout" type="xs:string"/>
             <xs:attribute name="from-file" type="xs:string"/>
@@ -753,6 +755,34 @@
     </xs:element>
 
     <xs:element name="import-script" type="xs:string"/>
+
+    <xs:element name="title-replacements">
+        <xs:complexType>
+            <xs:sequence>
+                <xs:element name="replace" minOccurs="0" maxOccurs="unbounded">
+                    <xs:complexType>
+                        <xs:attribute name="from" use="required">
+                            <xs:simpleType>
+                                <xs:restriction base="xs:string">
+                                    <xs:minLength value="1"/>
+                                </xs:restriction>
+                            </xs:simpleType>
+                        </xs:attribute>
+                        <xs:attribute name="to" type="xs:string" use="required"/>
+                        <xs:attribute name="regex" type="boolean" default="no"/>
+                        <xs:attribute name="if-title" type="xs:string"/>
+                        <xs:attribute name="if-artist" type="xs:string"/>
+                        <xs:attribute name="if-albumartist" type="xs:string"/>
+                        <xs:attribute name="if-albumtitle" type="xs:string"/>
+                        <xs:attribute name="if-genre" type="xs:string"/>
+                        <xs:attribute name="if-composer" type="xs:string"/>
+                        <xs:attribute name="if-year" type="xs:string"/>
+                    </xs:complexType>
+                </xs:element>
+            </xs:sequence>
+            <xs:attribute name="extend" type="boolean" default="no"/>
+        </xs:complexType>
+    </xs:element>
 
     <xs:element name="system-directories">
         <xs:complexType>
