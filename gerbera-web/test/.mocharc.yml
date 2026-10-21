@@ -1,4 +1,6 @@
 timeout: 60000
 slow: 5000
-retries: 5
+retries: 0
 parallel: false
+require:
+  - ./test/e2e/page/test-utils.js

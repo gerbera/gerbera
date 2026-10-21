@@ -21,8 +21,9 @@
     $Id$
 */
 
-const { By, until } = require('selenium-webdriver');
+const { By, until, error } = require('selenium-webdriver');
 const fs = require('fs');
+const TestUtils = require('./test-utils');
 
 module.exports = function (driver) {
 
@@ -63,24 +64,27 @@ module.exports = function (driver) {
   };
 
   this.logout = async () => {
-    let result;
-    try {
-      const logoutBtn = driver.findElement(By.id('logout'));
-      await driver.wait(until.elementIsVisible(logoutBtn), 5000);
-      await logoutBtn.click();
-      const loginBtn = driver.findElement(By.id('login-submit'));
-      result = await driver.wait(until.elementIsVisible(loginBtn), 5000);
-    } catch (err) {
-      console.log(err);
-      result = null;
-    }
-    return Promise.resolve(result);
+    const logoutBtn = await driver.findElement(By.id('logout'));
+    await driver.wait(until.elementIsVisible(logoutBtn), 5000);
+    await logoutBtn.click();
+    await TestUtils.waitForRequests(driver);
+    // Logout replaces the login controls. Reacquire them after each render.
+    return driver.wait(async () => {
+      try {
+        const button = await driver.findElement(By.id('login-submit'));
+        return await button.isDisplayed() && button;
+      } catch (err) {
+        if (err instanceof error.StaleElementReferenceError ||
+            err instanceof error.NoSuchElementError) return false;
+        throw err;
+      }
+    }, 5000, 'Waiting for the login form after logout');
   };
 
   this.submitLogin = async () => {
     await driver.findElement(By.id('login-submit')).click();
     await driver.wait(until.elementLocated(By.id('logout')), 5000);
-    return await driver.sleep(500);
+    return TestUtils.waitForRequests(driver);
   };
 
   this.setDisplayMode = async (mode) => {
