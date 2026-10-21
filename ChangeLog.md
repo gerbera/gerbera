@@ -3,14 +3,19 @@
 ### HEAD
 
 - Add config for search bracket nesting limit
+- Add opt-in whole-file charset selection for M3U playlists
 - Add ubuntu 26.10
 - Allow multiple clients by ip
+- Build with libpqxx 8
 - Bump serialize-javascript from 7.1.1 to 7.1.2 in /gerbera-web
+- Collect documentation updates
+- Declare scoped search container CTE as recursive
 - Default Sorting for Browse
 - Define Limits for Containter Type Selection
 - Docker: fix ownership of files created with PUID/PGID, rename UID/GID to PUID/PGID
 - Extend Mime Mapping
 - Fix CaptionInfo.sec never being sent to Samsung TVs
+- Fix hang when shutting down the SQLite thread
 - Fix internal transcoding with ffmpeg
 - Fix internal video (mpeg) transcoding
 - Fix sorting of files in structured import
@@ -19,15 +24,19 @@
 - Improve logging for mime and extensions
 - Keep sortKey for new containers
 - Pass the client quirks to the DIDL of search results
+- Preserve fractional MP4 BPM with configurable conflict priority
 - Preserve multiple genres in WebM and WMV metadata
+- Preserve playlist entries when media files are updated
 - Preserve repeated local files at different playlist positions
 - Seek in transcoded streams of constant bit rate
 - Serve transcoded streams to HTTP/1.0 clients
 - Stabilize import of broken files
+- transcode: fix build with ffmpeg 7.0
 - Update metadata\_service to use content-type
 - Update to cxxopts-gac6d47
 - Update to pupnp 22.1.8
 - Use fmt exception formatting
+- Wait for client grid rendering in browser tests
 
 ### v3.3.0
 

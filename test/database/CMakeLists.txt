@@ -26,7 +26,8 @@
 if(WITH_PGSQL AND libpqxx_VERSION VERSION_GREATER_EQUAL "8.0")
     set_property(
         SOURCE test_database.cc
-        APPEND PROPERTY COMPILE_OPTIONS "-std=c++20")
+        APPEND
+        PROPERTY COMPILE_OPTIONS "-std=c++20")
 endif()
 
 add_executable(

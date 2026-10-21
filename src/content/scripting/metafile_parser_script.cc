@@ -77,7 +77,7 @@ void MetafileParserScript::processObject(const std::shared_ptr<CdsObject>& obj, 
         prepareFile(path);
         call(obj, nullptr, metafileFunction, path, "", hasResult);
     } catch (const std::runtime_error& e) {
-        log_debug("Failed to parse metafile {}: {}", path.string(), e.what());
+        log_debug("Failed to parse metafile {}: {}", path.string(), EX(e));
         currentObjectID = INVALID_OBJECT_ID;
         cleanUp();
         throw;

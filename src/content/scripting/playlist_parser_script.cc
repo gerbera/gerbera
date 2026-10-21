@@ -204,7 +204,7 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
         }
         result = call(obj, nullptr, playlistFunction, rootPath, "", hasResult);
     } catch (const std::runtime_error& e) {
-        log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), e.what());
+        log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), EX(e));
         cleanUp();
         throw;
     }
