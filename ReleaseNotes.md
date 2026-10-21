@@ -2,18 +2,27 @@
 
 ## HEAD
 
-Because of changes to the configuration defaults, you should generate the the default configuration with ``gerbera --create-config`` and merge
-the additions into you ``config.xml`` file
+This release was enabled by a huge community effort and contains a lot of improvements and stabilisations
+esp. for internal transcoding and playlists.
+
+Because of changes to the configuration defaults, you should generate the the default configuration with 
+``gerbera --create-config`` and merge the additions into you ``config.xml`` file
 
 ### NEW Features
 
 - Configuration option for search bracket nesting limit
+- Handling for fractional MP4 BPM
+- More preconfigured media types
+- Multiple clients at one IP
+- Seeking in transcoded streams
 - Transcoding with constant bitrate for seeking
 
 ### FIXES
 
-- Internal Transcoding now stable
+- Client specific search result contents
 - Header handling for quirks
+- Internal Transcoding now stable
+- Serveral fixes for playlist handling
 - Sorting of files in structured import
 
 ### Code Improvements
@@ -21,6 +30,7 @@ the additions into you ``config.xml`` file
 - Update maximum versions of utf8cpp (4.2.1), cxxopts (3.3.1-gbb7915),
   pupnp (22.1.8), libpqxx (7.10.7)
 - Build for ubuntu 26.10
+- Updated docker_entry script
 - Use formatting for exception from fmtlib >= 11
 
 ## v3.3.0
