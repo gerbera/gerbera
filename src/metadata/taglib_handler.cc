@@ -281,7 +281,7 @@ void TagLibHandler::addSpecialFields(
             }
         }
         if (list.isEmpty())
-            return;
+            continue;
         for (auto&& val : list) {
             for (auto&& entrySeg : val.split(legacyEntrySeparator)) {
                 std::string entry = entrySeg.to8Bit(true);
