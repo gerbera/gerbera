@@ -21,10 +21,52 @@
     $Id$
 */
 
-const { By, until } = require('selenium-webdriver');
+const { By, until, error } = require('selenium-webdriver');
 const fs = require('fs');
+const TestUtils = require('./test-utils');
 
 module.exports = function (driver) {
+  const requestsComplete = () => TestUtils.waitForRequests(driver);
+
+  const clickWhenReady = async (locator, index = 0) => {
+    return driver.wait(async () => {
+      const elements = await driver.findElements(locator);
+      const element = elements[index];
+      if (!element) return false;
+      try {
+        if (!await element.isDisplayed() || !await element.isEnabled()) return false;
+        await element.click();
+        return element;
+      } catch (err) {
+        if (err instanceof error.StaleElementReferenceError ||
+            err instanceof error.ElementNotInteractableError ||
+            err instanceof error.ElementClickInterceptedError) return false;
+        throw err;
+      }
+    }, 5000, 'Waiting to click ' + locator);
+  };
+
+  const clickMenu = async (menuId, locator) => {
+    const previous = await driver.findElements(By.css('#tree li'));
+    await clickWhenReady(locator);
+    if (menuId === 'nav-db' || menuId === 'nav-fs' || menuId === 'nav-search') {
+      if (previous.length) await driver.wait(until.stalenessOf(previous[0]), 5000);
+      await driver.wait(until.elementLocated(By.css('#tree li')), 5000);
+      await driver.wait(until.elementIsVisible(driver.findElement(By.id('tree'))), 5000);
+    }
+  };
+
+  const editorReady = async () => driver.wait(() => driver.executeScript(() => {
+    const modal = window.jQuery('#editModal').data('modal');
+    return !!modal && modal._isShown && !modal._isTransitioning;
+  }), 5000, 'Waiting for the editor opening transition');
+
+  const editorClosed = async () => driver.wait(async () => {
+    const modal = await driver.findElement(By.id('editModal'));
+    return await modal.getCssValue('display') === 'none' &&
+      (await driver.findElements(By.css('.modal-backdrop'))).length === 0;
+  }, 5000, 'Waiting for the editor and its backdrop to close');
+
   this.getDatabaseMenu = async () => {
     return await driver.findElement(By.id('nav-db'));
   };
@@ -54,23 +96,11 @@ module.exports = function (driver) {
   };
 
   this.clickMenu = async (menuId) => {
-    if (menuId === 'nav-home' || menuId === 'nav-clients' || menuId == 'nav-config') {
-      return await driver.findElement(By.id(menuId)).click()
-    } else {
-      await driver.findElement(By.id(menuId)).click();
-      const tree = await driver.findElement(By.id('tree'));
-      return await driver.wait(until.elementIsVisible(tree), 5000)
-    }
+    return clickMenu(menuId, By.id(menuId));
   };
 
   this.clickMenuIcon = async (menuId) => {
-    const tree = await driver.findElement(By.id('tree'));
-    if (menuId === 'nav-home' || menuId === 'nav-clients' || menuId == 'nav-config') {
-      return await driver.findElement(By.css('#' + menuId + ' i')).click();
-    } else {
-      await driver.findElement(By.css('#' + menuId + ' i')).click();
-      return await driver.wait(until.elementIsVisible(tree), 5000);
-    }
+    return clickMenu(menuId, By.css('#' + menuId + ' i'));
   };
   this.isDisabled = async (id) => {
     try {
@@ -99,7 +129,7 @@ module.exports = function (driver) {
     const elem = await driver.findElement(By.xpath('//span[contains(text(),\'' + text + '\')]'));
     await driver.wait(until.elementIsVisible(elem), 5000);
     await elem.click();
-    return await driver.sleep(500); // todo use wait...
+    return requestsComplete();
   };
   this.clickTrail = async (index) => {
     const elem = await driver.findElements(By.css('.grb-trail-button'));
@@ -114,26 +144,24 @@ module.exports = function (driver) {
   };
 
   this.getItem = async (idx) => {
-    await driver.wait(until.elementLocated(By.id('datagrid'), 5000));
-    const items = await driver.findElements(By.className('grb-item'));
+    await requestsComplete();
+    await driver.wait(until.elementLocated(By.css('#datagrid .grb-item')), 5000);
+    const items = await driver.findElements(By.css('#datagrid .grb-item'));
     return items[idx];
   };
 
   this.deleteItemFromList = async (idx) => {
-    const items = await driver.findElements(By.css('.grb-item span.grb-item-delete'));
-    const item = items[idx];
-    await item.click();
-    return await driver.wait(until.stalenessOf(item));
+    const item = await clickWhenReady(By.css('#datagrid .grb-item span.grb-item-delete'), idx);
+    return await driver.wait(until.stalenessOf(item), 5000);
   };
 
   this.editItem = async (idx) => {
-    const items = await driver.findElements(By.css('.grb-item span.grb-item-edit'));
-    await items[idx].click();
-    return await driver.wait(until.elementIsVisible(driver.findElement(By.id('editModal'))), 5000);
+    await clickWhenReady(By.css('#datagrid .grb-item span.grb-item-edit'), idx);
+    return editorReady();
   };
 
   this.editOverlayDisplayed = async () => {
-    await driver.sleep(1000); // allow for animation
+    await editorReady();
     return await driver.findElement(By.id('editModal')).isDisplayed();
   };
 
@@ -175,21 +203,34 @@ module.exports = function (driver) {
   };
 
   this.cancelEdit = async () => {
-    await driver.sleep(500); // slow down with animations
-    await driver.findElement(By.id('editCancel')).click();
-    await driver.sleep(1000);
-    return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000);
+    try {
+      // A failed test can leave an edit-load request in flight.
+      await requestsComplete();
+      const opening = await driver.executeScript(() => {
+        const modal = window.jQuery('#editModal').data('modal');
+        return !!modal && modal._isShown;
+      });
+      if (opening) {
+        await editorReady();
+        await clickWhenReady(By.css('#editModal #editCancel'));
+      }
+      return await editorClosed();
+    } catch (err) {
+      await TestUtils.captureFailure('editor-cleanup', driver, err);
+      throw err;
+    }
   };
 
   this.submitEditor = async () => {
-    await driver.findElement(By.id('editSave')).click();
-    await driver.sleep(500); // todo: wait on .modal-backdrop somehow
-    return await driver.wait(until.elementIsNotVisible(driver.findElement(By.id('editModal'))), 5000);
+    await editorReady();
+    await clickWhenReady(By.id('editSave'));
+    return editorClosed();
   };
 
   this.items = async () => {
+    await requestsComplete();
     await driver.wait(until.elementLocated(By.id('datagrid')), 1000);
-    return await driver.findElements(By.className('grb-item'));
+    return await driver.findElements(By.css('#datagrid .grb-item'));
   };
 
   this.hasDeleteIcon = async (grbItem) => {
@@ -248,9 +289,8 @@ module.exports = function (driver) {
   };
 
   this.clickTrailAdd = async () => {
-    const addEl = await driver.findElement(By.css('.grb-trail-add'));
-    await addEl.click();
-    return await driver.wait(until.elementIsVisible(driver.findElement(By.id('editModal'))), 5000);
+    await clickWhenReady(By.css('.grb-trail-add'));
+    return editorReady();
   };
 
   this.clickTrailAddAutoscan = async () => {
@@ -266,9 +306,8 @@ module.exports = function (driver) {
   };
 
   this.clickTrailEdit = async () => {
-    const el = await driver.findElement(By.css('.grb-trail-edit'));
-    await el.click();
-    return await driver.wait(until.elementIsVisible(driver.findElement(By.id('editModal'))), 5000);
+    await clickWhenReady(By.css('.grb-trail-edit'));
+    return editorReady();
   };
 
   this.editOverlayTitle = async () => {
@@ -397,7 +436,7 @@ module.exports = function (driver) {
   };
 
   this.getClientColumn = async (idx, col) => {
-    await driver.wait(until.elementLocated(By.id('clientgrid'), 1000));
+    await driver.wait(until.elementLocated(By.id('clientgrid')), 1000);
     const clients = await driver.findElements(By.className('grb-client-' + col));
     return clients[idx];
   };

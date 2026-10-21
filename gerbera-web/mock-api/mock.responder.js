@@ -43,7 +43,7 @@ module.exports = class MockResponder {
 
     getTestCase (name, testCaseData) {
         this.testCaseData = testCaseData;
-        return require(`./${name}/tests/${testCaseData}`);
+        return structuredClone(require(`./${name}/tests/${testCaseData}`));
     }
 
 };

@@ -13,6 +13,7 @@ concurrency:
 jobs:
   js:
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     env:
       DETECT_CHROMEDRIVER_VERSION: true
     steps:
@@ -24,6 +25,14 @@ jobs:
         run: |
           npm ci --legacy-peer-deps
           npm run lint
+          npm run test:mock
           npm run test
           npm run test:e2e
         working-directory: ./gerbera-web
+      - name: Upload browser failure diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: web-ui-failure-diagnostics
+          path: gerbera-web/_build/e2e-failures/
+          if-no-files-found: ignore
