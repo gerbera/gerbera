@@ -393,10 +393,6 @@ add_library(
     src/util/url.h
     src/util/url_utils.cc
     src/util/url_utils.h
-    src/util/playlist_uri.cc
-    src/util/playlist_uri.h
-    src/util/xml_playlist.cc
-    src/util/xml_playlist.h
     src/web/action.cc
     src/web/add.cc
     src/web/add_object.cc

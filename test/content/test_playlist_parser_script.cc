@@ -16,8 +16,8 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "content/scripting/playlist_parser_script.h"
 #include "util/tools.h"
-#include "util/xml_playlist.h"
 
 #include <fstream>
 #include <gtest/gtest.h>
@@ -27,13 +27,15 @@
 
 class XmlPlaylistTest : public ::testing::TestWithParam<std::string> { };
 
-static std::vector<XmlPlaylistEntry> readXmlPlaylist(const fs::path& path, XmlPlaylistType type)
+static std::vector<XmlPlaylistEntry> readXmlPlaylist(const fs::path& path,
+    XmlPlaylistType type)
 {
     auto contents = GrbFile(path).readBinaryFile();
     if (!contents)
         throw std::runtime_error("Cannot open XML fixture");
     pugi::xml_document doc;
-    auto result = doc.load_buffer(contents->data(), contents->size(), pugi::parse_default | pugi::parse_doctype);
+    auto result = doc.load_buffer(contents->data(), contents->size(),
+        pugi::parse_default | pugi::parse_doctype);
     if (!result)
         throw std::runtime_error(result.description());
     return readXmlPlaylist(doc, path, type);
@@ -65,7 +67,8 @@ TEST_P(XmlPlaylistTest, ResolvesDeclaredPositionsAndRejectsInvalidDocuments)
     SCOPED_TRACE(test["purpose"].asString());
     auto type = GetParam()[0] == 'w' ? XmlPlaylistType::Wpl : XmlPlaylistType::Xspf;
     if (test["outcome"].asString() != "import") {
-        EXPECT_THROW(readXmlPlaylist(folder / GetParam(), type), std::runtime_error);
+        EXPECT_THROW(readXmlPlaylist(folder / GetParam(), type),
+            std::runtime_error);
         return;
     }
     std::map<std::string, std::string> known;
@@ -97,72 +100,18 @@ TEST_P(XmlPlaylistTest, ResolvesDeclaredPositionsAndRejectsInvalidDocuments)
 }
 
 INSTANTIATE_TEST_SUITE_P(Corpus, XmlPlaylistTest, ::testing::ValuesIn(cases()),
-    [](const ::testing::TestParamInfo<std::string>& info) { return info.param.substr(0, 3); });
+    [](const ::testing::TestParamInfo<std::string>& info) {
+        return info.param.substr(0, 3);
+    });
 
-TEST(XmlPlaylistReaderTest, RetainsAlternativeLocationsWithoutCreatingExtraTracks)
+TEST(XmlPlaylistReaderTest,
+    RetainsAlternativeLocationsWithoutCreatingExtraTracks)
 {
-    auto entries = readXmlPlaylist(fs::path(XML_PLAYLIST_FIXTURES) / "x09.xspf", XmlPlaylistType::Xspf);
+    auto entries = readXmlPlaylist(fs::path(XML_PLAYLIST_FIXTURES) / "x09.xspf",
+        XmlPlaylistType::Xspf);
     ASSERT_EQ(entries.size(), 2);
     ASSERT_EQ(entries[0].locations.size(), 3);
     EXPECT_EQ(fs::path(entries[0].locations[0]).filename(), "missing.wav");
     EXPECT_EQ(fs::path(entries[0].locations[1]).filename(), "a.wav");
     EXPECT_EQ(fs::path(entries[0].locations[2]).filename(), "b.wav");
-}
-
-TEST(XmlPlaylistReaderTest, ResolvesRfc3986ReferencesAndPreservesQueryAndFragment)
-{
-    struct TemporaryXml {
-        fs::path path = fs::temp_directory_path() / ("grb-xml-" + generateRandomId() + ".xspf");
-        ~TemporaryXml()
-        {
-            std::error_code ec;
-            fs::remove(path, ec);
-        }
-    } file;
-    const std::map<std::string, std::string> examples {
-        { "g", "http://a/b/c/g" },
-        { "./g", "http://a/b/c/g" },
-        { "g/", "http://a/b/c/g/" },
-        { "/g", "http://a/g" },
-        { "//g", "http://g" },
-        { "?y", "http://a/b/c/d;p?y" },
-        { "g?y", "http://a/b/c/g?y" },
-        { "#s", "http://a/b/c/d;p?q#s" },
-        { "g#s", "http://a/b/c/g#s" },
-        { "g?y#s", "http://a/b/c/g?y#s" },
-        { ";x", "http://a/b/c/;x" },
-        { "g;x", "http://a/b/c/g;x" },
-        { "g;x?y#s", "http://a/b/c/g;x?y#s" },
-        { ".", "http://a/b/c/" },
-        { "./", "http://a/b/c/" },
-        { "..", "http://a/b/" },
-        { "../", "http://a/b/" },
-        { "../g", "http://a/b/g" },
-        { "../..", "http://a/" },
-        { "../../", "http://a/" },
-        { "../../g", "http://a/g" },
-        { "../../../g", "http://a/g" },
-        { "/./g", "http://a/g" },
-        { "/../g", "http://a/g" },
-        { "g/./h", "http://a/b/c/g/h" },
-        { "g/../h", "http://a/b/c/h" },
-        { "g;x=1/../y", "http://a/b/c/y" },
-        { "g?y/./x", "http://a/b/c/g?y/./x" },
-        { "g#s/../x", "http://a/b/c/g#s/../x" },
-        { "http://g/a/../b", "http://g/b" },
-        { "http://g//a/./b", "http://g//a/b" },
-    };
-    for (const auto& [reference, expected] : examples) {
-        SCOPED_TRACE(reference);
-        pugi::xml_document doc;
-        auto root = doc.append_child("playlist");
-        root.append_attribute("version") = "1";
-        root.append_attribute("xmlns") = "http://xspf.org/ns/0/";
-        root.append_attribute("xml:base") = "http://a/b/c/d;p?q";
-        root.append_child("trackList").append_child("track").append_child("location").text() = reference.c_str();
-        ASSERT_TRUE(doc.save_file(file.path.c_str()));
-        auto entries = readXmlPlaylist(file.path, XmlPlaylistType::Xspf);
-        ASSERT_EQ(entries.size(), 1);
-        EXPECT_EQ(entries[0].locations, (std::vector<std::string> { expected }));
-    }
 }

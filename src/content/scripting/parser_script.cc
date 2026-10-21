@@ -216,18 +216,13 @@ pugi::xml_node& ParserScript::readXml(int direction)
 
 void ParserScript::prepareXmlFile(const fs::path& path, unsigned int flags)
 {
-    loadXmlFile(path, xmlDoc, flags);
-    root = xmlDoc.document_element();
-}
-
-void ParserScript::loadXmlFile(const fs::path& path, pugi::xml_document& document, unsigned int flags)
-{
     auto contents = GrbFile(path).readBinaryFile();
     if (!contents)
         throw_std_runtime_error("Cannot open XML file {}", path.string());
-    auto result = document.load_buffer(contents->data(), contents->size(), flags);
+    auto result = xmlDoc.load_buffer(contents->data(), contents->size(), flags);
     if (!result)
         throw ConfigParseException(result.description());
+    root = xmlDoc.document_element();
 }
 
 void ParserScript::useUtf8Converter()
