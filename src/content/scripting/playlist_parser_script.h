@@ -34,8 +34,33 @@
 #ifndef __PLAYLIST_PARSER_SCRIPT_H__
 #define __PLAYLIST_PARSER_SCRIPT_H__
 
+#include "util/grb_fs.h"
+
+#include <pugixml.hpp>
+#include <string>
+#include <vector>
+
+enum class XmlPlaylistType { Wpl,
+    Xspf };
+
+struct XmlPlaylistEntry {
+    // XSPF locations are alternatives for one position, not additional tracks.
+    std::vector<std::string> locations;
+    std::string title;
+};
+
+/// Validate the entire parsed XML before the caller changes playlist contents.
+/// Local references become absolute paths; HTTP(S) references remain encoded
+/// URIs.
+std::vector<XmlPlaylistEntry> readXmlPlaylist(const pugi::xml_document& doc,
+    const fs::path& path,
+    XmlPlaylistType type);
+
+#ifdef HAVE_JS
 #include "parser_script.h"
-#include "util/xml_playlist.h"
+
+#include <functional>
+#include <optional>
 
 #include <optional>
 
@@ -43,7 +68,7 @@ class PlaylistParserScript : public ParserScript {
 public:
     PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent);
     std::vector<int> processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath, bool& hasResult);
-    const XmlPlaylistEntry* readPlaylistEntry();
+    std::optional<std::reference_wrapper<const XmlPlaylistEntry>> readPlaylistEntry();
 
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override;
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
@@ -60,5 +85,7 @@ protected:
     void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
     void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) override;
 };
+
+#endif // HAVE_JS
 
 #endif // __PLAYLIST_PARSER_SCRIPT_H__

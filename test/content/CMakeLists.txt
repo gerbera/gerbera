@@ -27,6 +27,7 @@ add_executable(
     main.cc #
     test_autoscan_list.cc #
     test_playlist_update.cc #
+    test_playlist_parser_script.cc #
     test_resolution.cc #
 )
 
@@ -36,6 +37,10 @@ else()
     target_link_libraries(testcontent PRIVATE libgerbera GTest::gmock)
 endif()
 add_dependencies(testcontent libgerbera gerbera)
+
+target_compile_definitions(
+    testcontent
+    PRIVATE XML_PLAYLIST_FIXTURES="${CMAKE_SOURCE_DIR}/test/scripting/fixtures/xml-playlists")
 
 include(GoogleTest)
 gtest_discover_tests(testcontent DISCOVERY_TIMEOUT 60)
