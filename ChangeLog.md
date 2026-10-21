@@ -18,12 +18,14 @@
 - Fix hang when shutting down the SQLite thread
 - Fix internal transcoding with ffmpeg
 - Fix internal video (mpeg) transcoding
+- Fix additional metadata import with taglib
 - Fix sorting of files in structured import
 - Fix WavPack stack overflow by allocating entries on the heap
 - Handle missing database objects in playlists and cuesheets
 - Improve logging for mime and extensions
 - Keep sortKey for new containers
 - Pass the client quirks to the DIDL of search results
+- Prefer Alpine CDN bootstrap with verified GitLab fallback
 - Preserve fractional MP4 BPM with configurable conflict priority
 - Preserve multiple genres in WebM and WMV metadata
 - Preserve playlist entries when media files are updated
