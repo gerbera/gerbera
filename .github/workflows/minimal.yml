@@ -12,6 +12,9 @@ concurrency:
 env:
   APK_TOOLS_URL: https://gitlab.alpinelinux.org/api/v4/projects/5/packages/generic/v2.14.10/x86_64/apk.static
   APK_TOOLS_SHA256: 34bb1a96f0258982377a289392d4ea9f3f4b767a4bb5806b1b87179b79ad8a1c
+  APK_TOOLS_CDN_URL: https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/apk-tools-static-2.14.12-r0.apk
+  APK_TOOLS_CDN_PACKAGE_SHA256: f44523ae4ded143b3d85e16be4bf7ff386fc052406c3b22f87f045efb0aa4305
+  APK_TOOLS_CDN_SHA256: 034d28bbf3d97d90fd76e572ab8ae74a038da0e7593e9d412eabccf69ccd3553
 
 jobs:
   build:
@@ -32,21 +35,37 @@ jobs:
     steps:
       - uses: actions/checkout@v7
       - name: Download and verify static apk-tools
+        id: apk-tools
         shell: bash
         timeout-minutes: 6
         run: |
           # setup-alpine verifies and reuses this file instead of downloading it again.
           apk_download="$RUNNER_TEMP/apk.download"
-          trap 'rm -f -- "$apk_download"' EXIT
-          curl --fail --show-error --location \
-            --connect-timeout 30 --max-time 120 \
-            --retry 5 --retry-delay 5 --retry-max-time 180 --retry-connrefused \
-            --output "$apk_download" "$APK_TOOLS_URL"
-          printf '%s  %s\n' "$APK_TOOLS_SHA256" "$apk_download" | sha256sum --check --strict
+          apk_extracted="$RUNNER_TEMP/apk.extracted"
+          trap 'rm -f -- "$apk_download" "$apk_extracted"' EXIT
+          download() {
+            curl --ipv4 --fail --show-error --location \
+              --connect-timeout 10 --max-time 30 \
+              --retry 2 --retry-delay 5 --retry-max-time 60 --retry-connrefused \
+              --output "$apk_download" "$1"
+          }
+          apk_sha256="$APK_TOOLS_SHA256"
+          if download "$APK_TOOLS_CDN_URL"; then
+            printf '%s  %s\n' "$APK_TOOLS_CDN_PACKAGE_SHA256" "$apk_download" | sha256sum --check --strict
+            tar --ignore-zeros -xzOf "$apk_download" sbin/apk.static > "$apk_extracted"
+            mv -- "$apk_extracted" "$apk_download"
+            apk_sha256="$APK_TOOLS_CDN_SHA256"
+          else
+            echo '::warning::Alpine CDN download failed; using the pinned Alpine GitLab binary.'
+            download "$APK_TOOLS_URL"
+          fi
+          printf '%s  %s\n' "$apk_sha256" "$apk_download" | sha256sum --check --strict
           mv -- "$apk_download" "$RUNNER_TEMP/apk"
+          # setup-alpine must reuse the preloaded binary with the selected hash.
+          printf 'sha256=%s\n' "$apk_sha256" >> "$GITHUB_OUTPUT"
       - uses: jirutka/setup-alpine@v1
         with:
-          apk-tools-url: '${{ env.APK_TOOLS_URL }}#!sha256!${{ env.APK_TOOLS_SHA256 }}'
+          apk-tools-url: '${{ env.APK_TOOLS_URL }}#!sha256!${{ steps.apk-tools.outputs.sha256 }}'
           branch: ${{matrix.branch}}
           arch: ${{matrix.platform}}
           packages: >
