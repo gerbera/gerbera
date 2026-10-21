@@ -37,3 +37,32 @@ test('responders do not share response counters', () => {
   assert.equal(second.getResponse('get_sid'), './auth/get_sid.logged_in.json');
   assert.equal(first.getResponse('get_sid'), './auth/get_sid.not.logged_in.json');
 });
+
+test('fixture names cannot select files outside the fixture catalogue', () => {
+  const mock = new MockResponder('auth');
+  for (const name of ['../config.json', '../../../package.json', '../../mock.responder.js',
+    '/etc/passwd', 'C:\\Windows\\win.ini', '..\\config.json', '__proto__', 'default.json\0']) {
+    assert.throws(() => mock.getTestCase('auth', name), RangeError, name);
+  }
+});
+
+test('component names must exist in the fixture catalogue', () => {
+  for (const name of ['../auth', 'auth/..', '/tmp', '__proto__', 'constructor']) {
+    assert.throws(() => new MockResponder(name), RangeError, name);
+  }
+});
+
+test('an unknown reset fixture keeps the established default response', () => {
+  const mock = new MockResponder('auth');
+  mock.reset('../../../package.json');
+  assert.equal(mock.testCaseData, 'default.json');
+  assert.equal(mock.getResponse('get_config'), './auth/config.json');
+});
+
+test('fixture response contents are independent as well as counters', () => {
+  const mock = new MockResponder('auth');
+  const first = mock.getTestCase('auth', 'login.test.requests.json');
+  first.get_config.responses.default = 'changed';
+  const second = mock.getTestCase('auth', 'login.test.requests.json');
+  assert.notEqual(second.get_config.responses.default, 'changed');
+});
