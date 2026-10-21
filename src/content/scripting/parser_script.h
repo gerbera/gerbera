@@ -75,7 +75,6 @@ protected:
 
     /// Load XML through the common file utility, retaining BOM/declaration decoding.
     void prepareXmlFile(const fs::path& path, unsigned int flags = pugi::parse_default);
-    static void loadXmlFile(const fs::path& path, pugi::xml_document& document, unsigned int flags = pugi::parse_default);
     /// Preserve the parser converter until cleanUp when input is already UTF-8.
     void useUtf8Converter();
 

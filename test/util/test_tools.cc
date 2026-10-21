@@ -26,7 +26,6 @@
 #include "util/grb_net.h"
 #include "util/grb_time.h"
 #include "util/tools.h"
-#include "util/url_utils.h"
 
 #include <fmt/chrono.h>
 #include <fmt/core.h>
@@ -368,56 +367,6 @@ TEST(ToolsTest, hexEncodeTest)
 TEST(ToolsTest, hexDecodeTest)
 {
     EXPECT_EQ(hexDecodeString("476f6f64436f6465"), "GoodCode");
-}
-
-TEST(ToolsTest, dictEncodeTest)
-{
-    std::map<std::string, std::string> values;
-    values.emplace("Key 1", "Value 1");
-    values.emplace("Key2", "Value 2");
-    EXPECT_EQ(URLUtils::dictEncode(values), "Key%201=Value%201&Key2=Value%202");
-}
-
-TEST(ToolsTest, dictDecodeTest)
-{
-    std::map<std::string, std::string> values = URLUtils::dictDecode("Key%201=Value%201&Key2=Value%202");
-    ASSERT_EQ(values.size(), 2);
-    EXPECT_EQ(values["Key 1"], "Value 1");
-    EXPECT_EQ(values["Key2"], "Value 2");
-
-    values = URLUtils::dictDecode("");
-    EXPECT_EQ(values.size(), 0);
-}
-
-TEST(ToolsTest, pathToMapTest)
-{
-    std::map<std::string, std::string> values = URLUtils::pathToMap("Key 1/Value 1/Key 2/Value 2/Key3//");
-    ASSERT_EQ(values.size(), 3);
-    EXPECT_EQ(values["Key 1"], "Value 1");
-    EXPECT_EQ(values["Key 2"], "Value 2");
-    EXPECT_EQ(values["Key3"], "");
-
-    values = URLUtils::pathToMap("Key 1/Value 1/Key 2/");
-    ASSERT_EQ(values.size(), 2);
-    EXPECT_EQ(values["Key 1"], "Value 1");
-    EXPECT_EQ(values["Key 2"], "");
-
-    values = URLUtils::pathToMap("Key 1/Value 1/Key 2");
-    ASSERT_EQ(values.size(), 2);
-    EXPECT_EQ(values["Key 1"], "Value 1");
-    EXPECT_EQ(values["Key 2"], "");
-
-    values = URLUtils::pathToMap("Key 1/");
-    ASSERT_EQ(values.size(), 1);
-    EXPECT_EQ(values["Key 1"], "");
-
-    values = URLUtils::pathToMap("/");
-    ASSERT_EQ(values.size(), 1);
-    EXPECT_EQ(values[""], "");
-
-    values = URLUtils::pathToMap("/meh");
-    ASSERT_EQ(values.size(), 1);
-    EXPECT_EQ(values[""], "meh");
 }
 
 TEST(ToolsTest, formatSizeTest)

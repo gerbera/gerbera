@@ -24,7 +24,10 @@
 #ifndef GERBERA_URL_UTILS_H
 #define GERBERA_URL_UTILS_H
 
+#include "grb_fs.h"
+
 #include <map>
+#include <optional>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -64,6 +67,17 @@ std::string dictEncode(const std::map<std::string, std::string>& dict);
 std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
 std::map<std::string, std::string> dictDecode(std::string_view url, bool unEscape = true);
 std::map<std::string, std::string> pathToMap(std::string_view url);
+
+/// Encode a native playlist location as an absolute file URI.
+std::string filePathToUri(const fs::path& path);
+/// Resolve a URI reference against a base according to RFC 3986 section 5.2.
+std::string resolveUriReference(const std::string& reference,
+    const std::string& base);
+/// Resolve a media reference to a local path or encoded HTTP(S) URI.
+/// Native paths preserve literal percent, query and fragment characters.
+std::optional<std::string> resolveMediaReference(std::string text,
+    const std::string& base,
+    bool nativePath);
 
 } // namespace URLUtils
 
