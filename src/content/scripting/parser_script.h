@@ -74,6 +74,7 @@ protected:
     void prepareFile(const fs::path& path, TextFileCharset charset = TextFileCharset::Default);
 
     /// Load XML through the common file utility, retaining BOM/declaration decoding.
+    static pugi::xml_document readXmlFile(const fs::path& path, unsigned int flags = pugi::parse_default);
     void prepareXmlFile(const fs::path& path, unsigned int flags = pugi::parse_default);
     /// Preserve the parser converter until cleanUp when input is already UTF-8.
     void useUtf8Converter();

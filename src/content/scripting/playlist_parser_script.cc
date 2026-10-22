@@ -446,8 +446,7 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
                 if (!fs::is_regular_file(*location, ec))
                     return AsxPlaylistDocument { {}, {}, "ASX missing local ENTRYREF skipped (" + href + ")" };
                 auto path = fs::weakly_canonical(*location);
-                auto document = std::make_unique<pugi::xml_document>();
-                loadXmlFile(path, *document);
+                auto document = std::make_unique<pugi::xml_document>(readXmlFile(path));
                 return AsxPlaylistDocument { path, std::move(document), {} };
             });
             for (const auto& warning : plan.warnings)
