@@ -5,6 +5,11 @@ on:
     branches: [master]
   pull_request:
     branches: [master]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: read
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -18,11 +23,34 @@ jobs:
       DETECT_CHROMEDRIVER_VERSION: true
     steps:
       - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Test Web selection
+        id: selector_tests
+        run: python3 -B -m unittest discover -s test/ci -p 'test_*.py'
+      - name: Select Web coverage
+        id: selection
+        timeout-minutes: 2
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 -B .github/scripts/select_web_tests.py
       - uses: actions/setup-node@v7
+        id: node
+        if: steps.selection.outputs.web == 'true'
         with:
           node-version: '24'
       - name: run tests
+        if: ${{ always() && !cancelled() }}
+        env:
+          RUN_WEB: ${{ steps.selection.outputs.web }}
+          SELECTOR_TESTS_OUTCOME: ${{ steps.selector_tests.outcome }}
+          SELECTION_OUTCOME: ${{ steps.selection.outcome }}
+          NODE_OUTCOME: ${{ steps.node.outcome }}
         run: |
+          python3 -B ../.github/scripts/select_web_tests.py --check-result
+          if [ "$RUN_WEB" = "false" ]; then
+            exit 0
+          fi
           npm ci --legacy-peer-deps
           npm run lint
           npm run test:mock
