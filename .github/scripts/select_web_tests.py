@@ -22,12 +22,12 @@ def safe_path(value):
     return value
 
 
-def classify(files):
-    """Only documentation and the isolated Minimal workflow may omit Web tests."""
+def changed_paths(files):
+    """Validate complete change records and return both sides of renames."""
     if not isinstance(files, list) or not files:
         raise SelectionError("empty or invalid changed-file list")
-    components = set()
     names = set()
+    result = []
     for change in files:
         if not isinstance(change, dict):
             raise SelectionError("invalid changed-file record")
@@ -41,18 +41,25 @@ def classify(files):
         paths = [name]
         if status == "renamed":
             paths.append(safe_path(change.get("previous_filename")))
-        for path in paths:
-            if path == ".github/workflows/minimal.yml":
-                components.add("Minimal workflow")
-            elif ((path.startswith("doc/") and path.endswith((".rst", ".md")))
-                  or path in ("README.md", "ChangeLog.md", "ReleaseNotes.md")):
-                components.add("documentation")
-            elif path.startswith(("gerbera-web/", "web/")):
-                components.add("Web")
-            else:
-                # Native/API, shared build/CI, this selector and unknown paths
-                # retain Web coverage until a wider dependency map is agreed.
-                components.add("native, shared or unclassified inputs")
+        result.extend(paths)
+    return result
+
+
+def classify(files):
+    """Only documentation and the isolated Minimal workflow may omit Web tests."""
+    components = set()
+    for path in changed_paths(files):
+        if path == ".github/workflows/minimal.yml":
+            components.add("Minimal workflow")
+        elif ((path.startswith("doc/") and path.endswith((".rst", ".md")))
+              or path in ("README.md", "ChangeLog.md", "ReleaseNotes.md")):
+            components.add("documentation")
+        elif path.startswith(("gerbera-web/", "web/")):
+            components.add("Web")
+        else:
+            # Native/API, shared build/CI, this selector and unknown paths
+            # retain Web coverage until a wider dependency map is agreed.
+            components.add("native, shared or unclassified inputs")
     run_web = not components.issubset({"documentation", "Minimal workflow"})
     return run_web, ", ".join(sorted(components))
 

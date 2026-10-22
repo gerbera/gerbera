@@ -8,7 +8,7 @@ import subprocess
 import sys
 import urllib.error
 
-from select_web_tests import SelectionError, api_fetch, safe_path, select
+from select_web_tests import SelectionError, api_fetch, changed_paths, safe_path, select
 
 
 GROUPS = ("web", "native", "head", "freebsd", "omnios", "macos", "minimal",
@@ -32,14 +32,7 @@ def cmake_source(path):
 
 
 def classify_groups(files):
-    # Validate all records/rename paths before interpreting any exemption.
-    from select_web_tests import classify
-    classify(files)
-    paths = []
-    for change in files:
-        paths.append(change["filename"])
-        if change["status"] == "renamed":
-            paths.append(change["previous_filename"])
+    paths = changed_paths(files)
     def all_inputs(reason):
         selected = full(reason)
         selected["cmake_files"] = sorted({path for path in paths if cmake_source(path)})
