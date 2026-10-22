@@ -39,7 +39,7 @@ constexpr auto URL_PARAM_SEPARATOR = std::string_view("/");
 namespace URLUtils {
 
 /// @brief Splits the url into a path and parameters string.
-/// Only '?' and '/' separators are allowed, otherwise an exception will
+/// Only '?', '/', '#' and ':' separators are allowed, otherwise an exception will
 /// be thrown.
 /// @param url URL that has to be processed
 /// @param separator split url at this character
@@ -58,10 +58,14 @@ std::map<std::string, std::string> parseParameters(std::string_view filename, st
 /// @brief Converts a string to a URL (meaning: %20 instead of space and so on)
 /// @param str String to be converted.
 /// @return string that contains the url-escaped representation of the original string.
-std::string urlEscape(std::string_view str);
+/// Path mode preserves /, ~ and : and percent-encodes UTF-8 bytes.
+std::string urlEscape(std::string_view str, bool path = false);
 
 /// @brief Opposite of urlEscape :)
 std::string urlUnescape(std::string_view str);
+/// Strict URI paths preserve + and reject malformed escapes, NUL and invalid UTF-8.
+/// With strict=false, retain the legacy form-parameter decoding behavior.
+std::optional<std::string> urlUnescape(std::string_view str, bool strict);
 
 std::string dictEncode(const std::map<std::string, std::string>& dict);
 std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
