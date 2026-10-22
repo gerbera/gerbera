@@ -38,6 +38,21 @@
 #include "util/tools.h"
 #include "util/url_utils.h"
 
+#ifdef HAVE_JS
+#include "cds/cds_container.h"
+#include "cds/cds_item.h"
+#include "config/config.h"
+#include "config/config_option_enum.h"
+#include "config/config_val.h"
+#include "content/autoscan_setting.h"
+#include "content/content.h"
+#include "database/database.h"
+#include "script_property.h"
+#include "scripting_runtime.h"
+#include "util/generic_task.h"
+#include "util/string_converter.h"
+#endif
+
 static constexpr auto xspfNamespace = "http://xspf.org/ns/0/";
 
 static std::string namespaceUri(pugi::xml_node node)
@@ -73,10 +88,11 @@ static std::string nodeBase(pugi::xml_node node, const fs::path& path)
     return result;
 }
 
-std::vector<XmlPlaylistEntry> readXmlPlaylist(const pugi::xml_document& doc,
+void XmlPlaylist::read(const pugi::xml_document& doc,
     const fs::path& path,
     XmlPlaylistType type)
 {
+    entries.clear();
     int roots = 0;
     for (auto node : doc.children()) {
         if (node.type() == pugi::node_doctype)
@@ -86,7 +102,6 @@ std::vector<XmlPlaylistEntry> readXmlPlaylist(const pugi::xml_document& doc,
     }
     if (roots != 1)
         throw_std_runtime_error("XML playlists must have exactly one root element");
-    std::vector<XmlPlaylistEntry> entries;
     auto root = doc.document_element();
     if (type == XmlPlaylistType::Wpl) {
         if (!named(root, "smil"))
@@ -136,23 +151,9 @@ std::vector<XmlPlaylistEntry> readXmlPlaylist(const pugi::xml_document& doc,
                 entries.push_back(std::move(entry));
         }
     }
-    return entries;
 }
 
 #ifdef HAVE_JS
-
-#include "cds/cds_container.h"
-#include "cds/cds_item.h"
-#include "config/config.h"
-#include "config/config_option_enum.h"
-#include "config/config_val.h"
-#include "content/autoscan_setting.h"
-#include "content/content.h"
-#include "database/database.h"
-#include "script_property.h"
-#include "scripting_runtime.h"
-#include "util/generic_task.h"
-#include "util/string_converter.h"
 
 static duk_ret_t jsResolvePlaylistReference(duk_context* ctx)
 {
@@ -239,9 +240,9 @@ std::optional<std::reference_wrapper<const XmlPlaylistEntry>> PlaylistParserScri
 {
     if (currentTask && !currentTask->isValid())
         throw_std_runtime_error("Aborting playlist import after cancellation");
-    if (xmlPosition >= xmlEntries.size())
+    if (xmlPosition >= xmlPlaylist.entries.size())
         return std::nullopt;
-    return std::cref(xmlEntries[xmlPosition++]);
+    return std::cref(xmlPlaylist.entries[xmlPosition++]);
 }
 
 std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(
@@ -369,13 +370,13 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     currentTask = std::move(task);
     currentObjectID = item->getID();
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
-    xmlEntries.clear();
+    xmlPlaylist.entries.clear();
     xmlPosition = 0;
     std::vector<int> result;
     try {
         if (isXmlPlaylist) {
             prepareXmlFile(item->getLocation(), pugi::parse_default | pugi::parse_doctype);
-            xmlEntries = readXmlPlaylist(xmlDoc, item->getLocation(), item->getMimeType() == MIME_TYPE_WPL_PLAYLIST ? XmlPlaylistType::Wpl : XmlPlaylistType::Xspf);
+            xmlPlaylist.read(xmlDoc, item->getLocation(), item->getMimeType() == MIME_TYPE_WPL_PLAYLIST ? XmlPlaylistType::Wpl : XmlPlaylistType::Xspf);
             useUtf8Converter();
         } else if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
             prepareXmlFile(item->getLocation());
@@ -390,12 +391,12 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
         result = call(obj, nullptr, playlistFunction, rootPath, "", hasResult);
     } catch (const std::runtime_error& e) {
         log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), EX(e));
-        xmlEntries.clear();
+        xmlPlaylist.entries.clear();
         cleanUp();
         throw;
     }
 
-    xmlEntries.clear();
+    xmlPlaylist.entries.clear();
     cleanUp();
     log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
     return result;
