@@ -1,0 +1,15 @@
+SPDX-License-Identifier: GPL-2.0-only
+
+These 15 PNG images are contributed under the GNU General Public License,
+version 2, on the same terms as Gerbera. See ../../LICENSE.md in the source
+distribution for the complete license text.
+
+Provenance: created on 22 October 2026 using OpenAI image generation at the
+contributor's request. They are original generated artwork, rather than
+extracted or redistributed assets from Asset UPnP, Universal Media Server,
+WiiM, or another icon library. The PNGs are the supplied artwork source;
+no SVG or layered vector source is available.
+
+The WiiM Home screenshot in doc/_static is a separate user-supplied example
+of the theme in use. Product names identify the client used for that example;
+they do not imply endorsement by those products.

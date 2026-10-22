@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Configuration fragment: merge these sections into an existing config.xml.
+     This is not a complete replacement configuration or an include file.
+     Replace the location/image paths to use your own artwork. -->
+<config version="2" xmlns="http://gerbera.io/config/2">
+  <server>
+    <containers enabled="yes">
+      <container location="/LastAdded" title="Recently Added" sort="-last_updated"
+                 image="@CMAKE_INSTALL_FULL_DATADIR@/container-icons/recently-added.png">
+        <filter>upnp:class derivedfrom "object.item" and last_updated &gt; "@last7"</filter>
+      </container>
+      <container location="/LastModified" title="Recently Modified" sort="-last_modified"
+                 image="@CMAKE_INSTALL_FULL_DATADIR@/container-icons/recently-modified.png">
+        <filter>upnp:class derivedfrom "object.item" and last_modified &gt; "@last7"</filter>
+      </container>
+      <container location="/LastPlayed" title="Music Recently Played" sort="-upnp:lastPlaybackTime"
+                 upnp-shortcut="MUSIC_LAST_PLAYED"
+                 image="@CMAKE_INSTALL_FULL_DATADIR@/container-icons/tracks.png">
+        <filter>upnp:class derivedfrom "object.item.audioItem" and upnp:lastPlaybackTime &gt; "@last7"</filter>
+      </container>
+    </containers>
+  </server>
+  <import>
+    <resources>
+      <container location="@CMAKE_INSTALL_FULL_DATADIR@/container-icons">
+        <add-file name="%filename%.png"/>
+        <add-file name="folder.jpg"/>
+        <add-file name="poster.jpg"/>
+        <add-file name="cover.jpg"/>
+        <add-file name="albumartsmall.jpg"/>
+      </container>
+    </resources>
+  </import>
+</config>

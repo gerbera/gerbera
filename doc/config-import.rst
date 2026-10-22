@@ -1847,6 +1847,10 @@ Path to the directory containing the images to load. Relative paths are assumed 
 Drop your artists' images or logos for default containers here and they are displayed as thumbnail when browsing with a compatible client.
 If the image is not found in that location, it is also searched in the physical folder itself.
 
+For a supplied artwork set, installation paths and a ready-to-merge configuration
+fragment, see :doc:`container-icons`. Custom images remain supported through this
+same setting and the ``image`` attribute on dynamic containers.
+
 .. confval:: parentCount
    :type: :confval:`Integer`
    :required: false
