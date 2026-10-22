@@ -35,6 +35,12 @@
 #define __PLAYLIST_PARSER_SCRIPT_H__
 
 #include "util/grb_fs.h"
+#ifdef HAVE_JS
+#include "parser_script.h"
+#endif
+
+#include <functional>
+#include <optional>
 
 #include <pugixml.hpp>
 #include <string>
@@ -49,21 +55,14 @@ struct XmlPlaylistEntry {
     std::string title;
 };
 
-/// Validate the entire parsed XML before the caller changes playlist contents.
-/// Local references become absolute paths; HTTP(S) references remain encoded
-/// URIs.
-std::vector<XmlPlaylistEntry> readXmlPlaylist(const pugi::xml_document& doc,
-    const fs::path& path,
-    XmlPlaylistType type);
+/// Own the validated XML playlist positions independently of the optional JS runtime.
+struct XmlPlaylist {
+    /// Validate the entire document before the script changes playlist contents.
+    void read(const pugi::xml_document& doc, const fs::path& path, XmlPlaylistType type);
+    std::vector<XmlPlaylistEntry> entries;
+};
 
 #ifdef HAVE_JS
-#include "parser_script.h"
-
-#include <functional>
-#include <optional>
-
-#include <optional>
-
 class PlaylistParserScript : public ParserScript {
 public:
     PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent);
@@ -79,7 +78,7 @@ protected:
     bool followSymlinks;
     bool hidden;
     TextFileCharset charsetMode;
-    std::vector<XmlPlaylistEntry> xmlEntries;
+    XmlPlaylist xmlPlaylist;
     std::size_t xmlPosition {};
 
     void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
