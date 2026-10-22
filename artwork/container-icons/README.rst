@@ -11,6 +11,10 @@ category titles, such as ``Audio.png``, ``Albums.png``, and ``PC Directory.png``
 The original PNGs remain available under the names below. ``manifest.json``
 records their SHA-256 checksums; see ``LICENSE.txt`` for license and provenance.
 
+All 15 icons, including the favorites star, were generated using OpenAI image
+generation. They are freely available under GPLv2 (GPL-2.0-only), with no
+additional restrictions imposed by the contributor beyond the license itself.
+
 .. list-table:: Complete artwork set
    :header-rows: 1
 
