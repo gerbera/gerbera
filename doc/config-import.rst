@@ -2166,6 +2166,23 @@ Map Mimetype to Upnpclass
 
 This section holds the mime type to upnp:class mappings.
 
+Exact MIME mappings take precedence over wildcard mappings. The defaults map
+M3U/M3U8 (``audio/x-mpegurl``), PLS (``audio/x-scpls``) and ASX
+(``video/x-ms-asx``) files to ``object.item.playlistItem``, rather than treating
+them as music tracks or videos. Explicit user mappings still override the
+corresponding defaults. A nonempty mapping list from an older configuration
+needs the new exact entries added explicitly, or ``extend="yes"`` to merge
+missing defaults; without extension, its existing mappings are preserved.
+Metadata-dependent mappings described below can further refine the class.
+
+A playlist file in ``PC Directory`` is a playlist *item*. Parsed playlists in
+the virtual playlist view are browsable playlist *containers*. Correct file
+classification does not make the physical file a browsable container or
+guarantee that a client can play its playlist format. Existing database objects
+with a previously assigned class need to be removed and imported again to
+receive the new default class; reloading the configuration alone does not
+reclassify them.
+
 Mimetype Map
 ^^^^^^^^^^^^
 

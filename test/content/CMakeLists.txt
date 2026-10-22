@@ -50,5 +50,10 @@ if(WITH_JS
                  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_playlist_updates.py
                          --binary $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR})
         set_tests_properties(PlaylistUpdateIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 240)
+        add_test(
+            NAME PlaylistFileClassesIntegration
+            COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_playlist_file_classes.py
+                    --binary $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR})
+        set_tests_properties(PlaylistFileClassesIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 240)
     endif()
 endif()

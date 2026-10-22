@@ -345,14 +345,14 @@ void ImportService::destroyLayout()
 
 std::string ImportService::mimeTypeToUpnpClass(const std::string& mimeType) const
 {
-    auto it = std::find_if(upnpMap.begin(), upnpMap.end(), [=](auto&& um) { return startswith(mimeType, um.mimeType); });
-    if (it != upnpMap.end())
-        return it->upnpClass;
-
     // try direct search
     auto itm = mimetypeUpnpclassMap.find(mimeType);
     if (itm != mimetypeUpnpclassMap.end())
         return itm->second;
+
+    auto it = std::find_if(upnpMap.begin(), upnpMap.end(), [=](auto&& um) { return startswith(mimeType, um.mimeType); });
+    if (it != upnpMap.end())
+        return it->upnpClass;
 
     // try pattern search
     std::vector<std::string> parts = splitString(mimeType, '/');
