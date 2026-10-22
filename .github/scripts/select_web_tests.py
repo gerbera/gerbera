@@ -69,7 +69,7 @@ def pr_snapshot(pr):
     return head, base, count
 
 
-def select(event_name, event, repository, fetch):
+def select(event_name, event, repository, fetch, classifier=classify):
     if event_name != "pull_request":
         return True, "full Web validation for non-PR event"
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
@@ -100,7 +100,7 @@ def select(event_name, event, repository, fetch):
         raise SelectionError("file-list pagination limit reached")
     if len(files) != before[2] or pr_snapshot(fetch(endpoint)) != before:
         raise SelectionError("incomplete file list or PR changed during selection")
-    return classify(files)
+    return classifier(files)
 
 
 def api_fetch(token):
