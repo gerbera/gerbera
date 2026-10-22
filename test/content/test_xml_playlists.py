@@ -2,46 +2,36 @@
 # Gerbera - https://gerbera.io/
 # Copyright (C) 2026 Gerbera Contributors
 # SPDX-License-Identifier: GPL-2.0-only
+#
+# Gerbera is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+#
+# Gerbera is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Gerbera. If not, see <http://www.gnu.org/licenses/>.
 """Compare WPL/XSPF fixtures with real Gerbera ContentDirectory results."""
 
 import argparse
 import contextlib
 import hashlib
-import io
 import json
 from pathlib import Path
 import shutil
 import socket
-import struct
 import subprocess
 import tempfile
 import time
-import urllib.parse
-import urllib.request
-import wave
 import xml.etree.ElementTree as ET
 
-DC = "{http://purl.org/dc/elements/1.1/}"
-UP = "{urn:schemas-upnp-org:metadata-1-0/upnp/}"
-SERVICE = "urn:schemas-upnp-org:service:ContentDirectory:1"
-HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}))
+from test_playlist_updates import DC, UP, HTTP, Fixture as PlaylistFixture, wav_bytes
 
 
-def wav_bytes(title):
-    stream = io.BytesIO()
-    with wave.open(stream, "wb") as wav:
-        wav.setnchannels(1)
-        wav.setsampwidth(2)
-        wav.setframerate(8000)
-        wav.writeframes(b"\0\0" * 800)
-    data = stream.getvalue()
-    text = title.encode() + b"\0"
-    info = b"INFOINAM" + struct.pack("<I", len(text)) + text + b"\0" * (len(text) % 2)
-    data += b"LIST" + struct.pack("<I", len(info)) + info
-    return data[:4] + struct.pack("<I", len(data) - 8) + data[8:]
-
-
-class Fixture:
+class Fixture(PlaylistFixture):
     def __init__(self, args, root, mode):
         self.args, self.root, self.mode = args, root, mode
         self.src = root / "src"
@@ -179,41 +169,6 @@ class Fixture:
         self.process = None
         self.checks = []
 
-    def api(self, **params):
-        with HTTP.open(
-            self.host + "/interface?" + urllib.parse.urlencode(params), timeout=5
-        ) as response:
-            result = json.load(response)
-        assert result.get("success"), result
-        return result
-
-    def browse(self, oid, flag="BrowseDirectChildren"):
-        envelope = ET.Element("{http://schemas.xmlsoap.org/soap/envelope/}Envelope")
-        body = ET.SubElement(
-            envelope, "{http://schemas.xmlsoap.org/soap/envelope/}Body"
-        )
-        call = ET.SubElement(body, "{" + SERVICE + "}Browse")
-        for key, value in dict(
-            ObjectID=oid,
-            BrowseFlag=flag,
-            Filter="*",
-            StartingIndex=0,
-            RequestedCount=1000,
-            SortCriteria="",
-        ).items():
-            ET.SubElement(call, key).text = str(value)
-        request = urllib.request.Request(
-            self.host + "/upnp/control/cds",
-            data=ET.tostring(envelope),
-            headers={
-                "Content-Type": "text/xml; charset=utf-8",
-                "SOAPAction": '"' + SERVICE + '#Browse"',
-            },
-        )
-        with HTTP.open(request, timeout=5) as response:
-            result = ET.fromstring(response.read()).findtext(".//Result")
-        return list(ET.fromstring(result))
-
     def wait(self, check):
         end, last = time.monotonic() + 30, None
         while time.monotonic() < end:
@@ -227,7 +182,14 @@ class Fixture:
             time.sleep(0.15)
         raise AssertionError(f"Fixture timeout: {last}")
 
-    def assert_views(self):
+    def hash_sources(self):
+        return {
+            str(p.relative_to(self.src)): hashlib.sha256(p.read_bytes()).hexdigest()
+            for p in self.src.rglob("*")
+            if p.is_file()
+        }
+
+    def playlist_views(self):
         roots = [n for n in self.browse(0) if n.findtext(DC + "title") == "Playlists"]
         assert len(roots) == 1
         pending = [roots[0].get("id")]
@@ -238,6 +200,10 @@ class Fixture:
                     found.setdefault(node.findtext(DC + "title"), []).append(node)
                 elif node.tag.endswith("}container"):
                     pending.append(node.get("id"))
+        return found
+
+    def assert_views(self):
+        found = self.playlist_views()
         assert not (set(found) - set(self.expected)), set(found) - set(self.expected)
         for name, expected in self.expected.items():
             views = found.get(name, [])
@@ -283,24 +249,6 @@ class Fixture:
                     ), (name, key)
         return True
 
-    def rescan(self):
-        sid = self.api(req_type="auth", action="get_sid")["GerberaSID"]
-        scan = next(
-            x
-            for x in self.api(req_type="autoscan", action="list", GerberaSID=sid)[
-                "autoscans"
-            ]
-            if x["location"] == str(self.src)
-        )
-        self.api(
-            req_type="autoscan",
-            action="as_run",
-            object_id=scan["objectID"],
-            from_fs="false",
-            GerberaSID=sid,
-        )
-        time.sleep(0.5)
-
     def record(self, name):
         self.wait(self.assert_views)
         self.checks.append(name)
@@ -322,17 +270,6 @@ class Fixture:
             stderr=subprocess.STDOUT,
         )
         self.wait(lambda: self.browse(0))
-
-    def stop(self):
-        if self.process is not None:
-            self.process.terminate()
-            try:
-                self.process.wait(timeout=15)
-            except subprocess.TimeoutExpired:
-                self.process.kill()
-                self.process.wait()
-            self.log.close()
-            self.process = None
 
     def run(self):
         try:

@@ -245,10 +245,8 @@ void ParserScript::prepareFile(const fs::path& path, TextFileCharset charset)
     file->open(charset == TextFileCharset::Default ? "r" : "rb");
     file->setTextCharset(charset, charset == TextFileCharset::Default ? std::function<bool()>() : [this]() { return !currentTask || currentTask->isValid(); });
     currentFile = std::move(file);
-    if (charset != TextFileCharset::Default) {
-        savedConverter = sc;
-        sc = converterManager->i2i();
-    }
+    if (charset != TextFileCharset::Default)
+        useUtf8Converter();
 }
 
 std::pair<std::string, bool> ParserScript::readLine()

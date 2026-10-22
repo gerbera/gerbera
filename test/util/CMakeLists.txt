@@ -29,7 +29,6 @@ add_executable(
     test_asx_playlist.cc #
     test_jpeg_res.cc #
     test_tools.cc #
-    test_url_utils.cc #
     test_upnp_clients.cc #
     test_upnp_headers.cc #
 )

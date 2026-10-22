@@ -35,6 +35,13 @@
 #define __PLAYLIST_PARSER_SCRIPT_H__
 
 #include "util/grb_fs.h"
+#ifdef HAVE_JS
+#include "parser_script.h"
+#include "util/asx_playlist.h"
+#endif
+
+#include <functional>
+#include <optional>
 
 #include <pugixml.hpp>
 #include <string>
@@ -49,19 +56,14 @@ struct XmlPlaylistEntry {
     std::string title;
 };
 
-/// Validate the entire parsed XML before the caller changes playlist contents.
-/// Local references become absolute paths; HTTP(S) references remain encoded
-/// URIs.
-std::vector<XmlPlaylistEntry> readXmlPlaylist(const pugi::xml_document& doc,
-    const fs::path& path,
-    XmlPlaylistType type);
+/// Own the validated XML playlist positions independently of the optional JS runtime.
+struct XmlPlaylist {
+    /// Validate the entire document before the script changes playlist contents.
+    void read(const pugi::xml_document& doc, const fs::path& path, XmlPlaylistType type);
+    std::vector<XmlPlaylistEntry> entries;
+};
 
 #ifdef HAVE_JS
-#include "parser_script.h"
-#include "util/asx_playlist.h"
-
-#include <functional>
-#include <optional>
 
 class PlaylistParserScript : public ParserScript {
 public:
@@ -69,6 +71,7 @@ public:
     std::vector<int> processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath, bool& hasResult);
     std::optional<std::reference_wrapper<const XmlPlaylistEntry>> readPlaylistEntry();
     std::optional<std::reference_wrapper<const AsxPlaylistEntry>> readAsxPlaylistEntry();
+    static void pushAsxPlaylistEntry(duk_context* ctx, const AsxPlaylistEntry& entry);
 
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override;
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
@@ -79,7 +82,7 @@ protected:
     bool followSymlinks;
     bool hidden;
     TextFileCharset charsetMode;
-    std::vector<XmlPlaylistEntry> xmlEntries;
+    XmlPlaylist xmlPlaylist;
     std::size_t xmlPosition {};
     std::vector<AsxPlaylistEntry> asxEntries;
     std::size_t asxPosition {};

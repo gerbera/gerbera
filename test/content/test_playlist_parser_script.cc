@@ -38,7 +38,9 @@ static std::vector<XmlPlaylistEntry> readXmlPlaylist(const fs::path& path,
         pugi::parse_default | pugi::parse_doctype);
     if (!result)
         throw std::runtime_error(result.description());
-    return readXmlPlaylist(doc, path, type);
+    XmlPlaylist playlist;
+    playlist.read(doc, path, type);
+    return playlist.entries;
 }
 
 static std::vector<std::string> cases()
@@ -114,4 +116,19 @@ TEST(XmlPlaylistReaderTest,
     EXPECT_EQ(fs::path(entries[0].locations[0]).filename(), "missing.wav");
     EXPECT_EQ(fs::path(entries[0].locations[1]).filename(), "a.wav");
     EXPECT_EQ(fs::path(entries[0].locations[2]).filename(), "b.wav");
+}
+
+TEST(XmlPlaylistReaderTest, ReusingReaderReplacesPreviousPositions)
+{
+    XmlPlaylist playlist;
+    pugi::xml_document doc;
+    ASSERT_TRUE(doc.load_string("<smil><body><seq><media src='a.wav'/></seq></body></smil>"));
+    playlist.read(doc, fs::temp_directory_path() / "list.wpl", XmlPlaylistType::Wpl);
+    ASSERT_EQ(playlist.entries.size(), 1);
+    ASSERT_TRUE(doc.load_string("<smil><body><seq/></body></smil>"));
+    playlist.read(doc, fs::temp_directory_path() / "list.wpl", XmlPlaylistType::Wpl);
+    EXPECT_TRUE(playlist.entries.empty());
+    ASSERT_TRUE(doc.load_string("<invalid/>"));
+    EXPECT_THROW(playlist.read(doc, fs::temp_directory_path() / "list.wpl", XmlPlaylistType::Wpl), std::runtime_error);
+    EXPECT_TRUE(playlist.entries.empty());
 }

@@ -24,9 +24,9 @@
 
 #include "cds/cds_objects.h"
 #include "config/result/autoscan.h"
+#include "content/scripting/playlist_parser_script.h"
 #include "exceptions.h"
 #include "upnp/upnp_common.h"
-#include "util/asx_playlist.h"
 #include "util/tools.h"
 
 #include "mock/common_script_mock.h"
@@ -69,30 +69,7 @@ static duk_ret_t readAsxPlaylistEntry(duk_context* ctx)
     if (asxPosition >= asxPlan.entries.size())
         return 0;
     const auto& entry = asxPlan.entries[asxPosition++];
-    duk_push_object(ctx);
-    for (const auto& [key, value] : std::map<std::string, std::string> {
-             { "sourcePath", entry.source.string() }, { "base", entry.base },
-             { "title", entry.metadata.title }, { "author", entry.metadata.author },
-             { "copyright", entry.metadata.copyright }, { "description", entry.metadata.description } }) {
-        duk_push_string(ctx, value.c_str());
-        duk_put_prop_string(ctx, -2, key.c_str());
-    }
-    duk_push_object(ctx);
-    for (const auto& [key, value] : entry.metadata.parameters) {
-        duk_push_string(ctx, value.c_str());
-        duk_put_prop_string(ctx, -2, key.c_str());
-    }
-    duk_put_prop_string(ctx, -2, "parameters");
-    duk_push_array(ctx);
-    for (duk_uarridx_t i = 0; i < entry.references.size(); ++i) {
-        duk_push_object(ctx);
-        duk_push_string(ctx, entry.references[i].href.c_str());
-        duk_put_prop_string(ctx, -2, "href");
-        duk_push_int(ctx, entry.references[i].writeThrough);
-        duk_put_prop_string(ctx, -2, "writeThrough");
-        duk_put_prop_index(ctx, -2, i);
-    }
-    duk_put_prop_string(ctx, -2, "references");
+    PlaylistParserScript::pushAsxPlaylistEntry(ctx, entry);
     return 1;
 }
 
