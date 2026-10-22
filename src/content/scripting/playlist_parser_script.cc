@@ -152,7 +152,6 @@ std::vector<XmlPlaylistEntry> readXmlPlaylist(const pugi::xml_document& doc,
 #include "script_property.h"
 #include "scripting_runtime.h"
 #include "util/generic_task.h"
-#include "util/playlist_uri.h"
 #include "util/string_converter.h"
 
 static duk_ret_t jsResolvePlaylistReference(duk_context* ctx)
@@ -182,12 +181,12 @@ static duk_ret_t jsResolvePlaylistReference(duk_context* ctx)
         duk_pop_2(ctx);
     }
     try {
-        const auto base = playlistPathUri(source);
-        auto location = resolvePlaylistMediaReference(reference, base, true);
+        const auto base = URLUtils::filePathToUri(source);
+        auto location = URLUtils::resolveMediaReference(reference, base, true);
         std::error_code ec;
         // Existing native names, including literal percent escapes, retain priority.
         if (!location || !fs::is_regular_file(*location, ec))
-            location = resolvePlaylistMediaReference(reference, base, false);
+            location = URLUtils::resolveMediaReference(reference, base, false);
         if (!location)
             return 0;
         duk_push_lstring(ctx, location->data(), location->size());
