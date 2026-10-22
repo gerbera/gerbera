@@ -28,7 +28,6 @@
 
 #include <map>
 #include <optional>
-#include <pugixml.hpp>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -38,16 +37,6 @@
 constexpr auto URL_PARAM_SEPARATOR = std::string_view("/");
 
 namespace URLUtils {
-
-enum class UrlMode {
-    Form,
-    FilePath
-};
-
-enum class MediaReferenceType {
-    NativePath,
-    Uri
-};
 
 /// @brief Splits the url into a path and parameters string.
 /// Only '?', '/', '#' and ':' separators are allowed, otherwise an exception will
@@ -70,13 +59,13 @@ std::map<std::string, std::string> parseParameters(std::string_view filename, st
 /// @param str String to be converted.
 /// @return string that contains the url-escaped representation of the original string.
 /// Path mode preserves /, ~ and : and percent-encodes UTF-8 bytes.
-std::string urlEscape(std::string_view str, UrlMode mode = UrlMode::Form);
+std::string urlEscape(std::string_view str, bool path = false);
 
 /// @brief Opposite of urlEscape :)
 std::string urlUnescape(std::string_view str);
 /// Strict URI paths preserve + and reject malformed escapes, NUL and invalid UTF-8.
-/// Form mode delegates to the unchanged legacy parameter decoder.
-std::optional<std::string> urlUnescape(std::string_view str, UrlMode mode);
+/// With strict=false, retain the legacy form-parameter decoding behavior.
+std::optional<std::string> urlUnescape(std::string_view str, bool strict);
 
 std::string dictEncode(const std::map<std::string, std::string>& dict);
 std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
@@ -92,19 +81,7 @@ std::string resolveUriReference(const std::string& reference,
 /// Native paths preserve literal percent, query and fragment characters.
 std::optional<std::string> resolveMediaReference(std::string text,
     const std::string& base,
-    MediaReferenceType type);
-
-/// Resolve playlist references while preserving external protocols and existing native filenames.
-std::optional<std::string> resolvePlaylistReference(const std::string& reference,
-    const fs::path& source);
-
-/// Resolve the namespace declaration in scope for an XML element.
-std::string namespaceUri(pugi::xml_node node);
-/// Match an XML element by local name and namespace URI.
-bool isNamed(pugi::xml_node node, const std::string& local,
-    const std::string& ns = "");
-/// Resolve inherited xml:base attributes from the document root to the element.
-std::string nodeBase(pugi::xml_node node, const fs::path& path);
+    bool nativePath);
 
 } // namespace URLUtils
 

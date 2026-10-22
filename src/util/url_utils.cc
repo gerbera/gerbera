@@ -33,7 +33,6 @@ Gerbera - https://gerbera.io/
 #include <algorithm>
 #include <cstring>
 #include <sstream>
-#include <system_error>
 
 // URL FORMATTING CONSTANTS
 #define URL_UI_PARAM_SEPARATOR '?'
@@ -98,9 +97,8 @@ static constexpr auto hexCharS2 = "0123456789ABCDEF";
 /// @brief Converts a string to a URL (meaning: %20 instead of space and so on)
 /// @param str String to be converted.
 /// @return string that contains the url-escaped representation of the original string.
-std::string urlEscape(std::string_view str, UrlMode mode)
+std::string urlEscape(std::string_view str, bool path)
 {
-    const bool path = mode == UrlMode::FilePath;
     std::ostringstream buf;
     for (std::size_t i = 0; i < str.length();) {
         auto c = static_cast<unsigned char>(str[i]);
@@ -129,72 +127,43 @@ std::string urlEscape(std::string_view str, UrlMode mode)
     return buf.str();
 }
 
-/// @brief Opposite of urlEscape :)
-std::string urlUnescape(std::string_view str)
+std::optional<std::string> urlUnescape(std::string_view str, bool strict)
 {
-    auto data = str.data();
-    std::size_t len = str.length();
-    std::ostringstream buf;
-
+    std::string result;
+    auto hex = [strict](char c) -> int {
+        if (strict && c >= 'a' && c <= 'f')
+            c -= 'a' - 'A';
+        auto pos = strict && !c ? nullptr : std::strchr(hexCharS2, c);
+        return pos ? static_cast<int>(pos - hexCharS2) : (strict ? -1 : 0);
+    };
     std::size_t i = 0;
-    while (i < len) {
-        const char c = data[i++];
+    while (i < str.size()) {
+        char c = str[i++];
         if (c == '%') {
-            if (i + 2 > len)
-                break; // avoid buffer overrun
-            char chi = data[i++];
-            char clo = data[i++];
-
-            auto pos = std::strchr(hexCharS2, chi);
-            int hi = pos ? pos - hexCharS2 : 0;
-
-            pos = std::strchr(hexCharS2, clo);
-            int lo = pos ? pos - hexCharS2 : 0;
-
-            int ascii = (hi << 4) | lo;
-            buf << static_cast<char>(ascii);
-        } else if (c == '+') {
-            buf << ' ';
-        } else {
-            buf << c;
-        }
-    }
-    return buf.str();
-}
-
-std::optional<std::string> urlUnescape(std::string_view str, UrlMode mode)
-{
-    if (mode == UrlMode::Form)
-        return urlUnescape(str);
-
-    // Validate URI escapes before using the unchanged form decoder. Normalize
-    // hex digits and protect literal plus signs from form-parameter semantics.
-    std::string encoded;
-    std::size_t position = 0;
-    while (position < str.size()) {
-        char c = str[position++];
-        if (c == '+') {
-            encoded += "%2B";
-            continue;
-        }
-        encoded += c;
-        if (c != '%')
-            continue;
-        if (str.size() - position < 2)
-            return std::nullopt;
-        for (int digit = 0; digit < 2; ++digit) {
-            c = str[position++];
-            if (c >= 'a' && c <= 'f')
-                c -= 'a' - 'A';
-            if (!c || !std::strchr(hexCharS2, c))
+            if (str.size() - i < 2) {
+                if (strict)
+                    return std::nullopt;
+                break;
+            }
+            int hi = hex(str[i++]);
+            int lo = hex(str[i++]);
+            if (hi < 0 || lo < 0)
                 return std::nullopt;
-            encoded += c;
-        }
+            c = static_cast<char>((hi << 4) | lo);
+        } else if (!strict && c == '+')
+            c = ' ';
+        if (strict && c == 0)
+            return std::nullopt;
+        result += c;
     }
-    auto result = urlUnescape(encoded);
-    if (result.find('\0') != std::string::npos || !StringConverter("UTF-8", "UTF-8").validate(result))
+    if (strict && !StringConverter("UTF-8", "UTF-8").validate(result))
         return std::nullopt;
     return result;
+}
+
+std::string urlUnescape(std::string_view str)
+{
+    return *urlUnescape(str, false);
 }
 
 static std::string dictEncode(const std::map<std::string, std::string>& dict, std::string_view sep1, char sep2)
@@ -369,14 +338,13 @@ std::string resolveUriReference(const std::string& reference,
 std::string filePathToUri(const fs::path& path)
 {
     auto text = fs::absolute(path).generic_string();
-    return (text[0] == '/' ? "file://" : "file:///") + urlEscape(text, UrlMode::FilePath);
+    return (text[0] == '/' ? "file://" : "file:///") + urlEscape(text, true);
 }
 
 std::optional<std::string> resolveMediaReference(std::string text,
     const std::string& base,
-    MediaReferenceType type)
+    bool nativePath)
 {
-    const bool nativePath = type == MediaReferenceType::NativePath;
     if (!nativePath)
         text = trimString(text);
     if (text.empty())
@@ -391,7 +359,7 @@ std::optional<std::string> resolveMediaReference(std::string text,
         std::replace(text.begin(), text.end(), '\\', '/');
         auto path = fs::path(text);
         auto parent = splitUrl(base);
-        auto folder = urlUnescape(parent.path, UrlMode::FilePath);
+        auto folder = urlUnescape(parent.path, true);
         if (parent.scheme != "file" || !folder)
             return std::nullopt;
         return (path.is_absolute() ? path : fs::path(*folder).parent_path() / path)
@@ -405,7 +373,7 @@ std::optional<std::string> resolveMediaReference(std::string text,
             : std::nullopt;
     if (uri.scheme != "file" || uri.hasQuery || uri.hasFragment || (!uri.authority.empty() && toLower(uri.authority) != "localhost"))
         return std::nullopt;
-    auto decoded = urlUnescape(uri.path, UrlMode::FilePath);
+    auto decoded = urlUnescape(uri.path, true);
     if (!decoded)
         return std::nullopt;
 #ifdef _WIN32
@@ -419,54 +387,6 @@ std::optional<std::string> resolveMediaReference(std::string text,
         ? std::make_optional(
               fs::path(*decoded).lexically_normal().string())
         : std::nullopt;
-}
-
-std::string namespaceUri(pugi::xml_node node)
-{
-    std::string name = node.name();
-    auto colon = name.find(':');
-    auto attribute = colon == std::string::npos ? "xmlns" : "xmlns:" + name.substr(0, colon);
-    for (auto parent = node; parent; parent = parent.parent()) {
-        if (auto declaration = parent.attribute(attribute.c_str()))
-            return declaration.value();
-    }
-    return {};
-}
-
-bool isNamed(pugi::xml_node node, const std::string& local,
-    const std::string& ns)
-{
-    std::string name = node.name();
-    auto colon = name.find(':');
-    return name.substr(colon == std::string::npos ? 0 : colon + 1) == local && namespaceUri(node) == ns;
-}
-
-std::string nodeBase(pugi::xml_node node, const fs::path& path)
-{
-    std::vector<std::string> bases;
-    for (auto parent = node; parent; parent = parent.parent()) {
-        if (auto base = parent.attribute("xml:base"))
-            bases.emplace_back(base.value());
-    }
-    auto result = URLUtils::filePathToUri(path);
-    for (auto it = bases.rbegin(); it != bases.rend(); ++it)
-        result = URLUtils::resolveUriReference(*it, result);
-    return result;
-}
-
-std::optional<std::string> resolvePlaylistReference(const std::string& reference, const fs::path& source)
-{
-    const auto schemeEnd = reference.find("://");
-    // Keep the existing ASX external protocols and their query bytes unchanged.
-    if (schemeEnd != std::string::npos && toLower(trimString(reference.substr(0, schemeEnd))) != "file")
-        return reference;
-    const auto base = URLUtils::filePathToUri(source);
-    auto location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::NativePath);
-    std::error_code ec;
-    // Existing native names, including literal percent escapes, retain priority.
-    if (!location || !fs::is_regular_file(*location, ec))
-        location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::Uri);
-    return location;
 }
 
 } // namespace URLUtils

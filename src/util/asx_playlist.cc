@@ -21,8 +21,9 @@
 
 #include "asx_playlist.h" // API
 
+#include "util/tools.h"
+
 #include <algorithm>
-#include <cctype>
 #include <charconv>
 #include <set>
 #include <stdexcept>
@@ -32,18 +33,11 @@ static constexpr std::size_t ASX_MAX_POSITIONS = 10000;
 static constexpr std::size_t ASX_MAX_NESTING = 5;
 static constexpr std::size_t ASX_MAX_REFERENCES = 10000;
 
-static std::string asxName(std::string text)
-{
-    std::transform(text.begin(), text.end(), text.begin(),
-        [](unsigned char c) { return std::tolower(c); });
-    return text;
-}
-
 static pugi::xml_attribute asxAttribute(const pugi::xml_node& node,
     const std::string& name)
 {
     for (auto attribute : node.attributes()) {
-        if (asxName(attribute.name()) == name)
+        if (toLower(attribute.name()) == name)
             return attribute;
     }
     return {};
@@ -53,7 +47,7 @@ static std::string asxBase(const pugi::xml_node& node,
     std::string fallback = {})
 {
     for (auto child : node.children()) {
-        if (asxName(child.name()) == "base")
+        if (toLower(child.name()) == "base")
             return asxAttribute(child, "href").as_string();
     }
     return fallback;
@@ -64,7 +58,7 @@ static AsxPlaylistMetadata asxMetadata(const pugi::xml_node& node,
 {
     std::set<std::string> seen;
     for (auto child : node.children()) {
-        auto name = asxName(child.name());
+        auto name = toLower(child.name());
         if (name == "param") {
             auto parameter = asxAttribute(child, "name");
             if (parameter)
@@ -95,7 +89,7 @@ static void asxWarn(AsxPlaylistPlan& plan, const std::string& message,
 static void asxUnsupported(const pugi::xml_node& node, AsxPlaylistPlan& plan,
     const fs::path& source)
 {
-    auto name = asxName(node.name());
+    auto name = toLower(node.name());
     if (name == "starttime" || name == "duration" || name == "previewduration" || name == "startmarker" || name == "endmarker")
         asxWarn(plan, "ASX clip/marker playback semantics are unsupported", source);
     else if (name == "event" || name == "banner" || name == "moreinfo" || name == "logurl" || name == "skin")
@@ -133,7 +127,7 @@ static std::size_t asxRepeatCount(const pugi::xml_node& node,
 static std::vector<AsxPlaylistEntry>
 asxDocumentEntries(const pugi::xml_node& root, const fs::path& source,
     const AsxPlaylistLoader& loader,
-    std::vector<fs::path>& active, AsxPlaylistPlan& plan, std::size_t& references);
+    std::vector<fs::path>& active, AsxPlaylistPlan& plan, AsxPlaylistMetadata defaults, std::size_t& references);
 
 static std::vector<AsxPlaylistEntry>
 asxEntries(const pugi::xml_node& parent, const fs::path& source,
@@ -144,17 +138,17 @@ asxEntries(const pugi::xml_node& parent, const fs::path& source,
     std::vector<AsxPlaylistEntry> entries;
     bool repeated = false;
     for (auto node : parent.children()) {
-        auto name = asxName(node.name());
+        auto name = toLower(node.name());
         if (name == "entry") {
-            if (active.size() > 1 && asxName(asxAttribute(node, "skipifref").as_string()) == "yes")
+            if (active.size() > 1 && toLower(asxAttribute(node, "skipifref").as_string()) == "yes")
                 continue;
             AsxPlaylistEntry entry {
                 source, asxBase(node, base), asxMetadata(node, defaults), {}
             };
-            if (asxName(asxAttribute(node, "clientskip").as_string()) == "no")
+            if (toLower(asxAttribute(node, "clientskip").as_string()) == "no")
                 asxWarn(plan, "ASX CLIENTSKIP playback control is unsupported", source);
             for (auto child : node.children()) {
-                if (asxName(child.name()) == "ref") {
+                if (toLower(child.name()) == "ref") {
                     auto href = asxAttribute(child, "href");
                     if (href && *href.value())
                         entry.references.push_back(
@@ -189,7 +183,7 @@ asxEntries(const pugi::xml_node& parent, const fs::path& source,
                 throw std::runtime_error("ASX ENTRYREF cycle");
             active.push_back(canonical);
             auto nested = asxDocumentEntries(child.xml->document_element(), canonical,
-                loader, active, plan, references);
+                loader, active, plan, asxMetadata(child.xml->document_element()), references);
             active.pop_back();
             asxAppend(entries, nested);
         } else if (name == "repeat") {
@@ -210,14 +204,13 @@ asxEntries(const pugi::xml_node& parent, const fs::path& source,
 static std::vector<AsxPlaylistEntry>
 asxDocumentEntries(const pugi::xml_node& root, const fs::path& source,
     const AsxPlaylistLoader& loader,
-    std::vector<fs::path>& active, AsxPlaylistPlan& plan, std::size_t& references)
+    std::vector<fs::path>& active, AsxPlaylistPlan& plan, AsxPlaylistMetadata defaults, std::size_t& references)
 {
-    if (asxName(root.name()) != "asx")
+    if (toLower(root.name()) != "asx")
         throw std::runtime_error("Expected an ASX document");
     auto version = asxAttribute(root, "version");
     if (version && std::string(version.value()) != "3.0" && std::string(version.value()) != "3")
         throw std::runtime_error("Only ASX version 3 is supported");
-    auto defaults = asxMetadata(root);
     defaults.title.clear();
     return asxEntries(root, source, loader, active, plan, defaults, asxBase(root),
         false, references);
@@ -232,6 +225,6 @@ AsxPlaylistPlan readAsxPlaylistPlan(const pugi::xml_node& root,
     auto canonical = source.lexically_normal();
     std::vector<fs::path> active { canonical };
     std::size_t references = 0;
-    plan.entries = asxDocumentEntries(root, canonical, loader, active, plan, references);
+    plan.entries = asxDocumentEntries(root, canonical, loader, active, plan, plan.metadata, references);
     return plan;
 }
