@@ -2,6 +2,18 @@
 # Gerbera - https://gerbera.io/
 # Copyright (C) 2026 Gerbera Contributors
 # SPDX-License-Identifier: GPL-2.0-only
+#
+# Gerbera is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+#
+# Gerbera is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Gerbera. If not, see <http://www.gnu.org/licenses/>.
 """Exercise ASX URI and charset regressions through a real ContentDirectory."""
 
 import argparse
@@ -79,24 +91,8 @@ class AsxUriFixture(Fixture):
         config.write(self.config, encoding="utf-8", xml_declaration=True)
         self.original_hashes = self.hash_sources()
 
-    def hash_sources(self):
-        return {
-            str(p.relative_to(self.src)): hashlib.sha256(p.read_bytes()).hexdigest()
-            for p in self.src.rglob("*")
-            if p.is_file()
-        }
-
     def assert_views(self):
-        roots = [n for n in self.browse(0) if n.findtext(DC + "title") == "Playlists"]
-        assert len(roots) == 1
-        pending = [roots[0].get("id")]
-        found = {}
-        while pending:
-            for node in self.browse(pending.pop()):
-                if node.findtext(UP + "class") == "object.container.playlistContainer":
-                    found.setdefault(node.findtext(DC + "title"), []).append(node)
-                elif node.tag.endswith("}container"):
-                    pending.append(node.get("id"))
+        found = self.playlist_views()
         assert not (set(found) - set(self.expected)), set(found) - set(self.expected)
         for name, expected in self.expected.items():
             views = found.get(name, [])
