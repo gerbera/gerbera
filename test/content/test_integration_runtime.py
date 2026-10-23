@@ -18,6 +18,7 @@
 
 import contextlib
 import ctypes
+import http.client
 from http.server import BaseHTTPRequestHandler, HTTPServer
 import io
 import os
@@ -47,6 +48,10 @@ class DescriptionHandler(BaseHTTPRequestHandler):
         self.send_response(200)
         self.send_header("Content-Length", str(len(body)))
         self.end_headers()
+        if getattr(self.server, "short_responses", 0):
+            self.server.short_responses -= 1
+            body = body[:5]
+            self.close_connection = True
         self.wfile.write(body)
 
     def log_message(self, format, *args):
@@ -105,8 +110,37 @@ class TransportTest(unittest.TestCase):
                 self.assertEqual(wait_for(check, 1), "done")
                 self.assertEqual(check.call_count, 2)
 
+    def test_short_http_body_recovers_but_persistent_short_reads_fail(self):
+        for short_responses in (1, 100):
+            with self.subTest(short_responses=short_responses):
+                with patch("socket.getfqdn", return_value="127.0.0.1"):
+                    listener = HTTPServer(("127.0.0.1", 0), DescriptionHandler)
+                with listener as server:
+                    server.udn = "uuid:short-read"
+                    server.short_responses = short_responses
+                    thread = threading.Thread(target=server.serve_forever)
+                    thread.start()
+                    try:
+                        def read():
+                            with HTTP.open(f"http://127.0.0.1:{server.server_port}/", timeout=1) as response:
+                                return response.read()
+
+                        if short_responses == 1:
+                            body = wait_for(read, timeout=1)
+                            self.assertIn(b"<UDN>uuid:short-read</UDN>", body)
+                            self.assertEqual(server.short_responses, 0)
+                        else:
+                            with self.assertRaisesRegex(FixtureError, "IncompleteRead"):
+                                wait_for(read, timeout=0.15)
+                            self.assertLess(server.short_responses, short_responses)
+                    finally:
+                        server.shutdown()
+                        thread.join(timeout=2)
+                        self.assertFalse(thread.is_alive())
+
     def test_programming_errors_are_not_retried(self):
-        for error in [TypeError("unexpected"), RuntimeError("unexpected")]:
+        for error in [TypeError("unexpected"), RuntimeError("unexpected"),
+                      http.client.BadStatusLine("invalid status")]:
             with self.subTest(error=type(error).__name__):
                 check = Mock(side_effect=error)
                 with self.assertRaises(type(error)):

@@ -84,7 +84,7 @@ def wait_for(check, timeout=20, *, alive=None):
                 alive()
             if value:
                 return value
-        except (OSError, ValueError, AssertionError, ET.ParseError) as error:
+        except (OSError, ValueError, AssertionError, ET.ParseError, http.client.IncompleteRead) as error:
             last = str(error)
         remaining = deadline - time.monotonic()
         if remaining <= 0:

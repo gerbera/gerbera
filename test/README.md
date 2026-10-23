@@ -44,6 +44,12 @@ with its last error and server diagnostics. Process exits and unexpected
 programming errors fail immediately. There are no whole-test retries, skipped
 content assertions or fixed extra sleeps to guess startup completion. The
 readiness change does not alter Gerbera's UPnP error mapping.
+A response interrupted before its declared Content-Length raises
+`http.client.IncompleteRead`. Content polling retries this specific additional
+case within the same deadline, then validates the complete response and expected
+content again. Persistent truncation fails with diagnostics. Other HTTP protocol
+exceptions are not added to the retry policy. A real HTTP regression closes the
+connection before the declared body is sent and verifies recovery and timeout.
 `--startup-timeout SECONDS` changes the default 30-second lifecycle deadline;
 individual HTTP requests have a five-second timeout. A timeout or early exit
 includes the endpoint and server log. Owned process groups are stopped and
