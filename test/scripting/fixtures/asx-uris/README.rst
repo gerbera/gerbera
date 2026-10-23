@@ -2,12 +2,19 @@ ASX URI regression corpus
 =========================
 
 This corpus covers issue #4007. Independent acceptance expectations are consumed
-by the real ContentDirectory integration test ``test/content/test_asx_uris.py``.
-CTest registers it as ``AsxUriIntegration`` on Linux builds with JavaScript and
-AVCodec. It checks all 39 documents in mt/grb modes and both legacy charsets,
-plus decoded XML text, external MMS/RTSP URLs and a later legacy PLS import.
-Each configuration checks both views and full local HTTP resources, then rescans
-and restarts. The input verifier below remains a separate consistency check.
+by native ``AsxImportTest`` GoogleTest cases in ``testcontent``. They run all 39
+documents with mt/grb and UTF-8/windows-1252, both playlist views, decoded XML
+text, unchanged external MMS/RTSP URLs, and a later legacy PLS import.
+Rescan and restart reopen the same isolated SQLite database. Separately named
+HTTP cases compare complete server-delivered resources when CURL is available;
+without CURL only those HTTP cases are explicitly skipped. The native importer
+uses the existing Server, ConfigManager and database owners synchronously.
+No extra Gerbera process, READY log or Python readiness runtime is needed.
+
+Run the registered individual GoogleTest cases with CTest diagnostics:
+
+``ctest --test-dir build -R AsxImportTest --output-on-failure``
+
 Actual media files must be generated in an isolated Linux/macOS fixture from
 ``cases.json``; filenames containing ?, quotes or # must not be created in the
 Windows checkout. Media tags are fixture-owned synthetic data, not library edits.
@@ -24,9 +31,9 @@ for review, not assertions of Microsoft player behavior. ``requires_decision``
 cases deliberately have no golden sequence yet. Resolve those policies before
 registering importer tests; never turn these into passing no-op tests.
 
-Run ``python test/scripting/verify_asx_fixtures.py test/scripting/fixtures/asx-uris`` to check fixture
-hashes, declared XML parsing outcomes, key references and nested local files.
-That command validates test input consistency only, not Gerbera behavior.
+The manifest retains the original corpus SHA256 values for source audits.
+Input hashes alone do not certify importer behavior; the native tests compare
+the declared positions and actual media resources.
 
 Architecture after review of #4004
 ----------------------------------
