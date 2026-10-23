@@ -40,6 +40,7 @@ else()
 endif()
 
 add_dependencies(testutil libgerbera gerbera)
+
 include(GoogleTest)
 gtest_discover_tests(testutil DISCOVERY_TIMEOUT 60 TEST_LIST GRB_UTIL_TESTS)
 

@@ -173,6 +173,9 @@ void GerberaRuntime::notifySystemd(
 #ifdef HAVE_SYSTEMD
     sd_notify(0, fmt::format("{}", fmt::join(stateList, "\n")).c_str());
 #endif
+    // Keep readiness observable without systemd, without polluting CLI output.
+    if (status == ServiceStatus::Ready)
+        log_info("Service status: {}", statusMessage.at(status));
     log_debug("systemd: {}", fmt::join(stateList, "\n"));
 }
 

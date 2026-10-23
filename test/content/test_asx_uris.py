@@ -21,9 +21,9 @@ import hashlib
 import json
 from pathlib import Path
 import shutil
-import tempfile
 import xml.etree.ElementTree as ET
 
+from integration_runtime import fixture_workspace
 from test_xml_playlists import DC, UP, HTTP, Fixture, wav_bytes
 
 
@@ -170,10 +170,6 @@ class AsxUriFixture(Fixture):
                 "view_checks": self.view_checks,
                 "resource_checks": self.resource_checks,
             }
-        except BaseException:
-            self.log.flush()
-            print(Path(self.log.name).read_text(errors="replace")[-7000:], flush=True)
-            raise
         finally:
             self.stop()
 
@@ -188,7 +184,7 @@ def main():
     args.binary = args.binary.resolve()
     args.source_root = args.source_root.resolve()
     results = {}
-    with tempfile.TemporaryDirectory(prefix="grb-au-") as tmp:
+    with fixture_workspace(None, prefix="grb-au-") as tmp:
         for charset in ["UTF-8", "windows-1252"]:
             for mode in ["mt", "grb"]:
                 root = Path(tmp) / (mode + "-" + charset)
