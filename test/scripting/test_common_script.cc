@@ -712,7 +712,6 @@ TEST_F(CommonScriptTest, AudioTitleFormatsPreserveMetadataAndOrdering)
     addGlobalFunctions(ctx, functions);
     ASSERT_EQ(duk_peval_string(ctx, R"JS(
         function getRootPath() { return []; }
-        function getYear(date) { return date.slice(0, 4); }
         var formatKey = '/import/scripting/virtual-layout/attribute::audio-title-format';
         var rulesKey = '/import/scripting/virtual-layout/title-replacements/replace';
         var sourceItem = {
@@ -727,7 +726,9 @@ TEST_F(CommonScriptTest, AudioTitleFormatsPreserveMetadataAndOrdering)
             }
         };
         sourceItem.metaData[M_ALBUMARTIST] = ['Various Artists'];
+        var titleCaseNumber = 0;
         function titleCase(pattern, expected, rules, change) {
+            titleCaseNumber++;
             var item = JSON.parse(JSON.stringify(sourceItem));
             if (change) change(item);
             delete config[formatKey];
@@ -738,11 +739,13 @@ TEST_F(CommonScriptTest, AudioTitleFormatsPreserveMetadataAndOrdering)
             config[formatKey] = pattern;
             config[rulesKey] = rules || [];
             var result = getAudioDetails(item, '/music');
-            if (result.title !== expected) throw new Error(pattern + ': ' + result.title);
+            if (result.title !== expected)
+                throw new Error('Audio title case ' + titleCaseNumber + ' (' + pattern + '): expected ' +
+                    JSON.stringify(expected) + ', got ' + JSON.stringify(result.title));
             result.title = baseline.title;
             if (JSON.stringify(result) !== JSON.stringify(baseline) ||
                 JSON.stringify(item) !== JSON.stringify(baselineItem))
-                throw new Error('Formatting changed source metadata or ordering');
+                throw new Error('Audio title case ' + titleCaseNumber + ': formatting changed source metadata or ordering');
         }
         var defaultItem = JSON.parse(JSON.stringify(sourceItem));
         var defaultTitle = getAudioDetails(defaultItem, '/music').title;
