@@ -19,83 +19,20 @@ python3 test/content/test_playlist_updates.py --binary build/gerbera \
 Use a fresh work directory for each run. Omit `--work-directory` for automatic
 temporary-file cleanup.
 
-### Integration process readiness and diagnostics
-
-`test/content/integration_runtime.py` owns process start, restart, shutdown,
-condition polling, HTTP transport and temporary files. Gerbera selects its own
-port (`--port 0`); the test does not release a guessed port and race the server
-to bind it. Each start uses a fresh log and endpoint. The helper waits for
-`Service status: READY=1`, the existing lifecycle notification emitted after
-`server->init()` and `server->run()` complete, also when systemd is unavailable.
-It then verifies the fixture's UDN, a valid `GetSystemUpdateID` response and a
-root Browse response. An empty catalog is a valid ready server.
-
-READY means the server has started, not that background imports are complete.
-The database and ContentDirectory setup precede it, but filesystem monitoring
-and import jobs are asynchronous, some scan configuration errors are logged
-without aborting startup, and CLI server actions run after the notification.
-Content checks retain the original playlist waiter's retry policy:
-`OSError` (including HTTP errors), `ValueError`, `AssertionError` and XML parse
-errors may converge within the existing 20-second content deadline. This
-matters when an asynchronous scan invalidates a just-listed object or resource.
-Every retry reads and validates the expected views again; successful startup
-alone never satisfies a content check. A persistent error fails at the deadline
-with its last error and server diagnostics. Process exits and unexpected
-programming errors fail immediately. There are no whole-test retries, skipped
-content assertions or fixed extra sleeps to guess startup completion. The
-readiness change does not alter Gerbera's UPnP error mapping.
-A response interrupted before its declared Content-Length raises
-`http.client.IncompleteRead`. Content polling retries this specific additional
-case within the same deadline, then validates the complete response and expected
-content again. Persistent truncation fails with diagnostics. Other HTTP protocol
-exceptions are not added to the retry policy. A real HTTP regression closes the
-connection before the declared body is sent and verifies recovery and timeout.
-`--startup-timeout SECONDS` changes the default 30-second lifecycle deadline;
-individual HTTP requests have a five-second timeout. A timeout or early exit
-includes the endpoint and server log. Owned process groups are stopped and
-reaped before a restart, and stale readiness from an earlier start is ignored.
-
-Before an inotify scenario changes any files, it additionally waits for the
-owned process's kernel watches on the source, audio and playlist directories.
-Linux `/proc/PID/fdinfo` must report their device/inode identities and required
-close-write, move, create and delete event masks. This covers asynchronous
-watch registration after READY; it does not wait for the entire import queue
-to become idle. Timed-scan tests retain their separate scan/result assertions.
-
-The shared HTTP client binds a source port distinct from the destination
-before connecting. This prevents Linux TCP self-connections during a server's
-startup or exit window, rather than catching the resulting invalid HTTP reply.
-
-Successful automatic workspaces are removed. Failed workspaces retain logs,
-generated configuration, synthetic files and fixture database; their path and
-log tails are printed in CTest output. Set `GRB_TEST_ARTIFACTS` to choose their
-parent directory. The compiler CI jobs upload retained failure evidence.
-Explicit `--work-directory` directories are never overwritten or removed.
-
-The standard-library regression suite is registered as `IntegrationRuntime`
-with CTest and can also run without a Gerbera installation:
-
-```sh
-python3 test/content/test_integration_runtime.py
-```
-
-It covers delayed readiness after port binding, early exit, missing readiness,
-wrong identity, empty catalogs, callback failures, restart generations,
-self-connection prevention and failure evidence retention. This infrastructure
-does not promise to eliminate arbitrary application races or future filesystem
-events; each feature test must still assert its required result.
-
-The general regression cases use only the Python standard library. Process
-fixtures require POSIX; kernel-watch cases require Linux. Their unittest skip
-reasons are explicit. CMake reports when Python is unavailable. The real
-`PlaylistUpdateIntegration` remains restricted to Linux with JavaScript,
-inotify and a supported media metadata reader; it is not enabled on platforms
-without those features. Compiler/Conan, container, Alpine and native OS CI jobs
-must exercise their applicable subset in their own execution environment.
-Passing a development-container run alone does not certify the other runners.
-
 This file outlines how the Gerbera system uses the **GoogleTest**
 framework to provide unit testing for the C++ code-base.
+
+Physical playlist class mapping is covered by `PlaylistClassConfigTest` in
+`testconfig` and `ImportModes/PlaylistFileClassTest` in `testcontent`. The native
+import cases use the real server and an isolated SQLite database for both `mt`
+and `grb`, with default, extended legacy, exact override, conditional override,
+and nonextended mappings. They check physical item classes, MIME types and
+resources; JavaScript builds also check both parsed playlist views, repeated
+positions and media duration. Separate `HttpResourcesPreservePlaylistMediaBytes`
+cases check HTTP payloads through the existing CurlIOHandler; only these cases
+are explicitly skipped if JavaScript or CURL is unavailable. Content convergence retains
+the previous 20-second deadline. Input files are checked byte for byte after
+shutdown. The shared fixture uses no external Python process/readiness layer.
 
 ## Required Software
 
