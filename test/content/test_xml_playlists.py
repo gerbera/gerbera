@@ -17,18 +17,17 @@
 """Compare WPL/XSPF fixtures with real Gerbera ContentDirectory results."""
 
 import argparse
-import contextlib
 import hashlib
 import json
 from pathlib import Path
 import shutil
 import socket
 import subprocess
-import tempfile
 import time
 import xml.etree.ElementTree as ET
 
-from test_playlist_updates import DC, UP, HTTP, Fixture as PlaylistFixture, wav_bytes
+from integration_runtime import HTTP, GerberaProcess, fixture_workspace
+from test_playlist_updates import DC, UP, Fixture as PlaylistFixture, wav_bytes
 
 
 class Fixture(PlaylistFixture):
@@ -93,17 +92,6 @@ class Fixture(PlaylistFixture):
         )
         self.expected["legacycp"] = ["HTTPS"]
         self.ip = args.ip or socket.gethostbyname(socket.gethostname())
-        for port in range(49270, 49370):
-            with socket.socket() as probe:
-                try:
-                    probe.bind((self.ip, port))
-                except OSError:
-                    continue
-                self.port = port
-                self.host = f"http://{self.ip}:{port}"
-                break
-        else:
-            raise RuntimeError("No free fixture port")
         config_text = subprocess.check_output(
             [str(args.binary), "--create-config"]
         ).decode()
@@ -166,21 +154,13 @@ class Fixture(PlaylistFixture):
         ET.ElementTree(config).write(
             self.config, encoding="utf-8", xml_declaration=True
         )
-        self.process = None
+        self.server = GerberaProcess(args.binary, self.config, self.ip, self.root)
+        self.scan_mode = "timed"
+        self.startup_timeout = 30
         self.checks = []
 
     def wait(self, check):
-        end, last = time.monotonic() + 30, None
-        while time.monotonic() < end:
-            if self.process.poll() is not None:
-                raise AssertionError("Gerbera exited before fixture completed")
-            try:
-                if check():
-                    return
-            except (OSError, ValueError, AssertionError, ET.ParseError) as error:
-                last = error
-            time.sleep(0.15)
-        raise AssertionError(f"Fixture timeout: {last}")
+        return self.server.wait(check, timeout=30)
 
     def hash_sources(self):
         return {
@@ -254,23 +234,6 @@ class Fixture(PlaylistFixture):
         self.checks.append(name)
         print(self.mode, name, "PASS", flush=True)
 
-    def start(self):
-        self.log = (self.root / ("server-" + str(len(self.checks)) + ".log")).open("wb")
-        self.process = subprocess.Popen(
-            [
-                str(self.args.binary),
-                "-c",
-                str(self.config),
-                "-i",
-                self.ip,
-                "-p",
-                str(self.port),
-            ],
-            stdout=self.log,
-            stderr=subprocess.STDOUT,
-        )
-        self.wait(lambda: self.browse(0))
-
     def run(self):
         try:
             self.start()
@@ -294,10 +257,6 @@ class Fixture(PlaylistFixture):
             self.start()
             self.record("restart retains all playlist contents")
             return self.checks
-        except BaseException:
-            self.log.flush()
-            print(Path(self.log.name).read_text(errors="replace")[-7000:], flush=True)
-            raise
         finally:
             self.stop()
 
@@ -314,13 +273,8 @@ def main():
     args.source_root = args.source_root.resolve()
     if args.work_directory:
         args.work_directory = args.work_directory.resolve()
-    work = (
-        contextlib.nullcontext(str(args.work_directory))
-        if args.work_directory
-        else tempfile.TemporaryDirectory(prefix="grb-x-")
-    )
     results = {}
-    with work as directory:
+    with fixture_workspace(args.work_directory, prefix="grb-x-") as directory:
         for mode in ["mt", "grb"]:
             root = Path(directory) / mode
             root.mkdir(parents=True)
