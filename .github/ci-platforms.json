@@ -1,0 +1,500 @@
+{
+  "cpp": [
+    {
+      "compiler": {
+        "name": "gcc",
+        "cc": "gcc-10",
+        "cxx": "g++-10",
+        "icu": "False",
+        "pq": "False",
+        "systemd": "True",
+        "system": "ubuntu-22.04"
+      },
+      "target": "cpp/gcc",
+      "label": "Compile gcc"
+    },
+    {
+      "compiler": {
+        "name": "clang",
+        "cc": "clang-13",
+        "cxx": "clang++-13",
+        "icu": "True",
+        "pq": "False",
+        "systemd": "True",
+        "system": "ubuntu-22.04"
+      },
+      "target": "cpp/clang",
+      "label": "Compile clang"
+    },
+    {
+      "compiler": {
+        "name": "gcc-13",
+        "cc": "gcc-13",
+        "cxx": "g++-13",
+        "icu": "False",
+        "pq": "False",
+        "systemd": "True",
+        "system": "ubuntu-24.04"
+      },
+      "target": "cpp/gcc-13",
+      "label": "Compile gcc-13"
+    },
+    {
+      "compiler": {
+        "name": "clang-18",
+        "cc": "clang-18",
+        "cxx": "clang++-18",
+        "icu": "True",
+        "pq": "False",
+        "systemd": "True",
+        "system": "ubuntu-24.04"
+      },
+      "target": "cpp/clang-18",
+      "label": "Compile clang-18"
+    },
+    {
+      "compiler": {
+        "name": "gcc-15",
+        "cc": "gcc-15",
+        "cxx": "g++-15",
+        "icu": "False",
+        "pq": "False",
+        "systemd": "False",
+        "system": "ubuntu-26.04"
+      },
+      "target": "cpp/gcc-15",
+      "label": "Compile gcc-15"
+    },
+    {
+      "compiler": {
+        "name": "clang-21",
+        "cc": "clang-21",
+        "cxx": "clang++-21",
+        "icu": "True",
+        "pq": "False",
+        "systemd": "False",
+        "system": "ubuntu-26.04"
+      },
+      "target": "cpp/clang-21",
+      "label": "Compile clang-21"
+    }
+  ],
+  "head-check": [
+    {
+      "head": {
+        "name": "check",
+        "lib": "pupnp"
+      },
+      "target": "head-check/check",
+      "label": "head-check"
+    },
+    {
+      "head": {
+        "name": "npupnp",
+        "lib": "npupnp"
+      },
+      "target": "head-check/npupnp",
+      "label": "head-npupnp"
+    }
+  ],
+  "minimal": [
+    {
+      "platform": "x86_64",
+      "branch": "v3.23",
+      "target": "minimal/x86_64/v3.23",
+      "label": "Minimal x86_64 - v3.23"
+    },
+    {
+      "platform": "x86_64",
+      "branch": "v3.24",
+      "target": "minimal/x86_64/v3.24",
+      "label": "Minimal x86_64"
+    },
+    {
+      "platform": "x86_64",
+      "branch": "edge",
+      "target": "minimal/x86_64/edge",
+      "label": "Minimal x86_64 - edge"
+    },
+    {
+      "platform": "x86",
+      "branch": "v3.23",
+      "target": "minimal/x86/v3.23",
+      "label": "Minimal x86 - v3.23"
+    },
+    {
+      "platform": "x86",
+      "branch": "v3.24",
+      "target": "minimal/x86/v3.24",
+      "label": "Minimal x86"
+    },
+    {
+      "platform": "x86",
+      "branch": "edge",
+      "target": "minimal/x86/edge",
+      "label": "Minimal x86 - edge"
+    },
+    {
+      "platform": "armhf",
+      "branch": "v3.23",
+      "target": "minimal/armhf/v3.23",
+      "label": "Minimal armhf - v3.23"
+    },
+    {
+      "platform": "armhf",
+      "branch": "v3.24",
+      "target": "minimal/armhf/v3.24",
+      "label": "Minimal armhf"
+    },
+    {
+      "platform": "armhf",
+      "branch": "edge",
+      "target": "minimal/armhf/edge",
+      "label": "Minimal armhf - edge"
+    },
+    {
+      "platform": "armv7",
+      "branch": "v3.23",
+      "target": "minimal/armv7/v3.23",
+      "label": "Minimal armv7 - v3.23"
+    },
+    {
+      "platform": "armv7",
+      "branch": "v3.24",
+      "target": "minimal/armv7/v3.24",
+      "label": "Minimal armv7"
+    },
+    {
+      "platform": "armv7",
+      "branch": "edge",
+      "target": "minimal/armv7/edge",
+      "label": "Minimal armv7 - edge"
+    },
+    {
+      "platform": "aarch64",
+      "branch": "v3.23",
+      "target": "minimal/aarch64/v3.23",
+      "label": "Minimal aarch64 - v3.23"
+    },
+    {
+      "platform": "aarch64",
+      "branch": "v3.24",
+      "target": "minimal/aarch64/v3.24",
+      "label": "Minimal aarch64"
+    },
+    {
+      "platform": "aarch64",
+      "branch": "edge",
+      "target": "minimal/aarch64/edge",
+      "label": "Minimal aarch64 - edge"
+    },
+    {
+      "platform": "loongarch64",
+      "branch": "v3.23",
+      "target": "minimal/loongarch64/v3.23",
+      "label": "Minimal loongarch64 - v3.23"
+    },
+    {
+      "platform": "loongarch64",
+      "branch": "v3.24",
+      "target": "minimal/loongarch64/v3.24",
+      "label": "Minimal loongarch64"
+    },
+    {
+      "platform": "loongarch64",
+      "branch": "edge",
+      "target": "minimal/loongarch64/edge",
+      "label": "Minimal loongarch64 - edge"
+    },
+    {
+      "platform": "ppc64le",
+      "branch": "v3.23",
+      "target": "minimal/ppc64le/v3.23",
+      "label": "Minimal ppc64le - v3.23"
+    },
+    {
+      "platform": "ppc64le",
+      "branch": "edge",
+      "target": "minimal/ppc64le/edge",
+      "label": "Minimal ppc64le - edge"
+    },
+    {
+      "platform": "riscv64",
+      "branch": "v3.23",
+      "target": "minimal/riscv64/v3.23",
+      "label": "Minimal riscv64 - v3.23"
+    },
+    {
+      "platform": "riscv64",
+      "branch": "v3.24",
+      "target": "minimal/riscv64/v3.24",
+      "label": "Minimal riscv64"
+    },
+    {
+      "platform": "riscv64",
+      "branch": "edge",
+      "target": "minimal/riscv64/edge",
+      "label": "Minimal riscv64 - edge"
+    },
+    {
+      "platform": "s390x",
+      "branch": "v3.23",
+      "target": "minimal/s390x/v3.23",
+      "label": "Minimal s390x - v3.23"
+    },
+    {
+      "platform": "s390x",
+      "branch": "v3.24",
+      "target": "minimal/s390x/v3.24",
+      "label": "Minimal s390x"
+    },
+    {
+      "platform": "s390x",
+      "branch": "edge",
+      "target": "minimal/s390x/edge",
+      "label": "Minimal s390x - edge"
+    }
+  ],
+  "deb-package": [
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:18.04",
+      "arch": "linux/amd64",
+      "pr": true,
+      "target": "deb-package/ubuntu:18.04/linux/amd64",
+      "label": "Compile ubuntu:18.04 linux/amd64"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:18.04",
+      "arch": "linux/arm/v7",
+      "pr": false,
+      "target": "deb-package/ubuntu:18.04/linux/arm/v7",
+      "label": "Compile ubuntu:18.04 linux/arm/v7"
+    },
+    {
+      "runner": "ubuntu-24.04-arm",
+      "os-ver": "ubuntu:18.04",
+      "arch": "linux/arm64/v8",
+      "pr": false,
+      "target": "deb-package/ubuntu:18.04/linux/arm64/v8",
+      "label": "Compile ubuntu:18.04 linux/arm64/v8"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:20.04",
+      "arch": "linux/amd64",
+      "pr": true,
+      "target": "deb-package/ubuntu:20.04/linux/amd64",
+      "label": "Compile ubuntu:20.04 linux/amd64"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:20.04",
+      "arch": "linux/arm/v7",
+      "pr": false,
+      "target": "deb-package/ubuntu:20.04/linux/arm/v7",
+      "label": "Compile ubuntu:20.04 linux/arm/v7"
+    },
+    {
+      "runner": "ubuntu-24.04-arm",
+      "os-ver": "ubuntu:20.04",
+      "arch": "linux/arm64/v8",
+      "pr": false,
+      "target": "deb-package/ubuntu:20.04/linux/arm64/v8",
+      "label": "Compile ubuntu:20.04 linux/arm64/v8"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:22.04",
+      "arch": "linux/amd64",
+      "pr": true,
+      "target": "deb-package/ubuntu:22.04/linux/amd64",
+      "label": "Compile ubuntu:22.04 linux/amd64"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:22.04",
+      "arch": "linux/arm/v7",
+      "pr": false,
+      "target": "deb-package/ubuntu:22.04/linux/arm/v7",
+      "label": "Compile ubuntu:22.04 linux/arm/v7"
+    },
+    {
+      "runner": "ubuntu-24.04-arm",
+      "os-ver": "ubuntu:22.04",
+      "arch": "linux/arm64/v8",
+      "pr": false,
+      "target": "deb-package/ubuntu:22.04/linux/arm64/v8",
+      "label": "Compile ubuntu:22.04 linux/arm64/v8"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:24.04",
+      "arch": "linux/amd64",
+      "pr": true,
+      "target": "deb-package/ubuntu:24.04/linux/amd64",
+      "label": "Compile ubuntu:24.04 linux/amd64"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:24.04",
+      "arch": "linux/arm/v7",
+      "pr": false,
+      "target": "deb-package/ubuntu:24.04/linux/arm/v7",
+      "label": "Compile ubuntu:24.04 linux/arm/v7"
+    },
+    {
+      "runner": "ubuntu-24.04-arm",
+      "os-ver": "ubuntu:24.04",
+      "arch": "linux/arm64/v8",
+      "pr": false,
+      "target": "deb-package/ubuntu:24.04/linux/arm64/v8",
+      "label": "Compile ubuntu:24.04 linux/arm64/v8"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:26.04",
+      "arch": "linux/amd64",
+      "pr": true,
+      "target": "deb-package/ubuntu:26.04/linux/amd64",
+      "label": "Compile ubuntu:26.04 linux/amd64"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:26.04",
+      "arch": "linux/arm/v7",
+      "pr": false,
+      "target": "deb-package/ubuntu:26.04/linux/arm/v7",
+      "label": "Compile ubuntu:26.04 linux/arm/v7"
+    },
+    {
+      "runner": "ubuntu-24.04-arm",
+      "os-ver": "ubuntu:26.04",
+      "arch": "linux/arm64/v8",
+      "pr": false,
+      "target": "deb-package/ubuntu:26.04/linux/arm64/v8",
+      "label": "Compile ubuntu:26.04 linux/arm64/v8"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:26.10",
+      "arch": "linux/amd64",
+      "pr": true,
+      "target": "deb-package/ubuntu:26.10/linux/amd64",
+      "label": "Compile ubuntu:26.10 linux/amd64"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "ubuntu:26.10",
+      "arch": "linux/arm/v7",
+      "pr": false,
+      "target": "deb-package/ubuntu:26.10/linux/arm/v7",
+      "label": "Compile ubuntu:26.10 linux/arm/v7"
+    },
+    {
+      "runner": "ubuntu-24.04-arm",
+      "os-ver": "ubuntu:26.10",
+      "arch": "linux/arm64/v8",
+      "pr": false,
+      "target": "deb-package/ubuntu:26.10/linux/arm64/v8",
+      "label": "Compile ubuntu:26.10 linux/arm64/v8"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "debian:bookworm",
+      "arch": "linux/amd64",
+      "pr": true,
+      "target": "deb-package/debian:bookworm/linux/amd64",
+      "label": "Compile debian:bookworm linux/amd64"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "debian:bookworm",
+      "arch": "linux/arm/v7",
+      "pr": false,
+      "target": "deb-package/debian:bookworm/linux/arm/v7",
+      "label": "Compile debian:bookworm linux/arm/v7"
+    },
+    {
+      "runner": "ubuntu-24.04-arm",
+      "os-ver": "debian:bookworm",
+      "arch": "linux/arm64/v8",
+      "pr": false,
+      "target": "deb-package/debian:bookworm/linux/arm64/v8",
+      "label": "Compile debian:bookworm linux/arm64/v8"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "debian:trixie",
+      "arch": "linux/amd64",
+      "pr": true,
+      "target": "deb-package/debian:trixie/linux/amd64",
+      "label": "Compile debian:trixie linux/amd64"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "debian:trixie",
+      "arch": "linux/arm/v7",
+      "pr": false,
+      "target": "deb-package/debian:trixie/linux/arm/v7",
+      "label": "Compile debian:trixie linux/arm/v7"
+    },
+    {
+      "runner": "ubuntu-24.04-arm",
+      "os-ver": "debian:trixie",
+      "arch": "linux/arm64/v8",
+      "pr": false,
+      "target": "deb-package/debian:trixie/linux/arm64/v8",
+      "label": "Compile debian:trixie linux/arm64/v8"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "debian:testing",
+      "arch": "linux/amd64",
+      "pr": true,
+      "target": "deb-package/debian:testing/linux/amd64",
+      "label": "Compile debian:testing linux/amd64"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "debian:testing",
+      "arch": "linux/arm/v7",
+      "pr": false,
+      "target": "deb-package/debian:testing/linux/arm/v7",
+      "label": "Compile debian:testing linux/arm/v7"
+    },
+    {
+      "runner": "ubuntu-24.04-arm",
+      "os-ver": "debian:testing",
+      "arch": "linux/arm64/v8",
+      "pr": false,
+      "target": "deb-package/debian:testing/linux/arm64/v8",
+      "label": "Compile debian:testing linux/arm64/v8"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "debian:unstable",
+      "arch": "linux/amd64",
+      "pr": true,
+      "target": "deb-package/debian:unstable/linux/amd64",
+      "label": "Compile debian:unstable linux/amd64"
+    },
+    {
+      "runner": "ubuntu-latest",
+      "os-ver": "debian:unstable",
+      "arch": "linux/arm/v7",
+      "pr": false,
+      "target": "deb-package/debian:unstable/linux/arm/v7",
+      "label": "Compile debian:unstable linux/arm/v7"
+    },
+    {
+      "runner": "ubuntu-24.04-arm",
+      "os-ver": "debian:unstable",
+      "arch": "linux/arm64/v8",
+      "pr": false,
+      "target": "deb-package/debian:unstable/linux/arm64/v8",
+      "label": "Compile debian:unstable linux/arm64/v8"
+    }
+  ]
+}

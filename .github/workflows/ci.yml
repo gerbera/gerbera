@@ -6,6 +6,7 @@ on:
     tags: ['v*']
   pull_request:
     branches: [master]
+    types: [opened, synchronize, reopened, ready_for_review, labeled]
   workflow_dispatch:
     inputs:
       execution-order:
@@ -20,16 +21,33 @@ permissions:
   contents: read
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}${{ github.event.action == 'labeled' && github.event.label.name != 'ci:complete-platforms' && format('-ignored-{0}', github.run_id) || '' }}
+  cancel-in-progress: ${{ github.event.action != 'labeled' }}
+
+env:
+  APK_TOOLS_URL: https://gitlab.alpinelinux.org/api/v4/projects/5/packages/generic/v2.14.10/x86_64/apk.static
+  APK_TOOLS_SHA256: 34bb1a96f0258982377a289392d4ea9f3f4b767a4bb5806b1b87179b79ad8a1c
+  APK_TOOLS_CDN_URL: https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/apk-tools-static-2.14.12-r0.apk
+  APK_TOOLS_CDN_PACKAGE_SHA256: f44523ae4ded143b3d85e16be4bf7ff386fc052406c3b22f87f045efb0aa4305
+  APK_TOOLS_CDN_SHA256: 034d28bbf3d97d90fd76e572ab8ae74a038da0e7593e9d412eabccf69ccd3553
 
 jobs:
-  selection:
+  ignored-label:
+    if: ${{ github.event.action == 'labeled' && github.event.label.name != 'ci:complete-platforms' }}
     runs-on: ubuntu-24.04
-    timeout-minutes: 3
+    timeout-minutes: 1
+    steps:
+      - name: Record ignored label event
+        run: echo 'This label does not request build or test coverage.'
+
+  selection:
+    if: ${{ github.event.action != 'labeled' || github.event.label.name == 'ci:complete-platforms' }}
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
     permissions:
       contents: read
       pull-requests: read
+      actions: read
     outputs:
       web: ${{ steps.select.outputs.web }}
       native: ${{ steps.select.outputs.native }}
@@ -47,13 +65,31 @@ jobs:
       format: ${{ steps.select.outputs.format }}
       macos_first: ${{ steps.select.outputs.macos_first }}
       selection: ${{ steps.select.outputs.selection }}
+      fingerprint: ${{ steps.select.outputs.fingerprint }}
+      macos_run: ${{ steps.select.outputs.macos_run }}
+      macos_first_run: ${{ steps.select.outputs.macos_first_run }}
+      cpp_run: ${{ steps.select.outputs.cpp_run }}
+      cpp_matrix: ${{ steps.select.outputs.cpp_matrix }}
+      head_check_run: ${{ steps.select.outputs.head_check_run }}
+      head_check_matrix: ${{ steps.select.outputs.head_check_matrix }}
+      minimal_run: ${{ steps.select.outputs.minimal_run }}
+      minimal_matrix: ${{ steps.select.outputs.minimal_matrix }}
+      deb_package_run: ${{ steps.select.outputs.deb_package_run }}
+      deb_package_matrix: ${{ steps.select.outputs.deb_package_matrix }}
+      FreeBSD_run: ${{ steps.select.outputs.FreeBSD_run }}
+      OmniOS_run: ${{ steps.select.outputs.OmniOS_run }}
+      js_run: ${{ steps.select.outputs.js_run }}
+      docker_build_run: ${{ steps.select.outputs.docker_build_run }}
+      docker_debug_run: ${{ steps.select.outputs.docker_debug_run }}
+      format_run: ${{ steps.select.outputs.format_run }}
+      xml_run: ${{ steps.select.outputs.xml_run }}
     steps:
       - uses: actions/checkout@v7
         with:
           persist-credentials: false
       - name: Test coverage selection and completion gate
         run: python3 -B -m unittest discover -s test/ci -p 'test_*.py'
-      - name: Select affected groups and execution order
+      - name: Select affected groups, platforms and missing coverage
         id: select
         env:
           GH_TOKEN: ${{ github.token }}
@@ -61,34 +97,12 @@ jobs:
 
   macos-first:
     needs: [selection]
-    if: ${{ needs.selection.result == 'success' && needs.selection.outputs.macos == 'true' && needs.selection.outputs.macos_first == 'true' }}
+    if: ${{ needs.selection.result == 'success' && needs.selection.outputs.macos_run == 'true' && needs.selection.outputs.macos_first == 'true' }}
     name: macOS first
     runs-on: macos-latest
     steps: &macos_steps
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.macos }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
-        if: ${{ steps.coverage.outputs.run == 'true' }}
       - name: Install Deps
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         run: |
           brew uninstall cmake; \
           brew install \
@@ -114,134 +128,56 @@ jobs:
             taglib
 
       - name: Build
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         run: |
           cmake -S . -G Ninja -B build --preset=macos
           cmake --build build -j$(sysctl -n hw.physicalcpu) --verbose
 
       - name: Test
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         run: |
           cd build
           ctest --output-on-failure
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:macos]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   macos:
     name: macOS
     runs-on: macos-latest
     needs: [selection]
-    if: ${{ needs.selection.result == 'success' && needs.selection.outputs.macos == 'true' && needs.selection.outputs.macos_first == 'false' }}
+    if: ${{ needs.selection.result == 'success' && needs.selection.outputs.macos_run == 'true' && needs.selection.outputs.macos_first == 'false' }}
     steps: *macos_steps
 
   cpp:
     needs: [selection, macos-first]
-    if: ${{ always() && !cancelled() }}
+    if: ${{ always() && !cancelled() && needs.selection.result == 'success' && needs.selection.outputs.cpp_run == 'true' && (needs.selection.outputs.macos_first != 'true' || needs.selection.outputs.macos_run != 'true' || needs.macos-first.result == 'success') }}
     # ubuntu-latest is not latest....
     # until https://github.com/conan-io/conan-docker-tools/issues/205 is fixed:
     # libsqlite3.so: undefined reference to `fcntl64@GLIBC_2.28
     strategy:
-      matrix:
-        compiler:
-          - name: gcc
-            cc: gcc-10
-            cxx: g++-10
-            icu: "False"
-            pq: "False"
-            systemd: "True"
-            system: ubuntu-22.04
-          - name: clang
-            cc: clang-13
-            cxx: clang++-13
-            icu: "True"
-            pq: "False"
-            systemd: "True"
-            system: ubuntu-22.04
-          - name: gcc-13
-            cc: gcc-13
-            cxx: g++-13
-            icu: "False"
-            pq: "False"
-            systemd: "True"
-            system: ubuntu-24.04
-          - name: clang-18
-            cc: clang-18
-            cxx: clang++-18
-            icu: "True"
-            pq: "False"
-            systemd: "True"
-            system: ubuntu-24.04
-          - name: gcc-15
-            cc: gcc-15
-            cxx: g++-15
-            icu: "False"
-            pq: "False"
-            systemd: "False"
-            system: ubuntu-26.04
-          - name: clang-21
-            cc: clang-21
-            cxx: clang++-21
-            icu: "True"
-            pq: "False"
-            systemd: "False"
-            system: ubuntu-26.04
+      matrix: ${{ fromJSON(needs.selection.outputs.cpp_matrix) }}
     runs-on: ${{ matrix.compiler.system }}
-    name: Compile ${{ matrix.compiler.name }}
+    name: ${{ matrix.label }}
     env:
       CC: ${{ matrix.compiler.cc }}
       CXX: ${{ matrix.compiler.cxx }}
       CONAN_RUN_TESTS: 1
     steps:
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.native }}
-          MACOS_FIRST: ${{ needs.selection.outputs.macos_first }}
-          MACOS_SELECTED: ${{ needs.selection.outputs.macos }}
-          MACOS_RESULT: ${{ needs.macos-first.result }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          case "$MACOS_FIRST:$MACOS_SELECTED" in
-            true:true)
-              if [ "$MACOS_RESULT" != "success" ]; then
-                echo '::error::Selected coverage blocked by unsuccessful macOS preflight.'
-                exit 1
-              fi ;;
-            true:false|false:true|false:false) ;;
-            *) echo '::error::Invalid macOS scheduling decision.'; exit 1 ;;
-          esac
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
-        if: ${{ steps.coverage.outputs.run == 'true' }}
       # Alternatively: uses: docker://conanio/gcc9:latest
       - name: Update package list
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         run: |
           sudo apt-get update -y
           sudo apt-get install -y openssl
       - name: Set up Python
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         uses: actions/setup-python@v7
         with:
           python-version: "3.12"
       - name: Install conan
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         run: |
           pip install -U --no-cache-dir conan
           conan profile detect --name default
       - name: Cache conan dependencies
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         uses: actions/cache@v6
         with:
           path: ~/.conan2
@@ -249,30 +185,27 @@ jobs:
           restore-keys: |
             - ${{ runner.os }}-conan2-${{ matrix.compiler.name }}-
       - name: build and test
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         run: |
           # Remove existing package if it comes from the cache, otherwise
           # Conan will skip building it (due to --build=missing policy)
           conan remove 'gerbera/*' -c
           conan create -pr ./conan/dev -o='gerbera/*:icu=${{ matrix.compiler.icu }}' -o='gerbera/*:postgres=${{ matrix.compiler.pq }}' -o='gerbera/*:libsystemd=${{ matrix.compiler.systemd }}' --build=missing --version dev .
       - name: cleanup
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         run: |
           # Remove build directories before creating a cache.
           conan remove '*' -c
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:${{ matrix.target }}]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   head-check:
     needs: [selection, macos-first]
-    if: ${{ always() && !cancelled() }}
+    if: ${{ always() && !cancelled() && needs.selection.result == 'success' && needs.selection.outputs.head_check_run == 'true' && (needs.selection.outputs.macos_first != 'true' || needs.selection.outputs.macos_run != 'true' || needs.macos-first.result == 'success') }}
     strategy:
-      matrix:
-        head:
-          - name: check
-            lib: pupnp
-          - name: npupnp
-            lib: npupnp
+      matrix: ${{ fromJSON(needs.selection.outputs.head_check_matrix) }}
     runs-on: ubuntu-latest
-    name: head-${{ matrix.head.name }}
+    name: ${{ matrix.label }}
     container:
       image: "ubuntu:26.04"
       env:
@@ -280,40 +213,7 @@ jobs:
         TZ: Etc/UTC
         GH_ACTIONS: y
     steps:
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.head }}
-          MACOS_FIRST: ${{ needs.selection.outputs.macos_first }}
-          MACOS_SELECTED: ${{ needs.selection.outputs.macos }}
-          MACOS_RESULT: ${{ needs.macos-first.result }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          case "$MACOS_FIRST:$MACOS_SELECTED" in
-            true:true)
-              if [ "$MACOS_RESULT" != "success" ]; then
-                echo '::error::Selected coverage blocked by unsuccessful macOS preflight.'
-                exit 1
-              fi ;;
-            true:false|false:true|false:false) ;;
-            *) echo '::error::Invalid macOS scheduling decision.'; exit 1 ;;
-          esac
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - name: Install script pre-reqs
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         shell: bash
         run: |
           ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -321,56 +221,25 @@ jobs:
           apt-get install -y lsb-release sudo wget curl git
 
       - uses: actions/checkout@v7
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
       - name: Build and test
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         run: |
           bash scripts/debian/build-deb.sh HEAD ${{ matrix.head.lib }}
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:${{ matrix.target }}]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   FreeBSD:
+    name: FreeBSD
     needs: [selection, macos-first]
-    if: ${{ always() && !cancelled() }}
+    if: ${{ always() && !cancelled() && needs.selection.result == 'success' && needs.selection.outputs.FreeBSD_run == 'true' && (needs.selection.outputs.macos_first != 'true' || needs.selection.outputs.macos_run != 'true' || needs.macos-first.result == 'success') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.freebsd }}
-          MACOS_FIRST: ${{ needs.selection.outputs.macos_first }}
-          MACOS_SELECTED: ${{ needs.selection.outputs.macos }}
-          MACOS_RESULT: ${{ needs.macos-first.result }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          case "$MACOS_FIRST:$MACOS_SELECTED" in
-            true:true)
-              if [ "$MACOS_RESULT" != "success" ]; then
-                echo '::error::Selected coverage blocked by unsuccessful macOS preflight.'
-                exit 1
-              fi ;;
-            true:false|false:true|false:false) ;;
-            *) echo '::error::Invalid macOS scheduling decision.'; exit 1 ;;
-          esac
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
-        if: ${{ steps.coverage.outputs.run == 'true' }}
       - uses: vmactions/freebsd-vm@v1
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         with:
           prepare: |
             pkg install -y cmake curl duktape duktape-lib googletest \
@@ -385,48 +254,19 @@ jobs:
             cd build
             ctest --output-on-failure
             $GITHUB_WORKSPACE/build/gerbera --compile-info
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:FreeBSD]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   OmniOS:
+    name: OmniOS
     needs: [selection, macos-first]
-    if: ${{ always() && !cancelled() }}
+    if: ${{ always() && !cancelled() && needs.selection.result == 'success' && needs.selection.outputs.OmniOS_run == 'true' && (needs.selection.outputs.macos_first != 'true' || needs.selection.outputs.macos_run != 'true' || needs.macos-first.result == 'success') }}
     runs-on: ubuntu-latest
     steps:
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.omnios }}
-          MACOS_FIRST: ${{ needs.selection.outputs.macos_first }}
-          MACOS_SELECTED: ${{ needs.selection.outputs.macos }}
-          MACOS_RESULT: ${{ needs.macos-first.result }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          case "$MACOS_FIRST:$MACOS_SELECTED" in
-            true:true)
-              if [ "$MACOS_RESULT" != "success" ]; then
-                echo '::error::Selected coverage blocked by unsuccessful macOS preflight.'
-                exit 1
-              fi ;;
-            true:false|false:true|false:false) ;;
-            *) echo '::error::Invalid macOS scheduling decision.'; exit 1 ;;
-          esac
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
-        if: ${{ steps.coverage.outputs.run == 'true' }}
       - uses: vmactions/omnios-vm@v1
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         with:
           prepare: |
             pkg install bash cmake gnu-make icu4c curl ffmpeg gcc14 ninja \
@@ -437,55 +277,25 @@ jobs:
             scripts/sunos/build-solaris.sh
             export LD_LIBRARY_PATH=/usr/local/lib:/opt/ooce/lib:/opt/ooce/lib/amd64:${LD_LIBRARY_PATH:-}
             ./build-solaris/gerbera --compile-info
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:OmniOS]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   js:
+    name: js
     needs: [selection, macos-first]
-    if: ${{ always() && !cancelled() }}
+    if: ${{ always() && !cancelled() && needs.selection.result == 'success' && needs.selection.outputs.js_run == 'true' && (needs.selection.outputs.macos_first != 'true' || needs.selection.outputs.macos_run != 'true' || needs.macos-first.result == 'success') }}
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
       DETECT_CHROMEDRIVER_VERSION: true
     steps:
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.web }}
-          MACOS_FIRST: ${{ needs.selection.outputs.macos_first }}
-          MACOS_SELECTED: ${{ needs.selection.outputs.macos }}
-          MACOS_RESULT: ${{ needs.macos-first.result }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          case "$MACOS_FIRST:$MACOS_SELECTED" in
-            true:true)
-              if [ "$MACOS_RESULT" != "success" ]; then
-                echo '::error::Selected coverage blocked by unsuccessful macOS preflight.'
-                exit 1
-              fi ;;
-            true:false|false:true|false:false) ;;
-            *) echo '::error::Invalid macOS scheduling decision.'; exit 1 ;;
-          esac
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
-        if: ${{ steps.coverage.outputs.run == 'true' }}
       - uses: actions/setup-node@v7
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         with:
           node-version: '24'
       - name: run tests
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         run: |
           npm ci --legacy-peer-deps
           npm run lint
@@ -494,67 +304,31 @@ jobs:
           npm run test:e2e
         working-directory: ./gerbera-web
       - name: Upload browser failure diagnostics
-        if: ${{ steps.coverage.outputs.run == 'true' && (failure()) }}
+        if: ${{ (failure()) }}
         uses: actions/upload-artifact@v7
         with:
           name: web-ui-failure-diagnostics
           path: gerbera-web/_build/e2e-failures/
           if-no-files-found: ignore
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:js]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   minimal:
     needs: [selection, macos-first]
-    if: ${{ always() && !cancelled() }}
-    runs-on: ubuntu-latest
+    if: ${{ always() && !cancelled() && needs.selection.result == 'success' && needs.selection.outputs.minimal_run == 'true' && (needs.selection.outputs.macos_first != 'true' || needs.selection.outputs.macos_run != 'true' || needs.macos-first.result == 'success') }}
+    runs-on: ubuntu-24.04
     strategy:
       fail-fast: false
-      matrix:
-        platform: ['x86_64', 'x86', 'armhf', 'armv7', 'aarch64', 'loongarch64', 'ppc64le', 'riscv64', 's390x']
-        branch: ['v3.23', 'v3.24', 'edge']
-        exclude:
-          - platform: "ppc64le"
-            branch: "v3.24"
-
-    name: Minimal ${{matrix.platform}}${{matrix.branch != 'v3.24' && format(' - {0}', matrix.branch) || ''}}
+      matrix: ${{ fromJSON(needs.selection.outputs.minimal_matrix) }}
+    name: ${{ matrix.label }}
     defaults:
       run:
         shell: alpine.sh {0}
     steps:
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.minimal }}
-          MACOS_FIRST: ${{ needs.selection.outputs.macos_first }}
-          MACOS_SELECTED: ${{ needs.selection.outputs.macos }}
-          MACOS_RESULT: ${{ needs.macos-first.result }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          case "$MACOS_FIRST:$MACOS_SELECTED" in
-            true:true)
-              if [ "$MACOS_RESULT" != "success" ]; then
-                echo '::error::Selected coverage blocked by unsuccessful macOS preflight.'
-                exit 1
-              fi ;;
-            true:false|false:true|false:false) ;;
-            *) echo '::error::Invalid macOS scheduling decision.'; exit 1 ;;
-          esac
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
-        if: ${{ steps.coverage.outputs.run == 'true' }}
       - name: Download and verify static apk-tools
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         id: apk-tools
         shell: bash
         timeout-minutes: 6
@@ -583,9 +357,23 @@ jobs:
           mv -- "$apk_download" "$RUNNER_TEMP/apk"
           # setup-alpine must reuse the preloaded binary with the selected hash.
           printf 'sha256=%s\n' "$apk_sha256" >> "$GITHUB_OUTPUT"
+      - name: Test Alpine mirror selection
+        if: matrix.platform == 'x86' && matrix.branch == 'edge'
+        shell: bash
+        timeout-minutes: 2
+        run: python3 .github/scripts/test_select_alpine_mirror.py
+      - name: Select Alpine package mirror
+        id: alpine-mirror
+        shell: bash
+        timeout-minutes: 8
+        env:
+          ALPINE_BRANCH: ${{ matrix.branch }}
+          ALPINE_ARCH: ${{ matrix.platform }}
+        run: bash .github/scripts/select-alpine-mirror.sh "$ALPINE_BRANCH" "$ALPINE_ARCH" >> "$GITHUB_OUTPUT"
       - uses: jirutka/setup-alpine@v1
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         with:
+          mirror-url: ${{ steps.alpine-mirror.outputs.mirror-url }}
+          extra-repositories: ${{ steps.alpine-mirror.outputs.extra-repositories }}
           apk-tools-url: '${{ env.APK_TOOLS_URL }}#!sha256!${{ steps.apk-tools.outputs.sha256 }}'
           branch: ${{matrix.branch}}
           arch: ${{matrix.platform}}
@@ -608,103 +396,36 @@ jobs:
             zlib-dev
 
       - name: Build
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         run: |
           cmake -S . -B build -G Ninja --preset=minimal
           cmake --build build -j$(nproc) --verbose
 
       - name: Test
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         run: |
           cd build
           ctest --output-on-failure
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:${{ matrix.target }}]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   deb-package:
     needs: [selection, macos-first]
-    if: ${{ always() && !cancelled() }}
+    if: ${{ always() && !cancelled() && needs.selection.result == 'success' && needs.selection.outputs.deb_package_run == 'true' && (needs.selection.outputs.macos_first != 'true' || needs.selection.outputs.macos_run != 'true' || needs.macos-first.result == 'success') }}
     strategy:
       fail-fast: false
-      matrix:
-        runner:
-          - "ubuntu-latest"
-          - "ubuntu-24.04-arm"
-        os-ver:
-          - "ubuntu:18.04"
-          - "ubuntu:20.04"
-          - "ubuntu:22.04"
-          - "ubuntu:24.04"
-          - "ubuntu:26.04"
-          - "ubuntu:26.10"
-          - "debian:bookworm"
-          - "debian:trixie"
-          - "debian:testing"
-          - "debian:unstable"
-        arch:
-          - "linux/amd64"
-          - "linux/arm/v7"
-          - "linux/arm64/v8"
-
-        isPR:
-          - ${{github.event_name == 'pull_request'}}
-        # Run only the amd64 build in pull reqs:
-        exclude:
-          - runner: "ubuntu-24.04-arm"
-            arch: "linux/amd64"
-          - runner: "ubuntu-latest"
-            arch: "linux/arm64/v8"
-          - runner: "ubuntu-24.04-arm"
-            arch: "linux/arm/v7"
-          - isPR: true
-            arch: "linux/arm/v7"
-          - isPR: true
-            arch: "linux/arm64/v8"
-
+      matrix: ${{ fromJSON(needs.selection.outputs.deb_package_matrix) }}
     runs-on: ${{ matrix.runner }}
-    name: Compile ${{ matrix.os-ver }} ${{ matrix.arch }}
+    name: ${{ matrix.label }}
     steps:
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.deb }}
-          MACOS_FIRST: ${{ needs.selection.outputs.macos_first }}
-          MACOS_SELECTED: ${{ needs.selection.outputs.macos }}
-          MACOS_RESULT: ${{ needs.macos-first.result }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          case "$MACOS_FIRST:$MACOS_SELECTED" in
-            true:true)
-              if [ "$MACOS_RESULT" != "success" ]; then
-                echo '::error::Selected coverage blocked by unsuccessful macOS preflight.'
-                exit 1
-              fi ;;
-            true:false|false:true|false:false) ;;
-            *) echo '::error::Invalid macOS scheduling decision.'; exit 1 ;;
-          esac
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
       - name: Set up QEMU
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         uses: docker/setup-qemu-action@v4
 
       - name: Build and upload deb
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         env:
           DEB_UPLOAD_ACCESS_KEY_ID: ${{ secrets.DEB_UPLOAD_ACCESS_KEY_ID }}
           DEB_UPLOAD_ENDPOINT: ${{ secrets.DEB_UPLOAD_ENDPOINT }}
@@ -728,7 +449,7 @@ jobs:
           bash /build/scripts/debian/build-deb.sh ${{ matrix.os-ver }} ${{ matrix.arch }}
 
       - uses: frabert/replace-string-action@v2.5.2
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.event_name != 'pull_request') }}
+        if: ${{ (github.event_name != 'pull_request') }}
         id: replace
         with:
           pattern: '(\w+):([\w\.]+):linux/(\w+)(?:/(\w+))?'
@@ -736,57 +457,27 @@ jobs:
           replace-with: $1-$2-$3$4.deb
 
       - uses: actions/upload-artifact@v7
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.event_name != 'pull_request') }}
+        if: ${{ (github.event_name != 'pull_request') }}
         with:
           name: ${{ steps.replace.outputs.replaced }}
           path: build-deb/*.deb
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:${{ matrix.target }}]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   docker-build:
-    needs: [selection, macos-first]
-    if: ${{ always() && !cancelled() }}
     name: Docker image
+    needs: [selection, macos-first]
+    if: ${{ always() && !cancelled() && needs.selection.result == 'success' && needs.selection.outputs.docker_build_run == 'true' && (needs.selection.outputs.macos_first != 'true' || needs.selection.outputs.macos_run != 'true' || needs.macos-first.result == 'success') }}
     runs-on: ubuntu-22.04
     steps:
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.docker }}
-          MACOS_FIRST: ${{ needs.selection.outputs.macos_first }}
-          MACOS_SELECTED: ${{ needs.selection.outputs.macos }}
-          MACOS_RESULT: ${{ needs.macos-first.result }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          case "$MACOS_FIRST:$MACOS_SELECTED" in
-            true:true)
-              if [ "$MACOS_RESULT" != "success" ]; then
-                echo '::error::Selected coverage blocked by unsuccessful macOS preflight.'
-                exit 1
-              fi ;;
-            true:false|false:true|false:false) ;;
-            *) echo '::error::Invalid macOS scheduling decision.'; exit 1 ;;
-          esac
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - name: Checkout
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         uses: actions/checkout@v7
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
       - name: Docker meta
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         id: docker_meta
         uses: docker/metadata-action@v6
         with:
@@ -798,7 +489,6 @@ jobs:
             type=edge
 
       - name: Docker meta (transcoding)
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         id: docker_meta_transcoding
         uses: docker/metadata-action@v6
         with:
@@ -812,22 +502,20 @@ jobs:
             type=edge
 
       - name: Set up QEMU
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
+        if: ${{ (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
         uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         uses: docker/setup-buildx-action@v4
 
       - name: Login to DockerHub
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
+        if: ${{ (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Cache Docker layers
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         uses: actions/cache@v6
         with:
           path: /tmp/.buildx-cache
@@ -837,7 +525,7 @@ jobs:
 
         # https://docs.docker.com/build/ci/github-actions/test-before-push/
       - name: Build and export
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.event_name == 'pull_request') }}
+        if: ${{ (github.event_name == 'pull_request') }}
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -849,12 +537,11 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
       - name: Test
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.event_name == 'pull_request') }}
+        if: ${{ (github.event_name == 'pull_request') }}
         run: |
           docker run --user gerbera:gerbera --rm ${{ steps.docker_meta.outputs.tags }}-test gerbera --compile-info
 
       - name: Build and push
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -867,7 +554,7 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache-new,mode=max
 
       - name: Build and push (transcoding)
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
+        if: ${{ (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -881,7 +568,6 @@ jobs:
           target: with_transcoding
 
       - # Temp fix
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         # https://github.com/docker/build-push-action/issues/252
         # https://github.com/moby/buildkit/issues/1896
         name: Move cache
@@ -890,65 +576,30 @@ jobs:
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Docker Hub Description
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
+        if: ${{ (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
         uses: peter-evans/dockerhub-description@v5
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
           repository: gerbera/gerbera
           readme-filepath: README.Docker.md
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:docker-build]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   docker-debug:
-    needs: [selection, macos-first, docker-build]
-    if: ${{ always() && !cancelled() }}
     name: Docker debug image
+    needs: [selection, macos-first, docker-build]
+    if: ${{ always() && !cancelled() && needs.selection.result == 'success' && needs.selection.outputs.docker_debug_run == 'true' && (needs.selection.outputs.macos_first != 'true' || needs.selection.outputs.macos_run != 'true' || needs.macos-first.result == 'success') }}
     runs-on: ubuntu-22.04
     steps:
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.docker }}
-          MACOS_FIRST: ${{ needs.selection.outputs.macos_first }}
-          MACOS_SELECTED: ${{ needs.selection.outputs.macos }}
-          MACOS_RESULT: ${{ needs.macos-first.result }}
-          PARENT_RESULT: ${{ needs.docker-build.result }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          case "$MACOS_FIRST:$MACOS_SELECTED" in
-            true:true)
-              if [ "$MACOS_RESULT" != "success" ]; then
-                echo '::error::Selected coverage blocked by unsuccessful macOS preflight.'
-                exit 1
-              fi ;;
-            true:false|false:true|false:false) ;;
-            *) echo '::error::Invalid macOS scheduling decision.'; exit 1 ;;
-          esac
-          if [ "$PARENT_RESULT" != "success" ]; then
-            echo '::error::Docker debug validation blocked by the image build.'
-            exit 1
-          fi
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - name: Checkout
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         uses: actions/checkout@v7
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
       - name: Docker meta (debug)
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         id: docker_meta_debug
         uses: docker/metadata-action@v6
         with:
@@ -962,22 +613,20 @@ jobs:
             type=edge
 
       - name: Set up QEMU
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
+        if: ${{ (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
         uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         uses: docker/setup-buildx-action@v4
 
       - name: Login to DockerHub
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
+        if: ${{ (github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' )) }}
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_TOKEN }}
 
       - name: Cache Docker layers
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         uses: actions/cache@v6
         with:
           path: /tmp/.buildx-dbg
@@ -986,7 +635,7 @@ jobs:
             ${{ runner.os }}-buildx-
 
       - name: Build and export (debug)
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.event_name == 'pull_request') }}
+        if: ${{ (github.event_name == 'pull_request') }}
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -1000,12 +649,11 @@ jobs:
           target: debug
 
       - name: Test (debug)
-        if: ${{ steps.coverage.outputs.run == 'true' && (github.event_name == 'pull_request') }}
+        if: ${{ (github.event_name == 'pull_request') }}
         run: |
           docker run --user gerbera:gerbera --rm ${{ steps.docker_meta_debug.outputs.tags }}-test gerbera --compile-info
 
       - name: Build and push (debug)
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         uses: docker/build-push-action@v7
         with:
           context: .
@@ -1019,44 +667,26 @@ jobs:
           target: debug
 
       - # Temp fix
-        if: ${{ steps.coverage.outputs.run == 'true' }}
         # https://github.com/docker/build-push-action/issues/252
         # https://github.com/moby/buildkit/issues/1896
         name: Move cache
         run: |
           rm -rf /tmp/.buildx-dbg
           mv /tmp/.buildx-cache-dbg /tmp/.buildx-dbg
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:docker-debug]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   format:
     name: Formatting
     runs-on: ubuntu-latest
     needs: [selection]
-    if: ${{ always() && !cancelled() }}
+    if: ${{ always() && !cancelled() && needs.selection.result == 'success' && needs.selection.outputs.format_run == 'true' }}
     steps:
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.format }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - uses: actions/checkout@v7
-        if: steps.coverage.outputs.run == 'true'
       - name: Check C++ formatting
-        if: steps.coverage.outputs.run == 'true' && needs.selection.outputs.format_cpp == 'true'
+        if: needs.selection.outputs.format_cpp == 'true'
         uses: DoozyX/clang-format-lint-action@v0.20
         with:
           source: './src'
@@ -1064,119 +694,85 @@ jobs:
           extensions: 'h,cc'
           clangFormatVersion: 18
       - name: Install CMake formatter
-        if: steps.coverage.outputs.run == 'true' && needs.selection.outputs.format_cmake == 'true'
+        if: needs.selection.outputs.format_cmake == 'true'
         run: pip install cmakelang
       - name: Check selected CMake files together
-        if: steps.coverage.outputs.run == 'true' && needs.selection.outputs.format_cmake == 'true'
+        if: needs.selection.outputs.format_cmake == 'true'
         env:
           SELECTION_JSON: ${{ needs.selection.outputs.selection }}
         run: python3 -B .github/scripts/ci_selection.py --format-cmake
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:format]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   xml:
     name: Validate XSD schemas
     runs-on: ubuntu-latest
     needs: [selection, macos-first]
-    if: ${{ always() && !cancelled() }}
+    if: ${{ always() && !cancelled() && needs.selection.result == 'success' && needs.selection.outputs.xml_run == 'true' && (needs.selection.outputs.macos_first != 'true' || needs.selection.outputs.macos_run != 'true' || needs.macos-first.result == 'success') }}
     steps:
-      - name: Check selected coverage
-        id: coverage
-        shell: bash
-        env:
-          SELECTION_RESULT: ${{ needs.selection.result }}
-          SELECTED: ${{ needs.selection.outputs.xml }}
-          MACOS_FIRST: ${{ needs.selection.outputs.macos_first }}
-          MACOS_SELECTED: ${{ needs.selection.outputs.macos }}
-          MACOS_RESULT: ${{ needs.macos-first.result }}
-        run: |
-          if [ "$SELECTION_RESULT" != "success" ]; then
-            echo '::error::CI selection or its tests did not succeed.'
-            exit 1
-          fi
-          case "$SELECTED" in
-            false)
-              echo 'Not applicable: build/test steps were not executed.'
-              echo 'run=false' >> "$GITHUB_OUTPUT"
-              exit 0 ;;
-            true) ;;
-            *) echo '::error::Missing or invalid coverage decision.'; exit 1 ;;
-          esac
-          case "$MACOS_FIRST:$MACOS_SELECTED" in
-            true:true)
-              if [ "$MACOS_RESULT" != "success" ]; then
-                echo '::error::Selected coverage blocked by unsuccessful macOS preflight.'
-                exit 1
-              fi ;;
-            true:false|false:true|false:false) ;;
-            *) echo '::error::Invalid macOS scheduling decision.'; exit 1 ;;
-          esac
-          echo 'run=true' >> "$GITHUB_OUTPUT"
       - name: Checkout Gerbera code
-        if: steps.coverage.outputs.run == 'true'
         uses: actions/checkout@v7
       - name: Enable validation annotations
-        if: steps.coverage.outputs.run == 'true'
         uses: korelstar/xmllint-problem-matcher@v1
       - name: Validate mock-config-all-os.xml
-        if: steps.coverage.outputs.run == 'true'
         uses: ChristophWurst/xmllint-action@v1
         with:
           xml-file: ./test/config/fixtures/mock-config-all-os.xml
           xml-schema-file: ./config/config2.xsd
       - name: Validate mock-config-all.xml
-        if: steps.coverage.outputs.run == 'true'
         uses: ChristophWurst/xmllint-action@v1
         with:
           xml-file: ./test/config/fixtures/mock-config-all.xml
           xml-schema-file: ./config/config2.xsd
       - name: Validate mock-example-exiv2-all-os.xml
-        if: steps.coverage.outputs.run == 'true'
         uses: ChristophWurst/xmllint-action@v1
         with:
           xml-file: ./test/config/fixtures/mock-example-exiv2-all-os.xml
           xml-schema-file: ./config/config2.xsd
       - name: Validate mock-example-exiv2-all.xml
-        if: steps.coverage.outputs.run == 'true'
         uses: ChristophWurst/xmllint-action@v1
         with:
           xml-file: ./test/config/fixtures/mock-example-exiv2-all.xml
           xml-schema-file: ./config/config2.xsd
       - name: Validate mock-example-lastfm-all-os.xml
-        if: steps.coverage.outputs.run == 'true'
         uses: ChristophWurst/xmllint-action@v1
         with:
           xml-file: ./test/config/fixtures/mock-example-lastfm-all-os.xml
           xml-schema-file: ./config/config2.xsd
       - name: Validate mock-example-lastfm-all.xml
-        if: steps.coverage.outputs.run == 'true'
         uses: ChristophWurst/xmllint-action@v1
         with:
           xml-file: ./test/config/fixtures/mock-example-lastfm-all.xml
           xml-schema-file: ./config/config2.xsd
       - name: Validate mock-example-all-os.xml
-        if: steps.coverage.outputs.run == 'true'
         uses: ChristophWurst/xmllint-action@v1
         with:
           xml-file: ./test/config/fixtures/mock-example-all-os.xml
           xml-schema-file: ./config/config2.xsd
       - name: Validate mock-example-all.xml
-        if: steps.coverage.outputs.run == 'true'
         uses: ChristophWurst/xmllint-action@v1
         with:
           xml-file: ./test/config/fixtures/mock-example-all.xml
           xml-schema-file: ./config/config2.xsd
       - name: Validate full-example-for-xsd.xml
-        if: steps.coverage.outputs.run == 'true'
         uses: ChristophWurst/xmllint-action@v1
         with:
           xml-file: ./test/config/fixtures/full-example-for-xsd.xml
           xml-schema-file: ./config/config2.xsd
+
+      - name: Record platform completion [ci:${{ needs.selection.outputs.fingerprint }}:xml]
+        if: ${{ success() }}
+        shell: bash
+        run: echo 'Selected build/test payload completed successfully.'
 
   # Retain the required "lint" context as the completion/formatting gate.
   lint:
     runs-on: ubuntu-24.04
     timeout-minutes: 3
     needs: [selection, macos-first, macos, cpp, head-check, FreeBSD, OmniOS, js, minimal, deb-package, docker-build, docker-debug, format, xml]
-    if: ${{ always() }}
+    if: ${{ always() && (github.event.action != 'labeled' || github.event.label.name == 'ci:complete-platforms') }}
     steps:
       - uses: actions/checkout@v7
         if: ${{ always() }}

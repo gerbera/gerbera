@@ -1,3 +1,19 @@
+#!/usr/bin/env python3
+# Gerbera - https://gerbera.io/
+# Copyright (C) 2026 Gerbera Contributors
+#
+# Gerbera is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+#
+# Gerbera is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Gerbera. If not, see <http://www.gnu.org/licenses/>.
+
 """Group dependencies, optional scheduling, formatting batches and merge gate."""
 
 import contextlib
@@ -14,11 +30,12 @@ import unittest
 from unittest.mock import patch
 import urllib.error
 
-ROOT = Path(__file__).resolve().parents[2]
-sys.path.insert(0, str(ROOT / ".github/scripts"))
+sys.path.insert(0, str(Path(__file__).resolve().parents[2] / ".github/scripts"))
 import ci_selection as CI
 from select_web_tests import SelectionError
 from test_select_web_tests import FakeAPI, EVENT, change
+
+ROOT = Path(__file__).resolve().parents[2]
 
 
 def record(path, **extra):
@@ -28,9 +45,15 @@ def record(path, **extra):
 def results(selection):
     outputs = {key: str(value).lower() for key, value in selection["groups"].items()}
     outputs.update(selection=json.dumps(selection), macos_first=str(selection["macos_first"]).lower())
+    if "platform_plan" in selection:
+        outputs.update({key: str(value).lower() for key, value in selection["platform_plan"].items() if key.endswith("_run")})
+        outputs.update({key: json.dumps(value) for key, value in selection["platform_plan"].items() if key.endswith("_matrix")})
+        outputs["fingerprint"] = selection["platform_plan"]["fingerprint"]
     needs = {"selection": {"result": "success", "outputs": outputs}}
     for job in CI.JOBS:
         status = "success"
+        if "platform_plan" in selection and not selection["platform_plan"][job.replace("-", "_") + "_run"]:
+            status = "skipped"
         if job in ("macos", "macos-first") and (
                 not selection["groups"]["macos"] or selection["macos_first"] != (job == "macos-first")):
             status = "skipped"
@@ -169,13 +192,16 @@ class MainTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory, contextlib.chdir(directory):
             Path(".github").mkdir()
             Path(".github/ci-policy.json").write_text(json.dumps({"macos_first": False}))
+            Path(".github/ci-platforms.json").write_text((ROOT / ".github/ci-platforms.json").read_text())
             event = {**EVENT, "inputs": {"execution-order": order}}
+            event["pull_request"] = {**EVENT["pull_request"], "changed_files": api.count if isinstance(api, FakeAPI) else 1}
             Path("event.json").write_text(json.dumps(event))
             env = {**os.environ, "GITHUB_EVENT_NAME": event_name,
                    "GITHUB_EVENT_PATH": "event.json", "GITHUB_REPOSITORY": "gerbera/gerbera",
                    "GITHUB_OUTPUT": "output", "GITHUB_STEP_SUMMARY": "summary"}
             with patch.dict(os.environ, env), patch.object(sys, "argv", ["ci_selection.py"]), \
-                    patch.object(CI, "api_fetch", return_value=api), contextlib.redirect_stdout(io.StringIO()):
+                    patch.object(CI, "api_fetch", return_value=api), \
+                    patch("ci_platforms.subprocess.check_output", return_value="d" * 40), contextlib.redirect_stdout(io.StringIO()):
                 self.assertEqual(CI.main(), 0)
             outputs = dict(line.split("=", 1) for line in Path("output").read_text().splitlines())
             return json.loads(outputs["selection"]), outputs, Path("summary").read_text()

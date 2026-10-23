@@ -1,3 +1,6 @@
 {
-  "macos_first": false
+  "macos_first": false,
+  "platforms": [
+    "*"
+  ]
 }

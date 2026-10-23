@@ -1,4 +1,19 @@
 #!/usr/bin/env python3
+# Gerbera - https://gerbera.io/
+# Copyright (C) 2026 Gerbera Contributors
+#
+# Gerbera is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+#
+# Gerbera is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Gerbera. If not, see <http://www.gnu.org/licenses/>.
+
 """Dependency-aware CI selection and the final required result."""
 
 import json
@@ -9,6 +24,7 @@ import sys
 import urllib.error
 
 from select_web_tests import SelectionError, api_fetch, changed_paths, safe_path, select
+from ci_platforms import completion_requested, prepare, validate_plan, validate_policy
 
 
 GROUPS = ("web", "native", "head", "freebsd", "omnios", "macos", "minimal",
@@ -51,7 +67,7 @@ def classify_groups(files):
         affected = ()
         if path.startswith((".github/scripts/", "test/ci/")) or path in (
                 ".github/workflows/ci.yml", ".github/ci-selection.md",
-                ".github/cmake-format-files.json", ".github/ci-policy.json"):
+                ".github/cmake-format-files.json", ".github/ci-policy.json", ".github/ci-platforms.json"):
             return all_inputs("shared CI controller or dependency policy changed")
         if path.startswith(".github/workflows/") and path.split("/")[-1] in workflow_groups:
             affected = workflow_groups[path.split("/")[-1]]
@@ -156,8 +172,7 @@ def validate_selection(selection):
 
 
 def macos_first(policy, event_name, event):
-    if not isinstance(policy, dict) or set(policy) != {"macos_first"} or type(policy["macos_first"]) is not bool:
-        raise SelectionError("invalid repository CI policy")
+    validate_policy(policy)
     order = event.get("inputs", {}).get("execution-order", "repository-default") if event_name == "workflow_dispatch" else "repository-default"
     if order not in ("repository-default", "parallel", "macos-first"):
         raise SelectionError("invalid execution order")
@@ -176,21 +191,32 @@ def final_errors(needs):
                 raise SelectionError("coverage outputs do not agree")
         if needs["selection"]["outputs"].get("macos_first") != str(selection["macos_first"]).lower():
             raise SelectionError("execution order outputs do not agree")
+        plan = validate_plan(selection) if "platform_plan" in selection else None
+        if plan:
+            for job in JOBS:
+                key = job.replace("-", "_") + "_run"
+                if needs["selection"]["outputs"].get(key) != str(plan[key]).lower():
+                    raise SelectionError("platform outputs do not agree")
+            if needs["selection"]["outputs"].get("fingerprint") != plan["fingerprint"]:
+                raise SelectionError("platform fingerprint output does not agree")
+            for key in (key for key in plan if key.endswith("_matrix")):
+                if json.loads(needs["selection"]["outputs"].get(key, "null")) != plan[key]:
+                    raise SelectionError("platform matrix output does not agree")
     except (KeyError, TypeError, ValueError) as error:
         return ["invalid coverage selection: " + str(error)]
     errors = []
     for job, group in JOBS.items():
         status = needs[job].get("result")
-        selected = selection["groups"][group]
+        selected = plan[job.replace("-", "_") + "_run"] if plan else selection["groups"][group]
         if job in ("macos", "macos-first"):
-            selected = selected and (selection["macos_first"] == (job == "macos-first"))
+            selected = (plan["macos_run"] if plan else selected) and (selection["macos_first"] == (job == "macos-first"))
             if not selected and status != "skipped":
                 errors.append(job + ": unused macOS path was not skipped")
                 continue
         if selected:
             if status != "success":
                 errors.append(job + ": selected but " + str(status))
-        elif status not in ("success", "skipped"):
+        elif status not in (("skipped",) if plan else ("success", "skipped")):
             errors.append(job + ": unexpected " + str(status))
     return errors
 
@@ -219,13 +245,17 @@ def format_cmake(selection, run=subprocess.run):
 def main():
     if sys.argv[1:] == ["--final-result"]:
         try:
-            errors = final_errors(json.loads(os.environ["NEEDS_JSON"]))
+            needs = json.loads(os.environ["NEEDS_JSON"])
+            errors = final_errors(needs)
         except (KeyError, TypeError, ValueError):
             errors = ["unreadable CI results"]
         if errors:
             print("CI completion failed:\n" + "\n".join(errors), file=sys.stderr)
             return 1
-        print("Selected CI groups succeeded; groups not applicable were not executed.")
+        selected = needs["selection"]["outputs"]["selection"]
+        excluded = json.loads(selected).get("platform_plan", {}).get("excluded", [])
+        print("PARTIAL platform coverage; excluded targets: " + ", ".join(excluded) if excluded
+              else "All selected targets succeeded, including verified earlier platform jobs.")
         return 0
     if sys.argv[1:] == ["--format-cmake"]:
         return format_cmake(json.loads(os.environ["SELECTION_JSON"]))
@@ -243,22 +273,40 @@ def main():
             selection = full("full validation for master push, tag, manual or scheduled event")
         validate_selection(selection)
     except (SelectionError, OSError, ValueError, KeyError) as error:
+        if completion_requested(event):
+            raise  # Missing-only completion must not silently expand after an API error.
         detail = str(error) if isinstance(error, SelectionError) else type(error).__name__
         if isinstance(error, urllib.error.HTTPError):
             detail = "HTTP " + str(error.code)
         selection = full("full fallback: " + detail)
     selection["macos_first"] = first
+    selection = prepare(selection, policy, JOBS, event_name, event,
+                        api_fetch(os.environ.get("GH_TOKEN", "")),
+                        os.environ.get("GITHUB_REPOSITORY", ""),
+                        int(os.environ.get("GITHUB_RUN_ID", "0")))
+    platform_plan = validate_plan(selection)
     summary = "### CI coverage selection\n\n" + selection["reason"] + "\n\n| Group | Decision |\n| --- | --- |\n"
     for group, selected in selection["groups"].items():
         summary += f"| {group} | {'selected' if selected else 'not applicable / not executed'} |\n"
     summary += ("\nBuild order: " + ("macOS first when selected" if first else "parallel")
                 + ". Formatting and the separate CodeQL workflow are independent of this order. CodeQL triggers and both languages are unchanged.\n")
+    summary += "\n### Platform coverage: " + ("PARTIAL" if platform_plan["excluded"] else "all affected targets") + "\n\n"
+    for title, targets in [("To execute", platform_plan["pending"]), ("Reused successful jobs", platform_plan["reused"]), ("Excluded / NOT tested", platform_plan["excluded"])]:
+        summary += "- " + title + ": " + (", ".join(targets) or "none") + "\n"
+    for target, proof in platform_plan["reused"].items():
+        summary += f"- {target}: https://github.com/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{proof['run']}/job/{proof['job']}\n"
     print(summary)
     with open(os.environ["GITHUB_OUTPUT"], "a", encoding="utf-8") as output:
         for group, selected in selection["groups"].items():
             output.write(f"{group}={str(selected).lower()}\n")
         output.write("selection=" + json.dumps(selection, separators=(",", ":")) + "\n")
         output.write("macos_first=" + str(first).lower() + "\n")
+        output.write("fingerprint=" + platform_plan["fingerprint"] + "\n")
+        for key, value in platform_plan.items():
+            if key.endswith("_run"):
+                output.write(key + "=" + str(value).lower() + "\n")
+            elif key.endswith("_matrix"):
+                output.write(key + "=" + json.dumps(value, separators=(",", ":")) + "\n")
     with open(os.environ["GITHUB_STEP_SUMMARY"], "a", encoding="utf-8") as output:
         output.write(summary)
     return 0

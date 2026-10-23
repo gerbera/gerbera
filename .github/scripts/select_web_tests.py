@@ -1,4 +1,19 @@
 #!/usr/bin/env python3
+# Gerbera - https://gerbera.io/
+# Copyright (C) 2026 Gerbera Contributors
+#
+# Gerbera is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+#
+# Gerbera is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Gerbera. If not, see <http://www.gnu.org/licenses/>.
+
 """Select expensive Web checks conservatively; keep the existing required js job."""
 
 import json
@@ -76,6 +91,37 @@ def pr_snapshot(pr):
     return head, base, count
 
 
+def api_pages(fetch, endpoint, key=None, max_pages=100):
+    """Read a complete API list, rejecting truncation and inconsistent totals."""
+    result, total = [], None
+    separator = "&" if "?" in endpoint else "?"
+    for page in range(1, max_pages + 1):
+        data = fetch(f"{endpoint}{separator}per_page=100&page={page}")
+        if key is None:
+            rows = data
+        else:
+            if not isinstance(data, dict) or type(data.get("total_count")) is not int:
+                raise SelectionError("invalid API pagination metadata")
+            count = data["total_count"]
+            if count < 0 or count >= max_pages * 100 or (total is not None and total != count):
+                raise SelectionError("API pagination limit or changing total")
+            total, rows = count, data.get(key)
+        if not isinstance(rows, list) or len(rows) > 100:
+            raise SelectionError("invalid API list page")
+        result.extend(rows)
+        if key is not None:
+            ids = [row.get("id") for row in result if isinstance(row, dict)]
+            if len(ids) != len(result) or any(type(value) is not int for value in ids) or len(set(ids)) != len(ids):
+                raise SelectionError("missing or duplicate API record IDs")
+        if len(rows) < 100:
+            if total is not None and len(result) != total:
+                raise SelectionError("incomplete API list")
+            return result
+        if total is not None and len(result) == total:
+            return result
+    raise SelectionError("API pagination limit reached")
+
+
 def select(event_name, event, repository, fetch, classifier=classify):
     if event_name != "pull_request":
         return True, "full Web validation for non-PR event"
@@ -93,18 +139,9 @@ def select(event_name, event, repository, fetch, classifier=classify):
     before = pr_snapshot(fetch(endpoint))
     if before[:2] != (event_head, event_base):
         raise SelectionError("PR head/base no longer matches this event")
-    files = []
     # GitHub lists at most 3000 files. Do not accept a truncated list or a
     # changed PR while reading it, including movement of the base branch.
-    for page in range(1, 31):
-        rows = fetch(f"{endpoint}/files?per_page=100&page={page}")
-        if not isinstance(rows, list) or len(rows) > 100:
-            raise SelectionError("invalid files API response")
-        files.extend(rows)
-        if len(rows) < 100:
-            break
-    else:
-        raise SelectionError("file-list pagination limit reached")
+    files = api_pages(fetch, endpoint + "/files", max_pages=30)
     if len(files) != before[2] or pr_snapshot(fetch(endpoint)) != before:
         raise SelectionError("incomplete file list or PR changed during selection")
     return classifier(files)

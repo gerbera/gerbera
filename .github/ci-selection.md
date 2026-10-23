@@ -1,4 +1,4 @@
-# Component-aware CI and optional macOS-first scheduling
+# Component-aware CI, platform selection and incremental completion
 
 Build/test groups share `.github/workflows/ci.yml`. One selection job reads the
 complete PR change set and reports selected and not-applicable groups. CodeQL
@@ -10,7 +10,8 @@ The default in `.github/ci-policy.json` is:
 
 ```json
 {
-  "macos_first": false
+  "macos_first": false,
+  "platforms": ["*"]
 }
 ```
 
@@ -26,6 +27,71 @@ Automatic PR/master/tag/scheduled runs use the file. Invalid policy fails
 selection explicitly; policy changes themselves select all groups.
 The ordering option does not launch CodeQL: its existing separate triggers are
 unchanged. When triggered, CodeQL never waits for the macOS scheduling gate.
+
+## Select platforms before assigning runners
+
+`platforms` is an allowlist of target identifiers or shell-style `*`/`?` patterns.
+The default `['*']` retains every existing eligible platform. For example:
+
+```json
+{
+  "macos_first": false,
+  "platforms": ["cpp/gcc-13", "minimal/x86_64/v3.24", "minimal/aarch64/v3.24", "macos"]
+}
+```
+
+This first PR wave runs those native platforms plus any affected Web, formatting
+and XML checks. Other native compilers, operating systems and architectures are
+listed as **excluded / NOT tested**. Jobs excluded by this policy are skipped
+before matrix expansion and runner allocation. No placeholder build reports a
+successful test. CodeQL remains independently enabled for both languages.
+
+`.github/ci-platforms.json` is the single matrix registry. Identifiers include
+`cpp/clang-18`, `head-check/check`, `head-check/npupnp`,
+`minimal/ppc64le/edge`, `deb-package/ubuntu:24.04/linux/amd64`, `FreeBSD`,
+`OmniOS`, `macos`, `docker-build` and `docker-debug`. Docker image jobs are atomic
+targets; this setting does not split their internal image builds. The existing
+Debian restriction to amd64 in PRs and the Alpine ppc64le/v3.24 exclusion remain.
+Unknown patterns, an empty allowlist and malformed policies fail explicitly.
+Master/tag/manual/scheduled runs ignore the partial allowlist and run full
+coverage for their existing platform eligibility.
+
+## Complete only missing platforms
+
+After a partial wave finishes, a maintainer can add the PR label
+**`ci:complete-platforms`**. Removing and re-adding that label requests another
+completion pass. The label event queues behind the current wave rather than
+cancelling the results it intends to reuse. Other label events use one short
+control job to record that no build/test coverage was requested; their separate
+concurrency group cannot displace a queued completion request. The completion
+pass ignores the allowlist and executes only
+affected targets without a verified successful result, including failed targets.
+Successful Web/formatting/XML jobs are reused too. CodeQL is not relaunched by
+this label event; its separate existing checks remain authoritative.
+
+Reuse is restricted to the same PR number, head, base and complete tested merge
+tree. The tree includes the policy, platform registry, workflow and dependency
+recipes. Changing any of these invalidates old receipts. Moving the base also
+invalidates them. Each scheduled job carries that fingerprint and its target ID
+in a completion step and records success only after its actual build/test payload
+succeeds. The selector reads every workflow/job page and attempt, with the latest
+executed result taking precedence. A cancelled/failed job, a skipped Mac path or
+a guard-only success is not successful coverage. The summary links each reused
+job to its original run. Results from older workflow versions without these
+receipts cannot be reused.
+
+Active runs/jobs, unreadable or unexpectedly empty job lists, API failures and
+pagination limits block completion. A run/job explicitly cancelled before any
+step executed provides no receipt; it cannot deadlock later completion after
+GitHub replaces a pending concurrency request. A missing-only request never silently becomes a fresh
+full matrix after an API failure. No old job/check is rewritten to green.
+Partial coverage remains explicitly partial; the `lint` result verifies the
+requested wave and does not claim that excluded platforms passed. Maintainers
+must require completion before merge when full platform coverage is needed.
+Job/check names retain their existing names. If branch protection requires an
+excluded platform's individual context, it remains missing until that platform
+runs; it is never synthesized from another platform's result. This PR does not
+alter branch protection or bypass existing checks.
 
 ## Dependency map
 
@@ -61,10 +127,10 @@ scripts/templates and unknown inputs are not covered by the prose exemption.
   CMake files are included too; deleted paths are reported as not applicable.
 - One XML job retains all nine original fixture/schema pairs and validation
   action, replacing their nine-runner matrix.
-- Compiler, Minimal and Debian matrix names and variants remain, including the
-  required contexts. A not-applicable group performs only a short guard, with
-  no build/test commands. These compatibility checks still allocate some
-  runners. Measure real representative runs before claiming runner-minute gains.
+- Compiler, Minimal and Debian payloads, eligible variants and check names remain;
+  a completion step holds the exact-tree fingerprint. A not-applicable
+  group or excluded variant allocates no build/test runner. Measure representative
+  runs before claiming a particular runner-minute saving.
 - The required **`lint`** context becomes the completion/formatting gate. It
   checks every group against the selection and chosen Mac path. Failed,
   cancelled, missing or unexpectedly skipped selected results fail the gate;
@@ -74,14 +140,16 @@ scripts/templates and unknown inputs are not covered by the prose exemption.
 No workflow-level path filters, `continue-on-error` or automatic retries are
 added. A failed macOS-first run blocks selected downstream build commands and
 fails completion. Cancellation does not start downstream build/test commands.
-The short completion gate still checks cancelled or missing results and fails;
+The short completion gate still checks cancelled or missing selected results and fails;
 it does not treat an unused gate as a successful validation.
 
 ## Complete changes and full runs
 
 PR-files pages, both rename paths and deletions are checked. Head/base/file count
 must agree before and after collection. Unknown paths, API errors, incomplete
-lists, races or the 3000-file limit retain full coverage. The read-only selection
+lists, races or the 3000-file limit retain all component groups. An explicitly
+configured partial platform policy still applies to a normal first wave;
+completion API errors fail instead of silently expanding coverage. The read-only selection
 token is used only in that job. Invalid policy or selection timeout fails.
 
 Master pushes, version tags, manual CI runs and the weekly schedule select all
@@ -106,3 +174,5 @@ both the central Web job and standalone manual Web workflow. The mock command
 uses #4019's package/test files. CodeQL remains unchanged in its own workflow.
 The obsolete `install` input of `docker/setup-buildx-action@v4` is omitted; image
 build commands continue to use the existing build/push action. Refs #4020.
+The merged #4027 Alpine package-mirror selector, its regression check, pinned
+bootstrap hashes and mirror inputs are retained in the central Minimal job.
