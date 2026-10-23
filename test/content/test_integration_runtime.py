@@ -37,6 +37,7 @@ import xml.etree.ElementTree as ET
 from integration_runtime import (
     HTTP, FixtureError, GerberaProcess, _HTTPConnection, fixture_workspace, wait_for,
 )
+from test_playlist_updates import Fixture
 
 
 class DescriptionHandler(BaseHTTPRequestHandler):
@@ -56,7 +57,10 @@ def child():
     config = ET.parse(sys.argv[sys.argv.index("-c") + 1]).getroot()
     ip = sys.argv[sys.argv.index("-i") + 1]
     mode = config.findtext("mode", "ready")
-    with HTTPServer((ip, 0), DescriptionHandler) as server:
+    # HTTPServer's reverse-DNS lookup is irrelevant to this numeric-IP fixture.
+    with patch("socket.getfqdn", return_value=ip):
+        listener = HTTPServer((ip, 0), DescriptionHandler)
+    with listener as server:
         server.udn = config.findtext("actual-udn", config.findtext("server/udn"))
         print(f"IPv4: Server bound to: {ip}:{server.server_port}", flush=True)
         if mode == "exit":
@@ -112,6 +116,46 @@ class TransportTest(unittest.TestCase):
             with self.subTest(timeout=timeout):
                 with self.assertRaises(ValueError):
                     wait_for(lambda: True, timeout)
+
+
+class CatalogConvergenceTest(unittest.TestCase):
+    def setUp(self):
+        self.fixture = Fixture.__new__(Fixture)
+        self.fixture.server = Mock(host="http://127.0.0.1:12345")
+
+    @staticmethod
+    def fault(code=701, status=500):
+        body = ('<s:Envelope xmlns:s="http://schemas.xmlsoap.org/soap/envelope/">'
+                '<s:Body><s:Fault><detail>'
+                '<UPnPError xmlns="urn:schemas-upnp-org:control-1-0">'
+                f'<errorCode>{code}</errorCode></UPnPError>'
+                '</detail></s:Fault></s:Body></s:Envelope>').encode()
+        return urllib.error.HTTPError("http://127.0.0.1:12345", status, "fault", {}, io.BytesIO(body))
+
+    def test_disappearing_browse_object_can_converge(self):
+        response = b'<Envelope><Body><Result>ready</Result></Body></Envelope>'
+        with patch.object(HTTP, "open", side_effect=[self.fault(), io.BytesIO(response)]) as opened:
+            result = wait_for(lambda: self.fixture.soap_response(
+                "Browse", {"ObjectID": "42"}).findtext(".//Result"), timeout=1)
+        self.assertEqual(result, "ready")
+        self.assertEqual(opened.call_count, 2)
+
+    def test_other_faults_and_transport_failures_are_not_retried(self):
+        cases = [("Browse", self.fault(402)), ("Browse", self.fault(status=404)),
+                 ("Search", self.fault()), ("Browse", urllib.error.URLError("connection failed"))]
+        for action, error in cases:
+            with self.subTest(action=action, error=error):
+                with patch.object(HTTP, "open", side_effect=error) as opened:
+                    with self.assertRaises(urllib.error.URLError):
+                        wait_for(lambda: self.fixture.soap_response(action, {"ObjectID": "42"}), timeout=1)
+                self.assertEqual(opened.call_count, 1)
+
+    def test_malformed_fault_is_fatal(self):
+        error = urllib.error.HTTPError("http://127.0.0.1:12345", 500, "fault", {}, io.BytesIO(b"not XML"))
+        with patch.object(HTTP, "open", side_effect=error) as opened:
+            with self.assertRaises(ET.ParseError):
+                wait_for(lambda: self.fixture.soap_response("Browse", {"ObjectID": "42"}), timeout=1)
+        self.assertEqual(opened.call_count, 1)
 
 
 class WorkspaceTest(unittest.TestCase):

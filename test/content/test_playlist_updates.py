@@ -26,6 +26,7 @@ import socket
 import struct
 import subprocess
 import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import wave
@@ -205,8 +206,19 @@ class Fixture:
                 "SOAPAction": '"' + SERVICE + "#" + action + '"',
             },
         )
-        with HTTP.open(request, timeout=5) as response:
-            return ET.fromstring(response.read())
+        try:
+            with HTTP.open(request, timeout=5) as response:
+                return ET.fromstring(response.read())
+        except urllib.error.HTTPError as error:
+            if action != "Browse" or error.code != 500:
+                raise
+            control = "{urn:schemas-upnp-org:control-1-0}"
+            fault = ET.fromstring(error.read()).find(".//" + control + "UPnPError")
+            if fault is None or fault.findtext(control + "errorCode") != "701":
+                raise
+            # A scan can remove a container between listing it and reading it.
+            # Only the bounded content-convergence waiter retries assertions.
+            raise AssertionError(f"Browse object {params['ObjectID']} disappeared during update") from error
 
     def soap(self, action, params):
         result = self.soap_response(action, params).findtext(".//Result")
