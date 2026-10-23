@@ -1,17 +1,29 @@
 #!/usr/bin/env python3
 # Gerbera - https://gerbera.io/
 # Copyright (C) 2026 Gerbera Contributors
-# SPDX-License-Identifier: GPL-2.0-only
+#
+# Gerbera is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+#
+# Gerbera is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Gerbera. If not, see <http://www.gnu.org/licenses/>.
+
 """Check physical playlist classes and preserve parsed playlist contents."""
 
 import argparse
 import hashlib
 import json
 from pathlib import Path
-import tempfile
 import xml.etree.ElementTree as ET
 
-from test_playlist_updates import DC, UP, Fixture, wait_for
+from integration_runtime import fixture_workspace
+from test_playlist_updates import DC, UP, Fixture
 
 
 PLAYLIST = "object.item.playlistItem"
@@ -69,7 +81,7 @@ def run_case(args, root, mode, case, xml_types):
     before = {p: hashlib.sha256(p.read_bytes()).hexdigest() for p in fixture.src.rglob("*") if p.is_file()}
     try:
         fixture.start()
-        wait_for(fixture.assert_views)
+        fixture.server.wait(fixture.assert_views, timeout=20)
         physical = fixture.search(2, 'upnp:class derivedfrom "object.item"')
         items = {n.findtext(DC + "title"): n for n in physical}
         for name, cls in expected.items():
@@ -98,6 +110,7 @@ def main():
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--ip")
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--startup-timeout", type=float, default=30)
     parser.add_argument("--xml-playlists", action="store_true", help="Require the WPL/XSPF parser integration")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -106,7 +119,7 @@ def main():
     xml_types = "function readXmlPlaylist(" in (args.source_root / "scripts/js/playlists.js").read_text()
     assert not args.xml_playlists or xml_types, "WPL/XSPF parser support missing"
     results = []
-    with tempfile.TemporaryDirectory(prefix="grb-pclass-") as directory:
+    with fixture_workspace(None, prefix="grb-pclass-") as directory:
         for mode in ("mt", "grb"):
             for case in ("default", "legacy", "exact-override", "conditional-override", "disabled-defaults"):
                 root = Path(directory) / (mode + "-" + case)
