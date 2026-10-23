@@ -34,7 +34,7 @@ import xml.etree.ElementTree as ET
 
 
 class FixtureError(RuntimeError):
-    """A server lifecycle or protocol failure, never a convergence retry."""
+    """An owned process failure or an unmet condition at its deadline."""
 
 
 class _HTTPConnection(http.client.HTTPConnection):
@@ -70,7 +70,7 @@ HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}), _HTTPHandler
 
 
 def wait_for(check, timeout=20, *, alive=None):
-    """Wait for content assertions to converge; transport failures stay fatal."""
+    """Preserve playlist convergence retries within one finite deadline."""
     if not math.isfinite(timeout) or timeout <= 0:
         raise ValueError("The wait timeout must be finite and positive")
     deadline = time.monotonic() + timeout
@@ -84,7 +84,7 @@ def wait_for(check, timeout=20, *, alive=None):
                 alive()
             if value:
                 return value
-        except AssertionError as error:
+        except (OSError, ValueError, AssertionError, ET.ParseError) as error:
             last = str(error)
         remaining = deadline - time.monotonic()
         if remaining <= 0:

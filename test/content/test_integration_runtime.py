@@ -96,14 +96,22 @@ class TransportTest(unittest.TestCase):
             with self.assertRaises(urllib.error.URLError):
                 HTTP.open(f"http://127.0.0.1:{port}/", timeout=0.5)
 
-    def test_assertions_can_converge_but_protocol_errors_are_fatal(self):
-        check = Mock(side_effect=[AssertionError("pending"), "done"])
-        self.assertEqual(wait_for(check, 1), "done")
-        import_error = urllib.error.URLError("transport failed")
-        check = Mock(side_effect=import_error)
-        with self.assertRaises(urllib.error.URLError):
-            wait_for(check, 1)
-        self.assertEqual(check.call_count, 1)
+    def test_legacy_retryable_conditions_can_converge(self):
+        errors = [AssertionError("pending"), OSError("pending"), ValueError("pending"),
+                  ET.ParseError("pending"), urllib.error.URLError("pending")]
+        for error in errors:
+            with self.subTest(error=type(error).__name__):
+                check = Mock(side_effect=[error, "done"])
+                self.assertEqual(wait_for(check, 1), "done")
+                self.assertEqual(check.call_count, 2)
+
+    def test_programming_errors_are_not_retried(self):
+        for error in [TypeError("unexpected"), RuntimeError("unexpected")]:
+            with self.subTest(error=type(error).__name__):
+                check = Mock(side_effect=error)
+                with self.assertRaises(type(error)):
+                    wait_for(check, 1)
+                self.assertEqual(check.call_count, 1)
 
     def test_timeout_is_bounded_and_reports_last_assertion(self):
         started = time.monotonic()
@@ -132,30 +140,37 @@ class CatalogConvergenceTest(unittest.TestCase):
                 '</detail></s:Fault></s:Body></s:Envelope>').encode()
         return urllib.error.HTTPError("http://127.0.0.1:12345", status, "fault", {}, io.BytesIO(body))
 
-    def test_disappearing_browse_object_can_converge(self):
+    def test_legacy_http_faults_can_converge(self):
         response = b'<Envelope><Body><Result>ready</Result></Body></Envelope>'
-        with patch.object(HTTP, "open", side_effect=[self.fault(), io.BytesIO(response)]) as opened:
+        for error in [self.fault(701), self.fault(501), self.fault(402),
+                      self.fault(status=404), urllib.error.URLError("connection failed")]:
+            with self.subTest(error=str(error)):
+                with patch.object(HTTP, "open", side_effect=[error, io.BytesIO(response)]) as opened:
+                    result = wait_for(lambda: self.fixture.soap_response(
+                        "Browse", {"ObjectID": "42"}).findtext(".//Result"), timeout=1)
+                self.assertEqual(result, "ready")
+                self.assertEqual(opened.call_count, 2)
+
+    def test_persistent_faults_fail_at_deadline_with_last_error(self):
+        for error in [self.fault(501), self.fault(status=404),
+                      urllib.error.URLError("connection failed")]:
+            with self.subTest(error=str(error)):
+                with patch.object(HTTP, "open", side_effect=error) as opened:
+                    with self.assertRaises(FixtureError) as result:
+                        wait_for(lambda: self.fixture.soap_response(
+                            "Browse", {"ObjectID": "42"}), timeout=0.1)
+                self.assertIn(str(error), str(result.exception))
+                self.assertGreater(opened.call_count, 1)
+
+    def test_partial_xml_can_converge_but_permanent_bad_xml_fails(self):
+        response = b'<Envelope><Body><Result>ready</Result></Body></Envelope>'
+        with patch.object(HTTP, "open", side_effect=[io.BytesIO(b"not XML"), io.BytesIO(response)]):
             result = wait_for(lambda: self.fixture.soap_response(
                 "Browse", {"ObjectID": "42"}).findtext(".//Result"), timeout=1)
         self.assertEqual(result, "ready")
-        self.assertEqual(opened.call_count, 2)
-
-    def test_other_faults_and_transport_failures_are_not_retried(self):
-        cases = [("Browse", self.fault(402)), ("Browse", self.fault(status=404)),
-                 ("Search", self.fault()), ("Browse", urllib.error.URLError("connection failed"))]
-        for action, error in cases:
-            with self.subTest(action=action, error=error):
-                with patch.object(HTTP, "open", side_effect=error) as opened:
-                    with self.assertRaises(urllib.error.URLError):
-                        wait_for(lambda: self.fixture.soap_response(action, {"ObjectID": "42"}), timeout=1)
-                self.assertEqual(opened.call_count, 1)
-
-    def test_malformed_fault_is_fatal(self):
-        error = urllib.error.HTTPError("http://127.0.0.1:12345", 500, "fault", {}, io.BytesIO(b"not XML"))
-        with patch.object(HTTP, "open", side_effect=error) as opened:
-            with self.assertRaises(ET.ParseError):
-                wait_for(lambda: self.fixture.soap_response("Browse", {"ObjectID": "42"}), timeout=1)
-        self.assertEqual(opened.call_count, 1)
+        with patch.object(HTTP, "open", side_effect=lambda *a, **k: io.BytesIO(b"not XML")):
+            with self.assertRaises(FixtureError):
+                wait_for(lambda: self.fixture.soap_response("Browse", {"ObjectID": "42"}), timeout=0.1)
 
 
 class WorkspaceTest(unittest.TestCase):

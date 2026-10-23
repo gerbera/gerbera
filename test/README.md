@@ -34,9 +34,16 @@ READY means the server has started, not that background imports are complete.
 The database and ContentDirectory setup precede it, but filesystem monitoring
 and import jobs are asynchronous, some scan configuration errors are logged
 without aborting startup, and CLI server actions run after the notification.
-Content assertions still wait for the expected results. Transport, protocol
-and process failures are fatal; only content assertions may converge. There
-are no whole-test retries or fixed extra sleeps to guess startup completion.
+Content checks retain the original playlist waiter's retry policy:
+`OSError` (including HTTP errors), `ValueError`, `AssertionError` and XML parse
+errors may converge within the existing 20-second content deadline. This
+matters when an asynchronous scan invalidates a just-listed object or resource.
+Every retry reads and validates the expected views again; successful startup
+alone never satisfies a content check. A persistent error fails at the deadline
+with its last error and server diagnostics. Process exits and unexpected
+programming errors fail immediately. There are no whole-test retries, skipped
+content assertions or fixed extra sleeps to guess startup completion. The
+readiness change does not alter Gerbera's UPnP error mapping.
 `--startup-timeout SECONDS` changes the default 30-second lifecycle deadline;
 individual HTTP requests have a five-second timeout. A timeout or early exit
 includes the endpoint and server log. Owned process groups are stopped and
