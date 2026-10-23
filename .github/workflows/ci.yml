@@ -66,6 +66,7 @@ jobs:
       CC: ${{ matrix.compiler.cc }}
       CXX: ${{ matrix.compiler.cxx }}
       CONAN_RUN_TESTS: 1
+      GRB_TEST_ARTIFACTS: ${{ runner.temp }}/gerbera-test-artifacts
     steps:
       - uses: actions/checkout@v7
       # Alternatively: uses: docker://conanio/gcc9:latest
@@ -94,6 +95,13 @@ jobs:
           # Conan will skip building it (due to --build=missing policy)
           conan remove 'gerbera/*' -c
           conan create -pr ./conan/dev -o='gerbera/*:icu=${{ matrix.compiler.icu }}' -o='gerbera/*:postgres=${{ matrix.compiler.pq }}' -o='gerbera/*:libsystemd=${{ matrix.compiler.systemd }}' --build=missing --version dev .
+      - name: Preserve integration failure evidence
+        if: failure()
+        uses: actions/upload-artifact@v7
+        with:
+          name: integration-failure-${{ matrix.compiler.name }}
+          path: ${{ runner.temp }}/gerbera-test-artifacts
+          if-no-files-found: ignore
       - name: cleanup
         run: |
           # Remove build directories before creating a cache.
