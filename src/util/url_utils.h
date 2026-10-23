@@ -38,6 +38,16 @@ constexpr auto URL_PARAM_SEPARATOR = std::string_view("/");
 
 namespace URLUtils {
 
+enum class UrlMode {
+    Form,
+    FilePath
+};
+
+enum class MediaReferenceType {
+    NativePath,
+    Uri
+};
+
 /// @brief Splits the url into a path and parameters string.
 /// Only '?', '/', '#' and ':' separators are allowed, otherwise an exception will
 /// be thrown.
@@ -59,13 +69,13 @@ std::map<std::string, std::string> parseParameters(std::string_view filename, st
 /// @param str String to be converted.
 /// @return string that contains the url-escaped representation of the original string.
 /// Path mode preserves /, ~ and : and percent-encodes UTF-8 bytes.
-std::string urlEscape(std::string_view str, bool path = false);
+std::string urlEscape(std::string_view str, UrlMode mode = UrlMode::Form);
 
 /// @brief Opposite of urlEscape :)
 std::string urlUnescape(std::string_view str);
 /// Strict URI paths preserve + and reject malformed escapes, NUL and invalid UTF-8.
-/// With strict=false, retain the legacy form-parameter decoding behavior.
-std::optional<std::string> urlUnescape(std::string_view str, bool strict);
+/// Form mode delegates to the unchanged legacy parameter decoder.
+std::optional<std::string> urlUnescape(std::string_view str, UrlMode mode);
 
 std::string dictEncode(const std::map<std::string, std::string>& dict);
 std::string dictEncodeSimple(const std::map<std::string, std::string>& dict);
@@ -81,7 +91,7 @@ std::string resolveUriReference(const std::string& reference,
 /// Native paths preserve literal percent, query and fragment characters.
 std::optional<std::string> resolveMediaReference(std::string text,
     const std::string& base,
-    bool nativePath);
+    MediaReferenceType type);
 
 } // namespace URLUtils
 

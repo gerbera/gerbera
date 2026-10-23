@@ -97,8 +97,9 @@ static constexpr auto hexCharS2 = "0123456789ABCDEF";
 /// @brief Converts a string to a URL (meaning: %20 instead of space and so on)
 /// @param str String to be converted.
 /// @return string that contains the url-escaped representation of the original string.
-std::string urlEscape(std::string_view str, bool path)
+std::string urlEscape(std::string_view str, UrlMode mode)
 {
+    const bool path = mode == UrlMode::FilePath;
     std::ostringstream buf;
     for (std::size_t i = 0; i < str.length();) {
         auto c = static_cast<unsigned char>(str[i]);
@@ -127,43 +128,71 @@ std::string urlEscape(std::string_view str, bool path)
     return buf.str();
 }
 
-std::optional<std::string> urlUnescape(std::string_view str, bool strict)
-{
-    std::string result;
-    auto hex = [strict](char c) -> int {
-        if (strict && c >= 'a' && c <= 'f')
-            c -= 'a' - 'A';
-        auto pos = strict && !c ? nullptr : std::strchr(hexCharS2, c);
-        return pos ? static_cast<int>(pos - hexCharS2) : (strict ? -1 : 0);
-    };
-    std::size_t i = 0;
-    while (i < str.size()) {
-        char c = str[i++];
-        if (c == '%') {
-            if (str.size() - i < 2) {
-                if (strict)
-                    return std::nullopt;
-                break;
-            }
-            int hi = hex(str[i++]);
-            int lo = hex(str[i++]);
-            if (hi < 0 || lo < 0)
-                return std::nullopt;
-            c = static_cast<char>((hi << 4) | lo);
-        } else if (!strict && c == '+')
-            c = ' ';
-        if (strict && c == 0)
-            return std::nullopt;
-        result += c;
-    }
-    if (strict && !StringConverter("UTF-8", "UTF-8").validate(result))
-        return std::nullopt;
-    return result;
-}
-
+/// @brief Opposite of urlEscape :)
 std::string urlUnescape(std::string_view str)
 {
-    return *urlUnescape(str, false);
+    auto data = str.data();
+    std::size_t len = str.length();
+    std::ostringstream buf;
+
+    std::size_t i = 0;
+    while (i < len) {
+        const char c = data[i++];
+        if (c == '%') {
+            if (i + 2 > len)
+                break; // avoid buffer overrun
+            char chi = data[i++];
+            char clo = data[i++];
+
+            auto pos = std::strchr(hexCharS2, chi);
+            int hi = pos ? pos - hexCharS2 : 0;
+
+            pos = std::strchr(hexCharS2, clo);
+            int lo = pos ? pos - hexCharS2 : 0;
+
+            int ascii = (hi << 4) | lo;
+            buf << static_cast<char>(ascii);
+        } else if (c == '+') {
+            buf << ' ';
+        } else {
+            buf << c;
+        }
+    }
+    return buf.str();
+}
+
+std::optional<std::string> urlUnescape(std::string_view str, UrlMode mode)
+{
+    if (mode == UrlMode::Form)
+        return urlUnescape(str);
+
+    // Validate URI escapes before using the unchanged form decoder. Normalize
+    // hex digits and protect literal plus signs from form-parameter semantics.
+    std::string encoded;
+    for (std::size_t i = 0; i < str.size(); ++i) {
+        char c = str[i];
+        if (c == '+') {
+            encoded += "%2B";
+            continue;
+        }
+        encoded += c;
+        if (c != '%')
+            continue;
+        if (str.size() - i < 3)
+            return std::nullopt;
+        for (int digit = 0; digit < 2; ++digit) {
+            c = str[++i];
+            if (c >= 'a' && c <= 'f')
+                c -= 'a' - 'A';
+            if (!c || !std::strchr(hexCharS2, c))
+                return std::nullopt;
+            encoded += c;
+        }
+    }
+    auto result = urlUnescape(encoded);
+    if (result.find('\0') != std::string::npos || !StringConverter("UTF-8", "UTF-8").validate(result))
+        return std::nullopt;
+    return result;
 }
 
 static std::string dictEncode(const std::map<std::string, std::string>& dict, std::string_view sep1, char sep2)
@@ -338,13 +367,14 @@ std::string resolveUriReference(const std::string& reference,
 std::string filePathToUri(const fs::path& path)
 {
     auto text = fs::absolute(path).generic_string();
-    return (text[0] == '/' ? "file://" : "file:///") + urlEscape(text, true);
+    return (text[0] == '/' ? "file://" : "file:///") + urlEscape(text, UrlMode::FilePath);
 }
 
 std::optional<std::string> resolveMediaReference(std::string text,
     const std::string& base,
-    bool nativePath)
+    MediaReferenceType type)
 {
+    const bool nativePath = type == MediaReferenceType::NativePath;
     if (!nativePath)
         text = trimString(text);
     if (text.empty())
@@ -359,7 +389,7 @@ std::optional<std::string> resolveMediaReference(std::string text,
         std::replace(text.begin(), text.end(), '\\', '/');
         auto path = fs::path(text);
         auto parent = splitUrl(base);
-        auto folder = urlUnescape(parent.path, true);
+        auto folder = urlUnescape(parent.path, UrlMode::FilePath);
         if (parent.scheme != "file" || !folder)
             return std::nullopt;
         return (path.is_absolute() ? path : fs::path(*folder).parent_path() / path)
@@ -373,7 +403,7 @@ std::optional<std::string> resolveMediaReference(std::string text,
             : std::nullopt;
     if (uri.scheme != "file" || uri.hasQuery || uri.hasFragment || (!uri.authority.empty() && toLower(uri.authority) != "localhost"))
         return std::nullopt;
-    auto decoded = urlUnescape(uri.path, true);
+    auto decoded = urlUnescape(uri.path, UrlMode::FilePath);
     if (!decoded)
         return std::nullopt;
 #ifdef _WIN32
