@@ -89,20 +89,11 @@ jobs:
           restore-keys: |
             - ${{ runner.os }}-conan2-${{ matrix.compiler.name }}-
       - name: build and test
-        env:
-          GRB_TEST_ARTIFACTS: ${{ runner.temp }}/gerbera-test-artifacts
         run: |
           # Remove existing package if it comes from the cache, otherwise
           # Conan will skip building it (due to --build=missing policy)
           conan remove 'gerbera/*' -c
           conan create -pr ./conan/dev -o='gerbera/*:icu=${{ matrix.compiler.icu }}' -o='gerbera/*:postgres=${{ matrix.compiler.pq }}' -o='gerbera/*:libsystemd=${{ matrix.compiler.systemd }}' --build=missing --version dev .
-      - name: Preserve integration failure evidence
-        if: failure()
-        uses: actions/upload-artifact@v7
-        with:
-          name: integration-failure-${{ matrix.compiler.name }}
-          path: ${{ runner.temp }}/gerbera-test-artifacts
-          if-no-files-found: ignore
       - name: cleanup
         run: |
           # Remove build directories before creating a cache.
