@@ -117,7 +117,7 @@ void XmlPlaylist::read(const pugi::xml_document& doc,
             if (!named(node, "media"))
                 continue;
             if (auto reference = URLUtils::resolveMediaReference(
-                    node.attribute("src").value(), nodeBase(node, path), true))
+                    node.attribute("src").value(), nodeBase(node, path), URLUtils::MediaReferenceType::NativePath))
                 entries.push_back({ { *reference }, {} });
         }
     } else {
@@ -143,7 +143,7 @@ void XmlPlaylist::read(const pugi::xml_document& doc,
                     entry.title = node.text().as_string();
                 if (named(node, "location", xspfNamespace)) {
                     if (auto reference = URLUtils::resolveMediaReference(
-                            node.text().as_string(), nodeBase(node, path), false))
+                            node.text().as_string(), nodeBase(node, path), URLUtils::MediaReferenceType::Uri))
                         entry.locations.push_back(*reference);
                 }
             }
@@ -162,11 +162,11 @@ static std::optional<std::string> resolvePlaylistReferenceLocation(const std::st
     if (schemeEnd != std::string::npos && toLower(trimString(reference.substr(0, schemeEnd))) != "file")
         return reference;
     const auto base = URLUtils::filePathToUri(source);
-    auto location = URLUtils::resolveMediaReference(reference, base, true);
+    auto location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::NativePath);
     std::error_code ec;
     // Existing native names, including literal percent escapes, retain priority.
     if (!location || !fs::is_regular_file(*location, ec))
-        location = URLUtils::resolveMediaReference(reference, base, false);
+        location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::Uri);
     return location;
 }
 

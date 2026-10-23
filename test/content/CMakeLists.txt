@@ -45,11 +45,19 @@ target_compile_definitions(
 include(GoogleTest)
 gtest_discover_tests(testcontent DISCOVERY_TIMEOUT 60)
 
+find_package(Python3 QUIET COMPONENTS Interpreter)
+if(Python3_Interpreter_FOUND)
+    add_test(NAME IntegrationRuntime
+             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_integration_runtime.py)
+    set_tests_properties(IntegrationRuntime PROPERTIES TIMEOUT 60)
+else()
+    message(STATUS "IntegrationRuntime disabled: Python 3 interpreter not found")
+endif()
+
 if(WITH_JS
    AND WITH_INOTIFY
    AND (WITH_TAGLIB OR WITH_AVCODEC)
    AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    find_package(Python3 QUIET COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME PlaylistUpdateIntegration
                  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_playlist_updates.py
@@ -61,7 +69,6 @@ endif()
 if(WITH_JS
    AND WITH_AVCODEC
    AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    find_package(Python3 QUIET COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME XmlPlaylistIntegration
                  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_xml_playlists.py

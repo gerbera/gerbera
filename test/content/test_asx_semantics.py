@@ -22,30 +22,17 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 import json
 from pathlib import Path
 import shutil
-import socket
-import tempfile
 import threading
 import time
 import xml.etree.ElementTree as ET
 
+from integration_runtime import fixture_workspace
 from test_xml_playlists import DC, UP, HTTP, Fixture, wav_bytes
 
 
 class AsxSemanticsFixture(Fixture):
     def __init__(self, args, root, mode, charset):
         super().__init__(args, root, mode)
-        # Keep parallel format fixtures away from the XML/URI port pool.
-        for port in range(49600, 49700):
-            with socket.socket() as probe:
-                try:
-                    probe.bind((self.ip, port))
-                except OSError:
-                    continue
-                self.port = port
-                self.host = f"http://{self.ip}:{port}"
-                break
-        else:
-            raise RuntimeError("No free ASX semantics fixture port")
         shutil.rmtree(self.src)
         self.src.mkdir()
         corpus = args.source_root / "test/scripting/fixtures/asx-semantics"
@@ -132,6 +119,20 @@ class AsxSemanticsFixture(Fixture):
             directory.set("mode", "inotify")
         config.write(self.config, encoding="utf-8", xml_declaration=True)
         self.original_hashes = self.hash_sources()
+
+    def start(self):
+        super().start()
+        if self.args.exercise_media_updates:
+            # The inherited XML fixture checks lifecycle readiness. This
+            # inotify scenario also needs watches on the directories it edits.
+            self.server.wait_for_watches(
+                (
+                    self.src,
+                    self.src / "f01",
+                    self.case_files["f01"]["A"].parent,
+                    self.src / "f15",
+                )
+            )
 
     def media_indexed(self):
         expected = sum(len(files) for files in self.case_files.values())
@@ -289,10 +290,6 @@ class AsxSemanticsFixture(Fixture):
             self.rescan()
             self.record("actual parent deletion keeps other lists intact")
             return self.result()
-        except BaseException:
-            self.log.flush()
-            print(Path(self.log.name).read_text(errors="replace")[-7000:], flush=True)
-            raise
         finally:
             self.stop()
             self.remote.shutdown()
@@ -324,7 +321,7 @@ def main():
     args.binary = args.binary.resolve()
     args.source_root = args.source_root.resolve()
     results = {}
-    with tempfile.TemporaryDirectory(prefix="grb-af-") as tmp:
+    with fixture_workspace(None, prefix="grb-af-") as tmp:
         for charset in ["UTF-8", "windows-1252"]:
             for mode in ["mt", "grb"]:
                 root = Path(tmp) / (mode + "-" + charset)

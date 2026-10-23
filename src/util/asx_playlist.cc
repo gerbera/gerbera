@@ -33,6 +33,9 @@ static constexpr std::size_t ASX_MAX_POSITIONS = 10000;
 static constexpr std::size_t ASX_MAX_NESTING = 5;
 static constexpr std::size_t ASX_MAX_REFERENCES = 10000;
 
+enum class AsxRepeatContext { Document,
+    Repeat };
+
 static pugi::xml_attribute asxAttribute(const pugi::xml_node& node,
     const std::string& name)
 {
@@ -133,7 +136,7 @@ static std::vector<AsxPlaylistEntry>
 asxEntries(const pugi::xml_node& parent, const fs::path& source,
     const AsxPlaylistLoader& loader, std::vector<fs::path>& active,
     AsxPlaylistPlan& plan, const AsxPlaylistMetadata& defaults,
-    const std::string& base, bool inRepeat, std::size_t& references)
+    const std::string& base, AsxRepeatContext context, std::size_t& references)
 {
     std::vector<AsxPlaylistEntry> entries;
     bool repeated = false;
@@ -187,13 +190,13 @@ asxEntries(const pugi::xml_node& parent, const fs::path& source,
             active.pop_back();
             asxAppend(entries, nested);
         } else if (name == "repeat") {
-            if (inRepeat || repeated) {
+            if (context == AsxRepeatContext::Repeat || repeated) {
                 asxWarn(plan, "ASX subsequent or nested REPEAT ignored", source);
                 continue;
             }
             repeated = true;
             auto count = asxRepeatCount(node, plan, source);
-            auto sequence = asxEntries(node, source, loader, active, plan, defaults, base, true, references);
+            auto sequence = asxEntries(node, source, loader, active, plan, defaults, base, AsxRepeatContext::Repeat, references);
             asxAppend(entries, sequence, count);
         } else
             asxUnsupported(node, plan, source);
@@ -213,7 +216,7 @@ asxDocumentEntries(const pugi::xml_node& root, const fs::path& source,
         throw std::runtime_error("Only ASX version 3 is supported");
     defaults.title.clear();
     return asxEntries(root, source, loader, active, plan, defaults, asxBase(root),
-        false, references);
+        AsxRepeatContext::Document, references);
 }
 
 AsxPlaylistPlan readAsxPlaylistPlan(const pugi::xml_node& root,

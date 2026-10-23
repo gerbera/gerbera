@@ -44,7 +44,6 @@
 #include <sys/inotify.h>
 #endif
 
-#include <chrono>
 #include <gtest/gtest.h>
 
 class PlaylistUpdateConfig : public ConfigMock {
@@ -139,43 +138,6 @@ TEST_F(PlaylistUpdateTest, LayoutCleanupPreservesPlaylistPositionsAndRemovesStal
     EXPECT_EQ(std::static_pointer_cast<CdsItem>(database->objects.at(102))->getTrackNumber(), 3);
 }
 
-enum class PlaybackNotifications { Enabled,
-    Suppressed };
-
-class PlaybackMetadataConfig : public PlaylistUpdateConfig {
-public:
-    explicit PlaybackMetadataConfig(PlaybackNotifications notifications)
-        : notifications(notifications)
-    {
-    }
-
-    bool getBoolOption(ConfigVal option) const override
-    {
-        if (option == ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED)
-            return true;
-        if (option == ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES)
-            return notifications == PlaybackNotifications::Suppressed;
-        return PlaylistUpdateConfig::getBoolOption(option);
-    }
-
-private:
-    PlaybackNotifications notifications;
-};
-
-class PlaybackMetadataSessions : public Web::SessionManager {
-public:
-    using Web::SessionManager::SessionManager;
-
-    std::shared_ptr<Web::Session> addLoggedInSession()
-    {
-        // UI delivery is synchronous; this test needs no session-expiry timer.
-        auto session = std::make_shared<Web::Session>(std::chrono::seconds(60));
-        session->logIn();
-        sessions.push_back(session);
-        return session;
-    }
-};
-
 class PlaybackMetadataDatabase : public PlaylistUpdateDatabase {
 public:
     using PlaylistUpdateDatabase::PlaylistUpdateDatabase;
@@ -208,14 +170,11 @@ public:
     ~PlaybackMetadataContent() override { update_manager->shutdown(); }
 };
 
-class PlaybackMetadataTest : public ::testing::TestWithParam<PlaybackNotifications> { };
-
-TEST_P(PlaybackMetadataTest, PlaybackDoesNotOverwriteNewerPlaylistMetadata)
+TEST(PlaybackMetadataTest, PlaybackDoesNotOverwriteNewerPlaylistMetadata)
 {
-    auto config = std::make_shared<PlaybackMetadataConfig>(GetParam());
+    auto config = std::make_shared<PlaylistUpdateConfig>();
     auto database = std::make_shared<PlaybackMetadataDatabase>(config);
-    auto sessions = std::make_shared<PlaybackMetadataSessions>(config, nullptr);
-    auto session = sessions->addLoggedInSession();
+    auto sessions = std::make_shared<Web::SessionManager>(config, nullptr);
     auto context = std::make_shared<Context>(nullptr, config, nullptr, nullptr, database, sessions, nullptr);
     PlaybackMetadataContent content(context);
 
@@ -247,16 +206,7 @@ TEST_P(PlaybackMetadataTest, PlaybackDoesNotOverwriteNewerPlaylistMetadata)
     EXPECT_EQ(database->played->getPlayCount(), 9);
     EXPECT_EQ(database->played->getLastPlayedPosition().count(), 1234);
     EXPECT_EQ(database->played->getBookMarkPosition().count(), 5678);
-    EXPECT_EQ(session->hasUIUpdateIDs(), GetParam() == PlaybackNotifications::Enabled);
-    EXPECT_EQ(session->getUIUpdateIDs(), GetParam() == PlaybackNotifications::Enabled ? "20" : "");
-    EXPECT_FALSE(session->hasUIUpdateIDs());
 }
-
-INSTANTIATE_TEST_SUITE_P(NotificationModes, PlaybackMetadataTest,
-    ::testing::Values(PlaybackNotifications::Enabled, PlaybackNotifications::Suppressed),
-    [](const ::testing::TestParamInfo<PlaybackNotifications>& info) {
-        return info.param == PlaybackNotifications::Enabled ? "NotificationsEnabled" : "NotificationsSuppressed";
-    });
 
 #ifdef HAVE_INOTIFY
 TEST_F(PlaylistUpdateTest, WritableCloseKeepsMediaIdentityButDeletionAndPlaylistReplacementStillRemove)

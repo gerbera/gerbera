@@ -1,31 +1,41 @@
 #!/usr/bin/env python3
 # Gerbera - https://gerbera.io/
 # Copyright (C) 2026 Gerbera Contributors
-# SPDX-License-Identifier: GPL-2.0-only
+#
+# Gerbera is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+#
+# Gerbera is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with Gerbera. If not, see <http://www.gnu.org/licenses/>.
+
 """Exercise real file changes and ContentDirectory results on an isolated Gerbera."""
 
 import argparse
-import contextlib
 import hashlib
 import io
 import json
 import os
 from pathlib import Path
-import signal
 import socket
 import struct
 import subprocess
-import tempfile
 import time
 import urllib.parse
 import urllib.request
 import wave
 import xml.etree.ElementTree as ET
 
+from integration_runtime import HTTP, GerberaProcess, fixture_workspace
+
 DC = "{http://purl.org/dc/elements/1.1/}"
 UP = "{urn:schemas-upnp-org:metadata-1-0/upnp/}"
 SERVICE = "urn:schemas-upnp-org:service:ContentDirectory:1"
-HTTP = urllib.request.build_opener(urllib.request.ProxyHandler({}))
 
 
 def wav_bytes(title, frames=800):
@@ -41,20 +51,6 @@ def wav_bytes(title, frames=800):
     info = b"INFO" + chunk
     result += b"LIST" + struct.pack("<I", len(info)) + info
     return result[:4] + struct.pack("<I", len(result) - 8) + result[8:]
-
-
-def wait_for(check, timeout=20):
-    end = time.monotonic() + timeout
-    last = None
-    while time.monotonic() < end:
-        try:
-            value = check()
-            if value:
-                return value
-        except (OSError, ValueError, AssertionError, ET.ParseError) as error:
-            last = error
-        time.sleep(0.15)
-    raise AssertionError(f"Timed out: {last}")
 
 
 class Fixture:
@@ -78,18 +74,9 @@ class Fixture:
         self.write_playlists()
         self.binary = args.binary
         self.debug = args.debug
+        self.scan_mode = scan_mode
+        self.startup_timeout = args.startup_timeout
         self.ip = args.ip or socket.gethostbyname(socket.gethostname())
-        for port in range(49170, 49270):
-            with socket.socket() as probe:
-                try:
-                    probe.bind((self.ip, port))
-                except OSError:
-                    continue
-                self.host = f"http://{self.ip}:{port}"
-                self.port = port
-                break
-        else:
-            raise RuntimeError("No fixture port available")
         xml = subprocess.check_output([str(self.binary), "--create-config"]).decode()
         config = ET.fromstring(xml[xml.index("<?xml") :])
         ns = config.tag.split("}")[0][1:]
@@ -164,7 +151,9 @@ class Fixture:
         ET.ElementTree(config).write(
             self.config, encoding="utf-8", xml_declaration=True
         )
-        self.process = None
+        self.server = GerberaProcess(
+            self.binary, self.config, self.ip, self.root, debug=self.debug
+        )
         self.playlist_root = None
         self.checks = []
 
@@ -196,7 +185,11 @@ class Fixture:
         assert result.get("success"), result
         return result
 
-    def soap(self, action, params):
+    @property
+    def host(self):
+        return self.server.host
+
+    def soap_response(self, action, params):
         envelope = ET.Element("{http://schemas.xmlsoap.org/soap/envelope/}Envelope")
         body = ET.SubElement(
             envelope, "{http://schemas.xmlsoap.org/soap/envelope/}Body"
@@ -213,7 +206,10 @@ class Fixture:
             },
         )
         with HTTP.open(request, timeout=5) as response:
-            result = ET.fromstring(response.read()).findtext(".//Result")
+            return ET.fromstring(response.read())
+
+    def soap(self, action, params):
+        result = self.soap_response(action, params).findtext(".//Result")
         return list(ET.fromstring(result))
 
     def search(self, container, criteria):
@@ -303,38 +299,22 @@ class Fixture:
         return True
 
     def record(self, name, check=None):
-        wait_for(check or self.assert_views)
+        self.server.wait(check or self.assert_views)
         self.checks.append(name)
         print(name, "PASS", flush=True)
 
     def start(self):
-        self.log = (self.root / ("server-" + str(len(self.checks)) + ".log")).open("wb")
-        command = [
-            str(self.binary),
-            "-c",
-            str(self.config),
-            "-i",
-            self.ip,
-            "-p",
-            str(self.port),
-        ]
-        if self.debug:
-            command += ["--debug", "--debug-mode", "autoscan,content,layout"]
-        self.process = subprocess.Popen(
-            command, stdout=self.log, stderr=subprocess.STDOUT
-        )
-        wait_for(lambda: self.browse(0))
+        def ready():
+            ping = self.soap_response("GetSystemUpdateID", {}).findtext(".//Id")
+            assert ping is not None and ping.isdecimal(), ping
+            self.browse(0)  # A valid empty root is ready, too.
+
+        self.server.start(ready, timeout=self.startup_timeout)
+        if self.scan_mode == "inotify":
+            self.server.wait_for_watches((self.src, self.audio, self.playlists))
 
     def stop(self):
-        if self.process is not None:
-            self.process.send_signal(signal.SIGTERM)
-            try:
-                self.process.wait(timeout=15)
-            except subprocess.TimeoutExpired:
-                self.process.kill()
-                self.process.wait()
-            self.log.close()
-            self.process = None
+        self.server.stop()
 
     def rescan(self):
         sid = self.api(req_type="auth", action="get_sid")["GerberaSID"]
@@ -486,10 +466,6 @@ class Fixture:
             self.rescan()
             self.record("rescan does not resurrect deleted files")
             return self.checks
-        except BaseException:
-            self.log.flush()
-            print(Path(self.log.name).read_text(errors="replace")[-5000:], flush=True)
-            raise
         finally:
             self.stop()
 
@@ -502,15 +478,10 @@ def main():
     parser.add_argument("--output", type=Path)
     parser.add_argument("--work-directory", type=Path)
     parser.add_argument("--debug", action="store_true")
+    parser.add_argument("--startup-timeout", type=float, default=30)
     args = parser.parse_args()
     results = {}
-    workspace = (
-        contextlib.nullcontext(str(args.work_directory))
-        if args.work_directory
-        else tempfile.TemporaryDirectory(prefix="grb-pl-")
-    )
-    with workspace as work:
-        Path(work).mkdir(parents=True, exist_ok=True)
+    with fixture_workspace(args.work_directory, prefix="grb-pl-") as work:
         for mode in ("mt", "grb"):
             root = Path(work) / mode
             root.mkdir()
