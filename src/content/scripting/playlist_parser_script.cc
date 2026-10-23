@@ -117,7 +117,7 @@ void XmlPlaylist::read(const pugi::xml_document& doc,
             if (!named(node, "media"))
                 continue;
             if (auto reference = URLUtils::resolveMediaReference(
-                    node.attribute("src").value(), nodeBase(node, path), true))
+                    node.attribute("src").value(), nodeBase(node, path), URLUtils::MediaReferenceType::NativePath))
                 entries.push_back({ { *reference }, {} });
         }
     } else {
@@ -143,7 +143,7 @@ void XmlPlaylist::read(const pugi::xml_document& doc,
                     entry.title = node.text().as_string();
                 if (named(node, "location", xspfNamespace)) {
                     if (auto reference = URLUtils::resolveMediaReference(
-                            node.text().as_string(), nodeBase(node, path), false))
+                            node.text().as_string(), nodeBase(node, path), URLUtils::MediaReferenceType::Uri))
                         entry.locations.push_back(*reference);
                 }
             }
