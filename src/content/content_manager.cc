@@ -1789,12 +1789,8 @@ void ContentManager::triggerPlayHook(const std::string& group, const std::shared
 
     bool suppress = config->getBoolOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_ENABLED) && config->getBoolOption(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES);
     log_debug("Marking object {} as played", obj->getTitle());
-    if (!suppress) {
-        // Playback changes its status only. The request's media snapshot may
-        // already be stale after a concurrent playlist import.
-        update_manager->containerChanged(obj->getParentID());
-        session_manager->containerChangedUI(obj->getParentID());
-    }
+    if (!suppress)
+        updateObject(obj, true);
 
 #ifdef HAVE_LASTFM
     if (config->getBoolOption(ConfigVal::SERVER_EXTOPTS_LASTFM_ENABLED) && item->isSubClass(UPNP_CLASS_AUDIO_ITEM)) {

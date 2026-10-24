@@ -202,10 +202,6 @@ protected:
     {
         SCOPED_TRACE(stage);
         ASSERT_TRUE(waitFor([this, validation] {
-            // An unchanged old view can match while its replacement is queued.
-            // Finish that import before HTTP requests can mark those items played.
-            if (!importsIdle())
-                return false;
             const auto result = viewsMatch(validation);
             if (!result)
                 throw std::runtime_error(result.message());
@@ -256,7 +252,7 @@ TEST_P(XmlPlaylistImportTest, HttpResourcesRemainCompleteAcrossRefreshRescansAnd
 #ifdef HAVE_CURL
     runLifecycle(XmlResourceValidation::HttpBytes);
 #else
-    GTEST_SKIP() << "HTTP verification requires libcurl; real database/import lifecycle test remains enabled";
+    GTEST_SKIP() << "HTTP verification requires existing CurlIOHandler; real database/import lifecycle test remains enabled";
 #endif
 }
 

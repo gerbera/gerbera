@@ -18,9 +18,9 @@ must remain byte-identical and no remote availability probe may be performed.
 and server policies, not assertions of Microsoft player runtime behavior.
 The f14/f25/f30 decisions are defined in ``policy.rst`` and the manifest.
 
-Run ``python test/scripting/verify_asx_fixtures.py test/scripting/fixtures/asx-semantics`` to check fixture
-hashes, declared XML parsing outcomes, key references and nested local files.
-That command validates test input consistency only, not Gerbera behavior.
+The manifest retains the original corpus SHA256 values for source audits.
+These describe input consistency, not runtime outcomes. Native GoogleTest cases
+in ``testcontent`` compare the importer result against the manifest.
 
 Architecture after review of #4004
 ----------------------------------
@@ -46,10 +46,16 @@ upstream foundation, or explicitly identify a stacked PR dependency.
 Test parser/converter reuse after a valid ASX document, malformed input and a
 subsequent legacy PLS import. Compare metadata, ordered positions and actual
 media resources, rather than adding a unit test for each configuration default.
-The manifest verifier still checks inputs only. ``AsxSemanticsIntegration``
-runs this corpus against the real importer with mt/grb, both legacy charsets,
-both views and complete local resources. Its default mode first indexes the
-isolated media library, then adds the ASX documents. The separate
-``--exercise-media-updates`` mode starts media and playlists together and
-adds inotify, parent/child/media edits, emptying and deletion for combined
-validation with the independent playlist-update repair.
+Native ``AsxImportTest`` cases run all 35 documents against the real importer
+with mt/grb, both legacy charsets, both views and full local HTTP resources.
+The ordinary rescan/restart cases first index the isolated media library before
+adding ASX documents. Separately named inotify cases start media and playlists
+together, then exercise parent/media/child edits, unchanged writable close,
+restart, emptying and deletion. Those cases wait for the owned process's actual
+kernel watches before changing files; they require Linux inotify. HTTP byte
+cases require CURL and are explicitly named/skipped independently of DB cases.
+A small local connection trap proves that remote child/presentation/logging
+references and remote media are not probed during import. No external server
+availability is required.
+
+``ctest --test-dir build -R AsxImportTest --output-on-failure``
