@@ -35,7 +35,7 @@
 #include "util/tools.h"
 
 #ifdef HAVE_CURL
-#include "iohandler/curl_io_handler.h"
+#include <curl/curl.h>
 #endif
 
 #ifdef HAVE_INOTIFY
@@ -49,12 +49,12 @@
 #include "content/onlineservice/online_service.h"
 #endif
 
-#include <array>
 #include <cstdint>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <set>
 #include <stdexcept>
 #include <thread>
@@ -258,19 +258,33 @@ std::string PlaylistImportTest::resourceUrl(const std::shared_ptr<CdsObject>& ob
 std::string PlaylistImportTest::resourceBytes(const std::shared_ptr<CdsObject>& object) const
 {
 #ifdef HAVE_CURL
-    CurlIOHandler reader(config, resourceUrl(object), 65536, 0,
-        std::chrono::seconds(5), std::chrono::seconds(5));
-    reader.open(UPNP_READ);
+    const std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> reader(curl_easy_init(), curl_easy_cleanup);
+    if (!reader)
+        throw std::runtime_error("Could not initialise HTTP media resource request");
+    const auto url = resourceUrl(object);
     std::string result;
-    std::array<std::byte, 4096> buffer;
-    for (;;) {
-        const auto count = reader.read(buffer.data(), buffer.size());
-        if (count < 0)
-            throw std::runtime_error("HTTP media resource read failed");
-        if (count == GRB_READ_END)
-            return result;
-        result.append(reinterpret_cast<const char*>(buffer.data()), count);
-    }
+    const auto write = +[](char* data, std::size_t size, std::size_t count, void* output) noexcept -> std::size_t {
+        try {
+            static_cast<std::string*>(output)->append(data, size * count);
+            return size * count;
+        } catch (...) {
+            return 0;
+        }
+    };
+    if (curl_easy_setopt(reader.get(), CURLOPT_URL, url.c_str()) != CURLE_OK
+        || curl_easy_setopt(reader.get(), CURLOPT_NOSIGNAL, 1L) != CURLE_OK
+        || curl_easy_setopt(reader.get(), CURLOPT_CONNECTTIMEOUT, 5L) != CURLE_OK
+        || curl_easy_setopt(reader.get(), CURLOPT_TIMEOUT, 5L) != CURLE_OK
+        || curl_easy_setopt(reader.get(), CURLOPT_WRITEFUNCTION, write) != CURLE_OK
+        || curl_easy_setopt(reader.get(), CURLOPT_WRITEDATA, &result) != CURLE_OK)
+        throw std::runtime_error("Could not configure HTTP media resource request");
+    const auto status = curl_easy_perform(reader.get());
+    if (status != CURLE_OK)
+        throw std::runtime_error("HTTP media resource read failed: " + std::string(curl_easy_strerror(status)));
+    long response = 0;
+    if (curl_easy_getinfo(reader.get(), CURLINFO_RESPONSE_CODE, &response) != CURLE_OK || response != 200)
+        throw std::runtime_error("HTTP media resource response: " + std::to_string(response));
+    return result;
 #else
     static_cast<void>(object);
     throw std::runtime_error("The separately named HTTP resource test requires HAVE_CURL");

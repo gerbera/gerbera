@@ -256,7 +256,7 @@ TEST_P(XmlPlaylistImportTest, HttpResourcesRemainCompleteAcrossRefreshRescansAnd
 #ifdef HAVE_CURL
     runLifecycle(XmlResourceValidation::HttpBytes);
 #else
-    GTEST_SKIP() << "HTTP verification requires existing CurlIOHandler; real database/import lifecycle test remains enabled";
+    GTEST_SKIP() << "HTTP verification requires libcurl; real database/import lifecycle test remains enabled";
 #endif
 }
 
