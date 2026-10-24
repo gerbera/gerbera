@@ -169,8 +169,9 @@ std::optional<std::string> urlUnescape(std::string_view str, UrlMode mode)
     // Validate URI escapes before using the unchanged form decoder. Normalize
     // hex digits and protect literal plus signs from form-parameter semantics.
     std::string encoded;
-    for (std::size_t i = 0; i < str.size(); ++i) {
-        char c = str[i];
+    std::size_t position = 0;
+    while (position < str.size()) {
+        char c = str[position++];
         if (c == '+') {
             encoded += "%2B";
             continue;
@@ -178,10 +179,10 @@ std::optional<std::string> urlUnescape(std::string_view str, UrlMode mode)
         encoded += c;
         if (c != '%')
             continue;
-        if (str.size() - i < 3)
+        if (str.size() - position < 2)
             return std::nullopt;
         for (int digit = 0; digit < 2; ++digit) {
-            c = str[++i];
+            c = str[position++];
             if (c >= 'a' && c <= 'f')
                 c -= 'a' - 'A';
             if (!c || !std::strchr(hexCharS2, c))
