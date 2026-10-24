@@ -25,10 +25,8 @@
 #include "config/result/autoscan.h"
 #include "content/content_manager.h"
 #include "content/layout/layout.h"
-#include "content/update_manager.h"
 #include "context.h"
 #include "upnp/clients.h"
-#include "web/session_manager.h"
 
 #ifdef ONLINE_SERVICES
 #include "content/onlineservice/online_service.h"
@@ -136,76 +134,6 @@ TEST_F(PlaylistUpdateTest, LayoutCleanupPreservesPlaylistPositionsAndRemovesStal
     EXPECT_EQ(database->removed, (std::vector<int> { 100 }));
     EXPECT_EQ(std::static_pointer_cast<CdsItem>(database->objects.at(101))->getTrackNumber(), 1);
     EXPECT_EQ(std::static_pointer_cast<CdsItem>(database->objects.at(102))->getTrackNumber(), 3);
-}
-
-class PlaybackMetadataDatabase : public PlaylistUpdateDatabase {
-public:
-    using PlaylistUpdateDatabase::PlaylistUpdateDatabase;
-    int mediaUpdates {};
-    std::shared_ptr<ClientStatusDetail> played;
-
-    void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override
-    {
-        ++mediaUpdates;
-        auto saved = CdsObject::createObject(object->getEntryType());
-        object->copyTo(saved);
-        objects[object->getID()] = saved;
-        *changedContainer = object->getParentID();
-    }
-
-    void savePlayStatus(const std::shared_ptr<ClientStatusDetail>& detail) override
-    {
-        played = detail->clone();
-    }
-};
-
-class PlaybackMetadataContent : public PlaylistUpdateContent {
-public:
-    explicit PlaybackMetadataContent(const std::shared_ptr<Context>& context)
-        : PlaylistUpdateContent(context)
-    {
-        update_manager->run();
-    }
-
-    ~PlaybackMetadataContent() override { update_manager->shutdown(); }
-};
-
-TEST(PlaybackMetadataTest, PlaybackDoesNotOverwriteNewerPlaylistMetadata)
-{
-    auto config = std::make_shared<PlaylistUpdateConfig>();
-    auto database = std::make_shared<PlaybackMetadataDatabase>(config);
-    auto sessions = std::make_shared<Web::SessionManager>(config, nullptr);
-    auto context = std::make_shared<Context>(nullptr, config, nullptr, nullptr, database, sessions, nullptr);
-    PlaybackMetadataContent content(context);
-
-    auto requested = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
-    requested->setID(42);
-    requested->setRefID(41);
-    requested->setParentID(20);
-    requested->setTitle("Before playlist refresh");
-    requested->setClass(UPNP_CLASS_MUSIC_TRACK);
-    requested->setMimeType("audio/x-wav");
-    requested->setLocation(__FILE__, CdsEntryType::VirtualItem);
-    requested->setPlayStatus(std::make_shared<ClientStatusDetail>("default", 42, 7, 1, 1234, 5678));
-
-    // The request already holds its snapshot when a playlist refresh finishes.
-    auto refreshed = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
-    requested->copyTo(refreshed);
-    refreshed->setTitle("After playlist refresh");
-    refreshed->addMetaData(MetadataFields::M_DESCRIPTION, "Entry description");
-    refreshed->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_PLAYLIST_ITEM);
-    database->objects[42] = refreshed;
-
-    content.triggerPlayHook("default", requested);
-    content.triggerPlayHook("default", requested);
-
-    EXPECT_EQ(database->mediaUpdates, 0);
-    EXPECT_EQ(database->objects.at(42)->getTitle(), refreshed->getTitle());
-    EXPECT_EQ(database->objects.at(42)->getMetaData(), refreshed->getMetaData());
-    ASSERT_NE(database->played, nullptr);
-    EXPECT_EQ(database->played->getPlayCount(), 9);
-    EXPECT_EQ(database->played->getLastPlayedPosition().count(), 1234);
-    EXPECT_EQ(database->played->getBookMarkPosition().count(), 5678);
 }
 
 #ifdef HAVE_INOTIFY

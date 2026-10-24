@@ -1,7 +1,7 @@
 {
   "issue": 4008,
   "base": "ee79f479bc5bf0407c3fad59b438b6b4e7ad04ee",
-  "state": "feature implementation in progress; runtime validation recorded separately",
+  "state": "native real importer regression; see test/content/test_asx_import.cc and CTest AsxImportTest cases",
   "media": {
     "A": {
       "path": "media/a.wav",

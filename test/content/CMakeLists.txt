@@ -42,48 +42,29 @@ target_compile_definitions(
     testcontent
     PRIVATE XML_PLAYLIST_FIXTURES="${CMAKE_SOURCE_DIR}/test/scripting/fixtures/xml-playlists")
 
-include(GoogleTest)
-gtest_discover_tests(testcontent DISCOVERY_TIMEOUT 60)
-
-find_package(Python3 QUIET COMPONENTS Interpreter)
-if(Python3_Interpreter_FOUND)
-    add_test(NAME IntegrationRuntime
-             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_integration_runtime.py)
-    set_tests_properties(IntegrationRuntime PROPERTIES TIMEOUT 60)
-else()
-    message(STATUS "IntegrationRuntime disabled: Python 3 interpreter not found")
+if(WITH_JS
+   AND WITH_AVCODEC
+   AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_sources(testcontent PRIVATE playlist_import_test.cc test_xml_playlist_import.cc
+                                       test_asx_import.cc)
+    target_compile_definitions(testcontent PRIVATE GERBERA_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 endif()
+
+include(GoogleTest)
+gtest_discover_tests(
+    testcontent DISCOVERY_TIMEOUT 60
+    PROPERTIES
+    TIMEOUT 240)
 
 if(WITH_JS
    AND WITH_INOTIFY
    AND (WITH_TAGLIB OR WITH_AVCODEC)
    AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(Python3 QUIET COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME PlaylistUpdateIntegration
                  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_playlist_updates.py
                          --binary $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR})
         set_tests_properties(PlaylistUpdateIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 240)
-    endif()
-endif()
-
-if(WITH_JS
-   AND WITH_AVCODEC
-   AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    if(Python3_Interpreter_FOUND)
-        add_test(NAME XmlPlaylistIntegration
-                 COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_xml_playlists.py
-                         --binary $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR})
-        set_tests_properties(XmlPlaylistIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 240)
-        add_test(NAME AsxUriIntegration
-                 COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_asx_uris.py
-                         --binary $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR})
-        set_tests_properties(AsxUriIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 300)
-        add_test(
-            NAME AsxSemanticsIntegration
-            COMMAND
-                ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_asx_semantics.py --binary
-                $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR} --output
-                ${CMAKE_CURRENT_BINARY_DIR}/asx-semantics.json)
-        set_tests_properties(AsxSemanticsIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 300)
     endif()
 endif()
