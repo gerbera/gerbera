@@ -34,14 +34,40 @@
 #ifndef __PLAYLIST_PARSER_SCRIPT_H__
 #define __PLAYLIST_PARSER_SCRIPT_H__
 
+#include "util/grb_fs.h"
+#ifdef HAVE_JS
 #include "parser_script.h"
+#endif
 
+#include <functional>
 #include <optional>
 
+#include <pugixml.hpp>
+#include <string>
+#include <vector>
+
+enum class XmlPlaylistType { Wpl,
+    Xspf };
+
+struct XmlPlaylistEntry {
+    // XSPF locations are alternatives for one position, not additional tracks.
+    std::vector<std::string> locations;
+    std::string title;
+};
+
+/// Own the validated XML playlist positions independently of the optional JS runtime.
+struct XmlPlaylist {
+    /// Validate the entire document before the script changes playlist contents.
+    void read(const pugi::xml_document& doc, const fs::path& path, XmlPlaylistType type);
+    std::vector<XmlPlaylistEntry> entries;
+};
+
+#ifdef HAVE_JS
 class PlaylistParserScript : public ParserScript {
 public:
     PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent);
     std::vector<int> processPlaylistObject(const std::shared_ptr<CdsObject>& obj, std::shared_ptr<GenericTask> task, const std::string& rootPath, bool& hasResult);
+    std::optional<std::reference_wrapper<const XmlPlaylistEntry>> readPlaylistEntry();
 
     std::pair<std::shared_ptr<CdsObject>, int> createObject2cdsObject(const std::shared_ptr<CdsObject>& origObject, const std::string& rootPath) override;
     bool setRefId(const std::shared_ptr<CdsObject>& cdsObj, const std::shared_ptr<CdsObject>& origObject, int pcdId) override;
@@ -52,9 +78,13 @@ protected:
     bool followSymlinks;
     bool hidden;
     TextFileCharset charsetMode;
+    XmlPlaylist xmlPlaylist;
+    std::size_t xmlPosition {};
 
     void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
     void handleObject2cdsContainer(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsContainer>& cont) override;
 };
+
+#endif // HAVE_JS
 
 #endif // __PLAYLIST_PARSER_SCRIPT_H__

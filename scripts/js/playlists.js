@@ -91,6 +91,28 @@ function importPlaylist(obj, cont, rootPath, autoscanId, containerType) {
     result = readPlsPlaylist(obj_title, objLocation, objChain, objDirChain, rootPath);
   } else if (type === 'asx') {
     result = readAsxPlaylist(obj_title, objLocation, objChain, objDirChain, rootPath);
+  } else if (type === 'wpl' || type === 'xspf') {
+    result = readXmlPlaylist(obj_title, objLocation, objChain, objDirChain, rootPath);
+  }
+  return result;
+}
+
+// XML parsing, namespace and URI resolution are performed before the script runs.
+function readXmlPlaylist(playlist_title, playlistLocation, playlistChain, playlistDirChain, rootPath) {
+  var result = [];
+  var playlistOrder = 1;
+  var source = readPlaylistEntry();
+  while (source) {
+    for (var i = 0; i < source.locations.length; i++) {
+      var entry = { location: source.locations[i], title: source.title };
+      if (addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath)) {
+        if (playlistDirChain)
+          addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result, rootPath);
+        playlistOrder++;
+        break; // Alternative XSPF locations describe the same position.
+      }
+    }
+    source = readPlaylistEntry();
   }
   return result;
 }

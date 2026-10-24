@@ -22,6 +22,18 @@ temporary-file cleanup.
 This file outlines how the Gerbera system uses the **GoogleTest**
 framework to provide unit testing for the C++ code-base.
 
+`Corpus/XmlPlaylistTest` reports the 45 WPL/XSPF reader cases individually.
+`ImportModes/XmlPlaylistImportTest` then imports the same corpus with the real
+server and an isolated SQLite database for both `mt` and `grb`. It checks both
+playlist views, mixed audio/video order, repeated positions, local and external
+URIs, legacy formats and character set recovery, playlist refresh, two unchanged
+rescans and restart. Each content check retains its 30-second deadline.
+Separately named HTTP cases use the existing CurlIOHandler to compare complete
+local resources byte for byte and never fetch external fixture URLs. Only those
+HTTP cases are explicitly skipped when CURL is unavailable. The real corpus
+import retains its Linux, JavaScript and FFmpeg prerequisites; no Python
+process/readiness helper is added.
+
 ## Required Software
 
 - CMake ^3.9

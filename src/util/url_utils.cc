@@ -27,6 +27,10 @@ Gerbera - https://gerbera.io/
 #include "upnp/compat.h"
 #include "util/fmt_compat.h"
 
+#include "util/string_converter.h"
+#include "util/tools.h"
+
+#include <algorithm>
 #include <cstring>
 #include <sstream>
 
@@ -37,7 +41,7 @@ Gerbera - https://gerbera.io/
 namespace URLUtils {
 
 /// @brief Splits the url into a path and parameters string.
-/// Only '?' and '/' separators are allowed, otherwise an exception will
+/// Only '?', '/', '#' and ':' separators are allowed, otherwise an exception will
 /// be thrown.
 /// This function splits the url into its path and parameter components.
 /// content/media SEPARATOR object_id=12345&transcode=wav would be transformed to:
@@ -51,7 +55,9 @@ std::pair<std::string_view, std::string_view> splitUrl(std::string_view url, cha
         splitPos = url.rfind(_URL_PARAM_SEPARATOR);
         break;
     case URL_UI_PARAM_SEPARATOR:
-        splitPos = url.find(URL_UI_PARAM_SEPARATOR);
+    case '#':
+    case ':':
+        splitPos = url.find(separator);
         break;
     default:
         throw_std_runtime_error("Forbidden separator: {}", separator);
@@ -91,11 +97,12 @@ static constexpr auto hexCharS2 = "0123456789ABCDEF";
 /// @brief Converts a string to a URL (meaning: %20 instead of space and so on)
 /// @param str String to be converted.
 /// @return string that contains the url-escaped representation of the original string.
-std::string urlEscape(std::string_view str)
+std::string urlEscape(std::string_view str, UrlMode mode)
 {
+    const bool path = mode == UrlMode::FilePath;
     std::ostringstream buf;
     for (std::size_t i = 0; i < str.length();) {
-        auto c = str[i];
+        auto c = static_cast<unsigned char>(str[i]);
         int cplen = 1;
         if ((c & 0xf8) == 0xf0)
             cplen = 4;
@@ -103,10 +110,10 @@ std::string urlEscape(std::string_view str)
             cplen = 3;
         else if ((c & 0xe0) == 0xc0)
             cplen = 2;
-        if ((i + cplen) > str.length())
+        if (path || (i + cplen) > str.length())
             cplen = 1;
 
-        if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '-' || c == '.') {
+        if ((c >= '0' && c <= '9') || (c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z') || c == '_' || c == '-' || c == '.' || (path && std::string_view("/~:").find(c) != std::string_view::npos)) {
             buf << static_cast<char>(c);
         } else {
             int hi = c >> 4;
@@ -152,6 +159,41 @@ std::string urlUnescape(std::string_view str)
         }
     }
     return buf.str();
+}
+
+std::optional<std::string> urlUnescape(std::string_view str, UrlMode mode)
+{
+    if (mode == UrlMode::Form)
+        return urlUnescape(str);
+
+    // Validate URI escapes before using the unchanged form decoder. Normalize
+    // hex digits and protect literal plus signs from form-parameter semantics.
+    std::string encoded;
+    std::size_t position = 0;
+    while (position < str.size()) {
+        char c = str[position++];
+        if (c == '+') {
+            encoded += "%2B";
+            continue;
+        }
+        encoded += c;
+        if (c != '%')
+            continue;
+        if (str.size() - position < 2)
+            return std::nullopt;
+        for (int digit = 0; digit < 2; ++digit) {
+            c = str[position++];
+            if (c >= 'a' && c <= 'f')
+                c -= 'a' - 'A';
+            if (!c || !std::strchr(hexCharS2, c))
+                return std::nullopt;
+            encoded += c;
+        }
+    }
+    auto result = urlUnescape(encoded);
+    if (result.find('\0') != std::string::npos || !StringConverter("UTF-8", "UTF-8").validate(result))
+        return std::nullopt;
+    return result;
 }
 
 static std::string dictEncode(const std::map<std::string, std::string>& dict, std::string_view sep1, char sep2)
@@ -224,6 +266,158 @@ std::map<std::string, std::string> pathToMap(std::string_view url)
     } while (lastPos < size);
 
     return out;
+}
+
+struct Url {
+    std::string scheme;
+    std::string authority;
+    std::string path;
+    std::string query;
+    std::string fragment;
+    bool hasAuthority {};
+    bool hasQuery {};
+    bool hasFragment {};
+};
+
+static Url splitUrl(std::string_view text)
+{
+    Url uri;
+    auto [path, fragment] = splitUrl(text, '#');
+    uri.hasFragment = path.size() != text.size();
+    uri.fragment = fragment;
+    text = path;
+    auto [location, query] = splitUrl(text, '?');
+    uri.hasQuery = location.size() != text.size();
+    uri.query = query;
+    text = location;
+    auto pos = text.find(':');
+    if (pos != std::string_view::npos && pos < text.find('/')) {
+        auto [scheme, rest] = splitUrl(text, ':');
+        uri.scheme = toLower(std::string(scheme));
+        text = rest;
+    }
+    if (text.substr(0, 2) == "//") {
+        uri.hasAuthority = true;
+        pos = text.find('/', 2);
+        uri.authority = text.substr(2, pos == std::string_view::npos ? pos : pos - 2);
+        text = pos == std::string_view::npos ? "" : text.substr(pos);
+    }
+    uri.path = text;
+    return uri;
+}
+
+// RFC 3986 section 5.2.4: preserve empty segments and trailing slashes.
+static std::string removeDotSegments(std::string input)
+{
+    std::string output;
+    while (!input.empty()) {
+        if (input.compare(0, 3, "../") == 0)
+            input.erase(0, 3);
+        else if (input.compare(0, 2, "./") == 0)
+            input.erase(0, 2);
+        else if (input.compare(0, 3, "/./") == 0 || input == "/.")
+            input.replace(0, 3, "/");
+        else if (input.compare(0, 4, "/../") == 0 || input == "/..") {
+            input.replace(0, 4, "/");
+            auto slash = output.rfind('/');
+            output.resize(slash == std::string::npos ? 0 : slash);
+        } else if (input == "." || input == "..")
+            input.clear();
+        else {
+            auto end = input.find('/', input[0] == '/' ? 1 : 0);
+            output += input.substr(0, end);
+            input = end == std::string::npos ? "" : input.substr(end);
+        }
+    }
+    return output;
+}
+
+static std::string joinUri(const Url& uri)
+{
+    return (uri.scheme.empty() ? "" : uri.scheme + ":") + (uri.hasAuthority ? "//" + uri.authority : "") + uri.path + (uri.hasQuery ? "?" + uri.query : "") + (uri.hasFragment ? "#" + uri.fragment : "");
+}
+
+std::string resolveUriReference(const std::string& reference,
+    const std::string& base)
+{
+    auto ref = splitUrl(reference);
+    auto parent = splitUrl(base);
+    if (ref.scheme.empty()) {
+        ref.scheme = parent.scheme;
+        if (!ref.hasAuthority) {
+            ref.hasAuthority = parent.hasAuthority;
+            ref.authority = parent.authority;
+            if (ref.path.empty()) {
+                ref.path = parent.path;
+                if (!ref.hasQuery) {
+                    ref.hasQuery = parent.hasQuery;
+                    ref.query = parent.query;
+                }
+            } else if (ref.path[0] != '/') {
+                auto slash = parent.path.rfind('/');
+                ref.path = (slash == std::string::npos ? (parent.hasAuthority ? "/" : "")
+                                                       : parent.path.substr(0, slash + 1))
+                    + ref.path;
+            }
+        }
+    }
+    ref.path = removeDotSegments(ref.path);
+    return joinUri(ref);
+}
+
+std::string filePathToUri(const fs::path& path)
+{
+    auto text = fs::absolute(path).generic_string();
+    return (text[0] == '/' ? "file://" : "file:///") + urlEscape(text, UrlMode::FilePath);
+}
+
+std::optional<std::string> resolveMediaReference(std::string text,
+    const std::string& base,
+    MediaReferenceType type)
+{
+    const bool nativePath = type == MediaReferenceType::NativePath;
+    if (!nativePath)
+        text = trimString(text);
+    if (text.empty())
+        return std::nullopt;
+    bool drive = text.size() > 1 && text[1] == ':';
+    bool unc = text.compare(0, 2, "\\\\") == 0;
+#ifndef _WIN32
+    if (drive || unc)
+        return std::nullopt;
+#endif
+    if (nativePath && (drive || unc || splitUrl(text).scheme.empty())) {
+        std::replace(text.begin(), text.end(), '\\', '/');
+        auto path = fs::path(text);
+        auto parent = splitUrl(base);
+        auto folder = urlUnescape(parent.path, UrlMode::FilePath);
+        if (parent.scheme != "file" || !folder)
+            return std::nullopt;
+        return (path.is_absolute() ? path : fs::path(*folder).parent_path() / path)
+            .lexically_normal()
+            .string();
+    }
+    auto uri = splitUrl(resolveUriReference(text, base));
+    if (uri.scheme == "http" || uri.scheme == "https")
+        return uri.hasAuthority && !uri.authority.empty()
+            ? std::make_optional(joinUri(uri))
+            : std::nullopt;
+    if (uri.scheme != "file" || uri.hasQuery || uri.hasFragment || (!uri.authority.empty() && toLower(uri.authority) != "localhost"))
+        return std::nullopt;
+    auto decoded = urlUnescape(uri.path, UrlMode::FilePath);
+    if (!decoded)
+        return std::nullopt;
+#ifdef _WIN32
+    if (decoded->size() > 2 && (*decoded)[0] == '/' && (*decoded)[2] == ':')
+        decoded->erase(0, 1);
+#else
+    if (decoded->size() > 2 && (*decoded)[0] == '/' && (*decoded)[2] == ':')
+        return std::nullopt;
+#endif
+    return fs::path(*decoded).is_absolute()
+        ? std::make_optional(
+              fs::path(*decoded).lexically_normal().string())
+        : std::nullopt;
 }
 
 } // namespace URLUtils
