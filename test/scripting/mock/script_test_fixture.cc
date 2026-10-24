@@ -32,6 +32,7 @@
 #include "duk_helper.h"
 #include "script_test_fixture.h"
 
+#include <ctime>
 #include <duktape.h>
 #include <fstream>
 #include <gmock/gmock.h>
@@ -469,7 +470,7 @@ std::string ScriptTestFixture::getYear(duk_context* ctx)
 
     ss >> std::get_time(&dt, date_time_format.data());
     if (!ss.fail()) {
-        auto t = std::mktime(&dt);
+        (void)std::mktime(&dt);
         duk_push_string(ctx, fmt::format("{}", dt.tm_year + 1900).c_str());
     } else
         duk_push_string(ctx, "0000");

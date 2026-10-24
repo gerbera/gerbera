@@ -32,6 +32,9 @@
 #include <fstream>
 #include <gtest/gtest.h>
 #include <memory>
+#include <string>
+#include <utility>
+#include <vector>
 
 class ConfigManagerTest : public ::testing::Test {
 
