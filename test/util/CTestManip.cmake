@@ -21,4 +21,5 @@
 #  $Id$
 
 set_tests_properties(${GRB_UTIL_TESTS} PROPERTIES FIXTURES_REQUIRED GrbUtil)
+set_tests_properties(ThreadRunnerTest.ReadinessDoesNotWaitForWorkMutex PROPERTIES TIMEOUT 240)
 MESSAGE("Copying Util Test Data")
