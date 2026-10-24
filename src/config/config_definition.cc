@@ -1266,6 +1266,15 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             "/import/scripting/virtual-layout/script-options", "config-import.html#confval-script-options",
             ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION, ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_NAME, ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE),
 
+        std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_FORMAT,
+            "/import/scripting/virtual-layout/attribute::audio-title-format", "config-import.html#confval-audio-title-format",
+            ""),
+        std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
+            "/import/scripting/virtual-layout/title-replacements", "config-import.html#confval-title-replacements",
+            ConfigVal::A_IMPORT_AUDIO_TITLE_REPLACE,
+            std::vector<ConfigVal> { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO },
+            false, false, false),
+
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_STRUCTURED_LAYOUT_SKIPCHARS,
             "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "config-import.html#confval-skip-chars",
             ""),
@@ -2163,6 +2172,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getSimpleOptions()
             "name", "config-import.html#confval-script-option-name"),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE,
             "value", "config-import.html#confval-script-option-value"),
+        std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_AUDIO_TITLE_REPLACE,
+            "replace", "config-import.html#confval-title-replacements-replace"),
         std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LAYOUT_GENRE,
             "genre", "config-import.html#confval-genre"),
         std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LAYOUT_MODEL,
@@ -2550,12 +2561,18 @@ void ConfigDefinition::initHierarchy()
                                               } },
 
         { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, {
+#ifdef HAVE_JS
+                                                       ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
+#endif
                                                        ConfigVal::IMPORT_LAYOUT_MAPPING,
                                                        ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
                                                        ConfigVal::IMPORT_SCRIPTING_IMPORT_MODEL_MAP,
                                                        ConfigVal::IMPORT_SCRIPTING_IMPORT_HEADLINE_MAP,
                                                    } },
         { ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO, {
+#ifdef HAVE_JS
+                                                     ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
+#endif
                                                      ConfigVal::IMPORT_LAYOUT_MAPPING,
                                                      ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
                                                      ConfigVal::IMPORT_SCRIPTING_IMPORT_MODEL_MAP,
