@@ -25,6 +25,7 @@
 #include "metadata/metadata_enums.h"
 #include "upnp/upnp_common.h"
 #include "util/grb_time.h"
+#include "util/tools.h"
 
 #include <atomic>
 #include <chrono>
@@ -149,11 +150,7 @@ protected:
             from = encode(from);
             to = encode(to);
         }
-        std::size_t position = 0;
-        while ((position = data.find(from, position)) != std::string::npos) {
-            data.replace(position, from.size(), to);
-            position += to.size();
-        }
+        replaceAllString(data, from, to);
     }
 
     void prepareCorpus(const std::string& name)
@@ -341,7 +338,7 @@ protected:
     void verifyViews(const std::string& stage, AsxResourceChecks resources)
     {
         SCOPED_TRACE(stage);
-        ASSERT_TRUE(waitFor([&] { return viewsMatch(); }, stage)) << lastMismatch;
+        ASSERT_TRUE(waitFor([&] { return importsIdle() && viewsMatch(); }, stage)) << lastMismatch;
         for (const auto& [id, views] : playlistViews()) {
             SCOPED_TRACE(id);
             for (const auto& view : views) {

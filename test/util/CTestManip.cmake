@@ -1,25 +1,23 @@
-#*GRB*
+# *GRB*
 #
-#  Gerbera - https://gerbera.io/
+# Gerbera - https://gerbera.io/
 #
-#  CTestManip.cmake - this file is part of Gerbera.
+# CTestManip.cmake - this file is part of Gerbera.
 #
-#  Copyright (C) 2024-2026 Gerbera Contributors
+# Copyright (C) 2024-2026 Gerbera Contributors
 #
-#  Gerbera is free software; you can redistribute it and/or modify
-#  it under the terms of the GNU General Public License version 2
-#  as published by the Free Software Foundation.
+# Gerbera is free software; you can redistribute it and/or modify it under the terms of the GNU
+# General Public License version 2 as published by the Free Software Foundation.
 #
-#  Gerbera is distributed in the hope that it will be useful,
-#  but WITHOUT ANY WARRANTY; without even the implied warranty of
-#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-#  GNU General Public License for more details.
+# Gerbera is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even
+# the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU General
+# Public License for more details.
 #
-#  You should have received a copy of the GNU General Public License
-#  along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
+# You should have received a copy of the GNU General Public License along with Gerbera.  If not, see
+# <http://www.gnu.org/licenses/>.
 #
-#  $Id$
+# $Id$
 
 set_tests_properties(${GRB_UTIL_TESTS} PROPERTIES FIXTURES_REQUIRED GrbUtil)
 set_tests_properties(ThreadRunnerTest.ReadinessDoesNotWaitForWorkMutex PROPERTIES TIMEOUT 240)
-MESSAGE("Copying Util Test Data")
+message("Copying Util Test Data")
