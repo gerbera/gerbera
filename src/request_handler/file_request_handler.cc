@@ -245,7 +245,7 @@ void FileRequestHandler::getFileInfo(
 {
     if (!path.empty()) {
         // Check the path (if its real) is accessible
-        struct stat statbuf {};
+        struct stat statbuf { };
         int ret = stat(path.c_str(), &statbuf);
         if (ret != 0) {
             if (isResourceFile) {

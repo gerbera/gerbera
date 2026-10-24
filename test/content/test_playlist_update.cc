@@ -21,10 +21,12 @@
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "cds/cds_resource.h"
+#include "common.h"
 #include "config/config_definition.h"
 #include "config/config_option_enum.h"
 #include "config/config_setup.h"
 #include "config/result/autoscan.h"
+#include "config/result/transcoding.h"
 #include "content/content_manager.h"
 #include "content/layout/layout.h"
 #include "context.h"
@@ -55,6 +57,7 @@
 #include <cstddef>
 #include <gtest/gtest.h>
 #include <memory>
+#include <pugixml.hpp>
 #include <string>
 #include <system_error>
 #include <vector>
@@ -235,7 +238,17 @@ TEST_F(PlaylistUpdateTest, SourceHintPreservesLivePlaylistIdentityAndSurvivesPos
     auto context = std::make_shared<Context>(definition, config, nullptr, nullptr, database, nullptr, nullptr);
     content = std::make_shared<PlaylistUpdateContent>(context);
     auto xml = std::make_shared<UpnpXMLBuilder>(context, "");
-    const auto positionUrl = xml->renderResourceURL(*position, *position->getResource(ResourcePurpose::Content), {}, "diagnostic");
+    EXPECT_CALL(*config, getTranscodingProfileListOption(::testing::_))
+        .WillRepeatedly(::testing::Return(std::make_shared<TranscodingProfileList>()));
+    pugi::xml_document didl;
+    auto didlRoot = didl.append_child("DIDL-Lite");
+    xml->renderObject(position, { "*" }, std::string::npos, didlRoot);
+    const auto didlResource = didlRoot.child("item").child("res");
+    ASSERT_TRUE(didlResource);
+    const std::string positionUrl = didlResource.text().as_string();
+    ASSERT_FALSE(positionUrl.empty());
+    EXPECT_STRNE(didlResource.attribute("protocolInfo").as_string(), "http-get:*:audio/x-wav:*");
+    EXPECT_EQ(physical->getResource(ResourcePurpose::Content)->getAttribute(ResourceAttribute::PROTOCOLINFO), "http-get:*:audio/x-wav:*");
     EXPECT_NE(positionUrl.find("/object_id/64/"), std::string::npos);
     EXPECT_NE(positionUrl.find("/source_id/42/"), std::string::npos);
 #if defined(USING_NPUPNP)
@@ -268,7 +281,7 @@ TEST_F(PlaylistUpdateTest, SourceHintPreservesLivePlaylistIdentityAndSurvivesPos
         EXPECT_EQ(std::string(reinterpret_cast<const char*>(bytes.data()), bytes.size()), payload);
         ASSERT_FALSE(content->played.empty());
         EXPECT_EQ(content->played.back(), playingId);
-        EXPECT_EQ(content->playedGroup, "diagnostic");
+        EXPECT_EQ(content->playedGroup, DEFAULT_CLIENT_GROUP);
     }
     FileRequestHandler handler(content, xml, nullptr, nullptr);
     EXPECT_NO_THROW(handler.getInfo(positionUrl.c_str(), info.get()));
@@ -296,6 +309,14 @@ TEST_F(PlaylistUpdateTest, SourceHintPreservesLivePlaylistIdentityAndSurvivesPos
     customized = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
     position->copyTo(customized);
     customized->getResource(ResourcePurpose::Content)->addOption("custom", "value");
+    EXPECT_EQ(xml->getFirstResourcePath(customized).find("/source_id/"), std::string::npos);
+    customized = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
+    position->copyTo(customized);
+    customized->getResource(ResourcePurpose::Content)->addAttribute(ResourceAttribute::PROTOCOLINFO, "http-get:*:audio/other:*");
+    EXPECT_EQ(xml->getFirstResourcePath(customized).find("/source_id/"), std::string::npos);
+    customized = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
+    position->copyTo(customized);
+    customized->getResource(ResourcePurpose::Content)->addAttribute(ResourceAttribute::SIZE, std::to_string(payload.size() + 1));
     EXPECT_EQ(xml->getFirstResourcePath(customized).find("/source_id/"), std::string::npos);
     customized = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
     position->copyTo(customized);

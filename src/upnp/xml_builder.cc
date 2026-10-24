@@ -702,9 +702,16 @@ std::string UpnpXMLBuilder::renderResourceURL(
             if (source && media && source->getEntryType() == CdsEntryType::File && !source->isVirtual()
                 && source->getLocation() == item.getLocation() && source->getMimeType() == media->getMimeType()
                 && original && original->getHandlerType() == res.getHandlerType() && original->getPurpose() == purpose
-                && original->getAttributes() == res.getAttributes()
-                && original->getParameters() == res.getParameters() && original->getOptions() == res.getOptions())
-                url.append(URLUtils::joinUrl({ URL_PARAM_SOURCE_OBJECT_ID, fmt::to_string(source->getID()) }));
+                && getMimeType(*original, mimeMappings) == getMimeType(res, mimeMappings)
+                && original->getParameters() == res.getParameters() && original->getOptions() == res.getOptions()) {
+                auto sourceAttributes = original->getAttributes();
+                auto advertisedAttributes = res.getAttributes();
+                // DIDL adds client-specific DLNA information without changing the file bytes.
+                sourceAttributes.erase(ResourceAttribute::PROTOCOLINFO);
+                advertisedAttributes.erase(ResourceAttribute::PROTOCOLINFO);
+                if (sourceAttributes == advertisedAttributes)
+                    url.append(URLUtils::joinUrl({ URL_PARAM_SOURCE_OBJECT_ID, fmt::to_string(source->getID()) }));
+            }
         } catch (const ObjectNotFoundException&) {
             // A removed physical file has no fallback; keep the original URL semantics.
         }
