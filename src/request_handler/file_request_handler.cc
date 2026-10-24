@@ -58,6 +58,8 @@
 #include "util/url_utils.h"
 #include "web/session_manager.h"
 
+#include <algorithm>
+
 #ifdef HAVE_ZIP
 #include <condition_variable>
 #include <libzippp/libzippp.h>
@@ -78,6 +80,40 @@ FileRequestHandler::FileRequestHandler(
 {
 }
 
+std::shared_ptr<CdsObject> FileRequestHandler::loadFileObject(const std::map<std::string, std::string>& params) const
+{
+    try {
+        return loadObject(params);
+    } catch (const ObjectNotFoundException&) {
+        const auto source = params.find(URL_PARAM_SOURCE_OBJECT_ID);
+        const auto resourceId = params.find(URL_RESOURCE_ID);
+        const auto decimal = [](const std::string& value) {
+            return !value.empty() && std::all_of(value.begin(), value.end(), [](char c) { return c >= '0' && c <= '9'; });
+        };
+        if (source == params.end() || resourceId == params.end()
+            || !decimal(source->second) || !decimal(resourceId->second)
+            || params.count(URL_PARAM_TRANSCODE_PROFILE_NAME) || params.count(URL_PARAM_TRANSCODE)
+            || params.count(URL_PARAM_ZIP_REQUEST))
+            throw;
+        const auto sourceId = stoiString(source->second, -1);
+        const auto resId = stoiString(resourceId->second, -1);
+        if (sourceId <= CDS_ID_ROOT || sourceId == stoiString(getValueOrDefault(params, "object_id")) || resId < 0)
+            throw;
+        auto sourceParams = params;
+        sourceParams["object_id"] = source->second;
+        auto object = loadObject(sourceParams); // Keep the original client group and its access rules.
+        const auto resource = object->getResource(resId);
+        if (object->getEntryType() != CdsEntryType::File || object->isVirtual()
+            || !object->getLocation().is_absolute() || !resource
+            || resource->getHandlerType() != ContentHandler::DEFAULT || resource->getPurpose() != ResourcePurpose::Content
+            || !resource->getAttribute(ResourceAttribute::OFFSET).empty()
+            || !resource->getAttribute(ResourceAttribute::RESOURCE_FILE).empty()
+            || !resource->getParameters().empty() || !resource->getOptions().empty())
+            throw;
+        return object;
+    }
+}
+
 bool FileRequestHandler::getInfo(
     const char* filename,
     UpnpFileInfo* info)
@@ -85,7 +121,7 @@ bool FileRequestHandler::getInfo(
     log_debug("Start: {}", filename);
 
     auto params = URLUtils::parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
-    auto obj = loadObject(params);
+    auto obj = loadFileObject(params);
 
     auto resourceId = parseResourceInfo(params);
     std::string zipRequest = getValueOrDefault(params, URL_PARAM_ZIP_REQUEST);
@@ -209,7 +245,7 @@ void FileRequestHandler::getFileInfo(
 {
     if (!path.empty()) {
         // Check the path (if its real) is accessible
-        struct stat statbuf { };
+        struct stat statbuf {};
         int ret = stat(path.c_str(), &statbuf);
         if (ret != 0) {
             if (isResourceFile) {
@@ -462,7 +498,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::open(
     }
 
     auto params = URLUtils::parseParameters(filename, LINK_FILE_REQUEST_HANDLER);
-    auto obj = loadObject(params);
+    auto obj = loadFileObject(params);
     auto resourceId = parseResourceInfo(params);
     auto res = obj->getResource(resourceId);
 

@@ -36,7 +36,9 @@
 
 #include "request_handler.h"
 
+#include <map>
 #include <memory>
+#include <string>
 
 #include "upnp/xml_builder.h"
 
@@ -69,6 +71,7 @@ public:
         enum UpnpOpenFileMode mode) override;
 
 private:
+    std::shared_ptr<CdsObject> loadFileObject(const std::map<std::string, std::string>& params) const;
     static std::size_t parseResourceInfo(
         const std::map<std::string, std::string>& params);
     std::shared_ptr<MetadataHandler> getResourceMetadataHandler(
