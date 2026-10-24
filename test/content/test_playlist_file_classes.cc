@@ -32,12 +32,15 @@
 
 #include <array>
 #include <chrono>
+#include <cstddef>
 #include <cstdlib>
 #include <gtest/gtest.h>
 #include <map>
 #include <memory>
+#include <pugixml.hpp>
 #include <string>
 #include <tuple>
+#include <utility>
 #include <vector>
 
 enum class PlaylistClassMapping {
@@ -135,6 +138,8 @@ protected:
 
     bool physicalImportsReady()
     {
+        if (!importsIdle())
+            return false;
         for (const auto& [name, mime] : playlists) {
             if (!database->findObjectByPath(source / "pl" / name, DEFAULT_CLIENT_GROUP, DbFileType::File))
                 return false;
@@ -305,19 +310,15 @@ TEST_P(PlaylistFileClassTest, PhysicalClassesKeepMimeResourcesAndParsedPlaylistP
     }
 }
 
+#if defined(HAVE_JS) && defined(HAVE_CURL)
 TEST_P(PlaylistFileClassTest, HttpResourcesPreservePlaylistMediaBytes)
 {
-#if !defined(HAVE_JS)
-    GTEST_SKIP() << "Parsed playlist resources require JavaScript; physical class tests remain enabled";
-#elif !defined(HAVE_CURL)
-    GTEST_SKIP() << "HTTP resource verification requires the existing CurlIOHandler; database class and playlist position tests remain enabled";
-#else
     ASSERT_NO_FATAL_FAILURE(prepareInputs());
     ASSERT_NO_FATAL_FAILURE(startAndWaitForImports());
     ASSERT_TRUE(waitFor([this] { return static_cast<bool>(playlistResourceBytesMatch()); }, "HTTP bytes of both playlist views", std::chrono::seconds(20)));
     ASSERT_TRUE(playlistResourceBytesMatch());
-#endif
 }
+#endif
 
 static std::string playlistClassCaseName(const ::testing::TestParamInfo<PlaylistFileClassTest::ParamType>& info)
 {

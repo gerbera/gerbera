@@ -87,9 +87,10 @@ public:
 
     void setReady()
     {
+        auto lck = std::scoped_lock(ThreadExecutor::mutex);
         log_threading("ThreadRunner: Setting {} ready", threadName);
         isReady = true;
-        cond.notify_one();
+        ThreadExecutor::cond.notify_one();
     }
 
     void wait(std::unique_lock<Mutex>& lck)
@@ -99,10 +100,9 @@ public:
     }
     void waitForReady()
     {
-        auto lck = AutoLockU(mutex);
+        auto lck = std::unique_lock(ThreadExecutor::mutex);
         log_threading("ThreadRunner: Waiting for {} to become ready", threadName);
-        cond.wait(lck, [this] { return isReady; });
-        lck.unlock();
+        ThreadExecutor::cond.wait(lck, [this] { return isReady; });
         isReady = false;
     }
     template <class Predicate>

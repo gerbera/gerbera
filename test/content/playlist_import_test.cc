@@ -25,7 +25,9 @@
 #include "config/config_definition.h"
 #include "config/config_generator.h"
 #include "config/config_manager.h"
+#include "content/content_manager.h"
 #include "database/db_param.h"
+#include "metadata/metadata_service.h"
 #include "server.h"
 #include "upnp/upnp_common.h"
 #include "upnp/upnp_service.h"
@@ -33,15 +35,26 @@
 #include "util/tools.h"
 
 #ifdef HAVE_CURL
-#include "iohandler/curl_io_handler.h"
+#include <curl/curl.h>
 #endif
 
-#include <array>
+#ifdef HAVE_INOTIFY
+#include "content/inotify/autoscan_inotify.h"
+#ifdef HAVE_JS
+#include "content/inotify/scripting_inotify.h"
+#endif
+#endif
+
+#ifdef ONLINE_SERVICES
+#include "content/onlineservice/online_service.h"
+#endif
+
 #include <cstdint>
 #include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <memory>
 #include <set>
 #include <stdexcept>
 #include <thread>
@@ -53,9 +66,31 @@
 #include <sys/sysmacros.h>
 #endif
 
+class PlaylistImportContent : public ContentManager {
+public:
+    using ContentManager::ContentManager;
+
+    bool importsIdle() const
+    {
+        auto lock = threadRunner->lockGuard("playlist import completion");
+        return !currentTask && taskQueue1.empty() && taskQueue2.empty();
+    }
+};
+
 class PlaylistImportServer : public Server {
 public:
     using Server::Server;
+
+    void prepareContent()
+    {
+        content = std::make_shared<PlaylistImportContent>(context, self, timer);
+        metadataService = std::make_shared<MetadataService>(context, content);
+    }
+
+    bool importsIdle() const
+    {
+        return std::static_pointer_cast<PlaylistImportContent>(content)->importsIdle();
+    }
 
     std::shared_ptr<Database> getDatabase() const { return database; }
 
@@ -150,6 +185,7 @@ void PlaylistImportTest::start(const std::string& importMode, const std::string&
     config->load(root, "");
     server = std::make_shared<PlaylistImportServer>(config);
     server->init(definition, false, false, false);
+    server->prepareContent();
     // This returns after the owned listener and its request callbacks are installed.
     server->run();
     database = server->getDatabase();
@@ -206,6 +242,11 @@ std::vector<std::shared_ptr<CdsObject>> PlaylistImportTest::children(int id) con
     return database->browse(query);
 }
 
+bool PlaylistImportTest::importsIdle() const
+{
+    return server->importsIdle();
+}
+
 std::string PlaylistImportTest::resourceUrl(const std::shared_ptr<CdsObject>& object) const
 {
     const auto item = std::dynamic_pointer_cast<CdsItem>(object);
@@ -217,19 +258,33 @@ std::string PlaylistImportTest::resourceUrl(const std::shared_ptr<CdsObject>& ob
 std::string PlaylistImportTest::resourceBytes(const std::shared_ptr<CdsObject>& object) const
 {
 #ifdef HAVE_CURL
-    CurlIOHandler reader(config, resourceUrl(object), 65536, 0,
-        std::chrono::seconds(5), std::chrono::seconds(5));
-    reader.open(UPNP_READ);
+    const std::unique_ptr<CURL, decltype(&curl_easy_cleanup)> reader(curl_easy_init(), curl_easy_cleanup);
+    if (!reader)
+        throw std::runtime_error("Could not initialise HTTP media resource request");
+    const auto url = resourceUrl(object);
     std::string result;
-    std::array<std::byte, 4096> buffer;
-    for (;;) {
-        const auto count = reader.read(buffer.data(), buffer.size());
-        if (count < 0)
-            throw std::runtime_error("HTTP media resource read failed");
-        if (count == GRB_READ_END)
-            return result;
-        result.append(reinterpret_cast<const char*>(buffer.data()), count);
-    }
+    const auto write = +[](char* data, std::size_t size, std::size_t count, void* output) noexcept -> std::size_t {
+        try {
+            static_cast<std::string*>(output)->append(data, size * count);
+            return size * count;
+        } catch (...) {
+            return 0;
+        }
+    };
+    if (curl_easy_setopt(reader.get(), CURLOPT_URL, url.c_str()) != CURLE_OK
+        || curl_easy_setopt(reader.get(), CURLOPT_NOSIGNAL, 1L) != CURLE_OK
+        || curl_easy_setopt(reader.get(), CURLOPT_CONNECTTIMEOUT, 5L) != CURLE_OK
+        || curl_easy_setopt(reader.get(), CURLOPT_TIMEOUT, 5L) != CURLE_OK
+        || curl_easy_setopt(reader.get(), CURLOPT_WRITEFUNCTION, write) != CURLE_OK
+        || curl_easy_setopt(reader.get(), CURLOPT_WRITEDATA, &result) != CURLE_OK)
+        throw std::runtime_error("Could not configure HTTP media resource request");
+    const auto status = curl_easy_perform(reader.get());
+    if (status != CURLE_OK)
+        throw std::runtime_error("HTTP media resource read failed: " + std::string(curl_easy_strerror(status)));
+    long response = 0;
+    if (curl_easy_getinfo(reader.get(), CURLINFO_RESPONSE_CODE, &response) != CURLE_OK || response != 200)
+        throw std::runtime_error("HTTP media resource response: " + std::to_string(response));
+    return result;
 #else
     static_cast<void>(object);
     throw std::runtime_error("The separately named HTTP resource test requires HAVE_CURL");

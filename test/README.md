@@ -29,8 +29,9 @@ and `grb`, with default, extended legacy, exact override, conditional override,
 and nonextended mappings. They check physical item classes, MIME types and
 resources; JavaScript builds also check both parsed playlist views, repeated
 positions and media duration. Separate `HttpResourcesPreservePlaylistMediaBytes`
-cases check HTTP payloads through the existing CurlIOHandler; only these cases
-are explicitly skipped if JavaScript or CURL is unavailable. Content convergence retains
+cases check HTTP payloads through synchronous libcurl with five-second connection
+and total limits and are registered only when JavaScript and CURL are available.
+Content convergence retains
 the previous 20-second deadline. Input files are checked byte for byte after
 shutdown. The shared fixture uses no external Python process/readiness layer.
 

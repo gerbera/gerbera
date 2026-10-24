@@ -43,7 +43,10 @@ if((WITH_TAGLIB OR WITH_AVCODEC) AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
 endif()
 
 include(GoogleTest)
-gtest_discover_tests(testcontent DISCOVERY_TIMEOUT 60)
+gtest_discover_tests(
+    testcontent DISCOVERY_TIMEOUT 60
+    PROPERTIES
+    TIMEOUT 240)
 
 if(WITH_JS
    AND WITH_INOTIFY

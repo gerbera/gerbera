@@ -42,6 +42,7 @@
 #include "config/result/transcoding.h"
 #include "context.h"
 #include "database/database.h"
+#include "exceptions.h"
 #include "request_handler/device_description_handler.h"
 #include "request_handler/request_handler.h"
 #include "upnp/clients.h"
@@ -683,6 +684,36 @@ std::string UpnpXMLBuilder::renderResourceURL(
             url = mediaContentBuilder.buildUrl(virtualURL, item.getID());
         } else {
             url = mediaContentBuilder.buildUrl(virtualURL, item.getID(), res.getResId());
+        }
+    }
+
+    // Keep the playlist position as the primary playback identity. The optional source
+    // hint serves only unchanged local bytes if that position disappears during a refresh.
+    if (item.getEntryType() == CdsEntryType::VirtualItem && item.getRefID() > CDS_ID_ROOT
+        && item.getRefID() != item.getID() && item.getLocation().is_absolute()
+        && purpose == ResourcePurpose::Content && res.getHandlerType() == ContentHandler::DEFAULT
+        && res.getResId() >= 0 && res.getAttribute(ResourceAttribute::OFFSET).empty()
+        && res.getAttribute(ResourceAttribute::RESOURCE_FILE).empty()
+        && res.getParameters().empty() && res.getOptions().empty()) {
+        try {
+            const auto source = std::dynamic_pointer_cast<CdsItem>(database->loadObject(item.getRefID(), clientGroup.empty() ? DEFAULT_CLIENT_GROUP : clientGroup));
+            const auto* media = dynamic_cast<const CdsItem*>(&item);
+            const auto original = source ? source->getResource(res.getResId()) : nullptr;
+            if (source && media && source->getEntryType() == CdsEntryType::File && !source->isVirtual()
+                && source->getLocation() == item.getLocation() && source->getMimeType() == media->getMimeType()
+                && original && original->getHandlerType() == res.getHandlerType() && original->getPurpose() == purpose
+                && getMimeType(*original, mimeMappings) == getMimeType(res, mimeMappings)
+                && original->getParameters() == res.getParameters() && original->getOptions() == res.getOptions()) {
+                auto sourceAttributes = original->getAttributes();
+                auto advertisedAttributes = res.getAttributes();
+                // DIDL adds client-specific DLNA information without changing the file bytes.
+                sourceAttributes.erase(ResourceAttribute::PROTOCOLINFO);
+                advertisedAttributes.erase(ResourceAttribute::PROTOCOLINFO);
+                if (sourceAttributes == advertisedAttributes)
+                    url.append(URLUtils::joinUrl({ URL_PARAM_SOURCE_OBJECT_ID, fmt::to_string(source->getID()) }));
+            }
+        } catch (const ObjectNotFoundException&) {
+            // A removed physical file has no fallback; keep the original URL semantics.
         }
     }
 
