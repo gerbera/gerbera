@@ -2,7 +2,6 @@
 .. index:: Supported File Types
 
 Supported File Types
-====================
 
 Generally file type support depends on the linked libraries. Please check documentation for taglib, ffmpeg, libexif, libexiv2, libmatroska for the whole list and the restrictions.
 Gerbera depends on these libraries to extract the metadata.
@@ -115,6 +114,31 @@ asx
 ~~~
 
 ASX files are XML files. Only version 3 is supported. Gerbera accepts param entries ``mimetype`` and ``protocol`` and copies them to the respective properties in the playlist item.
+
+Local references first retain an existing native filename, including literal
+``?``, ``#``, ``%`` and ``+`` characters. If that native file does not exist,
+Gerbera resolves the reference as a URI relative to the ASX file. Percent escapes
+are decoded exactly once, and ``+`` is not converted to a space. An existing
+literal ``Why%3F.wav`` therefore retains priority over ``Why?.wav`` for the
+ambiguous reference ``Why%3F.wav``; use a local file URI to request URI semantics
+explicitly.
+
+``file:`` references with an empty or ``localhost`` authority use local media
+metadata and Gerbera HTTP resources. Remote file authorities, malformed escapes,
+embedded NUL bytes and invalid decoded UTF-8 are rejected. Local file URIs must
+not contain a query or fragment. Existing external streaming URLs, including
+their encoded query strings, are retained without fetching them during import.
+XML-parser output and local media metadata remain UTF-8, independently of the
+``playlist-charset`` configured for line-based playlists. The existing root
+``BASE`` prefix and Gerbera ``PARAM``/``writethrough`` extensions are retained.
+
+See :doc:`asx-playlists` for ordered alternatives, bounded repetition, local
+nested playlists, metadata precedence and unsupported player behavior.
+
+.. toctree::
+   :hidden:
+
+   asx-playlists
 
 .. code-block:: xml
 
