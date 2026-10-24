@@ -1,0 +1,77 @@
+[
+  {
+    "file": "artists.png",
+    "sha256": "f277a5feca3cc738883c32c350e3b50abf19ac105c12d78462c0385f94cfb28b",
+    "original_name": "kuenstler.png"
+  },
+  {
+    "file": "albums.png",
+    "sha256": "572e02e8c0e4056e0c2e6b68587f9fc8afdf161b53780c15cb1ecfb0b81e330d",
+    "original_name": "alben.png"
+  },
+  {
+    "file": "tracks.png",
+    "sha256": "4f4bed6e1005ffa17bb2c189ca06ae61bee6aae22671168d290737b4aeb10371",
+    "original_name": "titel.png"
+  },
+  {
+    "file": "composers.png",
+    "sha256": "c38110b1828231841077055fbcadf217607ce2cf9ecf4eb37ca777c1b951f62c",
+    "original_name": "komponisten.png"
+  },
+  {
+    "file": "genres.png",
+    "sha256": "bd2ededcc934bddfc9d6568a42fb38b76d44add9c8ca7e3846958821771a0548",
+    "original_name": "genres.png"
+  },
+  {
+    "file": "playlists.png",
+    "sha256": "90e9e2e439e5087a786a62797045f74302f1290574c4330cfcb19f1e0fd08c50",
+    "original_name": "playlists.png"
+  },
+  {
+    "file": "recently-added.png",
+    "sha256": "3ac37a120138e8bc80cac5b1a414974fb02810dee6953cb5b52402735aa6ce0a",
+    "original_name": "neu.png"
+  },
+  {
+    "file": "favorites.png",
+    "sha256": "a0c8139d86fa3ed27c4143b24a26fbcddd174ab01b70d5c6bc184a4521b0b19f",
+    "original_name": "favoriten.png"
+  },
+  {
+    "file": "computer.png",
+    "sha256": "ae399af5700528012d0b9eee6782d25eb2a531cccbc2875aabf2e9b0e22219dc",
+    "original_name": "computer.png"
+  },
+  {
+    "file": "directory.png",
+    "sha256": "50c7b6518b5d3905c2422da8a16504fe7bbbb09c3af5658ceee21cb60e18f0e7",
+    "original_name": "ordner.png"
+  },
+  {
+    "file": "photos.png",
+    "sha256": "724540a23f7f9fcc839e1a06c3e236373445823a4b0df0a1608f1586078eb370",
+    "original_name": "fotos.png"
+  },
+  {
+    "file": "videos.png",
+    "sha256": "9c2990b7ab06442114847109b330346e2e7e3ce3bda180e1ab284e9f4bd0bee1",
+    "original_name": "videos.png"
+  },
+  {
+    "file": "date.png",
+    "sha256": "a429afd0b03dcfddfece9f09962259725cd9f8664eed493b6326049bb7cf6ac4",
+    "original_name": "datum.png"
+  },
+  {
+    "file": "year.png",
+    "sha256": "ba1abca145192825262b21eee897ba83ddf69f10f3168f6dcf251232b9dd5479",
+    "original_name": "jahr.png"
+  },
+  {
+    "file": "recently-modified.png",
+    "sha256": "60602e01cd76f026694a882dbd321a7de5c40b5da5bdb5f859dd0fadeb827130",
+    "original_name": "geaendert.png"
+  }
+]

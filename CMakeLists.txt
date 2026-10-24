@@ -1014,6 +1014,8 @@ set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${DEBIAN_EXTRA_FILES})
 install(
     TARGETS gerbera
     DESTINATION ${CMAKE_INSTALL_BINDIR})
+add_subdirectory(artwork/container-icons)
+
 install(
     DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js
     DESTINATION ${CMAKE_INSTALL_DATADIR})
