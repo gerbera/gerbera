@@ -25,7 +25,9 @@
 #include "config/config_definition.h"
 #include "config/config_generator.h"
 #include "config/config_manager.h"
+#include "content/content_manager.h"
 #include "database/db_param.h"
+#include "metadata/metadata_service.h"
 #include "server.h"
 #include "upnp/upnp_common.h"
 #include "upnp/upnp_service.h"
@@ -34,6 +36,17 @@
 
 #ifdef HAVE_CURL
 #include "iohandler/curl_io_handler.h"
+#endif
+
+#ifdef HAVE_INOTIFY
+#include "content/inotify/autoscan_inotify.h"
+#ifdef HAVE_JS
+#include "content/inotify/scripting_inotify.h"
+#endif
+#endif
+
+#ifdef ONLINE_SERVICES
+#include "content/onlineservice/online_service.h"
 #endif
 
 #include <array>
@@ -53,9 +66,31 @@
 #include <sys/sysmacros.h>
 #endif
 
+class PlaylistImportContent : public ContentManager {
+public:
+    using ContentManager::ContentManager;
+
+    bool importsIdle() const
+    {
+        auto lock = threadRunner->lockGuard("playlist import completion");
+        return !currentTask && taskQueue1.empty() && taskQueue2.empty();
+    }
+};
+
 class PlaylistImportServer : public Server {
 public:
     using Server::Server;
+
+    void prepareContent()
+    {
+        content = std::make_shared<PlaylistImportContent>(context, self, timer);
+        metadataService = std::make_shared<MetadataService>(context, content);
+    }
+
+    bool importsIdle() const
+    {
+        return std::static_pointer_cast<PlaylistImportContent>(content)->importsIdle();
+    }
 
     std::shared_ptr<Database> getDatabase() const { return database; }
 
@@ -150,6 +185,7 @@ void PlaylistImportTest::start(const std::string& importMode, const std::string&
     config->load(root, "");
     server = std::make_shared<PlaylistImportServer>(config);
     server->init(definition, false, false, false);
+    server->prepareContent();
     // This returns after the owned listener and its request callbacks are installed.
     server->run();
     database = server->getDatabase();
@@ -204,6 +240,11 @@ std::vector<std::shared_ptr<CdsObject>> PlaylistImportTest::children(int id) con
         flags |= BROWSE_TRACK_SORT;
     BrowseParam query(parent, flags);
     return database->browse(query);
+}
+
+bool PlaylistImportTest::importsIdle() const
+{
+    return server->importsIdle();
 }
 
 std::string PlaylistImportTest::resourceUrl(const std::shared_ptr<CdsObject>& object) const

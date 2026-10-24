@@ -202,6 +202,10 @@ protected:
     {
         SCOPED_TRACE(stage);
         ASSERT_TRUE(waitFor([this, validation] {
+            // An unchanged old view can match while its replacement is queued.
+            // Finish that import before HTTP requests can mark those items played.
+            if (!importsIdle())
+                return false;
             const auto result = viewsMatch(validation);
             if (!result)
                 throw std::runtime_error(result.message());
