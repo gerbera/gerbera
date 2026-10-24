@@ -22,6 +22,18 @@ temporary-file cleanup.
 This file outlines how the Gerbera system uses the **GoogleTest**
 framework to provide unit testing for the C++ code-base.
 
+Physical playlist class mapping is covered by `PlaylistClassConfigTest` in
+`testconfig` and `ImportModes/PlaylistFileClassTest` in `testcontent`. The native
+import cases use the real server and an isolated SQLite database for both `mt`
+and `grb`, with default, extended legacy, exact override, conditional override,
+and nonextended mappings. They check physical item classes, MIME types and
+resources; JavaScript builds also check both parsed playlist views, repeated
+positions and media duration. Separate `HttpResourcesPreservePlaylistMediaBytes`
+cases check HTTP payloads through the existing CurlIOHandler; only these cases
+are explicitly skipped if JavaScript or CURL is unavailable. Content convergence retains
+the previous 20-second deadline. Input files are checked byte for byte after
+shutdown. The shared fixture uses no external Python process/readiness layer.
+
 ## Required Software
 
 - CMake ^3.9

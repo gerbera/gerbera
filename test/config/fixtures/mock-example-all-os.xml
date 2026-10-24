@@ -472,8 +472,11 @@
       <mimetype-upnpclass>
         <map from="application/ogg" to="object.item.audioItem.musicTrack" />
         <map from="audio/*" to="object.item.audioItem.musicTrack" />
+        <map from="audio/x-mpegurl" to="object.item.playlistItem" />
+        <map from="audio/x-scpls" to="object.item.playlistItem" />
         <map from="image/*" to="object.item.imageItem" />
         <map from="video/*" to="object.item.videoItem" />
+        <map from="video/x-ms-asx" to="object.item.playlistItem" />
       </mimetype-upnpclass>
       <mimetype-contenttype>
         <treat mimetype="application/ogg" as="ogg" />

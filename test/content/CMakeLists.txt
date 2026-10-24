@@ -37,6 +37,11 @@ else()
 endif()
 add_dependencies(testcontent libgerbera gerbera)
 
+if((WITH_TAGLIB OR WITH_AVCODEC) AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_sources(testcontent PRIVATE playlist_import_test.cc test_playlist_file_classes.cc)
+    target_compile_definitions(testcontent PRIVATE GERBERA_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+endif()
+
 include(GoogleTest)
 gtest_discover_tests(testcontent DISCOVERY_TIMEOUT 60)
 
