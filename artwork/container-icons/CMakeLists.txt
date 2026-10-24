@@ -27,6 +27,7 @@
 install(
     DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/"
     DESTINATION "${CMAKE_INSTALL_DATADIR}/container-icons"
+    COMPONENT ContainerIcons
     FILES_MATCHING
     PATTERN "*.png"
     PATTERN "LICENSE.txt"
@@ -59,11 +60,13 @@ foreach(
     install(
         FILES "${CMAKE_CURRENT_LIST_DIR}/${_container_icon_source}.png"
         DESTINATION "${CMAKE_INSTALL_DATADIR}/container-icons"
-        RENAME "${_container_icon_name}.png")
+        RENAME "${_container_icon_name}.png"
+        COMPONENT ContainerIcons)
 endforeach()
 
 configure_file("${PROJECT_SOURCE_DIR}/config/container-icons.xml.in"
                "${PROJECT_BINARY_DIR}/container-icons.xml" @ONLY)
 install(
     FILES "${PROJECT_BINARY_DIR}/container-icons.xml"
-    DESTINATION "${CMAKE_INSTALL_DATADIR}/container-icons")
+    DESTINATION "${CMAKE_INSTALL_DATADIR}/container-icons"
+    COMPONENT ContainerIcons)
