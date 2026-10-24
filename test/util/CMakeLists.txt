@@ -27,6 +27,7 @@ add_executable(
     main.cc #
     test_text_file.cc #
     test_jpeg_res.cc #
+    test_thread_runner.cc #
     test_tools.cc #
     test_upnp_clients.cc #
     test_upnp_headers.cc #

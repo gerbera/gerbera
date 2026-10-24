@@ -214,16 +214,32 @@ pugi::xml_node& ParserScript::readXml(int direction)
     return nullNode;
 }
 
+void ParserScript::prepareXmlFile(const fs::path& path, unsigned int flags)
+{
+    auto contents = GrbFile(path).readBinaryFile();
+    if (!contents)
+        throw_std_runtime_error("Cannot open XML file {}", path.string());
+    auto result = xmlDoc.load_buffer(contents->data(), contents->size(), flags);
+    if (!result)
+        throw ConfigParseException(result.description());
+    root = xmlDoc.document_element();
+}
+
+void ParserScript::useUtf8Converter()
+{
+    if (!savedConverter)
+        savedConverter = sc;
+    sc = converterManager->i2i();
+}
+
 void ParserScript::prepareFile(const fs::path& path, TextFileCharset charset)
 {
     auto file = std::make_unique<GrbFile>(path);
     file->open(charset == TextFileCharset::Default ? "r" : "rb");
     file->setTextCharset(charset, charset == TextFileCharset::Default ? std::function<bool()>() : [this]() { return !currentTask || currentTask->isValid(); });
     currentFile = std::move(file);
-    if (charset != TextFileCharset::Default) {
-        savedConverter = sc;
-        sc = converterManager->i2i();
-    }
+    if (charset != TextFileCharset::Default)
+        useUtf8Converter();
 }
 
 std::pair<std::string, bool> ParserScript::readLine()

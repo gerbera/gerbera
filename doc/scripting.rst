@@ -782,8 +782,39 @@ They can be used by the import and by the playlist script.
                 return 'm3u';
             if (mimetype == 'audio/x-scpls')
                 return 'pls';
+            if (mimetype == 'video/x-ms-asx')
+                return 'asx';
+            if (mimetype == 'application/vnd.ms-wpl')
+                return 'wpl';
+            if (mimetype == 'application/xspf+xml')
+                return 'xspf';
             return '';
         }
+
+.. js:function:: readPlaylistEntry()
+
+    Available to the playlist parser for WPL and XSPF after native XML validation.
+    Returns the next object with a ``locations`` array and optional ``title``
+    string, or undefined at the end. Locations are absolute local paths or
+    encoded HTTP(S) URLs. For XSPF, locations in the same object are alternatives
+    for one track, while separate objects preserve repeated positions. The
+    standard script tries alternatives in order and uses ``addPlaylistItem``
+    for metadata, resources and each configured playlist view. Cancellation
+    aborts the script instead of reporting a successful partial import.
+
+    NFO ``readXml`` behavior and text-playlist ``readln`` behavior are unchanged.
+
+.. js:function:: resolvePlaylistReference(reference[, sourcePath])
+
+    Available to playlist scripts. Resolves a reference relative to the current
+    playlist, or an explicit absolute source playlist path. Returns an absolute
+    native path or an external URL, or undefined for an unsupported local URI.
+    Existing native regular files take priority before URI decoding, preserving
+    literal percent escapes in legacy ASX filenames. Otherwise percent escapes
+    are decoded once by the shared playlist URI utility. External non-file URLs
+    retain their existing ASX behavior and are not fetched. The standard ASX
+    script passes the resulting location to ``addPlaylistItem`` for the actual
+    media lookup and import.
 
 
 
