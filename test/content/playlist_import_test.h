@@ -54,6 +54,7 @@ protected:
         std::chrono::seconds timeout = std::chrono::seconds(30));
     bool waitForWatches(const std::vector<fs::path>& paths,
         std::chrono::seconds timeout = std::chrono::seconds(20));
+    bool importsIdle() const;
     std::vector<std::shared_ptr<CdsObject>> children(int id) const;
     std::string resourceUrl(const std::shared_ptr<CdsObject>& item) const;
     std::string resourceBytes(const std::shared_ptr<CdsObject>& item) const;
