@@ -32,6 +32,7 @@
 #include "context.h"
 #include "exceptions.h"
 #include "iohandler/io_handler.h"
+#include "metadata/metadata_enums.h"
 #include "request_handler/file_request_handler.h"
 #include "upnp/clients.h"
 #include "upnp/compat.h"
@@ -215,11 +216,13 @@ TEST_F(PlaylistUpdateTest, WritableCloseKeepsMediaIdentityButDeletionAndPlaylist
 TEST_F(PlaylistUpdateTest, SourceHintPreservesLivePlaylistIdentityAndSurvivesPositionRemoval)
 {
     const std::string payload(1672, 'P');
+    constexpr auto fixtureDate = "2022-04-01T00:00:00";
     resourceFile = fs::temp_directory_path() / ("grb-playlist-http-" + generateRandomId() + ".wav");
     GrbFile(resourceFile).writeBinaryFile(reinterpret_cast<const std::byte*>(payload.data()), payload.size());
     auto physical = std::make_shared<CdsItem>(CdsEntryType::File);
     physical->setID(42);
     physical->setTitle("Physical track");
+    physical->addMetaData(MetadataFields::M_DATE, fixtureDate);
     physical->setLocation(resourceFile, CdsEntryType::File);
     physical->setMimeType("audio/x-wav");
     auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
@@ -245,6 +248,7 @@ TEST_F(PlaylistUpdateTest, SourceHintPreservesLivePlaylistIdentityAndSurvivesPos
     xml->renderObject(position, { "*" }, std::string::npos, didlRoot);
     const auto didlResource = didlRoot.child("item").child("res");
     ASSERT_TRUE(didlResource);
+    EXPECT_STREQ(didlRoot.child("item").child("dc:date").text().as_string(), fixtureDate);
     const std::string positionUrl = didlResource.text().as_string();
     ASSERT_FALSE(positionUrl.empty());
     EXPECT_STRNE(didlResource.attribute("protocolInfo").as_string(), "http-get:*:audio/x-wav:*");
