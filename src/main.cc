@@ -77,10 +77,6 @@ static struct {
     int shutdownFlag = 0;
     int restartFlag = 0;
     pthread_t mainThreadId;
-
-    mutable std::mutex mutex;
-    std::unique_lock<std::mutex> lock { mutex };
-    std::condition_variable cond;
 } _ctx;
 
 static GerberaRuntime runtime;
@@ -132,8 +128,6 @@ static void signalHandler(int signum)
     } else if (signum == SIGHUP) {
         _ctx.restartFlag = 1;
     }
-
-    _ctx.cond.notify_one();
 }
 
 static void installSignalHandler()
@@ -283,6 +277,8 @@ int main(int argc, char** argv, char** envp)
         installSignalHandler();
         sigset_t emptyMaskSet;
         sigemptyset(&emptyMaskSet);
+        sigset_t blockedMaskSet;
+        sigfillset(&blockedMaskSet);
 
         auto server = std::make_shared<Server>(configManager);
 
@@ -344,11 +340,18 @@ int main(int argc, char** argv, char** envp)
         runtime.handleServerOptions(server);
 
         // wait until signalled to terminate
-        while (!_ctx.shutdownFlag) {
+        for (;;) {
+            // Block the signals while the flags are tested, then let sigsuspend() unblock them and
+            // sleep in one step: a signal that arrived during startup is delivered right there, and
+            // none can fall between the test and the sleep.
+            if (pthread_sigmask(SIG_SETMASK, &blockedMaskSet, nullptr))
+                log_error("Error blocking signals {}", std::strerror(errno));
+            if (_ctx.shutdownFlag)
+                break;
+            sigsuspend(&emptyMaskSet);
+            // a repeated signal has to get through while restarting and shutting down
             if (pthread_sigmask(SIG_SETMASK, &emptyMaskSet, nullptr))
                 log_error("Error clearing masked signals {}", std::strerror(errno));
-
-            _ctx.cond.wait(_ctx.lock);
 
             if (_ctx.restartFlag != 0) {
                 log_info("Restarting Gerbera!");
@@ -416,6 +419,10 @@ int main(int argc, char** argv, char** envp)
                 }
             }
         }
+
+        // the loop ends with the signals blocked
+        if (pthread_sigmask(SIG_SETMASK, &emptyMaskSet, nullptr))
+            log_error("Error clearing masked signals {}", std::strerror(errno));
 
         // shutting down
         int ret = EXIT_SUCCESS;

@@ -24,6 +24,8 @@
 
 #include "cds/cds_objects.h"
 #include "config/result/autoscan.h"
+#include "content/scripting/playlist_parser_script.h"
+#include "content/scripting/xml_playlist.h"
 #include "exceptions.h"
 #include "upnp/upnp_common.h"
 #include "util/tools.h"
@@ -58,52 +60,19 @@ static duk_ret_t addContainerTree(duk_context* ctx)
     return ExternalUrlAsxPlaylistTest::commonScriptMock->addContainerTree(tree);
 }
 
-static pugi::xml_node nullNode;
 static pugi::xml_document xmlDoc;
-static pugi::xml_node root;
+static AsxPlaylist asxPlaylist([](const std::string&, const fs::path&) {
+    return AsxPlaylistDocument { {}, {}, "ENTRYREF is unavailable in this script fixture" };
+});
 
-// Proxy the Duktape script with `readXml`
-// Mimics reading the playlist file line by line
-// Uses the `CommonScriptMock` to track expectations
-static duk_ret_t readXml(duk_context* ctx)
+// Exercise the common native reader and product serializer with the actual JS importer.
+static duk_ret_t readPlaylistEntry(duk_context* ctx)
 {
-    int direction = duk_to_int(ctx, 0);
-    duk_pop(ctx);
-
-    pugi::xml_node node;
-
-    if (direction > 0 && root.first_child()) {
-        root = root.first_child();
-        node = root;
-    } else if (direction < -1 && root.root()) {
-        root = xmlDoc.document_element();
-        node = root;
-    } else if (direction < 0 && root.parent()) {
-        root = root.parent();
-        node = root;
-    } else if (root.next_sibling()) {
-        root = root.next_sibling();
-        node = root;
-    } else
-        node = nullNode;
-
-    std::ostringstream buf;
-    buf << "<" << toLower(node.name()) << " ";
-    duk_push_object(ctx);
-    for (auto&& attrib : node.attributes()) {
-        duk_push_string(ctx, attrib.value());
-        duk_put_prop_string(ctx, -2, toLower(attrib.name()).c_str());
-        buf << toLower(attrib.name()) << "=" << attrib.value() << " ";
-    }
-    buf << ">" << node.text().as_string();
-    buf << "</" << toLower(node.name()) << ">";
-
-    duk_push_string(ctx, node.text().as_string());
-    duk_put_prop_string(ctx, -2, "VALUE");
-    duk_push_string(ctx, toLower(node.name()).c_str());
-    duk_put_prop_string(ctx, -2, "NAME");
-
-    return ExternalUrlAsxPlaylistTest::commonScriptMock->readXml(buf.str());
+    auto entry = asxPlaylist.readPlaylistEntry();
+    if (!entry)
+        return 0;
+    PlaylistParserScript::pushPlaylistEntry(ctx, entry->get());
+    return 1;
 }
 
 // Proxy the Duktape script with `addCdsObject`
@@ -130,7 +99,7 @@ static duk_function_list_entry js_global_functions[] = {
     { "createContainerChain", CommonScriptTestFixture::js_createContainerChain, 1 },
     { "getLastPath", CommonScriptTestFixture::js_getLastPath, 1 },
     { "getLastPath2", CommonScriptTestFixture::js_getLastPath2, 2 },
-    { "readXml", readXml, 1 },
+    { "readPlaylistEntry", readPlaylistEntry, 0 },
     { "addCdsObject", addCdsObject, 3 },
     { "addContainerTree", addContainerTree, 1 },
     { nullptr, nullptr, 0 },
@@ -166,7 +135,7 @@ TEST_F(ExternalUrlAsxPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
     if (result.status != pugi::xml_parse_status::status_ok) {
         throw ConfigParseException(result.description());
     }
-    root = xmlDoc.document_element();
+    asxPlaylist.read(xmlDoc, "/location/of/playlist.asx");
     const std::string mimeType = "video/mp4";
     const std::string objtypeItemExternalUrl = "8";
 
@@ -187,15 +156,6 @@ TEST_F(ExternalUrlAsxPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "All Playlists", "Playlist Title"))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, getLastPath2(Eq("/location/of/playlist.asx"), Eq(1))).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addContainerTree(ElementsAre("Playlists", "Directories", "of", "Playlist Title"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readXml(Eq("<asx version=3.0 ></asx>"))).Times(2).WillRepeatedly(Return(1));
-    EXPECT_CALL(*commonScriptMock, readXml(Eq("<title >ASX Playlist</title>"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readXml(Eq("<entry ></entry>"))).Times(2).WillRepeatedly(Return(1));
-    EXPECT_CALL(*commonScriptMock, readXml(Eq("<title >ASX Playlist Entry</title>"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readXml(Eq("<author >Gerbera Team</author>"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readXml(Eq("<copyright >GPL</copyright>"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readXml(Eq("<ref href=https://10.0.0.10/pl/stream/12110/1641070200 ></ref>"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readXml(Eq("<param name=mimetype value=video/mp4 ></param>"))).WillOnce(Return(1));
-    EXPECT_CALL(*commonScriptMock, readXml(Eq("< ></>"))).Times(3).WillRepeatedly(Return(0));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "42", "/home/gerbera")).WillOnce(Return(1));
     EXPECT_CALL(*commonScriptMock, addCdsObject(IsIdenticalMap(asPlaylistChain), "43", "/home/gerbera")).WillOnce(Return(1));
 
@@ -209,5 +169,70 @@ TEST_F(ExternalUrlAsxPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
         "/home/gerbera");
     std::vector<int> items { 42000, 43000 };
     EXPECT_EQ(fnResult, items);
+}
+
+TEST_F(ExternalUrlAsxPlaylistTest, TriesAlternativesUntilOnePositionCanBeAdded)
+{
+    ASSERT_TRUE(xmlDoc.load_string("<ASX><AUTHOR>Original author</AUTHOR><PARAM NAME='Category' VALUE='Original category'/><ENTRY><REF HREF='https://example.invalid/a.mp3'/><REF HREF='https://example.invalid/b.mp3'/></ENTRY><ENTRY><REF HREF='https://example.invalid/c.mp3'/></ENTRY></ASX>"));
+    asxPlaylist.read(xmlDoc, "/location/of/playlist.asx");
+    addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
+    const char* fallbackCopy = R"JS(
+        var originalAsxAddPlaylistItem = addPlaylistItem;
+        var asxCandidateMetadata = [];
+        addPlaylistItem = function(title, location, entry, chain, order, result, root) {
+          asxCandidateMetadata.push([entry.defaults['upnp:author'], entry.extra.Category]);
+          var added = originalAsxAddPlaylistItem(title, location, entry, chain, order, result, root);
+          if (!added) {
+            entry.defaults['upnp:author'] = 'mutated';
+            entry.extra.Category = 'mutated';
+          }
+          return added;
+        };
+    )JS";
+    ASSERT_EQ(duk_peval_string(ctx, fallbackCopy), DUK_EXEC_SUCCESS);
+    duk_pop(ctx);
+    std::vector<std::pair<std::string, std::string>> inserted;
+    EXPECT_CALL(*commonScriptMock, addCdsObject(_, _, _)).WillRepeatedly(Invoke([&](auto item, auto chain, auto) {
+        inserted.emplace_back(item.at("location"), chain);
+        EXPECT_EQ(item.at("playlistOrder"), item.at("location").find("/c.mp3") != std::string::npos ? "2" : "1");
+        return item.at("location").find("/a.mp3") != std::string::npos ? 0 : 1;
+    }));
+    ASSERT_EQ(duk_peval_string(ctx, "readAsxPlaylist('Playlist Title', '/location/of/', '42', '43', '/home/gerbera').length"), DUK_EXEC_SUCCESS);
+    EXPECT_EQ(duk_get_int(ctx, -1), 4);
+    EXPECT_EQ(inserted, (std::vector<std::pair<std::string, std::string>> { { "https://example.invalid/a.mp3", "42" }, { "https://example.invalid/b.mp3", "42" }, { "https://example.invalid/b.mp3", "43" }, { "https://example.invalid/c.mp3", "42" }, { "https://example.invalid/c.mp3", "43" } }));
+    ASSERT_EQ(duk_peval_string(ctx, "JSON.stringify(asxCandidateMetadata)"), DUK_EXEC_SUCCESS);
+    EXPECT_STREQ(duk_get_string(ctx, -1), "[[\"Original author\",\"Original category\"],[\"Original author\",\"Original category\"],[\"Original author\",\"Original category\"],[\"Original author\",\"Original category\"],[\"Original author\",\"Original category\"]]");
+}
+
+TEST_F(ExternalUrlAsxPlaylistTest, PreservesEmbeddedMetadataAndWritesThroughOnlyInFirstView)
+{
+    ASSERT_TRUE(xmlDoc.load_string("<ASX><AUTHOR>Root author</AUTHOR><COPYRIGHT>Root rights</COPYRIGHT><ENTRY><TITLE>Override</TITLE><REF HREF='/media/a.wav' WRITETHROUGH='1'/></ENTRY></ASX>"));
+    asxPlaylist.read(xmlDoc, "/location/of/playlist.asx");
+    addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
+    const char* script = R"JS(
+        var asxSeen = [];
+        var asxWrites = 0;
+        var asxSource = { title: 'Embedded title', metaData: { 'dc:title': ['Embedded title'], 'upnp:author': ['Embedded author'] } };
+        getCdsObject = function() {
+          return JSON.parse(JSON.stringify(asxSource));
+        };
+        copyObject = function(obj) { return JSON.parse(JSON.stringify(obj)); };
+        addCdsObject = function(item) {
+          if (item.writeThrough > 0) {
+            asxWrites++;
+            asxSource.metaData['dc:title'] = [item.title];
+          }
+          asxSeen.push(item);
+          return asxSeen.length;
+        };
+        readAsxPlaylist('Playlist Title', '/location/of/', '42', '43', '/home/gerbera');
+        JSON.stringify(asxSeen.map(function(item) {
+          return [item.title, item.metaData['upnp:author'][0], item.metaData['dc:rights'][0], item.writeThrough];
+        }));
+    )JS";
+    ASSERT_EQ(duk_peval_string(ctx, script), DUK_EXEC_SUCCESS);
+    EXPECT_STREQ(duk_get_string(ctx, -1), "[[\"Override\",\"Embedded author\",\"Root rights\",1],[\"Override\",\"Embedded author\",\"Root rights\",0]]");
+    ASSERT_EQ(duk_peval_string(ctx, "asxWrites"), DUK_EXEC_SUCCESS);
+    EXPECT_EQ(duk_get_int(ctx, -1), 1);
 }
 #endif

@@ -545,6 +545,46 @@ playlist. Custom wrappers should return the standard function's result.
 For compatibility, a custom function that does not return an array does not
 trigger this cleanup.
 
+The standard playlist importer supports M3U/M3U8, PLS, ASX, static Windows Media
+Playlists (WPL) and XSPF version 1. WPL and XSPF preserve source order and repeated
+entries, including mixed audio/video lists. Local entries use the referenced
+media's metadata and resources; a playlist title is used only when the media has
+no title. Playlist containers retain the usual filename-derived name.
+
+WPL reads ``smil/body/seq/media/@src``. Relative Windows backslashes are accepted
+as directory separators. WMP ``cid``/``tid`` repair and dynamic
+``smartPlaylist`` database queries are not supported. Absolute Windows drive and
+UNC paths are not mapped to Linux/macOS paths: use server-relative paths or
+local file URIs instead.
+
+XSPF reads ``playlist/trackList/track/location`` in the
+``http://xspf.org/ns/0/`` namespace, with equivalent namespace prefixes and
+inherited ``xml:base``. Multiple locations in one track are alternatives: the
+first usable location creates one position. Repeated track elements remain
+separate positions. Identifier, image, attribution and extension elements do
+not create media entries.
+
+Both formats use XML encoding declarations/BOMs, independently of
+``playlist-charset``. XSPF paths are URI references: encode spaces as ``%20``,
+literal percent signs as ``%25``, ``#`` as ``%23`` and ``?`` in Linux/macOS
+filenames as ``%3F``. WPL native paths retain a literal ``?``. URI decoding
+is performed once and does not replace ``+`` with a space. Local ``file:`` URIs
+with no host or ``localhost`` are supported; remote file authorities do not
+mount network shares. HTTP(S) references remain external URLs and are not
+downloaded while parsing. External URLs use the existing playlist MIME default
+when no media metadata is available.
+
+Malformed XML, DTDs, an invalid document structure or unsupported dynamic WPL
+queries are rejected before the importer creates entries. An unavailable media
+reference is skipped while later valid entries continue to import.
+
+New configurations include ``wpl`` to ``application/vnd.ms-wpl`` and ``xspf`` to
+``application/xspf+xml`` extension mappings, with both MIME types mapped to the
+``playlist`` content type and the ``object.item.playlistItem`` UPnP class.
+Existing configurations with explicit mapping lists should include these
+extension, content-type and UPnP-class mappings as well. After adding mappings, restart Gerbera
+and rescan the playlist directory.
+
    .. confval:: playlist create-link
           :type: :confval:`Boolean`
           :required: false
@@ -834,19 +874,21 @@ Audio Title Format
 ^^^^^^^^^^^^^^^^^^
 
 The standard JavaScript audio layouts can build their displayed audio title
-from a format string, without editing JavaScript. Add the attribute to the
-existing ``import/scripting/virtual-layout`` element; keep its other settings:
+from a format string, without editing JavaScript. Add ``audioTitleFormat`` to
+the existing :confval:`script-options` dictionary; keep the other layout settings:
 
 .. code-block:: xml
 
-    <virtual-layout type="js" audio-title-format="%title%">
+    <virtual-layout type="js">
+      <script-options>
+        <script-option name="audioTitleFormat" value="%title%"/>
+      </script-options>
       <!-- Keep existing layout settings here. -->
     </virtual-layout>
 
-.. confval:: audio-title-format
-   :type: :confval:`String`
-   :required: false
-   :default: Empty (existing title behavior)
+The optional ``audioTitleFormat`` script option is a string, with an empty default.
+Scripts read it as
+``config['/import/scripting/virtual-layout/script-options/script-option'].audioTitleFormat``.
 
 The format replaces the automatic artist-prefix logic when nonempty. An absent
 or empty format preserves existing behavior. Examples:
@@ -906,12 +948,17 @@ Character replacements in displayed titles
    :type: :confval:`Section`
    :required: false
 
-Optional literal replacements apply after expanding a nonempty
-``audio-title-format``. They affect only the generated audio display title:
+Optional replacements apply to generated audio display titles. In JavaScript
+layouts they run after expanding a nonempty ``audioTitleFormat``. In the builtin
+layout they apply directly to each generated title, including the prefixed
+``All - full name`` title, exactly once:
 
 .. code-block:: xml
 
-    <virtual-layout type="js" audio-title-format="%title%">
+    <virtual-layout type="js">
+      <script-options>
+        <script-option name="audioTitleFormat" value="%title%"/>
+      </script-options>
       <title-replacements>
         <replace from="_" to=" "/>
         <replace from="[Live]" to="(Live)"/>
@@ -927,18 +974,21 @@ Each ``replace`` has a nonempty ``from`` attribute and a ``to`` attribute.
 An empty ``to=""`` removes the matched text. By default, matching is literal
 and case-sensitive. Rules run in the configured order,
 replacing all occurrences; later rules can also replace text inserted by earlier
-rules. Unicode is preserved. Whitespace at the edges of the final result is
-removed.
+rules. Unicode literal text is preserved. JavaScript formats trim surrounding
+whitespace; builtin replacements preserve it. An empty or whitespace-only builtin
+result falls back to the original generated title.
 
 Regular expressions
 ~~~~~~~~~~~~~~~~~~~
 
-Set ``regex="yes"`` (or ``true``) to interpret ``from`` as a JavaScript regular
-expression. The default ``no`` (or ``false``) keeps literal replacement. Matches
-are case-sensitive and all occurrences are replaced. Regex replacement strings
-support JavaScript capture references such as ``$1`` and ``$2``; literal rules
-keep such text literally. Use the syntax supported by Gerbera's Duktape engine,
-not PCRE-specific extensions. In XML attribute values, write backslashes once
+Set ``regex="yes"`` (or ``true``) to interpret ``from`` as a regular expression.
+The default ``no`` (or ``false``) keeps literal replacement. Matches are
+case-sensitive and all occurrences are replaced. Literal rules keep capture
+notation such as ``$1`` literally. JavaScript layouts retain Duktape's RegExp and
+String.replace behavior. The builtin layout uses the existing C++ ECMAScript
+``std::regex`` engine; it does not use genre mapping's case-insensitive full-match
+policy. Do not assume that these engines are interchangeable or support PCRE
+extensions. In XML attribute values, write backslashes once
 and escape XML characters such as ``&lt;`` and ``&amp;`` normally.
 
 .. code-block:: xml
@@ -950,7 +1000,18 @@ and escape XML characters such as ``&lt;`` and ``&amp;`` normally.
 
 An invalid expression is logged once per preparation of the rules and skipped;
 subsequent valid rules still apply. Rules and regular expressions are prepared
-once per script context/configuration, then reused for subsequent items.
+once per script context/configuration or builtin layout instance, then reused
+for subsequent items.
+
+The native engine matches UTF-8 bytes; Duktape matches JavaScript string units.
+For example, a native ``^.`` can split a multibyte character. A builtin rule
+whose result is invalid UTF-8 or contains NUL is skipped with a diagnostic; later
+rules still run on the intact title. No replacement ``?`` characters are saved.
+Use literal Unicode rules when matching whole non-ASCII characters.
+Replacement syntax also differs: builtin ``$0`` denotes the entire match while
+Duktape keeps it literal, and ``$10`` with only one capture is not equivalent.
+Unicode whitespace and zero-length matches can differ. Use the documented
+engine for the selected layout rather than relying on cross-engine parity.
 
 Conditional replacements
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1000,10 +1061,13 @@ regex patterns; simple patterns and a small rule set add little work compared
 with reading media metadata and storing entries.
 
 
-The format and replacements are used by ``getAudioDetails`` in the standard
-JavaScript audio layouts. They do not apply to the builtin layout. Views such
-as ``All - full name`` still add their own artist/album components around this
-title; include an artist in the format only if that duplication is desired.
+The format is used by ``getAudioDetails`` in the standard JavaScript audio
+layouts; builtin formatting remains unchanged. Both layouts support the
+replacement rules. JavaScript views such as ``All - full name`` still add their
+own artist/album components around the formatted title; include an artist in
+the format only if that duplication is desired. Builtin rules instead see each
+final generated view title, so a prefix can be explicitly matched there without
+applying replacements twice to the same title.
 These options do not change source filenames, file tags, artist/album metadata,
 search descriptions, media URLs or existing track-number handling and sorting.
 Artist text already present in a title or fallback filename is not guessed or
@@ -2567,6 +2631,18 @@ Specifies a mapping from a certain content type to a dlna profile in the Content
 In order to access special profiles you can specify a resource attribute with its required value. If multiple entries for the same
 mimetype exist, mappings with more details are preferred to simple from-to mappings.
 Resource attributes can be seen in the details page for an item on the web UI. The value must either match exactly the transformed value (incl. unit) or the raw value.
+
+.. versionadded:: HEAD
+
+The ffmpeg handler stores the transfer characteristics of the video in the resource attribute ``colorTransfer``,
+named as ffprobe names them: ``bt709``, ``smpte2084`` for HDR10 (PQ), ``arib-std-b67`` for HLG. HDR video can
+then get a profile of its own, e.g. to be transcoded for a client that cannot show it:
+
+   .. code:: xml
+
+      <map from="mkv" colorTransfer="smpte2084" to="MKV_HDR"/>
+
+Files imported before get the attribute when they are imported again.
 
    .. confval:: contenttype-dlnaprofile map from
       :type: :confval:`String`

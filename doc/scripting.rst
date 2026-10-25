@@ -782,19 +782,35 @@ They can be used by the import and by the playlist script.
                 return 'm3u';
             if (mimetype == 'audio/x-scpls')
                 return 'pls';
+            if (mimetype == 'video/x-ms-asx')
+                return 'asx';
+            if (mimetype == 'application/vnd.ms-wpl')
+                return 'wpl';
+            if (mimetype == 'application/xspf+xml')
+                return 'xspf';
             return '';
         }
 
+.. js:function:: readPlaylistEntry()
 
+    Available to the playlist parser for WPL, XSPF and ASX after native XML validation.
+    Returns the next object with a ``locations`` array and optional ``title``
+    string, or undefined at the end. Locations are absolute local paths or
+    encoded HTTP(S) URLs. For XSPF, locations in the same object are alternatives
+    for one track, while separate objects preserve repeated positions. The
+    standard script tries alternatives in order and uses ``addPlaylistItem``
+    for metadata, resources and each configured playlist view. Cancellation
+    aborts the script instead of reporting a successful partial import.
 
-Walkthrough
-~~~~~~~~~~~
+    NFO ``readXml`` behavior and text-playlist ``readln`` behavior are unchanged.
+    ASX also uses the native iterator; entries retain the existing title,
+    description, MIME type, protocol, size and extra parameters. The
+    ``writeThroughs`` array aligns with ``locations``; ``defaults`` provides
+    descriptive metadata that fills missing media tags. Each alternative is
+    copied into a fresh script entry before the importer may modify it.
+    ASX XML traversal and reference resolution run in C++, independently of
+    the script that creates playlist views.
 
-Now it is time to take a closer look at the default scripts that are supplied with Gerbera. Usually it is installed in
-the ``/usr/share/gerbera/js/`` directory, but you will also find it in ``scripts/js/`` in the Gerbera source tree.
-
-On startup gerbera loads all the javascript files from that directory (`common-folder` in `config.xml`) then loads all files from
-`custom-folder`. If a function defined in a common file is also found in the custom folder it overwrites it.
 
 .. Note::
   this is not a JavaScript tutorial, if you are new to JS you should probably make yourself familiar with the

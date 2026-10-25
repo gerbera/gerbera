@@ -915,6 +915,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
 
     /// @brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_CONTENTTYPE_LIST
     static const std::map<std::string, std::string> mtCtDefaults {
+        { MIME_TYPE_WPL_PLAYLIST, CONTENT_TYPE_PLAYLIST },
+        { MIME_TYPE_XSPF_PLAYLIST, CONTENT_TYPE_PLAYLIST },
         { "application/ogg", CONTENT_TYPE_OGG },
         { "audio/L16", CONTENT_TYPE_PCM },
         { "audio/flac", CONTENT_TYPE_FLAC },
@@ -924,7 +926,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "audio/x-dsd", CONTENT_TYPE_DSD },
         { "audio/x-flac", CONTENT_TYPE_FLAC },
         { "audio/x-matroska", CONTENT_TYPE_MKA },
-        { "audio/x-mpegurl", CONTENT_TYPE_PLAYLIST },
+        { MIME_TYPE_MPEGURL, CONTENT_TYPE_PLAYLIST },
         { "audio/x-ms-wma", CONTENT_TYPE_WMA },
         { "audio/x-scpls", CONTENT_TYPE_PLAYLIST },
         { "audio/x-wav", CONTENT_TYPE_PCM },
@@ -973,6 +975,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
     /// @brief default values for ConfigVal::IMPORT_MAPPINGS_MIMETYPE_TO_UPNP_CLASS_LIST
     static const std::map<std::string, std::string> mtUpnpDefaults {
         { "application/ogg", UPNP_CLASS_MUSIC_TRACK },
+        { MIME_TYPE_WPL_PLAYLIST, UPNP_CLASS_PLAYLIST_ITEM },
+        { MIME_TYPE_XSPF_PLAYLIST, UPNP_CLASS_PLAYLIST_ITEM },
         { "audio/*", UPNP_CLASS_MUSIC_TRACK },
         { "image/*", UPNP_CLASS_IMAGE_ITEM },
         { "video/*", UPNP_CLASS_VIDEO_ITEM },
@@ -1003,8 +1007,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "jpg", "image/jpeg" },
         { "jpeg", "image/jpeg" },
         { "m2ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
-        { "m3u", "audio/x-mpegurl" },
-        { "m3u8", "audio/x-mpegurl" },
+        { "m3u", MIME_TYPE_MPEGURL },
+        { "m3u8", MIME_TYPE_MPEGURL },
         { "m4a", "audio/mp4" }, // LibMagic identifies this as audio/x-m4a, preventing TagLib from parsing it
         { "mka", "audio/x-matroska" },
         { "mkv", "video/x-matroska" },
@@ -1029,9 +1033,11 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "wm", "video/x-ms-wm" },
         { "wma", "audio/x-ms-wma" },
         { "wmv", "video/x-ms-wmv" },
+        { "wpl", MIME_TYPE_WPL_PLAYLIST },
         { "wmx", "video/x-ms-wmx" },
         { "wv", "audio/x-wavpack" },
         { "wvx", "video/x-ms-wvx" },
+        { "xspf", MIME_TYPE_XSPF_PLAYLIST },
     };
 
     /// @brief default values for ConfigVal::IMPORT_SYSTEM_DIRECTORIES
@@ -1266,15 +1272,6 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             "/import/scripting/virtual-layout/script-options", "config-import.html#confval-script-options",
             ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION, ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_NAME, ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE),
 
-        std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_FORMAT,
-            "/import/scripting/virtual-layout/attribute::audio-title-format", "config-import.html#confval-audio-title-format",
-            ""),
-        std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
-            "/import/scripting/virtual-layout/title-replacements", "config-import.html#confval-title-replacements",
-            ConfigVal::A_IMPORT_AUDIO_TITLE_REPLACE,
-            std::vector<ConfigVal> { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO },
-            false, false, false),
-
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_STRUCTURED_LAYOUT_SKIPCHARS,
             "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "config-import.html#confval-skip-chars",
             ""),
@@ -1282,6 +1279,12 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             "/import/scripting/virtual-layout/structured-layout/attribute::div-char", "config-import.html#confval-div-char",
             ""),
 #endif // HAVE_JS
+
+        std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
+            "/import/scripting/virtual-layout/title-replacements", "config-import.html#confval-title-replacements",
+            ConfigVal::A_IMPORT_AUDIO_TITLE_REPLACE,
+            std::vector<ConfigVal> { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO },
+            false, false, false),
 
         std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
             "/import/scripting/virtual-layout/genre-map", "config-import.html#confval-genre-map",
@@ -2561,18 +2564,14 @@ void ConfigDefinition::initHierarchy()
                                               } },
 
         { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, {
-#ifdef HAVE_JS
                                                        ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
-#endif
                                                        ConfigVal::IMPORT_LAYOUT_MAPPING,
                                                        ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
                                                        ConfigVal::IMPORT_SCRIPTING_IMPORT_MODEL_MAP,
                                                        ConfigVal::IMPORT_SCRIPTING_IMPORT_HEADLINE_MAP,
                                                    } },
         { ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO, {
-#ifdef HAVE_JS
                                                      ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
-#endif
                                                      ConfigVal::IMPORT_LAYOUT_MAPPING,
                                                      ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
                                                      ConfigVal::IMPORT_SCRIPTING_IMPORT_MODEL_MAP,

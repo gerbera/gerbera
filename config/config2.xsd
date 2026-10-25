@@ -747,7 +747,6 @@
                 </xs:simpleType>
             </xs:attribute>
             <xs:attribute name="audio-layout" type="xs:string"/>
-            <xs:attribute name="audio-title-format" type="xs:string"/>
             <xs:attribute name="video-layout" type="xs:string"/>
             <xs:attribute name="image-layout" type="xs:string"/>
             <xs:attribute name="from-file" type="xs:string"/>

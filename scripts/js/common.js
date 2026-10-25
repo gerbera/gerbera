@@ -94,6 +94,10 @@ function getPlaylistType(mimetype) {
     return 'pls';
   if (mimetype == 'video/x-ms-asf' || mimetype === 'video/x-ms-asx')
     return 'asx';
+  if (mimetype === 'application/vnd.ms-wpl')
+    return 'wpl';
+  if (mimetype === 'application/xspf+xml')
+    return 'xspf';
   return '';
 }
 
@@ -412,7 +416,8 @@ function audioTitleNumber(value, width) {
 }
 
 function formatAudioTitle(obj, audio, trackNumber, discNumber) {
-  const format = config['/import/scripting/virtual-layout/attribute::audio-title-format'];
+  const options = config['/import/scripting/virtual-layout/script-options/script-option'] || {};
+  const format = options.audioTitleFormat;
   if (typeof format !== 'string' || format === '') {
     return audio.title;
   }
@@ -519,6 +524,7 @@ function getAudioDetails(obj, rootPath) {
   desc = desc + title;
 
   var date = 'Unknown';
+  var decade = 'Unknown';
   if (obj.metaData[M_DATE] && obj.metaData[M_DATE][0]) {
     date = getYear(obj.metaData[M_DATE][0]);
     obj.metaData[M_UPNP_DATE] = [date];
@@ -1054,6 +1060,11 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
     exturl.description = entry.description ? entry.description : ("Entry from " + playlist_title);
 
     exturl.extra = entry.extra;
+    if (entry.defaults) {
+      exturl.metaData = [];
+      for (var key in entry.defaults)
+        addMeta(exturl, key, entry.defaults[key]);
+    }
     exturl.size = entry.size;
     exturl.writeThrough = entry.writeThrough;
 
@@ -1083,6 +1094,14 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
     }
 
     var item = copyObject(cds);
+
+    // ASX descriptive defaults fill gaps without replacing embedded tags.
+    if (entry.defaults) {
+      for (var key in entry.defaults) {
+        if (!item.metaData[key] || !item.metaData[key].length)
+          item.metaData[key] = [entry.defaults[key]];
+      }
+    }
 
     item.playlistOrder = (entry.order ? entry.order : playlistOrder);
 
