@@ -53,6 +53,7 @@ const static auto res_names = std::map<ResourceAttribute, std::string> {
     std::pair(ResourceAttribute::PIXELFORMAT, "R_PIXELFORMAT"),
     std::pair(ResourceAttribute::LYRICS, "R_LYRICS"),
     std::pair(ResourceAttribute::OFFSET, "R_OFFSET"),
+    std::pair(ResourceAttribute::COLORTRANSFER, "R_COLORTRANSFER"),
 };
 
 const static auto mt_names = std::map<MetadataFields, std::string_view> {

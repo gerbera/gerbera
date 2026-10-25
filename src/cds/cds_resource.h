@@ -41,7 +41,6 @@
 #include <memory>
 
 #define RESOURCE_OPTION_FOURCC "4cc"
-#define RESOURCE_OPTION_COLOR_TRANSFER "colorTransfer"
 
 #define RESOURCE_IMAGE_STEP_ICO "ICO"
 #define RESOURCE_IMAGE_STEP_LICO "LICO"

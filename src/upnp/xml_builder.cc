@@ -528,6 +528,7 @@ static bool isPrivateAttribute(ResourceAttribute attribute)
     case ResourceAttribute::FORMAT:
     case ResourceAttribute::ORIENTATION:
     case ResourceAttribute::PIXELFORMAT:
+    case ResourceAttribute::COLORTRANSFER:
         return true;
     default:
         return false;
@@ -880,28 +881,17 @@ std::string UpnpXMLBuilder::findDlnaProfile(
             std::string profCand;
             bool match = true;
             for (auto&& [key, val] : map) {
-                if (key == fromKey) {
-                    if (val.empty() || (val != contentType && val != legacyKey))
-                        match = false;
-                    continue;
+                if (key == fromKey && (val.empty() || (val != contentType && val != legacyKey))) {
+                    match = false;
                 }
-                if (key == toKey) {
-                    if (!val.empty())
-                        profCand = val;
-                    continue;
+                if (key == toKey && !val.empty()) {
+                    profCand = val;
                 }
-                bool isAttribute = false;
                 for (auto&& attr : ResourceAttributeIterator()) {
                     auto attrName = EnumMapper::getAttributeDisplay(attr);
-                    if (key == attrName) {
-                        isAttribute = true;
-                        if (val != res.getAttributeValue(attr) && val != res.getAttribute(attr))
-                            match = false;
+                    if (key == attrName && val != res.getAttributeValue(attr) && val != res.getAttribute(attr)) {
+                        match = false;
                     }
-                }
-                // anything else is an option of the resource, e.g. colorTransfer
-                if (!isAttribute && val != res.getOption(key)) {
-                    match = false;
                 }
             }
             if (match && matchLength < map.size() && !profCand.empty()) {
