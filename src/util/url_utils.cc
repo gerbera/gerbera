@@ -33,6 +33,7 @@ Gerbera - https://gerbera.io/
 #include <algorithm>
 #include <cstring>
 #include <sstream>
+#include <system_error>
 
 // URL FORMATTING CONSTANTS
 #define URL_UI_PARAM_SEPARATOR '?'
@@ -418,6 +419,54 @@ std::optional<std::string> resolveMediaReference(std::string text,
         ? std::make_optional(
               fs::path(*decoded).lexically_normal().string())
         : std::nullopt;
+}
+
+std::string namespaceUri(pugi::xml_node node)
+{
+    std::string name = node.name();
+    auto colon = name.find(':');
+    auto attribute = colon == std::string::npos ? "xmlns" : "xmlns:" + name.substr(0, colon);
+    for (auto parent = node; parent; parent = parent.parent()) {
+        if (auto declaration = parent.attribute(attribute.c_str()))
+            return declaration.value();
+    }
+    return {};
+}
+
+bool isNamed(pugi::xml_node node, const std::string& local,
+    const std::string& ns)
+{
+    std::string name = node.name();
+    auto colon = name.find(':');
+    return name.substr(colon == std::string::npos ? 0 : colon + 1) == local && namespaceUri(node) == ns;
+}
+
+std::string nodeBase(pugi::xml_node node, const fs::path& path)
+{
+    std::vector<std::string> bases;
+    for (auto parent = node; parent; parent = parent.parent()) {
+        if (auto base = parent.attribute("xml:base"))
+            bases.emplace_back(base.value());
+    }
+    auto result = URLUtils::filePathToUri(path);
+    for (auto it = bases.rbegin(); it != bases.rend(); ++it)
+        result = URLUtils::resolveUriReference(*it, result);
+    return result;
+}
+
+std::optional<std::string> resolvePlaylistReference(const std::string& reference, const fs::path& source)
+{
+    const auto schemeEnd = reference.find("://");
+    // Keep the existing ASX external protocols and their query bytes unchanged.
+    if (schemeEnd != std::string::npos && toLower(trimString(reference.substr(0, schemeEnd))) != "file")
+        return reference;
+    const auto base = URLUtils::filePathToUri(source);
+    auto location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::NativePath);
+    std::error_code ec;
+    // Existing native names, including literal percent escapes, retain priority.
+    if (!location || !fs::is_regular_file(*location, ec))
+        location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::Uri);
+    return location;
 }
 
 } // namespace URLUtils

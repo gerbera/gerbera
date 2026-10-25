@@ -55,42 +55,15 @@
 
 static constexpr auto xspfNamespace = "http://xspf.org/ns/0/";
 
-static std::string namespaceUri(pugi::xml_node node)
+std::unique_ptr<XmlPlaylist> XmlPlaylist::create(XmlPlaylistType type)
 {
-    std::string name = node.name();
-    auto colon = name.find(':');
-    auto attribute = colon == std::string::npos ? "xmlns" : "xmlns:" + name.substr(0, colon);
-    for (auto parent = node; parent; parent = parent.parent()) {
-        if (auto declaration = parent.attribute(attribute.c_str()))
-            return declaration.value();
-    }
-    return {};
-}
-
-static bool named(pugi::xml_node node, const std::string& local,
-    const std::string& ns = "")
-{
-    std::string name = node.name();
-    auto colon = name.find(':');
-    return name.substr(colon == std::string::npos ? 0 : colon + 1) == local && namespaceUri(node) == ns;
-}
-
-static std::string nodeBase(pugi::xml_node node, const fs::path& path)
-{
-    std::vector<std::string> bases;
-    for (auto parent = node; parent; parent = parent.parent()) {
-        if (auto base = parent.attribute("xml:base"))
-            bases.emplace_back(base.value());
-    }
-    auto result = URLUtils::filePathToUri(path);
-    for (auto it = bases.rbegin(); it != bases.rend(); ++it)
-        result = URLUtils::resolveUriReference(*it, result);
-    return result;
+    if (type == XmlPlaylistType::Wpl)
+        return std::make_unique<WplPlaylist>();
+    return std::make_unique<XspfPlaylist>();
 }
 
 void XmlPlaylist::read(const pugi::xml_document& doc,
-    const fs::path& path,
-    XmlPlaylistType type)
+    const fs::path& path)
 {
     entries.clear();
     int roots = 0;
@@ -102,73 +75,63 @@ void XmlPlaylist::read(const pugi::xml_document& doc,
     }
     if (roots != 1)
         throw_std_runtime_error("XML playlists must have exactly one root element");
-    auto root = doc.document_element();
-    if (type == XmlPlaylistType::Wpl) {
-        if (!named(root, "smil"))
-            throw_std_runtime_error("WPL requires a smil root element");
-        auto body = root.child("body");
-        auto seq = body.child("seq");
-        if (!named(body, "body") || !named(seq, "seq") || body.next_sibling("body") || seq.next_sibling("seq"))
-            throw_std_runtime_error("WPL requires body/seq");
-        for (auto node : seq.children()) {
-            if (named(node, "smartPlaylist"))
-                throw_std_runtime_error(
-                    "Dynamic WPL smartPlaylist queries are not supported");
-            if (!named(node, "media"))
-                continue;
-            if (auto reference = URLUtils::resolveMediaReference(
-                    node.attribute("src").value(), nodeBase(node, path), URLUtils::MediaReferenceType::NativePath))
-                entries.push_back({ { *reference }, {} });
-        }
-    } else {
-        if (!named(root, "playlist", xspfNamespace) || std::string(root.attribute("version").value()) != "1")
+    readEntries(doc.document_element(), path);
+}
+
+void WplPlaylist::readEntries(pugi::xml_node root, const fs::path& path)
+{
+    if (!URLUtils::isNamed(root, "smil"))
+        throw_std_runtime_error("WPL requires a smil root element");
+    auto body = root.child("body");
+    auto seq = body.child("seq");
+    if (!URLUtils::isNamed(body, "body") || !URLUtils::isNamed(seq, "seq") || body.next_sibling("body") || seq.next_sibling("seq"))
+        throw_std_runtime_error("WPL requires body/seq");
+    for (auto node : seq.children()) {
+        if (URLUtils::isNamed(node, "smartPlaylist"))
             throw_std_runtime_error(
-                "XSPF requires playlist version 1 in the XSPF namespace");
-        pugi::xml_node trackList;
-        for (auto node : root.children()) {
-            if (named(node, "trackList", xspfNamespace)) {
-                if (trackList)
-                    throw_std_runtime_error("XSPF requires exactly one trackList");
-                trackList = node;
+                "Dynamic WPL smartPlaylist queries are not supported");
+        if (!URLUtils::isNamed(node, "media"))
+            continue;
+        if (auto reference = URLUtils::resolveMediaReference(
+                node.attribute("src").value(), URLUtils::nodeBase(node, path), URLUtils::MediaReferenceType::NativePath))
+            entries.push_back({ { *reference }, {} });
+    }
+}
+
+void XspfPlaylist::readEntries(pugi::xml_node root, const fs::path& path)
+{
+    if (!URLUtils::isNamed(root, "playlist", xspfNamespace) || std::string(root.attribute("version").value()) != "1")
+        throw_std_runtime_error(
+            "XSPF requires playlist version 1 in the XSPF namespace");
+    pugi::xml_node trackList;
+    for (auto node : root.children()) {
+        if (URLUtils::isNamed(node, "trackList", xspfNamespace)) {
+            if (trackList)
+                throw_std_runtime_error("XSPF requires exactly one trackList");
+            trackList = node;
+        }
+    }
+    if (!trackList)
+        throw_std_runtime_error("XSPF requires exactly one trackList");
+    for (auto track : trackList.children()) {
+        if (!URLUtils::isNamed(track, "track", xspfNamespace))
+            continue;
+        XmlPlaylistEntry entry;
+        for (auto node : track.children()) {
+            if (URLUtils::isNamed(node, "title", xspfNamespace))
+                entry.title = node.text().as_string();
+            if (URLUtils::isNamed(node, "location", xspfNamespace)) {
+                if (auto reference = URLUtils::resolveMediaReference(
+                        node.text().as_string(), URLUtils::nodeBase(node, path), URLUtils::MediaReferenceType::Uri))
+                    entry.locations.push_back(*reference);
             }
         }
-        if (!trackList)
-            throw_std_runtime_error("XSPF requires exactly one trackList");
-        for (auto track : trackList.children()) {
-            if (!named(track, "track", xspfNamespace))
-                continue;
-            XmlPlaylistEntry entry;
-            for (auto node : track.children()) {
-                if (named(node, "title", xspfNamespace))
-                    entry.title = node.text().as_string();
-                if (named(node, "location", xspfNamespace)) {
-                    if (auto reference = URLUtils::resolveMediaReference(
-                            node.text().as_string(), nodeBase(node, path), URLUtils::MediaReferenceType::Uri))
-                        entry.locations.push_back(*reference);
-                }
-            }
-            if (!entry.locations.empty())
-                entries.push_back(std::move(entry));
-        }
+        if (!entry.locations.empty())
+            entries.push_back(std::move(entry));
     }
 }
 
 #ifdef HAVE_JS
-
-static std::optional<std::string> resolvePlaylistReferenceLocation(const std::string& reference, const fs::path& source)
-{
-    const auto schemeEnd = reference.find("://");
-    // Keep the existing ASX external protocols and their query bytes unchanged.
-    if (schemeEnd != std::string::npos && toLower(trimString(reference.substr(0, schemeEnd))) != "file")
-        return reference;
-    const auto base = URLUtils::filePathToUri(source);
-    auto location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::NativePath);
-    std::error_code ec;
-    // Existing native names, including literal percent escapes, retain priority.
-    if (!location || !fs::is_regular_file(*location, ec))
-        location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::Uri);
-    return location;
-}
 
 static duk_ret_t jsResolvePlaylistReference(duk_context* ctx)
 {
@@ -190,7 +153,7 @@ static duk_ret_t jsResolvePlaylistReference(duk_context* ctx)
         duk_pop_2(ctx);
     }
     try {
-        auto location = resolvePlaylistReferenceLocation(reference, source);
+        auto location = URLUtils::resolvePlaylistReference(reference, source);
         if (!location)
             return 0;
         duk_push_lstring(ctx, location->data(), location->size());
@@ -299,9 +262,9 @@ std::optional<std::reference_wrapper<const XmlPlaylistEntry>> PlaylistParserScri
 {
     if (currentTask && !currentTask->isValid())
         throw_std_runtime_error("Aborting playlist import after cancellation");
-    if (xmlPosition >= xmlPlaylist.entries.size())
+    if (!xmlPlaylist || xmlPosition >= xmlPlaylist->entries.size())
         return std::nullopt;
-    return std::cref(xmlPlaylist.entries[xmlPosition++]);
+    return std::cref(xmlPlaylist->entries[xmlPosition++]);
 }
 
 std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(
@@ -429,7 +392,7 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     currentTask = std::move(task);
     currentObjectID = item->getID();
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
-    xmlPlaylist.entries.clear();
+    xmlPlaylist.reset();
     xmlPosition = 0;
     asxEntries.clear();
     asxPosition = 0;
@@ -437,7 +400,8 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     try {
         if (isXmlPlaylist) {
             prepareXmlFile(item->getLocation(), pugi::parse_default | pugi::parse_doctype);
-            xmlPlaylist.read(xmlDoc, item->getLocation(), item->getMimeType() == MIME_TYPE_WPL_PLAYLIST ? XmlPlaylistType::Wpl : XmlPlaylistType::Xspf);
+            xmlPlaylist = XmlPlaylist::create(item->getMimeType() == MIME_TYPE_WPL_PLAYLIST ? XmlPlaylistType::Wpl : XmlPlaylistType::Xspf);
+            xmlPlaylist->read(xmlDoc, item->getLocation());
             useUtf8Converter();
         } else if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
             prepareXmlFile(item->getLocation());
@@ -445,7 +409,7 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
             auto plan = readAsxPlaylistPlan(root, fs::weakly_canonical(item->getLocation()), [&](const std::string& href, const fs::path& source) {
                 if (currentTask && !currentTask->isValid())
                     throw_std_runtime_error("Aborting playlist import after cancellation");
-                auto location = resolvePlaylistReferenceLocation(href, source);
+                auto location = URLUtils::resolvePlaylistReference(href, source);
                 if (!location || !fs::path(*location).is_absolute())
                     return AsxPlaylistDocument { {}, {}, "ASX remote or unsupported ENTRYREF skipped (" + href + ")" };
                 std::error_code ec;
@@ -469,13 +433,13 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
         result = call(obj, nullptr, playlistFunction, rootPath, "", hasResult);
     } catch (const std::runtime_error& e) {
         log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), EX(e));
-        xmlPlaylist.entries.clear();
+        xmlPlaylist.reset();
         asxEntries.clear();
         cleanUp();
         throw;
     }
 
-    xmlPlaylist.entries.clear();
+    xmlPlaylist.reset();
     asxEntries.clear();
     cleanUp();
     log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
