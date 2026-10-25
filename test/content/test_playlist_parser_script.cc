@@ -16,7 +16,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "content/scripting/playlist_parser_script.h"
+#include "content/scripting/xml_playlist.h"
 #include "util/tools.h"
 
 #include <fstream>
@@ -33,12 +33,12 @@ static std::vector<XmlPlaylistEntry> readXmlPlaylist(const fs::path& path,
     auto contents = GrbFile(path).readBinaryFile();
     if (!contents)
         throw std::runtime_error("Cannot open XML fixture");
+    auto playlist = XmlPlaylist::create(type);
     pugi::xml_document doc;
     auto result = doc.load_buffer(contents->data(), contents->size(),
-        pugi::parse_default | pugi::parse_doctype);
+        playlist->getParseFlags());
     if (!result)
         throw std::runtime_error(result.description());
-    auto playlist = XmlPlaylist::create(type);
     playlist->read(doc, path);
     std::vector<XmlPlaylistEntry> entries;
     while (auto entry = playlist->readPlaylistEntry())
@@ -136,12 +136,20 @@ TEST(XmlPlaylistReaderTest, ReusingReaderReplacesPreviousPositions)
     EXPECT_TRUE(playlist.entries.empty());
 }
 
+static AsxPlaylistDocument skipAsxEntryRef(const std::string&, const fs::path&)
+{
+    return { {}, {}, "ENTRYREF intentionally unavailable in this reader fixture" };
+}
+
 TEST(XmlPlaylistReaderTest, AsxIteratorOwnsDocumentAndPreservesLegacyFields)
 {
-    auto playlist = XmlPlaylist::create(XmlPlaylistType::Asx);
+    EXPECT_THROW(XmlPlaylist::create(XmlPlaylistType::Asx), std::runtime_error);
+    EXPECT_THROW(XmlPlaylist::create(XmlPlaylistType::Asx, {}), std::runtime_error);
+    auto playlist = XmlPlaylist::create(XmlPlaylistType::Asx, skipAsxEntryRef);
+    EXPECT_EQ(playlist->getParseFlags(), pugi::parse_default);
     {
         pugi::xml_document doc;
-        ASSERT_TRUE(doc.load_string(R"XML(<AsX version="3.0"><EnTrY>
+        ASSERT_TRUE(doc.load_string(R"XML(<AsX version="3.0"><AUTHOR>Root author</AUTHOR><COPYRIGHT>Root rights</COPYRIGHT><EnTrY>
             <TiTlE>Äther 東京</TiTlE><AbStRaCt>Description</AbStRaCt>
             <ReF HrEf="https://media.example.invalid/a.mp3?token=a+b" WrItEtHrOuGh="2"/>
             <PaRaM NaMe="size" VaLuE="1672"/><param name="mimetype" value="audio/mpeg"/>
@@ -157,14 +165,16 @@ TEST(XmlPlaylistReaderTest, AsxIteratorOwnsDocumentAndPreservesLegacyFields)
     EXPECT_EQ(entry->get().size, "1672");
     EXPECT_EQ(entry->get().mimetype, "audio/mpeg");
     EXPECT_EQ(entry->get().protocol, "http-get");
-    EXPECT_EQ(entry->get().writeThrough, "2");
+    EXPECT_EQ(entry->get().writeThroughs, (std::vector<int> { 2 }));
+    EXPECT_EQ(entry->get().defaults.at("upnp:author"), "Root author");
+    EXPECT_EQ(entry->get().defaults.at("dc:rights"), "Root rights");
     EXPECT_EQ(entry->get().extra.at("Category"), "Mix");
     EXPECT_FALSE(playlist->readPlaylistEntry());
 }
 
-TEST(XmlPlaylistReaderTest, AsxIteratorKeepsRootBaseLastRefAndLegacyScope)
+TEST(XmlPlaylistReaderTest, AsxIteratorKeepsEntryBaseAlternativesRepeatAndMetadata)
 {
-    AsxPlaylist playlist;
+    AsxPlaylist playlist(skipAsxEntryRef);
     pugi::xml_document doc;
     ASSERT_TRUE(doc.load_string(R"XML(<asx><title>First default</title>
         <base href="https://media.example.invalid/base"/>
@@ -177,20 +187,27 @@ TEST(XmlPlaylistReaderTest, AsxIteratorKeepsRootBaseLastRefAndLegacyScope)
     playlist.read(doc, fs::path("/fixture/list.asx"));
     auto first = playlist.readPlaylistEntry();
     ASSERT_TRUE(first);
-    EXPECT_EQ(first->get().locations, (std::vector<std::string> { "https://media.example.invalid/base/last.mp3" }));
-    EXPECT_EQ(first->get().title, "First default");
-    EXPECT_EQ(first->get().writeThrough, "2");
+    EXPECT_EQ(first->get().locations, (std::vector<std::string> { "https://ignored.example.invalid/first.mp3", "https://ignored.example.invalid/last.mp3" }));
+    EXPECT_TRUE(first->get().title.empty()); // The playlist title is not an entry default.
+    EXPECT_EQ(first->get().writeThroughs, (std::vector<int> { 1, 2 }));
+    for (int i = 0; i < 3; ++i) {
+        auto repeated = playlist.readPlaylistEntry();
+        ASSERT_TRUE(repeated);
+        EXPECT_EQ(repeated->get().locations, (std::vector<std::string> { "https://media.example.invalid/base/not-expanded.mp3" }));
+        EXPECT_TRUE(repeated->get().title.empty());
+        EXPECT_EQ(repeated->get().writeThroughs, (std::vector<int> { -1 }));
+    }
     auto second = playlist.readPlaylistEntry();
     ASSERT_TRUE(second);
     EXPECT_EQ(second->get().locations, (std::vector<std::string> { "https://media.example.invalid/base/next.mp3" }));
     EXPECT_TRUE(second->get().title.empty());
-    EXPECT_EQ(second->get().writeThrough, "-1");
+    EXPECT_EQ(second->get().writeThroughs, (std::vector<int> { -1 }));
     EXPECT_FALSE(playlist.readPlaylistEntry());
 }
 
 TEST(XmlPlaylistReaderTest, AsxIteratorUsesSharedUriValidationAndExternalProtocols)
 {
-    AsxPlaylist playlist;
+    AsxPlaylist playlist(skipAsxEntryRef);
     pugi::xml_document doc;
     ASSERT_TRUE(doc.load_string(R"XML(<asx>
         <entry><ref href="file:///fixture/Why%3F.wav"/></entry>
@@ -215,7 +232,7 @@ TEST(XmlPlaylistReaderTest, AsxIteratorUsesSharedUriValidationAndExternalProtoco
 
 TEST(XmlPlaylistReaderTest, ReusingAsxIteratorClearsStateAndRemainsAtEof)
 {
-    AsxPlaylist playlist;
+    AsxPlaylist playlist(skipAsxEntryRef);
     pugi::xml_document doc;
     ASSERT_TRUE(doc.load_string("<asx><entry><ref href='https://media.example.invalid/a.mp3'/></entry></asx>"));
     playlist.read(doc, fs::path("/fixture/list.asx"));

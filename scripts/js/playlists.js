@@ -175,21 +175,40 @@ function readM3uPlaylist(playlist_title, playlistLocation, playlistChain, playli
 }
 // doc-playlist-m3u-parse-end
 
-// The native ASX iterator owns XML parsing and reference resolution.
+// The native parser validates and expands the complete structure before any
+// containers or metadata updates are created. Entries retain child contexts.
 function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playlistDirChain, rootPath) {
-  var result = [];
+  const result = [];
   var playlistOrder = 1;
-  var entry = readPlaylistEntry();
-  while (entry) {
-    entry.location = entry.locations[0];
-    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath);
-    if (playlistDirChain && state) {
-      entry.writeThrough = 0;
-      state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result, rootPath);
+  var source = readPlaylistEntry();
+  while (source) {
+    for (var i = 0; i < source.locations.length; i++) {
+      // An unsuccessful candidate may be mutated by addPlaylistItem.
+      const entry = {
+        location: source.locations[i],
+        title: source.title,
+        description: source.description,
+        mimetype: source.mimetype,
+        protocol: source.protocol,
+        size: source.size,
+        writeThrough: source.writeThroughs[i],
+        extra: {},
+        defaults: {}
+      };
+      for (var parameter in source.extra)
+        entry.extra[parameter] = source.extra[parameter];
+      for (var field in source.defaults)
+        entry.defaults[field] = source.defaults[field];
+      if (addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath)) {
+        if (playlistDirChain) {
+          entry.writeThrough = 0; // Apply source updates once, not once per view.
+          addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result, rootPath);
+        }
+        playlistOrder++;
+        break; // REF children are alternatives for one logical position.
+      }
     }
-    if (state)
-      playlistOrder++;
-    entry = readPlaylistEntry();
+    source = readPlaylistEntry();
   }
   return result;
 }

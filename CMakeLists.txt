@@ -230,6 +230,8 @@ add_library(
     src/content/scripting/script_property.h
     src/content/scripting/scripting_runtime.cc
     src/content/scripting/scripting_runtime.h
+    src/content/scripting/xml_playlist.cc
+    src/content/scripting/xml_playlist.h
     src/content/update_manager.cc
     src/content/update_manager.h
     src/context.cc
@@ -361,6 +363,8 @@ add_library(
     src/upnp/upnp_service.h
     src/upnp/xml_builder.cc
     src/upnp/xml_builder.h
+    src/util/asx_playlist.cc
+    src/util/asx_playlist.h
     src/util/enum_iterator.h
     src/util/executor.h
     src/util/ffmpeg_compat.h

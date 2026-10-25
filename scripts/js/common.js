@@ -959,6 +959,11 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
     exturl.description = entry.description ? entry.description : ("Entry from " + playlist_title);
 
     exturl.extra = entry.extra;
+    if (entry.defaults) {
+      exturl.metaData = [];
+      for (var key in entry.defaults)
+        exturl.metaData[key] = [entry.defaults[key]];
+    }
     exturl.size = entry.size;
     exturl.writeThrough = entry.writeThrough;
 
@@ -988,6 +993,14 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
     }
 
     var item = copyObject(cds);
+
+    // ASX descriptive defaults fill gaps without replacing embedded tags.
+    if (entry.defaults) {
+      for (var key in entry.defaults) {
+        if (!item.metaData[key] || !item.metaData[key].length)
+          item.metaData[key] = [entry.defaults[key]];
+      }
+    }
 
     item.playlistOrder = (entry.order ? entry.order : playlistOrder);
 
