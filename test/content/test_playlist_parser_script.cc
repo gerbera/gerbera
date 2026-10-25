@@ -143,7 +143,9 @@ static AsxPlaylistDocument skipAsxEntryRef(const std::string&, const fs::path&)
 
 TEST(XmlPlaylistReaderTest, AsxIteratorOwnsDocumentAndPreservesLegacyFields)
 {
-    std::unique_ptr<XmlPlaylist> playlist = std::make_unique<AsxPlaylist>(skipAsxEntryRef);
+    EXPECT_THROW(XmlPlaylist::create(XmlPlaylistType::Asx), std::runtime_error);
+    EXPECT_THROW(XmlPlaylist::create(XmlPlaylistType::Asx, {}), std::runtime_error);
+    auto playlist = XmlPlaylist::create(XmlPlaylistType::Asx, skipAsxEntryRef);
     {
         pugi::xml_document doc;
         ASSERT_TRUE(doc.load_string(R"XML(<AsX version="3.0"><AUTHOR>Root author</AUTHOR><COPYRIGHT>Root rights</COPYRIGHT><EnTrY>

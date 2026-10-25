@@ -50,7 +50,8 @@
 #include <vector>
 
 enum class XmlPlaylistType { Wpl,
-    Xspf };
+    Xspf,
+    Asx };
 
 struct XmlPlaylistEntry {
     // XSPF locations are alternatives for one position, not additional tracks.
@@ -72,6 +73,7 @@ class XmlPlaylist {
 public:
     virtual ~XmlPlaylist() = default;
     static std::unique_ptr<XmlPlaylist> create(XmlPlaylistType type);
+    static std::unique_ptr<XmlPlaylist> create(XmlPlaylistType type, AsxPlaylistLoader loader);
     /// Validate the document structure before the script changes playlist contents.
     void read(const pugi::xml_document& doc, const fs::path& path);
     /// Returned entries remain valid until the next iterator call or read.

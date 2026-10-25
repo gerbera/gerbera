@@ -39,6 +39,7 @@
 #include "util/tools.h"
 #include "util/url_utils.h"
 
+#include <map>
 #include <regex>
 #include <utility>
 
@@ -61,9 +62,18 @@ static constexpr auto xspfNamespace = "http://xspf.org/ns/0/";
 
 std::unique_ptr<XmlPlaylist> XmlPlaylist::create(XmlPlaylistType type)
 {
+    if (type == XmlPlaylistType::Asx)
+        throw_std_runtime_error("ASX requires an explicit ENTRYREF loader");
     if (type == XmlPlaylistType::Wpl)
         return std::make_unique<WplPlaylist>();
     return std::make_unique<XspfPlaylist>();
+}
+
+std::unique_ptr<XmlPlaylist> XmlPlaylist::create(XmlPlaylistType type, AsxPlaylistLoader loader)
+{
+    if (type == XmlPlaylistType::Asx)
+        return std::make_unique<AsxPlaylist>(std::move(loader));
+    return create(type);
 }
 
 void XmlPlaylist::read(const pugi::xml_document& doc,
@@ -411,21 +421,22 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     log_debug("Checking playlist {} ...", obj->getLocation().string());
-    bool isXmlPlaylist = item->getMimeType() == MIME_TYPE_WPL_PLAYLIST || item->getMimeType() == MIME_TYPE_XSPF_PLAYLIST;
+    static const std::map<std::string, XmlPlaylistType> xmlPlaylistTypes {
+        { MIME_TYPE_WPL_PLAYLIST, XmlPlaylistType::Wpl },
+        { MIME_TYPE_XSPF_PLAYLIST, XmlPlaylistType::Xspf },
+        { MIME_TYPE_ASX_PLAYLIST, XmlPlaylistType::Asx },
+    };
+    auto xmlPlaylistType = xmlPlaylistTypes.find(item->getMimeType());
     currentTask = std::move(task);
     currentObjectID = item->getID();
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     xmlPlaylist.reset();
     std::vector<int> result;
     try {
-        if (isXmlPlaylist) {
-            prepareXmlFile(item->getLocation(), pugi::parse_default | pugi::parse_doctype);
-            xmlPlaylist = XmlPlaylist::create(item->getMimeType() == MIME_TYPE_WPL_PLAYLIST ? XmlPlaylistType::Wpl : XmlPlaylistType::Xspf);
-            xmlPlaylist->read(xmlDoc, item->getLocation());
-            useUtf8Converter();
-        } else if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
-            prepareXmlFile(item->getLocation());
-            xmlPlaylist = std::make_unique<AsxPlaylist>([this](const std::string& href, const fs::path& source) {
+        if (xmlPlaylistType != xmlPlaylistTypes.end()) {
+            auto flags = xmlPlaylistType->second == XmlPlaylistType::Asx ? pugi::parse_default : pugi::parse_default | pugi::parse_doctype;
+            prepareXmlFile(item->getLocation(), flags);
+            xmlPlaylist = XmlPlaylist::create(xmlPlaylistType->second, [this](const std::string& href, const fs::path& source) {
                 if (currentTask && !currentTask->isValid())
                     throw_std_runtime_error("Aborting playlist import after cancellation");
                 auto location = URLUtils::resolvePlaylistReference(href, source);
@@ -439,7 +450,7 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
                 readXmlFile(*document, path);
                 return AsxPlaylistDocument { path, std::move(document), {} };
             });
-            xmlPlaylist->read(xmlDoc, fs::weakly_canonical(item->getLocation()));
+            xmlPlaylist->read(xmlDoc, xmlPlaylistType->second == XmlPlaylistType::Asx ? fs::weakly_canonical(item->getLocation()) : item->getLocation());
             useUtf8Converter();
         } else {
             auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
