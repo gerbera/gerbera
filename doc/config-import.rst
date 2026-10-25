@@ -2427,16 +2427,15 @@ Resource attributes can be seen in the details page for an item on the web UI. T
 
 .. versionadded:: HEAD
 
-A mapping can also test the options of a resource, which the details page shows as well. The ffmpeg handler
-sets ``colorTransfer`` to the transfer characteristics of the video, named as ffprobe names them: ``bt709``,
-``smpte2084`` for HDR10 (PQ), ``arib-std-b67`` for HLG. HDR video can then get a profile of its own, e.g. to
-be transcoded for a client that cannot show it:
+The ffmpeg handler stores the transfer characteristics of the video in the resource attribute ``colorTransfer``,
+named as ffprobe names them: ``bt709``, ``smpte2084`` for HDR10 (PQ), ``arib-std-b67`` for HLG. HDR video can
+then get a profile of its own, e.g. to be transcoded for a client that cannot show it:
 
    .. code:: xml
 
       <map from="mkv" colorTransfer="smpte2084" to="MKV_HDR"/>
 
-Files imported before get the option when they are imported again.
+Files imported before get the attribute when they are imported again.
 
    .. confval:: contenttype-dlnaprofile map from
       :type: :confval:`String`

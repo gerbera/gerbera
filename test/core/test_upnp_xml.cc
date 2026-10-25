@@ -210,6 +210,33 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
 }
 
+TEST_F(UpnpXmlTest, RenderObjectContainerKeepsColorTransferPrivate)
+{
+    // arrange
+    pugi::xml_document didlLite;
+    auto root = didlLite.append_child("DIDL-Lite");
+    auto obj = std::make_shared<CdsContainer>(CdsEntryType::Directory);
+    obj->setID(1);
+    obj->setParentID(2);
+    obj->setRestricted(false);
+    obj->setTitle("Title");
+    obj->setClass(UPNP_CLASS_MUSIC_ALBUM);
+
+    auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
+    resource->addAttribute(ResourceAttribute::RESOURCE_FILE, "/home/resource/cover.jpg");
+    resource->addAttribute(ResourceAttribute::COLORTRANSFER, "smpte2084");
+    obj->addResource(resource);
+
+    // act
+    subject->renderObject(obj, { "*" }, std::string::npos, root);
+
+    // assert
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "");
+    EXPECT_NE(didlLiteXml.find("<res id=\"1.0\" protocolInfo="), std::string::npos);
+    EXPECT_EQ(didlLiteXml.find("colorTransfer"), std::string::npos);
+}
+
 TEST_F(UpnpXmlTest, RenderObjectItem)
 {
     // arrange
@@ -567,7 +594,7 @@ public:
     using UpnpXMLBuilder::UpnpXMLBuilder;
 };
 
-TEST(UpnpXmlProfileTest, MatchesResourceOptions)
+TEST(UpnpXmlProfileTest, MatchesColorTransfer)
 {
     auto config = std::make_shared<ColorTransferConfigMock>();
     auto database = std::make_shared<DatabaseMock>(config);
@@ -578,9 +605,9 @@ TEST(UpnpXmlProfileTest, MatchesResourceOptions)
     ProfileXmlBuilder subject(context, "http://server");
 
     CdsResource hdr(ContentHandler::DEFAULT, ResourcePurpose::Content);
-    hdr.addOption(RESOURCE_OPTION_COLOR_TRANSFER, "smpte2084");
+    hdr.addAttribute(ResourceAttribute::COLORTRANSFER, "smpte2084");
     CdsResource sdr(ContentHandler::DEFAULT, ResourcePurpose::Content);
-    sdr.addOption(RESOURCE_OPTION_COLOR_TRANSFER, "bt709");
+    sdr.addAttribute(ResourceAttribute::COLORTRANSFER, "bt709");
     CdsResource unknown(ContentHandler::DEFAULT, ResourcePurpose::Content);
 
     EXPECT_EQ(subject.dlnaProfileString(hdr, CONTENT_TYPE_MKV, nullptr, false), "MKV_HDR");
