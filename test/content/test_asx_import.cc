@@ -231,8 +231,9 @@ protected:
                         continue;
                     auto item = std::dynamic_pointer_cast<CdsItem>(items[n]);
                     ASSERT_NE(item, nullptr);
-                    if (resources == AsxResourceChecks::Http)
+                    if (resources == AsxResourceChecks::Http) {
                         EXPECT_EQ(resourceBytes(item), readBytes(mediaFiles.at(id).at(key)));
+                    }
                 }
             }
         }

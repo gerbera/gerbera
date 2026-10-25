@@ -160,12 +160,7 @@ static duk_ret_t jsResolvePlaylistReference(duk_context* ctx)
         duk_pop_2(ctx);
     }
     try {
-        const auto base = URLUtils::filePathToUri(source);
-        auto location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::NativePath);
-        std::error_code ec;
-        // Existing native names, including literal percent escapes, retain priority.
-        if (!location || !fs::is_regular_file(*location, ec))
-            location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::Uri);
+        auto location = URLUtils::resolvePlaylistReference(reference, source);
         if (!location)
             return 0;
         duk_push_lstring(ctx, location->data(), location->size());
