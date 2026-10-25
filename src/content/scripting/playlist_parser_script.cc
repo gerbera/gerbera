@@ -453,7 +453,7 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
             xmlPlaylist->read(xmlDoc, xmlPlaylistType->second == XmlPlaylistType::Asx ? fs::weakly_canonical(item->getLocation()) : item->getLocation());
             useUtf8Converter();
         } else {
-            auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
+            auto mode = item->getMimeType() == MIME_TYPE_MPEGURL ? charsetMode : TextFileCharset::Default;
             if (mode != TextFileCharset::Default && toLower(item->getLocation().extension().string()) == ".m3u8")
                 mode = TextFileCharset::Utf8;
             prepareFile(item->getLocation(), mode);
