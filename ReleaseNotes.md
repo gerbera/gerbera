@@ -15,6 +15,7 @@ Because of changes to the configuration defaults, you should generate the the de
 - More preconfigured media types
 - Multiple clients at one IP
 - Seeking in transcoded streams
+- Support for WPL and XSPF playlists
 - Transcoding with constant bitrate for seeking
 
 ### FIXES

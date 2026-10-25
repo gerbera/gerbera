@@ -926,7 +926,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "audio/x-dsd", CONTENT_TYPE_DSD },
         { "audio/x-flac", CONTENT_TYPE_FLAC },
         { "audio/x-matroska", CONTENT_TYPE_MKA },
-        { "audio/x-mpegurl", CONTENT_TYPE_PLAYLIST },
+        { MIME_TYPE_MPEGURL, CONTENT_TYPE_PLAYLIST },
         { "audio/x-ms-wma", CONTENT_TYPE_WMA },
         { "audio/x-scpls", CONTENT_TYPE_PLAYLIST },
         { "audio/x-wav", CONTENT_TYPE_PCM },
@@ -1007,8 +1007,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { "jpg", "image/jpeg" },
         { "jpeg", "image/jpeg" },
         { "m2ts", "video/mp2t" }, // LibMagic fails to identify MPEG2 Transport Streams
-        { "m3u", "audio/x-mpegurl" },
-        { "m3u8", "audio/x-mpegurl" },
+        { "m3u", MIME_TYPE_MPEGURL },
+        { "m3u8", MIME_TYPE_MPEGURL },
         { "m4a", "audio/mp4" }, // LibMagic identifies this as audio/x-m4a, preventing TagLib from parsing it
         { "mka", "audio/x-matroska" },
         { "mkv", "video/x-matroska" },
