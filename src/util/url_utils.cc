@@ -33,6 +33,7 @@ Gerbera - https://gerbera.io/
 #include <algorithm>
 #include <cstring>
 #include <sstream>
+#include <system_error>
 
 // URL FORMATTING CONSTANTS
 #define URL_UI_PARAM_SEPARATOR '?'
@@ -451,6 +452,21 @@ std::string nodeBase(pugi::xml_node node, const fs::path& path)
     for (auto it = bases.rbegin(); it != bases.rend(); ++it)
         result = URLUtils::resolveUriReference(*it, result);
     return result;
+}
+
+std::optional<std::string> resolvePlaylistReference(const std::string& reference, const fs::path& source)
+{
+    const auto schemeEnd = reference.find("://");
+    // Keep the existing ASX external protocols and their query bytes unchanged.
+    if (schemeEnd != std::string::npos && toLower(trimString(reference.substr(0, schemeEnd))) != "file")
+        return reference;
+    const auto base = URLUtils::filePathToUri(source);
+    auto location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::NativePath);
+    std::error_code ec;
+    // Existing native names, including literal percent escapes, retain priority.
+    if (!location || !fs::is_regular_file(*location, ec))
+        location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::Uri);
+    return location;
 }
 
 } // namespace URLUtils
