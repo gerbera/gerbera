@@ -24,6 +24,8 @@
 #include "util/url_utils.h"
 
 #include <gtest/gtest.h>
+#include <map>
+#include <pugixml.hpp>
 
 class URLUtilsTest : public ::testing::Test {
 
@@ -69,4 +71,127 @@ TEST_F(URLUtilsTest, ParseParametersTest)
     ASSERT_EQ(m.size(), 2);
     EXPECT_EQ(m["paramA"], "value 1");
     EXPECT_EQ(m["paramB"], "2");
+}
+
+TEST_F(URLUtilsTest, ResolvesRfc3986ReferencesAndPreservesQueryAndFragment)
+{
+    const std::map<std::string, std::string> examples {
+        { "g", "http://a/b/c/g" },
+        { "./g", "http://a/b/c/g" },
+        { "g/", "http://a/b/c/g/" },
+        { "/g", "http://a/g" },
+        { "//g", "http://g" },
+        { "?y", "http://a/b/c/d;p?y" },
+        { "g?y", "http://a/b/c/g?y" },
+        { "#s", "http://a/b/c/d;p?q#s" },
+        { "g#s", "http://a/b/c/g#s" },
+        { "g?y#s", "http://a/b/c/g?y#s" },
+        { ";x", "http://a/b/c/;x" },
+        { "g;x", "http://a/b/c/g;x" },
+        { "g;x?y#s", "http://a/b/c/g;x?y#s" },
+        { ".", "http://a/b/c/" },
+        { "./", "http://a/b/c/" },
+        { "..", "http://a/b/" },
+        { "../", "http://a/b/" },
+        { "../g", "http://a/b/g" },
+        { "../..", "http://a/" },
+        { "../../", "http://a/" },
+        { "../../g", "http://a/g" },
+        { "../../../g", "http://a/g" },
+        { "/./g", "http://a/g" },
+        { "/../g", "http://a/g" },
+        { "g/./h", "http://a/b/c/g/h" },
+        { "g/../h", "http://a/b/c/h" },
+        { "g;x=1/../y", "http://a/b/c/y" },
+        { "g?y/./x", "http://a/b/c/g?y/./x" },
+        { "g#s/../x", "http://a/b/c/g#s/../x" },
+        { "http://g/a/../b", "http://g/b" },
+        { "http://g//a/./b", "http://g//a/b" },
+    };
+    for (const auto& [reference, expected] : examples) {
+        SCOPED_TRACE(reference);
+        EXPECT_EQ(URLUtils::resolveUriReference(reference, "http://a/b/c/d;p?q"),
+            expected);
+    }
+}
+
+TEST_F(URLUtilsTest, NativeMediaPathsPreserveLiteralReservedCharacters)
+{
+    const auto folder = fs::absolute(fs::temp_directory_path());
+    const auto base = URLUtils::filePathToUri(folder / "list with % and ?.xspf");
+    EXPECT_EQ(URLUtils::resolveMediaReference("a%20?b#c.wav", base, URLUtils::MediaReferenceType::NativePath),
+        (folder / "a%20?b#c.wav").lexically_normal().string());
+}
+
+TEST_F(URLUtilsTest, FileUriReferencesRejectInvalidEncodingAndRemoteAuthorities)
+{
+    const auto base = URLUtils::filePathToUri(fs::temp_directory_path() / "list.xspf");
+    for (const auto* reference :
+        { "file:///a%00b.wav", "file:///a%GG.wav", "file://remote/a.wav" }) {
+        SCOPED_TRACE(reference);
+        EXPECT_FALSE(URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::Uri));
+    }
+}
+
+TEST_F(URLUtilsTest, HttpMediaReferencesKeepEncodedQueryAndFragment)
+{
+    EXPECT_EQ(URLUtils::resolveMediaReference(
+                  "../a.wav?token=a%26b+c#part",
+                  "https://example.invalid/music/list.xspf", URLUtils::MediaReferenceType::Uri),
+        "https://example.invalid/a.wav?token=a%26b+c#part");
+}
+
+TEST_F(URLUtilsTest, SharedDecoderKeepsFormAndFilePathSemanticsSeparate)
+{
+    EXPECT_EQ(URLUtils::urlUnescape("a+b%20c%2Fd"), "a b c/d");
+    EXPECT_EQ(URLUtils::urlUnescape("a+b%20c%2Fd", URLUtils::UrlMode::Form), "a b c/d");
+    EXPECT_EQ(URLUtils::urlUnescape("a%"), "a");
+    EXPECT_EQ(URLUtils::urlUnescape("a%2"), "a");
+    EXPECT_EQ(URLUtils::urlUnescape("%GG"), std::string(1, '\0'));
+    EXPECT_EQ(URLUtils::urlUnescape("a+b%20c%2fd", URLUtils::UrlMode::FilePath), "a+b c/d");
+    EXPECT_EQ(URLUtils::urlUnescape("%C3%A4", URLUtils::UrlMode::FilePath), "\xC3\xA4");
+    for (const auto* value : { "%", "%2", "%GG", "%00", "%C3%28", "%FF" }) {
+        SCOPED_TRACE(value);
+        EXPECT_FALSE(URLUtils::urlUnescape(value, URLUtils::UrlMode::FilePath));
+    }
+}
+
+TEST_F(URLUtilsTest, SharedEncoderPreservesLegacyTextAndEncodesUriPaths)
+{
+    EXPECT_EQ(URLUtils::urlEscape("a/b~c:d+e%?\xC3\xA4"),
+        "a%2Fb%7Ec%3Ad%2Be%25%3F\xC3\xA4");
+    EXPECT_EQ(URLUtils::urlEscape("a/b~c:d+e%?\xC3\xA4", URLUtils::UrlMode::FilePath),
+        "a/b~c:d%2Be%25%3F%C3%A4");
+}
+
+TEST_F(URLUtilsTest, UriSplittingPreservesExplicitEmptyQueryAndFragment)
+{
+    EXPECT_EQ(URLUtils::resolveUriReference("?", "https://a/b?old#old"), "https://a/b?");
+    EXPECT_EQ(URLUtils::resolveUriReference("#", "https://a/b?old#old"), "https://a/b?old#");
+    EXPECT_EQ(URLUtils::resolveUriReference("?#", "https://a/b?old#old"), "https://a/b?#");
+    EXPECT_EQ(URLUtils::resolveUriReference("//b?x/y#z", "https://a/file"), "https://b?x/y#z");
+}
+
+TEST_F(URLUtilsTest, XmlNamesUseInheritedAndReboundNamespaces)
+{
+    pugi::xml_document doc;
+    ASSERT_TRUE(doc.load_string("<root xmlns='urn:outer' xmlns:p='urn:prefix'><p:item/><group xmlns=''><item/><p:item xmlns:p='urn:inner'/></group></root>"));
+    auto root = doc.document_element();
+    EXPECT_EQ(URLUtils::namespaceUri(root), "urn:outer");
+    EXPECT_TRUE(URLUtils::isNamed(root.child("p:item"), "item", "urn:prefix"));
+    auto group = root.child("group");
+    EXPECT_TRUE(URLUtils::isNamed(group.child("item"), "item"));
+    EXPECT_EQ(URLUtils::namespaceUri(group.child("p:item")), "urn:inner");
+    EXPECT_FALSE(URLUtils::isNamed(group.child("p:item"), "item", "urn:prefix"));
+}
+
+TEST_F(URLUtilsTest, XmlBaseResolvesAncestorsBeforeTheElement)
+{
+    pugi::xml_document doc;
+    ASSERT_TRUE(doc.load_string("<root xml:base='https://example.invalid/music/'><group xml:base='../playlists/'><item xml:base='disc/'/></group></root>"));
+    auto path = fs::temp_directory_path() / "list.xspf";
+    EXPECT_EQ(URLUtils::nodeBase(doc.document_element().child("group").child("item"), path),
+        "https://example.invalid/playlists/disc/");
+    ASSERT_TRUE(doc.load_string("<root><item/></root>"));
+    EXPECT_EQ(URLUtils::nodeBase(doc.document_element().child("item"), path), URLUtils::filePathToUri(path));
 }

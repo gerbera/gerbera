@@ -73,6 +73,11 @@ protected:
     void cleanUp();
     void prepareFile(const fs::path& path, TextFileCharset charset = TextFileCharset::Default);
 
+    /// Load XML through the common file utility, retaining BOM/declaration decoding.
+    void prepareXmlFile(const fs::path& path, unsigned int flags = pugi::parse_default);
+    /// Preserve the parser converter until cleanUp when input is already UTF-8.
+    void useUtf8Converter();
+
     static pugi::xml_node nullNode;
     /// @brief maximum length of one text line
     static constexpr int ONE_TEXTLINE_BYTES = 1024;

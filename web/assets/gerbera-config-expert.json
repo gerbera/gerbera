@@ -729,7 +729,7 @@
         {
           "item": "/import/attribute::import-mode",
           "caption": "Import Mode",
-          "editable": true
+          "editable": false
         },
         {
           "item": "/import/attribute::nomedia-file",
@@ -792,7 +792,7 @@
             {
               "item": "/import/autoscan/timed/directory/attribute::import-mode",
               "caption": "Import Mode",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/timed/directory/attribute::recursive",
@@ -825,13 +825,28 @@
               "editable": false
             },
             {
+              "item": "/import/autoscan/timed/directory/container-type-audio/attribute::item-limit",
+              "caption": "Item Limit for Audio",
+              "editable": false
+            },
+            {
               "item": "/import/autoscan/timed/directory/attribute::container-type-image",
               "caption": "Container Type for Image",
               "editable": false
             },
             {
+              "item": "/import/autoscan/timed/directory/container-type-image/attribute::item-limit",
+              "caption": "Item Limit for Image",
+              "editable": false
+            },
+            {
               "item": "/import/autoscan/timed/directory/attribute::container-type-video",
               "caption": "Container Type for Video",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/timed/directory/container-type-video/attribute::item-limit",
+              "caption": "Item Limit for Video",
               "editable": false
             },
             {
@@ -872,7 +887,7 @@
             {
               "item": "/import/autoscan/inotify/directory/attribute::import-mode",
               "caption": "Import Mode",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/inotify/directory/attribute::recursive",
@@ -910,13 +925,28 @@
               "editable": false
             },
             {
+              "item": "/import/autoscan/inotify/directory/container-type-audio/attribute::item-limit",
+              "caption": "Item Limit for Audio",
+              "editable": false
+            },
+            {
               "item": "/import/autoscan/inotify/directory/attribute::container-type-image",
               "caption": "Container Type for Image",
               "editable": false
             },
             {
+              "item": "/import/autoscan/inotify/directory/container-type-image/attribute::item-limit",
+              "caption": "Item Limit for Image",
+              "editable": false
+            },
+            {
               "item": "/import/autoscan/inotify/directory/attribute::container-type-video",
               "caption": "Container Type for Video",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/inotify/directory/container-type-video/attribute::item-limit",
+              "caption": "Item Limit for Video",
               "editable": false
             },
             {
@@ -957,7 +987,7 @@
             {
               "item": "/import/autoscan/manual/directory/attribute::import-mode",
               "caption": "Import Mode",
-              "editable": true
+              "editable": false
             },
             {
               "item": "/import/autoscan/manual/directory/attribute::recursive",
@@ -990,13 +1020,28 @@
               "editable": false
             },
             {
+              "item": "/import/autoscan/manual/directory/container-type-audio/attribute::item-limit",
+              "caption": "Item Limit for Audio",
+              "editable": false
+            },
+            {
               "item": "/import/autoscan/manual/directory/attribute::container-type-image",
               "caption": "Container Type for Image",
               "editable": false
             },
             {
+              "item": "/import/autoscan/manual/directory/container-type-image/attribute::item-limit",
+              "caption": "Item Limit for Image",
+              "editable": false
+            },
+            {
               "item": "/import/autoscan/manual/directory/attribute::container-type-video",
               "caption": "Container Type for Video",
+              "editable": false
+            },
+            {
+              "item": "/import/autoscan/manual/directory/container-type-video/attribute::item-limit",
+              "caption": "Item Limit for Video",
               "editable": false
             },
             {

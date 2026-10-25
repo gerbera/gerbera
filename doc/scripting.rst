@@ -782,8 +782,28 @@ They can be used by the import and by the playlist script.
                 return 'm3u';
             if (mimetype == 'audio/x-scpls')
                 return 'pls';
+            if (mimetype == 'video/x-ms-asx')
+                return 'asx';
+            if (mimetype == 'application/vnd.ms-wpl')
+                return 'wpl';
+            if (mimetype == 'application/xspf+xml')
+                return 'xspf';
             return '';
         }
+
+.. js:function:: readPlaylistEntry()
+
+    Available to the playlist parser for WPL and XSPF after native XML validation.
+    Returns the next object with a ``locations`` array and optional ``title``
+    string, or undefined at the end. Locations are absolute local paths or
+    encoded HTTP(S) URLs. For XSPF, locations in the same object are alternatives
+    for one track, while separate objects preserve repeated positions. The
+    standard script tries alternatives in order and uses ``addPlaylistItem``
+    for metadata, resources and each configured playlist view. Cancellation
+    aborts the script instead of reporting a successful partial import.
+
+    Existing ASX/NFO ``readXml`` behavior and text-playlist ``readln`` behavior
+    are unchanged.
 
 
 

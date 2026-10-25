@@ -529,6 +529,7 @@ static bool isPrivateAttribute(ResourceAttribute attribute)
     case ResourceAttribute::FORMAT:
     case ResourceAttribute::ORIENTATION:
     case ResourceAttribute::PIXELFORMAT:
+    case ResourceAttribute::COLORTRANSFER:
         return true;
     default:
         return false;
