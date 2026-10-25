@@ -26,6 +26,7 @@ Gerbera - https://gerbera.io/
 #include "exceptions.h"
 #include "upnp/compat.h"
 #include "util/fmt_compat.h"
+#include "util/grb_fs.h"
 
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -464,7 +465,7 @@ std::optional<std::string> resolvePlaylistReference(const std::string& reference
     auto location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::NativePath);
     std::error_code ec;
     // Existing native names, including literal percent escapes, retain priority.
-    if (!location || !fs::is_regular_file(*location, ec))
+    if (!location || !isRegularFile(*location, ec))
         location = URLUtils::resolveMediaReference(reference, base, URLUtils::MediaReferenceType::Uri);
     return location;
 }

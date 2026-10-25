@@ -25,6 +25,7 @@
 #include "cds/cds_objects.h"
 #include "config/result/autoscan.h"
 #include "content/scripting/playlist_parser_script.h"
+#include "content/scripting/xml_playlist.h"
 #include "exceptions.h"
 #include "upnp/upnp_common.h"
 #include "util/tools.h"

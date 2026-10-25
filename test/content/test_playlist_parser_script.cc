@@ -16,7 +16,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "content/scripting/playlist_parser_script.h"
+#include "content/scripting/xml_playlist.h"
 #include "util/tools.h"
 
 #include <fstream>
@@ -33,12 +33,12 @@ static std::vector<XmlPlaylistEntry> readXmlPlaylist(const fs::path& path,
     auto contents = GrbFile(path).readBinaryFile();
     if (!contents)
         throw std::runtime_error("Cannot open XML fixture");
+    auto playlist = XmlPlaylist::create(type);
     pugi::xml_document doc;
     auto result = doc.load_buffer(contents->data(), contents->size(),
-        pugi::parse_default | pugi::parse_doctype);
+        playlist->getParseFlags());
     if (!result)
         throw std::runtime_error(result.description());
-    auto playlist = XmlPlaylist::create(type);
     playlist->read(doc, path);
     std::vector<XmlPlaylistEntry> entries;
     while (auto entry = playlist->readPlaylistEntry())
@@ -146,6 +146,7 @@ TEST(XmlPlaylistReaderTest, AsxIteratorOwnsDocumentAndPreservesLegacyFields)
     EXPECT_THROW(XmlPlaylist::create(XmlPlaylistType::Asx), std::runtime_error);
     EXPECT_THROW(XmlPlaylist::create(XmlPlaylistType::Asx, {}), std::runtime_error);
     auto playlist = XmlPlaylist::create(XmlPlaylistType::Asx, skipAsxEntryRef);
+    EXPECT_EQ(playlist->getParseFlags(), pugi::parse_default);
     {
         pugi::xml_document doc;
         ASSERT_TRUE(doc.load_string(R"XML(<AsX version="3.0"><AUTHOR>Root author</AUTHOR><COPYRIGHT>Root rights</COPYRIGHT><EnTrY>
