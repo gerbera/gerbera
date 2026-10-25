@@ -39,6 +39,7 @@
 #include "util/tools.h"
 #include "util/url_utils.h"
 
+#include <map>
 #include <utility>
 
 #ifdef HAVE_JS
@@ -424,21 +425,22 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     log_debug("Checking playlist {} ...", obj->getLocation().string());
-    bool isXmlPlaylist = item->getMimeType() == MIME_TYPE_WPL_PLAYLIST || item->getMimeType() == MIME_TYPE_XSPF_PLAYLIST;
+    static const std::map<std::string, XmlPlaylistType> xmlPlaylistTypes {
+        { MIME_TYPE_WPL_PLAYLIST, XmlPlaylistType::Wpl },
+        { MIME_TYPE_XSPF_PLAYLIST, XmlPlaylistType::Xspf },
+        { MIME_TYPE_ASX_PLAYLIST, XmlPlaylistType::Asx },
+    };
+    auto xmlPlaylistType = xmlPlaylistTypes.find(item->getMimeType());
     currentTask = std::move(task);
     currentObjectID = item->getID();
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     xmlPlaylist.reset();
     std::vector<int> result;
     try {
-        if (isXmlPlaylist) {
-            prepareXmlFile(item->getLocation(), pugi::parse_default | pugi::parse_doctype);
-            xmlPlaylist = XmlPlaylist::create(item->getMimeType() == MIME_TYPE_WPL_PLAYLIST ? XmlPlaylistType::Wpl : XmlPlaylistType::Xspf);
-            xmlPlaylist->read(xmlDoc, item->getLocation());
-            useUtf8Converter();
-        } else if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
-            prepareXmlFile(item->getLocation());
-            xmlPlaylist = XmlPlaylist::create(XmlPlaylistType::Asx);
+        if (xmlPlaylistType != xmlPlaylistTypes.end()) {
+            auto flags = xmlPlaylistType->second == XmlPlaylistType::Asx ? pugi::parse_default : pugi::parse_default | pugi::parse_doctype;
+            prepareXmlFile(item->getLocation(), flags);
+            xmlPlaylist = XmlPlaylist::create(xmlPlaylistType->second);
             xmlPlaylist->read(xmlDoc, item->getLocation());
             useUtf8Converter();
         } else {
