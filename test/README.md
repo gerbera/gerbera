@@ -19,6 +19,11 @@ python3 test/content/test_playlist_updates.py --binary build/gerbera \
 Use a fresh work directory for each run. Omit `--work-directory` for automatic
 temporary-file cleanup.
 
+`ShutdownDuringStartup` starts a real Gerbera process on Linux when Python 3 is
+available and sends it SIGTERM as soon as the web server accepts a connection, three times. It fails
+if the process is still running 20 seconds later. It uses a generated configuration and
+database, and needs a usable IPv4 network interface for the UPnP listener.
+
 This file outlines how the Gerbera system uses the **GoogleTest**
 framework to provide unit testing for the C++ code-base.
 
