@@ -316,7 +316,7 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
         } else if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
             prepareXmlFile(item->getLocation());
         } else {
-            auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
+            auto mode = item->getMimeType() == MIME_TYPE_MPEGURL ? charsetMode : TextFileCharset::Default;
             if (mode != TextFileCharset::Default && toLower(item->getLocation().extension().string()) == ".m3u8")
                 mode = TextFileCharset::Utf8;
             prepareFile(item->getLocation(), mode);
