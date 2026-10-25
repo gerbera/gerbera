@@ -25,6 +25,7 @@
 
 #include <gtest/gtest.h>
 #include <map>
+#include <pugixml.hpp>
 
 class URLUtilsTest : public ::testing::Test {
 
@@ -169,4 +170,28 @@ TEST_F(URLUtilsTest, UriSplittingPreservesExplicitEmptyQueryAndFragment)
     EXPECT_EQ(URLUtils::resolveUriReference("#", "https://a/b?old#old"), "https://a/b?old#");
     EXPECT_EQ(URLUtils::resolveUriReference("?#", "https://a/b?old#old"), "https://a/b?#");
     EXPECT_EQ(URLUtils::resolveUriReference("//b?x/y#z", "https://a/file"), "https://b?x/y#z");
+}
+
+TEST_F(URLUtilsTest, XmlNamesUseInheritedAndReboundNamespaces)
+{
+    pugi::xml_document doc;
+    ASSERT_TRUE(doc.load_string("<root xmlns='urn:outer' xmlns:p='urn:prefix'><p:item/><group xmlns=''><item/><p:item xmlns:p='urn:inner'/></group></root>"));
+    auto root = doc.document_element();
+    EXPECT_EQ(URLUtils::namespaceUri(root), "urn:outer");
+    EXPECT_TRUE(URLUtils::isNamed(root.child("p:item"), "item", "urn:prefix"));
+    auto group = root.child("group");
+    EXPECT_TRUE(URLUtils::isNamed(group.child("item"), "item"));
+    EXPECT_EQ(URLUtils::namespaceUri(group.child("p:item")), "urn:inner");
+    EXPECT_FALSE(URLUtils::isNamed(group.child("p:item"), "item", "urn:prefix"));
+}
+
+TEST_F(URLUtilsTest, XmlBaseResolvesAncestorsBeforeTheElement)
+{
+    pugi::xml_document doc;
+    ASSERT_TRUE(doc.load_string("<root xml:base='https://example.invalid/music/'><group xml:base='../playlists/'><item xml:base='disc/'/></group></root>"));
+    auto path = fs::temp_directory_path() / "list.xspf";
+    EXPECT_EQ(URLUtils::nodeBase(doc.document_element().child("group").child("item"), path),
+        "https://example.invalid/playlists/disc/");
+    ASSERT_TRUE(doc.load_string("<root><item/></root>"));
+    EXPECT_EQ(URLUtils::nodeBase(doc.document_element().child("item"), path), URLUtils::filePathToUri(path));
 }

@@ -210,8 +210,9 @@ protected:
         // metadata and auxdata, rather than only checking the new genres.
         const auto genreKey = MetaEnumMapper::getMetaFieldName(MetadataFields::M_GENRE);
         for (const auto& [field, value] : before->getMetaData()) {
-            if (field != genreKey)
+            if (field != genreKey) {
                 EXPECT_THAT(after->getMetaGroup(field), ::testing::Contains(value)) << field;
+            }
         }
         for (const auto& [key, value] : before->getAuxData())
             EXPECT_EQ(after->getAuxData(key), value) << key;

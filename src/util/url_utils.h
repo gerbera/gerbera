@@ -28,6 +28,7 @@
 
 #include <map>
 #include <optional>
+#include <pugixml.hpp>
 #include <string>
 #include <string_view>
 #include <utility>
@@ -92,6 +93,14 @@ std::string resolveUriReference(const std::string& reference,
 std::optional<std::string> resolveMediaReference(std::string text,
     const std::string& base,
     MediaReferenceType type);
+
+/// Resolve the namespace declaration in scope for an XML element.
+std::string namespaceUri(pugi::xml_node node);
+/// Match an XML element by local name and namespace URI.
+bool isNamed(pugi::xml_node node, const std::string& local,
+    const std::string& ns = "");
+/// Resolve inherited xml:base attributes from the document root to the element.
+std::string nodeBase(pugi::xml_node node, const fs::path& path);
 
 } // namespace URLUtils
 

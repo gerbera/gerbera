@@ -40,6 +40,7 @@
 #endif
 
 #include <functional>
+#include <memory>
 #include <optional>
 
 #include <pugixml.hpp>
@@ -56,10 +57,26 @@ struct XmlPlaylistEntry {
 };
 
 /// Own the validated XML playlist positions independently of the optional JS runtime.
-struct XmlPlaylist {
+class XmlPlaylist {
+public:
+    virtual ~XmlPlaylist() = default;
+    static std::unique_ptr<XmlPlaylist> create(XmlPlaylistType type);
     /// Validate the entire document before the script changes playlist contents.
-    void read(const pugi::xml_document& doc, const fs::path& path, XmlPlaylistType type);
+    void read(const pugi::xml_document& doc, const fs::path& path);
     std::vector<XmlPlaylistEntry> entries;
+
+protected:
+    virtual void readEntries(pugi::xml_node root, const fs::path& path) = 0;
+};
+
+class WplPlaylist : public XmlPlaylist {
+protected:
+    void readEntries(pugi::xml_node root, const fs::path& path) override;
+};
+
+class XspfPlaylist : public XmlPlaylist {
+protected:
+    void readEntries(pugi::xml_node root, const fs::path& path) override;
 };
 
 #ifdef HAVE_JS
@@ -78,7 +95,7 @@ protected:
     bool followSymlinks;
     bool hidden;
     TextFileCharset charsetMode;
-    XmlPlaylist xmlPlaylist;
+    std::unique_ptr<XmlPlaylist> xmlPlaylist;
     std::size_t xmlPosition {};
 
     void handleObject2cdsItem(duk_context* ctx, const std::shared_ptr<CdsObject>& pcd, const std::shared_ptr<CdsItem>& item) override;
