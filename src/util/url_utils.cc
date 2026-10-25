@@ -420,4 +420,37 @@ std::optional<std::string> resolveMediaReference(std::string text,
         : std::nullopt;
 }
 
+std::string namespaceUri(pugi::xml_node node)
+{
+    std::string name = node.name();
+    auto colon = name.find(':');
+    auto attribute = colon == std::string::npos ? "xmlns" : "xmlns:" + name.substr(0, colon);
+    for (auto parent = node; parent; parent = parent.parent()) {
+        if (auto declaration = parent.attribute(attribute.c_str()))
+            return declaration.value();
+    }
+    return {};
+}
+
+bool isNamed(pugi::xml_node node, const std::string& local,
+    const std::string& ns)
+{
+    std::string name = node.name();
+    auto colon = name.find(':');
+    return name.substr(colon == std::string::npos ? 0 : colon + 1) == local && namespaceUri(node) == ns;
+}
+
+std::string nodeBase(pugi::xml_node node, const fs::path& path)
+{
+    std::vector<std::string> bases;
+    for (auto parent = node; parent; parent = parent.parent()) {
+        if (auto base = parent.attribute("xml:base"))
+            bases.emplace_back(base.value());
+    }
+    auto result = URLUtils::filePathToUri(path);
+    for (auto it = bases.rbegin(); it != bases.rend(); ++it)
+        result = URLUtils::resolveUriReference(*it, result);
+    return result;
+}
+
 } // namespace URLUtils
