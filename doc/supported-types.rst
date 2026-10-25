@@ -129,6 +129,8 @@ metadata and Gerbera HTTP resources. Remote file authorities, malformed escapes,
 embedded NUL bytes and invalid decoded UTF-8 are rejected. Local file URIs must
 not contain a query or fragment. Existing external streaming URLs, including
 their encoded query strings, are retained without fetching them during import.
+ASX XML traversal and reference resolution use the native XML playlist iterator.
+The script only creates the existing playlist views.
 XML-parser output and local media metadata remain UTF-8, independently of the
 ``playlist-charset`` configured for line-based playlists. The existing root
 ``BASE`` prefix and Gerbera ``PARAM``/``writethrough`` extensions are retained.
