@@ -221,6 +221,8 @@ TEST_F(UpnpXmlTest, RenderObjectContainerKeepsColorTransferPrivate)
     obj->setRestricted(false);
     obj->setTitle("Title");
     obj->setClass(UPNP_CLASS_MUSIC_ALBUM);
+    // without a date the renderer falls back to the local time, which fmt cannot format on illumos
+    obj->addMetaData(MetadataFields::M_DATE, "2022-04-01T00:00:00");
 
     auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
     resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
