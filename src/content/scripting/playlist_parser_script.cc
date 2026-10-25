@@ -35,8 +35,12 @@
 #include "playlist_parser_script.h" // API
 
 #include "exceptions.h"
+#include "util/logger.h"
 #include "util/tools.h"
 #include "util/url_utils.h"
+
+#include <map>
+#include <utility>
 
 #ifdef HAVE_JS
 #include "cds/cds_container.h"
@@ -57,6 +61,8 @@ static constexpr auto xspfNamespace = "http://xspf.org/ns/0/";
 
 std::unique_ptr<XmlPlaylist> XmlPlaylist::create(XmlPlaylistType type)
 {
+    if (type == XmlPlaylistType::Asx)
+        return std::make_unique<AsxPlaylist>();
     if (type == XmlPlaylistType::Wpl)
         return std::make_unique<WplPlaylist>();
     return std::make_unique<XspfPlaylist>();
@@ -66,6 +72,8 @@ void XmlPlaylist::read(const pugi::xml_document& doc,
     const fs::path& path)
 {
     entries.clear();
+    entryPosition = 0;
+    readComplete = false;
     int roots = 0;
     for (auto node : doc.children()) {
         if (node.type() == pugi::node_doctype)
@@ -76,6 +84,7 @@ void XmlPlaylist::read(const pugi::xml_document& doc,
     if (roots != 1)
         throw_std_runtime_error("XML playlists must have exactly one root element");
     readEntries(doc.document_element(), path);
+    readComplete = true;
 }
 
 void WplPlaylist::readEntries(pugi::xml_node root, const fs::path& path)
@@ -131,6 +140,102 @@ void XspfPlaylist::readEntries(pugi::xml_node root, const fs::path& path)
     }
 }
 
+std::optional<std::reference_wrapper<const XmlPlaylistEntry>> XmlPlaylist::readPlaylistEntry()
+{
+    if (!readComplete || entryPosition >= entries.size())
+        return std::nullopt;
+    return std::cref(entries[entryPosition++]);
+}
+
+static pugi::xml_attribute asxAttribute(pugi::xml_node node, const char* name)
+{
+    pugi::xml_attribute result;
+    for (auto attribute : node.attributes()) {
+        if (toLower(attribute.name()) == name)
+            result = attribute;
+    }
+    return result;
+}
+
+void AsxPlaylist::readEntries(pugi::xml_node root, const fs::path& path)
+{
+    document.reset();
+    node = {};
+    parents.clear();
+    source = path;
+    base.clear();
+    pendingEntry = {};
+    currentEntry = {};
+    if (toLower(root.name()) != "asx")
+        throw_std_runtime_error("ASX requires an asx root element");
+    // Keep the iterator independent of the caller's pugixml document lifetime.
+    node = document.append_copy(root);
+    if (!node)
+        throw_std_runtime_error("Cannot copy ASX XML document");
+}
+
+std::optional<std::reference_wrapper<const XmlPlaylistEntry>> AsxPlaylist::readPlaylistEntry()
+{
+    currentEntry = {};
+    if (!readComplete)
+        return std::nullopt;
+    while (node || !parents.empty()) {
+        if (!node) {
+            node = parents.back().next_sibling();
+            parents.pop_back();
+            currentEntry = std::move(pendingEntry);
+            pendingEntry = {};
+            if (currentEntry.locations.empty())
+                continue;
+            // Legacy ASX uses a root BASE prefix and the last REF in an ENTRY.
+            auto reference = currentEntry.locations.back();
+            if (!base.empty())
+                reference = base + '/' + reference;
+            std::optional<std::string> location;
+            try {
+                location = URLUtils::resolvePlaylistReference(reference, source);
+            } catch (const std::runtime_error& e) {
+                log_warning("Cannot resolve playlist reference {}: {}", reference, EX(e));
+                continue;
+            }
+            if (!location)
+                continue;
+            currentEntry.locations = { *location };
+            return std::cref(currentEntry);
+        }
+        const auto name = toLower(node.name());
+        if (name == "asx" || name == "entry") {
+            parents.push_back(node);
+            node = node.first_child();
+            continue;
+        }
+        const auto href = asxAttribute(node, "href").as_string();
+        if (name == "ref" && *href) {
+            pendingEntry.locations = { href };
+            pendingEntry.writeThrough = asxAttribute(node, "writethrough").as_string("-1");
+        } else if (name == "base" && *href && parents.size() < 2) {
+            base = href;
+        } else if (name == "title") {
+            pendingEntry.title = node.text().as_string();
+        } else if (name == "abstract") {
+            pendingEntry.description = node.text().as_string();
+        } else if (name == "param") {
+            const std::string parameter = asxAttribute(node, "name").as_string();
+            const std::string value = asxAttribute(node, "value").as_string();
+            if (parameter == "size")
+                pendingEntry.size = value;
+            else if (parameter == "mimetype")
+                pendingEntry.mimetype = value;
+            else if (parameter == "protocol")
+                pendingEntry.protocol = value;
+            else
+                pendingEntry.extra[parameter] = value;
+        }
+        node = node.next_sibling();
+    }
+    return std::nullopt;
+}
+
 #ifdef HAVE_JS
 
 static duk_ret_t jsReadPlaylistEntry(duk_context* ctx)
@@ -147,16 +252,34 @@ static duk_ret_t jsReadPlaylistEntry(duk_context* ctx)
     }
     if (!entry)
         return 0;
+    PlaylistParserScript::pushPlaylistEntry(ctx, entry->get());
+    return 1;
+}
+
+void PlaylistParserScript::pushPlaylistEntry(duk_context* ctx, const XmlPlaylistEntry& entry)
+{
     duk_push_object(ctx);
-    duk_push_string(ctx, entry->get().title.c_str());
-    duk_put_prop_string(ctx, -2, "title");
+    const std::pair<const char*, const std::string&> properties[] {
+        { "title", entry.title }, { "description", entry.description },
+        { "mimetype", entry.mimetype }, { "protocol", entry.protocol },
+        { "size", entry.size }, { "writeThrough", entry.writeThrough }
+    };
+    for (const auto& [name, value] : properties) {
+        duk_push_lstring(ctx, value.data(), value.size());
+        duk_put_prop_string(ctx, -2, name);
+    }
     duk_push_array(ctx);
-    for (duk_uarridx_t i = 0; i < entry->get().locations.size(); ++i) {
-        duk_push_string(ctx, entry->get().locations[i].c_str());
+    for (duk_uarridx_t i = 0; i < entry.locations.size(); ++i) {
+        duk_push_lstring(ctx, entry.locations[i].data(), entry.locations[i].size());
         duk_put_prop_index(ctx, -2, i);
     }
     duk_put_prop_string(ctx, -2, "locations");
-    return 1;
+    duk_push_array(ctx);
+    for (const auto& [name, value] : entry.extra) {
+        duk_push_lstring(ctx, value.data(), value.size());
+        duk_put_prop_string(ctx, -2, name.c_str());
+    }
+    duk_put_prop_string(ctx, -2, "extra");
 }
 
 PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
@@ -174,9 +297,11 @@ std::optional<std::reference_wrapper<const XmlPlaylistEntry>> PlaylistParserScri
 {
     if (currentTask && !currentTask->isValid())
         throw_std_runtime_error("Aborting playlist import after cancellation");
-    if (!xmlPlaylist || xmlPosition >= xmlPlaylist->entries.size())
-        return std::nullopt;
-    return std::cref(xmlPlaylist->entries[xmlPosition++]);
+    auto entry = xmlPlaylist ? xmlPlaylist->readPlaylistEntry() : std::nullopt;
+    // The native iterator may skip several XML nodes before returning, even at EOF.
+    if (currentTask && !currentTask->isValid())
+        throw_std_runtime_error("Aborting playlist import after cancellation");
+    return entry;
 }
 
 std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(
@@ -300,21 +425,24 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     log_debug("Checking playlist {} ...", obj->getLocation().string());
-    bool isXmlPlaylist = item->getMimeType() == MIME_TYPE_WPL_PLAYLIST || item->getMimeType() == MIME_TYPE_XSPF_PLAYLIST;
+    static const std::map<std::string, XmlPlaylistType> xmlPlaylistTypes {
+        { MIME_TYPE_WPL_PLAYLIST, XmlPlaylistType::Wpl },
+        { MIME_TYPE_XSPF_PLAYLIST, XmlPlaylistType::Xspf },
+        { MIME_TYPE_ASX_PLAYLIST, XmlPlaylistType::Asx },
+    };
+    auto xmlPlaylistType = xmlPlaylistTypes.find(item->getMimeType());
     currentTask = std::move(task);
     currentObjectID = item->getID();
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     xmlPlaylist.reset();
-    xmlPosition = 0;
     std::vector<int> result;
     try {
-        if (isXmlPlaylist) {
-            prepareXmlFile(item->getLocation(), pugi::parse_default | pugi::parse_doctype);
-            xmlPlaylist = XmlPlaylist::create(item->getMimeType() == MIME_TYPE_WPL_PLAYLIST ? XmlPlaylistType::Wpl : XmlPlaylistType::Xspf);
+        if (xmlPlaylistType != xmlPlaylistTypes.end()) {
+            auto flags = xmlPlaylistType->second == XmlPlaylistType::Asx ? pugi::parse_default : pugi::parse_default | pugi::parse_doctype;
+            prepareXmlFile(item->getLocation(), flags);
+            xmlPlaylist = XmlPlaylist::create(xmlPlaylistType->second);
             xmlPlaylist->read(xmlDoc, item->getLocation());
             useUtf8Converter();
-        } else if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
-            prepareXmlFile(item->getLocation());
         } else {
             auto mode = item->getMimeType() == MIME_TYPE_MPEGURL ? charsetMode : TextFileCharset::Default;
             if (mode != TextFileCharset::Default && toLower(item->getLocation().extension().string()) == ".m3u8")

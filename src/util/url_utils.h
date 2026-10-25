@@ -94,6 +94,10 @@ std::optional<std::string> resolveMediaReference(std::string text,
     const std::string& base,
     MediaReferenceType type);
 
+/// Resolve playlist references while preserving external protocols and existing native filenames.
+std::optional<std::string> resolvePlaylistReference(const std::string& reference,
+    const fs::path& source);
+
 /// Resolve the namespace declaration in scope for an XML element.
 std::string namespaceUri(pugi::xml_node node);
 /// Match an XML element by local name and namespace URI.

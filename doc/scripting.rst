@@ -802,19 +802,12 @@ They can be used by the import and by the playlist script.
     for metadata, resources and each configured playlist view. Cancellation
     aborts the script instead of reporting a successful partial import.
 
-    Existing ASX/NFO ``readXml`` behavior and text-playlist ``readln`` behavior
-    are unchanged.
+    NFO ``readXml`` behavior and text-playlist ``readln`` behavior are unchanged.
+    ASX also uses the native iterator; entries retain the existing title,
+    description, MIME type, protocol, size, writeThrough and extra parameters.
+    ASX XML traversal and reference resolution run in C++, independently of
+    the script that creates playlist views.
 
-
-
-Walkthrough
-~~~~~~~~~~~
-
-Now it is time to take a closer look at the default scripts that are supplied with Gerbera. Usually it is installed in
-the ``/usr/share/gerbera/js/`` directory, but you will also find it in ``scripts/js/`` in the Gerbera source tree.
-
-On startup gerbera loads all the javascript files from that directory (`common-folder` in `config.xml`) then loads all files from
-`custom-folder`. If a function defined in a common file is also found in the custom folder it overwrites it.
 
 .. Note::
   this is not a JavaScript tutorial, if you are new to JS you should probably make yourself familiar with the
