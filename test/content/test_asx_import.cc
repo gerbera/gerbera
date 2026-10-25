@@ -23,6 +23,7 @@
 #include "database/database.h"
 #include "metadata/metadata_enums.h"
 #include "upnp/upnp_common.h"
+#include "util/tools.h"
 
 #include <fstream>
 #include <gtest/gtest.h>
@@ -68,11 +69,7 @@ protected:
             from = encode(from);
             to = encode(to);
         }
-        std::size_t position = 0;
-        while ((position = data.find(from, position)) != std::string::npos) {
-            data.replace(position, from.size(), to);
-            position += to.size();
-        }
+        replaceAllString(data, from, to);
     }
 
     void prepareCorpus(const std::string& name)

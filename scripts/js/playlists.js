@@ -175,93 +175,21 @@ function readM3uPlaylist(playlist_title, playlistLocation, playlistChain, playli
 }
 // doc-playlist-m3u-parse-end
 
+// The native ASX iterator owns XML parsing and reference resolution.
 function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playlistDirChain, rootPath) {
-  var entry = {
-    title: null,
-    location: null,
-    order: 0,
-    size: -1,
-    writeThrough: -1,
-    mimetype: null,
-    description: null,
-    protocol: null,
-    extra: [],
-  };
-  var base = null;
+  var result = [];
   var playlistOrder = 1;
-  var node = readXml(-2);
-  var level = 0;
-  const result = [];
-
-  while (node || level > 0) {
-    if (!node && level > 0) {
-      node = readXml(-1); // read parent
-      node = readXml(0); // read next
-      level--;
-      if (entry.location) {
-        if (base)
-          entry.location = base + '/' + entry.location;
-        entry.location = resolvePlaylistReference(entry.location);
-        var state = entry.location && addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath);
-        if (playlistDirChain && state) {
-          entry.writeThrough = 0;
-          state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result, rootPath);
-        }
-        if (state)
-          playlistOrder++;
-      }
-      entry.title = null;
-      entry.location = null;
-      entry.size = -1;
-      entry.writeThrough = -1;
-      entry.mimetype = null;
-      entry.protocol = null;
-      entry.extra = [];
-      entry.description = null;
-    } else if (node.NAME === "asx") {
-      node = readXml(1); // read children
-      level++;
-    } else if (node.NAME === "entry") {
-      node = readXml(1); // read children
-      level++;
-    } else if (node.NAME === "ref" && node.href) {
-      entry.location = node.href;
-      entry.writeThrough = node.writethrough;
-      node = readXml(0); // read next
-    } else if (node.NAME === "base" && node.href && level < 2) {
-      base = node.href;
-      node = readXml(0); // read next
-    } else if (node.NAME == "title") {
-      entry.title = node.VALUE;
-      node = readXml(0); // read next
-    } else if (node.NAME == "abstract") {
-      entry.description = node.VALUE;
-      node = readXml(0); // read next
-      // currently unused
-    } else if (node.NAME == "param" && node.name === "size") {
-      entry.size = node.value;
-      node = readXml(0); // read next
-    } else if (node.NAME == "param" && node.name === "mimetype") {
-      entry.mimetype = node.value;
-      node = readXml(0); // read next
-    } else if (node.NAME == "param" && node.name === "protocol") {
-      entry.protocol = node.value;
-      node = readXml(0); // read next
-    } else if (node.NAME == "param") {
-      entry.extra[node.name] = node.value;
-      node = readXml(0); // read next
-    } else {
-      node = readXml(0); // read next
-    }
-  }
-
-  if (entry.location) {
-    entry.location = resolvePlaylistReference(entry.location);
-    var state = entry.location && addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath);
+  var entry = readPlaylistEntry();
+  while (entry) {
+    entry.location = entry.locations[0];
+    var state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath);
     if (playlistDirChain && state) {
       entry.writeThrough = 0;
-      addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result, rootPath);
+      state = addPlaylistItem(playlist_title, playlistLocation, entry, playlistDirChain, playlistOrder, result, rootPath);
     }
+    if (state)
+      playlistOrder++;
+    entry = readPlaylistEntry();
   }
   return result;
 }

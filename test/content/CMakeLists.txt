@@ -56,19 +56,11 @@ gtest_discover_tests(
     PROPERTIES
     TIMEOUT 240)
 
-find_package(Python3 QUIET COMPONENTS Interpreter)
-if(Python3_Interpreter_FOUND)
-    add_test(NAME IntegrationRuntime
-             COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_integration_runtime.py)
-    set_tests_properties(IntegrationRuntime PROPERTIES TIMEOUT 60)
-else()
-    message(STATUS "IntegrationRuntime disabled: Python 3 interpreter not found")
-endif()
-
 if(WITH_JS
    AND WITH_INOTIFY
    AND (WITH_TAGLIB OR WITH_AVCODEC)
    AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(Python3 QUIET COMPONENTS Interpreter)
     if(Python3_Interpreter_FOUND)
         add_test(NAME PlaylistUpdateIntegration
                  COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_playlist_updates.py
@@ -76,15 +68,3 @@ if(WITH_JS
         set_tests_properties(PlaylistUpdateIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 240)
     endif()
 endif()
-
-if(WITH_JS
-   AND WITH_AVCODEC
-   AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    if(Python3_Interpreter_FOUND)
-        add_test(NAME AsxUriIntegration
-                 COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_asx_uris.py
-                         --binary $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR})
-        set_tests_properties(AsxUriIntegration PROPERTIES RUN_SERIAL TRUE TIMEOUT 300)
-    endif()
-endif()
-

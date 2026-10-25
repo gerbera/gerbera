@@ -803,29 +803,11 @@ They can be used by the import and by the playlist script.
     aborts the script instead of reporting a successful partial import.
 
     NFO ``readXml`` behavior and text-playlist ``readln`` behavior are unchanged.
+    ASX also uses the native iterator; entries retain the existing title,
+    description, MIME type, protocol, size, writeThrough and extra parameters.
+    ASX XML traversal and reference resolution run in C++, independently of
+    the script that creates playlist views.
 
-.. js:function:: resolvePlaylistReference(reference[, sourcePath])
-
-    Available to playlist scripts. Resolves a reference relative to the current
-    playlist, or an explicit absolute source playlist path. Returns an absolute
-    native path or an external URL, or undefined for an unsupported local URI.
-    Existing native regular files take priority before URI decoding, preserving
-    literal percent escapes in legacy ASX filenames. Otherwise percent escapes
-    are decoded once by the shared playlist URI utility. External non-file URLs
-    retain their existing ASX behavior and are not fetched. The standard ASX
-    script passes the resulting location to ``addPlaylistItem`` for the actual
-    media lookup and import.
-
-
-
-Walkthrough
-~~~~~~~~~~~
-
-Now it is time to take a closer look at the default scripts that are supplied with Gerbera. Usually it is installed in
-the ``/usr/share/gerbera/js/`` directory, but you will also find it in ``scripts/js/`` in the Gerbera source tree.
-
-On startup gerbera loads all the javascript files from that directory (`common-folder` in `config.xml`) then loads all files from
-`custom-folder`. If a function defined in a common file is also found in the custom folder it overwrites it.
 
 .. Note::
   this is not a JavaScript tutorial, if you are new to JS you should probably make yourself familiar with the
