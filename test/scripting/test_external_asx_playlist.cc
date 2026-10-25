@@ -60,16 +60,17 @@ static duk_ret_t addContainerTree(duk_context* ctx)
 }
 
 static pugi::xml_document xmlDoc;
-static AsxPlaylistPlan asxPlan;
-static std::size_t asxPosition;
+static AsxPlaylist asxPlaylist([](const std::string&, const fs::path&) {
+    return AsxPlaylistDocument { {}, {}, "ENTRYREF is unavailable in this script fixture" };
+});
 
-// Feed the native structural plan to the actual JavaScript importer.
-static duk_ret_t readAsxPlaylistEntry(duk_context* ctx)
+// Exercise the common native reader and product serializer with the actual JS importer.
+static duk_ret_t readPlaylistEntry(duk_context* ctx)
 {
-    if (asxPosition >= asxPlan.entries.size())
+    auto entry = asxPlaylist.readPlaylistEntry();
+    if (!entry)
         return 0;
-    const auto& entry = asxPlan.entries[asxPosition++];
-    PlaylistParserScript::pushAsxPlaylistEntry(ctx, entry);
+    PlaylistParserScript::pushPlaylistEntry(ctx, entry->get());
     return 1;
 }
 
@@ -87,13 +88,6 @@ static duk_ret_t addCdsObject(duk_context* ctx)
     return ExternalUrlAsxPlaylistTest::commonScriptMock->addCdsObject(params.objectValues, params.containerChain, params.rootPath);
 }
 
-// External references in this script test already use absolute HTTP URLs.
-static duk_ret_t resolvePlaylistReference(duk_context* ctx)
-{
-    duk_dup(ctx, 0);
-    return 1;
-}
-
 // Mock the Duktape C methods
 // that are called from the playlists.js script
 // * These are static methods, which makes mocking difficult.
@@ -104,8 +98,7 @@ static duk_function_list_entry js_global_functions[] = {
     { "createContainerChain", CommonScriptTestFixture::js_createContainerChain, 1 },
     { "getLastPath", CommonScriptTestFixture::js_getLastPath, 1 },
     { "getLastPath2", CommonScriptTestFixture::js_getLastPath2, 2 },
-    { "readAsxPlaylistEntry", readAsxPlaylistEntry, 0 },
-    { "resolvePlaylistReference", resolvePlaylistReference, 2 },
+    { "readPlaylistEntry", readPlaylistEntry, 0 },
     { "addCdsObject", addCdsObject, 3 },
     { "addContainerTree", addContainerTree, 1 },
     { nullptr, nullptr, 0 },
@@ -141,8 +134,7 @@ TEST_F(ExternalUrlAsxPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
     if (result.status != pugi::xml_parse_status::status_ok) {
         throw ConfigParseException(result.description());
     }
-    asxPlan = readAsxPlaylistPlan(xmlDoc.document_element(), "/location/of/playlist.asx", {});
-    asxPosition = 0;
+    asxPlaylist.read(xmlDoc, "/location/of/playlist.asx");
     const std::string mimeType = "video/mp4";
     const std::string objtypeItemExternalUrl = "8";
 
@@ -180,10 +172,24 @@ TEST_F(ExternalUrlAsxPlaylistTest, AddsVideoFromPlaylistWithExternalUrlPlaylistA
 
 TEST_F(ExternalUrlAsxPlaylistTest, TriesAlternativesUntilOnePositionCanBeAdded)
 {
-    ASSERT_TRUE(xmlDoc.load_string("<ASX><ENTRY><REF HREF='https://example.invalid/a.mp3'/><REF HREF='https://example.invalid/b.mp3'/></ENTRY><ENTRY><REF HREF='https://example.invalid/c.mp3'/></ENTRY></ASX>"));
-    asxPlan = readAsxPlaylistPlan(xmlDoc.document_element(), "/location/of/playlist.asx", {});
-    asxPosition = 0;
+    ASSERT_TRUE(xmlDoc.load_string("<ASX><AUTHOR>Original author</AUTHOR><PARAM NAME='Category' VALUE='Original category'/><ENTRY><REF HREF='https://example.invalid/a.mp3'/><REF HREF='https://example.invalid/b.mp3'/></ENTRY><ENTRY><REF HREF='https://example.invalid/c.mp3'/></ENTRY></ASX>"));
+    asxPlaylist.read(xmlDoc, "/location/of/playlist.asx");
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
+    const char* fallbackCopy = R"JS(
+        var originalAsxAddPlaylistItem = addPlaylistItem;
+        var asxCandidateMetadata = [];
+        addPlaylistItem = function(title, location, entry, chain, order, result, root) {
+          asxCandidateMetadata.push([entry.defaults['upnp:author'], entry.extra.Category]);
+          var added = originalAsxAddPlaylistItem(title, location, entry, chain, order, result, root);
+          if (!added) {
+            entry.defaults['upnp:author'] = 'mutated';
+            entry.extra.Category = 'mutated';
+          }
+          return added;
+        };
+    )JS";
+    ASSERT_EQ(duk_peval_string(ctx, fallbackCopy), DUK_EXEC_SUCCESS);
+    duk_pop(ctx);
     std::vector<std::pair<std::string, std::string>> inserted;
     EXPECT_CALL(*commonScriptMock, addCdsObject(_, _, _)).WillRepeatedly(Invoke([&](auto item, auto chain, auto) {
         inserted.emplace_back(item.at("location"), chain);
@@ -193,13 +199,14 @@ TEST_F(ExternalUrlAsxPlaylistTest, TriesAlternativesUntilOnePositionCanBeAdded)
     ASSERT_EQ(duk_peval_string(ctx, "readAsxPlaylist('Playlist Title', '/location/of/', '42', '43', '/home/gerbera').length"), DUK_EXEC_SUCCESS);
     EXPECT_EQ(duk_get_int(ctx, -1), 4);
     EXPECT_EQ(inserted, (std::vector<std::pair<std::string, std::string>> { { "https://example.invalid/a.mp3", "42" }, { "https://example.invalid/b.mp3", "42" }, { "https://example.invalid/b.mp3", "43" }, { "https://example.invalid/c.mp3", "42" }, { "https://example.invalid/c.mp3", "43" } }));
+    ASSERT_EQ(duk_peval_string(ctx, "JSON.stringify(asxCandidateMetadata)"), DUK_EXEC_SUCCESS);
+    EXPECT_STREQ(duk_get_string(ctx, -1), "[[\"Original author\",\"Original category\"],[\"Original author\",\"Original category\"],[\"Original author\",\"Original category\"],[\"Original author\",\"Original category\"],[\"Original author\",\"Original category\"]]");
 }
 
 TEST_F(ExternalUrlAsxPlaylistTest, PreservesEmbeddedMetadataAndWritesThroughOnlyInFirstView)
 {
     ASSERT_TRUE(xmlDoc.load_string("<ASX><AUTHOR>Root author</AUTHOR><COPYRIGHT>Root rights</COPYRIGHT><ENTRY><TITLE>Override</TITLE><REF HREF='/media/a.wav' WRITETHROUGH='1'/></ENTRY></ASX>"));
-    asxPlan = readAsxPlaylistPlan(xmlDoc.document_element(), "/location/of/playlist.asx", {});
-    asxPosition = 0;
+    asxPlaylist.read(xmlDoc, "/location/of/playlist.asx");
     addGlobalFunctions(ctx, js_global_functions, {}, playlistBox);
     const char* script = R"JS(
         var asxSeen = [];
@@ -218,12 +225,13 @@ TEST_F(ExternalUrlAsxPlaylistTest, PreservesEmbeddedMetadataAndWritesThroughOnly
           return asxSeen.length;
         };
         readAsxPlaylist('Playlist Title', '/location/of/', '42', '43', '/home/gerbera');
-        if (asxWrites !== 1) throw new Error('writeThrough repeated across views');
         JSON.stringify(asxSeen.map(function(item) {
           return [item.title, item.metaData['upnp:author'][0], item.metaData['dc:rights'][0], item.writeThrough];
         }));
     )JS";
     ASSERT_EQ(duk_peval_string(ctx, script), DUK_EXEC_SUCCESS);
     EXPECT_STREQ(duk_get_string(ctx, -1), "[[\"Override\",\"Embedded author\",\"Root rights\",1],[\"Override\",\"Embedded author\",\"Root rights\",0]]");
+    ASSERT_EQ(duk_peval_string(ctx, "asxWrites"), DUK_EXEC_SUCCESS);
+    EXPECT_EQ(duk_get_int(ctx, -1), 1);
 }
 #endif

@@ -1,5 +1,6 @@
 .. _supported-types:
 .. index:: Supported File Types
+====================
 
 Supported File Types
 

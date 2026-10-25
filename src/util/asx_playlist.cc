@@ -39,11 +39,12 @@ enum class AsxRepeatContext { Document,
 static pugi::xml_attribute asxAttribute(const pugi::xml_node& node,
     const std::string& name)
 {
+    pugi::xml_attribute result;
     for (auto attribute : node.attributes()) {
         if (toLower(attribute.name()) == name)
-            return attribute;
+            result = attribute;
     }
-    return {};
+    return result;
 }
 
 static std::string asxBase(const pugi::xml_node& node,

@@ -40,7 +40,10 @@ static std::vector<XmlPlaylistEntry> readXmlPlaylist(const fs::path& path,
         throw std::runtime_error(result.description());
     auto playlist = XmlPlaylist::create(type);
     playlist->read(doc, path);
-    return playlist->entries;
+    std::vector<XmlPlaylistEntry> entries;
+    while (auto entry = playlist->readPlaylistEntry())
+        entries.push_back(entry->get());
+    return entries;
 }
 
 static std::vector<std::string> cases()
@@ -131,4 +134,115 @@ TEST(XmlPlaylistReaderTest, ReusingReaderReplacesPreviousPositions)
     ASSERT_TRUE(doc.load_string("<invalid/>"));
     EXPECT_THROW(playlist.read(doc, fs::temp_directory_path() / "list.wpl"), std::runtime_error);
     EXPECT_TRUE(playlist.entries.empty());
+}
+
+static AsxPlaylistDocument skipAsxEntryRef(const std::string&, const fs::path&)
+{
+    return { {}, {}, "ENTRYREF intentionally unavailable in this reader fixture" };
+}
+
+TEST(XmlPlaylistReaderTest, AsxIteratorOwnsDocumentAndPreservesLegacyFields)
+{
+    std::unique_ptr<XmlPlaylist> playlist = std::make_unique<AsxPlaylist>(skipAsxEntryRef);
+    {
+        pugi::xml_document doc;
+        ASSERT_TRUE(doc.load_string(R"XML(<AsX version="3.0"><AUTHOR>Root author</AUTHOR><COPYRIGHT>Root rights</COPYRIGHT><EnTrY>
+            <TiTlE>Äther 東京</TiTlE><AbStRaCt>Description</AbStRaCt>
+            <ReF HrEf="https://media.example.invalid/a.mp3?token=a+b" WrItEtHrOuGh="2"/>
+            <PaRaM NaMe="size" VaLuE="1672"/><param name="mimetype" value="audio/mpeg"/>
+            <param name="protocol" value="http-get"/><param name="Category" value="Mix"/>
+            </EnTrY></AsX>)XML"));
+        playlist->read(doc, fs::path("/fixture/playlist.asx"));
+    }
+    auto entry = playlist->readPlaylistEntry();
+    ASSERT_TRUE(entry);
+    EXPECT_EQ(entry->get().locations, (std::vector<std::string> { "https://media.example.invalid/a.mp3?token=a+b" }));
+    EXPECT_EQ(entry->get().title, "Äther 東京");
+    EXPECT_EQ(entry->get().description, "Description");
+    EXPECT_EQ(entry->get().size, "1672");
+    EXPECT_EQ(entry->get().mimetype, "audio/mpeg");
+    EXPECT_EQ(entry->get().protocol, "http-get");
+    EXPECT_EQ(entry->get().writeThroughs, (std::vector<int> { 2 }));
+    EXPECT_EQ(entry->get().defaults.at("upnp:author"), "Root author");
+    EXPECT_EQ(entry->get().defaults.at("dc:rights"), "Root rights");
+    EXPECT_EQ(entry->get().extra.at("Category"), "Mix");
+    EXPECT_FALSE(playlist->readPlaylistEntry());
+}
+
+TEST(XmlPlaylistReaderTest, AsxIteratorKeepsEntryBaseAlternativesRepeatAndMetadata)
+{
+    AsxPlaylist playlist(skipAsxEntryRef);
+    pugi::xml_document doc;
+    ASSERT_TRUE(doc.load_string(R"XML(<asx><title>First default</title>
+        <base href="https://media.example.invalid/base"/>
+        <entry><base href="https://ignored.example.invalid"/>
+            <ref href="first.mp3" writethrough="1"/><ref HREF="ignored.mp3" href="last.mp3" writethrough="2"/>
+        </entry>
+        <entryref href="not-loaded.asx"/>
+        <repeat count="3"><entry><ref href="not-expanded.mp3"/></entry></repeat>
+        <entry><ref href="next.mp3"/></entry></asx>)XML"));
+    playlist.read(doc, fs::path("/fixture/list.asx"));
+    auto first = playlist.readPlaylistEntry();
+    ASSERT_TRUE(first);
+    EXPECT_EQ(first->get().locations, (std::vector<std::string> { "https://ignored.example.invalid/first.mp3", "https://ignored.example.invalid/last.mp3" }));
+    EXPECT_TRUE(first->get().title.empty()); // The playlist title is not an entry default.
+    EXPECT_EQ(first->get().writeThroughs, (std::vector<int> { 1, 2 }));
+    for (int i = 0; i < 3; ++i) {
+        auto repeated = playlist.readPlaylistEntry();
+        ASSERT_TRUE(repeated);
+        EXPECT_EQ(repeated->get().locations, (std::vector<std::string> { "https://media.example.invalid/base/not-expanded.mp3" }));
+        EXPECT_TRUE(repeated->get().title.empty());
+        EXPECT_EQ(repeated->get().writeThroughs, (std::vector<int> { -1 }));
+    }
+    auto second = playlist.readPlaylistEntry();
+    ASSERT_TRUE(second);
+    EXPECT_EQ(second->get().locations, (std::vector<std::string> { "https://media.example.invalid/base/next.mp3" }));
+    EXPECT_TRUE(second->get().title.empty());
+    EXPECT_EQ(second->get().writeThroughs, (std::vector<int> { -1 }));
+    EXPECT_FALSE(playlist.readPlaylistEntry());
+}
+
+TEST(XmlPlaylistReaderTest, AsxIteratorUsesSharedUriValidationAndExternalProtocols)
+{
+    AsxPlaylist playlist(skipAsxEntryRef);
+    pugi::xml_document doc;
+    ASSERT_TRUE(doc.load_string(R"XML(<asx>
+        <entry><ref href="file:///fixture/Why%3F.wav"/></entry>
+        <entry><ref href="file://remote/fixture/a.wav"/></entry>
+        <entry><ref href="file:///fixture/Bad%GG.wav"/></entry>
+        <entry><ref href="file:///fixture/Bad%00.wav"/></entry>
+        <entry><ref href="https://media.example.invalid/a.mp3?name=Why%3F&amp;token=a+b"/></entry>
+        <entry><ref href="mms://media.example.invalid/a.wmv?token=a+b"/></entry>
+        </asx>)XML"));
+    playlist.read(doc, fs::path("/fixture/list.asx"));
+    auto local = playlist.readPlaylistEntry();
+    ASSERT_TRUE(local);
+    EXPECT_EQ(local->get().locations, (std::vector<std::string> { "/fixture/Why?.wav" }));
+    auto https = playlist.readPlaylistEntry();
+    ASSERT_TRUE(https);
+    EXPECT_EQ(https->get().locations, (std::vector<std::string> { "https://media.example.invalid/a.mp3?name=Why%3F&token=a+b" }));
+    auto mms = playlist.readPlaylistEntry();
+    ASSERT_TRUE(mms);
+    EXPECT_EQ(mms->get().locations, (std::vector<std::string> { "mms://media.example.invalid/a.wmv?token=a+b" }));
+    EXPECT_FALSE(playlist.readPlaylistEntry());
+}
+
+TEST(XmlPlaylistReaderTest, ReusingAsxIteratorClearsStateAndRemainsAtEof)
+{
+    AsxPlaylist playlist(skipAsxEntryRef);
+    pugi::xml_document doc;
+    ASSERT_TRUE(doc.load_string("<asx><entry><ref href='https://media.example.invalid/a.mp3'/></entry></asx>"));
+    playlist.read(doc, fs::path("/fixture/list.asx"));
+    ASSERT_TRUE(playlist.readPlaylistEntry());
+    EXPECT_FALSE(playlist.readPlaylistEntry());
+    EXPECT_FALSE(playlist.readPlaylistEntry());
+    ASSERT_TRUE(doc.load_string("<asx/><asx/>"));
+    EXPECT_THROW(playlist.read(doc, fs::path("/fixture/invalid.asx")), std::runtime_error);
+    EXPECT_FALSE(playlist.readPlaylistEntry());
+    ASSERT_TRUE(doc.load_string("<asx/>"));
+    playlist.read(doc, fs::path("/fixture/empty.asx"));
+    EXPECT_FALSE(playlist.readPlaylistEntry());
+    ASSERT_TRUE(doc.load_string("<invalid/>"));
+    EXPECT_THROW(playlist.read(doc, fs::path("/fixture/invalid.asx")), std::runtime_error);
+    EXPECT_FALSE(playlist.readPlaylistEntry());
 }

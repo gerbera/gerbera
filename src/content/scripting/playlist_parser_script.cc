@@ -35,8 +35,12 @@
 #include "playlist_parser_script.h" // API
 
 #include "exceptions.h"
+#include "util/logger.h"
 #include "util/tools.h"
 #include "util/url_utils.h"
+
+#include <regex>
+#include <utility>
 
 #ifdef HAVE_JS
 #include "cds/cds_container.h"
@@ -66,6 +70,8 @@ void XmlPlaylist::read(const pugi::xml_document& doc,
     const fs::path& path)
 {
     entries.clear();
+    entryPosition = 0;
+    readComplete = false;
     int roots = 0;
     for (auto node : doc.children()) {
         if (node.type() == pugi::node_doctype)
@@ -76,6 +82,7 @@ void XmlPlaylist::read(const pugi::xml_document& doc,
     if (roots != 1)
         throw_std_runtime_error("XML playlists must have exactly one root element");
     readEntries(doc.document_element(), path);
+    readComplete = true;
 }
 
 void WplPlaylist::readEntries(pugi::xml_node root, const fs::path& path)
@@ -131,56 +138,79 @@ void XspfPlaylist::readEntries(pugi::xml_node root, const fs::path& path)
     }
 }
 
-#ifdef HAVE_JS
-
-static duk_ret_t jsResolvePlaylistReference(duk_context* ctx)
+std::optional<std::reference_wrapper<const XmlPlaylistEntry>> XmlPlaylist::readPlaylistEntry()
 {
-    auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
-    if (!self || !duk_is_string(ctx, 0))
-        return 0;
-    const std::string reference = duk_get_string(ctx, 0);
-    fs::path source;
-    if (duk_is_string(ctx, 1)) {
-        source = duk_get_string(ctx, 1);
-    } else {
-        duk_get_global_string(ctx, self->getOrigName().c_str());
-        duk_get_prop_string(ctx, -1, "location");
-        if (!duk_is_string(ctx, -1)) {
-            duk_pop_2(ctx);
-            return 0;
+    if (!readComplete || entryPosition >= entries.size())
+        return std::nullopt;
+    return std::cref(entries[entryPosition++]);
+}
+
+AsxPlaylist::AsxPlaylist(AsxPlaylistLoader loader)
+    : loader(std::move(loader))
+{
+    if (!this->loader)
+        throw_std_runtime_error("ASX requires an explicit ENTRYREF loader");
+}
+
+void AsxPlaylist::readEntries(pugi::xml_node root, const fs::path& path)
+{
+    plan = {};
+    currentEntry = {};
+    // The complete bounded plan owns its strings; no caller DOM is retained.
+    plan = readAsxPlaylistPlan(root, path, loader);
+    for (const auto& warning : plan.warnings)
+        log_warning("{}", warning);
+}
+
+std::optional<std::reference_wrapper<const XmlPlaylistEntry>> AsxPlaylist::readPlaylistEntry()
+{
+    currentEntry = {};
+    if (!readComplete)
+        return std::nullopt;
+    // Preserve the existing ASX BASE extension's ASCII scheme policy.
+    static const std::regex scheme("^[a-zA-Z][a-zA-Z0-9+.-]*:");
+    while (entryPosition < plan.entries.size()) {
+        const auto& entry = plan.entries[entryPosition++];
+        currentEntry = {};
+        currentEntry.title = entry.metadata.title;
+        currentEntry.description = entry.metadata.description;
+        if (!entry.metadata.author.empty())
+            currentEntry.defaults["upnp:author"] = entry.metadata.author;
+        if (!entry.metadata.copyright.empty())
+            currentEntry.defaults["dc:rights"] = entry.metadata.copyright;
+        for (const auto& [name, value] : entry.metadata.parameters) {
+            if (name == "size")
+                currentEntry.size = value;
+            else if (name == "mimetype")
+                currentEntry.mimetype = value;
+            else if (name == "protocol")
+                currentEntry.protocol = value;
+            else
+                currentEntry.extra[name] = value;
         }
-        source = duk_get_string(ctx, -1);
-        duk_pop_2(ctx);
+        auto base = entry.base;
+        while (!base.empty() && base.back() == '/')
+            base.pop_back();
+        for (const auto& reference : entry.references) {
+            auto href = reference.href;
+            if (!entry.base.empty() && href.front() != '/' && !std::regex_search(href, scheme))
+                href = base + '/' + href;
+            try {
+                if (auto location = URLUtils::resolvePlaylistReference(href, entry.source)) {
+                    currentEntry.locations.push_back(*location);
+                    currentEntry.writeThroughs.push_back(reference.writeThrough);
+                }
+            } catch (const std::runtime_error& e) {
+                log_warning("Cannot resolve playlist reference {}: {}", href, EX(e));
+            }
+        }
+        if (!currentEntry.locations.empty())
+            return std::cref(currentEntry);
     }
-    try {
-        auto location = URLUtils::resolvePlaylistReference(reference, source);
-        if (!location)
-            return 0;
-        duk_push_lstring(ctx, location->data(), location->size());
-        return 1;
-    } catch (const std::runtime_error& e) {
-        log_warning("Cannot resolve playlist reference {}: {}", reference, EX(e));
-        return 0;
-    }
+    return std::nullopt;
 }
 
-static duk_ret_t jsReadAsxPlaylistEntry(duk_context* ctx)
-{
-    auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
-    if (!self)
-        return 0;
-    std::optional<std::reference_wrapper<const AsxPlaylistEntry>> entry;
-    try {
-        entry = self->readAsxPlaylistEntry();
-    } catch (const std::runtime_error& e) {
-        log_error("{}", EX(e));
-        return duk_error(ctx, DUK_ERR_ERROR, "Aborting playlist import");
-    }
-    if (!entry)
-        return 0;
-    PlaylistParserScript::pushAsxPlaylistEntry(ctx, entry->get());
-    return 1;
-}
+#ifdef HAVE_JS
 
 static duk_ret_t jsReadPlaylistEntry(duk_context* ctx)
 {
@@ -196,16 +226,46 @@ static duk_ret_t jsReadPlaylistEntry(duk_context* ctx)
     }
     if (!entry)
         return 0;
+    PlaylistParserScript::pushPlaylistEntry(ctx, entry->get());
+    return 1;
+}
+
+void PlaylistParserScript::pushPlaylistEntry(duk_context* ctx, const XmlPlaylistEntry& entry)
+{
     duk_push_object(ctx);
-    duk_push_string(ctx, entry->get().title.c_str());
-    duk_put_prop_string(ctx, -2, "title");
+    const std::pair<const char*, const std::string&> properties[] {
+        { "title", entry.title }, { "description", entry.description },
+        { "mimetype", entry.mimetype }, { "protocol", entry.protocol },
+        { "size", entry.size }, { "writeThrough", entry.writeThrough }
+    };
+    for (const auto& [name, value] : properties) {
+        duk_push_lstring(ctx, value.data(), value.size());
+        duk_put_prop_string(ctx, -2, name);
+    }
     duk_push_array(ctx);
-    for (duk_uarridx_t i = 0; i < entry->get().locations.size(); ++i) {
-        duk_push_string(ctx, entry->get().locations[i].c_str());
+    for (duk_uarridx_t i = 0; i < entry.locations.size(); ++i) {
+        duk_push_lstring(ctx, entry.locations[i].data(), entry.locations[i].size());
         duk_put_prop_index(ctx, -2, i);
     }
     duk_put_prop_string(ctx, -2, "locations");
-    return 1;
+    duk_push_array(ctx);
+    for (const auto& [name, value] : entry.extra) {
+        duk_push_lstring(ctx, value.data(), value.size());
+        duk_put_prop_string(ctx, -2, name.c_str());
+    }
+    duk_put_prop_string(ctx, -2, "extra");
+    duk_push_array(ctx);
+    for (duk_uarridx_t i = 0; i < entry.writeThroughs.size(); ++i) {
+        duk_push_int(ctx, entry.writeThroughs[i]);
+        duk_put_prop_index(ctx, -2, i);
+    }
+    duk_put_prop_string(ctx, -2, "writeThroughs");
+    duk_push_object(ctx);
+    for (const auto& [name, value] : entry.defaults) {
+        duk_push_lstring(ctx, value.data(), value.size());
+        duk_put_prop_string(ctx, -2, name.c_str());
+    }
+    duk_put_prop_string(ctx, -2, "defaults");
 }
 
 PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
@@ -217,54 +277,17 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& conte
     hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
     charsetMode = EnumOption<TextFileCharset>::getEnumOption(config, ConfigVal::IMPORT_PLAYLIST_CHARSET_MODE);
     defineFunction("readPlaylistEntry", jsReadPlaylistEntry, 0);
-    defineFunction("resolvePlaylistReference", jsResolvePlaylistReference, 2);
-    defineFunction("readAsxPlaylistEntry", jsReadAsxPlaylistEntry, 0);
-}
-
-void PlaylistParserScript::pushAsxPlaylistEntry(duk_context* ctx, const AsxPlaylistEntry& entry)
-{
-    duk_push_object(ctx);
-    for (const auto& [key, value] : std::map<std::string, std::string> {
-             { "sourcePath", entry.source.string() }, { "base", entry.base },
-             { "title", entry.metadata.title }, { "author", entry.metadata.author },
-             { "copyright", entry.metadata.copyright }, { "description", entry.metadata.description } }) {
-        duk_push_lstring(ctx, value.data(), value.size());
-        duk_put_prop_string(ctx, -2, key.c_str());
-    }
-    duk_push_object(ctx);
-    for (const auto& [key, value] : entry.metadata.parameters) {
-        duk_push_lstring(ctx, value.data(), value.size());
-        duk_put_prop_string(ctx, -2, key.c_str());
-    }
-    duk_put_prop_string(ctx, -2, "parameters");
-    duk_push_array(ctx);
-    for (duk_uarridx_t i = 0; i < entry.references.size(); ++i) {
-        duk_push_object(ctx);
-        duk_push_string(ctx, entry.references[i].href.c_str());
-        duk_put_prop_string(ctx, -2, "href");
-        duk_push_int(ctx, entry.references[i].writeThrough);
-        duk_put_prop_string(ctx, -2, "writeThrough");
-        duk_put_prop_index(ctx, -2, i);
-    }
-    duk_put_prop_string(ctx, -2, "references");
-}
-
-std::optional<std::reference_wrapper<const AsxPlaylistEntry>> PlaylistParserScript::readAsxPlaylistEntry()
-{
-    if (currentTask && !currentTask->isValid())
-        throw_std_runtime_error("Aborting playlist import after cancellation");
-    if (asxPosition >= asxEntries.size())
-        return std::nullopt;
-    return std::cref(asxEntries[asxPosition++]);
 }
 
 std::optional<std::reference_wrapper<const XmlPlaylistEntry>> PlaylistParserScript::readPlaylistEntry()
 {
     if (currentTask && !currentTask->isValid())
         throw_std_runtime_error("Aborting playlist import after cancellation");
-    if (!xmlPlaylist || xmlPosition >= xmlPlaylist->entries.size())
-        return std::nullopt;
-    return std::cref(xmlPlaylist->entries[xmlPosition++]);
+    auto entry = xmlPlaylist ? xmlPlaylist->readPlaylistEntry() : std::nullopt;
+    // The native iterator may skip several XML nodes before returning, even at EOF.
+    if (currentTask && !currentTask->isValid())
+        throw_std_runtime_error("Aborting playlist import after cancellation");
+    return entry;
 }
 
 std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(
@@ -393,9 +416,6 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     currentObjectID = item->getID();
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
     xmlPlaylist.reset();
-    xmlPosition = 0;
-    asxEntries.clear();
-    asxPosition = 0;
     std::vector<int> result;
     try {
         if (isXmlPlaylist) {
@@ -405,24 +425,22 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
             useUtf8Converter();
         } else if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
             prepareXmlFile(item->getLocation());
-            useUtf8Converter();
-            auto plan = readAsxPlaylistPlan(root, fs::weakly_canonical(item->getLocation()), [&](const std::string& href, const fs::path& source) {
+            xmlPlaylist = std::make_unique<AsxPlaylist>([this](const std::string& href, const fs::path& source) {
                 if (currentTask && !currentTask->isValid())
                     throw_std_runtime_error("Aborting playlist import after cancellation");
                 auto location = URLUtils::resolvePlaylistReference(href, source);
                 if (!location || !fs::path(*location).is_absolute())
-                    return AsxPlaylistDocument { {}, {}, "ASX remote or unsupported ENTRYREF skipped (" + href + ")" };
+                    return AsxPlaylistDocument { {}, {}, "ASX unsupported remote ENTRYREF skipped (" + href + ")" };
                 std::error_code ec;
                 if (!fs::is_regular_file(*location, ec))
-                    return AsxPlaylistDocument { {}, {}, "ASX missing local ENTRYREF skipped (" + href + ")" };
+                    return AsxPlaylistDocument { {}, {}, "ASX unavailable ENTRYREF skipped (" + href + ")" };
                 auto path = fs::weakly_canonical(*location);
                 auto document = std::make_unique<pugi::xml_document>();
                 readXmlFile(*document, path);
                 return AsxPlaylistDocument { path, std::move(document), {} };
             });
-            for (const auto& warning : plan.warnings)
-                log_warning("{}", warning);
-            asxEntries = std::move(plan.entries);
+            xmlPlaylist->read(xmlDoc, fs::weakly_canonical(item->getLocation()));
+            useUtf8Converter();
         } else {
             auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
             if (mode != TextFileCharset::Default && toLower(item->getLocation().extension().string()) == ".m3u8")
@@ -434,13 +452,11 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     } catch (const std::runtime_error& e) {
         log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), EX(e));
         xmlPlaylist.reset();
-        asxEntries.clear();
         cleanUp();
         throw;
     }
 
     xmlPlaylist.reset();
-    asxEntries.clear();
     cleanUp();
     log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
     return result;

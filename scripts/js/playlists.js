@@ -180,35 +180,25 @@ function readM3uPlaylist(playlist_title, playlistLocation, playlistChain, playli
 function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playlistDirChain, rootPath) {
   const result = [];
   var playlistOrder = 1;
-  var source = readAsxPlaylistEntry();
+  var source = readPlaylistEntry();
   while (source) {
-    for (var i = 0; i < source.references.length; i++) {
-      const reference = source.references[i];
-      var location = reference.href;
-      // BASE is a Gerbera compatibility extension for relative media paths.
-      if (source.base && location.charAt(0) !== '/' && !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(location))
-        location = source.base.replace(/\/+$/, '') + '/' + location;
-      location = resolvePlaylistReference(location, source.sourcePath);
-      if (!location)
-        continue;
+    for (var i = 0; i < source.locations.length; i++) {
+      // An unsuccessful candidate may be mutated by addPlaylistItem.
       const entry = {
-        location: location,
+        location: source.locations[i],
         title: source.title,
         description: source.description,
-        writeThrough: reference.writeThrough,
+        mimetype: source.mimetype,
+        protocol: source.protocol,
+        size: source.size,
+        writeThrough: source.writeThroughs[i],
         extra: {},
         defaults: {}
       };
-      if (source.author)
-        entry.defaults['upnp:author'] = source.author;
-      if (source.copyright)
-        entry.defaults['dc:rights'] = source.copyright;
-      for (var parameter in source.parameters) {
-        if (parameter === 'size' || parameter === 'mimetype' || parameter === 'protocol')
-          entry[parameter] = source.parameters[parameter];
-        else
-          entry.extra[parameter] = source.parameters[parameter];
-      }
+      for (var parameter in source.extra)
+        entry.extra[parameter] = source.extra[parameter];
+      for (var field in source.defaults)
+        entry.defaults[field] = source.defaults[field];
       if (addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain, playlistOrder, result, rootPath)) {
         if (playlistDirChain) {
           entry.writeThrough = 0; // Apply source updates once, not once per view.
@@ -218,7 +208,7 @@ function readAsxPlaylist(playlist_title, playlistLocation, playlistChain, playli
         break; // REF children are alternatives for one logical position.
       }
     }
-    source = readAsxPlaylistEntry();
+    source = readPlaylistEntry();
   }
   return result;
 }
