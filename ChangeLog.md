@@ -15,6 +15,7 @@
 - Define Limits for Containter Type Selection
 - Docker: fix ownership of files created with PUID/PGID, rename UID/GID to PUID/PGID
 - Extend Mime Mapping
+- Fix ASX local URI references and UTF-8 metadata
 - Fix CaptionInfo.sec never being sent to Samsung TVs
 - Fix hang when shutting down the SQLite thread
 - Fix hang when stopping Gerbera during startup
@@ -37,6 +38,7 @@
 - Preserve repeated local files at different playlist positions
 - Seek in transcoded streams of constant bit rate
 - Serve transcoded streams to HTTP/1.0 clients
+- Split XmlPlaylist into extra file
 - Stabilize import of broken files
 - Stabilize web UI tests and isolate mock response state
 - transcode: fix build with ffmpeg 7.0
