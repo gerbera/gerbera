@@ -20,14 +20,26 @@
 #include "../mock/database_mock.h"
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
+#include "cds/cds_resource.h"
+#include "common.h"
+#include "config/config_definition.h"
 #include "config/config_option_enum.h"
 #include "config/config_setup.h"
 #include "config/result/autoscan.h"
+#include "config/result/transcoding.h"
 #include "content/content_manager.h"
 #include "content/layout/layout.h"
 #include "content/update_manager.h"
 #include "context.h"
+#include "exceptions.h"
+#include "iohandler/io_handler.h"
+#include "metadata/metadata_enums.h"
+#include "request_handler/file_request_handler.h"
 #include "upnp/clients.h"
+#include "upnp/compat.h"
+#include "upnp/xml_builder.h"
+#include "util/grb_fs.h"
+#include "util/tools.h"
 #include "web/session_manager.h"
 
 #ifdef ONLINE_SERVICES
@@ -44,8 +56,15 @@
 #include <sys/inotify.h>
 #endif
 
+#include <array>
 #include <chrono>
+#include <cstddef>
 #include <gtest/gtest.h>
+#include <memory>
+#include <pugixml.hpp>
+#include <string>
+#include <system_error>
+#include <vector>
 
 class PlaylistUpdateConfig : public ConfigMock {
 public:
@@ -67,7 +86,13 @@ public:
     std::vector<int> removed;
     std::shared_ptr<CdsObject> source;
 
-    std::shared_ptr<CdsObject> loadObject(int id, const std::string&) override { return objects.at(id); }
+    std::shared_ptr<CdsObject> loadObject(int id, const std::string&) override
+    {
+        auto object = objects.find(id);
+        if (object == objects.end())
+            throw ObjectNotFoundException("Removed diagnostic object " + std::to_string(id));
+        return object->second;
+    }
     std::shared_ptr<CdsObject> findObjectByPath(const fs::path&, const std::string&, DbFileType) override { return source; }
     std::unique_ptr<ChangedContainers> removeObject(int id, const fs::path&, bool) override
     {
@@ -84,6 +109,13 @@ public:
     {
     }
     std::vector<int> removed;
+    std::vector<int> played;
+    std::string playedGroup;
+    void triggerPlayHook(const std::string& group, const std::shared_ptr<CdsObject>& object) override
+    {
+        played.push_back(object->getID());
+        playedGroup = group;
+    }
     std::vector<int> removeObject(const std::shared_ptr<AutoscanDirectory>&, const std::shared_ptr<CdsObject>& obj, const fs::path&, bool, bool, bool) override
     {
         removed.push_back(obj->getID());
@@ -114,6 +146,14 @@ protected:
         auto context = std::make_shared<Context>(nullptr, config, nullptr, nullptr, database, nullptr, nullptr);
         content = std::make_shared<PlaylistUpdateContent>(context);
     }
+    void TearDown() override
+    {
+        if (!resourceFile.empty()) {
+            std::error_code error;
+            fs::remove(resourceFile, error);
+        }
+    }
+    fs::path resourceFile;
     std::shared_ptr<PlaylistUpdateConfig> config;
     std::shared_ptr<PlaylistUpdateDatabase> database;
     std::shared_ptr<PlaylistUpdateContent> content;
@@ -206,6 +246,12 @@ public:
     }
 
     ~PlaybackMetadataContent() override { update_manager->shutdown(); }
+
+    void triggerPlayHook(const std::string& group, const std::shared_ptr<CdsObject>& object) override
+    {
+        // Bypass the SourceHint recorder to exercise the production playback path.
+        ContentManager::triggerPlayHook(group, object);
+    }
 };
 
 class PlaybackMetadataTest : public ::testing::TestWithParam<PlaybackNotifications> { };
@@ -294,3 +340,130 @@ TEST_F(PlaylistUpdateTest, WritableCloseKeepsMediaIdentityButDeletionAndPlaylist
     }
 }
 #endif
+
+TEST_F(PlaylistUpdateTest, SourceHintPreservesLivePlaylistIdentityAndSurvivesPositionRemoval)
+{
+    const std::string payload(1672, 'P');
+    constexpr auto fixtureDate = "2022-04-01T00:00:00";
+    resourceFile = fs::temp_directory_path() / ("grb-playlist-http-" + generateRandomId() + ".wav");
+    GrbFile(resourceFile).writeBinaryFile(reinterpret_cast<const std::byte*>(payload.data()), payload.size());
+    auto physical = std::make_shared<CdsItem>(CdsEntryType::File);
+    physical->setID(42);
+    physical->setTitle("Physical track");
+    physical->addMetaData(MetadataFields::M_DATE, fixtureDate);
+    physical->setLocation(resourceFile, CdsEntryType::File);
+    physical->setMimeType("audio/x-wav");
+    auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, "http-get:*:audio/x-wav:*");
+    resource->addAttribute(ResourceAttribute::SIZE, std::to_string(payload.size()));
+    physical->addResource(resource);
+    database->objects[42] = physical;
+    auto position = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
+    physical->copyTo(position);
+    position->setID(64);
+    position->setRefID(42);
+    position->setVirtual(true);
+    database->objects[64] = position;
+    auto definition = std::make_shared<ConfigDefinition>();
+    definition->init(definition);
+    auto context = std::make_shared<Context>(definition, config, nullptr, nullptr, database, nullptr, nullptr);
+    content = std::make_shared<PlaylistUpdateContent>(context);
+    auto xml = std::make_shared<UpnpXMLBuilder>(context, "");
+    EXPECT_CALL(*config, getTranscodingProfileListOption(::testing::_))
+        .WillRepeatedly(::testing::Return(std::make_shared<TranscodingProfileList>()));
+    pugi::xml_document didl;
+    auto didlRoot = didl.append_child("DIDL-Lite");
+    xml->renderObject(position, { "*" }, std::string::npos, didlRoot);
+    const auto didlResource = didlRoot.child("item").child("res");
+    ASSERT_TRUE(didlResource);
+    EXPECT_STREQ(didlRoot.child("item").child("dc:date").text().as_string(), fixtureDate);
+    const std::string positionUrl = didlResource.text().as_string();
+    ASSERT_FALSE(positionUrl.empty());
+    EXPECT_STRNE(didlResource.attribute("protocolInfo").as_string(), "http-get:*:audio/x-wav:*");
+    EXPECT_EQ(physical->getResource(ResourcePurpose::Content)->getAttribute(ResourceAttribute::PROTOCOLINFO), "http-get:*:audio/x-wav:*");
+    EXPECT_NE(positionUrl.find("/object_id/64/"), std::string::npos);
+    EXPECT_NE(positionUrl.find("/source_id/42/"), std::string::npos);
+#if defined(USING_NPUPNP)
+    auto info = std::make_unique<UpnpFileInfo>();
+#else
+    std::unique_ptr<UpnpFileInfo, decltype(&UpnpFileInfo_delete)> info(UpnpFileInfo_new(), UpnpFileInfo_delete);
+#endif
+    ASSERT_NE(info, nullptr);
+    for (int playingId : { 64, 42 }) {
+        FileRequestHandler infoHandler(content, xml, nullptr, nullptr);
+        ASSERT_NO_THROW(infoHandler.getInfo(positionUrl.c_str(), info.get()));
+#if defined(USING_NPUPNP)
+        EXPECT_EQ(info->file_length, static_cast<off_t>(payload.size()));
+#else
+        EXPECT_EQ(UpnpFileInfo_get_FileLength(info.get()), static_cast<off_t>(payload.size()));
+#endif
+        if (playingId == 42)
+            database->removeObject(64, "", false);
+        FileRequestHandler openHandler(content, xml, nullptr, nullptr);
+        std::unique_ptr<IOHandler> reader;
+        ASSERT_NO_THROW(reader = openHandler.open(positionUrl.c_str(), nullptr, UPNP_READ));
+        ASSERT_NE(reader, nullptr);
+        reader->open(UPNP_READ);
+        std::array<std::byte, 1672> bytes {};
+        const auto count = reader->read(bytes.data(), bytes.size());
+        const auto end = reader->read(bytes.data(), 1);
+        reader->close();
+        EXPECT_EQ(count, static_cast<grb_read_t>(payload.size()));
+        EXPECT_EQ(end, GRB_READ_END);
+        EXPECT_EQ(std::string(reinterpret_cast<const char*>(bytes.data()), bytes.size()), payload);
+        ASSERT_FALSE(content->played.empty());
+        EXPECT_EQ(content->played.back(), playingId);
+        EXPECT_EQ(content->playedGroup, DEFAULT_CLIENT_GROUP);
+    }
+    FileRequestHandler handler(content, xml, nullptr, nullptr);
+    EXPECT_NO_THROW(handler.getInfo(positionUrl.c_str(), info.get()));
+    EXPECT_EQ(content->played, (std::vector<int> { 64, 42 }));
+    for (const auto* suffix : { "", "/source_id/0", "/source_id/64", "/source_id/invalid",
+             "/source_id/999999999999999999999", "/source_id/42/pr_name/test", "/source_id/42/zip/1", "/source_id/42/tr/1" }) {
+        const std::string rejected = std::string("/media/object_id/64/res_id/0") + suffix + "/group/diagnostic";
+        EXPECT_THROW(handler.open(rejected.c_str(), nullptr, UPNP_READ), ObjectNotFoundException);
+    }
+    for (const auto* resId : { "1", "none", "invalid", "999999999999999999999" }) {
+        const auto rejected = std::string("/media/object_id/64/res_id/") + resId + "/source_id/42/group/diagnostic";
+        EXPECT_THROW(handler.open(rejected.c_str(), nullptr, UPNP_READ), ObjectNotFoundException);
+    }
+    for (auto attribute : { ResourceAttribute::OFFSET, ResourceAttribute::RESOURCE_FILE }) {
+        auto customized = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
+        position->copyTo(customized);
+        customized->getResource(ResourcePurpose::Content)->addAttribute(attribute, "1");
+        const auto url = xml->getFirstResourcePath(customized);
+        EXPECT_EQ(url.find("/source_id/"), std::string::npos);
+    }
+    auto customized = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
+    position->copyTo(customized);
+    customized->getResource(ResourcePurpose::Content)->addParameter("custom", "value");
+    EXPECT_EQ(xml->getFirstResourcePath(customized).find("/source_id/"), std::string::npos);
+    customized = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
+    position->copyTo(customized);
+    customized->getResource(ResourcePurpose::Content)->addOption("custom", "value");
+    EXPECT_EQ(xml->getFirstResourcePath(customized).find("/source_id/"), std::string::npos);
+    customized = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
+    position->copyTo(customized);
+    customized->getResource(ResourcePurpose::Content)->addAttribute(ResourceAttribute::PROTOCOLINFO, "http-get:*:audio/other:*");
+    EXPECT_EQ(xml->getFirstResourcePath(customized).find("/source_id/"), std::string::npos);
+    customized = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
+    position->copyTo(customized);
+    customized->getResource(ResourcePurpose::Content)->addAttribute(ResourceAttribute::SIZE, std::to_string(payload.size() + 1));
+    EXPECT_EQ(xml->getFirstResourcePath(customized).find("/source_id/"), std::string::npos);
+    customized = std::make_shared<CdsItem>(CdsEntryType::VirtualItem);
+    position->copyTo(customized);
+    customized->setMimeType("audio/other");
+    EXPECT_EQ(xml->getFirstResourcePath(customized).find("/source_id/"), std::string::npos);
+    customized->setMimeType(physical->getMimeType());
+    customized->setLocation(resourceFile.string() + ".other", CdsEntryType::VirtualItem);
+    EXPECT_EQ(xml->getFirstResourcePath(customized).find("/source_id/"), std::string::npos);
+    for (auto purpose : { ResourcePurpose::Transcode, ResourcePurpose::Thumbnail }) {
+        auto other = std::make_shared<CdsResource>(ContentHandler::DEFAULT, purpose);
+        EXPECT_EQ(xml->renderResourceURL(*position, *other, {}, "diagnostic").find("/source_id/"), std::string::npos);
+    }
+    resource->addAttribute(ResourceAttribute::OFFSET, "1");
+    EXPECT_THROW(handler.open(positionUrl.c_str(), nullptr, UPNP_READ), ObjectNotFoundException);
+    physical->setResources(position->getResources());
+    physical->setLocation(resourceFile, CdsEntryType::ExtraFile);
+    EXPECT_THROW(handler.open(positionUrl.c_str(), nullptr, UPNP_READ), ObjectNotFoundException);
+}
