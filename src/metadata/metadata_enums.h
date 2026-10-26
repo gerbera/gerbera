@@ -64,7 +64,10 @@
 #define CONTENT_TYPE_WMA "wma"
 
 #define MIME_TYPE_CUESHEET "text/cue"
+#define MIME_TYPE_MPEGURL "audio/x-mpegurl"
 #define MIME_TYPE_ASX_PLAYLIST "video/x-ms-asx"
+#define MIME_TYPE_WPL_PLAYLIST "application/vnd.ms-wpl"
+#define MIME_TYPE_XSPF_PLAYLIST "application/xspf+xml"
 #define MIME_TYPE_SRT_SUBTITLE "application/x-srt"
 
 #define DC_DATE "dc:date"

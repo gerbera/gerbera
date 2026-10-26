@@ -27,6 +27,7 @@ add_executable(
     main.cc #
     test_autoscan_list.cc #
     test_playlist_update.cc #
+    test_playlist_parser_script.cc #
     test_resolution.cc #
 )
 
@@ -37,9 +38,19 @@ else()
 endif()
 add_dependencies(testcontent libgerbera gerbera)
 
+target_compile_definitions(
+    testcontent
+    PRIVATE XML_PLAYLIST_FIXTURES="${CMAKE_SOURCE_DIR}/test/scripting/fixtures/xml-playlists")
+
 if((WITH_TAGLIB OR WITH_AVCODEC) AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_sources(testcontent PRIVATE playlist_import_test.cc test_playlist_file_classes.cc)
     target_compile_definitions(testcontent PRIVATE GERBERA_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
+endif()
+
+if(WITH_JS
+   AND WITH_AVCODEC
+   AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_sources(testcontent PRIVATE test_xml_playlist_import.cc test_asx_import.cc)
 endif()
 
 include(GoogleTest)

@@ -19,6 +19,11 @@ python3 test/content/test_playlist_updates.py --binary build/gerbera \
 Use a fresh work directory for each run. Omit `--work-directory` for automatic
 temporary-file cleanup.
 
+`ShutdownDuringStartup` starts a real Gerbera process on Linux when Python 3 is
+available and sends it SIGTERM as soon as the web server accepts a connection, three times. It fails
+if the process is still running 20 seconds later. It uses a generated configuration and
+database, and needs a usable IPv4 network interface for the UPnP listener.
+
 This file outlines how the Gerbera system uses the **GoogleTest**
 framework to provide unit testing for the C++ code-base.
 
@@ -34,6 +39,21 @@ and total limits and are registered only when JavaScript and CURL are available.
 Content convergence retains
 the previous 20-second deadline. Input files are checked byte for byte after
 shutdown. The shared fixture uses no external Python process/readiness layer.
+Physical class checks cover M3U, M3U8, PLS, ASX, WPL and XSPF in both builds.
+JavaScript builds also exercise their parsed views; WPL/XSPF now use the existing
+C++ XML readers rather than a JavaScript source marker.
+
+`Corpus/XmlPlaylistTest` reports the 45 WPL/XSPF reader cases individually.
+`ImportModes/XmlPlaylistImportTest` then imports the same corpus with the real
+server and an isolated SQLite database for both `mt` and `grb`. It checks both
+playlist views, mixed audio/video order, repeated positions, local and external
+URIs, legacy formats and character set recovery, playlist refresh, two unchanged
+rescans and restart. Each content check retains its 30-second deadline.
+Separately named HTTP cases use the existing CurlIOHandler to compare complete
+local resources byte for byte and never fetch external fixture URLs. Only those
+HTTP cases are explicitly skipped when CURL is unavailable. The real corpus
+import retains its Linux, JavaScript and FFmpeg prerequisites; no Python
+process/readiness helper is added.
 
 ## Required Software
 

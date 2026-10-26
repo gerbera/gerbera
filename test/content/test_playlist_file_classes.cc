@@ -28,6 +28,7 @@
 #include "database/database.h"
 #include "metadata/metadata_enums.h"
 #include "upnp/upnp_common.h"
+#include "util/grb_fs.h"
 #include "util/grb_time.h"
 
 #include <array>
@@ -39,6 +40,7 @@
 #include <memory>
 #include <pugixml.hpp>
 #include <string>
+#include <system_error>
 #include <tuple>
 #include <utility>
 #include <vector>
@@ -59,6 +61,8 @@ protected:
         std::pair { "two.m3u8", "audio/x-mpegurl" },
         std::pair { "three.pls", "audio/x-scpls" },
         std::pair { "four.asx", MIME_TYPE_ASX_PLAYLIST },
+        std::pair { "five.wpl", MIME_TYPE_WPL_PLAYLIST },
+        std::pair { "six.xspf", MIME_TYPE_XSPF_PLAYLIST },
     };
 
     void configureMappings(PlaylistClassMapping mode)
@@ -103,22 +107,12 @@ protected:
         writeBytes(directory / "two.m3u8", "../audio/a.wav\n../audio/b.wav\n../audio/a.wav\n");
         writeBytes(directory / "three.pls", "[playlist]\nFile1=../audio/a.wav\nFile2=../audio/b.wav\nFile3=../audio/a.wav\nNumberOfEntries=3\nVersion=2\n");
         writeBytes(directory / "four.asx", "<asx version=\"3.0\"><entry><ref href=\"../audio/a.wav\"/></entry><entry><ref href=\"../audio/b.wav\"/></entry><entry><ref href=\"../audio/a.wav\"/></entry></asx>");
-        if (playlists.size() > 4) {
-            writeBytes(directory / "five.wpl", "<smil><body><seq><media src=\"../audio/a.wav\"/><media src=\"../audio/b.wav\"/><media src=\"../audio/a.wav\"/></seq></body></smil>");
-            writeBytes(directory / "six.xspf", "<playlist xmlns=\"http://xspf.org/ns/0/\" version=\"1\"><trackList><track><location>../audio/a.wav</location></track><track><location>../audio/b.wav</location></track><track><location>../audio/a.wav</location></track></trackList></playlist>");
-        }
+        writeBytes(directory / "five.wpl", "<smil><body><seq><media src=\"../audio/a.wav\"/><media src=\"../audio/b.wav\"/><media src=\"../audio/a.wav\"/></seq></body></smil>");
+        writeBytes(directory / "six.xspf", "<playlist xmlns=\"http://xspf.org/ns/0/\" version=\"1\"><trackList><track><location>../audio/a.wav</location></track><track><location>../audio/b.wav</location></track><track><location>../audio/a.wav</location></track></trackList></playlist>");
     }
 
     void prepareInputs()
     {
-#ifdef HAVE_JS
-        // Keep the optional combined-feature coverage without requiring #4009.
-        const auto parser = fs::path(GERBERA_SOURCE_DIR) / "scripts/js/playlists.js";
-        if (readBytes(parser).find("function readXmlPlaylist(") != std::string::npos) {
-            playlists.emplace_back("five.wpl", "application/vnd.ms-wpl");
-            playlists.emplace_back("six.xspf", "application/xspf+xml");
-        }
-#endif
         configureMappings(std::get<1>(GetParam()));
         fs::create_directories(source / "audio");
         writeWave(source / "audio/a.wav", "Track A");
@@ -255,7 +249,10 @@ TEST_P(PlaylistFileClassTest, PhysicalClassesKeepMimeResourcesAndParsedPlaylistP
     ASSERT_NO_FATAL_FAILURE(prepareInputs());
     std::map<fs::path, std::string> original;
     for (const auto& entry : fs::recursive_directory_iterator(source)) {
-        if (entry.is_regular_file())
+        std::error_code error;
+        const auto regular = isRegularFile(entry, error);
+        ASSERT_FALSE(error) << error.message();
+        if (regular)
             original[entry.path()] = readBytes(entry.path());
     }
     ASSERT_NO_FATAL_FAILURE(startAndWaitForImports());

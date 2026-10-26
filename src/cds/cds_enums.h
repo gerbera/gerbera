@@ -113,6 +113,7 @@ enum class ResourceAttribute : int {
     PIXELFORMAT,
     LYRICS,
     OFFSET,
+    COLORTRANSFER,
     MAX
 };
 
@@ -173,6 +174,7 @@ private:
         { ResourceAttribute::PIXELFORMAT, "pixelFormat" },
         { ResourceAttribute::LYRICS, "lyrics" },
         { ResourceAttribute::OFFSET, "offset" },
+        { ResourceAttribute::COLORTRANSFER, "colorTransfer" },
         { ResourceAttribute::MAX, "unknown" },
     };
     inline static const std::map<ResourceAttribute, std::string> attrToDisplay {
@@ -197,6 +199,7 @@ private:
         { ResourceAttribute::PIXELFORMAT, "pixelFormat" },
         { ResourceAttribute::LYRICS, "lyrics" },
         { ResourceAttribute::OFFSET, "offset" },
+        { ResourceAttribute::COLORTRANSFER, "colorTransfer" },
         { ResourceAttribute::MAX, "unknown" },
     };
     inline static const std::map<ResourceAttribute, ResourceDataType> attrToType {
@@ -221,6 +224,7 @@ private:
         { ResourceAttribute::PIXELFORMAT, ResourceDataType::String },
         { ResourceAttribute::LYRICS, ResourceDataType::Text },
         { ResourceAttribute::OFFSET, ResourceDataType::Number },
+        { ResourceAttribute::COLORTRANSFER, ResourceDataType::String },
         { ResourceAttribute::MAX, ResourceDataType::String },
     };
 

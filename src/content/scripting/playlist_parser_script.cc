@@ -31,11 +31,10 @@
 
 /// @file content/scripting/playlist_parser_script.cc
 
-#ifdef HAVE_JS
 #define GRB_LOG_FAC GrbLogFacility::script
-
 #include "playlist_parser_script.h" // API
 
+#ifdef HAVE_JS
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "config/config.h"
@@ -48,8 +47,70 @@
 #include "script_property.h"
 #include "scripting_runtime.h"
 #include "util/generic_task.h"
+#include "util/logger.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
+#include "util/url_utils.h"
+
+#include <map>
+#include <system_error>
+#include <utility>
+
+static duk_ret_t jsReadPlaylistEntry(duk_context* ctx)
+{
+    auto self = dynamic_cast<PlaylistParserScript*>(Script::getContextScript(ctx));
+    if (!self)
+        return 0;
+    std::optional<std::reference_wrapper<const XmlPlaylistEntry>> entry;
+    try {
+        entry = self->readPlaylistEntry();
+    } catch (const std::runtime_error& e) {
+        log_error("{}", EX(e));
+        return duk_error(ctx, DUK_ERR_ERROR, "Aborting playlist import");
+    }
+    if (!entry)
+        return 0;
+    PlaylistParserScript::pushPlaylistEntry(ctx, entry->get());
+    return 1;
+}
+
+void PlaylistParserScript::pushPlaylistEntry(duk_context* ctx, const XmlPlaylistEntry& entry)
+{
+    duk_push_object(ctx);
+    const std::pair<const char*, const std::string&> properties[] {
+        { "title", entry.title }, { "description", entry.description },
+        { "mimetype", entry.mimetype }, { "protocol", entry.protocol },
+        { "size", entry.size }, { "writeThrough", entry.writeThrough }
+    };
+    for (const auto& [name, value] : properties) {
+        duk_push_lstring(ctx, value.data(), value.size());
+        duk_put_prop_string(ctx, -2, name);
+    }
+    duk_push_array(ctx);
+    for (duk_uarridx_t i = 0; i < entry.locations.size(); ++i) {
+        duk_push_lstring(ctx, entry.locations[i].data(), entry.locations[i].size());
+        duk_put_prop_index(ctx, -2, i);
+    }
+    duk_put_prop_string(ctx, -2, "locations");
+    duk_push_array(ctx);
+    for (const auto& [name, value] : entry.extra) {
+        duk_push_lstring(ctx, value.data(), value.size());
+        duk_put_prop_string(ctx, -2, name.c_str());
+    }
+    duk_put_prop_string(ctx, -2, "extra");
+    duk_push_array(ctx);
+    for (duk_uarridx_t i = 0; i < entry.writeThroughs.size(); ++i) {
+        duk_push_int(ctx, entry.writeThroughs[i]);
+        duk_put_prop_index(ctx, -2, i);
+    }
+    duk_put_prop_string(ctx, -2, "writeThroughs");
+    duk_push_object(ctx);
+    for (const auto& [name, value] : entry.defaults) {
+        duk_push_lstring(ctx, value.data(), value.size());
+        duk_put_prop_string(ctx, -2, name.c_str());
+    }
+    duk_put_prop_string(ctx, -2, "defaults");
+}
 
 PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
     : ParserScript(content, parent, "playlist", "pls", true)
@@ -59,6 +120,18 @@ PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& conte
     followSymlinks = config->getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS);
     hidden = config->getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES);
     charsetMode = EnumOption<TextFileCharset>::getEnumOption(config, ConfigVal::IMPORT_PLAYLIST_CHARSET_MODE);
+    defineFunction("readPlaylistEntry", jsReadPlaylistEntry, 0);
+}
+
+std::optional<std::reference_wrapper<const XmlPlaylistEntry>> PlaylistParserScript::readPlaylistEntry()
+{
+    if (currentTask && !currentTask->isValid())
+        throw_std_runtime_error("Aborting playlist import after cancellation");
+    auto entry = xmlPlaylist ? xmlPlaylist->readPlaylistEntry() : std::nullopt;
+    // The native iterator may skip several XML nodes before returning, even at EOF.
+    if (currentTask && !currentTask->isValid())
+        throw_std_runtime_error("Aborting playlist import after cancellation");
+    return entry;
 }
 
 std::pair<std::shared_ptr<CdsObject>, int> PlaylistParserScript::createObject2cdsObject(
@@ -182,33 +255,52 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     auto item = std::static_pointer_cast<CdsItem>(obj);
 
     log_debug("Checking playlist {} ...", obj->getLocation().string());
-    if (item->getMimeType() == MIME_TYPE_ASX_PLAYLIST) {
-        pugi::xml_parse_result result = xmlDoc.load_file(item->getLocation().c_str());
-        if (result.status != pugi::xml_parse_status::status_ok) {
-            throw ConfigParseException(result.description());
-        }
-        root = xmlDoc.document_element();
-    }
-
+    static const std::map<std::string, XmlPlaylistType> xmlPlaylistTypes {
+        { MIME_TYPE_WPL_PLAYLIST, XmlPlaylistType::Wpl },
+        { MIME_TYPE_XSPF_PLAYLIST, XmlPlaylistType::Xspf },
+        { MIME_TYPE_ASX_PLAYLIST, XmlPlaylistType::Asx },
+    };
+    auto xmlPlaylistType = xmlPlaylistTypes.find(item->getMimeType());
     currentTask = std::move(task);
     currentObjectID = item->getID();
-
     ScriptingRuntime::AutoLock lock(runtime->getMutex());
+    xmlPlaylist.reset();
     std::vector<int> result;
     try {
-        if (item->getMimeType() != MIME_TYPE_ASX_PLAYLIST) {
-            auto mode = item->getMimeType() == "audio/x-mpegurl" ? charsetMode : TextFileCharset::Default;
+        if (xmlPlaylistType != xmlPlaylistTypes.end()) {
+            xmlPlaylist = XmlPlaylist::create(xmlPlaylistType->second, [this](const std::string& href, const fs::path& source) {
+                if (currentTask && !currentTask->isValid())
+                    throw_std_runtime_error("Aborting playlist import after cancellation");
+                auto location = URLUtils::resolvePlaylistReference(href, source);
+                if (!location || !fs::path(*location).is_absolute())
+                    return AsxPlaylistDocument { {}, {}, "ASX unsupported remote ENTRYREF skipped (" + href + ")" };
+                std::error_code ec;
+                if (!isRegularFile(*location, ec))
+                    return AsxPlaylistDocument { {}, {}, "ASX unavailable ENTRYREF skipped (" + href + ")" };
+                auto path = fs::weakly_canonical(*location);
+                auto document = std::make_unique<pugi::xml_document>();
+                readXmlFile(*document, path);
+                return AsxPlaylistDocument { path, std::move(document), {} };
+            });
+            prepareXmlFile(item->getLocation(), xmlPlaylist->getParseFlags());
+            xmlPlaylist->read(xmlDoc, item->getLocation());
+            useUtf8Converter();
+        } else {
+            auto mode = item->getMimeType() == MIME_TYPE_MPEGURL ? charsetMode : TextFileCharset::Default;
             if (mode != TextFileCharset::Default && toLower(item->getLocation().extension().string()) == ".m3u8")
                 mode = TextFileCharset::Utf8;
             prepareFile(item->getLocation(), mode);
         }
+
         result = call(obj, nullptr, playlistFunction, rootPath, "", hasResult);
     } catch (const std::runtime_error& e) {
         log_debug("Failed to parse playlist {}: {}", obj->getLocation().string(), EX(e));
+        xmlPlaylist.reset();
         cleanUp();
         throw;
     }
 
+    xmlPlaylist.reset();
     cleanUp();
     log_debug("Done {} {} ({})...", contextName, obj->getLocation().string(), obj->getID());
     return result;

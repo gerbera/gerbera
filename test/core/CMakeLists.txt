@@ -61,6 +61,16 @@ add_test(
 )
 set_tests_properties(coreFixtures PROPERTIES FIXTURES_SETUP GrbCore)
 
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    find_package(Python3 QUIET COMPONENTS Interpreter)
+    if(Python3_Interpreter_FOUND)
+        add_test(NAME ShutdownDuringStartup
+                 COMMAND ${Python3_EXECUTABLE} ${CMAKE_CURRENT_SOURCE_DIR}/test_shutdown.py
+                         --binary $<TARGET_FILE:gerbera> --source-root ${CMAKE_SOURCE_DIR})
+        set_tests_properties(ShutdownDuringStartup PROPERTIES RUN_SERIAL TRUE TIMEOUT 240)
+    endif()
+endif()
+
 set_property(
     DIRECTORY
     APPEND

@@ -210,6 +210,35 @@ TEST_F(UpnpXmlTest, RenderObjectContainer)
     EXPECT_STREQ(didlLiteXml.c_str(), expectedXml.str().c_str());
 }
 
+TEST_F(UpnpXmlTest, RenderObjectContainerKeepsColorTransferPrivate)
+{
+    // arrange
+    pugi::xml_document didlLite;
+    auto root = didlLite.append_child("DIDL-Lite");
+    auto obj = std::make_shared<CdsContainer>(CdsEntryType::Directory);
+    obj->setID(1);
+    obj->setParentID(2);
+    obj->setRestricted(false);
+    obj->setTitle("Title");
+    obj->setClass(UPNP_CLASS_MUSIC_ALBUM);
+    // without a date the renderer falls back to the local time, which fmt cannot format on illumos
+    obj->addMetaData(MetadataFields::M_DATE, "2022-04-01T00:00:00");
+
+    auto resource = std::make_shared<CdsResource>(ContentHandler::CONTAINERART, ResourcePurpose::Thumbnail);
+    resource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo("jpg"));
+    resource->addAttribute(ResourceAttribute::RESOURCE_FILE, "/home/resource/cover.jpg");
+    resource->addAttribute(ResourceAttribute::COLORTRANSFER, "smpte2084");
+    obj->addResource(resource);
+
+    // act
+    subject->renderObject(obj, { "*" }, std::string::npos, root);
+
+    // assert
+    std::string didlLiteXml = UpnpXMLBuilder::printXml(didlLite, "");
+    EXPECT_NE(didlLiteXml.find("<res id=\"1.0\" protocolInfo="), std::string::npos);
+    EXPECT_EQ(didlLiteXml.find("colorTransfer"), std::string::npos);
+}
+
 TEST_F(UpnpXmlTest, RenderObjectItem)
 {
     // arrange
@@ -548,4 +577,42 @@ TEST_F(UpnpXmlTest, FirstResourceAddsLocalResourceIdToItem)
 
     EXPECT_NE(result, "");
     EXPECT_STREQ(result.c_str(), "http://server/media/object_id/12345/res_id/0");
+}
+
+class ColorTransferConfigMock final : public ConfigMock {
+public:
+    std::vector<std::vector<std::pair<std::string, std::string>>> getVectorOption(ConfigVal option) const override
+    {
+        auto mappings = ConfigMock::getVectorOption(option);
+        if (option == ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNAPROFILE_LIST)
+            mappings.push_back({ { "from", CONTENT_TYPE_MKV }, { "colorTransfer", "smpte2084" }, { "to", "MKV_HDR" } });
+        return mappings;
+    }
+};
+
+class ProfileXmlBuilder : public UpnpXMLBuilder {
+public:
+    using UpnpXMLBuilder::dlnaProfileString;
+    using UpnpXMLBuilder::UpnpXMLBuilder;
+};
+
+TEST(UpnpXmlProfileTest, MatchesColorTransfer)
+{
+    auto config = std::make_shared<ColorTransferConfigMock>();
+    auto database = std::make_shared<DatabaseMock>(config);
+    auto converterManager = std::make_shared<ConverterManager>(config);
+    auto definition = std::make_shared<ConfigDefinition>();
+    definition->init(definition);
+    auto context = std::make_shared<Context>(definition, config, nullptr, nullptr, database, nullptr, converterManager);
+    ProfileXmlBuilder subject(context, "http://server");
+
+    CdsResource hdr(ContentHandler::DEFAULT, ResourcePurpose::Content);
+    hdr.addAttribute(ResourceAttribute::COLORTRANSFER, "smpte2084");
+    CdsResource sdr(ContentHandler::DEFAULT, ResourcePurpose::Content);
+    sdr.addAttribute(ResourceAttribute::COLORTRANSFER, "bt709");
+    CdsResource unknown(ContentHandler::DEFAULT, ResourcePurpose::Content);
+
+    EXPECT_EQ(subject.dlnaProfileString(hdr, CONTENT_TYPE_MKV, nullptr, false), "MKV_HDR");
+    EXPECT_EQ(subject.dlnaProfileString(sdr, CONTENT_TYPE_MKV, nullptr, false), "MKV");
+    EXPECT_EQ(subject.dlnaProfileString(unknown, CONTENT_TYPE_MKV, nullptr, false), "MKV");
 }
