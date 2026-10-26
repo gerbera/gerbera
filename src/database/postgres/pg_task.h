@@ -65,7 +65,7 @@ public:
     void sendSignal();
 
     /// @brief notify the creator of the task using the supplied pthread_mutex and pthread_cond, that the task is finished
-    void sendSignal(std::string error);
+    void sendSignal(std::string error, std::string sqlState = {});
 
     /// @brief wait until task is finished
     void waitForTask();
@@ -75,6 +75,7 @@ public:
     bool didDecontamination() const { return decontamination; }
 
     std::string getError() const { return error; }
+    const std::string& getSqlState() const { return sqlState; }
 
     virtual std::string_view taskType() const = 0;
 
@@ -96,6 +97,7 @@ protected:
     mutable std::mutex mutex;
 
     std::string error;
+    std::string sqlState;
 };
 
 /// @brief A task for the postgres thread to inititally create the database.
