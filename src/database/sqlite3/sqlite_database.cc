@@ -304,14 +304,34 @@ std::string Sqlite3Database::handleError(const std::string& query, const std::st
     return fmt::format("SQLite3 ({}: {}): {}\n       Query: {}\n       Error: {}", sqlite3_errcode(db), sqlite3_extended_errcode(db), sqlite3_errmsg(db), query.empty() ? "unknown" : query, error.empty() ? "unknown" : error);
 }
 
-void Sqlite3Database::handleException(const std::exception& exc, const std::string& lineMessage)
+void Sqlite3Database::handleException(const std::exception& exc, const std::string& lineMessage, int sqliteErrorCode)
 {
     if (!dbInitDone)
         throw_std_runtime_error("{}", EX(exc));
+
+    bool rollbackFailed = false;
+    if (sqliteErrorCode == SQLITE_CONSTRAINT_FOREIGNKEY && !shutdownFlag) {
+        try {
+            rollback("");
+        } catch (const std::exception& error) {
+            log_error("Failed to roll back foreign-key violation: {}", EX(error));
+            rollbackFailed = true;
+        }
+        if (!rollbackFailed)
+            throw;
+    }
+
     ++shutdownFlag;
     if (shutdownFlag <= 1) {
         log_error("Prematurely shutting down.\n{}\n{}", lineMessage, EX(exc));
-        rollback("");
+        if (!rollbackFailed) {
+            try {
+                rollback("");
+            } catch (const std::exception& error) {
+                log_error("Failed to roll back database failure: {}", EX(error));
+                rollbackFailed = true;
+            }
+        }
         shutdown();
     }
     if (shutdownFlag >= shutdownAttempts) {
@@ -319,6 +339,8 @@ void Sqlite3Database::handleException(const std::exception& exc, const std::stri
         std::exit(1);
     }
     log_error("Already shutting down.\n{}\n{}", lineMessage, EX(exc));
+    if (rollbackFailed)
+        throw;
 }
 
 std::shared_ptr<SQLResult> Sqlite3Database::select(const std::string& query)
@@ -360,27 +382,29 @@ void Sqlite3Database::del(std::string_view tableName, const std::string& clause,
 
 void Sqlite3Database::execOnTable(std::string_view tableName, const std::string& query, int objId)
 {
+    std::shared_ptr<SLExecTask> etask;
     try {
         log_debug("Adding query to Queue: {}", query);
         auto eKey = fmt::format("{}_{}", tableName, objId);
-        auto etask = std::make_shared<SLExecTask>(query, eKey);
+        etask = std::make_shared<SLExecTask>(query, eKey);
         addTask(etask);
         etask->waitForTask();
     } catch (const std::runtime_error& e) {
-        handleException(e, LINE_MESSAGE);
+        handleException(e, LINE_MESSAGE, etask ? etask->getSqliteErrorCode() : 0);
     }
 }
 
 int Sqlite3Database::exec(const std::string& query, const std::string& getLastInsertId)
 {
+    std::shared_ptr<SLExecTask> etask;
     try {
         log_debug("Adding query to Queue: {}", query);
-        auto etask = std::make_shared<SLExecTask>(query, getLastInsertId, false);
+        etask = std::make_shared<SLExecTask>(query, getLastInsertId, false);
         addTask(etask);
         etask->waitForTask();
         return getLastInsertId.empty() ? -1 : etask->getLastInsertId();
     } catch (const std::runtime_error& e) {
-        handleException(e, LINE_MESSAGE);
+        handleException(e, LINE_MESSAGE, etask ? etask->getSqliteErrorCode() : 0);
         return -1;
     }
 }
@@ -388,13 +412,18 @@ int Sqlite3Database::exec(const std::string& query, const std::string& getLastIn
 void Sqlite3Database::execOnly(const std::string& query)
 {
     try {
-        log_debug("Adding query to Queue: {}", query);
-        auto etask = std::make_shared<SLExecTask>(query, "", false);
-        addTask(etask);
-        etask->waitForTask();
+        execChecked(query);
     } catch (const std::runtime_error& e) {
         log_error("Failed to execute {}\n{}", query, EX(e));
     }
+}
+
+void Sqlite3Database::execChecked(const std::string& query)
+{
+    log_debug("Adding query to Queue: {}", query);
+    auto etask = std::make_shared<SLExecTask>(query, "", false);
+    addTask(etask);
+    etask->waitForTask();
 }
 
 void Sqlite3Database::threadProc()
@@ -558,7 +587,7 @@ void Sqlite3DatabaseWithTransactions::rollback(std::string_view tName)
 {
     if (use_transaction && inTransaction) {
         log_debug("ROLLBACK {} {}", tName, inTransaction);
-        _exec("ROLLBACK");
+        execChecked("ROLLBACK");
         inTransaction = false;
     }
 }

@@ -219,6 +219,9 @@ void PostgresDatabase::threadProc()
                     else if (task->didDecontamination())
                         dirty = false;
                     task->sendSignal();
+                } catch (const pqxx::sql_error& e) {
+                    log_debug("{}", EX(e));
+                    task->sendSignal(e.what(), std::string(e.sqlstate()));
                 } catch (const pqxx::argument_error& e) {
                     log_debug("{}", EX(e));
                     task->sendSignal(e.what());
@@ -256,14 +259,34 @@ void PostgresDatabase::threadProc()
     }
 }
 
-void PostgresDatabase::handleException(const std::exception& exc, const std::string& lineMessage)
+void PostgresDatabase::handleException(const std::exception& exc, const std::string& lineMessage, const std::string& sqlState)
 {
     if (!dbInitDone)
         throw_std_runtime_error("{}", EX(exc));
+
+    bool rollbackFailed = false;
+    if (sqlState == "23503" && !shutdownFlag) {
+        try {
+            rollback("");
+        } catch (const std::exception& error) {
+            log_error("Failed to roll back foreign-key violation: {}", EX(error));
+            rollbackFailed = true;
+        }
+        if (!rollbackFailed)
+            throw;
+    }
+
     ++shutdownFlag;
     if (shutdownFlag <= 1) {
         log_error("Prematurely shutting down.\n{}\n{}", lineMessage, EX(exc));
-        rollback("");
+        if (!rollbackFailed) {
+            try {
+                rollback("");
+            } catch (const std::exception& error) {
+                log_error("Failed to roll back database failure: {}", EX(error));
+                rollbackFailed = true;
+            }
+        }
         shutdown();
     }
     if (shutdownFlag >= shutdownAttempts) {
@@ -271,6 +294,8 @@ void PostgresDatabase::handleException(const std::exception& exc, const std::str
         std::exit(1);
     }
     log_error("Already shutting down.\n{}\n{}", lineMessage, EX(exc));
+    if (rollbackFailed)
+        throw;
 }
 
 void PostgresDatabase::addTask(const std::shared_ptr<PGTask>& task, bool onlyIfDirty)
@@ -307,26 +332,28 @@ void PostgresDatabase::del(std::string_view tableName, const std::string& clause
 
 void PostgresDatabase::execOnTable(std::string_view tableName, const std::string& query, int objId)
 {
+    std::shared_ptr<PGExecTask> etask;
     try {
         log_debug("Adding query to Queue: {}", query);
-        auto etask = std::make_shared<PGExecTask>(query);
+        etask = std::make_shared<PGExecTask>(query);
         addTask(etask);
         etask->waitForTask();
     } catch (const std::exception& e) {
-        handleException(e, LINE_MESSAGE);
+        handleException(e, LINE_MESSAGE, etask ? etask->getSqlState() : std::string {});
     }
 }
 
 int PostgresDatabase::exec(const std::string& query, const std::string& getLastInsertId)
 {
+    std::shared_ptr<PGExecTask> etask;
     try {
         log_debug("Adding query to Queue: {} RETURNING '{}'", query, getLastInsertId);
-        auto etask = std::make_shared<PGExecTask>(query, getLastInsertId);
+        etask = std::make_shared<PGExecTask>(query, getLastInsertId);
         addTask(etask);
         etask->waitForTask();
         return getLastInsertId.empty() ? -1 : etask->getLastInsertId();
     } catch (const std::exception& e) {
-        handleException(e, LINE_MESSAGE);
+        handleException(e, LINE_MESSAGE, etask ? etask->getSqlState() : std::string {});
         return -1;
     }
 }
@@ -334,13 +361,18 @@ int PostgresDatabase::exec(const std::string& query, const std::string& getLastI
 void PostgresDatabase::execOnly(const std::string& query)
 {
     try {
-        log_debug("Adding query to Queue: {}", query);
-        auto etask = std::make_shared<PGExecTask>(query, "", false);
-        addTask(etask);
-        etask->waitForTask();
+        execChecked(query);
     } catch (const std::exception& e) {
         log_error("Failed to execute {}\n{}", query, EX(e));
     }
+}
+
+void PostgresDatabase::execChecked(const std::string& query)
+{
+    log_debug("Adding query to Queue: {}", query);
+    auto etask = std::make_shared<PGExecTask>(query, "", false);
+    addTask(etask);
+    etask->waitForTask();
 }
 
 std::shared_ptr<SQLResult> PostgresDatabase::select(const std::string& query)
@@ -429,7 +461,7 @@ void PostgresDatabaseWithTransactions::rollback(std::string_view tName)
 {
     if (use_transaction && inTransaction) {
         log_debug("ROLLBACK {} {}", tName, inTransaction);
-        _exec("ROLLBACK");
+        execChecked("ROLLBACK");
         inTransaction = false;
     }
 }

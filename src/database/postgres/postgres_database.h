@@ -58,6 +58,7 @@ public:
 
 protected:
     void _exec(const std::string& query) override;
+    void execChecked(const std::string& query);
     std::string prepareDatabase();
     std::string getUnreferencedQuery(const std::string& table) override;
 
@@ -76,7 +77,7 @@ private:
     void execOnly(const std::string& query) override;
 
     /// @brief Implement common behaviour on exceptions while calling the database
-    void handleException(const std::exception& exc, const std::string& lineMessage);
+    void handleException(const std::exception& exc, const std::string& lineMessage, const std::string& sqlState = {});
 
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 
