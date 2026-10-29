@@ -16,7 +16,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "content/scripting/xml_playlist.h"
+#include "content/scripting/asx_playlist.h"
 #include "util/tools.h"
 
 #include <fstream>
@@ -136,7 +136,7 @@ TEST(XmlPlaylistReaderTest, ReusingReaderReplacesPreviousPositions)
     EXPECT_TRUE(playlist.entries.empty());
 }
 
-static AsxPlaylistDocument skipAsxEntryRef(const std::string&, const fs::path&)
+static AsxPlaylist::Document skipAsxEntryRef(const std::string&, const fs::path&)
 {
     return { {}, {}, "ENTRYREF intentionally unavailable in this reader fixture" };
 }

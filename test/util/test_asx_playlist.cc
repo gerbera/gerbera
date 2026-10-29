@@ -17,7 +17,7 @@
     along with Gerbera.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include "util/asx_playlist.h"
+#include "content/scripting/asx_playlist.h"
 
 #include <gtest/gtest.h>
 #include <stdexcept>
@@ -28,24 +28,24 @@ protected:
     std::map<fs::path, std::string> children;
     std::vector<fs::path> requested;
 
-    AsxPlaylistPlan parse(const std::string& body)
+    AsxPlaylist::Plan parse(const std::string& body)
     {
         auto result = document.load_string(("<ASX VERSION='3.0'>" + body + "</ASX>").c_str());
         if (!result)
             throw std::runtime_error(result.description());
-        return readAsxPlaylistPlan(
+        return AsxPlaylist::readPlan(
             document.document_element(), "/asx/main.asx",
             [&](const auto& href, const auto& source) {
                 auto path = (source.parent_path() / href).lexically_normal();
                 requested.push_back(path);
                 auto found = children.find(path);
                 if (found == children.end())
-                    return AsxPlaylistDocument { {}, {}, "Missing local ENTRYREF" };
+                    return AsxPlaylist::Document { {}, {}, "Missing local ENTRYREF" };
                 auto xml = std::make_unique<pugi::xml_document>();
                 auto parsed = xml->load_string(found->second.c_str());
                 if (!parsed)
                     throw std::runtime_error(parsed.description());
-                return AsxPlaylistDocument { path, std::move(xml), {} };
+                return AsxPlaylist::Document { path, std::move(xml), {} };
             });
     }
 
@@ -54,7 +54,7 @@ protected:
         return "<ENTRY><REF HREF='" + href + "'/></ENTRY>";
     }
 
-    static std::vector<std::string> firstReferences(const AsxPlaylistPlan& plan)
+    static std::vector<std::string> firstReferences(const AsxPlaylist::Plan& plan)
     {
         std::vector<std::string> result;
         for (const auto& entry : plan.entries)
@@ -185,11 +185,11 @@ TEST_F(AsxPlaylistTest, RejectsCyclesWithoutReturningSurroundingEntries)
 TEST_F(AsxPlaylistTest, ChecksCanonicalLoaderPathForAliasCycles)
 {
     ASSERT_TRUE(document.load_string("<ASX><ENTRYREF HREF='alias.asx'/></ASX>"));
-    EXPECT_THROW(readAsxPlaylistPlan(document.document_element(), "/asx/main.asx",
+    EXPECT_THROW(AsxPlaylist::readPlan(document.document_element(), "/asx/main.asx",
                      [](const auto&, const auto&) {
                          auto child = std::make_unique<pugi::xml_document>();
                          child->load_string("<ASX/>");
-                         return AsxPlaylistDocument {
+                         return AsxPlaylist::Document {
                              "/asx/main.asx", std::move(child), {}
                          };
                      }),
@@ -321,7 +321,7 @@ TEST_F(AsxPlaylistTest, InvalidRootAndVersionAreRejected)
     for (auto xml : { "<WPL/>", "<ASX VERSION='2.0'/>" }) {
         ASSERT_TRUE(document.load_string(xml));
         EXPECT_THROW(
-            readAsxPlaylistPlan(document.document_element(), "/asx/main.asx", {}),
+            AsxPlaylist::readPlan(document.document_element(), "/asx/main.asx", {}),
             std::runtime_error);
     }
 }
