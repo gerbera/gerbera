@@ -72,6 +72,7 @@
 
 #define DC_DATE "dc:date"
 #define DC_TITLE "dc:title"
+#define UPNP_AUTHOR "upnp:author"
 
 /// @brief Preferred source when MP4 BPM values conflict.
 enum class BpmSource {

@@ -36,7 +36,6 @@
 
 #ifdef HAVE_JS
 #include "parser_script.h"
-
 #include "xml_playlist.h"
 
 #include <functional>

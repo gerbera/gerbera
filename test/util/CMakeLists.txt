@@ -33,6 +33,11 @@ add_executable(
     test_upnp_headers.cc #
 )
 
+# Keep the native ASX parser covered in builds without JavaScript.
+if(NOT WITH_JS)
+    target_sources(testutil PRIVATE ../scripting/test_asx_playlist.cc)
+endif()
+
 if(NOT TARGET GTest::gmock)
     target_link_libraries(testutil PRIVATE libgerbera GTest::GTest)
 else()

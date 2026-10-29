@@ -214,14 +214,19 @@ pugi::xml_node& ParserScript::readXml(int direction)
     return nullNode;
 }
 
-void ParserScript::prepareXmlFile(const fs::path& path, unsigned int flags)
+void ParserScript::readXmlFile(pugi::xml_document& document, const fs::path& path, unsigned int flags)
 {
     auto contents = GrbFile(path).readBinaryFile();
     if (!contents)
         throw_std_runtime_error("Cannot open XML file {}", path.string());
-    auto result = xmlDoc.load_buffer(contents->data(), contents->size(), flags);
+    auto result = document.load_buffer(contents->data(), contents->size(), flags);
     if (!result)
         throw ConfigParseException(result.description());
+}
+
+void ParserScript::prepareXmlFile(const fs::path& path, unsigned int flags)
+{
+    readXmlFile(xmlDoc, path, flags);
     root = xmlDoc.document_element();
 }
 

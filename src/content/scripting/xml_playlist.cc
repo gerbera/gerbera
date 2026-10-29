@@ -27,9 +27,8 @@
 
 #include "xml_playlist.h"
 
+#include "asx_playlist.h"
 #include "exceptions.h"
-#include "util/logger.h"
-#include "util/tools.h"
 #include "util/url_utils.h"
 
 #include <utility>
@@ -39,10 +38,17 @@ static constexpr auto xspfNamespace = "http://xspf.org/ns/0/";
 std::unique_ptr<XmlPlaylist> XmlPlaylist::create(XmlPlaylistType type)
 {
     if (type == XmlPlaylistType::Asx)
-        return std::make_unique<AsxPlaylist>();
+        throw_std_runtime_error("ASX requires an explicit ENTRYREF loader");
     if (type == XmlPlaylistType::Wpl)
         return std::make_unique<WplPlaylist>();
     return std::make_unique<XspfPlaylist>();
+}
+
+std::unique_ptr<XmlPlaylist> XmlPlaylist::create(XmlPlaylistType type, Loader loader)
+{
+    if (type == XmlPlaylistType::Asx)
+        return std::make_unique<AsxPlaylist>(std::move(loader));
+    return create(type);
 }
 
 void XmlPlaylist::read(const pugi::xml_document& doc,
@@ -122,93 +128,4 @@ std::optional<std::reference_wrapper<const XmlPlaylistEntry>> XmlPlaylist::readP
     if (!readComplete || entryPosition >= entries.size())
         return std::nullopt;
     return std::cref(entries[entryPosition++]);
-}
-
-static pugi::xml_attribute asxAttribute(pugi::xml_node node, const char* name)
-{
-    pugi::xml_attribute result;
-    for (auto attribute : node.attributes()) {
-        if (toLower(attribute.name()) == name)
-            result = attribute;
-    }
-    return result;
-}
-
-void AsxPlaylist::readEntries(pugi::xml_node root, const fs::path& path)
-{
-    document.reset();
-    node = {};
-    parents.clear();
-    source = path;
-    base.clear();
-    pendingEntry = {};
-    currentEntry = {};
-    if (toLower(root.name()) != "asx")
-        throw_std_runtime_error("ASX requires an asx root element");
-    // Keep the iterator independent of the caller's pugixml document lifetime.
-    node = document.append_copy(root);
-    if (!node)
-        throw_std_runtime_error("Cannot copy ASX XML document");
-}
-
-std::optional<std::reference_wrapper<const XmlPlaylistEntry>> AsxPlaylist::readPlaylistEntry()
-{
-    currentEntry = {};
-    if (!readComplete)
-        return std::nullopt;
-    while (node || !parents.empty()) {
-        if (!node) {
-            node = parents.back().next_sibling();
-            parents.pop_back();
-            currentEntry = std::move(pendingEntry);
-            pendingEntry = {};
-            if (currentEntry.locations.empty())
-                continue;
-            // Legacy ASX uses a root BASE prefix and the last REF in an ENTRY.
-            auto reference = currentEntry.locations.back();
-            if (!base.empty())
-                reference = base + '/' + reference;
-            std::optional<std::string> location;
-            try {
-                location = URLUtils::resolvePlaylistReference(reference, source);
-            } catch (const std::runtime_error& e) {
-                log_warning("Cannot resolve playlist reference {}: {}", reference, EX(e));
-                continue;
-            }
-            if (!location)
-                continue;
-            currentEntry.locations = { *location };
-            return std::cref(currentEntry);
-        }
-        const auto name = toLower(node.name());
-        if (name == "asx" || name == "entry") {
-            parents.push_back(node);
-            node = node.first_child();
-            continue;
-        }
-        const auto href = asxAttribute(node, "href").as_string();
-        if (name == "ref" && *href) {
-            pendingEntry.locations = { href };
-            pendingEntry.writeThrough = asxAttribute(node, "writethrough").as_string("-1");
-        } else if (name == "base" && *href && parents.size() < 2) {
-            base = href;
-        } else if (name == "title") {
-            pendingEntry.title = node.text().as_string();
-        } else if (name == "abstract") {
-            pendingEntry.description = node.text().as_string();
-        } else if (name == "param") {
-            const std::string parameter = asxAttribute(node, "name").as_string();
-            const std::string value = asxAttribute(node, "value").as_string();
-            if (parameter == "size")
-                pendingEntry.size = value;
-            else if (parameter == "mimetype")
-                pendingEntry.mimetype = value;
-            else if (parameter == "protocol")
-                pendingEntry.protocol = value;
-            else
-                pendingEntry.extra[parameter] = value;
-        }
-        node = node.next_sibling();
-    }
-    return std::nullopt;
 }
