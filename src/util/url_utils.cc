@@ -96,9 +96,6 @@ std::map<std::string, std::string> parseParameters(std::string_view filename, st
 
 static constexpr auto hexCharS2 = "0123456789ABCDEF";
 
-/// @brief Converts a string to a URL (meaning: %20 instead of space and so on)
-/// @param str String to be converted.
-/// @return string that contains the url-escaped representation of the original string.
 std::string urlEscape(std::string_view str, UrlMode mode)
 {
     const bool path = mode == UrlMode::FilePath;

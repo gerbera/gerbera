@@ -196,11 +196,11 @@ TEST_F(ExternalUrlAsxPlaylistTest, TriesAlternativesUntilOnePositionCanBeAdded)
     ASSERT_EQ(duk_peval_string(ctx, fallbackCopy), DUK_EXEC_SUCCESS);
     duk_pop(ctx);
     std::vector<std::pair<std::string, std::string>> inserted;
-    EXPECT_CALL(*commonScriptMock, addCdsObject(_, _, _)).WillRepeatedly(Invoke([&](auto item, auto chain, auto) {
+    EXPECT_CALL(*commonScriptMock, addCdsObject(_, _, _)).WillRepeatedly([&](auto item, auto chain, auto) {
         inserted.emplace_back(item.at("location"), chain);
         EXPECT_EQ(item.at("playlistOrder"), item.at("location").find("/c.mp3") != std::string::npos ? "2" : "1");
         return item.at("location").find("/a.mp3") != std::string::npos ? 0 : 1;
-    }));
+    });
     ASSERT_EQ(duk_peval_string(ctx, "readAsxPlaylist('Playlist Title', '/location/of/', '42', '43', '/home/gerbera').length"), DUK_EXEC_SUCCESS);
     EXPECT_EQ(duk_get_int(ctx, -1), 4);
     EXPECT_EQ(inserted, (std::vector<std::pair<std::string, std::string>> { { "https://example.invalid/a.mp3", "42" }, { "https://example.invalid/b.mp3", "42" }, { "https://example.invalid/b.mp3", "43" }, { "https://example.invalid/c.mp3", "42" }, { "https://example.invalid/c.mp3", "43" } }));
