@@ -51,7 +51,7 @@ std::map<MetadataFields, std::string> MetaEnumMapper::mt_keys = std::map<Metadat
     std::pair(MetadataFields::M_ALBUMARTURI, "upnp:albumArtURI"),
     std::pair(MetadataFields::M_REGION, "upnp:region"),
     std::pair(MetadataFields::M_CREATOR, "dc:creator"),
-    std::pair(MetadataFields::M_AUTHOR, "upnp:author"),
+    std::pair(MetadataFields::M_AUTHOR, UPNP_AUTHOR),
     std::pair(MetadataFields::M_DIRECTOR, "upnp:director"),
     std::pair(MetadataFields::M_PUBLISHER, "dc:publisher"),
     std::pair(MetadataFields::M_RATING, "upnp:rating"),

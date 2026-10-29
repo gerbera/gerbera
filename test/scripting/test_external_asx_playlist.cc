@@ -24,8 +24,8 @@
 
 #include "cds/cds_objects.h"
 #include "config/result/autoscan.h"
+#include "content/scripting/asx_playlist.h"
 #include "content/scripting/playlist_parser_script.h"
-#include "content/scripting/xml_playlist.h"
 #include "exceptions.h"
 #include "upnp/upnp_common.h"
 #include "util/tools.h"
@@ -62,7 +62,7 @@ static duk_ret_t addContainerTree(duk_context* ctx)
 
 static pugi::xml_document xmlDoc;
 static AsxPlaylist asxPlaylist([](const std::string&, const fs::path&) {
-    return AsxPlaylistDocument { {}, {}, "ENTRYREF is unavailable in this script fixture" };
+    return AsxPlaylist::Document { {}, {}, "ENTRYREF is unavailable in this script fixture" };
 });
 
 // Exercise the common native reader and product serializer with the actual JS importer.
@@ -82,6 +82,10 @@ static duk_ret_t readPlaylistEntry(duk_context* ctx)
 // expectations.
 static duk_ret_t addCdsObject(duk_context* ctx)
 {
+    duk_get_prop_string(ctx, 0, "metaData");
+    EXPECT_TRUE(duk_is_object(ctx, -1));
+    EXPECT_FALSE(duk_is_array(ctx, -1));
+    duk_pop(ctx);
     std::vector<std::string> keys = { "mimetype", "objectType", "location",
         "title", "protocol", "upnpclass",
         "description", "playlistOrder" };

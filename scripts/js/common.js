@@ -960,7 +960,7 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
 
     exturl.extra = entry.extra;
     if (entry.defaults) {
-      exturl.metaData = [];
+      exturl.metaData = {};
       for (var key in entry.defaults)
         exturl.metaData[key] = [entry.defaults[key]];
     }

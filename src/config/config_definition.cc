@@ -101,7 +101,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
         { "upnp:album", "UNKNOWN" },
         { "upnp:artist", "UNKNOWN" },
         { "upnp:artistDiscographyURI", "" },
-        { "upnp:author", "UNKNOWN" },
+        { UPNP_AUTHOR, "UNKNOWN" },
         { "upnp:contributor", "UNKNOWN" },
         { "upnp:director", "UNKNOWN" },
         { "upnp:genre", "UNKNOWN" },

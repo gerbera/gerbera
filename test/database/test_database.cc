@@ -28,10 +28,13 @@
 #include "cds/cds_resource.h"
 #include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
+#include "database/database.h"
+#include "database/sql_database.h"
 #include "database/sqlite3/sqlite_database.h"
 #include "exceptions.h"
 #include "sqlite_config_fake.h"
 #include "upnp/xml_builder.h"
+#include "util/fmt_compat.h"
 #include "util/tools.h"
 
 #ifdef HAVE_MYSQL
@@ -42,14 +45,22 @@
 #ifdef HAVE_PGSQL
 #include "database/postgres/postgres_database.h"
 #include "postgres_config_fake.h"
+#include "util/url_utils.h"
 #endif
 
+#include <cstdint>
 #include <cstdlib>
 #include <gtest/gtest.h>
+#include <memory>
 #include <pugixml.hpp>
+#include <stdexcept>
+#include <string>
+#include <utility>
+#include <vector>
 
-class TestSqliteDatabase : public Sqlite3Database {
-    friend class Sqlite3DatabaseTest;
+class TestDatabaseFactory : public Database {
+public:
+    using Database::createInstance;
 };
 
 class DatabaseTestBase : public ::testing::Test {
@@ -123,8 +134,9 @@ TEST_F(Sqlite3DatabaseTest, CheckUpgradeCommands)
 
 class PlaylistSqliteConfig : public SqliteConfigFake {
 public:
-    explicit PlaylistSqliteConfig(fs::path path)
+    explicit PlaylistSqliteConfig(fs::path path, bool transactions = false)
         : path(std::move(path))
+        , transactions(transactions)
     {
     }
 
@@ -142,6 +154,11 @@ public:
         return option == ConfigVal::SERVER_STORAGE_STRING_LIMIT ? 65535 : 0;
     }
 
+    bool getBoolOption(ConfigVal option) const override
+    {
+        return option == ConfigVal::SERVER_STORAGE_USE_TRANSACTIONS ? transactions : SqliteConfigFake::getBoolOption(option);
+    }
+
     std::shared_ptr<BoxLayoutList> getBoxLayoutListOption(ConfigVal) const override
     {
         return std::make_shared<BoxLayoutList>();
@@ -149,6 +166,7 @@ public:
 
 private:
     fs::path path;
+    bool transactions;
 };
 
 class PlaylistDatabaseTest : public ::testing::Test {
@@ -161,9 +179,7 @@ protected:
         auto created = mkdtemp(buffer.data());
         ASSERT_NE(created, nullptr);
         directory = created;
-        auto config = std::make_shared<PlaylistSqliteConfig>(directory / "gerbera.db");
-        database = std::make_shared<Sqlite3Database>(config, nullptr, nullptr, nullptr);
-        database->run();
+        database = createDatabase();
         database->init();
     }
 
@@ -174,6 +190,12 @@ protected:
         database.reset();
         if (!directory.empty())
             fs::remove_all(directory);
+    }
+
+    virtual std::shared_ptr<Database> createDatabase()
+    {
+        auto config = std::make_shared<PlaylistSqliteConfig>(directory / "gerbera.db");
+        return TestDatabaseFactory::createInstance(config, nullptr, nullptr, nullptr);
     }
 
     std::shared_ptr<CdsItem> addFile(int number, bool video = false)
@@ -289,6 +311,221 @@ TEST_F(PlaylistDatabaseTest, UnpositionedPlaylistReferencesRemainDeduplicated)
     EXPECT_EQ(addReference(file, parent, 0), first);
     EXPECT_EQ(database->getChildCounts({ parent }).at(parent), 1);
 }
+
+#ifdef HAVE_PGSQL
+class PlaylistPostgresConfig : public PlaylistSqliteConfig {
+public:
+    PlaylistPostgresConfig(const fs::path& path, bool transactions)
+        : PlaylistSqliteConfig(path, transactions)
+        , socket(URLUtils::urlEscape(std::getenv("GERBERA_TEST_PG_SOCKET")))
+        , database(std::getenv("GERBERA_TEST_PG_DATABASE"))
+        , user(std::getenv("GERBERA_TEST_PG_USER"))
+        , port(stoiString(std::getenv("GERBERA_TEST_PG_PORT"), 0))
+    {
+    }
+
+    std::string getOption(ConfigVal option) const override
+    {
+        switch (option) {
+        case ConfigVal::SERVER_STORAGE_DRIVER:
+            return DB_DRIVER_POSTGRES;
+        case ConfigVal::SERVER_STORAGE_PGSQL_HOST:
+            return socket;
+        case ConfigVal::SERVER_STORAGE_PGSQL_DATABASE:
+            return database;
+        case ConfigVal::SERVER_STORAGE_PGSQL_USERNAME:
+            return user;
+        case ConfigVal::SERVER_STORAGE_PGSQL_INIT_SQL_FILE:
+            return PG_INIT_FILE;
+        case ConfigVal::SERVER_STORAGE_PGSQL_DROP_FILE:
+            return PG_DROP_FILE;
+        case ConfigVal::SERVER_STORAGE_PGSQL_UPGRADE_FILE:
+            return PG_UPGR_FILE;
+        default:
+            return PlaylistSqliteConfig::getOption(option);
+        }
+    }
+
+    std::int32_t getIntOption(ConfigVal option) const override
+    {
+        return option == ConfigVal::SERVER_STORAGE_PGSQL_PORT ? port : PlaylistSqliteConfig::getIntOption(option);
+    }
+
+private:
+    std::string socket;
+    std::string database;
+    std::string user;
+    int port;
+};
+#endif
+
+enum class ForeignKeyBackend {
+    Sqlite,
+    Postgres
+};
+
+struct ForeignKeyRecoveryMode {
+    ForeignKeyBackend backend;
+    bool transactions;
+};
+
+class ForeignKeyRecoveryTest : public PlaylistDatabaseTest,
+                               public ::testing::WithParamInterface<ForeignKeyRecoveryMode> {
+protected:
+    void SetUp() override
+    {
+#ifdef HAVE_PGSQL
+        if (GetParam().backend == ForeignKeyBackend::Postgres) {
+            const auto* socket = std::getenv("GERBERA_TEST_PG_SOCKET");
+            const auto* database = std::getenv("GERBERA_TEST_PG_DATABASE");
+            const auto* user = std::getenv("GERBERA_TEST_PG_USER");
+            const auto* port = std::getenv("GERBERA_TEST_PG_PORT");
+            if (!socket || !database || !user || !port) {
+                GTEST_SKIP() << "PostgreSQL FK recovery requires isolated GERBERA_TEST_PG_SOCKET/DATABASE/USER/PORT";
+            }
+            ASSERT_TRUE(fs::path(socket).is_absolute());
+            ASSERT_TRUE(fs::is_directory(socket));
+            ASSERT_EQ(std::string(database), "gerbera_fk_test");
+            ASSERT_EQ(std::string(user), "gerbera_fk_test");
+            ASSERT_GT(stoiString(port, 0), 0);
+            ASSERT_LE(stoiString(port, 0), 65535);
+        }
+#endif
+        PlaylistDatabaseTest::SetUp();
+    }
+
+    std::shared_ptr<Database> createDatabase() override
+    {
+        std::shared_ptr<Config> config;
+#ifdef HAVE_PGSQL
+        if (GetParam().backend == ForeignKeyBackend::Postgres) {
+            config = std::make_shared<PlaylistPostgresConfig>(directory / "gerbera.db", GetParam().transactions);
+        } else
+#endif
+        {
+            config = std::make_shared<PlaylistSqliteConfig>(directory / "gerbera.db", GetParam().transactions);
+        }
+        auto result = TestDatabaseFactory::createInstance(config, nullptr, nullptr, nullptr);
+        if (GetParam().backend == ForeignKeyBackend::Postgres) {
+            auto sql = std::dynamic_pointer_cast<SQLDatabase>(result);
+            schema = "gerbera_fk_" + generateRandomId();
+            sql->exec(fmt::format("CREATE SCHEMA {}", sql->identifier(schema)));
+            sql->exec(fmt::format("SET search_path TO {}", sql->identifier(schema)));
+        }
+        return result;
+    }
+
+    void TearDown() override
+    {
+        if (database && !schema.empty()) {
+            auto sql = std::dynamic_pointer_cast<SQLDatabase>(database);
+            EXPECT_NO_THROW(sql->exec(fmt::format("DROP SCHEMA {} CASCADE", sql->identifier(schema))));
+        }
+        PlaylistDatabaseTest::TearDown();
+    }
+
+    static std::string referenceInsert(int ref, int parent)
+    {
+        return fmt::format("INSERT INTO \"mt_cds_object\" (\"ref_id\", \"parent_id\", \"object_type\", \"upnp_class\", \"dc_title\", \"entry_type\") VALUES ({}, {}, {}, 'object.container.playlistContainer', 'FK regression', {})",
+            ref, parent, OBJECT_TYPE_CONTAINER, static_cast<int>(CdsEntryType::PlaylistContainer));
+    }
+
+    std::string schema;
+};
+
+TEST_P(ForeignKeyRecoveryTest, RemovedParentInsertThrowsAndDatabaseRemainsUsable)
+{
+    auto file = addFile(1);
+    int parent = addContainer("Removed parent");
+    ASSERT_GT(addFile(99)->getID(), parent);
+    database->removeObject(parent, "", false);
+    ASSERT_THROW(database->loadObject(parent), ObjectNotFoundException);
+    auto sql = std::dynamic_pointer_cast<SQLDatabase>(database);
+
+    EXPECT_THROW(sql->exec(referenceInsert(file->getID(), parent), "\"id\""), std::runtime_error);
+    EXPECT_THROW(database->loadObject(parent), ObjectNotFoundException);
+
+    auto next = addFile(2);
+    int validParent = addContainer("After failed parent insert");
+    int position = addReference(next, validParent, 1);
+    auto saved = database->loadObject(position);
+    EXPECT_EQ(saved->getRefID(), next->getID());
+    EXPECT_EQ(database->getChildCounts({ validParent }).at(validParent), 1);
+}
+
+TEST_P(ForeignKeyRecoveryTest, RemovedReferenceInsertThrowsAndDatabaseRemainsUsable)
+{
+    auto removed = addFile(1);
+    int parent = addContainer("Playlist");
+    int removedID = removed->getID();
+    ASSERT_GT(addFile(99)->getID(), removedID);
+    database->removeObject(removedID, "", false);
+    ASSERT_THROW(database->loadObject(removedID), ObjectNotFoundException);
+    auto sql = std::dynamic_pointer_cast<SQLDatabase>(database);
+
+    EXPECT_THROW(sql->exec(referenceInsert(removedID, parent), "\"id\""), std::runtime_error);
+    EXPECT_THROW(database->loadObject(removedID), ObjectNotFoundException);
+    EXPECT_EQ(database->getChildCounts({ parent }).count(parent), 0);
+
+    auto next = addFile(2);
+    int position = addReference(next, parent, 1);
+    EXPECT_EQ(database->loadObject(position)->getRefID(), next->getID());
+    EXPECT_EQ(database->getChildCounts({ parent }).at(parent), 1);
+}
+
+TEST_P(ForeignKeyRecoveryTest, RemovedReferenceUpdateLeavesOriginalAndDatabaseUsable)
+{
+    auto file = addFile(1);
+    int parent = addContainer("Playlist");
+    int position = addReference(file, parent, 1);
+    auto removed = addFile(7);
+    int removedID = removed->getID();
+    ASSERT_GT(addFile(99)->getID(), removedID);
+    database->removeObject(removedID, "", false);
+    ASSERT_THROW(database->loadObject(removedID), ObjectNotFoundException);
+    auto sql = std::dynamic_pointer_cast<SQLDatabase>(database);
+    auto query = fmt::format("UPDATE \"mt_cds_object\" SET \"ref_id\" = {} WHERE \"id\" = {}", removedID, position);
+
+    EXPECT_THROW(sql->execOnTable("mt_cds_object", query, position), std::runtime_error);
+    EXPECT_EQ(database->loadObject(position)->getRefID(), file->getID());
+
+    auto next = addFile(2);
+    addReference(next, parent, 2);
+    EXPECT_EQ(database->getChildCounts({ parent }).at(parent), 2);
+}
+
+TEST_P(ForeignKeyRecoveryTest, FailedStatementRollsBackAndAcceptsFollowingTransaction)
+{
+    auto removed = addFile(1);
+    int removedID = removed->getID();
+    ASSERT_GT(addFile(99)->getID(), removedID);
+    database->removeObject(removedID, "", false);
+    ASSERT_THROW(database->loadObject(removedID), ObjectNotFoundException);
+    int parent = addContainer("Playlist");
+    auto sql = std::dynamic_pointer_cast<SQLDatabase>(database);
+    sql->beginTransaction("FK regression");
+    const auto query = std::string("INSERT INTO \"mt_internal_setting\" (\"key\", \"value\") VALUES ('fk_rollback_marker', 'written'); ") + referenceInsert(removedID, parent);
+
+    EXPECT_THROW(sql->exec(query, "\"id\""), std::runtime_error);
+    // PostgreSQL work is atomic per statement task even without configured transactions.
+    EXPECT_EQ(database->getInternalSetting("fk_rollback_marker"), GetParam().transactions || GetParam().backend == ForeignKeyBackend::Postgres ? "" : "written");
+
+    auto next = addFile(2);
+    int position = addReference(next, parent, 1);
+    EXPECT_EQ(database->loadObject(position)->getRefID(), next->getID());
+    EXPECT_EQ(database->getChildCounts({ parent }).at(parent), 1);
+}
+
+INSTANTIATE_TEST_SUITE_P(BackendsAndTransactions, ForeignKeyRecoveryTest,
+    ::testing::Values(ForeignKeyRecoveryMode { ForeignKeyBackend::Sqlite, false }, ForeignKeyRecoveryMode { ForeignKeyBackend::Sqlite, true }
+#ifdef HAVE_PGSQL
+        ,
+        ForeignKeyRecoveryMode { ForeignKeyBackend::Postgres, false }, ForeignKeyRecoveryMode { ForeignKeyBackend::Postgres, true }
+#endif
+        ),
+    [](const ::testing::TestParamInfo<ForeignKeyRecoveryMode>& info) {
+        return std::string(info.param.backend == ForeignKeyBackend::Postgres ? "Postgres" : "Sqlite") + (info.param.transactions ? "Transactions" : "NoTransactions");
+    });
 
 // test is blocking on CONAN
 #if 0

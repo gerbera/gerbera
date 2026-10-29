@@ -149,6 +149,7 @@ public:
 
     void run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError = true) override;
     int getLastInsertId() const { return lastInsertId; }
+    int getSqliteErrorCode() const { return sqliteErrorCode; }
     bool checkKey(const std::string& key) const override { return key != eKey; }
 
     std::string_view taskType() const override { return "ExecTask"; }
@@ -158,6 +159,7 @@ protected:
     const char* query;
 
     int lastInsertId {};
+    int sqliteErrorCode {};
     std::string lastInsertColumn {};
     std::string eKey;
 };
