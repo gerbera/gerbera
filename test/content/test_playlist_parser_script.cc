@@ -17,6 +17,7 @@
 */
 
 #include "content/scripting/asx_playlist.h"
+#include "metadata/metadata_enums.h"
 #include "util/tools.h"
 
 #include <fstream>
@@ -166,7 +167,7 @@ TEST(XmlPlaylistReaderTest, AsxIteratorOwnsDocumentAndPreservesLegacyFields)
     EXPECT_EQ(entry->get().mimetype, "audio/mpeg");
     EXPECT_EQ(entry->get().protocol, "http-get");
     EXPECT_EQ(entry->get().writeThroughs, (std::vector<int> { 2 }));
-    EXPECT_EQ(entry->get().defaults.at("upnp:author"), "Root author");
+    EXPECT_EQ(entry->get().defaults.at(UPNP_AUTHOR), "Root author");
     EXPECT_EQ(entry->get().defaults.at("dc:rights"), "Root rights");
     EXPECT_EQ(entry->get().extra.at("Category"), "Mix");
     EXPECT_FALSE(playlist->readPlaylistEntry());

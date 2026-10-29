@@ -194,6 +194,7 @@ void SLExecTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
         sqlite3_free(err);
     }
     if (ret != SQLITE_OK) {
+        sqliteErrorCode = sqlite3_extended_errcode(db);
         if (throwOnError)
             throw DatabaseException("", sl.handleError(query, error, db, ret));
         log_debug("Error in sqlite3_exec: {}", sl.handleError(query, error, db, ret));

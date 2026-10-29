@@ -28,9 +28,9 @@ protected:
     std::map<fs::path, std::string> children;
     std::vector<fs::path> requested;
 
-    AsxPlaylist::Plan parse(const std::string& body)
+    AsxPlaylist::Plan parse(const std::string& body, const std::string& version = "3.0")
     {
-        auto result = document.load_string(("<ASX VERSION='3.0'>" + body + "</ASX>").c_str());
+        auto result = document.load_string(("<ASX VERSION='" + version + "'>" + body + "</ASX>").c_str());
         if (!result)
             throw std::runtime_error(result.description());
         return AsxPlaylist::readPlan(
@@ -318,10 +318,23 @@ TEST_F(AsxPlaylistTest, CaseInsensitiveElementsAndAttributesAndEmptyEntries)
 
 TEST_F(AsxPlaylistTest, InvalidRootAndVersionAreRejected)
 {
-    for (auto xml : { "<WPL/>", "<ASX VERSION='2.0'/>" }) {
-        ASSERT_TRUE(document.load_string(xml));
-        EXPECT_THROW(
-            AsxPlaylist::readPlan(document.document_element(), "/asx/main.asx", {}),
-            std::runtime_error);
+    ASSERT_TRUE(document.load_string("<WPL/>"));
+    EXPECT_THROW(
+        AsxPlaylist::readPlan(document.document_element(), "/asx/main.asx", {}),
+        std::runtime_error);
+    for (auto version : { "", "2.0", "3.1", "4", "3junk", "3.0junk", "NaN", "inf", "1e999", "3,0", " 3", "3 " }) {
+        SCOPED_TRACE(version);
+        EXPECT_THROW(parse(entry("before.wav"), version), std::runtime_error);
     }
+}
+
+TEST_F(AsxPlaylistTest, AcceptsNumericallyEquivalentVersionThree)
+{
+    for (auto version : { "3", "3.0", "3.00", "03.000", "+3", "3e0" }) {
+        SCOPED_TRACE(version);
+        EXPECT_EQ(firstReferences(parse(entry("a.wav"), version)),
+            (std::vector<std::string> { "a.wav" }));
+    }
+    ASSERT_TRUE(document.load_string("<ASX/>"));
+    EXPECT_NO_THROW(AsxPlaylist::readPlan(document.document_element(), "/asx/main.asx", {}));
 }

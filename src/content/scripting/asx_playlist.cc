@@ -24,6 +24,7 @@
 #include "asx_playlist.h" // API
 
 #include "exceptions.h"
+#include "metadata/metadata_enums.h"
 #include "util/logger.h"
 #include "util/tools.h"
 #include "util/url_utils.h"
@@ -85,7 +86,7 @@ AsxPlaylist::Metadata AsxPlaylist::readMetadata(const pugi::xml_node& node,
 void AsxPlaylist::addWarning(Plan& plan, const std::string& message,
     const fs::path& source)
 {
-    auto warning = message + ": " + source.string();
+    auto warning = fmt::format("{}: {}", message, source.string());
     if (std::find(plan.warnings.begin(), plan.warnings.end(), warning) == plan.warnings.end())
         plan.warnings.push_back(std::move(warning));
 }
@@ -208,7 +209,7 @@ AsxPlaylist::readDocumentEntries(const pugi::xml_node& root, const fs::path& sou
     if (toLower(root.name()) != "asx")
         throw std::runtime_error("Expected an ASX document");
     auto version = readAttribute(root, "version");
-    if (version && std::string(version.value()) != "3.0" && std::string(version.value()) != "3")
+    if (version && parsePositiveDouble(version.value()) != 3.0)
         throw std::runtime_error("Only ASX version 3 is supported");
     defaults.title.clear();
     return readSequenceEntries(root, source, loader, active, plan, defaults, readBase(root),
@@ -258,7 +259,7 @@ std::optional<std::reference_wrapper<const XmlPlaylistEntry>> AsxPlaylist::readP
         currentEntry.title = entry.metadata.title;
         currentEntry.description = entry.metadata.description;
         if (!entry.metadata.author.empty())
-            currentEntry.defaults["upnp:author"] = entry.metadata.author;
+            currentEntry.defaults[UPNP_AUTHOR] = entry.metadata.author;
         if (!entry.metadata.copyright.empty())
             currentEntry.defaults["dc:rights"] = entry.metadata.copyright;
         for (const auto& [name, value] : entry.metadata.parameters) {
