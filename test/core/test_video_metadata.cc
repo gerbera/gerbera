@@ -8,7 +8,6 @@
     as published by the Free Software Foundation.
 */
 
-#include "../mock/config_mock.h"
 #include "cds/cds_item.h"
 #include "cds/cds_resource.h"
 #include "config/config_definition.h"
@@ -20,7 +19,10 @@
 #include "metadata/ffmpeg_handler.h"
 #include "metadata/metadata_enums.h"
 #include "metadata/taglib_handler.h"
+#include "util/mime.h"
 #include "util/string_converter.h"
+
+#include "../mock/config_mock.h"
 
 #include <array>
 #include <gmock/gmock.h>
@@ -63,6 +65,10 @@ public:
             return "; ";
         if (option == ConfigVal::IMPORT_LIBOPTS_ENTRY_LEGACY_SEP)
             return "\n";
+#ifdef HAVE_MAGIC
+        if (option == ConfigVal::IMPORT_MAGIC_FILE)
+            return "";
+#endif
         return "UTF-8";
     }
 
@@ -122,7 +128,8 @@ protected:
     {
         auto config = std::make_shared<VideoMetadataConfig>();
         auto converter = std::make_shared<ConverterManager>(config);
-        context = std::make_shared<Context>(nullptr, config, nullptr, nullptr, nullptr, nullptr, converter);
+        auto mime = std::make_shared<Mime>(config);
+        context = std::make_shared<Context>(nullptr, config, nullptr, mime, nullptr, nullptr, converter);
     }
 
     std::shared_ptr<CdsItem> makeItem(const fs::path& path, const std::string& mimeType, const std::string& upnpClass)
@@ -132,7 +139,7 @@ protected:
         item->setMimeType(mimeType);
         item->setClass(upnpClass);
         auto resource = std::make_shared<CdsResource>(ContentHandler::DEFAULT, ResourcePurpose::Content);
-        resource->addAttribute(ResourceAttribute::PROTOCOLINFO, "http-get:*:" + mimeType + ":*");
+        resource->addAttribute(ResourceAttribute::PROTOCOLINFO, fmt::format("http-get:*:{}:*", mimeType));
         resource->addAttribute(ResourceAttribute::SIZE, static_cast<long long>(fs::file_size(path)));
         item->addResource(resource);
         return item;

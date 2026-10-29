@@ -28,8 +28,8 @@ Because of changes to the configuration defaults, you should generate the the de
 
 ### Code Improvements
 
-- Update maximum versions of utf8cpp (4.2.1), cxxopts (3.3.1-gbb7915),
-  pupnp (22.1.8), libpqxx (7.10.7)
+- Update maximum versions of utf8cpp (4.2.1), cxxopts (3.3.1-g4e4fea),
+  pupnp (22.1.10), libpqxx (7.10.7), ffmpegthumbnailer (2.4.1)
 - Build for ubuntu 26.10
 - Updated docker_entry script
 - Use formatting for exception from fmtlib >= 11
