@@ -793,7 +793,7 @@ They can be used by the import and by the playlist script.
 
 .. js:function:: readPlaylistEntry()
 
-    Available to the playlist parser for WPL and XSPF after native XML validation.
+    Available to the playlist parser for WPL, XSPF and ASX after native XML validation.
     Returns the next object with a ``locations`` array and optional ``title``
     string, or undefined at the end. Locations are absolute local paths or
     encoded HTTP(S) URLs. For XSPF, locations in the same object are alternatives
@@ -804,7 +804,10 @@ They can be used by the import and by the playlist script.
 
     NFO ``readXml`` behavior and text-playlist ``readln`` behavior are unchanged.
     ASX also uses the native iterator; entries retain the existing title,
-    description, MIME type, protocol, size, writeThrough and extra parameters.
+    description, MIME type, protocol, size and extra parameters. The
+    ``writeThroughs`` array aligns with ``locations``; ``defaults`` provides
+    descriptive metadata that fills missing media tags. Each alternative is
+    copied into a fresh script entry before the importer may modify it.
     ASX XML traversal and reference resolution run in C++, independently of
     the script that creates playlist views.
 

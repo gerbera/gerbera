@@ -56,6 +56,7 @@ class UpnpXMLBuilder;
 #define URL_PARAM_TRANSCODE_PROFILE_NAME "pr_name"
 #define URL_PARAM_TRANSCODE "tr"
 #define URL_PARAM_ZIP_REQUEST "zip"
+#define URL_PARAM_SOURCE_OBJECT_ID "source_id"
 #define URL_VALUE_TRANSCODE_NO_RES_ID "none"
 #define URL_VALUE_TRANSCODE "1"
 #define URL_VALUE_ZIP_REQUEST "1"

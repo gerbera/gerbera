@@ -30,6 +30,7 @@ add_executable(
     mock/duk_helper.h
     mock/script_test_fixture.cc
     mock/script_test_fixture.h
+    test_asx_playlist.cc
     test_common_script.cc
     test_cue_cuesheet.cc
     test_external_asx_playlist.cc

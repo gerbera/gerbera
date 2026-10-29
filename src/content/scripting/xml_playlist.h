@@ -28,9 +28,13 @@
 
 #include "util/grb_fs.h"
 
+#include <cstddef>
+#include <functional>
 #include <map>
 #include <memory>
+#include <optional>
 #include <pugixml.hpp>
+#include <string>
 #include <vector>
 
 enum class XmlPlaylistType { Wpl,
@@ -48,13 +52,30 @@ struct XmlPlaylistEntry {
     std::string size { "-1" };
     std::string writeThrough { "-1" };
     std::map<std::string, std::string> extra {};
+    std::vector<int> writeThroughs {};
+    std::map<std::string, std::string> defaults {};
 };
 
-/// @brief Own the validated XML playlist positions independently of the optional JS runtime.
+/// Own the validated XML playlist positions independently of the optional JS runtime.
 class XmlPlaylist {
 public:
+    struct Document {
+        /// The loader resolves references with the shared URI policy and returns
+        /// a canonical local path, including symlink resolution for cycle checks.
+        fs::path source;
+        std::unique_ptr<pugi::xml_document> xml;
+        /// A missing/unsupported child is skipped with this diagnostic. Invalid
+        /// XML must throw instead so no partial structural plan can be imported.
+        std::string warning;
+    };
+
+    using Loader = std::function<Document(
+        const std::string& href, const fs::path& source)>;
+
     virtual ~XmlPlaylist() = default;
+    virtual unsigned int getParseFlags() const { return pugi::parse_default | pugi::parse_doctype; }
     static std::unique_ptr<XmlPlaylist> create(XmlPlaylistType type);
+    static std::unique_ptr<XmlPlaylist> create(XmlPlaylistType type, Loader loader);
     /// Validate the document structure before the script changes playlist contents.
     void read(const pugi::xml_document& doc, const fs::path& path);
     /// Returned entries remain valid until the next iterator call or read.
@@ -75,23 +96,6 @@ protected:
 class XspfPlaylist : public XmlPlaylist {
 protected:
     void readEntries(pugi::xml_node root, const fs::path& path) override;
-};
-
-class AsxPlaylist : public XmlPlaylist {
-public:
-    std::optional<std::reference_wrapper<const XmlPlaylistEntry>> readPlaylistEntry() override;
-
-protected:
-    void readEntries(pugi::xml_node root, const fs::path& path) override;
-
-private:
-    pugi::xml_document document;
-    pugi::xml_node node;
-    std::vector<pugi::xml_node> parents;
-    fs::path source;
-    std::string base;
-    XmlPlaylistEntry pendingEntry;
-    XmlPlaylistEntry currentEntry;
 };
 
 #endif // __GRB_XML_PLAYLIST__

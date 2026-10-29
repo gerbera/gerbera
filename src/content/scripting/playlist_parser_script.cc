@@ -50,6 +50,11 @@
 #include "util/logger.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
+#include "util/url_utils.h"
+
+#include <map>
+#include <system_error>
+#include <utility>
 
 static duk_ret_t jsReadPlaylistEntry(duk_context* ctx)
 {
@@ -93,6 +98,18 @@ void PlaylistParserScript::pushPlaylistEntry(duk_context* ctx, const XmlPlaylist
         duk_put_prop_string(ctx, -2, name.c_str());
     }
     duk_put_prop_string(ctx, -2, "extra");
+    duk_push_array(ctx);
+    for (duk_uarridx_t i = 0; i < entry.writeThroughs.size(); ++i) {
+        duk_push_int(ctx, entry.writeThroughs[i]);
+        duk_put_prop_index(ctx, -2, i);
+    }
+    duk_put_prop_string(ctx, -2, "writeThroughs");
+    duk_push_object(ctx);
+    for (const auto& [name, value] : entry.defaults) {
+        duk_push_lstring(ctx, value.data(), value.size());
+        duk_put_prop_string(ctx, -2, name.c_str());
+    }
+    duk_put_prop_string(ctx, -2, "defaults");
 }
 
 PlaylistParserScript::PlaylistParserScript(const std::shared_ptr<Content>& content, const std::string& parent)
@@ -251,9 +268,21 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
     std::vector<int> result;
     try {
         if (xmlPlaylistType != xmlPlaylistTypes.end()) {
-            auto flags = xmlPlaylistType->second == XmlPlaylistType::Asx ? pugi::parse_default : pugi::parse_default | pugi::parse_doctype;
-            prepareXmlFile(item->getLocation(), flags);
-            xmlPlaylist = XmlPlaylist::create(xmlPlaylistType->second);
+            xmlPlaylist = XmlPlaylist::create(xmlPlaylistType->second, [this](const std::string& href, const fs::path& source) {
+                if (currentTask && !currentTask->isValid())
+                    throw_std_runtime_error("Aborting playlist import after cancellation");
+                auto location = URLUtils::resolvePlaylistReference(href, source);
+                if (!location || !fs::path(*location).is_absolute())
+                    return XmlPlaylist::Document { {}, {}, "ASX unsupported remote ENTRYREF skipped (" + href + ")" };
+                std::error_code ec;
+                if (!isRegularFile(*location, ec))
+                    return XmlPlaylist::Document { {}, {}, "ASX unavailable ENTRYREF skipped (" + href + ")" };
+                auto path = fs::weakly_canonical(*location);
+                auto document = std::make_unique<pugi::xml_document>();
+                readXmlFile(*document, path);
+                return XmlPlaylist::Document { path, std::move(document), {} };
+            });
+            prepareXmlFile(item->getLocation(), xmlPlaylist->getParseFlags());
             xmlPlaylist->read(xmlDoc, item->getLocation());
             useUtf8Converter();
         } else {
