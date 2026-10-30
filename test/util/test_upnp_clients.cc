@@ -21,9 +21,9 @@
 */
 
 #include "config/result/client_config.h"
-#include "util/grb_net.h"
 #include "upnp/client_manager.h"
 #include "upnp/clients.h"
+#include "util/grb_net.h"
 
 #include "../mock/config_mock.h"
 
@@ -233,11 +233,12 @@ TEST_F(UpnpClientsTest, configuredIPRange)
 TEST_F(UpnpClientsTest, getHostName)
 {
     auto addr = std::make_shared<GrbNet>("192.168.99.100");
-    auto hostname = addr->getHostName();
+    auto hostname = addr->getNameInfo(false);
     EXPECT_EQ(hostname, "192.168.99.100");
     addr->setHostName("Wombat");
     hostname = addr->getHostName();
     EXPECT_EQ(hostname, "Wombat");
+    EXPECT_EQ(addr->getNameInfo(false), "192.168.99.100");
 }
 
 TEST_F(UpnpClientsTest, netmask4)
