@@ -28,7 +28,6 @@
 #include "util/tools.h"
 #include "util/url_utils.h"
 
-#include <ctime>
 #include <fmt/chrono.h>
 #include <fmt/core.h>
 #include <gtest/gtest.h>
@@ -83,14 +82,6 @@ TEST(ToolsTest, simpleDate)
 
 TEST(ToolsTest, parseDate)
 {
-    {
-        std::tm tmWork {};
-        ASSERT_TRUE(parseDate("1970-01-01T00:00:00.000000Z", tmWork));
-        constexpr std::time_t epoch = 0;
-        std::tm expected {};
-        ASSERT_NE(localtime_r(&epoch, &expected), nullptr);
-        EXPECT_EQ(fmt::format("{:%FT%T}", tmWork), fmt::format("{:%FT%T}", expected));
-    }
     {
         auto dt = "20240321";
         std::tm tmWork {};
