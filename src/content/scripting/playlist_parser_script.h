@@ -39,11 +39,7 @@
 #include "xml_playlist.h"
 
 #include <functional>
-#include <memory>
 #include <optional>
-#include <string>
-#include <utility>
-#include <vector>
 
 class PlaylistParserScript : public ParserScript {
 public:

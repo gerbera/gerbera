@@ -273,14 +273,14 @@ std::vector<int> PlaylistParserScript::processPlaylistObject(
                     throw_std_runtime_error("Aborting playlist import after cancellation");
                 auto location = URLUtils::resolvePlaylistReference(href, source);
                 if (!location || !fs::path(*location).is_absolute())
-                    return AsxPlaylistDocument { {}, {}, "ASX unsupported remote ENTRYREF skipped (" + href + ")" };
+                    return XmlPlaylist::Document { {}, {}, "ASX unsupported remote ENTRYREF skipped (" + href + ")" };
                 std::error_code ec;
                 if (!isRegularFile(*location, ec))
-                    return AsxPlaylistDocument { {}, {}, "ASX unavailable ENTRYREF skipped (" + href + ")" };
+                    return XmlPlaylist::Document { {}, {}, "ASX unavailable ENTRYREF skipped (" + href + ")" };
                 auto path = fs::weakly_canonical(*location);
                 auto document = std::make_unique<pugi::xml_document>();
                 readXmlFile(*document, path);
-                return AsxPlaylistDocument { path, std::move(document), {} };
+                return XmlPlaylist::Document { path, std::move(document), {} };
             });
             prepareXmlFile(item->getLocation(), xmlPlaylist->getParseFlags());
             xmlPlaylist->read(xmlDoc, item->getLocation());
