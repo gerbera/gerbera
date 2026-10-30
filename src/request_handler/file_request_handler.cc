@@ -80,6 +80,14 @@ FileRequestHandler::FileRequestHandler(
 {
 }
 
+/**
+ * @brief Load a file resource, recovering a stale playlist alias through its source item.
+ *
+ * A playlist reimport can replace a virtual item after its resource URL has
+ * already been sent to a client. If that alias no longer exists, use the URL's
+ * source-object hint only for the original physical file's default content
+ * resource. Keep the client's access checks and reject transformed resources.
+ */
 std::shared_ptr<CdsObject> FileRequestHandler::loadFileObject(const std::map<std::string, std::string>& params) const
 {
     try {

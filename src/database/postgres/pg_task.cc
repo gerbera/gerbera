@@ -49,9 +49,10 @@ void PGTask::sendSignal()
     }
 }
 
-void PGTask::sendSignal(std::string error)
+void PGTask::sendSignal(std::string error, std::string sqlState)
 {
     this->error = std::move(error);
+    this->sqlState = std::move(sqlState);
     sendSignal();
 }
 
