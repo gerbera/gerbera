@@ -25,7 +25,6 @@ Gerbera - https://gerbera.io/
 #include "logger.h"
 #include "tools.h"
 
-#include <ctime>
 #include <iomanip>
 #include <regex>
 #include <sstream>
@@ -129,9 +128,7 @@ std::string makeSimpleDate(std::string& s)
 
 bool parseDate(const char* value, std::tm& tmWork)
 {
-    // Initialize timezone names before strptime processes %Z.
-    ::tzset();
-    if (strptime(value, "%Y-%m-%dT%T.000000Z", &tmWork) || strptime(value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
+    if (strptime(value, "%Y-%m-%dT%T.000000%Z", &tmWork)) {
         // convert creation_time to local time
     } else if (strptime(value, "%Y-%m-%d", &tmWork)) {
         ; // use the value as is
