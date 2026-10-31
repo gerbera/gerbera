@@ -7,9 +7,11 @@
 - Add opt-in whole-file charset selection for M3U playlists
 - Add static WPL and XSPF playlist import
 - Add ubuntu 26.10
+- Allow ASX import headroom and avoid reverse DNS in diagnostics
 - Allow multiple clients by ip
 - Build with libpqxx 8
 - Bump serialize-javascript from 7.1.1 to 7.1.2 in /gerbera-web
+- Bump npm packages in /gerbera-web
 - Collect documentation updates
 - Declare scoped search container CTE as recursive
 - Default Sorting for Browse
@@ -20,6 +22,7 @@
 - Fix CaptionInfo.sec never being sent to Samsung TVs
 - Fix hang when shutting down the SQLite thread
 - Fix hang when stopping Gerbera during startup
+- Fix import of configured ASF auxiliary attributes
 - Fix internal transcoding with ffmpeg
 - Fix internal video (mpeg) transcoding
 - Fix additional metadata import with taglib
@@ -43,6 +46,7 @@
 - Split XmlPlaylist into extra file
 - Stabilize import of broken files
 - Stabilize web UI tests and isolate mock response state
+- Test numeric client addresses without reverse DNS assumptions
 - transcode: fix build with ffmpeg 7.0
 - Update metadata\_service to use content-type
 - Update to cxxopts-g4e4fea
