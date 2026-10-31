@@ -32,6 +32,7 @@
 #include "upnp/quirks.h"
 #include "upnp/upnp_common.h"
 #include "upnp/xml_builder.h"
+#include "util/grb_net.h"
 #include "util/grb_time.h"
 #include "util/logger.h"
 #include "util/tools.h"
@@ -51,7 +52,7 @@ fs::path UpnpDescHandler::getPath(const std::shared_ptr<Quirks>& quirks, std::st
     // HOWEVER it seems like its pretty common to just ignore that and request the base URL instead :(
     if (!startswith(path, UPNP_DESC_SCPD_URL)) {
         auto client = quirks ? quirks->getClient() : nullptr;
-        auto ip = client && client->addr ? client->addr->getHostName() : "";
+        auto ip = client && client->addr ? client->addr->getNameInfo(false) : "";
         auto userAgent = client ? client->userAgent : "";
         log_warning("Bad client {} (userAgent {}) is not following the SCPDURL spec! (requesting {} not /upnp{}) Remapping it.", ip, userAgent, path, path);
         path = fmt::format("{}{}", UPNP_DESC_SCPD_URL, path);

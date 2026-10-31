@@ -317,7 +317,7 @@ void ClientManager::addClientByDiscovery(
                         if (deviceProp && deviceProp.node()) {
                             auto info = getInfoByType(deviceProp.node().text().as_string(), mType);
                             if (info) {
-                                log_debug("discovery {}({}, {}) for {} = {}", addr->getHostName(), userAgent, descLocation, mNode, deviceProp.node().text().as_string());
+                                log_debug("discovery {}({}, {}) for {} = {}", addr->getNameInfo(false), userAgent, descLocation, mNode, deviceProp.node().text().as_string());
                                 updateCache(addr, userAgent, nullptr, info);
                             }
                         }
@@ -372,7 +372,7 @@ const ClientProfile* ClientManager::getInfoByAddr(const std::shared_ptr<GrbNet>&
     });
 
     if (it != clientProfile.end()) {
-        log_debug("found client by IP (ip='{}')", addr->getHostName());
+        log_debug("found client by IP (ip='{}')", addr->getNameInfo(false));
         return &(*it);
     }
 
@@ -403,7 +403,7 @@ const ClientObservation* ClientManager::getInfoByCache(
         { return entry.addr->equals(addr) && (entry.pInfo->isUnique || entry.userAgent == userAgent); });
 
     if (it != cache.end()) {
-        log_debug("found client by cache (hostname='{}')", it->addr ? it->addr->getHostName() : "");
+        log_debug("found client by cache (ip='{}')", it->addr ? it->addr->getNameInfo(false) : "");
         return &(*it);
     }
 
