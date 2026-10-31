@@ -26,6 +26,7 @@ add_executable(
     testcontent
     main.cc #
     test_autoscan_list.cc #
+    test_builtin_layout.cc #
     test_playlist_update.cc #
     test_playlist_parser_script.cc #
     test_resolution.cc #

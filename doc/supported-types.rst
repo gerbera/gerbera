@@ -1,8 +1,8 @@
 .. _supported-types:
 .. index:: Supported File Types
-====================
 
 Supported File Types
+====================
 
 Generally file type support depends on the linked libraries. Please check documentation for taglib, ffmpeg, libexif, libexiv2, libmatroska for the whole list and the restrictions.
 Gerbera depends on these libraries to extract the metadata.

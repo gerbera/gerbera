@@ -1280,6 +1280,12 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             ""),
 #endif // HAVE_JS
 
+        std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
+            "/import/scripting/virtual-layout/title-replacements", "config-import.html#confval-title-replacements",
+            ConfigVal::A_IMPORT_AUDIO_TITLE_REPLACE,
+            std::vector<ConfigVal> { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO },
+            false, false, false),
+
         std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
             "/import/scripting/virtual-layout/genre-map", "config-import.html#confval-genre-map",
             ConfigVal::A_IMPORT_LAYOUT_GENRE, ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO),
@@ -2169,6 +2175,8 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getSimpleOptions()
             "name", "config-import.html#confval-script-option-name"),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE,
             "value", "config-import.html#confval-script-option-value"),
+        std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_AUDIO_TITLE_REPLACE,
+            "replace", "config-import.html#confval-title-replacements-replace"),
         std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LAYOUT_GENRE,
             "genre", "config-import.html#confval-genre"),
         std::make_shared<ConfigSetup>(ConfigVal::A_IMPORT_LAYOUT_MODEL,
@@ -2556,12 +2564,14 @@ void ConfigDefinition::initHierarchy()
                                               } },
 
         { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, {
+                                                       ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
                                                        ConfigVal::IMPORT_LAYOUT_MAPPING,
                                                        ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
                                                        ConfigVal::IMPORT_SCRIPTING_IMPORT_MODEL_MAP,
                                                        ConfigVal::IMPORT_SCRIPTING_IMPORT_HEADLINE_MAP,
                                                    } },
         { ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO, {
+                                                     ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
                                                      ConfigVal::IMPORT_LAYOUT_MAPPING,
                                                      ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
                                                      ConfigVal::IMPORT_SCRIPTING_IMPORT_MODEL_MAP,

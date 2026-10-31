@@ -65,6 +65,13 @@ std::map<MetadataFields, std::string> MetaEnumMapper::mt_keys = std::map<Metadat
     std::pair(MetadataFields::M_UPNP_SHORTCUT, "upnp:shortcut"),
 };
 
+const std::map<std::string, MetadataFields> MetaEnumMapper::audioTitleFields {
+    { "title", MetadataFields::M_TITLE }, { "artist", MetadataFields::M_ARTIST },
+    { "albumartist", MetadataFields::M_ALBUMARTIST }, { "albumtitle", MetadataFields::M_ALBUM },
+    { "genre", MetadataFields::M_GENRE }, { "composer", MetadataFields::M_COMPOSER },
+    { "year", MetadataFields::M_DATE }
+};
+
 MetadataFields MetaEnumMapper::remapMetaDataField(const std::string& fieldName)
 {
     for (auto&& [f, s] : mt_names) {

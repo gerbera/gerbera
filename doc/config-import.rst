@@ -870,6 +870,213 @@ Set option ``value`` for option ``name``.
 
     Value of the option.
 
+Audio Title Format
+^^^^^^^^^^^^^^^^^^
+
+The standard JavaScript audio layouts can build their displayed audio title
+from a format string, without editing JavaScript. Add ``audioTitleFormat`` to
+the existing :confval:`script-options` dictionary; keep the other layout settings:
+
+.. code-block:: xml
+
+    <virtual-layout type="js">
+      <script-options>
+        <script-option name="audioTitleFormat" value="%title%"/>
+      </script-options>
+      <!-- Keep existing layout settings here. -->
+    </virtual-layout>
+
+The optional ``audioTitleFormat`` script option is a string, with an empty default.
+Scripts read it as
+``config['/import/scripting/virtual-layout/script-options/script-option'].audioTitleFormat``.
+
+The format replaces the automatic artist-prefix logic when nonempty. An absent
+or empty format preserves existing behavior. Examples:
+
+* ``%title%``: title only, including on compilation albums.
+* ``%artist% - %title%``: artist and title.
+* ``%tracknr2% - %title%``: two-digit track number and title.
+* ``%cdnumber%.%tracknr2% - %title%``: disc, track number and title.
+
+Placeholder legend
+~~~~~~~~~~~~~~~~~~
+
+.. list-table:: Supported placeholders (case-sensitive)
+   :header-rows: 1
+   :widths: 25 75
+
+   * - Placeholder
+     - Meaning
+   * - ``%title%``
+     - Track title; uses Gerbera's existing item-title/filename fallback if the title tag is missing.
+   * - ``%artist%``
+     - Track artists, joined with `` / ``.
+   * - ``%albumartist%``
+     - Album artist, falling back to the track artist.
+   * - ``%albumtitle%``
+     - Album title.
+   * - ``%tracknr1%``
+     - Track number, at least one digit (for example ``2``).
+   * - ``%tracknr2%``
+     - Track number, at least two digits (for example ``02``).
+   * - ``%tracknr3%``
+     - Track number, at least three digits (for example ``002``).
+   * - ``%cdnumber%``
+     - Disc number, without zero padding; supports disc tags such as ``2/3``.
+   * - ``%year%``
+     - Release year from the date tag.
+   * - ``%genre%``
+     - Genres, joined with `` / ``.
+   * - ``%composer%``
+     - Composers, joined with `` / ``.
+   * - ``%filename%``
+     - Source basename without its extension; the source file is not renamed.
+   * - ``%%``
+     - A literal percent sign.
+
+Missing metadata produces an empty placeholder, except for the documented
+title/album-artist fallbacks. Zero or unavailable track/disc numbers are empty;
+padding never truncates longer numbers. Unknown placeholders remain literal.
+Separators written into the format remain even when a neighboring field is
+empty. Leading and trailing whitespace is removed. If the generated title is
+empty, Gerbera falls back to the track title, then the filename.
+
+Character replacements in displayed titles
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. confval:: title-replacements
+   :type: :confval:`Section`
+   :required: false
+
+Optional replacements apply to generated audio display titles. In JavaScript
+layouts they run after expanding a nonempty ``audioTitleFormat``. In the builtin
+layout they apply directly to each generated title, including the prefixed
+``All - full name`` title, exactly once:
+
+.. code-block:: xml
+
+    <virtual-layout type="js">
+      <script-options>
+        <script-option name="audioTitleFormat" value="%title%"/>
+      </script-options>
+      <title-replacements>
+        <replace from="_" to=" "/>
+        <replace from="[Live]" to="(Live)"/>
+        <replace from="UNWANTED" to=""/>
+      </title-replacements>
+    </virtual-layout>
+
+.. confval:: title-replacements replace
+   :type: :confval:`Section`
+   :required: false
+
+Each ``replace`` has a nonempty ``from`` attribute and a ``to`` attribute.
+An empty ``to=""`` removes the matched text. By default, matching is literal
+and case-sensitive. Rules run in the configured order,
+replacing all occurrences; later rules can also replace text inserted by earlier
+rules. Unicode literal text is preserved. JavaScript formats trim surrounding
+whitespace; builtin replacements preserve it. An empty or whitespace-only builtin
+result falls back to the original generated title.
+
+Regular expressions
+~~~~~~~~~~~~~~~~~~~
+
+Set ``regex="yes"`` (or ``true``) to interpret ``from`` as a regular expression.
+The default ``no`` (or ``false``) keeps literal replacement. Matches are
+case-sensitive and all occurrences are replaced. Literal rules keep capture
+notation such as ``$1`` literally. JavaScript layouts retain Duktape's RegExp and
+String.replace behavior. The builtin layout uses the existing C++ ECMAScript
+``std::regex`` engine; it does not use genre mapping's case-insensitive full-match
+policy. Do not assume that these engines are interchangeable or support PCRE
+extensions. In XML attribute values, write backslashes once
+and escape XML characters such as ``&lt;`` and ``&amp;`` normally.
+
+.. code-block:: xml
+
+    <title-replacements>
+      <replace from="\s+" to=" " regex="yes"/>
+      <replace from="^(.+) - (.+)$" to="$2 ($1)" regex="yes"/>
+    </title-replacements>
+
+An invalid expression is logged once per preparation of the rules and skipped;
+subsequent valid rules still apply. Rules and regular expressions are prepared
+once per script context/configuration or builtin layout instance, then reused
+for subsequent items.
+
+The native engine matches UTF-8 bytes; Duktape matches JavaScript string units.
+For example, a native ``^.`` can split a multibyte character. A builtin rule
+whose result is invalid UTF-8 or contains NUL is skipped with a diagnostic; later
+rules still run on the intact title. No replacement ``?`` characters are saved.
+Use literal Unicode rules when matching whole non-ASCII characters.
+Replacement syntax also differs: builtin ``$0`` denotes the entire match while
+Duktape keeps it literal, and ``$10`` with only one capture is not equivalent.
+Unicode whitespace and zero-length matches can differ. Use the documented
+engine for the selected layout rather than relying on cross-engine parity.
+
+Conditional replacements
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Optional ``if-*`` attributes restrict a rule to items with matching metadata:
+
+.. code-block:: xml
+
+    <title-replacements>
+      <replace from="_" to=" " if-albumtitle="XXX"/>
+      <replace from="^YY\s*-\s*" to="" regex="yes" if-artist="YY"/>
+      <replace from="_" to=" " if-albumtitle="XXX" if-artist="YY"/>
+    </title-replacements>
+
+.. list-table:: Optional tag conditions
+   :header-rows: 1
+   :widths: 30 70
+
+   * - Attribute
+     - Compared metadata
+   * - ``if-title``
+     - Actual title tag, including its whitespace; no filename fallback.
+   * - ``if-artist``
+     - Track artist tags.
+   * - ``if-albumartist``
+     - Actual album-artist tags; no inferred track-artist fallback.
+   * - ``if-albumtitle``
+     - Album tags.
+   * - ``if-genre``
+     - Original genre tags, before display mapping.
+   * - ``if-composer``
+     - Composer tags.
+   * - ``if-year``
+     - Year extracted from the date tag with Gerbera's existing year helper.
+
+Conditions compare exact, case-sensitive values and do not interpret regex.
+For multivalued tags, any individual tag value may match. All conditions on one
+rule must match (AND); a missing required tag prevents the rule from applying.
+Conditions use source metadata, not text inserted by an earlier replacement.
+Omitted or empty conditions impose no restriction. Multiple separate rules can
+express alternatives. ``regex`` affects only ``from``, independently of conditions.
+
+Tag conditions are checked before applying the replacement. These rules run
+when the virtual entries are built, rather than again for every playback or
+display of an already stored entry. Cost scales with the configured rules and
+regex patterns; simple patterns and a small rule set add little work compared
+with reading media metadata and storing entries.
+
+
+The format is used by ``getAudioDetails`` in the standard JavaScript audio
+layouts; builtin formatting remains unchanged. Both layouts support the
+replacement rules. JavaScript views such as ``All - full name`` still add their
+own artist/album components around the formatted title; include an artist in
+the format only if that duplication is desired. Builtin rules instead see each
+final generated view title, so a prefix can be explicitly matched there without
+applying replacements twice to the same title.
+These options do not change source filenames, file tags, artist/album metadata,
+search descriptions, media URLs or existing track-number handling and sorting.
+Artist text already present in a title or fallback filename is not guessed or
+removed automatically; explicit replacements can remove known literal text.
+
+After loading the changed configuration, re-import the affected items to rebuild
+their virtual entries. Existing stored entries are not renamed merely by changing
+the configuration, and scans that skip unchanged files do not rebuild them.
+
 Mapping for Genres
 ------------------
 

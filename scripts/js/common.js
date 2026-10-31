@@ -362,6 +362,62 @@ function mapModel(model) {
   return { value: model, mapped: mapped };
 }
 
+function audioTitleNumber(value, width) {
+  const match = /^\s*(\d+)/.exec(String(value || ''));
+  if (!match) {
+    return '';
+  }
+  var number = match[1].replace(/^0+(?=\d)/, '');
+  if (number === '0') {
+    return '';
+  }
+  return toDigits(number, Math.max(width, number.length));
+}
+
+function formatAudioTitle(obj, audio, trackNumber, discNumber) {
+  const options = config['/import/scripting/virtual-layout/script-options/script-option'] || {};
+  const format = options.audioTitleFormat;
+  if (typeof format !== 'string' || format === '') {
+    return audio.title;
+  }
+
+  const filename = String(obj.location || '').replace(/^.*[\\/]/, '').replace(/\.[^.]*$/, '');
+  const fields = {
+    title: audio.trackTitle.trim(),
+    artist: audio.artistFull || '',
+    albumartist: (obj.metaData[M_ALBUMARTIST] && obj.metaData[M_ALBUMARTIST][0]) ||
+      getAuxInfo(obj, 'TPE2', '') || (audio.artistFull ? audio.albumArtist : ''),
+    albumtitle: audio.albumFull || '',
+    tracknr1: audioTitleNumber(trackNumber, 1),
+    tracknr2: audioTitleNumber(trackNumber, 2),
+    tracknr3: audioTitleNumber(trackNumber, 3),
+    cdnumber: audioTitleNumber(discNumber, 1),
+    year: audio.date === 'Unknown' ? '' : audio.date,
+    genre: audio.genres.join(' / '),
+    composer: obj.metaData[M_COMPOSER] ? obj.metaData[M_COMPOSER].join(' / ') : '',
+    filename: filename
+  };
+  var title = format.replace(/%%|%([a-zA-Z][a-zA-Z0-9]*)%/g, function (token, name) {
+    if (token === '%%') {
+      return '%';
+    }
+    return Object.prototype.hasOwnProperty.call(fields, name) ? fields[name] : token;
+  });
+
+  const replacements = config.audioTitleReplacements || [];
+  for (var i = 0; i < replacements.length; i++) {
+    const rule = replacements[i];
+    if (rule.conditions.every(function (condition) {
+      return (obj.metaData[condition.tag] || []).some(function (value) {
+        return (condition.tag === M_DATE ? getYear(value) : value) === condition.value;
+      });
+    })) {
+      title = rule.regex ? title.replace(rule.from, rule.to) : title.split(rule.from).join(rule.to);
+    }
+  }
+  return title.trim() || fields.title || filename;
+}
+
 // doc-map-audio-details-begin
 function getAudioDetails(obj, rootPath) {
   var trackTitle = getTitle(obj);
@@ -404,6 +460,7 @@ function getAudioDetails(obj, rootPath) {
       disknr = obj.aux['TPOS'];
     }
   }
+  const displayDiscNumber = disknr;
   if (!disknr || disknr.length == 0) {
     disknr = '';
   } else if (disknr == '1/1') {
@@ -427,6 +484,7 @@ function getAudioDetails(obj, rootPath) {
   desc = desc + title;
 
   var date = 'Unknown';
+  var decade = 'Unknown';
   if (obj.metaData[M_DATE] && obj.metaData[M_DATE][0]) {
     date = getYear(obj.metaData[M_DATE][0]);
     obj.metaData[M_UPNP_DATE] = [date];
@@ -467,6 +525,7 @@ function getAudioDetails(obj, rootPath) {
   }
 
   var track = obj.metaData[M_TRACKNUMBER] ? obj.metaData[M_TRACKNUMBER][0] : '';
+  const displayTrackNumber = track;
   if (!track) {
     track = '';
   } else {
@@ -506,7 +565,7 @@ function getAudioDetails(obj, rootPath) {
     channels = '';
   }
 
-  return {
+  const audio = {
     title: title,
     trackTitle: trackTitle,
     disknr: disknr,
@@ -528,6 +587,8 @@ function getAudioDetails(obj, rootPath) {
     description: description,
     dir: dir,
   };
+  audio.title = formatAudioTitle(obj, audio, displayTrackNumber, displayDiscNumber);
+  return audio;
 }
 // doc-map-audio-details-end
 
@@ -962,7 +1023,7 @@ function addPlaylistItem(playlist_title, playlistLocation, entry, playlistChain,
     if (entry.defaults) {
       exturl.metaData = {};
       for (var key in entry.defaults)
-        exturl.metaData[key] = [entry.defaults[key]];
+        addMeta(exturl, key, entry.defaults[key]);
     }
     exturl.size = entry.size;
     exturl.writeThrough = entry.writeThrough;

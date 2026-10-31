@@ -178,6 +178,8 @@ class MetaEnumMapper {
 public:
     /// @brief Definition of the supported metadata fields.
     static std::map<MetadataFields, std::string> mt_keys;
+    /// @brief Metadata names supported by audio title replacement conditions.
+    static const std::map<std::string, MetadataFields> audioTitleFields;
     static MetadataFields remapMetaDataField(const std::string& fieldName);
     static std::string getMetaFieldName(MetadataFields field);
 };

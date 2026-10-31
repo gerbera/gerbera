@@ -23,6 +23,7 @@
 #ifdef HAVE_JS
 
 #include "cds/cds_objects.h"
+#include "content/scripting/script.h"
 #include "content/scripting/script_names.h"
 #include "content/scripting/script_property.h"
 #include "util/grb_fs.h"
@@ -318,6 +319,16 @@ void ScriptTestFixture::addConfig(
     }
     duk_put_prop_string(ctx, -2, "/import/scripting/virtual-layout/boxlayout/box"); // box-layout
 
+    std::vector<std::vector<std::pair<std::string, std::string>>> titleRules;
+    const auto replacements = configVects.find("/import/scripting/virtual-layout/title-replacements/replace");
+    if (replacements != configVects.end()) {
+        for (const auto& attributes : replacements->second) {
+            auto& rule = titleRules.emplace_back();
+            for (const auto& [key, value] : attributes)
+                rule.emplace_back(key, value);
+        }
+    }
+    Script::prepareAudioTitleReplacements(ctx, titleRules);
     duk_put_global_string(ctx, "config");
 }
 

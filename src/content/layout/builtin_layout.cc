@@ -42,6 +42,7 @@
 #include "content/content.h"
 #include "context.h"
 #include "metadata/metadata_enums.h"
+#include "util/logger.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -49,6 +50,7 @@
 #include "content/onlineservice/online_service.h"
 #endif
 
+#include <algorithm>
 #include <regex>
 
 BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
@@ -57,6 +59,30 @@ BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
     , converterManager(this->content->getContext()->getConverterManager())
     , genreMap(this->config->getDictionaryOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
 {
+    // Prepare configured rules once; builtin keeps its existing native regex engine.
+    for (const auto& attributes : config->getVectorOption(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS)) {
+        const std::map<std::string, std::string> values(attributes.begin(), attributes.end());
+        AudioTitleReplacement rule;
+        rule.from = getValueOrDefault(values, "from");
+        rule.to = getValueOrDefault(values, "to");
+        if (rule.from.empty())
+            continue;
+        const auto regex = getValueOrDefault(values, "regex");
+        if (regex == "yes" || regex == "true") {
+            try {
+                rule.pattern.emplace(rule.from, std::regex::ECMAScript);
+            } catch (const std::regex_error& error) {
+                log_warning("Ignoring invalid builtin audio title replacement {}: {}", rule.from, EX(error));
+                continue;
+            }
+        }
+        for (const auto& [name, tag] : MetaEnumMapper::audioTitleFields) {
+            const auto value = getValueOrDefault(values, std::string("if-") + name);
+            if (!value.empty())
+                rule.conditions.emplace_back(tag, value);
+        }
+        audioTitleReplacements.push_back(std::move(rule));
+    }
     auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST);
     for (auto&& bl : EDIT_CAST(EditHelperBoxLayout, blOption)->getArrayCopy()) {
         // We could copy only the enabled containers, but to avoid checking dependencies here, we copy all of them!
@@ -365,7 +391,7 @@ std::vector<int> BuiltinLayout::addAudio(
     if (composer.empty())
         composer = "None";
 
-    obj->setTitle(title);
+    obj->setTitle(replaceAudioTitle(*obj, title));
     bool isFirst = true;
 
     // all audio container
@@ -500,7 +526,7 @@ std::vector<int> BuiltinLayout::addAudio(
     // Keep this last, since it's modifying the object title
     if (blOption->getKey(BoxKeys::audioAllTracks)->getEnabled()) {
         artistContainer->setSearchable(true);
-        obj->setTitle(fmt::format("{}{}", prefixTitle, title));
+        obj->setTitle(replaceAudioTitle(*obj, fmt::format("{}{}", prefixTitle, title)));
         result.push_back(add(obj, chain["/Audio/All - full name"], isFirst));
         isFirst = false;
 
@@ -533,6 +559,40 @@ std::vector<int> BuiltinLayout::addOnlineItem(
     return {};
 }
 #endif
+
+std::string BuiltinLayout::replaceAudioTitle(const CdsObject& object, std::string title) const
+{
+    const auto original = title;
+    if (audioTitleReplacements.empty())
+        return title;
+    StringConverter validator("UTF-8", "UTF-8");
+    for (const auto& rule : audioTitleReplacements) {
+        const bool applies = std::all_of(rule.conditions.begin(), rule.conditions.end(), [&](const auto& condition) {
+            const auto values = object.getMetaGroup(condition.first);
+            return std::any_of(values.begin(), values.end(), [&](std::string value) {
+                if (condition.first == MetadataFields::M_DATE && value.size() > 4 && value[4] == '-'
+                    && std::all_of(value.begin(), value.begin() + 4, [](char c) { return c >= '0' && c <= '9'; }))
+                    value.resize(4);
+                return value == condition.second;
+            });
+        });
+        if (!applies)
+            continue;
+        auto candidate = title;
+        if (rule.pattern)
+            candidate = std::regex_replace(candidate, *rule.pattern, rule.to);
+        else
+            replaceAllString(candidate, rule.from, rule.to);
+        // Native regex matches UTF-8 bytes; never publish a split multibyte character.
+        if (candidate.find('\0') != std::string::npos
+            || (!candidate.empty() && !validator.convert(candidate).second.empty())) {
+            log_warning("Ignoring builtin audio title replacement {}: result is not valid UTF-8 text", rule.from);
+            continue;
+        }
+        title = std::move(candidate);
+    }
+    return trimString(title).empty() ? original : title;
+}
 
 std::string BuiltinLayout::mapGenre(const std::string& genre)
 {
