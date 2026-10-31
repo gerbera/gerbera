@@ -31,6 +31,7 @@
 #include "config/result/autoscan.h"
 #include "content/autoscan_setting.h"
 #include "content/content.h"
+#include "content/import_service.h"
 #include "content/inotify/autoscan_inotify.h"
 #include "content/inotify/directory_watch.h"
 #include "content/inotify/inotify_types.h"
@@ -157,9 +158,11 @@ int InotifyHandler::doExistingEntry(
         log_debug("found {} -> {}", path.c_str(), changedObject ? changedObject->getID() : INVALID_OBJECT_ID);
         if (changedObject)
             isDir = changedObject->isContainer();
+        auto importService = adir ? adir->getImportService() : nullptr;
         if (changedObject
             && ((!AUTOSCAN_IS_WRITTEN(mask) && !AUTOSCAN_IS_MOVED(mask))
-                || (importMode != ImportMode::Gerbera && !changedObject->isMediaItem()))) {
+                || (importMode != ImportMode::Gerbera
+                    && !(importService ? importService->isMediaOrPlaylistItem(*changedObject) : changedObject->isMediaOrPlaylistItem())))) {
             log_debug("deleting {}", path.c_str());
             content->removeObject(adir, changedObject, path, !AUTOSCAN_IS_MOVED(mask), false);
             changedObject = nullptr;
