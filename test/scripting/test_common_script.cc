@@ -22,13 +22,20 @@
 */
 #ifdef HAVE_JS
 
+#include "metadata/metadata_enums.h"
 #include "util/grb_fs.h"
 #include "util/tools.h"
 
 #include "mock/duk_helper.h"
 #include "mock/script_test_fixture.h"
 
+#include <algorithm>
 #include <duktape.h>
+#include <map>
+#include <string>
+#include <string_view>
+#include <utility>
+#include <vector>
 
 class CommonScriptTest : public ScriptTestFixture {
 
@@ -706,4 +713,278 @@ TEST_F(CommonScriptTest, abcbox_BoxTypeSpecialChars_ReturnsCorrectBoxBasedOnChar
     result = this->invokeABCBOX(ctx, "#1", boxType, divChar);
     EXPECT_STREQ(result.c_str(), "-^&#'-");
 }
+using AudioTitleRules = std::vector<std::vector<std::pair<std::string_view, std::string_view>>>;
+
+enum class AudioTitleChange { None,
+    NoTitle,
+    NoArtist,
+    NoAlbumArtist,
+    OnlyTitle,
+    LongTrack,
+    ZeroNumbers,
+    WindowsFilename,
+    NoDate };
+
+struct AudioTitleCase {
+    const char* name;
+    const char* pattern;
+    const char* expected;
+    AudioTitleRules rules;
+    AudioTitleChange change;
+};
+
+class AudioTitleScriptTest : public CommonScriptTest {
+protected:
+    static std::vector<std::string> warnings;
+    static duk_ret_t printWarning(duk_context* context)
+    {
+        warnings.push_back(ScriptTestFixture::print(context));
+        return 1;
+    }
+
+    void SetUp() override
+    {
+        CommonScriptTest::SetUp();
+        warnings.clear();
+        const duk_function_list_entry functions[] { { "print", printWarning, DUK_VARARGS }, { nullptr, nullptr, 0 } };
+        addGlobalFunctions(ctx, functions);
+    }
+
+    void configure(const char* pattern, const AudioTitleRules& rules = {})
+    {
+        std::map<std::string_view, std::map<std::string_view, std::string_view>> dictionaries;
+        if (pattern)
+            dictionaries["/import/scripting/virtual-layout/script-options/script-option"]["audioTitleFormat"] = pattern;
+        addConfig(ctx, {}, {}, dictionaries,
+            { { "/import/scripting/virtual-layout/title-replacements/replace", rules } });
+    }
+
+    struct TitleResult {
+        std::string title;
+        std::string date;
+        std::string decade;
+        std::string details;
+        std::string source;
+    };
+
+    TitleResult invoke(AudioTitleChange change = AudioTitleChange::None)
+    {
+        const auto albumArtistKey = MetaEnumMapper::getMetaFieldName(MetadataFields::M_ALBUMARTIST);
+        std::map<std::string, std::string> props { { "title", "Artist - File" }, { "location", "/music/Artist - File.flac" } };
+        std::vector<std::pair<std::string, std::string>> metadata {
+            { "dc:title", " Track_\"音楽\" " }, { "upnp:artist", "Artist" }, { "upnp:artist", "Guest" },
+            { albumArtistKey, "Various Artists" }, { "upnp:album", "Album" },
+            { "upnp:originalTrackNumber", "02" }, { "dc:date", "2026-01-01" },
+            { "upnp:genre", "Techno" }, { "upnp:genre", "Trance" }, { "upnp:composer", "Composer" }
+        };
+        std::map<std::string, std::string> aux { { "DISCNUMBER", "2/3" } };
+        const char* removed = nullptr;
+        switch (change) {
+        case AudioTitleChange::NoTitle:
+            removed = "dc:title";
+            break;
+        case AudioTitleChange::NoArtist:
+            removed = "upnp:artist";
+            break;
+        case AudioTitleChange::NoAlbumArtist:
+            removed = albumArtistKey.c_str();
+            break;
+        case AudioTitleChange::NoDate:
+            removed = "dc:date";
+            break;
+        case AudioTitleChange::OnlyTitle:
+            metadata = { { "dc:title", "Track_\"音楽\"" } };
+            aux.clear();
+            break;
+        case AudioTitleChange::LongTrack:
+        case AudioTitleChange::ZeroNumbers:
+            for (auto& [key, value] : metadata) {
+                if (key == "upnp:originalTrackNumber")
+                    value = change == AudioTitleChange::LongTrack ? "123" : "0";
+            }
+            if (change == AudioTitleChange::ZeroNumbers)
+                aux["DISCNUMBER"] = "0";
+            break;
+        case AudioTitleChange::WindowsFilename:
+            props["location"] = "C:\\music\\Title.mp3";
+            break;
+        case AudioTitleChange::None:
+            break;
+        }
+        if (removed) {
+            metadata.erase(std::remove_if(metadata.begin(), metadata.end(), [&](const auto& field) {
+                return field.first == removed;
+            }),
+                metadata.end());
+        }
+        dukMockItem(ctx, props, metadata, aux, {});
+        duk_put_global_string(ctx, "titleSource");
+        duk_get_global_string(ctx, "getAudioDetails");
+        duk_get_global_string(ctx, "titleSource");
+        duk_push_string(ctx, "/music");
+        if (duk_pcall(ctx, 2) != DUK_EXEC_SUCCESS) {
+            ADD_FAILURE() << duk_safe_to_string(ctx, -1);
+            duk_pop(ctx);
+            return {};
+        }
+        TitleResult result;
+        duk_get_prop_string(ctx, -1, "title");
+        result.title = duk_safe_to_string(ctx, -1);
+        duk_pop(ctx);
+        duk_get_prop_string(ctx, -1, "date");
+        result.date = duk_safe_to_string(ctx, -1);
+        duk_pop(ctx);
+        duk_get_prop_string(ctx, -1, "decade");
+        result.decade = duk_safe_to_string(ctx, -1);
+        duk_pop(ctx);
+        duk_del_prop_string(ctx, -1, "title");
+        result.details = duk_json_encode(ctx, -1);
+        duk_pop(ctx);
+        duk_get_global_string(ctx, "titleSource");
+        result.source = duk_json_encode(ctx, -1);
+        duk_pop(ctx);
+        return result;
+    }
+
+    void* preparedRules()
+    {
+        duk_get_global_string(ctx, "getAudioTitleReplacements");
+        if (duk_pcall(ctx, 0) != DUK_EXEC_SUCCESS) {
+            ADD_FAILURE() << duk_safe_to_string(ctx, -1);
+            duk_pop(ctx);
+            return nullptr;
+        }
+        EXPECT_TRUE(duk_is_array(ctx, -1));
+        auto result = duk_get_heapptr(ctx, -1);
+        duk_pop(ctx);
+        return result;
+    }
+};
+
+std::vector<std::string> AudioTitleScriptTest::warnings;
+
+class AudioTitleFormatTest : public AudioTitleScriptTest,
+                             public ::testing::WithParamInterface<AudioTitleCase> { };
+
+TEST_P(AudioTitleFormatTest, UsesScriptOptionsWithoutChangingMetadataOrOrdering)
+{
+    const auto& test = GetParam();
+    configure(nullptr);
+    const auto baseline = invoke(test.change);
+    configure(test.pattern, test.rules);
+    const auto actual = invoke(test.change);
+    EXPECT_EQ(actual.title, test.expected);
+    EXPECT_EQ(actual.details, baseline.details);
+    EXPECT_EQ(actual.source, baseline.source);
+}
+
+INSTANTIATE_TEST_SUITE_P(ConfiguredFormats, AudioTitleFormatTest,
+    ::testing::ValuesIn(std::vector<AudioTitleCase> {
+        { "LegacyDefault", nullptr, "Artist - Guest -   Track_\"音楽\" ", {}, AudioTitleChange::None },
+        { "Title", "%title%", "Track_\"音楽\"", {}, AudioTitleChange::None },
+        { "Artist", "%artist% - %title%", "Artist / Guest - Track_\"音楽\"", {}, AudioTitleChange::None },
+        { "Metadata", "%albumartist% | %albumtitle% | %year% | %genre% | %composer%", "Various Artists | Album | 2026 | Techno / Trance | Composer", {}, AudioTitleChange::None },
+        { "Numbers", "%cdnumber%.%tracknr2%/%tracknr1%/%tracknr3%", "2.02/2/002", {}, AudioTitleChange::None },
+        { "Filename", "%filename%", "Artist - File", {}, AudioTitleChange::None },
+        { "UnknownTokens", "%% %unknown% %TITLE%", "% %unknown% %TITLE%", {}, AudioTitleChange::None },
+        { "MissingTitle", "%title%", "Artist - File", {}, AudioTitleChange::NoTitle },
+        { "MissingArtist", "%albumartist%", "Various Artists", {}, AudioTitleChange::NoArtist },
+        { "MissingAlbumArtist", "%albumartist%", "Artist", {}, AudioTitleChange::NoAlbumArtist },
+        { "OnlyTitle", "%artist%%albumartist%%albumtitle%%genre%%composer%%year%%tracknr2%%cdnumber%", "Track_\"音楽\"", {}, AudioTitleChange::OnlyTitle },
+        { "LongTrack", "%tracknr2%/%tracknr3%", "123/123", {}, AudioTitleChange::LongTrack },
+        { "ZeroNumbers", "%tracknr2%%cdnumber%", "Track_\"音楽\"", {}, AudioTitleChange::ZeroNumbers },
+        { "LiteralUnderscore", "%title%", "Track \"音楽\"", { { { "from", "_" }, { "to", " " } } }, AudioTitleChange::None },
+        { "LiteralQuote", "%title%", "Track_音楽", { { { "from", "\"" }, { "to", "" } } }, AudioTitleChange::None },
+        { "Sequential", "ab a", "Xb X", { { { "from", "a" }, { "to", "ab" } }, { { "from", "ab" }, { "to", "X" } } }, AudioTitleChange::None },
+        { "OrderedRules", "a", "first", { { { "from", "a" }, { "to", "first" } }, { { "from", "a" }, { "to", "second" } } }, AudioTitleChange::None },
+        { "LiteralUnicodeAndDollar", "A $1 [x]", "A literal 音楽", { { { "from", "a" }, { "to", "z" } }, { { "from", "$1" }, { "to", "literal" } }, { { "from", "[x]" }, { "to", "音楽" } } }, AudioTitleChange::None },
+        { "EmptyResultFallback", "REMOVE", "Track_\"音楽\"", { { { "from", "REMOVE" }, { "to", "" } } }, AudioTitleChange::None },
+        { "WindowsFilename", "%filename%", "Title", {}, AudioTitleChange::WindowsFilename },
+        { "EmptyFrom", "%title%", "Track_\"音楽\"", { { { "from", "" }, { "to", "ignored" } } }, AudioTitleChange::None },
+        { "RegexYes", "A  B\tC", "A B C", { { { "from", "\\s+" }, { "to", " " }, { "regex", "yes" } } }, AudioTitleChange::None },
+        { "RegexTrue", "A  B", "A B", { { { "from", "\\s+" }, { "to", " " }, { "regex", "true" } } }, AudioTitleChange::None },
+        { "LiteralRegexNo", "A.*B", "literal", { { { "from", "A.*B" }, { "to", "literal" }, { "regex", "no" } } }, AudioTitleChange::None },
+        { "LiteralRegexFalse", "A.*B", "literal", { { { "from", "A.*B" }, { "to", "literal" }, { "regex", "false" } } }, AudioTitleChange::None },
+        { "RegexCaptures", "A B A B", "B/A B/A", { { { "from", "(A) (B)" }, { "to", "$2/$1" }, { "regex", "yes" } } }, AudioTitleChange::None },
+        { "LiteralCaptureSyntax", "A", "$1", { { { "from", "A" }, { "to", "$1" } } }, AudioTitleChange::None },
+        { "AlbumMatches", "%title%", "Track \"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-albumtitle", "Album" } } }, AudioTitleChange::None },
+        { "AlbumDiffers", "%title%", "Track_\"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-albumtitle", "Other" } } }, AudioTitleChange::None },
+        { "AnyArtistMatches", "%title%", "Track \"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-artist", "Guest" } } }, AudioTitleChange::None },
+        { "ArtistCaseDiffers", "%title%", "Track_\"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-artist", "guest" } } }, AudioTitleChange::None },
+        { "BothConditionsMatch", "%title%", "Track \"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-artist", "Artist" }, { "if-albumtitle", "Album" } } }, AudioTitleChange::None },
+        { "OneConditionDiffers", "%title%", "Track_\"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-artist", "Artist" }, { "if-albumtitle", "Other" } } }, AudioTitleChange::None },
+        { "MissingArtistCondition", "%title%", "Track_\"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-artist", "Artist" } } }, AudioTitleChange::NoArtist },
+        { "MissingAlbumArtistCondition", "%title%", "Track_\"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-albumartist", "Artist" } } }, AudioTitleChange::NoAlbumArtist },
+        { "AllMetadataConditions", "%title%", "Track \"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-albumartist", "Various Artists" }, { "if-genre", "Trance" }, { "if-composer", "Composer" }, { "if-year", "2026" } } }, AudioTitleChange::None },
+        { "YearDiffers", "%title%", "Track_\"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-year", "2025" } } }, AudioTitleChange::None },
+        { "MissingYear", "%title%", "Track_\"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-year", "Unknown" } } }, AudioTitleChange::NoDate },
+        { "RawTitleCondition", "%title%", "Track \"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-title", " Track_\"音楽\" " } } }, AudioTitleChange::None },
+        { "FallbackNotMetadata", "%title%", "Artist - File", { { { "from", "Artist" }, { "to", "Changed" }, { "if-title", "Artist - File" } } }, AudioTitleChange::NoTitle },
+        { "EmptyCondition", "%title%", "Track \"音楽\"", { { { "from", "_" }, { "to", " " }, { "if-artist", "" } } }, AudioTitleChange::None },
+        { "RegexConditionMatches", "A  B", "A B", { { { "from", "\\s+" }, { "to", " " }, { "regex", "yes" }, { "if-artist", "Guest" } } }, AudioTitleChange::None },
+        { "RegexConditionDiffers", "A  B", "A  B", { { { "from", "\\s+" }, { "to", " " }, { "regex", "yes" }, { "if-artist", "Other" } } }, AudioTitleChange::None },
+        { "UntrimmedTitleCondition", "%title%", "Track_\"音楽\"", { { { "from", "Track" }, { "to", "Changed" }, { "if-title", "Track_\"音楽\"" } } }, AudioTitleChange::None },
+        { "RegexZeroCaptureLiteral", "A", "$0", { { { "from", "A" }, { "to", "$0" }, { "regex", "yes" } } }, AudioTitleChange::None },
+        { "RegexDigitFallback", "A", "A0", { { { "from", "(A)" }, { "to", "$10" }, { "regex", "yes" } } }, AudioTitleChange::None },
+        { "RegexMissingCaptureLiteral", "A", "$9", { { { "from", "(A)" }, { "to", "$9" }, { "regex", "yes" } } }, AudioTitleChange::None },
+        { "UnicodeRegexCharacter", "Äther", "ther", { { { "from", "^." }, { "to", "" }, { "regex", "yes" } } }, AudioTitleChange::None } }),
+    [](const ::testing::TestParamInfo<AudioTitleCase>& info) { return info.param.name; });
+
+TEST_F(AudioTitleScriptTest, MissingDatesDoNotInheritPreviousTrackDecade)
+{
+    configure("%title%");
+    const auto onlyTitle = invoke(AudioTitleChange::OnlyTitle);
+    EXPECT_EQ(onlyTitle.date, "Unknown");
+    EXPECT_EQ(onlyTitle.decade, "Unknown");
+
+    const auto dated = invoke();
+    EXPECT_EQ(dated.date, "2026");
+    EXPECT_EQ(dated.decade, "2020 - 2029");
+
+    const auto noDate = invoke(AudioTitleChange::NoDate);
+    EXPECT_EQ(noDate.date, "Unknown");
+    EXPECT_EQ(noDate.decade, "Unknown");
+
+    const auto onlyTitleAgain = invoke(AudioTitleChange::OnlyTitle);
+    EXPECT_EQ(onlyTitleAgain.date, onlyTitle.date);
+    EXPECT_EQ(onlyTitleAgain.decade, onlyTitle.decade);
+    EXPECT_EQ(onlyTitleAgain.details, onlyTitle.details);
+    EXPECT_EQ(onlyTitleAgain.source, onlyTitle.source);
+
+    const auto noDateAgain = invoke(AudioTitleChange::NoDate);
+    EXPECT_EQ(noDateAgain.details, noDate.details);
+    EXPECT_EQ(noDateAgain.source, noDate.source);
+}
+
+TEST_F(AudioTitleScriptTest, InvalidRegexIsLoggedOnceAndDoesNotHideLaterRules)
+{
+    configure("%title%", { { { "from", "(" }, { "to", "bad" }, { "regex", "yes" } }, { { "from", "_" }, { "to", " " } } });
+    auto* first = preparedRules();
+    ASSERT_NE(first, nullptr);
+    EXPECT_EQ(warnings.size(), 1U);
+    duk_push_heapptr(ctx, first);
+    EXPECT_EQ(duk_get_length(ctx, -1), 1U);
+    duk_pop(ctx);
+    EXPECT_EQ(preparedRules(), first);
+    EXPECT_EQ(warnings.size(), 1U);
+    EXPECT_EQ(invoke().title, "Track \"音楽\"");
+    EXPECT_EQ(warnings.size(), 1U);
+}
+
+TEST_F(AudioTitleScriptTest, CachedRegexResetsStateAndNewConfigurationReplacesRules)
+{
+    configure("A  B", { { { "from", "\\s+" }, { "to", " " }, { "regex", "yes" } } });
+    auto* first = preparedRules();
+    ASSERT_NE(first, nullptr);
+    duk_push_heapptr(ctx, first);
+    duk_put_global_string(ctx, "savedTitleRules");
+    for (int repeat = 0; repeat < 3; ++repeat) {
+        EXPECT_EQ(invoke().title, "A B");
+        EXPECT_EQ(preparedRules(), first);
+    }
+    configure("A  B", { { { "from", "A" }, { "to", "C" } } });
+    EXPECT_NE(preparedRules(), first);
+    EXPECT_EQ(invoke().title, "C  B");
+}
+
 #endif

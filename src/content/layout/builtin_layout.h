@@ -36,6 +36,11 @@
 
 #include <map>
 #include <memory>
+#include <optional>
+#include <regex>
+#include <string>
+#include <utility>
+#include <vector>
 
 #include "layout.h"
 
@@ -44,6 +49,7 @@ class CdsContainer;
 class Config;
 class ConverterManager;
 enum class BoxKeys;
+enum class MetadataFields;
 
 /// @brief layout class implementation for simple virtual layout
 class BuiltinLayout : public Layout {
@@ -92,6 +98,14 @@ protected:
         const std::map<AutoscanMediaMode, std::string>& containerMap) override;
 #endif
 
+    struct AudioTitleReplacement {
+        std::string from;
+        std::string to;
+        std::optional<std::regex> pattern;
+        std::vector<std::pair<MetadataFields, std::string>> conditions;
+    };
+    std::vector<AudioTitleReplacement> audioTitleReplacements;
+    std::string replaceAudioTitle(const CdsObject& object, std::string title) const;
     std::string mapGenre(const std::string& genre);
     std::shared_ptr<CdsContainer> containerAt(BoxKeys boxKey);
 };
