@@ -50,7 +50,9 @@
 
 #include <aifffile.h>
 #include <apefile.h>
+#include <asfattribute.h>
 #include <asffile.h>
+#include <asftag.h>
 #include <attachedpictureframe.h>
 #include <flacfile.h>
 #include <id3v2tag.h>
@@ -866,6 +868,38 @@ void TagLibHandler::extractASF(
     setBitsPerSample(item, res, asf);
 
     const TagLib::ASF::AttributeListMap& attrListMap = asf.tag()->attributeListMap();
+
+    // Import configured auxiliary tags not exposed by TagLib's PropertyMap.
+    for (const auto& desiredTag : auxTags) {
+        if (desiredTag.empty() || (item->getAuxData().find(desiredTag) != item->getAuxData().end()))
+            continue;
+
+        const auto it = attrListMap.find(desiredTag.c_str());
+        if (it == attrListMap.end() || it->second.isEmpty())
+            continue;
+
+        TagLib::StringList values;
+        for (const auto& attribute : it->second) {
+            if (attribute.type() != TagLib::ASF::Attribute::UnicodeType)
+                continue;
+            if (!attribute.toString().isEmpty())
+                values.append(attribute.toString());
+        }
+        if (values.isEmpty())
+            continue;
+
+        auto entry = values.toString(entrySeparator);
+        if (!legacyEntrySeparator.empty())
+            entry = entry.split(legacyEntrySeparator).toString(entrySeparator);
+
+        auto [val, err] = sc->convert(entry.to8Bit(true));
+        if (!err.empty())
+            log_warning("{}: {}", item->getLocation().string(), err);
+
+        log_debug("Adding ASF auxdata: {} with value {}", desiredTag, val);
+        item->setAuxData(desiredTag, val);
+    }
+
     if (attrListMap.contains("WM/Picture")) {
         const TagLib::ASF::AttributeList& attrList = attrListMap["WM/Picture"];
         if (attrList.isEmpty())
