@@ -126,6 +126,11 @@ bool CdsObject::isMediaItem() const
     return type == ObjectType::Audio || type == ObjectType::Video || type == ObjectType::Image;
 }
 
+bool CdsObject::isMediaOrPlaylistItem() const
+{
+    return isMediaItem() || isSubClass(UPNP_CLASS_PLAYLIST_ITEM);
+}
+
 ObjectType CdsObject::getMediaType(const std::string& contentType) const
 {
 #ifdef ONLINE_SERVICES

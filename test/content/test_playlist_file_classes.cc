@@ -22,6 +22,7 @@
 #include "cds/cds_item.h"
 #include "cds/cds_resource.h"
 #include "common.h"
+#include "config/result/autoscan.h"
 #include "content/content.h"
 #include "content/import_service.h"
 #include "context.h"
@@ -31,10 +32,13 @@
 #include "util/grb_fs.h"
 #include "util/grb_time.h"
 
+#include <algorithm>
 #include <array>
 #include <chrono>
 #include <cstddef>
 #include <cstdlib>
+#include <fmt/format.h>
+#include <fstream>
 #include <gtest/gtest.h>
 #include <map>
 #include <memory>
@@ -64,6 +68,7 @@ protected:
         std::pair { "five.wpl", MIME_TYPE_WPL_PLAYLIST },
         std::pair { "six.xspf", MIME_TYPE_XSPF_PLAYLIST },
     };
+    std::map<std::string, std::string> playlistTitles;
 
     void configureMappings(PlaylistClassMapping mode)
     {
@@ -118,11 +123,13 @@ protected:
         writeWave(source / "audio/a.wav", "Track A");
         writeWave(source / "audio/b.wav", "Track B");
         writePlaylists();
+        for (const auto& [name, mime] : playlists)
+            playlistTitles[name] = fs::path(name).stem().string();
     }
 
-    void startAndWaitForImports()
+    void startAndWaitForImports(AutoscanScanMode scanMode = AutoscanScanMode::Timed)
     {
-        start(std::get<0>(GetParam()));
+        start(std::get<0>(GetParam()), "UTF-8", scanMode);
         ASSERT_TRUE(waitFor([this] { return physicalImportsReady(); }, "physical playlist and audio imports", std::chrono::seconds(20)));
 #ifdef HAVE_JS
         ASSERT_TRUE(waitFor([this] { return static_cast<bool>(playlistViewsMatch()); }, "both parsed playlist views, repeated positions and media resources", std::chrono::seconds(20))) << playlistViewsMatch().message();
@@ -170,7 +177,7 @@ protected:
         }
         std::map<std::string, int> expectedNames;
         for (const auto& [name, mime] : playlists)
-            expectedNames[fs::path(name).stem().string()] = 2;
+            expectedNames[playlistTitles.at(name)] = 2;
         if (actualNames != expectedNames)
             return ::testing::AssertionFailure() << "Playlist container names/counts differ from the input file names";
         for (const auto& [name, mime] : playlists) {
@@ -181,7 +188,7 @@ protected:
             if (views.size() != 2)
                 return ::testing::AssertionFailure() << name << ": expected two playlist views, got " << views.size();
             for (int id : views) {
-                if (database->loadObject(id)->getTitle() != fs::path(name).stem().string())
+                if (database->loadObject(id)->getTitle() != playlistTitles.at(name))
                     return ::testing::AssertionFailure() << name << ": playlist view has the wrong title";
                 auto positions = children(id);
                 if (positions.size() != 3)
@@ -304,6 +311,109 @@ TEST_P(PlaylistFileClassTest, PhysicalClassesKeepMimeResourcesAndParsedPlaylistP
     for (const auto& [path, bytes] : original) {
         SCOPED_TRACE(path.string());
         EXPECT_EQ(readBytes(path), bytes);
+    }
+}
+
+TEST_P(PlaylistFileClassTest, UpdatesKeepPhysicalIdentityAndCompletePlaylistViews)
+{
+    ASSERT_NO_FATAL_FAILURE(prepareInputs());
+    std::map<fs::path, std::string> expectedBytes;
+    for (const auto& [name, mime] : playlists) {
+        auto path = source / "pl" / name;
+        expectedBytes[path] = readBytes(path);
+    }
+    for (const auto* name : { "a.wav", "b.wav" }) {
+        auto path = source / "audio" / name;
+        expectedBytes[path] = readBytes(path);
+    }
+    std::vector<AutoscanScanMode> scanModes { AutoscanScanMode::Timed };
+#if defined(HAVE_INOTIFY) && defined(__linux__)
+    scanModes.push_back(AutoscanScanMode::INotify);
+#endif
+    for (auto scanMode : scanModes) {
+        SCOPED_TRACE(AutoscanDirectory::mapScanmode(scanMode));
+        ASSERT_NO_FATAL_FAILURE(startAndWaitForImports(scanMode));
+        if (scanMode == AutoscanScanMode::INotify)
+            ASSERT_TRUE(waitForWatches({ source, source / "pl" }));
+        struct PlaylistState {
+            int id;
+            std::string upnpClass;
+            std::chrono::seconds mtime;
+        };
+        std::map<std::string, PlaylistState> before;
+        std::map<std::string, std::chrono::seconds> updatedTimes;
+        auto modified = fs::file_time_type::clock::now();
+        for (const auto& [path, bytes] : expectedBytes)
+            modified = std::max(modified, fs::last_write_time(path));
+        modified += std::chrono::seconds(2);
+        for (const auto& [name, mime] : playlists) {
+            auto path = source / "pl" / name;
+            auto item = std::dynamic_pointer_cast<CdsItem>(database->findObjectByPath(path, DEFAULT_CLIENT_GROUP, DbFileType::File));
+            ASSERT_NE(item, nullptr) << name;
+            before.emplace(name, PlaylistState { item->getID(), item->getClass(), item->getMTime() });
+            ASSERT_GT(toSeconds(modified), item->getMTime()) << name;
+            auto& bytes = expectedBytes.at(path);
+            bytes += "\n";
+            if (std::get<1>(GetParam()) == PlaylistClassMapping::DisabledDefaults
+                && (std::string(name) == "five.wpl" || std::string(name) == "six.xspf"))
+                playlistTitles[name] = name;
+            {
+                // Publish the new size and timestamp before Inotify sees CLOSE_WRITE.
+                auto output = std::ofstream(path, std::ios::out | std::ios::binary | std::ios::trunc);
+                ASSERT_TRUE(output) << path;
+                output.write(bytes.data(), static_cast<std::streamsize>(bytes.size()));
+                output.flush();
+                ASSERT_TRUE(output) << path;
+                fs::last_write_time(path, modified);
+            }
+            updatedTimes[name] = toSeconds(fs::last_write_time(path));
+        }
+        // Keep the simultaneous manual scan: it must coexist with watched updates.
+        content->rescanDirectory(content->getAutoscanDirectory(source), content->ensurePathExistence(source));
+        std::string lastState;
+        ASSERT_TRUE(waitFor([&] {
+            bool ready = physicalImportsReady();
+            lastState.clear();
+            for (const auto& [name, mime] : playlists) {
+                auto path = source / "pl" / name;
+                auto item = std::dynamic_pointer_cast<CdsItem>(database->findObjectByPath(path, DEFAULT_CLIENT_GROUP, DbFileType::File));
+                const auto& previous = before.at(name);
+                if (!item) {
+                    lastState += fmt::format("{}: missing; previous id={} mtime={}\n", name, previous.id, previous.mtime.count());
+                    ready = false;
+                    continue;
+                }
+                auto resource = item->getResource(ResourcePurpose::Content);
+                lastState += fmt::format("{}: id {} -> {}, mtime {} -> {} (expected {}), size {} (expected {})\n",
+                    name, previous.id, item->getID(), previous.mtime.count(), item->getMTime().count(),
+                    updatedTimes.at(name).count(), resource ? resource->getAttribute(ResourceAttribute::SIZE) : "missing", expectedBytes.at(path).size());
+                if (item->getID() != previous.id || item->getClass() != previous.upnpClass
+                    || item->getMTime() != updatedTimes.at(name) || item->getMimeType() != mime
+                    || !resource
+                    || resource->getAttribute(ResourceAttribute::SIZE) != std::to_string(expectedBytes.at(path).size())
+                    || resource->getAttribute(ResourceAttribute::PROTOCOLINFO) != std::string("http-get:*:") + mime + ":*")
+                    ready = false;
+            }
+#ifdef HAVE_JS
+            auto views = playlistViewsMatch();
+            if (!views) {
+                lastState += views.message();
+                ready = false;
+            }
+#endif
+            return ready;
+        },
+            "updated physical playlist timestamps, identities, resources and both complete views", std::chrono::seconds(20)))
+            << lastState;
+#if defined(HAVE_JS) && defined(HAVE_CURL)
+        ASSERT_TRUE(waitFor([this] { return static_cast<bool>(playlistResourceBytesMatch()); }, "HTTP bytes after playlist updates", std::chrono::seconds(20)));
+        ASSERT_TRUE(playlistResourceBytesMatch());
+#endif
+        stop();
+        for (const auto& [path, bytes] : expectedBytes) {
+            SCOPED_TRACE(path.string());
+            EXPECT_EQ(readBytes(path), bytes);
+        }
     }
 }
 

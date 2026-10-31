@@ -614,6 +614,12 @@ void ImportService::createContainers(
     log_debug("end {}", rootPath.string());
 }
 
+bool ImportService::isMediaOrPlaylistItem(const CdsObject& obj) const
+{
+    return obj.isMediaOrPlaylistItem()
+        || (obj.isItem() && obj.getMediaType(getValueOrDefault(mimetypeContenttypeMap, static_cast<const CdsItem&>(obj).getMimeType())) == ObjectType::Playlist);
+}
+
 std::tuple<bool, std::string, std::string> ImportService::getMimeForFile(const fs::path& objectPath) const
 {
     /* retrieve information about item and decide if it should be included */
