@@ -745,7 +745,7 @@ int Server::GetInfoCallback(
         auto quirks = server->getQuirks(info, startswith(filename, fmt::format("/{}", CONTENT_UI_HANDLER)));
         auto client = quirks->getClient();
         if (quirks && !quirks->isAllowed()) {
-            auto clientIp = client && client->addr ? client->addr->getHostName() : "unknown";
+            auto clientIp = client && client->addr ? client->addr->getNameInfo(false) : "unknown";
             log_debug("Client blocked {}", clientIp);
             return -1;
         }
@@ -779,7 +779,7 @@ UpnpWebFileHandle Server::OpenCallback(
         auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
         auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
         if (quirks && !quirks->isAllowed()) {
-            auto clientIp = client && client->addr ? client->addr->getHostName() : "unknown";
+            auto clientIp = client && client->addr ? client->addr->getNameInfo(false) : "unknown";
             log_debug("Client blocked {}", clientIp);
             return nullptr;
         }
@@ -816,7 +816,7 @@ int Server::ReadCallback(
     auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
     auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
     if (quirks && !quirks->isAllowed()) {
-        auto clientIp = client && client->addr ? client->addr->getHostName() : "unknown";
+        auto clientIp = client && client->addr ? client->addr->getNameInfo(false) : "unknown";
         log_debug("Client blocked {}", clientIp);
         return GRB_READ_ERROR;
     }
@@ -848,7 +848,7 @@ int Server::SeekCallback(
         auto client = requestCookie ? static_cast<const ClientObservation*>(requestCookie) : nullptr;
         auto quirks = client ? std::make_shared<Quirks>(client) : nullptr;
         if (quirks && !quirks->isAllowed()) {
-            auto clientIp = client && client->addr ? client->addr->getHostName() : "unknown";
+            auto clientIp = client && client->addr ? client->addr->getNameInfo(false) : "unknown";
             log_debug("Client blocked {}", clientIp);
             return -1;
         }

@@ -68,6 +68,7 @@ std::map<std::string, std::string> parseParameters(std::string_view filename, st
 
 /// @brief Converts a string to a URL (meaning: %20 instead of space and so on)
 /// @param str String to be converted.
+/// @param mode special escaping behaviour
 /// @return string that contains the url-escaped representation of the original string.
 /// Path mode preserves /, ~ and : and percent-encodes UTF-8 bytes.
 std::string urlEscape(std::string_view str, UrlMode mode = UrlMode::Form);

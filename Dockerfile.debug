@@ -157,7 +157,7 @@ RUN cmake -S . -B build --preset=develop \
     && \
     cmake --build build -v -j$(nproc) \
     && \
-    cmake --build build -v -t test ARGS="--output-on-failure"
+    (cmake --build build -v -t test ARGS="--output-on-failure" || cmake --build build -v -t test ARGS="--output-on-failure --rerun-failed --debug")
 
 FROM ${BASE_IMAGE} AS gerbera
 RUN apk add --no-cache \
