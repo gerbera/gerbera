@@ -286,7 +286,7 @@ class ParentTreeItem extends TreeItem {
   addTextLine(line) {
     var count = this.editable ? this.children.length - 1 : this.children.length;
     var text = $('<span></span>').addClass('configItemLabel');
-    var caption = '';
+    var caption;
     if (this.item.caption) {
       caption = `${this.item.caption} (${this.item.item})`;
       text.attr('title', this.item.item);
