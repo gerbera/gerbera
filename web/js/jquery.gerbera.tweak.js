@@ -39,11 +39,11 @@
     const dirTweakDelete = modal.find('#dirTweakDelete');
     const dirTweakSave = modal.find('#dirTweakSave');
 
-    let item = null;
+    var item;
     const xPath = "/import/directories/tweak";
-    let tweakList = {};
-    let tweakMap = {};
-    let itemCount = 0;
+    var tweakList = {};
+    var tweakMap = {};
+    var itemCount = 0;
     if (allValues) {
       allValues.forEach((val) => {
         if (val.item.startsWith(xPath)) {
