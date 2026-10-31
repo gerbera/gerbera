@@ -106,6 +106,58 @@ void Script::setBoolProperty(const std::string& name, bool value)
     duk_put_prop_string(ctx, -2, camelCaseString(name).c_str());
 }
 
+void Script::prepareAudioTitleReplacements(
+    duk_context* ctx,
+    const std::vector<std::vector<std::pair<std::string, std::string>>>& attributes)
+{
+    auto rules = duk_push_array(ctx);
+    duk_uarridx_t ruleIndex = 0;
+    for (const auto& values : attributes) {
+        const auto from = getValueOrDefault(values, "from");
+        if (from.empty())
+            continue;
+        const auto regexValue = getValueOrDefault(values, "regex");
+        const bool regex = regexValue == "yes" || regexValue == "true";
+        auto rule = duk_push_object(ctx);
+        if (regex) {
+            duk_get_global_string(ctx, "RegExp");
+            duk_push_lstring(ctx, from.data(), from.size());
+            duk_push_string(ctx, "g");
+            if (duk_pnew(ctx, 2) != DUK_EXEC_SUCCESS) {
+                log_warning("Ignoring invalid audio title replacement: {} ({})", from, duk_safe_to_string(ctx, -1));
+                duk_pop_2(ctx);
+                continue;
+            }
+        } else {
+            duk_push_lstring(ctx, from.data(), from.size());
+        }
+        duk_put_prop_string(ctx, rule, "from");
+        const auto to = getValueOrDefault(values, "to");
+        duk_push_lstring(ctx, to.data(), to.size());
+        duk_put_prop_string(ctx, rule, "to");
+        duk_push_boolean(ctx, regex);
+        duk_put_prop_string(ctx, rule, "regex");
+
+        auto conditions = duk_push_array(ctx);
+        duk_uarridx_t conditionIndex = 0;
+        for (const auto& [name, tag] : MetaEnumMapper::audioTitleFields) {
+            const auto value = getValueOrDefault(values, "if-" + name);
+            if (value.empty())
+                continue;
+            duk_push_object(ctx);
+            const auto tagName = MetaEnumMapper::getMetaFieldName(tag);
+            duk_push_lstring(ctx, tagName.data(), tagName.size());
+            duk_put_prop_string(ctx, -2, "tag");
+            duk_push_lstring(ctx, value.data(), value.size());
+            duk_put_prop_string(ctx, -2, "value");
+            duk_put_prop_index(ctx, conditions, conditionIndex++);
+        }
+        duk_put_prop_string(ctx, rule, "conditions");
+        duk_put_prop_index(ctx, rules, ruleIndex++);
+    }
+    duk_put_prop_string(ctx, -2, "audioTitleReplacements");
+}
+
 /* **************** */
 
 Script::Script(
@@ -332,6 +384,7 @@ void Script::init()
         }
     }
 
+    prepareAudioTitleReplacements(ctx, config->getVectorOption(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS));
     duk_put_global_string(ctx, "config");
 
     defineFunctions(jsGlobalFunctions.data());

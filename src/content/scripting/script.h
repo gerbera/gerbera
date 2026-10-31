@@ -38,6 +38,8 @@
 
 #include <duktape.h>
 #include <memory>
+#include <string>
+#include <utility>
 #include <vector>
 
 // forward declaration
@@ -73,6 +75,11 @@ public:
 
     /// @brief initialise script variables and library
     void init();
+
+    /// @brief Add prepared audio title rules to the config object at the top of the stack
+    static void prepareAudioTitleReplacements(
+        duk_context* ctx,
+        const std::vector<std::vector<std::pair<std::string, std::string>>>& attributes);
 
     /// @brief Write property with string value to object
     /// @param name of property
