@@ -2,6 +2,7 @@
 
 ### HEAD
 
+- Add bounded ASX playlist structures
 - Add config for search bracket nesting limit
 - Add opt-in whole-file charset selection for M3U playlists
 - Add static WPL and XSPF playlist import
@@ -36,6 +37,7 @@
 - Preserve newer media metadata when recording playback
 - Preserve playlist entries when media files are updated
 - Preserve repeated local files at different playlist positions
+- Recover SQLite and PostgreSQL foreign-key import failures without stopping the database
 - Seek in transcoded streams of constant bit rate
 - Serve transcoded streams to HTTP/1.0 clients
 - Split XmlPlaylist into extra file
@@ -43,8 +45,9 @@
 - Stabilize web UI tests and isolate mock response state
 - transcode: fix build with ffmpeg 7.0
 - Update metadata\_service to use content-type
-- Update to cxxopts-gac6d47
-- Update to pupnp 22.1.8
+- Update to cxxopts-g4e4fea
+- Update to pupnp 22.1.10
+- Update to ffmpegthumbnailer 2.4.1
 - Use fmt exception formatting
 - Wait for client grid rendering in browser tests
 
