@@ -303,6 +303,11 @@ void ContentManager::timerNotify(const std::shared_ptr<Timer::Parameter>& parame
 void ContentManager::shutdown()
 {
     log_debug("start");
+#ifdef HAVE_INOTIFY
+    // An Inotify event may need the content lock to queue its final import.
+    if (as_inotify)
+        as_inotify->shutdown();
+#endif
     auto lock = threadRunner->uniqueLock();
 
     destroyLayout();

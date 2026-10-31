@@ -53,6 +53,9 @@ public:
     /// @brief Run inotify manager
     void run();
 
+    /// @brief Stop and join the manager before destroying its resources
+    void shutdown();
+
 protected:
     /// @brief is set to true by shutdown() if the inotify thread should terminate
     bool shutdownFlag;
