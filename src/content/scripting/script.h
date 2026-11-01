@@ -79,7 +79,8 @@ public:
     /// @brief Add prepared audio title rules to the config object at the top of the stack
     static void prepareAudioTitleReplacements(
         duk_context* ctx,
-        const std::vector<std::vector<std::pair<std::string, std::string>>>& attributes);
+        const std::vector<std::vector<std::pair<std::string, std::string>>>& attributes,
+        const char* property = "audioTitleReplacements");
 
     /// @brief Write property with string value to object
     /// @param name of property

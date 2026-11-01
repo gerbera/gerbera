@@ -374,11 +374,12 @@ function audioTitleNumber(value, width) {
   return toDigits(number, Math.max(width, number.length));
 }
 
-function formatAudioTitle(obj, audio, trackNumber, discNumber) {
+function formatAudioTitle(obj, audio, trackNumber, discNumber, optionName, originalTitle) {
   const options = config['/import/scripting/virtual-layout/script-options/script-option'] || {};
-  const format = options.audioTitleFormat;
+  const format = options[optionName || 'audioTitleFormat'];
+  const album = optionName === 'albumTitleFormat';
   if (typeof format !== 'string' || format === '') {
-    return audio.title;
+    return album ? originalTitle : audio.title;
   }
 
   const filename = String(obj.location || '').replace(/^.*[\\/]/, '').replace(/\.[^.]*$/, '');
@@ -386,7 +387,7 @@ function formatAudioTitle(obj, audio, trackNumber, discNumber) {
     title: audio.trackTitle.trim(),
     artist: audio.artistFull || '',
     albumartist: (obj.metaData[M_ALBUMARTIST] && obj.metaData[M_ALBUMARTIST][0]) ||
-      getAuxInfo(obj, 'TPE2', '') || (audio.artistFull ? audio.albumArtist : ''),
+      getAuxInfo(obj, 'TPE2', '') || (audio.artistFull ? (album ? audio.artists[0] : audio.albumArtist) : ''),
     albumtitle: audio.albumFull || '',
     tracknr1: audioTitleNumber(trackNumber, 1),
     tracknr2: audioTitleNumber(trackNumber, 2),
@@ -397,6 +398,9 @@ function formatAudioTitle(obj, audio, trackNumber, discNumber) {
     composer: obj.metaData[M_COMPOSER] ? obj.metaData[M_COMPOSER].join(' / ') : '',
     filename: filename
   };
+  if (album) {
+    fields.importname = originalTitle;
+  }
   var title = format.replace(/%%|%([a-zA-Z][a-zA-Z0-9]*)%/g, function (token, name) {
     if (token === '%%') {
       return '%';
@@ -404,7 +408,7 @@ function formatAudioTitle(obj, audio, trackNumber, discNumber) {
     return Object.prototype.hasOwnProperty.call(fields, name) ? fields[name] : token;
   });
 
-  const replacements = config.audioTitleReplacements || [];
+  const replacements = (album ? config.albumTitleReplacements : config.audioTitleReplacements) || [];
   for (var i = 0; i < replacements.length; i++) {
     const rule = replacements[i];
     if (rule.conditions.every(function (condition) {
@@ -415,7 +419,12 @@ function formatAudioTitle(obj, audio, trackNumber, discNumber) {
       title = rule.regex ? title.replace(rule.from, rule.to) : title.split(rule.from).join(rule.to);
     }
   }
-  return title.trim() || fields.title || filename;
+  return title.trim() || (album ? originalTitle : fields.title || filename);
+}
+
+function formatAlbumTitle(obj, audio, originalTitle) {
+  return formatAudioTitle(obj, audio,
+    audio.displayTrackNumber, audio.displayDiscNumber, 'albumTitleFormat', originalTitle);
 }
 
 // doc-map-audio-details-begin
@@ -579,6 +588,8 @@ function getAudioDetails(obj, rootPath) {
     date: date,
     decade: decade,
     track: track,
+    displayTrackNumber: displayTrackNumber,
+    displayDiscNumber: displayDiscNumber,
     channels: channels,
     composer: composer,
     conductor: conductor,
@@ -644,6 +655,9 @@ function createUserChain(obj, media, chain, boxSetup, chainSetup, result, rootPa
             metaData: {},
             refID: (ulink.refID ? eval(ulink.refID) : undefined),
           };
+          if (media.album !== undefined && chain[ulink.key].upnpclass === UPNP_CLASS_CONTAINER_MUSIC_ALBUM) {
+            chain[ulink.key].title = formatAlbumTitle(obj, media, chain[ulink.key].title);
+          }
           if (ulink.metaData) {
             const mdArray = ulink.metaData.split(',');
             for (var mdi = 0; mdi < mdArray.length; mdi++) {
