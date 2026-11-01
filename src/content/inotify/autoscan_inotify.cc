@@ -49,6 +49,7 @@
 #include "database/database.h"
 
 template void InotifyManager<DirectoryWatch>::run();
+template void InotifyManager<DirectoryWatch>::shutdown();
 
 AutoscanInotify::AutoscanInotify(const std::shared_ptr<Content>& content)
     : config(content->getContext()->getConfig())
@@ -162,7 +163,8 @@ void AutoscanInotify::threadProc()
                 asSetting.recursive = adir ? adir->getRecursive() : false;
                 asSetting.hidden = adir ? adir->getHidden() : defHidden;
                 asSetting.rescanResource = true;
-                asSetting.async = false;
+                // Share the content worker with rescans; ImportService owns mutable scan state.
+                asSetting.async = true;
                 asSetting.resourcePatterns.clear();
                 asSetting.mergeOptions(config, path);
 
