@@ -108,7 +108,8 @@ void Script::setBoolProperty(const std::string& name, bool value)
 
 void Script::prepareAudioTitleReplacements(
     duk_context* ctx,
-    const std::vector<std::vector<std::pair<std::string, std::string>>>& attributes)
+    const std::vector<std::vector<std::pair<std::string, std::string>>>& attributes,
+    const char* property)
 {
     auto rules = duk_push_array(ctx);
     duk_uarridx_t ruleIndex = 0;
@@ -155,7 +156,7 @@ void Script::prepareAudioTitleReplacements(
         duk_put_prop_string(ctx, rule, "conditions");
         duk_put_prop_index(ctx, rules, ruleIndex++);
     }
-    duk_put_prop_string(ctx, -2, "audioTitleReplacements");
+    duk_put_prop_string(ctx, -2, property);
 }
 
 /* **************** */
@@ -385,6 +386,7 @@ void Script::init()
     }
 
     prepareAudioTitleReplacements(ctx, config->getVectorOption(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS));
+    prepareAudioTitleReplacements(ctx, config->getVectorOption(ConfigVal::IMPORT_SCRIPTING_ALBUM_TITLE_REPLACEMENTS), "albumTitleReplacements");
     duk_put_global_string(ctx, "config");
 
     defineFunctions(jsGlobalFunctions.data());
