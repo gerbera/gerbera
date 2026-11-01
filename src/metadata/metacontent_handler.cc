@@ -28,6 +28,7 @@
 
 #include "cds/cds_item.h"
 #include "cds/cds_objects.h"
+#include "cds/cds_resource.h"
 #include "config/config.h"
 #include "config/config_definition.h"
 #include "config/config_val.h"
@@ -36,6 +37,7 @@
 #include "context.h"
 #include "database/database.h"
 #include "iohandler/file_io_handler.h"
+#include "upnp/upnp_common.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -63,11 +65,29 @@ ContentPathSetup::ContentPathSetup(
 std::vector<fs::path> ContentPathSetup::getContentPath(
     const std::shared_ptr<CdsObject>& obj,
     const std::string& setting,
-    fs::path folder) const
+    fs::path folder,
+    ContentPathMode mode) const
 {
     auto objLocation = obj->getLocation();
     auto tweak = allTweaks ? allTweaks->getKey(objLocation) : nullptr;
     auto files = !tweak || !tweak->hasSetting(setting) ? this->names : std::vector<std::string> { tweak->getSetting(setting) };
+    if (setting == SETTING_CONTAINERART) {
+        std::vector<std::string> selectedFiles;
+        for (const auto& name : files) {
+            if (name == "%upnpclass%.png") {
+                if (mode == ContentPathMode::Primary)
+                    continue;
+                auto className = obj->getClass();
+                while (startswith(className, UPNP_CLASS_CONTAINER)) {
+                    selectedFiles.push_back(className + ".png");
+                    className.erase(className.find_last_of('.'));
+                }
+            } else if (mode == ContentPathMode::Primary) {
+                selectedFiles.push_back(name);
+            }
+        }
+        files = std::move(selectedFiles);
+    }
     auto isCaseSensitive = tweak && tweak->hasCaseSensitive() ? tweak->getCaseSensitive() : this->caseSensitive;
 
     static auto nameOption = definition->removeAttribute(ConfigVal::A_IMPORT_RESOURCES_NAME);
@@ -117,7 +137,7 @@ std::vector<fs::path> ContentPathSetup::getContentPath(
     }
 
     // resources added with add-dir
-    if (!patterns.empty()) {
+    if (mode == ContentPathMode::Primary && !patterns.empty()) {
         // filter files matching patterns
         for (auto&& pattern : patterns) {
             std::string dir;
@@ -229,6 +249,7 @@ std::string ContentPathSetup::expandName(const std::string& name, const std::sha
 
     for (auto&& [key, val] : metaTags)
         replaceString(copy, key, obj->getMetaData(val));
+    replaceString(copy, "%upnpclass%", obj->getClass());
 
     if (obj->isItem()) {
         fs::path location = obj->getLocation();
@@ -324,14 +345,10 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(const std::shared_ptr<Cds
     return std::make_unique<FileIOHandler>(path);
 }
 
-std::unique_ptr<ContentPathSetup> ContainerArtHandler::setup {};
-
 ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context)
     : MetacontentHandler(context)
+    , setup(std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST))
 {
-    if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST);
-    }
 }
 
 bool ContainerArtHandler::fillMetadata(
@@ -343,6 +360,28 @@ bool ContainerArtHandler::fillMetadata(
         pathList = setup->getContentPath(obj, SETTING_CONTAINERART);
     }
 
+    return fillMetadata(obj, pathList);
+}
+
+bool ContainerArtHandler::fillFallbackMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    std::vector<int>& newIds)
+{
+    if (obj->getResource(ResourcePurpose::Thumbnail))
+        return false;
+    auto paths = setup->getContentPath(obj, SETTING_CONTAINERART,
+        config->getOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION), ContentPathMode::Fallback);
+    paths.resize(1); // the nearest configured class is the only default
+    if (!fillMetadata(obj, paths))
+        return false;
+    obj->getResource(ResourcePurpose::Thumbnail)->addOption(RESOURCE_OPTION_CONTAINER_ART_FALLBACK, "yes");
+    return true;
+}
+
+bool ContainerArtHandler::fillMetadata(
+    const std::shared_ptr<CdsObject>& obj,
+    const std::vector<fs::path>& pathList)
+{
     bool result = false;
     if (pathList.empty() || pathList[0].empty())
         obj->removeResource(ContentHandler::CONTAINERART);

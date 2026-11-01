@@ -1,0 +1,282 @@
+[
+  {
+    "file": "album-single.png",
+    "sha256": "ddae234d2bbb8cf6f8013b4094f3255d4f357d1081e7d00395a69b35f8059f9b",
+    "theme": "Gerbera",
+    "category": "album-single",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "blue",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "albums.png",
+    "sha256": "5c8ad06c0830c99b7c74c22daa70fdfda20f268c289a9c68b3e06ac030d56a1c",
+    "theme": "Gerbera",
+    "category": "albums",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "red",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "all-audio.png",
+    "sha256": "04b4159ebde762fd3e9793ca2aa4222a125af49e8b51288b96ad98831551c54f",
+    "theme": "Gerbera",
+    "category": "all-audio",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "orange",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "all-full-name.png",
+    "sha256": "57720c2e71e9d1d62c0887838246b2ef7535709113cdc3bc6fff0c1ec1d238d0",
+    "theme": "Gerbera",
+    "category": "all-full-name",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "ruby red",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "artists.png",
+    "sha256": "3989a33f1c3587a03cd0776c242067ba90ae9bd4faa811935382c4f9a592a25d",
+    "theme": "Gerbera",
+    "category": "artists",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "fuchsia",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "audio.png",
+    "sha256": "efce05d057a545c3c2aa9885321ea07be88f6b12280a8a9b53fe95f20397cf2b",
+    "theme": "Gerbera",
+    "category": "audio",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "cobalt blue",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "composers.png",
+    "sha256": "1ae179c6ec2a66444f93d6d9aeddee6d3ec6b804f06cefd833ceaf01bf9ab70c",
+    "theme": "Gerbera",
+    "category": "composers",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "pearl white",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "computer.png",
+    "sha256": "0a94df338fb4dde86c272e9f1cc655f0874ba66541ad0ab857fb02c0e3cc507f",
+    "theme": "Gerbera",
+    "category": "computer",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "amber orange",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "date.png",
+    "sha256": "c70fc4dcd149d5f8dfc24d8d4af493c073b7bfdbd167d6d01a6da9754d8cc93d",
+    "theme": "Gerbera",
+    "category": "date",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "petrol teal",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "directory.png",
+    "sha256": "6746fada83086e0e4e1775152c79695d30ee49d5fed40e75c1111f2c5c55b3a9",
+    "theme": "Gerbera",
+    "category": "directory",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "violet",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "favorites.png",
+    "sha256": "6540d445c54474324030fde9a7f52c34fdca06a82f2251902a1d0f69a890e813",
+    "theme": "Gerbera",
+    "category": "favorites",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "ultramarine",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "genres.png",
+    "sha256": "e68dd97c574d8f29d9bbd96ea61df9f2121a36e60147d3cb4d794a3147db36e3",
+    "theme": "Gerbera",
+    "category": "genres",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "gold yellow",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "photos.png",
+    "sha256": "481c208194d7688c11108d6f86a4f7ccf52725322db60804d1777968170d45e7",
+    "theme": "Gerbera",
+    "category": "photos",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "cream",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "playlists.png",
+    "sha256": "7f75f8a82cbdf2e5c897e9aacd5149dd7269dfb7963961b8cfc5a573ed886b4d",
+    "theme": "Gerbera",
+    "category": "playlists",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "forest green",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "recently-added.png",
+    "sha256": "1203c1475a08dea960a37d4fa2b22c0656f61cd5b24b3f0ed7a5f184d4923d40",
+    "theme": "Gerbera",
+    "category": "recently-added",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "lemon yellow",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "recently-modified.png",
+    "sha256": "50e46ba2ddda307d4a7111b40e3cacc940b0f47c974b009ccd58f3f695e72bff",
+    "theme": "Gerbera",
+    "category": "recently-modified",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "magenta",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "recently-played.png",
+    "sha256": "a1d9a6a51ca63354304c61eea1a48771e55e686399f697073ea584d3147f194a",
+    "theme": "Gerbera",
+    "category": "recently-played",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "violet",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "tracks.png",
+    "sha256": "0bab316291d9d89a96b3e1027a16153e46ad6043c012bb6363d58e2de20982d7",
+    "theme": "Gerbera",
+    "category": "tracks",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "emerald green",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "videos.png",
+    "sha256": "79e6178f4365e23da654cea6774b835c5165916d8c65446d322a714756fd7041",
+    "theme": "Gerbera",
+    "category": "videos",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "red",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  },
+  {
+    "file": "year.png",
+    "sha256": "4a1fd96d85d1ca636628d1f790470df36ca4f5cfd71d96418c36b54d9bc481fc",
+    "theme": "Gerbera",
+    "category": "year",
+    "dimensions": [
+      1254,
+      1254
+    ],
+    "mime": "image/png",
+    "mode": "RGBA",
+    "flower_color": "burgundy",
+    "provenance": "Contributor-approved OpenAI generated 3D artwork, supplied as original PNG. The video play symbol was geometrically corrected by the contributor using the approved original. Final production selection: 2 November 2026."
+  }
+]

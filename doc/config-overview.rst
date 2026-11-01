@@ -19,6 +19,7 @@ Below are links to the configuration sections
 * :doc:`Extended Runtime Options </config-extended>`
 * :doc:`Client Options </config-clients>`
 * :doc:`Import Content </config-import>`
+* :doc:`Container Icon Theme </container-icons>`
 * :doc:`Online Content </config-online>`
 * :doc:`Transcode Content </config-transcode>`
 
@@ -31,6 +32,7 @@ Below are links to the configuration sections
    Server Options           <config-server>
    Extended Options         <config-extended>
    Content Import Options   <config-import>
+   Container Icon Theme     <container-icons>
    Online Content Options   <config-online>
    Client Options           <config-clients>
    Transcoding Options      <config-transcode>

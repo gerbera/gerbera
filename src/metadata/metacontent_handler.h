@@ -36,6 +36,9 @@ class Content;
 class Database;
 class StringConverter;
 
+enum class ContentPathMode { Primary,
+    Fallback };
+
 /// @brief This class is responsible for expanding configuration options to file names
 class ContentPathSetup {
 public:
@@ -48,7 +51,8 @@ public:
     std::vector<fs::path> getContentPath(
         const std::shared_ptr<CdsObject>& obj,
         const std::string& setting,
-        fs::path folder = "") const;
+        fs::path folder = "",
+        ContentPathMode mode = ContentPathMode::Primary) const;
 
 private:
     std::shared_ptr<Config> config;
@@ -100,12 +104,18 @@ public:
     bool fillMetadata(
         const std::shared_ptr<CdsObject>& obj,
         std::vector<int>& newIds) override;
+    bool fillFallbackMetadata(
+        const std::shared_ptr<CdsObject>& obj,
+        std::vector<int>& newIds) override;
     std::unique_ptr<IOHandler> serveContent(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsResource>& resource) override;
 
 private:
-    static std::unique_ptr<ContentPathSetup> setup;
+    bool fillMetadata(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::vector<fs::path>& paths);
+    std::unique_ptr<ContentPathSetup> setup;
 };
 
 /// @brief This class is responsible for populating filesystem based subtitles

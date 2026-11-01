@@ -13,7 +13,7 @@ class GerberaConan(ConanFile):
     name = "gerbera"
     license = "GPLv2"
     settings = "os", "arch", "compiler", "build_type"
-    exports_sources = "CMakeLists.txt", "cmake/*", "src/*", "test/*", "scripts/systemd/gerbera.service.cmake", "scripts/js/*"
+    exports_sources = "CMakeLists.txt", "cmake/*", "src/*", "test/*", "scripts/systemd/gerbera.service.cmake", "scripts/js/*", "artwork/container-icons/*", "config/container-icons.xml.in"
 
     options = {
         "js": [True, False],

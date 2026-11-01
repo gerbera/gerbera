@@ -27,10 +27,12 @@ gerbera.service
 
 .builds
 .github
-artwork
+artwork/*
+!artwork/container-icons/
 conan
 cmake-build-*
-config
+config/*
+!config/container-icons.xml.in
 doc
 gerbera-web
 conanfile.py

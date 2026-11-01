@@ -41,6 +41,7 @@
 #include <memory>
 
 #define RESOURCE_OPTION_FOURCC "4cc"
+#define RESOURCE_OPTION_CONTAINER_ART_FALLBACK "containerArtFallback"
 
 #define RESOURCE_IMAGE_STEP_ICO "ICO"
 #define RESOURCE_IMAGE_STEP_LICO "LICO"

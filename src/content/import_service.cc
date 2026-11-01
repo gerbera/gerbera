@@ -29,6 +29,7 @@
 #include "autoscan_setting.h"
 #include "cds/cds_container.h"
 #include "cds/cds_item.h"
+#include "cds/cds_resource.h"
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "content_manager.h"
@@ -1079,14 +1080,20 @@ void ImportService::assignFanArt(
         }
     }
 
-    if (containerCache.getFanArt(container->getID())) {
+    auto fanart = container->getResource(ResourcePurpose::Thumbnail);
+    const auto isFallback = fanart && !fanart->getOption(RESOURCE_OPTION_CONTAINER_ART_FALLBACK).empty();
+    if (containerCache.getFanArt(container->getID()) && !isFallback) {
         log_debug("Already {} assigned fanart {}", container->getLocation().string(), container->getID());
         if (doUpdate)
             database->updateObject(container, nullptr);
         return;
     }
 
-    auto fanart = container->getResource(ResourcePurpose::Thumbnail);
+    if (isFallback) {
+        container->clearResources();
+        fanart = nullptr;
+        doUpdate = true;
+    }
     if (fanart && fanart->getHandlerType() != ContentHandler::CONTAINERART) {
         // remove stale references
         auto fanartObjId = stoiString(fanart->getAttribute(ResourceAttribute::FANART_OBJ_ID));
@@ -1122,7 +1129,7 @@ void ImportService::assignFanArt(
         auto location = container->getLocation();
         if (refObj->isContainer() || (count < containerImageParentCount && container->getParentID() != CDS_ID_ROOT && std::distance(location.begin(), location.end()) > containerImageMinDepth)) {
             auto refFanArt = refObj->getResource(ResourcePurpose::Thumbnail);
-            if (refFanArt) {
+            if (refFanArt && refFanArt->getOption(RESOURCE_OPTION_CONTAINER_ART_FALLBACK).empty()) {
                 auto fanArtObj = refObj;
                 auto fanArtObjId = refObj->getID();
                 auto fanArtResId = refFanArt->getResId();
@@ -1151,12 +1158,18 @@ void ImportService::assignFanArt(
             }
         }
     }
+    if (!fanart) {
+        std::vector<int> newIds;
+        metadataService->getHandler(ContentHandler::CONTAINERART)->fillFallbackMetadata(container, newIds);
+        fanart = container->getResource(ResourcePurpose::Thumbnail);
+    }
     if (fanart) {
         container->clearResources();
         auto theFanArt = std::make_shared<CdsResource>(fanart->getHandlerType(), fanart->getPurpose(), fanart->getAttributes(), fanart->getParameters(), fanart->getOptions());
         container->addResource(theFanArt); // overwrite all other resources
         doUpdate = true;
-        containerCache.setFanArt(container->getID(), container);
+        if (fanart->getOption(RESOURCE_OPTION_CONTAINER_ART_FALLBACK).empty())
+            containerCache.setFanArt(container->getID(), container);
     }
     if (doUpdate)
         database->updateObject(container, nullptr);

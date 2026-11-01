@@ -33,6 +33,10 @@ You can also ``gerbera --create-example-config`` or ``gerbera --create-advanced-
 You have to validate all generated settings and adjust them to your preferences. There are several empty options you have to fill in or
 remove before your configuration will work.
 
+The advanced configuration also selects the installed ``Gerbera`` container-icon
+theme, including category matching and dynamic-container images. See
+:doc:`container-icons` to select ``Techno`` or use custom artwork.
+
 You can also run ``gerbera --create-config=sections`` to export only a relevant section. The output can be used to compare with the existing settings
 but not as a full configuration. The following sections are supported: ``Server``, ``Ui``, ``ExtendedRuntime``, ``DynamicContainer``, ``Database``, ``Import``,
 ``Mappings``, ``Boxlayout``, ``Transcoding``. The pseudo section ``All`` is equivalent to stating no section at all.
