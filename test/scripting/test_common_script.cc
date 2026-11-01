@@ -22,6 +22,8 @@
 */
 #ifdef HAVE_JS
 
+#include "config/result/box_layout.h"
+#include "content/scripting/script_names.h"
 #include "metadata/metadata_enums.h"
 #include "util/grb_fs.h"
 #include "util/logger.h"
@@ -31,6 +33,7 @@
 #include "mock/script_test_fixture.h"
 
 #include <algorithm>
+#include <cstddef>
 #include <duktape.h>
 #include <map>
 #include <memory>
@@ -727,7 +730,9 @@ enum class AudioTitleChange { None,
     LongTrack,
     ZeroNumbers,
     WindowsFilename,
-    NoDate };
+    NoDate,
+    NoAlbum,
+    AuxAlbumArtist };
 
 struct AudioTitleCase {
     const char* name;
@@ -761,24 +766,25 @@ protected:
         CommonScriptTest::TearDown();
     }
 
-    void configure(const char* pattern, const AudioTitleRules& rules = {})
+    void configure(const char* pattern, const AudioTitleRules& rules = {}, std::string_view option = "audioTitleFormat")
     {
         std::map<std::string_view, std::map<std::string_view, std::string_view>> dictionaries;
         if (pattern)
-            dictionaries["/import/scripting/virtual-layout/script-options/script-option"]["audioTitleFormat"] = pattern;
+            dictionaries["/import/scripting/virtual-layout/script-options/script-option"][option] = pattern;
         addConfig(ctx, {}, {}, dictionaries,
-            { { "/import/scripting/virtual-layout/title-replacements/replace", rules } });
+            { { option == "albumTitleFormat" ? "/import/scripting/virtual-layout/album-title-replacements/replace" : "/import/scripting/virtual-layout/title-replacements/replace", rules } });
     }
 
     struct TitleResult {
         std::string title;
+        std::string albumTitle;
         std::string date;
         std::string decade;
         std::string details;
         std::string source;
     };
 
-    TitleResult invoke(AudioTitleChange change = AudioTitleChange::None)
+    TitleResult invoke(AudioTitleChange change = AudioTitleChange::None, const char* albumName = "Imported album")
     {
         const auto albumArtistKey = MetaEnumMapper::getMetaFieldName(MetadataFields::M_ALBUMARTIST);
         std::map<std::string, std::string> props { { "title", "Artist - File" }, { "location", "/music/Artist - File.flac" } };
@@ -802,6 +808,13 @@ protected:
             break;
         case AudioTitleChange::NoDate:
             removed = "dc:date";
+            break;
+        case AudioTitleChange::NoAlbum:
+            removed = "upnp:album";
+            break;
+        case AudioTitleChange::AuxAlbumArtist:
+            removed = albumArtistKey.c_str();
+            aux["TPE2"] = "Aux artist";
             break;
         case AudioTitleChange::OnlyTitle:
             metadata = { { "dc:title", "Track_\"音楽\"" } };
@@ -839,6 +852,17 @@ protected:
             return {};
         }
         TitleResult result;
+        const auto audio = duk_normalize_index(ctx, -1);
+        duk_get_global_string(ctx, "formatAlbumTitle");
+        duk_get_global_string(ctx, "titleSource");
+        duk_dup(ctx, audio);
+        duk_push_string(ctx, albumName);
+        if (duk_pcall(ctx, 3) != DUK_EXEC_SUCCESS) {
+            ADD_FAILURE() << duk_safe_to_string(ctx, -1);
+        } else {
+            result.albumTitle = duk_safe_to_string(ctx, -1);
+        }
+        duk_pop(ctx);
         duk_get_prop_string(ctx, -1, "title");
         result.title = duk_safe_to_string(ctx, -1);
         duk_pop(ctx);
@@ -857,10 +881,10 @@ protected:
         return result;
     }
 
-    void* preparedRules()
+    void* preparedRules(const char* property = "audioTitleReplacements")
     {
         duk_get_global_string(ctx, "config");
-        duk_get_prop_string(ctx, -1, "audioTitleReplacements");
+        duk_get_prop_string(ctx, -1, property);
         EXPECT_TRUE(duk_is_array(ctx, -1));
         auto result = duk_get_heapptr(ctx, -1);
         duk_pop_2(ctx);
@@ -870,6 +894,40 @@ protected:
 
 class AudioTitleFormatTest : public AudioTitleScriptTest,
                              public ::testing::WithParamInterface<AudioTitleCase> { };
+
+class AlbumTitleFormatTest : public AudioTitleScriptTest,
+                             public ::testing::WithParamInterface<AudioTitleCase> { };
+
+TEST_P(AlbumTitleFormatTest, ChangesOnlyAlbumDisplayAndUsesRawMetadata)
+{
+    const auto& test = GetParam();
+    configure(nullptr);
+    const auto baseline = invoke(test.change);
+    configure(test.pattern, test.rules, "albumTitleFormat");
+    const auto actual = invoke(test.change);
+    EXPECT_EQ(actual.albumTitle, test.expected);
+    EXPECT_EQ(actual.title, baseline.title);
+    EXPECT_EQ(actual.details, baseline.details);
+    EXPECT_EQ(actual.source, baseline.source);
+}
+
+INSTANTIATE_TEST_SUITE_P(ConfiguredAlbums, AlbumTitleFormatTest,
+    ::testing::ValuesIn(std::vector<AudioTitleCase> {
+        { "LegacyDefault", nullptr, "Imported album", {}, AudioTitleChange::None },
+        { "EmptyFormat", "", "Imported album", {}, AudioTitleChange::None },
+        { "Compilation", "%albumartist% - %albumtitle% (%year%)", "Various Artists - Album (2026)", {}, AudioTitleChange::None },
+        { "ArtistFallback", "%albumartist% - %albumtitle%", "Artist - Album", {}, AudioTitleChange::NoAlbumArtist },
+        { "AuxArtistFallback", "%albumartist% - %albumtitle%", "Aux artist - Album", {}, AudioTitleChange::AuxAlbumArtist },
+        { "MissingAlbum", "%albumtitle%", "Imported album", {}, AudioTitleChange::NoAlbum },
+        { "MissingFields", "%albumtitle%%albumartist%%year%%genre%", "Imported album", {}, AudioTitleChange::OnlyTitle },
+        { "OriginalNumbers", "%cdnumber%.%tracknr2%/%tracknr1%/%tracknr3%", "2.02/2/002", {}, AudioTitleChange::None },
+        { "ImportName", "%importname%", "Imported album", {}, AudioTitleChange::None },
+        { "LiteralAndUnknown", "%% %unknown% %ALBUMTITLE%", "% %unknown% %ALBUMTITLE%", {}, AudioTitleChange::None },
+        { "ConditionalRules", "%albumartist% - %albumtitle%", "Various Artists / Album", { { { "from", " - " }, { "to", "_" }, { "if-albumtitle", "Album" }, { "if-artist", "Guest" } }, { { "from", "_" }, { "to", " / " } } }, AudioTitleChange::None },
+        { "RegexRules", "%albumtitle%   %year%", "Album_2026", { { { "from", "\\s+" }, { "to", "_" }, { "regex", "yes" } } }, AudioTitleChange::None },
+        { "EmptyReplacementFallback", "%albumartist% - %albumtitle%", "Imported album", { { { "from", ".+" }, { "to", "" }, { "regex", "yes" } } }, AudioTitleChange::None },
+        { "MissingCondition", "%albumtitle%", "Album", { { { "from", "Album" }, { "to", "Changed" }, { "if-year", "2026" } } }, AudioTitleChange::NoDate } }),
+    [](const ::testing::TestParamInfo<AudioTitleCase>& info) { return info.param.name; });
 
 TEST_P(AudioTitleFormatTest, UsesScriptOptionsWithoutChangingMetadataOrOrdering)
 {
@@ -997,5 +1055,132 @@ TEST_F(AudioTitleScriptTest, CachedRegexResetsStateAndNewConfigurationReplacesRu
     EXPECT_NE(preparedRules(), first);
     EXPECT_EQ(invoke().title, "C  B");
 }
+
+TEST_F(AudioTitleScriptTest, AlbumRulesAreContextPreparedAndDoNotCreateTrackOrGlobalCaches)
+{
+    configure("%albumtitle%  %year%", { { { "from", "(" }, { "to", "bad" }, { "regex", "yes" } }, { { "from", "\\s+" }, { "to", " " }, { "regex", "yes" } } },
+        "albumTitleFormat");
+    auto* rules = preparedRules("albumTitleReplacements");
+    ASSERT_NE(rules, nullptr);
+    const auto warning = warnings.str();
+    EXPECT_EQ(std::count(warning.begin(), warning.end(), '\n'), 1);
+    for (int repeat = 0; repeat < 3; ++repeat) {
+        EXPECT_EQ(invoke().albumTitle, "Album 2026");
+        EXPECT_EQ(preparedRules("albumTitleReplacements"), rules);
+        EXPECT_EQ(warnings.str(), warning);
+    }
+    EXPECT_FALSE(duk_get_global_string(ctx, "albumTitleReplacements"));
+    duk_pop(ctx);
+    configure("%importname%");
+    EXPECT_EQ(invoke().title, "%importname%");
+}
+
+class AlbumLayoutScriptTest : public CommonScriptTest,
+                              public ::testing::WithParamInterface<const char*> { };
+
+TEST_P(AlbumLayoutScriptTest, FormatsAlbumViewsAndCustomChainsWithoutChangingItemsOrResources)
+{
+    std::vector<boxConfig> boxes;
+    for (const auto& [symbol, key] : boxKeyNames) {
+        const auto name = BoxLayout::getBoxKey(key);
+        boxes.push_back({ name, name, UPNP_CLASS_CONTAINER, true, 6 });
+    }
+    const duk_function_list_entry functions[] { { nullptr, nullptr, 0 } };
+    addGlobalFunctions(ctx, functions, {}, boxes,
+        { { "/import/scripting/virtual-layout/script-options/script-option", { { "specialGenre", "Techno" } } } });
+    dukMockItem(ctx, { { "title", "Physical file" }, { "id", "42" }, { "location", "/music/album/track.mp3" } },
+        { { "dc:title", "Track" }, { "upnp:artist", "Performer" },
+            { std::string(MetaEnumMapper::getMetaFieldName(MetadataFields::M_ALBUMARTIST)), "Various Artists" },
+            { "upnp:album", "Album" }, { "upnp:genre", "Techno" },
+            { "dc:date", "2026-01-01" }, { "upnp:originalTrackNumber", "02" } },
+        { { "DISCNUMBER", "2/3" } }, {});
+    duk_put_global_string(ctx, "albumSource");
+    duk_get_global_string(ctx, GetParam());
+    duk_put_global_string(ctx, "albumImporter");
+    ASSERT_EQ(duk_peval_string(ctx, R"JS(
+        (function () {
+          var trees = [], items = [];
+          addContainerTree = function (chain) {
+            trees.push(JSON.parse(JSON.stringify(chain)));
+            return trees.length;
+          };
+          addCdsObject = function (item) {
+            items.push(JSON.parse(JSON.stringify(item)));
+            return items.length;
+          };
+          var custom = [[{ key: 'customAlbum', title: 'media.album',
+            class: 'UPNP_CLASS_CONTAINER_MUSIC_ALBUM', refID: 'obj.id' }]];
+          custom.size = 1;
+          custom[0].size = 1;
+          config['/import/scripting/virtual-layout/boxlayout/chain/audio'] = custom;
+          config['/import/resources/container/attribute::parentCount'] = '2';
+          var parent = { id: 99, res: { count: 1, cover: 'original-cover' } };
+          function run(format) {
+            config['/import/scripting/virtual-layout/script-options/script-option'].albumTitleFormat = format;
+            trees = []; items = [];
+            var source = JSON.parse(JSON.stringify(albumSource));
+            albumImporter(source, parent, '/music', 0, UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
+            return { trees: trees, items: items, source: source };
+          }
+          return { baseline: run(''), configured: run('%albumartist% - %albumtitle% (%year%)') };
+        })()
+    )JS"),
+        DUK_EXEC_SUCCESS)
+        << duk_safe_to_string(ctx, -1);
+    duk_get_prop_string(ctx, -1, "baseline");
+    const auto baseline = duk_normalize_index(ctx, -1);
+    duk_get_prop_string(ctx, -2, "configured");
+    const auto configured = duk_normalize_index(ctx, -1);
+    const auto jsonProperty = [&](duk_idx_t object, const char* property) {
+        duk_get_prop_string(ctx, object, property);
+        const std::string json = duk_json_encode(ctx, -1);
+        duk_pop(ctx);
+        return json;
+    };
+    EXPECT_EQ(jsonProperty(baseline, "items"), jsonProperty(configured, "items"));
+    EXPECT_EQ(jsonProperty(baseline, "source"), jsonProperty(configured, "source"));
+    duk_get_prop_string(ctx, baseline, "trees");
+    const auto beforeTrees = duk_normalize_index(ctx, -1);
+    duk_get_prop_string(ctx, configured, "trees");
+    const auto afterTrees = duk_normalize_index(ctx, -1);
+    ASSERT_EQ(duk_get_length(ctx, beforeTrees), duk_get_length(ctx, afterTrees));
+    std::size_t albums = 0;
+    for (duk_uarridx_t tree = 0; tree < duk_get_length(ctx, beforeTrees); ++tree) {
+        duk_get_prop_index(ctx, beforeTrees, tree);
+        const auto beforeChain = duk_normalize_index(ctx, -1);
+        duk_get_prop_index(ctx, afterTrees, tree);
+        const auto afterChain = duk_normalize_index(ctx, -1);
+        const auto length = duk_get_length(ctx, beforeChain);
+        ASSERT_EQ(length, duk_get_length(ctx, afterChain));
+        for (duk_uarridx_t item = 0; item < length; ++item) {
+            duk_get_prop_index(ctx, beforeChain, item);
+            const auto before = duk_normalize_index(ctx, -1);
+            duk_get_prop_index(ctx, afterChain, item);
+            const auto after = duk_normalize_index(ctx, -1);
+            duk_get_prop_string(ctx, before, "metaData");
+            const bool hasAlbum = duk_is_object(ctx, -1) && duk_has_prop_string(ctx, -1, "upnp:album");
+            duk_pop(ctx);
+            duk_get_prop_string(ctx, before, "title");
+            const std::string original = duk_safe_to_string(ctx, -1);
+            duk_pop(ctx);
+            if (hasAlbum || original == "Album - Performer" || length == 1) {
+                ++albums;
+                duk_get_prop_string(ctx, after, "title");
+                EXPECT_STREQ(duk_safe_to_string(ctx, -1), "Various Artists - Album (2026)") << original;
+                duk_pop(ctx);
+                duk_del_prop_string(ctx, before, "title");
+                duk_del_prop_string(ctx, after, "title");
+            }
+            duk_pop_2(ctx);
+        }
+        duk_pop_2(ctx);
+    }
+    EXPECT_GE(albums, 2U);
+    EXPECT_EQ(jsonProperty(baseline, "trees"), jsonProperty(configured, "trees"));
+    duk_set_top(ctx, 0);
+}
+
+INSTANTIATE_TEST_SUITE_P(StandardAlbumLayouts, AlbumLayoutScriptTest,
+    ::testing::Values("importAudio", "importAudioStructured", "importAudioInitial", "importAudioClassical"));
 
 #endif

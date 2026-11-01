@@ -265,10 +265,14 @@
                     <replace from="[Live]" to=""/>
                     <replace from="\s+" to=" " regex="yes" if-albumtitle="XXX" if-artist="YY"/>
                 </title-replacements>
+                <album-title-replacements>
+                    <replace from="_" to=" " if-albumartist="Various Artists"/>
+                </album-title-replacements>
                 <structured-layout skip-chars="" div-char=""/>
                 <script-options>
                     <script-option name="album-mode" value="unique"/>
                     <script-option name="audioTitleFormat" value="%tracknr2% - %title%"/>
+                    <script-option name="albumTitleFormat" value="%albumartist% - %albumtitle% (%year%)"/>
                 </script-options>
                 <genre-map>
                     <genre from="Christian|Gospel|Gesprochen" to="Worship"/>

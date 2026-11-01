@@ -51,38 +51,27 @@
 #endif
 
 #include <algorithm>
+#include <cstddef>
+#include <fmt/ranges.h>
 #include <regex>
+
+static std::string audioTitleYear(std::string value)
+{
+    if (value.size() > 4 && value[4] == '-'
+        && std::all_of(value.begin(), value.begin() + 4, [](char c) { return c >= '0' && c <= '9'; }))
+        value.resize(4);
+    return value;
+}
 
 BuiltinLayout::BuiltinLayout(std::shared_ptr<Content> content)
     : Layout(std::move(content))
     , config(this->content->getContext()->getConfig())
     , converterManager(this->content->getContext()->getConverterManager())
     , genreMap(this->config->getDictionaryOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP))
+    , audioTitleReplacements(prepareAudioTitleReplacements(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS))
+    , albumTitleReplacements(prepareAudioTitleReplacements(ConfigVal::IMPORT_SCRIPTING_ALBUM_TITLE_REPLACEMENTS))
+    , albumTitleFormat(getValueOrDefault(config->getDictionaryOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS), "albumTitleFormat"))
 {
-    // Prepare configured rules once; builtin keeps its existing native regex engine.
-    for (const auto& attributes : config->getVectorOption(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS)) {
-        const std::map<std::string, std::string> values(attributes.begin(), attributes.end());
-        AudioTitleReplacement rule;
-        rule.from = getValueOrDefault(values, "from");
-        rule.to = getValueOrDefault(values, "to");
-        if (rule.from.empty())
-            continue;
-        const auto regex = getValueOrDefault(values, "regex");
-        if (regex == "yes" || regex == "true") {
-            try {
-                rule.pattern.emplace(rule.from, std::regex::ECMAScript);
-            } catch (const std::regex_error& error) {
-                log_warning("Ignoring invalid builtin audio title replacement {}: {}", rule.from, EX(error));
-                continue;
-            }
-        }
-        for (const auto& [name, tag] : MetaEnumMapper::audioTitleFields) {
-            const auto value = getValueOrDefault(values, std::string("if-") + name);
-            if (!value.empty())
-                rule.conditions.emplace_back(tag, value);
-        }
-        audioTitleReplacements.push_back(std::move(rule));
-    }
     auto blOption = config->getBoxLayoutListOption(ConfigVal::BOXLAYOUT_LIST);
     for (auto&& bl : EDIT_CAST(EditHelperBoxLayout, blOption)->getArrayCopy()) {
         // We could copy only the enabled containers, but to avoid checking dependencies here, we copy all of them!
@@ -391,6 +380,8 @@ std::vector<int> BuiltinLayout::addAudio(
     if (composer.empty())
         composer = "None";
 
+    const auto albumTitle = formatAlbumTitle(*obj, album);
+    const auto chronologyTitle = formatAlbumTitle(*obj, date + " - " + album);
     obj->setTitle(replaceAudioTitle(*obj, title));
     bool isFirst = true;
 
@@ -429,7 +420,7 @@ std::vector<int> BuiltinLayout::addAudio(
         prefixTitle = fmt::format("{} - ", prefixTitle);
 
     // album container
-    auto albumContainer = std::make_shared<CdsContainer>(album, UPNP_CLASS_MUSIC_ALBUM);
+    auto albumContainer = std::make_shared<CdsContainer>(albumTitle, UPNP_CLASS_MUSIC_ALBUM);
     albumContainer->setMetaData(obj->getMetaData());
     if (parent && parent->getResourceCount() > 0)
         albumContainer->setResources(parent->getResources());
@@ -517,7 +508,7 @@ std::vector<int> BuiltinLayout::addAudio(
         chronology.push_back(containerAt(BoxKeys::audioAllArtists));
         chronology.push_back(artistContainer);
         chronology.push_back(containerAt(BoxKeys::audioArtistChronology));
-        chronology.push_back(std::make_shared<CdsContainer>(date + " - " + album, UPNP_CLASS_MUSIC_ALBUM));
+        chronology.push_back(std::make_shared<CdsContainer>(chronologyTitle, UPNP_CLASS_MUSIC_ALBUM));
         auto id = content->addContainerTree(chronology, obj);
         result.push_back(add(obj, id, isFirst));
         isFirst = false;
@@ -560,19 +551,49 @@ std::vector<int> BuiltinLayout::addOnlineItem(
 }
 #endif
 
-std::string BuiltinLayout::replaceAudioTitle(const CdsObject& object, std::string title) const
+std::vector<BuiltinLayout::AudioTitleReplacement> BuiltinLayout::prepareAudioTitleReplacements(ConfigVal option) const
+{
+    std::vector<AudioTitleReplacement> replacements;
+    // Prepare each configured rule set once using the same native regex engine.
+    for (const auto& attributes : config->getVectorOption(option)) {
+        const std::map<std::string, std::string> values(attributes.begin(), attributes.end());
+        AudioTitleReplacement rule;
+        rule.from = getValueOrDefault(values, "from");
+        rule.to = getValueOrDefault(values, "to");
+        if (rule.from.empty())
+            continue;
+        const auto regex = getValueOrDefault(values, "regex");
+        if (regex == "yes" || regex == "true") {
+            try {
+                rule.pattern.emplace(rule.from, std::regex::ECMAScript);
+            } catch (const std::regex_error& error) {
+                log_warning("Ignoring invalid builtin audio title replacement {}: {}", rule.from, EX(error));
+                continue;
+            }
+        }
+        for (const auto& [name, tag] : MetaEnumMapper::audioTitleFields) {
+            const auto value = getValueOrDefault(values, std::string("if-") + name);
+            if (!value.empty())
+                rule.conditions.emplace_back(tag, value);
+        }
+        replacements.push_back(std::move(rule));
+    }
+    return replacements;
+}
+
+std::string BuiltinLayout::replaceAudioTitle(const CdsObject& object, std::string title, AudioTitleMode mode) const
 {
     const auto original = title;
-    if (audioTitleReplacements.empty())
+    const auto& replacements = mode == AudioTitleMode::Album ? albumTitleReplacements : audioTitleReplacements;
+    if (replacements.empty())
         return title;
     StringConverter validator("UTF-8", "UTF-8");
-    for (const auto& rule : audioTitleReplacements) {
+    for (const auto& rule : replacements) {
         const bool applies = std::all_of(rule.conditions.begin(), rule.conditions.end(), [&](const auto& condition) {
             const auto values = object.getMetaGroup(condition.first);
             return std::any_of(values.begin(), values.end(), [&](std::string value) {
-                if (condition.first == MetadataFields::M_DATE && value.size() > 4 && value[4] == '-'
-                    && std::all_of(value.begin(), value.begin() + 4, [](char c) { return c >= '0' && c <= '9'; }))
-                    value.resize(4);
+                if (condition.first == MetadataFields::M_DATE)
+                    value = audioTitleYear(std::move(value));
                 return value == condition.second;
             });
         });
@@ -591,7 +612,71 @@ std::string BuiltinLayout::replaceAudioTitle(const CdsObject& object, std::strin
         }
         title = std::move(candidate);
     }
-    return trimString(title).empty() ? original : title;
+    return mode == AudioTitleMode::Track && trimString(title).empty() ? original : title;
+}
+
+std::string BuiltinLayout::formatAlbumTitle(const CdsObject& object, const std::string& title) const
+{
+    if (albumTitleFormat.empty())
+        return title;
+
+    std::map<std::string, std::string> fields;
+    for (const auto& [name, tag] : MetaEnumMapper::audioTitleFields) {
+        const auto values = object.getMetaGroup(tag);
+        fields[name] = (tag == MetadataFields::M_ARTIST || tag == MetadataFields::M_GENRE || tag == MetadataFields::M_COMPOSER)
+            ? fmt::format("{}", fmt::join(values, " / "))
+            : object.getMetaData(tag);
+    }
+    if (fields["albumartist"].empty()) {
+        fields["albumartist"] = trimString(object.getAuxData("TPE2"));
+        if (fields["albumartist"].empty())
+            fields["albumartist"] = object.getMetaData(MetadataFields::M_ARTIST);
+    }
+    fields["year"] = audioTitleYear(std::move(fields["year"]));
+    fields["filename"] = object.getLocation().stem().string();
+    if (fields["title"].empty())
+        fields["title"] = trimString(object.getTitle());
+    else
+        fields["title"] = trimString(fields["title"]);
+    const auto number = [](const std::string& value, std::size_t width) {
+        const auto start = value.find_first_not_of(" \t\r\n\f\v");
+        if (start == std::string::npos)
+            return std::string();
+        const auto end = value.find_first_not_of("0123456789", start);
+        const auto digits = value.substr(start, end == std::string::npos ? end : end - start);
+        const auto nonzero = digits.find_first_not_of('0');
+        if (nonzero == std::string::npos)
+            return std::string();
+        const auto result = digits.substr(nonzero);
+        return fmt::format("{:0>{}}", result, width);
+    };
+    const auto track = object.getMetaData(MetadataFields::M_TRACKNUMBER);
+    fields["tracknr1"] = number(track, 1);
+    fields["tracknr2"] = number(track, 2);
+    fields["tracknr3"] = number(track, 3);
+    auto disc = object.getAuxData("DISCNUMBER");
+    if (disc.empty())
+        disc = object.getAuxData("TPOS");
+    fields["cdnumber"] = number(disc, 1);
+    fields["importname"] = title;
+
+    // Expand once: metadata containing percent tokens must remain literal.
+    static const std::regex token("%%|%([a-zA-Z][a-zA-Z0-9]*)%");
+    std::string formatted;
+    auto cursor = albumTitleFormat.cbegin();
+    for (std::sregex_iterator match(albumTitleFormat.begin(), albumTitleFormat.end(), token), end; match != end; ++match) {
+        formatted.append(cursor, (*match)[0].first);
+        if (match->str() == "%%")
+            formatted += '%';
+        else {
+            const auto field = fields.find((*match)[1].str());
+            formatted += field == fields.end() ? match->str() : field->second;
+        }
+        cursor = (*match)[0].second;
+    }
+    formatted.append(cursor, albumTitleFormat.cend());
+    formatted = trimString(replaceAudioTitle(object, std::move(formatted), AudioTitleMode::Album));
+    return formatted.empty() ? title : formatted;
 }
 
 std::string BuiltinLayout::mapGenre(const std::string& genre)

@@ -1268,10 +1268,6 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             "importOnlineItem"),
 #endif
 
-        std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
-            "/import/scripting/virtual-layout/script-options", "config-import.html#confval-script-options",
-            ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION, ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_NAME, ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE),
-
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_SCRIPTING_STRUCTURED_LAYOUT_SKIPCHARS,
             "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "config-import.html#confval-skip-chars",
             ""),
@@ -1280,8 +1276,18 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             ""),
 #endif // HAVE_JS
 
+        std::make_shared<ConfigDictionarySetup>(ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
+            "/import/scripting/virtual-layout/script-options", "config-import.html#confval-script-options",
+            ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION, ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_NAME, ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE),
+
         std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
             "/import/scripting/virtual-layout/title-replacements", "config-import.html#confval-title-replacements",
+            ConfigVal::A_IMPORT_AUDIO_TITLE_REPLACE,
+            std::vector<ConfigVal> { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO },
+            false, false, false),
+
+        std::make_shared<ConfigVectorSetup>(ConfigVal::IMPORT_SCRIPTING_ALBUM_TITLE_REPLACEMENTS,
+            "/import/scripting/virtual-layout/album-title-replacements", "config-import.html#confval-album-title-replacements",
             ConfigVal::A_IMPORT_AUDIO_TITLE_REPLACE,
             std::vector<ConfigVal> { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO },
             false, false, false),
@@ -2565,6 +2571,7 @@ void ConfigDefinition::initHierarchy()
 
         { ConfigVal::A_IMPORT_LAYOUT_MAPPING_FROM, {
                                                        ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
+                                                       ConfigVal::IMPORT_SCRIPTING_ALBUM_TITLE_REPLACEMENTS,
                                                        ConfigVal::IMPORT_LAYOUT_MAPPING,
                                                        ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
                                                        ConfigVal::IMPORT_SCRIPTING_IMPORT_MODEL_MAP,
@@ -2572,19 +2579,18 @@ void ConfigDefinition::initHierarchy()
                                                    } },
         { ConfigVal::A_IMPORT_LAYOUT_MAPPING_TO, {
                                                      ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS,
+                                                     ConfigVal::IMPORT_SCRIPTING_ALBUM_TITLE_REPLACEMENTS,
                                                      ConfigVal::IMPORT_LAYOUT_MAPPING,
                                                      ConfigVal::IMPORT_SCRIPTING_IMPORT_GENRE_MAP,
                                                      ConfigVal::IMPORT_SCRIPTING_IMPORT_MODEL_MAP,
                                                      ConfigVal::IMPORT_SCRIPTING_IMPORT_HEADLINE_MAP,
                                                  } },
-#ifdef HAVE_JS
         { ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_NAME, {
                                                              ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
                                                          } },
         { ConfigVal::A_IMPORT_LAYOUT_SCRIPT_OPTION_VALUE, {
                                                               ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS,
                                                           } },
-#endif
     };
 }
 

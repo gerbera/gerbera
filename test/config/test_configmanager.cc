@@ -197,6 +197,34 @@ TEST_F(ConfigManagerTest, LoadsAudioTitleFormatFromScriptOptions)
 }
 #endif
 
+TEST_F(ConfigManagerTest, LoadsAlbumFormatAndIndependentReplacementsForBothLayoutEngines)
+{
+    pugi::xml_document document;
+    ASSERT_TRUE(document.load_file(configFile.c_str()));
+    auto layout = document.child("config").child("import").child("scripting").child("virtual-layout");
+    ASSERT_TRUE(layout);
+    layout.attribute("type") = "builtin";
+    auto options = layout.child("script-options");
+    if (!options)
+        options = layout.append_child("script-options");
+    auto option = options.append_child("script-option");
+    option.append_attribute("name") = "albumTitleFormat";
+    option.append_attribute("value") = "%albumartist% - %albumtitle% (%year%)";
+    auto rule = layout.append_child("album-title-replacements").append_child("replace");
+    rule.append_attribute("from") = "_";
+    rule.append_attribute("to") = " ";
+    rule.append_attribute("if-albumartist") = "Various Artists";
+    ASSERT_TRUE(document.save_file(configFile.c_str()));
+    auto shared = std::make_shared<ConfigManager>(definition, configFile, home, confdir, prefix, false);
+    shared->load(home, "");
+    EXPECT_EQ(shared->getDictionaryOption(ConfigVal::IMPORT_SCRIPTING_IMPORT_SCRIPT_OPTIONS).at("albumTitleFormat"), "%albumartist% - %albumtitle% (%year%)");
+    const auto rules = shared->getVectorOption(ConfigVal::IMPORT_SCRIPTING_ALBUM_TITLE_REPLACEMENTS);
+    const std::vector<std::pair<std::string, std::string>> expected { { "from", "_" }, { "to", " " }, { "if-albumartist", "Various Artists" } };
+    ASSERT_EQ(rules.size(), 1U);
+    EXPECT_EQ(rules[0], expected);
+    EXPECT_TRUE(shared->getVectorOption(ConfigVal::IMPORT_SCRIPTING_AUDIO_TITLE_REPLACEMENTS).empty());
+}
+
 TEST_F(ConfigManagerTest, LoadsOrderedAudioTitleReplacements)
 {
     pugi::xml_document document;
