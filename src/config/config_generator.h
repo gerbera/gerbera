@@ -95,7 +95,7 @@ public:
     /// @brief directly generate extended-runtime section
     void generateExtendedRuntime();
     /// @brief directly generate dynamic section
-    void generateDynamics();
+    void generateDynamics(const fs::path& dataDir = "");
     /// @brief directly generate database section
     void generateDatabase(const fs::path& prefixDir);
     /// @brief directly generate import section

@@ -29,6 +29,7 @@ add_executable(
     testcore
     main.cc #
     test_bpm_metadata.cc #
+    test_container_art.cc #
     test_ffmpeg_cache_paths.cc #
     test_searchhandler.cc #
     test_server.cc #

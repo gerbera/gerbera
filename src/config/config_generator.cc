@@ -42,6 +42,8 @@
 #define XML_XMLNS_XSI "http://www.w3.org/2001/XMLSchema-instance"
 #define XML_XMLNS "http://gerbera.io/config/"
 
+#define DEFAULT_CONTAINER_ICON_DIR "container-icons/gerbera"
+
 #define DEFAULT_AUDIO_BUFFER_SIZE 1048576
 #define DEFAULT_AUDIO_CHUNK_SIZE 131072
 #define DEFAULT_AUDIO_FILL_SIZE 262144
@@ -427,7 +429,7 @@ void ConfigGenerator::generateServer(const fs::path& userHome, const fs::path& c
     generateUi();
     generateServerOptions(server, userHome, configDir, dataDir);
     generateDatabase(dataDir);
-    generateDynamics();
+    generateDynamics(dataDir);
     generateExtendedRuntime();
 }
 
@@ -461,7 +463,7 @@ void ConfigGenerator::generateUi()
     setValue(ConfigVal::SERVER_UI_ACCOUNT_LIST, ConfigVal::A_SERVER_UI_ACCOUNT_LIST_ACCOUNT, ConfigVal::A_SERVER_UI_ACCOUNT_LIST_PASSWORD, DEFAULT_ACCOUNT_PASSWORD);
 }
 
-void ConfigGenerator::generateDynamics()
+void ConfigGenerator::generateDynamics(const fs::path& dataDir)
 {
     if (!isGenerated(GeneratorSections::DynamicContainer))
         return;
@@ -475,18 +477,24 @@ void ConfigGenerator::generateDynamics()
 
     auto&& containersTag = definition->mapConfigOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST);
     auto&& containerTag = definition->mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER);
+    const auto setIcon = [&](const std::shared_ptr<pugi::xml_node>& node, const std::string& filename) {
+        if (level > ConfigLevel::Example && !dataDir.empty())
+            setXmlValue(node, ConfigVal::A_DYNAMIC_CONTAINER_IMAGE, (dataDir / DEFAULT_CONTAINER_ICON_DIR / filename).string());
+    };
 
     auto container = setValue(fmt::format("{}/{}/", containersTag, containerTag), {}, "", true);
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastAdded");
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Recently Added");
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-last_updated");
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_updated > "@last7")");
+    setIcon(container, "recently-added.png");
 
     container = setValue(fmt::format("{}/{}/", containersTag, containerTag), {}, "", true);
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastModified");
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_TITLE, "Recently Modified");
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-last_modified");
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item" and last_modified > "@last7")");
+    setIcon(container, "recently-modified.png");
 
     container = setValue(fmt::format("{}/{}/", containersTag, containerTag), {}, "", true);
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_LOCATION, "/LastPlayed");
@@ -494,6 +502,7 @@ void ConfigGenerator::generateDynamics()
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_SORT, "-upnp:lastPlaybackTime");
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_UPNP_SHORTCUT, "MUSIC_LAST_PLAYED");
     setXmlValue(container, ConfigVal::A_DYNAMIC_CONTAINER_FILTER, R"(upnp:class derivedfrom "object.item.audioItem" and upnp:lastPlaybackTime > "@last7")");
+    setIcon(container, "recently-played.png");
 }
 
 void ConfigGenerator::generateDatabase(const fs::path& prefixDir)
@@ -768,13 +777,17 @@ void ConfigGenerator::generateImportOptions(
     if (level > ConfigLevel::Example) {
         /// @brief default values for ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST
         static const std::vector<std::string> defaultContainerArtFile {
+            "%upnpclass%-%filename%.png",
             "folder.jpg",
             "poster.jpg",
             "cover.jpg",
             "albumartsmall.jpg",
+            "%upnpclass%.png",
         };
         auto cs = definition->findConfigSetup<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST);
         cs->setDefaultValue(defaultContainerArtFile);
+        auto location = definition->findConfigSetup(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION);
+        location->setDefaultValue(prefixDir / DEFAULT_CONTAINER_ICON_DIR);
     }
     if (level > ConfigLevel::Example) {
         /// @brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST
