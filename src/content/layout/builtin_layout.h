@@ -49,6 +49,7 @@ class CdsContainer;
 class Config;
 class ConverterManager;
 enum class BoxKeys;
+enum class ConfigVal;
 enum class MetadataFields;
 
 /// @brief layout class implementation for simple virtual layout
@@ -104,8 +105,14 @@ protected:
         std::optional<std::regex> pattern;
         std::vector<std::pair<MetadataFields, std::string>> conditions;
     };
+    enum class AudioTitleMode { Track,
+        Album };
     std::vector<AudioTitleReplacement> audioTitleReplacements;
-    std::string replaceAudioTitle(const CdsObject& object, std::string title) const;
+    std::vector<AudioTitleReplacement> albumTitleReplacements;
+    std::string albumTitleFormat;
+    std::vector<AudioTitleReplacement> prepareAudioTitleReplacements(ConfigVal option) const;
+    std::string replaceAudioTitle(const CdsObject& object, std::string title, AudioTitleMode mode = AudioTitleMode::Track) const;
+    std::string formatAlbumTitle(const CdsObject& object, const std::string& title) const;
     std::string mapGenre(const std::string& genre);
     std::shared_ptr<CdsContainer> containerAt(BoxKeys boxKey);
 };

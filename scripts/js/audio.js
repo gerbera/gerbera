@@ -99,7 +99,7 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
     },
     album: {
       searchable: false,
-      title: audio.album,
+      title: formatAlbumTitle(obj, audio, audio.album),
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM,
       metaData: {},
@@ -274,7 +274,7 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
     chain.album.searchable = boxSetup[BK_audioArtistChronology].searchable && !albumSearch;
     albumSearch = albumSearch || chain.album.searchable;
 
-    chain.album.title = audio.date + " - " + audio.album;
+    chain.album.title = formatAlbumTitle(obj, audio, audio.date + " - " + audio.album);
 
     for (var i = 0; i < artCnt; i++) {
       chain.artist.title = audio.artists[i];
@@ -282,7 +282,7 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
       result.push(addCdsObject(obj, container, rootPath));
     }
 
-    chain.album.title = audio.album; // Restore the title;
+    chain.album.title = formatAlbumTitle(obj, audio, audio.album); // Restore the title;
     obj.title = titleBackup; // Restore the title
   }
 
@@ -378,7 +378,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
       refID: containerRefID
     },
     album_artist: {
-      title: audio.albumArtist,
+      title: formatAlbumTitle(obj, audio, audio.albumArtist),
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ARTIST,
       metaData: {},
@@ -387,7 +387,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
       refID: containerRefID
     },
     album: {
-      title: audio.album,
+      title: formatAlbumTitle(obj, audio, audio.album),
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: containerType,
       metaData: {},
@@ -476,7 +476,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
     result.push(addCdsObject(obj, container, rootPath));
 
     obj.title = tracktitle;
-    chain.album.title = audio.album + ' (' + audio.date + ')';
+    chain.album.title = formatAlbumTitle(obj, audio, audio.album + ' (' + audio.date + ')');
     container = addContainerTree(isSingleCharBox ? [chain.allArtists, chain.abc, chain.artist, chain.album] : [chain.allArtists, chain.abc, chain.init, chain.artist, chain.album]);
     result.push(addCdsObject(obj, container, rootPath));
   }
@@ -545,7 +545,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
     result.push(addCdsObject(obj, container, rootPath));
 
     obj.title = tracktitle;
-    chain.album.title = audio.album;
+    chain.album.title = formatAlbumTitle(obj, audio, audio.album);
     container = addContainerTree([chain.allYears, chain.decade, chain.date, chain.artist, chain.album]);
     result.push(addCdsObject(obj, container, rootPath));
   }
@@ -650,7 +650,7 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
       refID: containerRefID
     },
     album: {
-      title: audio.album,
+      title: formatAlbumTitle(obj, audio, audio.album),
       location: audio.dir.join('_'),
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: containerType,
@@ -803,15 +803,17 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
     }
   }
 
+  var originalAlbumTitle = audio.album;
   if (audio.disknr != '') {
     if (specialGenre.exec(audio.genre)) {
       if (audio.disknr.length == 1) {
-        chain.album.title = '0' + audio.disknr + ' - ' + audio.album;
+        originalAlbumTitle = '0' + audio.disknr + ' - ' + audio.album;
       } else {
-        chain.album.title = audio.disknr + ' - ' + audio.album;
+        originalAlbumTitle = audio.disknr + ' - ' + audio.album;
       }
     }
   }
+  chain.album.title = formatAlbumTitle(obj, audio, originalAlbumTitle);
   var init = mapInitial(audio.albumArtist.charAt(0));
   if (init && init !== '') {
     chain.init.title = init;
@@ -836,11 +838,11 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
     var part = '';
     if (obj.metaData[M_UPNP_DATE] && obj.metaData[M_UPNP_DATE][0])
       part = obj.metaData[M_UPNP_DATE][0] + ' - ';
-    obj.title = part + chain.album.title + " - " + audio.track + audio.title;
+    obj.title = part + originalAlbumTitle + " - " + audio.track + audio.title;
     container = addContainerTree([chain.audio, chain.abc, chain.init, chain.artist, chain.all000]);
     result.push(addCdsObject(obj, container, rootPath));
   }
-  chain.album.title = audio.album;
+  chain.album.title = formatAlbumTitle(obj, audio, audio.album);
 
   if (boxSetup[BK_audioAllGenres].enabled) {
     const genCnt = audio.genres.length;
@@ -861,9 +863,9 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
         }
         if (specialGenre.exec(chain.genre.title)) {
           if (audio.disknr.length === 1) {
-            chain.album.title = '0' + audio.disknr + ' - ' + audio.album;
+            chain.album.title = formatAlbumTitle(obj, audio, '0' + audio.disknr + ' - ' + audio.album);
           } else {
-            chain.album.title = audio.disknr + ' - ' + audio.album;
+            chain.album.title = formatAlbumTitle(obj, audio, audio.disknr + ' - ' + audio.album);
           }
         }
         container = addContainerTree([chain.audio, chain.allGenres, chain.genre, chain.artist, chain.album]);
@@ -908,11 +910,11 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
     chain.album.searchable = boxSetup[BK_audioArtistChronology].searchable && !albumSearch;
     albumSearch = albumSearch || chain.album.searchable;
 
-    chain.album.title = audio.date + " - " + audio.album;
+    chain.album.title = formatAlbumTitle(obj, audio, audio.date + " - " + audio.album);
     container = addContainerTree([chain.audio, chain.allArtists, chain.artist, chain.artistChronology, chain.album]);
     result.push(addCdsObject(obj, container, rootPath));
 
-    chain.album.title = audio.album; // Restore the title;
+    chain.album.title = formatAlbumTitle(obj, audio, audio.album); // Restore the title;
   }
 
   obj.title = audio.title;
@@ -978,7 +980,7 @@ function importAudioClassical(obj, cont, rootPath, autoscanId, containerType) {
     },
     album: {
       searchable: false,
-      title: audio.album,
+      title: formatAlbumTitle(obj, audio, audio.album),
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: UPNP_CLASS_CONTAINER_MUSIC_ALBUM,
       metaData: {},

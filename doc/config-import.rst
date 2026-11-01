@@ -1077,6 +1077,72 @@ After loading the changed configuration, re-import the affected items to rebuild
 their virtual entries. Existing stored entries are not renamed merely by changing
 the configuration, and scans that skip unchanged files do not rebuild them.
 
+Album Container Title Format
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The optional ``albumTitleFormat`` :confval:`script-options` entry controls the
+displayed names of virtual album containers independently of track titles and
+the selected audio import function. It is supported by the builtin layout and
+the standard, structured, initial and classical JavaScript audio layouts.
+For example, keep the other layout settings and add:
+
+.. code-block:: xml
+
+    <script-options>
+      <script-option name="albumTitleFormat" value="%albumartist% - %albumtitle% (%year%)"/>
+    </script-options>
+
+The default is empty: an absent or empty option keeps each layout's existing
+album name exactly, including its chronology, artist or disc decorations.
+A nonempty format replaces the entire album label, so those decorations are
+not added a second time. Examples:
+
+* ``%albumtitle%``: the album tag only.
+* ``%albumartist% - %albumtitle%``: album artist and album title.
+* ``%year% - %albumtitle%``: release year followed by the album title.
+* ``%importname%``: the original album label produced by the selected layout.
+
+All placeholders listed for audio titles are available, with the same
+case-sensitive spelling, missing-field behavior and ``%%`` escape. The
+additional album-only ``%importname%`` placeholder preserves the context's
+original label. Album artist prefers the album-artist tag, then ``TPE2``, then
+the first track artist. Use ``%albumartist%`` for compilations: ``%artist%``
+describes the performers of each track and can produce separate album labels.
+Track-dependent fields such as ``%title%``, track/disc numbers or ``%filename%``
+can likewise split an album across containers. Unknown placeholders stay literal;
+inserted metadata is not expanded again. An empty or whitespace-only final
+result falls back to that context's original album label.
+
+Album character replacements
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+.. confval:: album-title-replacements
+   :type: :confval:`Section`
+   :required: false
+
+Optional album replacements run after a nonempty ``albumTitleFormat``. They
+use the same ordered literal/regex rules and source-metadata ``if-*`` conditions
+as :confval:`title-replacements`, with the same documented differences between
+the JavaScript and native regex engines. The two rule sets are independent:
+album rules do not change track titles, and track rules do not change albums.
+For example:
+
+.. code-block:: xml
+
+    <album-title-replacements>
+      <replace from="_" to=" "/>
+      <replace from="[Live]" to="(Live)" if-albumartist="Various Artists"/>
+    </album-title-replacements>
+
+Only the virtual album container's display title changes. Source tags, album
+metadata, track titles, filesystem directories, media URLs, cover resources and
+their reference fields retain their existing values. Configured JavaScript
+user chains apply the format to dynamic music-album containers as well; a custom
+import script can call ``formatAlbumTitle(obj, audio, originalName)`` explicitly.
+As with audio titles, re-import the affected items after changing the setting.
+Virtual container paths are built from their titles, so rebuilding a renamed
+album may create a new virtual container ID; physical media IDs are preserved.
+
 Mapping for Genres
 ------------------
 
