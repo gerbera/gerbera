@@ -6,8 +6,10 @@
   },
   {
     "file": "albums.png",
-    "sha256": "572e02e8c0e4056e0c2e6b68587f9fc8afdf161b53780c15cb1ecfb0b81e330d",
-    "original_name": "alben.png"
+    "sha256": "84a045c5efb001418dd932d54529b3f03ed1b6febfb0cb4922b3469d422fcd8f",
+    "original_name": "alben.png",
+    "revision_date": "2026-11-02",
+    "provenance": "OpenAI generated album collection: three sleeves in orange, blue and green with three vinyl records; contributor-approved 2 November 2026. Single-album artwork remains separate."
   },
   {
     "file": "tracks.png",
