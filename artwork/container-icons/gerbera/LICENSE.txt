@@ -1,0 +1,45 @@
+SPDX-License-Identifier: GPL-2.0-only
+
+Gerbera - https://gerbera.io/
+Copyright (C) 2016-2026 Gerbera Contributors
+
+Gerbera is free software; you can redistribute it and/or modify
+it under the terms of the GNU General Public License version 2
+as published by the Free Software Foundation.
+
+Gerbera is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with Gerbera. If not, see <http://www.gnu.org/licenses/>.
+The complete license is available at ../../../LICENSE.md.
+
+Gerbera is the name of this optional flower-based icon theme.
+
+All 20 images in this theme were created on 1 and 2 November
+2026 using OpenAI built-in image generation at the contributor's request.
+The contributor makes the supplied artwork available under GPL-2.0-only,
+on the same terms as Gerbera, with no additional restrictions.
+
+Design provenance: the Gerbera flower/petal identity was derived from
+the existing project artwork ../../logo-orange.svg. The original icon
+series in the parent directory, particularly albums.png and tracks.png,
+provided the dimensional material and lighting references. The approved
+3D media-icon concepts informed the foreground materials and geometry.
+Each icon uses multiple Gerbera flowers of different sizes and viewing angles,
+with sculpted petals, shadows and distinct color families. High-contrast
+foreground symbols remain prominent. The Albums collection and single Album
+use distinct artwork. Recently Played uses a clock and play symbol; Recently
+Modified uses a hammer and media-library symbol. The supplied Video PNG
+includes the approved geometric correction to its play triangle.
+
+These are generated raster interpretations of the Gerbera flower identity,
+not exact vector-logo exports or extracted third-party icon-library assets.
+The PNG files are the supplied artwork sources; no SVG, 3D mesh or layered
+source is available.
+
+The separate 20-icon Techno theme remains in the parent directory with its
+own provenance and license notice. It includes five added motifs and an
+updated Albums collection image.

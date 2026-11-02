@@ -102,7 +102,8 @@ RUN cmake -S . -B build --preset=release-pupnp \
         -DCMAKE_CXX_FLAGS=-g1 \
         -DWITH_SYSTEMD=NO \
     && \
-    cmake --build build -v -j$(nproc)
+    cmake --build build -v -j$(nproc) \
+    && DESTDIR=/container-icons-stage cmake --install build --component ContainerIcons
 
 FROM ${BASE_IMAGE} AS gerbera
 RUN apk add --no-cache \
@@ -154,6 +155,7 @@ COPY --from=builder /usr/local/lib/libzip*.so* /usr/lib/
 COPY --from=builder /gerbera_build/build/gerbera /bin/gerbera
 COPY --from=builder /gerbera_build/scripts/js /usr/local/share/gerbera/js
 COPY --from=builder /gerbera_build/web /usr/local/share/gerbera/web
+COPY --from=builder /container-icons-stage/usr/local/share/gerbera/container-icons /usr/local/share/gerbera/container-icons
 COPY --from=builder /gerbera_build/src/database/*/*.sql /gerbera_build/src/database/*/*.xml /usr/local/share/gerbera/
 COPY --from=builder /gerbera_build/scripts/docker/docker-entrypoint.sh /usr/local/bin
 

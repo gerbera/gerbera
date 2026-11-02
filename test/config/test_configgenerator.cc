@@ -24,8 +24,13 @@
 #include "config/config_definition.h"
 #include "config/config_generator.h"
 
+#include <array>
 #include <fstream>
+#include <iterator>
+#include <map>
 #include <regex>
+#include <string>
+#include <vector>
 
 #include <gmock/gmock.h>
 #include <gtest/gtest.h>
@@ -40,7 +45,7 @@ public:
 
     void SetUp() override
     {
-        std::shared_ptr<ConfigDefinition> definition = std::make_shared<ConfigDefinition>();
+        definition = std::make_shared<ConfigDefinition>();
         definition->init(definition);
         subject = new ConfigGenerator(definition, GERBERA_TEST, ConfigLevel::Base);
         subject->init();
@@ -63,11 +68,84 @@ public:
     }
 
     ConfigGenerator* subject;
+    std::shared_ptr<ConfigDefinition> definition;
     std::string homePath;
     std::string configDir;
     std::string prefixDir;
     std::string magicFile;
 };
+
+TEST_F(ConfigGeneratorTest, AdvancedConfigIncludesInstalledContainerIconsAndExistingCoverFallbacks)
+{
+    for (const auto& dataDir : std::array { fs::path("/usr/share/gerbera"), fs::path("/opt/music/share/gerbera") }) {
+        const std::map<ContainerIconTheme, fs::path> themes {
+            { ContainerIconTheme::Gerbera, "container-icons/gerbera" }, { ContainerIconTheme::Techno, "container-icons" }
+        };
+        for (const auto& [theme, themeDir] : themes) {
+            ConfigGenerator advanced(definition, GERBERA_TEST, ConfigLevel::Advanced, 0, 0, theme);
+            pugi::xml_document document;
+            ASSERT_TRUE(document.load_string(advanced.generate(homePath, configDir, dataDir, magicFile).c_str()));
+            const auto resources = document.child("config").child("import").child("resources").child("container");
+            ASSERT_TRUE(resources);
+            EXPECT_EQ(resources.attribute("location").as_string(), (dataDir / themeDir).string());
+            std::vector<std::string> names;
+            for (const auto file : resources.children("add-file"))
+                names.emplace_back(file.attribute("name").as_string());
+            const std::vector<std::string> expected { "%upnpclass%-%filename%.png", "folder.jpg", "poster.jpg", "cover.jpg", "albumartsmall.jpg", "%upnpclass%.png" };
+            EXPECT_EQ(names, expected);
+            const auto containers = document.child("config").child("server").child("containers");
+            EXPECT_EQ(std::distance(containers.children("container").begin(), containers.children("container").end()), 3);
+            const std::map<std::string, std::string> images {
+                { "/LastAdded", "recently-added.png" }, { "/LastModified", "recently-modified.png" }, { "/LastPlayed", "recently-played.png" }
+            };
+            for (const auto& [location, image] : images) {
+                const auto container = containers.find_child_by_attribute("container", "location", location.c_str());
+                ASSERT_TRUE(container) << location;
+                EXPECT_EQ(container.attribute("image").as_string(), (dataDir / themeDir / image).string());
+            }
+            const auto played = containers.find_child_by_attribute("container", "location", "/LastPlayed");
+            EXPECT_NE(played.attribute("image").as_string(), (dataDir / themeDir / "Audio.png").string());
+            EXPECT_EQ(fs::path(played.attribute("image").as_string()).extension(), ".png");
+            EXPECT_STREQ(played.attribute("upnp-shortcut").as_string(), "MUSIC_LAST_PLAYED");
+            EXPECT_STREQ(played.attribute("sort").as_string(), "-upnp:lastPlaybackTime");
+            EXPECT_STREQ(played.child_value("filter"), R"(upnp:class derivedfrom "object.item.audioItem" and upnp:lastPlaybackTime > "@last7")");
+        }
+    }
+}
+
+TEST_F(ConfigGeneratorTest, BaseAndExampleConfigKeepExistingArtworkDefaults)
+{
+    for (const auto level : std::array { ConfigLevel::Base, ConfigLevel::Example }) {
+        ConfigGenerator generator(definition, GERBERA_TEST, level);
+        pugi::xml_document document;
+        ASSERT_TRUE(document.load_string(generator.generate(homePath, configDir, prefixDir, magicFile).c_str()));
+        EXPECT_STREQ(document.child("config").child("import").child("resources").child("container").attribute("location").as_string(), "");
+        for (const auto container : document.child("config").child("server").child("containers").children("container")) {
+            EXPECT_FALSE(container.attribute("image"));
+        }
+        EXPECT_FALSE(document.child("config").child("import").child("resources").child("container").find_child_by_attribute("add-file", "name", "%filename%.png"));
+        EXPECT_FALSE(document.child("config").child("import").child("resources").child("container").find_child_by_attribute("add-file", "name", "%upnpclass%-%filename%.png"));
+        EXPECT_FALSE(document.child("config").child("import").child("resources").child("container").find_child_by_attribute("add-file", "name", "%upnpclass%.png"));
+    }
+}
+
+TEST_F(ConfigGeneratorTest, AdvancedIconSettingsRespectSelectedSections)
+{
+    for (const auto& section : std::array { "Import", "DynamicContainer" }) {
+        ConfigGenerator advanced(definition, GERBERA_TEST, ConfigLevel::Advanced, ConfigGenerator::makeSections(section));
+        pugi::xml_document document;
+        ASSERT_TRUE(document.load_string(advanced.generate(homePath, configDir, prefixDir, magicFile).c_str()));
+        const auto resources = document.child("config").child("import").child("resources").child("container");
+        const auto containers = document.child("config").child("server").child("containers");
+        if (std::string(section) == "Import") {
+            EXPECT_EQ(resources.attribute("location").as_string(), (fs::path(prefixDir) / "container-icons" / "gerbera").string());
+            EXPECT_FALSE(containers);
+        } else {
+            EXPECT_FALSE(resources);
+            EXPECT_EQ(containers.first_child().attribute("image").as_string(), (fs::path(prefixDir) / "container-icons" / "gerbera" / "recently-added.png").string());
+        }
+    }
+}
 
 #if defined(HAVE_FFMPEG) && defined(HAVE_FFMPEGTHUMBNAILER) && defined(HAVE_MYSQL) && defined(HAVE_MAGIC) && defined(HAVE_JS) && defined(HAVE_PGSQL)
 TEST_F(ConfigGeneratorTest, GeneratesFullConfigXmlWithAllDefinitions)

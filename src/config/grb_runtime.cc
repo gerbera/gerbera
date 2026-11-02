@@ -105,7 +105,7 @@ void GerberaRuntime::init(
         { GRB_OPTION_PRINTOPTIONS, [=](const std::string& arg) { return this->printOptions(arg); }, true },
         { GRB_OPTION_LOGFILE, [=](const std::string& arg) { return this->setLogFile(arg); } },
         { GRB_OPTION_SYSLOG, [=](const std::string& arg) { return this->setSyslog(arg); } },
-        { GRB_OPTION_CREATECONFIG, [=](const std::string& arg) { return this->createConfig(arg); }, true, [=]() { return this->printConfig(); } },
+        { GRB_OPTION_CREATECONFIG, [=](const std::string& arg) { return this->createConfig(arg, ConfigLevel::Base); }, true, [=]() { return this->printConfig(); } },
         { GRB_OPTION_CREATEEXAMPLECONFIG, [=](const std::string& arg) { return this->createExampleConfig(arg); }, true, [=]() { return this->printConfig(); } },
         { GRB_OPTION_CREATEADVANCEDCONFIG, [=](const std::string& arg) { return this->createAdvancedConfig(arg); }, true, [=]() { return this->printConfig(); } },
         { GRB_OPTION_HOME, [=](const std::string& arg) { return this->setHome(arg); } },
@@ -500,31 +500,25 @@ bool GerberaRuntime::printCopyright(const std::string& arg)
 
 bool GerberaRuntime::createAdvancedConfig(const std::string& arg)
 {
-    exampleConfigSet = ConfigLevel::Advanced;
-    createConfigSet = true;
-    std::optional<std::string> sectionString = (*results)[arg].as<std::string>();
-
-    sections = ConfigGenerator::makeSections(sectionString.value_or("All"));
-    return true;
+    return createConfig(arg, ConfigLevel::Advanced);
 }
 
 bool GerberaRuntime::createExampleConfig(const std::string& arg)
 {
-    exampleConfigSet = ConfigLevel::Example;
-    createConfigSet = true;
-    std::optional<std::string> sectionString = (*results)[arg].as<std::string>();
-
-    sections = ConfigGenerator::makeSections(sectionString.value_or("All"));
-    return true;
+    return createConfig(arg, ConfigLevel::Example);
 }
 
-bool GerberaRuntime::createConfig(const std::string& arg)
+bool GerberaRuntime::createConfig(const std::string& arg, ConfigLevel level)
 {
-    exampleConfigSet = ConfigLevel::Base;
+    exampleConfigSet = level;
     createConfigSet = true;
-    std::optional<std::string> sectionString = (*results)[arg].as<std::string>();
-
-    sections = ConfigGenerator::makeSections(sectionString.value_or("All"));
+    auto value = (*results)[arg].as<std::string>();
+    const auto theme = toLower(value);
+    if (level == ConfigLevel::Advanced && (theme == "gerbera" || theme == "techno")) {
+        containerIconTheme = theme == "techno" ? ContainerIconTheme::Techno : ContainerIconTheme::Gerbera;
+        value = "All";
+    }
+    sections = ConfigGenerator::makeSections(value);
     return true;
 }
 
@@ -592,7 +586,8 @@ bool GerberaRuntime::checkDirs()
             log_error("Could not determine users home directory");
             this->exit(EXIT_FAILURE);
         }
-        log_info("Home detected as: {}", home->c_str());
+        if (!createConfigSet)
+            log_info("Home detected as: {}", home->c_str());
     }
 
     if (!dataDir.has_value())
@@ -602,7 +597,8 @@ bool GerberaRuntime::checkDirs()
 
 bool GerberaRuntime::printConfig()
 {
-    ConfigGenerator configGenerator(definition, GERBERA_VERSION, exampleConfigSet, sections, configModules);
+    ConfigGenerator configGenerator(definition, GERBERA_VERSION, exampleConfigSet, sections, configModules,
+        containerIconTheme.value_or(ContainerIconTheme::Gerbera));
     if (!configDirSet) {
         confDir = "";
     }
