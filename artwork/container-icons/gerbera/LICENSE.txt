@@ -41,4 +41,5 @@ The PNG files are the supplied artwork sources; no SVG, 3D mesh or layered
 source is available.
 
 The separate 20-icon Techno theme remains in the parent directory with its
-own provenance and license notice. Its original 15 images are unchanged.
+own provenance and license notice. It includes five added motifs and an
+updated Albums collection image.

@@ -10,6 +10,8 @@ Provenance: the original 15 icons were created on 22 October 2026. Five
 additional icons (Audio, All Audio, All - full name, Recently Played and
 Single Album) were created on 2 November 2026 using OpenAI image generation
 with the original icons as style references, at the contributor's request.
+The Albums artwork was revised on the same date to show three albums with
+different sleeve colors; the separate Single Album artwork is unchanged.
 They are original generated artwork, rather than
 extracted or redistributed assets from Asset UPnP, Universal Media Server,
 WiiM, or another icon library. The PNGs are the supplied artwork source;
