@@ -12,6 +12,7 @@
 - Build with libpqxx 8
 - Bump serialize-javascript from 7.1.1 to 7.1.2 in /gerbera-web
 - Bump npm packages in /gerbera-web
+- Cleanup asx tests
 - Collect documentation updates
 - Declare scoped search container CTE as recursive
 - Default Sorting for Browse
@@ -49,7 +50,7 @@
 - Test numeric client addresses without reverse DNS assumptions
 - transcode: fix build with ffmpeg 7.0
 - Update metadata\_service to use content-type
-- Update to cxxopts-g4e4fea
+- Update to cxxopts-g7af8aa
 - Update to pupnp 22.1.10
 - Update to ffmpegthumbnailer 2.4.1
 - Use fmt exception formatting

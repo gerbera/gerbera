@@ -910,7 +910,7 @@ Placeholder legend
    * - ``%title%``
      - Track title; uses Gerbera's existing item-title/filename fallback if the title tag is missing.
    * - ``%artist%``
-     - Track artists, joined with `` / ``.
+     - Track artists, joined with ``/``.
    * - ``%albumartist%``
      - Album artist, falling back to the track artist.
    * - ``%albumtitle%``
@@ -926,9 +926,9 @@ Placeholder legend
    * - ``%year%``
      - Release year from the date tag.
    * - ``%genre%``
-     - Genres, joined with `` / ``.
+     - Genres, joined with ``/``.
    * - ``%composer%``
-     - Composers, joined with `` / ``.
+     - Composers, joined with ``/``.
    * - ``%filename%``
      - Source basename without its extension; the source file is not renamed.
    * - ``%%``
@@ -942,7 +942,7 @@ empty. Leading and trailing whitespace is removed. If the generated title is
 empty, Gerbera falls back to the track title, then the filename.
 
 Character replacements in displayed titles
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. confval:: title-replacements
    :type: :confval:`Section`

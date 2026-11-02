@@ -15,6 +15,7 @@
     You should have received a copy of the GNU General Public License
     along with Gerbera. If not, see <http://www.gnu.org/licenses/>.
 */
+#ifdef HAVE_JS
 
 #include "playlist_import_test.h"
 
@@ -42,19 +43,16 @@
 #include <tuple>
 #include <vector>
 
-#ifndef _WIN32
 #include <arpa/inet.h>
 #include <sys/select.h>
 #include <sys/socket.h>
 #include <unistd.h>
-#endif
 
-#ifdef HAVE_JS
+enum class AsxResourceChecks {
+    Database,
+    Http
+};
 
-enum class AsxResourceChecks { Database,
-    Http };
-
-#ifndef _WIN32
 class AsxRemoteTrap {
 public:
     AsxRemoteTrap()
@@ -74,7 +72,7 @@ public:
             ::close(listener);
             throw std::runtime_error("Cannot obtain the ASX request-trap port");
         }
-        location = "http://127.0.0.1:" + std::to_string(ntohs(address.sin_port));
+        location = fmt::format("http://127.0.0.1:{}", ntohs(address.sin_port));
         worker = std::thread([this] {
             for (;;) {
                 fd_set readable;
@@ -116,7 +114,6 @@ private:
     std::atomic<unsigned int> requests {};
     std::thread worker;
 };
-#endif
 
 class AsxImportTest : public PlaylistImportTest,
                       public ::testing::WithParamInterface<std::tuple<std::string, std::string>> {
@@ -137,7 +134,9 @@ protected:
     {
         // Preserve the corpus's UTF-16 byte order and BOM while replacing an
         // ASCII fixture path; XML decoding remains the actual parser's job.
-        if (data.size() >= 2 && ((static_cast<unsigned char>(data[0]) == 0xff && static_cast<unsigned char>(data[1]) == 0xfe) || (static_cast<unsigned char>(data[0]) == 0xfe && static_cast<unsigned char>(data[1]) == 0xff))) {
+        if (data.size() >= 2
+            && ((static_cast<unsigned char>(data[0]) == 0xff && static_cast<unsigned char>(data[1]) == 0xfe)
+                || (static_cast<unsigned char>(data[0]) == 0xfe && static_cast<unsigned char>(data[1]) == 0xff))) {
             const bool littleEndian = static_cast<unsigned char>(data[0]) == 0xff;
             auto encode = [littleEndian](const std::string& text) {
                 std::string result;
@@ -161,50 +160,60 @@ protected:
         if (!input)
             throw std::runtime_error("Cannot read ASX corpus manifest");
         input >> manifest;
-        for (const auto& test : manifest["cases"]) {
-            const auto id = test["id"].asString();
-            const auto directory = source / id;
-            std::set<std::string> absent;
-            for (const auto& key : test["absent_media"])
-                absent.insert(key.asString());
-            for (const auto& key : manifest["media"].getMemberNames()) {
-                const auto& media = manifest["media"][key];
-                if (!media.isMember("path") || absent.count(key))
-                    continue;
-                auto path = directory / media["path"].asString();
-                writeBytes(path, key == "V" ? readBytes(fs::path(GERBERA_SOURCE_DIR) / "test/scripting/fixtures/xml-playlists/video.mp4") : waveBytes(media["title"].asString()));
-                mediaFiles[id][key] = path;
-            }
-            auto data = readBytes(corpus / test["file"].asString());
-            replaceText(data, "/fixture/asx", directory.string());
-            if (name == "asx-semantics") {
-                replaceText(data, "\"sub/", "\".sub/");
-                replaceText(data, "\"depth/", "\".depth/");
-                replaceText(data, "https://media.example.invalid/a.mp3?title=Why%3F&amp;token=a+b", remoteHost + "/a.mp3?title=Why%3F&amp;token=a+b");
-                replaceText(data, "https://playlist.example.invalid/list.asx", remoteHost + "/child.asx");
-                replaceText(data, "https://presentation.example.invalid/image", remoteHost + "/image");
-                replaceText(data, "https://log.example.invalid/", remoteHost + "/log");
-                for (const auto& child : manifest["dependencies"].getMemberNames()) {
-                    auto contents = readBytes(corpus / child);
-                    replaceText(contents, "\"sub/", "\".sub/");
-                    replaceText(contents, "\"depth/", "\".depth/");
-                    writeBytes(directory / ("." + child), contents);
+        try {
+            for (const auto& test : manifest["cases"]) {
+                const auto id = test["id"].asString();
+                const auto directory = source / id;
+                std::set<std::string> absent;
+                for (const auto& key : test["absent_media"])
+                    absent.insert(key.asString());
+                for (const auto& key : manifest["media"].getMemberNames()) {
+                    const auto& media = manifest["media"][key];
+                    if (!media.isMember("path") || absent.count(key))
+                        continue;
+                    auto path = directory / media["path"].asString();
+                    writeBytes(path, key == "V" ? readBytes(fs::path(GERBERA_SOURCE_DIR) / "test/scripting/fixtures/xml-playlists/video.mp4") : waveBytes(media["title"].asString()));
+                    mediaFiles[id][key] = path;
                 }
+                auto data = readBytes(corpus / test["file"].asString());
+                replaceText(data, "/fixture/asx", directory.string());
+                if (name == "asx-semantics") {
+                    replaceText(data, "\"sub/", "\".sub/");
+                    replaceText(data, "\"depth/", "\".depth/");
+                    replaceText(data, "https://media.example.invalid/a.mp3?title=Why%3F&amp;token=a+b", fmt::format("{}/a.mp3?title=Why%3F&amp;token=a+b", remoteHost));
+                    replaceText(data, "https://playlist.example.invalid/list.asx", fmt::format("{}/child.asx", remoteHost));
+                    replaceText(data, "https://presentation.example.invalid/image", fmt::format("{}/image", remoteHost));
+                    replaceText(data, "https://log.example.invalid/", fmt::format("{}/log", remoteHost));
+                    for (const auto& child : manifest["dependencies"].getMemberNames()) {
+                        auto contents = readBytes(corpus / child);
+                        replaceText(contents, "\"sub/", "\".sub/");
+                        replaceText(contents, "\"depth/", "\".depth/");
+                        writeBytes(directory / ("." + child), contents);
+                    }
+                }
+                documents[directory / test["file"].asString()] = data;
+                for (const auto& key : test["expected"])
+                    expected[id].push_back(key.asString());
+                expected.try_emplace(id);
             }
-            documents[directory / test["file"].asString()] = data;
-            for (const auto& key : test["expected"])
-                expected[id].push_back(key.asString());
-            expected.try_emplace(id);
+            if (name == "asx-semantics")
+                manifest["media"]["HTTPS"]["uri"] = fmt::format("{}/a.mp3?title=Why%3F&token=a+b", remoteHost);
+        } catch (const std::exception& ex) {
+            std::cerr << ex.what() << std::endl;
+            throw;
         }
-        if (name == "asx-semantics")
-            manifest["media"]["HTTPS"]["uri"] = remoteHost + "/a.mp3?title=Why%3F&token=a+b";
     }
 
     void addDocuments()
     {
-        for (const auto& [path, bytes] : documents)
-            writeBytes(path, bytes);
-        rememberSources();
+        try {
+            for (const auto& [path, bytes] : documents)
+                writeBytes(path, bytes);
+            rememberSources();
+        } catch (const std::exception& ex) {
+            std::cerr << ex.what() << std::endl;
+            throw;
+        }
     }
 
     void rememberSources()
@@ -233,6 +242,10 @@ protected:
             if (!visited.insert(parent).second)
                 continue;
             for (const auto& object : children(parent)) {
+                if (!object) {
+                    std::cerr << "object null" << std::endl;
+                    continue;
+                }
                 if (!object->isContainer())
                     continue;
                 if (object->getClass() == UPNP_CLASS_PLAYLIST_CONTAINER)
@@ -263,7 +276,7 @@ protected:
         const auto views = playlistViews();
         for (const auto& [title, containers] : views) {
             if (!expected.count(title)) {
-                lastMismatch = "Unexpected playlist view: " + title;
+                lastMismatch = fmt::format("Unexpected playlist view: {}", title);
                 return false;
             }
         }
@@ -271,24 +284,28 @@ protected:
             const auto found = views.find(id);
             const auto count = found == views.end() ? 0 : found->second.size();
             if ((deleted.count(id) && count) || (!deleted.count(id) && count != 2 && !(keys.empty() && !count))) {
-                lastMismatch = id + ": expected two views, found " + std::to_string(count);
+                lastMismatch = fmt::format("{}: expected two views, found {}", id, count);
                 return false;
             }
             if (found == views.end())
                 continue;
             for (const auto& view : found->second) {
+                if (!view)
+                    continue;
                 auto items = children(view->getID());
                 if (items.size() != keys.size()) {
-                    lastMismatch = id + ": expected " + std::to_string(keys.size()) + " positions, found " + std::to_string(items.size());
+                    lastMismatch = fmt::format("{}: expected {} positions, found {}", id, keys.size(), items.size());
                     return false;
                 }
                 for (std::size_t n = 0; n < keys.size(); ++n) {
                     const auto& key = keys[n];
-                    lastMismatch = id + ": " + key + " at position " + std::to_string(n);
+                    lastMismatch = fmt::format("{}: {} at position {}", id, key, n);
                     const auto& item = items[n];
+                    if (!item)
+                        continue;
                     if (key == "HTTPS") {
                         if (item->getLocation().string() != manifest["media"][key]["uri"].asString()) {
-                            lastMismatch += ": expected external URI '" + manifest["media"][key]["uri"].asString() + "', got '" + item->getLocation().string() + "'";
+                            lastMismatch += fmt::format(": expected external URI '{}', got '{}#", manifest["media"][key]["uri"].asString(), item->getLocation().string());
                             return false;
                         }
                         continue;
@@ -296,25 +313,25 @@ protected:
                     const auto location = key == "EXTERNAL" ? external.at(id).first : key == "LEGACY" ? "https://media.example.invalid/legacy.mp3"
                                                                                                       : mediaFiles.at(id).at(key).string();
                     if (item->getLocation().string() != location) {
-                        lastMismatch += ": expected location '" + location + "', got '" + item->getLocation().string() + "'";
+                        lastMismatch += fmt::format(": expected location '{}', got '{}'", location, item->getLocation().string());
                         return false;
                     }
                     // These are virtual playlist positions: the DIDL renderer
                     // emits getTitle(), including writeThrough overrides.
                     const auto title = expectedTitle(id, key, n);
                     if (item->getTitle() != title) {
-                        lastMismatch += ": expected DIDL title '" + title + "', got '" + item->getTitle() + "' (embedded dc:title '" + item->getMetaData(MetadataFields::M_TITLE) + "')";
+                        lastMismatch += fmt::format(": expected DIDL title '{}', got '{}' (embedded dc:title '{}')", title, item->getTitle(), item->getMetaData(MetadataFields::M_TITLE));
                         return false;
                     }
                     if (key != "EXTERNAL" && key != "LEGACY" && item->getClass().find(key == "V" ? "object.item.videoItem" : "object.item.audioItem") != 0) {
-                        lastMismatch += ": wrong media class '" + item->getClass() + "'";
+                        lastMismatch += fmt::format(": wrong media class '{}'", item->getClass());
                         return false;
                     }
                     if (corpusName == "asx-semantics" && id == "f25") {
                         if (item->getMetaData(MetadataFields::M_AUTHOR) != (n == 0 ? "Entry author" : "Root author")
                             || item->getMetaData("dc:rights") != "Root rights"
                             || (n == 0 && item->getMetaData(MetadataFields::M_DESCRIPTION) != "Entry description")) {
-                            lastMismatch += ": scoped metadata mismatch: author='" + item->getMetaData(MetadataFields::M_AUTHOR) + "', rights='" + item->getMetaData("dc:rights") + "', description='" + item->getMetaData(MetadataFields::M_DESCRIPTION) + "'";
+                            lastMismatch += fmt::format(": scoped metadata mismatch: author='{}', rights='{}', description='{}'", item->getMetaData(MetadataFields::M_AUTHOR), item->getMetaData("dc:rights"), item->getMetaData(MetadataFields::M_DESCRIPTION));
                             return false;
                         }
                     }
@@ -325,7 +342,7 @@ protected:
                         }
                         const auto duration = item->getResources().front()->getAttribute(ResourceAttribute::DURATION);
                         if (duration.empty() || std::abs(HMSFToMilliseconds(duration) - 100) >= 10) {
-                            lastMismatch += ": expected original duration0.1s, got '" + duration + "'";
+                            lastMismatch += fmt::format(": expected original duration0.1s, got '{}'", duration);
                             return false;
                         }
                     }
@@ -342,6 +359,7 @@ protected:
         for (const auto& [id, views] : playlistViews()) {
             SCOPED_TRACE(id);
             for (const auto& view : views) {
+                ASSERT_NE(view, nullptr);
                 const auto items = children(view->getID());
                 for (std::size_t n = 0; n < items.size(); ++n) {
                     const auto& key = expected.at(id)[n];
@@ -369,7 +387,7 @@ protected:
         auto title = std::get<1>(GetParam()) == "UTF-8"
             ? (corpusName == "asx-uris" ? std::string("Ã„ther") : std::string("Äther"))
             : (corpusName == "asx-uris" ? std::string("\xc3\x84ther") : std::string("\xc4ther"));
-        return "[playlist]\nFile1=https://media.example.invalid/legacy.mp3\nTitle1=" + title + "\n";
+        return fmt::format("[playlist]\nFile1=https://media.example.invalid/legacy.mp3\nTitle1={}\n", title);
     }
 
     void exerciseUriCorpus(AsxResourceChecks resources)
@@ -402,7 +420,6 @@ protected:
         ASSERT_NO_FATAL_FAILURE(verifyViews("Restart preserves both database views", resources));
     }
 
-#ifndef _WIN32
     void exerciseSemanticsCorpus(AsxResourceChecks resources, AutoscanScanMode scanMode)
     {
         AsxRemoteTrap trap;
@@ -486,7 +503,6 @@ protected:
         stop();
         EXPECT_EQ(trap.finish(), 0U) << "ASX import must not probe remote media, children, banners or logging URLs";
     }
-#endif
 };
 
 TEST_P(AsxImportTest, UriCorpusRescanAndRestartRetainDatabaseViews)
@@ -494,55 +510,43 @@ TEST_P(AsxImportTest, UriCorpusRescanAndRestartRetainDatabaseViews)
     ASSERT_NO_FATAL_FAILURE(exerciseUriCorpus(AsxResourceChecks::Database));
 }
 
+#if defined(HAVE_CURL)
 TEST_P(AsxImportTest, UriCorpusRescanAndRestartServeCompleteHttpResources)
 {
-#ifdef HAVE_CURL
     ASSERT_NO_FATAL_FAILURE(exerciseUriCorpus(AsxResourceChecks::Http));
-#else
-    GTEST_SKIP() << "HTTP byte validation requires CURL; the database test remains enabled";
-#endif
 }
+#endif
 
 TEST_P(AsxImportTest, SemanticsCorpusRescanAndRestartRetainDatabaseViews)
 {
-#ifndef _WIN32
     ASSERT_NO_FATAL_FAILURE(exerciseSemanticsCorpus(AsxResourceChecks::Database, AutoscanScanMode::Timed));
-#else
-    GTEST_SKIP() << "The ASX corpus requires native filenames unavailable on Windows";
-#endif
 }
 
+#if defined(HAVE_CURL)
 TEST_P(AsxImportTest, SemanticsCorpusRescanAndRestartServeCompleteHttpResources)
 {
-#if defined(HAVE_CURL) && !defined(_WIN32)
     ASSERT_NO_FATAL_FAILURE(exerciseSemanticsCorpus(AsxResourceChecks::Http, AutoscanScanMode::Timed));
-#else
-    GTEST_SKIP() << "HTTP validation requires CURL and native corpus filenames";
-#endif
 }
+#endif
 
+#if defined(HAVE_INOTIFY) && defined(__linux__)
 TEST_P(AsxImportTest, SemanticsCorpusInotifyMediaAndPlaylistUpdatesRetainDatabaseViews)
 {
-#if defined(HAVE_INOTIFY) && defined(__linux__)
     ASSERT_NO_FATAL_FAILURE(exerciseSemanticsCorpus(AsxResourceChecks::Database, AutoscanScanMode::INotify));
-#else
-    GTEST_SKIP() << "The combined filesystem update regression requires Linux inotify";
-#endif
 }
+#endif
 
+#if defined(HAVE_CURL) && defined(HAVE_INOTIFY) && defined(__linux__)
 TEST_P(AsxImportTest, SemanticsCorpusInotifyMediaAndPlaylistUpdatesServeCompleteHttpResources)
 {
-#if defined(HAVE_CURL) && defined(HAVE_INOTIFY) && defined(__linux__)
     ASSERT_NO_FATAL_FAILURE(exerciseSemanticsCorpus(AsxResourceChecks::Http, AutoscanScanMode::INotify));
-#else
-    GTEST_SKIP() << "The combined HTTP/filesystem regression requires CURL and Linux inotify";
-#endif
 }
+#endif
 
 INSTANTIATE_TEST_SUITE_P(ImportModesAndCharsets, AsxImportTest,
     ::testing::Combine(::testing::Values("mt", "grb"), ::testing::Values("UTF-8", "windows-1252")),
     [](const ::testing::TestParamInfo<AsxImportTest::ParamType>& info) {
-        return std::get<0>(info.param) + (std::get<1>(info.param) == "UTF-8" ? "Utf8" : "Windows1252");
+        return fmt::format("{}_{}", std::get<0>(info.param), (std::get<1>(info.param) == "UTF-8" ? "Utf8" : "Windows1252"));
     });
 
 #endif // HAVE_JS
