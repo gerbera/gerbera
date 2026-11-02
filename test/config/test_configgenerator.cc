@@ -78,33 +78,38 @@ public:
 TEST_F(ConfigGeneratorTest, AdvancedConfigIncludesInstalledContainerIconsAndExistingCoverFallbacks)
 {
     for (const auto& dataDir : std::array { fs::path("/usr/share/gerbera"), fs::path("/opt/music/share/gerbera") }) {
-        ConfigGenerator advanced(definition, GERBERA_TEST, ConfigLevel::Advanced);
-        pugi::xml_document document;
-        ASSERT_TRUE(document.load_string(advanced.generate(homePath, configDir, dataDir, magicFile).c_str()));
-        const auto resources = document.child("config").child("import").child("resources").child("container");
-        ASSERT_TRUE(resources);
-        EXPECT_EQ(resources.attribute("location").as_string(), (dataDir / "container-icons" / "gerbera").string());
-        std::vector<std::string> names;
-        for (const auto file : resources.children("add-file"))
-            names.emplace_back(file.attribute("name").as_string());
-        const std::vector<std::string> expected { "%upnpclass%-%filename%.png", "folder.jpg", "poster.jpg", "cover.jpg", "albumartsmall.jpg", "%upnpclass%.png" };
-        EXPECT_EQ(names, expected);
-        const auto containers = document.child("config").child("server").child("containers");
-        EXPECT_EQ(std::distance(containers.children("container").begin(), containers.children("container").end()), 3);
-        const std::map<std::string, std::string> images {
-            { "/LastAdded", "recently-added.png" }, { "/LastModified", "recently-modified.png" }, { "/LastPlayed", "recently-played.png" }
+        const std::map<ContainerIconTheme, fs::path> themes {
+            { ContainerIconTheme::Gerbera, "container-icons/gerbera" }, { ContainerIconTheme::Techno, "container-icons" }
         };
-        for (const auto& [location, image] : images) {
-            const auto container = containers.find_child_by_attribute("container", "location", location.c_str());
-            ASSERT_TRUE(container) << location;
-            EXPECT_EQ(container.attribute("image").as_string(), (dataDir / "container-icons" / "gerbera" / image).string());
+        for (const auto& [theme, themeDir] : themes) {
+            ConfigGenerator advanced(definition, GERBERA_TEST, ConfigLevel::Advanced, 0, 0, theme);
+            pugi::xml_document document;
+            ASSERT_TRUE(document.load_string(advanced.generate(homePath, configDir, dataDir, magicFile).c_str()));
+            const auto resources = document.child("config").child("import").child("resources").child("container");
+            ASSERT_TRUE(resources);
+            EXPECT_EQ(resources.attribute("location").as_string(), (dataDir / themeDir).string());
+            std::vector<std::string> names;
+            for (const auto file : resources.children("add-file"))
+                names.emplace_back(file.attribute("name").as_string());
+            const std::vector<std::string> expected { "%upnpclass%-%filename%.png", "folder.jpg", "poster.jpg", "cover.jpg", "albumartsmall.jpg", "%upnpclass%.png" };
+            EXPECT_EQ(names, expected);
+            const auto containers = document.child("config").child("server").child("containers");
+            EXPECT_EQ(std::distance(containers.children("container").begin(), containers.children("container").end()), 3);
+            const std::map<std::string, std::string> images {
+                { "/LastAdded", "recently-added.png" }, { "/LastModified", "recently-modified.png" }, { "/LastPlayed", "recently-played.png" }
+            };
+            for (const auto& [location, image] : images) {
+                const auto container = containers.find_child_by_attribute("container", "location", location.c_str());
+                ASSERT_TRUE(container) << location;
+                EXPECT_EQ(container.attribute("image").as_string(), (dataDir / themeDir / image).string());
+            }
+            const auto played = containers.find_child_by_attribute("container", "location", "/LastPlayed");
+            EXPECT_NE(played.attribute("image").as_string(), (dataDir / themeDir / "Audio.png").string());
+            EXPECT_EQ(fs::path(played.attribute("image").as_string()).extension(), ".png");
+            EXPECT_STREQ(played.attribute("upnp-shortcut").as_string(), "MUSIC_LAST_PLAYED");
+            EXPECT_STREQ(played.attribute("sort").as_string(), "-upnp:lastPlaybackTime");
+            EXPECT_STREQ(played.child_value("filter"), R"(upnp:class derivedfrom "object.item.audioItem" and upnp:lastPlaybackTime > "@last7")");
         }
-        const auto played = containers.find_child_by_attribute("container", "location", "/LastPlayed");
-        EXPECT_NE(played.attribute("image").as_string(), (dataDir / "container-icons" / "gerbera" / "Audio.png").string());
-        EXPECT_EQ(fs::path(played.attribute("image").as_string()).extension(), ".png");
-        EXPECT_STREQ(played.attribute("upnp-shortcut").as_string(), "MUSIC_LAST_PLAYED");
-        EXPECT_STREQ(played.attribute("sort").as_string(), "-upnp:lastPlaybackTime");
-        EXPECT_STREQ(played.child_value("filter"), R"(upnp:class derivedfrom "object.item.audioItem" and upnp:lastPlaybackTime > "@last7")");
     }
 }
 
