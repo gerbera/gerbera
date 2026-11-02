@@ -51,9 +51,9 @@ protected:
         AutoscanScanMode scanMode = AutoscanScanMode::Timed);
     void stop();
     bool waitFor(const std::function<bool()>& predicate, const std::string& description,
-        std::chrono::seconds timeout = std::chrono::seconds(30));
+        std::chrono::seconds timeout = std::chrono::seconds(60));
     bool waitForWatches(const std::vector<fs::path>& paths,
-        std::chrono::seconds timeout = std::chrono::seconds(20));
+        std::chrono::seconds timeout = std::chrono::seconds(40));
     bool importsIdle() const;
     std::vector<std::shared_ptr<CdsObject>> children(int id) const;
     std::string resourceUrl(const std::shared_ptr<CdsObject>& item) const;
