@@ -6,6 +6,14 @@
     Gerbera is free software; you can redistribute it and/or modify
     it under the terms of the GNU General Public License version 2
     as published by the Free Software Foundation.
+
+    Gerbera is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Gerbera. If not, see <http://www.gnu.org/licenses/>.
 */
 
 #include "cds/cds_item.h"
@@ -32,14 +40,12 @@
 #include <taglib.h>
 #endif
 
-namespace {
-std::map<std::string, std::string> defaultMappings(ConfigVal option)
+static std::map<std::string, std::string> defaultMappings(ConfigVal option)
 {
     auto definition = std::make_shared<ConfigDefinition>();
     definition->init(definition);
     auto setup = definition->findConfigSetup<ConfigDictionarySetup>(option);
     return setup->getXmlContent({}, nullptr);
-}
 }
 
 TEST(VideoMetadataMappingsTest, SelectsReadersForWebmAndWmv)
@@ -56,7 +62,6 @@ TEST(VideoMetadataMappingsTest, SelectsReadersForWebmAndWmv)
     EXPECT_EQ(contentTypes.at(extensions.at("wmv")), CONTENT_TYPE_ASF);
 }
 
-namespace {
 class VideoMetadataConfig final : public ConfigMock {
 public:
     std::string getOption(ConfigVal option) const override
@@ -119,7 +124,6 @@ public:
         return std::make_shared<DirectoryConfigList>();
     }
 };
-}
 
 #ifdef HAVE_TAGLIB
 class VideoTagLibMetadataTest : public ::testing::Test {
