@@ -30,6 +30,7 @@ Gerbera - https://gerbera.io/
 #include <cxxopts.hpp>
 #include <fmt/core.h>
 #include <functional>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -37,6 +38,7 @@ class Config;
 class ConfigDefinition;
 class Server;
 enum class ConfigLevel;
+enum class ContainerIconTheme;
 namespace spdlog {
 class logger;
 }
@@ -178,6 +180,7 @@ private:
     int configModules = { 0 };
     bool lastFM = false;
     ConfigLevel exampleConfigSet;
+    std::optional<ContainerIconTheme> containerIconTheme;
     int sections = { 0 };
     bool createConfigSet = false;
     bool configDirSet = false;
@@ -206,7 +209,7 @@ private:
     /// @brief handler for log file rotation
     bool setRotatelog(const std::string& arg);
     /// @brief handler for config creation
-    bool createConfig(const std::string& arg);
+    bool createConfig(const std::string& arg, ConfigLevel level);
     /// @brief handler for example config creation
     bool createExampleConfig(const std::string& arg);
     /// @brief handler for advanced example config creation

@@ -72,11 +72,14 @@ additional restrictions imposed by the contributor beyond the license itself.
 Enable or customize
 -------------------
 
-Generate a configuration with the ``Gerbera`` theme already selected:
+Select either theme directly when generating an advanced configuration:
 
 .. code-block:: console
 
-    gerbera --create-advanced-config > config.xml
+    gerbera --create-advanced-config=gerbera > config-gerbera.xml
+    gerbera --create-advanced-config=techno > config-techno.xml
+
+Without a theme argument, ``--create-advanced-config`` selects ``Gerbera``.
 
 The advanced configuration includes the installed ``gerbera`` directory,
 type-qualified category matching, cover filenames, class fallbacks and the

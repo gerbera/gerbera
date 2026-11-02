@@ -63,6 +63,9 @@ enum class ConfigLevel : int {
     Advanced, // --create-advanced-config
 };
 
+enum class ContainerIconTheme { Gerbera,
+    Techno };
+
 /// @brief Class to generate default or example configuration when called with respective command line
 /// also used in tests
 class ConfigGenerator {
@@ -72,12 +75,14 @@ public:
         std::string version,
         ConfigLevel level,
         int sections = 0,
-        int modules = 0)
+        int modules = 0,
+        ContainerIconTheme iconTheme = ContainerIconTheme::Gerbera)
         : definition(std::move(definition))
         , version(std::move(version))
         , level(level)
         , generateSections(sections)
         , doModules(modules)
+        , containerIconDir(iconTheme == ContainerIconTheme::Techno ? "container-icons" : "container-icons/gerbera")
     {
     }
     /// @brief gerate full output
@@ -150,6 +155,8 @@ protected:
     pugi::xml_document doc;
     /// @brief bitfield to generate "from-file" attributes for config module loading
     int doModules { 0 };
+
+    fs::path containerIconDir;
 
     /// @brief generate list of options
     void generateOptions(const std::vector<std::pair<ConfigVal, ConfigLevel>>& options);
