@@ -31,6 +31,7 @@
 - Fix WavPack stack overflow by allocating entries on the heap
 - Handle missing database objects in playlists and cuesheets
 - Improve logging for mime and extensions
+- Increase timeouts for tests
 - Keep sortKey for new containers
 - Let DLNA profile mappings test the color transfer (HDR)
 - Make Alpine package-index downloads resilient with HTTPS mirror fallback
