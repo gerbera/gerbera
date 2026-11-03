@@ -518,7 +518,7 @@ std::shared_ptr<CdsObject> ContentManager::_addFile(
         rootPath = task->getRootPath();
 
     auto importMode = asSetting.adir ? asSetting.adir->getLayoutMode() : EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
-    if (importMode == ImportMode::Gerbera || (asSetting.changedObject && asSetting.changedObject->isMediaItem())) {
+    if (importMode == ImportMode::Gerbera || asSetting.refreshExisting || (asSetting.changedObject && asSetting.changedObject->isMediaItem())) {
         std::unordered_set<int> currentContent;
         if (asSetting.changedObject || !asSetting.adir || asSetting.adir->getScanMode() != AutoscanScanMode::INotify) {
             importService->clearCache(); // may be called by layout
