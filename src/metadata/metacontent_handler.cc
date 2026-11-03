@@ -363,19 +363,18 @@ bool ContainerArtHandler::fillMetadata(
     return fillMetadata(obj, pathList);
 }
 
-bool ContainerArtHandler::fillFallbackMetadata(
-    const std::shared_ptr<CdsObject>& obj,
-    std::vector<int>& newIds)
+std::shared_ptr<CdsResource> ContainerArtHandler::fillFallbackMetadata(const std::shared_ptr<CdsObject>& obj)
 {
-    if (obj->getResource(ResourcePurpose::Thumbnail))
-        return false;
+    if (auto resource = obj->getResource(ResourcePurpose::Thumbnail))
+        return resource;
     auto paths = setup->getContentPath(obj, SETTING_CONTAINERART,
         config->getOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION), ContentPathMode::Fallback);
     paths.resize(1); // the nearest configured class is the only default
     if (!fillMetadata(obj, paths))
-        return false;
-    obj->getResource(ResourcePurpose::Thumbnail)->addOption(RESOURCE_OPTION_CONTAINER_ART_FALLBACK, "yes");
-    return true;
+        return nullptr;
+    auto resource = obj->getResource(ResourcePurpose::Thumbnail);
+    resource->addOption(RESOURCE_OPTION_CONTAINER_ART_FALLBACK, "yes");
+    return resource;
 }
 
 bool ContainerArtHandler::fillMetadata(
