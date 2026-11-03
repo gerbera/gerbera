@@ -75,16 +75,22 @@ public:
     std::string magicFile;
 };
 
-TEST_F(ConfigGeneratorTest, AdvancedConfigIncludesInstalledContainerIconsAndExistingCoverFallbacks)
+TEST_F(ConfigGeneratorTest, ConfigIncludesSelectedContainerIconsAndExistingCoverFallbacks)
 {
-    for (const auto& dataDir : std::array { fs::path("/usr/share/gerbera"), fs::path("/opt/music/share/gerbera") }) {
+    const auto configs = std::array {
+        std::pair { ConfigLevel::Base, fs::path("/usr/share/gerbera") },
+        std::pair { ConfigLevel::Example, fs::path("/usr/share/gerbera") },
+        std::pair { ConfigLevel::Advanced, fs::path("/usr/share/gerbera") },
+        std::pair { ConfigLevel::Advanced, fs::path("/opt/music/share/gerbera") },
+    };
+    for (const auto& [level, dataDir] : configs) {
         const std::map<ContainerIconTheme, fs::path> themes {
             { ContainerIconTheme::Gerbera, "container-icons/gerbera" }, { ContainerIconTheme::Techno, "container-icons" }
         };
         for (const auto& [theme, themeDir] : themes) {
-            ConfigGenerator advanced(definition, GERBERA_TEST, ConfigLevel::Advanced, 0, 0, theme);
+            ConfigGenerator generator(definition, GERBERA_TEST, level, 0, 0, theme);
             pugi::xml_document document;
-            ASSERT_TRUE(document.load_string(advanced.generate(homePath, configDir, dataDir, magicFile).c_str()));
+            ASSERT_TRUE(document.load_string(generator.generate(homePath, configDir, dataDir, magicFile).c_str()));
             const auto resources = document.child("config").child("import").child("resources").child("container");
             ASSERT_TRUE(resources);
             EXPECT_EQ(resources.attribute("location").as_string(), (dataDir / themeDir).string());
@@ -113,26 +119,33 @@ TEST_F(ConfigGeneratorTest, AdvancedConfigIncludesInstalledContainerIconsAndExis
     }
 }
 
-TEST_F(ConfigGeneratorTest, BaseAndExampleConfigKeepExistingArtworkDefaults)
+TEST_F(ConfigGeneratorTest, DefaultConfigKeepsCoverCandidatesWithoutATheme)
 {
-    for (const auto level : std::array { ConfigLevel::Base, ConfigLevel::Example }) {
+    for (const auto level : std::array { ConfigLevel::Base, ConfigLevel::Example, ConfigLevel::Advanced }) {
         ConfigGenerator generator(definition, GERBERA_TEST, level);
         pugi::xml_document document;
         ASSERT_TRUE(document.load_string(generator.generate(homePath, configDir, prefixDir, magicFile).c_str()));
-        EXPECT_STREQ(document.child("config").child("import").child("resources").child("container").attribute("location").as_string(), "");
+        const auto resources = document.child("config").child("import").child("resources").child("container");
+        EXPECT_STREQ(resources.attribute("location").as_string(), "");
         for (const auto container : document.child("config").child("server").child("containers").children("container")) {
             EXPECT_FALSE(container.attribute("image"));
         }
-        EXPECT_FALSE(document.child("config").child("import").child("resources").child("container").find_child_by_attribute("add-file", "name", "%filename%.png"));
-        EXPECT_FALSE(document.child("config").child("import").child("resources").child("container").find_child_by_attribute("add-file", "name", "%upnpclass%-%filename%.png"));
-        EXPECT_FALSE(document.child("config").child("import").child("resources").child("container").find_child_by_attribute("add-file", "name", "%upnpclass%.png"));
+        std::vector<std::string> names;
+        for (const auto file : resources.children("add-file"))
+            names.emplace_back(file.attribute("name").as_string());
+        if (level == ConfigLevel::Advanced) {
+            const std::vector<std::string> covers { "folder.jpg", "poster.jpg", "cover.jpg", "albumartsmall.jpg" };
+            EXPECT_EQ(names, covers);
+        } else {
+            EXPECT_TRUE(names.empty());
+        }
     }
 }
 
 TEST_F(ConfigGeneratorTest, AdvancedIconSettingsRespectSelectedSections)
 {
     for (const auto& section : std::array { "Import", "DynamicContainer" }) {
-        ConfigGenerator advanced(definition, GERBERA_TEST, ConfigLevel::Advanced, ConfigGenerator::makeSections(section));
+        ConfigGenerator advanced(definition, GERBERA_TEST, ConfigLevel::Advanced, ConfigGenerator::makeSections(section), 0, ContainerIconTheme::Gerbera);
         pugi::xml_document document;
         ASSERT_TRUE(document.load_string(advanced.generate(homePath, configDir, prefixDir, magicFile).c_str()));
         const auto resources = document.child("config").child("import").child("resources").child("container");

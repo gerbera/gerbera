@@ -72,20 +72,16 @@ additional restrictions imposed by the contributor beyond the license itself.
 Enable or customize
 -------------------
 
-Select either theme directly when generating an advanced configuration:
+Select either theme with ``--icon-theme`` when generating a configuration:
 
 .. code-block:: console
 
-    gerbera --create-advanced-config=gerbera > config-gerbera.xml
-    gerbera --create-advanced-config=techno > config-techno.xml
+    gerbera --create-advanced-config --icon-theme=gerbera > config-gerbera.xml
+    gerbera --create-advanced-config --icon-theme=techno > config-techno.xml
 
-Without a theme argument, ``--create-advanced-config`` selects ``Gerbera``.
-
-The advanced configuration includes the installed ``gerbera`` directory,
+The default theme is ``none``. An explicit theme adds its installed directory,
 type-qualified category matching, cover filenames, class fallbacks and the
-three dynamic-container image paths.
-``--create-config`` and ``--create-example-config`` retain their existing
-artwork settings. Existing configurations are not changed automatically.
+three dynamic-container image paths to the corresponding generated sections.
 
 Both themes are installed. In Gerbera's server configuration, change the
 ``location`` of ``import/resources/container`` and the three dynamic-container
@@ -96,7 +92,7 @@ settings; there is no additional script to install.
    :header-rows: 1
 
    * - Setting
-     - Gerbera (default)
+     - Gerbera
      - Techno
    * - Container resource location
      - ``/usr/local/share/gerbera/container-icons/gerbera``
