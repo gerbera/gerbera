@@ -377,7 +377,7 @@ std::shared_ptr<CdsObject> ImportService::doImport(
     auto stateCache = std::make_shared<StateCache>();
     log_debug("start {} root '{}' update {}", location.string(), rootPath.string(), !!settings.changedObject);
     if (activeScan.empty()) {
-        if (settings.changedObject || !autoscanDir || autoscanDir->getScanMode() != AutoscanScanMode::INotify)
+        if (settings.refreshExisting || settings.changedObject || !autoscanDir || autoscanDir->getScanMode() != AutoscanScanMode::INotify)
             clearCache();
         activeScan = location;
         if (importStateCache->contentStateCache.empty() || location == rootPath)
@@ -697,7 +697,7 @@ void ImportService::createItems(
                 cdsObj = database->findObjectByPath(itemPath, UNUSED_CLIENT_GROUP, DbFileType::File);
             }
             if (cdsObj && cdsObj->isItem()) {
-                auto isChanged = (settings.changedObject && settings.changedObject->getID() == cdsObj->getID())
+                auto isChanged = settings.refreshExisting || (settings.changedObject && settings.changedObject->getID() == cdsObj->getID())
                     || stateEntry->getMTime() != cdsObj->getMTime() || cdsObj->getLocation().string() != dirEntry.path().string();
                 if (autoscanDir && autoscanDir->getForceRescan())
                     isChanged = isChanged || cdsObj->getClass().empty() || cdsObj->getClass() == UPNP_CLASS_ITEM;

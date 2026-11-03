@@ -200,6 +200,8 @@ void InotifyHandler::doNewEntry(
         // dirEnt, path, rootPath, settings, lowPriority, cancellable
         if (isDir) {
             auto wdObjPath = ai->monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
+            // Children may have been written before the new directory watch was installed.
+            asSetting.refreshExisting = mask & (IN_CREATE | IN_MOVED_TO);
             if (AUTOSCAN_IS_MOVED(mask) && wdObjPath) {
                 log_debug("Resetting {} to {}", wdObjPath->getPath().c_str(), path.c_str());
                 wdObjPath->setPath(path);

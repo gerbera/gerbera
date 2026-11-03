@@ -57,7 +57,13 @@ void CMAddFileTask::run()
 {
     log_debug("running add file task with path {} recursive: {}", dirEnt.path().c_str(), asSetting.recursive);
     auto self = shared_from_this();
-    content->_addFile(dirEnt, rootpath, asSetting, self);
+    try {
+        content->_addFile(dirEnt, rootpath, asSetting, self);
+    } catch (...) {
+        if (asSetting.adir)
+            asSetting.adir->decTaskCount();
+        throw;
+    }
     if (asSetting.adir) {
         asSetting.adir->decTaskCount();
         if (asSetting.adir->updateLMT()) {
@@ -103,7 +109,12 @@ void CMRescanDirectoryTask::run()
         return;
 
     auto self = shared_from_this();
-    content->_rescanDirectory(adir, containerID, self);
+    try {
+        content->_rescanDirectory(adir, containerID, self);
+    } catch (...) {
+        adir->decTaskCount();
+        throw;
+    }
     adir->decTaskCount();
     if (adir->updateLMT()) {
         log_debug("CMRescanDirectoryTask::run: Updating last_modified for autoscan directory {}", adir->getLocation().c_str());
