@@ -236,7 +236,7 @@ public:
     /// @brief handles the recreation of a persistent autoscan directory
     void handlePersistentAutoscanRecreate(const std::shared_ptr<AutoscanDirectory>& adir) override;
 
-    void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath = {}, bool cancellable = true) override;
+    void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath = {}, bool cancellable = true, bool refreshExisting = false) override;
 
     /// @brief instructs ContentManager to reload scripting environment
     void reloadLayout();
@@ -335,7 +335,8 @@ protected:
     void _rescanDirectory(
         const std::shared_ptr<AutoscanDirectory>& adir,
         int containerID,
-        const std::shared_ptr<GenericTask>& task = nullptr);
+        const std::shared_ptr<GenericTask>& task = nullptr,
+        bool refreshExisting = false);
     /* for recursive addition */
     void addRecursive(
         std::shared_ptr<AutoscanDirectory>& adir,

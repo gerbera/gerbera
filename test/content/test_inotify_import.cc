@@ -51,6 +51,16 @@ protected:
         return waitForMedia(sentinel, "Event barrier")
             && waitFor([&] { return importsIdle(); }, "Queued reconciliation completion");
     }
+
+    void replaceDirectoryWithTrack(const fs::path& track, const std::string& title)
+    {
+        auto replacement = root / "Replacement";
+        auto replacementTrack = replacement / track.filename();
+        writeWave(replacementTrack, title);
+        fs::last_write_time(replacementTrack, fs::last_write_time(track));
+        fs::remove_all(track.parent_path());
+        fs::rename(replacement, track.parent_path());
+    }
 };
 
 TEST_F(PlaylistImportTest, InotifyBatchesBelongToTheirInstance)
@@ -188,22 +198,25 @@ TEST_P(InotifyImportTest, DelayedOldDirectoryDeletionPreservesReplacementContent
 TEST_P(InotifyImportTest, RecreatedAutoscanRootRebuildsItsWatches)
 {
     auto track = source / "track.wav";
+    auto removedTrack = source / "removed.wav";
     writeWave(track, "Old root");
+    writeWave(removedTrack, "Removed with old root");
     start(GetParam(), "UTF-8", AutoscanScanMode::INotify);
     ASSERT_TRUE(waitForWatches({ source }));
     ASSERT_TRUE(waitForMedia(track, "Old root"));
+    ASSERT_TRUE(waitForMedia(removedTrack, "Removed with old root"));
     GrbFile oldRoot(source);
     GrbFile oldTrack(track);
     ASSERT_NE(oldRoot.open("rb"), nullptr);
     ASSERT_NE(oldTrack.open("rb"), nullptr);
-    fs::remove_all(source);
-    writeWave(track, "Recreated root");
+    replaceDirectoryWithTrack(track, "Recreated root");
     ASSERT_TRUE(oldTrack.close());
     ASSERT_TRUE(oldRoot.close());
     ASSERT_TRUE(waitForMedia(track, "Recreated root"));
     ASSERT_TRUE(waitForWatches({ source, track }));
     ASSERT_TRUE(drainEvents());
     EXPECT_NE(database->findObjectByPath(track, "", DbFileType::File), nullptr);
+    EXPECT_EQ(database->findObjectByPath(removedTrack, "", DbFileType::File), nullptr);
 }
 
 TEST_P(InotifyImportTest, DelayedOldFileDeletionPreservesReplacementRenameAndHardlink)
@@ -264,12 +277,7 @@ TEST_P(InotifyImportTest, NestedAutoscanCleanupPreservesParentAndReplacementWatc
     ASSERT_TRUE(waitForMedia(track, "Old nested root"));
     GrbFile old(nested);
     ASSERT_NE(old.open("rb"), nullptr);
-    auto replacement = root / "Replacement";
-    auto replacementTrack = replacement / track.filename();
-    writeWave(replacementTrack, "New nested root");
-    fs::last_write_time(replacementTrack, fs::last_write_time(track));
-    fs::remove_all(nested);
-    fs::rename(replacement, nested);
+    replaceDirectoryWithTrack(track, "New nested root");
     ASSERT_TRUE(waitForMedia(track, "New nested root"));
     ASSERT_TRUE(old.close());
     ASSERT_TRUE(drainEvents());

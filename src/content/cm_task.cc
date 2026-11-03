@@ -93,11 +93,12 @@ void CMRemoveObjectTask::run()
 }
 
 CMRescanDirectoryTask::CMRescanDirectoryTask(std::shared_ptr<ContentManager> content,
-    std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable)
+    std::shared_ptr<AutoscanDirectory> adir, int containerId, bool cancellable, bool refreshExisting)
     : GenericTask(TaskOwner::ContentManagerTask)
     , content(std::move(content))
     , adir(std::move(adir))
     , containerID(containerId)
+    , refreshExisting(refreshExisting)
 {
     this->cancellable = cancellable;
     this->taskType = TaskType::RescanDirectory;
@@ -110,7 +111,7 @@ void CMRescanDirectoryTask::run()
 
     auto self = shared_from_this();
     try {
-        content->_rescanDirectory(adir, containerID, self);
+        content->_rescanDirectory(adir, containerID, self, refreshExisting);
     } catch (...) {
         adir->decTaskCount();
         throw;

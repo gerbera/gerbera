@@ -640,7 +640,7 @@ int ContentManager::ensurePathExistence(const fs::path& path) const
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task)
+void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task, bool refreshExisting)
 {
     log_debug("start");
 
@@ -733,9 +733,10 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         return;
     }
 
-    auto importMode = adir->getLayoutMode();
+    auto importMode = refreshExisting ? ImportMode::Gerbera : adir->getLayoutMode();
     AutoScanSetting asSetting;
     asSetting.adir = adir;
+    asSetting.refreshExisting = refreshExisting;
     asSetting.recursive = adir->getRecursive();
     asSetting.followSymlinks = adir->getFollowSymlinks();
     asSetting.hidden = adir->getHidden();
@@ -1621,10 +1622,11 @@ void ContentManager::rescanDirectory(
     const std::shared_ptr<AutoscanDirectory>& adir,
     int objectId,
     fs::path descPath,
-    bool cancellable)
+    bool cancellable,
+    bool refreshExisting)
 {
     auto self = shared_from_this();
-    auto task = std::make_shared<CMRescanDirectoryTask>(self, adir, objectId, cancellable);
+    auto task = std::make_shared<CMRescanDirectoryTask>(self, adir, objectId, cancellable, refreshExisting);
 
     adir->incTaskCount();
 

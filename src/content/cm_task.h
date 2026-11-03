@@ -87,13 +87,15 @@ protected:
     std::shared_ptr<ContentManager> content;
     std::shared_ptr<AutoscanDirectory> adir;
     int containerID;
+    bool refreshExisting;
 
 public:
     CMRescanDirectoryTask(
         std::shared_ptr<ContentManager> content,
         std::shared_ptr<AutoscanDirectory> adir,
         int containerId,
-        bool cancellable);
+        bool cancellable,
+        bool refreshExisting);
     void run() override;
 };
 
