@@ -24,8 +24,8 @@ The contributor makes the supplied artwork available under GPL-2.0-only,
 on the same terms as Gerbera, with no additional restrictions.
 
 Design provenance: the Gerbera flower/petal identity was derived from
-the existing project artwork ../../logo-orange.svg. The original icon
-series in the parent directory, particularly albums.png and tracks.png,
+the existing project artwork ../../logo-orange.svg. The Techno icon
+series in ../techno, particularly albums.png and tracks.png,
 provided the dimensional material and lighting references. The approved
 3D media-icon concepts informed the foreground materials and geometry.
 Each icon uses multiple Gerbera flowers of different sizes and viewing angles,

@@ -4,7 +4,7 @@ All 20 icons, including the favorites star, are AI-generated using OpenAI
 image generation and are freely available under the GNU General Public
 License, version 2 (GPL-2.0-only), on the same terms as Gerbera. No additional
 restrictions beyond the GPLv2 are imposed by the contributor. See
-../../LICENSE.md in the source distribution for the complete license text.
+../../../LICENSE.md in the source distribution for the complete license text.
 
 Provenance: the original 15 icons were created on 22 October 2026. Five
 additional icons (Audio, All Audio, All - full name, Recently Played and
