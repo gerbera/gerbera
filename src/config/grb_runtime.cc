@@ -106,8 +106,9 @@ void GerberaRuntime::init(
         { GRB_OPTION_LOGFILE, [=](const std::string& arg) { return this->setLogFile(arg); } },
         { GRB_OPTION_SYSLOG, [=](const std::string& arg) { return this->setSyslog(arg); } },
         { GRB_OPTION_CREATECONFIG, [=](const std::string& arg) { return this->createConfig(arg, ConfigLevel::Base); }, true, [=]() { return this->printConfig(); } },
-        { GRB_OPTION_CREATEEXAMPLECONFIG, [=](const std::string& arg) { return this->createExampleConfig(arg); }, true, [=]() { return this->printConfig(); } },
-        { GRB_OPTION_CREATEADVANCEDCONFIG, [=](const std::string& arg) { return this->createAdvancedConfig(arg); }, true, [=]() { return this->printConfig(); } },
+        { GRB_OPTION_CREATEEXAMPLECONFIG, [=](const std::string& arg) { return this->createConfig(arg, ConfigLevel::Example); }, true, [=]() { return this->printConfig(); } },
+        { GRB_OPTION_CREATEADVANCEDCONFIG, [=](const std::string& arg) { return this->createConfig(arg, ConfigLevel::Advanced); }, true, [=]() { return this->printConfig(); } },
+        { GRB_OPTION_ICONTHEME, [=](const std::string& arg) { return this->setIconTheme(arg); } },
         { GRB_OPTION_HOME, [=](const std::string& arg) { return this->setHome(arg); } },
         { GRB_OPTION_SCRIPTS, [=](const std::string& arg) { return this->setScripts(arg); } },
         { GRB_OPTION_USER, [=](const std::string& arg) { return this->setUser(arg); } },
@@ -498,27 +499,32 @@ bool GerberaRuntime::printCopyright(const std::string& arg)
     return true;
 }
 
-bool GerberaRuntime::createAdvancedConfig(const std::string& arg)
-{
-    return createConfig(arg, ConfigLevel::Advanced);
-}
-
-bool GerberaRuntime::createExampleConfig(const std::string& arg)
-{
-    return createConfig(arg, ConfigLevel::Example);
-}
-
 bool GerberaRuntime::createConfig(const std::string& arg, ConfigLevel level)
 {
     exampleConfigSet = level;
     createConfigSet = true;
-    auto value = (*results)[arg].as<std::string>();
-    const auto theme = toLower(value);
-    if (level == ConfigLevel::Advanced && (theme == "gerbera" || theme == "techno")) {
-        containerIconTheme = theme == "techno" ? ContainerIconTheme::Techno : ContainerIconTheme::Gerbera;
-        value = "All";
+    sections = ConfigGenerator::makeSections((*results)[arg].as<std::string>());
+    return true;
+}
+
+bool GerberaRuntime::setIconTheme(const std::string& arg)
+{
+    if (!createConfigSet) {
+        log_error("--icon-theme requires a config generation option.");
+        this->exit(EXIT_FAILURE);
     }
-    sections = ConfigGenerator::makeSections(value);
+
+    const auto theme = toLower((*results)[arg].as<std::string>());
+    if (theme == "none") {
+        containerIconTheme = ContainerIconTheme::None;
+    } else if (theme == "gerbera") {
+        containerIconTheme = ContainerIconTheme::Gerbera;
+    } else if (theme == "techno") {
+        containerIconTheme = ContainerIconTheme::Techno;
+    } else {
+        log_error("Unknown icon theme '{}'. Choose none, gerbera or techno.", theme);
+        this->exit(EXIT_FAILURE);
+    }
     return true;
 }
 
@@ -597,8 +603,7 @@ bool GerberaRuntime::checkDirs()
 
 bool GerberaRuntime::printConfig()
 {
-    ConfigGenerator configGenerator(definition, GERBERA_VERSION, exampleConfigSet, sections, configModules,
-        containerIconTheme.value_or(ContainerIconTheme::Gerbera));
+    ConfigGenerator configGenerator(definition, GERBERA_VERSION, exampleConfigSet, sections, configModules, containerIconTheme);
     if (!configDirSet) {
         confDir = "";
     }

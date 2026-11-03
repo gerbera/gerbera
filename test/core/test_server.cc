@@ -92,9 +92,9 @@ TEST_F(ServerTest, ServerOutputsHelpInformation)
         " *Print a default config.xml file and exit",
         "    --create-example-config \\[=Section\\(=All\\)\\]",
         " *Print a example config.xml file and exit",
-        "    --create-advanced-config \\[=Theme/Section\\(=All\\)\\]",
-        " *Print an advanced config.xml with gerbera( or)? *",
-        " *(or )?techno icons and exit",
+        "    --create-advanced-config \\[=Section\\(=All\\)\\]",
+        " *Print an advanced config.xml and exit",
+        "    --icon-theme Theme *none \\(default\\), gerbera or techno",
         "    --modules \\[=Module\\(=None\\)\\]",
         " *Create \\\"from-file\\\" module statements in",
         " *config\\.xml",
@@ -144,8 +144,6 @@ TEST_F(ServerTest, ServerOutputsHelpInformation)
 
     fs::path cmd = fs::path(CMAKE_BINARY_DIR) / "gerbera --help 2>&1";
     std::string output = exec(cmd.c_str());
-
-    ASSERT_THAT(output, ContainsRegex("Print an advanced config.xml with gerbera[[:space:]]+or[[:space:]]+techno icons and exit"));
 
     auto expectedOutput = splitString(expected, '\n', '\0', true);
     for (auto&& line : expectedOutput) {

@@ -476,7 +476,7 @@ void ConfigGenerator::generateDynamics(const fs::path& dataDir)
     auto&& containersTag = definition->mapConfigOption(ConfigVal::SERVER_DYNAMIC_CONTENT_LIST);
     auto&& containerTag = definition->mapConfigOption(ConfigVal::A_DYNAMIC_CONTAINER);
     const auto setIcon = [&](const std::shared_ptr<pugi::xml_node>& node, const std::string& filename) {
-        if (level > ConfigLevel::Example && !dataDir.empty())
+        if (!containerIconDir.empty() && !dataDir.empty())
             setXmlValue(node, ConfigVal::A_DYNAMIC_CONTAINER_IMAGE, (dataDir / containerIconDir / filename).string());
     };
 
@@ -744,13 +744,13 @@ void ConfigGenerator::generateImportOptions(
         { ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigLevel::Advanced },
         { ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, ConfigLevel::Advanced },
         { ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigLevel::Advanced },
-        { ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigLevel::Advanced },
+        { ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, containerIconDir.empty() ? ConfigLevel::Advanced : ConfigLevel::Base },
         { ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST, ConfigLevel::Example },
         { ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST, ConfigLevel::Example },
         { ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST, ConfigLevel::Example },
         { ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST, ConfigLevel::Example },
         { ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST, ConfigLevel::Example },
-        { ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION, ConfigLevel::Example },
+        { ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION, containerIconDir.empty() ? ConfigLevel::Example : ConfigLevel::Base },
         { ConfigVal::IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT, ConfigLevel::Example },
         { ConfigVal::IMPORT_RESOURCES_CONTAINERART_MINDEPTH, ConfigLevel::Example },
 #ifdef HAVE_INOTIFY
@@ -772,21 +772,18 @@ void ConfigGenerator::generateImportOptions(
         auto cs = definition->findConfigSetup<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST);
         cs->setDefaultValue(defaultFanArtFile);
     }
-    if (level > ConfigLevel::Example) {
-        /// @brief default values for ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST
-        static const std::vector<std::string> defaultContainerArtFile {
-            "%upnpclass%-%filename%.png",
-            "folder.jpg",
-            "poster.jpg",
-            "cover.jpg",
-            "albumartsmall.jpg",
-            "%upnpclass%.png",
-        };
-        auto cs = definition->findConfigSetup<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST);
-        cs->setDefaultValue(defaultContainerArtFile);
-        auto location = definition->findConfigSetup(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION);
-        location->setDefaultValue(prefixDir / containerIconDir);
+    auto containerArtFiles = std::vector<std::string> {};
+    if (level > ConfigLevel::Example || !containerIconDir.empty()) {
+        containerArtFiles = { "folder.jpg", "poster.jpg", "cover.jpg", "albumartsmall.jpg" };
+        if (!containerIconDir.empty()) {
+            containerArtFiles.insert(containerArtFiles.begin(), "%upnpclass%-%filename%.png");
+            containerArtFiles.emplace_back("%upnpclass%.png");
+        }
     }
+    auto containerArt = definition->findConfigSetup<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST);
+    containerArt->setDefaultValue(containerArtFiles);
+    auto containerArtLocation = definition->findConfigSetup(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION);
+    containerArtLocation->setDefaultValue(containerIconDir.empty() ? fs::path {} : prefixDir / containerIconDir);
     if (level > ConfigLevel::Example) {
         /// @brief default values for ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST
         static const std::vector<std::string> defaultSubtitleFile {

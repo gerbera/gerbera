@@ -57,6 +57,7 @@ using HandleCallback = std::function<bool()>;
 #define GRB_OPTION_CREATECONFIG "create-config"
 #define GRB_OPTION_CREATEEXAMPLECONFIG "create-example-config"
 #define GRB_OPTION_CREATEADVANCEDCONFIG "create-advanced-config"
+#define GRB_OPTION_ICONTHEME "icon-theme"
 #define GRB_OPTION_CHECKCONFIG "check-config"
 #define GRB_OPTION_MODULES "modules"
 #define GRB_OPTION_OFFLINE "offline"
@@ -180,7 +181,7 @@ private:
     int configModules = { 0 };
     bool lastFM = false;
     ConfigLevel exampleConfigSet;
-    std::optional<ContainerIconTheme> containerIconTheme;
+    ContainerIconTheme containerIconTheme {};
     int sections = { 0 };
     bool createConfigSet = false;
     bool configDirSet = false;
@@ -210,10 +211,8 @@ private:
     bool setRotatelog(const std::string& arg);
     /// @brief handler for config creation
     bool createConfig(const std::string& arg, ConfigLevel level);
-    /// @brief handler for example config creation
-    bool createExampleConfig(const std::string& arg);
-    /// @brief handler for advanced example config creation
-    bool createAdvancedConfig(const std::string& arg);
+    /// @brief handler for selecting the generated container icon theme
+    bool setIconTheme(const std::string& arg);
     /// @brief handler for home directory
     bool setHome(const std::string& arg);
     /// @brief handler for custom scripts directory

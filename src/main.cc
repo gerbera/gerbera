@@ -209,7 +209,8 @@ int main(int argc, char** argv, char** envp)
         (GRB_OPTION_COMPILEINFO, "Print compile info and exit") //
         (GRB_OPTION_CREATECONFIG, "Print a default config.xml file and exit", cxxopts::value<std::string>()->implicit_value("All"), "Section") //
         (GRB_OPTION_CREATEEXAMPLECONFIG, "Print a example config.xml file and exit", cxxopts::value<std::string>()->implicit_value("All"), "Section") //
-        (GRB_OPTION_CREATEADVANCEDCONFIG, "Print an advanced config.xml with gerbera or techno icons and exit", cxxopts::value<std::string>()->implicit_value("All"), "Theme/Section") //
+        (GRB_OPTION_CREATEADVANCEDCONFIG, "Print an advanced config.xml and exit", cxxopts::value<std::string>()->implicit_value("All"), "Section") //
+        (GRB_OPTION_ICONTHEME, "none (default), gerbera or techno", cxxopts::value<std::string>(), "Theme") //
         (GRB_OPTION_MODULES, "Create \"from-file\" module statements in config.xml", cxxopts::value<std::string>()->implicit_value("None"), "Module") //
         (GRB_OPTION_CHECKCONFIG, "Check config.xml file and exit") //
         (GRB_OPTION_PRINTOPTIONS, "Print simple config options and exit") //

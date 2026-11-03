@@ -63,8 +63,11 @@ enum class ConfigLevel : int {
     Advanced, // --create-advanced-config
 };
 
-enum class ContainerIconTheme { Gerbera,
-    Techno };
+enum class ContainerIconTheme {
+    None,
+    Gerbera,
+    Techno,
+};
 
 /// @brief Class to generate default or example configuration when called with respective command line
 /// also used in tests
@@ -76,14 +79,16 @@ public:
         ConfigLevel level,
         int sections = 0,
         int modules = 0,
-        ContainerIconTheme iconTheme = ContainerIconTheme::Gerbera)
+        ContainerIconTheme iconTheme = ContainerIconTheme::None)
         : definition(std::move(definition))
         , version(std::move(version))
         , level(level)
         , generateSections(sections)
         , doModules(modules)
-        , containerIconDir(iconTheme == ContainerIconTheme::Techno ? "container-icons" : "container-icons/gerbera")
+        , containerIconDir(iconTheme == ContainerIconTheme::None ? "" : "container-icons")
     {
+        if (iconTheme == ContainerIconTheme::Gerbera)
+            containerIconDir /= "gerbera";
     }
     /// @brief gerate full output
     std::string generate(
