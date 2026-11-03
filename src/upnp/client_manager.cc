@@ -38,6 +38,7 @@
 
 #include <algorithm>
 #include <array>
+#include <iterator>
 #include <pugixml.hpp>
 #include <sys/socket.h>
 #include <upnp.h>
@@ -456,8 +457,7 @@ const ClientObservation* ClientManager::updateCache(
     } else {
         // add new client
         cache.emplace_back(addr, userAgent, now, now, headers, pInfo);
-        it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
-            { return entry.addr->equals(addr); });
+        it = std::prev(cache.end());
     }
     if (this->database && (!this->server || this->server->isRunning()))
         this->database->saveClients(cache);

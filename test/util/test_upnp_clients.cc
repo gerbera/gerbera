@@ -20,6 +20,7 @@
     $Id$
 */
 
+#include "config/config_val.h"
 #include "config/result/client_config.h"
 #include "upnp/client_manager.h"
 #include "upnp/clients.h"
@@ -34,6 +35,10 @@ class MyConfigMock final : public ConfigMock {
 public:
     MyConfigMock() { list = std::make_shared<ClientConfigList>(); }
     std::shared_ptr<ClientConfigList> getClientConfigListOption(ConfigVal option) const override { return list; }
+    long long getLongOption(ConfigVal option) const override
+    {
+        return option == ConfigVal::CLIENTS_CACHE_THRESHOLD ? 1 : ConfigMock::getLongOption(option);
+    }
     std::shared_ptr<ClientConfigList> list;
 };
 
@@ -126,13 +131,17 @@ TEST_F(UpnpClientsTest, samsungAllShare)
 {
     const ClientObservation* pClient;
     auto addr = std::make_shared<GrbNet>("192.168.1.42");
+    constexpr auto allShareAgent = "DLNADOC/1.50 SEC_HHP_[PC]LPC001/1.0  MS-DeviceCaps/1024";
 
     // 1. via actionReq (e.g. doBrowse)
-    pClient = subject->getInfo(addr, "DLNADOC/1.50 SEC_HHP_[PC]LPC001/1.0  MS-DeviceCaps/1024", nullptr);
+    pClient = subject->getInfo(addr, allShareAgent, nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::SamsungAllShare);
 
-    // 2. via fileInfo (e.g. info/open/read video)
+    // AllShare can share its address with other clients, so the other user agent gets its own observation.
     pClient = subject->getInfo(addr, "samsung-agent/1.1", nullptr);
+    EXPECT_EQ(pClient->pInfo->type, ClientType::Unknown);
+
+    pClient = subject->getInfo(addr, allShareAgent, nullptr);
     EXPECT_EQ(pClient->pInfo->type, ClientType::SamsungAllShare);
 }
 
