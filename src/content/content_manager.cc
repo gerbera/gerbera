@@ -717,6 +717,8 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         log_error("Could not open {}: {}", location.c_str(), ec.message());
     }
     if (ec || !dIter) {
+        if (ec && ec != std::errc::no_such_file_or_directory && ec != std::errc::not_a_directory)
+            return; // An inaccessible directory is not evidence that its contents were deleted.
         if (adir->persistent()) {
             removeObject(adir, obj, location, false);
             if (location == adir->getLocation()) {

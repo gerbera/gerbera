@@ -396,6 +396,7 @@ void Script::init()
 
 void Script::loadContent()
 {
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     std::string commonFdrPath = config->getOption(ConfigVal::IMPORT_SCRIPTING_COMMON_FOLDER);
 
     if (commonFdrPath.empty()) {

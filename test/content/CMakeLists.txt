@@ -47,7 +47,7 @@ if(WITH_JS
    AND WITH_AVCODEC
    AND CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_sources(testcontent PRIVATE playlist_import_test.cc test_xml_playlist_import.cc
-                                       test_asx_import.cc)
+                                       test_asx_import.cc test_inotify_import.cc)
     target_compile_definitions(testcontent PRIVATE GERBERA_SOURCE_DIR="${CMAKE_SOURCE_DIR}")
 endif()
 

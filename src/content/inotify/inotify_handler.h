@@ -95,6 +95,7 @@ private:
     std::shared_ptr<CdsObject> changedObject;
     fs::directory_entry dirEnt;
     fs::path path;
+    bool reconcileReplacement {};
 };
 
 #endif
