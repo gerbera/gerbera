@@ -264,8 +264,12 @@ TEST_P(InotifyImportTest, NestedAutoscanCleanupPreservesParentAndReplacementWatc
     ASSERT_TRUE(waitForMedia(track, "Old nested root"));
     GrbFile old(nested);
     ASSERT_NE(old.open("rb"), nullptr);
+    auto replacement = root / "Replacement";
+    auto replacementTrack = replacement / track.filename();
+    writeWave(replacementTrack, "New nested root");
+    fs::last_write_time(replacementTrack, fs::last_write_time(track));
     fs::remove_all(nested);
-    writeWave(track, "New nested root");
+    fs::rename(replacement, nested);
     ASSERT_TRUE(waitForMedia(track, "New nested root"));
     ASSERT_TRUE(old.close());
     ASSERT_TRUE(drainEvents());

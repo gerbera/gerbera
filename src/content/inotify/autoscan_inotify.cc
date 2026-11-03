@@ -188,7 +188,7 @@ void AutoscanInotify::threadProc()
                 asSetting.recursive = adir ? adir->getRecursive() : false;
                 asSetting.hidden = adir ? adir->getHidden() : defHidden;
                 asSetting.rescanResource = true;
-                asSetting.async = false;
+                asSetting.async = true; // Share the content worker with rescans.
                 asSetting.resourcePatterns.clear();
                 asSetting.mergeOptions(config, path);
 

@@ -39,6 +39,7 @@
 #include <iconv.h>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 
 class Config;
@@ -75,6 +76,9 @@ protected:
         const std::string& str,
         bool validate,
         std::size_t* stoppedAt = nullptr);
+
+private:
+    std::mutex conversionMutex;
 };
 
 class ConverterManager {

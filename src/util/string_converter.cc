@@ -118,6 +118,8 @@ std::pair<std::string, std::string> StringConverter::_convert(
     bool validate,
     std::size_t* stoppedAt)
 {
+    // ConverterManager shares converters with the same charset across callers.
+    std::lock_guard lock(conversionMutex);
     // reset to initial state
     if (dirty) {
         iconv(cd, nullptr, nullptr, nullptr, nullptr);
