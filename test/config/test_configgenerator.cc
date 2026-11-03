@@ -85,7 +85,7 @@ TEST_F(ConfigGeneratorTest, ConfigIncludesSelectedContainerIconsAndExistingCover
     };
     for (const auto& [level, dataDir] : configs) {
         const std::map<ContainerIconTheme, fs::path> themes {
-            { ContainerIconTheme::Gerbera, "container-icons/gerbera" }, { ContainerIconTheme::Techno, "container-icons" }
+            { ContainerIconTheme::Gerbera, "container-icons/gerbera" }, { ContainerIconTheme::Techno, "container-icons/techno" }
         };
         for (const auto& [theme, themeDir] : themes) {
             ConfigGenerator generator(definition, GERBERA_TEST, level, 0, 0, theme);

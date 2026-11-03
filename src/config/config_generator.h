@@ -87,8 +87,8 @@ public:
         , doModules(modules)
         , containerIconDir(iconTheme == ContainerIconTheme::None ? "" : "container-icons")
     {
-        if (iconTheme == ContainerIconTheme::Gerbera)
-            containerIconDir /= "gerbera";
+        if (iconTheme != ContainerIconTheme::None)
+            containerIconDir /= iconTheme == ContainerIconTheme::Gerbera ? "gerbera" : "techno";
     }
     /// @brief gerate full output
     std::string generate(

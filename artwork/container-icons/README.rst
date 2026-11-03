@@ -3,13 +3,13 @@ Container icon theme
 
 Two transparent 3D PNG themes are supplied for DLNA/UPnP container artwork:
 ``Gerbera`` (20 originals with Gerbera flowers) and ``Techno`` (20 originals).
-``Gerbera`` is selected by ``--create-advanced-config``. Both use the existing
-``ContainerArt`` handler and dynamic-container ``image`` attribute.
+Each theme has its own ``gerbera`` or ``techno`` subdirectory. Both use the
+existing ``ContainerArt`` handler and dynamic-container ``image`` attribute.
 
 Installation also supplies category aliases for the unmodified English layout,
 such as ``Audio.png``, ``Albums.png``, and ``PC Directory.png``.
-The original PNGs remain available under the names below. ``manifest.json``
-records their SHA-256 checksums; see ``LICENSE.txt`` for license and provenance.
+The original PNGs remain available under the names below. Each theme directory
+contains a ``manifest.json`` with checksums and a ``LICENSE.txt`` with provenance.
 
 The ``Gerbera`` theme uses Gerbera flower details in a three-dimensional
 style, with its own license and checksum manifest.
@@ -96,7 +96,7 @@ settings; there is no additional script to install.
      - Techno
    * - Container resource location
      - ``/usr/local/share/gerbera/container-icons/gerbera``
-     - ``/usr/local/share/gerbera/container-icons``
+     - ``/usr/local/share/gerbera/container-icons/techno``
    * - ``/LastAdded`` image, relative to that location
      - ``recently-added.png``
      - ``recently-added.png``

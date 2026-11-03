@@ -34,11 +34,9 @@ install(
     PATTERN "README.rst"
     PATTERN "manifest.json")
 
-foreach(_container_icon_theme IN ITEMS "." "gerbera")
-    set(_container_icon_destination "${CMAKE_INSTALL_DATADIR}/container-icons")
-    if(NOT _container_icon_theme STREQUAL ".")
-        string(APPEND _container_icon_destination "/${_container_icon_theme}")
-    endif()
+foreach(_container_icon_theme IN ITEMS "gerbera" "techno")
+    set(_container_icon_destination
+        "${CMAKE_INSTALL_DATADIR}/container-icons/${_container_icon_theme}")
     foreach(
         _container_icon_alias IN
         ITEMS "computer;PC Directory"
@@ -101,7 +99,7 @@ foreach(_container_icon_theme IN ITEMS "." "gerbera")
 endforeach()
 
 foreach(_container_icon_fragment IN ITEMS "container-icons.xml;gerbera"
-                                          "container-icons-techno.xml;.")
+                                          "container-icons-techno.xml;techno")
     list(GET _container_icon_fragment 0 _container_icon_config_name)
     list(GET _container_icon_fragment 1 CONTAINER_ICON_THEME_DIR)
     configure_file("${PROJECT_SOURCE_DIR}/config/container-icons.xml.in"
