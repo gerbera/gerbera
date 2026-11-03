@@ -1158,11 +1158,8 @@ void ImportService::assignFanArt(
             }
         }
     }
-    if (!fanart) {
-        std::vector<int> newIds;
-        metadataService->getHandler(ContentHandler::CONTAINERART)->fillFallbackMetadata(container, newIds);
-        fanart = container->getResource(ResourcePurpose::Thumbnail);
-    }
+    if (!fanart)
+        fanart = metadataService->getHandler(ContentHandler::CONTAINERART)->fillFallbackMetadata(container);
     if (fanart) {
         container->clearResources();
         auto theFanArt = std::make_shared<CdsResource>(fanart->getHandlerType(), fanart->getPurpose(), fanart->getAttributes(), fanart->getParameters(), fanart->getOptions());

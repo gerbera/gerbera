@@ -104,9 +104,7 @@ public:
     bool fillMetadata(
         const std::shared_ptr<CdsObject>& obj,
         std::vector<int>& newIds) override;
-    bool fillFallbackMetadata(
-        const std::shared_ptr<CdsObject>& obj,
-        std::vector<int>& newIds) override;
+    std::shared_ptr<CdsResource> fillFallbackMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsResource>& resource) override;
@@ -115,6 +113,7 @@ private:
     bool fillMetadata(
         const std::shared_ptr<CdsObject>& obj,
         const std::vector<fs::path>& paths);
+    // The handler is reused across folders. The setup belongs to its config and database.
     std::unique_ptr<ContentPathSetup> setup;
 };
 

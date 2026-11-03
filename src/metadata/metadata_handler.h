@@ -88,10 +88,8 @@ public:
         std::vector<int>& newIds)
         = 0;
 
-    /// @brief add default artwork only after actual and inherited artwork lookup
-    virtual bool fillFallbackMetadata(
-        const std::shared_ptr<CdsObject>& obj,
-        std::vector<int>& newIds) { return false; }
+    /// @brief return existing artwork or add and return a default
+    virtual std::shared_ptr<CdsResource> fillFallbackMetadata(const std::shared_ptr<CdsObject>& obj) { return nullptr; }
 
     /// @brief stream content of object or resource to client
     /// @param obj Object to stream

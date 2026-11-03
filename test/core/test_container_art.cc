@@ -116,18 +116,25 @@ TEST_F(ContainerArtTest, TypedDefaultsPreserveNamedCategoriesLocalCoversAndLater
     album->setLocation(directory / "album", CdsEntryType::Directory);
     std::ofstream(directory / "album/folder.jpg") << "local cover";
     ASSERT_TRUE(handler.fillMetadata(album, newIds));
-    EXPECT_EQ(album->getResource(ResourcePurpose::Thumbnail)->getAttribute(ResourceAttribute::RESOURCE_FILE), (directory / "album/folder.jpg").string());
-    EXPECT_FALSE(handler.fillFallbackMetadata(album, newIds));
+    auto cover = album->getResource(ResourcePurpose::Thumbnail);
+    ASSERT_NE(cover, nullptr);
+    EXPECT_EQ(cover->getAttribute(ResourceAttribute::RESOURCE_FILE), (directory / "album/folder.jpg").string());
+    EXPECT_EQ(handler.fillFallbackMetadata(album), cover);
+    EXPECT_TRUE(cover->getOption(RESOURCE_OPTION_CONTAINER_ART_FALLBACK).empty());
 
     auto photoAlbum = std::make_shared<CdsContainer>("Audio", "object.container.album.photoAlbum");
     EXPECT_FALSE(handler.fillMetadata(photoAlbum, newIds));
-    ASSERT_TRUE(handler.fillFallbackMetadata(photoAlbum, newIds));
-    EXPECT_EQ(photoAlbum->getResource(ResourcePurpose::Thumbnail)->getAttribute(ResourceAttribute::RESOURCE_FILE), (config->directory / "object.container.album.png").string());
+    auto albumFallback = handler.fillFallbackMetadata(photoAlbum);
+    ASSERT_NE(albumFallback, nullptr);
+    EXPECT_EQ(albumFallback, photoAlbum->getResource(ResourcePurpose::Thumbnail));
+    EXPECT_EQ(albumFallback->getAttribute(ResourceAttribute::RESOURCE_FILE), (config->directory / "object.container.album.png").string());
 
     auto generic = std::make_shared<CdsContainer>("Unknown folder");
     EXPECT_FALSE(handler.fillMetadata(generic, newIds));
-    ASSERT_TRUE(handler.fillFallbackMetadata(generic, newIds));
-    EXPECT_EQ(generic->getResource(ResourcePurpose::Thumbnail)->getAttribute(ResourceAttribute::RESOURCE_FILE), (config->directory / "object.container.png").string());
+    auto genericFallback = handler.fillFallbackMetadata(generic);
+    ASSERT_NE(genericFallback, nullptr);
+    EXPECT_EQ(genericFallback, generic->getResource(ResourcePurpose::Thumbnail));
+    EXPECT_EQ(genericFallback->getAttribute(ResourceAttribute::RESOURCE_FILE), (config->directory / "object.container.png").string());
 
     ImportService importer(context, converters);
     importer.run(nullptr);
@@ -154,5 +161,5 @@ TEST_F(ContainerArtTest, TypedDefaultsPreserveNamedCategoriesLocalCoversAndLater
     EXPECT_TRUE(legacy.getContentPath(root, SETTING_CONTAINERART, config->directory, ContentPathMode::Fallback).front().empty());
     ContainerArtHandler legacyHandler(context);
     auto legacyContainer = std::make_shared<CdsContainer>("No configured default");
-    EXPECT_FALSE(legacyHandler.fillFallbackMetadata(legacyContainer, newIds));
+    EXPECT_EQ(legacyHandler.fillFallbackMetadata(legacyContainer), nullptr);
 }
