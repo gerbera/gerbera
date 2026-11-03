@@ -89,13 +89,7 @@ void AutoscanInotify::threadProc()
                 // read dir
                 auto dirEnt = fs::directory_entry(location, ec);
 
-                if (adir->getRecursive()) {
-                    log_debug("Removing recursive watch: {}", location.c_str());
-                    monitorUnmonitorRecursive(dirEnt, true, adir, true, adir->getFollowSymlinks());
-                } else {
-                    log_debug("Removing non-recursive watch: {}", location.c_str());
-                    unmonitorDirectory(location, adir);
-                }
+                monitorUnmonitorRecursive(dirEnt, true, adir, true, adir->getFollowSymlinks());
 
                 lock.lock();
             }
@@ -122,14 +116,8 @@ void AutoscanInotify::threadProc()
 
                 auto dirEnt = fs::directory_entry(location, ec);
                 if (!ec) {
-                    // handle dir recursively
-                    if (adir->getRecursive()) {
-                        log_debug("Adding recursive watch: {}", location.c_str());
-                        monitorUnmonitorRecursive(dirEnt, false, adir, true, adir->getFollowSymlinks());
-                    } else {
-                        log_debug("Adding non-recursive watch: {}", location.c_str());
-                        monitorDirectory(location, adir, true);
-                    }
+                    // Honors recursive=no while still watching direct files.
+                    monitorUnmonitorRecursive(dirEnt, false, adir, true, adir->getFollowSymlinks());
                     content->rescanDirectory(adir, adir->getObjectID(), location, false);
                 } else {
                     log_error("Failed to read autoscan directory {}: {}", location.c_str(), ec.message());
@@ -144,12 +132,50 @@ void AutoscanInotify::threadProc()
             inotify_event* event = inotify->nextEvent();
             /* --- */
 
-            if (event && (event->mask & events)) {
-                auto handler = InotifyHandler(this, event, event->mask & events);
+            if (event && (event->mask & IN_Q_OVERFLOW)) {
+                log_warning("Inotify queue overflow: rebuilding watches and reconciling monitored directories");
+                auto directories = content->getAutoscanDirectories();
+                auto replacement = std::make_unique<Inotify>();
+                AutoLock watchLock(mutex);
+                watches.clear();
+                inotify.swap(replacement);
+                for (const auto& adir : directories) {
+                    if (adir->getScanMode() == AutoscanScanMode::INotify)
+                        monitorQueue.push(adir);
+                }
+                continue;
+            }
+
+            if (event && (event->mask & (events | IN_IGNORED))) {
+                auto handler = InotifyHandler(this, event, event->mask & (events | IN_IGNORED));
                 auto wdObj = getWatch(handler);
 
                 if (!wdObj)
                     continue;
+
+                if (event->mask & IN_IGNORED) {
+                    handler.doIgnored();
+                    continue;
+                }
+                // The kernel returns the same wd only for the same watched object,
+                // including another hard link. MASK_ADD preserves its event mask.
+                auto currentWd = inotify->addWatch(wdObj->getPath(), IN_DELETE_SELF | IN_MASK_ADD);
+                if (currentWd >= 0 && currentWd != event->wd) {
+                    if (watches.find(currentWd) == watches.end())
+                        inotify->removeWatch(currentWd);
+                    log_debug("Ignoring event {} for replaced watch {} at {}", InotifyUtil::mapFlags(event->mask), event->wd, wdObj->getPath().c_str());
+                    if (auto start = wdObj->getStartPoint())
+                        monitor(start->getAutoscanDirectory());
+                    continue;
+                }
+                if (currentWd < 0) {
+                    std::error_code statusError;
+                    bool exists = fs::exists(wdObj->getPath(), statusError);
+                    if (statusError && statusError != std::errc::no_such_file_or_directory && statusError != std::errc::not_a_directory)
+                        throw fs::filesystem_error("Cannot verify inotify watch", wdObj->getPath(), statusError);
+                    if (exists)
+                        continue; // A failed identity check does not prove deletion.
+                }
 
                 fs::path path = handler.getPath(wdObj);
                 auto [isDir, adir] = handler.getAutoscanDirectory(wdObj);
@@ -297,6 +323,8 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<DirectoryWa
     auto&& wdWatches = wdObj->getWdWatches();
     for (auto it = wdWatches.begin(); it != wdWatches.end(); /*++it*/) {
         if ((*it)->getType() == WatchType::Move) {
+            auto watchMv = std::static_pointer_cast<WatchMove>(*it);
+            int removeWd = watchMv->getRemoveWd();
             if (wdWatches.size() == 1) {
                 inotify->removeWatch(wd);
                 ++it;
@@ -304,8 +332,6 @@ void AutoscanInotify::checkMoveWatches(int wd, const std::shared_ptr<DirectoryWa
                 it = wdWatches.erase(it);
             }
 
-            auto watchMv = std::static_pointer_cast<WatchMove>(*it);
-            int removeWd = watchMv->getRemoveWd();
             try {
                 auto wdToRemove = watches.at(removeWd);
 
@@ -371,17 +397,24 @@ std::shared_ptr<DirectoryWatch> AutoscanInotify::monitorUnmonitorRecursive(const
 {
     log_debug("start {}", startPath.path().c_str());
 
+    std::error_code ec;
+    bool directory = startPath.is_directory(ec);
+    if (ec) {
+        log_warning("Cannot inspect watched object {}: {}", startPath.path().c_str(), ec.message());
+        return nullptr;
+    }
     int result = INOTIFY_ROOT;
     if (unmonitor)
         unmonitorDirectory(startPath.path(), adir);
     else {
-        result = monitorDirectory(startPath.path(), adir, isStartPoint);
+        result = monitorDirectory(startPath.path(), adir, isStartPoint, false, {}, directory ? 0 : IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT);
         if (result <= INOTIFY_ROOT)
             return nullptr;
     }
 
-    std::error_code ec;
-    if (!startPath.exists(ec) || !startPath.is_directory(ec)) {
+    if (!directory)
+        return (result > INOTIFY_ROOT) ? watches.at(result) : nullptr;
+    if (!startPath.exists(ec)) {
         log_warning("Could not open {}: {}", startPath.path().c_str(), ec.message());
         return nullptr;
     }
@@ -408,9 +441,8 @@ std::shared_ptr<DirectoryWatch> AutoscanInotify::monitorUnmonitorRecursive(const
             continue;
         }
 
-        if (dirEnt.is_directory(ec) && asSetting.recursive) {
+        if ((dirEnt.is_directory(ec) && asSetting.recursive) || isRegularFile(dirEnt, ec))
             monitorUnmonitorRecursive(dirEnt, unmonitor, adir, false, followSymlinks);
-        }
 
         if (ec) {
             log_error("AutoscanInotify::monitorUnmonitorRecursive {}: Failed to read {}, {}", startPath.path().c_str(), dirEnt.path().c_str(), ec.message());
@@ -424,9 +456,10 @@ int AutoscanInotify::monitorDirectory(
     const std::shared_ptr<AutoscanDirectory>& adir,
     bool isStartPoint,
     bool hasNonExisting,
-    const fs::path& nonExistingPath)
+    const fs::path& nonExistingPath,
+    InotifyFlags monitoredEvents)
 {
-    int wd = inotify->addWatch(path, events, adir->getRetryCount());
+    int wd = inotify->addWatch(path, monitoredEvents ? monitoredEvents : events, adir->getRetryCount());
 
     log_debug("start {} => {}", path.c_str(), wd);
 
@@ -443,6 +476,7 @@ int AutoscanInotify::monitorDirectory(
         std::shared_ptr<DirectoryWatch> wdObj;
         try {
             wdObj = watches.at(wd);
+            wdObj->setPath(path);
             if (parentWd > INOTIFY_ROOT && wdObj->getParentWd() <= INOTIFY_ROOT) {
                 wdObj->setParentWd(parentWd);
             }
@@ -553,8 +587,8 @@ void AutoscanInotify::removeWatchMoves(int wd)
                         }
                         inotify->removeWatch(checkWd);
                     }
-                    ++it;
                 }
+                ++it;
             }
         }
         checkWd = wdObj->getParentWd();

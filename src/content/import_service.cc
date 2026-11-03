@@ -386,58 +386,63 @@ std::shared_ptr<CdsObject> ImportService::doImport(
         log_debug("Additional scan {}, already active {}", location.c_str(), activeScan.c_str());
     }
 
-    if (!rootPath.empty()) {
-        auto rootDirEntry = fs::directory_entry(rootPath);
-        stateCache->cacheState(rootPath, rootDirEntry, ImportState::New, autoscanDir, toSeconds(rootDirEntry.last_write_time(ec)));
-    }
-    auto rootEntry = fs::directory_entry(location, ec);
-    if (ec) {
-        log_error("Failed to start {}, {}", location.c_str(), ec.message());
-        return {};
-    }
-    auto isDir = rootEntry.is_directory(ec);
-    if (ec) {
-        log_error("Failed to start {}, {}", location.c_str(), ec.message());
-        return {};
-    }
+    try {
+        if (!rootPath.empty()) {
+            auto rootDirEntry = fs::directory_entry(rootPath);
+            stateCache->cacheState(rootPath, rootDirEntry, ImportState::New, autoscanDir, toSeconds(rootDirEntry.last_write_time(ec)));
+        }
+        auto rootEntry = fs::directory_entry(location, ec);
+        if (ec) {
+            throw fs::filesystem_error("Cannot start import", location, ec);
+        }
+        auto isDir = rootEntry.is_directory(ec);
+        if (ec) {
+            throw fs::filesystem_error("Cannot determine import target type", location, ec);
+        }
 
-    stateCache->cacheState(location, rootEntry, ImportState::New, autoscanDir, toSeconds(rootEntry.last_write_time(ec)), settings.changedObject);
-    if (isDir) {
-        readDir(stateCache, location, settings);
-    } else {
-        readFile(stateCache, location);
-    }
-    removeHidden(stateCache, settings);
-    createContainers(stateCache, CDS_ID_FS_ROOT, settings);
-    createItems(stateCache, settings);
-    updateFanArt(stateCache, isDir);
-    fillLayout(stateCache, task);
+        stateCache->cacheState(location, rootEntry, ImportState::New, autoscanDir, toSeconds(rootEntry.last_write_time(ec)), settings.changedObject);
+        if (isDir) {
+            readDir(stateCache, location, settings);
+        } else {
+            readFile(stateCache, location);
+        }
+        removeHidden(stateCache, settings);
+        createContainers(stateCache, CDS_ID_FS_ROOT, settings);
+        createItems(stateCache, settings);
+        updateFanArt(stateCache, isDir);
+        fillLayout(stateCache, task);
 
-    // update currentContent
-    for (auto&& [itemPath, stateEntry] : stateCache->contentStateCache) {
-        if (!stateEntry)
-            continue;
-        if (stateEntry->getObject() && stateEntry->getState() <= ImportState::Existing) {
-            auto entry = currentContent.find(stateEntry->getObject()->getID());
-            if (entry != currentContent.end()) {
-                currentContent.erase(stateEntry->getObject()->getID());
+        // update currentContent
+        for (auto&& [itemPath, stateEntry] : stateCache->contentStateCache) {
+            if (!stateEntry)
+                continue;
+            if (stateEntry->getObject() && stateEntry->getState() <= ImportState::Existing) {
+                auto entry = currentContent.find(stateEntry->getObject()->getID());
+                if (entry != currentContent.end()) {
+                    currentContent.erase(stateEntry->getObject()->getID());
+                }
             }
         }
-    }
-    if (!currentContent.empty())
+        if (!currentContent.empty())
+            clearCache();
+
+        log_debug("import of {} left {} item(s) to be deleted", location.c_str(), currentContent.size());
+
+        if (!task && autoscanDir && autoscanDir->updateLMT()) {
+            log_debug("Updating last_modified for autoscan directory {}", autoscanDir->getLocation().c_str());
+            database->updateAutoscanDirectory(autoscanDir);
+        }
+        if (activeScan == location)
+            activeScan.clear();
+        if (importStateCache->contentStateCache.size() < stateCache->contentStateCache.size())
+            importStateCache = stateCache;
+        return stateCache->getObject(location);
+    } catch (const fs::filesystem_error&) {
+        if (activeScan == location)
+            activeScan.clear();
         clearCache();
-
-    log_debug("import of {} left {} item(s) to be deleted", location.c_str(), currentContent.size());
-
-    if (!task && autoscanDir && autoscanDir->updateLMT()) {
-        log_debug("Updating last_modified for autoscan directory {}", autoscanDir->getLocation().c_str());
-        database->updateAutoscanDirectory(autoscanDir);
+        throw;
     }
-    if (activeScan == location)
-        activeScan.clear();
-    if (importStateCache->contentStateCache.size() < stateCache->contentStateCache.size())
-        importStateCache = stateCache;
-    return stateCache->getObject(location);
 }
 
 void ImportService::readDir(
@@ -447,8 +452,7 @@ void ImportService::readDir(
     log_debug("start {}", location.string());
     auto dirIterator = fs::directory_iterator(location, ec);
     if (ec) {
-        log_error("Failed to iterate {}, {}", location.c_str(), ec.message());
-        return;
+        throw fs::filesystem_error("Cannot enumerate import directory", location, ec);
     }
     settings.mergeOptions(config, location);
     for (auto&& dirEntry : dirIterator) {
@@ -461,12 +465,10 @@ void ImportService::readDir(
             if (!ec) {
                 readDir(stateCache, entryPath, settings);
             } else {
-                stateCache->cacheState(entryPath, dirEntry, ImportState::Broken, autoscanDir);
-                log_error("ImportService::readDir {}: Failed to read {}, {}", location.c_str(), entryPath.c_str(), ec.message());
+                throw fs::filesystem_error("Cannot determine import entry type", entryPath, ec);
             }
         } else if (ec) {
-            stateCache->cacheState(entryPath, dirEntry, ImportState::Broken, autoscanDir);
-            log_error("ImportService::readDir {}: Failed to read {}, {}", location.c_str(), entryPath.c_str(), ec.message());
+            throw fs::filesystem_error("Cannot read import entry", entryPath, ec);
         }
     }
     log_debug("end {}", location.string());

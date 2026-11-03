@@ -51,6 +51,7 @@ ScriptingRuntime::~ScriptingRuntime()
 
 bool ScriptingRuntime::reloadFolders()
 {
+    AutoLock lock(mutex);
     for (auto&& script : activeScripts) {
         script->loadContent();
     }
@@ -69,6 +70,7 @@ duk_context* ScriptingRuntime::createContext(const std::string& name)
 
 void ScriptingRuntime::destroyContext(const std::string& name)
 {
+    AutoLock lock(mutex);
     duk_push_heap_stash(ctx);
     duk_del_prop_string(ctx, -1, name.c_str());
     duk_pop(ctx);

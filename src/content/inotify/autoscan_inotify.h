@@ -118,7 +118,8 @@ private:
         const std::shared_ptr<AutoscanDirectory>& adir,
         bool isStartPoint,
         bool hasNonExisting = false,
-        const fs::path& nonExistingPath = {});
+        const fs::path& nonExistingPath = {},
+        InotifyFlags monitoredEvents = 0);
 
     /// @brief Remove monitoring of a directory
     void unmonitorDirectory(

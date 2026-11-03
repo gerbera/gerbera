@@ -40,6 +40,7 @@
 #include "config/result/autoscan.h"
 #include "content/content.h"
 #include "context.h"
+#include "scripting_runtime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -57,6 +58,7 @@ std::vector<int> ImportScript::callFunction(
     const std::map<AutoscanMediaMode,
         std::string>& containerMap)
 {
+    ScriptingRuntime::AutoLock lock(runtime->getMutex());
     std::vector<int> result;
     bool hasResult = false;
     processed = obj;
