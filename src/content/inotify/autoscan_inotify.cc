@@ -96,7 +96,7 @@ void AutoscanInotify::threadProc()
 
             // monitor new dir
             while (!monitorQueue.empty()) {
-                auto adir = std::move(monitorQueue.front());
+                auto [adir, refreshExisting] = std::move(monitorQueue.front());
                 monitorQueue.pop();
 
                 lock.unlock();
@@ -118,7 +118,7 @@ void AutoscanInotify::threadProc()
                 if (!ec) {
                     // Honors recursive=no while still watching direct files.
                     monitorUnmonitorRecursive(dirEnt, false, adir, true, adir->getFollowSymlinks());
-                    content->rescanDirectory(adir, adir->getObjectID(), location, false);
+                    content->rescanDirectory(adir, adir->getObjectID(), location, false, refreshExisting);
                 } else {
                     log_error("Failed to read autoscan directory {}: {}", location.c_str(), ec.message());
                 }
@@ -141,7 +141,7 @@ void AutoscanInotify::threadProc()
                 inotify.swap(replacement);
                 for (const auto& adir : directories) {
                     if (adir->getScanMode() == AutoscanScanMode::INotify)
-                        monitorQueue.push(adir);
+                        monitorQueue.emplace(adir, true);
                 }
                 continue;
             }
@@ -165,7 +165,7 @@ void AutoscanInotify::threadProc()
                         inotify->removeWatch(currentWd);
                     log_debug("Ignoring event {} for replaced watch {} at {}", InotifyUtil::mapFlags(event->mask), event->wd, wdObj->getPath().c_str());
                     if (auto start = wdObj->getStartPoint())
-                        monitor(start->getAutoscanDirectory());
+                        monitor(start->getAutoscanDirectory(), true);
                     continue;
                 }
                 if (currentWd < 0) {
@@ -225,12 +225,12 @@ std::shared_ptr<DirectoryWatch> AutoscanInotify::getWatch(const InotifyHandler& 
     return wdObj;
 }
 
-void AutoscanInotify::monitor(const std::shared_ptr<AutoscanDirectory>& dir)
+void AutoscanInotify::monitor(const std::shared_ptr<AutoscanDirectory>& dir, bool refreshExisting)
 {
     assert(dir->getScanMode() == AutoscanScanMode::INotify);
     log_debug("Requested to monitor \"{}\"", dir->getLocation().c_str());
     AutoLock lock(mutex);
-    monitorQueue.push(dir);
+    monitorQueue.emplace(dir, refreshExisting);
     inotify->stop();
 }
 

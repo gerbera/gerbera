@@ -38,6 +38,7 @@
 #include "util/grb_fs.h"
 
 #include <queue>
+#include <utility>
 
 // forward declarations
 class AutoscanDirectory;
@@ -58,7 +59,7 @@ public:
     AutoscanInotify& operator=(const AutoscanInotify&) = delete;
 
     /// @brief Start monitoring a directory
-    void monitor(const std::shared_ptr<AutoscanDirectory>& dir);
+    void monitor(const std::shared_ptr<AutoscanDirectory>& dir, bool refreshExisting = false);
 
     /// @brief Stop monitoring a directory
     void unmonitor(const std::shared_ptr<AutoscanDirectory>& dir);
@@ -101,7 +102,7 @@ private:
     void threadProc() override;
 
     /// @brief directory to add to monitoring
-    std::queue<std::shared_ptr<AutoscanDirectory>> monitorQueue;
+    std::queue<std::pair<std::shared_ptr<AutoscanDirectory>, bool>> monitorQueue;
 
     /// @brief directory to remove from monitoring
     std::queue<std::shared_ptr<AutoscanDirectory>> unmonitorQueue;
