@@ -68,13 +68,17 @@ private:
 /// @brief This class is responsible for populating filesystem based metadata
 class MetacontentHandler : public MetadataHandler {
 public:
-    explicit MetacontentHandler(const std::shared_ptr<Context>& context);
+    explicit MetacontentHandler(
+        const std::shared_ptr<Context>& context,
+        ConfigVal fileListOption,
+        ConfigVal dirListOption);
     ~MetacontentHandler() override;
 
 protected:
     const std::shared_ptr<StringConverter> f2i;
     std::shared_ptr<ConfigDefinition> definition;
     std::shared_ptr<Database> database;
+    std::unique_ptr<ContentPathSetup> setup;
 };
 
 /// @brief This class is responsible for populating filesystem based album and fan art
@@ -92,9 +96,6 @@ public:
     std::unique_ptr<IOHandler> serveContent(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsResource>& resource) override;
-
-private:
-    static std::unique_ptr<ContentPathSetup> setup;
 };
 
 /// @brief This class is responsible for populating filesystem based album and fan art
@@ -113,8 +114,6 @@ private:
     bool fillMetadata(
         const std::shared_ptr<CdsObject>& obj,
         const std::vector<fs::path>& paths);
-    // The handler is reused across folders. The setup belongs to its config and database.
-    std::unique_ptr<ContentPathSetup> setup;
 };
 
 /// @brief This class is responsible for populating filesystem based subtitles
@@ -132,9 +131,6 @@ public:
     std::unique_ptr<IOHandler> serveContent(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsResource>& resource) override;
-
-private:
-    static std::unique_ptr<ContentPathSetup> setup;
 };
 
 /// @brief This class is responsible for reverse mapping filesystem based resources
@@ -147,9 +143,6 @@ public:
     std::unique_ptr<IOHandler> serveContent(
         const std::shared_ptr<CdsObject>& obj,
         const std::shared_ptr<CdsResource>& resource) override;
-
-private:
-    static std::unique_ptr<ContentPathSetup> setup;
 };
 
 #endif // __METACONTENT_HANDLER_H__

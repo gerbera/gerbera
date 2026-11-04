@@ -5,6 +5,7 @@
 - Add bounded ASX playlist structures
 - Add config for search bracket nesting limit
 - Add opt-in whole-file charset selection for M3U playlists
+- Add selectable Gerbera and Techno container icon themes
 - Add static WPL and XSPF playlist import
 - Add ubuntu 26.10
 - Allow ASX import headroom and avoid reverse DNS in diagnostics
@@ -14,6 +15,7 @@
 - Bump npm packages in /gerbera-web
 - Cleanup asx tests
 - Collect documentation updates
+- Configure audio display titles and conditional replacements
 - Declare scoped search container CTE as recursive
 - Default Sorting for Browse
 - Define Limits for Containter Type Selection
@@ -28,6 +30,7 @@
 - Fix internal video (mpeg) transcoding
 - Fix additional metadata import with taglib
 - Fix sorting of files in structured import
+- Fix UPnP client cache returning the wrong observation for a shared IP
 - Fix WavPack stack overflow by allocating entries on the heap
 - Handle missing database objects in playlists and cuesheets
 - Improve logging for mime and extensions
@@ -43,6 +46,7 @@
 - Preserve playlist entries when media files are updated
 - Preserve repeated local files at different playlist positions
 - Recover SQLite and PostgreSQL foreign-key import failures without stopping the database
+- Refactor ContentPathSetup
 - Seek in transcoded streams of constant bit rate
 - Serve transcoded streams to HTTP/1.0 clients
 - Split XmlPlaylist into extra file
@@ -52,7 +56,7 @@
 - transcode: fix build with ffmpeg 7.0
 - Update metadata\_service to use content-type
 - Update to cxxopts-g7af8aa
-- Update to pupnp 22.1.10
+- Update to pupnp 22.2.0
 - Update to ffmpegthumbnailer 2.4.1
 - Use fmt exception formatting
 - Wait for client grid rendering in browser tests
