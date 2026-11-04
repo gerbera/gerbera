@@ -44,7 +44,6 @@ public:
         const std::shared_ptr<CdsResource>& resource) override;
 
 private:
-    static std::unique_ptr<ContentPathSetup> setup;
     std::shared_ptr<Content> content;
 };
 

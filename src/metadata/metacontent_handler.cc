@@ -265,24 +265,23 @@ std::string ContentPathSetup::expandName(const std::string& name, const std::sha
     return copy;
 }
 
-std::unique_ptr<ContentPathSetup> FanArtHandler::setup {};
-
-MetacontentHandler::MetacontentHandler(const std::shared_ptr<Context>& context)
+MetacontentHandler::MetacontentHandler(
+    const std::shared_ptr<Context>& context,
+    ConfigVal fileListOption,
+    ConfigVal dirListOption)
     : MetadataHandler(context)
     , f2i(context->getConverterManager()->f2i())
     , definition(context->getDefinition())
     , database(context->getDatabase())
+    , setup(std::make_unique<ContentPathSetup>(this->config, this->database, this->definition, fileListOption, dirListOption))
 {
 }
 
 MetacontentHandler::~MetacontentHandler() = default;
 
 FanArtHandler::FanArtHandler(const std::shared_ptr<Context>& context)
-    : MetacontentHandler(context)
+    : MetacontentHandler(context, ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST)
 {
-    if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_FANART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_FANART_DIR_LIST);
-    }
 }
 
 bool FanArtHandler::isSupported(
@@ -346,8 +345,7 @@ std::unique_ptr<IOHandler> FanArtHandler::serveContent(const std::shared_ptr<Cds
 }
 
 ContainerArtHandler::ContainerArtHandler(const std::shared_ptr<Context>& context)
-    : MetacontentHandler(context)
-    , setup(std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST))
+    : MetacontentHandler(context, ConfigVal::IMPORT_RESOURCES_CONTAINERART_FILE_LIST, ConfigVal::IMPORT_RESOURCES_CONTAINERART_DIR_LIST)
 {
 }
 
@@ -429,14 +427,9 @@ std::unique_ptr<IOHandler> ContainerArtHandler::serveContent(const std::shared_p
     return std::make_unique<FileIOHandler>(path);
 }
 
-std::unique_ptr<ContentPathSetup> SubtitleHandler::setup {};
-
 SubtitleHandler::SubtitleHandler(const std::shared_ptr<Context>& context)
-    : MetacontentHandler(context)
+    : MetacontentHandler(context, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST)
 {
-    if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_SUBTITLE_DIR_LIST);
-    }
 }
 
 bool SubtitleHandler::isSupported(
@@ -515,14 +508,9 @@ std::unique_ptr<IOHandler> SubtitleHandler::serveContent(const std::shared_ptr<C
     return std::make_unique<FileIOHandler>(path);
 }
 
-std::unique_ptr<ContentPathSetup> ResourceHandler::setup {};
-
 ResourceHandler::ResourceHandler(const std::shared_ptr<Context>& context)
-    : MetacontentHandler(context)
+    : MetacontentHandler(context, ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST)
 {
-    if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_RESOURCE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_RESOURCE_DIR_LIST);
-    }
 }
 
 bool ResourceHandler::fillMetadata(

@@ -32,17 +32,12 @@
 
 #include <vector>
 
-std::unique_ptr<ContentPathSetup> MetaFileHandler::setup {};
-
 MetaFileHandler::MetaFileHandler(
     const std::shared_ptr<Context>& context,
     std::shared_ptr<Content> content)
-    : MetacontentHandler(context)
+    : MetacontentHandler(context, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST)
     , content(std::move(content))
 {
-    if (!setup) {
-        setup = std::make_unique<ContentPathSetup>(config, database, definition, ConfigVal::IMPORT_RESOURCES_METAFILE_FILE_LIST, ConfigVal::IMPORT_RESOURCES_METAFILE_DIR_LIST);
-    }
 }
 
 bool MetaFileHandler::fillMetadata(
