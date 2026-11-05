@@ -509,6 +509,50 @@ TEST(ToolsTest, parseTimeTest)
     EXPECT_EQ(value, "1x:1x");
 }
 
+TEST(ToolsTest, getValidUTF8CutPosition)
+{
+    // ASCII: every position is valid
+    EXPECT_EQ(getValidUTF8CutPosition("abcdef", 0), 0);
+    EXPECT_EQ(getValidUTF8CutPosition("abcdef", 3), 3);
+    EXPECT_EQ(getValidUTF8CutPosition("abcdef", 6), 6);
+
+    // 2-byte characters (α = CE B1)
+    const std::string greek = "αααααα";
+    EXPECT_EQ(getValidUTF8CutPosition(greek, 4), 4);
+    EXPECT_EQ(getValidUTF8CutPosition(greek, 5), 4);
+    EXPECT_EQ(getValidUTF8CutPosition(greek, 1), 0);
+
+    // 3-byte characters (€ = E2 82 AC)
+    const std::string euro = "a€€";
+    EXPECT_EQ(getValidUTF8CutPosition(euro, 1), 1);
+    EXPECT_EQ(getValidUTF8CutPosition(euro, 2), 1);
+    EXPECT_EQ(getValidUTF8CutPosition(euro, 3), 1);
+    EXPECT_EQ(getValidUTF8CutPosition(euro, 4), 4);
+
+    // 4-byte characters (😀 = F0 9F 98 80)
+    const std::string emoji = "😀😀";
+    EXPECT_EQ(getValidUTF8CutPosition(emoji, 3), 0);
+    EXPECT_EQ(getValidUTF8CutPosition(emoji, 4), 4);
+    EXPECT_EQ(getValidUTF8CutPosition(emoji, 7), 4);
+    EXPECT_EQ(getValidUTF8CutPosition(emoji, 8), 8);
+
+    // Out of range
+    EXPECT_EQ(getValidUTF8CutPosition("abc", -1), -1);
+    EXPECT_EQ(getValidUTF8CutPosition("abc", 4), -1);
+    EXPECT_EQ(getValidUTF8CutPosition("", 0), 0);
+}
+
+TEST(ToolsTest, limitStringKeepsUTF8Valid)
+{
+    EXPECT_EQ(limitString(7, "αααααα"), "αα...");
+    EXPECT_EQ(limitString(8, "αααααα"), "αα...");
+    EXPECT_EQ(limitString(6, "a€€"), "a...");
+    EXPECT_EQ(limitString(7, "😀😀"), "😀...");
+    EXPECT_EQ(limitString(6, "abcdefgh"), "abc...");
+    EXPECT_EQ(limitString(10, "αααααα"), "ααα...");
+    EXPECT_EQ(limitString(12, "αααααα"), "αααααα");
+}
+
 #ifdef HAVE_ICU
 TEST(ToolsTest, transliterate)
 {
