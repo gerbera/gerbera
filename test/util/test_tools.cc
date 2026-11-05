@@ -536,6 +536,14 @@ TEST(ToolsTest, getValidUTF8CutPosition)
     EXPECT_EQ(getValidUTF8CutPosition(emoji, 7), 4);
     EXPECT_EQ(getValidUTF8CutPosition(emoji, 8), 8);
 
+    // Mixed 1-2-3-4-3-2-1 bytes
+    const std::string mixed = "aα€😀€αa";
+    EXPECT_EQ(getValidUTF8CutPosition(mixed, 2), 1);
+    EXPECT_EQ(getValidUTF8CutPosition(mixed, 5), 3);
+    EXPECT_EQ(getValidUTF8CutPosition(mixed, 9), 6);
+    EXPECT_EQ(getValidUTF8CutPosition(mixed, 12), 10);
+    EXPECT_EQ(getValidUTF8CutPosition(mixed, 14), 13);
+
     // Out of range
     EXPECT_EQ(getValidUTF8CutPosition("abc", -1), -1);
     EXPECT_EQ(getValidUTF8CutPosition("abc", 4), -1);
@@ -551,6 +559,13 @@ TEST(ToolsTest, limitStringKeepsUTF8Valid)
     EXPECT_EQ(limitString(6, "abcdefgh"), "abc...");
     EXPECT_EQ(limitString(10, "αααααα"), "ααα...");
     EXPECT_EQ(limitString(12, "αααααα"), "αααααα");
+
+    // Mixed 1-2-3-4-3-2-1 bytes
+    const std::string mixed = "aα€😀€αa";
+    EXPECT_EQ(limitString(5, mixed), "a...");
+    EXPECT_EQ(limitString(8, mixed), "aα...");
+    EXPECT_EQ(limitString(12, mixed), "aα€...");
+    EXPECT_EQ(limitString(15, mixed), "aα€😀...");
 }
 
 #ifdef HAVE_ICU
