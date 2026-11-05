@@ -454,32 +454,15 @@ std::string getValueOrDefault(const std::map<std::string, std::string>& m, const
 
 ssize_t getValidUTF8CutPosition(std::string_view str, ssize_t cutpos)
 {
-    ssize_t pos = -1;
-    auto len = str.length();
+    if (cutpos < 0 || static_cast<std::size_t>(cutpos) > str.size())
+        return -1;
 
-    if ((len == 0) || (cutpos > static_cast<ssize_t>(len)))
-        return pos;
+    auto pos = static_cast<std::size_t>(cutpos);
 
-    log_vdebug("Character at cut position: {:0x}", char(str.at(cutpos)));
-    log_vdebug("Character at cut-1 position: {:0x}", char(str.at(cutpos - 1)));
-    log_vdebug("Character at cut-2 position: {:0x}", char(str.at(cutpos - 2)));
-    log_vdebug("Character at cut-3 position: {:0x}", char(str.at(cutpos - 3)));
+    while (pos > 0 && pos < str.size() && (static_cast<unsigned char>(str[pos]) & 0xC0) == 0x80)
+        --pos;
 
-    // > 0x7f, we are dealing with a non-ascii character
-    if (str.at(cutpos) & 0x80) {
-        // check if we are at byte 2
-        if (((cutpos - 1) >= 0) && (((str.at(cutpos - 1) & 0xc2) == 0xc2) || ((str.at(cutpos - 1) & 0xe2) == 0xe2) || ((str.at(cutpos - 1) & 0xf0) == 0xf0)))
-            pos = cutpos - 1;
-        // check if we are at byte 3
-        else if (((cutpos - 2) >= 0) && (((str.at(cutpos - 2) & 0xe2) == 0xe2) || ((str.at(cutpos - 2) & 0xf0) == 0xf0)))
-            pos = cutpos - 2;
-        // we must be at byte 4 then...
-        else if ((cutpos - 3) >= 0)
-            pos = cutpos - 3;
-    } else
-        pos = cutpos;
-
-    return pos;
+    return static_cast<ssize_t>(pos);
 }
 
 static constexpr std::string_view ellipse("...");
