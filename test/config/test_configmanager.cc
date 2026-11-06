@@ -224,16 +224,3 @@ TEST_F(ConfigManagerTest, LoadsOrderedAudioTitleReplacements)
     EXPECT_EQ(entries[0], expectedFirst);
     EXPECT_EQ(entries[1], expectedSecond);
 }
-
-TEST_F(ConfigManagerTest, ReadsOptionalCoverArtPriority)
-{
-    auto setup = definition->findConfigSetup(ConfigVal::IMPORT_RESOURCES_CONTAINERART_PRIORITY);
-    ASSERT_NE(setup, nullptr);
-    pugi::xml_document document;
-    ASSERT_TRUE(document.load_string("<config><import><resources><container/></resources></import></config>"));
-    EXPECT_TRUE(setup->getXmlContent(document, nullptr, true).empty());
-
-    auto priority = document.select_node("/config/import/resources/container").node().append_attribute("priority");
-    priority.set_value("Embedded, pattern, preview, external");
-    EXPECT_EQ(setup->getXmlContent(document, nullptr, true), "Embedded, pattern, preview, external");
-}

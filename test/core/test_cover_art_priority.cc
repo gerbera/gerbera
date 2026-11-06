@@ -310,6 +310,61 @@ TEST_F(CoverArtPriorityTest, ArtworkPriorityUsesConfiguredFileOrderCaseAndTheme)
     EXPECT_EQ(album->getResource(ResourcePurpose::Thumbnail), nullptr);
 }
 
+TEST_F(CoverArtPriorityTest, BoxCoverIsUsedOnlyForVirtualAlbum)
+{
+    config->priority = "pattern, embedded";
+    config->files = { "cover.jpg" };
+    const auto albumFolder = directory / "album";
+    const auto boxCover = albumFolder / "cover.jpg";
+    std::ofstream(boxCover) << "box artwork";
+
+    ImportService importer(context, converters);
+    const auto scan = std::make_shared<AutoscanDirectory>(albumFolder, AutoscanScanMode::Timed, true, false);
+    importer.run(nullptr, scan, albumFolder);
+
+    auto album = std::make_shared<CdsContainer>("Album", UPNP_CLASS_MUSIC_ALBUM);
+    std::vector<int> newIds;
+    const auto addToAlbum = [&](const auto& track) {
+        album->setArtworkSource(track->getID());
+        importer.addContainerTree(0, { album }, track, newIds);
+        return database->container->getResource(ResourcePurpose::Thumbnail);
+    };
+
+    for (int part : { 1, 2 }) {
+        const auto discFolder = albumFolder / ("CD " + std::to_string(part));
+        fs::create_directories(discFolder);
+        auto track = std::make_shared<CdsItem>(CdsEntryType::File);
+        track->setID(100 + part);
+        track->setClass(UPNP_CLASS_MUSIC_TRACK);
+        track->setPartNumber(part);
+        track->setTrackNumber(1);
+        track->setLocation(discFolder / "track.flac", CdsEntryType::File);
+        auto embedded = std::make_shared<CdsResource>(ContentHandler::FLAC, ResourcePurpose::Thumbnail);
+        track->addResource(embedded);
+        database->tracks.emplace(track->getID(), track);
+
+        auto disc = std::make_shared<CdsContainer>(CdsEntryType::Directory);
+        disc->setID(20 + part);
+        disc->setLocation(discFolder, CdsEntryType::Directory);
+        importer.finishScan(discFolder, disc, std::chrono::seconds(1), track);
+
+        const auto albumArt = addToAlbum(track);
+        ASSERT_NE(albumArt, nullptr);
+        EXPECT_EQ(albumArt->getAttribute(ResourceAttribute::RESOURCE_FILE), boxCover.string());
+        const auto discArt = disc->getResource(ResourcePurpose::Thumbnail);
+        ASSERT_NE(discArt, nullptr);
+        EXPECT_EQ(discArt->getAttribute(ResourceAttribute::FANART_OBJ_ID), std::to_string(track->getID()));
+        EXPECT_EQ(track->getResource(ResourcePurpose::Thumbnail), embedded);
+    }
+
+    const auto firstTrack = std::static_pointer_cast<CdsItem>(database->tracks.at(101));
+    firstTrack->setPartNumber(2);
+    const auto mismatched = addToAlbum(firstTrack);
+    ASSERT_NE(mismatched, nullptr);
+    EXPECT_TRUE(mismatched->getAttribute(ResourceAttribute::RESOURCE_FILE).empty());
+    EXPECT_EQ(mismatched->getAttribute(ResourceAttribute::FANART_OBJ_ID), "101");
+}
+
 TEST_F(CoverArtPriorityTest, VideoDirectorySeparatesEmbeddedPostersFromPreviews)
 {
     const auto folderPath = directory / "album";

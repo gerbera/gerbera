@@ -398,9 +398,11 @@ bool ContainerArtHandler::fillMetadata(
 
 std::shared_ptr<CdsResource> ContainerArtHandler::findPatternArtwork(
     const std::shared_ptr<CdsContainer>& obj,
-    const fs::path& mediaLocation)
+    const fs::path& mediaLocation,
+    const fs::path& searchFolder)
 {
-    const auto paths = setup->getContentPath(obj, SETTING_CONTAINERART, mediaLocation.parent_path(), ContentPathMode::Primary, mediaLocation);
+    const auto paths = setup->getContentPath(obj, SETTING_CONTAINERART,
+        searchFolder.empty() ? mediaLocation.parent_path() : searchFolder, ContentPathMode::Primary, mediaLocation);
     const auto match = std::find_if(paths.begin(), paths.end(), [&](const auto& path) {
         return !path.empty() && startswith(std::get<1>(mime->getMimeType(path)), "image/")
             && std::ifstream(path, std::ios::binary);

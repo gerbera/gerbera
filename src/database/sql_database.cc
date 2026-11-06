@@ -3284,65 +3284,49 @@ void SQLDatabase::generateResourceDBOperations(
 {
     const auto& resources = obj->getResources();
     operations.reserve(operations.size() + resources.size());
-    if (op == Operation::Insert) {
-        std::size_t resId = 0;
-        for (auto&& resource : resources) {
-            std::map<ResourceColumn, std::string> resourceSql;
-            resourceSql[ResourceColumn::ResId] = quote(resId);
-            resourceSql[ResourceColumn::HandlerType] = quote(to_underlying(resource->getHandlerType()));
-            resourceSql[ResourceColumn::Purpose] = quote(to_underlying(resource->getPurpose()));
-            auto&& options = resource->getOptions();
-            if (!options.empty()) {
-                resourceSql[ResourceColumn::Options] = quote(URLUtils::dictEncode(options));
-            }
-            auto&& parameters = resource->getParameters();
-            if (!parameters.empty()) {
-                resourceSql[ResourceColumn::Parameters] = quote(URLUtils::dictEncode(parameters));
-            }
-            std::map<ResourceAttribute, std::string> resourceAttrs;
-            for (auto&& [key, val] : resource->getAttributes()) {
-                resourceAttrs[key] = quote(val);
-            }
-            auto rt = std::make_shared<Resource2Table>(std::move(resourceSql), std::move(resourceAttrs), Operation::Insert, resColumnMapper);
-            operations.push_back(std::move(rt));
-            resId++;
+    const auto dbResources = op == Operation::Insert ? std::vector<std::shared_ptr<CdsResource>> {} : retrieveResourcesForObject(obj->getID());
+
+    std::size_t resId = 0;
+    for (const auto& resource : resources) {
+        const auto* previous = resId < dbResources.size() ? dbResources[resId].get() : nullptr;
+        std::map<ResourceColumn, std::string> resourceSql;
+        resourceSql[ResourceColumn::ResId] = quote(resId);
+        resourceSql[ResourceColumn::HandlerType] = quote(to_underlying(resource->getHandlerType()));
+        resourceSql[ResourceColumn::Purpose] = quote(to_underlying(resource->getPurpose()));
+        const auto& options = resource->getOptions();
+        if (!options.empty())
+            resourceSql[ResourceColumn::Options] = quote(URLUtils::dictEncode(options));
+        else if (previous && !previous->getOptions().empty())
+            resourceSql[ResourceColumn::Options] = SQL_NULL;
+
+        const auto& parameters = resource->getParameters();
+        if (!parameters.empty())
+            resourceSql[ResourceColumn::Parameters] = quote(URLUtils::dictEncode(parameters));
+        else if (previous && !previous->getParameters().empty())
+            resourceSql[ResourceColumn::Parameters] = SQL_NULL;
+
+        std::map<ResourceAttribute, std::string> resourceAttrs;
+        for (const auto& [key, val] : resource->getAttributes())
+            resourceAttrs[key] = quote(val);
+
+        // Updating a resource replaces it, so attributes from its previous source must be cleared.
+        if (previous) {
+            for (const auto& [key, val] : previous->getAttributes())
+                resourceAttrs.try_emplace(key, SQL_NULL);
         }
-    } else {
-        // get current resoures from DB
-        auto dbResources = retrieveResourcesForObject(obj->getID());
-        std::size_t resId = 0;
-        for (auto&& resource : resources) {
-            Operation operation = resId < dbResources.size() ? Operation::Update : Operation::Insert;
+
+        auto operation = previous ? Operation::Update : Operation::Insert;
+        operations.push_back(std::make_shared<Resource2Table>(std::move(resourceSql), std::move(resourceAttrs), operation, resColumnMapper));
+        ++resId;
+    }
+
+    // Delete rows with no corresponding resource in the updated object.
+    for (; resId < dbResources.size(); ++resId) {
+        if (dbResources[resId]) {
             std::map<ResourceColumn, std::string> resourceSql;
-            resourceSql[ResourceColumn::ResId] = quote(resId);
-            resourceSql[ResourceColumn::HandlerType] = quote(to_underlying(resource->getHandlerType()));
-            resourceSql[ResourceColumn::Purpose] = quote(to_underlying(resource->getPurpose()));
-            auto&& options = resource->getOptions();
-            if (!options.empty()) {
-                resourceSql[ResourceColumn::Options] = quote(URLUtils::dictEncode(options));
-            }
-            auto&& parameters = resource->getParameters();
-            if (!parameters.empty()) {
-                resourceSql[ResourceColumn::Parameters] = quote(URLUtils::dictEncode(parameters));
-            }
             std::map<ResourceAttribute, std::string> resourceAttrs;
-            for (auto&& [key, val] : resource->getAttributes()) {
-                resourceAttrs[key] = quote(val);
-            }
-            auto rt = std::make_shared<Resource2Table>(std::move(resourceSql), std::move(resourceAttrs), operation, resColumnMapper);
-            operations.push_back(std::move(rt));
-            resId++;
-        }
-        // res_id in db resources but not obj resources, so needs a delete
-        while (resId < dbResources.size()) {
-            if (dbResources.at(resId)) {
-                std::map<ResourceColumn, std::string> resourceSql;
-                std::map<ResourceAttribute, std::string> resourceAttrs;
-                resourceSql[ResourceColumn::ResId] = quote(resId);
-                auto rt = std::make_shared<Resource2Table>(std::move(resourceSql), std::move(resourceAttrs), Operation::Delete, resColumnMapper);
-                operations.push_back(std::move(rt));
-            }
-            ++resId;
+            resourceSql[ResourceColumn::ResId] = quote(resId);
+            operations.push_back(std::make_shared<Resource2Table>(std::move(resourceSql), std::move(resourceAttrs), Operation::Delete, resColumnMapper));
         }
     }
 }

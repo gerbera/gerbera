@@ -55,7 +55,6 @@
 #endif
 
 #include <algorithm>
-#include <optional>
 #include <regex>
 
 bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const std::string& actual) const
@@ -159,7 +158,7 @@ static ObjectType artworkMediaType(const std::shared_ptr<CdsObject>& object)
     return object ? object->getArtworkMediaType() : ObjectType::Unknown;
 }
 
-static std::optional<ArtworkSource> parseArtworkSource(const std::string& source)
+static ArtworkSource parseArtworkSource(const std::string& source)
 {
     if (source == "embedded")
         return ArtworkSource::Embedded;
@@ -169,7 +168,7 @@ static std::optional<ArtworkSource> parseArtworkSource(const std::string& source
         return ArtworkSource::Pattern;
     if (source == "external")
         return ArtworkSource::External;
-    return std::nullopt;
+    return ArtworkSource::None;
 }
 
 bool ImportService::preferMediaArtwork(
@@ -336,9 +335,10 @@ ImportService::ImportService(std::shared_ptr<Context> context, std::shared_ptr<C
     containerImageParentCount = config->getIntOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT);
     containerImageMinDepth = config->getIntOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_MINDEPTH);
     for (const auto& entry : splitString(toLower(config->getOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_PRIORITY)), ',')) {
-        auto name = trimString(entry);
-        if (auto source = parseArtworkSource(name))
-            coverArtPriority.push_back(*source);
+        const auto name = trimString(entry);
+        const auto source = parseArtworkSource(name);
+        if (source != ArtworkSource::None)
+            coverArtPriority.push_back(source);
         else if (!name.empty())
             log_warning("Unknown container artwork source: {}", name);
     }
@@ -1171,7 +1171,14 @@ void ImportService::assignMediaArtwork(
     std::shared_ptr<CdsResource> selected;
     for (auto source : coverArtPriority) {
         if (source == ArtworkSource::Pattern) {
-            selected = handler->findPatternArtwork(container, item->getLocation());
+            if (container->getEntryType() == CdsEntryType::VirtualContainer && container->isSubClass(UPNP_CLASS_MUSIC_ALBUM)
+                && artworkMediaType(item) == ObjectType::Audio) {
+                const auto part = static_cast<const CdsItem&>(*item).getPartNumber();
+                if (part > 0 && toLower(folder.filename().string()) == fmt::format("cd {}", part))
+                    selected = handler->findPatternArtwork(container, item->getLocation(), folder.parent_path());
+            }
+            if (!selected)
+                selected = handler->findPatternArtwork(container, item->getLocation());
         } else if (source != ArtworkSource::External) {
             auto candidate = primary;
             auto artwork = candidate->getArtwork(source);
