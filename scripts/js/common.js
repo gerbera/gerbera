@@ -667,7 +667,7 @@ function createUserChain(obj, media, chain, boxSetup, chainSetup, result, rootPa
 }
 
 // doc-getDirectories-begin
-function getDirectories(tree, box, dir, result, rootPath, obj, containerType, containerResource, containerRefID) {
+function getDirectories(tree, box, dir, result, rootPath, obj, containerType, containerResource, containerRefID, artworkSource) {
   if (box.enabled) {
     for (var i = 0; i < dir.length; i++) {
       tree = tree.concat([{ title: dir[i], objectType: OBJECT_TYPE_CONTAINER, upnpclass: UPNP_CLASS_CONTAINER }]);
@@ -677,6 +677,8 @@ function getDirectories(tree, box, dir, result, rootPath, obj, containerType, co
     tree[tree.length - 1].res = containerResource;
     tree[tree.length - 1].aux = obj.aux;
     tree[tree.length - 1].refID = containerRefID;
+    if (dir.length > 0 && artworkSource !== undefined)
+      tree[tree.length - 1].artworkSource = artworkSource;
     result.push(addCdsObject(obj, addContainerTree(tree), rootPath));
   }
 }

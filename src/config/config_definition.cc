@@ -1368,6 +1368,10 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
             "/import/resources/container/attribute::minDepth", "config-import.html#confval-minDepth",
             2, 0, ConfigIntSetup::CheckMinValue),
 
+        std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_RESOURCES_CONTAINERART_PRIORITY,
+            "/import/resources/container/attribute::priority", "config-import.html#confval-resource-container-priority",
+            ""),
+
         // subtitles
         std::make_shared<ConfigArraySetup>(ConfigVal::IMPORT_RESOURCES_SUBTITLE_FILE_LIST,
             "/import/resources/subtitle", "config-import.html#confval-subtitle",

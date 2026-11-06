@@ -45,6 +45,9 @@ protected:
     /// @brief whether this container is an autoscan start point.
     AutoscanType autoscanType { AutoscanType::None };
 
+    /// @brief Artwork source item ID used during layout import.
+    int artworkSource { INVALID_OBJECT_ID };
+
 public:
     /// @brief Constructor, initializes default values for the flags and sets the object type.
     CdsContainer() = delete;
@@ -83,6 +86,12 @@ public:
 
     /// @brief sets whether this container is an autoscan start point.
     void setAutoscanType(AutoscanType type) { autoscanType = type; }
+
+    /// @brief Gets the artwork source item ID used during layout import.
+    int getArtworkSource() const { return artworkSource; }
+
+    /// @brief Sets the artwork source item ID used during layout import.
+    void setArtworkSource(int id) { artworkSource = id; }
 
     /// @brief Copies all object properties to another object.
     /// @param obj target object (clone)

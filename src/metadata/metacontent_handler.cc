@@ -26,6 +26,7 @@
 
 #include "metacontent_handler.h" // API
 
+#include "cds/cds_container.h"
 #include "cds/cds_item.h"
 #include "cds/cds_objects.h"
 #include "cds/cds_resource.h"
@@ -42,9 +43,36 @@
 #include "util/string_converter.h"
 #include "util/tools.h"
 
+#include <algorithm>
 #include <array>
+#include <fstream>
 #include <regex>
 #include <sys/stat.h>
+
+static std::vector<std::string> expandFileExtensions(const std::vector<std::string>& names)
+{
+    std::vector<std::string> result;
+    for (const auto& name : names) {
+        const auto group = name.rfind(".{");
+        if (group == std::string::npos || name.back() != '}') {
+            result.push_back(name);
+            continue;
+        }
+        auto extensions = splitString(name.substr(group + 2, name.size() - group - 3), ',', '\0', true);
+        for (auto& extension : extensions)
+            trimStringInPlace(extension);
+        if (std::any_of(extensions.begin(), extensions.end(), [](const auto& extension) {
+                return extension.empty() || extension.find_first_not_of("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789") != std::string::npos;
+            })) {
+            result.push_back(name);
+            continue;
+        }
+        const auto prefix = name.substr(0, group + 1);
+        for (const auto& extension : extensions)
+            result.push_back(prefix + extension);
+    }
+    return result;
+}
 
 ContentPathSetup::ContentPathSetup(
     std::shared_ptr<Config> config,
@@ -54,7 +82,7 @@ ContentPathSetup::ContentPathSetup(
     ConfigVal dirListOption)
     : config(std::move(config))
     , database(std::move(database))
-    , names(this->config->getArrayOption(fileListOption))
+    , names(expandFileExtensions(this->config->getArrayOption(fileListOption)))
     , patterns(this->config->getVectorOption(dirListOption))
     , allTweaks(this->config->getDirectoryTweakOption(ConfigVal::IMPORT_DIRECTORIES_LIST))
     , caseSensitive(this->config->getBoolOption(ConfigVal::IMPORT_RESOURCES_CASE_SENSITIVE))
@@ -66,11 +94,14 @@ std::vector<fs::path> ContentPathSetup::getContentPath(
     const std::shared_ptr<CdsObject>& obj,
     const std::string& setting,
     fs::path folder,
-    ContentPathMode mode) const
+    ContentPathMode mode,
+    const fs::path& mediaLocation) const
 {
     auto objLocation = obj->getLocation();
-    auto tweak = allTweaks ? allTweaks->getKey(objLocation) : nullptr;
-    auto files = !tweak || !tweak->hasSetting(setting) ? this->names : std::vector<std::string> { tweak->getSetting(setting) };
+    const bool useMediaLocation = !mediaLocation.empty();
+    const auto& tweakLocation = useMediaLocation ? mediaLocation : objLocation;
+    auto tweak = allTweaks ? allTweaks->getKey(tweakLocation) : nullptr;
+    auto files = !tweak || !tweak->hasSetting(setting) ? this->names : expandFileExtensions({ tweak->getSetting(setting) });
     if (setting == SETTING_CONTAINERART) {
         std::vector<std::string> selectedFiles;
         for (const auto& name : files) {
@@ -126,11 +157,9 @@ std::vector<fs::path> ContentPathSetup::getContentPath(
             // filter files matching filenames
             for (auto&& name : files) {
                 auto fileName = toLower(expandName(name, obj));
-                for (auto&& [f, s] : fileNames) {
-                    if (f == fileName) {
-                        log_debug("{}: found", f);
-                        result.push_back(s);
-                    }
+                if (auto match = fileNames.find(fileName); match != fileNames.end()) {
+                    log_debug("{}: found", match->first);
+                    result.push_back(match->second);
                 }
             }
         }
@@ -158,9 +187,12 @@ std::vector<fs::path> ContentPathSetup::getContentPath(
                         mime = fmt::format("{}/", parts.at(0));
                 }
             }
-            auto contentPath = fs::path(expandName(dir, obj));
-            auto extn = fs::path(expandName(ext, obj));
-            ptt = expandName(ptt, obj);
+            auto contentPath = useMediaLocation && (dir.empty() || dir == ".")
+                ? folder
+                : fs::path(expandName(dir, obj));
+            auto extn = useMediaLocation && ext.empty() ? fs::path {} : fs::path(expandName(ext, obj));
+            if (!useMediaLocation || !ptt.empty())
+                ptt = expandName(ptt, obj);
             auto stem = isCaseSensitive ? extn.stem().string() : toLower(extn.stem().string());
             if (extn.has_extension()) {
                 extn = isCaseSensitive ? extn.extension().string() : toLower(extn.extension().string());
@@ -181,7 +213,10 @@ std::vector<fs::path> ContentPathSetup::getContentPath(
                 replaceAllString(stem, "{", "\\\{");
                 replaceAllString(stem, "}", "\\}");
             }
-            auto re = std::regex(fmt::format("^{}$", stem));
+            auto flags = std::regex::ECMAScript;
+            if (useMediaLocation && !isCaseSensitive)
+                flags |= std::regex::icase;
+            auto re = std::regex(fmt::format("^{}$", stem), flags);
 
             std::error_code ec;
             if (contentPath.is_relative()) {
@@ -359,6 +394,37 @@ bool ContainerArtHandler::fillMetadata(
     }
 
     return fillMetadata(obj, pathList);
+}
+
+std::shared_ptr<CdsResource> ContainerArtHandler::findPatternArtwork(
+    const std::shared_ptr<CdsContainer>& obj,
+    const fs::path& mediaLocation)
+{
+    const auto paths = setup->getContentPath(obj, SETTING_CONTAINERART, mediaLocation.parent_path(), ContentPathMode::Primary, mediaLocation);
+    const auto match = std::find_if(paths.begin(), paths.end(), [&](const auto& path) {
+        return !path.empty() && startswith(std::get<1>(mime->getMimeType(path)), "image/")
+            && std::ifstream(path, std::ios::binary);
+    });
+    if (match == paths.end())
+        return nullptr;
+
+    auto target = std::make_shared<CdsContainer>(obj->getEntryType());
+    fillMetadata(target, { *match });
+    return target->getResource(ResourcePurpose::Thumbnail);
+}
+
+std::shared_ptr<CdsResource> ContainerArtHandler::findThemeArtwork(const std::shared_ptr<CdsContainer>& obj)
+{
+    const auto location = config->getOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_LOCATION);
+    if (location.empty())
+        return nullptr;
+
+    auto paths = setup->getContentPath(obj, SETTING_CONTAINERART, location);
+    auto target = std::make_shared<CdsContainer>(obj->getEntryType());
+    target->setClass(obj->getClass());
+    if (!paths.empty() && !paths.front().empty())
+        fillMetadata(target, { paths.front() });
+    return fillFallbackMetadata(target);
 }
 
 std::shared_ptr<CdsResource> ContainerArtHandler::fillFallbackMetadata(const std::shared_ptr<CdsObject>& obj)

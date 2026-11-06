@@ -38,6 +38,7 @@
 #include "database/db_param.h"
 #include "exceptions.h"
 #include "layout/builtin_layout.h"
+#include "metadata/metacontent_handler.h"
 #include "metadata/metadata_enums.h"
 #include "metadata/metadata_handler.h"
 #include "metadata/metadata_service.h"
@@ -54,6 +55,7 @@
 #endif
 
 #include <algorithm>
+#include <optional>
 #include <regex>
 
 bool UpnpMap::checkValue(const std::string& op, const std::string& expect, const std::string& actual) const
@@ -150,6 +152,60 @@ ContentState::ContentState(
     itemLimit[ObjectType::Playlist] = 3;
     itemLimit[ObjectType::Folder] = 3;
     itemLimit[ObjectType::Unknown] = 3;
+}
+
+static ObjectType artworkMediaType(const std::shared_ptr<CdsObject>& object)
+{
+    return object ? object->getArtworkMediaType() : ObjectType::Unknown;
+}
+
+static std::optional<ArtworkSource> parseArtworkSource(const std::string& source)
+{
+    if (source == "embedded")
+        return ArtworkSource::Embedded;
+    if (source == "preview")
+        return ArtworkSource::Preview;
+    if (source == "pattern")
+        return ArtworkSource::Pattern;
+    if (source == "external")
+        return ArtworkSource::External;
+    return std::nullopt;
+}
+
+bool ImportService::preferMediaArtwork(
+    const std::shared_ptr<CdsObject>& candidate,
+    const std::shared_ptr<CdsObject>& current) const
+{
+    const auto candidateType = artworkMediaType(candidate);
+    const auto currentType = artworkMediaType(current);
+    if (candidateType == ObjectType::Unknown)
+        return false;
+    if (candidateType != currentType)
+        return currentType == ObjectType::Unknown || candidateType == ObjectType::Audio;
+
+    if (candidateType == ObjectType::Video) {
+        for (auto source : coverArtPriority) {
+            const auto candidateHasArt = static_cast<bool>(candidate->getArtwork(source));
+            const auto currentHasArt = static_cast<bool>(current->getArtwork(source));
+            if (candidateHasArt != currentHasArt)
+                return candidateHasArt;
+            if (candidateHasArt)
+                break;
+        }
+        return candidate->getLocation() < current->getLocation();
+    }
+
+    const auto order = [](const std::shared_ptr<CdsObject>& object) {
+        const auto item = std::static_pointer_cast<CdsItem>(object);
+        return std::tuple {
+            !item->getArtwork(ArtworkSource::Embedded),
+            std::max(1, item->getPartNumber()),
+            item->getTrackNumber() <= 0,
+            std::max(0, item->getTrackNumber()),
+            item->getLocation(),
+        };
+    };
+    return order(candidate) < order(current);
 }
 
 static std::map<ObjectType, AutoscanMediaMode> amm = {
@@ -279,6 +335,13 @@ ImportService::ImportService(std::shared_ptr<Context> context, std::shared_ptr<C
     configLayoutMapping = config->getDictionaryOption(ConfigVal::IMPORT_LAYOUT_MAPPING);
     containerImageParentCount = config->getIntOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_PARENTCOUNT);
     containerImageMinDepth = config->getIntOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_MINDEPTH);
+    for (const auto& entry : splitString(toLower(config->getOption(ConfigVal::IMPORT_RESOURCES_CONTAINERART_PRIORITY)), ',')) {
+        auto name = trimString(entry);
+        if (auto source = parseArtworkSource(name))
+            coverArtPriority.push_back(*source);
+        else if (!name.empty())
+            log_warning("Unknown container artwork source: {}", name);
+    }
     virtualDirKeys = config->getVectorOption(ConfigVal::IMPORT_VIRTUAL_DIRECTORY_KEYS);
     noMediaName = config->getOption(ConfigVal::IMPORT_NOMEDIA_FILE);
     UpnpMap::initMap(upnpMap, mimetypeUpnpclassMap);
@@ -785,7 +848,9 @@ void ImportService::createItems(
             }
             if (contState && cdsObj) {
                 contState->increaseItemCounter(cdsObj->getMediaType());
-                contState->setFirstObject(cdsObj);
+                const auto& previous = contState->getFirstObject();
+                if (!hasCoverArtPriority() || artworkMediaType(previous) == ObjectType::Unknown || preferMediaArtwork(cdsObj, previous))
+                    contState->setFirstObject(cdsObj);
             }
             if (parentContainer) {
                 stateEntry->setParentObject(parentContainer);
@@ -1031,6 +1096,22 @@ void ImportService::updateItemData(const std::shared_ptr<CdsItem>& item, const s
     }
 }
 
+void ImportService::updateFolderArtwork(
+    const std::shared_ptr<CdsObject>& item,
+    std::shared_ptr<CdsContainer> parent)
+{
+    if (!hasCoverArtPriority() || artworkMediaType(item) == ObjectType::Unknown)
+        return;
+    if (!parent && item->getParentID() > CDS_ID_ROOT) {
+        try {
+            parent = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(item->getParentID()));
+        } catch (const ObjectNotFoundException&) {
+            return;
+        }
+    }
+    assignFanArt(parent, item, AutoscanMediaMode::Mixed, false /* isDir */, 0, false /* isNew */);
+}
+
 void ImportService::finishScan(
     const fs::path& location,
     const std::shared_ptr<CdsContainer>& parent,
@@ -1057,13 +1138,77 @@ void ImportService::finishScan(
     }
 }
 
+void ImportService::assignMediaArtwork(
+    const std::shared_ptr<CdsContainer>& container,
+    const std::shared_ptr<CdsObject>& item,
+    bool doUpdate)
+{
+    auto current = container->getResource(ResourcePurpose::Thumbnail);
+    auto handler = std::static_pointer_cast<ContainerArtHandler>(metadataService->getHandler(ContentHandler::CONTAINERART));
+    std::shared_ptr<CdsObject> previous;
+    if (current) {
+        const auto previousId = stoiString(current->getAttribute(ResourceAttribute::FANART_OBJ_ID));
+        if (previousId > CDS_ID_ROOT && previousId != item->getID()) {
+            try {
+                previous = database->loadObject(previousId);
+            } catch (const ObjectNotFoundException&) {
+                // Removed items no longer supply artwork.
+            }
+        }
+    }
+    const auto folder = item->getLocation().parent_path();
+    const bool physicalFolder = container->getEntryType() == CdsEntryType::Directory;
+    if (previous && physicalFolder && previous->getLocation().parent_path() != folder)
+        previous.reset();
+
+    auto primary = item;
+    if (previous && artworkMediaType(previous) != artworkMediaType(item)) {
+        if (physicalFolder && artworkMediaType(previous) == ObjectType::Audio)
+            primary = previous;
+        previous.reset();
+    }
+
+    std::shared_ptr<CdsResource> selected;
+    for (auto source : coverArtPriority) {
+        if (source == ArtworkSource::Pattern) {
+            selected = handler->findPatternArtwork(container, item->getLocation());
+        } else if (source != ArtworkSource::External) {
+            auto candidate = primary;
+            auto artwork = candidate->getArtwork(source);
+            if (auto previousArt = previous ? previous->getArtwork(source) : nullptr; previousArt && (!artwork || preferMediaArtwork(previous, candidate))) {
+                candidate = previous;
+                artwork = previousArt;
+            }
+            if (artwork) {
+                selected = artwork->clone();
+                selected->addAttribute(ResourceAttribute::FANART_OBJ_ID, candidate->getID());
+                selected->addAttribute(ResourceAttribute::FANART_RES_ID, artwork->getResId());
+            }
+        }
+        if (selected)
+            break;
+    }
+    if (!selected)
+        selected = handler->findThemeArtwork(container);
+
+    if (current ? !current->equals(selected) : selected != nullptr) {
+        container->clearResources();
+        if (selected)
+            container->addResource(selected);
+        doUpdate = true;
+    }
+    if (doUpdate)
+        database->updateObject(container, nullptr);
+}
+
 void ImportService::assignFanArt(
     const std::shared_ptr<CdsContainer>& container,
     const std::shared_ptr<CdsObject>& refObj,
     AutoscanMediaMode mediaMode,
     bool isDir,
     int count,
-    bool isNew)
+    bool isNew,
+    const std::shared_ptr<CdsObject>& artworkItem)
 {
     if (!container)
         return;
@@ -1077,6 +1222,17 @@ void ImportService::assignFanArt(
         if (refObj->getMTime() > container->getMTime()) {
             container->setMTime(refObj->getMTime());
             doUpdate = true;
+        }
+    }
+
+    if (hasCoverArtPriority()) {
+        auto item = artworkItem;
+        if (!item && container->getEntryType() == CdsEntryType::Directory && artworkMediaType(refObj) != ObjectType::Unknown
+            && refObj->getLocation().parent_path() == container->getLocation())
+            item = refObj;
+        if (artworkMediaType(item) != ObjectType::Unknown && item->getID() > CDS_ID_ROOT) {
+            assignMediaArtwork(container, item, doUpdate);
+            return;
         }
     }
 
@@ -1147,9 +1303,9 @@ void ImportService::assignFanArt(
                 }
                 if (refFanArt->getAttribute(ResourceAttribute::RESOURCE_FILE).empty()) {
                     if (fanArtObjId > CDS_ID_ROOT) {
-                        refFanArt->addAttribute(ResourceAttribute::FANART_OBJ_ID, fanArtObjId);
-                        refFanArt->addAttribute(ResourceAttribute::FANART_RES_ID, fanArtResId);
-                        fanart = refFanArt;
+                        fanart = refFanArt->clone();
+                        fanart->addAttribute(ResourceAttribute::FANART_OBJ_ID, fanArtObjId);
+                        fanart->addAttribute(ResourceAttribute::FANART_RES_ID, fanArtResId);
                     }
                 } else {
                     fanart = refFanArt;
@@ -1162,8 +1318,7 @@ void ImportService::assignFanArt(
         fanart = metadataService->getHandler(ContentHandler::CONTAINERART)->fillFallbackMetadata(container);
     if (fanart) {
         container->clearResources();
-        auto theFanArt = std::make_shared<CdsResource>(fanart->getHandlerType(), fanart->getPurpose(), fanart->getAttributes(), fanart->getParameters(), fanart->getOptions());
-        container->addResource(theFanArt); // overwrite all other resources
+        container->addResource(fanart->clone()); // overwrite all other resources
         doUpdate = true;
         if (fanart->getOption(RESOURCE_OPTION_CONTAINER_ART_FALLBACK).empty())
             containerCache.setFanArt(container->getID(), container);
@@ -1303,13 +1458,28 @@ std::pair<int, bool> ImportService::addContainerTree(
             }
         }
         count++;
-        if (isVirtual) // && chain.size() - count < containerImageParentCount
+        if (isVirtual) {
+            std::shared_ptr<CdsObject> artworkItem;
+            if (!coverArtPriority.empty() && item->isContainer()) {
+                const auto source = std::static_pointer_cast<CdsContainer>(item)->getArtworkSource();
+                if (source > CDS_ID_ROOT) {
+                    try {
+                        artworkItem = refItem && refItem->getID() == source ? refItem : database->loadObject(source);
+                    } catch (const ObjectNotFoundException&) {
+                        // The source was removed before the layout used it.
+                    }
+                } else if (item->isSubClass(UPNP_CLASS_MUSIC_ALBUM) && artworkMediaType(refItem) == ObjectType::Audio) {
+                    artworkItem = refItem;
+                }
+            }
             assignFanArt(containerCache.at(subTree),
                 refItem && count > containerImageMinDepth ? refItem : item,
                 AutoscanMediaMode::Mixed,
                 false /* isDir */,
                 chain.size() - count,
-                isNew);
+                isNew,
+                artworkItem);
+        }
     }
     log_debug("end '{}' {} {}", tree, result, isNew);
     return { result, isNew };

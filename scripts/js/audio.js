@@ -98,6 +98,7 @@ function importAudio(obj, cont, rootPath, autoscanId, containerType) {
       refID: containerRefID
     },
     album: {
+      artworkSource: obj.id,
       searchable: false,
       title: audio.album,
       objectType: OBJECT_TYPE_CONTAINER,
@@ -387,6 +388,7 @@ function importAudioStructured(obj, cont, rootPath, autoscanId, containerType) {
       refID: containerRefID
     },
     album: {
+      artworkSource: obj.id,
       title: audio.album,
       objectType: OBJECT_TYPE_CONTAINER,
       upnpclass: containerType,
@@ -650,6 +652,7 @@ function importAudioInitial(obj, cont, rootPath, autoscanId, containerType) {
       refID: containerRefID
     },
     album: {
+      artworkSource: obj.id,
       title: audio.album,
       location: audio.dir.join('_'),
       objectType: OBJECT_TYPE_CONTAINER,
@@ -977,6 +980,7 @@ function importAudioClassical(obj, cont, rootPath, autoscanId, containerType) {
       refID: containerRefID
     },
     album: {
+      artworkSource: obj.id,
       searchable: false,
       title: audio.album,
       objectType: OBJECT_TYPE_CONTAINER,

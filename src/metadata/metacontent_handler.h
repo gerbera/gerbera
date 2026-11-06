@@ -31,6 +31,7 @@
 #include "metadata_enums.h"
 #include "metadata_handler.h"
 
+class CdsContainer;
 class ConfigDefinition;
 class Content;
 class Database;
@@ -48,11 +49,13 @@ public:
         const std::shared_ptr<ConfigDefinition>& definition,
         ConfigVal fileListOption,
         ConfigVal dirListOption);
+    /// @brief Resolve configured resources, optionally using the physical media context.
     std::vector<fs::path> getContentPath(
         const std::shared_ptr<CdsObject>& obj,
         const std::string& setting,
         fs::path folder = "",
-        ContentPathMode mode = ContentPathMode::Primary) const;
+        ContentPathMode mode = ContentPathMode::Primary,
+        const fs::path& mediaLocation = {}) const;
 
 private:
     std::shared_ptr<Config> config;
@@ -105,6 +108,11 @@ public:
     bool fillMetadata(
         const std::shared_ptr<CdsObject>& obj,
         std::vector<int>& newIds) override;
+    /// @brief Find the first usable configured image in the media item's folder.
+    std::shared_ptr<CdsResource> findPatternArtwork(
+        const std::shared_ptr<CdsContainer>& obj,
+        const fs::path& mediaLocation);
+    std::shared_ptr<CdsResource> findThemeArtwork(const std::shared_ptr<CdsContainer>& obj);
     std::shared_ptr<CdsResource> fillFallbackMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(
         const std::shared_ptr<CdsObject>& obj,

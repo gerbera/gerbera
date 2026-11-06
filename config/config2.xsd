@@ -1191,6 +1191,7 @@
         <xs:attribute name="extend" type="boolean" default="no"/>
         <xs:attribute name="location" type="xs:string"/>
         <xs:attribute name="parentCount" type="xs:integer" default="2"/>
+        <xs:attribute name="priority" type="xs:string"/>
         <xs:attribute name="minDepth" type="xs:integer" default="2"/>
     </xs:complexType>
 
