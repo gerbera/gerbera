@@ -97,7 +97,7 @@ function importVideo(obj, cont, rootPath, autoscanId, containerType) {
   }
 
   // Directories
-  getDirectories([chain.video, chain.allDirectories], boxSetup[BK_videoAllDirectories], video.dir, result, rootPath, obj, containerType, containerResource, containerRefID);
+  getDirectories([chain.video, chain.allDirectories], boxSetup[BK_videoAllDirectories], video.dir, result, rootPath, obj, containerType, containerResource, containerRefID, obj.id);
 
   return result;
 }
@@ -155,7 +155,7 @@ function importVideoDetail(obj, cont, rootPath, autoscanId, containerType) {
     chain.video.metaData[M_CONTENT_CLASS] = [UPNP_CLASS_VIDEO_ITEM];
     result.push(addCdsObject(obj, addContainerTree([chain.video, chain.allVideo]), rootPath));
   }
-  getDirectories([chain.video, chain.allDirectories], boxSetup[BK_videoAllDirectories], video.dir, result, rootPath, obj, containerType, containerResource, cont.id);
+  getDirectories([chain.video, chain.allDirectories], boxSetup[BK_videoAllDirectories], video.dir, result, rootPath, obj, containerType, containerResource, cont.id, obj.id);
   var titlePrefix = '';
 
   if (video.videoDate) {

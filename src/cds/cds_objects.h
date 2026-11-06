@@ -83,6 +83,14 @@ enum class CdsEntryType : int {
     MAX,
 };
 
+/// @brief Artwork sources that can be ordered for containers.
+enum class ArtworkSource {
+    Embedded,
+    Preview,
+    Pattern,
+    External,
+};
+
 /// @brief Generic object in the Content Directory.
 class CdsObject {
 protected:
@@ -212,6 +220,9 @@ public:
     std::string getClass() const { return upnpClass; }
     bool isSubClass(const std::string& cls) const;
     ObjectType getMediaType(const std::string& contentType = "") const;
+
+    /// @brief Returns the media type of a non-external audio or video item, or Unknown.
+    ObjectType getArtworkMediaType() const;
 
     /// @brief Whether this object is an audio, video or image item.
     bool isMediaItem() const;
@@ -444,6 +455,9 @@ public:
         }
         return {};
     }
+
+    /// @brief Returns the first embedded cover or generated preview matching the source.
+    std::shared_ptr<CdsResource> getArtwork(ArtworkSource source) const;
 
     /// @brief Query resource attribute with the given value
     std::shared_ptr<CdsResource> getResource(ResourceAttribute attrib, const std::string& value) const

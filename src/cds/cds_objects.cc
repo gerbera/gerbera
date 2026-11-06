@@ -150,6 +150,38 @@ ObjectType CdsObject::getMediaType(const std::string& contentType) const
     return ObjectType::Unknown;
 }
 
+ObjectType CdsObject::getArtworkMediaType() const
+{
+    if (!isItem() || isExternalItem())
+        return ObjectType::Unknown;
+    const auto type = getMediaType();
+    return type == ObjectType::Audio || type == ObjectType::Video ? type : ObjectType::Unknown;
+}
+
+std::shared_ptr<CdsResource> CdsObject::getArtwork(ArtworkSource source) const
+{
+    if (source != ArtworkSource::Embedded && source != ArtworkSource::Preview)
+        return nullptr;
+    const auto type = getArtworkMediaType();
+    if (type == ObjectType::Unknown || (source == ArtworkSource::Preview && type != ObjectType::Video))
+        return nullptr;
+    for (const auto& resource : resources) {
+        if (resource->getPurpose() != ResourcePurpose::Thumbnail
+            || !resource->getAttribute(ResourceAttribute::RESOURCE_FILE).empty()
+            || !resource->getAttribute(ResourceAttribute::FANART_OBJ_ID).empty())
+            continue;
+        const auto handler = resource->getHandlerType();
+        if (source == ArtworkSource::Preview) {
+            if (handler == ContentHandler::FFTH)
+                return resource;
+        } else if (handler == ContentHandler::MATROSKA || handler == ContentHandler::FFMPEG
+            || (type == ObjectType::Audio && (handler == ContentHandler::ID3 || handler == ContentHandler::FLAC || handler == ContentHandler::WAVPACK))) {
+            return resource;
+        }
+    }
+    return nullptr;
+}
+
 std::shared_ptr<CdsObject> CdsObject::createObject(unsigned int objectType)
 {
     if (IS_CDS_CONTAINER(objectType)) {

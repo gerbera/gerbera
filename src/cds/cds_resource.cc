@@ -219,11 +219,11 @@ std::string CdsResource::getOption(const std::string& name) const
 bool CdsResource::equals(const std::shared_ptr<CdsResource>& other) const
 {
     return (
-        handlerType == other->handlerType
+        other && handlerType == other->handlerType
         && purpose == other->purpose
-        && std::equal(attributes.begin(), attributes.end(), other->attributes.begin())
-        && std::equal(parameters.begin(), parameters.end(), other->parameters.begin())
-        && std::equal(options.begin(), options.end(), other->options.begin()));
+        && attributes == other->attributes
+        && parameters == other->parameters
+        && options == other->options);
 }
 
 std::shared_ptr<CdsResource> CdsResource::clone()

@@ -34,12 +34,14 @@
 #include <unordered_set>
 
 // forward declarations
+enum class ArtworkSource;
 class AutoscanDirectory;
 enum class AutoscanMediaMode;
 class AutoScanSetting;
 class CdsContainer;
 class CdsItem;
 class CdsObject;
+class CdsResource;
 class Config;
 class ContentManager;
 class Context;
@@ -238,6 +240,7 @@ private:
     bool pcDirTypes { true };
     int containerImageParentCount { 2 };
     int containerImageMinDepth { 2 };
+    std::vector<ArtworkSource> coverArtPriority;
 
     std::vector<std::vector<std::pair<std::string, std::string>>> virtualDirKeys;
 
@@ -270,6 +273,12 @@ private:
     void updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
     void fillLayout(const std::shared_ptr<StateCache>& stateCache, const std::shared_ptr<GenericTask>& task);
     void updateFanArt(const std::shared_ptr<StateCache>& stateCache, bool isDir);
+    /// @brief Select and store artwork for a container using the configured source order.
+    void assignMediaArtwork(
+        const std::shared_ptr<CdsContainer>& container,
+        const std::shared_ptr<CdsObject>& item,
+        bool doUpdate);
+
     /// @brief try to assign fanart to container
     /// @param container target object
     /// @param refObj object to point to for fanart
@@ -277,13 +286,15 @@ private:
     /// @param isDir target is physical folder
     /// @param count current depth of folder path
     /// @param isNew new virtual target
+    /// @param artworkItem physical media item offered by the layout for this container
     void assignFanArt(
         const std::shared_ptr<CdsContainer>& container,
         const std::shared_ptr<CdsObject>& refObj,
         AutoscanMediaMode mediaMode,
         bool isDir,
         int count,
-        bool isNew);
+        bool isNew,
+        const std::shared_ptr<CdsObject>& artworkItem = nullptr);
     void removeHidden(const std::shared_ptr<StateCache>& stateCache, const AutoScanSetting& settings);
 
     /// @brief Extract mime type and corresponding upnp class from file
@@ -361,6 +372,19 @@ public:
         const std::vector<std::shared_ptr<CdsObject>>& chain,
         const std::shared_ptr<CdsObject>& refItem,
         std::vector<int>& createdIds);
+
+    /// @brief Whether the configured source order overrides legacy artwork selection.
+    bool hasCoverArtPriority() const { return !coverArtPriority.empty(); }
+
+    /// @brief Refresh the physical parent folder artwork after importing a media item.
+    void updateFolderArtwork(
+        const std::shared_ptr<CdsObject>& item,
+        std::shared_ptr<CdsContainer> parent);
+
+    /// @brief Prefer a direct media source with a better configured artwork candidate.
+    bool preferMediaArtwork(
+        const std::shared_ptr<CdsObject>& candidate,
+        const std::shared_ptr<CdsObject>& current) const;
 
     void finishScan(
         const fs::path& location,

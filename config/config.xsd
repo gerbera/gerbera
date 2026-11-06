@@ -679,6 +679,7 @@
                 <xs:element ref="add-dir" minOccurs="0"/>
             </xs:sequence>
             <xs:attribute name="parentCount"/>
+            <xs:attribute name="priority" type="xs:string"/>
             <xs:attribute name="minDepth"/>
         </xs:complexType>
     </xs:element>

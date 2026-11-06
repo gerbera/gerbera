@@ -172,8 +172,10 @@ int BuiltinLayout::getDir(
             if (segment != "/" && segment != ".." && !segment.empty())
                 dirVect.push_back(std::make_shared<CdsContainer>(segment.string()));
         }
+        if (c1 == BoxKeys::videoRoot && dirVect.size() > 2)
+            std::static_pointer_cast<CdsContainer>(dirVect.back())->setArtworkSource(obj->getID());
         auto id = content->addContainerTree(dirVect, obj);
-        dirVect[dirVect.size() - 1]->setClass(upnpClass);
+        dirVect.back()->setClass(upnpClass);
         return add(obj, id, isFirst);
     }
     return INVALID_OBJECT_ID;
