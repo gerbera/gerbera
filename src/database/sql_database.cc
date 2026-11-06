@@ -3288,7 +3288,7 @@ void SQLDatabase::generateResourceDBOperations(
 
     std::size_t resId = 0;
     for (const auto& resource : resources) {
-        const auto* previous = resId < dbResources.size() ? dbResources[resId].get() : nullptr;
+        const auto previous = resId < dbResources.size() ? dbResources[resId] : nullptr;
         std::map<ResourceColumn, std::string> resourceSql;
         resourceSql[ResourceColumn::ResId] = quote(resId);
         resourceSql[ResourceColumn::HandlerType] = quote(to_underlying(resource->getHandlerType()));
