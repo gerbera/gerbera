@@ -108,10 +108,11 @@ public:
     bool fillMetadata(
         const std::shared_ptr<CdsObject>& obj,
         std::vector<int>& newIds) override;
-    /// @brief Find the first usable configured image in the media item's folder.
+    /// @brief Find the first usable configured image in the given folder or the media item's folder.
     std::shared_ptr<CdsResource> findPatternArtwork(
         const std::shared_ptr<CdsContainer>& obj,
-        const fs::path& mediaLocation);
+        const fs::path& mediaLocation,
+        const fs::path& searchFolder = {});
     std::shared_ptr<CdsResource> findThemeArtwork(const std::shared_ptr<CdsContainer>& obj);
     std::shared_ptr<CdsResource> fillFallbackMetadata(const std::shared_ptr<CdsObject>& obj) override;
     std::unique_ptr<IOHandler> serveContent(

@@ -85,6 +85,7 @@ enum class CdsEntryType : int {
 
 /// @brief Artwork sources that can be ordered for containers.
 enum class ArtworkSource {
+    None,
     Embedded,
     Preview,
     Pattern,
