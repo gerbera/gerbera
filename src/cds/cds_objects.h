@@ -216,6 +216,9 @@ public:
     /// @brief Whether this object is an audio, video or image item.
     bool isMediaItem() const;
 
+    /// @brief Whether this is an audio, video, image or playlist item.
+    bool isMediaOrPlaylistItem() const;
+
     /// @brief Set the physical location of the media (usually an absolute path)
     void setLocation(const fs::path& location, CdsEntryType type)
     {

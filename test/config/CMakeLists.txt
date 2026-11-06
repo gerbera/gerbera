@@ -28,6 +28,7 @@ add_executable(
     test_configgenerator.cc #
     test_configenum.cc #
     test_configmanager.cc #
+    test_playlist_classes.cc #
     test_transcoding.cc #
 )
 
