@@ -12,9 +12,9 @@ concurrency:
 env:
   APK_TOOLS_URL: https://gitlab.alpinelinux.org/api/v4/projects/5/packages/generic/v2.14.10/x86_64/apk.static
   APK_TOOLS_SHA256: 34bb1a96f0258982377a289392d4ea9f3f4b767a4bb5806b1b87179b79ad8a1c
-  APK_TOOLS_CDN_URL: https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/apk-tools-static-2.14.12-r0.apk
-  APK_TOOLS_CDN_PACKAGE_SHA256: f44523ae4ded143b3d85e16be4bf7ff386fc052406c3b22f87f045efb0aa4305
-  APK_TOOLS_CDN_SHA256: 034d28bbf3d97d90fd76e572ab8ae74a038da0e7593e9d412eabccf69ccd3553
+  APK_TOOLS_CDN_URL: https://dl-cdn.alpinelinux.org/alpine/v3.22/main/x86_64/apk-tools-static-2.14.13-r0.apk
+  APK_TOOLS_CDN_PACKAGE_SHA256: d78d2a9ebadc8179b3b9063c3316e948f594c833db51eaeabe67f1d044245527
+  APK_TOOLS_CDN_SHA256: 99b6de1fdd5725b22f316e00be64e80fb3c708c5eba4ffebbcfe18dcec469aee
 
 jobs:
   build:
@@ -45,19 +45,19 @@ jobs:
           trap 'rm -f -- "$apk_download" "$apk_extracted"' EXIT
           download() {
             curl --ipv4 --fail --show-error --location \
-              --connect-timeout 10 --max-time 30 \
-              --retry 2 --retry-delay 5 --retry-max-time 60 --retry-connrefused \
+              --connect-timeout 10 --max-time "$2" \
+              --retry 2 --retry-delay 5 --retry-max-time 120 --retry-connrefused \
               --output "$apk_download" "$1"
           }
           apk_sha256="$APK_TOOLS_SHA256"
-          if download "$APK_TOOLS_CDN_URL"; then
+          if download "$APK_TOOLS_CDN_URL" 30; then
             printf '%s  %s\n' "$APK_TOOLS_CDN_PACKAGE_SHA256" "$apk_download" | sha256sum --check --strict
             tar --ignore-zeros -xzOf "$apk_download" sbin/apk.static > "$apk_extracted"
             mv -- "$apk_extracted" "$apk_download"
             apk_sha256="$APK_TOOLS_CDN_SHA256"
           else
             echo '::warning::Alpine CDN download failed; using the pinned Alpine GitLab binary.'
-            download "$APK_TOOLS_URL"
+            download "$APK_TOOLS_URL" 60
           fi
           printf '%s  %s\n' "$apk_sha256" "$apk_download" | sha256sum --check --strict
           mv -- "$apk_download" "$RUNNER_TEMP/apk"
