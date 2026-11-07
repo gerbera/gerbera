@@ -59,7 +59,11 @@ public:
     ScriptingRuntime& operator=(const ScriptingRuntime&) = delete;
 
     /// @brief script listens to changes in folders
-    void addScript(const std::shared_ptr<Script>& script) { activeScripts.push_back(script); }
+    void addScript(const std::shared_ptr<Script>& script)
+    {
+        AutoLock lock(mutex);
+        activeScripts.push_back(script);
+    }
     /// @brief get scripts
     const std::vector<std::shared_ptr<Script>>& getScripts() { return activeScripts; }
     /// @brief reload scripts in folders

@@ -81,6 +81,16 @@ std::pair<bool, std::shared_ptr<AutoscanDirectory>> InotifyHandler::getAutoscanD
 {
     std::error_code ec;
     dirEnt = fs::directory_entry(path, ec);
+    if (ec && ec != std::errc::no_such_file_or_directory && ec != std::errc::not_a_directory)
+        throw fs::filesystem_error("Cannot verify inotify event target", path, ec);
+    if (AUTOSCAN_WAS_REMOVED(mask) && !ec) {
+        log_debug("Reconciling replacement after stale removal {}: {}", InotifyUtil::mapFlags(mask), path.c_str());
+        reconcileReplacement = true;
+    }
+    if (ec && !AUTOSCAN_WAS_REMOVED(mask)) {
+        log_debug("Ignoring event {} for absent target {}", InotifyUtil::mapFlags(mask), path.c_str());
+        return { false, nullptr };
+    }
     bool isDir = AUTOSCAN_IS_DIR(mask);
     if (!ec) {
         isDir = isDir || !isRegularFile(path, ec);
@@ -138,6 +148,12 @@ int InotifyHandler::doExistingEntry(
     ImportMode importMode, bool& isDir)
 {
     int result = INOTIFY_ROOT;
+    if (reconcileReplacement) {
+        auto parentPath = path == adir->getLocation() ? path : path.parent_path();
+        auto parent = database->findObjectByPath(parentPath, UNUSED_CLIENT_GROUP, DbFileType::Directory);
+        content->rescanDirectory(adir, parent ? parent->getID() : INVALID_OBJECT_ID, parentPath, false);
+        return result;
+    }
     if (!AUTOSCAN_IS_NEW(mask) || (AUTOSCAN_IS_MOVED(mask) && !isDir)) {
         // deleted
         log_debug("updating {}", path.c_str());
@@ -173,21 +189,26 @@ void InotifyHandler::doNewEntry(
     const std::shared_ptr<Content>& content,
     bool isDir) const
 {
+    if (!isDir && !content->isHiddenFile(dirEnt, false, asSetting)
+        && ((mask & IN_CREATE) || AUTOSCAN_IS_NEW_ENTRY(mask, dirEnt.is_symlink())))
+        ai->monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
     if (changedObject)
         asSetting.changedObject = changedObject;
 
     if (AUTOSCAN_IS_NEW_ENTRY(mask, isDir || dirEnt.is_symlink())) {
         log_debug("Adding {}", path.c_str());
         // dirEnt, path, rootPath, settings, lowPriority, cancellable
-        content->addFile(dirEnt, adir->getLocation(), asSetting, true, false);
-        asSetting.changedObject = nullptr;
         if (isDir) {
             auto wdObjPath = ai->monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
+            // Children may have been written before the new directory watch was installed.
+            asSetting.refreshExisting = mask & (IN_CREATE | IN_MOVED_TO);
             if (AUTOSCAN_IS_MOVED(mask) && wdObjPath) {
                 log_debug("Resetting {} to {}", wdObjPath->getPath().c_str(), path.c_str());
                 wdObjPath->setPath(path);
             }
         }
+        content->addFile(dirEnt, adir->getLocation(), asSetting, true, false);
+        asSetting.changedObject = nullptr;
     }
 }
 

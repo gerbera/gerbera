@@ -39,6 +39,10 @@
 #include "inotify_types.h"
 #include "util/grb_fs.h"
 
+#include <array>
+#include <cstddef>
+#include <sys/inotify.h>
+
 /// @brief Inotify interface.
 class Inotify {
 public:
@@ -77,6 +81,9 @@ private:
     int stop_fds_pipe[2];
     int stop_fd_read;
     int stop_fd_write;
+    std::array<inotify_event, 4096> eventBuffer {};
+    std::size_t nextEventOffset {};
+    std::size_t eventBytes {};
 };
 
 #endif

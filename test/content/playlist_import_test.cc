@@ -54,8 +54,8 @@
 #include <fstream>
 #include <iostream>
 #include <limits>
+#include <map>
 #include <memory>
-#include <set>
 #include <stdexcept>
 #include <thread>
 #include <utility>
@@ -353,14 +353,14 @@ bool PlaylistImportTest::waitForWatches(const std::vector<fs::path>& paths, std:
 {
 #ifdef __linux__
     constexpr auto requiredMask = IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_CREATE | IN_DELETE;
-    std::set<std::pair<unsigned long long, unsigned long long>> expected;
+    std::map<std::pair<unsigned long long, unsigned long long>, unsigned long long> expected;
     std::string description = "Kernel watches for";
     for (const auto& path : paths) {
-        struct stat info { };
+        struct stat info {};
         if (stat(path.c_str(), &info) != 0)
             throw std::runtime_error("Cannot inspect watch directory: " + path.string());
         const auto device = (static_cast<unsigned long long>(major(info.st_dev)) << 20) | minor(info.st_dev);
-        expected.emplace(device, info.st_ino);
+        expected[{ device, info.st_ino }] = S_ISDIR(info.st_mode) ? requiredMask : IN_DELETE_SELF | IN_MOVE_SELF;
         description += " " + path.string();
     }
     return waitFor([&] {
@@ -369,9 +369,11 @@ bool PlaylistImportTest::waitForWatches(const std::vector<fs::path>& paths, std:
             std::ifstream input(descriptor.path());
             for (std::string line; std::getline(input, line);) {
                 unsigned long long inode, device, mask;
-                if (std::sscanf(line.c_str(), "inotify wd:%*x ino:%llx sdev:%llx mask:%llx", &inode, &device, &mask) == 3
-                    && (mask & requiredMask) == requiredMask)
-                    missing.erase({ device, inode });
+                if (std::sscanf(line.c_str(), "inotify wd:%*x ino:%llx sdev:%llx mask:%llx", &inode, &device, &mask) == 3) {
+                    auto entry = missing.find({ device, inode });
+                    if (entry != missing.end() && (mask & entry->second) == entry->second)
+                        missing.erase(entry);
+                }
             }
         }
         return missing.empty();

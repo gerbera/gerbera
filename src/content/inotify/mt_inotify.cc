@@ -46,18 +46,11 @@
 #include "util/logger.h"
 
 #include <algorithm>
-#include <array>
 #include <cstring>
 #include <sys/inotify.h>
-#include <sys/ioctl.h>
 #include <sys/select.h>
 #include <thread>
 #include <unistd.h>
-#ifdef SOLARIS
-#include <sys/filio.h> // FIONREAD
-#endif
-
-#define MAX_EVENTS 4096
 
 Inotify::Inotify()
 #ifdef __linux__
@@ -74,7 +67,12 @@ Inotify::Inotify()
 #else
     if (pipe(stop_fds_pipe) < 0)
 #endif
+    {
+        int savedError = errno;
+        close(inotify_fd);
+        errno = savedError;
         throw_fmt_system_error("Unable to create pipe");
+    }
 
     stop_fd_read = stop_fds_pipe[0];
     stop_fd_write = stop_fds_pipe[1];
@@ -84,6 +82,8 @@ Inotify::~Inotify()
 {
     if (inotify_fd >= 0)
         close(inotify_fd);
+    close(stop_fd_read);
+    close(stop_fd_write);
 }
 
 bool Inotify::supported()
@@ -135,107 +135,40 @@ void Inotify::removeWatch(int wd) const
 
 struct inotify_event* Inotify::nextEvent()
 {
-    static std::array<inotify_event, MAX_EVENTS> event;
-    static struct inotify_event* ret = nullptr;
-    static ssize_t firstByte = 0;
-    static ssize_t bytes = 0;
-
-    // firstByte is index into event buffer
-    if (firstByte != 0
-        && firstByte <= bytes - ssize_t(sizeof(struct inotify_event))) {
-        ret = reinterpret_cast<struct inotify_event*>(reinterpret_cast<char*>(event.data()) + firstByte);
-        firstByte += sizeof(struct inotify_event) + ret->len;
-
-        // if the pointer to the next event exactly hits end of bytes read,
-        // that's good.  next time we're called, we'll read.
-        if (firstByte == bytes) {
-            firstByte = 0;
-        } else if (firstByte > bytes) {
-            // oh... no.  this can't be happening.  An incomplete event.
-            // Copy what we currently have into first element, call self to
-            // read remainder.
-            // oh, and they BETTER NOT overlap.
-            // Boy I hope this code works.
-            // But I think this can never happen due to how inotify is written.
-            assert(long(reinterpret_cast<char*>(event.data()) + sizeof(struct inotify_event) + event[0].len) <= long(ret));
-
-            // how much of the event do we have?
-            bytes = reinterpret_cast<char*>(event.data()) + bytes - reinterpret_cast<char*>(ret);
-            std::memcpy(event.data(), ret, bytes);
-            return nextEvent();
-        }
-        return ret;
-    }
-
-    if (firstByte == 0) {
-        bytes = 0;
-    }
-
-    static ssize_t bytesToRead = 0;
-    static int rc;
-    static fd_set readFds;
-
-    FD_ZERO(&readFds);
-
-    FD_SET(inotify_fd, &readFds);
-
-    auto fdMax = inotify_fd;
-
-    FD_SET(stop_fd_read, &readFds);
-
-    fdMax = std::max(stop_fd_read, fdMax);
-
-    rc = select(fdMax + 1, &readFds, nullptr, nullptr, nullptr);
-    if (rc < 0) {
-        return nullptr;
-    }
-    if (rc == 0) {
-        // timeout
-        return nullptr;
-    }
-
-    if (FD_ISSET(stop_fd_read, &readFds)) {
-        char buf;
-        if (read(stop_fd_read, &buf, 1) == -1) {
-            log_error("Inotify: could not read stop: {}", std::strerror(errno));
-        }
-    }
-
-    if (FD_ISSET(inotify_fd, &readFds)) {
-        static ssize_t thisBytes = 0;
-        // wait until we have enough bytes to read
-        do {
-            rc = ioctl(inotify_fd, FIONREAD, &bytesToRead);
-        } while (!rc && bytesToRead < ssize_t(sizeof(struct inotify_event)));
-
-        if (rc == -1) {
+    if (nextEventOffset == eventBytes) {
+        fd_set readFds;
+        FD_ZERO(&readFds);
+        FD_SET(inotify_fd, &readFds);
+        FD_SET(stop_fd_read, &readFds);
+        int rc = select(std::max(inotify_fd, stop_fd_read) + 1, &readFds, nullptr, nullptr, nullptr);
+        if (rc <= 0)
             return nullptr;
+        if (FD_ISSET(stop_fd_read, &readFds)) {
+            char stop;
+            if (read(stop_fd_read, &stop, 1) == -1)
+                log_error("Inotify: could not read stop: {}", std::strerror(errno));
         }
-
-        thisBytes = read(inotify_fd, event.data() + bytes,
-            sizeof(struct inotify_event) * MAX_EVENTS - bytes);
-        if (thisBytes < 0) {
+        if (!FD_ISSET(inotify_fd, &readFds))
             return nullptr;
-        }
-        if (thisBytes == 0) {
-            log_error("Inotify reported end-of-file.  Possibly too many "
-                      "events occurred at once.\n");
+
+        // inotify reads contain complete events; each instance owns its batch.
+        auto bytesRead = read(inotify_fd, eventBuffer.data(), sizeof(eventBuffer));
+        if (bytesRead < 0)
             return nullptr;
-        }
-        bytes += thisBytes;
-
-        ret = event.data();
-        firstByte = sizeof(struct inotify_event) + ret->len;
-        assert(firstByte <= bytes);
-
-        if (firstByte == bytes) {
-            firstByte = 0;
-        }
-
-        return ret;
+        if (bytesRead == 0)
+            throw_std_runtime_error("Inotify reported end-of-file");
+        eventBytes = bytesRead;
+        nextEventOffset = 0;
     }
 
-    return nullptr;
+    auto remaining = eventBytes - nextEventOffset;
+    if (remaining < sizeof(inotify_event))
+        throw_std_runtime_error("Inotify returned an incomplete event header");
+    auto event = reinterpret_cast<inotify_event*>(reinterpret_cast<char*>(eventBuffer.data()) + nextEventOffset);
+    if (event->len > remaining - sizeof(inotify_event))
+        throw_std_runtime_error("Inotify returned an incomplete event name");
+    nextEventOffset += sizeof(inotify_event) + event->len;
+    return event;
 }
 
 void Inotify::stop() const

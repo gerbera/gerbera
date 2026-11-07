@@ -43,6 +43,7 @@ public:
     bool hidden = false;
     bool rescanResource = true;
     bool async = true;
+    bool refreshExisting = false;
     std::shared_ptr<AutoscanDirectory> adir;
     std::shared_ptr<CdsObject> changedObject;
     std::vector<std::string> resourcePatterns;

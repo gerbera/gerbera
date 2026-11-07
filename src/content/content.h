@@ -94,7 +94,8 @@ public:
         const std::shared_ptr<AutoscanDirectory>& adir,
         int objectId,
         fs::path descPath = {},
-        bool cancellable = true)
+        bool cancellable = true,
+        bool refreshExisting = false)
         = 0;
     virtual void handlePersistentAutoscanRecreate(
         const std::shared_ptr<AutoscanDirectory>& adir)

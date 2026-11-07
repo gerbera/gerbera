@@ -518,7 +518,7 @@ std::shared_ptr<CdsObject> ContentManager::_addFile(
         rootPath = task->getRootPath();
 
     auto importMode = asSetting.adir ? asSetting.adir->getLayoutMode() : EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
-    if (importMode == ImportMode::Gerbera || (asSetting.changedObject && asSetting.changedObject->isMediaItem())) {
+    if (importMode == ImportMode::Gerbera || asSetting.refreshExisting || (asSetting.changedObject && asSetting.changedObject->isMediaItem())) {
         std::unordered_set<int> currentContent;
         if (asSetting.changedObject || !asSetting.adir || asSetting.adir->getScanMode() != AutoscanScanMode::INotify) {
             importService->clearCache(); // may be called by layout
@@ -642,7 +642,7 @@ int ContentManager::ensurePathExistence(const fs::path& path) const
     return containerID;
 }
 
-void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task)
+void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int containerID, const std::shared_ptr<GenericTask>& task, bool refreshExisting)
 {
     log_debug("start");
 
@@ -717,6 +717,8 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         log_error("Could not open {}: {}", location.c_str(), ec.message());
     }
     if (ec || !dIter) {
+        if (ec && ec != std::errc::no_such_file_or_directory && ec != std::errc::not_a_directory)
+            return; // An inaccessible directory is not evidence that its contents were deleted.
         if (adir->persistent()) {
             removeObject(adir, obj, location, false);
             if (location == adir->getLocation()) {
@@ -733,9 +735,10 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         return;
     }
 
-    auto importMode = adir->getLayoutMode();
+    auto importMode = refreshExisting ? ImportMode::Gerbera : adir->getLayoutMode();
     AutoScanSetting asSetting;
     asSetting.adir = adir;
+    asSetting.refreshExisting = refreshExisting;
     asSetting.recursive = adir->getRecursive();
     asSetting.followSymlinks = adir->getFollowSymlinks();
     asSetting.hidden = adir->getHidden();
@@ -1620,10 +1623,11 @@ void ContentManager::rescanDirectory(
     const std::shared_ptr<AutoscanDirectory>& adir,
     int objectId,
     fs::path descPath,
-    bool cancellable)
+    bool cancellable,
+    bool refreshExisting)
 {
     auto self = shared_from_this();
-    auto task = std::make_shared<CMRescanDirectoryTask>(self, adir, objectId, cancellable);
+    auto task = std::make_shared<CMRescanDirectoryTask>(self, adir, objectId, cancellable, refreshExisting);
 
     adir->incTaskCount();
 
