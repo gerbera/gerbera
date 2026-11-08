@@ -42,6 +42,7 @@
 #include "config/result/box_layout.h"
 #include "config/setup/config_setup_array.h"
 #include "config/setup/config_setup_autoscan.h"
+#include "config/setup/config_setup_bool.h"
 #include "config/setup/config_setup_boxlayout.h"
 #include "config/setup/config_setup_dictionary.h"
 #include "config/setup/config_setup_enum.h"
@@ -109,7 +110,7 @@ void Script::setBoolProperty(const std::string& name, bool value)
 void Script::prepareAudioTitleReplacements(
     duk_context* ctx,
     const std::vector<std::vector<std::pair<std::string, std::string>>>& attributes,
-    const char* property)
+    std::string_view property)
 {
     auto rules = duk_push_array(ctx);
     duk_uarridx_t ruleIndex = 0;
@@ -117,8 +118,7 @@ void Script::prepareAudioTitleReplacements(
         const auto from = getValueOrDefault(values, "from");
         if (from.empty())
             continue;
-        const auto regexValue = getValueOrDefault(values, "regex");
-        const bool regex = regexValue == "yes" || regexValue == "true";
+        const bool regex = ConfigBoolSetup::isTrue(getValueOrDefault(values, "regex"));
         auto rule = duk_push_object(ctx);
         if (regex) {
             duk_get_global_string(ctx, "RegExp");
@@ -156,7 +156,7 @@ void Script::prepareAudioTitleReplacements(
         duk_put_prop_string(ctx, rule, "conditions");
         duk_put_prop_index(ctx, rules, ruleIndex++);
     }
-    duk_put_prop_string(ctx, -2, property);
+    duk_put_prop_lstring(ctx, -2, property.data(), property.size());
 }
 
 /* **************** */

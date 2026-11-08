@@ -374,20 +374,16 @@ function audioTitleNumber(value, width) {
   return toDigits(number, Math.max(width, number.length));
 }
 
-function formatAudioTitle(obj, audio, trackNumber, discNumber, optionName, originalTitle) {
-  const options = config['/import/scripting/virtual-layout/script-options/script-option'] || {};
-  const format = options[optionName || 'audioTitleFormat'];
-  const album = optionName === 'albumTitleFormat';
+function formatTitle(obj, audio, trackNumber, discNumber, format, replacements, album, originalTitle) {
   if (typeof format !== 'string' || format === '') {
-    return album ? originalTitle : audio.title;
+    return originalTitle;
   }
 
   const filename = String(obj.location || '').replace(/^.*[\\/]/, '').replace(/\.[^.]*$/, '');
   const fields = {
     title: audio.trackTitle.trim(),
     artist: audio.artistFull || '',
-    albumartist: (obj.metaData[M_ALBUMARTIST] && obj.metaData[M_ALBUMARTIST][0]) ||
-      getAuxInfo(obj, 'TPE2', '') || (audio.artistFull ? (album ? audio.artists[0] : audio.albumArtist) : ''),
+    albumartist: audio.albumArtistFull,
     albumtitle: audio.albumFull || '',
     tracknr1: audioTitleNumber(trackNumber, 1),
     tracknr2: audioTitleNumber(trackNumber, 2),
@@ -408,7 +404,6 @@ function formatAudioTitle(obj, audio, trackNumber, discNumber, optionName, origi
     return Object.prototype.hasOwnProperty.call(fields, name) ? fields[name] : token;
   });
 
-  const replacements = (album ? config.albumTitleReplacements : config.audioTitleReplacements) || [];
   for (var i = 0; i < replacements.length; i++) {
     const rule = replacements[i];
     if (rule.conditions.every(function (condition) {
@@ -422,9 +417,16 @@ function formatAudioTitle(obj, audio, trackNumber, discNumber, optionName, origi
   return title.trim() || (album ? originalTitle : fields.title || filename);
 }
 
+function formatAudioTitle(obj, audio, trackNumber, discNumber) {
+  const options = config['/import/scripting/virtual-layout/script-options/script-option'] || {};
+  return formatTitle(obj, audio, trackNumber, discNumber,
+    options.audioTitleFormat, config.audioTitleReplacements || [], false, audio.title);
+}
+
 function formatAlbumTitle(obj, audio, originalTitle) {
-  return formatAudioTitle(obj, audio,
-    audio.displayTrackNumber, audio.displayDiscNumber, 'albumTitleFormat', originalTitle);
+  const options = config['/import/scripting/virtual-layout/script-options/script-option'] || {};
+  return formatTitle(obj, audio, audio.displayTrackNumber, audio.displayDiscNumber,
+    options.albumTitleFormat, config.albumTitleReplacements || [], true, originalTitle);
 }
 
 // doc-map-audio-details-begin
@@ -457,10 +459,10 @@ function getAudioDetails(obj, rootPath) {
   }
 
 
-  var aartist = obj.aux && obj.aux['TPE2'] ? obj.aux['TPE2'] : artist[0];
-  if (obj.metaData[M_ALBUMARTIST] && obj.metaData[M_ALBUMARTIST][0] && obj.metaData[M_ALBUMARTIST][0] !== '') {
-    aartist = obj.metaData[M_ALBUMARTIST][0];
-  }
+  const albumArtist = obj.metaData[M_ALBUMARTIST] && obj.metaData[M_ALBUMARTIST][0];
+  const auxAlbumArtist = obj.aux && obj.aux['TPE2'];
+  const aartist = albumArtist || auxAlbumArtist || artist[0];
+  const albumArtistFull = albumArtist || getAuxInfo(obj, 'TPE2', '') || (artist_full ? artist[0] : '');
 
   var disknr = '';
   if (obj.aux) {
@@ -579,6 +581,7 @@ function getAudioDetails(obj, rootPath) {
     trackTitle: trackTitle,
     disknr: disknr,
     albumArtist: aartist,
+    albumArtistFull: albumArtistFull,
     artists: artist,
     artistFull: artist_full,
     album: album,
@@ -655,7 +658,10 @@ function createUserChain(obj, media, chain, boxSetup, chainSetup, result, rootPa
             metaData: {},
             refID: (ulink.refID ? eval(ulink.refID) : undefined),
           };
-          if (media.album !== undefined && chain[ulink.key].upnpclass === UPNP_CLASS_CONTAINER_MUSIC_ALBUM) {
+          const upnpClass = chain[ulink.key].upnpclass;
+          if (media.album !== undefined && typeof upnpClass === 'string' &&
+              (upnpClass === UPNP_CLASS_CONTAINER_MUSIC_ALBUM ||
+               upnpClass.startsWith(UPNP_CLASS_CONTAINER_MUSIC_ALBUM + '.'))) {
             chain[ulink.key].title = formatAlbumTitle(obj, media, chain[ulink.key].title);
           }
           if (ulink.metaData) {

@@ -1076,79 +1076,103 @@ TEST_F(AudioTitleScriptTest, AlbumRulesAreContextPreparedAndDoNotCreateTrackOrGl
 }
 
 class AlbumLayoutScriptTest : public CommonScriptTest,
-                              public ::testing::WithParamInterface<const char*> { };
+                              public ::testing::WithParamInterface<const char*> {
+protected:
+    struct LayoutResult {
+        std::vector<std::string> trees;
+        std::vector<std::string> items;
+        std::string source;
+    };
+
+    static duk_ret_t capture(duk_context* ctx, std::vector<std::string> LayoutResult::*member)
+    {
+        duk_push_heap_stash(ctx);
+        duk_get_prop_string(ctx, -1, "albumLayoutCapture");
+        auto* result = static_cast<LayoutResult*>(duk_get_pointer(ctx, -1));
+        duk_pop_2(ctx);
+        auto& values = result->*member;
+        values.emplace_back(duk_json_encode(ctx, 0));
+        duk_push_uint(ctx, static_cast<duk_uint_t>(values.size()));
+        return 1;
+    }
+
+    LayoutResult runLayout(std::string_view format)
+    {
+        std::vector<boxConfig> boxes;
+        for (const auto& [symbol, key] : boxKeyNames) {
+            const auto name = BoxLayout::getBoxKey(key);
+            boxes.push_back({ name, name, UPNP_CLASS_CONTAINER, true, 6 });
+        }
+        const duk_function_list_entry functions[] {
+            { "addContainerTree", [](duk_context* ctx) { return capture(ctx, &LayoutResult::trees); }, 1 },
+            { "addCdsObject", [](duk_context* ctx) { return capture(ctx, &LayoutResult::items); }, 3 },
+            { nullptr, nullptr, 0 },
+        };
+        addGlobalFunctions(ctx, functions,
+            { { "/import/scripting/virtual-layout/structured-layout/attribute::skip-chars", "" },
+                { "/import/resources/container/attribute::parentCount", "2" } },
+            boxes, { { "/import/scripting/virtual-layout/script-options/script-option", { { "specialGenre", "Techno" }, { "albumTitleFormat", format } } } });
+
+        duk_get_global_string(ctx, "config");
+        duk_push_string(ctx, R"([[{"key":"customAlbum","title":"media.album","class":"UPNP_CLASS_CONTAINER_MUSIC_ALBUM + '.test'","refID":"obj.id"}]])");
+        duk_json_decode(ctx, -1);
+        duk_get_prop_index(ctx, -1, 0);
+        duk_push_int(ctx, 1);
+        duk_put_prop_string(ctx, -2, "size");
+        duk_pop(ctx);
+        duk_push_int(ctx, 1);
+        duk_put_prop_string(ctx, -2, "size");
+        duk_put_prop_string(ctx, -2, "/import/scripting/virtual-layout/boxlayout/chain/audio");
+        duk_pop(ctx);
+
+        LayoutResult result;
+        duk_push_heap_stash(ctx);
+        duk_push_pointer(ctx, &result);
+        duk_put_prop_string(ctx, -2, "albumLayoutCapture");
+        duk_pop(ctx);
+
+        const auto source = duk_get_top(ctx);
+        dukMockItem(ctx, { { "title", "Physical file" }, { "id", "42" }, { "location", "/music/album/track.mp3" } },
+            { { "dc:title", "Track" }, { "upnp:artist", "Performer" },
+                { std::string(MetaEnumMapper::getMetaFieldName(MetadataFields::M_ALBUMARTIST)), "Various Artists" },
+                { "upnp:album", "Album" }, { "upnp:genre", "Techno" },
+                { "dc:date", "2026-01-01" }, { "upnp:originalTrackNumber", "02" } },
+            { { "DISCNUMBER", "2/3" }, { "TPE2", "Aux album artist" } }, {});
+        duk_get_global_string(ctx, GetParam());
+        duk_dup(ctx, source);
+        duk_push_string(ctx, R"({"id":99,"res":{"count":1,"cover":"original-cover"}})");
+        duk_json_decode(ctx, -1);
+        duk_push_string(ctx, "/music");
+        duk_push_int(ctx, 0);
+        duk_push_string(ctx, UPNP_CLASS_MUSIC_ALBUM);
+        if (duk_pcall(ctx, 5) != DUK_EXEC_SUCCESS) {
+            ADD_FAILURE() << duk_safe_to_string(ctx, -1);
+        }
+        result.source = duk_json_encode(ctx, source);
+        duk_set_top(ctx, source);
+
+        duk_push_heap_stash(ctx);
+        duk_del_prop_string(ctx, -1, "albumLayoutCapture");
+        duk_pop(ctx);
+        return result;
+    }
+};
 
 TEST_P(AlbumLayoutScriptTest, FormatsAlbumViewsAndCustomChainsWithoutChangingItemsOrResources)
 {
-    std::vector<boxConfig> boxes;
-    for (const auto& [symbol, key] : boxKeyNames) {
-        const auto name = BoxLayout::getBoxKey(key);
-        boxes.push_back({ name, name, UPNP_CLASS_CONTAINER, true, 6 });
-    }
-    const duk_function_list_entry functions[] { { nullptr, nullptr, 0 } };
-    addGlobalFunctions(ctx, functions, {}, boxes,
-        { { "/import/scripting/virtual-layout/script-options/script-option", { { "specialGenre", "Techno" } } } });
-    dukMockItem(ctx, { { "title", "Physical file" }, { "id", "42" }, { "location", "/music/album/track.mp3" } },
-        { { "dc:title", "Track" }, { "upnp:artist", "Performer" },
-            { std::string(MetaEnumMapper::getMetaFieldName(MetadataFields::M_ALBUMARTIST)), "Various Artists" },
-            { "upnp:album", "Album" }, { "upnp:genre", "Techno" },
-            { "dc:date", "2026-01-01" }, { "upnp:originalTrackNumber", "02" } },
-        { { "DISCNUMBER", "2/3" } }, {});
-    duk_put_global_string(ctx, "albumSource");
-    duk_get_global_string(ctx, GetParam());
-    duk_put_global_string(ctx, "albumImporter");
-    ASSERT_EQ(duk_peval_string(ctx, R"JS(
-        (function () {
-          var trees = [], items = [];
-          addContainerTree = function (chain) {
-            trees.push(JSON.parse(JSON.stringify(chain)));
-            return trees.length;
-          };
-          addCdsObject = function (item) {
-            items.push(JSON.parse(JSON.stringify(item)));
-            return items.length;
-          };
-          var custom = [[{ key: 'customAlbum', title: 'media.album',
-            class: 'UPNP_CLASS_CONTAINER_MUSIC_ALBUM', refID: 'obj.id' }]];
-          custom.size = 1;
-          custom[0].size = 1;
-          config['/import/scripting/virtual-layout/boxlayout/chain/audio'] = custom;
-          config['/import/resources/container/attribute::parentCount'] = '2';
-          var parent = { id: 99, res: { count: 1, cover: 'original-cover' } };
-          function run(format) {
-            config['/import/scripting/virtual-layout/script-options/script-option'].albumTitleFormat = format;
-            trees = []; items = [];
-            var source = JSON.parse(JSON.stringify(albumSource));
-            albumImporter(source, parent, '/music', 0, UPNP_CLASS_CONTAINER_MUSIC_ALBUM);
-            return { trees: trees, items: items, source: source };
-          }
-          return { baseline: run(''), configured: run('%albumartist% - %albumtitle% (%year%)') };
-        })()
-    )JS"),
-        DUK_EXEC_SUCCESS)
-        << duk_safe_to_string(ctx, -1);
-    duk_get_prop_string(ctx, -1, "baseline");
-    const auto baseline = duk_normalize_index(ctx, -1);
-    duk_get_prop_string(ctx, -2, "configured");
-    const auto configured = duk_normalize_index(ctx, -1);
-    const auto jsonProperty = [&](duk_idx_t object, const char* property) {
-        duk_get_prop_string(ctx, object, property);
-        const std::string json = duk_json_encode(ctx, -1);
-        duk_pop(ctx);
-        return json;
-    };
-    EXPECT_EQ(jsonProperty(baseline, "items"), jsonProperty(configured, "items"));
-    EXPECT_EQ(jsonProperty(baseline, "source"), jsonProperty(configured, "source"));
-    duk_get_prop_string(ctx, baseline, "trees");
-    const auto beforeTrees = duk_normalize_index(ctx, -1);
-    duk_get_prop_string(ctx, configured, "trees");
-    const auto afterTrees = duk_normalize_index(ctx, -1);
-    ASSERT_EQ(duk_get_length(ctx, beforeTrees), duk_get_length(ctx, afterTrees));
+    const auto baseline = runLayout("");
+    const auto configured = runLayout("%albumartist% - %albumtitle% (%year%)");
+    EXPECT_EQ(baseline.items, configured.items);
+    EXPECT_EQ(baseline.source, configured.source);
+    ASSERT_EQ(baseline.trees.size(), configured.trees.size());
     std::size_t albums = 0;
-    for (duk_uarridx_t tree = 0; tree < duk_get_length(ctx, beforeTrees); ++tree) {
-        duk_get_prop_index(ctx, beforeTrees, tree);
+    bool formattedSubclass = false;
+    for (std::size_t tree = 0; tree < baseline.trees.size(); ++tree) {
+        duk_push_string(ctx, baseline.trees[tree].c_str());
+        duk_json_decode(ctx, -1);
         const auto beforeChain = duk_normalize_index(ctx, -1);
-        duk_get_prop_index(ctx, afterTrees, tree);
+        duk_push_string(ctx, configured.trees[tree].c_str());
+        duk_json_decode(ctx, -1);
         const auto afterChain = duk_normalize_index(ctx, -1);
         const auto length = duk_get_length(ctx, beforeChain);
         ASSERT_EQ(length, duk_get_length(ctx, afterChain));
@@ -1163,8 +1187,12 @@ TEST_P(AlbumLayoutScriptTest, FormatsAlbumViewsAndCustomChainsWithoutChangingIte
             duk_get_prop_string(ctx, before, "title");
             const std::string original = duk_safe_to_string(ctx, -1);
             duk_pop(ctx);
-            if (hasAlbum || original == "Album - Performer" || length == 1) {
+            duk_get_prop_string(ctx, before, "upnpclass");
+            const bool isSubclass = std::string_view(duk_safe_to_string(ctx, -1)) == "object.container.album.musicAlbum.test";
+            duk_pop(ctx);
+            if (hasAlbum || original == "Album - Performer" || isSubclass) {
                 ++albums;
+                formattedSubclass |= isSubclass;
                 duk_get_prop_string(ctx, after, "title");
                 EXPECT_STREQ(duk_safe_to_string(ctx, -1), "Various Artists - Album (2026)") << original;
                 duk_pop(ctx);
@@ -1173,11 +1201,12 @@ TEST_P(AlbumLayoutScriptTest, FormatsAlbumViewsAndCustomChainsWithoutChangingIte
             }
             duk_pop_2(ctx);
         }
+        const std::string before = duk_json_encode(ctx, beforeChain);
+        EXPECT_EQ(before, duk_json_encode(ctx, afterChain));
         duk_pop_2(ctx);
     }
     EXPECT_GE(albums, 2U);
-    EXPECT_EQ(jsonProperty(baseline, "trees"), jsonProperty(configured, "trees"));
-    duk_set_top(ctx, 0);
+    EXPECT_TRUE(formattedSubclass);
 }
 
 INSTANTIATE_TEST_SUITE_P(StandardAlbumLayouts, AlbumLayoutScriptTest,

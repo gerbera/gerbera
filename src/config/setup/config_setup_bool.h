@@ -50,6 +50,9 @@ public:
         this->defaultValue = defaultValue ? YES : NO;
     }
 
+    /// @brief Whether a configuration value is explicitly true.
+    static bool isTrue(std::string_view value);
+
     std::string getTypeString() const override { return "Boolean"; }
 
     void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;

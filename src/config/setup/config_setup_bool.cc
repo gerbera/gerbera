@@ -58,6 +58,11 @@ static bool validateYesNo(std::string_view value)
     return value == YES || value == NO;
 }
 
+bool ConfigBoolSetup::isTrue(std::string_view value)
+{
+    return value == YES || value == B_TRUE;
+}
+
 void ConfigBoolSetup::makeOption(
     std::string optValue,
     const std::shared_ptr<Config>& config,
@@ -65,7 +70,7 @@ void ConfigBoolSetup::makeOption(
 {
     if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
         throw_std_runtime_error("Invalid {} value '{}'", xpath, optValue);
-    optionValue = std::make_shared<BoolOption>(optValue == YES || optValue == B_TRUE);
+    optionValue = std::make_shared<BoolOption>(isTrue(optValue));
     setOption(config);
 }
 
@@ -85,7 +90,7 @@ bool ConfigBoolSetup::checkValue(std::string& optValue, const std::string& pathN
 
     if (!validateTrueFalse(optValue) && !validateYesNo(optValue))
         throw_std_runtime_error("Invalid {}/{} value '{}'", pathName, xpath, optValue);
-    return optValue == YES || optValue == B_TRUE;
+    return isTrue(optValue);
 }
 
 std::shared_ptr<ConfigOption> ConfigBoolSetup::newOption(bool optValue)
@@ -109,7 +114,7 @@ bool ConfigBoolSetup::CheckInotifyValue(std::string& value)
     tempBool = (inotifySupported && value == IN_AUTO);
 #endif
 
-    if (value == YES || value == B_TRUE) {
+    if (isTrue(value)) {
 #ifdef HAVE_INOTIFY
         if (!inotifySupported) {
             log_error("You specified \"" YES "\" in \"<autoscan use-inotify=\"\">"
