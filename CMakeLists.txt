@@ -198,6 +198,8 @@ add_library(
     src/content/layout/js_layout.h
     src/content/layout/layout.cc
     src/content/layout/layout.h
+    src/content/layout/layout_refresh.cc
+    src/content/layout/layout_refresh.h
     src/content/onlineservice/curl_online_service.cc
     src/content/onlineservice/curl_online_service.h
     src/content/onlineservice/lastfm_scrobbler.cc

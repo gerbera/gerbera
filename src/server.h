@@ -91,8 +91,8 @@ public:
     /// Reads information from the config and creates a
     /// device description document. Initializes the UPnP SDK,
     /// sets up the virtual web server directories and registers
-    /// web callbacks. Starts the update manager task.
-    void run();
+    /// web callbacks. Starts content management with an optional startup rescan.
+    void run(bool rescan = false, bool preserveIds = false, bool removeHistory = false);
 
     /// @brief Tells if the server is about to be terminated.
     ///

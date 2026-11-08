@@ -664,6 +664,21 @@ void GerberaRuntime::handleOptions(const cxxopts::ParseResult* results, bool sta
     if (startup) {
         spdlog::set_level(spdlog::level::info);
         spdlog::set_pattern("%Y-%m-%d %X %^%6l%$: %v");
+
+        rescan = (*results)[GRB_OPTION_RESCAN].as<bool>();
+        const auto hasPreserveIds = results->count(GRB_OPTION_PRESERVE_IDS);
+        const auto hasNoPreserveIds = results->count(GRB_OPTION_NO_PRESERVE_IDS);
+        if (!rescan && (hasPreserveIds || hasNoPreserveIds || results->count(GRB_OPTION_REMOVE_HISTORY))) {
+            log_error("--preserve-ids, --no-preserve-ids and --remove-history require --rescan.");
+            this->exit(EXIT_FAILURE);
+        }
+        if (hasPreserveIds && hasNoPreserveIds) {
+            log_error("--preserve-ids and --no-preserve-ids cannot be combined.");
+            this->exit(EXIT_FAILURE);
+        }
+
+        preserveIds = rescan && (*results)[GRB_OPTION_PRESERVE_IDS].as<bool>() && !(*results)[GRB_OPTION_NO_PRESERVE_IDS].as<bool>();
+        removeHistory = (*results)[GRB_OPTION_REMOVE_HISTORY].as<bool>();
     }
     this->results = results;
     auto finalHandlers = executeOptions(argumentCallbacks);

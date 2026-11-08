@@ -51,6 +51,14 @@ Database::Database(std::shared_ptr<Config> config)
 
 Database::~Database() = default;
 
+void Database::updateLayoutTitles(
+    const std::vector<std::shared_ptr<CdsObject>>&,
+    const std::vector<int>&,
+    const std::string&)
+{
+    throw_std_runtime_error("This database does not support layout title updates");
+}
+
 std::shared_ptr<Database> Database::createInstance(
     const std::shared_ptr<Config>& config,
     const std::shared_ptr<Mime>& mime,

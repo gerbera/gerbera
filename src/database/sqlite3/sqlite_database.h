@@ -70,6 +70,7 @@ public:
 
 protected:
     void _exec(const std::string& query) override;
+    void execLayoutUpdate(const std::vector<std::string>& statements) override;
     void execChecked(const std::string& query);
     std::string prepareDatabase(const fs::path& dbFilePath, GrbFile& dbFile);
 
@@ -91,7 +92,7 @@ private:
     /// @brief Implement common behaviour on exceptions while calling the database
     void handleException(const std::exception& exc, const std::string& lineMessage, int sqliteErrorCode = 0);
 
-    void storeInternalSetting(const std::string& key, const std::string& value) override;
+    std::string internalSettingUpsert(const std::string& key, const std::string& value) const override;
 
     std::string startupError;
 

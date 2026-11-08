@@ -75,7 +75,7 @@ public:
     ContentManager(const std::shared_ptr<Context>& context,
         const std::shared_ptr<Server>& server, std::shared_ptr<Timer> timer);
 
-    void run() override;
+    void run(bool rescan = false, bool preserveIds = false, bool removeHistory = false) override;
     void shutdown() override;
 
 #ifdef HAVE_LASTFM
@@ -360,6 +360,9 @@ protected:
         const fs::path& parentPath,
         bool all);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
+
+    /// @brief Refresh indexed audio display names before enabling automatic scans.
+    void refreshAudioLayout(bool preserveIds, bool removeHistory);
 
     void initLayout();
     void destroyLayout();

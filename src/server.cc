@@ -162,17 +162,20 @@ struct UpnpDesc {
     int len;
 };
 
-void Server::run()
+void Server::run(bool rescan, bool preserveIds, bool removeHistory)
 {
     log_debug("Starting...");
 
-    // run what is needed
-    try {
-        content->run();
-    } catch (const std::runtime_error& ex) {
-        log_error("Activating ContentService failed {}", EX(ex));
-        throw UpnpException(500, fmt::format("run: Activating ContentService failed {}", EX(ex)));
-    }
+    const auto startContent = [&] {
+        try {
+            content->run(rescan, preserveIds, removeHistory);
+        } catch (const std::runtime_error& ex) {
+            log_error("Activating ContentService failed {}", EX(ex));
+            throw UpnpException(500, fmt::format("run: Activating ContentService failed {}", EX(ex)));
+        }
+    };
+    if (!rescan)
+        startContent();
 
     std::string iface = config->getOption(ConfigVal::SERVER_NETWORK_INTERFACE);
     ip = config->getOption(ConfigVal::SERVER_IP);
@@ -201,6 +204,10 @@ void Server::run()
     if (configPort > 0 && port != configPort) {
         throw UpnpException(ret, fmt::format("LibUPnP failed to bind to request port! Bound to {}, requested: {}", port, configPort));
     }
+
+    // Apply an explicit startup rescan only after Gerbera has bound its port.
+    if (rescan)
+        startContent();
 
     log_debug("webroot: {}", webRoot);
     log_debug("Adding root virtual dir");

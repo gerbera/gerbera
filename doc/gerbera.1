@@ -60,6 +60,8 @@ gerbera \- UPnP MediaServer
 \fR] [
 \fB--add-file \fIfile\fB
 \fR] [
+\fB--rescan\fR [\fB--preserve-ids\fR | \fB--no-preserve-ids\fR] [\fB--remove-history\fR]
+] [
 \fB--set-option \fIopt=val\fB
 \fR] [
 \fB-p|--port \fIport\fB
@@ -151,6 +153,27 @@ Add the specified file name to the database without UI
 interaction. The path must be absolute, if path is a directory then it will be
 added recursively. If path is a file, then only the given file will be
 imported.
+.TP
+\*(T<\fB\-\-rescan\fR\*(T>
+Rescan all registered autoscan directories at startup. By default, Gerbera
+applies audio display-name changes to the indexed virtual layout while
+retaining matching album and track IDs. Gerbera uses the last applied settings
+recorded in the database to skip the refresh when the settings are unchanged.
+The regular scan handles external changes to media files. Stop the existing
+Gerbera instance before using this option. Gerbera continues running as a server.
+.TP
+\*(T<\fB\-\-preserve\-ids\fR\*(T>
+Explicitly select the default ID-preserving display-name refresh. Requires
+--rescan. Mutually exclusive with --no-preserve-ids.
+.TP
+\*(T<\fB\-\-no\-preserve\-ids\fR\*(T>
+Run the regular scan without a display-name refresh. Requires --rescan.
+Mutually exclusive with --preserve-ids.
+.TP
+\*(T<\fB\-\-remove\-history\fR\*(T>
+Clear playback history of virtual tracks in the audio layout. Requires
+--rescan and works with either ID option. The history removal leaves physical
+track and playlist entry history untouched.
 .TP
 \*(T<\fB\-\-print\-options\fR\*(T>
 Print all option numbers available for use with --set-option.

@@ -165,10 +165,11 @@ void SLSelectTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
 
 /* SLExecTask */
 
-SLExecTask::SLExecTask(const std::string& query, std::string getLastInsertId, bool warnOnly)
+SLExecTask::SLExecTask(const std::string& query, std::string getLastInsertId, bool warnOnly, bool atomic)
     : SLTask(!warnOnly)
     , query(query.c_str())
     , lastInsertColumn(std::move(getLastInsertId))
+    , atomic(atomic)
 {
 }
 
@@ -181,7 +182,9 @@ SLExecTask::SLExecTask(const std::string& query, std::string eKey)
 void SLExecTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
 {
     log_debug("Running: {}", query);
-    char* err;
+    if (atomic && sqlite3_get_autocommit(db) == 0)
+        throw DatabaseException("", "Cannot update layout titles during an active SQLite transaction");
+    char* err = nullptr;
     int ret = sqlite3_exec(
         db,
         query,
@@ -195,9 +198,15 @@ void SLExecTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
     }
     if (ret != SQLITE_OK) {
         sqliteErrorCode = sqlite3_extended_errcode(db);
+        const auto message = sl.handleError(query, error, db, ret);
+        if (atomic && sqlite3_get_autocommit(db) == 0) {
+            const int rollbackResult = sqlite3_exec(db, "ROLLBACK", nullptr, nullptr, nullptr);
+            if (rollbackResult != SQLITE_OK)
+                log_error("Failed to roll back layout title update: {}", sqlite3_errmsg(db));
+        }
         if (throwOnError)
-            throw DatabaseException("", sl.handleError(query, error, db, ret));
-        log_debug("Error in sqlite3_exec: {}", sl.handleError(query, error, db, ret));
+            throw DatabaseException("", message);
+        log_debug("Error in sqlite3_exec: {}", message);
     }
     if (!lastInsertColumn.empty())
         lastInsertId = sqlite3_last_insert_rowid(db);

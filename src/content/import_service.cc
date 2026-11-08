@@ -1035,6 +1035,18 @@ void ImportService::fillSingleLayout(
     }
 }
 
+void ImportService::refreshAudioLayout(const std::shared_ptr<CdsObject>& object, const std::shared_ptr<CdsContainer>& parent)
+{
+    if (!layout || (autoscanDir && !autoscanDir->hasContent(object->getClass())))
+        return;
+
+    const auto& item = static_cast<const CdsItem&>(*object);
+    const auto contentType = getValueOrDefault(mimetypeContenttypeMap, item.getMimeType());
+    std::vector<int> previous;
+    LayoutAutoLock lock(layoutMutex);
+    layout->processCdsObject(object, parent, rootPath, contentType, containerTypeMap, previous);
+}
+
 void ImportService::parseMetafile(
     const std::shared_ptr<CdsObject>& obj,
     const fs::path& path) const
@@ -1368,7 +1380,8 @@ std::pair<int, bool> ImportService::addContainerTree(
     int parentContainerId,
     const std::vector<std::shared_ptr<CdsObject>>& chain,
     const std::shared_ptr<CdsObject>& refItem,
-    std::vector<int>& createdIds)
+    std::vector<int>& createdIds,
+    const std::function<int(int, const std::shared_ptr<CdsObject>&, const std::string&)>& capture)
 {
     log_debug("start '{}' {}", rootPath.string(), parentContainerId);
     std::string tree; // accumulate path to container here
@@ -1428,7 +1441,7 @@ std::pair<int, bool> ImportService::addContainerTree(
             if (!hasCaseSensitiveNames) {
                 subTree = toLower(subTree);
             }
-            if (!containerCache.at(subTree)) {
+            if (!capture && !containerCache.at(subTree)) {
                 auto cont = database->findObjectByPath(subTree, UNUSED_CLIENT_GROUP, DbFileType::Virtual);
                 if (cont && cont->isContainer())
                     containerCache.set(subTree, std::dynamic_pointer_cast<CdsContainer>(cont));
@@ -1438,6 +1451,10 @@ std::pair<int, bool> ImportService::addContainerTree(
             }
         } else if (subTree.empty()) {
             subTree = tree;
+        }
+        if (capture) {
+            result = capture(result, item, subTree);
+            continue;
         }
         if (!containerCache.at(subTree)) {
             item->removeMetaData(MetadataFields::M_TITLE);
