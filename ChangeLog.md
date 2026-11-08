@@ -9,20 +9,24 @@
 - Add static WPL and XSPF playlist import
 - Add ubuntu 26.10
 - Allow ASX import headroom and avoid reverse DNS in diagnostics
+- Allow configuring cover art priority for audio and video
 - Allow multiple clients by ip
 - Build with libpqxx 8
 - Bump serialize-javascript from 7.1.1 to 7.1.2 in /gerbera-web
 - Bump npm packages in /gerbera-web
 - Cleanup asx tests
 - Collect documentation updates
+- Configure album container names independently from audio titles
 - Configure audio display titles and conditional replacements
 - Declare scoped search container CTE as recursive
 - Default Sorting for Browse
 - Define Limits for Containter Type Selection
 - Docker: fix ownership of files created with PUID/PGID, rename UID/GID to PUID/PGID
 - Extend Mime Mapping
+- Fix Alpine apk-tools download in Minimal CI
 - Fix ASX local URI references and UTF-8 metadata
 - Fix CaptionInfo.sec never being sent to Samsung TVs
+- Fix getValidUTF8CutPosition splitting multibyte characters
 - Fix hang when shutting down the SQLite thread
 - Fix hang when stopping Gerbera during startup
 - Fix import of configured ASF auxiliary attributes
@@ -56,7 +60,8 @@
 - transcode: fix build with ffmpeg 7.0
 - Update metadata\_service to use content-type
 - Update to cxxopts-g7af8aa
-- Update to pupnp 22.2.0
+- Update to fmt 12.2.1
+- Update to pupnp 22.2.1
 - Update to ffmpegthumbnailer 2.4.1
 - Use fmt exception formatting
 - Wait for client grid rendering in browser tests

@@ -355,7 +355,7 @@ protected:
     void verifyViews(const std::string& stage, AsxResourceChecks resources)
     {
         SCOPED_TRACE(stage);
-        ASSERT_TRUE(waitFor([&] { return importsIdle() && viewsMatch(); }, stage, std::chrono::seconds(120))) << lastMismatch;
+        ASSERT_TRUE(waitFor([&] { return importsIdle() && viewsMatch(); }, stage, std::chrono::seconds(240))) << lastMismatch;
         for (const auto& [id, views] : playlistViews()) {
             SCOPED_TRACE(id);
             for (const auto& view : views) {

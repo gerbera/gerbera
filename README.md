@@ -57,7 +57,7 @@ sudo make install
 
 | Library             | Min Version  | Recommended  | Latest tested | Required?     | Note                             | Default  |
 | ------------------- | ------------ | ------------ | ------------- | ------------- | -------------------------------- | -------- |
-| [libupnp]           | 1.14.6       | 1.14.30      | 22.2.0        | XOR libnpupnp | UPnP protocol support            |          |
+| [libupnp]           | 1.14.6       | 1.14.30      | 22.2.1        | XOR libnpupnp | UPnP protocol support            |          |
 | [libnpupnp]         | 4.2.1        | 5.1.2        | 6.3.0         | XOR libupnp   | Alternate UPnP protocol support  | Disabled |
 | libuuid             |              |              |               | Depends on OS | Not required on \*BSD            |          |
 | [pugixml]           |              | 1.10         | 1.16          | Required      | XML file and data support        |          |
@@ -66,7 +66,7 @@ sudo make install
 | libiconv            |              |              |               | Required      | Charset conversion               |          |
 | [sqlite3]           | 3.7.0        | 3.35.5       | 3.53.2        | Required      | Database storage                 |          |
 | [zlib]              |              |              |               | Required      | Data compression                 |          |
-| [fmtlib]            | 7.1.3        | 11.2.0       | 12.2.0        | Required      | Fast string formatting           |          |
+| [fmtlib]            | 7.1.3        | 11.2.0       | 12.2.1        | Required      | Fast string formatting           |          |
 | [spdlog]            | 1.8.1        | 1.15.3       | 1.17.0        | Required      | Runtime logging                  |          |
 | [icu4c]             | 65.1         | 65.1         | 77.1          | Optional      | Transliteration                  | Enabled  |
 | [duktape]           | 2.1.0        | 2.6.0        | 2.7.0         | Optional      | Scripting Support                | Enabled  |

@@ -115,9 +115,9 @@
 
     <xs:element name="interface" type="xs:string"/>
 
-    <xs:element name="name" type="xs:string" default="MediaTomb"/>
+    <xs:element name="name" type="xs:string" default="Gerbera"/>
 
-    <xs:element name="modelName" type="xs:string" default="MediaTomb"/>
+    <xs:element name="modelName" type="xs:string" default="Gerbera"/>
 
     <xs:element name="modelNumber" type="xs:string"/>
 
