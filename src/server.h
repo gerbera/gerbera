@@ -223,6 +223,7 @@ protected:
     void writeBookmark(const std::string& addr);
     void emptyBookmark();
 
+    /// @brief activate upnp server at given interface
     int startupInterface(const std::string& iface, in_port_t inPort);
 
     /// @brief Returns the content url of the server.
