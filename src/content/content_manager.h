@@ -364,6 +364,11 @@ protected:
     /// @brief Refresh indexed audio display names before enabling automatic scans.
     void refreshAudioLayout(bool preserveIds, bool removeHistory);
 
+    /// @brief Generate and validate an in-place update for the indexed audio layout.
+    std::vector<std::shared_ptr<CdsObject>> planAudioLayoutRefresh(
+        const std::map<int, std::shared_ptr<CdsObject>>& current,
+        const std::vector<std::shared_ptr<CdsObject>>& sources);
+
     void initLayout();
     void destroyLayout();
 

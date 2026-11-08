@@ -199,7 +199,55 @@ std::string audioLayoutDisplayFingerprint(const Config& config)
     return hexStringMd5(data);
 }
 
-thread_local AudioLayoutCapture* activeAudioLayoutCapture = nullptr;
+// Scope capture to the synchronous layout callbacks on the initiating thread.
+thread_local std::unique_ptr<AudioLayoutCapture> activeAudioLayoutCapture;
+
+struct IndexedAudioLayout {
+    std::map<int, std::shared_ptr<CdsObject>> objects;
+    std::vector<std::shared_ptr<CdsObject>> sources;
+};
+
+/// @brief Collect generated audio branches and, for a title refresh, their physical sources.
+IndexedAudioLayout collectIndexedAudioLayout(Database& database, bool includeSources)
+{
+    std::unordered_set<int> physicalIds;
+    database.getObjects(CDS_ID_FS_ROOT, false, physicalIds, true, INVALID_OBJECT_ID);
+
+    IndexedAudioLayout layout;
+    for (const auto id : physicalIds) {
+        const auto source = database.loadObject(id);
+        if (source->getEntryType() != CdsEntryType::File || source->getMediaType() != ObjectType::Audio)
+            continue;
+
+        // Exclude playlist branches and user-managed entries.
+        bool hasLayout = false;
+        for (const auto refId : database.getRefObjects(id, CdsEntryType::VirtualItem)) {
+            const auto reference = database.loadObject(refId);
+            if (reference->getSource() != ObjectSource::Import)
+                continue;
+            std::vector<std::shared_ptr<CdsObject>> branch { reference };
+            auto parent = reference->getParentID();
+            while (parent != CDS_ID_ROOT && !layout.objects.count(parent)) {
+                const auto container = database.loadObject(parent);
+                if (container->getEntryType() != CdsEntryType::VirtualContainer
+                    || container->isSubClass(UPNP_CLASS_PLAYLIST_CONTAINER)
+                    || container->getSource() != ObjectSource::Import)
+                    break;
+                branch.push_back(container);
+                parent = container->getParentID();
+            }
+            if (parent != CDS_ID_ROOT && !layout.objects.count(parent))
+                continue;
+            for (const auto& object : branch)
+                layout.objects.emplace(object->getID(), object);
+            hasLayout = true;
+        }
+
+        if (hasLayout && includeSources)
+            layout.sources.push_back(source);
+    }
+    return layout;
+}
 
 } // namespace
 
@@ -378,6 +426,74 @@ void ContentManager::run(bool rescan, bool preserveIds, bool removeHistory)
 #endif
 }
 
+std::vector<std::shared_ptr<CdsObject>> ContentManager::planAudioLayoutRefresh(
+    const std::map<int, std::shared_ptr<CdsObject>>& current,
+    const std::vector<std::shared_ptr<CdsObject>>& sources)
+{
+    // Both layout implementations call back into addObject and addContainerTree.
+    auto capture = std::make_unique<AudioLayoutCapture>(database);
+    for (const auto& source : sources) {
+        // Match against the indexed source only while its file is unchanged.
+        std::error_code error;
+        const fs::directory_entry file(source->getLocation(), error);
+        const auto resource = source->getResource(ResourcePurpose::Content);
+        const auto size = resource ? resource->getAttribute(ResourceAttribute::SIZE) : std::string();
+        if (error || !file.is_regular_file(error) || error
+            || toSeconds(file.last_write_time(error)) != source->getMTime() || error
+            || (!size.empty() && std::to_string(file.file_size(error)) != size) || error)
+            throw_std_runtime_error("Source file has changed: {}", source->getLocation().string());
+
+        capture->trackId = source->getID();
+        const auto adir = findAutoscanDirectory(source->getLocation());
+        const auto parent = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(source->getParentID()));
+        activeAudioLayoutCapture = std::move(capture);
+        try {
+            getImportService(adir)->refreshAudioLayout(source, parent);
+        } catch (...) {
+            activeAudioLayoutCapture.reset();
+            throw;
+        }
+        capture = std::move(activeAudioLayoutCapture);
+    }
+
+    // Only containers leading to captured tracks participate in the comparison.
+    std::map<int, std::shared_ptr<CdsObject>> desired;
+    for (const auto& [id, item] : capture->objects) {
+        if (!item->isItem())
+            continue;
+        auto ancestor = id;
+        while (ancestor != CDS_ID_ROOT && !desired.count(ancestor)) {
+            const auto& object = capture->objects.at(ancestor);
+            desired.emplace(ancestor, object);
+            ancestor = object->getParentID();
+        }
+    }
+
+    auto changes = planAudioLayoutTitles(current, desired);
+    // Check destinations and children that are outside the matched audio layout.
+    std::unordered_set<int> renamedPaths;
+    for (const auto& object : changes) {
+        if (object->isContainer() && object->getLocation() != current.at(object->getID())->getLocation())
+            renamedPaths.insert(object->getID());
+    }
+
+    for (const auto& object : changes) {
+        if (!renamedPaths.count(object->getID()))
+            continue;
+        const auto collision = database->findObjectByPath(object->getLocation(), UNUSED_CLIENT_GROUP, DbFileType::Virtual);
+        if (collision && !renamedPaths.count(collision->getID()))
+            throw_std_runtime_error("An existing container already uses {}", object->getLocation().string());
+
+        auto children = BrowseParam(current.at(object->getID()), BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS | BROWSE_CONTAINERS);
+        children.setDynamicContainers(false);
+        for (const auto& child : database->browse(children)) {
+            if (!current.count(child->getID()))
+                throw_std_runtime_error("A separate entry would be affected: {}", child->getTitle());
+        }
+    }
+    return changes;
+}
+
 void ContentManager::refreshAudioLayout(bool preserveIds, bool removeHistory)
 {
     if (!layoutEnabled || (!preserveIds && !removeHistory))
@@ -387,109 +503,13 @@ void ContentManager::refreshAudioLayout(bool preserveIds, bool removeHistory)
     if (!refreshTitles && !removeHistory)
         return;
 
-    std::unordered_set<int> physicalIds;
-    database->getObjects(CDS_ID_FS_ROOT, false, physicalIds, true, INVALID_OBJECT_ID);
-
-    std::map<int, std::shared_ptr<CdsObject>> current;
-    std::vector<std::shared_ptr<CdsObject>> sources;
-    for (const auto id : physicalIds) {
-        const auto source = database->loadObject(id);
-        if (source->getEntryType() != CdsEntryType::File || source->getMediaType() != ObjectType::Audio)
-            continue;
-
-        bool hasLayout = false;
-        for (const auto refId : database->getRefObjects(id, CdsEntryType::VirtualItem)) {
-            const auto reference = database->loadObject(refId);
-            if (reference->getSource() != ObjectSource::Import)
-                continue;
-            std::vector<std::shared_ptr<CdsObject>> branch { reference };
-            auto parent = reference->getParentID();
-            while (parent != CDS_ID_ROOT && !current.count(parent)) {
-                const auto container = database->loadObject(parent);
-                if (container->getEntryType() != CdsEntryType::VirtualContainer
-                    || container->isSubClass(UPNP_CLASS_PLAYLIST_CONTAINER)
-                    || container->getSource() != ObjectSource::Import)
-                    break;
-                branch.push_back(container);
-                parent = container->getParentID();
-            }
-            if (parent != CDS_ID_ROOT && !current.count(parent))
-                continue;
-            for (const auto& object : branch)
-                current.emplace(object->getID(), object);
-            hasLayout = true;
-        }
-
-        if (hasLayout && refreshTitles)
-            sources.push_back(source);
-    }
-
-    const auto plan = [&] {
-        AudioLayoutCapture capture(database);
-        for (const auto& source : sources) {
-            std::error_code error;
-            const fs::directory_entry file(source->getLocation(), error);
-            const auto resource = source->getResource(ResourcePurpose::Content);
-            const auto size = resource ? resource->getAttribute(ResourceAttribute::SIZE) : std::string();
-            if (error || !file.is_regular_file(error) || error
-                || toSeconds(file.last_write_time(error)) != source->getMTime() || error
-                || (!size.empty() && std::to_string(file.file_size(error)) != size) || error)
-                throw_std_runtime_error("Source file has changed: {}", source->getLocation().string());
-
-            capture.trackId = source->getID();
-            const auto adir = findAutoscanDirectory(source->getLocation());
-            const auto parent = std::dynamic_pointer_cast<CdsContainer>(database->loadObject(source->getParentID()));
-            activeAudioLayoutCapture = &capture;
-            try {
-                getImportService(adir)->refreshAudioLayout(source, parent);
-            } catch (...) {
-                activeAudioLayoutCapture = nullptr;
-                throw;
-            }
-            activeAudioLayoutCapture = nullptr;
-        }
-
-        std::map<int, std::shared_ptr<CdsObject>> desired;
-        for (const auto& [id, item] : capture.objects) {
-            if (!item->isItem())
-                continue;
-            auto ancestor = id;
-            while (ancestor != CDS_ID_ROOT && !desired.count(ancestor)) {
-                const auto& object = capture.objects.at(ancestor);
-                desired.emplace(ancestor, object);
-                ancestor = object->getParentID();
-            }
-        }
-
-        auto changes = planAudioLayoutTitles(current, desired);
-        std::unordered_set<int> renamedPaths;
-        for (const auto& object : changes) {
-            if (object->isContainer() && object->getLocation() != current.at(object->getID())->getLocation())
-                renamedPaths.insert(object->getID());
-        }
-
-        for (const auto& object : changes) {
-            if (!renamedPaths.count(object->getID()))
-                continue;
-            const auto collision = database->findObjectByPath(object->getLocation(), UNUSED_CLIENT_GROUP, DbFileType::Virtual);
-            if (collision && !renamedPaths.count(collision->getID()))
-                throw_std_runtime_error("An existing container already uses {}", object->getLocation().string());
-
-            auto children = BrowseParam(current.at(object->getID()), BROWSE_DIRECT_CHILDREN | BROWSE_ITEMS | BROWSE_CONTAINERS);
-            children.setDynamicContainers(false);
-            for (const auto& child : database->browse(children)) {
-                if (!current.count(child->getID()))
-                    throw_std_runtime_error("A separate entry would be affected: {}", child->getTitle());
-            }
-        }
-        return changes;
-    };
+    const auto current = collectIndexedAudioLayout(*database, refreshTitles);
 
     std::vector<std::shared_ptr<CdsObject>> changes;
     std::string appliedFingerprint;
     if (refreshTitles) {
         try {
-            changes = plan();
+            changes = planAudioLayoutRefresh(current.objects, current.sources);
             appliedFingerprint = fingerprint;
         } catch (const std::runtime_error& error) {
             log_warning("Skipping the ID-preserving audio display refresh. Continuing with a normal scan: {}", EX(error));
@@ -498,11 +518,12 @@ void ContentManager::refreshAudioLayout(bool preserveIds, bool removeHistory)
 
     std::vector<int> history;
     if (removeHistory) {
-        for (const auto& [id, object] : current) {
+        for (const auto& [id, object] : current.objects) {
             if (object->isItem())
                 history.push_back(id);
         }
     }
+    // Store the fingerprint only with the successfully matched changes.
     database->updateLayoutTitles(changes, history, appliedFingerprint);
     if (!changes.empty()) {
         importService->clearCache();
