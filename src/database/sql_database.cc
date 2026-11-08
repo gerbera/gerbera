@@ -1641,7 +1641,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
         *changedContainer = parentID;
 
     std::vector<std::pair<std::string, std::string>> itemMetadata;
-    itemMetadata.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE), grbLocaltime("{:%FT%T%z}", toSeconds(fs::last_write_time(path))));
+    itemMetadata.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE), grbLocaltime(toSeconds(fs::last_write_time(path))));
 
     auto f2i = converterManager->f2i();
     auto [mval, err] = f2i->convert(path.filename());
@@ -1818,7 +1818,7 @@ bool SQLDatabase::addContainer(
     commit("addContainer");
 
     if (cont->getMetaData(MetadataFields::M_DATE).empty())
-        cont->addMetaData(MetadataFields::M_DATE, grbLocaltime("{:%FT%T%z}", cont->getMTime()));
+        cont->addMetaData(MetadataFields::M_DATE, grbLocaltime(cont->getMTime()));
 
     *containerID = createContainer(parentContainerId,
         cont->getTitle(), cont->getSortKey(), virtualPath, cont->getFlags(), cont->isVirtual(), cont->getClass(),

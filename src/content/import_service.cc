@@ -1099,7 +1099,7 @@ std::vector<int> ImportService::parseCueSheet(
 void ImportService::updateItemData(const std::shared_ptr<CdsItem>& item, const std::string& mimetype)
 {
     if (hasDefaultDate && item->getMetaData(MetadataFields::M_DATE).empty())
-        item->addMetaData(MetadataFields::M_DATE, grbLocaltime("{:%FT%T%z}", item->getMTime()));
+        item->addMetaData(MetadataFields::M_DATE, grbLocaltime(item->getMTime()));
     for (auto&& upnpPattern : upnpMap) {
         if (upnpPattern.isMatch(item, mimetype)) {
             item->setClass(upnpPattern.upnpClass);

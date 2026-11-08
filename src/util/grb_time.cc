@@ -25,6 +25,7 @@ Gerbera - https://gerbera.io/
 #include "logger.h"
 #include "tools.h"
 
+#include <cerrno>
 #include <ctime>
 #include <iomanip>
 #include <regex>
@@ -211,8 +212,25 @@ bool parseTime(long long& value, std::string& timeValue, GrbTimeType type)
 
 std::string grbLocaltime(const std::string& format, const std::chrono::seconds& t)
 {
-    std::time_t time = t.count();
-    std::tm tm;
-    localtime_r(&time, &tm);
-    return fmt::format(format, tm);
+    return fmt::format(format, fmt::localtime(static_cast<std::time_t>(t.count())));
+}
+
+std::string grbLocaltime(const std::chrono::seconds& t)
+{
+    const auto time = static_cast<std::time_t>(t.count());
+    const auto local = fmt::localtime(time);
+    // Interpret the local wall time as UTC to get the offset without tm_gmtoff.
+    auto localAsUtc = local;
+    errno = 0;
+    const auto utc = timegm(&localAsUtc);
+    if (utc == static_cast<std::time_t>(-1) && errno == EOVERFLOW) {
+        // The wall time can exceed time_t even when the original instant fits.
+        char zone[8];
+        if (std::strftime(zone, sizeof(zone), "%z", &local) == 0)
+            zone[0] = '\0';
+        return fmt::format("{:%FT%T}{}", local, zone);
+    }
+    const auto offset = std::chrono::seconds(utc) - std::chrono::seconds(time);
+    const auto minutes = std::chrono::abs(std::chrono::duration_cast<std::chrono::minutes>(offset)).count();
+    return fmt::format("{:%FT%T}{}{:02}{:02}", local, offset.count() < 0 ? '-' : '+', minutes / 60, minutes % 60);
 }
