@@ -39,9 +39,11 @@
 #include "config/config_val.h"
 #include "config/result/autoscan.h"
 #include "config/result/box_layout.h"
+#include "config/setup/config_setup_bool.h"
 #include "content/content.h"
 #include "context.h"
 #include "metadata/metadata_enums.h"
+#include "util/fmt_compat.h"
 #include "util/logger.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -52,7 +54,6 @@
 
 #include <algorithm>
 #include <cstddef>
-#include <fmt/ranges.h>
 #include <regex>
 
 static std::string audioTitleYear(std::string value)
@@ -564,8 +565,7 @@ std::vector<BuiltinLayout::AudioTitleReplacement> BuiltinLayout::prepareAudioTit
         rule.to = getValueOrDefault(values, "to");
         if (rule.from.empty())
             continue;
-        const auto regex = getValueOrDefault(values, "regex");
-        if (regex == "yes" || regex == "true") {
+        if (ConfigBoolSetup::isTrue(getValueOrDefault(values, "regex"))) {
             try {
                 rule.pattern.emplace(rule.from, std::regex::ECMAScript);
             } catch (const std::regex_error& error) {

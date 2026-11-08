@@ -39,6 +39,7 @@
 #include <duktape.h>
 #include <memory>
 #include <string>
+#include <string_view>
 #include <utility>
 #include <vector>
 
@@ -80,7 +81,7 @@ public:
     static void prepareAudioTitleReplacements(
         duk_context* ctx,
         const std::vector<std::vector<std::pair<std::string, std::string>>>& attributes,
-        const char* property = "audioTitleReplacements");
+        std::string_view property = "audioTitleReplacements");
 
     /// @brief Write property with string value to object
     /// @param name of property
