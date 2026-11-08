@@ -210,15 +210,23 @@ bool parseTime(long long& value, std::string& timeValue, GrbTimeType type)
     return !list.empty();
 }
 
+static std::tm toLocalTime(std::time_t time)
+{
+    std::tm local {};
+    if (!localtime_r(&time, &local))
+        throw fmt::format_error("time_t value out of range");
+    return local;
+}
+
 std::string grbLocaltime(const std::string& format, const std::chrono::seconds& t)
 {
-    return fmt::format(format, fmt::localtime(static_cast<std::time_t>(t.count())));
+    return fmt::format(format, toLocalTime(static_cast<std::time_t>(t.count())));
 }
 
 std::string grbLocaltime(const std::chrono::seconds& t)
 {
     const auto time = static_cast<std::time_t>(t.count());
-    const auto local = fmt::localtime(time);
+    const auto local = toLocalTime(time);
     // Interpret the local wall time as UTC to get the offset without tm_gmtoff.
     auto localAsUtc = local;
     errno = 0;
