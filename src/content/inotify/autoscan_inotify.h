@@ -64,10 +64,9 @@ public:
     /// @brief Stop monitoring a directory
     void unmonitor(const std::shared_ptr<AutoscanDirectory>& dir);
 
-    /// @brief Update monitoring of a directory
-    std::shared_ptr<DirectoryWatch> monitorUnmonitorRecursive(
+    /// @brief Register watches for an object and its applicable descendants
+    std::shared_ptr<DirectoryWatch> monitorRecursive(
         const fs::directory_entry& startPath,
-        bool unmonitor,
         const std::shared_ptr<AutoscanDirectory>& adir,
         bool isStartPoint,
         bool followSymlinks);
@@ -123,9 +122,7 @@ private:
         InotifyFlags monitoredEvents = 0);
 
     /// @brief Remove monitoring of a directory
-    void unmonitorDirectory(
-        const fs::path& path,
-        const std::shared_ptr<AutoscanDirectory>& adir);
+    void unmonitorDirectory(const std::shared_ptr<AutoscanDirectory>& adir);
 
     /// @brief Get autoscan associated with watch
     static std::shared_ptr<WatchAutoscan> getAppropriateAutoscan(
@@ -133,7 +130,7 @@ private:
         const std::shared_ptr<AutoscanDirectory>& adir);
 
     /// @brief Remove watch
-    bool removeFromWdObj(
+    void removeFromWdObj(
         const std::shared_ptr<DirectoryWatch>& wdObj,
         const std::shared_ptr<Watch>& toRemove);
 

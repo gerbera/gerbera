@@ -46,11 +46,16 @@
 #include "util/logger.h"
 
 #include <algorithm>
+#include <climits>
 #include <cstring>
 #include <sys/inotify.h>
 #include <sys/select.h>
 #include <thread>
 #include <unistd.h>
+
+#ifdef __linux__
+static_assert(sizeof(inotify_event) * INOTIFY_EVENT_BUFFER_SIZE >= sizeof(inotify_event) + NAME_MAX + 1);
+#endif
 
 Inotify::Inotify()
 #ifdef __linux__
@@ -135,7 +140,32 @@ void Inotify::removeWatch(int wd) const
 
 struct inotify_event* Inotify::nextEvent()
 {
-    if (nextEventOffset == eventBytes) {
+    auto buffer = reinterpret_cast<char*>(eventBuffer.data());
+    bool stopRequested = false;
+    while (true) {
+        auto remaining = eventBytes - nextEventOffset;
+        if (remaining >= sizeof(inotify_event)) {
+            auto event = reinterpret_cast<inotify_event*>(buffer + nextEventOffset);
+            if (event->len > sizeof(eventBuffer) - sizeof(inotify_event)) {
+                nextEventOffset = 0;
+                eventBytes = 0;
+                throw_std_runtime_error("Inotify event exceeds the read buffer");
+            }
+            if (event->len <= remaining - sizeof(inotify_event)) {
+                nextEventOffset += sizeof(inotify_event) + event->len;
+                return event;
+            }
+        }
+        if (stopRequested)
+            return nullptr;
+
+        // Linux returns complete events; socket-based libinotify can split one.
+        // Keep the unread prefix until both the header and its name are available.
+        if (remaining > 0 && nextEventOffset > 0)
+            std::memmove(buffer, buffer + nextEventOffset, remaining);
+        nextEventOffset = 0;
+        eventBytes = remaining;
+
         fd_set readFds;
         FD_ZERO(&readFds);
         FD_SET(inotify_fd, &readFds);
@@ -143,7 +173,8 @@ struct inotify_event* Inotify::nextEvent()
         int rc = select(std::max(inotify_fd, stop_fd_read) + 1, &readFds, nullptr, nullptr, nullptr);
         if (rc <= 0)
             return nullptr;
-        if (FD_ISSET(stop_fd_read, &readFds)) {
+        stopRequested = FD_ISSET(stop_fd_read, &readFds);
+        if (stopRequested) {
             char stop;
             if (read(stop_fd_read, &stop, 1) == -1)
                 log_error("Inotify: could not read stop: {}", std::strerror(errno));
@@ -151,24 +182,11 @@ struct inotify_event* Inotify::nextEvent()
         if (!FD_ISSET(inotify_fd, &readFds))
             return nullptr;
 
-        // inotify reads contain complete events; each instance owns its batch.
-        auto bytesRead = read(inotify_fd, eventBuffer.data(), sizeof(eventBuffer));
-        if (bytesRead < 0)
+        auto bytesRead = read(inotify_fd, buffer + eventBytes, sizeof(eventBuffer) - eventBytes);
+        if (bytesRead <= 0)
             return nullptr;
-        if (bytesRead == 0)
-            throw_std_runtime_error("Inotify reported end-of-file");
-        eventBytes = bytesRead;
-        nextEventOffset = 0;
+        eventBytes += bytesRead;
     }
-
-    auto remaining = eventBytes - nextEventOffset;
-    if (remaining < sizeof(inotify_event))
-        throw_std_runtime_error("Inotify returned an incomplete event header");
-    auto event = reinterpret_cast<inotify_event*>(reinterpret_cast<char*>(eventBuffer.data()) + nextEventOffset);
-    if (event->len > remaining - sizeof(inotify_event))
-        throw_std_runtime_error("Inotify returned an incomplete event name");
-    nextEventOffset += sizeof(inotify_event) + event->len;
-    return event;
 }
 
 void Inotify::stop() const

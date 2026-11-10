@@ -60,6 +60,7 @@ void CMAddFileTask::run()
     try {
         content->_addFile(dirEnt, rootpath, asSetting, self);
     } catch (...) {
+        log_debug("Add file task failed for {}", dirEnt.path().c_str());
         if (asSetting.adir)
             asSetting.adir->decTaskCount();
         throw;
@@ -113,6 +114,7 @@ void CMRescanDirectoryTask::run()
     try {
         content->_rescanDirectory(adir, containerID, self, refreshExisting);
     } catch (...) {
+        log_debug("Rescan task failed for {} (container {})", adir->getLocation().c_str(), containerID);
         adir->decTaskCount();
         throw;
     }

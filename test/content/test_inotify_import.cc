@@ -26,6 +26,8 @@
 #include "metadata/metadata_enums.h"
 #include "util/tools.h"
 
+#include <climits>
+#include <cstdio>
 #include <gtest/gtest.h>
 #include <unistd.h>
 
@@ -72,7 +74,8 @@ TEST_F(PlaylistImportTest, InotifyBatchesBelongToTheirInstance)
     ASSERT_GE(first.addWatch(source / "a", IN_CREATE), 0);
     ASSERT_GE(second.addWatch(source / "b", IN_CREATE), 0);
     writeBytes(source / "a/first", "one");
-    writeBytes(source / "a/remaining", "two");
+    const std::string longestName(NAME_MAX, 'x');
+    writeBytes(source / "a" / longestName, "two");
     writeBytes(source / "b/own", "three");
     first.stop();
     auto event = first.nextEvent();
@@ -85,7 +88,7 @@ TEST_F(PlaylistImportTest, InotifyBatchesBelongToTheirInstance)
     first.stop();
     event = first.nextEvent();
     ASSERT_NE(event, nullptr);
-    EXPECT_STREQ(event->name, "remaining");
+    EXPECT_STREQ(event->name, longestName.c_str());
 }
 
 TEST_F(PlaylistImportTest, NewInotifyInstanceDoesNotInheritDiscardedBatch)
@@ -254,6 +257,30 @@ TEST_P(InotifyImportTest, DelayedOldFileDeletionPreservesReplacementRenameAndHar
     fs::remove(linked);
     ASSERT_TRUE(drainEvents());
     EXPECT_EQ(database->findObjectByPath(linked, "", DbFileType::File), nullptr);
+}
+
+TEST_P(InotifyImportTest, UnmonitorRemovesWatchAfterDirectoryIsDeleted)
+{
+    start(GetParam(), "UTF-8", AutoscanScanMode::INotify);
+    auto removed = root / "RemovedAutoscan";
+    fs::create_directory(removed);
+    auto adir = std::make_shared<AutoscanDirectory>(removed, AutoscanScanMode::INotify, true, false);
+    adir->setObjectID(content->ensurePathExistence(removed));
+    adir->setLayoutMode(GetParam() == "mt" ? ImportMode::MediaTomb : ImportMode::Gerbera);
+    content->setAutoscanDirectory(adir);
+    ASSERT_TRUE(waitForWatches({ source, removed }));
+    ASSERT_TRUE(waitFor([&] { return importsIdle(); }, "Initial autoscan completion"));
+
+    GrbFile old(removed);
+    auto handle = old.open("rb");
+    ASSERT_NE(handle, nullptr);
+    auto openPath = fs::path("/proc/self/fd") / std::to_string(fileno(handle));
+    ASSERT_TRUE(fs::remove(removed));
+    // Keep the original inode open so the kernel has not removed its watch.
+    ASSERT_TRUE(waitForWatches({ openPath }));
+    content->removeAutoscanDirectory(adir);
+    ASSERT_TRUE(waitForWatches({ openPath }, std::chrono::seconds(3), false));
+    ASSERT_TRUE(waitForWatches({ source }));
 }
 
 TEST_P(InotifyImportTest, NestedAutoscanCleanupPreservesParentAndReplacementWatches)

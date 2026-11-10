@@ -134,7 +134,7 @@ void InotifyHandler::doDirectory(
     if (asSetting.recursive && AUTOSCAN_IS_CREATED(mask)) {
         if (!content->isHiddenFile(dirEnt, true, asSetting)) {
             log_debug("Detected new dir, adding to inotify: {}", path.c_str());
-            ai->monitorUnmonitorRecursive(dirEnt, false, asSetting.adir, false, asSetting.followSymlinks);
+            ai->monitorRecursive(dirEnt, asSetting.adir, false, asSetting.followSymlinks);
         } else {
             log_debug("Detected new dir, ignoring because it's hidden: {}", path.c_str());
         }
@@ -191,7 +191,7 @@ void InotifyHandler::doNewEntry(
 {
     if (!isDir && !content->isHiddenFile(dirEnt, false, asSetting)
         && ((mask & IN_CREATE) || AUTOSCAN_IS_NEW_ENTRY(mask, dirEnt.is_symlink())))
-        ai->monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
+        ai->monitorRecursive(dirEnt, adir, false, asSetting.followSymlinks);
     if (changedObject)
         asSetting.changedObject = changedObject;
 
@@ -199,7 +199,7 @@ void InotifyHandler::doNewEntry(
         log_debug("Adding {}", path.c_str());
         // dirEnt, path, rootPath, settings, lowPriority, cancellable
         if (isDir) {
-            auto wdObjPath = ai->monitorUnmonitorRecursive(dirEnt, false, adir, false, asSetting.followSymlinks);
+            auto wdObjPath = ai->monitorRecursive(dirEnt, adir, false, asSetting.followSymlinks);
             // Children may have been written before the new directory watch was installed.
             asSetting.refreshExisting = mask & (IN_CREATE | IN_MOVED_TO);
             if (AUTOSCAN_IS_MOVED(mask) && wdObjPath) {
