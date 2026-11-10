@@ -55,6 +55,14 @@ InotifyManager<Watcher>::InotifyManager()
 template <class Watcher>
 InotifyManager<Watcher>::~InotifyManager()
 {
+    shutdown();
+    inotify = nullptr;
+    watches.clear();
+}
+
+template <class Watcher>
+void InotifyManager<Watcher>::shutdown()
+{
     std::unique_lock<std::mutex> lock(mutex);
     if (!shutdownFlag) {
         log_debug("start");
@@ -63,8 +71,6 @@ InotifyManager<Watcher>::~InotifyManager()
         lock.unlock();
         inotifyThread.join();
         log_debug("inotify thread died.");
-        inotify = nullptr;
-        watches.clear();
     }
 }
 

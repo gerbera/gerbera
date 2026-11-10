@@ -978,8 +978,11 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         { MIME_TYPE_WPL_PLAYLIST, UPNP_CLASS_PLAYLIST_ITEM },
         { MIME_TYPE_XSPF_PLAYLIST, UPNP_CLASS_PLAYLIST_ITEM },
         { "audio/*", UPNP_CLASS_MUSIC_TRACK },
+        { MIME_TYPE_MPEGURL, UPNP_CLASS_PLAYLIST_ITEM },
+        { "audio/x-scpls", UPNP_CLASS_PLAYLIST_ITEM },
         { "image/*", UPNP_CLASS_IMAGE_ITEM },
         { "video/*", UPNP_CLASS_VIDEO_ITEM },
+        { MIME_TYPE_ASX_PLAYLIST, UPNP_CLASS_PLAYLIST_ITEM },
     };
 
     /// @brief default values for ConfigVal::IMPORT_MAPPINGS_CONTENTTYPE_TO_DLNATRANSFER_LIST
