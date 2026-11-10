@@ -349,12 +349,12 @@ void PlaylistImportTest::writeBytes(const fs::path& path, const std::string& byt
     GrbFile(path).writeBinaryFile(reinterpret_cast<const std::byte*>(bytes.data()), bytes.size());
 }
 
-bool PlaylistImportTest::waitForWatches(const std::vector<fs::path>& paths, std::chrono::seconds timeout)
+bool PlaylistImportTest::waitForWatches(const std::vector<fs::path>& paths, std::chrono::seconds timeout, bool present)
 {
 #ifdef __linux__
     constexpr auto requiredMask = IN_CLOSE_WRITE | IN_MOVED_FROM | IN_MOVED_TO | IN_CREATE | IN_DELETE;
     std::map<std::pair<unsigned long long, unsigned long long>, unsigned long long> expected;
-    std::string description = "Kernel watches for";
+    std::string description = present ? "Kernel watches for" : "No kernel watches for";
     for (const auto& path : paths) {
         struct stat info {};
         if (stat(path.c_str(), &info) != 0)
@@ -371,17 +371,18 @@ bool PlaylistImportTest::waitForWatches(const std::vector<fs::path>& paths, std:
                 unsigned long long inode, device, mask;
                 if (std::sscanf(line.c_str(), "inotify wd:%*x ino:%llx sdev:%llx mask:%llx", &inode, &device, &mask) == 3) {
                     auto entry = missing.find({ device, inode });
-                    if (entry != missing.end() && (mask & entry->second) == entry->second)
+                    if (entry != missing.end() && (!present || (mask & entry->second) == entry->second))
                         missing.erase(entry);
                 }
             }
         }
-        return missing.empty();
+        return present ? missing.empty() : missing.size() == expected.size();
     },
         description, timeout);
 #else
     static_cast<void>(paths);
     static_cast<void>(timeout);
+    static_cast<void>(present);
     ADD_FAILURE() << "Real kernel-watch validation requires Linux /proc/self/fdinfo";
     return false;
 #endif

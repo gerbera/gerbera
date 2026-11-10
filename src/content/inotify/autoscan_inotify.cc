@@ -75,21 +75,10 @@ void AutoscanInotify::threadProc()
                 unmonitorQueue.pop();
                 lock.unlock();
 
-                if (!adir) {
+                if (!adir)
                     log_debug("Empty autoscan");
-                    lock.lock();
-                    continue;
-                }
-
-                const fs::path& location = adir->getLocation();
-                if (location.empty()) {
-                    lock.lock();
-                    continue;
-                }
-                // read dir
-                auto dirEnt = fs::directory_entry(location, ec);
-
-                monitorUnmonitorRecursive(dirEnt, true, adir, true, adir->getFollowSymlinks());
+                else if (!adir->getLocation().empty())
+                    unmonitorDirectory(adir);
 
                 lock.lock();
             }
@@ -117,7 +106,7 @@ void AutoscanInotify::threadProc()
                 auto dirEnt = fs::directory_entry(location, ec);
                 if (!ec) {
                     // Honors recursive=no while still watching direct files.
-                    monitorUnmonitorRecursive(dirEnt, false, adir, true, adir->getFollowSymlinks());
+                    monitorRecursive(dirEnt, adir, true, adir->getFollowSymlinks());
                     content->rescanDirectory(adir, adir->getObjectID(), location, false, refreshExisting);
                 } else {
                     log_error("Failed to read autoscan directory {}: {}", location.c_str(), ec.message());
@@ -393,7 +382,7 @@ void AutoscanInotify::removeNonexistingMonitor(int wd, const std::shared_ptr<Dir
     }
 }
 
-std::shared_ptr<DirectoryWatch> AutoscanInotify::monitorUnmonitorRecursive(const fs::directory_entry& startPath, bool unmonitor, const std::shared_ptr<AutoscanDirectory>& adir, bool isStartPoint, bool followSymlinks)
+std::shared_ptr<DirectoryWatch> AutoscanInotify::monitorRecursive(const fs::directory_entry& startPath, const std::shared_ptr<AutoscanDirectory>& adir, bool isStartPoint, bool followSymlinks)
 {
     log_debug("start {}", startPath.path().c_str());
 
@@ -403,24 +392,18 @@ std::shared_ptr<DirectoryWatch> AutoscanInotify::monitorUnmonitorRecursive(const
         log_warning("Cannot inspect watched object {}: {}", startPath.path().c_str(), ec.message());
         return nullptr;
     }
-    int result = INOTIFY_ROOT;
-    if (unmonitor)
-        unmonitorDirectory(startPath.path(), adir);
-    else {
-        result = monitorDirectory(startPath.path(), adir, isStartPoint, false, {}, directory ? 0 : IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT);
-        if (result <= INOTIFY_ROOT)
-            return nullptr;
-    }
-
+    int result = monitorDirectory(startPath.path(), adir, isStartPoint, false, {}, directory ? 0 : IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT);
+    if (result <= INOTIFY_ROOT)
+        return nullptr;
     if (!directory)
-        return (result > INOTIFY_ROOT) ? watches.at(result) : nullptr;
+        return watches.at(result);
     if (!startPath.exists(ec)) {
         log_warning("Could not open {}: {}", startPath.path().c_str(), ec.message());
         return nullptr;
     }
     auto dIter = fs::directory_iterator(startPath, ec);
     if (ec) {
-        log_error("monitorUnmonitorRecursive: Failed to iterate {}, {}", startPath.path().c_str(), ec.message());
+        log_error("monitorRecursive: Failed to iterate {}, {}", startPath.path().c_str(), ec.message());
         return nullptr;
     }
     for (auto&& dirEnt : dIter) {
@@ -442,13 +425,13 @@ std::shared_ptr<DirectoryWatch> AutoscanInotify::monitorUnmonitorRecursive(const
         }
 
         if ((dirEnt.is_directory(ec) && asSetting.recursive) || isRegularFile(dirEnt, ec))
-            monitorUnmonitorRecursive(dirEnt, unmonitor, adir, false, followSymlinks);
+            monitorRecursive(dirEnt, adir, false, followSymlinks);
 
         if (ec) {
-            log_error("AutoscanInotify::monitorUnmonitorRecursive {}: Failed to read {}, {}", startPath.path().c_str(), dirEnt.path().c_str(), ec.message());
+            log_error("AutoscanInotify::monitorRecursive {}: Failed to read {}, {}", startPath.path().c_str(), dirEnt.path().c_str(), ec.message());
         }
     }
-    return (result > INOTIFY_ROOT) ? watches.at(result) : nullptr;
+    return watches.at(result);
 }
 
 int AutoscanInotify::monitorDirectory(
@@ -509,38 +492,16 @@ int AutoscanInotify::monitorDirectory(
     return wd;
 }
 
-void AutoscanInotify::unmonitorDirectory(const fs::path& path, const std::shared_ptr<AutoscanDirectory>& adir)
+void AutoscanInotify::unmonitorDirectory(const std::shared_ptr<AutoscanDirectory>& adir)
 {
-    log_debug("start {}", path.c_str());
-    // maybe there is a faster method...
-    // we use addWatch, because it returns the wd to the filename
-    // this should not add a new watch, because it should be already watched
-    int wd = inotify->addWatch(path, events, adir->getRetryCount());
-
-    if (wd <= INOTIFY_ROOT) {
-        // doesn't seem to be monitored currently
-        log_debug("unmonitorDirectory called, but it isn't monitored? ({})", path.c_str());
-        return;
-    }
-
-    auto wdObj = watches.find(wd);
-    if (wdObj == watches.end()) {
-        log_error("wd not found in watches!? ({}, {})", wd, path.c_str());
-        return;
-    }
-
-    auto watchAs = getAppropriateAutoscan(wdObj->second, adir);
-    if (!watchAs) {
-        log_debug("autoscan not found in watches? ({}, {})", wd, path.c_str());
-    } else {
-        if (wdObj->second->getWdWatches().size() == 1) {
-            // should be done automatically, because removeWatch triggers an IGNORED event
-            // watches.remove(wd);
-
-            inotify->removeWatch(wd);
-        } else {
-            removeFromWdObj(wdObj->second, watchAs);
-        }
+    // Remove this autoscan's registrations even if the directory is gone.
+    for (const auto& [wd, wdObj] : watches) {
+        auto watch = getAppropriateAutoscan(wdObj, adir);
+        if (!watch)
+            continue;
+        if (watch->getIsStartPoint())
+            removeWatchMoves(wd);
+        removeFromWdObj(wdObj, watch);
     }
 }
 
@@ -595,20 +556,16 @@ void AutoscanInotify::removeWatchMoves(int wd)
     } while (checkWd > INOTIFY_ROOT);
 }
 
-bool AutoscanInotify::removeFromWdObj(const std::shared_ptr<DirectoryWatch>& wdObj, const std::shared_ptr<Watch>& toRemove)
+void AutoscanInotify::removeFromWdObj(const std::shared_ptr<DirectoryWatch>& wdObj, const std::shared_ptr<Watch>& toRemove)
 {
     auto&& wdWatches = wdObj->getWdWatches();
     auto it = std::find(wdWatches.begin(), wdWatches.end(), toRemove);
-    if (it != wdWatches.end()) {
-        if (wdWatches.size() == 1) {
-            inotify->removeWatch(wdObj->getWd());
-        } else {
-            wdWatches.erase(it);
-        }
-        return true;
-    }
+    if (it == wdWatches.end())
+        return;
 
-    return false;
+    wdWatches.erase(it);
+    if (wdWatches.empty())
+        inotify->removeWatch(wdObj->getWd());
 }
 
 void AutoscanInotify::addDescendant(int startPointWd, int addWd, const std::shared_ptr<AutoscanDirectory>& adir)
