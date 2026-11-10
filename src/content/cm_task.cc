@@ -35,6 +35,8 @@
 #include "onlineservice/task_processor.h"
 #endif
 
+#include <exception>
+
 CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
     fs::directory_entry dirEnt, fs::path rootpath, AutoScanSetting asSetting, bool cancellable)
     : GenericTask(TaskOwner::ContentManagerTask)
@@ -59,6 +61,11 @@ void CMAddFileTask::run()
     auto self = shared_from_this();
     try {
         content->_addFile(dirEnt, rootpath, asSetting, self);
+    } catch (const std::exception& ex) {
+        log_debug("Add file task failed for {}: {}", dirEnt.path().c_str(), EX(ex));
+        if (asSetting.adir)
+            asSetting.adir->decTaskCount();
+        throw;
     } catch (...) {
         log_debug("Add file task failed for {}", dirEnt.path().c_str());
         if (asSetting.adir)
@@ -113,6 +120,10 @@ void CMRescanDirectoryTask::run()
     auto self = shared_from_this();
     try {
         content->_rescanDirectory(adir, containerID, self, refreshExisting);
+    } catch (const std::exception& ex) {
+        log_debug("Rescan task failed for {} (container {}): {}", adir->getLocation().c_str(), containerID, EX(ex));
+        adir->decTaskCount();
+        throw;
     } catch (...) {
         log_debug("Rescan task failed for {} (container {})", adir->getLocation().c_str(), containerID);
         adir->decTaskCount();
