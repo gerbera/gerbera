@@ -56,9 +56,14 @@ bool ConfigSetup::hasXmlElement(const pugi::xml_node& root) const
 
 std::string ConfigSetup::getDocs()
 {
+#ifdef GERBERA_RELEASE
+    constexpr std::string_view docRoot = "https://docs.gerbera.io/en/stable/";
+#else
+    constexpr std::string_view docRoot = "https://docs.gerbera.io/en/latest/";
+#endif
     if (help)
-        return fmt::format(", see help https://docs.gerbera.io/en/stable/{}", help);
-    return ", see documentation https://docs.gerbera.io/en/stable/config-overview.html";
+        return fmt::format(", see help {}{}", docRoot, help);
+    return fmt::format(", see documentation {}config-overview.html", docRoot);
 }
 
 /// @brief Returns a config option with the given xpath, if option does not exist a default value is returned.

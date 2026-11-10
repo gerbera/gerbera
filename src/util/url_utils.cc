@@ -27,7 +27,6 @@ Gerbera - https://gerbera.io/
 #include "upnp/compat.h"
 #include "util/fmt_compat.h"
 #include "util/grb_fs.h"
-
 #include "util/string_converter.h"
 #include "util/tools.h"
 
@@ -90,8 +89,11 @@ std::string joinUrl(const std::vector<std::string>& components, bool addToEnd, s
 
 std::map<std::string, std::string> parseParameters(std::string_view filename, std::string_view baseLink)
 {
-    const auto parameters = filename.substr(baseLink.size());
-    return pathToMap(parameters);
+    if (filename.size() >= baseLink.size() && filename.compare(0, baseLink.size(), baseLink) == 0) {
+        const auto parameters = filename.substr(baseLink.size());
+        return pathToMap(parameters);
+    }
+    throw_std_runtime_error("Requested URL {} does not match base link {}", filename, baseLink);
 }
 
 static constexpr auto hexCharS2 = "0123456789ABCDEF";
