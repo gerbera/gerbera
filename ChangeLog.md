@@ -12,8 +12,8 @@
 - Allow configuring cover art priority for audio and video
 - Allow multiple clients by ip
 - Build with libpqxx 8
-- Bump serialize-javascript from 7.1.1 to 7.1.2 in /gerbera-web
 - Bump npm packages in /gerbera-web
+- Bump serialize-javascript from 7.1.1 to 7.1.2 in /gerbera-web
 - Cleanup asx tests
 - Collect documentation updates
 - Configure album container names independently from audio titles
@@ -23,6 +23,7 @@
 - Define Limits for Containter Type Selection
 - Docker: fix ownership of files created with PUID/PGID, rename UID/GID to PUID/PGID
 - Extend Mime Mapping
+- Fix additional metadata import with taglib
 - Fix Alpine apk-tools download in Minimal CI
 - Fix ASX local URI references and UTF-8 metadata
 - Fix CaptionInfo.sec never being sent to Samsung TVs
@@ -32,7 +33,7 @@
 - Fix import of configured ASF auxiliary attributes
 - Fix internal transcoding with ffmpeg
 - Fix internal video (mpeg) transcoding
-- Fix additional metadata import with taglib
+- Fix potential underflow in parseParameter
 - Fix sorting of files in structured import
 - Fix UPnP client cache returning the wrong observation for a shared IP
 - Fix WavPack stack overflow by allocating entries on the heap
@@ -60,9 +61,9 @@
 - transcode: fix build with ffmpeg 7.0
 - Update metadata\_service to use content-type
 - Update to cxxopts-g7af8aa
-- Update to fmt 12.2.1
-- Update to pupnp 22.2.1
 - Update to ffmpegthumbnailer 2.4.1
+- Update to fmt 12.2.1
+- Update to pupnp 22.2.2
 - Use fmt exception formatting
 - Wait for client grid rendering in browser tests
 

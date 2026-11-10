@@ -726,10 +726,12 @@ int Server::HostValidateCallback(const char* host, void* cookie)
         }
     }
 
+    auto config = static_cast<Server*>(cookie)->config;
     log_warning("Rejected attempt to load host '{}' as it does not match configured virtualURL/externalURL: '{}'/'{}'. "
-                "See https://docs.gerbera.io/en/stable/config-server.html#virtualurl",
-        host, static_cast<Server*>(cookie)->config->getOption(ConfigVal::VIRTUAL_URL),
-        static_cast<Server*>(cookie)->config->getOption(ConfigVal::EXTERNAL_URL));
+                "See {}/config-server.html#virtual-url",
+        host, config->getOption(ConfigVal::VIRTUAL_URL),
+        config->getOption(ConfigVal::EXTERNAL_URL),
+        config->getOption(ConfigVal::SERVER_UI_DOCUMENTATION_USER));
     return UPNP_E_BAD_HTTPMSG;
 }
 
@@ -761,6 +763,9 @@ int Server::GetInfoCallback(
         return -1;
     } catch (const std::runtime_error& e) {
         log_error("Exception: {}", EX(e));
+        return -1;
+    } catch (const std::logic_error& ex) {
+        log_error("Exception: logic error {}", EX(ex));
         return -1;
     }
 }
@@ -799,6 +804,9 @@ UpnpWebFileHandle Server::OpenCallback(
         return nullptr;
     } catch (const std::runtime_error& ex) {
         log_error("Exception: {}", EX(ex));
+        return nullptr;
+    } catch (const std::logic_error& ex) {
+        log_error("Exception: logic error {}", EX(ex));
         return nullptr;
     }
 }
@@ -859,6 +867,9 @@ int Server::SeekCallback(
     } catch (const std::runtime_error& e) {
         log_error("Exception during seek: {}", EX(e));
         return -1;
+    } catch (const std::logic_error& ex) {
+        log_error("Exception during seek: logic error {}", EX(ex));
+        return -1;
     }
 }
 
@@ -875,6 +886,9 @@ int Server::CloseCallback(
             ioHandler->close();
         } catch (const std::runtime_error& e) {
             log_error("Exception during close: {}", EX(e));
+            retClose = -1;
+        } catch (const std::logic_error& ex) {
+            log_error("Exception during close: logic error {}", EX(ex));
             retClose = -1;
         }
     }
