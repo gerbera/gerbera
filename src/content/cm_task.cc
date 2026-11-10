@@ -30,12 +30,45 @@
 #include "content_manager.h"
 #include "context.h"
 #include "database/database.h"
+#include "util/logger.h"
 
 #ifdef ONLINE_SERVICES
 #include "onlineservice/task_processor.h"
 #endif
 
 #include <exception>
+
+/// @brief Complete the autoscan task count on every exit and persist its scan time on success.
+template <typename Run, typename DescribeFailure>
+static void runAutoscanTask(const std::shared_ptr<ContentManager>& content,
+    const std::shared_ptr<AutoscanDirectory>& adir, const Run& run, const DescribeFailure& describeFailure)
+{
+    struct TaskCountCompletion {
+        const std::shared_ptr<AutoscanDirectory>& directory;
+
+        ~TaskCountCompletion()
+        {
+            if (directory)
+                directory->decTaskCount();
+        }
+    };
+
+    try {
+        const TaskCountCompletion completion { adir };
+        run();
+    } catch (const std::exception& ex) {
+        log_debug("{}: {}", describeFailure(), EX(ex));
+        throw;
+    } catch (...) {
+        log_debug("{}", describeFailure());
+        throw;
+    }
+
+    if (adir && adir->updateLMT()) {
+        log_debug("Updating last_modified for autoscan directory {}", adir->getLocation().c_str());
+        content->getContext()->getDatabase()->updateAutoscanDirectory(adir);
+    }
+}
 
 CMAddFileTask::CMAddFileTask(std::shared_ptr<ContentManager> content,
     fs::directory_entry dirEnt, fs::path rootpath, AutoScanSetting asSetting, bool cancellable)
@@ -59,26 +92,10 @@ void CMAddFileTask::run()
 {
     log_debug("running add file task with path {} recursive: {}", dirEnt.path().c_str(), asSetting.recursive);
     auto self = shared_from_this();
-    try {
-        content->_addFile(dirEnt, rootpath, asSetting, self);
-    } catch (const std::exception& ex) {
-        log_debug("Add file task failed for {}: {}", dirEnt.path().c_str(), EX(ex));
-        if (asSetting.adir)
-            asSetting.adir->decTaskCount();
-        throw;
-    } catch (...) {
-        log_debug("Add file task failed for {}", dirEnt.path().c_str());
-        if (asSetting.adir)
-            asSetting.adir->decTaskCount();
-        throw;
-    }
-    if (asSetting.adir) {
-        asSetting.adir->decTaskCount();
-        if (asSetting.adir->updateLMT()) {
-            log_debug("CMAddFileTask::run: Updating last_modified for autoscan directory {}", asSetting.adir->getLocation().c_str());
-            content->getContext()->getDatabase()->updateAutoscanDirectory(asSetting.adir);
-        }
-    }
+    const auto describeFailure = [&] {
+        return fmt::format("Add file task failed for {}", dirEnt.path().c_str());
+    };
+    runAutoscanTask(content, asSetting.adir, [&] { content->_addFile(dirEnt, rootpath, asSetting, self); }, describeFailure);
 }
 
 CMRemoveObjectTask::CMRemoveObjectTask(std::shared_ptr<ContentManager> content, std::shared_ptr<AutoscanDirectory> adir,
@@ -118,22 +135,10 @@ void CMRescanDirectoryTask::run()
         return;
 
     auto self = shared_from_this();
-    try {
-        content->_rescanDirectory(adir, containerID, self, refreshExisting);
-    } catch (const std::exception& ex) {
-        log_debug("Rescan task failed for {} (container {}): {}", adir->getLocation().c_str(), containerID, EX(ex));
-        adir->decTaskCount();
-        throw;
-    } catch (...) {
-        log_debug("Rescan task failed for {} (container {})", adir->getLocation().c_str(), containerID);
-        adir->decTaskCount();
-        throw;
-    }
-    adir->decTaskCount();
-    if (adir->updateLMT()) {
-        log_debug("CMRescanDirectoryTask::run: Updating last_modified for autoscan directory {}", adir->getLocation().c_str());
-        content->getContext()->getDatabase()->updateAutoscanDirectory(adir);
-    }
+    const auto describeFailure = [&] {
+        return fmt::format("Rescan task failed for {} (container {})", adir->getLocation().c_str(), containerID);
+    };
+    runAutoscanTask(content, adir, [&] { content->_rescanDirectory(adir, containerID, self, refreshExisting); }, describeFailure);
 }
 
 #ifdef ONLINE_SERVICES
