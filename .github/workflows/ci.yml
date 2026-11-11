@@ -158,9 +158,21 @@ jobs:
       - uses: vmactions/omnios-vm@v1
         with:
           prepare: |
-            pkg install bash cmake gnu-make icu4c curl ffmpeg gcc14 ninja \
-                pkg-config sqlite-3 libexif gnu-coreutils \
-                autoconf automake gnu-m4 libtool gnu-tar gzip bzip2
+            # IPS does not retry every TLS transport error.
+            for attempt in 1 2 3; do
+              if PKG_SUCCESS_ON_NOP=1 pkg install bash cmake gnu-make icu4c curl ffmpeg gcc14 ninja \
+                  pkg-config sqlite-3 libexif gnu-coreutils \
+                  autoconf automake gnu-m4 libtool gnu-tar gzip bzip2; then
+                break
+              else
+                status=$?
+              fi
+              if [ "$attempt" -eq 3 ]; then
+                exit "$status"
+              fi
+              echo "OmniOS package install attempt $attempt failed. Retrying in 10 seconds."
+              sleep 10
+            done
           run: |
             export GH_ACTIONS=y
             scripts/sunos/build-solaris.sh
