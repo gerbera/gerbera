@@ -17,6 +17,9 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-22.04
+    outputs:
+      debug-tags: ${{ steps.docker_meta_debug.outputs.tags }}
+      debug-labels: ${{ steps.docker_meta_debug.outputs.labels }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
@@ -47,14 +50,25 @@ jobs:
             type=sha
             type=edge
 
+      - name: Docker meta (debug)
+        id: docker_meta_debug
+        uses: docker/metadata-action@v6
+        with:
+          images: gerbera/gerbera
+          flavor: |
+            suffix=-debug
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=sha
+            type=edge
+
       - name: Set up QEMU
         if: "${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}"
         uses: docker/setup-qemu-action@v4
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-        with:
-          install: true
 
       - name: Login to DockerHub
         if: "${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}"
@@ -133,38 +147,29 @@ jobs:
           readme-filepath: README.Docker.md
 
   debug:
-    runs-on: ubuntu-22.04
     needs: build
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-22.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    env:
+      PUBLISH_DEBUG: ${{ github.repository == 'gerbera/gerbera' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master') }}
     steps:
       - name: Checkout
         uses: actions/checkout@v7
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
-      - name: Docker meta (debug)
-        id: docker_meta_debug
-        uses: docker/metadata-action@v6
-        with:
-          images: gerbera/gerbera
-          flavor: |
-            suffix=-debug
-          tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=sha
-            type=edge
-
-      - name: Set up QEMU
-        if: "${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}"
-        uses: docker/setup-qemu-action@v4
-
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v4
-        with:
-          install: true
 
       - name: Login to DockerHub
-        if: "${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}"
+        if: env.PUBLISH_DEBUG == 'true'
         uses: docker/login-action@v4
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
@@ -174,41 +179,44 @@ jobs:
         uses: actions/cache@v6
         with:
           path: /tmp/.buildx-dbg
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
+          key: ${{ runner.os }}-buildx-debug-${{ matrix.arch }}-${{ github.sha }}
           restore-keys: |
-            ${{ runner.os }}-buildx-
+            ${{ runner.os }}-buildx-debug-${{ matrix.arch }}-
 
-      - name: Build and export (debug)
-        if: ${{github.event_name == 'pull_request'}}
+      - name: Build and test (debug)
+        id: build
         uses: docker/build-push-action@v7
         with:
           context: .
           file: ./Dockerfile.debug
-          platforms: "linux/amd64"
-          load: true
-          tags: ${{ steps.docker_meta_debug.outputs.tags }}-test
-          labels: ${{ steps.docker_meta_debug.outputs.labels }}
+          platforms: linux/${{ matrix.arch }}
+          outputs: ${{ env.PUBLISH_DEBUG == 'true' && 'type=image,name=gerbera/gerbera,push-by-digest=true,name-canonical=true,push=true' || 'type=docker' }}
+          tags: ${{ env.PUBLISH_DEBUG != 'true' && 'gerbera-debug:test' || '' }}
+          labels: ${{ needs.build.outputs.debug-labels }}
           cache-from: type=local,src=/tmp/.buildx-dbg
           cache-to: type=local,dest=/tmp/.buildx-cache-dbg,mode=max
           target: debug
 
-      - name: Test (debug)
-        if: ${{github.event_name == 'pull_request'}}
+      - name: Check the debug image
+        if: env.PUBLISH_DEBUG != 'true'
+        run: docker run --user gerbera:gerbera --rm gerbera-debug:test gerbera --compile-info
+
+      - name: Record the debug image digest
+        if: env.PUBLISH_DEBUG == 'true'
+        env:
+          DIGEST: ${{ steps.build.outputs.digest }}
         run: |
-          docker run --user gerbera:gerbera --rm ${{ steps.docker_meta_debug.outputs.tags }}-test gerbera --compile-info
+          [[ "$DIGEST" =~ ^sha256:[0-9a-f]{64}$ ]]
+          printf '%s\n' "$DIGEST" > debug-${{ matrix.arch }}.digest
 
-      - name: Build and push (debug)
-        uses: docker/build-push-action@v7
+      - name: Upload the debug image digest
+        if: env.PUBLISH_DEBUG == 'true'
+        uses: actions/upload-artifact@v7
         with:
-          context: .
-          file: ./Dockerfile.debug
-          platforms: "linux/amd64${{ ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) && ',linux/arm64' || '' }}"
-          push: ${{ github.repository == 'gerbera/gerbera' && ( startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master' ) }}
-          tags: ${{ steps.docker_meta_debug.outputs.tags }}
-          labels: ${{ steps.docker_meta_debug.outputs.labels }}
-          cache-from: type=local,src=/tmp/.buildx-dbg
-          cache-to: type=local,dest=/tmp/.buildx-cache-dbg,mode=max
-          target: debug
+          name: debug-digest-${{ matrix.arch }}
+          path: debug-${{ matrix.arch }}.digest
+          if-no-files-found: error
+          overwrite: true
 
       - # Temp fix
         # https://github.com/docker/build-push-action/issues/252
@@ -217,3 +225,39 @@ jobs:
         run: |
           rm -rf /tmp/.buildx-dbg
           mv /tmp/.buildx-cache-dbg /tmp/.buildx-dbg
+
+  publish-debug:
+    needs: [build, debug]
+    if: ${{ github.repository == 'gerbera/gerbera' && (startsWith(github.ref, 'refs/tags/') || github.ref == 'refs/heads/master') }}
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v4
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+
+      - name: Download the debug image digests
+        uses: actions/download-artifact@v8
+        with:
+          pattern: debug-digest-*
+          merge-multiple: true
+
+      - name: Publish the multi-platform debug image
+        env:
+          TAGS: ${{ needs.build.outputs.debug-tags }}
+        run: |
+          tags=()
+          while IFS= read -r tag; do
+            if [[ -n "$tag" ]]; then
+              tags+=(--tag "$tag")
+            fi
+          done <<< "$TAGS"
+          test "${#tags[@]}" -gt 0
+          read -r amd64_digest < debug-amd64.digest
+          read -r arm64_digest < debug-arm64.digest
+          docker buildx imagetools create "${tags[@]}" \
+            "gerbera/gerbera@$amd64_digest" "gerbera/gerbera@$arm64_digest"
