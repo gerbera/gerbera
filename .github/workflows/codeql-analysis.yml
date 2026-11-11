@@ -29,6 +29,7 @@ jobs:
       - if: matrix.language == 'cpp'
         name: Install Deps
         run: |
+           sudo bash .github/scripts/ubuntu-apt-mirrors.sh
            sudo apt-get update && \
            sudo apt-get install -y \
              libpugixml-dev libexiv2-dev libsqlite3-dev \

@@ -118,11 +118,14 @@ fi
 
 # Pre reqs
 export DEBIAN_FRONTEND=noninteractive
+GH_ACTIONS="${GH_ACTIONS:-n}"
+if [[ "${GH_ACTIONS}" == "y" ]]; then
+  bash "${ROOT_DIR}.github/scripts/ubuntu-apt-mirrors.sh"
+fi
 apt-get update -y
 apt-get install -y lsb-release sudo wget curl git ca-certificates
 
 # Work around https://github.com/actions/checkout/issues/760
-GH_ACTIONS="${GH_ACTIONS:-n}"
 if [[ "${GH_ACTIONS}" == "y" ]]; then
   git config --global --add safe.directory "$(pwd)"
 fi

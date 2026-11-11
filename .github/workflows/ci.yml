@@ -71,6 +71,7 @@ jobs:
       # Alternatively: uses: docker://conanio/gcc9:latest
       - name: Update package list
         run: |
+          sudo bash .github/scripts/ubuntu-apt-mirrors.sh
           sudo apt-get update -y
           sudo apt-get install -y openssl
       - name: Set up Python
@@ -109,27 +110,15 @@ jobs:
             lib: npupnp
     runs-on: ubuntu-latest
     name: head-${{ matrix.head.name }}
-    container:
-      image: "ubuntu:26.04"
-      env:
-        DEBIAN_FRONTEND: noninteractive
-        TZ: Etc/UTC
-        GH_ACTIONS: y
     steps:
-      - name: Install script pre-reqs
-        shell: bash
-        run: |
-          ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
-          apt-get update -y
-          apt-get install -y lsb-release sudo wget curl git
-
       - uses: actions/checkout@v7
         with:
           fetch-depth: 0 # We need history/tags to generate version info
 
       - name: Build and test
         run: |
-          bash scripts/debian/build-deb.sh HEAD ${{ matrix.head.lib }}
+          docker run --rm -e TZ=Etc/UTC -e GH_ACTIONS=y -v "$PWD:/build" -w /build \
+            ubuntu:26.04 bash scripts/debian/build-deb.sh HEAD ${{ matrix.head.lib }}
 
   FreeBSD:
     runs-on: ubuntu-latest
