@@ -46,6 +46,7 @@
 #include <queue>
 #include <regex>
 #include <sstream>
+#include <utility>
 
 #ifdef __HAIKU__
 #define _DEFAULT_SOURCE
@@ -59,7 +60,6 @@
 
 #ifdef HAVE_ICU
 #include <unicode/translit.h>
-#include <unicode/ustream.h>
 #endif
 
 static constexpr auto hexChars = "0123456789abcdef";
@@ -502,11 +502,10 @@ std::string transliterate(const std::string& input)
             delete trans;
         }
 
-        std::ostringstream result;
-        result << unicodeString;
-
-        // remember for future
-        translitCache[input] = result.str();
+        // Keep the cached result in UTF-8 regardless of the process locale.
+        std::string result;
+        unicodeString.toUTF8String(result);
+        translitCache[input] = std::move(result);
     }
 
     // return remembered transliterated text
