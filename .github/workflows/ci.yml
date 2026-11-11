@@ -157,6 +157,8 @@ jobs:
       - uses: actions/checkout@v7
       - uses: vmactions/omnios-vm@v1
         with:
+          release: r151060-build
+          cache-after-prepare: true
           prepare: |
             # IPS does not retry every TLS transport error.
             for attempt in 1 2 3; do
