@@ -144,28 +144,52 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - uses: vmactions/omnios-vm@v1
+      - name: Stage verified OmniOS package archives
+        continue-on-error: true
+        run: |
+          archive_dir=$(mktemp -d "$RUNNER_TEMP/omnios-ips.XXXXXX")
+          trap 'rm -f -- "$archive_dir/core.p5p" "$archive_dir/extra.p5p"; rmdir -- "$archive_dir"' EXIT
+          release_url=https://github.com/atomvincent01/gerbera/releases/download/ci-omnios-r151060-20261111
+          for archive in core.p5p extra.p5p; do
+            curl --proto '=https' --proto-redir '=https' --fail --silent --show-error --location \
+              --connect-timeout 10 --max-time 180 --retry 2 --retry-all-errors --retry-max-time 240 \
+              --output "$archive_dir/$archive" "$release_url/$archive"
+          done
+          (
+            cd "$archive_dir"
+            sha256sum --check --strict <<'SHA256'
+          a82062396b590c4246235d5ba96c86e0d89bc0dfefaab8811b96ef4437eced4b  core.p5p
+          252543385be22804515c91f0b277336c9f8dc2f1fe2db9df57e053251726e1b1  extra.p5p
+          SHA256
+          )
+          mv -T -- "$archive_dir" "$GITHUB_WORKSPACE/.omnios-ips"
+          trap - EXIT
+      - uses: vmactions/omnios-vm@aeee92416495d9685b2997d954f6b063ae5b832d # v1
         with:
           release: r151060-build
-          cache-after-prepare: true
+          copyback: false
           prepare: |
-            # IPS does not retry every TLS transport error.
-            for attempt in 1 2 3; do
-              if PKG_SUCCESS_ON_NOP=1 pkg install bash cmake gnu-make icu4c curl ffmpeg gcc14 ninja \
-                  pkg-config sqlite-3 libexif gnu-coreutils \
-                  autoconf automake gnu-m4 libtool gnu-tar gzip bzip2; then
-                break
-              else
-                status=$?
-              fi
-              if [ "$attempt" -eq 3 ]; then
-                exit "$status"
-              fi
-              echo "OmniOS package install attempt $attempt failed. Retrying in 10 seconds."
-              sleep 10
-            done
+            set -eu
+            export PKG_SUCCESS_ON_NOP=1
+            set -- sudo git bash cmake gnu-make icu4c curl ffmpeg gcc14 ninja \
+              pkg-config sqlite-3 libexif gnu-coreutils autoconf automake gnu-m4 libtool gnu-tar gzip bzip2
+            if pkg install "$@"; then
+              exit 0
+            fi
+
+            core="$PWD/.omnios-ips/core.p5p"
+            extra="$PWD/.omnios-ips/extra.p5p"
+            if [ ! -s "$core" ] || [ ! -s "$extra" ]; then
+              echo 'OmniOS package installation failed and verified fallback archives are unavailable.' >&2
+              exit 1
+            fi
+            echo 'OmniOS package installation failed. Using the verified local IPS archives.'
+            # Keep the signed publishers and use the local catalogs for later pkg commands too.
+            pkg set-publisher -M '*' -O "$core" omnios
+            pkg set-publisher -M '*' -O "$extra" extra.omnios
+            pkg install --no-refresh "$@"
           run: |
-            export GH_ACTIONS=y
+            export GH_ACTIONS=y PKG_SUCCESS_ON_NOP=1
             scripts/sunos/build-solaris.sh
             export LD_LIBRARY_PATH=/usr/local/lib:/opt/ooce/lib:/opt/ooce/lib/amd64:${LD_LIBRARY_PATH:-}
             ./build-solaris/gerbera --compile-info
