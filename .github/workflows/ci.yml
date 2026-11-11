@@ -160,9 +160,6 @@ jobs:
           release: r151060-build
           cache-after-prepare: true
           prepare: |
-            set -e
-            pkg set-publisher --no-refresh -m https://us-west.mirror.omnios.org/r151060/core/ omnios
-            pkg set-publisher --no-refresh -m https://us-west.mirror.omnios.org/r151060/extra/ extra.omnios
             # IPS does not retry every TLS transport error.
             for attempt in 1 2 3; do
               if PKG_SUCCESS_ON_NOP=1 pkg install bash cmake gnu-make icu4c curl ffmpeg gcc14 ninja \
