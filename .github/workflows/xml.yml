@@ -31,12 +31,11 @@ jobs:
     steps:
       - name: Checkout Gerbera code
         uses: actions/checkout@v7
-      - name: Install xmllint
-        run: |
-          sudo bash .github/scripts/ubuntu-apt-mirrors.sh
-          sudo apt-get update
-          sudo apt-get install -y libxml2-utils
       - name: Enable Annotations for Validation Errors and Warnings
         uses: korelstar/xmllint-problem-matcher@v1
       - name: Validate ${{ matrix.xml-config }} Using Schema ${{ matrix.xsd-schema }}
-        run: xmllint --noout --schema "./config/${{ matrix.xsd-schema }}" "./test/config/fixtures/${{ matrix.xml-config }}"
+        uses: ChristophWurst/xmllint-action@v1
+        with:
+          xml-file: ./test/config/fixtures/${{ matrix.xml-config }}
+          xml-schema-file: ./config/${{ matrix.xsd-schema }}
+          # xmllint --noout --schema ./config/config2.xsd ./test/config/fixtures/mock-example-all-os.xml
