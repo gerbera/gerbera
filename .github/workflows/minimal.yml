@@ -76,14 +76,6 @@ jobs:
           ALPINE_BRANCH: ${{ matrix.branch }}
           ALPINE_ARCH: ${{ matrix.platform }}
         run: bash .github/scripts/select-alpine-mirror.sh "$ALPINE_BRANCH" "$ALPINE_ARCH" >> "$GITHUB_OUTPUT"
-      - name: Prepare Ubuntu package sources for emulation
-        if: matrix.platform != 'x86_64' && matrix.platform != 'x86'
-        shell: bash
-        run: |
-          if ! command -v update-binfmts >/dev/null; then
-            sudo bash .github/scripts/ubuntu-apt-mirrors.sh
-            sudo apt-get update
-          fi
       - uses: jirutka/setup-alpine@v1
         with:
           mirror-url: ${{ steps.alpine-mirror.outputs.mirror-url }}
