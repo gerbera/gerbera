@@ -1176,8 +1176,15 @@ void ImportService::assignMediaArtwork(
             if (container->getEntryType() == CdsEntryType::VirtualContainer && container->isSubClass(UPNP_CLASS_MUSIC_ALBUM)
                 && artworkMediaType(item) == ObjectType::Audio) {
                 const auto part = static_cast<const CdsItem&>(*item).getPartNumber();
-                if (part > 0 && toLower(folder.filename().string()) == fmt::format("cd {}", part))
-                    selected = handler->findPatternArtwork(container, item->getLocation(), folder.parent_path());
+                const auto albumFolder = folder.parent_path();
+                const auto albumName = toLower(item->getMetaData(MetadataFields::M_ALBUM));
+                const auto albumArtist = toLower(item->getMetaData(MetadataFields::M_ALBUMARTIST));
+                const auto parentName = toLower(albumFolder.filename().string());
+                // Named disc folders can use box artwork when their parent identifies the album.
+                const bool parentIsAlbum = !albumName.empty()
+                    && (parentName == albumName || (!albumArtist.empty() && parentName == fmt::format("{} - {}", albumArtist, albumName)));
+                if (part > 0 && (parentIsAlbum || toLower(folder.filename().string()) == fmt::format("cd {}", part)))
+                    selected = handler->findPatternArtwork(container, item->getLocation(), albumFolder);
             }
             if (!selected)
                 selected = handler->findPatternArtwork(container, item->getLocation());
