@@ -314,7 +314,8 @@ TEST_F(CoverArtPriorityTest, BoxCoverIsUsedOnlyForVirtualAlbum)
 {
     config->priority = "pattern, embedded";
     config->files = { "cover.jpg" };
-    const auto albumFolder = directory / "album";
+    const auto albumFolder = directory / "Various Artists - Album";
+    fs::create_directories(albumFolder);
     const auto boxCover = albumFolder / "cover.jpg";
     std::ofstream(boxCover) << "box artwork";
 
@@ -330,13 +331,17 @@ TEST_F(CoverArtPriorityTest, BoxCoverIsUsedOnlyForVirtualAlbum)
         return database->container->getResource(ResourcePurpose::Thumbnail);
     };
 
-    for (int part : { 1, 2 }) {
-        const auto discFolder = albumFolder / ("CD " + std::to_string(part));
+    for (int part : { 1, 2, 3 }) {
+        const auto discFolder = albumFolder / (part == 3 ? "Megamix CD" : "CD " + std::to_string(part));
         fs::create_directories(discFolder);
         auto track = std::make_shared<CdsItem>(CdsEntryType::File);
         track->setID(100 + part);
         track->setClass(UPNP_CLASS_MUSIC_TRACK);
         track->setPartNumber(part);
+        if (part == 3) {
+            track->addMetaData(MetadataFields::M_ALBUM, "Album");
+            track->addMetaData(MetadataFields::M_ALBUMARTIST, "Various Artists");
+        }
         track->setTrackNumber(1);
         track->setLocation(discFolder / "track.flac", CdsEntryType::File);
         auto embedded = std::make_shared<CdsResource>(ContentHandler::FLAC, ResourcePurpose::Thumbnail);
@@ -359,6 +364,7 @@ TEST_F(CoverArtPriorityTest, BoxCoverIsUsedOnlyForVirtualAlbum)
 
     const auto firstTrack = std::static_pointer_cast<CdsItem>(database->tracks.at(101));
     firstTrack->setPartNumber(2);
+    firstTrack->addMetaData(MetadataFields::M_ALBUM, "Unrelated Album");
     const auto mismatched = addToAlbum(firstTrack);
     ASSERT_NE(mismatched, nullptr);
     EXPECT_TRUE(mismatched->getAttribute(ResourceAttribute::RESOURCE_FILE).empty());
