@@ -959,6 +959,72 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
     commit("updateObject");
 }
 
+void SQLDatabase::updateLayoutTitles(
+    const std::vector<std::shared_ptr<CdsObject>>& objects,
+    const std::vector<int>& clearHistoryIds,
+    const std::string& audioTitleFingerprint)
+{
+    if (objects.empty() && clearHistoryIds.empty() && audioTitleFingerprint.empty())
+        return;
+
+    SqlAutoLock lock(sqlMutex);
+    const auto* transactions = dynamic_cast<const SqlWithTransactions*>(this);
+    if (transactions && transactions->hasActiveTransaction())
+        throw DatabaseException("Cannot update layout titles during an active database transaction", LINE_MESSAGE);
+
+    std::vector<std::string> statements;
+    std::unordered_set<int> objectIds;
+    const auto titleKey = quote(std::string(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE)));
+    const auto updated = quote(currentTime().count());
+    for (const auto& obj : objects) {
+        if (!obj || IS_FORBIDDEN_CDS_ID(obj->getID()) || !objectIds.insert(obj->getID()).second
+            || (obj->getEntryType() != CdsEntryType::VirtualContainer && obj->getEntryType() != CdsEntryType::VirtualItem)
+            || obj->getSource() != ObjectSource::Import || obj->getTitle().empty()
+            || (obj->isContainer() && obj->getLocation().empty()))
+            throw DatabaseException("Invalid object in layout title update", LINE_MESSAGE);
+
+        std::map<BrowseColumn, std::string> fields { { BrowseColumn::LastUpdated, updated } };
+        setCol(fields, BrowseColumn::DcTitle, obj->getTitle(), browseColMap);
+        setCol(fields, BrowseColumn::SortKey, obj->getSortKey(), browseColMap);
+        if (obj->isContainer()) {
+            const auto location = obj->getLocation().string();
+            setCol(fields, BrowseColumn::Location, location, browseColMap);
+            fields.emplace(BrowseColumn::LocationHash, quote(stringHash(location)));
+        }
+
+        const Object2Table update(std::move(fields), Operation::Update, browseColumnMapper);
+        statements.push_back(update.sqlForUpdate(obj));
+
+        if (obj->isContainer()) {
+            statements.push_back(fmt::format("DELETE FROM {} WHERE {} AND {}",
+                metaColumnMapper->getTableName(),
+                metaColumnMapper->getClause(MetadataColumn::ItemId, obj->getID(), true),
+                metaColumnMapper->getClause(MetadataColumn::PropertyName, titleKey, true)));
+            for (const auto& title : obj->getMetaGroup(MetadataFields::M_TITLE)) {
+                std::map<MetadataColumn, std::string> fields {
+                    { MetadataColumn::PropertyName, titleKey },
+                    { MetadataColumn::PropertyValue, quote(title, metaColMap.at(MetadataColumn::PropertyValue).length) },
+                };
+                const Metadata2Table insertTitle(std::move(fields), Operation::Insert, metaColumnMapper);
+                statements.push_back(insertTitle.sqlForInsert(obj));
+            }
+        }
+    }
+
+    if (!audioTitleFingerprint.empty())
+        statements.push_back(internalSettingUpsert(AUDIO_LAYOUT_DISPLAY_SETTING, audioTitleFingerprint));
+
+    if (!clearHistoryIds.empty()) {
+        if (std::any_of(clearHistoryIds.begin(), clearHistoryIds.end(), IS_FORBIDDEN_CDS_ID))
+            throw DatabaseException("Invalid object ID in layout history update", LINE_MESSAGE);
+        statements.push_back(fmt::format("DELETE FROM {} WHERE {} IN ({})",
+            playstatusColumnMapper->getTableName(),
+            playstatusColumnMapper->mapQuoted(PlaystatusColumn::ItemId, true),
+            fmt::join(clearHistoryIds, ",")));
+    }
+    execLayoutUpdate(statements);
+}
+
 std::shared_ptr<CdsObject> SQLDatabase::loadObject(
     int objectID,
     const std::string& group)
@@ -1575,7 +1641,7 @@ int SQLDatabase::ensurePathExistence(const fs::path& path, int* changedContainer
         *changedContainer = parentID;
 
     std::vector<std::pair<std::string, std::string>> itemMetadata;
-    itemMetadata.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE), grbLocaltime("{:%FT%T%z}", toSeconds(fs::last_write_time(path))));
+    itemMetadata.emplace_back(MetaEnumMapper::getMetaFieldName(MetadataFields::M_DATE), grbLocaltime(toSeconds(fs::last_write_time(path))));
 
     auto f2i = converterManager->f2i();
     auto [mval, err] = f2i->convert(path.filename());
@@ -1752,7 +1818,7 @@ bool SQLDatabase::addContainer(
     commit("addContainer");
 
     if (cont->getMetaData(MetadataFields::M_DATE).empty())
-        cont->addMetaData(MetadataFields::M_DATE, grbLocaltime("{:%FT%T%z}", cont->getMTime()));
+        cont->addMetaData(MetadataFields::M_DATE, grbLocaltime(cont->getMTime()));
 
     *containerID = createContainer(parentContainerId,
         cont->getTitle(), cont->getSortKey(), virtualPath, cont->getFlags(), cont->isVirtual(), cont->getClass(),
@@ -2531,6 +2597,11 @@ std::unique_ptr<Database::ChangedContainers> SQLDatabase::_purgeEmptyContainers(
     log_debug("end; changedContainers (ui): {}", changedUi.size());
 
     return changedContainers;
+}
+
+void SQLDatabase::storeInternalSetting(const std::string& key, const std::string& value)
+{
+    execOnly(internalSettingUpsert(key, value));
 }
 
 std::string SQLDatabase::getInternalSetting(const std::string& key)

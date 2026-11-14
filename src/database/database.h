@@ -113,6 +113,18 @@ public:
 
     virtual void addObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) = 0;
 
+    /// @brief Internal setting for the last applied audio display configuration.
+    static constexpr auto AUDIO_LAYOUT_DISPLAY_SETTING = "audio_layout_display_v1";
+
+    /// @brief Apply in-place virtual layout changes, history deletion and display settings in one transaction.
+    /// @param objects validated virtual objects with unchanged IDs and updated titles and paths
+    /// @param clearHistoryIds object IDs whose playback history and bookmarks are to be cleared
+    /// @param audioTitleFingerprint fingerprint of the applied display configuration, or empty to retain it
+    virtual void updateLayoutTitles(
+        const std::vector<std::shared_ptr<CdsObject>>& objects,
+        const std::vector<int>& clearHistoryIds,
+        const std::string& audioTitleFingerprint = {});
+
     /// @brief Adds a virtual container chain specified by path.
     /// @param parentContainerId the id of the parent container
     /// @param virtualPath container path separated by '/'

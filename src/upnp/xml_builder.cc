@@ -487,7 +487,7 @@ void UpnpXMLBuilder::renderObject(
     // make sure a date is set
     auto dateNode = result.child(DC_DATE);
     if (!dateNode) {
-        auto fDate = grbLocaltime("{:%FT%T%z}", obj->getMTime());
+        auto fDate = grbLocaltime(obj->getMTime());
         if (simpleDate)
             fDate = makeSimpleDate(fDate);
         result.append_child(DC_DATE).append_child(pugi::node_pcdata).set_value(fDate.c_str());

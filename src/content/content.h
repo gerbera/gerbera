@@ -52,7 +52,7 @@ class Content : public Timer::Subscriber {
 public:
     ~Content() override = default;
     /// @brief start content server
-    virtual void run() = 0;
+    virtual void run(bool rescan = false, bool preserveIds = false, bool removeHistory = false) = 0;
     /// @brief stop content server
     virtual void shutdown() = 0;
 

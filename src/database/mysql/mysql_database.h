@@ -57,6 +57,7 @@ public:
 
 protected:
     void _exec(const std::string& query) override;
+    void execLayoutUpdate(const std::vector<std::string>& statements) override;
     void checkMysqlThreadInit() const;
     std::string prepareDatabase();
 
@@ -79,6 +80,7 @@ private:
     void execOnly(const std::string& query) override;
 
     void storeInternalSetting(const std::string& key, const std::string& value) override;
+    std::string internalSettingUpsert(const std::string& key, const std::string& value) const override;
 
     bool mysql_connection {};
 

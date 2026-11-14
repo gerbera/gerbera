@@ -40,6 +40,7 @@
 #include "sql_format.h"
 
 #include <array>
+#include <atomic>
 #include <mutex>
 #include <unordered_set>
 #include <utility>
@@ -97,6 +98,10 @@ public:
 
     void addObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer) override;
     void updateObject(const std::shared_ptr<CdsObject>& obj, int* changedContainer) override;
+    void updateLayoutTitles(
+        const std::vector<std::shared_ptr<CdsObject>>& objects,
+        const std::vector<int>& clearHistoryIds,
+        const std::string& audioTitleFingerprint = {}) override;
 
     std::shared_ptr<CdsObject> loadObject(
         int objectID,
@@ -153,7 +158,7 @@ public:
     std::map<std::string, long long> getGroupStats(const StatsParam& stats) override;
 
     std::string getInternalSetting(const std::string& key) override;
-    void storeInternalSetting(const std::string& key, const std::string& value) override = 0;
+    void storeInternalSetting(const std::string& key, const std::string& value) override;
 
     std::shared_ptr<AutoscanList> getAutoscanList(AutoscanScanMode scanmode) override;
     void updateAutoscanList(AutoscanScanMode scanmode, const std::shared_ptr<AutoscanList>& list) override;
@@ -235,6 +240,12 @@ protected:
 
     /// @brief internal version of sql exec command
     virtual void _exec(const std::string& query) = 0;
+
+    /// @brief Execute the statements as one transaction while the caller holds sqlMutex.
+    virtual void execLayoutUpdate(const std::vector<std::string>& statements) = 0;
+
+    /// @brief Build the backend's insert-or-update statement for an internal setting.
+    virtual std::string internalSettingUpsert(const std::string& key, const std::string& value) const = 0;
 
     /// @brief Get query for unreferenced objects depending on database
     virtual std::string getUnreferencedQuery(const std::string& table);
@@ -323,6 +334,9 @@ void SQLDatabase::deleteRow(const std::string& tableName, const std::string& key
 }
 
 class SqlWithTransactions {
+public:
+    bool hasActiveTransaction() const { return inTransaction.load(); }
+
 protected:
     explicit SqlWithTransactions(const std::shared_ptr<Config>& config)
         : use_transaction(config->getBoolOption(ConfigVal::SERVER_STORAGE_USE_TRANSACTIONS))
@@ -330,7 +344,7 @@ protected:
     }
 
     bool use_transaction;
-    bool inTransaction {};
+    std::atomic_bool inTransaction {};
 };
 
 #endif // __SQL_STORAGE_H__

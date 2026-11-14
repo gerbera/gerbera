@@ -392,6 +392,34 @@ Add the specified directory or file name to the database without UI interaction.
 path is a directory then it will be added recursively. If path is a file, then only the given file will be imported.
 Can be supplied multiple times to add multiple paths
 
+Rescan Content
+--------------
+
+::
+
+    --rescan [--preserve-ids | --no-preserve-ids] [--remove-history]
+
+Rescan all registered autoscan directories at startup. By default, Gerbera
+compares the configured audio display names with the last applied settings
+recorded in the database. If the settings changed, it applies the new names to
+the indexed virtual audio layout while retaining the IDs of matching albums
+and tracks. Unchanged settings skip this refresh.
+
+* ``--preserve-ids`` explicitly selects the default behavior.
+* ``--no-preserve-ids`` runs the regular scan without a display-name refresh.
+* ``--remove-history`` clears the playback history of virtual tracks in the
+  audio layout. This applies with either ID option and leaves physical track
+  and playlist entry history out of the removal.
+
+A display-name refresh requires a one-to-one match between the existing and
+formatted layouts. Gerbera skips the refresh if it detects a changed source
+file or cannot preserve the layout IDs. The regular scan processes external
+changes to files, tags and paths.
+
+All three modifiers require ``--rescan``. The two ID options are mutually
+exclusive. Stop the existing Gerbera instance before using these startup
+options. Gerbera continues running as a server after startup.
+
 Set Option/Print Options
 -------------------------
 

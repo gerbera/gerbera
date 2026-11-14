@@ -33,6 +33,7 @@
 #include "exceptions.h"
 #include "pg_result.h"
 #include "pg_task.h"
+#include "util/fmt_compat.h"
 #include "util/thread_runner.h"
 #include "util/tools.h"
 
@@ -375,6 +376,12 @@ void PostgresDatabase::execChecked(const std::string& query)
     etask->waitForTask();
 }
 
+void PostgresDatabase::execLayoutUpdate(const std::vector<std::string>& statements)
+{
+    // PGExecTask runs the entire query in one pqxx::work and propagates failures.
+    execChecked(fmt::format("{}", fmt::join(statements, ";\n")));
+}
+
 std::shared_ptr<SQLResult> PostgresDatabase::select(const std::string& query)
 {
     try {
@@ -427,10 +434,10 @@ std::shared_ptr<Database> PostgresDatabase::getSelf()
     return shared_from_this();
 }
 
-void PostgresDatabase::storeInternalSetting(const std::string& key, const std::string& value)
+std::string PostgresDatabase::internalSettingUpsert(const std::string& key, const std::string& value) const
 {
-    std::string sql = fmt::format("INSERT INTO \"mt_internal_setting\" (\"key\", \"value\") VALUES ({0}, {1}) ON CONFLICT (\"key\") DO UPDATE SET \"value\" = EXCLUDED.\"value\"", quote(key), quote(value));
-    execOnly(sql);
+    return fmt::format("INSERT INTO {0} ({1}, {2}) VALUES ({3}, {4}) ON CONFLICT ({1}) DO UPDATE SET {2} = EXCLUDED.{2}",
+        identifier(INTERNAL_SETTINGS_TABLE), identifier("key"), identifier("value"), quote(key), quote(value));
 }
 
 /* PostgresDatabaseWithTransactions */
@@ -447,9 +454,9 @@ PostgresDatabaseWithTransactions::PostgresDatabaseWithTransactions(
 void PostgresDatabaseWithTransactions::beginTransaction(std::string_view tName)
 {
     if (use_transaction) {
-        log_debug("BEGIN TRANSACTION {} {}", tName, inTransaction);
+        log_debug("BEGIN TRANSACTION {} {}", tName, hasActiveTransaction());
         SqlAutoLock lock(sqlMutex);
-        log_debug("BEGIN TRANSACTION LOCK {} {}", tName, inTransaction);
+        log_debug("BEGIN TRANSACTION LOCK {} {}", tName, hasActiveTransaction());
         StdThreadRunner::waitFor(
             fmt::format("PostgresDatabaseWithTransactions.begin {}", tName), [this] { return !inTransaction; }, 100);
         inTransaction = true;
@@ -460,7 +467,7 @@ void PostgresDatabaseWithTransactions::beginTransaction(std::string_view tName)
 void PostgresDatabaseWithTransactions::rollback(std::string_view tName)
 {
     if (use_transaction && inTransaction) {
-        log_debug("ROLLBACK {} {}", tName, inTransaction);
+        log_debug("ROLLBACK {} {}", tName, hasActiveTransaction());
         execChecked("ROLLBACK");
         inTransaction = false;
     }
@@ -469,7 +476,7 @@ void PostgresDatabaseWithTransactions::rollback(std::string_view tName)
 void PostgresDatabaseWithTransactions::commit(std::string_view tName)
 {
     if (use_transaction && inTransaction) {
-        log_debug("COMMIT {} {}", tName, inTransaction);
+        log_debug("COMMIT {} {}", tName, hasActiveTransaction());
         _exec("COMMIT");
         inTransaction = false;
     }

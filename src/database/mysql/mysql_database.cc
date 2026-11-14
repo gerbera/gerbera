@@ -37,6 +37,7 @@
 
 #include "cds/cds_enums.h"
 #include "config/config_val.h"
+#include "database/sql_table.h"
 #include "exceptions.h"
 #include "mysql_result.h"
 #include "util/thread_runner.h"
@@ -260,6 +261,8 @@ void MySQLDatabase::init()
 
 void MySQLDatabase::dropTables()
 {
+    SqlAutoLock lock(sqlMutex);
+    checkMysqlThreadInit();
     auto sqlFilePath = fs::path(config->getOption(ConfigVal::SERVER_STORAGE_MYSQL_DROP_FILE));
     log_info("Dropping tables with {}", sqlFilePath.c_str());
     auto sql = GrbFile(std::move(sqlFilePath)).readTextFile();
@@ -291,6 +294,8 @@ std::shared_ptr<Database> MySQLDatabase::getSelf()
 
 std::string MySQLDatabase::quote(const std::string& value) const
 {
+    SqlAutoLock lock(sqlMutex);
+    checkMysqlThreadInit();
     /* note: mysql_real_escape_string returns a maximum of (length * 2 + 1)
      * chars; we need +1 for the first ' - the second ' will be written over
      * the \0; then the string won't be null-terminated, but that doesn't matter,
@@ -320,22 +325,31 @@ MySQLDatabaseWithTransactions::MySQLDatabaseWithTransactions(const std::shared_p
 
 void MySQLDatabaseWithTransactions::beginTransaction(std::string_view tName)
 {
-    log_debug("START TRANSACTION {} {}", tName, inTransaction);
+    log_debug("START TRANSACTION {} {}", tName, hasActiveTransaction());
     StdThreadRunner::waitFor(
         "MySqlDatabase", [this] { return !inTransaction; }, 100);
     inTransaction = true;
     log_debug("START TRANSACTION {}", tName);
     SqlAutoLock lock(sqlMutex);
-    if (use_transaction)
-        _exec("START TRANSACTION");
+    try {
+        if (use_transaction)
+            _exec("START TRANSACTION");
+    } catch (...) {
+        inTransaction = false;
+        throw;
+    }
 }
 
 void MySQLDatabaseWithTransactions::rollback(std::string_view tName)
 {
     log_debug("ROLLBACK {}", tName);
-    if (use_transaction && inTransaction && mysql_rollback(&db)) {
-        std::string myError = getError(&db);
-        throw DatabaseException(myError, fmt::format("Mysql: error while rolling back db: {}", myError));
+    SqlAutoLock lock(sqlMutex);
+    if (use_transaction && inTransaction) {
+        checkMysqlThreadInit();
+        if (mysql_rollback(&db)) {
+            std::string myError = getError(&db);
+            throw DatabaseException(myError, fmt::format("Mysql: error while rolling back db: {}", myError));
+        }
     }
     inTransaction = false;
 }
@@ -344,9 +358,12 @@ void MySQLDatabaseWithTransactions::commit(std::string_view tName)
 {
     log_debug("COMMIT {}", tName);
     SqlAutoLock lock(sqlMutex);
-    if (use_transaction && inTransaction && mysql_commit(&db)) {
-        std::string myError = getError(&db);
-        throw DatabaseException(myError, fmt::format("Mysql: error while committing db: {}", myError));
+    if (use_transaction && inTransaction) {
+        checkMysqlThreadInit();
+        if (mysql_commit(&db)) {
+            std::string myError = getError(&db);
+            throw DatabaseException(myError, fmt::format("Mysql: error while committing db: {}", myError));
+        }
     }
     inTransaction = false;
 }
@@ -355,8 +372,8 @@ std::shared_ptr<SQLResult> MySQLDatabaseWithTransactions::select(const std::stri
 {
     log_debug("{}", query);
 
-    checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
+    checkMysqlThreadInit();
     bool myTransaction = false;
     if (!inTransaction) { // protect calls outside transactions
         inTransaction = true;
@@ -386,8 +403,8 @@ std::shared_ptr<SQLResult> MySQLDatabase::select(const std::string& query)
 {
     log_debug("{}", query);
 
-    checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
+    checkMysqlThreadInit();
     auto res = mysql_real_query(&db, query.c_str(), query.size());
     if (res) {
         std::string myError = getError(&db);
@@ -410,8 +427,8 @@ void MySQLDatabase::del(std::string_view tableName, const std::string& clause, c
         : fmt::format("DELETE FROM {} WHERE {}", identifier(std::string(tableName)), clause);
     log_debug("{}", query);
 
-    checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
+    checkMysqlThreadInit();
     auto res = mysql_real_query(&db, query.c_str(), query.size());
     if (res) {
         std::string myError = getError(&db);
@@ -424,8 +441,8 @@ void MySQLDatabase::execOnTable(std::string_view tableName, const std::string& q
 {
     log_debug("{}", query);
 
-    checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
+    checkMysqlThreadInit();
     auto res = mysql_real_query(&db, query.c_str(), query.size());
     if (res) {
         std::string myError = getError(&db);
@@ -438,8 +455,8 @@ int MySQLDatabase::exec(const std::string& query, const std::string& getLastInse
 {
     log_debug("{}", query);
 
-    checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
+    checkMysqlThreadInit();
     auto res = mysql_real_query(&db, query.c_str(), query.size());
     if (res) {
         std::string myError = getError(&db);
@@ -456,13 +473,54 @@ void MySQLDatabase::execOnly(const std::string& query)
 {
     log_debug("{}", query);
 
-    checkMysqlThreadInit();
     SqlAutoLock lock(sqlMutex);
+    checkMysqlThreadInit();
     auto res = mysql_real_query(&db, query.c_str(), query.size());
     if (res) {
         std::string myError = getError(&db);
         log_error("{}\n{}", myError, fmt::format("Mysql: mysql_real_query() failed: {}; query: {}", myError, query));
     }
+}
+
+void MySQLDatabase::execLayoutUpdate(const std::vector<std::string>& statements)
+{
+    checkMysqlThreadInit();
+    const auto engines = select(fmt::format(
+        "SELECT COUNT(*) FROM information_schema.TABLES WHERE TABLE_SCHEMA = DATABASE() "
+        "AND TABLE_NAME IN ({}, {}, {}, {}) AND ENGINE = 'InnoDB'",
+        quote(CDS_OBJECT_TABLE), quote(METADATA_TABLE), quote(PLAYSTATUS_TABLE), quote(INTERNAL_SETTINGS_TABLE)));
+    const auto row = engines ? engines->nextRow() : nullptr;
+    if (!row || row->col_int(0, 0) != 4)
+        throw DatabaseException("Layout title updates require transactional InnoDB tables", LINE_MESSAGE);
+
+    bool reconnect = false;
+    const bool noReconnect = false;
+    if (mysql_get_option(&db, MYSQL_OPT_RECONNECT, &reconnect)
+        || (reconnect && mysql_options(&db, MYSQL_OPT_RECONNECT, &noReconnect)))
+        throw DatabaseException("Cannot disable automatic MySQL reconnect for a layout title update", LINE_MESSAGE);
+
+    const auto restoreReconnect = [&] {
+        if (reconnect && mysql_options(&db, MYSQL_OPT_RECONNECT, &reconnect))
+            log_error("Failed to restore automatic MySQL reconnect: {}", getError(&db));
+    };
+
+    try {
+        _exec("START TRANSACTION");
+        for (const auto& statement : statements)
+            _exec(statement);
+        _exec("COMMIT");
+    } catch (...) {
+        if (mysql_rollback(&db)) {
+            log_error("Failed to roll back layout title update: {}", getError(&db));
+            // Discard a session whose transaction could not be rolled back.
+            mysql_close(&db);
+            mysql_connection = false;
+        } else {
+            restoreReconnect();
+        }
+        throw;
+    }
+    restoreReconnect();
 }
 
 void MySQLDatabase::shutdownDriver()
@@ -471,12 +529,19 @@ void MySQLDatabase::shutdownDriver()
 
 void MySQLDatabase::storeInternalSetting(const std::string& key, const std::string& value)
 {
-    exec(fmt::format("INSERT INTO `{0}` (`key`, `value`) VALUES ({1}, {2}) ON DUPLICATE KEY UPDATE `value` = {2}",
-        INTERNAL_SETTINGS_TABLE, quote(key), quote(value)));
+    exec(internalSettingUpsert(key, value));
+}
+
+std::string MySQLDatabase::internalSettingUpsert(const std::string& key, const std::string& value) const
+{
+    return fmt::format("INSERT INTO {0} ({1}, {2}) VALUES ({3}, {4}) ON DUPLICATE KEY UPDATE {2} = {4}",
+        identifier(INTERNAL_SETTINGS_TABLE), identifier("key"), identifier("value"), quote(key), quote(value));
 }
 
 void MySQLDatabase::_exec(const std::string& query)
 {
+    SqlAutoLock lock(sqlMutex);
+    checkMysqlThreadInit();
     if (mysql_real_query(&db, query.c_str(), query.size())) {
         std::string myError = getError(&db);
         throw DatabaseException(myError, fmt::format("Mysql: error while updating db: {}; query: {}", myError, query));

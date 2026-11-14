@@ -59,9 +59,7 @@ public:
 
     void del(std::string_view tableName, const std::string& clause, const std::vector<int>& values) override
     {
-        auto query = clause.empty() ?
-            fmt::format("DELETE FROM {}", identifier(std::string(tableName))) :
-            fmt::format("DELETE FROM {} WHERE {}", identifier(std::string(tableName)), clause);
+        auto query = clause.empty() ? fmt::format("DELETE FROM {}", identifier(std::string(tableName))) : fmt::format("DELETE FROM {} WHERE {}", identifier(std::string(tableName)), clause);
         lastStatement = query;
     }
 
@@ -85,6 +83,10 @@ public:
     {
         lastStatement = query;
     }
+
+    void execLayoutUpdate(const std::vector<std::string>& statements) override { }
+
+    std::string internalSettingUpsert(const std::string& key, const std::string& value) const override { return {}; }
 
     std::shared_ptr<SQLResult> select(const std::string& query) override
     {

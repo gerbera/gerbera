@@ -71,6 +71,10 @@ using HandleCallback = std::function<bool()>;
 #define GRB_OPTION_DATABASE "database"
 #define GRB_OPTION_SETOPTION "set-option"
 #define GRB_OPTION_ADDFILE "add-file"
+#define GRB_OPTION_RESCAN "rescan"
+#define GRB_OPTION_PRESERVE_IDS "preserve-ids"
+#define GRB_OPTION_NO_PRESERVE_IDS "no-preserve-ids"
+#define GRB_OPTION_REMOVE_HISTORY "remove-history"
 #define GRB_OPTION_DROPTABLES "drop-tables"
 #define GRB_OPTION_INITLASTFM "init-lastfm"
 
@@ -145,6 +149,12 @@ public:
     bool getDebug() const { return debug; }
     /// @brief access property for active offline flag
     bool getOffline() const { return offline; }
+    /// @brief Whether to rescan on startup.
+    bool getRescan() const { return rescan; }
+    /// @brief Whether to retain virtual album and track IDs during the startup rescan.
+    bool getPreserveIds() const { return preserveIds; }
+    /// @brief Whether to clear playback history during the startup rescan.
+    bool getRemoveHistory() const { return removeHistory; }
     /// @brief access property for active drop database flag
     bool getDropDatabase() const { return dropDatabase; }
     /// @brief access property for active init Last.FM flag
@@ -177,6 +187,9 @@ private:
     bool startup = false;
     bool debug = false;
     bool offline = false;
+    bool rescan = false;
+    bool preserveIds = false;
+    bool removeHistory = false;
     bool dropDatabase = false;
     int configModules = { 0 };
     bool lastFM = false;

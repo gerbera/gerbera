@@ -144,7 +144,8 @@ public:
     /// @param query The SQL query string
     /// @param getLastInsertId return the last created object
     /// @param warnOnly no not throw exceptions
-    SLExecTask(const std::string& query, std::string getLastInsertId, bool warnOnly);
+    /// @param atomic query contains its own transaction, to be rolled back on failure
+    SLExecTask(const std::string& query, std::string getLastInsertId, bool warnOnly, bool atomic = false);
     SLExecTask(const std::string& query, std::string eKey);
 
     void run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError = true) override;
@@ -162,6 +163,7 @@ protected:
     int sqliteErrorCode {};
     std::string lastInsertColumn {};
     std::string eKey;
+    bool atomic {};
 };
 
 /// @brief A task for the sqlite3 thread to do a SQLite backup.

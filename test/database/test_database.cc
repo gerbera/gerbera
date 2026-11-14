@@ -33,6 +33,7 @@
 #include "database/sqlite3/sqlite_database.h"
 #include "exceptions.h"
 #include "sqlite_config_fake.h"
+#include "upnp/clients.h"
 #include "upnp/xml_builder.h"
 #include "util/fmt_compat.h"
 #include "util/tools.h"
@@ -213,13 +214,14 @@ protected:
         return item;
     }
 
-    int addContainer(const std::string& title)
+    int addContainer(const std::string& title, const std::string& upnpClass = UPNP_CLASS_CONTAINER)
     {
-        auto container = std::make_shared<CdsContainer>(title);
-        container->setParentID(CDS_ID_ROOT);
-        container->setEntryType(CdsEntryType::VirtualContainer);
-        database->addObject(container, nullptr);
-        return container->getID();
+        auto container = std::make_shared<CdsContainer>(title, upnpClass);
+        container->setVirtual(true);
+        container->addMetaData(MetadataFields::M_TITLE, title);
+        int id = INVALID_OBJECT_ID;
+        database->addContainer(CDS_ID_ROOT, "/" + title, container, &id);
+        return id;
     }
 
     int addReference(const std::shared_ptr<CdsItem>& file, int parent, int position, bool playlist = true)
@@ -237,6 +239,15 @@ protected:
             item->addMetaData(MetadataFields::M_CONTENT_CLASS, UPNP_CLASS_PLAYLIST_ITEM);
         database->addObject(item, nullptr);
         return item->getID();
+    }
+
+    std::shared_ptr<CdsObject> prepareAlbumRename(int id, const std::string& title)
+    {
+        auto album = database->loadObject(id);
+        album->setTitle(title);
+        album->setLocation("/" + title, CdsEntryType::VirtualContainer);
+        album->addMetaData(MetadataFields::M_TITLE, title);
+        return album;
     }
 
     fs::path directory;
@@ -310,6 +321,107 @@ TEST_F(PlaylistDatabaseTest, UnpositionedPlaylistReferencesRemainDeduplicated)
     int first = addReference(file, parent, 0);
     EXPECT_EQ(addReference(file, parent, 0), first);
     EXPECT_EQ(database->getChildCounts({ parent }).at(parent), 1);
+}
+
+TEST_F(PlaylistDatabaseTest, LayoutTitleUpdateKeepsIdsAndClearsOnlySelectedHistory)
+{
+    auto file = addFile(1);
+    file->addMetaData(MetadataFields::M_TITLE, "Original tag");
+    database->updateObject(file, nullptr);
+    const int albumId = addContainer("Old Album", UPNP_CLASS_MUSIC_ALBUM);
+    const int trackId = addReference(file, albumId, 1, false);
+    const int playlistId = addContainer("Playlist", UPNP_CLASS_PLAYLIST_CONTAINER);
+    const int playlistTrackId = addReference(file, playlistId, 2);
+
+    for (int id : { trackId, playlistTrackId, file->getID() })
+        database->savePlayStatus(std::make_shared<ClientStatusDetail>("living-room", id, 3, 10, 1100, 1200));
+    database->savePlayStatus(std::make_shared<ClientStatusDetail>("office", trackId, 2, 20, 1300, 1400));
+
+    auto album = prepareAlbumRename(albumId, "New Album");
+    album->setSortKey("Album, New");
+    auto track = database->loadObject(trackId);
+    track->setTitle("New Track");
+    track->setSortKey("Track, New");
+    track->addMetaData(MetadataFields::M_TITLE, "New Track");
+
+    database->updateLayoutTitles({}, {}, "original-format");
+    EXPECT_EQ(database->getInternalSetting(Database::AUDIO_LAYOUT_DISPLAY_SETTING), "original-format");
+    database->updateLayoutTitles({ album, track }, {}, "new-format");
+
+    EXPECT_EQ(database->getInternalSetting(Database::AUDIO_LAYOUT_DISPLAY_SETTING), "new-format");
+    EXPECT_EQ(database->findObjectByPath("/Old Album", UNUSED_CLIENT_GROUP, DbFileType::Virtual), nullptr);
+    auto renamedAlbum = database->findObjectByPath("/New Album", UNUSED_CLIENT_GROUP, DbFileType::Virtual);
+    ASSERT_NE(renamedAlbum, nullptr);
+    EXPECT_EQ(renamedAlbum->getID(), albumId);
+    EXPECT_EQ(renamedAlbum->getTitle(), "New Album");
+    EXPECT_EQ(renamedAlbum->getSortKey(), "Album, New");
+    EXPECT_EQ(renamedAlbum->getMetaData(MetadataFields::M_TITLE), "New Album");
+    auto renamedTrack = database->loadObject(trackId);
+    EXPECT_EQ(renamedTrack->getTitle(), "New Track");
+    EXPECT_EQ(renamedTrack->getSortKey(), "Track, New");
+    EXPECT_EQ(renamedTrack->getParentID(), albumId);
+    EXPECT_EQ(renamedTrack->getRefID(), file->getID());
+    EXPECT_EQ(renamedTrack->getLocation(), file->getLocation());
+    EXPECT_EQ(renamedTrack->getMetaData(MetadataFields::M_TITLE), "Original tag");
+    EXPECT_TRUE(renamedTrack->resourcesEqual(file));
+    auto history = database->getPlayStatus("living-room", trackId);
+    ASSERT_NE(history, nullptr);
+    EXPECT_EQ(history->getPlayCount(), 3);
+    EXPECT_EQ(history->getLastPlayedPosition().count(), 1100);
+    EXPECT_EQ(history->getBookMarkPosition().count(), 1200);
+    EXPECT_NE(database->getPlayStatus("office", trackId), nullptr);
+
+    database->updateLayoutTitles({}, { trackId });
+
+    EXPECT_EQ(database->getInternalSetting(Database::AUDIO_LAYOUT_DISPLAY_SETTING), "new-format");
+    EXPECT_TRUE(database->getPlayStatusList(trackId).empty());
+    EXPECT_NE(database->getPlayStatus("living-room", playlistTrackId), nullptr);
+    EXPECT_NE(database->getPlayStatus("living-room", file->getID()), nullptr);
+    EXPECT_EQ(database->loadObject(file->getID())->getTitle(), file->getTitle());
+    EXPECT_EQ(database->loadObject(playlistId)->getClass(), UPNP_CLASS_PLAYLIST_CONTAINER);
+    auto playlistTrack = std::dynamic_pointer_cast<CdsItem>(database->loadObject(playlistTrackId));
+    ASSERT_NE(playlistTrack, nullptr);
+    EXPECT_EQ(playlistTrack->getParentID(), playlistId);
+    EXPECT_EQ(playlistTrack->getRefID(), file->getID());
+    EXPECT_EQ(playlistTrack->getTrackNumber(), 2);
+    EXPECT_EQ(playlistTrack->getTitle(), file->getTitle());
+    EXPECT_EQ(playlistTrack->getMetaData(MetadataFields::M_CONTENT_CLASS), UPNP_CLASS_PLAYLIST_ITEM);
+}
+
+TEST_F(PlaylistDatabaseTest, LayoutTitleUpdateRollsBackWhenHistoryDeletionFails)
+{
+    auto file = addFile(1);
+    const int albumId = addContainer("Old Album", UPNP_CLASS_MUSIC_ALBUM);
+    const int trackId = addReference(file, albumId, 1, false);
+    database->savePlayStatus(std::make_shared<ClientStatusDetail>("living-room", trackId, 3, 10, 1100, 1200));
+
+    auto album = prepareAlbumRename(albumId, "New Album");
+    auto track = database->loadObject(trackId);
+    track->setTitle("New Track");
+
+    auto sql = std::dynamic_pointer_cast<SQLDatabase>(database);
+    ASSERT_NE(sql, nullptr);
+    database->storeInternalSetting(Database::AUDIO_LAYOUT_DISPLAY_SETTING, "old-format");
+    sql->exec("CREATE TEMP TRIGGER reject_layout_history_delete BEFORE DELETE ON grb_playstatus "
+              "BEGIN SELECT RAISE(ABORT, 'Injected history failure'); END");
+    EXPECT_THROW(database->updateLayoutTitles({ album, track }, { trackId }, "new-format"), std::runtime_error);
+
+    EXPECT_EQ(database->getInternalSetting(Database::AUDIO_LAYOUT_DISPLAY_SETTING), "old-format");
+    auto originalAlbum = database->findObjectByPath("/Old Album", UNUSED_CLIENT_GROUP, DbFileType::Virtual);
+    ASSERT_NE(originalAlbum, nullptr);
+    EXPECT_EQ(originalAlbum->getID(), albumId);
+    EXPECT_EQ(originalAlbum->getTitle(), "Old Album");
+    EXPECT_EQ(originalAlbum->getMetaData(MetadataFields::M_TITLE), "Old Album");
+    EXPECT_EQ(database->findObjectByPath("/New Album", UNUSED_CLIENT_GROUP, DbFileType::Virtual), nullptr);
+    EXPECT_EQ(database->loadObject(trackId)->getTitle(), file->getTitle());
+    EXPECT_NE(database->getPlayStatus("living-room", trackId), nullptr);
+
+    sql->exec("DROP TRIGGER reject_layout_history_delete");
+    database->updateLayoutTitles({ album, track }, { trackId }, "new-format");
+    EXPECT_EQ(database->getInternalSetting(Database::AUDIO_LAYOUT_DISPLAY_SETTING), "new-format");
+    EXPECT_EQ(database->loadObject(albumId)->getTitle(), "New Album");
+    EXPECT_EQ(database->loadObject(trackId)->getTitle(), "New Track");
+    EXPECT_TRUE(database->getPlayStatusList(trackId).empty());
 }
 
 #ifdef HAVE_PGSQL

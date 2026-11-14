@@ -230,6 +230,10 @@ int main(int argc, char** argv, char** envp)
         (GRB_OPTION_ROTATELOG, "Set rotating log location", cxxopts::value<fs::path>(), "FILE") //
         (GRB_OPTION_SYSLOG, "Log to syslog", cxxopts::value<std::string>()->implicit_value("USER"), "LOG") //
         (GRB_OPTION_ADDFILE, "Scan a file into the DB on startup, can be specified multiple times", cxxopts::value<std::vector<fs::path>>(), "FILE") //
+        (GRB_OPTION_RESCAN, "Scan registered directories on startup", cxxopts::value<bool>()->default_value("false")) //
+        (GRB_OPTION_PRESERVE_IDS, "Keep album and track IDs", cxxopts::value<bool>()->default_value("true")) //
+        (GRB_OPTION_NO_PRESERVE_IDS, "Skip ID-preserving display updates", cxxopts::value<bool>()->default_value("false")) //
+        (GRB_OPTION_REMOVE_HISTORY, "Clear virtual audio playback history", cxxopts::value<bool>()->default_value("false")) //
         (GRB_OPTION_SETOPTION, "Set simple config option OPT to value VAL, can be specified multiple times use --print-options for value OPTs", cxxopts::value<std::vector<std::string>>(), "OPT=VAL") //
         ("s," GRB_OPTION_DATABASE, "Select Database for storage", cxxopts::value<std::string>(), fmt::format("DB=({})", fmt::join(dbs, "|"))) //
         ;
@@ -290,7 +294,7 @@ int main(int argc, char** argv, char** envp)
             server->init(definition, runtime.getOffline(), dropDatabase, initLastFM);
 
             if (!dropDatabase && !initLastFM)
-                server->run();
+                server->run(runtime.getRescan(), runtime.getPreserveIds(), runtime.getRemoveHistory());
             else
                 runtime.exit(EXIT_SUCCESS);
 
