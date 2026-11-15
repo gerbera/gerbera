@@ -236,10 +236,10 @@ std::vector<std::string> Object2Table::getWhere(
 std::vector<std::string> Metadata2Table::getWhere(
     const std::shared_ptr<CdsObject>& obj) const
 {
-    if (!rowData.empty()) {
+    if (const auto name = rowData.find(MetadataColumn::PropertyName); name != rowData.end()) {
         return {
             columnMapper->getClause(MetadataColumn::ItemId, obj->getID(), true),
-            columnMapper->getClause(MetadataColumn::PropertyName, rowData.begin()->second, true),
+            columnMapper->getClause(MetadataColumn::PropertyName, name->second, true),
         };
     }
     return { columnMapper->getClause(MetadataColumn::ItemId, obj->getID(), true) };

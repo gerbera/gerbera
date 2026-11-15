@@ -39,6 +39,7 @@
 
 #include <map>
 #include <memory>
+#include <mutex>
 #include <vector>
 
 // forward declarations
@@ -239,6 +240,8 @@ public:
     /// @brief handles the recreation of a persistent autoscan directory
     void handlePersistentAutoscanRecreate(const std::shared_ptr<AutoscanDirectory>& adir) override;
 
+    void rescanLibrary() override;
+    void rescanWithNameUpdates() override;
     void rescanDirectory(const std::shared_ptr<AutoscanDirectory>& adir, int objectId, fs::path descPath = {}, bool cancellable = true, bool refreshExisting = false) override;
 
     /// @brief instructs ContentManager to reload scripting environment
@@ -365,6 +368,13 @@ protected:
         bool all);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
+    /// @brief Plan virtual audio renames against the indexed physical items.
+    std::vector<std::shared_ptr<CdsObject>> planAudioLayoutRefresh(
+        const std::map<int, std::shared_ptr<CdsObject>>& current,
+        const std::vector<std::shared_ptr<CdsObject>>& sources);
+    /// @brief Apply the verified renames before queuing the regular scan.
+    void runNameUpdateScan();
+
     void initLayout();
     void destroyLayout();
 
@@ -375,6 +385,7 @@ protected:
     std::unique_ptr<OnlineServiceList> online_services;
 #endif // ONLINE_SERVICES
 
+    std::mutex nameUpdateMutex;
     bool layoutEnabled {};
     void threadProc();
 
@@ -394,6 +405,7 @@ protected:
     friend class CMAddFileTask;
     friend class CMRemoveObjectTask;
     friend class CMRescanDirectoryTask;
+    friend class CMRescanNameUpdatesTask;
 #ifdef ONLINE_SERVICES
     friend class CMFetchOnlineContentTask;
 #endif

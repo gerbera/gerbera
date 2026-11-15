@@ -377,6 +377,18 @@ describe('Gerbera Trail', () => {
       expect(Items.editItem).toHaveBeenCalled();
     });
 
+    it('requests distinct actions for the two library rescan buttons', () => {
+      spyOn(GerberaApp, 'getType').and.returnValue('config');
+      const ajax = spyOn($, 'ajax').and.returnValue($.Deferred().promise());
+
+      Trail.makeTrailFromItem(items);
+      $('#trail .grb-trail-rescan').click();
+      $('#trail .grb-trail-rescan-names').click();
+
+      expect(ajax.calls.allArgs().map(([request]) => request.data.action))
+        .toEqual(['rescan', 'rescan_names']);
+    });
+
     it('when click add autoscan for fs type calls Gerbera Autoscan add', () => {
       spyOn(GerberaApp, 'getType').and.returnValue('db');
       spyOn(Autoscan, 'addAutoscan');

@@ -99,6 +99,15 @@ public:
     void run() override;
 };
 
+/// @brief Task to update audio display names before a normal library scan.
+class CMRescanNameUpdatesTask : public GenericTask {
+    std::shared_ptr<ContentManager> content;
+
+public:
+    explicit CMRescanNameUpdatesTask(std::shared_ptr<ContentManager> content);
+    void run() override;
+};
+
 #ifdef ONLINE_SERVICES
 /// @brief Task to update references to o line content
 class CMFetchOnlineContentTask : public GenericTask {

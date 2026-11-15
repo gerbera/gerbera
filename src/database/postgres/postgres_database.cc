@@ -33,6 +33,7 @@
 #include "exceptions.h"
 #include "pg_result.h"
 #include "pg_task.h"
+#include "util/fmt_compat.h"
 #include "util/thread_runner.h"
 #include "util/tools.h"
 
@@ -375,6 +376,12 @@ void PostgresDatabase::execChecked(const std::string& query)
     etask->waitForTask();
 }
 
+void PostgresDatabase::execLayoutUpdate(const std::vector<std::string>& statements)
+{
+    // The database worker executes the batch in one pqxx::work.
+    execChecked(fmt::format("{}", fmt::join(statements, ";\n")));
+}
+
 std::shared_ptr<SQLResult> PostgresDatabase::select(const std::string& query)
 {
     try {
@@ -447,9 +454,9 @@ PostgresDatabaseWithTransactions::PostgresDatabaseWithTransactions(
 void PostgresDatabaseWithTransactions::beginTransaction(std::string_view tName)
 {
     if (use_transaction) {
-        log_debug("BEGIN TRANSACTION {} {}", tName, inTransaction);
+        log_debug("BEGIN TRANSACTION {} {}", tName, hasActiveTransaction());
         SqlAutoLock lock(sqlMutex);
-        log_debug("BEGIN TRANSACTION LOCK {} {}", tName, inTransaction);
+        log_debug("BEGIN TRANSACTION LOCK {} {}", tName, hasActiveTransaction());
         StdThreadRunner::waitFor(
             fmt::format("PostgresDatabaseWithTransactions.begin {}", tName), [this] { return !inTransaction; }, 100);
         inTransaction = true;
@@ -460,7 +467,7 @@ void PostgresDatabaseWithTransactions::beginTransaction(std::string_view tName)
 void PostgresDatabaseWithTransactions::rollback(std::string_view tName)
 {
     if (use_transaction && inTransaction) {
-        log_debug("ROLLBACK {} {}", tName, inTransaction);
+        log_debug("ROLLBACK {} {}", tName, hasActiveTransaction());
         execChecked("ROLLBACK");
         inTransaction = false;
     }
@@ -469,7 +476,7 @@ void PostgresDatabaseWithTransactions::rollback(std::string_view tName)
 void PostgresDatabaseWithTransactions::commit(std::string_view tName)
 {
     if (use_transaction && inTransaction) {
-        log_debug("COMMIT {} {}", tName, inTransaction);
+        log_debug("COMMIT {} {}", tName, hasActiveTransaction());
         _exec("COMMIT");
         inTransaction = false;
     }

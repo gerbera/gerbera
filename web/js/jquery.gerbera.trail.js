@@ -189,6 +189,15 @@ $.widget('grb.trail', {
 
       rescanIcon.appendTo(buttons);
       saveIcon.appendTo(buttons);
+      if (config.onRescanWithNameUpdates) {
+        this.generateItemButton(item, {
+          title: 'Rescan with Name Updates',
+          tooltip: 'Apply configured album and track names while preserving IDs for unchanged media',
+          class: 'grb-trail-rescan-names',
+          iconClass: 'fa-font',
+          click: config.onRescanWithNameUpdates
+        }).appendTo(buttons);
+      }
     }
 
     if (config.enableAddTweak && config.onAddTweak) {

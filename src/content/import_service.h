@@ -28,6 +28,7 @@
 
 #include "util/grb_fs.h"
 
+#include <functional>
 #include <map>
 #include <mutex>
 #include <tuple>
@@ -271,6 +272,12 @@ private:
     /// @brief create items for all discovered files
     void createItems(const std::shared_ptr<StateCache>& stateCache, AutoScanSetting& settings);
     void updateSingleItem(const fs::directory_entry& dirEntry, const std::shared_ptr<CdsItem>& item, const std::string& mimetype);
+    /// @brief Run the item layout, optionally reconciling its existing virtual references.
+    void processItemLayout(
+        const std::shared_ptr<CdsObject>& object,
+        const std::shared_ptr<CdsContainer>& parent,
+        const std::string& contentType,
+        bool reconcileExisting);
     void fillLayout(const std::shared_ptr<StateCache>& stateCache, const std::shared_ptr<GenericTask>& task);
     void updateFanArt(const std::shared_ptr<StateCache>& stateCache, bool isDir);
     /// @brief Select and store artwork for a container using the configured source order.
@@ -369,12 +376,17 @@ public:
     /// @param refItem object to take artwork from
     /// @param createdIds of the last container in the chain.
     ///        used by messaging in ContentManager
+    /// @param capture record planned containers in place of writing them to the database
     /// @return last id created
     std::pair<int, bool> addContainerTree(
         int parentContainerId,
         const std::vector<std::shared_ptr<CdsObject>>& chain,
         const std::shared_ptr<CdsObject>& refItem,
-        std::vector<int>& createdIds);
+        std::vector<int>& createdIds,
+        const std::function<int(int, const std::shared_ptr<CdsObject>&, const std::string&)>& capture = {});
+
+    /// @brief Generate layout entries from an already indexed audio object.
+    void refreshAudioLayout(const std::shared_ptr<CdsObject>& object, const std::shared_ptr<CdsContainer>& parent);
 
     /// @brief Whether the configured source order overrides legacy artwork selection.
     bool hasCoverArtPriority() const { return !coverArtPriority.empty(); }

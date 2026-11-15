@@ -159,7 +159,10 @@ bool Web::ConfigSave::processPageAction(Json::Value& element, const std::string&
     Json::Value taskEl;
     if (action == "clear")
         taskEl["text"] = "Removed all config values from database";
-    else if (action != "rescan")
+    else if (action == "rescan_names") {
+        content->rescanWithNameUpdates();
+        taskEl["text"] = "Rescan with Name Updates";
+    } else if (action != "rescan")
         taskEl["text"] = fmt::format("Successfully updated {} items", count);
     else
         taskEl["text"] = "Rescan";
@@ -183,11 +186,7 @@ bool Web::ConfigSave::processPageAction(Json::Value& element, const std::string&
                 log_error("No such autoscan or dir: {}", target);
             }
         } else {
-            auto autoScans = content->getAutoscanDirectories();
-            for (auto&& autoscan : autoScans) {
-                content->rescanDirectory(autoscan, autoscan->getObjectID());
-                log_info("Rescanning directory {}", autoscan->getLocation().c_str());
-            }
+            content->rescanLibrary();
         }
     }
     element["task"] = taskEl;

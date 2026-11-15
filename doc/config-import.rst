@@ -1073,9 +1073,9 @@ search descriptions, media URLs or existing track-number handling and sorting.
 Artist text already present in a title or fallback filename is not guessed or
 removed automatically; explicit replacements can remove known literal text.
 
-After loading the changed configuration, re-import the affected items to rebuild
-their virtual entries. Existing stored entries are not renamed merely by changing
-the configuration, and scans that skip unchanged files do not rebuild them.
+After loading the changed configuration, use **Rescan with Name Updates** in
+the :ref:`Gerbera web interface <gerbera-ui>` to apply the new display names to
+existing virtual entries. The regular scan may skip unchanged files.
 
 Album Container Title Format
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -1139,9 +1139,9 @@ metadata, track titles, filesystem directories, media URLs, cover resources and
 their reference fields retain their existing values. Configured JavaScript
 user chains apply the format to dynamic music-album containers as well; a custom
 import script can call ``formatAlbumTitle(obj, audio, originalName)`` explicitly.
-As with audio titles, re-import the affected items after changing the setting.
-Virtual container paths are built from their titles, so rebuilding a renamed
-album may create a new virtual container ID; physical media IDs are preserved.
+As with audio titles, use **Rescan with Name Updates** after loading the changed
+configuration. If the new format splits or merges albums, re-import the affected
+items to apply the new grouping. A new grouping can create new virtual album IDs.
 
 Mapping for Genres
 ------------------

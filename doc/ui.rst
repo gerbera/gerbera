@@ -341,6 +341,15 @@ Config View
 
 * Rescan Library
     * Trigger rescanning of all files
+* Rescan with Name Updates
+    * Apply the configured audio track and album display formats and replacement
+      rules to existing virtual entries, then rescan the library. Gerbera keeps
+      their object IDs and playback state when it can match the old and new
+      entries one-to-one and verify that the source files are unchanged. If it
+      cannot verify the update, it logs the reason and continues with the
+      ordinary scan. The ordinary scan processes changes to files, paths and
+      tags. MySQL and MariaDB require transactional tables, such as InnoDB,
+      for the name update.
 * Save Config
     * Save changed entries into database, a restart of gerbera may be necessary to activate the changes
 * Clear Saved Config

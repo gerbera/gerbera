@@ -308,7 +308,11 @@ public:
     }
 
 protected:
-    bool isValid() const override { return rowData.size() == 2 || (operation == Operation::Delete && rowData.empty()); }
+    bool isValid() const override
+    {
+        return rowData.size() == 2
+            || (operation == Operation::Delete && (rowData.empty() || rowData.count(MetadataColumn::PropertyName) != 0));
+    }
     const std::vector<MetadataColumn>& getTableColumnOrder() const override
     {
         return tableColumnOrder;

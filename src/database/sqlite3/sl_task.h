@@ -28,6 +28,7 @@
 
 #include <condition_variable>
 #include <mutex>
+#include <vector>
 
 class Config;
 enum class ConfigVal;
@@ -146,6 +147,8 @@ public:
     /// @param warnOnly no not throw exceptions
     SLExecTask(const std::string& query, std::string getLastInsertId, bool warnOnly);
     SLExecTask(const std::string& query, std::string eKey);
+    /// @brief Run the supplied statements together in a checked transaction.
+    explicit SLExecTask(const std::vector<std::string>& statements);
 
     void run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError = true) override;
     int getLastInsertId() const { return lastInsertId; }
@@ -156,12 +159,13 @@ public:
 
 protected:
     /// @brief The SQL query string
-    const char* query;
+    std::string query;
 
     int lastInsertId {};
     int sqliteErrorCode {};
     std::string lastInsertColumn {};
     std::string eKey;
+    bool atomic {};
 };
 
 /// @brief A task for the sqlite3 thread to do a SQLite backup.
