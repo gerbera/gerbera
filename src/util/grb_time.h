@@ -62,4 +62,7 @@ std::string makeSimpleDate(std::string& s);
 /// @brief Converts seconds to localtime and prints a formatted string
 std::string grbLocaltime(const std::string& format, const std::chrono::seconds& t);
 
+/// @brief Formats an ISO local timestamp with the UTC offset at that instant.
+std::string grbLocaltime(const std::chrono::seconds& t);
+
 #endif // __GRB_TIME_H__
