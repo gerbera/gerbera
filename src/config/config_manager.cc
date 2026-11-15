@@ -420,6 +420,7 @@ void ConfigManager::load(const fs::path& userHome, const std::string& database)
 
     // read import options
     args["trim"] = "false";
+    setOption(root, ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING, &args);
     setOption(root, ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP, &args);
     setOption(root, ConfigVal::UPNP_SEARCH_SEPARATOR, &args);
     setOption(root, ConfigVal::IMPORT_LIBOPTS_ENTRY_LEGACY_SEP, &args);

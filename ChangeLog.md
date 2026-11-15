@@ -35,6 +35,7 @@
 - Fix internal video (mpeg) transcoding
 - Fix potential underflow in parseParameter
 - Fix sorting of files in structured import
+- Fix stale inotify events deleting replacement media
 - Fix UPnP client cache returning the wrong observation for a shared IP
 - Fix WavPack stack overflow by allocating entries on the heap
 - Handle missing database objects in playlists and cuesheets
@@ -52,6 +53,7 @@
 - Preserve repeated local files at different playlist positions
 - Recover SQLite and PostgreSQL foreign-key import failures without stopping the database
 - Refactor ContentPathSetup
+- Run Docker debug builds on native amd64 and arm64 runners
 - Seek in transcoded streams of constant bit rate
 - Serve transcoded streams to HTTP/1.0 clients
 - Split XmlPlaylist into extra file
@@ -64,6 +66,7 @@
 - Update to ffmpegthumbnailer 2.4.1
 - Update to fmt 12.2.1
 - Update to pupnp 22.2.2
+- Use album cover for named disc folders
 - Use fmt exception formatting
 - Wait for client grid rendering in browser tests
 

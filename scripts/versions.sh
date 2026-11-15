@@ -76,12 +76,12 @@ else
     EBML="1.4.7"
     EXIV2="v0.28.9"
     EXIF="v0.6.26"
-    FFMPEGTHUMBNAILER="v2.4.1"
+    FFMPEGTHUMBNAILER="v2.4.2"
     FMT="12.2.1"
     GOOGLETEST="1.18.0"
     LASTFM="0.4.0"
     MATROSKA="1.7.2"
-    NPUPNP="6.3.0"
+    NPUPNP="6.3.1"
     PUGIXML="1.16"
     PUPNP="22.2.2"
     SPDLOG="1.17.0"
@@ -95,6 +95,6 @@ else
     LIBZIPPP="v7.1-1.10.1"
     CXXOPTS="3.3.1"
     CXXOPTS_COMMIT="7af8aad55eddd73715ded20d4478e242424a0bda"
-    UTF8CPP="4.2.1"
+    UTF8CPP="5.0.0"
 
 fi
