@@ -141,6 +141,19 @@ void CMRescanDirectoryTask::run()
     runAutoscanTask(content, adir, [&] { content->_rescanDirectory(adir, containerID, self, refreshExisting); }, describeFailure);
 }
 
+CMRescanNameUpdatesTask::CMRescanNameUpdatesTask(std::shared_ptr<ContentManager> content)
+    : GenericTask(TaskOwner::ContentManagerTask)
+    , content(std::move(content))
+{
+    setDescription("Rescan with Name Updates");
+    cancellable = false;
+}
+
+void CMRescanNameUpdatesTask::run()
+{
+    content->runNameUpdateScan();
+}
+
 #ifdef ONLINE_SERVICES
 CMFetchOnlineContentTask::CMFetchOnlineContentTask(std::shared_ptr<ContentManager> content,
     std::shared_ptr<TaskProcessor> taskProcessor, std::shared_ptr<Timer> timer,

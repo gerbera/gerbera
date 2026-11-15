@@ -1030,15 +1030,7 @@ void ImportService::fillSingleLayout(
                 log_warning("Playlist {} will not be parsed: Gerbera was compiled without JS support!", cdsObject->getLocation().c_str());
 #endif // HAVE_JS
             } else if (!autoscanDir || autoscanDir->hasContent(cdsObject->getClass())) {
-                // only lock mutex while processing item layout
-                LayoutAutoLock lock(layoutMutex);
-                // get ref'd objects with last mod time
-                auto refObjects = state ? database->getRefObjects(cdsObject->getID(), CdsEntryType::VirtualItem) : std::vector<int> {};
-                log_debug("Updating layout {}", cdsObject->getLocation().c_str());
-                layout->processCdsObject(cdsObject, parent,
-                    rootPath, contentType,
-                    containerTypeMap,
-                    refObjects);
+                processItemLayout(cdsObject, parent, contentType, !!state);
             } else {
                 log_debug("File ignored: {} autoscanDir={}, class={}, hasContent={}, mediaType={}", cdsObject->getLocation().string(), !!autoscanDir, cdsObject->getClass(), autoscanDir ? autoscanDir->hasContent(cdsObject->getClass()) : false, autoscanDir ? autoscanDir->getMediaType() : -2);
             }
@@ -1047,6 +1039,32 @@ void ImportService::fillSingleLayout(
             log_error("{}", EX(ex));
         }
     }
+}
+
+void ImportService::processItemLayout(
+    const std::shared_ptr<CdsObject>& object,
+    const std::shared_ptr<CdsContainer>& parent,
+    const std::string& contentType,
+    bool reconcileExisting)
+{
+    LayoutAutoLock lock(layoutMutex);
+    if (!layout)
+        return;
+
+    auto refObjects = reconcileExisting ? database->getRefObjects(object->getID(), CdsEntryType::VirtualItem) : std::vector<int> {};
+    log_debug("Updating layout {}", object->getLocation().c_str());
+    layout->processCdsObject(object, parent, rootPath, contentType, containerTypeMap, refObjects);
+}
+
+void ImportService::refreshAudioLayout(const std::shared_ptr<CdsObject>& object, const std::shared_ptr<CdsContainer>& parent)
+{
+    if (autoscanDir && !autoscanDir->hasContent(object->getClass()))
+        return;
+
+    const auto& item = static_cast<const CdsItem&>(*object);
+    const auto contentType = getValueOrDefault(mimetypeContenttypeMap, item.getMimeType());
+    // There are no real reference IDs in the captured layout to reconcile.
+    processItemLayout(object, parent, contentType, false);
 }
 
 void ImportService::parseMetafile(
@@ -1389,7 +1407,8 @@ std::pair<int, bool> ImportService::addContainerTree(
     int parentContainerId,
     const std::vector<std::shared_ptr<CdsObject>>& chain,
     const std::shared_ptr<CdsObject>& refItem,
-    std::vector<int>& createdIds)
+    std::vector<int>& createdIds,
+    const std::function<int(int, const std::shared_ptr<CdsObject>&, const std::string&)>& capture)
 {
     log_debug("start '{}' {}", rootPath.string(), parentContainerId);
     std::string tree; // accumulate path to container here
@@ -1449,7 +1468,7 @@ std::pair<int, bool> ImportService::addContainerTree(
             if (!hasCaseSensitiveNames) {
                 subTree = toLower(subTree);
             }
-            if (!containerCache.at(subTree)) {
+            if (!capture && !containerCache.at(subTree)) {
                 auto cont = database->findObjectByPath(subTree, UNUSED_CLIENT_GROUP, DbFileType::Virtual);
                 if (cont && cont->isContainer())
                     containerCache.set(subTree, std::dynamic_pointer_cast<CdsContainer>(cont));
@@ -1459,6 +1478,10 @@ std::pair<int, bool> ImportService::addContainerTree(
             }
         } else if (subTree.empty()) {
             subTree = tree;
+        }
+        if (capture) {
+            result = capture(result, item, subTree);
+            continue;
         }
         if (!containerCache.at(subTree)) {
             item->removeMetaData(MetadataFields::M_TITLE);

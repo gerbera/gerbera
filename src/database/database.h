@@ -136,6 +136,10 @@ public:
 
     virtual void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) = 0;
 
+    /// @brief Update display titles and virtual container paths as a single transaction.
+    /// @param objects Validated generated layout objects with their existing IDs.
+    virtual void updateLayoutTitles(const std::vector<std::shared_ptr<CdsObject>>& objects);
+
     /// @brief Perform upnp browse on the database
     /// @param param browse parameters as received via request
     /// @return list of CdsObject matching the browse criteria

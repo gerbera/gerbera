@@ -197,6 +197,7 @@ add_library(
     src/content/layout/js_layout.cc
     src/content/layout/js_layout.h
     src/content/layout/layout.cc
+    src/content/layout/layout_refresh.cc
     src/content/layout/layout.h
     src/content/onlineservice/curl_online_service.cc
     src/content/onlineservice/curl_online_service.h

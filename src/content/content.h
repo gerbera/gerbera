@@ -96,6 +96,10 @@ public:
     /// @param path location of the container to handle
     /// @return objectID of the container given by path
     virtual int ensurePathExistence(const fs::path& path) const = 0;
+    /// @brief Queue an ordinary scan of all autoscan directories.
+    virtual void rescanLibrary() = 0;
+    /// @brief Queue a display-name refresh followed by an ordinary library scan.
+    virtual void rescanWithNameUpdates() = 0;
     virtual void rescanDirectory(
         const std::shared_ptr<AutoscanDirectory>& adir,
         int objectId,

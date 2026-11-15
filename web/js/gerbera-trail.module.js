@@ -113,7 +113,6 @@ const makeTrailFromItem = (items, parentItem) => {
   let onRunScan;
   let onAddTweak;
   let onDeleteAll;
-  let onRescan;
   const noOp = function () { return false };
 
   if (itemType === 'db') {
@@ -156,7 +155,6 @@ const makeTrailFromItem = (items, parentItem) => {
   onAddTweak = enableAddTweak ? addTweak : noOp;
   onSave = enableConfig ? saveConfig : noOp;
   onClear = enableClearConfig ? clearConfig : noOp;
-  onRescan = enableConfig ? reScanLibrary : noOp;
 
   const config = {
     itemType: itemType,
@@ -182,7 +180,8 @@ const makeTrailFromItem = (items, parentItem) => {
     enableClearConfig: enableClearConfig,
     onSave: onSave,
     onClear: onClear,
-    onRescan: onRescan,
+    onRescan: enableConfig ? Config.reScanLibrary : noOp,
+    onRescanWithNameUpdates: enableConfig ? Config.reScanWithNameUpdates : noOp,
   };
 
   makeTrail(treeElement, config, items);
@@ -223,10 +222,6 @@ const saveConfig = (event) => {
 
 const clearConfig = (event) => {
   Config.clearConfig(event);
-};
-
-const reScanLibrary = (event) => {
-  Config.reScanLibrary(event);
 };
 
 const deleteItem = (event) => {

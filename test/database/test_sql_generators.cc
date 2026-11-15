@@ -92,6 +92,8 @@ public:
         return {};
     }
 
+    void execLayoutUpdate(const std::vector<std::string>&) override { }
+
     std::string lastStatement;
 };
 

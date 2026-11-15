@@ -33,6 +33,7 @@
 #include "database/sqlite3/sqlite_database.h"
 #include "exceptions.h"
 #include "sqlite_config_fake.h"
+#include "upnp/clients.h"
 #include "upnp/xml_builder.h"
 #include "util/fmt_compat.h"
 #include "util/tools.h"
@@ -239,6 +240,27 @@ protected:
         return item->getID();
     }
 
+    int addLayoutAlbum(const std::string& title)
+    {
+        auto album = std::make_shared<CdsContainer>(title, UPNP_CLASS_MUSIC_ALBUM);
+        album->setVirtual(true);
+        album->addMetaData(MetadataFields::M_TITLE, title);
+        album->addMetaData(MetadataFields::M_GENRE, "Test genre");
+        int id = INVALID_OBJECT_ID;
+        database->addContainer(CDS_ID_ROOT, "/" + title, album, &id);
+        return id;
+    }
+
+    std::shared_ptr<CdsObject> prepareAlbumRename(int id, const std::string& title)
+    {
+        auto album = database->loadObject(id);
+        album->setTitle(title);
+        album->setLocation("/" + title, CdsEntryType::VirtualContainer);
+        album->removeMetaData(MetadataFields::M_TITLE);
+        album->addMetaData(MetadataFields::M_TITLE, title);
+        return album;
+    }
+
     fs::path directory;
     std::shared_ptr<Database> database;
 };
@@ -310,6 +332,93 @@ TEST_F(PlaylistDatabaseTest, UnpositionedPlaylistReferencesRemainDeduplicated)
     int first = addReference(file, parent, 0);
     EXPECT_EQ(addReference(file, parent, 0), first);
     EXPECT_EQ(database->getChildCounts({ parent }).at(parent), 1);
+}
+
+TEST_F(PlaylistDatabaseTest, LayoutTitleUpdateKeepsIdsAndPlaybackState)
+{
+    auto file = addFile(1);
+    file->addMetaData(MetadataFields::M_TITLE, "Original tag");
+    database->updateObject(file, nullptr);
+    const int albumId = addLayoutAlbum("Old Album");
+    const int trackId = addReference(file, albumId, 1, false);
+    const int playlistId = addContainer("Playlist");
+    const int playlistTrackId = addReference(file, playlistId, 2);
+
+    for (int id : { trackId, playlistTrackId, file->getID() })
+        database->savePlayStatus(std::make_shared<ClientStatusDetail>("living-room", id, 3, 10, 1100, 1200));
+    database->savePlayStatus(std::make_shared<ClientStatusDetail>("office", trackId, 2, 20, 1300, 1400));
+
+    auto album = prepareAlbumRename(albumId, "New Album");
+    album->setSortKey("Album, New");
+    auto track = database->loadObject(trackId);
+    track->setTitle("New Track");
+    track->setSortKey("Track, New");
+
+    database->updateLayoutTitles({ album, track });
+
+    EXPECT_EQ(database->findObjectByPath("/Old Album", UNUSED_CLIENT_GROUP, DbFileType::Virtual), nullptr);
+    auto renamedAlbum = database->findObjectByPath("/New Album", UNUSED_CLIENT_GROUP, DbFileType::Virtual);
+    ASSERT_NE(renamedAlbum, nullptr);
+    EXPECT_EQ(renamedAlbum->getID(), albumId);
+    EXPECT_EQ(renamedAlbum->getTitle(), "New Album");
+    EXPECT_EQ(renamedAlbum->getSortKey(), "Album, New");
+    EXPECT_EQ(renamedAlbum->getMetaData(MetadataFields::M_TITLE), "New Album");
+    EXPECT_EQ(renamedAlbum->getMetaData(MetadataFields::M_GENRE), "Test genre");
+    auto renamedTrack = database->loadObject(trackId);
+    EXPECT_EQ(renamedTrack->getTitle(), "New Track");
+    EXPECT_EQ(renamedTrack->getSortKey(), "Track, New");
+    EXPECT_EQ(renamedTrack->getParentID(), albumId);
+    EXPECT_EQ(renamedTrack->getRefID(), file->getID());
+    EXPECT_EQ(renamedTrack->getLocation(), file->getLocation());
+    EXPECT_EQ(renamedTrack->getMetaData(MetadataFields::M_TITLE), "Original tag");
+    EXPECT_TRUE(renamedTrack->resourcesEqual(file));
+    auto history = database->getPlayStatus("living-room", trackId);
+    ASSERT_NE(history, nullptr);
+    EXPECT_EQ(history->getPlayCount(), 3);
+    EXPECT_EQ(history->getLastPlayedPosition().count(), 1100);
+    EXPECT_EQ(history->getBookMarkPosition().count(), 1200);
+    EXPECT_NE(database->getPlayStatus("office", trackId), nullptr);
+    EXPECT_NE(database->getPlayStatus("living-room", playlistTrackId), nullptr);
+    EXPECT_NE(database->getPlayStatus("living-room", file->getID()), nullptr);
+
+    EXPECT_EQ(database->loadObject(file->getID())->getTitle(), file->getTitle());
+    auto playlistTrack = std::dynamic_pointer_cast<CdsItem>(database->loadObject(playlistTrackId));
+    ASSERT_NE(playlistTrack, nullptr);
+    EXPECT_EQ(playlistTrack->getParentID(), playlistId);
+    EXPECT_EQ(playlistTrack->getRefID(), file->getID());
+    EXPECT_EQ(playlistTrack->getTrackNumber(), 2);
+    EXPECT_EQ(playlistTrack->getTitle(), file->getTitle());
+    EXPECT_EQ(playlistTrack->getMetaData(MetadataFields::M_CONTENT_CLASS), UPNP_CLASS_PLAYLIST_ITEM);
+}
+
+TEST_F(PlaylistDatabaseTest, LayoutTitleUpdateRollsBackWhenLaterTitleUpdateFails)
+{
+    auto file = addFile(1);
+    const int albumId = addLayoutAlbum("Old Album");
+    const int trackId = addReference(file, albumId, 1, false);
+    auto album = prepareAlbumRename(albumId, "New Album");
+    auto track = database->loadObject(trackId);
+    track->setTitle("New Track");
+
+    auto sql = std::dynamic_pointer_cast<SQLDatabase>(database);
+    ASSERT_NE(sql, nullptr);
+    sql->exec(fmt::format("CREATE TEMP TRIGGER reject_layout_title BEFORE UPDATE OF dc_title ON mt_cds_object "
+                          "WHEN NEW.id = {} BEGIN SELECT RAISE(ABORT, 'Injected title update failure'); END",
+        trackId));
+    EXPECT_THROW(database->updateLayoutTitles({ album, track }), std::runtime_error);
+
+    auto originalAlbum = database->findObjectByPath("/Old Album", UNUSED_CLIENT_GROUP, DbFileType::Virtual);
+    ASSERT_NE(originalAlbum, nullptr);
+    EXPECT_EQ(originalAlbum->getID(), albumId);
+    EXPECT_EQ(originalAlbum->getTitle(), "Old Album");
+    EXPECT_EQ(originalAlbum->getMetaData(MetadataFields::M_TITLE), "Old Album");
+    EXPECT_EQ(database->findObjectByPath("/New Album", UNUSED_CLIENT_GROUP, DbFileType::Virtual), nullptr);
+    EXPECT_EQ(database->loadObject(trackId)->getTitle(), file->getTitle());
+
+    sql->exec("DROP TRIGGER reject_layout_title");
+    database->updateLayoutTitles({ album, track });
+    EXPECT_EQ(database->loadObject(albumId)->getTitle(), "New Album");
+    EXPECT_EQ(database->loadObject(trackId)->getTitle(), "New Track");
 }
 
 #ifdef HAVE_PGSQL

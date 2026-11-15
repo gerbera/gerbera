@@ -959,6 +959,56 @@ void SQLDatabase::updateObject(const std::shared_ptr<CdsObject>& obj, int* chang
     commit("updateObject");
 }
 
+void SQLDatabase::updateLayoutTitles(const std::vector<std::shared_ptr<CdsObject>>& objects)
+{
+    if (objects.empty())
+        return;
+
+    SqlAutoLock lock(sqlMutex);
+    const auto* transactions = dynamic_cast<const SqlWithTransactions*>(this);
+    if (transactions && transactions->hasActiveTransaction())
+        throw DatabaseException("Cannot update layout titles during an active database transaction", LINE_MESSAGE);
+
+    std::vector<std::string> statements;
+    std::unordered_set<int> objectIds;
+    const auto titleKey = quote(std::string(MetaEnumMapper::getMetaFieldName(MetadataFields::M_TITLE)));
+    const auto updated = quote(currentTime().count());
+    for (const auto& obj : objects) {
+        if (!obj || IS_FORBIDDEN_CDS_ID(obj->getID()) || !objectIds.insert(obj->getID()).second
+            || (obj->getEntryType() != CdsEntryType::VirtualContainer && obj->getEntryType() != CdsEntryType::VirtualItem)
+            || obj->getSource() != ObjectSource::Import || obj->getTitle().empty()
+            || (obj->isContainer() && obj->getLocation().empty()))
+            throw DatabaseException("Invalid object in layout title update", LINE_MESSAGE);
+
+        std::map<BrowseColumn, std::string> fields { { BrowseColumn::LastUpdated, updated } };
+        setCol(fields, BrowseColumn::DcTitle, obj->getTitle(), browseColMap);
+        setCol(fields, BrowseColumn::SortKey, obj->getSortKey(), browseColMap);
+        if (obj->isContainer()) {
+            const auto location = obj->getLocation().string();
+            setCol(fields, BrowseColumn::Location, location, browseColMap);
+            fields.emplace(BrowseColumn::LocationHash, quote(stringHash(location)));
+        }
+
+        const Object2Table update(std::move(fields), Operation::Update, browseColumnMapper);
+        statements.push_back(update.sqlForUpdate(obj));
+
+        if (!obj->isContainer())
+            continue;
+
+        const Metadata2Table removeTitle({ { MetadataColumn::PropertyName, titleKey } }, Operation::Delete, metaColumnMapper);
+        statements.push_back(fmt::format("DELETE FROM {} WHERE {}", removeTitle.getTableName(), removeTitle.sqlForDelete(obj)));
+        for (const auto& title : obj->getMetaGroup(MetadataFields::M_TITLE)) {
+            std::map<MetadataColumn, std::string> titleFields {
+                { MetadataColumn::PropertyName, titleKey },
+                { MetadataColumn::PropertyValue, quote(title, metaColMap.at(MetadataColumn::PropertyValue).length) },
+            };
+            const Metadata2Table insertTitle(std::move(titleFields), Operation::Insert, metaColumnMapper);
+            statements.push_back(insertTitle.sqlForInsert(obj));
+        }
+    }
+    execLayoutUpdate(statements);
+}
+
 std::shared_ptr<CdsObject> SQLDatabase::loadObject(
     int objectID,
     const std::string& group)

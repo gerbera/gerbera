@@ -270,11 +270,11 @@ const clearConfig = () => {
   }
 };
 
-const reScanLibrary = () => {
+const requestRescan = (action) => {
   const saveData = {
     req_type: 'config_save',
     data: [],
-    action: 'rescan',
+    action: action,
     target: '--all',
     changedCount: -1,
     updates: 'check'
@@ -298,12 +298,17 @@ const reScanLibrary = () => {
   }
 };
 
+const reScanLibrary = () => requestRescan('rescan');
+
+const reScanWithNameUpdates = () => requestRescan('rescan_names');
+
 export const Config = {
   destroy,
   loadConfig,
   saveConfig,
   clearConfig,
   reScanLibrary,
+  reScanWithNameUpdates,
   initialize,
   menuSelected,
 };

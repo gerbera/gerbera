@@ -426,6 +426,13 @@ void Sqlite3Database::execChecked(const std::string& query)
     etask->waitForTask();
 }
 
+void Sqlite3Database::execLayoutUpdate(const std::vector<std::string>& statements)
+{
+    auto task = std::make_shared<SLExecTask>(statements);
+    addTask(task);
+    task->waitForTask();
+}
+
 void Sqlite3Database::threadProc()
 {
     log_debug("Running thread");
@@ -573,9 +580,9 @@ Sqlite3DatabaseWithTransactions::Sqlite3DatabaseWithTransactions(
 void Sqlite3DatabaseWithTransactions::beginTransaction(std::string_view tName)
 {
     if (use_transaction) {
-        log_debug("BEGIN TRANSACTION {} {}", tName, inTransaction);
+        log_debug("BEGIN TRANSACTION {} {}", tName, hasActiveTransaction());
         SqlAutoLock lock(sqlMutex);
-        log_debug("BEGIN TRANSACTION LOCK {} {}", tName, inTransaction);
+        log_debug("BEGIN TRANSACTION LOCK {} {}", tName, hasActiveTransaction());
         StdThreadRunner::waitFor(
             fmt::format("SqliteDatabase.begin {}", tName), [this] { return !inTransaction; }, 100);
         inTransaction = true;
@@ -586,7 +593,7 @@ void Sqlite3DatabaseWithTransactions::beginTransaction(std::string_view tName)
 void Sqlite3DatabaseWithTransactions::rollback(std::string_view tName)
 {
     if (use_transaction && inTransaction) {
-        log_debug("ROLLBACK {} {}", tName, inTransaction);
+        log_debug("ROLLBACK {} {}", tName, hasActiveTransaction());
         execChecked("ROLLBACK");
         inTransaction = false;
     }
@@ -595,7 +602,7 @@ void Sqlite3DatabaseWithTransactions::rollback(std::string_view tName)
 void Sqlite3DatabaseWithTransactions::commit(std::string_view tName)
 {
     if (use_transaction && inTransaction) {
-        log_debug("COMMIT {} {}", tName, inTransaction);
+        log_debug("COMMIT {} {}", tName, hasActiveTransaction());
         _exec("COMMIT");
         inTransaction = false;
     }
