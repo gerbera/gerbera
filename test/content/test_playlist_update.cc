@@ -59,11 +59,13 @@
 #include <array>
 #include <chrono>
 #include <cstddef>
+#include <cstdint>
 #include <gtest/gtest.h>
 #include <memory>
 #include <pugixml.hpp>
 #include <string>
 #include <system_error>
+#include <tuple>
 #include <vector>
 
 class PlaylistUpdateConfig : public ConfigMock {
@@ -305,36 +307,42 @@ INSTANTIATE_TEST_SUITE_P(NotificationModes, PlaybackMetadataTest,
     });
 
 #ifdef HAVE_INOTIFY
-TEST_F(PlaylistUpdateTest, WritableCloseKeepsMediaIdentityButDeletionAndPlaylistReplacementStillRemove)
+TEST_F(PlaylistUpdateTest, WritableCloseKeepsMediaAndPlaylistIdentityButDeletionAndGenericReplacementStillRemove)
 {
     auto source = std::make_shared<CdsItem>(CdsEntryType::File);
     source->setID(42);
     database->source = source;
     auto watch = std::make_shared<DirectoryWatch>("/fixture/file", 1, 0);
+    auto notify = [&](ImportMode mode, const auto& cls, std::uint32_t mask) {
+        source->setClass(cls);
+        inotify_event event {};
+        event.wd = 1;
+        event.mask = mask;
+        InotifyHandler handler(nullptr, &event, mask);
+        handler.getPath(watch);
+        bool isDir = false;
+        handler.doExistingEntry(database, content, watch, mode, isDir);
+    };
     for (auto mode : { ImportMode::MediaTomb, ImportMode::Gerbera }) {
-        for (const auto& cls : { UPNP_CLASS_AUDIO_ITEM, UPNP_CLASS_VIDEO_ITEM, UPNP_CLASS_IMAGE_ITEM }) {
+        for (const auto& cls : { UPNP_CLASS_AUDIO_ITEM, UPNP_CLASS_VIDEO_ITEM, UPNP_CLASS_IMAGE_ITEM, UPNP_CLASS_PLAYLIST_ITEM }) {
             for (auto mask : { IN_CLOSE_WRITE, IN_MOVED_TO }) {
-                source->setClass(cls);
-                inotify_event event {};
-                event.wd = 1;
-                event.mask = mask;
-                InotifyHandler handler(nullptr, &event, event.mask);
-                handler.getPath(watch);
-                bool isDir = false;
-                handler.doExistingEntry(database, content, watch, mode, isDir);
+                SCOPED_TRACE(::testing::Message() << static_cast<int>(mode) << ": " << cls << ", event " << mask);
+                notify(mode, cls, mask);
                 EXPECT_TRUE(content->removed.empty());
             }
         }
     }
-    for (auto eventMask : { IN_CLOSE_WRITE, IN_DELETE, IN_MOVED_FROM }) {
-        source->setClass(eventMask == IN_CLOSE_WRITE ? "object.item.playlistItem" : UPNP_CLASS_AUDIO_ITEM);
-        inotify_event event {};
-        event.wd = 1;
-        event.mask = eventMask;
-        InotifyHandler handler(nullptr, &event, event.mask);
-        handler.getPath(watch);
-        bool isDir = false;
-        handler.doExistingEntry(database, content, watch, ImportMode::MediaTomb, isDir);
+    for (const auto& [mode, cls, eventMask] : {
+             std::tuple { ImportMode::MediaTomb, UPNP_CLASS_ITEM, IN_CLOSE_WRITE },
+             std::tuple { ImportMode::MediaTomb, UPNP_CLASS_AUDIO_ITEM, IN_DELETE },
+             std::tuple { ImportMode::MediaTomb, UPNP_CLASS_AUDIO_ITEM, IN_MOVED_FROM },
+             std::tuple { ImportMode::MediaTomb, UPNP_CLASS_PLAYLIST_ITEM, IN_DELETE },
+             std::tuple { ImportMode::MediaTomb, UPNP_CLASS_PLAYLIST_ITEM, IN_MOVED_FROM },
+             std::tuple { ImportMode::Gerbera, UPNP_CLASS_PLAYLIST_ITEM, IN_DELETE },
+             std::tuple { ImportMode::Gerbera, UPNP_CLASS_PLAYLIST_ITEM, IN_MOVED_FROM },
+         }) {
+        SCOPED_TRACE(::testing::Message() << static_cast<int>(mode) << ": " << cls << ", event " << eventMask);
+        notify(mode, cls, eventMask);
         ASSERT_EQ(content->removed, (std::vector<int> { 42 }));
         content->removed.clear();
     }

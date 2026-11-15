@@ -49,6 +49,7 @@
 #include "database/database.h"
 
 template void InotifyManager<DirectoryWatch>::run();
+template void InotifyManager<DirectoryWatch>::shutdown();
 
 AutoscanInotify::AutoscanInotify(const std::shared_ptr<Content>& content)
     : config(content->getContext()->getConfig())

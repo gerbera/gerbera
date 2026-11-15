@@ -303,6 +303,11 @@ void ContentManager::timerNotify(const std::shared_ptr<Timer::Parameter>& parame
 void ContentManager::shutdown()
 {
     log_debug("start");
+#ifdef HAVE_INOTIFY
+    // An Inotify event may need the content lock to queue its final import.
+    if (as_inotify)
+        as_inotify->shutdown();
+#endif
     auto lock = threadRunner->uniqueLock();
 
     destroyLayout();
@@ -404,6 +409,13 @@ std::shared_ptr<ImportService> ContentManager::getImportService(const std::share
     if (!result)
         return importService;
     return result;
+}
+
+bool ContentManager::isMediaOrPlaylistItem(
+    const std::shared_ptr<CdsObject>& obj,
+    const std::shared_ptr<AutoscanDirectory>& adir) const
+{
+    return getImportService(adir)->isMediaOrPlaylistItem(obj);
 }
 
 void ContentManager::addVirtualItem(const std::shared_ptr<CdsObject>& obj, bool allowFifo)
@@ -518,7 +530,7 @@ std::shared_ptr<CdsObject> ContentManager::_addFile(
         rootPath = task->getRootPath();
 
     auto importMode = asSetting.adir ? asSetting.adir->getLayoutMode() : EnumOption<ImportMode>::getEnumOption(config, ConfigVal::IMPORT_LAYOUT_MODE);
-    if (importMode == ImportMode::Gerbera || asSetting.refreshExisting || (asSetting.changedObject && asSetting.changedObject->isMediaItem())) {
+    if (importMode == ImportMode::Gerbera || asSetting.refreshExisting || isMediaOrPlaylistItem(asSetting.changedObject, asSetting.adir)) {
         std::unordered_set<int> currentContent;
         if (asSetting.changedObject || !asSetting.adir || asSetting.adir->getScanMode() != AutoscanScanMode::INotify) {
             importService->clearCache(); // may be called by layout
@@ -811,7 +823,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
                     // check modification time and update file if changed
                     if (lastModifiedCurrentMax < lwt) {
-                        if (newObject->isMediaItem()) {
+                        if (isMediaOrPlaylistItem(newObject, adir)) {
                             // Keep the physical identity and dependent playlist entries.
                             asSetting.changedObject = newObject;
                         } else {

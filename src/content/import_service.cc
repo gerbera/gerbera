@@ -409,14 +409,14 @@ void ImportService::destroyLayout()
 
 std::string ImportService::mimeTypeToUpnpClass(const std::string& mimeType) const
 {
-    auto it = std::find_if(upnpMap.begin(), upnpMap.end(), [=](auto&& um) { return startswith(mimeType, um.mimeType); });
-    if (it != upnpMap.end())
-        return it->upnpClass;
-
     // try direct search
     auto itm = mimetypeUpnpclassMap.find(mimeType);
     if (itm != mimetypeUpnpclassMap.end())
         return itm->second;
+
+    auto it = std::find_if(upnpMap.begin(), upnpMap.end(), [=](auto&& um) { return startswith(mimeType, um.mimeType); });
+    if (it != upnpMap.end())
+        return it->upnpClass;
 
     // try pattern search
     std::vector<std::string> parts = splitString(mimeType, '/');
@@ -678,6 +678,18 @@ void ImportService::createContainers(
         }
     }
     log_debug("end {}", rootPath.string());
+}
+
+bool ImportService::isMediaOrPlaylistItem(const std::shared_ptr<CdsObject>& obj) const
+{
+    if (!obj)
+        return false;
+    if (obj->isMediaItem() || obj->isSubClass(UPNP_CLASS_PLAYLIST_ITEM))
+        return true;
+    if (!obj->isItem())
+        return false;
+    const auto& item = static_cast<const CdsItem&>(*obj);
+    return item.getMediaType(getValueOrDefault(mimetypeContenttypeMap, item.getMimeType())) == ObjectType::Playlist;
 }
 
 std::tuple<bool, std::string, std::string> ImportService::getMimeForFile(const fs::path& objectPath) const

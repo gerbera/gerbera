@@ -27,6 +27,22 @@ database, and needs a usable IPv4 network interface for the UPnP listener.
 This file outlines how the Gerbera system uses the **GoogleTest**
 framework to provide unit testing for the C++ code-base.
 
+Physical playlist class mapping is covered by `PlaylistClassConfigTest` in
+`testconfig` and `ImportModes/PlaylistFileClassTest` in `testcontent`. The native
+import cases use the real server and an isolated SQLite database for both `mt`
+and `grb`, with default, extended legacy, exact override, conditional override,
+and nonextended mappings. They check physical item classes, MIME types and
+resources; JavaScript builds also check both parsed playlist views, repeated
+positions and media duration. Separate `HttpResourcesPreservePlaylistMediaBytes`
+cases check HTTP payloads through synchronous libcurl with five-second connection
+and total limits and are registered only when JavaScript and CURL are available.
+Content convergence retains
+the previous 20-second deadline. Input files are checked byte for byte after
+shutdown. The shared fixture uses no external Python process/readiness layer.
+Physical class checks cover M3U, M3U8, PLS, ASX, WPL and XSPF in both builds.
+JavaScript builds also exercise their parsed views; WPL/XSPF now use the existing
+C++ XML readers rather than a JavaScript source marker.
+
 `Corpus/XmlPlaylistTest` reports the 45 WPL/XSPF reader cases individually.
 `ImportModes/XmlPlaylistImportTest` then imports the same corpus with the real
 server and an isolated SQLite database for both `mt` and `grb`. It checks both

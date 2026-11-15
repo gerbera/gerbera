@@ -222,6 +222,9 @@ public:
 
     std::shared_ptr<AutoscanDirectory> findAutoscanDirectory(fs::path path) const override;
     bool isHiddenFile(const fs::directory_entry& dirEntry, bool isDirectory, const AutoScanSetting& settings) override;
+    bool isMediaOrPlaylistItem(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<AutoscanDirectory>& adir) const override;
 
     /// @brief Removes an AutoscanDirectrory (found by scanID) from the watch list.
     void removeAutoscanDirectory(const std::shared_ptr<AutoscanDirectory>& adir) override;
