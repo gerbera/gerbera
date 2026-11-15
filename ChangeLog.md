@@ -14,6 +14,7 @@
 - Build with libpqxx 8
 - Bump npm packages in /gerbera-web
 - Bump serialize-javascript from 7.1.1 to 7.1.2 in /gerbera-web
+- Classify physical playlist files before generic audio/video mappings
 - Cleanup asx tests
 - Collect documentation updates
 - Configure album container names independently from audio titles
@@ -53,6 +54,7 @@
 - Preserve repeated local files at different playlist positions
 - Recover SQLite and PostgreSQL foreign-key import failures without stopping the database
 - Refactor ContentPathSetup
+- Refactor StringSetupArguments
 - Run Docker debug builds on native amd64 and arm64 runners
 - Seek in transcoded streams of constant bit rate
 - Serve transcoded streams to HTTP/1.0 clients

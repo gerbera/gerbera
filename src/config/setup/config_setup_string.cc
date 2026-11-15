@@ -40,16 +40,13 @@ void ConfigStringSetup::makeOption(
     const std::shared_ptr<Config>& config,
     const std::map<std::string, std::string>* arguments)
 {
-    bool trim = true;
-    if (arguments && arguments->find("trim") != arguments->end()) {
-        trim = arguments->at("trim") == "true";
-    }
-    newOption(getXmlContent(root, config, trim));
+    newOption(getXmlContent(root, config, !isSet(ConfigStringArguments::dontTrim)));
     setOption(config);
 }
 
 std::shared_ptr<ConfigOption> ConfigStringSetup::newOption(const std::string& optValue)
 {
+    auto notEmpty = isSet(ConfigStringArguments::notEmpty);
     if (notEmpty && optValue.empty()) {
         throw_std_runtime_error("Invalid {} empty value '{}'", xpath, optValue);
     }

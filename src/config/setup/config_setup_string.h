@@ -29,26 +29,64 @@
 
 #include "config/config_setup.h"
 
+/// @brief set behaviour of string option
+enum class ConfigStringArguments {
+    none = 0,
+    /// @brief option must not be empty
+    notEmpty = (1 << 0),
+    /// @brief don't trim the string
+    dontTrim = (1 << 1),
+};
+
+inline ConfigStringArguments operator|(ConfigStringArguments a, ConfigStringArguments b)
+{
+    return static_cast<ConfigStringArguments>(static_cast<int>(a) | static_cast<int>(b));
+}
+
+inline ConfigStringArguments operator&(ConfigStringArguments a, ConfigStringArguments b)
+{
+    return static_cast<ConfigStringArguments>(static_cast<int>(a) & static_cast<int>(b));
+}
+
 class ConfigStringSetup : public ConfigSetup {
 protected:
-    bool notEmpty = false;
+    ConfigStringArguments arguments;
+
+    /// @brief check for flag
+    bool isSet(ConfigStringArguments arg) const { return (arguments & arg) == arg; }
 
 public:
-    ConfigStringSetup(ConfigVal option, const char* xpath, const char* help, bool required = false, const char* defaultValue = "", bool notEmpty = false)
+    ConfigStringSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        bool required = false,
+        const char* defaultValue = "",
+        ConfigStringArguments arguments = ConfigStringArguments::none)
         : ConfigSetup(option, xpath, help, required, defaultValue)
-        , notEmpty(notEmpty)
+        , arguments(arguments)
     {
     }
 
-    ConfigStringSetup(ConfigVal option, const char* xpath, const char* help, const char* defaultValue, StringCheckFunction check = nullptr, bool notEmpty = false, bool required = false)
+    ConfigStringSetup(
+        ConfigVal option,
+        const char* xpath,
+        const char* help,
+        const char* defaultValue,
+        StringCheckFunction check = nullptr,
+        bool required = false,
+        ConfigStringArguments arguments = ConfigStringArguments::none)
         : ConfigSetup(option, xpath, help, std::move(check), defaultValue, required)
-        , notEmpty(notEmpty)
+        , arguments(arguments)
     {
     }
 
     std::string getTypeString() const override { return "String"; }
 
-    void makeOption(const pugi::xml_node& root, const std::shared_ptr<Config>& config, const std::map<std::string, std::string>* arguments = nullptr) override;
+    void makeOption(
+        const pugi::xml_node& root,
+        const std::shared_ptr<Config>& config,
+        const std::map<std::string, std::string>* arguments = nullptr) override;
 
     std::shared_ptr<ConfigOption> newOption(const std::string& optValue);
 
