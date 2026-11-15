@@ -308,6 +308,9 @@ private:
 public:
     ImportService(std::shared_ptr<Context> context, std::shared_ptr<ConverterManager> converterManager);
 
+    /// @brief Whether the object's class or configured content type identifies media or a playlist.
+    bool isMediaOrPlaylistItem(const std::shared_ptr<CdsObject>& obj) const;
+
     /// @brief initialise import service with runtime properties
     void run(
         std::shared_ptr<ContentManager> content,

@@ -175,7 +175,7 @@ int InotifyHandler::doExistingEntry(
             isDir = changedObject->isContainer();
         if (changedObject
             && ((!AUTOSCAN_IS_WRITTEN(mask) && !AUTOSCAN_IS_MOVED(mask))
-                || (importMode != ImportMode::Gerbera && !changedObject->isMediaItem()))) {
+                || (importMode != ImportMode::Gerbera && !content->isMediaOrPlaylistItem(changedObject, adir)))) {
             log_debug("deleting {}", path.c_str());
             content->removeObject(adir, changedObject, path, !AUTOSCAN_IS_MOVED(mask), false);
             changedObject = nullptr;

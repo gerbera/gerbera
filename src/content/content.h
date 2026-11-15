@@ -83,6 +83,12 @@ public:
         const AutoScanSetting& settings)
         = 0;
 
+    /// @brief Check whether an object can be refreshed in place as media or a playlist.
+    virtual bool isMediaOrPlaylistItem(
+        const std::shared_ptr<CdsObject>& obj,
+        const std::shared_ptr<AutoscanDirectory>& adir) const
+        = 0;
+
     /// @brief Ensures that a container given by it's location on disk is
     /// present in the database. If it does not exist it will be created, but
     /// it's content will not be added.
