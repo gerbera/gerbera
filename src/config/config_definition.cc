@@ -518,7 +518,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerOptions()
             YES),
         std::make_shared<ConfigStringSetup>(ConfigVal::UPNP_SEARCH_SEPARATOR,
             "/server/upnp/attribute::search-result-separator", "config-server.html#confval-search-result-separator",
-            " - "),
+            false, " - ", ConfigStringArguments::dontTrim),
         std::make_shared<ConfigBoolSetup>(ConfigVal::UPNP_SEARCH_FILENAME,
             "/server/upnp/attribute::search-filename", "config-server.html#confval-search-filename",
             NO),
@@ -682,7 +682,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerExtendedOpt
             DEFAULT_MARK_PLAYED_ITEMS_STRING_MODE, StringCheckFunction(ConfigBoolSetup::CheckMarkPlayedValue)),
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING,
             "/server/extended-runtime-options/mark-played-items/string", "config-extended.html#confval-mark-played-items-string",
-            false, "*", true),
+            false, "*", ConfigStringArguments::notEmpty | ConfigStringArguments::dontTrim),
         std::make_shared<ConfigBoolSetup>(ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_SUPPRESS_CDS_UPDATES,
             "/server/extended-runtime-options/mark-played-items/attribute::suppress-cds-updates", "config-extended.html#confval-mark-played-items-cds-updates",
             YES),
@@ -698,20 +698,20 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getServerExtendedOpt
             NO),
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_EXTOPTS_LASTFM_USERNAME,
             "/server/extended-runtime-options/lastfm/username", "config-extended.html#confval-lastfm-username",
-            false, "lastfmuser", true),
+            false, "lastfmuser", ConfigStringArguments::notEmpty),
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_EXTOPTS_LASTFM_PASSWORD,
             "/server/extended-runtime-options/lastfm/password", "config-extended.html#confval-lastfm-password",
-            false, "lastfmpass", true),
+            false, "lastfmpass", ConfigStringArguments::notEmpty),
 #ifndef HAVE_LASTFMLIB
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_EXTOPTS_LASTFM_SESSIONKEY,
             "/server/extended-runtime-options/lastfm/sessionkey", "config-extended.html#confval-lastfm-sessionkey",
-            false, "sessionKey", true),
+            false, "sessionKey", ConfigStringArguments::notEmpty),
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_EXTOPTS_LASTFM_AUTHURL,
             "/server/extended-runtime-options/lastfm/auth-url", "config-extended.html#confval-lastfm-auth-url",
-            false, "https://www.last.fm/api/auth/", true),
+            false, "https://www.last.fm/api/auth/", ConfigStringArguments::notEmpty),
         std::make_shared<ConfigStringSetup>(ConfigVal::SERVER_EXTOPTS_LASTFM_SCROBBLEURL,
             "/server/extended-runtime-options/lastfm/scrobble-url", "config-extended.html#confval-lastfm-scrobble-url",
-            false, "https://ws.audioscrobbler.com/2.0/", true),
+            false, "https://ws.audioscrobbler.com/2.0/", ConfigStringArguments::notEmpty),
 #endif
 #endif
 
@@ -1337,10 +1337,10 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getImportOptions()
         // tweaks
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP,
             "/import/library-options/attribute::multi-value-separator", "config-import.html#confval-multi-value-separator",
-            DEFAULT_LIBOPTS_ENTRY_SEPARATOR),
+            false, DEFAULT_LIBOPTS_ENTRY_SEPARATOR, ConfigStringArguments::dontTrim),
         std::make_shared<ConfigStringSetup>(ConfigVal::IMPORT_LIBOPTS_ENTRY_LEGACY_SEP,
             "/import/library-options/attribute::legacy-value-separator", "config-import.html#confval-legacy-value-separator",
-            ""),
+            false, "", ConfigStringArguments::dontTrim),
 
         // resources
         std::make_shared<ConfigBoolSetup>(ConfigVal::IMPORT_RESOURCES_CASE_SENSITIVE,
@@ -2053,10 +2053,10 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             ""),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_NAME,
             "attribute::name", "config-transcode.html#confval-profile-name",
-            true, "", true),
+            true, "", ConfigStringArguments::notEmpty),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_MIMETYPE,
             "mimetype", "config-transcode.html#confval-profile-mimetype",
-            true, "", true),
+            true, "", ConfigStringArguments::notEmpty),
 
         // Buffer
         std::make_shared<ConfigUIntSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_BUFFER_SIZE,
@@ -2082,7 +2082,7 @@ std::vector<std::shared_ptr<ConfigSetup>> ConfigDefinition::getTranscodingOption
             ConfigPathArguments::isFile | ConfigPathArguments::mustExist | ConfigPathArguments::notEmpty | ConfigPathArguments::isExe | ConfigPathArguments::resolveEmpty),
         std::make_shared<ConfigStringSetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ARGS,
             "attribute::arguments", "config-transcode.html#confval-arguments",
-            true, "", true),
+            true, "", ConfigStringArguments::notEmpty),
         std::make_shared<ConfigDictionarySetup>(ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON,
             "agent", "config-transcode.html#profiles",
             ConfigVal::A_TRANSCODING_PROFILES_PROFLE_AGENT_ENVIRON_KEY,

@@ -170,7 +170,6 @@ void ConfigManager::registerNode(const std::string& xmlPath)
 
 void ConfigManager::load(const fs::path& userHome, const std::string& database)
 {
-    std::map<std::string, std::string> args;
     auto self = getSelf();
 
     log_info("Loading configuration from: {}", filename.string());
@@ -335,17 +334,19 @@ void ConfigManager::load(const fs::path& userHome, const std::string& database)
     co = definition->findConfigSetup(ConfigVal::A_CLIENTS_UPNP_MULTI_VALUE);
     co->setDefaultValue(multiValue ? YES : NO);
 
-    bool clEn = setOption(root, ConfigVal::CLIENTS_LIST_ENABLED)->getBoolOption();
-    args["isEnabled"] = clEn ? "true" : "false";
-    setOption(root, ConfigVal::CLIENTS_LIST, &args);
-    args.clear();
+    {
+        bool clEn = setOption(root, ConfigVal::CLIENTS_LIST_ENABLED)->getBoolOption();
+        std::map<std::string, std::string> args = { { "isEnabled", clEn ? "true" : "false" } };
+        setOption(root, ConfigVal::CLIENTS_LIST, &args);
+    }
 
     setOption(root, ConfigVal::IMPORT_HIDDEN_FILES);
     setOption(root, ConfigVal::IMPORT_FOLLOW_SYMLINKS);
-    bool csens = setOption(root, ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE)->getBoolOption();
-    args["tolower"] = fmt::to_string(!csens);
-    setOption(root, ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, &args);
-    args.clear();
+    {
+        bool csens = setOption(root, ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_CASE_SENSITIVE)->getBoolOption();
+        std::map<std::string, std::string> args = { { "tolower", fmt::to_string(!csens) } };
+        setOption(root, ConfigVal::IMPORT_MAPPINGS_EXTENSION_TO_MIMETYPE_LIST, &args);
+    }
 
     std::string defaultCharSet = DEFAULT_FILESYSTEM_CHARSET;
 #if defined(HAVE_NL_LANGINFO) && defined(HAVE_SETLOCALE)
@@ -389,26 +390,30 @@ void ConfigManager::load(const fs::path& userHome, const std::string& database)
     auto lmco = definition->findConfigSetup<ConfigEnumSetup<ImportMode>>(ConfigVal::A_AUTOSCAN_DIRECTORY_LAYOUT_MODE);
     lmco->setDefaultValue(layoutMode);
 
-    args["hiddenFiles"] = getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES) ? "true" : "false";
-    args["followSymlinks"] = getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS) ? "true" : "false";
-    setOption(root, ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, &args);
+    {
+        std::map<std::string, std::string> args = {
+            { "hiddenFiles", getBoolOption(ConfigVal::IMPORT_HIDDEN_FILES) ? "true" : "false" },
+            { "followSymlinks", getBoolOption(ConfigVal::IMPORT_FOLLOW_SYMLINKS) ? "true" : "false" },
+        };
+        setOption(root, ConfigVal::IMPORT_AUTOSCAN_TIMED_LIST, &args);
 
 #ifdef HAVE_INOTIFY
-    auto useInotify = setOption(root, ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)->getBoolOption();
+        auto useInotify = setOption(root, ConfigVal::IMPORT_AUTOSCAN_USE_INOTIFY)->getBoolOption();
 
-    if (useInotify) {
-        setOption(root, ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST, &args);
-    } else {
-        setOption({}, ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST); // set empty list
-    }
+        if (useInotify) {
+            setOption(root, ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST, &args);
+        } else {
+            setOption({}, ConfigVal::IMPORT_AUTOSCAN_INOTIFY_LIST); // set empty list
+        }
 #endif
-    args.clear();
+    }
 
     // read transcoding options
     auto trEn = setOption(root, ConfigVal::TRANSCODING_TRANSCODING_ENABLED)->getBoolOption();
-    args["isEnabled"] = trEn ? "true" : "false";
-    setOption(root, ConfigVal::TRANSCODING_PROFILE_LIST, &args);
-    args.clear();
+    {
+        std::map<std::string, std::string> args = { { "isEnabled", trEn ? "true" : "false" } };
+        setOption(root, ConfigVal::TRANSCODING_PROFILE_LIST, &args);
+    }
 
 #ifdef HAVE_CURL
     if (trEn) {
@@ -417,14 +422,6 @@ void ConfigManager::load(const fs::path& userHome, const std::string& database)
         }
     }
 #endif // HAVE_CURL
-
-    // read import options
-    args["trim"] = "false";
-    setOption(root, ConfigVal::SERVER_EXTOPTS_MARK_PLAYED_ITEMS_STRING, &args);
-    setOption(root, ConfigVal::IMPORT_LIBOPTS_ENTRY_SEP, &args);
-    setOption(root, ConfigVal::UPNP_SEARCH_SEPARATOR, &args);
-    setOption(root, ConfigVal::IMPORT_LIBOPTS_ENTRY_LEGACY_SEP, &args);
-    args.clear();
 
 #ifdef HAVE_FFMPEGTHUMBNAILER
     auto ffmpEn = setOption(root, ConfigVal::SERVER_EXTOPTS_FFMPEGTHUMBNAILER_ENABLED)->getBoolOption();

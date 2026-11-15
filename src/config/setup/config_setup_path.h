@@ -29,6 +29,7 @@
 
 #include "config/config_setup.h"
 
+/// @brief set behaviour of path option
 enum class ConfigPathArguments {
     none = 0,
     /// @brief isFile file or directory
@@ -63,6 +64,7 @@ protected:
     void loadArguments(const std::map<std::string, std::string>* arguments = nullptr);
     bool checkExecutable(std::string& optValue) const;
 
+    /// @brief check for flag
     bool isSet(ConfigPathArguments a) const { return (arguments & a) == a; }
 
 public:
