@@ -70,7 +70,7 @@ public:
 
 protected:
     void _exec(const std::string& query) override;
-    void execLayoutUpdate(const std::vector<std::string>& statements) override;
+    void execMultiStatement(const std::vector<std::string>& statements) override;
     void execChecked(const std::string& query);
     std::string prepareDatabase(const fs::path& dbFilePath, GrbFile& dbFile);
 

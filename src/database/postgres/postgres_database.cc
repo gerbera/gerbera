@@ -376,7 +376,7 @@ void PostgresDatabase::execChecked(const std::string& query)
     etask->waitForTask();
 }
 
-void PostgresDatabase::execLayoutUpdate(const std::vector<std::string>& statements)
+void PostgresDatabase::execMultiStatement(const std::vector<std::string>& statements)
 {
     // The database worker executes the batch in one pqxx::work.
     execChecked(fmt::format("{}", fmt::join(statements, ";\n")));

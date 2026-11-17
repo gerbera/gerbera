@@ -195,7 +195,7 @@ protected:
 
     virtual std::shared_ptr<Database> createDatabase()
     {
-        auto config = std::make_shared<PlaylistSqliteConfig>(directory / "gerbera.db");
+        auto config = std::make_shared<PlaylistSqliteConfig>(directory / "gerbera.db", transactions);
         return TestDatabaseFactory::createInstance(config, nullptr, nullptr, nullptr);
     }
 
@@ -263,6 +263,7 @@ protected:
 
     fs::path directory;
     std::shared_ptr<Database> database;
+    bool transactions {};
 };
 
 TEST_F(PlaylistDatabaseTest, RepeatedFilesKeepTheirPositionsAndReferences)
@@ -334,7 +335,16 @@ TEST_F(PlaylistDatabaseTest, UnpositionedPlaylistReferencesRemainDeduplicated)
     EXPECT_EQ(database->getChildCounts({ parent }).at(parent), 1);
 }
 
-TEST_F(PlaylistDatabaseTest, LayoutTitleUpdateKeepsIdsAndPlaybackState)
+class LayoutTitleUpdateTest : public PlaylistDatabaseTest,
+                              public ::testing::WithParamInterface<bool> {
+public:
+    LayoutTitleUpdateTest()
+    {
+        transactions = GetParam();
+    }
+};
+
+TEST_P(LayoutTitleUpdateTest, LayoutTitleUpdateKeepsIdsAndPlaybackState)
 {
     auto file = addFile(1);
     file->addMetaData(MetadataFields::M_TITLE, "Original tag");
@@ -391,7 +401,7 @@ TEST_F(PlaylistDatabaseTest, LayoutTitleUpdateKeepsIdsAndPlaybackState)
     EXPECT_EQ(playlistTrack->getMetaData(MetadataFields::M_CONTENT_CLASS), UPNP_CLASS_PLAYLIST_ITEM);
 }
 
-TEST_F(PlaylistDatabaseTest, LayoutTitleUpdateRollsBackWhenLaterTitleUpdateFails)
+TEST_P(LayoutTitleUpdateTest, LayoutTitleUpdateRollsBackWhenLaterTitleUpdateFails)
 {
     auto file = addFile(1);
     const int albumId = addLayoutAlbum("Old Album");
@@ -420,6 +430,40 @@ TEST_F(PlaylistDatabaseTest, LayoutTitleUpdateRollsBackWhenLaterTitleUpdateFails
     EXPECT_EQ(database->loadObject(albumId)->getTitle(), "New Album");
     EXPECT_EQ(database->loadObject(trackId)->getTitle(), "New Track");
 }
+
+TEST_P(LayoutTitleUpdateTest, LayoutTitleUpdatePreservesActiveSqliteTransaction)
+{
+    const int albumId = addLayoutAlbum("Old Album");
+    auto album = prepareAlbumRename(albumId, "New Album");
+    auto sql = std::dynamic_pointer_cast<SQLDatabase>(database);
+    ASSERT_NE(sql, nullptr);
+
+    // Use the native transaction state to exercise the worker's savepoint
+    // ownership independently of the normal updateLayoutTitles entry guard.
+    sql->exec("BEGIN TRANSACTION");
+    ASSERT_NO_THROW(database->updateLayoutTitles({ album }));
+    sql->exec("ROLLBACK");
+    EXPECT_EQ(database->loadObject(albumId)->getTitle(), "Old Album");
+
+    sql->exec(fmt::format("CREATE TEMP TRIGGER reject_layout_metadata BEFORE INSERT ON mt_metadata "
+                          "WHEN NEW.item_id = {} BEGIN SELECT RAISE(ABORT, 'Injected title metadata failure'); END",
+        albumId));
+    sql->exec("BEGIN TRANSACTION");
+    sql->exec("INSERT INTO mt_internal_setting (key, value) VALUES ('layout_outer_marker', 'written')");
+    EXPECT_THROW(database->updateLayoutTitles({ album }), std::runtime_error);
+    EXPECT_EQ(database->getInternalSetting("layout_outer_marker"), "written");
+    sql->exec("COMMIT");
+
+    EXPECT_EQ(database->loadObject(albumId)->getTitle(), "Old Album");
+    EXPECT_EQ(database->loadObject(albumId)->getMetaData(MetadataFields::M_TITLE), "Old Album");
+    EXPECT_EQ(database->getInternalSetting("layout_outer_marker"), "written");
+}
+
+INSTANTIATE_TEST_SUITE_P(TransactionModes, LayoutTitleUpdateTest,
+    ::testing::Bool(),
+    [](const ::testing::TestParamInfo<bool>& info) {
+        return info.param ? "Transactions" : "NoTransactions";
+    });
 
 #ifdef HAVE_PGSQL
 class PlaylistPostgresConfig : public PlaylistSqliteConfig {

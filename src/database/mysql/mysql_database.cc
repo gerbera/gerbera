@@ -245,6 +245,14 @@ void MySQLDatabase::init()
     auto dbVersion = prepareDatabase();
     upgradeDatabase(std::stoul(dbVersion), hashies, ConfigVal::SERVER_STORAGE_MYSQL_UPGRADE_FILE, mysqlUpdateVersion, mysqlAddResourceAttr);
 
+    const auto engines = MySQLDatabase::select(fmt::format(
+        "SELECT COUNT(*) FROM information_schema.TABLES t "
+        "JOIN information_schema.ENGINES e ON t.ENGINE = e.ENGINE "
+        "WHERE t.TABLE_SCHEMA = DATABASE() AND t.TABLE_NAME IN ({}, {}) AND e.TRANSACTIONS = 'YES'",
+        quote(CDS_OBJECT_TABLE), quote(METADATA_TABLE)));
+    const auto row = engines ? engines->nextRow() : nullptr;
+    transactionalTables = row && row->col_int(0, 0) == 2;
+
     auto dbLimit = getInternalSetting("string_limit");
     if (!dbLimit.empty() && std::stoul(dbLimit) > stringLimit)
         log_warning("Your database was created with string length {} but your current config value is {}", dbLimit, stringLimit);
@@ -484,23 +492,18 @@ void MySQLDatabase::execOnly(const std::string& query)
     }
 }
 
-void MySQLDatabase::execLayoutUpdate(const std::vector<std::string>& statements)
+void MySQLDatabase::execMultiStatement(const std::vector<std::string>& statements)
 {
-    const auto engines = MySQLDatabase::select(fmt::format(
-        "SELECT COUNT(*) FROM information_schema.TABLES t "
-        "JOIN information_schema.ENGINES e ON t.ENGINE = e.ENGINE "
-        "WHERE t.TABLE_SCHEMA = DATABASE() AND t.TABLE_NAME IN ({}, {}) AND e.TRANSACTIONS = 'YES'",
-        quote(CDS_OBJECT_TABLE), quote(METADATA_TABLE)));
-    const auto row = engines ? engines->nextRow() : nullptr;
-    if (!row || row->col_int(0, 0) != 2)
-        throw DatabaseException("Layout title updates require transactional MySQL tables", LINE_MESSAGE);
+    checkMysqlThreadInit();
+    if (!transactionalTables)
+        throw DatabaseException("Atomic batches require transactional MySQL tables", LINE_MESSAGE);
 
     // A reconnect mid-batch would silently lose the transaction.
     bool reconnect = false;
     const bool disabled = false;
     if (mysql_get_option(&db, MYSQL_OPT_RECONNECT, &reconnect)
         || (reconnect && mysql_options(&db, MYSQL_OPT_RECONNECT, &disabled)))
-        throw DatabaseException("Cannot disable automatic MySQL reconnect for a layout title update", LINE_MESSAGE);
+        throw DatabaseException("Cannot disable automatic MySQL reconnect for an atomic batch", LINE_MESSAGE);
 
     const auto restoreReconnect = [&] {
         if (reconnect && mysql_options(&db, MYSQL_OPT_RECONNECT, &reconnect))
@@ -514,7 +517,7 @@ void MySQLDatabase::execLayoutUpdate(const std::vector<std::string>& statements)
         _exec("COMMIT");
     } catch (...) {
         if (mysql_rollback(&db)) {
-            log_error("Failed to roll back layout title update: {}", getError(&db));
+            log_error("Failed to roll back MySQL batch: {}", getError(&db));
             // Prevent subsequent work from committing any remaining changes.
             mysql_close(&db);
             mysql_connection = false;

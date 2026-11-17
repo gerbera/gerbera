@@ -180,7 +180,7 @@ SLExecTask::SLExecTask(const std::string& query, std::string eKey)
 }
 
 SLExecTask::SLExecTask(const std::vector<std::string>& statements)
-    : query(fmt::format("BEGIN IMMEDIATE;\n{};\nCOMMIT;", fmt::join(statements, ";\n")))
+    : query(fmt::format("{};", fmt::join(statements, ";\n")))
     , atomic(true)
 {
 }
@@ -188,25 +188,36 @@ SLExecTask::SLExecTask(const std::vector<std::string>& statements)
 void SLExecTask::run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError)
 {
     log_debug("Running: {}", query);
-    if (atomic && sqlite3_get_autocommit(db) == 0)
-        throw DatabaseException("", "Cannot start an atomic batch during an active SQLite transaction");
-    char* err = nullptr;
-    int ret = sqlite3_exec(
-        db,
-        query.c_str(),
-        nullptr,
-        nullptr,
-        &err);
     std::string error;
-    if (err) {
-        error = err;
+    const auto execute = [&](const char* statement) {
+        char* err = nullptr;
+        const auto result = sqlite3_exec(db, statement, nullptr, nullptr, &err);
+        error = err ? err : "";
         sqlite3_free(err);
+        return result;
+    };
+
+    int ret = SQLITE_OK;
+    bool ownsSavepoint = false;
+    if (atomic) {
+        // A savepoint starts a transaction in autocommit mode and nests inside
+        // an active transaction without taking ownership of its commit/rollback.
+        ret = execute("SAVEPOINT grb_multi_statement");
+        ownsSavepoint = ret == SQLITE_OK;
     }
+    if (ret == SQLITE_OK)
+        ret = execute(query.c_str());
+    if (ret == SQLITE_OK && ownsSavepoint)
+        ret = execute("RELEASE SAVEPOINT grb_multi_statement");
     if (ret != SQLITE_OK) {
         sqliteErrorCode = sqlite3_extended_errcode(db);
         const auto message = sl.handleError(query, error, db, ret);
-        if (atomic && sqlite3_get_autocommit(db) == 0 && sqlite3_exec(db, "ROLLBACK", nullptr, nullptr, nullptr) != SQLITE_OK)
-            log_error("Failed to roll back SQLite batch: {}", sqlite3_errmsg(db));
+        if (ownsSavepoint && sqlite3_get_autocommit(db) == 0) {
+            if (execute("ROLLBACK TO SAVEPOINT grb_multi_statement") != SQLITE_OK)
+                log_error("Failed to roll back SQLite batch: {}", sqlite3_errmsg(db));
+            else if (execute("RELEASE SAVEPOINT grb_multi_statement") != SQLITE_OK)
+                log_error("Failed to release SQLite batch savepoint: {}", sqlite3_errmsg(db));
+        }
         if (throwOnError)
             throw DatabaseException("", message);
         log_debug("Error in sqlite3_exec: {}", message);

@@ -47,6 +47,7 @@ public:
     fs::path buildContainerPath(int parentID, const std::string& title) override { return {}; }
 
     void updateObject(const std::shared_ptr<CdsObject>& object, int* changedContainer) override { }
+    void updateLayoutTitles(const std::vector<std::shared_ptr<CdsObject>>& objects) override { }
 
     std::vector<std::shared_ptr<CdsObject>> browse(BrowseParam& param) override { return {}; }
     std::vector<std::shared_ptr<CdsObject>> search(SearchParam& param) override { return {}; }

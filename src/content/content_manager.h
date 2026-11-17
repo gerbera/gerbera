@@ -62,6 +62,7 @@ class CMAddFileTask;
 class GenericTask;
 class ImportService;
 class LastFm;
+class LayoutRefreshService;
 class Mime;
 class Server;
 class TaskProcessor;
@@ -292,6 +293,7 @@ protected:
     std::shared_ptr<ConverterManager> converterManager;
     std::shared_ptr<Context> context;
     std::shared_ptr<ImportService> importService;
+    std::shared_ptr<LayoutRefreshService> layoutRefreshService;
 
     std::shared_ptr<Timer> timer;
     std::shared_ptr<TaskProcessor> task_processor;
@@ -368,10 +370,6 @@ protected:
         bool all);
     static void invalidateAddTask(const std::shared_ptr<GenericTask>& t, const fs::path& path);
 
-    /// @brief Plan virtual audio renames against the indexed physical items.
-    std::vector<std::shared_ptr<CdsObject>> planAudioLayoutRefresh(
-        const std::map<int, std::shared_ptr<CdsObject>>& current,
-        const std::vector<std::shared_ptr<CdsObject>>& sources);
     /// @brief Apply the verified renames before queuing the regular scan.
     void runNameUpdateScan();
 

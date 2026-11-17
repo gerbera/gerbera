@@ -42,6 +42,7 @@
 #include "metadata/metadata_enums.h"
 #include "metadata/metadata_handler.h"
 #include "metadata/metadata_service.h"
+#include "util/grb_fs.h"
 #include "util/mime.h"
 #include "util/string_converter.h"
 #include "util/tools.h"
@@ -1058,11 +1059,21 @@ void ImportService::processItemLayout(
 
 void ImportService::refreshAudioLayout(const std::shared_ptr<CdsObject>& object, const std::shared_ptr<CdsContainer>& parent)
 {
+    // Reuse indexed metadata only while the physical source remains unchanged.
+    std::error_code error;
+    const fs::directory_entry file(object->getLocation(), error);
+    const auto resource = object->getResource(ResourcePurpose::Content);
+    const auto size = resource ? resource->getAttribute(ResourceAttribute::SIZE) : std::string();
+    if (error || !isRegularFile(file, error) || error
+        || toSeconds(file.last_write_time(error)) != object->getMTime() || error
+        || (!size.empty() && std::to_string(getFileSize(file)) != size))
+        throw_std_runtime_error("Source file has changed: {}", object->getLocation().string());
+
     if (autoscanDir && !autoscanDir->hasContent(object->getClass()))
         return;
 
-    const auto& item = static_cast<const CdsItem&>(*object);
-    const auto contentType = getValueOrDefault(mimetypeContenttypeMap, item.getMimeType());
+    const auto item = std::static_pointer_cast<CdsItem>(object);
+    const auto contentType = getValueOrDefault(mimetypeContenttypeMap, item->getMimeType());
     // There are no real reference IDs in the captured layout to reconcile.
     processItemLayout(object, parent, contentType, false);
 }
@@ -1408,7 +1419,7 @@ std::pair<int, bool> ImportService::addContainerTree(
     const std::vector<std::shared_ptr<CdsObject>>& chain,
     const std::shared_ptr<CdsObject>& refItem,
     std::vector<int>& createdIds,
-    const std::function<int(int, const std::shared_ptr<CdsObject>&, const std::string&)>& capture)
+    const ContainerCapture& capture)
 {
     log_debug("start '{}' {}", rootPath.string(), parentContainerId);
     std::string tree; // accumulate path to container here

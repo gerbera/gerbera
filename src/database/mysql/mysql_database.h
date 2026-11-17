@@ -57,7 +57,7 @@ public:
 
 protected:
     void _exec(const std::string& query) override;
-    void execLayoutUpdate(const std::vector<std::string>& statements) override;
+    void execMultiStatement(const std::vector<std::string>& statements) override;
     void checkMysqlThreadInit() const;
     std::string prepareDatabase();
 
@@ -82,6 +82,7 @@ private:
     void storeInternalSetting(const std::string& key, const std::string& value) override;
 
     bool mysql_connection {};
+    bool transactionalTables {};
 
     void threadCleanup() override;
     bool threadCleanupRequired() const override { return true; }

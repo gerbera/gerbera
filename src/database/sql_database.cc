@@ -1006,7 +1006,7 @@ void SQLDatabase::updateLayoutTitles(const std::vector<std::shared_ptr<CdsObject
             statements.push_back(insertTitle.sqlForInsert(obj));
         }
     }
-    execLayoutUpdate(statements);
+    execMultiStatement(statements);
 }
 
 std::shared_ptr<CdsObject> SQLDatabase::loadObject(

@@ -426,7 +426,7 @@ void Sqlite3Database::execChecked(const std::string& query)
     etask->waitForTask();
 }
 
-void Sqlite3Database::execLayoutUpdate(const std::vector<std::string>& statements)
+void Sqlite3Database::execMultiStatement(const std::vector<std::string>& statements)
 {
     auto task = std::make_shared<SLExecTask>(statements);
     addTask(task);
