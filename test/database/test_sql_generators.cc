@@ -92,7 +92,7 @@ public:
         return {};
     }
 
-    void execLayoutUpdate(const std::vector<std::string>&) override { }
+    void execMultiStatement(const std::vector<std::string>&) override { }
 
     std::string lastStatement;
 };

@@ -313,6 +313,9 @@ private:
         const std::vector<int>& newIds);
 
 public:
+    /// @brief Record a prepared virtual container instead of persisting it.
+    using ContainerCapture = std::function<int(int, const std::shared_ptr<CdsObject>&, const std::string&)>;
+
     ImportService(std::shared_ptr<Context> context, std::shared_ptr<ConverterManager> converterManager);
 
     /// @brief Whether the object's class or configured content type identifies media or a playlist.
@@ -383,7 +386,7 @@ public:
         const std::vector<std::shared_ptr<CdsObject>>& chain,
         const std::shared_ptr<CdsObject>& refItem,
         std::vector<int>& createdIds,
-        const std::function<int(int, const std::shared_ptr<CdsObject>&, const std::string&)>& capture = {});
+        const ContainerCapture& capture = {});
 
     /// @brief Generate layout entries from an already indexed audio object.
     void refreshAudioLayout(const std::shared_ptr<CdsObject>& object, const std::shared_ptr<CdsContainer>& parent);

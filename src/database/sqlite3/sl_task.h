@@ -147,7 +147,7 @@ public:
     /// @param warnOnly no not throw exceptions
     SLExecTask(const std::string& query, std::string getLastInsertId, bool warnOnly);
     SLExecTask(const std::string& query, std::string eKey);
-    /// @brief Run the supplied statements together in a checked transaction.
+    /// @brief Run the supplied statements atomically within their own savepoint.
     explicit SLExecTask(const std::vector<std::string>& statements);
 
     void run(sqlite3*& db, Sqlite3Database& sl, bool throwOnError = true) override;

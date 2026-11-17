@@ -239,7 +239,7 @@ protected:
     virtual void _exec(const std::string& query) = 0;
 
     /// @brief Execute an atomic batch while the caller holds sqlMutex.
-    virtual void execLayoutUpdate(const std::vector<std::string>& statements) = 0;
+    virtual void execMultiStatement(const std::vector<std::string>& statements) = 0;
 
     /// @brief Get query for unreferenced objects depending on database
     virtual std::string getUnreferencedQuery(const std::string& table);
