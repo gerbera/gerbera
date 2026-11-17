@@ -1046,8 +1046,8 @@ install(
     DESTINATION ${CMAKE_INSTALL_MANDIR})
 
 macro(makeLink root src dest)
-    install(CODE "MESSAGE(\"adding link in ${root} to ${src} from ${dest}\")"
-            "EXECUTE_PROCESS(COMMAND ln -snf ${root}/${src} ${root}/${dest})")
+    install(CODE "MESSAGE(\"adding link in ${root} to ${src} from ${dest}\")")
+    install(CODE "EXECUTE_PROCESS(COMMAND ln -snf ${root}/${src} ${root}/${dest})")
 endmacro()
 
 if(INSTALL_DOC)

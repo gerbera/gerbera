@@ -57,7 +57,7 @@ sudo make install
 
 | Library             | Min Version  | Recommended  | Latest tested | Required?     | Note                             | Default  |
 | ------------------- | ------------ | ------------ | ------------- | ------------- | -------------------------------- | -------- |
-| [libupnp]           | 1.14.6       | 1.14.30      | 22.2.2        | XOR libnpupnp | UPnP protocol support            |          |
+| [libupnp]           | 1.14.6       | 1.14.30      | 22.2.3        | XOR libnpupnp | UPnP protocol support            |          |
 | [libnpupnp]         | 4.2.1        | 5.1.2        | 6.3.1         | XOR libupnp   | Alternate UPnP protocol support  | Disabled |
 | libuuid             |              |              |               | Depends on OS | Not required on \*BSD            |          |
 | [pugixml]           |              | 1.10         | 1.16          | Required      | XML file and data support        |          |
@@ -96,7 +96,7 @@ sudo make install
 | ------------ | ----------- | ----------- | ------------- | --------- | ----------------------------- | -------- |
 | [googletest] | 1.10.0      | 1.10.0      | 1.18.0        | Optional  | Running tests                 | Disabled |
 | [doxygen]    |             | 1.8.14      | 1.14.0        | Optional  | Building source documentation | Disabled |
-| [cmake]      | 3.25.0      | 3.31.38     | 4.4.4         | Required  | Build processing              | Enabled  |
+| [cmake]      | 3.25.0      | 3.31.38     | 4.5.0         | Required  | Build processing              | Enabled  |
 
 ## License
 
