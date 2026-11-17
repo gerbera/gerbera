@@ -67,7 +67,7 @@
 - Update to cxxopts-g7af8aa
 - Update to ffmpegthumbnailer 2.4.1
 - Update to fmt 12.2.1
-- Update to pupnp 22.2.2
+- Update to pupnp 22.2.3
 - Use album cover for named disc folders
 - Use fmt exception formatting
 - Wait for client grid rendering in browser tests
