@@ -35,11 +35,11 @@
 #ifndef __UPNP_MRREG_H__
 #define __UPNP_MRREG_H__
 
+#include "upnp/compat.h"
 #include "upnp_service.h"
 
 #include <memory>
 #include <string>
-#include <upnp.h>
 
 class CdsObject;
 class Context;

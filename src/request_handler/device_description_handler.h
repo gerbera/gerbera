@@ -46,7 +46,10 @@ public:
     /// @param quirks allows modifying the content of the response based on the client
     /// @param mode either UPNP_READ or UPNP_WRITE
     /// @return the appropriate IOHandler for the request.
-    std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
+    std::unique_ptr<IOHandler> open(
+        const char* filename,
+        const std::shared_ptr<Quirks>& quirks,
+        UpnpOpenFileMode_t mode) override;
     std::string renderDeviceDescription(const std::string& ip, in_port_t port, const std::shared_ptr<Quirks>& quirks) const;
 
 private:

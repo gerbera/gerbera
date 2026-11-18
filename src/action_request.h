@@ -35,9 +35,10 @@
 #ifndef __ACTION_REQUEST_H__
 #define __ACTION_REQUEST_H__
 
+#include "upnp/compat.h"
+
 #include <memory>
 #include <string>
-#include <upnp.h>
 
 // forward declaration
 class UpnpXMLBuilder;

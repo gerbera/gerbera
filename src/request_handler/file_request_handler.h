@@ -68,7 +68,7 @@ public:
     std::unique_ptr<IOHandler> open(
         const char* filename,
         const std::shared_ptr<Quirks>& quirks,
-        enum UpnpOpenFileMode mode) override;
+        UpnpOpenFileMode_t mode) override;
 
 private:
     std::shared_ptr<CdsObject> loadFileObject(const std::map<std::string, std::string>& params) const;

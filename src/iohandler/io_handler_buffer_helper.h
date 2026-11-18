@@ -60,7 +60,7 @@ public:
     IOHandlerBufferHelper& operator=(const IOHandlerBufferHelper&) = delete;
 
     // inherited from IOHandler
-    void open(enum UpnpOpenFileMode mode) override;
+    void open(UpnpOpenFileMode_t mode) override;
     grb_read_t read(std::byte* buf, std::size_t length) override;
     void seek(off_t offset, int whence) override;
     void close() override;

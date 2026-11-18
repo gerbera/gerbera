@@ -51,7 +51,7 @@ public:
         std::shared_ptr<CdsObject> obj,
         std::string group);
 
-    void open(enum UpnpOpenFileMode mode) override;
+    void open(UpnpOpenFileMode_t mode) override;
     grb_read_t read(std::byte* buf, std::size_t length) override;
     void seek(off_t seekOffset, int whence) override;
     off_t tell() override;
@@ -63,7 +63,7 @@ private:
     std::string path;
     std::shared_ptr<CdsObject> obj;
     std::string group;
-    enum UpnpOpenFileMode mode { UPNP_READ };
+    UpnpOpenFileMode_t mode { UPNP_READ };
     off_t offset {};
     off_t position {};
     std::unique_ptr<IOHandler> transcoder;

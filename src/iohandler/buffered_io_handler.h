@@ -35,9 +35,9 @@
 #define __BUFFERED_IO_HANDLER_H__
 
 #include "io_handler_buffer_helper.h"
+#include "upnp/compat.h"
 
 #include <memory>
-#include <upnp.h>
 
 /// @brief a IOHandler with buffer support
 /// the buffer is only for read(). write() is not supported
@@ -55,7 +55,7 @@ public:
     BufferedIOHandler(const std::shared_ptr<Config>& config, std::unique_ptr<IOHandler> underlyingHandler, std::size_t bufSize, std::size_t maxChunkSize, std::size_t initialFillSize);
     ~BufferedIOHandler() noexcept override;
 
-    void open(enum UpnpOpenFileMode mode) override;
+    void open(UpnpOpenFileMode_t mode) override;
     void close() override;
 
 private:

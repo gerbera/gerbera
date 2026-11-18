@@ -27,11 +27,12 @@
 #ifndef __UPNP_SERVICE_H__
 #define __UPNP_SERVICE_H__
 
+#include "upnp/compat.h"
+
 #include <functional>
 #include <map>
 #include <memory>
 #include <string>
-#include <upnp.h>
 
 class ActionRequest;
 class Config;

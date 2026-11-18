@@ -63,7 +63,7 @@ BufferedIOHandler::~BufferedIOHandler() noexcept
     BufferedIOHandler::close();
 }
 
-void BufferedIOHandler::open(enum UpnpOpenFileMode mode)
+void BufferedIOHandler::open(UpnpOpenFileMode_t mode)
 {
     // do the open here instead of threadProc() because it may throw an exception
     underlyingHandler->open(mode);

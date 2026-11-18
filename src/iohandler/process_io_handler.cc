@@ -125,7 +125,7 @@ ProcessIOHandler::ProcessIOHandler(
     registerAll();
 }
 
-void ProcessIOHandler::open(enum UpnpOpenFileMode mode)
+void ProcessIOHandler::open(UpnpOpenFileMode_t mode)
 {
     if (mainProc && (!mainProc->isAlive() || abort())) {
         killAll();

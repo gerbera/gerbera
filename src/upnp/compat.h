@@ -32,6 +32,11 @@
 #include <map>
 #include <string>
 
+extern "C" {
+enum UpnpOpenFileMode;
+}
+typedef enum UpnpOpenFileMode UpnpOpenFileMode_t;
+
 using grb_read_t = std::int32_t;
 static constexpr grb_read_t GRB_READ_END = 0;
 

@@ -41,7 +41,10 @@ public:
         std::shared_ptr<Server> server);
 
     bool getInfo(const char* filename, UpnpFileInfo* info) override;
-    std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
+    std::unique_ptr<IOHandler> open(
+        const char* filename,
+        const std::shared_ptr<Quirks>& quirks,
+        UpnpOpenFileMode_t mode) override;
 
 private:
     std::string webRoot;

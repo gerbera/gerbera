@@ -35,9 +35,9 @@
 #ifndef __IO_HANDLER_H__
 #define __IO_HANDLER_H__
 
-#include <cstddef>
-
 #include "upnp/compat.h"
+
+#include <cstddef>
 
 class IOHandler {
 public:
@@ -49,7 +49,7 @@ public:
 
     /// @brief Opens a data for the web server.
     /// @param mode in which the data will be opened (we only support UPNP_READ)
-    virtual void open(enum UpnpOpenFileMode mode);
+    virtual void open(UpnpOpenFileMode_t mode);
 
     /// @brief Reads previously opened/initialized data sequentially.
     /// @param buf This buffer will be filled by our read functions.

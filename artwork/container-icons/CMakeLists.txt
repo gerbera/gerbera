@@ -24,6 +24,15 @@
 
 # Install the original artwork plus filename aliases used by the stock layout. Keep this usable on
 # its own for a staged installation check.
+
+macro(makeLink root src dest comp)
+    install(
+        CODE "MESSAGE(\"adding link in ${CMAKE_INSTALL_PREFIX}/${root} to ${src} from ${dest}\")")
+    install(
+        CODE "EXECUTE_PROCESS(COMMAND cd \"${CMAKE_INSTALL_PREFIX}/${root}\" && ln -snf \"${src}\" \"${dest}\")"
+        COMPONENT "${comp}")
+endmacro()
+
 install(
     DIRECTORY "${CMAKE_CURRENT_LIST_DIR}/"
     DESTINATION "${CMAKE_INSTALL_DATADIR}/container-icons"
@@ -66,23 +75,19 @@ foreach(_container_icon_theme IN ITEMS "gerbera" "techno")
         install(
             FILES "${CMAKE_CURRENT_LIST_DIR}/${_container_icon_theme}/${_container_icon_source}.png"
             DESTINATION "${_container_icon_destination}"
-            RENAME "${_container_icon_name}.png"
             COMPONENT ContainerIcons)
-        install(
-            FILES "${CMAKE_CURRENT_LIST_DIR}/${_container_icon_theme}/${_container_icon_source}.png"
-            DESTINATION "${_container_icon_destination}"
-            RENAME "object.container-${_container_icon_name}.png"
-            COMPONENT ContainerIcons)
+        makelink(${_container_icon_destination} "${_container_icon_source}.png"
+                 "${_container_icon_name}.png" ContainerIcons)
+        makelink(${_container_icon_destination} "${_container_icon_source}.png"
+                 "object.container-${_container_icon_name}.png" ContainerIcons)
     endforeach()
     foreach(_container_icon_album_class IN
             ITEMS "object.container.album" "object.container.album.musicAlbum"
                   "object.container.album.photoAlbum")
         foreach(_container_icon_album_name IN ITEMS "Albums" "Alben")
-            install(
-                FILES "${CMAKE_CURRENT_LIST_DIR}/${_container_icon_theme}/albums.png"
-                DESTINATION "${_container_icon_destination}"
-                RENAME "${_container_icon_album_class}-${_container_icon_album_name}.png"
-                COMPONENT ContainerIcons)
+            makelink(${_container_icon_destination} "albums.png"
+                     "${_container_icon_album_class}-${_container_icon_album_name}.png"
+                     ContainerIcons)
         endforeach()
     endforeach()
     foreach(_container_icon_fallback IN
@@ -90,11 +95,8 @@ foreach(_container_icon_theme IN ITEMS "gerbera" "techno")
                   "playlists;object.container.playlistContainer")
         list(GET _container_icon_fallback 0 _container_icon_source)
         list(GET _container_icon_fallback 1 _container_icon_name)
-        install(
-            FILES "${CMAKE_CURRENT_LIST_DIR}/${_container_icon_theme}/${_container_icon_source}.png"
-            DESTINATION "${_container_icon_destination}"
-            RENAME "${_container_icon_name}.png"
-            COMPONENT ContainerIcons)
+        makelink(${_container_icon_destination} "${_container_icon_source}.png"
+                 "${_container_icon_name}.png" ContainerIcons)
     endforeach()
 endforeach()
 

@@ -76,7 +76,10 @@ bool UpnpDescHandler::getInfo(const char* filename, UpnpFileInfo* info)
     return quirks && quirks->getClient();
 }
 
-std::unique_ptr<IOHandler> UpnpDescHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> UpnpDescHandler::open(
+    const char* filename,
+    const std::shared_ptr<Quirks>& quirks,
+    UpnpOpenFileMode_t mode)
 {
     auto webFile = getPath(quirks, filename);
     auto svcDescription = (useDynamicDescription && quirks) ? getServiceDescription(webFile, quirks) : "";

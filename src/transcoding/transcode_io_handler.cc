@@ -101,7 +101,7 @@ TranscodeInternalIOHandler::~TranscodeInternalIOHandler()
     avformat_free_context(outFormatContext);
 }
 
-void TranscodeInternalIOHandler::open(enum UpnpOpenFileMode mode)
+void TranscodeInternalIOHandler::open(UpnpOpenFileMode_t mode)
 {
     log_debug("open {}", file.getPath().string());
     if (mode != UPNP_READ)

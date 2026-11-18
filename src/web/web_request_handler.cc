@@ -107,7 +107,7 @@ bool WebRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
 std::unique_ptr<IOHandler> WebRequestHandler::open(
     const char* filename,
     const std::shared_ptr<Quirks>& quirks,
-    enum UpnpOpenFileMode mode)
+    UpnpOpenFileMode_t mode)
 {
     if (!filename) {
         Json::Value errorJson;

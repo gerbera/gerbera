@@ -33,6 +33,7 @@
 #include "config/result/client_config.h"
 #include "database/database.h"
 #include "server.h"
+#include "upnp/compat.h"
 #include "util/grb_net.h"
 #include "util/logger.h"
 
@@ -41,7 +42,6 @@
 #include <iterator>
 #include <pugixml.hpp>
 #include <sys/socket.h>
-#include <upnp.h>
 
 ClientManager::ClientManager(
     std::shared_ptr<Config> config,
