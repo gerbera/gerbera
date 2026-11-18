@@ -965,8 +965,7 @@ void SQLDatabase::updateLayoutTitles(const std::vector<std::shared_ptr<CdsObject
         return;
 
     SqlAutoLock lock(sqlMutex);
-    const auto* transactions = dynamic_cast<const SqlWithTransactions*>(this);
-    if (transactions && transactions->hasActiveTransaction())
+    if (hasActiveTransaction())
         throw DatabaseException("Cannot update layout titles during an active database transaction", LINE_MESSAGE);
 
     std::vector<std::string> statements;

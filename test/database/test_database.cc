@@ -459,6 +459,25 @@ TEST_P(LayoutTitleUpdateTest, LayoutTitleUpdatePreservesActiveSqliteTransaction)
     EXPECT_EQ(database->getInternalSetting("layout_outer_marker"), "written");
 }
 
+TEST_P(LayoutTitleUpdateTest, LayoutTitleUpdateRejectsActiveRegularTransaction)
+{
+    const int albumId = addLayoutAlbum("Old Album");
+    auto album = prepareAlbumRename(albumId, "New Album");
+    auto sql = std::dynamic_pointer_cast<SQLDatabase>(database);
+    ASSERT_NE(sql, nullptr);
+
+    sql->beginTransaction("Layout title guard");
+    if (GetParam())
+        EXPECT_THROW(database->updateLayoutTitles({ album }), DatabaseException);
+    else
+        EXPECT_NO_THROW(database->updateLayoutTitles({ album }));
+    sql->rollback("Layout title guard");
+    EXPECT_EQ(database->loadObject(albumId)->getTitle(), GetParam() ? "Old Album" : "New Album");
+
+    EXPECT_NO_THROW(database->updateLayoutTitles({ album }));
+    EXPECT_EQ(database->loadObject(albumId)->getTitle(), "New Album");
+}
+
 INSTANTIATE_TEST_SUITE_P(TransactionModes, LayoutTitleUpdateTest,
     ::testing::Bool(),
     [](const ::testing::TestParamInfo<bool>& info) {
