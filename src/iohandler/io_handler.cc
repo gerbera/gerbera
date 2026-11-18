@@ -34,10 +34,8 @@
 
 #include "io_handler.h" // API
 
-#include "upnp/compat.h"
-
 /// @brief Opens a file for the web server.
-void IOHandler::open(enum UpnpOpenFileMode mode)
+void IOHandler::open(UpnpOpenFileMode_t mode)
 {
 }
 

@@ -178,6 +178,9 @@ Additional cmake Options
 +------------------------+-----------------------------------------------------+----------+
 | INSTALL\_DOC           | Install generated documentation into target         | Disabled |
 +------------------------+-----------------------------------------------------+----------+
+| INSTALL\_ICONS         | Install additional container icons into target.     | Enabled  |
+|                        | See :ref:`container-icon-theme`                     |          |
++------------------------+-----------------------------------------------------+----------+
 
 
 .. index:: Quick Start Build

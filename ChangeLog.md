@@ -39,6 +39,7 @@
 - Fix stale inotify events deleting replacement media
 - Fix UPnP client cache returning the wrong observation for a shared IP
 - Fix WavPack stack overflow by allocating entries on the heap
+- Fix: Link icon files
 - Handle missing database objects in playlists and cuesheets
 - Improve logging for mime and extensions
 - Increase timeouts for tests
@@ -47,6 +48,7 @@
 - Make Alpine package-index downloads resilient with HTTPS mirror fallback
 - Pass the client quirks to the DIDL of search results
 - Prefer Alpine CDN bootstrap with verified GitLab fallback
+- Preserve album and track IDs on display-name rescans
 - Preserve fractional MP4 BPM with configurable conflict priority
 - Preserve multiple genres in WebM and WMV metadata
 - Preserve newer media metadata when recording playback

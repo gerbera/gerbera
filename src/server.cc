@@ -772,7 +772,7 @@ int Server::GetInfoCallback(
 
 UpnpWebFileHandle Server::OpenCallback(
     const char* filename,
-    enum UpnpOpenFileMode mode,
+    UpnpOpenFileMode_t mode,
     const void* cookie,
     const void* requestCookie)
 {

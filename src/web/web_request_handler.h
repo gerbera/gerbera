@@ -45,10 +45,6 @@ class Server;
 class UpnpXMLBuilder;
 enum class AutoscanType;
 enum class ConfigVal;
-extern "C" {
-enum UpnpOpenFileMode;
-}
-typedef enum UpnpOpenFileMode UpnpOpenFileMode_t;
 
 namespace Web {
 
@@ -132,7 +128,7 @@ public:
     std::unique_ptr<IOHandler> open(
         const char* filename,
         const std::shared_ptr<Quirks>& quirks,
-        enum UpnpOpenFileMode mode) override;
+        UpnpOpenFileMode_t mode) override;
 };
 
 /// @brief Chooses and creates the appropriate handler for processing the request.

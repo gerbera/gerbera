@@ -68,7 +68,10 @@ bool DeviceDescriptionHandler::getInfo(const char* filename, UpnpFileInfo* info)
     return quirks && quirks->getClient();
 }
 
-std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> DeviceDescriptionHandler::open(
+    const char* filename,
+    const std::shared_ptr<Quirks>& quirks,
+    UpnpOpenFileMode_t mode)
 {
     log_debug("Device description opened {}", filename);
 

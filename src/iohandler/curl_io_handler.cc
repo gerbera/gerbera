@@ -69,7 +69,7 @@ CurlIOHandler::~CurlIOHandler() noexcept
     CurlIOHandler::close();
 }
 
-void CurlIOHandler::open(enum UpnpOpenFileMode mode)
+void CurlIOHandler::open(UpnpOpenFileMode_t mode)
 {
     if (!curl_handle) {
         curl_handle = curl_easy_init();

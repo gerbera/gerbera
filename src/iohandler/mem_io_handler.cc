@@ -56,7 +56,7 @@ MemIOHandler::~MemIOHandler()
     delete[] buffer;
 }
 
-void MemIOHandler::open(enum UpnpOpenFileMode mode)
+void MemIOHandler::open(UpnpOpenFileMode_t mode)
 {
     pos = 0;
 }

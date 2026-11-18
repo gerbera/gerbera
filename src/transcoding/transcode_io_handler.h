@@ -107,7 +107,7 @@ public:
     ~TranscodeInternalIOHandler() override;
 
     /// @brief Opens file for reading (writing is not supported)
-    void open(enum UpnpOpenFileMode mode) override;
+    void open(UpnpOpenFileMode_t mode) override;
 
     /// @brief Reads a previously opened file sequentially.
     /// @param buf Data from the file will be copied into this buffer.

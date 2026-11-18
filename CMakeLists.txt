@@ -75,6 +75,7 @@ option(WITH_DEBUG_OPTIONS     "Enables dedicated debug messages" ON)
 option(WITH_TESTS             "Build unit tests" OFF)
 
 option(INSTALL_DOC            "Install generated documentation into target" OFF)
+option(INSTALL_ICONS          "Install additional container icons into target" ON)
 option(BUILD_DOC              "Add 'doc' target to generate source documentation" OFF)
 option(BUILD_CHANGELOG        "Build 'changelog.gz' file for Debian packages" OFF)
 
@@ -1019,7 +1020,10 @@ set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${DEBIAN_EXTRA_FILES})
 install(
     TARGETS gerbera
     DESTINATION ${CMAKE_INSTALL_BINDIR})
-add_subdirectory(artwork/container-icons)
+
+if(INSTALL_ICONS)
+    add_subdirectory(artwork/container-icons)
+endif()
 
 install(
     DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js
@@ -1046,9 +1050,12 @@ install(
     FILES ${PROJECT_SOURCE_DIR}/doc/gerbera.1
     DESTINATION ${CMAKE_INSTALL_MANDIR})
 
-macro(makeLink root src dest)
-    install(CODE "MESSAGE(\"adding link in ${root} to ${src} from ${dest}\")")
-    install(CODE "EXECUTE_PROCESS(COMMAND ln -snf ${root}/${src} ${root}/${dest})")
+macro(makeLink root src dest comp)
+    install(
+        CODE "MESSAGE(\"adding link in ${CMAKE_INSTALL_PREFIX}/${root} to ${src} from ${dest}\")")
+    install(
+        CODE "EXECUTE_PROCESS(COMMAND cd \"${CMAKE_INSTALL_PREFIX}/${root}\" && ln -snf \"${src}\" \"${dest}\")"
+        COMPONENT "${comp}")
 endmacro()
 
 if(INSTALL_DOC)
@@ -1056,16 +1063,16 @@ if(INSTALL_DOC)
     install(CODE "EXECUTE_PROCESS(COMMAND ${PROJECT_SOURCE_DIR}/doc/do_sphinx.sh)")
     install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/_build/dist/
             DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/dist)
-    makelink(${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR} doc/dist web/doc)
+    makelink(${CMAKE_INSTALL_DATADIR} doc/dist web/doc Documentation)
 
     if(BUILD_DOC)
         install(CODE "MESSAGE(\"${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} -t doc\")")
         install(
             CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} -t doc)"
-        )
+            COMPONENT Documentation)
         install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/_build/html/
                 DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/dev)
-        makelink(${CMAKE_INSTALL_PREFIX}/${CMAKE_INSTALL_DATADIR} doc/dev web/dev)
+        makelink(${CMAKE_INSTALL_DATADIR} doc/dev web/dev Documentation)
     endif()
 endif()
 

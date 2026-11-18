@@ -37,10 +37,10 @@
 
 #ifdef HAVE_CURL
 
-#include <curl/curl.h>
-#include <upnp.h>
-
 #include "io_handler_buffer_helper.h"
+#include "upnp/compat.h"
+
+#include <curl/curl.h>
 
 class Config;
 
@@ -56,7 +56,7 @@ public:
         std::chrono::seconds timeout);
     ~CurlIOHandler() noexcept override;
 
-    void open(enum UpnpOpenFileMode mode) override;
+    void open(UpnpOpenFileMode_t mode) override;
     void close() override;
 
 private:

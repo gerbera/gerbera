@@ -45,7 +45,7 @@ FileIOHandler::FileIOHandler(const fs::path& filename, off_t offset)
     log_debug("path = {}", file.getPath().string());
 }
 
-void FileIOHandler::open(enum UpnpOpenFileMode mode)
+void FileIOHandler::open(UpnpOpenFileMode_t mode)
 {
     if (mode != UPNP_READ)
         throw_std_runtime_error("open: UpnpOpenFileMode mode not supported");

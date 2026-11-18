@@ -34,10 +34,11 @@
 #ifndef __SERVER_H__
 #define __SERVER_H__
 
+#include "upnp/compat.h"
+
 #include <memory>
 #include <netinet/in.h>
 #include <string>
-#include <upnp.h>
 #include <vector>
 
 // forward declarations
@@ -236,14 +237,47 @@ protected:
     std::string getExternalUrl() const;
 
     std::shared_ptr<Quirks> getQuirks(const UpnpFileInfo* info, bool isWeb) const;
-    /// @brief Upnp callbacks
+
+    /// @brief Upnp callback for host name validation
     static int HostValidateCallback(const char* host, void* cookie);
-    static int GetInfoCallback(const char* filename, UpnpFileInfo* info, const void* cookie, const void** requestCookie);
-    static UpnpWebFileHandle OpenCallback(const char* filename, enum UpnpOpenFileMode mode, const void* cookie, const void* requestCookie);
-    static int ReadCallback(UpnpWebFileHandle fileHandle, char* buf, std::size_t length, const void* cookie, const void* requestCookie);
-    static int WriteCallback(UpnpWebFileHandle fileHandle, char* buf, std::size_t length, const void* cookie, const void* requestCookie);
-    static int SeekCallback(UpnpWebFileHandle fileHandle, off_t offset, int whence, const void* cookie, const void* requestCookie);
-    static int CloseCallback(UpnpWebFileHandle fileHandle, const void* cookie, const void* requestCookie);
+    /// @brief Upnp callback for item metadata
+    static int GetInfoCallback(
+        const char* filename,
+        UpnpFileInfo* info,
+        const void* cookie,
+        const void** requestCookie);
+    /// @brief Upnp callback to open a stream or file
+    static UpnpWebFileHandle OpenCallback(
+        const char* filename,
+        UpnpOpenFileMode_t mode,
+        const void* cookie,
+        const void* requestCookie);
+    /// @brief Upnp callback to read data from a stream
+    static int ReadCallback(
+        UpnpWebFileHandle fileHandle,
+        char* buf,
+        std::size_t length,
+        const void* cookie,
+        const void* requestCookie);
+    /// @brief Upnp callback to write to stream
+    static int WriteCallback(
+        UpnpWebFileHandle fileHandle,
+        char* buf,
+        std::size_t length,
+        const void* cookie,
+        const void* requestCookie);
+    /// @brief Upnp callback to jump to a new position
+    static int SeekCallback(
+        UpnpWebFileHandle fileHandle,
+        off_t offset,
+        int whence,
+        const void* cookie,
+        const void* requestCookie);
+    /// @brief Upnp callback to close a file or stream
+    static int CloseCallback(
+        UpnpWebFileHandle fileHandle,
+        const void* cookie,
+        const void* requestCookie);
 };
 
 #endif // __SERVER_H__

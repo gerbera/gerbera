@@ -54,7 +54,7 @@ IOHandlerBufferHelper::IOHandlerBufferHelper(
         throw_std_runtime_error("initialFillSize {} must be lesser than or equal to the size of the buffer {}", initialFillSize, bufSize);
 }
 
-void IOHandlerBufferHelper::open(enum UpnpOpenFileMode mode)
+void IOHandlerBufferHelper::open(UpnpOpenFileMode_t mode)
 {
     if (isOpen)
         throw_std_runtime_error("tried to reopen an open IOHandlerBufferHelper");

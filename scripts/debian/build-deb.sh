@@ -290,12 +290,17 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
   if [[ ${ex_preset} -eq 0 ]]; then
     cmake_preset="release-${my_upnp}"
   fi
+  INSTALL_ICONS=ON
+  if [[ ${deb_arc} != "amd64" ]]; then
+    INSTALL_ICONS=OFF
+  fi
   set -euEo pipefail
 
   echo "::group::Building gerbera"
   cmake "${ROOT_DIR}" --preset="${cmake_preset}" \
     -DWITH_SYSTEMD=${WITH_SYSTEMD} \
     -DWITH_PGSQL=${WITH_POSTGRES} \
+    -DINSTALL_ICONS=${INSTALL_ICONS} \
     -DBUILD_CHANGELOG=ON \
     -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"

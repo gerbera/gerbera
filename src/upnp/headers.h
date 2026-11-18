@@ -26,9 +26,10 @@
 #ifndef GERBERA_HEADERS_H
 #define GERBERA_HEADERS_H
 
+#include "upnp/compat.h"
+
 #include <map>
 #include <string>
-#include <upnp.h>
 
 /// @brief Utility class for HTTP headers in UPnP requests
 class Headers {

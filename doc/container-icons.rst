@@ -1,3 +1,5 @@
+.. _container-icon-theme:
+
 Container icon theme
 ====================
 

@@ -496,7 +496,7 @@ std::unique_ptr<IOHandler> FileRequestHandler::openZip(
 std::unique_ptr<IOHandler> FileRequestHandler::open(
     const char* filename,
     const std::shared_ptr<Quirks>& quirks,
-    enum UpnpOpenFileMode mode)
+    UpnpOpenFileMode_t mode)
 {
     log_debug("start: {}", filename);
 

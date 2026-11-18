@@ -107,7 +107,10 @@ bool UIHandler::getInfo(const char* filename, UpnpFileInfo* info)
     return quirks && quirks->getClient();
 }
 
-std::unique_ptr<IOHandler> UIHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> UIHandler::open(
+    const char* filename,
+    const std::shared_ptr<Quirks>& quirks,
+    UpnpOpenFileMode_t mode)
 {
     log_debug("UI: requested {}", filename);
 

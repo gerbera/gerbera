@@ -105,7 +105,10 @@ bool URLRequestHandler::getInfo(const char* filename, UpnpFileInfo* info)
     return quirks && quirks->getClient();
 }
 
-std::unique_ptr<IOHandler> URLRequestHandler::open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode)
+std::unique_ptr<IOHandler> URLRequestHandler::open(
+    const char* filename,
+    const std::shared_ptr<Quirks>& quirks,
+    UpnpOpenFileMode_t mode)
 {
     log_debug("start");
 

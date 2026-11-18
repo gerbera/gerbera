@@ -37,7 +37,10 @@ public:
     explicit UpnpDescHandler(const std::shared_ptr<Content>& content, const std::shared_ptr<UpnpXMLBuilder>& xmlBuilder, const std::shared_ptr<Quirks>& quirks);
 
     bool getInfo(const char* filename, UpnpFileInfo* info) override;
-    std::unique_ptr<IOHandler> open(const char* filename, const std::shared_ptr<Quirks>& quirks, enum UpnpOpenFileMode mode) override;
+    std::unique_ptr<IOHandler> open(
+        const char* filename,
+        const std::shared_ptr<Quirks>& quirks,
+        UpnpOpenFileMode_t mode) override;
 
 private:
     std::string getServiceDescription(const std::string& path, const std::shared_ptr<Quirks>& quirks);

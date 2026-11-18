@@ -45,7 +45,7 @@ SeekableTranscodeIOHandler::SeekableTranscodeIOHandler(
 {
 }
 
-void SeekableTranscodeIOHandler::open(enum UpnpOpenFileMode mode)
+void SeekableTranscodeIOHandler::open(UpnpOpenFileMode_t mode)
 {
     this->mode = mode;
 }
