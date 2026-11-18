@@ -1062,12 +1062,29 @@ void ImportService::refreshAudioLayout(const std::shared_ptr<CdsObject>& object,
     // Reuse indexed metadata only while the physical source remains unchanged.
     std::error_code error;
     const fs::directory_entry file(object->getLocation(), error);
+    if (error)
+        throw_std_runtime_error("Cannot inspect source file {}: {}", object->getLocation().string(), error.message());
+
+    const auto regular = isRegularFile(file, error);
+    if (error)
+        throw_std_runtime_error("Cannot determine source file type {}: {}", file.path().string(), error.message());
+    if (!regular)
+        throw_std_runtime_error("Source file has changed: {} is not a regular file", file.path().string());
+
+    const auto modified = file.last_write_time(error);
+    if (error)
+        throw_std_runtime_error("Cannot read source file modification time {}: {}", file.path().string(), error.message());
+    if (toSeconds(modified) != object->getMTime())
+        throw_std_runtime_error("Source file has changed: {} (modification time)", file.path().string());
+
     const auto resource = object->getResource(ResourcePurpose::Content);
     const auto size = resource ? resource->getAttribute(ResourceAttribute::SIZE) : std::string();
-    if (error || !isRegularFile(file, error) || error
-        || toSeconds(file.last_write_time(error)) != object->getMTime() || error
-        || (!size.empty() && std::to_string(getFileSize(file)) != size))
-        throw_std_runtime_error("Source file has changed: {}", object->getLocation().string());
+    if (!size.empty()) {
+        const auto expectedSize = stoumaxString(size);
+        const auto actualSize = getFileSize(file);
+        if (actualSize != expectedSize)
+            throw_std_runtime_error("Source file has changed: {} (size {} instead of {})", file.path().string(), actualSize, expectedSize);
+    }
 
     if (autoscanDir && !autoscanDir->hasContent(object->getClass()))
         return;

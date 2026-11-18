@@ -43,6 +43,7 @@
 #include <map>
 #include <memory>
 #include <pugixml.hpp>
+#include <stdexcept>
 #include <string>
 #include <system_error>
 #include <tuple>
@@ -426,6 +427,41 @@ TEST_P(PlaylistFileClassTest, HttpResourcesPreservePlaylistMediaBytes)
     ASSERT_TRUE(playlistResourceBytesMatch());
 }
 #endif
+
+TEST_F(PlaylistImportTest, AudioLayoutRefreshValidatesNumericSizeAndFilesystemErrors)
+{
+    const auto path = source / "source.wav";
+    writeWave(path, "Source");
+    start("grb");
+    ASSERT_TRUE(waitFor([&] {
+        return importsIdle() && database->findObjectByPath(path, DEFAULT_CLIENT_GROUP, DbFileType::File);
+    },
+        "source import before layout validation"));
+    auto object = database->findObjectByPath(path, DEFAULT_CLIENT_GROUP, DbFileType::File);
+    const auto resource = object->getResource(ResourcePurpose::Content);
+    ASSERT_NE(resource, nullptr);
+    const auto size = resource->getAttribute(ResourceAttribute::SIZE);
+    ASSERT_FALSE(size.empty());
+    const auto context = content->getContext();
+    ImportService importer(context, context->getConverterManager());
+
+    resource->addAttribute(ResourceAttribute::SIZE, "000" + size);
+    EXPECT_NO_THROW(importer.refreshAudioLayout(object, nullptr));
+    resource->addAttribute(ResourceAttribute::SIZE, "0");
+    EXPECT_THROW(importer.refreshAudioLayout(object, nullptr), std::runtime_error);
+    resource->addAttribute(ResourceAttribute::SIZE, "");
+    EXPECT_NO_THROW(importer.refreshAudioLayout(object, nullptr));
+
+    object->setLocation(source / "missing.wav", CdsEntryType::File);
+    try {
+        importer.refreshAudioLayout(object, nullptr);
+        FAIL() << "Missing source file was accepted";
+    } catch (const std::runtime_error& error) {
+        const std::string message = error.what();
+        EXPECT_NE(message.find(object->getLocation().string()), std::string::npos);
+        EXPECT_NE(message.find(std::make_error_code(std::errc::no_such_file_or_directory).message()), std::string::npos);
+    }
+}
 
 static std::string playlistClassCaseName(const ::testing::TestParamInfo<PlaylistFileClassTest::ParamType>& info)
 {

@@ -86,6 +86,8 @@ public:
     SQLIdentifier identifier(const std::string& name) const { return { name, table_quote_begin, table_quote_end }; }
 
     // hooks for transactions
+    /// @brief Whether a regular transaction currently owns the connection.
+    virtual bool hasActiveTransaction() const { return false; }
     virtual void beginTransaction(std::string_view tName) { }
     virtual void rollback(std::string_view tName) { }
     virtual void commit(std::string_view tName) { }

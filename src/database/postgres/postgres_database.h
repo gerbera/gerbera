@@ -116,6 +116,7 @@ public:
         const std::shared_ptr<Mime>& mime,
         const std::shared_ptr<ConverterManager>& converterManager);
 
+    bool hasActiveTransaction() const override { return SqlWithTransactions::hasActiveTransaction(); }
     void beginTransaction(std::string_view tName) override;
     void rollback(std::string_view tName) override;
     void commit(std::string_view tName) override;
