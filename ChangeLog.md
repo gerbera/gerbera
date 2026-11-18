@@ -39,7 +39,7 @@
 - Fix stale inotify events deleting replacement media
 - Fix UPnP client cache returning the wrong observation for a shared IP
 - Fix WavPack stack overflow by allocating entries on the heap
-- Fix: Link icon files
+- Fix: Link icon files instead of copying
 - Handle missing database objects in playlists and cuesheets
 - Improve logging for mime and extensions
 - Increase timeouts for tests
@@ -69,7 +69,7 @@
 - Update to cxxopts-g7af8aa
 - Update to ffmpegthumbnailer 2.4.1
 - Update to fmt 12.2.1
-- Update to pupnp 22.2.3
+- Update to pupnp 22.2.4
 - Use album cover for named disc folders
 - Use fmt exception formatting
 - Wait for client grid rendering in browser tests
