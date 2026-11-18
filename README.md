@@ -57,7 +57,7 @@ sudo make install
 
 | Library             | Min Version  | Recommended  | Latest tested | Required?     | Note                             | Default  |
 | ------------------- | ------------ | ------------ | ------------- | ------------- | -------------------------------- | -------- |
-| [libupnp]           | 1.14.6       | 1.14.30      | 22.2.3        | XOR libnpupnp | UPnP protocol support            |          |
+| [libupnp]           | 1.14.6       | 1.14.30      | 22.2.4        | XOR libnpupnp | UPnP protocol support            |          |
 | [libnpupnp]         | 4.2.1        | 5.1.2        | 6.3.1         | XOR libupnp   | Alternate UPnP protocol support  | Disabled |
 | libuuid             |              |              |               | Depends on OS | Not required on \*BSD            |          |
 | [pugixml]           |              | 1.10         | 1.16          | Required      | XML file and data support        |          |
@@ -75,7 +75,7 @@ sudo make install
 | [libpq]             | 12.22        |              | 17.0.6        | Optional      | required by [libpqxx]            | Disabled |
 | [curl]              |              |              | 8.14.1        | Optional      | Enables web services             | Enabled  |
 | [taglib]            | 1.12         | 1.12         | 2.3.2         | Optional      | Audio tag support                | Enabled  |
-5 [utf8cpp]           | 4.1.1        | 4.1.1        | 5.0.0         | Optional      | Required for [taglib] build      | Enabled  |
+| [utf8cpp]           | 4.1.1        | 4.1.1        | 5.0.0         | Optional      | Required for [taglib] build      | Enabled  |
 | libmagic            |              |              |               | Optional      | File type detection              | Enabled  |
 | [wavpack]           | 5.1.0        | 5.4.0        | 5.9.0         | Optional      | WavPack metadata support         | Disabled |
 | [libmatroska]       | 1.4.8        | 1.6.3        | 1.7.2         | Optional      | MKV metadata                     | Enabled  |

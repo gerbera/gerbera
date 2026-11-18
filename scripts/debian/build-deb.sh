@@ -291,7 +291,7 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
     cmake_preset="release-${my_upnp}"
   fi
   INSTALL_ICONS=ON
-  if [[ ${deb_arc} != "amd64" ]]; then
+  if [[ ${deb_arch} != "amd64" ]]; then
     INSTALL_ICONS=OFF
   fi
   set -euEo pipefail
