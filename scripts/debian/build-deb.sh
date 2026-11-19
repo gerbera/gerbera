@@ -75,6 +75,10 @@ function install-deb-s3() {
 function upload_to_repo() {
   echo "::group::Uploading package"
   install-deb-s3
+  prefix=${1}
+  pkg_name="gerbera_${2}"
+  doc_name="gerbera-doc_${2}"
+  ico_name="gerbera-container-icons_${2}"
 
   echo "${PKG_SIGNING_KEY}" | gpg --import
   PRES_VERS='--no-preserve-versions'
@@ -84,22 +88,21 @@ function upload_to_repo() {
 
   deb-s3 upload \
     --bucket=gerbera \
-    --prefix="${1}" \
+    --prefix="${prefix}" \
     ${PRES_VERS} \
     --codename="${lsb_codename}" \
-    --arch="${deb_arch}" \
     --lock \
     --sign="${PKG_SIGNING_KEY_ID}" \
     --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
     --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
     --endpoint="${DEB_UPLOAD_ENDPOINT}" \
-    "${deb_name}"
+    "${pkg_name}" "${doc_name}" "${ico_name}"
 
   # Clean old debs after they are replaced above
   if [[ "$1" != "debian" ]]; then
     deb-s3 clean \
       --bucket=gerbera \
-      --prefix="${1}" \
+      --prefix="${prefix}" \
       --codename="${lsb_codename}" \
       --sign="${PKG_SIGNING_KEY_ID}" \
       --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
@@ -262,7 +265,7 @@ if [[ ${GH_EVENT:-} == "pull_request" ]]; then
   is_tag=2
 fi
 
-deb_name="gerbera_${deb_version}_${deb_arch}.deb"
+deb_name="${deb_version}_${deb_arch}.deb"
 
 echo "::group::SystemD build support"
 set +e
@@ -282,7 +285,7 @@ fi
 set -e
 echo "::endgroup::"
 
-if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
+if [[ (! -f "gerbera_${deb_name}") || "${my_sys}" == "HEAD" ]]; then
   cmake_preset="${my_sys}-${my_upnp}"
   set +euEo pipefail
   ex_preset=$(cmake "${ROOT_DIR}" --list-presets | grep -cs "${cmake_preset}")
@@ -309,22 +312,22 @@ if [[ (! -f ${deb_name}) || "${my_sys}" == "HEAD" ]]; then
     if [[ "${my_sys}" != "HEAD" ]]; then
       cpack -G DEB \
             -D CPACK_DEBIAN_PACKAGE_VERSION="${deb_version}" \
-            -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="${deb_arch}" \
-            -D CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA="${ROOT_DIR}/scripts/debian/postinst;${ROOT_DIR}/${BUILD_DIR}/changelog.gz"
+            -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="${deb_arch}"
+      mv "gerbera-gerbera_${deb_name}" "gerbera_${deb_name}"
     fi
   fi
   echo "::endgroup::"
 else
-  printf "Deb ${deb_name} already built!\n"
+  printf "Deb gerbera_${deb_name} already built!\n"
 fi
 
 if [[ "${lsb_distro}" != "Raspbian" && "${lsb_codename}_${deb_arch}" != "focal_armhf" ]]; then
   if [[ "${my_sys}" != "HEAD" ]]; then
     if [[ "${DEB_UPLOAD_ENDPOINT:-}" ]]; then
       # Tags only for main repo
-      [[ $is_tag == 1 ]] && upload_to_repo debian
+      [[ $is_tag == 1 ]] && upload_to_repo debian ${deb_name}
       # Git builds go to git
-      [[ $is_tag == 0 ]] && upload_to_repo debian-git
+      [[ $is_tag == 0 ]] && upload_to_repo debian-git ${deb_name}
       exit 0
     else
       printf "Skipping upload due to missing DEB_UPLOAD_ENDPOINT"

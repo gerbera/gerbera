@@ -92,7 +92,7 @@ jobs:
         with:
           pattern: '(\w+):([\w\.]+):linux/(\w+)(?:/(\w+))?'
           string: '${{ matrix.os-ver }}:${{ matrix.arch }}'
-          replace-with: $1-$2-$3$4.deb
+          replace-with: $1-$2-$3$4.deb.zip
 
       - uses: actions/upload-artifact@v7
         if: ${{github.event_name != 'pull_request'}}

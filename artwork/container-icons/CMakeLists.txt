@@ -27,7 +27,8 @@
 
 macro(makeLink root src dest comp)
     install(
-        CODE "MESSAGE(\"adding link in ${CMAKE_INSTALL_PREFIX}/${root} to ${src} from ${dest}\")")
+        CODE "MESSAGE(\"adding link in ${CMAKE_INSTALL_PREFIX}/${root} to ${src} from ${dest}\")"
+        COMPONENT "${comp}")
     install(
         CODE "EXECUTE_PROCESS(COMMAND cd \"${CMAKE_INSTALL_PREFIX}/${root}\" && ln -snf \"${src}\" \"${dest}\")"
         COMPONENT "${comp}")
