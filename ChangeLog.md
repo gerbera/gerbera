@@ -19,6 +19,7 @@
 - Collect documentation updates
 - Configure album container names independently from audio titles
 - Configure audio display titles and conditional replacements
+- Create separate debian packages for doc and icons
 - Declare scoped search container CTE as recursive
 - Default Sorting for Browse
 - Define Limits for Containter Type Selection

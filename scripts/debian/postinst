@@ -32,4 +32,13 @@ configure)
         gerbera --home /var/lib/gerbera --create-config > /etc/gerbera/config.xml
         chown gerbera:gerbera /etc/gerbera/config.xml
     fi
+    # Link documentation if it is also installed
+    if test -d /usr/share/gerbera/web; then
+        if test -d /usr/share/gerbera/doc/dev; then
+            ln -snf /usr/share/gerbera/doc/dev /usr/share/gerbera/web/dev
+        fi
+        if test -d /usr/share/gerbera/doc/dist; then
+            ln -snf /usr/share/gerbera/doc/dist /usr/share/gerbera/web/doc
+        fi
+    fi
 esac

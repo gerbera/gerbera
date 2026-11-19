@@ -958,7 +958,7 @@ if(WITH_SYSTEMD AND (${CMAKE_SYSTEM_NAME} MATCHES "Linux"))
         install(
             FILES ${CMAKE_CURRENT_BINARY_DIR}/gerbera.service
             DESTINATION ${SYSTEMD_UNIT_DIR}
-            COMPONENT init)
+            COMPONENT Gerbera)
 
         find_package(libsystemd)
         if(libsystemd_FOUND)
@@ -999,11 +999,14 @@ if(BUILD_CHANGELOG)
         WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}"
         DEPENDS ChangeLog.md
         COMMENT "Building changelog")
-    set(DEBIAN_EXTRA_FILES "${DEBIAN_EXTRA_FILES}" "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
+    set(DEBIAN_EXTRA_FILES ${DEBIAN_EXTRA_FILES} "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
 
     add_custom_target(changelog ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz")
 
-    install(FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz" DESTINATION "${CMAKE_INSTALL_DOCDIR}")
+    install(
+        FILES "${CMAKE_CURRENT_BINARY_DIR}/changelog.gz"
+        DESTINATION "${CMAKE_INSTALL_DOCDIR}"
+        COMPONENT Gerbera)
 endif()
 
 if(NOT CMAKE_SYSTEM_NAME MATCHES "Darwin")
@@ -1012,14 +1015,16 @@ if(NOT CMAKE_SYSTEM_NAME MATCHES "Darwin")
     install(
         FILES scripts/gerbera-completion.sh
         DESTINATION "${BASH_COMPLETION_DIR}"
-        RENAME gerbera)
+        RENAME gerbera
+        COMPONENT Gerbera)
 endif()
 
-set(CPACK_DEBIAN_PACKAGE_CONTROL_EXTRA ${DEBIAN_EXTRA_FILES})
+set(CMAKE_INSTALL_DEFAULT_COMPONENT_NAME "Gerbera")
 
 install(
     TARGETS gerbera
-    DESTINATION ${CMAKE_INSTALL_BINDIR})
+    DESTINATION ${CMAKE_INSTALL_BINDIR}
+    COMPONENT Gerbera)
 
 if(INSTALL_ICONS)
     add_subdirectory(artwork/container-icons)
@@ -1027,10 +1032,12 @@ endif()
 
 install(
     DIRECTORY ${PROJECT_SOURCE_DIR}/scripts/js
-    DESTINATION ${CMAKE_INSTALL_DATADIR})
+    DESTINATION ${CMAKE_INSTALL_DATADIR}
+    COMPONENT Gerbera)
 install(
     DIRECTORY ${PROJECT_SOURCE_DIR}/web
     DESTINATION ${CMAKE_INSTALL_DATADIR}
+    COMPONENT Gerbera
     PATTERN web/dev EXCLUDE
     PATTERN web/doc EXCLUDE)
 
@@ -1045,24 +1052,31 @@ install(
           src/database/postgres/postgres.sql
           src/database/postgres/postgres-drop.sql
           src/database/postgres/postgres-upgrade.xml
-    DESTINATION ${CMAKE_INSTALL_DATADIR})
+    DESTINATION ${CMAKE_INSTALL_DATADIR}
+    COMPONENT Gerbera)
 install(
     FILES ${PROJECT_SOURCE_DIR}/doc/gerbera.1
-    DESTINATION ${CMAKE_INSTALL_MANDIR})
+    DESTINATION ${CMAKE_INSTALL_MANDIR}
+    COMPONENT Gerbera)
 
 macro(makeLink root src dest comp)
     install(
-        CODE "MESSAGE(\"adding link in ${CMAKE_INSTALL_PREFIX}/${root} to ${src} from ${dest}\")")
+        CODE "MESSAGE(\"adding link in ${CMAKE_INSTALL_PREFIX}/${root} to ${src} from ${dest}\")"
+        COMPONENT "${comp}")
     install(
         CODE "EXECUTE_PROCESS(COMMAND cd \"${CMAKE_INSTALL_PREFIX}/${root}\" && ln -snf \"${src}\" \"${dest}\")"
         COMPONENT "${comp}")
 endmacro()
 
 if(INSTALL_DOC)
-    install(CODE "MESSAGE(\"${PROJECT_SOURCE_DIR}/doc/do_sphinx.sh\")")
-    install(CODE "EXECUTE_PROCESS(COMMAND ${PROJECT_SOURCE_DIR}/doc/do_sphinx.sh)")
-    install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/_build/dist/
-            DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/dist)
+    install(CODE "MESSAGE(\"${PROJECT_SOURCE_DIR}/doc/do_sphinx.sh\")" COMPONENT Documentation)
+    install(CODE "EXECUTE_PROCESS(COMMAND ${PROJECT_SOURCE_DIR}/doc/do_sphinx.sh)"
+            COMPONENT Documentation)
+    install(
+        DIRECTORY ${PROJECT_SOURCE_DIR}/doc/_build/dist/
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/dist
+        COMPONENT Documentation)
+    install(CODE "FILE(MAKE_DIRECTORY ${CMAKE_INSTALL_DATADIR}/web)" COMPONENT Documentation)
     makelink(${CMAKE_INSTALL_DATADIR} doc/dist web/doc Documentation)
 
     if(BUILD_DOC)
@@ -1070,8 +1084,10 @@ if(INSTALL_DOC)
         install(
             CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} -t doc)"
             COMPONENT Documentation)
-        install(DIRECTORY ${PROJECT_SOURCE_DIR}/doc/_build/html/
-                DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/dev)
+        install(
+            DIRECTORY ${PROJECT_SOURCE_DIR}/doc/_build/html/
+            DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/dev
+            COMPONENT Documentation)
         makelink(${CMAKE_INSTALL_DATADIR} doc/dev web/dev Documentation)
     endif()
 endif()
