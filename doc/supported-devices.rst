@@ -140,6 +140,11 @@ The device flags have the following meaning.
 | ``CAPTION_PROTOCOL``           | Add protocolInfo to ``sec:CaptionInfoEx`` for Samsung                          |
 | ``CaptionProtocol``            |                                                                                |
 +--------------------------------+--------------------------------------------------------------------------------+
+| ``NO_SORT_EXTENSION_``         | Answer ``GetSortExtensionCapabilities`` with "Invalid Action".                 |
+| ``CAPABILITIES``               |                                                                                |
+| ``NoSortExtension``            | dleyna-server crashes when this action succeeds. Set by default for            |
+| ``Capabilities``               | User-Agent ``dLeyna/``.                                                        |
++--------------------------------+--------------------------------------------------------------------------------+
 
 
 Manual Overrides

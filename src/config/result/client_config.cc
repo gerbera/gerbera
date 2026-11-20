@@ -244,6 +244,8 @@ std::vector<std::pair<std::string, Quirk>> ClientConfig::quirkFlags {
     { "CAPTION_PROTOCOL", Quirk::CaptionProtocol },
     { "NoSecNamespace", Quirk::NoSecNamespace },
     { "NO_SEC_NAMESPACE", Quirk::NoSecNamespace },
+    { "NoSortExtensionCapabilities", Quirk::NoSortExtensionCapabilities },
+    { "NO_SORT_EXTENSION_CAPABILITIES", Quirk::NoSortExtensionCapabilities },
     { "Transcoding1", Quirk::Transcoding1 },
     { "Transcoding2", Quirk::Transcoding2 },
     { "Transcoding3", Quirk::Transcoding3 },
