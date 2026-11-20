@@ -218,6 +218,22 @@ TEST_F(UpnpClientsTest, multipleClientsOnSameIP)
     EXPECT_EQ(pClient->pInfo->type, ClientType::StandardUPnP);
 }
 
+TEST_F(UpnpClientsTest, clientPointerStableWhenCacheGrows)
+{
+    // callers keep the returned pointer (e.g. as libupnp request cookie) while
+    // other request threads add clients, so it must not move
+    auto addr = std::make_shared<GrbNet>("192.168.3.1");
+    const ClientObservation* pClient = subject->getInfo(addr, "first client", nullptr);
+    ASSERT_NE(pClient, nullptr);
+
+    for (int i = 2; i < 200; i++)
+        subject->getInfo(std::make_shared<GrbNet>(fmt::format("192.168.3.{}", i)), fmt::format("client {}", i), nullptr);
+
+    EXPECT_EQ(subject->getInfo(addr, "first client", nullptr), pClient);
+    EXPECT_TRUE(pClient->addr->equals(addr));
+    EXPECT_EQ(pClient->userAgent, "first client");
+}
+
 // keep this at the end of all tests (otherwise we need a removeClientProfile function...)
 TEST_F(UpnpClientsTest, configuredIP)
 {
