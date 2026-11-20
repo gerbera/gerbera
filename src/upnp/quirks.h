@@ -63,6 +63,7 @@ enum class Quirk {
     ForceSortCriteriaTitle,
     CaptionProtocol,
     NoSecNamespace,
+    NoSortExtensionCapabilities,
     Transcoding1,
     Transcoding2,
     Transcoding3,

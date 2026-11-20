@@ -42,6 +42,7 @@
 - Fix WavPack stack overflow by allocating entries on the heap
 - Fix: Link icon files instead of copying
 - Handle missing database objects in playlists and cuesheets
+- Hide GetSortExtensionCapabilities from dLeyna to avoid its crash
 - Improve logging for mime and extensions
 - Increase timeouts for tests
 - Keep sortKey for new containers

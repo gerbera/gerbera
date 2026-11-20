@@ -263,6 +263,19 @@ void ClientManager::refresh()
             ClientMatchType::UserAgent,
             "IR 500/1.0",
         },
+
+        // User-Agent(actionReq): dLeyna/0.8.3 GUPnP/1.6.6 DLNADOC/1.50
+        // dleyna-server frees the action of a successful GetSortExtensionCapabilities
+        // call twice and crashes with heap corruption
+        {
+            "dLeyna",
+            DEFAULT_CLIENT_GROUP,
+            ClientType::StandardUPnP,
+            ClientConfig::getFlags({ Quirk::NoSortExtensionCapabilities }),
+            ClientMatchType::UserAgent,
+            "dLeyna/",
+            false,
+        },
     };
 
     auto configList = config->getClientConfigListOption(ConfigVal::CLIENTS_LIST);

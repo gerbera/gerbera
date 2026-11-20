@@ -384,6 +384,10 @@ void ContentDirectoryService::doGetSortExtensionCapabilities(ActionRequest& requ
 {
     log_debug("start");
 
+    auto&& quirks = request.getQuirks();
+    if (quirks && quirks->hasFlag(Quirk::NoSortExtensionCapabilities))
+        throw UpnpException(UPNP_SOAP_E_INVALID_ACTION, "Invalid Action");
+
     auto response = xmlBuilder->createResponse(request.getActionName(), UPNP_DESC_CDS_SERVICE_TYPE);
     auto root = response->document_element();
     root.append_child("SortExtensionCaps").append_child(pugi::node_pcdata).set_value("+,-"); // TIME+, TIME-
