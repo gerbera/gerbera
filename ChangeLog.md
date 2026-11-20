@@ -67,7 +67,7 @@
 - Test numeric client addresses without reverse DNS assumptions
 - transcode: fix build with ffmpeg 7.0
 - Update metadata\_service to use content-type
-- Update to cxxopts-g7af8aa
+- Update to cxxopts-gf81e75
 - Update to ffmpegthumbnailer 2.4.1
 - Update to fmt 12.2.1
 - Update to pupnp 22.2.4

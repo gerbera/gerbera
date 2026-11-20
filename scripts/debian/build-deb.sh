@@ -76,9 +76,13 @@ function upload_to_repo() {
   echo "::group::Uploading package"
   install-deb-s3
   prefix=${1}
-  pkg_name="gerbera_${2}"
-  doc_name="gerbera-doc_${2}"
-  ico_name="gerbera-container-icons_${2}"
+  pkg_name="gerbera_${2}_${3}.deb"
+  doc_name=""
+  ico_name=""
+  if [[ "${3}" == "ON" ]];then
+    doc_name="gerbera-doc_${2}_all.deb"
+    ico_name="gerbera-container-icons_${2}_all.deb"
+  fi
 
   echo "${PKG_SIGNING_KEY}" | gpg --import
   PRES_VERS='--no-preserve-versions'
@@ -86,17 +90,31 @@ function upload_to_repo() {
       PRES_VERS='--preserve-versions'
   fi
 
-  deb-s3 upload \
-    --bucket=gerbera \
-    --prefix="${prefix}" \
-    ${PRES_VERS} \
-    --codename="${lsb_codename}" \
-    --lock \
-    --sign="${PKG_SIGNING_KEY_ID}" \
-    --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
-    --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
-    --endpoint="${DEB_UPLOAD_ENDPOINT}" \
-    "${pkg_name}" "${doc_name}" "${ico_name}"
+  if [[ "${3}" == "ON" ]];then
+    deb-s3 upload \
+      --bucket=gerbera \
+      --prefix="${prefix}" \
+      ${PRES_VERS} \
+      --codename="${lsb_codename}" \
+      --lock \
+      --sign="${PKG_SIGNING_KEY_ID}" \
+      --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
+      --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
+      --endpoint="${DEB_UPLOAD_ENDPOINT}" \
+      "${pkg_name}" "${doc_name}" "${ico_name}"
+  else
+    deb-s3 upload \
+      --bucket=gerbera \
+      --prefix="${prefix}" \
+      ${PRES_VERS} \
+      --codename="${lsb_codename}" \
+      --lock \
+      --sign="${PKG_SIGNING_KEY_ID}" \
+      --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
+      --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
+      --endpoint="${DEB_UPLOAD_ENDPOINT}" \
+      "${pkg_name}"
+  fi
 
   # Clean old debs after they are replaced above
   if [[ "$1" != "debian" ]]; then
@@ -265,7 +283,7 @@ if [[ ${GH_EVENT:-} == "pull_request" ]]; then
   is_tag=2
 fi
 
-deb_name="${deb_version}_${deb_arch}.deb"
+deb_name="gerbera_${deb_version}_${deb_arch}.deb"
 
 echo "::group::SystemD build support"
 set +e
@@ -285,7 +303,7 @@ fi
 set -e
 echo "::endgroup::"
 
-if [[ (! -f "gerbera_${deb_name}") || "${my_sys}" == "HEAD" ]]; then
+if [[ (! -f "${deb_name}") || "${my_sys}" == "HEAD" ]]; then
   cmake_preset="${my_sys}-${my_upnp}"
   set +euEo pipefail
   ex_preset=$(cmake "${ROOT_DIR}" --list-presets | grep -cs "${cmake_preset}")
@@ -294,7 +312,7 @@ if [[ (! -f "gerbera_${deb_name}") || "${my_sys}" == "HEAD" ]]; then
     cmake_preset="release-${my_upnp}"
   fi
   INSTALL_ICONS=ON
-  if [[ ${deb_arch} != "amd64" ]]; then
+  if [[ "${deb_arch}" != "amd64" ]]; then
     INSTALL_ICONS=OFF
   fi
   set -euEo pipefail
@@ -313,7 +331,9 @@ if [[ (! -f "gerbera_${deb_name}") || "${my_sys}" == "HEAD" ]]; then
       cpack -G DEB \
             -D CPACK_DEBIAN_PACKAGE_VERSION="${deb_version}" \
             -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="${deb_arch}"
-      mv "gerbera-gerbera_${deb_name}" "gerbera_${deb_name}"
+      if [[ "${INSTALL_ICONS}" == "ON" ]]; then
+        mv "gerbera-${deb_name}" "${deb_name}"
+      fi
     fi
   fi
   echo "::endgroup::"
@@ -325,9 +345,9 @@ if [[ "${lsb_distro}" != "Raspbian" && "${lsb_codename}_${deb_arch}" != "focal_a
   if [[ "${my_sys}" != "HEAD" ]]; then
     if [[ "${DEB_UPLOAD_ENDPOINT:-}" ]]; then
       # Tags only for main repo
-      [[ $is_tag == 1 ]] && upload_to_repo debian ${deb_name}
+      [[ $is_tag == 1 ]] && upload_to_repo debian "${deb_version}" "${deb_arch}" "${INSTALL_ICONS}"
       # Git builds go to git
-      [[ $is_tag == 0 ]] && upload_to_repo debian-git ${deb_name}
+      [[ $is_tag == 0 ]] && upload_to_repo debian-git "${deb_version}" "${deb_arch}" "${INSTALL_ICONS}"
       exit 0
     else
       printf "Skipping upload due to missing DEB_UPLOAD_ENDPOINT"
