@@ -65,7 +65,7 @@ ClientManager::ClientManager(
                 info = &(clientProfile.at(0));
             }
             entry.pInfo = info;
-            cache.push_back(std::move(entry));
+            cache.push_back(std::make_shared<ClientObservation>(std::move(entry)));
         }
     }
 }
@@ -401,14 +401,29 @@ const ClientObservation* ClientManager::getInfoByCache(
     AutoLock lock(mutex);
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
-        { return entry.addr->equals(addr) && (entry.pInfo->isUnique || entry.userAgent == userAgent); });
+        { return entry->addr->equals(addr) && (entry->pInfo->isUnique || entry->userAgent == userAgent); });
 
     if (it != cache.end()) {
-        log_debug("found client by cache (ip='{}')", it->addr ? it->addr->getNameInfo(false) : "");
-        return &(*it);
+        log_debug("found client by cache (ip='{}')", (*it)->addr ? (*it)->addr->getNameInfo(false) : "");
+        return it->get();
     }
 
     return nullptr;
+}
+
+std::vector<ClientObservation> ClientManager::copyCache() const
+{
+    std::vector<ClientObservation> result;
+    result.reserve(cache.size());
+    for (auto&& entry : cache)
+        result.push_back(*entry);
+    return result;
+}
+
+std::vector<ClientObservation> ClientManager::getClientList() const
+{
+    AutoLock lock(mutex);
+    return copyCache();
 }
 
 void ClientManager::removeClient(
@@ -418,11 +433,11 @@ void ClientManager::removeClient(
     AutoLock lock(mutex);
 
     cache.erase(std::remove_if(cache.begin(), cache.end(),
-                    [clientIp, userAgent](auto&& entry) { return entry.addr && entry.addr->equals(clientIp) && (entry.pInfo->isUnique || entry.userAgent == userAgent); }),
+                    [clientIp, userAgent](auto&& entry) { return entry->addr && entry->addr->equals(clientIp) && (entry->pInfo->isUnique || entry->userAgent == userAgent); }),
         cache.end());
 
     if (this->database && (!this->server || this->server->isRunning()))
-        this->database->saveClients(cache);
+        this->database->saveClients(copyCache());
 }
 
 const ClientObservation* ClientManager::updateCache(
@@ -437,32 +452,33 @@ const ClientObservation* ClientManager::updateCache(
     // house cleaning, remove old entries
     auto now = currentTime();
     cache.erase(std::remove_if(cache.begin(), cache.end(),
-                    [this, now](auto&& entry) { return entry.last + cacheThreshold < now; }),
+                    [this, now](auto&& entry) { return entry->last + cacheThreshold < now; }),
         cache.end());
 
     auto it = std::find_if(cache.begin(), cache.end(), [=](auto&& entry) //
-        { return entry.addr->equals(addr) && (entry.pInfo->isUnique || entry.userAgent == userAgent); });
+        { return entry->addr->equals(addr) && (entry->pInfo->isUnique || entry->userAgent == userAgent); });
 
     if (it != cache.end()) {
         log_debug("cache {}", userAgent);
-        it->last = now;
-        if (it->pInfo != pInfo) {
+        auto&& entry = *it;
+        entry->last = now;
+        if (entry->pInfo != pInfo) {
             // client info changed, update all
-            it->age = now;
-            it->userAgent = userAgent;
+            entry->age = now;
+            entry->userAgent = userAgent;
             if (headers)
-                it->headers = headers;
-            it->pInfo = pInfo;
+                entry->headers = headers;
+            entry->pInfo = pInfo;
         }
     } else {
         // add new client
-        cache.emplace_back(addr, userAgent, now, now, headers, pInfo);
+        cache.push_back(std::make_shared<ClientObservation>(addr, userAgent, now, now, headers, pInfo));
         it = std::prev(cache.end());
     }
     if (this->database && (!this->server || this->server->isRunning()))
-        this->database->saveClients(cache);
+        this->database->saveClients(copyCache());
     log_debug("client info: {} '{}' -> '{}' as {} with {}", addr ? addr->getNameInfo() : "", userAgent, pInfo ? pInfo->name : "", ClientConfig::mapClientType(pInfo->type), pInfo ? ClientConfig::mapFlags(pInfo->flags) : "");
-    return &(*it);
+    return it->get();
 }
 
 std::unique_ptr<pugi::xml_document> ClientManager::downloadDescription(const std::string& location)
