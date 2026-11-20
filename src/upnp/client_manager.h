@@ -72,8 +72,8 @@ public:
         const std::string& userAgent,
         const std::string& descLocation);
 
-    /// @brief get current cache content
-    const std::vector<ClientObservation>& getClientList() const { return cache; }
+    /// @brief get copy of current cache content
+    std::vector<ClientObservation> getClientList() const;
 
     /// @brief Remove single client from cache and database
     void removeClient(
@@ -96,11 +96,17 @@ private:
         const std::shared_ptr<Headers>& headers,
         const ClientProfile* pInfo) const;
 
+    /// @brief copy of cache content, mutex must be held
+    std::vector<ClientObservation> copyCache() const;
+
     static std::unique_ptr<pugi::xml_document> downloadDescription(const std::string& location);
 
     mutable std::mutex mutex;
     using AutoLock = std::scoped_lock<std::mutex>;
-    mutable std::vector<ClientObservation> cache;
+    /// @brief entries are heap allocated: callers keep raw pointers to them
+    /// beyond the lock (e.g. as libupnp request cookie), so they must not move
+    /// when the vector grows or entries are removed
+    mutable std::vector<std::shared_ptr<ClientObservation>> cache;
 
     std::vector<ClientProfile> clientProfile;
     std::shared_ptr<Database> database;
