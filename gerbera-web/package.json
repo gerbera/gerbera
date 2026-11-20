@@ -32,7 +32,7 @@
     "bootstrap": "4.6.2",
     "braces": "^3.0.3",
     "chai": "^6.3.0",
-    "chromedriver": "^157.0.2",
+    "chromedriver": "^158.0.0",
     "concurrently": "^10.0.7",
     "eslint": "^10.15.0",
     "eslint-config-standard": "^17.1.0",
@@ -62,8 +62,8 @@
     "mocha": "^12.0.3",
     "popper.js": "1.16.1",
     "rimraf": "^6.1.4",
-    "selenium-webdriver": "^4.51.0",
-    "webpack": "^5.112.2",
+    "selenium-webdriver": "^4.53.0",
+    "webpack": "^5.113.0",
     "yargs": "^18.2.0"
   },
   "allowScripts": {

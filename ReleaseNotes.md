@@ -28,7 +28,7 @@ Because of changes to the configuration defaults, you should generate the the de
 
 ### Code Improvements
 
-- Update maximum versions of utf8cpp (5.0.0), cxxopts (3.3.1-g7af8aa),
+- Update maximum versions of utf8cpp (5.0.0), cxxopts (3.3.1-gf81e75),
   pupnp (22.2.4), libpqxx (7.10.7), ffmpegthumbnailer (2.4.2),
   fmt (12.2.1), npupnp (6.3.1), cmake(4.5.0)
 - Build for ubuntu 26.10
