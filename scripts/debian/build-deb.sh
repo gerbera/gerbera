@@ -74,14 +74,19 @@ function install-deb-s3() {
 
 function upload_to_repo() {
   echo "::group::Uploading package"
+
   install-deb-s3
+
   prefix=${1}
   pkg_name="gerbera_${2}_${3}.deb"
-  doc_name=""
-  ico_name=""
-  if [[ "${3}" == "ON" ]];then
-    doc_name="gerbera-doc_${2}_all.deb"
-    ico_name="gerbera-container-icons_${2}_all.deb"
+  doc_name="gerbera-doc_${2}_all.deb"
+  ico_name="gerbera-container-icons_${2}_all.deb"
+  files=${pkg_name}
+  if [[ -f ${doc_name} ]]; then
+    files+=(${doc_name})
+  fi
+  if [[ -f ${ico_name} ]]; then
+    files+=(${ico_name})
   fi
 
   echo "${PKG_SIGNING_KEY}" | gpg --import
@@ -90,7 +95,9 @@ function upload_to_repo() {
       PRES_VERS='--preserve-versions'
   fi
 
-  if [[ "${3}" == "ON" ]];then
+  echo "got files ${files}"
+
+  for file in "${files[@]}"; do
     deb-s3 upload \
       --bucket=gerbera \
       --prefix="${prefix}" \
@@ -101,23 +108,11 @@ function upload_to_repo() {
       --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
       --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
       --endpoint="${DEB_UPLOAD_ENDPOINT}" \
-      "${pkg_name}" "${doc_name}" "${ico_name}"
-  else
-    deb-s3 upload \
-      --bucket=gerbera \
-      --prefix="${prefix}" \
-      ${PRES_VERS} \
-      --codename="${lsb_codename}" \
-      --lock \
-      --sign="${PKG_SIGNING_KEY_ID}" \
-      --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
-      --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
-      --endpoint="${DEB_UPLOAD_ENDPOINT}" \
-      "${pkg_name}"
-  fi
+      "${file}"
+  done
 
   # Clean old debs after they are replaced above
-  if [[ "$1" != "debian" ]]; then
+  if [[ "${prefix}" != "debian" ]]; then
     deb-s3 clean \
       --bucket=gerbera \
       --prefix="${prefix}" \
@@ -345,9 +340,9 @@ if [[ "${lsb_distro}" != "Raspbian" && "${lsb_codename}_${deb_arch}" != "focal_a
   if [[ "${my_sys}" != "HEAD" ]]; then
     if [[ "${DEB_UPLOAD_ENDPOINT:-}" ]]; then
       # Tags only for main repo
-      [[ $is_tag == 1 ]] && upload_to_repo debian "${deb_version}" "${deb_arch}" "${INSTALL_ICONS}"
+      [[ $is_tag == 1 ]] && upload_to_repo debian "${deb_version}" "${deb_arch}"
       # Git builds go to git
-      [[ $is_tag == 0 ]] && upload_to_repo debian-git "${deb_version}" "${deb_arch}" "${INSTALL_ICONS}"
+      [[ $is_tag == 0 ]] && upload_to_repo debian-git "${deb_version}" "${deb_arch}"
       exit 0
     else
       printf "Skipping upload due to missing DEB_UPLOAD_ENDPOINT"

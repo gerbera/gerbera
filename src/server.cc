@@ -219,7 +219,7 @@ void Server::run()
     webXmlBuilder = std::make_shared<UpnpXMLBuilder>(context, getExternalUrl());
 
     auto net = std::make_shared<GrbNet>(getIp(), AF_INET);
-    auto userAgent = fmt::format("Gerbera-UPnP-Server/{} Portable SDK for UPnP devices/{}", GERBERA_VERSION, UPNP_VERSION_STRING);
+    auto userAgent = fmt::format("Gerbera-UPnP-Server/{} libupnp/{}", GERBERA_VERSION, UPNP_VERSION_STRING);
     clientManager->refresh();
     clientManager->removeClient(getIp(), userAgent); // local calls will always be treated as calls from gerbera
 
