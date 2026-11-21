@@ -51,7 +51,6 @@
 #define AUTOSCAN_IS_NEW_ENTRY(mask, noFile) ((mask) & (IN_CLOSE_WRITE | IN_MOVED_TO | IN_ATTRIB) || ((noFile) && ((mask) & IN_CREATE)))
 #define AUTOSCAN_IS_MOVED(mask) ((mask) & (IN_MOVED_TO))
 #define AUTOSCAN_IS_NEW(mask) ((mask) & (IN_CREATE | IN_MOVED_TO | IN_ATTRIB))
-#define AUTOSCAN_IS_CREATED(mask) ((mask) & (IN_CREATE | IN_ATTRIB))
 #define AUTOSCAN_IS_WRITTEN(mask) ((mask) & (IN_CLOSE_WRITE | IN_MOVE_SELF | IN_ATTRIB))
 #define AUTOSCAN_IS_IGNORED(mask) ((mask) & (IN_IGNORED))
 
@@ -122,22 +121,10 @@ void InotifyHandler::doMove(const std::shared_ptr<DirectoryWatch>& wdObj) const
     }
 }
 
-void InotifyHandler::doDirectory(
-    AutoScanSetting& asSetting,
-    const std::shared_ptr<Content>& content,
-    const std::shared_ptr<DirectoryWatch>& wdObj) const
+void InotifyHandler::doDirectory(const std::shared_ptr<DirectoryWatch>& wdObj) const
 {
     if (AUTOSCAN_IS_NEW(mask)) {
         ai->recheckNonexistingMonitors(wd, wdObj);
-    }
-
-    if (asSetting.recursive && AUTOSCAN_IS_CREATED(mask)) {
-        if (!content->isHiddenFile(dirEnt, true, asSetting)) {
-            log_debug("Detected new dir, adding to inotify: {}", path.c_str());
-            ai->monitorRecursive(dirEnt, asSetting.adir, false, asSetting.followSymlinks);
-        } else {
-            log_debug("Detected new dir, ignoring because it's hidden: {}", path.c_str());
-        }
     }
 }
 
@@ -189,9 +176,6 @@ void InotifyHandler::doNewEntry(
     const std::shared_ptr<Content>& content,
     bool isDir) const
 {
-    if (!isDir && !content->isHiddenFile(dirEnt, false, asSetting)
-        && ((mask & IN_CREATE) || AUTOSCAN_IS_NEW_ENTRY(mask, dirEnt.is_symlink())))
-        ai->monitorRecursive(dirEnt, adir, false, asSetting.followSymlinks);
     if (changedObject)
         asSetting.changedObject = changedObject;
 

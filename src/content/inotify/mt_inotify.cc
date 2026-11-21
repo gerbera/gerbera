@@ -109,9 +109,10 @@ int Inotify::addWatch(const fs::path& path, InotifyFlags events, unsigned int re
 {
     for (int wd = -1; wd < 0;) {
         wd = inotify_add_watch(inotify_fd, path.c_str(), events);
-        if (wd < 0 && errno != ENOENT) {
+        const bool missingDirectory = (events & IN_ONLYDIR) && errno == ENOTDIR;
+        if (wd < 0 && errno != ENOENT && !missingDirectory) {
             if (errno == ENOSPC)
-                throw_fmt_system_error("The user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource.");
+                throw_fmt_system_error("Cannot watch '{}': the user limit on the total number of inotify watches was reached or the kernel failed to allocate a needed resource.", path.string());
             if (errno == EACCES) {
                 if (retryCount > 0) {
                     log_debug("Retrying {} to add inotify watch for {}: {}", retryCount, path.c_str(), std::strerror(errno));
