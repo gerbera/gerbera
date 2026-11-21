@@ -349,6 +349,22 @@ void PlaylistImportTest::writeBytes(const fs::path& path, const std::string& byt
     GrbFile(path).writeBinaryFile(reinterpret_cast<const std::byte*>(bytes.data()), bytes.size());
 }
 
+#ifdef __linux__
+PlaylistImportTest::KernelWatches PlaylistImportTest::kernelWatches() const
+{
+    KernelWatches result;
+    for (const auto& descriptor : fs::directory_iterator("/proc/self/fdinfo")) {
+        std::ifstream input(descriptor.path());
+        for (std::string line; std::getline(input, line);) {
+            unsigned long long inode, device, mask;
+            if (std::sscanf(line.c_str(), "inotify wd:%*x ino:%llx sdev:%llx mask:%llx", &inode, &device, &mask) == 3)
+                result.emplace(std::make_pair(device, inode), mask);
+        }
+    }
+    return result;
+}
+#endif
+
 bool PlaylistImportTest::waitForWatches(const std::vector<fs::path>& paths, std::chrono::seconds timeout, bool present)
 {
 #ifdef __linux__
@@ -356,7 +372,7 @@ bool PlaylistImportTest::waitForWatches(const std::vector<fs::path>& paths, std:
     std::map<std::pair<unsigned long long, unsigned long long>, unsigned long long> expected;
     std::string description = present ? "Kernel watches for" : "No kernel watches for";
     for (const auto& path : paths) {
-        struct stat info {};
+        struct stat info { };
         if (stat(path.c_str(), &info) != 0)
             throw std::runtime_error("Cannot inspect watch directory: " + path.string());
         const auto device = (static_cast<unsigned long long>(major(info.st_dev)) << 20) | minor(info.st_dev);
@@ -365,16 +381,10 @@ bool PlaylistImportTest::waitForWatches(const std::vector<fs::path>& paths, std:
     }
     return waitFor([&] {
         auto missing = expected;
-        for (const auto& descriptor : fs::directory_iterator("/proc/self/fdinfo")) {
-            std::ifstream input(descriptor.path());
-            for (std::string line; std::getline(input, line);) {
-                unsigned long long inode, device, mask;
-                if (std::sscanf(line.c_str(), "inotify wd:%*x ino:%llx sdev:%llx mask:%llx", &inode, &device, &mask) == 3) {
-                    auto entry = missing.find({ device, inode });
-                    if (entry != missing.end() && (!present || (mask & entry->second) == entry->second))
-                        missing.erase(entry);
-                }
-            }
+        for (const auto& [object, mask] : kernelWatches()) {
+            auto entry = missing.find(object);
+            if (entry != missing.end() && (!present || (mask & entry->second) == entry->second))
+                missing.erase(entry);
         }
         return present ? missing.empty() : missing.size() == expected.size();
     },

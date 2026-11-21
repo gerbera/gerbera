@@ -32,9 +32,11 @@
 #include <cstddef>
 #include <functional>
 #include <gtest/gtest.h>
+#include <map>
 #include <memory>
 #include <pugixml.hpp>
 #include <string>
+#include <utility>
 #include <vector>
 
 class ConfigDefinition;
@@ -54,6 +56,11 @@ protected:
         std::chrono::seconds timeout = std::chrono::seconds(60));
     bool waitForWatches(const std::vector<fs::path>& paths,
         std::chrono::seconds timeout = std::chrono::seconds(40), bool present = true);
+#ifdef __linux__
+    using KernelWatches = std::multimap<std::pair<unsigned long long, unsigned long long>, unsigned long long>;
+    /// @brief Read active kernel watches without counting registration attempts.
+    KernelWatches kernelWatches() const;
+#endif
     bool importsIdle() const;
     std::vector<std::shared_ptr<CdsObject>> children(int id) const;
     std::string resourceUrl(const std::shared_ptr<CdsObject>& item) const;

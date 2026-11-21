@@ -106,7 +106,7 @@ void AutoscanInotify::threadProc()
 
                 auto dirEnt = fs::directory_entry(location, ec);
                 if (!ec) {
-                    // Honors recursive=no while still watching direct files.
+                    // Parent directory events cover its immediate files, including recursive=no.
                     monitorRecursive(dirEnt, adir, true, adir->getFollowSymlinks());
                     content->rescanDirectory(adir, adir->getObjectID(), location, false, refreshExisting);
                 } else {
@@ -147,9 +147,9 @@ void AutoscanInotify::threadProc()
                     handler.doIgnored();
                     continue;
                 }
-                // The kernel returns the same wd only for the same watched object,
-                // including another hard link. MASK_ADD preserves its event mask.
-                auto currentWd = inotify->addWatch(wdObj->getPath(), IN_DELETE_SELF | IN_MASK_ADD);
+                // A replacement directory has a different wd. MASK_ADD preserves
+                // the directory's event mask; ONLYDIR avoids watching a replacement file.
+                auto currentWd = inotify->addWatch(wdObj->getPath(), IN_DELETE_SELF | IN_MASK_ADD | IN_ONLYDIR);
                 if (currentWd >= 0 && currentWd != event->wd) {
                     if (watches.find(currentWd) == watches.end())
                         inotify->removeWatch(currentWd);
@@ -160,11 +160,11 @@ void AutoscanInotify::threadProc()
                 }
                 if (currentWd < 0) {
                     std::error_code statusError;
-                    bool exists = fs::exists(wdObj->getPath(), statusError);
+                    bool directory = fs::is_directory(wdObj->getPath(), statusError);
                     if (statusError && statusError != std::errc::no_such_file_or_directory && statusError != std::errc::not_a_directory)
                         throw fs::filesystem_error("Cannot verify inotify watch", wdObj->getPath(), statusError);
-                    if (exists)
-                        continue; // A failed identity check does not prove deletion.
+                    if (directory)
+                        continue; // A failed identity check does not prove deletion of a directory.
                 }
 
                 fs::path path = handler.getPath(wdObj);
@@ -193,7 +193,7 @@ void AutoscanInotify::threadProc()
                 }
                 // target is directory
                 if (isDir) {
-                    handler.doDirectory(asSetting, content, wdObj);
+                    handler.doDirectory(wdObj);
                 }
                 handler.doIgnored();
                 log_debug("end event {}", event->wd);
@@ -252,7 +252,7 @@ int AutoscanInotify::watchPathForMoves(const fs::path& path, int wd, unsigned in
 
 int AutoscanInotify::addMoveWatch(const fs::path& path, int removeWd, int parentWd, unsigned int retryCount)
 {
-    int wd = inotify->addWatch(path, events, retryCount);
+    int wd = inotify->addWatch(path, events | IN_ONLYDIR, retryCount);
     if (wd > INOTIFY_ROOT) {
         std::shared_ptr<DirectoryWatch> wdObj;
         try {
@@ -388,16 +388,14 @@ std::shared_ptr<DirectoryWatch> AutoscanInotify::monitorRecursive(const fs::dire
     log_debug("start {}", startPath.path().c_str());
 
     std::error_code ec;
-    bool directory = startPath.is_directory(ec);
-    if (ec) {
-        log_warning("Cannot inspect watched object {}: {}", startPath.path().c_str(), ec.message());
+    if (!startPath.is_directory(ec)) {
+        if (ec)
+            log_warning("Cannot inspect watched directory {}: {}", startPath.path().c_str(), ec.message());
         return nullptr;
     }
-    int result = monitorDirectory(startPath.path(), adir, isStartPoint, false, {}, directory ? 0 : IN_DELETE_SELF | IN_MOVE_SELF | IN_UNMOUNT);
+    int result = monitorDirectory(startPath.path(), adir, isStartPoint);
     if (result <= INOTIFY_ROOT)
         return nullptr;
-    if (!directory)
-        return watches.at(result);
     if (!startPath.exists(ec)) {
         log_warning("Could not open {}: {}", startPath.path().c_str(), ec.message());
         return nullptr;
@@ -425,7 +423,7 @@ std::shared_ptr<DirectoryWatch> AutoscanInotify::monitorRecursive(const fs::dire
             continue;
         }
 
-        if ((dirEnt.is_directory(ec) && asSetting.recursive) || isRegularFile(dirEnt, ec))
+        if (dirEnt.is_directory(ec) && asSetting.recursive)
             monitorRecursive(dirEnt, adir, false, followSymlinks);
 
         if (ec) {
@@ -440,10 +438,9 @@ int AutoscanInotify::monitorDirectory(
     const std::shared_ptr<AutoscanDirectory>& adir,
     bool isStartPoint,
     bool hasNonExisting,
-    const fs::path& nonExistingPath,
-    InotifyFlags monitoredEvents)
+    const fs::path& nonExistingPath)
 {
-    int wd = inotify->addWatch(path, monitoredEvents ? monitoredEvents : events, adir->getRetryCount());
+    int wd = inotify->addWatch(path, events | IN_ONLYDIR, adir->getRetryCount());
 
     log_debug("start {} => {}", path.c_str(), wd);
 
@@ -483,7 +480,7 @@ int AutoscanInotify::monitorDirectory(
             wdObj->addWatch(std::move(watch));
 
             if (!isStartPoint && adir) {
-                int startPointWd = inotify->addWatch(adir->getLocation(), events, adir->getRetryCount());
+                int startPointWd = inotify->addWatch(adir->getLocation(), events | IN_ONLYDIR, adir->getRetryCount());
                 log_debug("getting start point for {} -> {} wd={}", path.c_str(), adir->getLocation().c_str(), startPointWd);
                 if (wd > INOTIFY_ROOT)
                     addDescendant(startPointWd, wd, adir);

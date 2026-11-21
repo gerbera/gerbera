@@ -125,6 +125,10 @@ TEST_F(PlaylistImportTest, KernelWatchIdsDistinguishReplacementFilesDirectoriesA
         GrbFile oldHandle(path);
         ASSERT_NE(oldHandle.open("rb"), nullptr);
         Inotify notifications;
+        if (!directory) {
+            EXPECT_LT(notifications.addWatch(path, IN_DELETE_SELF | IN_ONLYDIR), 0);
+            ASSERT_TRUE(waitForWatches({ path }, std::chrono::seconds(40), false));
+        }
         auto oldWd = notifications.addWatch(path, IN_DELETE_SELF);
         ASSERT_GE(oldWd, 0);
         EXPECT_EQ(notifications.addWatch(path, IN_DELETE_SELF | IN_MASK_ADD), oldWd);
@@ -158,6 +162,67 @@ TEST_F(PlaylistImportTest, KernelWatchIdsDistinguishReplacementFilesDirectoriesA
         EXPECT_EQ(event->mask & IN_DELETE_SELF, IN_DELETE_SELF);
         EXPECT_EQ(notifications.addWatch(path, IN_DELETE_SELF | IN_MASK_ADD), newWd);
     }
+}
+
+TEST_P(InotifyImportTest, AutoscanWatchesGrowWithDirectoriesAndNotFiles)
+{
+    auto album = source / "Album";
+    auto disc = album / "Disc";
+    auto track = disc / "track.wav";
+    writeWave(track, "Initial recording");
+    std::vector<fs::path> files { track };
+    for (int index = 0; index < 32; ++index) {
+        auto path = disc / ("unsupported-" + std::to_string(index) + ".unrecognized");
+        writeBytes(path, "Unsupported file");
+        files.push_back(path);
+    }
+    start(GetParam(), "UTF-8", AutoscanScanMode::INotify);
+    ASSERT_TRUE(waitForWatches({ source, album, disc }));
+    ASSERT_TRUE(waitForMedia(track, "Initial recording"));
+    ASSERT_TRUE(drainEvents());
+    ASSERT_TRUE(waitForWatches(files, std::chrono::seconds(40), false));
+    const auto initialWatchCount = kernelWatches().size();
+
+    // Include arrivals after startup, not just the initial recursive enumeration.
+    for (int index = 32; index < 64; ++index) {
+        auto path = disc / ("unsupported-" + std::to_string(index) + ".unrecognized");
+        writeBytes(path, "Unsupported file");
+        files.push_back(path);
+    }
+    ASSERT_TRUE(drainEvents());
+    ASSERT_TRUE(waitForWatches(files, std::chrono::seconds(40), false));
+    EXPECT_EQ(kernelWatches().size(), initialWatchCount);
+    auto added = album / "Added";
+    fs::create_directory(added);
+    ASSERT_TRUE(waitForWatches({ source, album, disc, added }));
+    ASSERT_TRUE(drainEvents());
+    EXPECT_EQ(kernelWatches().size(), initialWatchCount + 1);
+    for (int index = 0; index < 32; ++index) {
+        auto title = "Updated recording " + std::to_string(index);
+        writeWave(track, title, 801 + index);
+        ASSERT_TRUE(waitForMedia(track, title));
+    }
+    ASSERT_TRUE(drainEvents());
+    ASSERT_TRUE(waitForWatches(files, std::chrono::seconds(40), false));
+    EXPECT_EQ(kernelWatches().size(), initialWatchCount + 1);
+
+    auto outside = root / "outside.wav";
+    // The inode stays alive outside the root, so kernel deletion cannot hide a leak.
+    fs::rename(track, outside);
+    ASSERT_TRUE(drainEvents());
+    EXPECT_EQ(database->findObjectByPath(track, "", DbFileType::File), nullptr);
+    ASSERT_TRUE(waitForWatches({ outside }, std::chrono::seconds(40), false));
+    EXPECT_EQ(kernelWatches().size(), initialWatchCount + 1);
+    writeWave(track, "After move");
+    ASSERT_TRUE(waitForMedia(track, "After move"));
+    writeWave(outside, "Outside change");
+    ASSERT_TRUE(drainEvents());
+    ASSERT_TRUE(waitForMedia(track, "After move"));
+    ASSERT_TRUE(waitForWatches({ track, outside }, std::chrono::seconds(40), false));
+    EXPECT_EQ(kernelWatches().size(), initialWatchCount + 1);
+    auto later = added / "later.wav";
+    writeWave(later, "Still monitoring new directories");
+    ASSERT_TRUE(waitForMedia(later, "Still monitoring new directories"));
 }
 
 TEST_P(InotifyImportTest, DelayedOldDirectoryDeletionPreservesReplacementContents)
@@ -216,8 +281,9 @@ TEST_P(InotifyImportTest, RecreatedAutoscanRootRebuildsItsWatches)
     ASSERT_TRUE(oldTrack.close());
     ASSERT_TRUE(oldRoot.close());
     ASSERT_TRUE(waitForMedia(track, "Recreated root"));
-    ASSERT_TRUE(waitForWatches({ source, track }));
+    ASSERT_TRUE(waitForWatches({ source }));
     ASSERT_TRUE(drainEvents());
+    ASSERT_TRUE(waitForWatches({ track }, std::chrono::seconds(40), false));
     EXPECT_NE(database->findObjectByPath(track, "", DbFileType::File), nullptr);
     EXPECT_EQ(database->findObjectByPath(removedTrack, "", DbFileType::File), nullptr);
 }
@@ -227,16 +293,19 @@ TEST_P(InotifyImportTest, DelayedOldFileDeletionPreservesReplacementRenameAndHar
     auto track = source / "track.wav";
     writeWave(track, "Old file");
     start(GetParam(), "UTF-8", AutoscanScanMode::INotify);
-    ASSERT_TRUE(waitForWatches({ source, track }));
+    ASSERT_TRUE(waitForWatches({ source }));
     ASSERT_TRUE(waitForMedia(track, "Old file"));
+    ASSERT_TRUE(drainEvents());
+    ASSERT_TRUE(waitForWatches({ track }, std::chrono::seconds(40), false));
     GrbFile old(track);
     ASSERT_NE(old.open("r+b"), nullptr);
     fs::remove(track);
     writeWave(track, "New file");
-    ASSERT_TRUE(waitForWatches({ track }));
+    ASSERT_TRUE(waitForWatches({ source }));
     ASSERT_TRUE(waitForMedia(track, "New file"));
     ASSERT_TRUE(old.close());
     ASSERT_TRUE(drainEvents());
+    ASSERT_TRUE(waitForWatches({ track }, std::chrono::seconds(40), false));
     ASSERT_NE(database->findObjectByPath(track, "", DbFileType::File), nullptr);
     auto renamed = source / "renamed.wav";
     fs::rename(track, renamed);
@@ -308,7 +377,8 @@ TEST_P(InotifyImportTest, NestedAutoscanCleanupPreservesParentAndReplacementWatc
     ASSERT_TRUE(waitForMedia(track, "New nested root"));
     ASSERT_TRUE(old.close());
     ASSERT_TRUE(drainEvents());
-    ASSERT_TRUE(waitForWatches({ source, nested, track }));
+    ASSERT_TRUE(waitForWatches({ source, nested }));
+    ASSERT_TRUE(waitForWatches({ track }, std::chrono::seconds(40), false));
     EXPECT_NE(database->findObjectByPath(track, "", DbFileType::File), nullptr);
 }
 
@@ -330,8 +400,14 @@ TEST_P(InotifyImportTest, ReplacementTypeAndExcludedSymlinkAreReconciled)
     ASSERT_TRUE(drainEvents());
     EXPECT_EQ(database->findObjectByPath(entry, "", DbFileType::File), nullptr);
     EXPECT_NE(database->findObjectByPath(entry, "", DbFileType::Directory), nullptr);
+    GrbFile oldDirectory(entry);
+    ASSERT_NE(oldDirectory.open("rb"), nullptr);
     fs::remove_all(entry);
     writeWave(entry, "Another file");
+    ASSERT_TRUE(waitForMedia(entry, "Another file"));
+    ASSERT_TRUE(oldDirectory.close());
+    ASSERT_TRUE(drainEvents());
+    ASSERT_TRUE(waitForWatches({ entry }, std::chrono::seconds(40), false));
     ASSERT_TRUE(waitForMedia(entry, "Another file"));
     auto excluded = root / "excluded.wav";
     writeWave(excluded, "Outside watched tree");

@@ -36,6 +36,32 @@ If you want to update from a version that was provided by another package source
 
 - start gerbera and check the log for migration errors in the database (if you migrate)
 
+Inotify watch limit
+~~~~~~~~~~~~~~~~~~~
+
+If adding an inotify watch reports ``No space left on device``, the error concerns
+the user's watch limit or another kernel resource, rather than free disk space.
+Check the configured limit with::
+
+    cat /proc/sys/fs/inotify/max_user_watches
+
+Autoscan watches directories and receives events for their immediate files through
+those directory watches. Recursive scanning also watches included subdirectories.
+Ancestor directories and script monitoring can require additional watches, and
+other instances or applications running under the same user share the limit.
+
+When reporting this error, include the Gerbera version, autoscan roots and recursive
+settings, approximate file and directory counts, and the operation that triggers it.
+Distinguish errors immediately after startup from errors after rescans or file moves.
+The active watches can be inspected in the inotify entries under
+``/proc/<gerbera-pid>/fdinfo/``; repeated calls to add the same watch do not count as
+additional watches within one inotify instance.
+
+For a library that legitimately needs more watches, an administrator may still need
+to raise ``fs.inotify.max_user_watches``, taking other applications and available
+kernel memory into account. After resolving the resource shortage, restart Gerbera
+to rebuild any incompletely registered watches.
+
 Web UI
 ~~~~~~
 

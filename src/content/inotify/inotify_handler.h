@@ -55,10 +55,7 @@ public:
     void doMove(const std::shared_ptr<DirectoryWatch>& wdObj) const;
 
     /// @brief Handle directory
-    void doDirectory(
-        AutoScanSetting& asSetting,
-        const std::shared_ptr<Content>& content,
-        const std::shared_ptr<DirectoryWatch>& wdObj) const;
+    void doDirectory(const std::shared_ptr<DirectoryWatch>& wdObj) const;
 
     /// @brief Handle existing filesystem entry
     int doExistingEntry(
