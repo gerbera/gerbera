@@ -62,6 +62,10 @@ protected:
     KernelWatches kernelWatches() const;
 #endif
     bool importsIdle() const;
+    /// @brief Check for a valid queued import of the given path under the worker lock.
+    bool hasQueuedImport(const fs::path& path) const;
+    /// @brief Run filesystem changes while the content worker defers queued imports.
+    bool withDeferredImports(const std::function<bool()>& action);
     std::vector<std::shared_ptr<CdsObject>> children(int id) const;
     std::string resourceUrl(const std::shared_ptr<CdsObject>& item) const;
     std::string resourceBytes(const std::shared_ptr<CdsObject>& item) const;

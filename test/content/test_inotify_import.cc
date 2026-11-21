@@ -328,6 +328,67 @@ TEST_P(InotifyImportTest, DelayedOldFileDeletionPreservesReplacementRenameAndHar
     EXPECT_EQ(database->findObjectByPath(linked, "", DbFileType::File), nullptr);
 }
 
+TEST_P(InotifyImportTest, DeletedQueuedFilesDoNotLeaveStaleImportsAndLaterEventsRecover)
+{
+    auto known = source / "known.wav";
+    auto immediate = source / "immediate.wav";
+    auto vanished = source / "vanished.wav";
+    auto replacement = source / "replacement.wav";
+    auto sentinel = source / "queued-sentinel.wav";
+    writeWave(known, "Initial recording");
+    start(GetParam(), "UTF-8", AutoscanScanMode::INotify);
+    ASSERT_TRUE(waitForWatches({ source }));
+    ASSERT_TRUE(waitForMedia(known, "Initial recording"));
+    ASSERT_TRUE(drainEvents());
+    auto adir = content->getAutoscanDirectory(source);
+    ASSERT_NE(adir, nullptr);
+    ASSERT_EQ(adir->getTaskCount(), 0);
+
+    ASSERT_TRUE(withDeferredImports([&] {
+        writeWave(immediate, "Immediately deleted");
+        if (!fs::remove(immediate))
+            return false;
+        writeWave(vanished, "Deleted after queueing");
+        if (!waitFor([&] { return hasQueuedImport(vanished); }, "Queued transient file import"))
+            return false;
+        if (!fs::remove(vanished))
+            return false;
+
+        writeWave(replacement, "Old queued recording");
+        if (!waitFor([&] { return hasQueuedImport(replacement); }, "Queued replacement file import"))
+            return false;
+        if (!fs::remove(replacement))
+            return false;
+        writeWave(replacement, "Replacement recording", 802);
+
+        writeWave(known, "Queued update", 801);
+        if (!waitFor([&] { return hasQueuedImport(known); }, "Queued existing file update"))
+            return false;
+        if (!fs::remove(known))
+            return false;
+
+        // Seeing this queued close proves preceding kernel events reached the
+        // real handler while all their imports remain behind the worker barrier.
+        writeWave(sentinel, "Deferred event barrier");
+        return waitFor([&] { return hasQueuedImport(sentinel); }, "Deferred inotify event completion");
+    }));
+    ASSERT_TRUE(drainEvents());
+    EXPECT_EQ(database->findObjectByPath(immediate, "", DbFileType::File), nullptr);
+    EXPECT_EQ(database->findObjectByPath(vanished, "", DbFileType::File), nullptr);
+    EXPECT_EQ(database->findObjectByPath(known, "", DbFileType::File), nullptr);
+    ASSERT_TRUE(waitForMedia(replacement, "Replacement recording"));
+    EXPECT_EQ(readBytes(replacement), waveBytes("Replacement recording", 802));
+    EXPECT_EQ(adir->getTaskCount(), 0);
+
+    writeWave(vanished, "Recreated recording");
+    auto later = source / "later.wav";
+    writeWave(later, "Later recording");
+    ASSERT_TRUE(waitForMedia(vanished, "Recreated recording"));
+    ASSERT_TRUE(waitForMedia(later, "Later recording"));
+    ASSERT_TRUE(drainEvents());
+    EXPECT_EQ(adir->getTaskCount(), 0);
+}
+
 TEST_P(InotifyImportTest, UnmonitorRemovesWatchAfterDirectoryIsDeleted)
 {
     start(GetParam(), "UTF-8", AutoscanScanMode::INotify);
