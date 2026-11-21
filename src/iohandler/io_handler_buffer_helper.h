@@ -38,8 +38,6 @@
 
 #include "util/thread_runner.h"
 
-#include <upnp.h>
-
 class Config;
 
 /// @brief a IOHandler with buffer support
