@@ -801,7 +801,7 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
 
     // request only items if non-recursive scan is wanted
     auto list = std::unordered_set<int>();
-    database->getObjects(containerID, !asSetting.recursive || importMode != ImportMode::Gerbera, list, importMode == ImportMode::Gerbera, INVALID_OBJECT_ID);
+    database->getObjects(containerID, !asSetting.recursive, list, importMode == ImportMode::Gerbera, INVALID_OBJECT_ID);
 
     unsigned int thisTaskID;
     if (task) {
@@ -959,6 +959,8 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
     if (!list.empty()) {
         log_debug("Deleting unreferenced physical objects {}", fmt::join(list, ","));
         auto changedContainers = database->removeObjects(list);
+        importService->clearCache();
+        getImportService(adir)->clearCache();
         if (changedContainers) {
             session_manager->containerChangedUI(changedContainers->ui);
             update_manager->containersChanged(changedContainers->upnp);
@@ -970,6 +972,8 @@ void ContentManager::_rescanDirectory(const std::shared_ptr<AutoscanDirectory>& 
         // DELETE FROM mt_cds_object WHERE ref_id is not null and ref_id not in (SELECT id FROM mt_cds_object)
         log_debug("Deleting unreferenced virtual objects {}", fmt::join(list, ","));
         auto changedContainers = database->removeObjects(list);
+        importService->clearCache();
+        getImportService(adir)->clearCache();
         if (changedContainers) {
             session_manager->containerChangedUI(changedContainers->ui);
             update_manager->containersChanged(changedContainers->upnp);
@@ -1107,6 +1111,8 @@ void ContentManager::addRecursive(
     if (!list.empty()) {
         log_debug("Deleting unreferenced physical objects {}", fmt::join(list, ","));
         auto changedContainers = database->removeObjects(list);
+        importService->clearCache();
+        getImportService(adir)->clearCache();
         if (changedContainers) {
             session_manager->containerChangedUI(changedContainers->ui);
             update_manager->containersChanged(changedContainers->upnp);

@@ -29,7 +29,8 @@
 - Fix Alpine apk-tools download in Minimal CI
 - Fix ASX local URI references and UTF-8 metadata
 - Fix CaptionInfo.sec never being sent to Samsung TVs
-- Fix crash when the client cache grows during requests
+- Fix client cache dangling pointer
+- Fix folder handling for mt mode
 - Fix getValidUTF8CutPosition splitting multibyte characters
 - Fix hang when shutting down the SQLite thread
 - Fix hang when stopping Gerbera during startup
@@ -48,6 +49,7 @@
 - Increase timeouts for tests
 - Keep sortKey for new containers
 - Let DLNA profile mappings test the color transfer (HDR)
+- Limit autoscan inotify watches to directories
 - Make Alpine package-index downloads resilient with HTTPS mirror fallback
 - Pass the client quirks to the DIDL of search results
 - Prefer Alpine CDN bootstrap with verified GitLab fallback

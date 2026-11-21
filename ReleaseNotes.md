@@ -2,11 +2,22 @@
 
 ## HEAD
 
-This release was enabled by a huge community effort and contains a lot of improvements and stabilisations
-esp. for internal transcoding and playlists.
+This release was enabled by a huge community effort and contains a lot of
+improvements and stabilisations esp. for internal transcoding and playlists.
 
-Because of changes to the configuration defaults, you should generate the the default configuration with 
-``gerbera --create-config`` and merge the additions into you ``config.xml`` file
+It introduces more flexible media organization and presentation, including
+configurable audio and album titles, cover-art priorities, selectable
+container icon themes, and playlist import improvements.
+
+This release also improves media rescanning and inotify handling, preserves
+existing IDs and playlist entries, strengthens DLNA and transcoding behavior,
+expands database recovery, and fixes several stability, packaging, and
+compatibility issues. Documentation, dependencies, build systems, and test
+coverage have also been updated.
+
+Because of changes to the configuration defaults, you should generate the
+default configuration with ``gerbera --create-config`` and merge the
+additions into you ``config.xml`` file
 
 ### NEW Features
 
@@ -25,6 +36,7 @@ Because of changes to the configuration defaults, you should generate the the de
 - Internal Transcoding now stable
 - Serveral fixes for playlist handling
 - Sorting of files in structured import
+- Client handling with many new clients
 
 ### Code Improvements
 
