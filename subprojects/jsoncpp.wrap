@@ -1,0 +1,10 @@
+[wrap-file]
+directory = jsoncpp-1.9.6
+source_url = https://github.com/open-source-parsers/jsoncpp/archive/1.9.6.tar.gz
+source_filename = jsoncpp-1.9.6.tar.gz
+source_hash = f93b6dd7ce796b13d02c108bc9f79812245a82e577581c4c9aabe57075c90ea2
+source_fallback_url = https://github.com/mesonbuild/wrapdb/releases/download/jsoncpp_1.9.6-1/jsoncpp-1.9.6.tar.gz
+wrapdb_version = 1.9.6-1
+
+[provide]
+jsoncpp = jsoncpp_dep

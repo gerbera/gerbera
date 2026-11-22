@@ -1,0 +1,67 @@
+option('avcodec', type : 'feature',
+  description : 'Use ffmpeg/libav to extract file metadata',
+)
+
+option('curl', type : 'feature',
+  description : 'CURL required for online services',
+)
+
+option('exif', type : 'feature',
+  description : 'Use libexif to extract image metadata',
+)
+
+option('exiv2', type : 'feature',
+  description : 'Use libexiv2 to extract image metadata',
+)
+
+option('ffmpegthumbnailer', type : 'feature',
+  description : 'Enable Thumbnail generation',
+)
+
+option('inotify', type : 'feature',
+  description : 'Enable Inotify file monitoring support',
+)
+
+option('js', type : 'feature',
+  description : 'Enable JavaScript for scripting',
+)
+
+option('lastfm', type : 'feature',
+  description : 'Enable scrobbling to LastFM',
+)
+
+option('magic', type : 'feature',
+  description : 'Use libmagic to identify file mime types',
+)
+
+option('matroska', type : 'feature',
+  description : 'Use libmatroska to extract video/mkv metadata',
+)
+
+option('mysql', type : 'feature',
+  description : 'Store media information in MySQL DB',
+)
+
+option('npupnp', type : 'feature',
+  description : 'Use npupnp instead of libupnp',
+)
+
+option('pgsql', type : 'feature',
+  description : 'Store media information in PostgreSQL DB',
+)
+
+option('systemd', type : 'feature',
+  description : 'Install Systemd unit file',
+)
+
+option('taglib', type : 'feature',
+  description : 'Use TagLib to extract audio file metadata',
+)
+
+option('tests', type : 'feature',
+  description : 'Build unit tests',
+)
+
+option('wavpack', type : 'feature',
+  description : 'Use wavpack to extract audio file metadata',
+)
