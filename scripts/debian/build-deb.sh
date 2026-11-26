@@ -80,6 +80,7 @@ function upload_to_repo() {
   prefix=${1}
   pkg_name="gerbera_${2}_${3}.deb"
   doc_name="gerbera-doc_${2}_all.deb"
+  srcdoc_name="gerbera-src-doc_${2}_all.deb"
   ico_name="gerbera-container-icons_${2}_all.deb"
   files=${pkg_name}
   if [[ -f ${doc_name} ]]; then
@@ -87,6 +88,9 @@ function upload_to_repo() {
   fi
   if [[ -f ${ico_name} ]]; then
     files+=(${ico_name})
+  fi
+  if [[ -f ${srcdoc_name} ]]; then
+    files+=(${srcdoc_name})
   fi
 
   echo "${PKG_SIGNING_KEY}" | gpg --import
@@ -122,6 +126,16 @@ function upload_to_repo() {
       --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
       --endpoint="${DEB_UPLOAD_ENDPOINT}"
   fi
+  # Clean Package manifests to reflect deleted files
+  deb-s3 verify \
+    --bucket=gerbera \
+    --prefix="${prefix}" \
+    --fix-manifests \
+    --codename="${lsb_codename}" \
+    --sign="${PKG_SIGNING_KEY_ID}" \
+    --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
+    --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
+    --endpoint="${DEB_UPLOAD_ENDPOINT}"
   echo "::endgroup::"
 }
 
