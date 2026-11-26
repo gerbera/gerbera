@@ -37,6 +37,7 @@
 - Fix import of configured ASF auxiliary attributes
 - Fix internal transcoding with ffmpeg
 - Fix internal video (mpeg) transcoding
+- Fix Package manifests after upload
 - Fix potential underflow in parseParameter
 - Fix sorting of files in structured import
 - Fix stale inotify events deleting replacement media
@@ -71,11 +72,11 @@
 - Test numeric client addresses without reverse DNS assumptions
 - transcode: fix build with ffmpeg 7.0
 - Update metadata\_service to use content-type
+- Update Sphinx to 9.2.0
 - Update to cxxopts-gf81e75
 - Update to ffmpegthumbnailer 2.4.1
 - Update to fmt 12.2.1
 - Update to pupnp 22.2.4
-- Update Sphinx to 9.2.0
 - Use album cover for named disc folders
 - Use fmt exception formatting
 - Wait for client grid rendering in browser tests

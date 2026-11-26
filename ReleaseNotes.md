@@ -28,6 +28,7 @@ additions into you ``config.xml`` file
 - Seeking in transcoded streams
 - Support for WPL and XSPF playlists
 - Transcoding with constant bitrate for seeking
+- Separate Ubuntu/Debian packages containing documentation and icons in pkg.gerbera.io
 
 ### FIXES
 
