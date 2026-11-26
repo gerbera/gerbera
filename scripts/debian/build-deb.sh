@@ -307,8 +307,24 @@ if [[ (! -f "${deb_name}") || "${my_sys}" == "HEAD" ]]; then
     cmake_preset="release-${my_upnp}"
   fi
   INSTALL_ICONS=ON
+  BUILD_DOC=ON
+  INSTALL_DOC=ON
   if [[ "${deb_arch}" != "amd64" ]]; then
     INSTALL_ICONS=OFF
+    BUILD_DOC=OFF
+    INSTALL_DOC=OFF
+  else
+    sudo apt-get install -y doxygen graphviz python3
+    if [[ $? -ne 0 ]]; then
+      BUILD_DOC=OFF
+      INSTALL_DOC=OFF
+    else
+      python3 -c "import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)"
+      if [[ $? -ne 0 ]]; then
+        BUILD_DOC=OFF
+        INSTALL_DOC=OFF
+      fi
+    fi
   fi
   set -euEo pipefail
 
@@ -317,6 +333,8 @@ if [[ (! -f "${deb_name}") || "${my_sys}" == "HEAD" ]]; then
     -DWITH_SYSTEMD=${WITH_SYSTEMD} \
     -DWITH_PGSQL=${WITH_POSTGRES} \
     -DINSTALL_ICONS=${INSTALL_ICONS} \
+    -DBUILD_DOC=${BUILD_DOC} \
+    -DINSTALL_DOC=${INSTALL_DOC} \
     -DBUILD_CHANGELOG=ON \
     -DCMAKE_INSTALL_PREFIX=/usr
   make "-j$(nproc)"
