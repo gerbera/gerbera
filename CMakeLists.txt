@@ -1088,12 +1088,12 @@ if(INSTALL_DOC)
         install(CODE "MESSAGE(\"${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} -t doc\")")
         install(
             CODE "EXECUTE_PROCESS(COMMAND ${CMAKE_COMMAND} --build ${CMAKE_CURRENT_BINARY_DIR} -t doc)"
-            COMPONENT Documentation)
+            COMPONENT SrcDoc)
         install(
             DIRECTORY ${PROJECT_SOURCE_DIR}/doc/_build/html/
             DESTINATION ${CMAKE_INSTALL_DATADIR}/doc/dev
-            COMPONENT Documentation)
-        makelink(${CMAKE_INSTALL_DATADIR} doc/dev web/dev Documentation)
+            COMPONENT SrcDoc)
+        makelink(${CMAKE_INSTALL_DATADIR} doc/dev web/dev SrcDoc)
     endif()
 endif()
 
