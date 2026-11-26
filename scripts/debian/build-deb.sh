@@ -116,26 +116,28 @@ function upload_to_repo() {
   done
 
   # Clean old debs after they are replaced above
-  if [[ "${prefix}" != "debian" ]]; then
-    deb-s3 clean \
+  if [[ ${lsb_codename} != "bionic" ]]; then
+    if [[ "${prefix}" != "debian" ]]; then
+      deb-s3 clean \
+        --bucket=gerbera \
+        --prefix="${prefix}" \
+        --codename="${lsb_codename}" \
+        --sign="${PKG_SIGNING_KEY_ID}" \
+        --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
+        --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
+        --endpoint="${DEB_UPLOAD_ENDPOINT}"
+    fi
+    # Clean Package manifests to reflect deleted files
+    deb-s3 verify \
       --bucket=gerbera \
       --prefix="${prefix}" \
+      --fix-manifests \
       --codename="${lsb_codename}" \
       --sign="${PKG_SIGNING_KEY_ID}" \
       --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
       --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
       --endpoint="${DEB_UPLOAD_ENDPOINT}"
   fi
-  # Clean Package manifests to reflect deleted files
-  deb-s3 verify \
-    --bucket=gerbera \
-    --prefix="${prefix}" \
-    --fix-manifests \
-    --codename="${lsb_codename}" \
-    --sign="${PKG_SIGNING_KEY_ID}" \
-    --access-key-id="${DEB_UPLOAD_ACCESS_KEY_ID}" \
-    --secret-access-key="${DEB_UPLOAD_SECRET_ACCESS_KEY}" \
-    --endpoint="${DEB_UPLOAD_ENDPOINT}"
   echo "::endgroup::"
 }
 
@@ -358,9 +360,6 @@ if [[ (! -f "${deb_name}") || "${my_sys}" == "HEAD" ]]; then
       cpack -G DEB \
             -D CPACK_DEBIAN_PACKAGE_VERSION="${deb_version}" \
             -D CPACK_DEBIAN_PACKAGE_ARCHITECTURE="${deb_arch}"
-      if [[ "${INSTALL_ICONS}" == "ON" ]]; then
-        mv "gerbera-${deb_name}" "${deb_name}"
-      fi
     fi
   fi
   echo "::endgroup::"

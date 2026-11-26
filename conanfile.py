@@ -120,7 +120,7 @@ class GerberaConan(ConanFile):
             self.requires("icu/78.2")
 
         if self.options.libsystemd:
-            self.requires("libsystemd/[>=255]")
+            self.requires("libsystemd/255.10")
 
     def system_requirements(self):
         if cross_building(self):
