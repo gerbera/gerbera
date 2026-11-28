@@ -213,6 +213,8 @@ std::unique_ptr<WebRequestHandler> createWebRequestHandler(
 {
     if (page == Web::Add::PAGE)
         return std::make_unique<Web::Add>(content, server, xmlBuilder, quirks);
+    if (page == Web::Sync::PAGE)
+        return std::make_unique<Web::Sync>(content, server, xmlBuilder, quirks);
     if (page == Web::Remove::PAGE)
         return std::make_unique<Web::Remove>(content, server, xmlBuilder, quirks);
     if (page == Web::AddObject::PAGE)
