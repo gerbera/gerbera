@@ -25,6 +25,7 @@
 #include "config/config_definition.h"
 #include "config/config_generator.h"
 #include "config/config_manager.h"
+#include "content/cm_task.h"
 #include "content/content_manager.h"
 #include "database/db_param.h"
 #include "metadata/metadata_service.h"
@@ -49,9 +50,11 @@
 #include "content/onlineservice/online_service.h"
 #endif
 
+#include <algorithm>
 #include <cstdint>
 #include <cstdio>
 #include <fstream>
+#include <future>
 #include <iostream>
 #include <limits>
 #include <map>
@@ -66,6 +69,28 @@
 #include <sys/sysmacros.h>
 #endif
 
+/// @brief Hold the real content worker while inotify continues queueing imports.
+class DeferredImportTask : public GenericTask {
+public:
+    DeferredImportTask(std::promise<void> ready, std::shared_future<void> released)
+        : GenericTask(TaskOwner::ContentManagerTask)
+        , ready(std::move(ready))
+        , released(std::move(released))
+    {
+        setDescription("Deferred import barrier");
+    }
+
+    void run() override
+    {
+        ready.set_value();
+        released.wait();
+    }
+
+private:
+    std::promise<void> ready;
+    std::shared_future<void> released;
+};
+
 class PlaylistImportContent : public ContentManager {
 public:
     using ContentManager::ContentManager;
@@ -74,6 +99,25 @@ public:
     {
         auto lock = threadRunner->lockGuard("playlist import completion");
         return !currentTask && taskQueue1.empty() && taskQueue2.empty();
+    }
+
+    bool hasQueuedImport(const fs::path& path) const
+    {
+        auto lock = threadRunner->lockGuard("queued playlist import");
+        const auto matches = [&path](const std::shared_ptr<GenericTask>& task) {
+            return task->isValid() && task->getType() == TaskType::AddFile
+                && std::static_pointer_cast<CMAddFileTask>(task)->getPath() == path;
+        };
+        return std::any_of(taskQueue1.begin(), taskQueue1.end(), matches)
+            || std::any_of(taskQueue2.begin(), taskQueue2.end(), matches);
+    }
+
+    std::future<void> deferImports(std::shared_future<void> released)
+    {
+        std::promise<void> ready;
+        auto started = ready.get_future();
+        addTask(std::make_shared<DeferredImportTask>(std::move(ready), std::move(released)));
+        return started;
     }
 };
 
@@ -245,6 +289,23 @@ std::vector<std::shared_ptr<CdsObject>> PlaylistImportTest::children(int id) con
 bool PlaylistImportTest::importsIdle() const
 {
     return server->importsIdle();
+}
+
+bool PlaylistImportTest::hasQueuedImport(const fs::path& path) const
+{
+    return std::static_pointer_cast<PlaylistImportContent>(content)->hasQueuedImport(path);
+}
+
+bool PlaylistImportTest::withDeferredImports(const std::function<bool()>& action)
+{
+    // Destruction also releases the worker on a failed assertion or exception.
+    std::promise<void> released;
+    auto started = std::static_pointer_cast<PlaylistImportContent>(content)->deferImports(released.get_future().share());
+    if (!waitFor([&] { return started.wait_for(std::chrono::seconds::zero()) == std::future_status::ready; },
+            "Deferred import worker readiness"))
+        return false;
+    started.get();
+    return action();
 }
 
 std::string PlaylistImportTest::resourceUrl(const std::shared_ptr<CdsObject>& object) const
