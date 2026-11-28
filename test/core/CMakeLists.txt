@@ -32,6 +32,7 @@ add_executable(
     test_cover_art_priority.cc #
     test_container_art.cc #
     test_ffmpeg_cache_paths.cc #
+    test_ffmpeg_subtitles.cc #
     test_searchhandler.cc #
     test_server.cc #
     test_upnp_map.cc #
