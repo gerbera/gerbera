@@ -115,6 +115,9 @@ ContentManager::ContentManager(const std::shared_ptr<Context>& context,
 #endif
 }
 
+// default destructor
+ContentManager::~ContentManager() = default;
+
 #ifdef HAVE_LASTFM
 #ifndef HAVE_LASTFMLIB
 void ContentManager::initLastFM()
