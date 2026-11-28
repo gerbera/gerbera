@@ -313,8 +313,12 @@ std::string FileRequestHandler::getResourceInfo(
             mimeType = fmt::format("{}; charset=utf-8", mimeType);
 
         log_debug("getInfo {}:{}", obj->getID(), resource->getResId());
+
+        // Ignore the size stored in older releases. New imports store nothing.
+        bool isFfmpegSubtitle = resource->getHandlerType() == ContentHandler::FFMPEG && resource->getPurpose() == ResourcePurpose::Subtitle;
+
         auto resSize = resource->getAttribute(ResourceAttribute::SIZE);
-        if (!resSize.empty()) {
+        if (!resSize.empty() && !isFfmpegSubtitle) {
             UpnpFileInfo_set_FileLength(info, stoiString(resSize));
         } else {
             auto ioHandler = metadataHandler->serveContent(obj, resource);

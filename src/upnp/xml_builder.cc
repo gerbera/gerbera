@@ -737,8 +737,9 @@ std::string UpnpXMLBuilder::renderResourceURL(
     if (ext.empty()) {
         auto mimeType = getMimeType(res, mimeMappings);
         auto contentType = getValueOrDefault(ctMappings, mimeType);
+        // SRT content gets a .srt URL, not .sub
         if (contentType.empty() && purpose == ResourcePurpose::Subtitle)
-            contentType = getValueOrDefault(ctMappings, MIME_TYPE_SRT_SUBTITLE, "sub");
+            contentType = getValueOrDefault(ctMappings, MIME_TYPE_SRT_SUBTITLE, mimeType == MIME_TYPE_SRT_SUBTITLE ? "srt" : "sub");
         ext = renderExtension(contentType, purpose == ResourcePurpose::Transcode ? "" : item.getLocation(), lang);
     }
     url.append(ext);

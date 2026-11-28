@@ -61,12 +61,15 @@
 
 #include <algorithm>
 #include <cstdint>
+#include <memory>
+#include <string>
 
 extern "C" {
 
 #include <libavformat/avformat.h>
 #include <libavutil/avutil.h>
 #include <libavutil/display.h>
+#include <libavutil/mem.h>
 #include <libavutil/pixdesc.h>
 
 } // extern "C"
@@ -150,7 +153,6 @@ FfmpegHandler::FfmpegHandler(const std::shared_ptr<Context>& context)
           ConfigVal::IMPORT_LIBOPTS_FFMPEG_COMMENT_LIST)
     , artWorkEnabled(config->getBoolOption(ConfigVal::IMPORT_LIBOPTS_FFMPEG_ARTWORK_ENABLED))
     , streamsEnabled(config->getBoolOption(ConfigVal::IMPORT_LIBOPTS_FFMPEG_STREAMS_ENABLED))
-    , subtitleSeekSize(config->getUIntOption(ConfigVal::IMPORT_LIBOPTS_FFMPEG_SUBTITLE_SEEK_SIZE))
 {
 #if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(58, 9, 100))
     // Register all formats and codecs
@@ -494,11 +496,20 @@ static std::vector<std::uint8_t> extractArtImage(
     return std::vector<std::uint8_t>(avEntry->value, avEntry->value + strlen(avEntry->value));
 }
 
-/// @brief Extract Subtitle from media file
-static std::vector<std::uint8_t> extractSubtitle(
+/// @brief Check if an embedded subtitle can be served as SRT
+static bool canExtractSubtitle([[maybe_unused]] AVCodecID codecId)
+{
+#if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(60, 0, 0))
+    return false;
+#else
+    return (codecId == AV_CODEC_ID_SUBRIP || codecId == AV_CODEC_ID_TEXT) && av_guess_format("srt", nullptr, nullptr);
+#endif
+}
+
+/// @brief Extract Subtitle from media file as SRT
+static std::string extractSubtitle(
     const FfmpegObject& ffmpegObject,
-    long long subtitleStreamIndex,
-    std::size_t maxBytes = 0)
+    std::size_t subtitleStreamIndex)
 {
 #if (LIBAVFORMAT_VERSION_INT < AV_VERSION_INT(60, 0, 0))
     log_debug("extractSubtitle disabled - ffmpeg seems broken");
@@ -509,28 +520,123 @@ static std::vector<std::uint8_t> extractSubtitle(
         return {};
     }
 
-    AVPacket* packet = av_packet_alloc();
+    auto pFormatCtx = ffmpegObject.pFormatCtx;
+    auto subtitleStream = pFormatCtx->streams[subtitleStreamIndex];
+
+    // Write SRT to a memory buffer
+    AVFormatContext* outputCtx = nullptr;
+    if (avformat_alloc_output_context2(&outputCtx, nullptr, "srt", nullptr) < 0) {
+        log_debug("Could not allocate srt muxer");
+        return {};
+    }
+
+    auto freeContext = [](AVFormatContext* ctx) { avformat_free_context(ctx); };
+    std::unique_ptr<AVFormatContext, decltype(freeContext)> outputHandle(outputCtx, freeContext);
+
+    auto outputStream = avformat_new_stream(outputCtx, nullptr);
+    if (!outputStream || avcodec_parameters_copy(outputStream->codecpar, as_codecpar(subtitleStream)) < 0) {
+        return {};
+    }
+
+    outputStream->codecpar->codec_tag = 0;
+    outputStream->time_base = subtitleStream->time_base;
+
+    if (avio_open_dyn_buf(&outputCtx->pb) < 0) {
+        return {};
+    }
+
+    auto closeBuffer = [](AVIOContext* ioCtx) {
+        std::uint8_t* buffer = nullptr;
+        avio_close_dyn_buf(ioCtx, &buffer);
+        av_free(buffer);
+    };
+
+    std::unique_ptr<AVIOContext, decltype(closeBuffer)> bufferHandle(outputCtx->pb, closeBuffer);
+
+    auto freePacket = [](AVPacket* packet) { av_packet_free(&packet); };
+    std::unique_ptr<AVPacket, decltype(freePacket)> packet(av_packet_alloc(), freePacket);
+
     if (!packet) {
         log_debug("Could not allocate packet");
         return {};
     }
 
-    av_seek_frame(ffmpegObject.pFormatCtx, subtitleStreamIndex, 0, 0);
-
-    std::vector<std::uint8_t> result;
-    // Store subtitle packets
-    while (av_read_frame(ffmpegObject.pFormatCtx, packet) >= 0 && (maxBytes == 0 || result.size() < maxBytes)) {
-        log_vdebug("checking {} vs {}", packet->stream_index, subtitleStreamIndex);
-        if (packet->stream_index == subtitleStreamIndex) {
-            auto chunk = std::vector<uint8_t>(packet->data, packet->data + packet->size);
-            result.reserve(result.size() + chunk.size());
-            result.insert(result.end(), chunk.begin(), chunk.end());
-        }
-        av_packet_unref(packet);
+    if (avformat_write_header(outputCtx, nullptr) < 0) {
+        return {};
     }
-    av_packet_free(&packet);
-    log_debug("end {}", result.size());
-    return result;
+
+    // Skip other streams so av_read_frame() doesn't return video/audio packets.
+    // This context is not used anywhere else, so the flags need no restore.
+    for (std::size_t streamNumber = 0; streamNumber < pFormatCtx->nb_streams; streamNumber++) {
+        pFormatCtx->streams[streamNumber]->discard = (streamNumber == subtitleStreamIndex) ? AVDISCARD_DEFAULT : AVDISCARD_ALL;
+    }
+
+    // Align cues to the video stream's start, falling back to the file start for subtitle-only files
+    std::int64_t origin = (pFormatCtx->start_time != AV_NOPTS_VALUE)
+        ? av_rescale_q(pFormatCtx->start_time, AV_TIME_BASE_Q, subtitleStream->time_base)
+        : 0;
+
+    for (std::size_t streamNumber = 0; streamNumber < pFormatCtx->nb_streams; streamNumber++) {
+        auto st = pFormatCtx->streams[streamNumber];
+
+        if (as_codecpar(st)->codec_type == AVMEDIA_TYPE_VIDEO && !(st->disposition & AV_DISPOSITION_ATTACHED_PIC) && st->start_time != AV_NOPTS_VALUE) {
+            origin = av_rescale_q(st->start_time, st->time_base, subtitleStream->time_base);
+            break;
+        }
+    }
+
+    // A negative start plays from 0, don't move cues
+    origin = std::max<std::int64_t>(origin, 0);
+
+    int status;
+
+    while ((status = av_read_frame(pFormatCtx, packet.get())) >= 0) {
+        bool writePacket = packet->stream_index == static_cast<int>(subtitleStreamIndex) && packet->size > 0 && packet->pts != AV_NOPTS_VALUE;
+
+        // drop cues ending before the video starts
+        // clip cues crossing its start
+        if (writePacket && packet->pts < origin) {
+            auto cut = origin - packet->pts;
+            writePacket = packet->duration > cut;
+
+            packet->duration -= cut;
+            packet->pts = origin;
+        }
+
+        if (writePacket) {
+            packet->pts -= origin;
+            packet->dts = packet->pts;
+
+            av_packet_rescale_ts(packet.get(), subtitleStream->time_base, outputStream->time_base);
+
+            packet->stream_index = outputStream->index;
+            packet->pos = -1;
+
+            if (av_write_frame(outputCtx, packet.get()) < 0) {
+                return {};
+            }
+        }
+
+        av_packet_unref(packet.get());
+    }
+
+    // A read error would leave a truncated file
+    if (status != AVERROR_EOF || av_write_trailer(outputCtx) < 0) {
+        return {};
+    }
+
+    std::uint8_t* buffer = nullptr;
+    auto size = avio_get_dyn_buf(outputCtx->pb, &buffer);
+
+    if (size <= 0) {
+        log_debug("No subtitle data");
+
+        return {};
+    }
+
+    log_debug("end {}", size);
+
+    return std::string(reinterpret_cast<const char*>(buffer), size);
 #endif
 }
 
@@ -739,29 +845,19 @@ bool FfmpegHandler::addFfmpegResourceFields(
             break;
         }
         case AVMEDIA_TYPE_SUBTITLE: {
-            auto stResource = std::make_shared<CdsResource>(ContentHandler::FFMPEG, ResourcePurpose::Subtitle);
-            item->addResource(stResource);
-            // subtitle codec
-            auto codecId = as_codecpar(st)->codec_id;
-            stResource->addAttribute(ResourceAttribute::TYPE, avcodec_get_name(codecId));
-            stResource->addOption(STREAM_NUMBER_OPTION, fmt::to_string(stream_number));
-
-            auto subtitle = extractSubtitle(ffmpegObject, stream_number, subtitleSeekSize);
-            if (!subtitle.empty()) {
-                auto subMimetype = getContentTypeFromByteVector(subtitle);
-                log_debug("subtitle {} {}", subtitle.size(), subMimetype);
-                if (subMimetype != MIMETYPE_DEFAULT) {
-                    stResource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(subMimetype));
-                }
+            // Subtitles that can't be extracted as SRT get no resource.
+            // No SIZE: the request calculates the SRT.
+            if (!canExtractSubtitle(as_codecpar(st)->codec_id)) {
+                break;
             }
 
-            setResourceAttributes(stResource, st, stream_number);
+            auto stResource = std::make_shared<CdsResource>(ContentHandler::FFMPEG, ResourcePurpose::Subtitle);
+            item->addResource(stResource);
+            stResource->addAttribute(ResourceAttribute::TYPE, "srt");
+            stResource->addAttribute(ResourceAttribute::PROTOCOLINFO, renderProtocolInfo(MIME_TYPE_SRT_SUBTITLE));
+            stResource->addOption(STREAM_NUMBER_OPTION, fmt::to_string(stream_number));
 
-            if (as_codecpar(st)->extradata && as_codecpar(st)->extradata_size > 0) {
-                log_debug("Subtitle Size: {}", as_codecpar(st)->extradata_size);
-                stResource->addAttribute(ResourceAttribute::SIZE, as_codecpar(st)->extradata_size);
-            } else
-                stResource->addAttribute(ResourceAttribute::SIZE, subtitle.size());
+            setResourceAttributes(stResource, st, stream_number);
             result = true;
             break;
         }
@@ -891,8 +987,21 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(
         }
     }
     if (resource->getPurpose() == ResourcePurpose::Subtitle) {
-        FfmpegObject ffmpegObject(converterManager, item, streamsEnabled);
         auto language = resource->getAttribute(ResourceAttribute::LANGUAGE);
+
+        // One request calls this twice, cache the result
+        auto cacheKey = fmt::format("{}|{}|{}|{}", item->getLocation().string(), item->getMTime().count(), streamIndex, language);
+        {
+            std::lock_guard<std::mutex> lock(subtitleCacheMutex);
+
+            auto cached = std::find_if(subtitleCache.begin(), subtitleCache.end(), [&](auto&& entry) { return entry.first == cacheKey; });
+
+            if (cached != subtitleCache.end()) {
+                return std::make_unique<MemIOHandler>(cached->second);
+            }
+        }
+
+        FfmpegObject ffmpegObject(converterManager, item, streamsEnabled);
         auto st = ffmpegObject.pFormatCtx->streams[streamIndex];
 
         if (!st) {
@@ -903,14 +1012,24 @@ std::unique_ptr<IOHandler> FfmpegHandler::serveContent(
         AVDictionaryEntry* langEntry = av_dict_get(st->metadata, "language", nullptr, 0);
         std::string lang = (langEntry && langEntry->value) ? langEntry->value : fmt::to_string(streamIndex);
 
-        if (language == lang) {
+        if (language == lang && canExtractSubtitle(as_codecpar(st)->codec_id)) {
             auto subtitle = extractSubtitle(ffmpegObject, streamIndex);
             if (!subtitle.empty()) {
-                auto subString = std::string(reinterpret_cast<const char*>(subtitle.data()), subtitle.size());
-                auto [val, err] = ffmpegObject.sc->convert(subString);
+                auto [val, err] = ffmpegObject.sc->convert(subtitle);
                 if (!err.empty()) {
-                    log_warning("{} {}: {}", ffmpegObject.location, subString, err);
+                    log_warning("{} {}: {}", ffmpegObject.location, subtitle, err);
                 }
+
+                {
+                    std::lock_guard<std::mutex> lock(subtitleCacheMutex);
+
+                    if (subtitleCache.size() >= SUBTITLE_CACHE_SIZE) {
+                        subtitleCache.pop_front();
+                    }
+
+                    subtitleCache.emplace_back(cacheKey, val);
+                }
+
                 return std::make_unique<MemIOHandler>(val);
             }
         }

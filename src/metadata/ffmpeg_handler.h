@@ -46,6 +46,10 @@
 #include "metadata_handler.h"
 
 #include <array>
+#include <deque>
+#include <mutex>
+#include <string>
+#include <utility>
 
 // forward declarations
 class CdsItem;
@@ -129,8 +133,10 @@ private:
     bool artWorkEnabled;
     /// @brief activate reading metadata from all streams
     bool streamsEnabled;
-    /// @brief number of bytes to read for mime detection of subtitles
-    unsigned int subtitleSeekSize;
+    /// @brief recently extracted subtitles (key, SRT text)
+    static constexpr std::size_t SUBTITLE_CACHE_SIZE = 4;
+    std::mutex subtitleCacheMutex;
+    std::deque<std::pair<std::string, std::string>> subtitleCache;
 };
 
 #endif // HAVE_FFMPEG

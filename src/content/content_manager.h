@@ -76,6 +76,7 @@ class ContentManager : public Content, public std::enable_shared_from_this<Conte
 public:
     ContentManager(const std::shared_ptr<Context>& context,
         const std::shared_ptr<Server>& server, std::shared_ptr<Timer> timer);
+    ~ContentManager() override;
 
     void run() override;
     void shutdown() override;
