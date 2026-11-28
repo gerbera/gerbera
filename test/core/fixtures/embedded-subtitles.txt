@@ -1,0 +1,21 @@
+embedded-subtitles.mkv is an original synthetic fixture: 2 seconds of 32x32
+black video starting at 1 second, with the same three cues as a SubRip track
+(language eng) and as an ASS track (language ger). No third-party media is
+included.
+
+Cues, relative to the file start:
+  1  0.0 - 0.5  "Before video"    ends before the video starts
+  2  0.8 - 1.5  "Crossing start"  crosses the video start
+  3  2.0 - 2.5  "After start"     inside the video
+
+Players start at the first video frame, so the served SRT drops cue 1, clips
+cue 2 to 0.0 - 0.5 and moves cue 3 to 1.0 - 1.5. Only the SubRip track is
+served; the ASS track gets no resource.
+
+Generated with FFmpeg 9.0 from lavfi color and the cues as cues.srt:
+  ffmpeg -i cues.srt cues.ass
+  ffmpeg -itsoffset 1 -f lavfi -t 2 -i color=black:size=32x32:rate=5 \
+    -i cues.srt -i cues.ass -map 0:v -map 1:s -map 2:s \
+    -c:v mpeg4 -c:s:0 srt -c:s:1 ass \
+    -metadata:s:s:0 language=eng -metadata:s:s:1 language=ger \
+    embedded-subtitles.mkv
